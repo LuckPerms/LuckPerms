@@ -402,23 +402,15 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }
     }
 
-    public void refreshAutoOp(Player player) {
+    public void refreshAutoOp(User user, Player player) {
+        if (user == null) {
+            return;
+        }
+
         if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
-            try {
-                LPPermissible permissible = Injector.getPermissible(player.getUniqueId());
-                if (permissible == null || !permissible.getActive().get()) {
-                    return;
-                }
-
-                User user = permissible.getUser();
-                if (user == null) {
-                    return;
-                }
-
-                Map<String, Boolean> backing = user.getUserData().getPermissionData(permissible.calculateContexts()).getImmutableBacking();
-                boolean op = Optional.ofNullable(backing.get("luckperms.autoop")).orElse(false);
-                player.setOp(op);
-            } catch (Exception ignored) {}
+            Map<String, Boolean> backing = user.getUserData().getPermissionData(contextManager.getApplicableContexts(player)).getImmutableBacking();
+            boolean op = Optional.ofNullable(backing.get("luckperms.autoop")).orElse(false);
+            player.setOp(op);
         }
     }
 

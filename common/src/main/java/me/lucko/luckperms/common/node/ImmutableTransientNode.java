@@ -23,42 +23,39 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.processors;
+package me.lucko.luckperms.common.node;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NonNull;
+import lombok.ToString;
+import lombok.experimental.Delegate;
 
-import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.processors.PermissionProcessor;
-
-import org.bukkit.permissions.PermissionAttachmentInfo;
-
-import java.util.Map;
-import java.util.function.Supplier;
+import me.lucko.luckperms.api.Node;
 
 /**
- * Permission Processor for permissions set to a player via permission attachments.
+ * Holds a Node and plus an owning object. All calls are passed onto the contained Node instance.
  */
-@AllArgsConstructor
-public class AttachmentProcessor implements PermissionProcessor {
+@Getter
+@ToString
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ImmutableTransientNode implements Node {
+    public static ImmutableTransientNode of(@NonNull Node node, @NonNull Object owner) {
+        return new ImmutableTransientNode(node, owner);
+    }
 
-    @Getter
-    private final Supplier<Map<String, PermissionAttachmentInfo>> map;
+    @Delegate
+    private final Node node;
+    private final Object owner;
 
     @Override
-    public Tristate hasPermission(String permission) {
-        Map<String, PermissionAttachmentInfo> m = map.get();
-        if (m == null) {
-            return Tristate.UNDEFINED;
-        }
-
-        PermissionAttachmentInfo pai = m.get(permission);
-        return pai == null ? Tristate.UNDEFINED : Tristate.fromBoolean(pai.getValue());
+    public int hashCode() {
+        return node.hashCode();
     }
 
     @Override
-    public void updateBacking(Map<String, Boolean> map) {
-        // Do nothing, this doesn't use the backing
+    public boolean equals(Object obj) {
+        return this == obj || node.equals(obj);
     }
-
 }

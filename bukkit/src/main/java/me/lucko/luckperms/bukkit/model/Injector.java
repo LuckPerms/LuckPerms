@@ -116,13 +116,12 @@ public class Injector {
         //noinspection unchecked
         List<PermissionAttachment> attachments = (List<PermissionAttachment>) PERMISSIBLE_BASE_ATTACHMENTS_FIELD.get(oldPermissible);
 
-        newPermissible.addAttachments(attachments);
+        newPermissible.convertAndAddAttachments(attachments);
         attachments.clear();
         oldPermissible.clearPermissions();
 
         // Setup the new permissible
         newPermissible.getActive().set(true);
-        newPermissible.recalculatePermissions(false);
         newPermissible.setOldPermissible(oldPermissible);
         newPermissible.updateSubscriptionsAsync();
 
@@ -164,22 +163,13 @@ public class Injector {
             // handle the replacement permissible.
             if (dummy) {
                 // just inject a dummy class. this is used when we know the player is about to quit the server.
-                HUMAN_ENTITY_PERMISSIBLE_FIELD.set(player, new DummyPermissibleBase());
+                HUMAN_ENTITY_PERMISSIBLE_FIELD.set(player, DummyPermissibleBase.INSTANCE);
 
             } else {
-                // otherwise, inject the permissible they had when we first injected.
-
-                List<PermissionAttachment> lpAttachments = lpPermissible.getAttachments();
-
                 PermissibleBase newPb = lpPermissible.getOldPermissible();
                 if (newPb == null) {
                     newPb = new PermissibleBase(player);
                 }
-
-                //noinspection unchecked
-                List<PermissionAttachment> newPbAttachments = (List<PermissionAttachment>) PERMISSIBLE_BASE_ATTACHMENTS_FIELD.get(newPb);
-                newPbAttachments.addAll(lpAttachments);
-                lpAttachments.clear();
 
                 HUMAN_ENTITY_PERMISSIBLE_FIELD.set(player, newPb);
             }

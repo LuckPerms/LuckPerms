@@ -45,63 +45,17 @@ public class DummyPermissible implements Permissible {
         onRefresh.run();
     }
 
-    @Override
-    public Set<PermissionAttachmentInfo> getEffectivePermissions() {
-        return Collections.emptySet();
-    }
+    @Override public Set<PermissionAttachmentInfo> getEffectivePermissions() { return Collections.emptySet(); }
+    @Override public boolean isPermissionSet(String name) { return false; }
+    @Override public boolean isPermissionSet(Permission perm) { return false; }
+    @Override public boolean hasPermission(String name) { return false; }
+    @Override public boolean hasPermission(Permission perm) { return false; }
+    @Override public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value) { return null; }
+    @Override public PermissionAttachment addAttachment(Plugin plugin) { return null; }
+    @Override public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value, int ticks) { return null; }
+    @Override public PermissionAttachment addAttachment(Plugin plugin, int ticks) { return null; }
+    @Override public void removeAttachment(PermissionAttachment attachment) {}
+    @Override public boolean isOp() { return false; }
+    @Override public void setOp(boolean value) {}
 
-    @Override
-    public boolean isPermissionSet(String name) {
-        return false;
-    }
-
-    @Override
-    public boolean isPermissionSet(Permission perm) {
-        return false;
-    }
-
-    @Override
-    public boolean hasPermission(String name) {
-        return false;
-    }
-
-    @Override
-    public boolean hasPermission(Permission perm) {
-        return false;
-    }
-
-    @Override
-    public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value) {
-        return null;
-    }
-
-    @Override
-    public PermissionAttachment addAttachment(Plugin plugin) {
-        return null;
-    }
-
-    @Override
-    public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value, int ticks) {
-        return null;
-    }
-
-    @Override
-    public PermissionAttachment addAttachment(Plugin plugin, int ticks) {
-        return null;
-    }
-
-    @Override
-    public void removeAttachment(PermissionAttachment attachment) {
-
-    }
-
-    @Override
-    public boolean isOp() {
-        return false;
-    }
-
-    @Override
-    public void setOp(boolean value) {
-
-    }
 }

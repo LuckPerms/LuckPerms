@@ -173,7 +173,7 @@ public class BukkitListener implements Listener {
             t.printStackTrace();
         }
 
-        plugin.refreshAutoOp(player);
+        plugin.refreshAutoOp(user, player);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -201,7 +201,7 @@ public class BukkitListener implements Listener {
         }
 
         // everything is going well. login was processed ok, this is just to refresh auto-op status.
-        plugin.refreshAutoOp(e.getPlayer());
+        plugin.refreshAutoOp(plugin.getUserManager().getIfLoaded(e.getPlayer().getUniqueId()), e.getPlayer());
     }
 
     // Wait until the last priority to unload, so plugins can still perform permission checks on this event
@@ -252,6 +252,6 @@ public class BukkitListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onWorldChange(PlayerChangedWorldEvent e) {
         plugin.getContextManager().invalidateCache(e.getPlayer());
-        plugin.refreshAutoOp(e.getPlayer());
+        plugin.refreshAutoOp(plugin.getUserManager().getIfLoaded(e.getPlayer().getUniqueId()), e.getPlayer());
     }
 }

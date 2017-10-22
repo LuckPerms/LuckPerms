@@ -37,25 +37,19 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissibleBase;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
-import org.bukkit.permissions.PermissionRemovedExecutor;
 import org.bukkit.plugin.Plugin;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 /**
@@ -94,12 +88,9 @@ public class LPPermissible extends PermissibleBase {
     // if the permissible is currently active.
     private final AtomicBoolean active = new AtomicBoolean(false);
 
-    // the permissions registered by PermissionAttachments.
-    // stored in this format, as that's what is used by #getEffectivePermissions
-    private final Map<String, PermissionAttachmentInfo> attachmentPermissions = new ConcurrentHashMap<>();
-
     // the attachments hooked onto the permissible.
-    private final List<PermissionAttachment> attachments = Collections.synchronizedList(new ArrayList<>());
+    // this collection is only modified by the attachments themselves
+    final Set<LPPermissionAttachment> attachments = ConcurrentHashMap.newKeySet();
 
     public LPPermissible(@NonNull Player parent, @NonNull User user, @NonNull LPBukkitPlugin plugin) {
         super(parent);
@@ -204,8 +195,10 @@ public class LPPermissible extends PermissibleBase {
      *
      * @param attachments the attachments to add
      */
-    public void addAttachments(Collection<PermissionAttachment> attachments) {
-        this.attachments.addAll(attachments);
+    public void convertAndAddAttachments(Collection<PermissionAttachment> attachments) {
+        for (PermissionAttachment attachment : attachments) {
+            new LPPermissionAttachment(this, attachment).hook();
+        }
     }
 
     /**
@@ -226,135 +219,70 @@ public class LPPermissible extends PermissibleBase {
     @Override
     public Set<PermissionAttachmentInfo> getEffectivePermissions() {
         Set<PermissionAttachmentInfo> perms = new HashSet<>();
-        perms.addAll(attachmentPermissions.values());
-
         perms.addAll(
                 user.getUserData().getPermissionData(calculateContexts()).getImmutableBacking().entrySet().stream()
                         .map(e -> new PermissionAttachmentInfo(parent, e.getKey(), null, e.getValue()))
                         .collect(Collectors.toList())
         );
-
         return perms;
     }
 
     @Override
-    public PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String name, boolean value) {
-        if (!plugin.isEnabled()) {
-            throw new IllegalArgumentException("Plugin " + plugin.getDescription().getFullName() + " is not enabled");
-        }
-
-        PermissionAttachment result = addAttachment(plugin);
-        result.setPermission(name, value);
-
-        recalculatePermissions();
-
-        return result;
+    public LPPermissionAttachment addAttachment(Plugin plugin) {
+        LPPermissionAttachment ret = new LPPermissionAttachment(this, plugin);
+        ret.hook();
+        return ret;
     }
 
     @Override
-    public PermissionAttachment addAttachment(@NonNull Plugin plugin) {
-        if (!plugin.isEnabled()) {
-            throw new IllegalArgumentException("Plugin " + plugin.getDescription().getFullName() + " is not enabled");
-        }
-
-        PermissionAttachment result = new PermissionAttachment(plugin, parent);
-
-        attachments.add(result);
-        recalculatePermissions();
-
-        return result;
+    public PermissionAttachment addAttachment(Plugin plugin, @NonNull String name, boolean value) {
+        PermissionAttachment ret = addAttachment(plugin);
+        ret.setPermission(name, value);
+        return ret;
     }
 
     @Override
-    public PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String name, boolean value, int ticks) {
+    public LPPermissionAttachment addAttachment(@NonNull Plugin plugin, int ticks) {
         if (!plugin.isEnabled()) {
             throw new IllegalArgumentException("Plugin " + plugin.getDescription().getFullName() + " is not enabled");
         }
 
-        PermissionAttachment result = addAttachment(plugin, ticks);
-        if (result != null) {
-            result.setPermission(name, value);
+        LPPermissionAttachment ret = addAttachment(plugin);
+        if (getPlugin().getServer().getScheduler().scheduleSyncDelayedTask(plugin, ret::remove, ticks) == -1) {
+            ret.remove();
+            throw new RuntimeException("Could not add PermissionAttachment to " + parent + " for plugin " + plugin.getDescription().getFullName() + ": Scheduler returned -1");
         }
-
-        return result;
+        return ret;
     }
 
     @Override
-    public PermissionAttachment addAttachment(@NonNull Plugin plugin, int ticks) {
-        if (!plugin.isEnabled()) {
-            throw new IllegalArgumentException("Plugin " + plugin.getDescription().getFullName() + " is not enabled");
-        }
-
-        PermissionAttachment result = addAttachment(plugin);
-        if (Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, result::remove, ticks) == -1) {
-            Bukkit.getServer().getLogger().log(Level.WARNING, "Could not add PermissionAttachment to " + parent + " for plugin " + plugin.getDescription().getFullName() + ": Scheduler returned -1");
-            result.remove();
-            return null;
-        } else {
-            return result;
-        }
+    public LPPermissionAttachment addAttachment(Plugin plugin, @NonNull String name, boolean value, int ticks) {
+        LPPermissionAttachment ret = addAttachment(plugin, ticks);
+        ret.setPermission(name, value);
+        return ret;
     }
 
     @Override
     public void removeAttachment(@NonNull PermissionAttachment attachment) {
-        if (attachments.contains(attachment)) {
-            attachments.remove(attachment);
-            PermissionRemovedExecutor ex = attachment.getRemovalCallback();
-
-            if (ex != null) {
-                ex.attachmentRemoved(attachment);
-            }
-
-            recalculatePermissions();
-        } else {
-            throw new IllegalArgumentException("Given attachment is not part of Permissible object " + parent);
+        if (!(attachment instanceof LPPermissionAttachment)) {
+            throw new IllegalArgumentException("Given attachment is not a LPPermissionAttachment.");
         }
+
+        LPPermissionAttachment a = ((LPPermissionAttachment) attachment);
+        if (a.getPermissible() != this) {
+            throw new IllegalArgumentException("Attachment does not belong to this permissible.");
+        }
+
+        a.remove();
     }
 
     @Override
     public void recalculatePermissions() {
-        recalculatePermissions(true);
-    }
-
-    public void recalculatePermissions(boolean invalidate) {
-        if (attachmentPermissions == null) {
-            return;
-        }
-
-        attachmentPermissions.clear();
-
-        for (PermissionAttachment attachment : attachments) {
-            calculateChildPermissions(attachment.getPermissions(), false, attachment);
-        }
-
-        if (invalidate) {
-            user.getUserData().invalidatePermissionCalculators();
-        }
+        // do nothing
     }
 
     @Override
-    public synchronized void clearPermissions() {
-        Set<String> perms = attachmentPermissions.keySet();
-
-        for (String name : perms) {
-            Bukkit.getServer().getPluginManager().unsubscribeFromPermission(name, parent);
-        }
-
-        attachmentPermissions.clear();
-    }
-
-    private void calculateChildPermissions(Map<String, Boolean> children, boolean invert, PermissionAttachment attachment) {
-        for (Map.Entry<String, Boolean> e : children.entrySet()) {
-            Permission perm = Bukkit.getServer().getPluginManager().getPermission(e.getKey());
-            boolean value = e.getValue() ^ invert;
-            String name = e.getKey().toLowerCase();
-
-            attachmentPermissions.put(name, new PermissionAttachmentInfo(parent, name, attachment, value));
-            Bukkit.getServer().getPluginManager().subscribeToPermission(name, parent);
-
-            if (perm != null) {
-                calculateChildPermissions(perm.getChildren(), !value, attachment);
-            }
-        }
+    public void clearPermissions() {
+        attachments.forEach(LPPermissionAttachment::remove);
     }
 }

@@ -31,9 +31,6 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.bukkit.model.Injector;
-import me.lucko.luckperms.bukkit.model.LPPermissible;
-import me.lucko.luckperms.bukkit.processors.AttachmentProcessor;
 import me.lucko.luckperms.bukkit.processors.ChildProcessor;
 import me.lucko.luckperms.bukkit.processors.DefaultsProcessor;
 import me.lucko.luckperms.common.calculators.AbstractCalculatorFactory;
@@ -47,7 +44,6 @@ import me.lucko.luckperms.common.processors.RegexProcessor;
 import me.lucko.luckperms.common.processors.WildcardProcessor;
 
 import java.util.List;
-import java.util.UUID;
 
 @AllArgsConstructor
 public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
@@ -61,14 +57,6 @@ public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
 
         if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_CHILD_PERMISSIONS)) {
             processors.add(new ChildProcessor(plugin.getChildPermissionProvider()));
-        }
-
-        if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_ATTACHMENT_PERMISSIONS)) {
-            final UUID uuid = plugin.getUuidCache().getExternalUUID(user.getUuid());
-            processors.add(new AttachmentProcessor(() -> {
-                LPPermissible permissible = Injector.getPermissible(uuid);
-                return permissible == null ? null : permissible.getAttachmentPermissions();
-            }));
         }
 
         if (plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) {
