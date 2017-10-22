@@ -123,6 +123,11 @@ public class ConfigKeys {
     public static final ConfigKey<Boolean> USE_SERVER_UUID_CACHE = BooleanKey.of("use-server-uuid-cache", false);
 
     /**
+     * If LuckPerms should allow usernames with non alphanumeric characters.
+     */
+    public static final ConfigKey<Boolean> ALLOW_INVALID_USERNAMES = BooleanKey.of("allow-invalid-usernames", false);
+
+    /**
      * If LuckPerms should produce extra logging output when it handles logins.
      */
     public static final ConfigKey<Boolean> DEBUG_LOGINS = BooleanKey.of("debug-logins", false);

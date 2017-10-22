@@ -68,22 +68,29 @@ public class LogUserHistory extends SubCommand<Log> {
 
         UUID uuid = Util.parseUuid(target.toLowerCase());
         if (uuid == null) {
-            if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {
-                Message.USER_INVALID_ENTRY.send(sender, target);
-                return null;
+            if (!plugin.getConfiguration().get(ConfigKeys.ALLOW_INVALID_USERNAMES)) {
+                if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {
+                    Message.USER_INVALID_ENTRY.send(sender, target);
+                    return CommandResult.INVALID_ARGS;
+                }
+            } else {
+                if (!DataConstraints.PLAYER_USERNAME_TEST_LENIENT.test(target)) {
+                    Message.USER_INVALID_ENTRY.send(sender, target);
+                    return CommandResult.INVALID_ARGS;
+                }
             }
 
             uuid = plugin.getStorage().getUUID(target.toLowerCase()).join();
             if (uuid == null) {
                 if (!plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
                     Message.USER_NOT_FOUND.send(sender, target);
-                    return null;
+                    return CommandResult.INVALID_ARGS;
                 }
 
                 uuid = plugin.lookupUuid(target).orElse(null);
                 if (uuid == null) {
                     Message.USER_NOT_FOUND.send(sender, target);
-                    return null;
+                    return CommandResult.INVALID_ARGS;
                 }
             }
         }

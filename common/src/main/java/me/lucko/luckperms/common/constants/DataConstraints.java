@@ -68,6 +68,14 @@ public class DataConstraints {
         return true;
     };
 
+    public static final Predicate<String> PLAYER_USERNAME_TEST_LENIENT = s -> {
+        if (s.length() <= 0 || s.length() > MAX_PLAYER_USERNAME_LENGTH) {
+            return false;
+        }
+
+        return true;
+    };
+
     public static final Predicate<String> GROUP_NAME_TEST = s -> {
         if (s.length() <= 0 || s.length() > MAX_GROUP_NAME_LENGTH) {
             return false;

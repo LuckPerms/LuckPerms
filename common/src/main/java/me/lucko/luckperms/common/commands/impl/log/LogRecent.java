@@ -73,9 +73,16 @@ public class LogRecent extends SubCommand<Log> {
         final String target = args.get(0);
         UUID uuid = Util.parseUuid(target.toLowerCase());
         if (uuid == null) {
-            if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {
-                Message.USER_INVALID_ENTRY.send(sender, target);
-                return CommandResult.INVALID_ARGS;
+            if (!plugin.getConfiguration().get(ConfigKeys.ALLOW_INVALID_USERNAMES)) {
+                if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {
+                    Message.USER_INVALID_ENTRY.send(sender, target);
+                    return CommandResult.INVALID_ARGS;
+                }
+            } else {
+                if (!DataConstraints.PLAYER_USERNAME_TEST_LENIENT.test(target)) {
+                    Message.USER_INVALID_ENTRY.send(sender, target);
+                    return CommandResult.INVALID_ARGS;
+                }
             }
 
             uuid = plugin.getStorage().getUUID(target.toLowerCase()).join();

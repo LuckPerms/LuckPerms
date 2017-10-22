@@ -73,6 +73,12 @@ use-server-uuids: true
 # try to find a uuid for a username using RedisBungee, if installed.
 use-server-uuid-cache: false
 
+# If set to true, LuckPerms will allow usernames with non alphanumeric characters.
+#
+# Note that due to the design of the storage implementation, usernames must still be
+# 16 characters or less.
+allow-invalid-usernames: false
+
 # If LuckPerms should produce extra logging output when it handles logins.
 # Useful if you're having issues with UUID forwarding or data not being loaded.
 debug-logins: false
