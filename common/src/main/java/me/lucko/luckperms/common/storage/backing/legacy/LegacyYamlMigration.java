@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.storage.backing.file.YAMLBacking;
+import me.lucko.luckperms.common.storage.backing.file.YamlDao;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -53,11 +53,13 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor
-public class LegacyYAMLSchemaMigration implements Runnable {
+public class LegacyYamlMigration implements Runnable {
     private final LuckPermsPlugin plugin;
-    private final YAMLBacking backing;
+    private final YamlDao backing;
     private final File oldDataFolder;
     private final File newDataFolder;
+
+    private final Yaml yaml = getYaml();
 
     private static Yaml getYaml() {
         DumperOptions options = new DumperOptions();
@@ -66,21 +68,19 @@ public class LegacyYAMLSchemaMigration implements Runnable {
         return new Yaml(options);
     }
 
-    public boolean writeMapToFile(File file, Map<String, Object> values) {
+    public void writeMapToFile(File file, Map<String, Object> values) {
         try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
-            getYaml().dump(values, writer);
+            yaml.dump(values, writer);
             writer.flush();
-            return true;
         } catch (Throwable t) {
             plugin.getLog().warn("Exception whilst writing to file: " + file.getAbsolutePath());
             t.printStackTrace();
-            return false;
         }
     }
 
     public Map<String, Object> readMapFromFile(File file) {
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
-            return (Map<String, Object>) getYaml().load(reader);
+            return (Map<String, Object>) yaml.load(reader);
         } catch (Throwable t) {
             plugin.getLog().warn("Exception whilst reading from file: " + file.getAbsolutePath());
             t.printStackTrace();
@@ -211,7 +211,7 @@ public class LegacyYAMLSchemaMigration implements Runnable {
 
         for (NodeModel node : nodes) {
             // just a raw, default node.
-            boolean single = node.isValue() &&
+            boolean single = node.getValue() &&
                     node.getServer().equalsIgnoreCase("global") &&
                     node.getWorld().equalsIgnoreCase("global") &&
                     node.getExpiry() == 0L &&
@@ -228,7 +228,7 @@ public class LegacyYAMLSchemaMigration implements Runnable {
 
             // create a map of node attributes
             Map<String, Object> attributes = new LinkedHashMap<>();
-            attributes.put("value", node.isValue());
+            attributes.put("value", node.getValue());
 
             if (!node.getServer().equals("global")) {
                 attributes.put("server", node.getServer());

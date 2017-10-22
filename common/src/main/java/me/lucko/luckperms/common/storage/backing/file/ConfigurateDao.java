@@ -27,22 +27,19 @@ package me.lucko.luckperms.common.storage.backing.file;
 
 import lombok.Getter;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Constants;
+import me.lucko.luckperms.common.contexts.ContextSetConfigurateSerializer;
 import me.lucko.luckperms.common.managers.GenericUserManager;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
@@ -53,9 +50,9 @@ import me.lucko.luckperms.common.node.NodeHeldPermission;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
-import me.lucko.luckperms.common.storage.backing.AbstractBacking;
-import me.lucko.luckperms.common.storage.backing.legacy.LegacyJSONSchemaMigration;
-import me.lucko.luckperms.common.storage.backing.legacy.LegacyYAMLSchemaMigration;
+import me.lucko.luckperms.common.storage.backing.AbstractDao;
+import me.lucko.luckperms.common.storage.backing.legacy.LegacyJsonMigration;
+import me.lucko.luckperms.common.storage.backing.legacy.LegacyYamlMigration;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.SimpleConfigurationNode;
@@ -67,6 +64,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -82,7 +80,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public abstract class ConfigurateBacking extends AbstractBacking {
+public abstract class ConfigurateDao extends AbstractDao {
     private static final String LOG_FORMAT = "%s(%s): [%s] %s(%s) --> %s";
 
     private final Logger actionLogger = Logger.getLogger("luckperms_actions");
@@ -100,7 +98,7 @@ public abstract class ConfigurateBacking extends AbstractBacking {
     private File groupsDirectory;
     private File tracksDirectory;
 
-    protected ConfigurateBacking(LuckPermsPlugin plugin, String name, String fileExtension, String dataFolderName) {
+    protected ConfigurateDao(LuckPermsPlugin plugin, String name, String fileExtension, String dataFolderName) {
         super(plugin, name);
         this.fileExtension = fileExtension;
         this.dataFolderName = dataFolderName;
@@ -210,15 +208,15 @@ public abstract class ConfigurateBacking extends AbstractBacking {
             plugin.getLog().severe("Starting migration from legacy schema. This could take a while....");
             plugin.getLog().severe("Please do not stop your server while the migration takes place.");
 
-            if (this instanceof YAMLBacking) {
+            if (this instanceof YamlDao) {
                 try {
-                    new LegacyYAMLSchemaMigration(plugin, (YAMLBacking) this, oldData, data).run();
+                    new LegacyYamlMigration(plugin, (YamlDao) this, oldData, data).run();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } else if (this instanceof JSONBacking) {
+            } else if (this instanceof JsonDao) {
                 try {
-                    new LegacyJSONSchemaMigration(plugin, (JSONBacking) this, oldData, data).run();
+                    new LegacyJsonMigration(plugin, (JsonDao) this, oldData, data).run();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -361,7 +359,7 @@ public abstract class ConfigurateBacking extends AbstractBacking {
             reportException("bulk update", e);
             return false;
         }
-        return false;
+        return true;
     }
 
     @Override
@@ -372,7 +370,7 @@ public abstract class ConfigurateBacking extends AbstractBacking {
             ConfigurationNode object = readFile(StorageLocation.USER, uuid.toString());
             if (object != null) {
                 String name = object.getNode("name").getString();
-                user.getPrimaryGroup().setStoredValue(object.getNode(this instanceof JSONBacking ? "primaryGroup" : "primary-group").getString());
+                user.getPrimaryGroup().setStoredValue(object.getNode(this instanceof JsonDao ? "primaryGroup" : "primary-group").getString());
 
                 Set<NodeModel> data = readNodes(object);
                 Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
@@ -412,7 +410,7 @@ public abstract class ConfigurateBacking extends AbstractBacking {
                 ConfigurationNode data = SimpleConfigurationNode.root();
                 data.getNode("uuid").setValue(user.getUuid().toString());
                 data.getNode("name").setValue(user.getName().orElse("null"));
-                data.getNode(this instanceof JSONBacking ? "primaryGroup" : "primary-group").setValue(user.getPrimaryGroup().getStoredValue().orElse("default"));
+                data.getNode(this instanceof JsonDao ? "primaryGroup" : "primary-group").setValue(user.getPrimaryGroup().getStoredValue().orElse("default"));
 
                 Set<NodeModel> nodes = user.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
                 writeNodes(data, nodes);
@@ -499,13 +497,21 @@ public abstract class ConfigurateBacking extends AbstractBacking {
 
     @Override
     public boolean loadGroup(String name) {
-        Group group = plugin.getGroupManager().getOrMake(name);
-        group.getIoLock().lock();
+        Group group = plugin.getGroupManager().getIfLoaded(name);
+        if (group != null) {
+            group.getIoLock().lock();
+        }
+
         try {
             ConfigurationNode object = readFile(StorageLocation.GROUP, name);
 
             if (object == null) {
                 return false;
+            }
+
+            if (group == null) {
+                group = plugin.getGroupManager().getOrMake(name);
+                group.getIoLock().lock();
             }
 
             Set<NodeModel> data = readNodes(object);
@@ -515,7 +521,9 @@ public abstract class ConfigurateBacking extends AbstractBacking {
         } catch (Exception e) {
             return reportException(name, e);
         } finally {
-            group.getIoLock().unlock();
+            if (group != null) {
+                group.getIoLock().unlock();
+            }
         }
         return true;
     }
@@ -633,13 +641,21 @@ public abstract class ConfigurateBacking extends AbstractBacking {
 
     @Override
     public boolean loadTrack(String name) {
-        Track track = plugin.getTrackManager().getOrMake(name);
-        track.getIoLock().lock();
+        Track track = plugin.getTrackManager().getIfLoaded(name);
+        if (track != null) {
+            track.getIoLock().lock();
+        }
+
         try {
             ConfigurationNode object = readFile(StorageLocation.TRACK, name);
 
             if (object == null) {
                 return false;
+            }
+
+            if (track == null) {
+                track = plugin.getTrackManager().getOrMake(name);
+                track.getIoLock().lock();
             }
 
             List<String> groups = object.getNode("groups").getList(TypeToken.of(String.class));
@@ -648,7 +664,9 @@ public abstract class ConfigurateBacking extends AbstractBacking {
         } catch (Exception e) {
             return reportException(name, e);
         } finally {
-            track.getIoLock().unlock();
+            if (track != null) {
+                track.getIoLock().unlock();
+            }
         }
         return true;
     }
@@ -720,6 +738,45 @@ public abstract class ConfigurateBacking extends AbstractBacking {
         return uuidCache.lookupUsername(uuid);
     }
 
+    private static Collection<NodeModel> readAttributes(ConfigurationNode entry, String permission) {
+        Map<Object, ? extends ConfigurationNode> attributes = entry.getChildrenMap();
+
+        boolean value = true;
+        String server = "global";
+        String world = "global";
+        long expiry = 0L;
+        ImmutableContextSet context = ImmutableContextSet.empty();
+
+        if (attributes.containsKey("value")) {
+            value = attributes.get("value").getBoolean();
+        }
+        if (attributes.containsKey("server")) {
+            server = attributes.get("server").getString();
+        }
+        if (attributes.containsKey("world")) {
+            world = attributes.get("world").getString();
+        }
+        if (attributes.containsKey("expiry")) {
+            expiry = attributes.get("expiry").getLong();
+        }
+
+        if (attributes.containsKey("context") && attributes.get("context").hasMapChildren()) {
+            ConfigurationNode contexts = attributes.get("context");
+            context = ContextSetConfigurateSerializer.deserializeContextSet(contexts).makeImmutable();
+        }
+
+        ConfigurationNode batchAttribute = attributes.get("permissions");
+        if (permission.startsWith("luckperms.batch") && batchAttribute != null && batchAttribute.hasListChildren()) {
+            List<NodeModel> nodes = new ArrayList<>();
+            for (ConfigurationNode element : batchAttribute.getChildrenList()) {
+                nodes.add(NodeModel.of(element.getString(), value, server, world, expiry, context));
+            }
+            return nodes;
+        } else {
+            return Collections.singleton(NodeModel.of(permission, value, server, world, expiry, context));
+        }
+    }
+
     private static Set<NodeModel> readNodes(ConfigurationNode data) {
         Set<NodeModel> nodes = new HashSet<>();
 
@@ -743,129 +800,102 @@ public abstract class ConfigurateBacking extends AbstractBacking {
                 }
 
                 String permission = entry.getKey().toString();
-                Map<Object, ? extends ConfigurationNode> attributes = entry.getValue().getChildrenMap();
+                nodes.addAll(readAttributes(entry.getValue(), permission));
+            }
+        }
 
-                boolean value = true;
-                String server = "global";
-                String world = "global";
-                long expiry = 0L;
-                ImmutableContextSet context = ImmutableContextSet.empty();
+        if (data.getNode("parents").hasListChildren()) {
+            List<? extends ConfigurationNode> parts = data.getNode("parents").getChildrenList();
 
-                if (attributes.containsKey("value")) {
-                    value = attributes.get("value").getBoolean();
-                }
-                if (attributes.containsKey("server")) {
-                    server = attributes.get("server").getString();
-                }
-                if (attributes.containsKey("world")) {
-                    world = attributes.get("world").getString();
-                }
-                if (attributes.containsKey("expiry")) {
-                    expiry = attributes.get("expiry").getLong();
+            for (ConfigurationNode ent : parts) {
+                String stringValue = ent.getValue(Types::strictAsString);
+                if (stringValue != null) {
+                    nodes.add(NodeModel.of("group." + stringValue, true, "global", "global", 0L, ImmutableContextSet.empty()));
+                    continue;
                 }
 
-                if (attributes.containsKey("context") && attributes.get("context").hasMapChildren()) {
-                    ConfigurationNode contexts = attributes.get("context");
-                    context = deserializeContextSet(contexts).makeImmutable();
+                if (!ent.hasMapChildren()) {
+                    continue;
                 }
 
-                final ConfigurationNode batchAttribute = attributes.get("permissions");
-                if (permission.startsWith("luckperms.batch") && batchAttribute != null && batchAttribute.hasListChildren()) {
-                    for (ConfigurationNode element : batchAttribute.getChildrenList()) {
-                        nodes.add(NodeModel.of(element.getString(), value, server, world, expiry, context));
-                    }
-                } else {
-                    nodes.add(NodeModel.of(permission, value, server, world, expiry, context));
+                Map.Entry<Object, ? extends ConfigurationNode> entry = Iterables.getFirst(ent.getChildrenMap().entrySet(), null);
+                if (entry == null || !entry.getValue().hasMapChildren()) {
+                    continue;
                 }
+
+                String permission = "group." + entry.getKey().toString();
+                nodes.addAll(readAttributes(entry.getValue(), permission));
             }
         }
 
         return nodes;
     }
 
+    private static ConfigurationNode writeAttributes(NodeModel node) {
+        ConfigurationNode attributes = SimpleConfigurationNode.root();
+        attributes.getNode("value").setValue(node.getValue());
+
+        if (!node.getServer().equals("global")) {
+            attributes.getNode("server").setValue(node.getServer());
+        }
+
+        if (!node.getWorld().equals("global")) {
+            attributes.getNode("world").setValue(node.getWorld());
+        }
+
+        if (node.getExpiry() != 0L) {
+            attributes.getNode("expiry").setValue(node.getExpiry());
+        }
+
+        if (!node.getContexts().isEmpty()) {
+            attributes.getNode("context").setValue(ContextSetConfigurateSerializer.serializeContextSet(node.getContexts()));
+        }
+
+        return attributes;
+    }
+
     private static void writeNodes(ConfigurationNode to, Set<NodeModel> nodes) {
-        ConfigurationNode arr = SimpleConfigurationNode.root();
+        ConfigurationNode permsSection = SimpleConfigurationNode.root();
+        ConfigurationNode parentsSection = SimpleConfigurationNode.root();
 
         for (NodeModel node : nodes) {
 
             // just a raw, default node.
-            boolean single = node.isValue() &&
+            boolean single = node.getValue() &&
                     node.getServer().equalsIgnoreCase("global") &&
                     node.getWorld().equalsIgnoreCase("global") &&
                     node.getExpiry() == 0L &&
                     node.getContexts().isEmpty();
 
+            // try to parse out the group
+            String group = node.toNode().isGroupNode() ? node.toNode().getGroupName() : null;
+
             // just add a string to the list.
             if (single) {
-                arr.getAppendedNode().setValue(node.getPermission());
+
+                if (group != null) {
+                    parentsSection.getAppendedNode().setValue(group);
+                    continue;
+                }
+
+                permsSection.getAppendedNode().setValue(node.getPermission());
                 continue;
             }
 
-            ConfigurationNode attributes = SimpleConfigurationNode.root();
-            attributes.getNode("value").setValue(node.isValue());
-
-            if (!node.getServer().equals("global")) {
-                attributes.getNode("server").setValue(node.getServer());
+            if (group != null) {
+                ConfigurationNode ent = SimpleConfigurationNode.root();
+                ent.getNode(group).setValue(writeAttributes(node));
+                parentsSection.getAppendedNode().setValue(ent);
+                continue;
             }
 
-            if (!node.getWorld().equals("global")) {
-                attributes.getNode("world").setValue(node.getWorld());
-            }
-
-            if (node.getExpiry() != 0L) {
-                attributes.getNode("expiry").setValue(node.getExpiry());
-            }
-
-            if (!node.getContexts().isEmpty()) {
-                attributes.getNode("context").setValue(serializeContextSet(node.getContexts()));
-            }
-
-            ConfigurationNode perm = SimpleConfigurationNode.root();
-            perm.getNode(node.getPermission()).setValue(attributes);
-            arr.getAppendedNode().setValue(perm);
+            ConfigurationNode ent = SimpleConfigurationNode.root();
+            ent.getNode(node.getPermission()).setValue(writeAttributes(node));
+            permsSection.getAppendedNode().setValue(ent);
         }
 
-        to.getNode("permissions").setValue(arr);
-    }
-
-    private static ConfigurationNode serializeContextSet(ContextSet contextSet) {
-        ConfigurationNode data = SimpleConfigurationNode.root();
-        Map<String, Collection<String>> map = contextSet.toMultimap().asMap();
-
-        map.forEach((k, v) -> {
-            List<String> values = new ArrayList<>(v);
-            int size = values.size();
-
-            if (size == 1) {
-                data.getNode(k).setValue(values.get(0));
-            } else if (size > 1) {
-                data.getNode(k).setValue(values);
-            }
-        });
-
-        return data;
-    }
-
-    private static MutableContextSet deserializeContextSet(ConfigurationNode data) {
-        Preconditions.checkArgument(data.hasMapChildren());
-        Map<Object, ? extends ConfigurationNode> dataMap = data.getChildrenMap();
-
-        ImmutableSetMultimap.Builder<String, String> map = ImmutableSetMultimap.builder();
-        for (Map.Entry<Object, ? extends ConfigurationNode> e : dataMap.entrySet()) {
-            String k = e.getKey().toString();
-            ConfigurationNode v = e.getValue();
-
-            if (v.hasListChildren()) {
-                List<? extends ConfigurationNode> values = v.getChildrenList();
-                for (ConfigurationNode value : values) {
-                    map.put(k, value.getString());
-                }
-            } else {
-                map.put(k, v.getString());
-            }
-        }
-
-        return MutableContextSet.fromMultimap(map.build());
+        to.getNode("permissions").setValue(permsSection);
+        to.getNode("parents").setValue(parentsSection);
     }
 
 }

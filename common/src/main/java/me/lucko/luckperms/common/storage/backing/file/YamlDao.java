@@ -27,18 +27,20 @@ package me.lucko.luckperms.common.storage.backing.file;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import org.yaml.snakeyaml.DumperOptions;
+
 import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
+import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-public class HOCONBacking extends ConfigurateBacking {
+public class YamlDao extends ConfigurateDao {
 
-    public HOCONBacking(LuckPermsPlugin plugin, String dataFolderName) {
-        super(plugin, "HOCON", ".conf", dataFolderName);
+    public YamlDao(LuckPermsPlugin plugin, String dataFolderName) {
+        super(plugin, "YAML", ".yml", dataFolderName);
     }
 
     @Override
@@ -47,7 +49,8 @@ public class HOCONBacking extends ConfigurateBacking {
             return null;
         }
 
-        HoconConfigurationLoader loader = HoconConfigurationLoader.builder()
+        YAMLConfigurationLoader loader = YAMLConfigurationLoader.builder()
+                .setFlowStyle(DumperOptions.FlowStyle.BLOCK)
                 .setSource(() -> Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8))
                 .setSink(() -> Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8))
                 .build();
@@ -62,7 +65,9 @@ public class HOCONBacking extends ConfigurateBacking {
             return;
         }
 
-        HoconConfigurationLoader loader = HoconConfigurationLoader.builder()
+        YAMLConfigurationLoader loader = YAMLConfigurationLoader.builder()
+                .setFlowStyle(DumperOptions.FlowStyle.BLOCK)
+                .setIndent(2)
                 .setSource(() -> Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8))
                 .setSink(() -> Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8))
                 .build();

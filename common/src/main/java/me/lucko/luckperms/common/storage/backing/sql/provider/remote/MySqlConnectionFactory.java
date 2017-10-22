@@ -23,13 +23,13 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing.sql.provider;
+package me.lucko.luckperms.common.storage.backing.sql.provider.remote;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
-import me.lucko.luckperms.common.storage.backing.sql.WrappedConnection;
+import me.lucko.luckperms.common.storage.backing.sql.provider.AbstractConnectionFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -38,13 +38,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class MySQLProvider extends SQLProvider {
+public class MySqlConnectionFactory extends AbstractConnectionFactory {
 
     private final DatastoreConfiguration configuration;
     private final String driverClass;
     private HikariDataSource hikari;
 
-    public MySQLProvider(String name, String driverClass, DatastoreConfiguration configuration) {
+    public MySqlConnectionFactory(String name, String driverClass, DatastoreConfiguration configuration) {
         super(name);
         this.configuration = configuration;
         this.driverClass = driverClass;
@@ -143,11 +143,11 @@ public class MySQLProvider extends SQLProvider {
     }
 
     @Override
-    public WrappedConnection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
         Connection connection = hikari.getConnection();
         if (connection == null) {
-            throw new SQLException("Connection is null");
+            throw new SQLException("Unable to get a connection from the pool.");
         }
-        return new WrappedConnection(connection, true);
+        return connection;
     }
 }

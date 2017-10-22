@@ -40,6 +40,7 @@ import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -191,7 +192,7 @@ public class ApplyEditsCommand extends SingleCommand {
 
             if (data.has("context") && data.get("context").isJsonObject()) {
                 JsonObject contexts = data.get("context").getAsJsonObject();
-                context = NodeModel.deserializeContextSet(contexts).makeImmutable();
+                context = ContextSetJsonSerializer.deserializeContextSet(contexts).makeImmutable();
             }
 
             nodes.add(NodeModel.of(permission, value, server, world, expiry, context));

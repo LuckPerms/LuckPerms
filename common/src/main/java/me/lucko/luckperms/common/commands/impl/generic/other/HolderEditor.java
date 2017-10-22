@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -176,7 +177,7 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
         for (NodeModel node : nodes) {
             JsonObject attributes = new JsonObject();
             attributes.addProperty("permission", node.getPermission());
-            attributes.addProperty("value", node.isValue());
+            attributes.addProperty("value", node.getValue());
 
             if (!node.getServer().equals("global")) {
                 attributes.addProperty("server", node.getServer());
@@ -191,7 +192,7 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
             }
 
             if (!node.getContexts().isEmpty()) {
-                attributes.add("context", node.getContextsAsJson());
+                attributes.add("context", ContextSetJsonSerializer.serializeContextSet(node.getContexts()));
             }
 
             arr.add(attributes);

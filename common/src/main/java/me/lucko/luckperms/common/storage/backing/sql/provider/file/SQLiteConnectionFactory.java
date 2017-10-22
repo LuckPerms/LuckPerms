@@ -23,14 +23,14 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing.sql.provider;
+package me.lucko.luckperms.common.storage.backing.sql.provider.file;
 
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class SQLiteProvider extends FlatfileProvider {
-    public SQLiteProvider(File file) {
+public class SQLiteConnectionFactory extends FlatfileConnectionFactory {
+    public SQLiteConnectionFactory(File file) {
         super("SQLite", file);
 
         // backwards compat
@@ -46,7 +46,8 @@ public class SQLiteProvider extends FlatfileProvider {
 
         File databaseFile = new File(super.file.getParent(), "luckperms-sqlite.db");
         if (databaseFile.exists()) {
-            ret.put("File Size", DF.format(databaseFile.length() / 1048576) + "MB");
+            double size = databaseFile.length() / 1048576;
+            ret.put("File Size", DF.format(size) + "MB");
         } else {
             ret.put("File Size", "0MB");
         }

@@ -32,21 +32,17 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 @AllArgsConstructor
-public class WrappedConnection implements Connection {
+public class NonClosableConnection implements Connection {
 
     @Delegate(excludes = Exclude.class)
     private Connection delegate;
 
-    private final boolean shouldClose;
-
     @Override
     public void close() throws SQLException {
-        if (shouldClose) {
-            delegate.close();
-        }
+
     }
 
     private interface Exclude {
-        void close();
+        void close() throws SQLException;
     }
 }

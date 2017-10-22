@@ -30,9 +30,10 @@ import lombok.RequiredArgsConstructor;
 import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
 
+import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.node.NodeModel;
-import me.lucko.luckperms.common.storage.backing.sql.SQLBacking;
+import me.lucko.luckperms.common.storage.backing.sql.SqlDao;
 
 import java.lang.reflect.Type;
 import java.sql.Connection;
@@ -50,9 +51,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-public class LegacySQLSchemaMigration implements Runnable {
+public class LegacySqlMigration implements Runnable {
     private static final Type NODE_MAP_TYPE = new TypeToken<Map<String, Boolean>>() {}.getType();
-    private final SQLBacking backing;
+    private final SqlDao backing;
 
     @Override
     public void run() {
@@ -162,11 +163,11 @@ public class LegacySQLSchemaMigration implements Runnable {
                     for (NodeModel nd : nodes) {
                         ps.setString(1, uuid.toString());
                         ps.setString(2, nd.getPermission());
-                        ps.setBoolean(3, nd.isValue());
+                        ps.setBoolean(3, nd.getValue());
                         ps.setString(4, nd.getServer());
                         ps.setString(5, nd.getWorld());
                         ps.setLong(6, nd.getExpiry());
-                        ps.setString(7, nd.serializeContext());
+                        ps.setString(7, backing.getGson().toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
                         ps.addBatch();
                     }
                     ps.executeBatch();
@@ -241,11 +242,11 @@ public class LegacySQLSchemaMigration implements Runnable {
                     for (NodeModel nd : nodes) {
                         ps.setString(1, name);
                         ps.setString(2, nd.getPermission());
-                        ps.setBoolean(3, nd.isValue());
+                        ps.setBoolean(3, nd.getValue());
                         ps.setString(4, nd.getServer());
                         ps.setString(5, nd.getWorld());
                         ps.setLong(6, nd.getExpiry());
-                        ps.setString(7, nd.serializeContext());
+                        ps.setString(7, backing.getGson().toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
                         ps.addBatch();
                     }
                     ps.executeBatch();

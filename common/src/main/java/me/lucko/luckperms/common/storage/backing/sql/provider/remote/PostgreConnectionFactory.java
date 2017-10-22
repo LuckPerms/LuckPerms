@@ -23,13 +23,13 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing.sql.provider;
+package me.lucko.luckperms.common.storage.backing.sql.provider.remote;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
-import me.lucko.luckperms.common.storage.backing.sql.WrappedConnection;
+import me.lucko.luckperms.common.storage.backing.sql.provider.AbstractConnectionFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -38,12 +38,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class PostgreSQLProvider extends SQLProvider {
+public class PostgreConnectionFactory extends AbstractConnectionFactory {
 
     private final DatastoreConfiguration configuration;
     private HikariDataSource hikari;
 
-    public PostgreSQLProvider(DatastoreConfiguration configuration) {
+    public PostgreConnectionFactory(DatastoreConfiguration configuration) {
         super("PostgreSQL");
         this.configuration = configuration;
     }
@@ -117,11 +117,11 @@ public class PostgreSQLProvider extends SQLProvider {
     }
 
     @Override
-    public WrappedConnection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
         Connection connection = hikari.getConnection();
         if (connection == null) {
-            throw new SQLException("Connection is null");
+            throw new SQLException("Unable to get a connection from the pool.");
         }
-        return new WrappedConnection(connection, true);
+        return connection;
     }
 }

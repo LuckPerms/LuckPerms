@@ -34,10 +34,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.storage.backing.file.JSONBacking;
+import me.lucko.luckperms.common.storage.backing.file.JsonDao;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -53,23 +54,21 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor
-public class LegacyJSONSchemaMigration implements Runnable {
+public class LegacyJsonMigration implements Runnable {
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     private final LuckPermsPlugin plugin;
-    private final JSONBacking backing;
+    private final JsonDao backing;
     private final File oldDataFolder;
     private final File newDataFolder;
 
-    private boolean writeElementToFile(File file, JsonElement element) {
+    private void writeElementToFile(File file, JsonElement element) {
         try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
             gson.toJson(element, writer);
             writer.flush();
-            return true;
         } catch (Throwable t) {
             plugin.getLog().warn("Exception whilst writing to file: " + file.getAbsolutePath());
             t.printStackTrace();
-            return false;
         }
     }
 
@@ -213,7 +212,7 @@ public class LegacyJSONSchemaMigration implements Runnable {
 
         for (NodeModel node : nodes) {
             // just a raw, default node.
-            boolean single = node.isValue() &&
+            boolean single = node.getValue() &&
                     node.getServer().equalsIgnoreCase("global") &&
                     node.getWorld().equalsIgnoreCase("global") &&
                     node.getExpiry() == 0L &&
@@ -226,7 +225,7 @@ public class LegacyJSONSchemaMigration implements Runnable {
             }
 
             JsonObject attributes = new JsonObject();
-            attributes.addProperty("value", node.isValue());
+            attributes.addProperty("value", node.getValue());
 
             if (!node.getServer().equals("global")) {
                 attributes.addProperty("server", node.getServer());
@@ -241,7 +240,7 @@ public class LegacyJSONSchemaMigration implements Runnable {
             }
 
             if (!node.getContexts().isEmpty()) {
-                attributes.add("context", node.getContextsAsJson());
+                attributes.add("context", ContextSetJsonSerializer.serializeContextSet(node.getContexts()));
             }
 
             JsonObject perm = new JsonObject();

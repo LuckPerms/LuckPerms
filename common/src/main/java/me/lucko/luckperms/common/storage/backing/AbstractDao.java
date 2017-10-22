@@ -46,7 +46,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class AbstractBacking {
+public abstract class AbstractDao {
 
     @Getter
     protected final LuckPermsPlugin plugin;

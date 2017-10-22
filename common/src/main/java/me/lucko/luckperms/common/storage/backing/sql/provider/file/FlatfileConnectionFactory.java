@@ -23,9 +23,10 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing.sql.provider;
+package me.lucko.luckperms.common.storage.backing.sql.provider.file;
 
-import me.lucko.luckperms.common.storage.backing.sql.WrappedConnection;
+import me.lucko.luckperms.common.storage.backing.sql.NonClosableConnection;
+import me.lucko.luckperms.common.storage.backing.sql.provider.AbstractConnectionFactory;
 
 import java.io.File;
 import java.sql.Connection;
@@ -34,14 +35,14 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.concurrent.locks.ReentrantLock;
 
-abstract class FlatfileProvider extends SQLProvider {
+abstract class FlatfileConnectionFactory extends AbstractConnectionFactory {
     protected static final DecimalFormat DF = new DecimalFormat("#.00");
 
     protected final File file;
     private final ReentrantLock lock = new ReentrantLock();
-    private WrappedConnection connection;
+    private Connection connection;
 
-    FlatfileProvider(String name, File file) {
+    FlatfileConnectionFactory(String name, File file) {
         super(name);
         this.file = file;
     }
@@ -62,7 +63,7 @@ abstract class FlatfileProvider extends SQLProvider {
     }
 
     @Override
-    public WrappedConnection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
         lock.lock();
         try {
             if (this.connection == null || this.connection.isClosed()) {
@@ -72,7 +73,7 @@ abstract class FlatfileProvider extends SQLProvider {
 
                 Connection connection = DriverManager.getConnection(getDriverId() + ":" + file.getAbsolutePath());
                 if (connection != null) {
-                    this.connection = new WrappedConnection(connection, false);
+                    this.connection = new NonClosableConnection(connection);
                 }
             }
 
@@ -81,7 +82,7 @@ abstract class FlatfileProvider extends SQLProvider {
         }
 
         if (this.connection == null) {
-            throw new SQLException("Connection is null");
+            throw new SQLException("Unable to get a connection.");
         }
 
         return this.connection;

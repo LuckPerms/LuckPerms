@@ -30,6 +30,7 @@ import lombok.Getter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 import me.lucko.luckperms.api.HeldPermission;
@@ -37,6 +38,7 @@ import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.managers.GenericUserManager;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
@@ -47,9 +49,9 @@ import me.lucko.luckperms.common.node.NodeHeldPermission;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
-import me.lucko.luckperms.common.storage.backing.AbstractBacking;
-import me.lucko.luckperms.common.storage.backing.legacy.LegacySQLSchemaMigration;
-import me.lucko.luckperms.common.storage.backing.sql.provider.SQLProvider;
+import me.lucko.luckperms.common.storage.backing.AbstractDao;
+import me.lucko.luckperms.common.storage.backing.legacy.LegacySqlMigration;
+import me.lucko.luckperms.common.storage.backing.sql.provider.AbstractConnectionFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -72,7 +74,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class SQLBacking extends AbstractBacking {
+public class SqlDao extends AbstractDao {
     private static final Type LIST_STRING_TYPE = new TypeToken<List<String>>(){}.getType();
 
     private static final String USER_PERMISSIONS_SELECT = "SELECT permission, value, server, world, expiry, contexts FROM {prefix}user_permissions WHERE uuid=?";
@@ -118,12 +120,12 @@ public class SQLBacking extends AbstractBacking {
     private final Gson gson;
 
     @Getter
-    private final SQLProvider provider;
+    private final AbstractConnectionFactory provider;
 
     @Getter
     private final Function<String, String> prefix;
 
-    public SQLBacking(LuckPermsPlugin plugin, SQLProvider provider, String prefix) {
+    public SqlDao(LuckPermsPlugin plugin, AbstractConnectionFactory provider, String prefix) {
         super(plugin, provider.getName());
         this.provider = provider;
         this.prefix = s -> s.replace("{prefix}", prefix);
@@ -189,7 +191,7 @@ public class SQLBacking extends AbstractBacking {
                     plugin.getLog().severe("Starting migration from legacy schema. This could take a while....");
                     plugin.getLog().severe("Please do not stop your server while the migration takes place.");
 
-                    new LegacySQLSchemaMigration(this).run();
+                    new LegacySqlMigration(this).run();
                 }
             }
 
@@ -322,7 +324,7 @@ public class SQLBacking extends AbstractBacking {
                             String world = rs.getString("world");
                             long expiry = rs.getLong("expiry");
                             String contexts = rs.getString("contexts");
-                            data.add(NodeModel.deserialize(permission, value, server, world, expiry, contexts));
+                            data.add(deserializeNode(permission, value, server, world, expiry, contexts));
                         }
                     }
                 }
@@ -422,7 +424,7 @@ public class SQLBacking extends AbstractBacking {
                             String world = rs.getString("world");
                             long expiry = rs.getLong("expiry");
                             String contexts = rs.getString("contexts");
-                            remote.add(NodeModel.deserialize(permission, value, server, world, expiry, contexts));
+                            remote.add(deserializeNode(permission, value, server, world, expiry, contexts));
                         }
                     }
                 }
@@ -443,11 +445,11 @@ public class SQLBacking extends AbstractBacking {
                         for (NodeModel nd : toRemove) {
                             ps.setString(1, user.getUuid().toString());
                             ps.setString(2, nd.getPermission());
-                            ps.setBoolean(3, nd.isValue());
+                            ps.setBoolean(3, nd.getValue());
                             ps.setString(4, nd.getServer());
                             ps.setString(5, nd.getWorld());
                             ps.setLong(6, nd.getExpiry());
-                            ps.setString(7, nd.serializeContext());
+                            ps.setString(7, gson.toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
                             ps.addBatch();
                         }
                         ps.executeBatch();
@@ -464,11 +466,11 @@ public class SQLBacking extends AbstractBacking {
                         for (NodeModel nd : toAdd) {
                             ps.setString(1, user.getUuid().toString());
                             ps.setString(2, nd.getPermission());
-                            ps.setBoolean(3, nd.isValue());
+                            ps.setBoolean(3, nd.getValue());
                             ps.setString(4, nd.getServer());
                             ps.setString(5, nd.getWorld());
                             ps.setLong(6, nd.getExpiry());
-                            ps.setString(7, nd.serializeContext());
+                            ps.setString(7, gson.toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
                             ps.addBatch();
                         }
                         ps.executeBatch();
@@ -551,7 +553,7 @@ public class SQLBacking extends AbstractBacking {
                         long expiry = rs.getLong("expiry");
                         String contexts = rs.getString("contexts");
 
-                        NodeModel data = NodeModel.deserialize(permission, value, server, world, expiry, contexts);
+                        NodeModel data = deserializeNode(permission, value, server, world, expiry, contexts);
                         held.add(NodeHeldPermission.of(holder, data));
                     }
                 }
@@ -633,7 +635,7 @@ public class SQLBacking extends AbstractBacking {
                             String world = rs.getString("world");
                             long expiry = rs.getLong("expiry");
                             String contexts = rs.getString("contexts");
-                            data.add(NodeModel.deserialize(permission, value, server, world, expiry, contexts));
+                            data.add(deserializeNode(permission, value, server, world, expiry, contexts));
                         }
                     }
                 }
@@ -720,7 +722,7 @@ public class SQLBacking extends AbstractBacking {
                             String world = rs.getString("world");
                             long expiry = rs.getLong("expiry");
                             String contexts = rs.getString("contexts");
-                            remote.add(NodeModel.deserialize(permission, value, server, world, expiry, contexts));
+                            remote.add(deserializeNode(permission, value, server, world, expiry, contexts));
                         }
                     }
                 }
@@ -742,11 +744,11 @@ public class SQLBacking extends AbstractBacking {
                         for (NodeModel nd : toRemove) {
                             ps.setString(1, group.getName());
                             ps.setString(2, nd.getPermission());
-                            ps.setBoolean(3, nd.isValue());
+                            ps.setBoolean(3, nd.getValue());
                             ps.setString(4, nd.getServer());
                             ps.setString(5, nd.getWorld());
                             ps.setLong(6, nd.getExpiry());
-                            ps.setString(7, nd.serializeContext());
+                            ps.setString(7, gson.toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
                             ps.addBatch();
                         }
                         ps.executeBatch();
@@ -763,11 +765,11 @@ public class SQLBacking extends AbstractBacking {
                         for (NodeModel nd : toAdd) {
                             ps.setString(1, group.getName());
                             ps.setString(2, nd.getPermission());
-                            ps.setBoolean(3, nd.isValue());
+                            ps.setBoolean(3, nd.getValue());
                             ps.setString(4, nd.getServer());
                             ps.setString(5, nd.getWorld());
                             ps.setLong(6, nd.getExpiry());
-                            ps.setString(7, nd.serializeContext());
+                            ps.setString(7, gson.toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
                             ps.addBatch();
                         }
                         ps.executeBatch();
@@ -825,7 +827,7 @@ public class SQLBacking extends AbstractBacking {
                         long expiry = rs.getLong("expiry");
                         String contexts = rs.getString("contexts");
 
-                        NodeModel data = NodeModel.deserialize(permission, value, server, world, expiry, contexts);
+                        NodeModel data = deserializeNode(permission, value, server, world, expiry, contexts);
                         held.add(NodeHeldPermission.of(holder, data));
                     }
                 }
@@ -1112,5 +1114,10 @@ public class SQLBacking extends AbstractBacking {
         toRemove.removeAll(local);
 
         return Maps.immutableEntry(toAdd, toRemove);
+    }
+
+    private NodeModel deserializeNode(String permission, boolean value, String server, String world, long expiry, String contexts) {
+        JsonObject context = gson.fromJson(contexts, JsonObject.class);
+        return NodeModel.of(permission, value, server, world, expiry, ContextSetJsonSerializer.deserializeContextSet(context).makeImmutable());
     }
 }

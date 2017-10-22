@@ -53,7 +53,7 @@ import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
-import me.lucko.luckperms.common.storage.backing.AbstractBacking;
+import me.lucko.luckperms.common.storage.backing.AbstractDao;
 
 import org.bson.Document;
 
@@ -64,24 +64,14 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
-public class MongoDBBacking extends AbstractBacking {
-
-    private static <T> T call(Callable<T> c, T def) {
-        try {
-            return c.call();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return def;
-        }
-    }
+public class MongoDao extends AbstractDao {
 
     private final DatastoreConfiguration configuration;
     private MongoClient mongoClient;
@@ -90,10 +80,16 @@ public class MongoDBBacking extends AbstractBacking {
     @Getter
     private final String prefix;
 
-    public MongoDBBacking(LuckPermsPlugin plugin, DatastoreConfiguration configuration, String prefix) {
+    public MongoDao(LuckPermsPlugin plugin, DatastoreConfiguration configuration, String prefix) {
         super(plugin, "MongoDB");
         this.configuration = configuration;
         this.prefix = prefix;
+    }
+
+    private boolean reportException(Exception ex) {
+        plugin.getLog().warn("Exception thrown whilst performing i/o: ");
+        ex.printStackTrace();
+        return false;
     }
 
     @Override
@@ -162,7 +158,7 @@ public class MongoDBBacking extends AbstractBacking {
 
     @Override
     public boolean logAction(LogEntry entry) {
-        return call(() -> {
+        try {
             MongoCollection<Document> c = database.getCollection(prefix + "action");
 
             //noinspection deprecation
@@ -179,14 +175,16 @@ public class MongoDBBacking extends AbstractBacking {
             }
 
             c.insertOne(doc, new InsertOneOptions());
-            return true;
-        }, false);
+        } catch (Exception e) {
+            return reportException(e);
+        }
+        return true;
     }
 
     @Override
     public Log getLog() {
-        return call(() -> {
-            final Log.Builder log = Log.builder();
+        Log.Builder log = Log.builder();
+        try {
             MongoCollection<Document> c = database.getCollection(prefix + "action");
 
             try (MongoCursor<Document> cursor = c.find().iterator()) {
@@ -210,14 +208,16 @@ public class MongoDBBacking extends AbstractBacking {
                     log.add(e);
                 }
             }
-
-            return log.build();
-        }, null);
+        } catch (Exception e) {
+            reportException(e);
+            return null;
+        }
+        return log.build();
     }
 
     @Override
     public boolean applyBulkUpdate(BulkUpdate bulkUpdate) {
-        return call(() -> {
+        try {
             if (bulkUpdate.getDataType().isIncludingUsers()) {
                 MongoCollection<Document> c = database.getCollection(prefix + "users");
 
@@ -234,20 +234,20 @@ public class MongoDBBacking extends AbstractBacking {
                             nodes.add(NodeModel.fromNode(node));
                         }
 
-                        Set<Node> results = nodes.stream()
-                                .map(n -> Optional.ofNullable(bulkUpdate.apply(n)))
-                                .filter(Optional::isPresent)
-                                .map(Optional::get)
-                                .map(NodeModel::toNode)
+                        Set<NodeModel> results = nodes.stream()
+                                .map(bulkUpdate::apply)
+                                .filter(Objects::nonNull)
                                 .collect(Collectors.toSet());
 
-                        Document permsDoc = new Document();
-                        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(results)).entrySet()) {
-                            permsDoc.append(e.getKey(), e.getValue());
-                        }
+                        if (!nodes.equals(results)) {
+                            Document permsDoc = new Document();
+                            for (Map.Entry<String, Boolean> e : convert(exportToLegacy(results.stream().map(NodeModel::toNode).collect(Collectors.toList()))).entrySet()) {
+                                permsDoc.append(e.getKey(), e.getValue());
+                            }
 
-                        d.put("perms", perms);
-                        c.replaceOne(new Document("_id", uuid), d);
+                            d.put("perms", perms);
+                            c.replaceOne(new Document("_id", uuid), d);
+                        }
                     }
                 }
             }
@@ -268,26 +268,28 @@ public class MongoDBBacking extends AbstractBacking {
                             nodes.add(NodeModel.fromNode(node));
                         }
 
-                        Set<Node> results = nodes.stream()
-                                .map(n -> Optional.ofNullable(bulkUpdate.apply(n)))
-                                .filter(Optional::isPresent)
-                                .map(Optional::get)
-                                .map(NodeModel::toNode)
+                        Set<NodeModel> results = nodes.stream()
+                                .map(bulkUpdate::apply)
+                                .filter(Objects::nonNull)
                                 .collect(Collectors.toSet());
 
-                        Document permsDoc = new Document();
-                        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(results)).entrySet()) {
-                            permsDoc.append(e.getKey(), e.getValue());
-                        }
+                        if (!nodes.equals(results)) {
+                            Document permsDoc = new Document();
+                            for (Map.Entry<String, Boolean> e : convert(exportToLegacy(results.stream().map(NodeModel::toNode).collect(Collectors.toList()))).entrySet()) {
+                                permsDoc.append(e.getKey(), e.getValue());
+                            }
 
-                        d.put("perms", perms);
-                        c.replaceOne(new Document("_id", holder), d);
+                            d.put("perms", perms);
+                            c.replaceOne(new Document("_id", holder), d);
+                        }
                     }
                 }
             }
-
-            return true;
-        }, false);
+        } catch (Exception e) {
+            reportException(e);
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -295,80 +297,73 @@ public class MongoDBBacking extends AbstractBacking {
         User user = plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
         user.getIoLock().lock();
         try {
-            return call(() -> {
-                MongoCollection<Document> c = database.getCollection(prefix + "users");
+            MongoCollection<Document> c = database.getCollection(prefix + "users");
 
-                try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUuid())).iterator()) {
-                    if (cursor.hasNext()) {
-                        // User exists, let's load.
-                        Document d = cursor.next();
-                        user.setEnduringNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
-                                .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
-                                .collect(Collectors.toSet())
-                        );
-                        user.getPrimaryGroup().setStoredValue(d.getString("primaryGroup"));
-                        user.setName(name, true);
+            try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUuid())).iterator()) {
+                if (cursor.hasNext()) {
+                    // User exists, let's load.
+                    Document d = cursor.next();
+                    user.setEnduringNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
+                            .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                            .collect(Collectors.toSet())
+                    );
+                    user.getPrimaryGroup().setStoredValue(d.getString("primaryGroup"));
+                    user.setName(name, true);
 
-                        boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
-                        if (user.getName().isPresent() && (name == null || !user.getName().get().equalsIgnoreCase(name))) {
-                            save = true;
-                        }
+                    boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
+                    if (user.getName().isPresent() && (name == null || !user.getName().get().equalsIgnoreCase(name))) {
+                        save = true;
+                    }
 
-                        if (save) {
-                            c.replaceOne(new Document("_id", user.getUuid()), fromUser(user));
-                        }
-                    } else {
-                        if (GenericUserManager.shouldSave(user)) {
-                            user.clearNodes();
-                            user.getPrimaryGroup().setStoredValue(null);
-                            plugin.getUserManager().giveDefaultIfNeeded(user, false);
-                        }
+                    if (save) {
+                        c.replaceOne(new Document("_id", user.getUuid()), fromUser(user));
+                    }
+                } else {
+                    if (GenericUserManager.shouldSave(user)) {
+                        user.clearNodes();
+                        user.getPrimaryGroup().setStoredValue(null);
+                        plugin.getUserManager().giveDefaultIfNeeded(user, false);
                     }
                 }
-                return true;
-            }, false);
+            }
+        } catch (Exception e) {
+            return reportException(e);
         } finally {
             user.getIoLock().unlock();
             user.getRefreshBuffer().requestDirectly();
         }
+        return true;
     }
 
     @Override
     public boolean saveUser(User user) {
-        if (!GenericUserManager.shouldSave(user)) {
-            user.getIoLock().lock();
-            try {
-                return call(() -> {
-                    MongoCollection<Document> c = database.getCollection(prefix + "users");
-                    return c.deleteOne(new Document("_id", user.getUuid())).wasAcknowledged();
-                }, false);
-            } finally {
-                user.getIoLock().unlock();
-            }
-        }
-
         user.getIoLock().lock();
         try {
-            return call(() -> {
+            if (!GenericUserManager.shouldSave(user)) {
                 MongoCollection<Document> c = database.getCollection(prefix + "users");
-                try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUuid())).iterator()) {
-                    if (!cursor.hasNext()) {
-                        c.insertOne(fromUser(user));
-                    } else {
-                        c.replaceOne(new Document("_id", user.getUuid()), fromUser(user));
-                    }
+                return c.deleteOne(new Document("_id", user.getUuid())).wasAcknowledged();
+            }
+
+            MongoCollection<Document> c = database.getCollection(prefix + "users");
+            try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUuid())).iterator()) {
+                if (!cursor.hasNext()) {
+                    c.insertOne(fromUser(user));
+                } else {
+                    c.replaceOne(new Document("_id", user.getUuid()), fromUser(user));
                 }
-                return true;
-            }, false);
+            }
+        } catch (Exception e) {
+            return reportException(e);
         } finally {
             user.getIoLock().unlock();
         }
+        return true;
     }
 
     @Override
     public Set<UUID> getUniqueUsers() {
         Set<UUID> uuids = new HashSet<>();
-        boolean success = call(() -> {
+        try {
             MongoCollection<Document> c = database.getCollection(prefix + "users");
 
             try (MongoCursor<Document> cursor = c.find().iterator()) {
@@ -377,17 +372,16 @@ public class MongoDBBacking extends AbstractBacking {
                     uuids.add(d.get("_id", UUID.class));
                 }
             }
-
-            return true;
-        }, false);
-
-        return success ? uuids : null;
+        } catch (Exception e) {
+            return null;
+        }
+        return uuids;
     }
 
     @Override
     public List<HeldPermission<UUID>> getUsersWithPermission(String permission) {
         ImmutableList.Builder<HeldPermission<UUID>> held = ImmutableList.builder();
-        boolean success = call(() -> {
+        try {
             MongoCollection<Document> c = database.getCollection(prefix + "users");
 
             try (MongoCursor<Document> cursor = c.find().iterator()) {
@@ -407,10 +401,11 @@ public class MongoDBBacking extends AbstractBacking {
                     }
                 }
             }
-            return true;
-        }, false);
-
-        return success ? held.build() : null;
+        } catch (Exception e) {
+            reportException(e);
+            return null;
+        }
+        return held.build();
     }
 
     @Override
@@ -418,26 +413,26 @@ public class MongoDBBacking extends AbstractBacking {
         Group group = plugin.getGroupManager().getOrMake(name);
         group.getIoLock().lock();
         try {
-            return call(() -> {
-                MongoCollection<Document> c = database.getCollection(prefix + "groups");
+            MongoCollection<Document> c = database.getCollection(prefix + "groups");
 
-                try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
-                    if (cursor.hasNext()) {
-                        // Group exists, let's load.
-                        Document d = cursor.next();
-                        group.setEnduringNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
-                                .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
-                                .collect(Collectors.toSet())
-                        );
-                    } else {
-                        c.insertOne(fromGroup(group));
-                    }
+            try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
+                if (cursor.hasNext()) {
+                    // Group exists, let's load.
+                    Document d = cursor.next();
+                    group.setEnduringNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
+                            .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                            .collect(Collectors.toSet())
+                    );
+                } else {
+                    c.insertOne(fromGroup(group));
                 }
-                return true;
-            }, false);
+            }
+        } catch (Exception e) {
+            return reportException(e);
         } finally {
             group.getIoLock().unlock();
         }
+        return true;
     }
 
     @Override
@@ -445,22 +440,22 @@ public class MongoDBBacking extends AbstractBacking {
         Group group = plugin.getGroupManager().getOrMake(name);
         group.getIoLock().lock();
         try {
-            return call(() -> {
-                MongoCollection<Document> c = database.getCollection(prefix + "groups");
+            MongoCollection<Document> c = database.getCollection(prefix + "groups");
 
-                try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
-                    if (cursor.hasNext()) {
-                        Document d = cursor.next();
+            try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
+                if (cursor.hasNext()) {
+                    Document d = cursor.next();
 
-                        group.setEnduringNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
-                                .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
-                                .collect(Collectors.toSet())
-                        );
-                        return true;
-                    }
-                    return false;
+                    group.setEnduringNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
+                            .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                            .collect(Collectors.toSet())
+                    );
+                    return true;
                 }
-            }, false);
+                return false;
+            }
+        } catch (Exception e) {
+            return reportException(e);
         } finally {
             group.getIoLock().unlock();
         }
@@ -469,39 +464,36 @@ public class MongoDBBacking extends AbstractBacking {
     @Override
     public boolean loadAllGroups() {
         List<String> groups = new ArrayList<>();
-        boolean success = call(() -> {
+        try {
             MongoCollection<Document> c = database.getCollection(prefix + "groups");
 
-            boolean b = true;
             try (MongoCursor<Document> cursor = c.find().iterator()) {
                 while (cursor.hasNext()) {
                     String name = cursor.next().getString("_id");
-                    if (!loadGroup(name)) {
-                        b = false;
-                    }
+                    loadGroup(name);
                     groups.add(name);
                 }
             }
-            return b;
-        }, false);
-
-        if (success) {
-            GroupManager gm = plugin.getGroupManager();
-            gm.getAll().values().stream()
-                    .filter(g -> !groups.contains(g.getName()))
-                    .forEach(gm::unload);
+        } catch (Exception e) {
+            reportException(e);
+            return false;
         }
-        return success;
+
+        GroupManager gm = plugin.getGroupManager();
+        gm.getAll().values().stream()
+                .filter(g -> !groups.contains(g.getName()))
+                .forEach(gm::unload);
+        return true;
     }
 
     @Override
     public boolean saveGroup(Group group) {
         group.getIoLock().lock();
         try {
-            return call(() -> {
-                MongoCollection<Document> c = database.getCollection(prefix + "groups");
-                return c.replaceOne(new Document("_id", group.getName()), fromGroup(group)).wasAcknowledged();
-            }, false);
+            MongoCollection<Document> c = database.getCollection(prefix + "groups");
+            return c.replaceOne(new Document("_id", group.getName()), fromGroup(group)).wasAcknowledged();
+        } catch (Exception e) {
+            return reportException(e);
         } finally {
             group.getIoLock().unlock();
         }
@@ -510,24 +502,25 @@ public class MongoDBBacking extends AbstractBacking {
     @Override
     public boolean deleteGroup(Group group) {
         group.getIoLock().lock();
-        boolean success;
         try {
-            success = call(() -> {
-                MongoCollection<Document> c = database.getCollection(prefix + "groups");
-                return c.deleteOne(new Document("_id", group.getName())).wasAcknowledged();
-            }, false);
+            MongoCollection<Document> c = database.getCollection(prefix + "groups");
+            if (!c.deleteOne(new Document("_id", group.getName())).wasAcknowledged()) {
+                throw new RuntimeException();
+            }
+        } catch (Exception e) {
+            return reportException(e);
         } finally {
             group.getIoLock().unlock();
         }
 
-        if (success) plugin.getGroupManager().unload(group);
-        return success;
+        plugin.getGroupManager().unload(group);
+        return true;
     }
 
     @Override
     public List<HeldPermission<String>> getGroupsWithPermission(String permission) {
         ImmutableList.Builder<HeldPermission<String>> held = ImmutableList.builder();
-        boolean success = call(() -> {
+        try {
             MongoCollection<Document> c = database.getCollection(prefix + "groups");
 
             try (MongoCursor<Document> cursor = c.find().iterator()) {
@@ -547,10 +540,11 @@ public class MongoDBBacking extends AbstractBacking {
                     }
                 }
             }
-            return true;
-        }, false);
-
-        return success ? held.build() : null;
+        } catch (Exception e) {
+            reportException(e);
+            return null;
+        }
+        return held.build();
     }
 
     @Override
@@ -558,22 +552,22 @@ public class MongoDBBacking extends AbstractBacking {
         Track track = plugin.getTrackManager().getOrMake(name);
         track.getIoLock().lock();
         try {
-            return call(() -> {
-                MongoCollection<Document> c = database.getCollection(prefix + "tracks");
+            MongoCollection<Document> c = database.getCollection(prefix + "tracks");
 
-                try (MongoCursor<Document> cursor = c.find(new Document("_id", track.getName())).iterator()) {
-                    if (!cursor.hasNext()) {
-                        c.insertOne(fromTrack(track));
-                    } else {
-                        Document d = cursor.next();
-                        track.setGroups((List<String>) d.get("groups"));
-                    }
+            try (MongoCursor<Document> cursor = c.find(new Document("_id", track.getName())).iterator()) {
+                if (!cursor.hasNext()) {
+                    c.insertOne(fromTrack(track));
+                } else {
+                    Document d = cursor.next();
+                    track.setGroups((List<String>) d.get("groups"));
                 }
-                return true;
-            }, false);
+            }
+        } catch (Exception e) {
+            return reportException(e);
         } finally {
             track.getIoLock().unlock();
         }
+        return true;
     }
 
     @Override
@@ -581,18 +575,18 @@ public class MongoDBBacking extends AbstractBacking {
         Track track = plugin.getTrackManager().getOrMake(name);
         track.getIoLock().lock();
         try {
-            return call(() -> {
-                MongoCollection<Document> c = database.getCollection(prefix + "tracks");
+            MongoCollection<Document> c = database.getCollection(prefix + "tracks");
 
-                try (MongoCursor<Document> cursor = c.find(new Document("_id", track.getName())).iterator()) {
-                    if (cursor.hasNext()) {
-                        Document d = cursor.next();
-                        track.setGroups((List<String>) d.get("groups"));
-                        return true;
-                    }
-                    return false;
+            try (MongoCursor<Document> cursor = c.find(new Document("_id", track.getName())).iterator()) {
+                if (cursor.hasNext()) {
+                    Document d = cursor.next();
+                    track.setGroups((List<String>) d.get("groups"));
+                    return true;
                 }
-            }, false);
+                return false;
+            }
+        } catch (Exception e) {
+            return reportException(e);
         } finally {
             track.getIoLock().unlock();
         }
@@ -601,39 +595,36 @@ public class MongoDBBacking extends AbstractBacking {
     @Override
     public boolean loadAllTracks() {
         List<String> tracks = new ArrayList<>();
-        boolean success = call(() -> {
+        try {
             MongoCollection<Document> c = database.getCollection(prefix + "tracks");
 
-            boolean b = true;
             try (MongoCursor<Document> cursor = c.find().iterator()) {
                 while (cursor.hasNext()) {
                     String name = cursor.next().getString("_id");
-                    if (!loadTrack(name)) {
-                        b = false;
-                    }
+                    loadTrack(name);
                     tracks.add(name);
                 }
             }
-            return b;
-        }, false);
-
-        if (success) {
-            TrackManager tm = plugin.getTrackManager();
-            tm.getAll().values().stream()
-                    .filter(t -> !tracks.contains(t.getName()))
-                    .forEach(tm::unload);
+        } catch (Exception e) {
+            reportException(e);
+            return false;
         }
-        return success;
+
+        TrackManager tm = plugin.getTrackManager();
+        tm.getAll().values().stream()
+                .filter(t -> !tracks.contains(t.getName()))
+                .forEach(tm::unload);
+        return true;
     }
 
     @Override
     public boolean saveTrack(Track track) {
         track.getIoLock().lock();
         try {
-            return call(() -> {
-                MongoCollection<Document> c = database.getCollection(prefix + "tracks");
-                return c.replaceOne(new Document("_id", track.getName()), fromTrack(track)).wasAcknowledged();
-            }, false);
+            MongoCollection<Document> c = database.getCollection(prefix + "tracks");
+            return c.replaceOne(new Document("_id", track.getName()), fromTrack(track)).wasAcknowledged();
+        } catch (Exception e) {
+            return reportException(e);
         } finally {
             track.getIoLock().unlock();
         }
@@ -642,23 +633,24 @@ public class MongoDBBacking extends AbstractBacking {
     @Override
     public boolean deleteTrack(Track track) {
         track.getIoLock().lock();
-        boolean success;
         try {
-            success = call(() -> {
-                MongoCollection<Document> c = database.getCollection(prefix + "tracks");
-                return c.deleteOne(new Document("_id", track.getName())).wasAcknowledged();
-            }, false);
+            MongoCollection<Document> c = database.getCollection(prefix + "tracks");
+            if (!c.deleteOne(new Document("_id", track.getName())).wasAcknowledged()) {
+                throw new RuntimeException();
+            }
+        } catch (Exception e) {
+            return reportException(e);
         } finally {
             track.getIoLock().unlock();
         }
 
-        if (success) plugin.getTrackManager().unload(track);
-        return success;
+        plugin.getTrackManager().unload(track);
+        return true;
     }
 
     @Override
     public boolean saveUUIDData(UUID uuid, String username) {
-        return call(() -> {
+        try {
             MongoCollection<Document> c = database.getCollection(prefix + "uuid");
 
             try (MongoCursor<Document> cursor = c.find(new Document("_id", uuid)).iterator()) {
@@ -668,14 +660,15 @@ public class MongoDBBacking extends AbstractBacking {
                     c.insertOne(new Document("_id", uuid).append("name", username.toLowerCase()));
                 }
             }
-
-            return true;
-        }, false);
+        } catch (Exception e) {
+            return reportException(e);
+        }
+        return true;
     }
 
     @Override
     public UUID getUUID(String username) {
-        return call(() -> {
+        try {
             MongoCollection<Document> c = database.getCollection(prefix + "uuid");
 
             try (MongoCursor<Document> cursor = c.find(new Document("name", username.toLowerCase())).iterator()) {
@@ -684,12 +677,15 @@ public class MongoDBBacking extends AbstractBacking {
                 }
             }
             return null;
-        }, null);
+        } catch (Exception e) {
+            reportException(e);
+            return null;
+        }
     }
 
     @Override
     public String getName(UUID uuid) {
-        return call(() -> {
+        try {
             MongoCollection<Document> c = database.getCollection(prefix + "uuid");
 
             try (MongoCursor<Document> cursor = c.find(new Document("_id", uuid)).iterator()) {
@@ -698,7 +694,10 @@ public class MongoDBBacking extends AbstractBacking {
                 }
             }
             return null;
-        }, null);
+        } catch (Exception e) {
+            reportException(e);
+            return null;
+        }
     }
 
     /*  MongoDB does not allow '.' or '$' in key names.

@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.storage.backing.AbstractBacking;
+import me.lucko.luckperms.common.storage.backing.AbstractDao;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,11 +43,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class SplitBacking extends AbstractBacking {
-    private final Map<String, AbstractBacking> backing;
+public class SplitStorageDao extends AbstractDao {
+    private final Map<String, AbstractDao> backing;
     private final Map<String, String> types;
 
-    protected SplitBacking(LuckPermsPlugin plugin, Map<String, AbstractBacking> backing, Map<String, String> types) {
+    protected SplitStorageDao(LuckPermsPlugin plugin, Map<String, AbstractDao> backing, Map<String, String> types) {
         super(plugin, "Split Storage");
         this.backing = ImmutableMap.copyOf(backing);
         this.types = ImmutableMap.copyOf(types);
@@ -56,8 +56,8 @@ public class SplitBacking extends AbstractBacking {
     @Override
     public void init() {
         boolean success = true;
-        backing.values().forEach(AbstractBacking::init);
-        for (AbstractBacking ds : backing.values()) {
+        backing.values().forEach(AbstractDao::init);
+        for (AbstractDao ds : backing.values()) {
             if (!ds.isAcceptingLogins()) {
                 success = false;
             }
@@ -68,14 +68,14 @@ public class SplitBacking extends AbstractBacking {
 
     @Override
     public void shutdown() {
-        backing.values().forEach(AbstractBacking::shutdown);
+        backing.values().forEach(AbstractDao::shutdown);
     }
 
     @Override
     public Map<String, String> getMeta() {
         Map<String, String> ret = new LinkedHashMap<>();
         ret.put("Types", types.toString());
-        for (AbstractBacking backing : backing.values()) {
+        for (AbstractDao backing : backing.values()) {
             ret.putAll(backing.getMeta());
         }
         return ret;

@@ -28,17 +28,17 @@ package me.lucko.luckperms.common.storage.backing.file;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.gson.GsonConfigurationLoader;
+import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-public class JSONBacking extends ConfigurateBacking {
+public class HoconDao extends ConfigurateDao {
 
-    public JSONBacking(LuckPermsPlugin plugin, String dataFolderName) {
-        super(plugin, "JSON", ".json", dataFolderName);
+    public HoconDao(LuckPermsPlugin plugin, String dataFolderName) {
+        super(plugin, "HOCON", ".conf", dataFolderName);
     }
 
     @Override
@@ -47,8 +47,7 @@ public class JSONBacking extends ConfigurateBacking {
             return null;
         }
 
-        GsonConfigurationLoader loader = GsonConfigurationLoader.builder()
-                .setIndent(2)
+        HoconConfigurationLoader loader = HoconConfigurationLoader.builder()
                 .setSource(() -> Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8))
                 .setSink(() -> Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8))
                 .build();
@@ -63,8 +62,7 @@ public class JSONBacking extends ConfigurateBacking {
             return;
         }
 
-        GsonConfigurationLoader loader = GsonConfigurationLoader.builder()
-                .setIndent(2)
+        HoconConfigurationLoader loader = HoconConfigurationLoader.builder()
                 .setSource(() -> Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8))
                 .setSink(() -> Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8))
                 .build();
