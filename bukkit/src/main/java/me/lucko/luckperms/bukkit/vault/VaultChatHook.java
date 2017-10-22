@@ -108,25 +108,25 @@ public class VaultChatHook extends Chat {
 
     @Override
     public String getGroupPrefix(String world, @NonNull String group) {
-        final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
+        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
         return getGroupChatMeta(g, ChatMetaType.PREFIX, world);
     }
 
     @Override
     public void setGroupPrefix(String world, @NonNull String group, @NonNull String prefix) {
-        final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
+        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
         setChatMeta(g, ChatMetaType.PREFIX, prefix, world);
     }
 
     @Override
     public String getGroupSuffix(String world, @NonNull String group) {
-        final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
+        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
         return getGroupChatMeta(g, ChatMetaType.SUFFIX, world);
     }
 
     @Override
     public void setGroupSuffix(String world, @NonNull String group, @NonNull String suffix) {
-        final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
+        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
         setChatMeta(g, ChatMetaType.SUFFIX, suffix, world);
     }
 
@@ -148,7 +148,7 @@ public class VaultChatHook extends Chat {
 
     @Override
     public int getGroupInfoInteger(String world, @NonNull String group, @NonNull String node, int defaultValue) {
-        final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
+        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
         try {
             return Integer.parseInt(getGroupMeta(g, node, world, String.valueOf(defaultValue)));
         } catch (NumberFormatException e) {
@@ -158,7 +158,7 @@ public class VaultChatHook extends Chat {
 
     @Override
     public void setGroupInfoInteger(String world, @NonNull String group, @NonNull String node, int value) {
-        final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
+        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
         setMeta(g, node, String.valueOf(value), world);
     }
 
@@ -180,7 +180,7 @@ public class VaultChatHook extends Chat {
 
     @Override
     public double getGroupInfoDouble(String world, @NonNull String group, @NonNull String node, double defaultValue) {
-        final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
+        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
         try {
             return Double.parseDouble(getGroupMeta(g, node, world, String.valueOf(defaultValue)));
         } catch (NumberFormatException e) {
@@ -190,7 +190,7 @@ public class VaultChatHook extends Chat {
 
     @Override
     public void setGroupInfoDouble(String world, @NonNull String group, @NonNull String node, double value) {
-        final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
+        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
         setMeta(g, node, String.valueOf(value), world);
     }
 
@@ -212,7 +212,7 @@ public class VaultChatHook extends Chat {
 
     @Override
     public boolean getGroupInfoBoolean(String world, @NonNull String group, @NonNull String node, boolean defaultValue) {
-        final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
+        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
         String s = getGroupMeta(g, node, world, String.valueOf(defaultValue));
         if (!s.equalsIgnoreCase("true") && !s.equalsIgnoreCase("false")) {
             return defaultValue;
@@ -222,7 +222,7 @@ public class VaultChatHook extends Chat {
 
     @Override
     public void setGroupInfoBoolean(String world, @NonNull String group, @NonNull String node, boolean value) {
-        final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
+        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
         setMeta(g, node, String.valueOf(value), world);
     }
 
@@ -240,13 +240,13 @@ public class VaultChatHook extends Chat {
 
     @Override
     public String getGroupInfoString(String world, @NonNull String group, @NonNull String node, String defaultValue) {
-        final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
+        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
         return getGroupMeta(g, node, world, defaultValue);
     }
 
     @Override
     public void setGroupInfoString(String world, @NonNull String group, @NonNull String node, String value) {
-        final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
+        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
         setMeta(g, node, value, world);
     }
 

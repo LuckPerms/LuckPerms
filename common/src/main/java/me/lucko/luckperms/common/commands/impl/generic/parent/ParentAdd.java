@@ -88,7 +88,7 @@ public class ParentAdd extends SharedSubCommand {
         DataMutateResult result = holder.setInheritGroup(group, context);
 
         if (result.asBoolean()) {
-            Message.SET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), Util.contextSetToString(context));
+            Message.SET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), Util.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("parent add " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
@@ -97,7 +97,7 @@ public class ParentAdd extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_INHERITS.send(sender, holder.getFriendlyName(), group.getDisplayName(), Util.contextSetToString(context));
+            Message.ALREADY_INHERITS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), Util.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

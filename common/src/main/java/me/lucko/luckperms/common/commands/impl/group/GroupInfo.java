@@ -58,8 +58,8 @@ public class GroupInfo extends SubCommand<Group> {
         }
 
         Message.GROUP_INFO_GENERAL.send(sender,
-                group.getId(),
-                group.getDisplayName(),
+                group.getName(),
+                group.getDisplayName().orElse(group.getName()),
                 group.getWeight().isPresent() ? group.getWeight().getAsInt() : "None",
                 group.getOwnNodes().size(),
                 group.getOwnNodes().stream().filter(n -> !(n.isGroupNode() || n.isPrefix() || n.isSuffix() || n.isMeta())).mapToInt(n -> 1).sum(),

@@ -91,7 +91,7 @@ public class ParentSet extends SharedSubCommand {
             ((User) holder).getPrimaryGroup().setStoredValue(group.getName());
         }
 
-        Message.SET_PARENT_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), Util.contextSetToString(context));
+        Message.SET_PARENT_SUCCESS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), Util.contextSetToString(context));
 
         ExtendedLogEntry.build().actor(sender).acted(holder)
                 .action("parent set " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))

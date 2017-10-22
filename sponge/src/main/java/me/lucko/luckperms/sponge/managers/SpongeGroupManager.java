@@ -288,4 +288,29 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
     public void suggestUnload(String identifier) {
         // noop
     }
+
+    @Override
+    public Group getByDisplayName(String name) {
+        // try to get an exact match first
+        Group g = getIfLoaded(name);
+        if (g != null) {
+            return g;
+        }
+
+        // then try exact display name matches
+        for (Group group : getAll().values()) {
+            if (group.getDisplayName().isPresent() && group.getDisplayName().get().equals(name)) {
+                return group;
+            }
+        }
+
+        // then try case insensitive name matches
+        for (Group group : getAll().values()) {
+            if (group.getDisplayName().isPresent() && group.getDisplayName().get().equalsIgnoreCase(name)) {
+                return group;
+            }
+        }
+
+        return null;
+    }
 }

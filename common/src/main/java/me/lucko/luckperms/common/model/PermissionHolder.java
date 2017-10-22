@@ -1494,7 +1494,7 @@ public abstract class PermissionHolder {
 
         boolean seen = false;
         int best = 0;
-        for (Node n : getOwnNodes()) {
+        for (Node n : getEnduringNodes().get(ImmutableContextSet.empty())) {
             if (!n.getPermission().startsWith("weight.")) {
                 continue;
             }

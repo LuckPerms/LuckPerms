@@ -92,11 +92,6 @@ world-rewrite:
 #  world_nether: world
 #  world_the_end: world
 
-# Rewrites group names. The underlying name of the group does not change, just the output in
-# commands / placeholders / Vault.
-group-name-rewrite:
-#  default: Member
-
 # Controls how temporary permissions/parents/meta should be accumulated
 #
 # The default behaviour is "deny"

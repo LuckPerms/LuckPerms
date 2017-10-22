@@ -171,9 +171,9 @@ public class UserPromote extends SubCommand<User> {
             user.getPrimaryGroup().setStoredValue(nextGroup.getName());
         }
 
-        Message.USER_PROMOTE_SUCCESS.send(sender, user.getFriendlyName(), track.getName(), old, nextGroup.getDisplayName(), Util.contextSetToString(context));
+        Message.USER_PROMOTE_SUCCESS.send(sender, user.getFriendlyName(), track.getName(), old, nextGroup.getFriendlyName(), Util.contextSetToString(context));
         if (!silent) {
-            Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), old, nextGroup.getDisplayName(), false));
+            Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), old, nextGroup.getFriendlyName(), false));
         }
 
         ExtendedLogEntry.build().actor(sender).acted(user)

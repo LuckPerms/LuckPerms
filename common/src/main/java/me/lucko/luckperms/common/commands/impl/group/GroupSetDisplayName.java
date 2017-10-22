@@ -42,9 +42,9 @@ import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
-public class GroupSetWeight extends SubCommand<Group> {
-    public GroupSetWeight(LocaleManager locale) {
-        super(CommandSpec.GROUP_SETWEIGHT.spec(locale), "setweight", CommandPermission.GROUP_SETWEIGHT, Predicates.not(1));
+public class GroupSetDisplayName extends SubCommand<Group> {
+    public GroupSetDisplayName(LocaleManager locale) {
+        super(CommandSpec.GROUP_SET_DISPLAY_NAME.spec(locale), "setdisplayname", CommandPermission.GROUP_SET_DISPLAY_NAME, Predicates.not(1));
     }
 
     @Override
@@ -54,13 +54,37 @@ public class GroupSetWeight extends SubCommand<Group> {
             return CommandResult.NO_PERMISSION;
         }
 
-        int weight = ArgumentUtils.handlePriority(0, args);
+        String name = ArgumentUtils.handleString(0, args);
+        String previousName = group.getDisplayName().orElse(null);
 
-        group.removeIf(n -> n.getPermission().startsWith("weight."));
-        group.setPermission(NodeFactory.newBuilder("weight." + weight).build());
+        if (previousName == null && name.equals(group.getName())) {
+            Message.GROUP_SET_DISPLAY_NAME_DOESNT_HAVE.send(sender, group.getName());
+            return CommandResult.STATE_ERROR;
+        }
+
+        if (name.equals(previousName)) {
+            Message.GROUP_SET_DISPLAY_NAME_ALREADY_HAS.send(sender, group.getName(), name);
+            return CommandResult.STATE_ERROR;
+        }
+
+        Group existing = plugin.getGroupManager().getByDisplayName(name);
+        if (existing != null && !group.equals(existing)) {
+            Message.GROUP_SET_DISPLAY_NAME_ALREADY_IN_USE.send(sender, name, existing.getName());
+            return CommandResult.STATE_ERROR;
+        }
+
+        group.removeIf(n -> n.getPermission().startsWith("displayname."));
+
+        if (name.equals(group.getName())) {
+            save(group, sender, plugin);
+            Message.GROUP_SET_DISPLAY_NAME_REMOVED.send(sender, group.getName());
+            return CommandResult.SUCCESS;
+        }
+
+        group.setPermission(NodeFactory.newBuilder("displayname." + name).build());
 
         save(group, sender, plugin);
-        Message.GROUP_SET_WEIGHT.send(sender, weight, group.getFriendlyName());
+        Message.GROUP_SET_DISPLAY_NAME.send(sender, name, group.getName());
         return CommandResult.SUCCESS;
     }
 }

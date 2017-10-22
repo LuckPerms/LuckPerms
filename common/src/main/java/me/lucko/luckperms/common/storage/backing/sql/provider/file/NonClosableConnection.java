@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing.sql;
+package me.lucko.luckperms.common.storage.backing.sql.provider.file;
 
 import lombok.AllArgsConstructor;
 import lombok.experimental.Delegate;
@@ -32,7 +32,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 @AllArgsConstructor
-public class NonClosableConnection implements Connection {
+public final class NonClosableConnection implements Connection {
 
     @Delegate(excludes = Exclude.class)
     private Connection delegate;

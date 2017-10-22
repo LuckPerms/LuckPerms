@@ -31,11 +31,9 @@ import lombok.NonNull;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.common.caching.PermissionCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -52,9 +50,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * An implementation of the Vault {@link Permission} API using LuckPerms.
@@ -110,7 +106,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public String[] getGroups() {
-        return plugin.getGroupManager().getAll().keySet().toArray(new String[0]);
+        return plugin.getGroupManager().getAll().values().stream().map(g -> g.getDisplayName().orElse(g.getName())).toArray(String[]::new);
     }
 
     @Override
@@ -221,7 +217,7 @@ public class VaultPermissionHook extends Permission {
         world = correctWorld(world);
         log("Checking if group " + groupName + " has permission: " + permission + " on world " + world + ", server " + getServer());
 
-        final Group group = plugin.getGroupManager().getIfLoaded(groupName);
+        final Group group = plugin.getGroupManager().getByDisplayName(groupName);
         if (group == null) return false;
 
         // This is a nasty call. Groups aren't cached. :(
@@ -234,7 +230,7 @@ public class VaultPermissionHook extends Permission {
         world = correctWorld(world);
         log("Adding permission to group " + groupName + ": '" + permission + "' on world " + world + ", server " + getServer());
 
-        final Group group = plugin.getGroupManager().getIfLoaded(groupName);
+        final Group group = plugin.getGroupManager().getByDisplayName(groupName);
         if (group == null) return false;
 
         holderAddPermission(group, permission, world);
@@ -246,7 +242,7 @@ public class VaultPermissionHook extends Permission {
         world = correctWorld(world);
         log("Removing permission from group " + groupName + ": '" + permission + "' on world " + world + ", server " + getServer());
 
-        final Group group = plugin.getGroupManager().getIfLoaded(groupName);
+        final Group group = plugin.getGroupManager().getByDisplayName(groupName);
         if (group == null) return false;
 
         holderRemovePermission(group, permission, world);
@@ -255,69 +251,77 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerInGroup(String world, String player, @NonNull String group) {
-        return playerHas(world, player, "group." + group);
+        return playerHas(world, player, "group." + rewriteGroupName(group));
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public boolean playerInGroup(World world, String player, @NonNull String group) {
-        return playerHas(world, player, "group." + group);
+        return playerHas(world, player, "group." + rewriteGroupName(group));
     }
 
     @Override
     public boolean playerInGroup(String world, OfflinePlayer player, @NonNull String group) {
-        return playerHas(world, player, "group." + group);
+        return playerHas(world, player, "group." + rewriteGroupName(group));
     }
 
     @Override
     public boolean playerInGroup(Player player, @NonNull String group) {
-        return playerHas(player, "group." + group);
+        return playerHas(player, "group." + rewriteGroupName(group));
     }
 
     private boolean checkGroupExists(String group) {
-        return plugin.getGroupManager().isLoaded(group);
+        return plugin.getGroupManager().getByDisplayName(group) != null;
+    }
+
+    private String rewriteGroupName(String name) {
+        Group group = plugin.getGroupManager().getByDisplayName(name);
+        if (group != null) {
+            return group.getName();
+        }
+        return name;
     }
 
     @Override
     public boolean playerAddGroup(String world, String player, @NonNull String group) {
-        return checkGroupExists(group) && playerAdd(world, player, "group." + group);
+        return checkGroupExists(group) && playerAdd(world, player, "group." + rewriteGroupName(group));
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public boolean playerAddGroup(World world, String player, @NonNull String group) {
-        return checkGroupExists(group) && playerAdd(world, player, "group." + group);
+        return checkGroupExists(group) && playerAdd(world, player, "group." + rewriteGroupName(group));
     }
 
     @Override
     public boolean playerAddGroup(String world, OfflinePlayer player, @NonNull String group) {
-        return checkGroupExists(group) && playerAdd(world, player, "group." + group);
+        return checkGroupExists(group) && playerAdd(world, player, "group." + rewriteGroupName(group));
     }
 
     @Override
     public boolean playerAddGroup(Player player, @NonNull String group) {
-        return checkGroupExists(group) && playerAdd(player, "group." + group);
+        return checkGroupExists(group) && playerAdd(player, "group." + rewriteGroupName(group));
     }
 
     @Override
     public boolean playerRemoveGroup(String world, String player, @NonNull String group) {
-        return checkGroupExists(group) && playerRemove(world, player, "group." + group);
+        return checkGroupExists(group) && playerRemove(world, player, "group." + rewriteGroupName(group));
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public boolean playerRemoveGroup(World world, String player, @NonNull String group) {
-        return checkGroupExists(group) && playerRemove(world, player, "group." + group);
+        return checkGroupExists(group) && playerRemove(world, player, "group." + rewriteGroupName(group));
     }
 
     @Override
     public boolean playerRemoveGroup(String world, OfflinePlayer player, @NonNull String group) {
-        return checkGroupExists(group) && playerRemove(world, player, "group." + group);
+        return checkGroupExists(group) && playerRemove(world, player, "group." + rewriteGroupName(group));
     }
 
     @Override
     public boolean playerRemoveGroup(Player player, @NonNull String group) {
-        return checkGroupExists(group) && playerRemove(player, "group." + group);
+        return checkGroupExists(group) && playerRemove(player, "group." + rewriteGroupName(group));
     }
 
     @Override
@@ -353,28 +357,34 @@ public class VaultPermissionHook extends Permission {
         return user.getEnduringNodes().values().stream()
                 .filter(Node::isGroupNode)
                 .filter(n -> n.shouldApplyWithContext(createContextForWorldLookup(player, w).getContexts()))
-                .map(Node::getGroupName)
+                .map(n -> {
+                    Group group = plugin.getGroupManager().getIfLoaded(n.getGroupName());
+                    if (group != null) {
+                        return group.getDisplayName().orElse(group.getName());
+                    }
+                    return n.getGroupName();
+                })
                 .toArray(String[]::new);
     }
 
     @Override
     public String getPrimaryGroup(String world, @NonNull String player) {
-        return getPrimaryGroup(world, Bukkit.getPlayerExact(player));
+        return getPrimaryGroup(Bukkit.getPlayerExact(player));
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public String getPrimaryGroup(World world, @NonNull String player) {
-        return getPrimaryGroup(world == null ? null : world.getName(), Bukkit.getPlayerExact(player));
+        return getPrimaryGroup(Bukkit.getPlayerExact(player));
     }
 
     @Override
     public String getPrimaryGroup(String world, @NonNull OfflinePlayer player) {
-        return getPrimaryGroup(world, player.getPlayer());
+        return getPrimaryGroup(player.getPlayer());
     }
 
-    private String getPrimaryGroup(String world, Player player) {
-        world = correctWorld(world);
+    @Override
+    public String getPrimaryGroup(Player player) {
         log("Getting primary group of player: " + player);
 
         if (player == null) {
@@ -387,71 +397,13 @@ public class VaultPermissionHook extends Permission {
             return null;
         }
 
-        // nothing special, just return the value.
-        if (!isPgo()) {
-            String g = user.getPrimaryGroup().getValue();
-            return plugin.getConfiguration().get(ConfigKeys.GROUP_NAME_REWRITES).getOrDefault(g, g);
-        }
-
-        // we need to do the complex PGO checking. (it's been enabled in the config.)
-        if (isPgoCheckInherited()) {
-            // we can just check the cached data
-            PermissionCache data = user.getUserData().getPermissionData(createContextForWorldLookup(plugin.getPlayer(user), world));
-            for (Map.Entry<String, Boolean> e : data.getImmutableBacking().entrySet()) {
-                if (!e.getValue()) continue;
-                if (!e.getKey().toLowerCase().startsWith("vault.primarygroup.")) continue;
-
-                String group = e.getKey().substring("vault.primarygroup.".length());
-                if (isPgoCheckExists()) {
-                    if (!plugin.getGroupManager().isLoaded(group)) {
-                        continue;
-                    }
-                }
-
-                if (isPgoCheckMemberOf()) {
-                    if (data.getPermissionValue("group." + group, CheckOrigin.INTERNAL) != Tristate.TRUE) {
-                        continue;
-                    }
-                }
-
-                return group;
-            }
-        } else {
-            // we need to check the users permissions only
-            for (Node node : user.getOwnNodes()) {
-                if (!node.getValuePrimitive()) continue;
-                if (!node.getPermission().toLowerCase().startsWith("vault.primarygroup.")) continue;
-                if (!node.shouldApplyOnServer(getServer(), isIncludeGlobal(), false)) continue;
-                if (!node.shouldApplyOnWorld(world, true, false)) continue;
-
-                String group = node.getPermission().substring("vault.primarygroup.".length());
-                if (isPgoCheckExists()) {
-                    if (!plugin.getGroupManager().isLoaded(group)) {
-                        continue;
-                    }
-                }
-
-                if (isPgoCheckMemberOf()) {
-                    String finalWorld = world;
-                    List<String> localGroups = user.getOwnNodes().stream()
-                            .filter(Node::isGroupNode)
-                            .filter(n -> n.shouldApplyOnWorld(finalWorld, isIncludeGlobal(), true))
-                            .filter(n -> n.shouldApplyOnServer(getServer(), isIncludeGlobal(), true))
-                            .map(Node::getGroupName)
-                            .collect(Collectors.toList());
-
-                    if (!localGroups.contains(group.toLowerCase())) {
-                        continue;
-                    }
-                }
-
-                return group;
-            }
-        }
-
-        // Fallback
         String g = user.getPrimaryGroup().getValue();
-        return plugin.getConfiguration().get(ConfigKeys.GROUP_NAME_REWRITES).getOrDefault(g, g);
+        Group group = plugin.getGroupManager().getByDisplayName(g);
+        if (group != null) {
+            return group.getDisplayName().orElse(group.getName());
+        }
+
+        return g;
     }
 
     public void log(String s) {
@@ -560,21 +512,5 @@ public class VaultPermissionHook extends Permission {
 
     boolean isIgnoreWorld() {
         return plugin.getConfiguration().get(ConfigKeys.VAULT_IGNORE_WORLD);
-    }
-
-    private boolean isPgo() {
-        return plugin.getConfiguration().get(ConfigKeys.VAULT_PRIMARY_GROUP_OVERRIDES);
-    }
-
-    private boolean isPgoCheckInherited() {
-        return plugin.getConfiguration().get(ConfigKeys.VAULT_PRIMARY_GROUP_OVERRIDES_CHECK_INHERITED);
-    }
-
-    private boolean isPgoCheckExists() {
-        return plugin.getConfiguration().get(ConfigKeys.VAULT_PRIMARY_GROUP_OVERRIDES_CHECK_EXISTS);
-    }
-
-    private boolean isPgoCheckMemberOf() {
-        return plugin.getConfiguration().get(ConfigKeys.VAULT_PRIMARY_GROUP_OVERRIDES_CHECK_MEMBER_OF);
     }
 }

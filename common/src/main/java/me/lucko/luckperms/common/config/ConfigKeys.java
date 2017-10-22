@@ -320,12 +320,6 @@ public class ConfigKeys {
      */
     public static final ConfigKey<Boolean> VAULT_IGNORE_WORLD = BooleanKey.of("vault-ignore-world", false);
 
-    /* controls the settings for Vault primary group overrides. Likely to be removed in later versions */
-    public static final ConfigKey<Boolean> VAULT_PRIMARY_GROUP_OVERRIDES = BooleanKey.of("vault-primary-groups-overrides.enabled", false);
-    public static final ConfigKey<Boolean> VAULT_PRIMARY_GROUP_OVERRIDES_CHECK_INHERITED = BooleanKey.of("vault-primary-groups-overrides.check-inherited-permissions", false);
-    public static final ConfigKey<Boolean> VAULT_PRIMARY_GROUP_OVERRIDES_CHECK_EXISTS = BooleanKey.of("vault-primary-groups-overrides.check-group-exists", true);
-    public static final ConfigKey<Boolean> VAULT_PRIMARY_GROUP_OVERRIDES_CHECK_MEMBER_OF = BooleanKey.of("vault-primary-groups-overrides.check-user-member-of", true);
-
     /**
      * If Vault debug mode is enabled
      */

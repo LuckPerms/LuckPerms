@@ -68,6 +68,7 @@ public class GroupMainCommand extends MainCommand<Group, String> {
                 .add(new HolderEditor<>(locale, false))
                 .add(new GroupListMembers(locale))
                 .add(new GroupSetWeight(locale))
+                .add(new GroupSetDisplayName(locale))
                 .add(new HolderShowTracks<>(locale, false))
                 .add(new HolderClear<>(locale, false))
                 .add(new GroupRename(locale))
@@ -84,11 +85,16 @@ public class GroupMainCommand extends MainCommand<Group, String> {
     @Override
     protected Group getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
         if (!plugin.getStorage().loadGroup(target).join()) {
-            Message.GROUP_NOT_FOUND.send(sender, target);
-            return null;
+            // failed to load, but it might be a display name.
+
+            // nope, not a display name
+            if (plugin.getGroupManager().getByDisplayName(target) == null) {
+                Message.GROUP_NOT_FOUND.send(sender, target);
+                return null;
+            }
         }
 
-        Group group = plugin.getGroupManager().getIfLoaded(target);
+        Group group = plugin.getGroupManager().getByDisplayName(target);
         if (group == null) {
             Message.GROUP_NOT_FOUND.send(sender, target);
             return null;

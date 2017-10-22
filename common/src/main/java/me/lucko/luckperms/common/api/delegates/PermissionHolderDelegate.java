@@ -41,6 +41,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.MetaType;
 import me.lucko.luckperms.common.node.NodeFactory;
@@ -72,6 +73,10 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public String getFriendlyName() {
+        if (handle instanceof Group) {
+            Group group = (Group) this.handle;
+            return group.getDisplayName().orElse(group.getName());
+        }
         return handle.getFriendlyName();
     }
 

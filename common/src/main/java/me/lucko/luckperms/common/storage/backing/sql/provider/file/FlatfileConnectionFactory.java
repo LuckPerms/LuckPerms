@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.storage.backing.sql.provider.file;
 
-import me.lucko.luckperms.common.storage.backing.sql.NonClosableConnection;
 import me.lucko.luckperms.common.storage.backing.sql.provider.AbstractConnectionFactory;
 
 import java.io.File;

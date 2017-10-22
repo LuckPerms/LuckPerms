@@ -163,6 +163,11 @@ public enum CommandSpec {
                     Arg.create("weight", true, "the weight to set")
             )
     ),
+    GROUP_SET_DISPLAY_NAME("Set the groups display name",
+            Arg.list(
+                    Arg.create("name", true, "the name to set")
+            )
+    ),
     GROUP_RENAME("Rename the group",
             Arg.list(
                     Arg.create("name", true, "the new name")

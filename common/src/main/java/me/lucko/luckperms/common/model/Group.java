@@ -29,11 +29,15 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
+import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.api.delegates.GroupDelegate;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.GroupReference;
 import me.lucko.luckperms.common.references.Identifiable;
+
+import java.util.Optional;
 
 @ToString(of = {"name"})
 @EqualsAndHashCode(of = {"name"}, callSuper = false)
@@ -58,18 +62,29 @@ public class Group extends PermissionHolder implements Identifiable<String> {
         return name;
     }
 
-    public String getRawDisplayName() {
-        return getPlugin().getConfiguration().get(ConfigKeys.GROUP_NAME_REWRITES).getOrDefault(name, name);
-    }
+    public Optional<String> getDisplayName() {
+        String name = null;
+        for (Node n : getEnduringNodes().get(ImmutableContextSet.empty())) {
+            if (!n.getPermission().startsWith("displayname.")) {
+                continue;
+            }
 
-    public String getDisplayName() {
-        String dn = getRawDisplayName();
-        return dn.equals(name) ? name : name + " (" + dn + ")";
+            name = n.getPermission().substring("displayname.".length());
+            break;
+        }
+
+        if (name != null) {
+            return Optional.of(name);
+        }
+
+        name = getPlugin().getConfiguration().get(ConfigKeys.GROUP_NAME_REWRITES).get(getObjectName());
+        return name == null || name.equals(getObjectName()) ? Optional.empty() : Optional.of(name);
     }
 
     @Override
     public String getFriendlyName() {
-        return getDisplayName();
+        Optional<String> dn = getDisplayName();
+        return dn.map(s -> name + " (" + s + ")").orElse(name);
     }
 
     @Override

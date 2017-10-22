@@ -136,6 +136,7 @@ public enum CommandPermission {
     GROUP_LISTMEMBERS("listmembers", GROUP),
     GROUP_SHOWTRACKS("showtracks", GROUP),
     GROUP_SETWEIGHT("setweight", GROUP),
+    GROUP_SET_DISPLAY_NAME("setdisplayname", GROUP),
     GROUP_CLEAR("clear", GROUP),
     GROUP_RENAME("rename", GROUP),
     GROUP_CLONE("clone", GROUP),

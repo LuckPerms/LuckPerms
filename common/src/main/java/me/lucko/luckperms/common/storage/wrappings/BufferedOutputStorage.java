@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.storage.wrappings;
 
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
 
@@ -44,15 +43,14 @@ public class BufferedOutputStorage implements Storage, Runnable {
         return new BufferedOutputStorage(storage, flushTime);
     }
 
-    @Getter
     @Delegate(excludes = Exclude.class)
-    private final Storage backing;
+    private final Storage delegate;
 
     private final long flushTime;
 
-    private final Buffer<User, Boolean> userOutputBuffer = Buffer.of(user -> BufferedOutputStorage.this.backing.saveUser(user).join());
-    private final Buffer<Group, Boolean> groupOutputBuffer = Buffer.of(group -> BufferedOutputStorage.this.backing.saveGroup(group).join());
-    private final Buffer<Track, Boolean> trackOutputBuffer = Buffer.of(track -> BufferedOutputStorage.this.backing.saveTrack(track).join());
+    private final Buffer<User, Boolean> userOutputBuffer = Buffer.of(user -> BufferedOutputStorage.this.delegate.saveUser(user).join());
+    private final Buffer<Group, Boolean> groupOutputBuffer = Buffer.of(group -> BufferedOutputStorage.this.delegate.saveGroup(group).join());
+    private final Buffer<Track, Boolean> trackOutputBuffer = Buffer.of(track -> BufferedOutputStorage.this.delegate.saveTrack(track).join());
 
     @Override
     public void run() {
@@ -71,13 +69,13 @@ public class BufferedOutputStorage implements Storage, Runnable {
 
     @Override
     public Storage noBuffer() {
-        return backing;
+        return delegate;
     }
 
     @Override
     public void shutdown() {
         forceFlush();
-        backing.shutdown();
+        delegate.shutdown();
     }
 
     @Override

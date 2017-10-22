@@ -71,12 +71,12 @@ public class ListGroups extends SingleCommand {
 
                     if (tracks.isEmpty()) {
                         component = TextUtils.fromLegacy(Message.GROUPS_LIST_ENTRY.asString(plugin.getLocaleManager(),
-                                group.getDisplayName(),
+                                group.getFriendlyName(),
                                 group.getWeight().orElse(0)
                         ), Constants.COLOR_CHAR);
                     } else {
                         component = TextUtils.fromLegacy(Message.GROUPS_LIST_ENTRY_WITH_TRACKS.asString(plugin.getLocaleManager(),
-                                group.getDisplayName(),
+                                group.getFriendlyName(),
                                 group.getWeight().orElse(0),
                                 Util.toCommaSep(tracks)
                         ), Constants.COLOR_CHAR);

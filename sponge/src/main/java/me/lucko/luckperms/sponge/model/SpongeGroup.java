@@ -151,8 +151,7 @@ public class SpongeGroup extends Group {
 
         @Override
         public Optional<String> getFriendlyIdentifier() {
-            String rawDisplayName = parent.getRawDisplayName();
-            return rawDisplayName.equals(getIdentifier()) ? Optional.empty() : Optional.of(rawDisplayName);
+            return parent.getDisplayName();
         }
 
         @Override

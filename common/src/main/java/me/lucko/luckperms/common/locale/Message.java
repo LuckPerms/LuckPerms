@@ -359,6 +359,12 @@ public enum Message {
     ),
     GROUP_SET_WEIGHT("&aSet weight to &b{}&a for group &b{}&a.", true),
 
+    GROUP_SET_DISPLAY_NAME_DOESNT_HAVE("&b{}&a doesn't have a display name set.", true),
+    GROUP_SET_DISPLAY_NAME_ALREADY_HAS("&b{}&a already has a display name of &b{}&a.", true),
+    GROUP_SET_DISPLAY_NAME_ALREADY_IN_USE("&aThe display name &b{}&a is already being used by &b{}&a.", true),
+    GROUP_SET_DISPLAY_NAME("&aSet display name to &b{}&a for group &b{}&a.", true),
+    GROUP_SET_DISPLAY_NAME_REMOVED("&aRemoved display name for group &b{}&a.", true),
+
     TRACK_INFO(
             "{PREFIX}&b&l> &bShowing Track: &f{}" + "\n" +
             "{PREFIX}&f- &7Path: &f{}",
