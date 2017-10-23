@@ -133,6 +133,11 @@ public class ConfigKeys {
     public static final ConfigKey<Boolean> DEBUG_LOGINS = BooleanKey.of("debug-logins", false);
 
     /**
+     * If LP should cancel login attempts for players whose permission data could not be loaded.
+     */
+    public static final ConfigKey<Boolean> CANCEL_FAILED_LOGINS = BooleanKey.of("cancel-failed-logins", false);
+
+    /**
      * Controls how temporary add commands should behave
      */
     public static final ConfigKey<TemporaryModifier> TEMPORARY_ADD_BEHAVIOUR = AbstractKey.of(c -> {

@@ -83,6 +83,18 @@ allow-invalid-usernames: false
 # Useful if you're having issues with UUID forwarding or data not being loaded.
 debug-logins: false
 
+# If LuckPerms should ensure all players have permission data when they connect to the server.
+#
+# When set to true, LuckPerms will cancel login attempts if it is unable to load permissions data
+# for a user, of if the storage provider is unavailable.
+#
+# When set to false, LuckPerms will allow a player to connect regardless of whether their
+# permissions data could be loaded.
+#
+# This option does not exist on other platforms, and effectively defaults to true - however,
+# the option is provided on BungeeCord, as it is less likely to be so dependant on permissions.
+cancel-failed-logins: false
+
 # If the plugin should send log notifications to users whenever permissions are modified.
 log-notify: true
 

@@ -77,8 +77,14 @@ public class BungeeListener implements Listener {
            the proxy will just fallback to using the config file perms. */
         if (!plugin.getStorage().isAcceptingLogins()) {
 
-            // log that the user tried to login, but was denied at this stage.
-            plugin.getLog().warn("Permissions storage is not loaded. No permissions data will be loaded for: " + c.getUniqueId() + " - " + c.getName());
+            if (plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {
+                // cancel the login attempt
+                e.setCancelReason(TextComponent.fromLegacyText(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
+                e.setCancelled(true);
+            } else {
+                // log that the user tried to login, but was denied at this stage.
+                plugin.getLog().warn("Permissions storage is not loaded. No permissions data will be loaded for: " + c.getUniqueId() + " - " + c.getName());
+            }
 
             e.completeIntent(plugin);
             return;
@@ -104,7 +110,14 @@ public class BungeeListener implements Listener {
                 ex.printStackTrace();
 
                 // there was some error loading
-                plugin.getLog().warn("Error loading data. No permissions data will be loaded for: " + c.getUniqueId() + " - " + c.getName());
+                if (plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {
+                    // cancel the login attempt
+                    e.setCancelReason(TextComponent.fromLegacyText(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
+                    e.setCancelled(true);
+                } else {
+                    plugin.getLog().warn("Error loading data. No permissions data will be loaded for: " + c.getUniqueId() + " - " + c.getName());
+                }
+
             }
 
             // finally, complete our intent to modify state, so the proxy can continue handling the connection.
@@ -126,13 +139,20 @@ public class BungeeListener implements Listener {
         }
 
         if (user == null) {
-            plugin.getProxy().getScheduler().schedule(plugin, () -> {
-                if (!player.isConnected()) {
-                    return;
-                }
+            if (plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {
+                // disconnect the user
+                plugin.getLog().warn("User " + player.getUniqueId() + " - " + player.getName() + " doesn't have data pre-loaded - cancelling login.");
+                e.getPlayer().disconnect(TextComponent.fromLegacyText(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
+            } else {
+                // just send a message
+                plugin.getProxy().getScheduler().schedule(plugin, () -> {
+                    if (!player.isConnected()) {
+                        return;
+                    }
 
-                player.sendMessage(new TextComponent(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
-            }, 3, TimeUnit.SECONDS);
+                    player.sendMessage(TextComponent.fromLegacyText(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
+                }, 1, TimeUnit.SECONDS);
+            }
         }
     }
 
