@@ -204,7 +204,7 @@ public interface LPConfiguration {
          * <p>This method is nested under {@link Unsafe} because the keys
          * and return types may change between versions without warning.</p>
          *
-         * @param key the key, as defined as a parameter name in
+         * @param key the key, as defined as a field name in
          *            the "ConfigKeys" class.
          * @return the corresponding object, if one is present
          * @throws IllegalArgumentException if the key isn't known

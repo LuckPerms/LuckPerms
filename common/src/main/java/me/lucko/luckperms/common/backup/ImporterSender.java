@@ -29,6 +29,7 @@ import lombok.AllArgsConstructor;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -51,7 +52,7 @@ public abstract class ImporterSender implements Sender {
 
     @Override
     public String getName() {
-        return Constants.IMPORT_NAME;
+        return Constants.IMPORT_NAME.apply(plugin.getConfiguration().get(ConfigKeys.SERVER));
     }
 
     @Override
