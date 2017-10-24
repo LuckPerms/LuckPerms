@@ -454,7 +454,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
                 @Override
                 public String getName() {
-                    return Constants.CONSOLE_NAME.apply(getConfiguration().get(ConfigKeys.SERVER));
+                    LuckPermsConfiguration config = getPlatform().getConfiguration();
+                    return config == null ? Constants.CONSOLE_NAME.apply(null) : Constants.CONSOLE_NAME.apply(config.get(ConfigKeys.SERVER));
                 }
 
                 @Override

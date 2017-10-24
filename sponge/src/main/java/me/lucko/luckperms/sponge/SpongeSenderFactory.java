@@ -27,7 +27,6 @@ package me.lucko.luckperms.sponge;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.commands.sender.SenderFactory;
-import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.TextUtils;
@@ -52,7 +51,7 @@ public class SpongeSenderFactory extends SenderFactory<CommandSource> {
         if (source instanceof Player) {
             return source.getName();
         }
-        return Constants.CONSOLE_NAME.apply(getPlugin().getConfiguration().get(ConfigKeys.SERVER));
+        return getConsoleName();
     }
 
     @Override

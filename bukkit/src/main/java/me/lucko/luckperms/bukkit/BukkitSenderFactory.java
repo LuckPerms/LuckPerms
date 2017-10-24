@@ -28,7 +28,6 @@ package me.lucko.luckperms.bukkit;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.compat.MessageHandler;
 import me.lucko.luckperms.common.commands.sender.SenderFactory;
-import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -53,7 +52,7 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
         if (sender instanceof Player) {
             return sender.getName();
         }
-        return Constants.CONSOLE_NAME.apply(getPlugin().getConfiguration().get(ConfigKeys.SERVER));
+        return getConsoleName();
     }
 
     @Override

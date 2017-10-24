@@ -28,7 +28,6 @@ package me.lucko.luckperms.bungee;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bungee.event.TristateCheckEvent;
 import me.lucko.luckperms.common.commands.sender.SenderFactory;
-import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.TextUtils;
@@ -51,7 +50,7 @@ public class BungeeSenderFactory extends SenderFactory<CommandSender> {
         if (sender instanceof ProxiedPlayer) {
             return sender.getName();
         }
-        return Constants.CONSOLE_NAME.apply(getPlugin().getConfiguration().get(ConfigKeys.SERVER));
+        return getConsoleName();
     }
 
     @Override
