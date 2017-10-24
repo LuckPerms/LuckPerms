@@ -115,7 +115,7 @@ public class ParentInfo extends SharedSubCommand {
 
         TextComponent.Builder message = TextComponent.builder("");
         for (Node node : page) {
-            String s = "&3> &a" + node.getPermission() + Util.getAppendableNodeContextString(node) + "\n&2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()) + "\n";
+            String s = "&3> &a" + node.getGroupName() + Util.getAppendableNodeContextString(node) + "\n&2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()) + "\n";
             message.append(TextUtils.fromLegacy(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build());
         }
         return message.build();
