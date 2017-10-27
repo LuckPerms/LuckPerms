@@ -323,8 +323,10 @@ public abstract class ConfigurateDao extends AbstractDao {
                                 .map(bulkUpdate::apply)
                                 .filter(Objects::nonNull)
                                 .collect(Collectors.toSet());
+                        
                         if (!nodes.equals(results)) {
                             writeNodes(object, results);
+                            saveFile(file, object);
                         }
                     } catch (Exception e) {
                         reportException(file.getName(), e);
@@ -347,8 +349,10 @@ public abstract class ConfigurateDao extends AbstractDao {
                                 .map(bulkUpdate::apply)
                                 .filter(Objects::nonNull)
                                 .collect(Collectors.toSet());
+
                         if (!nodes.equals(results)) {
                             writeNodes(object, results);
+                            saveFile(file, object);
                         }
                     } catch (Exception e) {
                         reportException(file.getName(), e);
