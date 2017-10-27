@@ -323,7 +323,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                                 .map(bulkUpdate::apply)
                                 .filter(Objects::nonNull)
                                 .collect(Collectors.toSet());
-                        
+
                         if (!nodes.equals(results)) {
                             writeNodes(object, results);
                             saveFile(file, object);
