@@ -151,7 +151,7 @@ public class LPPermissible extends PermissibleBase {
      *
      * @return the calculated contexts for the player.
      */
-    public Contexts calculateContexts() {
+    private Contexts calculateContexts() {
         return plugin.getContextManager().getApplicableContexts(player);
     }
 

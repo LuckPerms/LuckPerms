@@ -181,7 +181,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             // Make a LuckPerms user for the one being migrated
-            plugin.getStorage().loadUser(uuid, "null").join();
+            plugin.getStorage().loadUser(uuid, null).join();
             User user = plugin.getUserManager().getIfLoaded(uuid);
             if (user.getEnduringNodes().size() <= 1) {
                 user.clearNodes(false);

@@ -256,7 +256,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                 User u = plugin.getUserManager().getIfLoaded(uuid);
                 if (u != null) {
                     plugin.getLog().info("[FileWatcher] Refreshing user " + u.getFriendlyName());
-                    plugin.getStorage().loadUser(uuid, "null");
+                    plugin.getStorage().loadUser(uuid, null);
                 }
             });
             watcher.subscribe("group", groupsDirectory.toPath(), s -> {

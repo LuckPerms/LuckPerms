@@ -262,7 +262,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         log.log("Starting user migration.");
         AtomicInteger userCount = new AtomicInteger(0);
         for (Map.Entry<UUID, Set<Node>> e : users.entrySet()) {
-            plugin.getStorage().loadUser(e.getKey(), "null").join();
+            plugin.getStorage().loadUser(e.getKey(), null).join();
             me.lucko.luckperms.common.model.User user = plugin.getUserManager().getIfLoaded(e.getKey());
 
             for (Node node : e.getValue()) {

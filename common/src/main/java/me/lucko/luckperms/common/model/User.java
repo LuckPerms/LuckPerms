@@ -186,7 +186,6 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         userData.recalculatePermissions();
         userData.recalculateMeta();
         getPlugin().getApiProvider().getEventFactory().handleUserDataRecalculate(this, userData);
-        getPlugin().onUserRefresh(this);
     }
 
     /**

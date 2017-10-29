@@ -109,16 +109,12 @@ public class VerboseCommand extends SingleCommand {
                     Message.VERBOSE_OFF.send(sender);
                 } else {
                     Message.VERBOSE_UPLOAD_START.send(sender);
-
                     String url = listener.uploadPasteData(!noTraces, attachRaw);
-                    if (url == null) {
-                        url = "null";
-                    }
 
                     Message.VERBOSE_RESULTS_URL.send(sender);
 
                     Component message = TextComponent.builder(url).color(TextColor.AQUA)
-                            .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url))
+                            .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, String.valueOf(url)))
                             .hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to open the results page.").color(TextColor.GRAY)))
                             .build();
 

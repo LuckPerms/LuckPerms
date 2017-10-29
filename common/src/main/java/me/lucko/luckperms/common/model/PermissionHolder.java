@@ -733,13 +733,13 @@ public abstract class PermissionHolder {
         Map<String, Boolean> perms = new HashMap<>();
         boolean applyShorthand = plugin.getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND);
         for (Node node : entries) {
-            String perm = lowerCase ? node.getPermission().toLowerCase() : node.getPermission();
+            String perm = lowerCase ? node.getPermission().toLowerCase().intern() : node.getPermission();
 
-            if (perms.putIfAbsent(perm, node.getValuePrimitive()) == null) {
-                if (applyShorthand) {
-                    List<String> sh = node.resolveShorthand();
-                    if (!sh.isEmpty()) {
-                        sh.stream().map(s -> lowerCase ? s.toLowerCase() : s).forEach(s -> perms.putIfAbsent(s, node.getValuePrimitive()));
+            if (perms.putIfAbsent(perm, node.getValuePrimitive()) == null && applyShorthand) {
+                List<String> shorthand = node.resolveShorthand();
+                if (!shorthand.isEmpty()) {
+                    for (String s : shorthand) {
+                        perms.putIfAbsent((lowerCase ? s.toLowerCase() : s).intern(), node.getValuePrimitive());
                     }
                 }
             }

@@ -59,7 +59,7 @@ public class PermissionCalculator implements CacheLoader<String, Tristate> {
 
         // convert the permission to lowercase, as all values in the backing map are also lowercase.
         // this allows fast case insensitive lookups
-        permission = permission.toLowerCase();
+        permission = permission.toLowerCase().intern();
 
         // get the result
         Tristate result = lookupCache.get(permission);
@@ -72,11 +72,7 @@ public class PermissionCalculator implements CacheLoader<String, Tristate> {
     }
 
     @Override
-    public Tristate load(String s) {
-        return lookupPermissionValue(s);
-    }
-
-    private Tristate lookupPermissionValue(String permission) {
+    public Tristate load(String permission) {
 
         // offer the permission to the permission vault
         // we only need to do this once per permission, so it doesn't matter

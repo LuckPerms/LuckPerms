@@ -112,11 +112,12 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
 
     @Override
     public CompletableFuture<Void> updateAllUsers() {
-        return CompletableFuture.supplyAsync(plugin::getOnlinePlayers, plugin.getScheduler().sync())
-                .thenAcceptAsync(players -> players.forEach(uuid -> {
-                    UUID internal = plugin.getUuidCache().getUUID(uuid);
-                    plugin.getStorage().loadUser(internal, "null").join();
-                }), plugin.getScheduler().async());
+        return CompletableFuture.runAsync(
+                () -> plugin.getOnlinePlayers()
+                        .map(u -> plugin.getUuidCache().getUUID(u))
+                        .forEach(u -> plugin.getStorage().loadUser(u, null).join()),
+                plugin.getScheduler().async()
+        );
     }
 
     public static boolean giveDefaultIfNeeded(User user, boolean save, LuckPermsPlugin plugin) {
