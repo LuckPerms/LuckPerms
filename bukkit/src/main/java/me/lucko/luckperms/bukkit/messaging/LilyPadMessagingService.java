@@ -27,6 +27,7 @@ package me.lucko.luckperms.bukkit.messaging;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.messaging.AbstractMessagingService;
+import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 
 import lilypad.client.connect.api.Connect;
 import lilypad.client.connect.api.event.EventListener;
@@ -38,7 +39,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 
 /**
- * An implementation of {@link me.lucko.luckperms.api.MessagingService} using LilyPad.
+ * An implementation of {@link ExtendedMessagingService} using LilyPad.
  */
 public class LilyPadMessagingService extends AbstractMessagingService {
     private final LPBukkitPlugin plugin;
@@ -60,11 +61,11 @@ public class LilyPadMessagingService extends AbstractMessagingService {
     }
 
     @Override
-    protected void sendMessage(String channel, String message) {
+    protected void sendMessage(String message) {
         MessageRequest request;
 
         try {
-            request = new MessageRequest(Collections.emptyList(), channel, message);
+            request = new MessageRequest(Collections.emptyList(), CHANNEL, message);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             return;
@@ -79,12 +80,17 @@ public class LilyPadMessagingService extends AbstractMessagingService {
 
     @EventListener
     public void onMessage(MessageEvent event) {
-        plugin.doAsync(() -> {
+        plugin.getScheduler().doAsync(() -> {
             try {
                 String channel = event.getChannel();
+
+                if (!channel.equals(CHANNEL)) {
+                    return;
+                }
+
                 String message = event.getMessageAsString();
 
-                onMessage(channel, message, null);
+                onMessage(message, null);
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -29,7 +29,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import me.lucko.luckperms.common.plugin.LuckPermsScheduler;
+import me.lucko.luckperms.common.plugin.SchedulerAdapter;
 
 import org.bukkit.scheduler.BukkitTask;
 
@@ -40,7 +40,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class LPBukkitScheduler implements LuckPermsScheduler {
+public class BukkitSchedulerAdapter implements SchedulerAdapter {
     private final LPBukkitPlugin plugin;
 
     @Getter
@@ -56,22 +56,22 @@ public class LPBukkitScheduler implements LuckPermsScheduler {
     private Executor sync;
 
     @Getter
+    @Accessors(fluent = true)
+    private Executor async;
+
+    @Getter
     @Setter
     private boolean useBukkitAsync = false;
 
     private final Set<BukkitTask> tasks = ConcurrentHashMap.newKeySet();
 
-    public LPBukkitScheduler(LPBukkitPlugin plugin) {
+    public BukkitSchedulerAdapter(LPBukkitPlugin plugin) {
         this.plugin = plugin;
 
         this.asyncLp = Executors.newCachedThreadPool();
         this.asyncBukkit = r -> plugin.getServer().getScheduler().runTaskAsynchronously(plugin, r);
         this.sync = r -> plugin.getServer().getScheduler().runTask(plugin, r);
-    }
-
-    @Override
-    public Executor async() {
-        return useBukkitAsync ? asyncBukkit : asyncLp;
+        this.async = r -> (useBukkitAsync ? asyncBukkit : asyncLp).execute(r);
     }
 
     @Override

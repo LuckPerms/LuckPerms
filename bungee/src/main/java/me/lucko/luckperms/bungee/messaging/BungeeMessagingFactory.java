@@ -26,7 +26,7 @@
 package me.lucko.luckperms.bungee.messaging;
 
 import me.lucko.luckperms.bungee.LPBungeePlugin;
-import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 
 public class BungeeMessagingFactory extends MessagingFactory<LPBungeePlugin> {
@@ -35,7 +35,7 @@ public class BungeeMessagingFactory extends MessagingFactory<LPBungeePlugin> {
     }
 
     @Override
-    protected InternalMessagingService getServiceFor(String messagingType) {
+    protected ExtendedMessagingService getServiceFor(String messagingType) {
         if (messagingType.equals("bungee")) {
             BungeeMessagingService bungeeMessaging = new BungeeMessagingService(getPlugin());
             bungeeMessaging.init();

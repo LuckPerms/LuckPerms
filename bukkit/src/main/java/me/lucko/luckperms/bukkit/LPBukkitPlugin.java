@@ -34,9 +34,12 @@ import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.bukkit.calculators.BukkitCalculatorFactory;
 import me.lucko.luckperms.bukkit.contexts.BukkitContextManager;
 import me.lucko.luckperms.bukkit.contexts.WorldCalculator;
+import me.lucko.luckperms.bukkit.listeners.BukkitConnectionListener;
+import me.lucko.luckperms.bukkit.listeners.BukkitPlatformListener;
 import me.lucko.luckperms.bukkit.messaging.BukkitMessagingFactory;
 import me.lucko.luckperms.bukkit.model.Injector;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
+import me.lucko.luckperms.bukkit.processors.BukkitProcessorsSetupTask;
 import me.lucko.luckperms.bukkit.processors.ChildPermissionProvider;
 import me.lucko.luckperms.bukkit.processors.DefaultsProvider;
 import me.lucko.luckperms.bukkit.vault.VaultHookManager;
@@ -48,6 +51,7 @@ import me.lucko.luckperms.common.buffers.UpdateTaskBuffer;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.config.AbstractConfiguration;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.constants.CommandPermission;
@@ -65,7 +69,7 @@ import me.lucko.luckperms.common.managers.GenericUserManager;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.UserManager;
-import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.Storage;
@@ -92,16 +96,14 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * LuckPerms implementation for the Bukkit API.
@@ -110,8 +112,8 @@ import java.util.stream.Collectors;
 public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     private long startTime;
-    private LPBukkitScheduler scheduler;
-    private BukkitCommand commandManager;
+    private BukkitSchedulerAdapter scheduler;
+    private BukkitCommandExecutor commandManager;
     private VaultHookManager vaultHookManager = null;
     private LuckPermsConfiguration configuration;
     private UserManager userManager;
@@ -119,9 +121,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private TrackManager trackManager;
     private Storage storage;
     private FileWatcher fileWatcher = null;
-    private InternalMessagingService messagingService = null;
+    private ExtendedMessagingService messagingService = null;
     private UuidCache uuidCache;
-    private BukkitListener listener;
     private ApiProvider apiProvider;
     private Logger log;
     private DefaultsProvider defaultsProvider;
@@ -146,7 +147,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }
 
         // setup minimal functionality in order to load initial dependencies
-        scheduler = new LPBukkitScheduler(this);
+        scheduler = new BukkitSchedulerAdapter(this);
         localeManager = new NoopLocaleManager();
         senderFactory = new BukkitSenderFactory(this);
         log = new SenderLogger(this, getConsoleSender());
@@ -186,9 +187,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         logDispatcher = new LogDispatcher(this);
 
         getLog().info("Loading configuration...");
-        configuration = new BukkitConfig(this);
+        configuration = new AbstractConfiguration(this, new BukkitConfigAdapter(this));
         configuration.init();
-        configuration.loadAll();
 
         Set<StorageType> storageTypes = StorageFactory.getRequiredTypes(this, StorageType.H2);
         DependencyManager.loadStorageDependencies(this, storageTypes);
@@ -198,22 +198,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         childPermissionProvider = new ChildPermissionProvider();
 
         // give all plugins a chance to load their permissions, then refresh.
-        scheduler.syncLater(() -> {
-            defaultsProvider.refresh();
-            childPermissionProvider.setup();
-
-            Set<String> perms = new HashSet<>();
-            getServer().getPluginManager().getPermissions().forEach(p -> {
-                perms.add(p.getName());
-                perms.addAll(p.getChildren().keySet());
-            });
-
-            perms.forEach(p -> permissionVault.offer(p));
-        }, 1L);
+        scheduler.syncLater(new BukkitProcessorsSetupTask(this), 1L);
 
         // register events
-        listener = new BukkitListener(this);
-        getServer().getPluginManager().registerEvents(listener, this);
+        getServer().getPluginManager().registerEvents(new BukkitConnectionListener(this), this);
+        getServer().getPluginManager().registerEvents(new BukkitPlatformListener(this), this);
 
         if (getConfiguration().get(ConfigKeys.WATCH_FILES)) {
             fileWatcher = new FileWatcher(this);
@@ -234,7 +223,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         localeManager.tryLoad(this, new File(getDataFolder(), "lang.yml"));
 
         // register commands
-        commandManager = new BukkitCommand(this);
+        commandManager = new BukkitCommandExecutor(this);
         PluginCommand main = getServer().getPluginCommand("luckperms");
         main.setExecutor(commandManager);
         main.setTabCompleter(commandManager);
@@ -282,7 +271,12 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         // register permissions
         try {
-            registerPermissions(getConfiguration().get(ConfigKeys.COMMANDS_ALLOW_OP) ? PermissionDefault.OP : PermissionDefault.FALSE);
+            PluginManager pm = getServer().getPluginManager();
+            PermissionDefault permDefault = getConfiguration().get(ConfigKeys.COMMANDS_ALLOW_OP) ? PermissionDefault.OP : PermissionDefault.FALSE;
+
+            for (CommandPermission p : CommandPermission.values()) {
+                pm.addPermission(new org.bukkit.permissions.Permission(p.getPermission(), permDefault));
+            }
         } catch (Exception e) {
             // this throws an exception if the plugin is /reloaded, grr
         }
@@ -415,6 +409,15 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     @Override
+    public Optional<ExtendedMessagingService> getMessagingService() {
+        return Optional.ofNullable(messagingService);
+    }
+
+    public Optional<FileWatcher> getFileWatcher() {
+        return Optional.ofNullable(fileWatcher);
+    }
+
+    @Override
     public String getVersion() {
         return getDescription().getVersion();
     }
@@ -475,13 +478,13 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public List<String> getPlayerList() {
-        return getServer().getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
+    public Stream<String> getPlayerList() {
+        return getServer().getOnlinePlayers().stream().map(Player::getName);
     }
 
     @Override
-    public Set<UUID> getOnlinePlayers() {
-        return getServer().getOnlinePlayers().stream().map(Player::getUniqueId).collect(Collectors.toSet());
+    public Stream<UUID> getOnlinePlayers() {
+        return getServer().getOnlinePlayers().stream().map(Player::getUniqueId);
     }
 
     @Override
@@ -491,10 +494,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public List<Sender> getOnlineSenders() {
-        return getServer().getOnlinePlayers().stream()
-                .map(p -> getSenderFactory().wrap(p))
-                .collect(Collectors.toList());
+    public Stream<Sender> getOnlineSenders() {
+        return Stream.concat(
+                Stream.of(getConsoleSender()),
+                getServer().getOnlinePlayers().stream().map(p -> getSenderFactory().wrap(p))
+        );
     }
 
     @Override
@@ -509,14 +513,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         map.put("Bukkit Defaults count", defaultsProvider.size());
         map.put("Bukkit Child Permissions count", childPermissionProvider.getPermissions().size());
         return map;
-    }
-
-    private void registerPermissions(PermissionDefault def) {
-        PluginManager pm = getServer().getPluginManager();
-
-        for (CommandPermission p : CommandPermission.values()) {
-            pm.addPermission(new org.bukkit.permissions.Permission(p.getPermission(), def));
-        }
     }
 
     private static boolean checkInvalidVersion() {

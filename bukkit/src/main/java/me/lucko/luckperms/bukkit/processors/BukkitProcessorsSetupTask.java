@@ -23,42 +23,33 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit;
+package me.lucko.luckperms.bukkit.processors;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
+import lombok.RequiredArgsConstructor;
 
-import me.lucko.luckperms.common.commands.CommandManager;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabExecutor;
+import java.util.HashSet;
+import java.util.Set;
 
-import java.util.Arrays;
-import java.util.List;
-
-public class BukkitCommand extends CommandManager implements CommandExecutor, TabExecutor {
+/**
+ * Performs the initial setup for Bukkit permission processors
+ */
+@RequiredArgsConstructor
+public class BukkitProcessorsSetupTask implements Runnable {
     private final LPBukkitPlugin plugin;
 
-    BukkitCommand(LPBukkitPlugin plugin) {
-        super(plugin);
-        this.plugin = plugin;
-    }
-
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        onCommand(
-                plugin.getSenderFactory().wrap(sender),
-                label,
-                Util.stripQuotes(Splitter.on(COMMAND_SEPARATOR_PATTERN).omitEmptyStrings().splitToList(Joiner.on(' ').join(args)))
-        );
-        return true;
-    }
+    public void run() {
+        plugin.getDefaultsProvider().refresh();
+        plugin.getChildPermissionProvider().setup();
 
-    @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
-        return onTabComplete(plugin.getSenderFactory().wrap(sender), Arrays.asList(args));
+        Set<String> perms = new HashSet<>();
+        plugin.getServer().getPluginManager().getPermissions().forEach(p -> {
+            perms.add(p.getName());
+            perms.addAll(p.getChildren().keySet());
+        });
+
+        perms.forEach(p -> plugin.getPermissionVault().offer(p));
     }
 }

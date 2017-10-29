@@ -29,19 +29,23 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.commands.CommandManager;
+import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
 
-import java.util.Arrays;
+import java.util.List;
 
-public class BungeeCommand extends Command implements TabExecutor {
+public class BungeeCommandExecutor extends Command implements TabExecutor {
+    private static final Splitter ARGUMENT_SPLITTER = Splitter.on(CommandManager.COMMAND_SEPARATOR_PATTERN).omitEmptyStrings();
+    private static final Joiner ARGUMENT_JOINER = Joiner.on(' ');
+
     private final LPBungeePlugin plugin;
     private final CommandManager manager;
 
-    BungeeCommand(LPBungeePlugin plugin, CommandManager manager) {
+    BungeeCommandExecutor(LPBungeePlugin plugin, CommandManager manager) {
         super("luckpermsbungee", null, "lpb", "bperm", "bperms", "bpermission", "bpermissions");
         this.plugin = plugin;
         this.manager = manager;
@@ -49,15 +53,17 @@ public class BungeeCommand extends Command implements TabExecutor {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        manager.onCommand(
-                plugin.getSenderFactory().wrap(sender),
-                "lpb",
-                Util.stripQuotes(Splitter.on(CommandManager.COMMAND_SEPARATOR_PATTERN).omitEmptyStrings().splitToList(Joiner.on(' ').join(args)))
-        );
+        Sender lpSender = plugin.getSenderFactory().wrap(sender);
+        List<String> arguments = Util.stripQuotes(ARGUMENT_SPLITTER.splitToList(ARGUMENT_JOINER.join(args)));
+
+        manager.onCommand(lpSender, "lpb", arguments);
     }
 
     @Override
     public Iterable<String> onTabComplete(CommandSender sender, String[] args) {
-        return manager.onTabComplete(plugin.getSenderFactory().wrap(sender), Arrays.asList(args));
+        Sender lpSender = plugin.getSenderFactory().wrap(sender);
+        List<String> arguments = Util.stripQuotes(ARGUMENT_SPLITTER.splitToList(ARGUMENT_JOINER.join(args)));
+
+        return manager.onTabComplete(lpSender, arguments);
     }
 }

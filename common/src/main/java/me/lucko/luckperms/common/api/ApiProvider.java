@@ -48,8 +48,6 @@ import me.lucko.luckperms.common.api.delegates.NodeFactoryDelegate;
 import me.lucko.luckperms.common.api.delegates.UserDelegate;
 import me.lucko.luckperms.common.event.EventFactory;
 import me.lucko.luckperms.common.event.LuckPermsEventBus;
-import me.lucko.luckperms.common.messaging.InternalMessagingService;
-import me.lucko.luckperms.common.messaging.NoopMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
 
@@ -57,6 +55,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -113,8 +112,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Optional<MessagingService> getMessagingService() {
-        InternalMessagingService service = plugin.getMessagingService();
-        return service instanceof NoopMessagingService ? Optional.empty() : Optional.of(service);
+        return plugin.getMessagingService().map(Function.identity());
     }
 
     @Override

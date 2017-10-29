@@ -23,10 +23,11 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit;
+package me.lucko.luckperms.bukkit.listeners;
 
 import lombok.RequiredArgsConstructor;
 
+import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.bukkit.model.Injector;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -39,11 +40,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.server.PluginEnableEvent;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -52,7 +50,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
-public class BukkitListener implements Listener {
+public class BukkitConnectionListener implements Listener {
     private final LPBukkitPlugin plugin;
 
     private final Set<UUID> deniedAsyncLogin = Collections.synchronizedSet(new HashSet<>());
@@ -225,33 +223,4 @@ public class BukkitListener implements Listener {
         plugin.getUserManager().scheduleUnload(player.getUniqueId());
     }
 
-    @EventHandler
-    public void onPlayerCommand(PlayerCommandPreprocessEvent e) {
-        if (plugin.getConfiguration().get(ConfigKeys.OPS_ENABLED)) {
-            return;
-        }
-
-        String s = e.getMessage().substring(1).toLowerCase()
-                .replace("bukkit:", "")
-                .replace("spigot:", "")
-                .replace("minecraft:", "");
-
-        if (s.equals("op") || s.startsWith("op ") || s.equals("deop") || s.startsWith("deop ")) {
-            e.setCancelled(true);
-            e.getPlayer().sendMessage(Message.OP_DISABLED.asString(plugin.getLocaleManager()));
-        }
-    }
-
-    @EventHandler
-    public void onPluginEnable(PluginEnableEvent e) {
-        if (e.getPlugin().getName().equalsIgnoreCase("Vault")) {
-            plugin.tryVaultHook(true);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onWorldChange(PlayerChangedWorldEvent e) {
-        plugin.getContextManager().invalidateCache(e.getPlayer());
-        plugin.refreshAutoOp(plugin.getUserManager().getIfLoaded(e.getPlayer().getUniqueId()), e.getPlayer());
-    }
 }

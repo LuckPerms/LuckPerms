@@ -224,8 +224,7 @@ public class SqlDao extends AbstractDao {
                 ps.setLong(1, entry.getTimestamp());
                 ps.setString(2, entry.getActor().toString());
                 ps.setString(3, entry.getActorName());
-                //noinspection deprecation
-                ps.setString(4, Character.toString(entry.getType()));
+                ps.setString(4, Character.toString(entry.getEntryType().getCode()));
                 ps.setString(5, entry.getActed() == null ? "null" : entry.getActed().toString());
                 ps.setString(6, entry.getActedName());
                 ps.setString(7, entry.getAction());

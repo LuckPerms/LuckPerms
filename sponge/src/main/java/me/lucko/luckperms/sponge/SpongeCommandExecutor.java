@@ -28,10 +28,10 @@ package me.lucko.luckperms.sponge;
 import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.commands.CommandManager;
+import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 
 import org.spongepowered.api.command.CommandCallable;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
@@ -46,49 +46,31 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class SpongeCommand extends CommandManager implements CommandCallable {
+public class SpongeCommandExecutor extends CommandManager implements CommandCallable {
+    private static final Splitter ARGUMENT_SPLITTER = Splitter.on(COMMAND_SEPARATOR_PATTERN).omitEmptyStrings();
+
     private final LPSpongePlugin plugin;
 
-    SpongeCommand(LPSpongePlugin plugin) {
+    SpongeCommandExecutor(LPSpongePlugin plugin) {
         super(plugin);
         this.plugin = plugin;
     }
 
-    private List<String> processArgs(CommandSource source, String s) {
-        List<String> args = Util.stripQuotes(Splitter.on(COMMAND_SEPARATOR_PATTERN).omitEmptyStrings().splitToList(s));
-
-        // resolve selectors
-        ListIterator<String> it = args.listIterator();
-        while (it.hasNext()) {
-            String element = it.next();
-            if (element.startsWith("@")) {
-                try {
-                    Player ret = Selector.parse(element).resolve(source).stream()
-                            .filter(e -> e instanceof Player)
-                            .map(e -> ((Player) e))
-                            .findFirst().orElse(null);
-
-                    if (ret != null) {
-                        it.set(ret.getUniqueId().toString());
-                    }
-                } catch (IllegalArgumentException e) {
-                    // ignored
-                }
-            }
-        }
-
-        return args;
-    }
-
     @Override
-    public CommandResult process(CommandSource source, String s) throws CommandException {
-        onCommand(plugin.getSenderFactory().wrap(source), "lp", processArgs(source, s));
+    public CommandResult process(CommandSource source, String s) {
+        Sender lpSender = plugin.getSenderFactory().wrap(source);
+        List<String> arguments = processSelectors(source, Util.stripQuotes(ARGUMENT_SPLITTER.splitToList(s)));
+
+        onCommand(lpSender, "lp", arguments);
         return CommandResult.success();
     }
 
     @Override
-    public List<String> getSuggestions(CommandSource source, String s, @Nullable Location<World> location) throws CommandException {
-        return onTabComplete(plugin.getSenderFactory().wrap(source), processArgs(source, s));
+    public List<String> getSuggestions(CommandSource source, String s, @Nullable Location<World> location) {
+        Sender lpSender = plugin.getSenderFactory().wrap(source);
+        List<String> arguments = processSelectors(source, Util.stripQuotes(ARGUMENT_SPLITTER.splitToList(s)));
+
+        return onTabComplete(lpSender, arguments);
     }
 
     @Override
@@ -110,4 +92,27 @@ public class SpongeCommand extends CommandManager implements CommandCallable {
     public Text getUsage(CommandSource source) {
         return Text.of("/luckperms");
     }
+
+    private List<String> processSelectors(CommandSource source, List<String> args) {
+        ListIterator<String> it = args.listIterator();
+        while (it.hasNext()) {
+            String element = it.next();
+            if (element.startsWith("@")) {
+                try {
+                    Player ret = Selector.parse(element).resolve(source).stream()
+                            .filter(e -> e instanceof Player)
+                            .map(e -> ((Player) e))
+                            .findFirst().orElse(null);
+
+                    if (ret != null) {
+                        it.set(ret.getUniqueId().toString());
+                    }
+                } catch (IllegalArgumentException e) {
+                    // ignored
+                }
+            }
+        }
+        return args;
+    }
+
 }

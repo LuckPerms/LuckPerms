@@ -31,6 +31,7 @@ import com.google.common.io.ByteStreams;
 
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.messaging.AbstractMessagingService;
+import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -39,7 +40,7 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
 /**
- * An implementation of {@link me.lucko.luckperms.api.MessagingService} using the plugin messaging channels.
+ * An implementation of {@link ExtendedMessagingService} using the plugin messaging channels.
  */
 public class BungeeMessagingService extends AbstractMessagingService implements Listener {
     private final LPBungeePlugin plugin;
@@ -60,7 +61,7 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
     }
 
     @Override
-    protected void sendMessage(String channel, String message) {
+    protected void sendMessage(String message) {
 
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF(message);
@@ -68,7 +69,7 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
         byte[] data = out.toByteArray();
 
         for (ServerInfo server : plugin.getProxy().getServers().values()) {
-            server.sendData(channel, data, true);
+            server.sendData(CHANNEL, data, true);
         }
     }
 
@@ -87,9 +88,9 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
         ByteArrayDataInput in = ByteStreams.newDataInput(e.getData());
         String msg = in.readUTF();
 
-        onMessage(e.getTag(), msg, u -> {
+        onMessage(msg, u -> {
             // Forward to other servers
-            plugin.doAsync(() -> sendMessage(CHANNEL, u));
+            plugin.getScheduler().doAsync(() -> sendMessage(u));
         });
     }
 }

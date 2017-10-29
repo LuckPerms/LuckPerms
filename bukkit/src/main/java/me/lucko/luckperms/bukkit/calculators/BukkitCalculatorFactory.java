@@ -71,11 +71,8 @@ public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
             processors.add(new DefaultsProcessor(contexts.isOp(), plugin.getDefaultsProvider()));
         }
 
-        return registerCalculator(new PermissionCalculator(
-                plugin,
-                PermissionCalculatorMetadata.of(user.getFriendlyName(), contexts.getContexts()),
-                processors.build()
-        ));
+        PermissionCalculatorMetadata meta = PermissionCalculatorMetadata.of(user.getFriendlyName(), contexts.getContexts());
+        return registerCalculator(new PermissionCalculator(plugin, meta, processors.build()));
     }
 
     @Override

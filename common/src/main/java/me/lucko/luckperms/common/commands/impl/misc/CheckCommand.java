@@ -76,11 +76,11 @@ public class CheckCommand extends SingleCommand {
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         if (args.isEmpty()) {
-            return plugin.getPlayerList();
+            return plugin.getPlayerList().collect(Collectors.toList());
         }
 
         if (args.size() == 1) {
-            return plugin.getPlayerList().stream().filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
+            return plugin.getPlayerList().filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
         }
 
         args.remove(0);

@@ -73,7 +73,7 @@ public class LPPermissible extends PermissibleBase {
     private final User user;
 
     // the player this permissible is injected into.
-    private final Player parent;
+    private final Player player;
 
     // the luckperms plugin instance
     private final LPBukkitPlugin plugin;
@@ -92,10 +92,10 @@ public class LPPermissible extends PermissibleBase {
     // this collection is only modified by the attachments themselves
     final Set<LPPermissionAttachment> attachments = ConcurrentHashMap.newKeySet();
 
-    public LPPermissible(@NonNull Player parent, @NonNull User user, @NonNull LPBukkitPlugin plugin) {
-        super(parent);
+    public LPPermissible(@NonNull Player player, @NonNull User user, @NonNull LPBukkitPlugin plugin) {
+        super(player);
         this.user = user;
-        this.parent = parent;
+        this.player = player;
         this.plugin = plugin;
         this.subscriptions = new SubscriptionManager(this);
     }
@@ -148,7 +148,7 @@ public class LPPermissible extends PermissibleBase {
             return;
         }
 
-        plugin.doAsync(this::updateSubscriptions);
+        plugin.getScheduler().doAsync(this::updateSubscriptions);
     }
 
     /**
@@ -166,7 +166,7 @@ public class LPPermissible extends PermissibleBase {
 
         // include defaults, if enabled.
         if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
-            if (parent.isOp()) {
+            if (player.isOp()) {
                 ent.addAll(plugin.getDefaultsProvider().getOpDefaults().keySet());
             } else {
                 ent.addAll(plugin.getDefaultsProvider().getNonOpDefaults().keySet());
@@ -180,7 +180,7 @@ public class LPPermissible extends PermissibleBase {
      * Unsubscribes from all permissions asynchronously
      */
     public void unsubscribeFromAllAsync() {
-        plugin.doAsync(this::unsubscribeFromAll);
+        plugin.getScheduler().doAsync(this::unsubscribeFromAll);
     }
 
     /**
@@ -208,12 +208,12 @@ public class LPPermissible extends PermissibleBase {
      * @return the calculated contexts for the player.
      */
     public Contexts calculateContexts() {
-        return plugin.getContextManager().getApplicableContexts(parent);
+        return plugin.getContextManager().getApplicableContexts(player);
     }
 
     @Override
     public void setOp(boolean value) {
-        parent.setOp(value);
+        player.setOp(value);
     }
 
     @Override
@@ -221,7 +221,7 @@ public class LPPermissible extends PermissibleBase {
         Set<PermissionAttachmentInfo> perms = new HashSet<>();
         perms.addAll(
                 user.getUserData().getPermissionData(calculateContexts()).getImmutableBacking().entrySet().stream()
-                        .map(e -> new PermissionAttachmentInfo(parent, e.getKey(), null, e.getValue()))
+                        .map(e -> new PermissionAttachmentInfo(player, e.getKey(), null, e.getValue()))
                         .collect(Collectors.toList())
         );
         return perms;
@@ -250,7 +250,7 @@ public class LPPermissible extends PermissibleBase {
         LPPermissionAttachment ret = addAttachment(plugin);
         if (getPlugin().getServer().getScheduler().scheduleSyncDelayedTask(plugin, ret::remove, ticks) == -1) {
             ret.remove();
-            throw new RuntimeException("Could not add PermissionAttachment to " + parent + " for plugin " + plugin.getDescription().getFullName() + ": Scheduler returned -1");
+            throw new RuntimeException("Could not add PermissionAttachment to " + player + " for plugin " + plugin.getDescription().getFullName() + ": Scheduler returned -1");
         }
         return ret;
     }

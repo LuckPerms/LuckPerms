@@ -46,7 +46,7 @@ import java.util.function.Consumer;
 /**
  * An abstract implementation of {@link me.lucko.luckperms.api.MessagingService}.
  */
-public abstract class AbstractMessagingService implements InternalMessagingService {
+public abstract class AbstractMessagingService implements ExtendedMessagingService {
     protected static final String CHANNEL = "lpuc";
 
     @Getter
@@ -69,13 +69,9 @@ public abstract class AbstractMessagingService implements InternalMessagingServi
         this.updateBuffer = new PushUpdateBuffer(plugin);
     }
 
-    protected abstract void sendMessage(String channel, String message);
+    protected abstract void sendMessage(String message);
 
-    protected void onMessage(String channel, String msg, Consumer<String> callback) {
-        if (!channel.equals(CHANNEL)) {
-            return;
-        }
-
+    protected void onMessage(String msg, Consumer<String> callback) {
         if (msg.startsWith("update:") && msg.length() > "update:".length()) {
             UUID uuid = parseUpdateMessage(msg);
             if (uuid == null) {
@@ -127,7 +123,7 @@ public abstract class AbstractMessagingService implements InternalMessagingServi
 
     @Override
     public void pushLog(LogEntry logEntry) {
-        plugin.doAsync(() -> {
+        plugin.getScheduler().doAsync(() -> {
             UUID id = generatePingId();
 
             if (plugin.getApiProvider().getEventFactory().handleLogNetworkPublish(!plugin.getConfiguration().get(ConfigKeys.PUSH_LOG_ENTRIES), id, logEntry)) {
@@ -135,17 +131,17 @@ public abstract class AbstractMessagingService implements InternalMessagingServi
             }
 
             plugin.getLog().info("[" + name + " Messaging] Sending log with id: " + id.toString());
-            sendMessage(CHANNEL, "log:" + gson.toJson(ExtendedLogEntry.serializeWithId(id, logEntry)));
+            sendMessage("log:" + gson.toJson(ExtendedLogEntry.serializeWithId(id, logEntry)));
         });
     }
 
     @Override
     public void pushUpdate() {
-        plugin.doAsync(() -> {
+        plugin.getScheduler().doAsync(() -> {
             UUID id = generatePingId();
             plugin.getLog().info("[" + name + " Messaging] Sending ping with id: " + id.toString());
 
-            sendMessage(CHANNEL, "update:" + id.toString());
+            sendMessage("update:" + id.toString());
         });
     }
 
@@ -166,7 +162,7 @@ public abstract class AbstractMessagingService implements InternalMessagingServi
 
     private final class PushUpdateBuffer extends BufferedRequest<Void> {
         public PushUpdateBuffer(LuckPermsPlugin plugin) {
-            super(3000L, 200L, plugin::doAsync);
+            super(3000L, 200L, plugin.getScheduler().async());
         }
 
         @Override

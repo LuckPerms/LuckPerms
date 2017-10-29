@@ -23,68 +23,73 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge;
+package me.lucko.luckperms.bungee;
 
-import me.lucko.luckperms.common.plugin.LuckPermsScheduler;
+import me.lucko.luckperms.common.plugin.SchedulerAdapter;
 
-import org.spongepowered.api.scheduler.Task;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
-public class LPSpongeScheduler implements LuckPermsScheduler {
-    private final LPSpongePlugin plugin;
-    private final Set<Task> tasks = ConcurrentHashMap.newKeySet();
+public class BungeeSchedulerAdapter implements SchedulerAdapter {
+    private final LPBungeePlugin plugin;
 
-    public LPSpongeScheduler(LPSpongePlugin plugin) {
+    private final Executor asyncExecutor;
+    private final Set<ScheduledTask> tasks = ConcurrentHashMap.newKeySet();
+
+    public BungeeSchedulerAdapter(LPBungeePlugin plugin) {
         this.plugin = plugin;
+        this.asyncExecutor = r -> plugin.getProxy().getScheduler().runAsync(plugin, r);
     }
 
     @Override
     public Executor async() {
-        return plugin.getAsyncExecutorService();
+        return asyncExecutor;
     }
 
     @Override
     public Executor sync() {
-        return plugin.getSyncExecutorService();
+        return asyncExecutor;
     }
 
     @Override
     public void doAsync(Runnable runnable) {
-        plugin.getSpongeScheduler().createTaskBuilder().async().execute(runnable).submit(plugin);
+        asyncExecutor.execute(runnable);
     }
 
     @Override
     public void doSync(Runnable runnable) {
-        plugin.getSpongeScheduler().createTaskBuilder().execute(runnable).submit(plugin);
+        doAsync(runnable);
     }
 
     @Override
     public void asyncRepeating(Runnable runnable, long intervalTicks) {
-        Task task = plugin.getSpongeScheduler().createTaskBuilder().async().intervalTicks(intervalTicks).delayTicks(intervalTicks).execute(runnable).submit(plugin);
+        long millis = intervalTicks * 50L; // convert from ticks to milliseconds
+        ScheduledTask task = plugin.getProxy().getScheduler().schedule(plugin, runnable, millis, millis, TimeUnit.MILLISECONDS);
         tasks.add(task);
     }
 
     @Override
     public void syncRepeating(Runnable runnable, long intervalTicks) {
-        Task task = plugin.getSpongeScheduler().createTaskBuilder().intervalTicks(intervalTicks).delayTicks(intervalTicks).execute(runnable).submit(plugin);
-        tasks.add(task);
+        asyncRepeating(runnable, intervalTicks);
     }
 
     @Override
     public void asyncLater(Runnable runnable, long delayTicks) {
-        plugin.getSpongeScheduler().createTaskBuilder().async().delayTicks(delayTicks).execute(runnable).submit(plugin);
+        long millis = delayTicks * 50L; // convert from ticks to milliseconds
+        plugin.getProxy().getScheduler().schedule(plugin, runnable, millis, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void syncLater(Runnable runnable, long delayTicks) {
-        plugin.getSpongeScheduler().createTaskBuilder().delayTicks(delayTicks).execute(runnable).submit(plugin);
+        asyncLater(runnable, delayTicks);
     }
 
     @Override
     public void shutdown() {
-        tasks.forEach(Task::cancel);
+        tasks.forEach(ScheduledTask::cancel);
     }
 }

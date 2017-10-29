@@ -32,12 +32,12 @@ import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.messaging.InternalMessagingService;
-import me.lucko.luckperms.common.messaging.NoopMessagingService;
+import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
+import java.util.Optional;
 
 public class NetworkSyncCommand extends SingleCommand {
     public NetworkSyncCommand(LocaleManager locale) {
@@ -50,16 +50,15 @@ public class NetworkSyncCommand extends SingleCommand {
         plugin.getUpdateTaskBuffer().request().join();
         Message.UPDATE_TASK_COMPLETE_NETWORK.send(sender);
 
-        InternalMessagingService messagingService = plugin.getMessagingService();
-
-        if (messagingService instanceof NoopMessagingService) {
+        Optional<ExtendedMessagingService> messagingService = plugin.getMessagingService();
+        if (!messagingService.isPresent()) {
             Message.UPDATE_TASK_PUSH_FAILURE_NOT_SETUP.send(sender);
             return CommandResult.FAILURE;
         }
 
         try {
-            messagingService.pushUpdate();
-            Message.UPDATE_TASK_PUSH_SUCCESS.send(sender, messagingService.getName());
+            messagingService.get().pushUpdate();
+            Message.UPDATE_TASK_PUSH_SUCCESS.send(sender, messagingService.get().getName());
             return CommandResult.SUCCESS;
         } catch (Exception e) {
             e.printStackTrace();

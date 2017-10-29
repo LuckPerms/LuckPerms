@@ -57,7 +57,7 @@ import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getGroup
 
 public class ParentAddTemp extends SharedSubCommand {
     public ParentAddTemp(LocaleManager locale) {
-        super(CommandSpec.PARENT_ADD_TEMP.spec(locale), "addtemp", CommandPermission.USER_PARENT_ADDTEMP, CommandPermission.GROUP_PARENT_ADDTEMP, Predicates.inRange(0, 1));
+        super(CommandSpec.PARENT_ADD_TEMP.spec(locale), "addtemp", CommandPermission.USER_PARENT_ADD_TEMP, CommandPermission.GROUP_PARENT_ADD_TEMP, Predicates.inRange(0, 1));
     }
 
     @Override

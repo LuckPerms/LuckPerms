@@ -60,8 +60,8 @@ public class MetaRemoveChatMeta extends SharedSubCommand {
         super(
                 type == ChatMetaType.PREFIX ? CommandSpec.META_REMOVEPREFIX.spec(locale) : CommandSpec.META_REMOVESUFFIX.spec(locale),
                 "remove" + type.name().toLowerCase(),
-                type == ChatMetaType.PREFIX ? CommandPermission.USER_META_REMOVEPREFIX : CommandPermission.USER_META_REMOVESUFFIX,
-                type == ChatMetaType.PREFIX ? CommandPermission.GROUP_META_REMOVEPREFIX : CommandPermission.GROUP_META_REMOVESUFFIX,
+                type == ChatMetaType.PREFIX ? CommandPermission.USER_META_REMOVE_PREFIX : CommandPermission.USER_META_REMOVE_SUFFIX,
+                type == ChatMetaType.PREFIX ? CommandPermission.GROUP_META_REMOVE_PREFIX : CommandPermission.GROUP_META_REMOVE_SUFFIX,
                 Predicates.is(0)
         );
         this.type = type;

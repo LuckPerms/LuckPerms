@@ -36,8 +36,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.LocalizedSpec;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.messaging.InternalMessagingService;
-import me.lucko.luckperms.common.messaging.NoopMessagingService;
+import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -50,6 +49,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -182,9 +182,9 @@ public abstract class SubCommand<T> extends Command<T, Void> {
         }
 
         if (!sender.isImport()) {
-            InternalMessagingService messagingService = plugin.getMessagingService();
-            if (!(messagingService instanceof NoopMessagingService) && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
-                messagingService.getUpdateBuffer().request();
+            Optional<ExtendedMessagingService> messagingService = plugin.getMessagingService();
+            if (messagingService.isPresent() && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
+                messagingService.get().getUpdateBuffer().request();
             }
         }
 
@@ -203,9 +203,9 @@ public abstract class SubCommand<T> extends Command<T, Void> {
         }
 
         if (!sender.isImport()) {
-            InternalMessagingService messagingService = plugin.getMessagingService();
-            if (!(messagingService instanceof NoopMessagingService) && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
-                messagingService.getUpdateBuffer().request();
+            Optional<ExtendedMessagingService> messagingService = plugin.getMessagingService();
+            if (messagingService.isPresent() && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
+                messagingService.get().getUpdateBuffer().request();
             }
         }
 
@@ -224,9 +224,9 @@ public abstract class SubCommand<T> extends Command<T, Void> {
         }
 
         if (!sender.isImport()) {
-            InternalMessagingService messagingService = plugin.getMessagingService();
-            if (!(messagingService instanceof NoopMessagingService) && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
-                messagingService.getUpdateBuffer().request();
+            Optional<ExtendedMessagingService> messagingService = plugin.getMessagingService();
+            if (messagingService.isPresent() && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
+                messagingService.get().getUpdateBuffer().request();
             }
         }
 

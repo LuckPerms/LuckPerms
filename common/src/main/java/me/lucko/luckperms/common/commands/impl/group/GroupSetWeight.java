@@ -44,7 +44,7 @@ import java.util.List;
 
 public class GroupSetWeight extends SubCommand<Group> {
     public GroupSetWeight(LocaleManager locale) {
-        super(CommandSpec.GROUP_SETWEIGHT.spec(locale), "setweight", CommandPermission.GROUP_SETWEIGHT, Predicates.not(1));
+        super(CommandSpec.GROUP_SETWEIGHT.spec(locale), "setweight", CommandPermission.GROUP_SET_WEIGHT, Predicates.not(1));
     }
 
     @Override

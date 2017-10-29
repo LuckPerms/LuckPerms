@@ -58,7 +58,7 @@ public class RedisMessagingService extends AbstractMessagingService {
             jedisPool = new JedisPool(new JedisPoolConfig(), host, port, 0, password);
         }
 
-        plugin.doAsync(() -> {
+        plugin.getScheduler().doAsync(() -> {
             sub = new LPSub(this);
             try (Jedis jedis = jedisPool.getResource()) {
                 jedis.subscribe(sub, CHANNEL);
@@ -75,7 +75,7 @@ public class RedisMessagingService extends AbstractMessagingService {
     }
 
     @Override
-    protected void sendMessage(String channel, String message) {
+    protected void sendMessage(String message) {
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.publish(CHANNEL, message);
         } catch (Exception e) {
@@ -89,7 +89,10 @@ public class RedisMessagingService extends AbstractMessagingService {
 
         @Override
         public void onMessage(String channel, String msg) {
-            parent.onMessage(channel, msg, null);
+            if (!channel.equals(CHANNEL)) {
+                return;
+            }
+            parent.onMessage(msg, null);
         }
     }
 

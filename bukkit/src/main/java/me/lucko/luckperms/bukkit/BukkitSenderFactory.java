@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.bukkit;
 
+import lombok.AllArgsConstructor;
+
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.compat.MessageHandler;
 import me.lucko.luckperms.common.commands.sender.SenderFactory;
@@ -68,7 +70,7 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
 
         // send sync if command block
         if (sender instanceof BlockCommandSender) {
-            getPlugin().getScheduler().doSync(() -> sender.sendMessage(s));
+            getPlugin().getScheduler().doSync(new BlockMessageAgent(((BlockCommandSender) sender), s));
             return;
         }
 
@@ -92,4 +94,16 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
     protected boolean hasPermission(CommandSender sender, String node) {
         return sender.hasPermission(node);
     }
+
+    @AllArgsConstructor
+    private static final class BlockMessageAgent implements Runnable {
+        private final BlockCommandSender block;
+        private final String message;
+
+        @Override
+        public void run() {
+            block.sendMessage(message);
+        }
+    }
+
 }

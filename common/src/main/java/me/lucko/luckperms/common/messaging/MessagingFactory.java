@@ -38,28 +38,28 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
     @Getter(AccessLevel.PROTECTED)
     private final P plugin;
 
-    public final InternalMessagingService getInstance() {
+    public final ExtendedMessagingService getInstance() {
         String messagingType = plugin.getConfiguration().get(ConfigKeys.MESSAGING_SERVICE).toLowerCase();
         if (messagingType.equals("none") && plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
             messagingType = "redis";
         }
 
         if (messagingType.equals("none")) {
-            return new NoopMessagingService();
+            return null;
         }
 
         plugin.getLog().info("Loading messaging service... [" + messagingType.toUpperCase() + "]");
 
-        InternalMessagingService service = getServiceFor(messagingType);
+        ExtendedMessagingService service = getServiceFor(messagingType);
         if (service != null) {
             return service;
         }
 
         plugin.getLog().warn("Messaging service '" + messagingType + "' not recognised.");
-        return new NoopMessagingService();
+        return null;
     }
 
-    protected InternalMessagingService getServiceFor(String messagingType) {
+    protected ExtendedMessagingService getServiceFor(String messagingType) {
         if (messagingType.equals("redis")) {
             if (plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
                 RedisMessagingService redis = new RedisMessagingService(plugin);

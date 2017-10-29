@@ -51,7 +51,7 @@ import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getGroup
 
 public class ParentRemoveTemp extends SharedSubCommand {
     public ParentRemoveTemp(LocaleManager locale) {
-        super(CommandSpec.PARENT_REMOVE_TEMP.spec(locale), "removetemp", CommandPermission.USER_PARENT_REMOVETEMP, CommandPermission.GROUP_PARENT_REMOVETEMP, Predicates.is(0));
+        super(CommandSpec.PARENT_REMOVE_TEMP.spec(locale), "removetemp", CommandPermission.USER_PARENT_REMOVE_TEMP, CommandPermission.GROUP_PARENT_REMOVE_TEMP, Predicates.is(0));
     }
 
     @Override

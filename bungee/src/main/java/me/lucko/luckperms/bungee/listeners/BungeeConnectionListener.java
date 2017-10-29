@@ -23,24 +23,20 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bungee;
+package me.lucko.luckperms.bungee.listeners;
 
 import lombok.RequiredArgsConstructor;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.bungee.event.TristateCheckEvent;
+import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.utils.LoginHelper;
-import me.lucko.luckperms.common.verbose.CheckOrigin;
 
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.LoginEvent;
-import net.md_5.bungee.api.event.PermissionCheckEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
@@ -50,7 +46,7 @@ import net.md_5.bungee.event.EventPriority;
 import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
-public class BungeeListener implements Listener {
+public class BungeeConnectionListener implements Listener {
     private final LPBungeePlugin plugin;
 
     @EventHandler(priority = EventPriority.LOW)
@@ -91,7 +87,7 @@ public class BungeeListener implements Listener {
         }
 
 
-        plugin.doAsync(() -> {
+        plugin.getScheduler().doAsync(() -> {
             plugin.getUniqueConnections().add(c.getUniqueId());
 
             /* Actually process the login for the connection.
@@ -161,52 +157,6 @@ public class BungeeListener implements Listener {
     public void onPlayerQuit(PlayerDisconnectEvent e) {
         // Request that the users data is unloaded.
         plugin.getUserManager().scheduleUnload(e.getPlayer().getUniqueId());
-    }
-
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onPlayerPermissionCheck(PermissionCheckEvent e) {
-        if (!(e.getSender() instanceof ProxiedPlayer)) {
-            return;
-        }
-
-        final ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
-
-        User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
-        if (user == null) {
-            e.setHasPermission(false);
-            return;
-        }
-
-        Contexts contexts = plugin.getContextManager().getApplicableContexts(player);
-        Tristate result = user.getUserData().getPermissionData(contexts).getPermissionValue(e.getPermission(), CheckOrigin.PLATFORM_PERMISSION_CHECK);
-        if (result == Tristate.UNDEFINED && plugin.getConfiguration().get(ConfigKeys.APPLY_BUNGEE_CONFIG_PERMISSIONS)) {
-            return; // just use the result provided by the proxy when the event was created
-        }
-
-        e.setHasPermission(result.asBoolean());
-    }
-
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onPlayerTristateCheck(TristateCheckEvent e) {
-        if (!(e.getSender() instanceof ProxiedPlayer)) {
-            return;
-        }
-
-        final ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
-
-        User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
-        if (user == null) {
-            e.setResult(Tristate.UNDEFINED);
-            return;
-        }
-
-        Contexts contexts = plugin.getContextManager().getApplicableContexts(player);
-        Tristate result = user.getUserData().getPermissionData(contexts).getPermissionValue(e.getPermission(), CheckOrigin.PLATFORM_LOOKUP_CHECK);
-        if (result == Tristate.UNDEFINED && plugin.getConfiguration().get(ConfigKeys.APPLY_BUNGEE_CONFIG_PERMISSIONS)) {
-            return; // just use the result provided by the proxy when the event was created
-        }
-
-        e.setResult(result);
     }
 
 }

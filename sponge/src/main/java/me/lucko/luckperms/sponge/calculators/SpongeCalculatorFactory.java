@@ -71,11 +71,8 @@ public class SpongeCalculatorFactory extends AbstractCalculatorFactory {
             processors.add(new DefaultsProcessor(plugin.getService(), contexts.getContexts().makeImmutable()));
         }
 
-        return registerCalculator(new PermissionCalculator(
-                plugin,
-                PermissionCalculatorMetadata.of(user.getFriendlyName(), contexts.getContexts()),
-                processors.build()
-        ));
+        PermissionCalculatorMetadata meta = PermissionCalculatorMetadata.of(user.getFriendlyName(), contexts.getContexts());
+        return registerCalculator(new PermissionCalculator(plugin, meta, processors.build()));
     }
 
     @Override

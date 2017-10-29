@@ -67,7 +67,7 @@ import java.util.stream.Collectors;
 
 public class GroupListMembers extends SubCommand<Group> {
     public GroupListMembers(LocaleManager locale) {
-        super(CommandSpec.GROUP_LISTMEMBERS.spec(locale), "listmembers", CommandPermission.GROUP_LISTMEMBERS, Predicates.notInRange(0, 1));
+        super(CommandSpec.GROUP_LISTMEMBERS.spec(locale), "listmembers", CommandPermission.GROUP_LIST_MEMBERS, Predicates.notInRange(0, 1));
     }
 
     @Override

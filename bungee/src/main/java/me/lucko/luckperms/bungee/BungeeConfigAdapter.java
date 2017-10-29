@@ -28,7 +28,7 @@ package me.lucko.luckperms.bungee;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import me.lucko.luckperms.common.config.AbstractConfiguration;
+import me.lucko.luckperms.common.config.ConfigurationAdapter;
 
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -45,7 +45,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-public class BungeeConfig extends AbstractConfiguration {
+public class BungeeConfigAdapter implements ConfigurationAdapter {
 
     @Getter
     private final LPBungeePlugin plugin;

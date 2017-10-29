@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 
 public class MetaUnsetTemp extends SharedSubCommand {
     public MetaUnsetTemp(LocaleManager locale) {
-        super(CommandSpec.META_UNSETTEMP.spec(locale), "unsettemp", CommandPermission.USER_META_UNSETTEMP, CommandPermission.GROUP_META_UNSETTEMP, Predicates.is(0));
+        super(CommandSpec.META_UNSETTEMP.spec(locale), "unsettemp", CommandPermission.USER_META_UNSET_TEMP, CommandPermission.GROUP_META_UNSET_TEMP, Predicates.is(0));
     }
 
     @Override

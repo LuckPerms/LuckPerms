@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge;
+package me.lucko.luckperms.sponge.listeners;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,11 +32,10 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.utils.LoginHelper;
 import me.lucko.luckperms.common.utils.UuidCache;
+import me.lucko.luckperms.sponge.LPSpongePlugin;
 
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.command.SendCommandEvent;
 import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.profile.GameProfile;
@@ -49,7 +48,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public class SpongeListener {
+public class SpongeConnectionListener {
     private final LPSpongePlugin plugin;
 
     private final Set<UUID> deniedAsyncLogin = Collections.synchronizedSet(new HashSet<>());
@@ -175,7 +174,7 @@ public class SpongeListener {
     @Listener(order = Order.EARLY)
     public void onClientJoin(ClientConnectionEvent.Join e) {
         // Refresh permissions again
-        plugin.doAsync(() -> LoginHelper.refreshPlayer(plugin, e.getTargetEntity().getUniqueId()));
+        plugin.getScheduler().doAsync(() -> LoginHelper.refreshPlayer(plugin, e.getTargetEntity().getUniqueId()));
     }
 
     @Listener(order = Order.POST)
@@ -190,14 +189,4 @@ public class SpongeListener {
         cache.clearCache(e.getTargetEntity().getUniqueId());
     }
 
-    @Listener
-    public void onSendCommand(SendCommandEvent e) {
-        CommandSource source = e.getCause().first(CommandSource.class).orElse(null);
-        if (source == null) return;
-
-        final String name = e.getCommand().toLowerCase();
-        if (((name.equals("op") || name.equals("minecraft:op")) && source.hasPermission("minecraft.command.op")) || ((name.equals("deop") || name.equals("minecraft:deop")) && source.hasPermission("minecraft.command.deop"))) {
-            Message.OP_DISABLED_SPONGE.send(plugin.getSenderFactory().wrap(source));
-        }
-    }
 }

@@ -51,7 +51,7 @@ import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getPermi
 
 public class PermissionUnsetTemp extends SharedSubCommand {
     public PermissionUnsetTemp(LocaleManager locale) {
-        super(CommandSpec.PERMISSION_UNSETTEMP.spec(locale), "unsettemp", CommandPermission.USER_PERM_UNSETTEMP, CommandPermission.GROUP_PERM_UNSETTEMP, Predicates.is(0));
+        super(CommandSpec.PERMISSION_UNSETTEMP.spec(locale), "unsettemp", CommandPermission.USER_PERM_UNSET_TEMP, CommandPermission.GROUP_PERM_UNSET_TEMP, Predicates.is(0));
     }
 
     @Override

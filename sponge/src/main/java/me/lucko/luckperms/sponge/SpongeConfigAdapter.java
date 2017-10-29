@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.google.common.base.Splitter;
 
-import me.lucko.luckperms.common.config.AbstractConfiguration;
+import me.lucko.luckperms.common.config.ConfigurationAdapter;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.SimpleConfigurationNode;
@@ -49,7 +49,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-public class SpongeConfig extends AbstractConfiguration {
+public class SpongeConfigAdapter implements ConfigurationAdapter {
 
     @Getter
     private final LPSpongePlugin plugin;

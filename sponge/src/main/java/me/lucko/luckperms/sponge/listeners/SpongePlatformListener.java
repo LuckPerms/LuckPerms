@@ -23,38 +23,29 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.messaging;
+package me.lucko.luckperms.sponge.listeners;
 
-import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.api.MessagingService;
-import me.lucko.luckperms.common.buffers.BufferedRequest;
+import lombok.RequiredArgsConstructor;
 
-public interface InternalMessagingService extends MessagingService {
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.sponge.LPSpongePlugin;
 
-    /**
-     * Gets the name of this messaging service
-     *
-     * @return the name of this messaging service
-     */
-    String getName();
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.command.SendCommandEvent;
 
-    /**
-     * Closes the messaging service
-     */
-    void close();
+@RequiredArgsConstructor
+public class SpongePlatformListener {
+    private final LPSpongePlugin plugin;
 
-    /**
-     * Gets the buffer for sending updates to other servers
-     *
-     * @return the update buffer
-     */
-    BufferedRequest<Void> getUpdateBuffer();
+    @Listener
+    public void onSendCommand(SendCommandEvent e) {
+        CommandSource source = e.getCause().first(CommandSource.class).orElse(null);
+        if (source == null) return;
 
-    /**
-     * Pushes a log entry to connected servers.
-     *
-     * @param logEntry the log entry
-     */
-    void pushLog(LogEntry logEntry);
-
+        final String name = e.getCommand().toLowerCase();
+        if (((name.equals("op") || name.equals("minecraft:op")) && source.hasPermission("minecraft.command.op")) || ((name.equals("deop") || name.equals("minecraft:deop")) && source.hasPermission("minecraft.command.deop"))) {
+            Message.OP_DISABLED_SPONGE.send(plugin.getSenderFactory().wrap(source));
+        }
+    }
 }

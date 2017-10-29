@@ -161,12 +161,11 @@ public class MongoDao extends AbstractDao {
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "action");
 
-            //noinspection deprecation
             Document doc = new Document()
                     .append("timestamp", entry.getTimestamp())
                     .append("actor", entry.getActor())
                     .append("actorName", entry.getActorName())
-                    .append("type", Character.toString(entry.getType()))
+                    .append("type", Character.toString(entry.getEntryType().getCode()))
                     .append("actedName", entry.getActedName())
                     .append("action", entry.getAction());
 

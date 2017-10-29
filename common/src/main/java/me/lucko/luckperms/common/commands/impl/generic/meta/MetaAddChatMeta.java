@@ -60,8 +60,8 @@ public class MetaAddChatMeta extends SharedSubCommand {
         super(
                 type == ChatMetaType.PREFIX ? CommandSpec.META_ADDPREFIX.spec(locale) : CommandSpec.META_ADDSUFFIX.spec(locale),
                 "add" + type.name().toLowerCase(),
-                type == ChatMetaType.PREFIX ? CommandPermission.USER_META_ADDPREFIX : CommandPermission.USER_META_ADDSUFFIX,
-                type == ChatMetaType.PREFIX ? CommandPermission.GROUP_META_ADDPREFIX : CommandPermission.GROUP_META_ADDSUFFIX,
+                type == ChatMetaType.PREFIX ? CommandPermission.USER_META_ADD_PREFIX : CommandPermission.USER_META_ADD_SUFFIX,
+                type == ChatMetaType.PREFIX ? CommandPermission.GROUP_META_ADD_PREFIX : CommandPermission.GROUP_META_ADD_SUFFIX,
                 Predicates.inRange(0, 1)
         );
         this.type = type;

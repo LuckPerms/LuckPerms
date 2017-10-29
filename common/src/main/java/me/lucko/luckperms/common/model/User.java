@@ -68,10 +68,10 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      * The users data cache instance, if present.
      */
     @Getter
-    private final UserCache userData = new UserCache(this);
+    private final UserCache userData;
 
     @Getter
-    private BufferedRequest<Void> refreshBuffer = new UserRefreshBuffer(this);
+    private BufferedRequest<Void> refreshBuffer;
 
     @Getter
     private final UserDelegate delegate = new UserDelegate(this);
@@ -80,16 +80,22 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         super(uuid.toString(), plugin);
         this.uuid = uuid;
 
+        this.refreshBuffer = new UserRefreshBuffer(plugin, this);
         this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
+
+        this.userData = new UserCache(this);
         getPlugin().getApiProvider().getEventFactory().handleUserCacheLoad(this, userData);
     }
 
     public User(UUID uuid, String name, LuckPermsPlugin plugin) {
         super(uuid.toString(), plugin);
         this.uuid = uuid;
-
         setName(name, false);
+
+        this.refreshBuffer = new UserRefreshBuffer(plugin, this);
         this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
+
+        this.userData = new UserCache(this);
         getPlugin().getApiProvider().getEventFactory().handleUserCacheLoad(this, userData);
     }
 
@@ -207,8 +213,8 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     private static final class UserRefreshBuffer extends BufferedRequest<Void> {
         private final User user;
 
-        private UserRefreshBuffer(User user) {
-            super(250L, 50L, r -> user.getPlugin().doAsync(r));
+        private UserRefreshBuffer(LuckPermsPlugin plugin, User user) {
+            super(250L, 50L, plugin.getScheduler().async());
             this.user = user;
         }
 

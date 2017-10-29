@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
 
 public class MetaSetTemp extends SharedSubCommand {
     public MetaSetTemp(LocaleManager locale) {
-        super(CommandSpec.META_SETTEMP.spec(locale), "settemp", CommandPermission.USER_META_SETTEMP, CommandPermission.GROUP_META_SETTEMP, Predicates.inRange(0, 2));
+        super(CommandSpec.META_SETTEMP.spec(locale), "settemp", CommandPermission.USER_META_SET_TEMP, CommandPermission.GROUP_META_SET_TEMP, Predicates.inRange(0, 2));
     }
 
     @Override

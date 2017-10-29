@@ -30,7 +30,7 @@ import java.util.concurrent.Executor;
 /**
  * A scheduler for running tasks using the systems provided by the platform
  */
-public interface LuckPermsScheduler {
+public interface SchedulerAdapter {
 
     /**
      * Gets an async executor instance

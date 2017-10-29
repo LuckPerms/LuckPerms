@@ -32,6 +32,7 @@ import com.google.common.io.ByteStreams;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.messaging.AbstractMessagingService;
+import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
@@ -40,7 +41,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.Collection;
 
 /**
- * An implementation of {@link me.lucko.luckperms.api.MessagingService} using the plugin messaging channels.
+ * An implementation of {@link ExtendedMessagingService} using the plugin messaging channels.
  */
 public class BungeeMessagingService extends AbstractMessagingService implements PluginMessageListener {
     private final LPBukkitPlugin plugin;
@@ -62,7 +63,7 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
     }
 
     @Override
-    protected void sendMessage(String channel, String message) {
+    protected void sendMessage(String message) {
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -77,7 +78,7 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
 
                 byte[] data = out.toByteArray();
 
-                p.sendPluginMessage(plugin, channel, data);
+                p.sendPluginMessage(plugin, CHANNEL, data);
                 cancel();
             }
         }.runTaskTimer(plugin, 1L, 100L);
@@ -92,6 +93,6 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
         ByteArrayDataInput in = ByteStreams.newDataInput(bytes);
         String msg = in.readUTF();
 
-        onMessage(s, msg, null);
+        onMessage(msg, null);
     }
 }

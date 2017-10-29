@@ -34,11 +34,10 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.messaging.InternalMessagingService;
-import me.lucko.luckperms.common.messaging.NoopMessagingService;
+import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 public class LogDispatcher {
@@ -55,18 +54,15 @@ public class LogDispatcher {
             return;
         }
 
-        InternalMessagingService messagingService = plugin.getMessagingService();
-        if (!sender.isImport() && !(messagingService instanceof NoopMessagingService)) {
-            messagingService.pushLog(entry);
+        Optional<ExtendedMessagingService> messagingService = plugin.getMessagingService();
+        if (!sender.isImport() && messagingService.isPresent()) {
+            messagingService.get().pushLog(entry);
         }
 
         if (!plugin.getApiProvider().getEventFactory().handleLogBroadcast(!plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY), entry, LogBroadcastEvent.Origin.LOCAL)) {
             final String msg = entry.getFormatted();
 
-            List<Sender> senders = plugin.getOnlineSenders();
-            senders.add(plugin.getConsoleSender());
-
-            senders.stream()
+            plugin.getOnlineSenders()
                     .filter(CommandPermission.LOG_NOTIFY::isAuthorized)
                     .filter(s -> !LogNotify.isIgnoring(plugin, s.getUuid()))
                     .filter(s -> !s.getUuid().equals(sender.getUuid()))
@@ -82,10 +78,7 @@ public class LogDispatcher {
         if (!plugin.getApiProvider().getEventFactory().handleLogBroadcast(!plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY), entry, LogBroadcastEvent.Origin.REMOTE)) {
             final String msg = entry.getFormatted();
 
-            List<Sender> senders = plugin.getOnlineSenders();
-            senders.add(plugin.getConsoleSender());
-
-            senders.stream()
+            plugin.getOnlineSenders()
                     .filter(CommandPermission.LOG_NOTIFY::isAuthorized)
                     .filter(s -> !LogNotify.isIgnoring(plugin, s.getUuid()))
                     .forEach(s -> Message.LOG.send(s, msg));

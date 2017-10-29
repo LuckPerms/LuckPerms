@@ -144,7 +144,7 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     private void registerFileAction(StorageLocation type, File file) {
-        plugin.applyToFileWatcher(fileWatcher -> fileWatcher.registerChange(type, file.getName()));
+        plugin.getFileWatcher().ifPresent(fileWatcher -> fileWatcher.registerChange(type, file.getName()));
     }
 
     @Override
@@ -241,7 +241,7 @@ public abstract class ConfigurateDao extends AbstractDao {
         actionLogFile.createNewFile();
 
         // Listen for file changes.
-        plugin.applyToFileWatcher(watcher -> {
+        plugin.getFileWatcher().ifPresent(watcher -> {
             watcher.subscribe("user", usersDirectory.toPath(), s -> {
                 if (!s.endsWith(fileExtension)) {
                     return;
@@ -287,11 +287,10 @@ public abstract class ConfigurateDao extends AbstractDao {
 
     @Override
     public boolean logAction(LogEntry entry) {
-        //noinspection deprecation
         actionLogger.info(String.format(LOG_FORMAT,
                 (entry.getActor().equals(Constants.CONSOLE_UUID) ? "" : entry.getActor() + " "),
                 entry.getActorName(),
-                Character.toString(entry.getType()),
+                Character.toString(entry.getEntryType().getCode()),
                 (entry.getActed() == null ? "" : entry.getActed().toString() + " "),
                 entry.getActedName(),
                 entry.getAction())

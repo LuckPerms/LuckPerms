@@ -44,7 +44,7 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.UserManager;
-import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.dao.file.FileWatcher;
@@ -60,7 +60,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * Main internal interface for LuckPerms plugins, providing the base for abstraction throughout the project.
@@ -109,7 +109,7 @@ public interface LuckPermsPlugin {
      *
      * @return the redis messaging service
      */
-    InternalMessagingService getMessagingService();
+    Optional<ExtendedMessagingService> getMessagingService();
 
     /**
      * Gets a wrapped logger instance for the platform.
@@ -194,15 +194,14 @@ public interface LuckPermsPlugin {
      *
      * @return the scheduler
      */
-    LuckPermsScheduler getScheduler();
+    SchedulerAdapter getScheduler();
 
-    default void doAsync(Runnable runnable) {
-        getScheduler().doAsync(runnable);
-    }
-
-    default void doSync(Runnable runnable) {
-        getScheduler().doSync(runnable);
-    }
+    /**
+     * Gets the file watcher running on the platform
+     *
+     * @return the file watcher
+     */
+    Optional<FileWatcher> getFileWatcher();
 
     /**
      * Gets a string of the plugin's version
@@ -238,20 +237,6 @@ public interface LuckPermsPlugin {
      * @return the enable time
      */
     long getStartTime();
-
-    /**
-     * Gets the file watcher running on the platform, or null if it's not enabled.
-     *
-     * @return the file watcher, or null
-     */
-    FileWatcher getFileWatcher();
-
-    default void applyToFileWatcher(Consumer<FileWatcher> consumer) {
-        FileWatcher fw = getFileWatcher();
-        if (fw != null) {
-            consumer.accept(fw);
-        }
-    }
 
     /**
      * Gets the plugins main data storage directory
@@ -331,14 +316,14 @@ public interface LuckPermsPlugin {
      *
      * @return a {@link List} of usernames
      */
-    List<String> getPlayerList();
+    Stream<String> getPlayerList();
 
     /**
      * Gets the UUIDs of the users online on the platform
      *
      * @return a {@link Set} of UUIDs
      */
-    Set<UUID> getOnlinePlayers();
+    Stream<UUID> getOnlinePlayers();
 
     /**
      * Checks if a user is online
@@ -353,7 +338,7 @@ public interface LuckPermsPlugin {
      *
      * @return a {@link List} of senders online on the platform
      */
-    List<Sender> getOnlineSenders();
+    Stream<Sender> getOnlineSenders();
 
     /**
      * Gets the console.

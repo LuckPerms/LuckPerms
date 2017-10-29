@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 
 public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> {
     public HolderShowTracks(LocaleManager locale, boolean user) {
-        super(CommandSpec.HOLDER_SHOWTRACKS.spec(locale), "showtracks", user ? CommandPermission.USER_SHOWTRACKS : CommandPermission.GROUP_SHOWTRACKS, Predicates.alwaysFalse());
+        super(CommandSpec.HOLDER_SHOWTRACKS.spec(locale), "showtracks", user ? CommandPermission.USER_SHOW_TRACKS : CommandPermission.GROUP_SHOW_TRACKS, Predicates.alwaysFalse());
     }
 
     @Override

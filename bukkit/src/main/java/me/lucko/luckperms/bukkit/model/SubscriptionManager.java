@@ -57,7 +57,9 @@ public class SubscriptionManager {
         // we compare changes to avoid unnecessary time wasted on the main thread mutating this data.
         // the changes can be calculated here async, and then only the needed changes can be applied.
         Map.Entry<Set<String>, Set<String>> changes = compareSets(newPerms, currentSubscriptions);
-        permissible.getPlugin().doSync(new SubscriptionUpdateTask(permissible, changes.getKey(), changes.getValue()));
+        if (!changes.getKey().isEmpty() || !changes.getValue().isEmpty()) {
+            permissible.getPlugin().getScheduler().doSync(new SubscriptionUpdateTask(permissible, changes.getKey(), changes.getValue()));
+        }
 
         this.currentSubscriptions = newPerms;
     }
@@ -71,10 +73,10 @@ public class SubscriptionManager {
         @Override
         public void run() {
             for (String s : toAdd) {
-                permissible.getPlugin().getServer().getPluginManager().subscribeToPermission(s, permissible.getParent());
+                permissible.getPlugin().getServer().getPluginManager().subscribeToPermission(s, permissible.getPlayer());
             }
             for (String s : toRemove) {
-                permissible.getPlugin().getServer().getPluginManager().unsubscribeFromPermission(s, permissible.getParent());
+                permissible.getPlugin().getServer().getPluginManager().unsubscribeFromPermission(s, permissible.getPlayer());
             }
         }
     }

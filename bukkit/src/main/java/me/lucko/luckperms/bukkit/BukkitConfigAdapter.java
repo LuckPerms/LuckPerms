@@ -28,7 +28,7 @@ package me.lucko.luckperms.bukkit;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import me.lucko.luckperms.common.config.AbstractConfiguration;
+import me.lucko.luckperms.common.config.ConfigurationAdapter;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -41,7 +41,7 @@ import java.util.Map;
 import java.util.Set;
 
 @RequiredArgsConstructor
-public class BukkitConfig extends AbstractConfiguration {
+public class BukkitConfigAdapter implements ConfigurationAdapter {
 
     @Getter
     private final LPBukkitPlugin plugin;
