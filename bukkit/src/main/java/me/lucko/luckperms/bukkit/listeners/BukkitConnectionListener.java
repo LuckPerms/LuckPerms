@@ -209,7 +209,7 @@ public class BukkitConnectionListener implements Listener {
 
         // Remove the custom permissible
         try {
-            Injector.unInject(player, true, true);
+            Injector.unInject(player, true);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

@@ -32,7 +32,6 @@ import lombok.Setter;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.common.caching.UserCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
@@ -45,7 +44,6 @@ import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -78,9 +76,6 @@ public class LPPermissible extends PermissibleBase {
     // the luckperms plugin instance
     private final LPBukkitPlugin plugin;
 
-    // the subscription manager, handling the players permission subscriptions.
-    private final SubscriptionManager subscriptions;
-
     // the players previous permissible. (the one they had before this one was injected)
     @Setter
     private PermissibleBase oldPermissible = null;
@@ -97,7 +92,6 @@ public class LPPermissible extends PermissibleBase {
         this.user = user;
         this.player = player;
         this.plugin = plugin;
-        this.subscriptions = new SubscriptionManager(this);
     }
 
     @Override
@@ -138,56 +132,6 @@ public class LPPermissible extends PermissibleBase {
         } else {
             return permission.getDefault().getValue(isOp());
         }
-    }
-
-    /**
-     * Updates the players subscriptions asynchronously
-     */
-    public void updateSubscriptionsAsync() {
-        if (!active.get()) {
-            return;
-        }
-
-        plugin.getScheduler().doAsync(this::updateSubscriptions);
-    }
-
-    /**
-     * Updates the players subscriptions
-     */
-    public void updateSubscriptions() {
-        if (!active.get()) {
-            return;
-        }
-
-        UserCache cache = user.getUserData();
-
-        // calculate their "active" permissions
-        Set<String> ent = new HashSet<>(cache.getPermissionData(calculateContexts()).getImmutableBacking().keySet());
-
-        // include defaults, if enabled.
-        if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
-            if (player.isOp()) {
-                ent.addAll(plugin.getDefaultsProvider().getOpDefaults().keySet());
-            } else {
-                ent.addAll(plugin.getDefaultsProvider().getNonOpDefaults().keySet());
-            }
-        }
-
-        subscriptions.subscribe(ent);
-    }
-
-    /**
-     * Unsubscribes from all permissions asynchronously
-     */
-    public void unsubscribeFromAllAsync() {
-        plugin.getScheduler().doAsync(this::unsubscribeFromAll);
-    }
-
-    /**
-     * Unsubscribes from all permissions
-     */
-    public void unsubscribeFromAll() {
-        subscriptions.subscribe(Collections.emptySet());
     }
 
     /**

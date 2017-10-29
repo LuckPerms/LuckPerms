@@ -35,9 +35,6 @@ import org.bukkit.permissions.PermissionAttachment;
 
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Injects a {@link LPPermissible} into a {@link Player}.
@@ -47,7 +44,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @UtilityClass
 public class Injector {
-    private static final Map<UUID, LPPermissible> INJECTED_PERMISSIBLES = new ConcurrentHashMap<>();
 
     /**
      * All permission checks made on standard Bukkit objects are effectively proxied to a
@@ -123,13 +119,9 @@ public class Injector {
         // Setup the new permissible
         newPermissible.getActive().set(true);
         newPermissible.setOldPermissible(oldPermissible);
-        newPermissible.updateSubscriptionsAsync();
 
         // inject the new instance
         HUMAN_ENTITY_PERMISSIBLE_FIELD.set(player, newPermissible);
-
-        // register the injection with the map
-        INJECTED_PERMISSIBLES.put(player.getUniqueId(), newPermissible);
     }
 
     /**
@@ -137,10 +129,9 @@ public class Injector {
      *
      * @param player the player to uninject from
      * @param dummy if the replacement permissible should be a dummy.
-     * @param unsubscribe if the extracted permissible should unsubscribe itself. see {@link SubscriptionManager}.
      * @throws Exception propagates any exceptions which were thrown during uninjection
      */
-    public static void unInject(Player player, boolean dummy, boolean unsubscribe) throws Exception {
+    public static void unInject(Player player, boolean dummy) throws Exception {
 
         // gets the players current permissible.
         PermissibleBase permissible = (PermissibleBase) HUMAN_ENTITY_PERMISSIBLE_FIELD.get(player);
@@ -151,11 +142,6 @@ public class Injector {
 
             // clear all permissions
             lpPermissible.clearPermissions();
-
-            // try to unsubscribe
-            if (unsubscribe) {
-                lpPermissible.unsubscribeFromAllAsync();
-            }
 
             // set to inactive
             lpPermissible.getActive().set(false);
@@ -174,12 +160,6 @@ public class Injector {
                 HUMAN_ENTITY_PERMISSIBLE_FIELD.set(player, newPb);
             }
         }
-
-        INJECTED_PERMISSIBLES.remove(player.getUniqueId());
-    }
-
-    public static LPPermissible getPermissible(UUID uuid) {
-        return INJECTED_PERMISSIBLES.get(uuid);
     }
 
 }

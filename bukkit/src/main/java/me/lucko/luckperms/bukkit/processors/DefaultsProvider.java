@@ -78,7 +78,7 @@ public class DefaultsProvider {
      * @param isOp if the player is op
      * @return a tristate result
      */
-    public Tristate hasDefault(String permission, boolean isOp) {
+    public Tristate lookup(String permission, boolean isOp) {
         Map<String, Boolean> map = isOp ? opDefaults : nonOpDefaults;
 
         Boolean b = map.get(permission);
@@ -126,6 +126,10 @@ public class DefaultsProvider {
         unregisterDefaults(nonOpDefaults, nonOpDummy, false);
     }
 
+    private static PluginManager pm() {
+        return Bukkit.getServer().getPluginManager();
+    }
+
     /**
      * Unregisters defaults for a given permissible.
      *
@@ -136,21 +140,21 @@ public class DefaultsProvider {
         Set<String> perms = map.keySet();
 
         for (String name : perms) {
-            Bukkit.getServer().getPluginManager().unsubscribeFromPermission(name, p);
+            pm().unsubscribeFromPermission(name, p);
         }
 
-        Bukkit.getServer().getPluginManager().unsubscribeFromDefaultPerms(op, p);
+        pm().unsubscribeFromDefaultPerms(op, p);
     }
 
     private static void calculateDefaults(Map<String, Boolean> map, DummyPermissible p, boolean op) {
-        Bukkit.getServer().getPluginManager().subscribeToDefaultPerms(op, p);
+        pm().subscribeToDefaultPerms(op, p);
 
-        Set<Permission> defaults = Bukkit.getServer().getPluginManager().getDefaultPermissions(op);
+        Set<Permission> defaults = pm().getDefaultPermissions(op);
         for (Permission perm : defaults) {
             String name = perm.getName().toLowerCase();
 
             map.put(name, true);
-            Bukkit.getServer().getPluginManager().subscribeToPermission(name, p);
+            pm().subscribeToPermission(name, p);
 
             // register defaults for any children too
             calculateChildPermissions(map, p, perm.getChildren(), false);
@@ -167,10 +171,10 @@ public class DefaultsProvider {
             boolean value = e.getValue() ^ invert;
 
             accumulator.put(e.getKey().toLowerCase(), value);
-            Bukkit.getServer().getPluginManager().subscribeToPermission(e.getKey(), p);
+            pm().subscribeToPermission(e.getKey(), p);
 
             // lookup any deeper children & resolve if present
-            Permission perm = Bukkit.getServer().getPluginManager().getPermission(e.getKey());
+            Permission perm = pm().getPermission(e.getKey());
             if (perm != null) {
                 calculateChildPermissions(accumulator, p, perm.getChildren(), !value);
             }

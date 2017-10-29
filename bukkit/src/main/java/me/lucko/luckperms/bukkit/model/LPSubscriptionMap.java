@@ -1,0 +1,270 @@
+/*
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
+
+package me.lucko.luckperms.bukkit.model;
+
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
+import me.lucko.luckperms.bukkit.LPBukkitPlugin;
+import me.lucko.luckperms.common.utils.ImmutableCollectors;
+
+import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permissible;
+import org.bukkit.permissions.Permission;
+import org.bukkit.plugin.PluginManager;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.WeakHashMap;
+import java.util.stream.Collectors;
+
+/**
+ * A replacement map for the 'permSubs' instance in Bukkit's SimplePluginManager.
+ *
+ * This instance allows LuckPerms to intercept calls to
+ * {@link PluginManager#subscribeToPermission(String, Permissible)},
+ * {@link PluginManager#unsubscribeFromPermission(String, Permissible)} and
+ * {@link PluginManager#getPermissionSubscriptions(String)}.
+ *
+ * Bukkit for some reason sometimes uses subscription status to determine whether
+ * a permissible has a given node, instead of checking directly with
+ * {@link Permissible#hasPermission(Permission)}.
+ *
+ * {@link org.bukkit.Server#broadcast(String, String)} is a good example of this.
+ *
+ * In order to implement predicable Bukkit behaviour, LP has two options:
+ * 1) register subscriptions for all players as normal, or
+ * 2) inject it's own map instance to proxy calls to {@link PluginManager#getPermissionSubscriptions(String)} back to LuckPerms.
+ *
+ * This class implements option 2 above. It is preferred because it is faster & uses less memory
+ */
+public class LPSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>> {
+
+    // the plugin instance
+    private final LPBukkitPlugin plugin;
+
+    public LPSubscriptionMap(LPBukkitPlugin plugin, Map<String, Map<Permissible, Boolean>> existingData) {
+        super(existingData);
+        this.plugin = plugin;
+    }
+
+    /* The get method is the only one which is actually used by SimplePluginManager
+     * we override it to always return a value - which means the null check in
+     * subscribeToDefaultPerms always fails - soo, we don't have to worry too much
+     * about implementing #put.
+     *
+     * we also ensure all returns are LPSubscriptionValueMaps. this extension
+     * will also delegate checks to online players - meaning we don't ever
+     * have to register their subscriptions with the plugin manager.
+     */
+    @Override
+    public Map<Permissible, Boolean> get(Object key) {
+        if (key == null || !(key instanceof String)) {
+            return null;
+        }
+
+        String permission = ((String) key);
+
+        Map<Permissible, Boolean> result = super.get(key);
+
+        if (result == null) {
+            // calculate a new map - always!
+            result = new LPSubscriptionValueMap(permission);
+            super.put(permission, result);
+        } else if (!(result instanceof LPSubscriptionValueMap)) {
+            // ensure return type is a LPSubscriptionMap
+            result = new LPSubscriptionValueMap(permission, result);
+            super.put(permission, result);
+        }
+        return result;
+    }
+
+    @Override
+    public Map<Permissible, Boolean> put(String key, Map<Permissible, Boolean> value) {
+        if (value == null) {
+            throw new NullPointerException("Map value cannot be null");
+        }
+
+        // ensure values are LP subscription maps
+        if (!(value instanceof LPSubscriptionValueMap)) {
+            value = new LPSubscriptionValueMap(key, value);
+        }
+        return super.put(key, value);
+    }
+
+    // if the key isn't null and is a string, #get will always return a value for it
+    @Override
+    public boolean containsKey(Object key) {
+        return key != null && key instanceof String;
+    }
+
+    /**
+     * Converts this map back to a standard HashMap
+     *
+     * @return a standard representation of this map
+     */
+    public Map<String, Map<Permissible, Boolean>> detach() {
+        Map<String, Map<Permissible, Boolean>> ret = new HashMap<>();
+
+        for (Map.Entry<String, Map<Permissible, Boolean>> ent : entrySet()) {
+            if (ent.getValue() instanceof LPSubscriptionValueMap) {
+                ret.put(ent.getKey(), ((LPSubscriptionValueMap) ent.getValue()).backing);
+            } else {
+                ret.put(ent.getKey(), ent.getValue());
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     * Value map extension which includes LP objects in Permissible related queries.
+     */
+    public class LPSubscriptionValueMap implements Map<Permissible, Boolean> {
+
+        // the permission being mapped to this value map
+        private final String permission;
+
+        // the backing map
+        private final Map<Permissible, Boolean> backing;
+
+        public LPSubscriptionValueMap(String permission, Map<Permissible, Boolean> backing) {
+            this.permission = permission;
+            this.backing = backing;
+        }
+
+        public LPSubscriptionValueMap(String permission) {
+            this(permission, new WeakHashMap<>());
+        }
+
+        @Override
+        public Boolean get(Object key) {
+            boolean isPlayer = key instanceof Player;
+
+            // if the key is a player, check their LPPermissible first
+            if (isPlayer) {
+                Permissible p = (Permissible) key;
+                if (p.isPermissionSet(permission)) {
+                    return p.hasPermission(permission);
+                }
+            }
+
+            // then try the map
+            Boolean result = backing.get(key);
+            if (result != null) {
+                return result;
+            }
+
+            // then try the map, if we haven't already
+            if (!isPlayer && key instanceof Permissible) {
+                Permissible p = (Permissible) key;
+                if (p.isPermissionSet(permission)) {
+                    return p.hasPermission(permission);
+                }
+            }
+
+            // no result
+            return null;
+        }
+
+        @Override
+        public boolean containsKey(Object key) {
+            // check the backing map, as well as if the permissible has the perm set
+            return backing.containsKey(key) || (key instanceof Permissible && ((Permissible) key).isPermissionSet(permission));
+        }
+
+        @Override
+        public Set<Permissible> keySet() {
+            // gather players (LPPermissibles)
+            Set<Permissible> players = plugin.getServer().getOnlinePlayers().stream()
+                    .filter(player -> player.isPermissionSet(permission))
+                    .collect(Collectors.toSet());
+
+            // then combine the players with the backing map
+            return Sets.union(players, backing.keySet());
+        }
+
+        @Override
+        public Set<Entry<Permissible, Boolean>> entrySet() {
+            return keySet().stream()
+                    .map(p -> {
+                        Boolean ret = get(p);
+                        return ret != null ? Maps.immutableEntry(p, ret) : null;
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(ImmutableCollectors.toImmutableSet());
+        }
+
+        @Override
+        public boolean isEmpty() {
+            // we never want to remove this map from the parent - since it just gets recreated
+            // on subsequent calls
+            return false;
+        }
+
+        // just delegate to the backing map
+
+        @Override
+        public Boolean put(Permissible key, Boolean value) {
+            return backing.put(key, value);
+        }
+
+        @Override
+        public Boolean remove(Object key) {
+            return backing.remove(key);
+        }
+
+        // the following methods are not used in the current impls of PluginManager, but just delegate them for now
+
+        @Override
+        public int size() {
+            return backing.size();
+        }
+
+        @Override
+        public boolean containsValue(Object value) {
+            return backing.containsValue(value);
+        }
+
+        @Override
+        public void putAll(Map<? extends Permissible, ? extends Boolean> m) {
+            backing.putAll(m);
+        }
+
+        @Override
+        public void clear() {
+            backing.clear();
+        }
+
+        @Override
+        public Collection<Boolean> values() {
+            return backing.values();
+        }
+    }
+}

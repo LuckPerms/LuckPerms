@@ -381,15 +381,6 @@ public interface LuckPermsPlugin {
 
     }
 
-    /**
-     * Called when a users data is refreshed
-     *
-     * @param user the user
-     */
-    default void onUserRefresh(User user) {
-
-    }
-
     static void sendStartupBanner(Sender sender, LuckPermsPlugin plugin) {
         sender.sendMessage(Util.color("&b               __       &3 __   ___  __         __  "));
         sender.sendMessage(Util.color("&b    |    |  | /  ` |__/ &3|__) |__  |__)  |\\/| /__` "));

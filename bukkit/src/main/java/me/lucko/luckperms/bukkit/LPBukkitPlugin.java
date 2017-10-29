@@ -39,6 +39,7 @@ import me.lucko.luckperms.bukkit.listeners.BukkitPlatformListener;
 import me.lucko.luckperms.bukkit.messaging.BukkitMessagingFactory;
 import me.lucko.luckperms.bukkit.model.Injector;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
+import me.lucko.luckperms.bukkit.model.SubscriptionMapInjector;
 import me.lucko.luckperms.bukkit.processors.BukkitProcessorsSetupTask;
 import me.lucko.luckperms.bukkit.processors.ChildPermissionProvider;
 import me.lucko.luckperms.bukkit.processors.DefaultsProvider;
@@ -244,6 +245,13 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         contextManager.registerCalculator(new WorldCalculator(this));
         contextManager.registerCalculator(new LuckPermsCalculator<>(getConfiguration()), true);
 
+        // inject our own subscription map
+        new SubscriptionMapInjector(this).run();
+
+        // schedule another injection after all plugins have loaded - the entire pluginmanager instance
+        // is replaced by some plugins :(
+        scheduler.asyncLater(new SubscriptionMapInjector(this), 2L);
+
         // Provide vault support
         tryVaultHook(false);
 
@@ -324,9 +332,10 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         permissionVault.shutdown();
         verboseHandler.shutdown();
 
+        // uninject from players
         for (Player player : getServer().getOnlinePlayers()) {
             try {
-                Injector.unInject(player, false, false);
+                Injector.unInject(player, false);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -341,6 +350,9 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
                 getUserManager().unload(user);
             }
         }
+
+        // uninject subscription map
+        SubscriptionMapInjector.uninject();
 
         getLog().info("Closing storage...");
         storage.shutdown();
@@ -385,14 +397,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             vaultHookManager = null;
             getLog().severe("Error occurred whilst hooking into Vault.");
             e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void onUserRefresh(User user) {
-        LPPermissible lpp = Injector.getPermissible(uuidCache.getExternalUUID(user.getUuid()));
-        if (lpp != null) {
-            lpp.updateSubscriptions();
         }
     }
 
