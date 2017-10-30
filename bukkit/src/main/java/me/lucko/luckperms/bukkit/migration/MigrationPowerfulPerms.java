@@ -264,10 +264,13 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 user.setPermission(NodeFactory.makeSuffixNode(maxWeight, suffix).build());
             }
 
-            String primary = joinFuture(pm.getPlayerPrimaryGroup(uuid)).getName().toLowerCase();
-            if (!primary.equals("default")) {
-                user.setPermission(NodeFactory.make("group." + primary));
-                user.getPrimaryGroup().setStoredValue(primary);
+            Group primaryGroup = joinFuture(pm.getPlayerPrimaryGroup(uuid));
+            if (primaryGroup != null && primaryGroup.getName() != null) {
+                String primary = primaryGroup.getName().toLowerCase();
+                if (!primary.equals("default")) {
+                    user.setPermission(NodeFactory.make("group." + primary));
+                    user.getPrimaryGroup().setStoredValue(primary);
+                }
             }
 
             plugin.getUserManager().cleanup(user);
