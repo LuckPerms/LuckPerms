@@ -44,7 +44,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MetaClear extends SharedSubCommand {
     public MetaClear(LocaleManager locale) {
@@ -109,7 +108,7 @@ public class MetaClear extends SharedSubCommand {
         }
 
         ExtendedLogEntry.build().actor(sender).acted(holder)
-                .action("meta clear " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                .action("meta", "clear", context)
                 .build().submit(plugin, sender);
 
         save(holder, sender, plugin);

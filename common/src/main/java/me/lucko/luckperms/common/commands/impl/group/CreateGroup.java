@@ -70,7 +70,11 @@ public class CreateGroup extends SingleCommand {
         }
 
         Message.CREATE_SUCCESS.send(sender, groupName);
-        ExtendedLogEntry.build().actor(sender).actedName(groupName).entryType(LogEntry.Type.GROUP).action("create").build().submit(plugin, sender);
+
+        ExtendedLogEntry.build().actor(sender).actedName(groupName).entryType(LogEntry.Type.GROUP)
+                .action("create")
+                .build().submit(plugin, sender);
+
         return CommandResult.SUCCESS;
     }
 }

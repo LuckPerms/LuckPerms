@@ -50,7 +50,6 @@ import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getBoolTabComplete;
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getPermissionTabComplete;
@@ -90,7 +89,7 @@ public class PermissionSetTemp extends SharedSubCommand {
             Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, b, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), Util.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("permission settemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("permission", "settemp", node, b, duration, context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);

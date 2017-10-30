@@ -80,7 +80,11 @@ public class GroupRename extends SubCommand<Group> {
         newGroup.replaceEnduringNodes(group.getEnduringNodes());
 
         Message.RENAME_SUCCESS.send(sender, group.getName(), newGroup.getName());
-        ExtendedLogEntry.build().actor(sender).acted(group).action("rename " + newGroup.getName()).build().submit(plugin, sender);
+
+        ExtendedLogEntry.build().actor(sender).acted(group)
+                .action("rename", newGroup.getName())
+                .build().submit(plugin, sender);
+
         save(newGroup, sender, plugin);
         return CommandResult.SUCCESS;
     }

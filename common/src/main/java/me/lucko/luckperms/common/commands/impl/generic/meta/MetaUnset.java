@@ -43,7 +43,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MetaUnset extends SharedSubCommand {
     public MetaUnset(LocaleManager locale) {
@@ -74,7 +73,7 @@ public class MetaUnset extends SharedSubCommand {
             Message.UNSET_META_SUCCESS.send(sender, key, holder.getFriendlyName(), Util.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("meta unset " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("meta", "unset", key, context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);

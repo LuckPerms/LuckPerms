@@ -53,7 +53,6 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MetaSetTemp extends SharedSubCommand {
     public MetaSetTemp(LocaleManager locale) {
@@ -102,7 +101,7 @@ public class MetaSetTemp extends SharedSubCommand {
         sender.sendMessage(builder.build());
 
         ExtendedLogEntry.build().actor(sender).acted(holder)
-                .action("meta settemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                .action("meta", "settemp", key, value, duration, context)
                 .build().submit(plugin, sender);
 
         save(holder, sender, plugin);

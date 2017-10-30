@@ -119,8 +119,9 @@ public class UserPromote extends SubCommand<User> {
             user.setPermission(NodeFactory.newBuilder("group." + first).withExtraContext(context).build());
 
             Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFriendlyName(), first, Util.contextSetToString(context));
+
             ExtendedLogEntry.build().actor(sender).acted(user)
-                    .action("promote " + args.stream().collect(Collectors.joining(" ")))
+                    .action("promote", track.getName(), context)
                     .build().submit(plugin, sender);
 
             save(user, sender, plugin);
@@ -177,7 +178,7 @@ public class UserPromote extends SubCommand<User> {
         }
 
         ExtendedLogEntry.build().actor(sender).acted(user)
-                .action("promote " + args.stream().collect(Collectors.joining(" ")))
+                .action("promote", track.getName(), context)
                 .build().submit(plugin, sender);
 
         save(user, sender, plugin);

@@ -51,7 +51,6 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MetaAddChatMeta extends SharedSubCommand {
     private final ChatMetaType type;
@@ -94,7 +93,7 @@ public class MetaAddChatMeta extends SharedSubCommand {
             sender.sendMessage(builder.build());
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("meta add" + type.name().toLowerCase() + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("meta" , "add" + type.name().toLowerCase(), priority, meta, context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);

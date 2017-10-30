@@ -51,7 +51,6 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MetaRemoveChatMeta extends SharedSubCommand {
     private final ChatMetaType type;
@@ -92,6 +91,11 @@ public class MetaRemoveChatMeta extends SharedSubCommand {
                     n.getFullContexts().makeImmutable().equals(context.makeImmutable())
             );
             Message.BULK_REMOVE_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), priority, Util.contextSetToString(context));
+
+            ExtendedLogEntry.build().actor(sender).acted(holder)
+                    .action("meta" , "remove" + type.name().toLowerCase(), priority, "*", context)
+                    .build().submit(plugin, sender);
+
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         }
@@ -108,7 +112,7 @@ public class MetaRemoveChatMeta extends SharedSubCommand {
             sender.sendMessage(builder.build());
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("meta remove" + type.name().toLowerCase() + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("meta" , "remove" + type.name().toLowerCase(), priority, meta, context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);

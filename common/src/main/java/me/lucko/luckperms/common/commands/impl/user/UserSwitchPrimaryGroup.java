@@ -79,8 +79,9 @@ public class UserSwitchPrimaryGroup extends SubCommand<User> {
 
         user.getPrimaryGroup().setStoredValue(group.getName());
         Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user.getFriendlyName(), group.getFriendlyName());
+
         ExtendedLogEntry.build().actor(sender).acted(user)
-                .action("setprimarygroup " + group.getName())
+                .action("setprimarygroup", group.getName())
                 .build().submit(plugin, sender);
 
         save(user, sender, plugin);

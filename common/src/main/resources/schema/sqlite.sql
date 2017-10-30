@@ -47,7 +47,7 @@ CREATE TABLE `{prefix}actions` (
   `type`       CHAR(1)             NOT NULL,
   `acted_uuid` VARCHAR(36)         NOT NULL,
   `acted_name` VARCHAR(36)         NOT NULL,
-  `action`     VARCHAR(256)        NOT NULL
+  `action`     VARCHAR(300)        NOT NULL
 );
 
 CREATE TABLE `{prefix}tracks` (

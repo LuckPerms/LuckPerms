@@ -49,7 +49,6 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MetaSet extends SharedSubCommand {
     public MetaSet(LocaleManager locale) {
@@ -96,7 +95,7 @@ public class MetaSet extends SharedSubCommand {
         sender.sendMessage(builder.build());
 
         ExtendedLogEntry.build().actor(sender).acted(holder)
-                .action("meta set " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                .action("meta", "set", key, value, context)
                 .build().submit(plugin, sender);
 
         save(holder, sender, plugin);

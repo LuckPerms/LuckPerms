@@ -79,7 +79,11 @@ public class DeleteGroup extends SingleCommand {
         }
 
         Message.DELETE_SUCCESS.send(sender, group.getFriendlyName());
-        ExtendedLogEntry.build().actor(sender).actedName(groupName).entryType(LogEntry.Type.GROUP).action("delete").build().submit(plugin, sender);
+
+        ExtendedLogEntry.build().actor(sender).actedName(groupName).entryType(LogEntry.Type.GROUP)
+                .action("delete")
+                .build().submit(plugin, sender);
+
         plugin.getUpdateTaskBuffer().request();
         return CommandResult.SUCCESS;
     }

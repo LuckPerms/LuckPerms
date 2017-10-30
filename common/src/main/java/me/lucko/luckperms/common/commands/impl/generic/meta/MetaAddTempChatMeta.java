@@ -56,7 +56,6 @@ import net.kyori.text.event.HoverEvent;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class MetaAddTempChatMeta extends SharedSubCommand {
     private final ChatMetaType type;
@@ -104,7 +103,7 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
             sender.sendMessage(builder.build());
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("meta addtemp" + type.name().toLowerCase() + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("meta" , "addtemp" + type.name().toLowerCase(), priority, meta, duration, context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);

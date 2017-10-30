@@ -75,9 +75,11 @@ public class TrackAppend extends SubCommand<Track> {
             if (track.getGroups().size() > 1) {
                 Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), group.getName()));
             }
+
             ExtendedLogEntry.build().actor(sender).acted(track)
-                    .action("append " + group.getName())
+                    .action("append", group.getName())
                     .build().submit(plugin, sender);
+
             save(track, sender, plugin);
             return CommandResult.SUCCESS;
         } else {

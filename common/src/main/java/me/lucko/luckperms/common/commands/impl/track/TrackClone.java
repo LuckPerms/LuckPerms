@@ -66,7 +66,11 @@ public class TrackClone extends SubCommand<Track> {
         newTrack.setGroups(track.getGroups());
 
         Message.CLONE_SUCCESS.send(sender, track.getName(), newTrack.getName());
-        ExtendedLogEntry.build().actor(sender).acted(track).action("clone " + newTrack.getName()).build().submit(plugin, sender);
+
+        ExtendedLogEntry.build().actor(sender).acted(track)
+                .action("clone", newTrack.getName())
+                .build().submit(plugin, sender);
+
         save(newTrack, sender, plugin);
         return CommandResult.SUCCESS;
     }

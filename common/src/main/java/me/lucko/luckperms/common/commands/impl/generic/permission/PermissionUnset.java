@@ -45,7 +45,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getPermissionTabComplete;
 
@@ -87,7 +86,7 @@ public class PermissionUnset extends SharedSubCommand {
             Message.UNSETPERMISSION_SUCCESS.send(sender, node, holder.getFriendlyName(), Util.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("permission unset " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("permission", "unset", node, context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);

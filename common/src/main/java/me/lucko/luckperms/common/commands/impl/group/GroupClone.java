@@ -77,7 +77,11 @@ public class GroupClone extends SubCommand<Group> {
         newGroup.replaceEnduringNodes(group.getEnduringNodes());
 
         Message.CLONE_SUCCESS.send(sender, group.getName(), newGroup.getName());
-        ExtendedLogEntry.build().actor(sender).acted(group).action("clone " + newGroup.getName()).build().submit(plugin, sender);
+
+        ExtendedLogEntry.build().actor(sender).acted(group)
+                .action("clone", newGroup.getName())
+                .build().submit(plugin, sender);
+
         save(newGroup, sender, plugin);
         return CommandResult.SUCCESS;
     }

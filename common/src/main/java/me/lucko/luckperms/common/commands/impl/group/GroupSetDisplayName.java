@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.commands.impl.group;
 
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -76,15 +77,25 @@ public class GroupSetDisplayName extends SubCommand<Group> {
         group.removeIf(n -> n.getPermission().startsWith("displayname."));
 
         if (name.equals(group.getName())) {
-            save(group, sender, plugin);
             Message.GROUP_SET_DISPLAY_NAME_REMOVED.send(sender, group.getName());
+
+            ExtendedLogEntry.build().actor(sender).acted(group)
+                    .action("setdisplayname", name)
+                    .build().submit(plugin, sender);
+
+            save(group, sender, plugin);
             return CommandResult.SUCCESS;
         }
 
         group.setPermission(NodeFactory.newBuilder("displayname." + name).build());
 
-        save(group, sender, plugin);
         Message.GROUP_SET_DISPLAY_NAME.send(sender, name, group.getName());
+
+        ExtendedLogEntry.build().actor(sender).acted(group)
+                .action("setdisplayname", name)
+                .build().submit(plugin, sender);
+
+        save(group, sender, plugin);
         return CommandResult.SUCCESS;
     }
 }

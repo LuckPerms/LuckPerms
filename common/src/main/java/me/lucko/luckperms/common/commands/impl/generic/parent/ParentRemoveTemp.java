@@ -45,7 +45,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getGroupTabComplete;
 
@@ -80,7 +79,7 @@ public class ParentRemoveTemp extends SharedSubCommand {
             Message.UNSET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), groupName, Util.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("parent removetemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("parent", "removetemp", groupName, context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);

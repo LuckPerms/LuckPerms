@@ -30,6 +30,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -38,8 +39,11 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * An extended version of {@link LogEntry}, with helper methods for
@@ -124,6 +128,37 @@ public class ExtendedLogEntry extends LogEntry {
         public ExtendedLogEntryBuilder acted(Track track) {
             super.actedName(track.getName());
             super.entryType(Type.TRACK);
+            return this;
+        }
+
+        public ExtendedLogEntryBuilder action(Object... args) {
+            List<String> parts = new ArrayList<>();
+
+            for (Object o : args) {
+
+                // special formatting for ContextSets instead of just #toString
+                if (o instanceof ContextSet) {
+                    ContextSet set = (ContextSet) o;
+
+                    for (String value : set.getValues("server")) {
+                        parts.add("server=" + value);
+                    }
+                    for (String value : set.getValues("world")) {
+                        parts.add("world=" + value);
+                    }
+
+                    for (Map.Entry<String, String> context : set.toSet()) {
+                        if (context.getKey().equals("server") || context.getKey().equals("world")) {
+                            continue;
+                        }
+                        parts.add(context.getKey() + "=" + context.getValue());
+                    }
+                } else {
+                    parts.add(String.valueOf(o));
+                }
+            }
+
+            super.action(parts.stream().collect(Collectors.joining(" ")));
             return this;
         }
 

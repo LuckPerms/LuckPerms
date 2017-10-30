@@ -32,6 +32,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -140,6 +141,10 @@ public class ApplyEditsCommand extends SingleCommand {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
+
+        ExtendedLogEntry.build().actor(sender).acted(holder)
+                .action("applyedits", part1 + "/" + part2)
+                .build().submit(plugin, sender);
 
         Set<NodeModel> nodes = deserializePermissions(data.getAsJsonArray("nodes"));
         holder.setEnduringNodes(nodes.stream().map(NodeModel::toNode).collect(Collectors.toSet()));

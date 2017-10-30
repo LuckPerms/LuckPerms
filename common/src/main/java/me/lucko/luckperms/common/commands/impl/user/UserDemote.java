@@ -134,7 +134,7 @@ public class UserDemote extends SubCommand<User> {
             Message.USER_DEMOTE_ENDOFTRACK.send(sender, track.getName(), user.getFriendlyName(), old);
 
             ExtendedLogEntry.build().actor(sender).acted(user)
-                    .action("demote " + args.stream().collect(Collectors.joining(" ")))
+                    .action("demote", track.getName(), context)
                     .build().submit(plugin, sender);
 
             save(user, sender, plugin);
@@ -166,7 +166,7 @@ public class UserDemote extends SubCommand<User> {
         }
 
         ExtendedLogEntry.build().actor(sender).acted(user)
-                .action("demote " + args.stream().collect(Collectors.joining(" ")))
+                .action("demote", track.getName(), context)
                 .build().submit(plugin, sender);
 
         save(user, sender, plugin);

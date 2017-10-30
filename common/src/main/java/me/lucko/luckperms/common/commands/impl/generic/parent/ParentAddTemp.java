@@ -51,7 +51,6 @@ import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getGroupTabComplete;
 
@@ -105,7 +104,7 @@ public class ParentAddTemp extends SharedSubCommand {
             Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), DateUtil.formatDateDiff(duration), Util.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("parent addtemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("parent", "addtemp", group.getName(), duration, context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);

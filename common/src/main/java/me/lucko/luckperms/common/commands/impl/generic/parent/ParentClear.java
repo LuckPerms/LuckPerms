@@ -43,7 +43,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ParentClear extends SharedSubCommand {
     public ParentClear(LocaleManager locale) {
@@ -80,7 +79,7 @@ public class ParentClear extends SharedSubCommand {
         }
 
         ExtendedLogEntry.build().actor(sender).acted(holder)
-                .action("parent clear " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                .action("parent", "clear", context)
                 .build().submit(plugin, sender);
 
         save(holder, sender, plugin);

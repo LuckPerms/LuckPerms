@@ -84,9 +84,11 @@ public class TrackInsert extends SubCommand<Track> {
                 if (track.getGroups().size() > 1) {
                     Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), group.getName()));
                 }
+
                 ExtendedLogEntry.build().actor(sender).acted(track)
-                        .action("insert " + group.getName() + " " + pos)
+                        .action("insert", group.getName(), pos)
                         .build().submit(plugin, sender);
+
                 save(track, sender, plugin);
                 return CommandResult.SUCCESS;
             } else {
