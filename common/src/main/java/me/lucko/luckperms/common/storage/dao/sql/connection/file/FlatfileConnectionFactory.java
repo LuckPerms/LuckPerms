@@ -35,7 +35,7 @@ import java.text.DecimalFormat;
 import java.util.concurrent.locks.ReentrantLock;
 
 abstract class FlatfileConnectionFactory extends AbstractConnectionFactory {
-    protected static final DecimalFormat DF = new DecimalFormat("#.00");
+    protected static final DecimalFormat DF = new DecimalFormat("#.##");
 
     protected final File file;
     private final ReentrantLock lock = new ReentrantLock();

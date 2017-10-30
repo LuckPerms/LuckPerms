@@ -46,7 +46,7 @@ public class SQLiteConnectionFactory extends FlatfileConnectionFactory {
 
         File databaseFile = new File(super.file.getParent(), "luckperms-sqlite.db");
         if (databaseFile.exists()) {
-            double size = databaseFile.length() / 1048576;
+            double size = databaseFile.length() / 1048576D;
             ret.put("File Size", DF.format(size) + "MB");
         } else {
             ret.put("File Size", "0MB");
