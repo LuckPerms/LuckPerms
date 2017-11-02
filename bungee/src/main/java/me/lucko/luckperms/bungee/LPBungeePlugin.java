@@ -33,6 +33,7 @@ import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.bungee.calculators.BungeeCalculatorFactory;
 import me.lucko.luckperms.bungee.contexts.BackendServerCalculator;
 import me.lucko.luckperms.bungee.contexts.BungeeContextManager;
+import me.lucko.luckperms.bungee.contexts.RedisBungeeCalculator;
 import me.lucko.luckperms.bungee.listeners.BungeeConnectionListener;
 import me.lucko.luckperms.bungee.listeners.BungeePermissionCheckListener;
 import me.lucko.luckperms.bungee.messaging.BungeeMessagingFactory;
@@ -188,6 +189,10 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         contextManager = new BungeeContextManager(this);
         contextManager.registerCalculator(new BackendServerCalculator(this));
         contextManager.registerCalculator(new LuckPermsCalculator<>(getConfiguration()), true);
+
+        if (getProxy().getPluginManager().getPlugin("RedisBungee") != null) {
+            contextManager.registerCalculator(new RedisBungeeCalculator(), true);
+        }
 
         // register with the LP API
         apiProvider = new ApiProvider(this);
