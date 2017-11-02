@@ -198,7 +198,7 @@ public class SqlDao extends AbstractDao {
             // migrations
             try (Connection connection = provider.getConnection()) {
                 try (Statement s = connection.createStatement()) {
-                    s.execute(prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN actor_name VARCHAR(36)"));
+                    s.execute(prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN actor_name VARCHAR(100)"));
                     s.execute(prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN action VARCHAR(300)"));
                 }
             }
