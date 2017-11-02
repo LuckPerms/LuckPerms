@@ -26,10 +26,9 @@
 package me.lucko.luckperms.common.commands.sender;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
+import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.text.Component;
@@ -65,26 +64,22 @@ public interface Sender {
     default String getNameWithLocation() {
         String name = getName();
 
-        LuckPermsConfiguration config = getPlatform().getConfiguration();
-
-        if (config == null) {
+        ContextManager<?> contextManager = getPlatform().getContextManager();
+        if (contextManager == null) {
             return name;
         }
 
-        String location = config.get(ConfigKeys.SERVER);
-        if (location == null || location.equalsIgnoreCase("global")) {
-            location = "";
+
+        String location = contextManager.getStaticContextString().orElse(null);
+        if (location == null) {
+            return name;
         }
 
-        if (!location.isEmpty()) {
-            location = "@" + location;
+        if (isConsole()) {
+            return name.toLowerCase() + "@" + location;
+        } else {
+            return name + "@" + location;
         }
-
-        if (isConsole() && !location.isEmpty()) {
-            name = name.toLowerCase();
-        }
-
-        return name + location;
     }
 
     /**

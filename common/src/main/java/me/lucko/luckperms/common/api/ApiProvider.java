@@ -46,6 +46,7 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.api.delegates.MetaStackFactoryDelegate;
 import me.lucko.luckperms.common.api.delegates.NodeFactoryDelegate;
 import me.lucko.luckperms.common.api.delegates.UserDelegate;
+import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.event.EventFactory;
 import me.lucko.luckperms.common.event.LuckPermsEventBus;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -217,7 +218,8 @@ public class ApiProvider implements LuckPermsApi {
     @SuppressWarnings("unchecked")
     @Override
     public void registerContextCalculator(@NonNull ContextCalculator<?> contextCalculator) {
-        plugin.getContextManager().registerCalculator(contextCalculator);
+        ContextManager contextManager = plugin.getContextManager();
+        contextManager.registerCalculator(contextCalculator);
     }
 
     @Override
@@ -228,13 +230,15 @@ public class ApiProvider implements LuckPermsApi {
     @SuppressWarnings("unchecked")
     @Override
     public ContextSet getContextForPlayer(@NonNull Object player) {
-        return plugin.getContextManager().getApplicableContext(player);
+        ContextManager contextManager = plugin.getContextManager();
+        return contextManager.getApplicableContext(player);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Contexts getContextsForPlayer(@NonNull Object player) {
-        return plugin.getContextManager().getApplicableContexts(player);
+        ContextManager contextManager = plugin.getContextManager();
+        return contextManager.getApplicableContexts(player);
     }
 
     @Override

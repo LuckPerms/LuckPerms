@@ -152,7 +152,7 @@ public interface LuckPermsPlugin {
      *
      * @return the context manager
      */
-    ContextManager getContextManager();
+    ContextManager<?> getContextManager();
 
     /**
      * Gets the cached state manager for the platform.

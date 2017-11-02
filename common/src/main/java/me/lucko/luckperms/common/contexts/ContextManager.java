@@ -31,6 +31,8 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 
+import java.util.Optional;
+
 /**
  * Manages {@link ContextCalculator}s, and calculates applicable contexts for a
  * given type.
@@ -68,6 +70,15 @@ public interface ContextManager<T> {
      * @return the current active static contexts
      */
     Contexts getStaticContexts();
+
+    /**
+     * Returns a string form of the managers static context
+     *
+     * <p>Returns an empty optional if the set is empty.</p>
+     *
+     * @return a string representation of {@link #getStaticContext()}
+     */
+    Optional<String> getStaticContextString();
 
     /**
      * Forms a {@link Contexts} instance from an {@link ImmutableContextSet}.

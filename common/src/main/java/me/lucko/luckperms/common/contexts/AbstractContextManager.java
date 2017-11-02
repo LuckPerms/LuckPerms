@@ -39,8 +39,12 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * An abstract implementation of {@link ContextManager} which caches content lookups.
@@ -87,6 +91,23 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
     @Override
     public Contexts getStaticContexts() {
         return formContexts(getStaticContext());
+    }
+
+    @Override
+    public Optional<String> getStaticContextString() {
+        Set<Map.Entry<String, String>> entries = getStaticContext().toSet();
+        if (entries.isEmpty()) {
+            return Optional.empty();
+        }
+
+        // effectively: if entries contains any non-server keys
+        if (entries.stream().anyMatch(pair -> !pair.getKey().equals("server"))) {
+            // return all entries in 'key=value' form
+            return Optional.of(entries.stream().map(pair -> pair.getKey() + "=" + pair.getValue()).collect(Collectors.joining(";")));
+        } else {
+            // just return the server ids, without the 'server='
+            return Optional.of(entries.stream().map(Map.Entry::getValue).collect(Collectors.joining(";")));
+        }
     }
 
     @Override
