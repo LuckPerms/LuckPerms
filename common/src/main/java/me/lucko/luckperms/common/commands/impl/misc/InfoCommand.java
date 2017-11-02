@@ -69,7 +69,7 @@ public class InfoCommand extends SingleCommand {
 
         Message.INFO_MIDDLE.send(sender,
                 plugin.getMessagingService().map(ExtendedMessagingService::getName).orElse("None"),
-                plugin.getContextManager().getStaticContextString().orElse("global"),
+                plugin.getContextManager().getStaticContextString().orElse("None"),
                 plugin.getPlayerCount(),
                 plugin.getUniqueConnections().size(),
                 DateUtil.formatTimeShort((System.currentTimeMillis() - plugin.getStartTime()) / 1000L),
