@@ -25,20 +25,20 @@
 
 package me.lucko.luckperms.common.commands.sender;
 
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.TextUtils;
 
 import net.kyori.text.Component;
 
 import java.lang.ref.WeakReference;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -52,31 +52,36 @@ public final class AbstractSender<T> implements Sender {
     private static final Splitter NEW_LINE_SPLITTER = Splitter.on("\n");
 
     private final LuckPermsPlugin platform;
+
+    @Getter(AccessLevel.NONE)
     private final SenderFactory<T> factory;
-    private final WeakReference<T> ref;
-    private final String name;
+
+    @Getter(AccessLevel.NONE)
+    private final WeakReference<T> reference;
+
     private final UUID uuid;
+    private final String name;
 
     AbstractSender(LuckPermsPlugin platform, SenderFactory<T> factory, T t) {
         this.platform = platform;
         this.factory = factory;
-        this.ref = new WeakReference<>(t);
-        this.name = factory.getName(t);
+        this.reference = new WeakReference<>(t);
         this.uuid = factory.getUuid(t);
+        this.name = factory.getName(t);
     }
 
     @Override
-    public void sendMessage(String s) {
-        final T t = ref.get();
+    public void sendMessage(String message) {
+        final T t = reference.get();
         if (t != null) {
 
             if (!isConsole()) {
-                factory.sendMessage(t, s);
+                factory.sendMessage(t, message);
                 return;
             }
 
             // if it is console, split up the lines and send individually.
-            for (String line : NEW_LINE_SPLITTER.split(s)) {
+            for (String line : NEW_LINE_SPLITTER.split(message)) {
                 factory.sendMessage(t, line);
             }
         }
@@ -90,7 +95,7 @@ public final class AbstractSender<T> implements Sender {
             return;
         }
 
-        final T t = ref.get();
+        final T t = reference.get();
         if (t != null) {
             factory.sendMessage(t, message);
         }
@@ -98,49 +103,33 @@ public final class AbstractSender<T> implements Sender {
 
     @Override
     public Tristate getPermissionValue(String permission) {
-        if (isConsole()) return Tristate.TRUE;
-
-        T t = ref.get();
+        T t = reference.get();
         if (t != null) {
             return factory.getPermissionValue(t, permission);
         }
 
-        return Tristate.UNDEFINED;
+        return isConsole() ? Tristate.TRUE : Tristate.UNDEFINED;
     }
 
     @Override
     public boolean hasPermission(String permission) {
-        if (isConsole()) return true;
-
-        T t = ref.get();
+        T t = reference.get();
         if (t != null) {
             if (factory.hasPermission(t, permission)) {
                 return true;
             }
         }
 
-        return false;
-    }
-
-    @Override
-    public boolean hasPermission(CommandPermission permission) {
-        return hasPermission(permission.getPermission());
-    }
-
-    @Override
-    public boolean isConsole() {
-        return this.uuid.equals(Constants.CONSOLE_UUID) || this.uuid.equals(Constants.IMPORT_UUID);
-    }
-
-    @Override
-    public boolean isImport() {
-        // the importer uses it's own instance of Sender
-        return false;
+        return isConsole();
     }
 
     @Override
     public boolean isValid() {
-        return ref.get() != null;
+        return reference.get() != null;
     }
 
+    @Override
+    public Optional<Object> getHandle() {
+        return Optional.ofNullable(reference.get());
+    }
 }

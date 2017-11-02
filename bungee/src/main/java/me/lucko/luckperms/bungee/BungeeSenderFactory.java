@@ -50,7 +50,7 @@ public class BungeeSenderFactory extends SenderFactory<CommandSender> {
         if (sender instanceof ProxiedPlayer) {
             return sender.getName();
         }
-        return getConsoleName();
+        return Constants.CONSOLE_NAME;
     }
 
     @Override

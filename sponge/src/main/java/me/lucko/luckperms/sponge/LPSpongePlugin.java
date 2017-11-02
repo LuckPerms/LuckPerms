@@ -456,24 +456,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public Sender getConsoleSender() {
         if (!game.isServerAvailable()) {
-            return new ImporterSender(this) {
-
-                @Override
-                public String getName() {
-                    LuckPermsConfiguration config = getPlatform().getConfiguration();
-                    return config == null ? Constants.CONSOLE_NAME.apply(null) : Constants.CONSOLE_NAME.apply(config.get(ConfigKeys.SERVER));
-                }
-
-                @Override
-                public UUID getUuid() {
-                    return Constants.CONSOLE_UUID;
-                }
-
-                @Override
-                public boolean isImport() {
-                    return false;
-                }
-
+            return new ImporterSender(this, Constants.CONSOLE_UUID, Constants.CONSOLE_NAME) {
                 @Override
                 protected void consumeMessage(String s) {
                     logger.info(s);

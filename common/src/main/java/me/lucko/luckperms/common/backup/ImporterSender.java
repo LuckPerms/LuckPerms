@@ -25,12 +25,10 @@
 
 package me.lucko.luckperms.common.backup;
 
-import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.TextUtils;
@@ -39,30 +37,28 @@ import net.kyori.text.Component;
 
 import java.util.UUID;
 
-@AllArgsConstructor
+@Getter
 public abstract class ImporterSender implements Sender {
-    private final LuckPermsPlugin plugin;
+    private final LuckPermsPlugin platform;
+
+    private final UUID uuid;
+    private final String name;
+
+    public ImporterSender(LuckPermsPlugin plugin, UUID uuid, String name) {
+        this.platform = plugin;
+        this.uuid = uuid;
+        this.name = name;
+    }
+
+    public ImporterSender(LuckPermsPlugin plugin) {
+        this(plugin, Constants.IMPORT_UUID, Constants.IMPORT_NAME);
+    }
 
     protected abstract void consumeMessage(String s);
 
     @Override
-    public LuckPermsPlugin getPlatform() {
-        return plugin;
-    }
-
-    @Override
-    public String getName() {
-        return Constants.IMPORT_NAME.apply(plugin.getConfiguration().get(ConfigKeys.SERVER));
-    }
-
-    @Override
-    public UUID getUuid() {
-        return Constants.IMPORT_UUID;
-    }
-
-    @Override
-    public void sendMessage(String s) {
-        consumeMessage(s);
+    public void sendMessage(String message) {
+        consumeMessage(message);
     }
 
     @SuppressWarnings("deprecation")
@@ -81,23 +77,4 @@ public abstract class ImporterSender implements Sender {
         return true;
     }
 
-    @Override
-    public boolean hasPermission(CommandPermission permission) {
-        return true;
-    }
-
-    @Override
-    public boolean isConsole() {
-        return true;
-    }
-
-    @Override
-    public boolean isImport() {
-        return true;
-    }
-
-    @Override
-    public boolean isValid() {
-        return true;
-    }
 }

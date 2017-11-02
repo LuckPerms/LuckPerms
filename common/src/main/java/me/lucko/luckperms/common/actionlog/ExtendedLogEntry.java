@@ -108,7 +108,7 @@ public class ExtendedLogEntry extends LogEntry {
         }
 
         public ExtendedLogEntryBuilder actor(Sender actor) {
-            super.actorName(actor.getName());
+            super.actorName(actor.getNameWithLocation());
             super.actor(actor.getUuid());
             return this;
         }

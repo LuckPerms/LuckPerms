@@ -31,9 +31,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.config.LuckPermsConfiguration;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.text.Component;
@@ -51,9 +48,9 @@ public abstract class SenderFactory<T> {
     @Getter(AccessLevel.PROTECTED)
     private final LuckPermsPlugin plugin;
 
-    protected abstract String getName(T t);
-
     protected abstract UUID getUuid(T t);
+
+    protected abstract String getName(T t);
 
     protected abstract void sendMessage(T t, String s);
 
@@ -62,16 +59,6 @@ public abstract class SenderFactory<T> {
     protected abstract Tristate getPermissionValue(T t, String node);
 
     protected abstract boolean hasPermission(T t, String node);
-
-    protected String getConsoleName() {
-        LuckPermsConfiguration config = getPlugin().getConfiguration();
-        return config == null ? Constants.CONSOLE_NAME.apply(null) : Constants.CONSOLE_NAME.apply(config.get(ConfigKeys.SERVER));
-    }
-
-    protected String getImportName() {
-        LuckPermsConfiguration config = getPlugin().getConfiguration();
-        return config == null ? Constants.IMPORT_NAME.apply(null) : Constants.IMPORT_NAME.apply(config.get(ConfigKeys.SERVER));
-    }
 
     public final Sender wrap(@NonNull T sender) {
         return new AbstractSender<>(plugin, this, sender);

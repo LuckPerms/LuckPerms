@@ -194,7 +194,7 @@ public class VerboseListener {
                 .add("| End Time | " + endDate + " |")
                 .add("| Duration | " + duration +" |")
                 .add("| Count | **" + matchedCounter.get() + "** / " + counter.get() + " |")
-                .add("| User | " + notifiedSender.getName() + " |")
+                .add("| User | " + notifiedSender.getNameWithLocation() + " |")
                 .add("| Filter | " + filter + " |")
                 .add("| Include traces | " + showTraces + " |")
                 .add("");

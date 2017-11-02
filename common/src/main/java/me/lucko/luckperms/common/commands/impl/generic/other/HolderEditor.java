@@ -88,7 +88,7 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
         Set<NodeModel> nodes = holder.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
         data.addProperty("who", id(holder));
         data.addProperty("cmdAlias", label);
-        data.addProperty("uploadedBy", sender.getName());
+        data.addProperty("uploadedBy", sender.getNameWithLocation());
         data.addProperty("time", System.currentTimeMillis());
         data.add("nodes", serializePermissions(nodes));
 

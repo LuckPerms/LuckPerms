@@ -51,7 +51,7 @@ public class SpongeSenderFactory extends SenderFactory<CommandSource> {
         if (source instanceof Player) {
             return source.getName();
         }
-        return getConsoleName();
+        return Constants.CONSOLE_NAME;
     }
 
     @Override
