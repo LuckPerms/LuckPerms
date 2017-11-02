@@ -308,11 +308,13 @@ public final class ImmutableNode implements Node {
     }
 
     @Override
+    @Deprecated
     public boolean shouldApply(boolean includeGlobal, boolean includeGlobalWorld, String server, String world, ContextSet context, boolean applyRegex) {
         return shouldApplyOnServer(server, includeGlobal, applyRegex) && shouldApplyOnWorld(world, includeGlobalWorld, applyRegex) && shouldApplyWithContext(context, false);
     }
 
     @Override
+    @Deprecated
     public boolean shouldApplyOnServer(String server, boolean includeGlobal, boolean applyRegex) {
         if (server == null || server.equals("") || server.equalsIgnoreCase("global")) {
             return !isServerSpecific();
@@ -322,6 +324,7 @@ public final class ImmutableNode implements Node {
     }
 
     @Override
+    @Deprecated
     public boolean shouldApplyOnWorld(String world, boolean includeGlobal, boolean applyRegex) {
         if (world == null || world.equals("") || world.equalsIgnoreCase("null")) {
             return !isWorldSpecific();
@@ -331,40 +334,22 @@ public final class ImmutableNode implements Node {
     }
 
     @Override
+    @Deprecated
     public boolean shouldApplyWithContext(ContextSet context, boolean worldAndServer) {
-        if (contexts.isEmpty() && !isServerSpecific() && !isWorldSpecific()) {
-            return true;
-        }
-
         if (worldAndServer) {
-            if (isWorldSpecific()) {
-                if (context == null) return false;
-                if (!context.hasIgnoreCase("world", world)) return false;
-            }
-
-            if (isServerSpecific()) {
-                if (context == null) return false;
-                if (!context.hasIgnoreCase("server", server)) return false;
-            }
+            return getFullContexts().isSatisfiedBy(context, false);
+        } else {
+            return getContexts().isSatisfiedBy(context, false);
         }
-
-        if (!contexts.isEmpty()) {
-            if (context == null) return false;
-
-            for (Map.Entry<String, String> c : contexts.toSet()) {
-                if (!context.hasIgnoreCase(c.getKey(), c.getValue())) return false;
-            }
-        }
-
-        return true;
     }
 
     @Override
     public boolean shouldApplyWithContext(ContextSet context) {
-        return shouldApplyWithContext(context, true);
+        return getFullContexts().isSatisfiedBy(context, false);
     }
 
     @Override
+    @Deprecated
     public boolean shouldApplyOnAnyServers(List<String> servers, boolean includeGlobal) {
         for (String s : servers) {
             if (shouldApplyOnServer(s, includeGlobal, false)) {
@@ -376,6 +361,7 @@ public final class ImmutableNode implements Node {
     }
 
     @Override
+    @Deprecated
     public boolean shouldApplyOnAnyWorlds(List<String> worlds, boolean includeGlobal) {
         for (String s : worlds) {
             if (shouldApplyOnWorld(s, includeGlobal, false)) {
