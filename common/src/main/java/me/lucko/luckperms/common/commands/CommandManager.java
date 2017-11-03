@@ -311,19 +311,17 @@ public class CommandManager {
     private static void handleRewrites(List<String> args, boolean rewriteLastArgument) {
         // Provide aliases
         if (args.size() >= 1 && (rewriteLastArgument || args.size() >= 2)) {
-            if (args.get(0).equalsIgnoreCase("u")) {
+            String arg0 = args.get(0);
+            if (arg0.equalsIgnoreCase("u") || arg0.equalsIgnoreCase("player") || arg0.equalsIgnoreCase("p")) {
                 args.remove(0);
                 args.add(0, "user");
-            }
-            if (args.get(0).equalsIgnoreCase("g")) {
+            } else if (arg0.equalsIgnoreCase("g")) {
                 args.remove(0);
                 args.add(0, "group");
-            }
-            if (args.get(0).equalsIgnoreCase("t")) {
+            } else if (arg0.equalsIgnoreCase("t")) {
                 args.remove(0);
                 args.add(0, "track");
-            }
-            if (args.get(0).equalsIgnoreCase("i")) {
+            } else if (arg0.equalsIgnoreCase("i")) {
                 args.remove(0);
                 args.add(0, "info");
             }
