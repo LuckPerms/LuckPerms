@@ -73,14 +73,7 @@ public class PermissionUnset extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        DataMutateResult result;
-        if (node.startsWith("group.")) {
-            // unset exact - with false value only
-            result = holder.unsetPermissionExact(NodeFactory.newBuilder(node).setValue(false).withExtraContext(context).build());
-        } else {
-            // standard unset
-            result = holder.unsetPermission(NodeFactory.newBuilder(node).withExtraContext(context).build());
-        }
+        DataMutateResult result = holder.unsetPermission(NodeFactory.newBuilder(node).withExtraContext(context).build());
 
         if (result.asBoolean()) {
             Message.UNSETPERMISSION_SUCCESS.send(sender, node, holder.getFriendlyName(), Util.contextSetToString(context));

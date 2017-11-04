@@ -37,13 +37,11 @@ import me.lucko.luckperms.common.utils.DateUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * Utility class to help process arguments, and throw checked exceptions if the arguments are invalid.
  */
 public class ArgumentUtils {
-    public static final Function<String, String> WRAPPER = s -> s.contains(" ") ? "\"" + s + "\"" : s;
 
     public static String handleString(int index, List<String> args) {
         return args.get(index).replace("{SPACE}", " ");
@@ -67,16 +65,6 @@ public class ArgumentUtils {
         } catch (NumberFormatException e) {
             return other;
         }
-    }
-
-    public static String handleNode(int index, List<String> args) throws ArgumentException {
-        String node = args.get(index).replace("{SPACE}", " ");
-        if (node.toLowerCase().startsWith("group.")) {
-            throw new UseInheritException();
-        }
-
-
-        return node;
     }
 
     public static String handleName(int index, List<String> args) throws ArgumentException {
@@ -245,20 +233,10 @@ public class ArgumentUtils {
         return contextSet.makeImmutable();
     }
 
-    public static abstract class ArgumentException extends CommandException {
-    }
-
-    public static class DetailedUsageException extends ArgumentException {
-    }
-
-    public static class UseInheritException extends ArgumentException {
-    }
-
-    public static class InvalidServerWorldException extends ArgumentException {
-    }
-
-    public static class PastDateException extends ArgumentException {
-    }
+    public static abstract class ArgumentException extends CommandException {}
+    public static class DetailedUsageException extends ArgumentException {}
+    public static class InvalidServerWorldException extends ArgumentException {}
+    public static class PastDateException extends ArgumentException {}
 
     @Getter
     @AllArgsConstructor

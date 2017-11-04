@@ -91,7 +91,6 @@ public enum Message {
     GROUP_INVALID_ENTRY("&4{}&c is not a valid group name.", true),
     TRACK_INVALID_ENTRY("&4{}&c is not a valid track name.", true),
     SERVER_WORLD_INVALID_ENTRY("&cServer/world names can only contain alphanumeric characters and cannot exceed 36 characters in length.", true),
-    USE_INHERIT_COMMAND("&cUse the 'parent add' and 'parent remove' commands instead of specifying the node.", true),
 
 
     /*

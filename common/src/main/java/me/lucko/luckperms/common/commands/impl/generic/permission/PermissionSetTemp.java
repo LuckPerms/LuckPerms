@@ -66,8 +66,8 @@ public class PermissionSetTemp extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
+        String node = ArgumentUtils.handleString(0, args);
         boolean b = ArgumentUtils.handleBoolean(1, args);
-        String node = b ? ArgumentUtils.handleNode(0, args) : ArgumentUtils.handleString(0, args);
         long duration = ArgumentUtils.handleDuration(2, args);
         MutableContextSet context = ArgumentUtils.handleContext(3, args, plugin);
 

@@ -61,8 +61,8 @@ public class PermissionSet extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
+        String node = ArgumentUtils.handleString(0, args);
         boolean b = ArgumentUtils.handleBoolean(1, args);
-        String node = b ? ArgumentUtils.handleNode(0, args) : ArgumentUtils.handleString(0, args);
         MutableContextSet context = ArgumentUtils.handleContext(2, args, plugin);
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {

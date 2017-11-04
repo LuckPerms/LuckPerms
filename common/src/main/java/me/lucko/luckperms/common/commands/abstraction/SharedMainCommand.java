@@ -168,11 +168,6 @@ public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T>
                 return CommandResult.INVALID_ARGS;
             }
 
-            if (e instanceof ArgumentUtils.UseInheritException) {
-                Message.USE_INHERIT_COMMAND.send(sender);
-                return CommandResult.INVALID_ARGS;
-            }
-
             if (e instanceof ArgumentUtils.InvalidServerWorldException) {
                 Message.SERVER_WORLD_INVALID_ENTRY.send(sender);
                 return CommandResult.INVALID_ARGS;
