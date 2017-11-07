@@ -23,22 +23,34 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api;
+package me.lucko.luckperms.common.api.delegates.manager;
 
-import javax.annotation.Nonnull;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
 
-/**
- * Represents the logger instance being used by LuckPerms on the platform.
- *
- * <p>Messages sent using the logger are sent prefixed with the LuckPerms tag, and on some implementations will be colored
- * depending on the message type.</p>
- */
-public interface Logger {
+import me.lucko.luckperms.api.Group;
+import me.lucko.luckperms.api.manager.GroupManager;
 
-    void info(@Nonnull String s);
+import java.util.Set;
+import java.util.stream.Collectors;
 
-    void warn(@Nonnull String s);
+@AllArgsConstructor
+public class ApiGroupManager implements GroupManager {
+    private final me.lucko.luckperms.common.managers.GroupManager handle;
 
-    void severe(@Nonnull String s);
+    @Override
+    public Group getGroup(@NonNull String name) {
+        me.lucko.luckperms.common.model.Group group = handle.getIfLoaded(name);
+        return group == null ? null : group.getDelegate();
+    }
 
+    @Override
+    public Set<Group> getLoadedGroups() {
+        return handle.getAll().values().stream().map(me.lucko.luckperms.common.model.Group::getDelegate).collect(Collectors.toSet());
+    }
+
+    @Override
+    public boolean isLoaded(@NonNull String name) {
+        return handle.isLoaded(name);
+    }
 }

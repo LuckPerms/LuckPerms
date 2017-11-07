@@ -30,8 +30,6 @@ import com.google.common.collect.Multimap;
 
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
 import java.util.Map;
@@ -40,7 +38,6 @@ import java.util.SortedSet;
 import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * An object which holds permissions.
@@ -48,7 +45,6 @@ import javax.annotation.Nullable;
  * <p>Any changes made to permission holding objects will be lost unless the
  * instance is saved back to the {@link Storage}.</p>
  */
-@SuppressWarnings("RedundantThrows")
 public interface PermissionHolder {
 
     /**
@@ -292,22 +288,12 @@ public interface PermissionHolder {
      * Sets a permission for the object
      *
      * @param node The node to be set
-     * @throws ObjectAlreadyHasException if the object already has the permission
-     * @throws NullPointerException      if the node is null
-     * @since 2.6
-     */
-    void setPermission(@Nonnull Node node) throws ObjectAlreadyHasException;
-
-    /**
-     * Sets a permission for the object
-     *
-     * @param node The node to be set
-     * @throws NullPointerException if the node is null
      * @return the result of the operation
-     * @since 3.1
+     * @throws NullPointerException if the node is null
+     * @since 4.0
      */
     @Nonnull
-    DataMutateResult setPermissionUnchecked(@Nonnull Node node);
+    DataMutateResult setPermission(@Nonnull Node node);
 
     /**
      * Sets a transient permission for the object
@@ -322,73 +308,34 @@ public interface PermissionHolder {
      * <p>For unsetting a transient permission, see {@link #unsetTransientPermission(Node)}</p>
      *
      * @param node The node to be set
-     * @throws ObjectAlreadyHasException if the object already has the permission
-     * @throws NullPointerException      if the node is null
-     * @since 2.6
-     */
-    void setTransientPermission(@Nonnull Node node) throws ObjectAlreadyHasException;
-
-    /**
-     * Sets a transient permission for the object
-     *
-     * <p>A transient node is a permission that does not persist.
-     * Whenever a user logs out of the server, or the server restarts, this permission will disappear.
-     * It is never saved to the datastore, and therefore will not apply on other servers.</p>
-     *
-     * <p>This is useful if you want to temporarily set a permission for a user while they're online, but don't
-     * want it to persist, and have to worry about removing it when they log out.</p>
-     *
-     * <p>For unsetting a transient permission, see {@link #unsetTransientPermission(Node)}</p>
-     *
-     * @param node The node to be set
-     * @throws NullPointerException      if the node is null
      * @return the result of the operation
-     * @since 3.1
+     * @throws NullPointerException if the node is null
+     * @since 4.0
      */
     @Nonnull
-    DataMutateResult setTransientPermissionUnchecked(@Nonnull Node node);
+    DataMutateResult setTransientPermission(@Nonnull Node node);
 
     /**
      * Unsets a permission for the object
      *
      * @param node The node to be unset
-     * @throws ObjectLacksException if the node wasn't already set
-     * @throws NullPointerException if the node is null
-     * @since 2.6
-     */
-    void unsetPermission(@Nonnull Node node) throws ObjectLacksException;
-
-    /**
-     * Unsets a permission for the object
-     *
-     * @param node The node to be unset
-     * @throws NullPointerException if the node is null
      * @return the result of the operation
-     * @since 3.1
+     * @throws NullPointerException if the node is null
+     * @since 4.0
      */
     @Nonnull
-    DataMutateResult unsetPermissionUnchecked(@Nonnull Node node);
+    DataMutateResult unsetPermission(@Nonnull Node node);
 
     /**
      * Unsets a transient permission for the object
      *
      * @param node The node to be unset
-     * @throws ObjectLacksException if the node wasn't already set
-     * @throws NullPointerException if the node is null
-     * @since 2.6
-     */
-    void unsetTransientPermission(@Nonnull Node node) throws ObjectLacksException;
-
-    /**
-     * Unsets a transient permission for the object
-     *
-     * @param node The node to be unset
-     * @throws NullPointerException if the node is null
      * @return the result of the operation
-     * @since 3.1
+     * @throws NullPointerException if the node is null
+     * @since 4.0
      */
     @Nonnull
-    DataMutateResult unsetTransientPermissionUnchecked(@Nonnull Node node);
+    DataMutateResult unsetTransientPermission(@Nonnull Node node);
 
     /**
      * Clears any nodes from the holder which pass the predicate
@@ -457,420 +404,63 @@ public interface PermissionHolder {
     void clearTransientNodes();
 
     /**
-     * Checks to see if the object has a certain permission
-     *
-     * @param node The permission node
-     * @param b    If the node is true/false(negated)
-     * @return true if the object has the permission
-     * @throws NullPointerException     if the node is null
-     * @throws IllegalArgumentException if the node is invalid
-     * @deprecated in favour of {@link #hasPermission(Node)}
-     */
-    @Deprecated
-    boolean hasPermission(@Nonnull String node, boolean b);
-
-    /**
-     * Checks to see the the object has a permission on a certain server
-     *
-     * @param node   The permission node
-     * @param b      If the node is true/false(negated)
-     * @param server The server
-     * @return true if the object has the permission
-     * @throws NullPointerException     if the node or server is null
-     * @throws IllegalArgumentException if the node or server is invalid
-     * @deprecated in favour of {@link #hasPermission(Node)}
-     */
-    @Deprecated
-    boolean hasPermission(@Nonnull String node, boolean b, @Nonnull String server);
-
-    /**
-     * Checks to see the the object has a permission on a certain server and world
-     *
-     * @param node   The permission node
-     * @param b      If the node is true/false(negated)
-     * @param server The server
-     * @param world  The world
-     * @return true if the object has the permission
-     * @throws NullPointerException     if the node, server or world is null
-     * @throws IllegalArgumentException if the node, server or world is invalid
-     * @deprecated in favour of {@link #hasPermission(Node)}
-     */
-    @Deprecated
-    boolean hasPermission(@Nonnull String node, boolean b, @Nonnull String server, @Nonnull String world);
-
-    /**
-     * Checks to see the the object has a permission
-     *
-     * @param node      The permission node
-     * @param b         If the node is true/false(negated)
-     * @param temporary if the permission is temporary
-     * @return true if the object has the permission
-     * @throws NullPointerException     if the node is null
-     * @throws IllegalArgumentException if the node is invalid
-     * @deprecated in favour of {@link #hasPermission(Node)}
-     */
-    @Deprecated
-    boolean hasPermission(@Nonnull String node, boolean b, boolean temporary);
-
-    /**
-     * Checks to see the the object has a permission on a certain server
-     *
-     * @param node      The permission node
-     * @param b         If the node is true/false(negated)
-     * @param server    The server to check on
-     * @param temporary if the permission is temporary
-     * @return true if the object has the permission
-     * @throws NullPointerException     if the node or server is null
-     * @throws IllegalArgumentException if the node or server is invalid
-     * @deprecated in favour of {@link #hasPermission(Node)}
-     */
-    @Deprecated
-    boolean hasPermission(@Nonnull String node, boolean b, @Nonnull String server, boolean temporary);
-
-    /**
-     * Checks to see the the object has a permission on a certain server and world
-     *
-     * @param node      The permission node
-     * @param b         If the node is true/false(negated)
-     * @param server    The server to check on
-     * @param world     The world to check on
-     * @param temporary if the permission is temporary
-     * @return true if the object has the permission
-     * @throws NullPointerException     if the node, server or world is null
-     * @throws IllegalArgumentException if the node, server or world is invalid
-     * @deprecated in favour of {@link #hasPermission(Node)}
-     */
-    @Deprecated
-    boolean hasPermission(@Nonnull String node, boolean b, @Nonnull String server, @Nonnull String world, boolean temporary);
-
-    /**
-     * Checks to see if the object inherits a certain permission
-     *
-     * @param node The permission node
-     * @param b    If the node is true/false(negated)
-     * @return true if the object inherits the permission
-     * @throws NullPointerException     if the node is null
-     * @throws IllegalArgumentException if the node is invalid
-     * @deprecated in favour of {@link #hasPermission(Node)}
-     */
-    @Deprecated
-    boolean inheritsPermission(@Nonnull String node, boolean b);
-
-    /**
-     * Checks to see the the object inherits a permission on a certain server
-     *
-     * @param node   The permission node
-     * @param b      If the node is true/false(negated)
-     * @param server The server
-     * @return true if the object inherits the permission
-     * @throws NullPointerException     if the node or server is null
-     * @throws IllegalArgumentException if the node or server is invalid
-     * @deprecated in favour of {@link #hasPermission(Node)}
-     */
-    @Deprecated
-    boolean inheritsPermission(@Nonnull String node, boolean b, @Nonnull String server);
-
-    /**
-     * Checks to see the the object inherits a permission on a certain server and world
-     *
-     * @param node   The permission node
-     * @param b      If the node is true/false(negated)
-     * @param server The server
-     * @param world  The world
-     * @return true if the object inherits the permission
-     * @throws NullPointerException     if the node, server or world is null
-     * @throws IllegalArgumentException if the node server or world is invalid
-     * @deprecated in favour of {@link #hasPermission(Node)}
-     */
-    @Deprecated
-    boolean inheritsPermission(@Nonnull String node, boolean b, @Nonnull String server, @Nonnull String world);
-
-    /**
-     * Checks to see if the object inherits a permission
-     *
-     * @param node      The permission node
-     * @param b         If the node is true/false(negated)
-     * @param temporary if the permission is temporary
-     * @return true if the object inherits the permission
-     * @throws NullPointerException     if the node is null
-     * @throws IllegalArgumentException if the node is invalid
-     * @deprecated in favour of {@link #hasPermission(Node)}
-     */
-    @Deprecated
-    boolean inheritsPermission(@Nonnull String node, boolean b, boolean temporary);
-
-    /**
-     * Checks to see if the object inherits a permission on a certain server
-     *
-     * @param node      The permission node
-     * @param b         If the node is true/false(negated)
-     * @param server    The server
-     * @param temporary if the permission is temporary
-     * @return true if the object inherits the permission
-     * @throws NullPointerException     if the node or server is null
-     * @throws IllegalArgumentException if the node or server is invalid
-     * @deprecated in favour of {@link #hasPermission(Node)}
-     */
-    @Deprecated
-    boolean inheritsPermission(@Nonnull String node, boolean b, @Nonnull String server, boolean temporary);
-
-    /**
-     * Checks to see if the object inherits a permission on a certain server and world
-     *
-     * @param node      The permission node
-     * @param b         If the node is true/false(negated)
-     * @param server    The server
-     * @param world     The world
-     * @param temporary if the permission is temporary
-     * @return true if the object inherits the permission
-     * @throws NullPointerException     if the node, server or world is null
-     * @throws IllegalArgumentException if the node, server or world if invalid
-     * @deprecated in favour of {@link #hasPermission(Node)}
-     */
-    @Deprecated
-    boolean inheritsPermission(@Nonnull String node, boolean b, @Nonnull String server, @Nonnull String world, boolean temporary);
-
-    /**
      * Sets a permission for the object
      *
-     * @param node  The node to be set
-     * @param value What to set the node to - true/false(negated)
-     * @throws ObjectAlreadyHasException if the object already has the permission
-     * @throws NullPointerException      if the node is null
-     * @throws IllegalArgumentException  if the node is invalid
-     * @deprecated in favour of {@link #setPermission(Node)}
+     * @param node The node to be set
+     * @return the result of the operation
+     * @throws NullPointerException if the node is null
+     * @since 3.1
+     * @deprecated now forwards to {@link #setPermission(Node)}.
      */
+    @Nonnull
     @Deprecated
-    void setPermission(@Nonnull String node, boolean value) throws ObjectAlreadyHasException;
+    default DataMutateResult setPermissionUnchecked(@Nonnull Node node) {
+        return setPermission(node);
+    }
 
     /**
-     * Sets a permission for the object on a specific server
+     * Sets a transient permission for the object
      *
-     * @param node   The node to set
-     * @param value  What to set the node to - true/false(negated)
-     * @param server The server to set the permission on
-     * @throws ObjectAlreadyHasException if the object already has the permission
-     * @throws NullPointerException      if the node or server is null
-     * @throws IllegalArgumentException  if the node or server is invalid
-     * @deprecated in favour of {@link #setPermission(Node)}
+     * @param node The node to be set
+     * @return the result of the operation
+     * @throws NullPointerException if the node is null
+     * @since 3.1
+     * @deprecated now forwards to {@link #setTransientPermission(Node)}
      */
+    @Nonnull
     @Deprecated
-    void setPermission(@Nonnull String node, boolean value, @Nonnull String server) throws ObjectAlreadyHasException;
-
-    /**
-     * Sets a permission for the object on a specific server and world
-     *
-     * @param node   The node to set
-     * @param value  What to set the node to - true/false(negated)
-     * @param server The server to set the permission on
-     * @param world  The world to set the permission on
-     * @throws ObjectAlreadyHasException if the object already has the permission
-     * @throws NullPointerException      if the node, server or world is null
-     * @throws IllegalArgumentException  if the node, server or world is invalid
-     * @deprecated in favour of {@link #setPermission(Node)}
-     */
-    @Deprecated
-    void setPermission(@Nonnull String node, boolean value, @Nonnull String server, @Nonnull String world) throws ObjectAlreadyHasException;
-
-    /**
-     * Sets a temporary permission for the object
-     *
-     * @param node     The node to set
-     * @param value    What to set the node to - true/false(negated)
-     * @param expireAt The time in unixtime when the permission will expire
-     * @throws ObjectAlreadyHasException if the object already has the permission
-     * @throws NullPointerException      if the node is null
-     * @throws IllegalArgumentException  if the node is invalid or if the expiry time is in the past
-     * @deprecated in favour of {@link #setPermission(Node)}
-     */
-    @Deprecated
-    void setPermission(@Nonnull String node, boolean value, long expireAt) throws ObjectAlreadyHasException;
-
-    /**
-     * Sets a temporary permission for the object on a specific server
-     *
-     * @param node     The node to set
-     * @param value    What to set the node to - true/false(negated)
-     * @param server   The server to set the permission on
-     * @param expireAt The time in unixtime when the permission will expire
-     * @throws ObjectAlreadyHasException if the object already has the permission
-     * @throws NullPointerException      if the node or server is null
-     * @throws IllegalArgumentException  if the node/server is invalid or if the expiry time is in the past
-     * @deprecated in favour of {@link #setPermission(Node)}
-     */
-    @Deprecated
-    void setPermission(@Nonnull String node, boolean value, @Nonnull String server, long expireAt) throws ObjectAlreadyHasException;
-
-    /**
-     * Sets a temporary permission for the object on a specific server and world
-     *
-     * @param node     The node to set
-     * @param value    What to set the node to - true/false(negated)
-     * @param server   The server to set the permission on
-     * @param world    The world to set the permission on
-     * @param expireAt The time in unixtime when the permission will expire
-     * @throws ObjectAlreadyHasException if the object already has the permission
-     * @throws NullPointerException      if the node, server or world is null
-     * @throws IllegalArgumentException  if the node/server/world is invalid, or if the expiry time is in the past
-     * @deprecated in favour of {@link #setPermission(Node)}
-     */
-    @Deprecated
-    void setPermission(String node, boolean value, @Nonnull String server, @Nonnull String world, long expireAt) throws ObjectAlreadyHasException;
-
-    /**
-     * Unsets a permission for the object
-     *
-     * @param node      The node to be unset
-     * @param temporary if the permission being removed is temporary
-     * @throws ObjectLacksException     if the node wasn't already set
-     * @throws NullPointerException     if the node is null
-     * @throws IllegalArgumentException if the node is invalid
-     * @deprecated in favour of {@link #unsetPermission(Node)}
-     */
-    @Deprecated
-    void unsetPermission(@Nonnull String node, boolean temporary) throws ObjectLacksException;
+    default DataMutateResult setTransientPermissionUnchecked(@Nonnull Node node) {
+        return setTransientPermission(node);
+    }
 
     /**
      * Unsets a permission for the object
      *
      * @param node The node to be unset
-     * @throws ObjectLacksException     if the node wasn't already set
-     * @throws NullPointerException     if the node is null
-     * @throws IllegalArgumentException if the node is invalid
-     * @deprecated in favour of {@link #unsetPermission(Node)}
+     * @throws NullPointerException if the node is null
+     * @return the result of the operation
+     * @since 3.1
+     * @deprecated now forwards to {@link #unsetPermission(Node)}
      */
+    @Nonnull
     @Deprecated
-    void unsetPermission(@Nonnull String node) throws ObjectLacksException;
+    default DataMutateResult unsetPermissionUnchecked(@Nonnull Node node) {
+        return unsetPermission(node);
+    }
 
     /**
-     * Unsets a permission for the object on a specific server
+     * Unsets a transient permission for the object
      *
-     * @param node   The node to be unset
-     * @param server The server to unset the node on
-     * @throws ObjectLacksException     if the node wasn't already set
-     * @throws NullPointerException     if the node or server is null
-     * @throws IllegalArgumentException if the node or server is invalid
-     * @deprecated in favour of {@link #unsetPermission(Node)}
+     * @param node The node to be unset
+     * @throws NullPointerException if the node is null
+     * @return the result of the operation
+     * @since 3.1
+     * @deprecated now forwards to {@link #unsetTransientPermission(Node)}
      */
+    @Nonnull
     @Deprecated
-    void unsetPermission(@Nonnull String node, @Nonnull String server) throws ObjectLacksException;
-
-    /**
-     * Unsets a permission for the object on a specific server and world
-     *
-     * @param node   The node to be unset
-     * @param server The server to unset the node on
-     * @param world  The world to unset the node on
-     * @throws ObjectLacksException     if the node wasn't already set
-     * @throws NullPointerException     if the node, server or world is null
-     * @throws IllegalArgumentException if the node, server or world is invalid
-     * @deprecated in favour of {@link #unsetPermission(Node)}
-     */
-    @Deprecated
-    void unsetPermission(@Nonnull String node, @Nonnull String server, @Nonnull String world) throws ObjectLacksException;
-
-    /**
-     * Unsets a permission for the object on a specific server
-     *
-     * @param node      The node to be unset
-     * @param server    The server to unset the node on
-     * @param temporary if the permission being unset is temporary
-     * @throws ObjectLacksException     if the node wasn't already set
-     * @throws NullPointerException     if the node or server is null
-     * @throws IllegalArgumentException if the node or server is invalid
-     * @deprecated in favour of {@link #unsetPermission(Node)}
-     */
-    @Deprecated
-    void unsetPermission(@Nonnull String node, @Nonnull String server, boolean temporary) throws ObjectLacksException;
-
-    /**
-     * Unsets a permission for the object on a specific server and world
-     *
-     * @param node      The node to be unset
-     * @param server    The server to unset the node on
-     * @param world     The world to unset the node on
-     * @param temporary if the permission being unset is temporary
-     * @throws ObjectLacksException     if the node wasn't already set
-     * @throws NullPointerException     if the node, server or world is null
-     * @throws IllegalArgumentException if the node, server or world is invalid
-     * @deprecated in favour of {@link #unsetPermission(Node)}
-     */
-    @Deprecated
-    void unsetPermission(@Nonnull String node, @Nonnull String server, @Nonnull String world, boolean temporary) throws ObjectLacksException;
-
-    /**
-     * Clears all nodes held by the object on a specific server
-     *
-     * @param server the server to filter by, can be null
-     * @since 2.17
-     * @deprecated in favour of {@link #clearNodes(ContextSet)}
-     */
-    @Deprecated
-    void clearNodes(@Nullable String server);
-
-    /**
-     * Clears all nodes held by the object on a specific server and world
-     *
-     * @param server the server to filter by, can be null
-     * @param world the world to filter by, can be null
-     * @since 2.17
-     * @deprecated in favour of {@link #clearNodes(ContextSet)}
-     */
-    @Deprecated
-    void clearNodes(@Nullable String server, @Nullable String world);
-
-    /**
-     * Clears all parents on a specific server
-     *
-     * @param server the server to filter by, can be null
-     * @since 2.17
-     * @deprecated in favour of {@link #clearParents(ContextSet)}
-     */
-    @Deprecated
-    void clearParents(@Nullable String server);
-
-    /**
-     * Clears all parents on a specific server and world
-     *
-     * @param server the server to filter by, can be null
-     * @param world the world to filter by, can be null
-     * @since 2.17
-     * @deprecated in favour of {@link #clearParents(ContextSet)}
-     */
-    @Deprecated
-    void clearParents(@Nullable String server, @Nullable String world);
-
-    /**
-     * Clears all meta held by the object on a specific server
-     *
-     * @param server the server to filter by, can be null
-     * @since 2.17
-     * @deprecated in favour of {@link #clearMeta(ContextSet)}
-     */
-    @Deprecated
-    void clearMeta(@Nullable String server);
-
-    /**
-     * Clears all meta held by the object on a specific server and world
-     *
-     * @param server the server to filter by, can be null
-     * @param world the world to filter by, can be null
-     * @since 2.17
-     * @deprecated in favour of {@link #clearMeta(ContextSet)}
-     */
-    @Deprecated
-    void clearMeta(@Nullable String server, @Nullable String world);
-
-    /**
-     * Clears all meta for a given key.
-     *
-     * @param key the meta key
-     * @param server the server to filter by, can be null
-     * @param world the world to filter by, can be null
-     * @param temporary whether the query is for temporary nodes or not.
-     * @deprecated in favour of {@link #clearMatching(Predicate)}
-     */
-    @Deprecated
-    void clearMetaKeys(@Nonnull String key, @Nullable String server, @Nullable String world, boolean temporary);
+    default DataMutateResult unsetTransientPermissionUnchecked(@Nonnull Node node) {
+        return unsetTransientPermission(node);
+    }
 
 }

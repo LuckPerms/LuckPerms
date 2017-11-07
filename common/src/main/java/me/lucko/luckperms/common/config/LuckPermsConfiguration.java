@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.config;
 
-import me.lucko.luckperms.common.api.delegates.LPConfigurationDelegate;
+import me.lucko.luckperms.common.api.delegates.misc.ApiConfiguration;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 /**
@@ -38,7 +38,7 @@ public interface LuckPermsConfiguration {
      *
      * @return the api delegate
      */
-    LPConfigurationDelegate getDelegate();
+    ApiConfiguration getDelegate();
 
     /**
      * Gets the main plugin instance.

@@ -23,21 +23,21 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.delegates;
+package me.lucko.luckperms.common.api.delegates.misc;
 
 import lombok.NonNull;
 
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.api.delegates.model.ApiGroup;
 import me.lucko.luckperms.common.node.NodeFactory;
 
-public class NodeFactoryDelegate implements me.lucko.luckperms.api.NodeFactory {
-    public static final NodeFactoryDelegate INSTANCE = new NodeFactoryDelegate();
+public final class ApiNodeFactory implements me.lucko.luckperms.api.NodeFactory {
+    public static final ApiNodeFactory INSTANCE = new ApiNodeFactory();
 
-    @Override
-    public Node fromSerialisedNode(@NonNull String serialisedPermission, boolean value) {
-        return NodeFactory.fromSerializedNode(serialisedPermission, value);
+    private ApiNodeFactory() {
+
     }
 
     @Override
@@ -51,13 +51,13 @@ public class NodeFactoryDelegate implements me.lucko.luckperms.api.NodeFactory {
     }
 
     @Override
-    public Node.Builder newBuilderFromSerialisedNode(@NonNull String serialisedPermission, boolean value) {
-        return NodeFactory.builderFromLegacyString(serialisedPermission, value);
+    public Node.Builder makeGroupNode(Group group) {
+        return NodeFactory.newBuilder("group." + ApiGroup.cast(group).getName());
     }
 
     @Override
-    public Node.Builder makeGroupNode(Group group) {
-        return NodeFactory.newBuilder("group." + GroupDelegate.cast(group).getName());
+    public Node.Builder makeGroupNode(String groupName) {
+        return NodeFactory.newBuilder("group." + groupName);
     }
 
     @Override

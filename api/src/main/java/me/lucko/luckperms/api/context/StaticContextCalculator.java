@@ -23,18 +23,41 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.exceptions;
+package me.lucko.luckperms.api.context;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
- * Thrown when an object lacks something.
+ * Extension of {@link ContextCalculator} which provides the same context
+ * regardless of the subject.
  *
- * <p>For example, when:</p>
- * <p></p>
- * <ul>
- *     <li>a permission holding object doesn't have a permission</li>
- *     <li>a permission holding object isn't already a member of a group</li>
- *     <li>a track doesn't contain a group</li>
- * </ul>
+ * @since 4.0
  */
-public class ObjectLacksException extends MembershipException {
+@FunctionalInterface
+public interface StaticContextCalculator extends ContextCalculator<Object> {
+
+    /**
+     * Adds this calculators context to the given accumulator.
+     *
+     * @param accumulator a map of contexts to add to
+     * @return the map
+     */
+    @Nonnull
+    MutableContextSet giveApplicableContext(@Nonnull MutableContextSet accumulator);
+
+    /**
+     * Gives the subject all of the applicable contexts they meet
+     *
+     * @param subject the subject to add contexts to
+     * @param accumulator a map of contexts to add to
+     * @return the map
+     */
+    @Nonnull
+    @Override
+    @Deprecated
+    default MutableContextSet giveApplicableContext(@Nullable Object subject, @Nonnull MutableContextSet accumulator) {
+        return giveApplicableContext(accumulator);
+    }
+
 }

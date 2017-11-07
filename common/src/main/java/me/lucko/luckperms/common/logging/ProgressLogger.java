@@ -30,8 +30,6 @@ import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -84,17 +82,5 @@ public class ProgressLogger {
             // migrated {} groups so far.
             logAllProgress(msg, amount);
         }
-    }
-
-    public void handleException(Exception ex) {
-        handleAndPrintException(ex);
-    }
-
-    public static void handleAndPrintException(Exception ex) {
-        if (ex instanceof ObjectAlreadyHasException || ex instanceof ObjectLacksException) {
-            return;
-        }
-
-        ex.printStackTrace();
     }
 }

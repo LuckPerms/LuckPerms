@@ -50,9 +50,4 @@ public class ApiUtils {
         return s.toLowerCase();
     }
 
-    public static long checkTime(long l) {
-        Preconditions.checkArgument(DataConstraints.TIME_TEST.test(l), "Unix time '" + l + "' is invalid, as it has already passed.");
-        return l;
-    }
-
 }

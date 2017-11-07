@@ -23,34 +23,26 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api;
+package me.lucko.luckperms.common.api.delegates.misc;
 
-import javax.annotation.Nonnull;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
 
-/**
- * Represents a type of platform which LuckPerms can run on.
- *
- * @since 2.7
- */
-public enum PlatformType {
+import me.lucko.luckperms.api.UuidCache;
 
-    BUKKIT("Bukkit"),
-    BUNGEE("Bungee"),
-    SPONGE("Sponge");
+import java.util.UUID;
 
-    private final String friendlyName;
+@AllArgsConstructor
+public class ApiUuidCache implements UuidCache {
+    private final me.lucko.luckperms.common.utils.UuidCache handle;
 
-    PlatformType(String friendlyName) {
-        this.friendlyName = friendlyName;
+    @Override
+    public UUID getUUID(@NonNull UUID external) {
+        return handle.getUUID(external);
     }
 
-    /**
-     * Gets a readable name for the platform type.
-     *
-     * @return a readable name
-     */
-    @Nonnull
-    public String getFriendlyName() {
-        return friendlyName;
+    @Override
+    public UUID getExternalUUID(@NonNull UUID internal) {
+        return handle.getExternalUUID(internal);
     }
 }

@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.delegates;
+package me.lucko.luckperms.common.api.delegates.model;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -49,11 +49,8 @@ import java.util.concurrent.Executor;
 import static me.lucko.luckperms.common.api.ApiUtils.checkName;
 import static me.lucko.luckperms.common.api.ApiUtils.checkUsername;
 
-/**
- * Provides a link between {@link Storage} and {@link me.lucko.luckperms.common.storage.Storage}
- */
 @AllArgsConstructor
-public class StorageDelegate implements Storage {
+public class ApiStorage implements Storage {
     private final LuckPermsPlugin plugin;
     private final me.lucko.luckperms.common.storage.Storage handle;
 
@@ -84,7 +81,7 @@ public class StorageDelegate implements Storage {
 
     @Override
     public CompletableFuture<Log> getLog() {
-        return handle.noBuffer().getLog().thenApply(log -> log == null ? null : new LogDelegate(log));
+        return handle.noBuffer().getLog().thenApply(log -> log == null ? null : new ApiLog(log));
     }
 
     @Override
@@ -94,7 +91,7 @@ public class StorageDelegate implements Storage {
 
     @Override
     public CompletableFuture<Boolean> saveUser(@NonNull User user) {
-        return handle.noBuffer().saveUser(UserDelegate.cast(user));
+        return handle.noBuffer().saveUser(ApiUser.cast(user));
     }
 
     @Override
@@ -124,7 +121,7 @@ public class StorageDelegate implements Storage {
 
     @Override
     public CompletableFuture<Boolean> saveGroup(@NonNull Group group) {
-        return handle.noBuffer().saveGroup(GroupDelegate.cast(group));
+        return handle.noBuffer().saveGroup(ApiGroup.cast(group));
     }
 
     @Override
@@ -132,7 +129,7 @@ public class StorageDelegate implements Storage {
         if (group.getName().equalsIgnoreCase(plugin.getConfiguration().get(ConfigKeys.DEFAULT_GROUP_NAME))) {
             throw new IllegalArgumentException("Cannot delete the default group.");
         }
-        return handle.noBuffer().deleteGroup(GroupDelegate.cast(group), DeletionCause.API);
+        return handle.noBuffer().deleteGroup(ApiGroup.cast(group), DeletionCause.API);
     }
 
     @Override
@@ -157,12 +154,12 @@ public class StorageDelegate implements Storage {
 
     @Override
     public CompletableFuture<Boolean> saveTrack(@NonNull Track track) {
-        return handle.noBuffer().saveTrack(TrackDelegate.cast(track));
+        return handle.noBuffer().saveTrack(ApiTrack.cast(track));
     }
 
     @Override
     public CompletableFuture<Boolean> deleteTrack(@NonNull Track track) {
-        return handle.noBuffer().deleteTrack(TrackDelegate.cast(track), DeletionCause.API);
+        return handle.noBuffer().deleteTrack(ApiTrack.cast(track), DeletionCause.API);
     }
 
     @Override

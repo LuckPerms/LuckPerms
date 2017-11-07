@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.logging;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
-import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;

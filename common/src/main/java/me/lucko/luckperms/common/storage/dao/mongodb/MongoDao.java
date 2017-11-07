@@ -39,6 +39,7 @@ import com.mongodb.client.model.InsertOneOptions;
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.managers.GenericUserManager;
@@ -165,7 +166,7 @@ public class MongoDao extends AbstractDao {
                     .append("timestamp", entry.getTimestamp())
                     .append("actor", entry.getActor())
                     .append("actorName", entry.getActorName())
-                    .append("type", Character.toString(entry.getEntryType().getCode()))
+                    .append("type", Character.toString(entry.getType().getCode()))
                     .append("actedName", entry.getActedName())
                     .append("action", entry.getAction());
 
@@ -195,15 +196,16 @@ public class MongoDao extends AbstractDao {
                         actedUuid = d.get("acted", UUID.class);
                     }
 
-                    LogEntry e = new LogEntry(
-                            d.getLong("timestamp"),
-                            d.get("actor", UUID.class),
-                            d.getString("actorName"),
-                            d.getString("type").toCharArray()[0],
-                            actedUuid,
-                            d.getString("actedName"),
-                            d.getString("action")
-                    );
+                    ExtendedLogEntry e = ExtendedLogEntry.build()
+                            .timestamp(d.getLong("timestamp"))
+                            .actor(d.get("actor", UUID.class))
+                            .actorName(d.getString("actorName"))
+                            .type(LogEntry.Type.valueOf(d.getString("type").toCharArray()[0]))
+                            .acted(actedUuid)
+                            .actedName(d.getString("actedName"))
+                            .action(d.getString("action"))
+                            .build();
+
                     log.add(e);
                 }
             }
@@ -750,8 +752,39 @@ public class MongoDao extends AbstractDao {
         Map<String, Boolean> m = new HashMap<>();
         for (Node node : nodes) {
             //noinspection deprecation
-            m.put(node.toSerializedNode(), node.getValuePrimitive());
+            m.put(toSerializedNode(node), node.getValuePrimitive());
         }
         return m;
+    }
+
+    private static final String[] SERVER_WORLD_DELIMITERS = new String[]{"/", "-"};
+
+    private static String toSerializedNode(Node node) {
+        StringBuilder builder = new StringBuilder();
+
+        if (node.getServer().orElse(null) != null) {
+            builder.append(NodeFactory.escapeDelimiters(node.getServer().orElse(null), SERVER_WORLD_DELIMITERS));
+            if (node.getWorld().orElse(null) != null) {
+                builder.append("-").append(NodeFactory.escapeDelimiters(node.getWorld().orElse(null), SERVER_WORLD_DELIMITERS));
+            }
+            builder.append("/");
+        } else {
+            if (node.getWorld().orElse(null) != null) {
+                builder.append("global-").append(NodeFactory.escapeDelimiters(node.getWorld().orElse(null), SERVER_WORLD_DELIMITERS)).append("/");
+            }
+        }
+
+        if (!node.getContexts().isEmpty()) {
+            builder.append("(");
+            for (Map.Entry<String, String> entry : node.getContexts().toSet()) {
+                builder.append(NodeFactory.escapeDelimiters(entry.getKey(), "=", "(", ")", ",")).append("=").append(NodeFactory.escapeDelimiters(entry.getValue(), "=", "(", ")", ",")).append(",");
+            }
+            builder.deleteCharAt(builder.length() - 1);
+            builder.append(")");
+        }
+
+        builder.append(NodeFactory.escapeDelimiters(node.getPermission(), "/", "-", "$", "(", ")", "=", ","));
+        if (node.isTemporary()) builder.append("$").append(node.getExpiryUnixTime());
+        return builder.toString();
     }
 }

@@ -33,7 +33,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.ChatMetaType;
-import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.model.Group;
@@ -61,6 +60,8 @@ public class NodeFactory {
     private static final Splitter LEGACY_WORLD_SPLITTER = Splitter.on(LEGACY_WORLD_DELIM).limit(2);
     private static final Pattern LEGACY_EXPIRY_DELIM = PatternCache.compileDelimitedMatcher("$", "\\");
     private static final Splitter LEGACY_EXPIRY_SPLITTER = Splitter.on(LEGACY_EXPIRY_DELIM).limit(2);
+
+    private static final String[] DELIMS = new String[]{".", "/", "-", "$"};
 
     // caches the conversion between legacy node strings --> node instances
     private static final LoadingCache<String, Node> LEGACY_SERIALIZATION_CACHE = Caffeine.newBuilder()
@@ -154,7 +155,7 @@ public class NodeFactory {
             return makeSuffixNode(100, value);
         }
 
-        return new NodeBuilder("meta." + MetaUtils.escapeCharacters(key) + "." + MetaUtils.escapeCharacters(value));
+        return new NodeBuilder("meta." + escapeCharacters(key) + "." + escapeCharacters(value));
     }
 
     public static Node.Builder makeChatMetaNode(ChatMetaType type, int priority, String s) {
@@ -162,11 +163,11 @@ public class NodeFactory {
     }
 
     public static Node.Builder makePrefixNode(int priority, String prefix) {
-        return new NodeBuilder("prefix." + priority + "." + MetaUtils.escapeCharacters(prefix));
+        return new NodeBuilder("prefix." + priority + "." + escapeCharacters(prefix));
     }
 
     public static Node.Builder makeSuffixNode(int priority, String suffix) {
-        return new NodeBuilder("suffix." + priority + "." + MetaUtils.escapeCharacters(suffix));
+        return new NodeBuilder("suffix." + priority + "." + escapeCharacters(suffix));
     }
 
     public static String nodeAsCommand(Node node, String id, boolean group, boolean set) {
@@ -262,6 +263,41 @@ public class NodeFactory {
         return sb;
     }
 
+    /**
+     * Escapes special characters used within LuckPerms, so the string can be saved without issues
+     *
+     * @param s the string to escape
+     * @return an escaped string
+     * @throws NullPointerException if the string is null
+     */
+    public static String escapeCharacters(String s) {
+        if (s == null) {
+            throw new NullPointerException();
+        }
+
+        return escapeDelimiters(s, DELIMS);
+    }
+
+    /**
+     * Unescapes special characters used within LuckPerms, the inverse of {@link #escapeCharacters(String)}
+     *
+     * @param s the string to unescape
+     * @return an unescaped string
+     * @throws NullPointerException if the string is null
+     */
+    public static String unescapeCharacters(String s) {
+        if (s == null) {
+            throw new NullPointerException();
+        }
+
+        s = s.replace("{SEP}", ".");
+        s = s.replace("{FSEP}", "/");
+        s = s.replace("{DSEP}", "$");
+        s = unescapeDelimiters(s, DELIMS);
+
+        return s;
+    }
+
     public static String escapeDelimiters(String s, String... delims) {
         if (s == null) {
             return null;
@@ -305,7 +341,7 @@ public class NodeFactory {
         if (!metaParts.hasNext()) return null;
         String value = metaParts.next();
 
-        return Maps.immutableEntry(MetaUtils.unescapeCharacters(key).intern(), MetaUtils.unescapeCharacters(value).intern());
+        return Maps.immutableEntry(unescapeCharacters(key).intern(), unescapeCharacters(value).intern());
     }
 
     private static Map.Entry<Integer, String> parseChatMetaNode(String type, String s) {
@@ -323,7 +359,7 @@ public class NodeFactory {
 
         try {
             int p = Integer.parseInt(priority);
-            String v = MetaUtils.unescapeCharacters(value).intern();
+            String v = unescapeCharacters(value).intern();
             return Maps.immutableEntry(p, v);
         } catch (NumberFormatException e) {
             return null;

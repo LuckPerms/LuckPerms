@@ -73,7 +73,7 @@ public class DeleteTrack extends SingleCommand {
 
         Message.DELETE_SUCCESS.send(sender, trackName);
 
-        ExtendedLogEntry.build().actor(sender).actedName(trackName).entryType(LogEntry.Type.TRACK)
+        ExtendedLogEntry.build().actor(sender).actedName(trackName).type(LogEntry.Type.TRACK)
                 .action("delete")
                 .build().submit(plugin, sender);
 

@@ -34,7 +34,7 @@ import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.actionlog.Log;
-import me.lucko.luckperms.common.api.delegates.StorageDelegate;
+import me.lucko.luckperms.common.api.delegates.model.ApiStorage;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
@@ -292,7 +292,7 @@ public class PhasedStorage implements Storage {
     }
 
     private interface Delegated {
-        StorageDelegate getDelegate();
+        ApiStorage getDelegate();
         String getName();
         boolean isAcceptingLogins();
         void setAcceptingLogins(boolean b);

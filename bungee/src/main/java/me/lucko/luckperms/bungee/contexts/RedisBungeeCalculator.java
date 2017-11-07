@@ -28,16 +28,14 @@ package me.lucko.luckperms.bungee.contexts;
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
 
-import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.context.StaticContextCalculator;
 
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-
-public class RedisBungeeCalculator implements ContextCalculator<ProxiedPlayer> {
+public class RedisBungeeCalculator implements StaticContextCalculator {
     private static final String PROXY_KEY = "proxy";
 
     @Override
-    public MutableContextSet giveApplicableContext(ProxiedPlayer subject, MutableContextSet accumulator) {
+    public MutableContextSet giveApplicableContext(MutableContextSet accumulator) {
         RedisBungeeAPI redisBungee = RedisBungee.getApi();
         if (redisBungee != null) {
             accumulator.add(PROXY_KEY, redisBungee.getServerId());

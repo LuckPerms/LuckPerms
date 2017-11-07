@@ -28,9 +28,8 @@ package me.lucko.luckperms.bukkit;
 import lombok.Getter;
 
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.LuckPermsApi;
-import me.lucko.luckperms.api.PlatformType;
+import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.bukkit.calculators.BukkitCalculatorFactory;
 import me.lucko.luckperms.bukkit.contexts.BukkitContextManager;
 import me.lucko.luckperms.bukkit.contexts.WorldCalculator;
@@ -45,8 +44,8 @@ import me.lucko.luckperms.bukkit.processors.ChildPermissionProvider;
 import me.lucko.luckperms.bukkit.processors.DefaultsProvider;
 import me.lucko.luckperms.bukkit.vault.VaultHookManager;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
-import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
+import me.lucko.luckperms.common.api.ApiSingletonUtils;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.UpdateTaskBuffer;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
@@ -63,6 +62,7 @@ import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.NoopLocaleManager;
 import me.lucko.luckperms.common.locale.SimpleLocaleManager;
+import me.lucko.luckperms.common.logging.Logger;
 import me.lucko.luckperms.common.logging.SenderLogger;
 import me.lucko.luckperms.common.managers.GenericGroupManager;
 import me.lucko.luckperms.common.managers.GenericTrackManager;
@@ -243,7 +243,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         // setup context manager
         contextManager = new BukkitContextManager(this);
         contextManager.registerCalculator(new WorldCalculator(this));
-        contextManager.registerCalculator(new LuckPermsCalculator<>(getConfiguration()), true);
+        contextManager.registerStaticCalculator(new LuckPermsCalculator(getConfiguration()));
 
         // inject our own subscription map
         new SubscriptionMapInjector(this).run();
@@ -257,7 +257,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         // register with the LP API
         apiProvider = new ApiProvider(this);
-        ApiHandler.registerProvider(apiProvider);
+        ApiSingletonUtils.registerProvider(apiProvider);
         getServer().getServicesManager().register(LuckPermsApi.class, apiProvider, this, ServicePriority.Normal);
 
 
@@ -366,7 +366,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             messagingService.close();
         }
 
-        ApiHandler.unregisterProvider();
+        ApiSingletonUtils.unregisterProvider();
         getServer().getServicesManager().unregisterAll(this);
 
         if (vaultHookManager != null) {

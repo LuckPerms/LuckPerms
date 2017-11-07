@@ -30,7 +30,7 @@ import lombok.Getter;
 import lombok.ToString;
 
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.common.api.delegates.UserDelegate;
+import me.lucko.luckperms.common.api.delegates.model.ApiUser;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.caching.UserCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -74,7 +74,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     private BufferedRequest<Void> refreshBuffer;
 
     @Getter
-    private final UserDelegate delegate = new UserDelegate(this);
+    private final ApiUser delegate = new ApiUser(this);
 
     public User(UUID uuid, LuckPermsPlugin plugin) {
         super(uuid.toString(), plugin);

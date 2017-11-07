@@ -31,7 +31,7 @@ import lombok.ToString;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.api.delegates.GroupDelegate;
+import me.lucko.luckperms.common.api.delegates.model.ApiGroup;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.GroupReference;
@@ -50,7 +50,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     private final String name;
 
     @Getter
-    private final GroupDelegate delegate = new GroupDelegate(this);
+    private final ApiGroup delegate = new ApiGroup(this);
 
     public Group(String name, LuckPermsPlugin plugin) {
         super(name, plugin);

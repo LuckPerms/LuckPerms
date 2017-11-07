@@ -96,7 +96,7 @@ public abstract class AbstractMessagingService implements ExtendedMessagingServi
 
         } else if (msg.startsWith("log:") && msg.length() > "log:".length()) {
             String logData = msg.substring("log:".length());
-            Map.Entry<UUID, LogEntry> entry = null;
+            Map.Entry<UUID, ExtendedLogEntry> entry = null;
             try {
                 entry = ExtendedLogEntry.deserialize(gson.fromJson(logData, JsonObject.class));
             } catch (Exception e) {

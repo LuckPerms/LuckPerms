@@ -23,26 +23,34 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.data;
+package me.lucko.luckperms.common.api.delegates.manager;
 
-import javax.annotation.Nullable;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
 
-/**
- * Represents the data section of the main LuckPerms configuration.
- * All methods could return null.
- */
-public interface DatastoreConfiguration {
+import me.lucko.luckperms.api.Track;
+import me.lucko.luckperms.api.manager.TrackManager;
 
-    @Nullable
-    String getAddress();
+import java.util.Set;
+import java.util.stream.Collectors;
 
-    @Nullable
-    String getDatabase();
+@AllArgsConstructor
+public class ApiTrackManager implements TrackManager {
+    private final me.lucko.luckperms.common.managers.TrackManager handle;
 
-    @Nullable
-    String getUsername();
+    @Override
+    public Track getTrack(@NonNull String name) {
+        me.lucko.luckperms.common.model.Track track = handle.getIfLoaded(name);
+        return track == null ? null : track.getDelegate();
+    }
 
-    @Nullable
-    String getPassword();
+    @Override
+    public Set<Track> getLoadedTracks() {
+        return handle.getAll().values().stream().map(me.lucko.luckperms.common.model.Track::getDelegate).collect(Collectors.toSet());
+    }
 
+    @Override
+    public boolean isLoaded(@NonNull String name) {
+        return handle.isLoaded(name);
+    }
 }

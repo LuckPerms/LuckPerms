@@ -35,7 +35,7 @@ import org.bukkit.entity.Player;
 
 public class BukkitContextManager extends AbstractContextManager<Player> {
     public BukkitContextManager(LPBukkitPlugin plugin) {
-        super(plugin);
+        super(plugin, Player.class);
     }
 
     @Override

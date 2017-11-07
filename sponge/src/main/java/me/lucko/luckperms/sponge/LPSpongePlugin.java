@@ -31,10 +31,10 @@ import com.google.inject.Inject;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LuckPermsApi;
-import me.lucko.luckperms.api.PlatformType;
+import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
-import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
+import me.lucko.luckperms.common.api.ApiSingletonUtils;
 import me.lucko.luckperms.common.backup.ImporterSender;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.UpdateTaskBuffer;
@@ -175,7 +175,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private ExtendedMessagingService messagingService = null;
     private UuidCache uuidCache;
     private ApiProvider apiProvider;
-    private me.lucko.luckperms.api.Logger log;
+    private me.lucko.luckperms.common.logging.Logger log;
     private LuckPermsService service;
     private LocaleManager localeManager;
     private CachedStateManager cachedStateManager;
@@ -247,7 +247,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         // setup context manager
         contextManager = new SpongeContextManager(this);
         contextManager.registerCalculator(new WorldCalculator(this));
-        contextManager.registerCalculator(new LuckPermsCalculator<>(getConfiguration()), true);
+        contextManager.registerStaticCalculator(new LuckPermsCalculator(getConfiguration()));
 
         // register the PermissionService with Sponge
         getLog().info("Registering PermissionService...");
@@ -265,7 +265,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         // register with the LP API
         apiProvider = new ApiProvider(this);
-        ApiHandler.registerProvider(apiProvider);
+        ApiSingletonUtils.registerProvider(apiProvider);
         game.getServiceManager().setProvider(this, LuckPermsApi.class, apiProvider);
 
         // schedule update tasks
@@ -320,7 +320,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
             messagingService.close();
         }
 
-        ApiHandler.unregisterProvider();
+        ApiSingletonUtils.unregisterProvider();
 
         getLog().info("Shutting down internal scheduler...");
         scheduler.shutdown();

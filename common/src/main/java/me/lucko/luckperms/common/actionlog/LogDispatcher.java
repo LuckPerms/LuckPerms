@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.actionlog;
 
 import lombok.RequiredArgsConstructor;
 
-import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.log.LogBroadcastEvent;
 import me.lucko.luckperms.common.commands.impl.log.LogNotify;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -43,7 +42,7 @@ import java.util.Optional;
 public class LogDispatcher {
     private final LuckPermsPlugin plugin;
 
-    public void dispatch(LogEntry entry, Sender sender) {
+    public void dispatch(ExtendedLogEntry entry, Sender sender) {
         // set the event to cancelled if the sender is import
         if (!plugin.getApiProvider().getEventFactory().handleLogPublish(sender.isImport(), entry)) {
             plugin.getStorage().logAction(entry);
@@ -70,7 +69,7 @@ public class LogDispatcher {
         }
     }
 
-    public void dispatchFromRemote(LogEntry entry) {
+    public void dispatchFromRemote(ExtendedLogEntry entry) {
         if (!plugin.getConfiguration().get(ConfigKeys.BROADCAST_RECEIVED_LOG_ENTRIES)) {
             return;
         }

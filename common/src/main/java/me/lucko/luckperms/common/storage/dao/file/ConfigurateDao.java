@@ -290,7 +290,7 @@ public abstract class ConfigurateDao extends AbstractDao {
         actionLogger.info(String.format(LOG_FORMAT,
                 (entry.getActor().equals(Constants.CONSOLE_UUID) ? "" : entry.getActor() + " "),
                 entry.getActorName(),
-                Character.toString(entry.getEntryType().getCode()),
+                Character.toString(entry.getType().getCode()),
                 (entry.getActed() == null ? "" : entry.getActed().toString() + " "),
                 entry.getActedName(),
                 entry.getAction())

@@ -35,7 +35,7 @@ import org.spongepowered.api.service.permission.Subject;
 
 public class SpongeContextManager extends AbstractContextManager<Subject> {
     public SpongeContextManager(LPSpongePlugin plugin) {
-        super(plugin);
+        super(plugin, Subject.class);
     }
 
     @Override

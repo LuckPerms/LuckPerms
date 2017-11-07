@@ -80,7 +80,7 @@ public class DeleteGroup extends SingleCommand {
 
         Message.DELETE_SUCCESS.send(sender, group.getFriendlyName());
 
-        ExtendedLogEntry.build().actor(sender).actedName(groupName).entryType(LogEntry.Type.GROUP)
+        ExtendedLogEntry.build().actor(sender).actedName(groupName).type(LogEntry.Type.GROUP)
                 .action("delete")
                 .build().submit(plugin, sender);
 

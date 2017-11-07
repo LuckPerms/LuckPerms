@@ -34,7 +34,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Represents a permission node.
@@ -152,50 +151,6 @@ public interface Node extends Map.Entry<String, Boolean> {
     boolean hasSpecificContext();
 
     /**
-     * Gets if this node is able to apply in the given context
-     *
-     * @param includeGlobal if global server values should apply
-     * @param includeGlobalWorld if global world values should apply
-     * @param server the server being checked against, or null
-     * @param world the world being checked against, or null
-     * @param context the context being checked against, or null
-     * @param applyRegex if regex should be applied
-     * @return true if the node should apply, otherwise false
-     * @since 3.1
-     */
-    boolean shouldApply(boolean includeGlobal, boolean includeGlobalWorld, @Nullable String server, @Nullable String world, @Nullable ContextSet context, boolean applyRegex);
-
-    /**
-     * Gets if this node should apply on a specific server
-     *
-     * @param server        the name of the server
-     * @param includeGlobal if global permissions should apply
-     * @param applyRegex    if regex should be applied
-     * @return true if the node should apply
-     */
-    boolean shouldApplyOnServer(@Nullable String server, boolean includeGlobal, boolean applyRegex);
-
-    /**
-     * Gets if this node should apply on a specific world
-     *
-     * @param world         the name of the world
-     * @param includeGlobal if global permissions should apply
-     * @param applyRegex    if regex should be applied
-     * @return true if the node should apply
-     */
-    boolean shouldApplyOnWorld(@Nullable String world, boolean includeGlobal, boolean applyRegex);
-
-    /**
-     * Gets if this node should apply in the given context
-     *
-     * @param context        the context key value pairs
-     * @param worldAndServer if world and server contexts should be checked
-     * @return true if the node should apply
-     * @since 2.13
-     */
-    boolean shouldApplyWithContext(@Nonnull ContextSet context, boolean worldAndServer);
-
-    /**
      * Gets if this node should apply in the given context
      *
      * @param context the context key value pairs
@@ -203,35 +158,6 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @since 2.13
      */
     boolean shouldApplyWithContext(@Nonnull ContextSet context);
-
-    /**
-     * Similar to {@link #shouldApplyOnServer(String, boolean, boolean)}, except this method accepts a List
-     *
-     * @param servers       the list of servers
-     * @param includeGlobal if global permissions should apply
-     * @return true if the node should apply
-     */
-    boolean shouldApplyOnAnyServers(@Nonnull List<String> servers, boolean includeGlobal);
-
-    /**
-     * Similar to {@link #shouldApplyOnWorld(String, boolean, boolean)}, except this method accepts a List
-     *
-     * @param worlds        the list of world
-     * @param includeGlobal if global permissions should apply
-     * @return true if the node should apply
-     */
-    boolean shouldApplyOnAnyWorlds(@Nonnull List<String> worlds, boolean includeGlobal);
-
-    /**
-     * Resolves a list of wildcards that match this node
-     *
-     * @param possibleNodes a list of possible permission nodes
-     * @return a list of permissions that match this wildcard
-     * @deprecated as this is no longer used internally to resolve wildcards
-     */
-    @Nonnull
-    @Deprecated
-    List<String> resolveWildcard(@Nonnull List<String> possibleNodes);
 
     /**
      * Resolves any shorthand parts of this node and returns the full list
@@ -308,16 +234,6 @@ public interface Node extends Map.Entry<String, Boolean> {
      */
     @Nonnull
     ContextSet getFullContexts();
-
-    /**
-     * Converts this node into a serialized form
-     *
-     * @return a serialized node string
-     * @deprecated because this serialized form is no longer used by the implementation.
-     */
-    @Deprecated
-    @Nonnull
-    String toSerializedNode();
 
     /**
      * Gets if this is a group node

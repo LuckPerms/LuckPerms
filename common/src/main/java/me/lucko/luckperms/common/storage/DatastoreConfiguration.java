@@ -30,7 +30,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class DatastoreConfiguration implements me.lucko.luckperms.api.data.DatastoreConfiguration {
+public class DatastoreConfiguration {
 
     private final String address;
     private final String database;

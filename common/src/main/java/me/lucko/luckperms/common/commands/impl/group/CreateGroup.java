@@ -71,7 +71,7 @@ public class CreateGroup extends SingleCommand {
 
         Message.CREATE_SUCCESS.send(sender, groupName);
 
-        ExtendedLogEntry.build().actor(sender).actedName(groupName).entryType(LogEntry.Type.GROUP)
+        ExtendedLogEntry.build().actor(sender).actedName(groupName).type(LogEntry.Type.GROUP)
                 .action("create")
                 .build().submit(plugin, sender);
 

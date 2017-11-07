@@ -36,6 +36,7 @@ import com.google.gson.reflect.TypeToken;
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
@@ -232,7 +233,7 @@ public class SqlDao extends AbstractDao {
                 ps.setLong(1, entry.getTimestamp());
                 ps.setString(2, entry.getActor().toString());
                 ps.setString(3, entry.getActorName());
-                ps.setString(4, Character.toString(entry.getEntryType().getCode()));
+                ps.setString(4, Character.toString(entry.getType().getCode()));
                 ps.setString(5, String.valueOf(entry.getActed()));
                 ps.setString(6, entry.getActedName());
                 ps.setString(7, entry.getAction());
@@ -253,15 +254,16 @@ public class SqlDao extends AbstractDao {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         final String actedUuid = rs.getString("acted_uuid");
-                        LogEntry e = new LogEntry(
-                                rs.getLong("time"),
-                                UUID.fromString(rs.getString("actor_uuid")),
-                                rs.getString("actor_name"),
-                                rs.getString("type").toCharArray()[0],
-                                actedUuid.equals("null") ? null : UUID.fromString(actedUuid),
-                                rs.getString("acted_name"),
-                                rs.getString("action")
-                        );
+                        ExtendedLogEntry e = ExtendedLogEntry.build()
+                                .timestamp(rs.getLong("time"))
+                                .actor(UUID.fromString(rs.getString("actor_uuid")))
+                                .actorName(rs.getString("actor_name"))
+                                .type(LogEntry.Type.valueOf(rs.getString("type").toCharArray()[0]))
+                                .acted(actedUuid.equals("null") ? null : UUID.fromString(actedUuid))
+                                .actedName(rs.getString("acted_name"))
+                                .action(rs.getString("action"))
+                                .build();
+                        
                         log.add(e);
                     }
                 }

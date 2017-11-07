@@ -135,18 +135,6 @@ public interface Storage {
     CompletableFuture<Boolean> saveUser(@Nonnull User user);
 
     /**
-     * Removes users from the main storage who are "default". This is called every time the plugin loads.
-     *
-     * @return true if the operation completed successfully
-     * @deprecated this method no longer does anything - the cleanup feature was removed. :)
-     */
-    @Nonnull
-    @Deprecated
-    default CompletableFuture<Boolean> cleanupUsers() {
-        return CompletableFuture.completedFuture(false);
-    }
-
-    /**
      * Gets a set all "unique" user UUIDs.
      *
      * <p>"Unique" meaning the user isn't just a member of the "default" group.</p>

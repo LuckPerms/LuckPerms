@@ -23,21 +23,20 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.exceptions;
+package me.lucko.luckperms.common.logging;
 
 /**
- * Thrown when a certain membership state is / isn't met.
+ * Represents the logger instance being used by LuckPerms on the platform.
  *
- * For example, when:
- * <p></p>
- * <ul>
- *     <li>a permission holding object doesn't have a permission</li>
- *     <li>a permission holding object already has a permission</li>
- *     <li>a permission holding object is already a member of a group</li>
- *     <li>a permission holding object isn't already a member of a group</li>
- * </ul>
- *
- * @since 2.7
+ * <p>Messages sent using the logger are sent prefixed with the LuckPerms tag, and on some implementations will be colored
+ * depending on the message type.</p>
  */
-public abstract class MembershipException extends Exception {
+public interface Logger {
+
+    void info(String s);
+
+    void warn(String s);
+
+    void severe(String s);
+
 }

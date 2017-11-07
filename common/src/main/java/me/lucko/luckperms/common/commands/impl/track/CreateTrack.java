@@ -71,7 +71,7 @@ public class CreateTrack extends SingleCommand {
 
         Message.CREATE_SUCCESS.send(sender, trackName);
 
-        ExtendedLogEntry.build().actor(sender).actedName(trackName).entryType(LogEntry.Type.TRACK)
+        ExtendedLogEntry.build().actor(sender).actedName(trackName).type(LogEntry.Type.TRACK)
                 .action("create").build()
                 .submit(plugin, sender);
 

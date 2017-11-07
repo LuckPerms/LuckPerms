@@ -33,7 +33,7 @@ import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
-import me.lucko.luckperms.common.api.delegates.LPConfigurationDelegate;
+import me.lucko.luckperms.common.api.delegates.misc.ApiConfiguration;
 import me.lucko.luckperms.common.config.keys.EnduringKey;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -58,7 +58,7 @@ public class AbstractConfiguration implements LuckPermsConfiguration, CacheLoade
     // the adapter used to read values
     private final ConfigurationAdapter adapter;
     // the api delegate
-    private final LPConfigurationDelegate delegate = new LPConfigurationDelegate(this);
+    private final ApiConfiguration delegate = new ApiConfiguration(this);
     // the contextsfile handler
     private final ContextsFile contextsFile = new ContextsFile(this);
 

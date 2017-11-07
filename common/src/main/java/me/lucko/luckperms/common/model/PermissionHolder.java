@@ -45,7 +45,7 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.api.delegates.PermissionHolderDelegate;
+import me.lucko.luckperms.common.api.delegates.model.ApiPermissionHolder;
 import me.lucko.luckperms.common.buffers.Cache;
 import me.lucko.luckperms.common.caching.MetaAccumulator;
 import me.lucko.luckperms.common.caching.handlers.StateListener;
@@ -262,7 +262,7 @@ public abstract class PermissionHolder {
      *
      * @return the api delegate
      */
-    public abstract PermissionHolderDelegate getDelegate();
+    public abstract ApiPermissionHolder getDelegate();
 
     /**
      * Returns an immutable copy of this objects nodes

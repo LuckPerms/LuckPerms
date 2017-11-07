@@ -35,16 +35,11 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.utils.DateUtil;
-import me.lucko.luckperms.common.utils.PatternCache;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -129,8 +124,6 @@ public final class ImmutableNode implements Node {
     private Map.Entry<Integer, String> suffix;
 
     private final List<String> resolvedShorthand;
-
-    private String serializedNode = null;
 
     /**
      * Make an immutable node instance
@@ -308,116 +301,13 @@ public final class ImmutableNode implements Node {
     }
 
     @Override
-    @Deprecated
-    public boolean shouldApply(boolean includeGlobal, boolean includeGlobalWorld, String server, String world, ContextSet context, boolean applyRegex) {
-        return shouldApplyOnServer(server, includeGlobal, applyRegex) && shouldApplyOnWorld(world, includeGlobalWorld, applyRegex) && shouldApplyWithContext(context, false);
-    }
-
-    @Override
-    @Deprecated
-    public boolean shouldApplyOnServer(String server, boolean includeGlobal, boolean applyRegex) {
-        if (server == null || server.equals("") || server.equalsIgnoreCase("global")) {
-            return !isServerSpecific();
-        }
-
-        return isServerSpecific() ? shouldApply(server, applyRegex, this.server) : includeGlobal;
-    }
-
-    @Override
-    @Deprecated
-    public boolean shouldApplyOnWorld(String world, boolean includeGlobal, boolean applyRegex) {
-        if (world == null || world.equals("") || world.equalsIgnoreCase("null")) {
-            return !isWorldSpecific();
-        }
-
-        return isWorldSpecific() ? shouldApply(world, applyRegex, this.world) : includeGlobal;
-    }
-
-    @Override
-    @Deprecated
-    public boolean shouldApplyWithContext(ContextSet context, boolean worldAndServer) {
-        if (worldAndServer) {
-            return getFullContexts().isSatisfiedBy(context, false);
-        } else {
-            return getContexts().isSatisfiedBy(context, false);
-        }
-    }
-
-    @Override
     public boolean shouldApplyWithContext(ContextSet context) {
         return getFullContexts().isSatisfiedBy(context, false);
     }
 
     @Override
-    @Deprecated
-    public boolean shouldApplyOnAnyServers(List<String> servers, boolean includeGlobal) {
-        for (String s : servers) {
-            if (shouldApplyOnServer(s, includeGlobal, false)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    @Override
-    @Deprecated
-    public boolean shouldApplyOnAnyWorlds(List<String> worlds, boolean includeGlobal) {
-        for (String s : worlds) {
-            if (shouldApplyOnWorld(s, includeGlobal, false)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    @Override
-    public List<String> resolveWildcard(List<String> possibleNodes) {
-        if (!isWildcard() || possibleNodes == null) {
-            return Collections.emptyList();
-        }
-
-        String match = getPermission().substring(0, getPermission().length() - 2);
-        return possibleNodes.stream().filter(pn -> pn.startsWith(match)).collect(Collectors.toList());
-    }
-
-    @Override
     public List<String> resolveShorthand() {
         return resolvedShorthand;
-    }
-
-    @Override
-    public synchronized String toSerializedNode() {
-        if (serializedNode == null) {
-            serializedNode = calculateSerializedNode();
-        }
-        return serializedNode;
-    }
-
-    private String calculateSerializedNode() {
-        StringBuilder builder = new StringBuilder();
-
-        if (server != null) {
-            builder.append(NodeFactory.escapeDelimiters(server, SERVER_WORLD_DELIMITERS));
-            if (world != null) builder.append("-").append(NodeFactory.escapeDelimiters(world, SERVER_WORLD_DELIMITERS));
-            builder.append("/");
-        } else {
-            if (world != null) builder.append("global-").append(NodeFactory.escapeDelimiters(world, SERVER_WORLD_DELIMITERS)).append("/");
-        }
-
-        if (!contexts.isEmpty()) {
-            builder.append("(");
-            for (Map.Entry<String, String> entry : contexts.toSet()) {
-                builder.append(NodeFactory.escapeDelimiters(entry.getKey(), "=", "(", ")", ",")).append("=").append(NodeFactory.escapeDelimiters(entry.getValue(), "=", "(", ")", ",")).append(",");
-            }
-            builder.deleteCharAt(builder.length() - 1);
-            builder.append(")");
-        }
-
-        builder.append(NodeFactory.escapeDelimiters(permission, "/", "-", "$", "(", ")", "=", ","));
-        if (expireAt != 0L) builder.append("$").append(expireAt);
-        return builder.toString();
     }
 
     @SuppressWarnings("StringEquality")
@@ -525,46 +415,6 @@ public final class ImmutableNode implements Node {
     @Override
     public String getKey() {
         return getPermission();
-    }
-
-    private static boolean shouldApply(String str, boolean applyRegex, String thisStr) {
-        if (str.equalsIgnoreCase(thisStr)) {
-            return true;
-        }
-
-        Set<String> expandedStr = ShorthandParser.parseShorthand(str, false);
-        Set<String> expandedThisStr = ShorthandParser.parseShorthand(thisStr, false);
-
-        if (str.toLowerCase().startsWith("r=") && applyRegex) {
-            Pattern p = PatternCache.compile(str.substring(2));
-            if (p == null) {
-                return false;
-            }
-
-            for (String s : expandedThisStr) {
-                if (p.matcher(s).matches()) return true;
-            }
-            return false;
-        }
-
-        if (thisStr.toLowerCase().startsWith("r=") && applyRegex) {
-            Pattern p = PatternCache.compile(thisStr.substring(2));
-            if (p == null) return false;
-
-            for (String s : expandedStr) {
-                if (p.matcher(s).matches()) return true;
-            }
-            return false;
-        }
-
-        if (expandedStr.size() <= 1 && expandedThisStr.size() <= 1) return false;
-
-        for (String t : expandedThisStr) {
-            for (String s : expandedStr) {
-                if (t.equalsIgnoreCase(s)) return true;
-            }
-        }
-        return false;
     }
 
     private static String internString(String s) {

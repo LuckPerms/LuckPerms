@@ -32,7 +32,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 
-import me.lucko.luckperms.common.api.delegates.UuidCacheDelegate;
+import me.lucko.luckperms.common.api.delegates.misc.ApiUuidCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -49,7 +49,7 @@ public class UuidCache {
     private final BiMap<UUID, UUID> cache = Maps.synchronizedBiMap(HashBiMap.create());
 
     @Getter
-    private final UuidCacheDelegate delegate = new UuidCacheDelegate(this);
+    private final ApiUuidCache delegate = new ApiUuidCache(this);
 
     public UUID getUUID(UUID external) {
         return inUse() ? external : cache.getOrDefault(external, external);

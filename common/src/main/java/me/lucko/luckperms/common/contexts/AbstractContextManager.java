@@ -35,6 +35,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.context.StaticContextCalculator;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -54,8 +55,10 @@ import java.util.stream.Collectors;
 public abstract class AbstractContextManager<T> implements ContextManager<T> {
 
     protected final LuckPermsPlugin plugin;
+    private final Class<T> subjectClass;
+
     private final List<ContextCalculator<T>> calculators = new CopyOnWriteArrayList<>();
-    private final List<ContextCalculator<?>> staticCalculators = new CopyOnWriteArrayList<>();
+    private final List<StaticContextCalculator> staticCalculators = new CopyOnWriteArrayList<>();
 
     // caches context lookups
     private final LoadingCache<T, Contexts> lookupCache = Caffeine.newBuilder()
@@ -63,8 +66,14 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
             .expireAfterWrite(50L, TimeUnit.MILLISECONDS) // expire roughly every tick
             .build(new Loader());
 
-    protected AbstractContextManager(LuckPermsPlugin plugin) {
+    protected AbstractContextManager(LuckPermsPlugin plugin, Class<T> subjectClass) {
         this.plugin = plugin;
+        this.subjectClass = subjectClass;
+    }
+
+    @Override
+    public Class<T> getSubjectClass() {
+        return subjectClass;
     }
 
     @Override
@@ -124,13 +133,17 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
     }
 
     @Override
-    public void registerCalculator(ContextCalculator<T> calculator, boolean isStatic) {
+    public void registerCalculator(ContextCalculator<T> calculator) {
         // calculators registered first should have priority (and be checked last.)
         calculators.add(0, calculator);
+    }
 
-        if (isStatic) {
-            staticCalculators.add(0, calculator);
-        }
+    @Override
+    public void registerStaticCalculator(StaticContextCalculator calculator) {
+        //noinspection unchecked
+        registerCalculator((ContextCalculator<T>) calculator);
+
+        staticCalculators.add(0, calculator);
     }
 
     @Override

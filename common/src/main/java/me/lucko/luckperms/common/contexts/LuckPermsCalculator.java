@@ -27,17 +27,17 @@ package me.lucko.luckperms.common.contexts;
 
 import lombok.AllArgsConstructor;
 
-import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.context.StaticContextCalculator;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 
 @AllArgsConstructor
-public class LuckPermsCalculator<T> implements ContextCalculator<T> {
+public class LuckPermsCalculator implements StaticContextCalculator {
     private final LuckPermsConfiguration config;
 
     @Override
-    public MutableContextSet giveApplicableContext(T subject, MutableContextSet accumulator) {
+    public MutableContextSet giveApplicableContext(MutableContextSet accumulator) {
         String server = config.get(ConfigKeys.SERVER);
         if (!server.equals("global")) {
             accumulator.add("server", server);

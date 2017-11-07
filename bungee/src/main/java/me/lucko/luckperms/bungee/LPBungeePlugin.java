@@ -28,8 +28,7 @@ package me.lucko.luckperms.bungee;
 import lombok.Getter;
 
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.Logger;
-import me.lucko.luckperms.api.PlatformType;
+import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.bungee.calculators.BungeeCalculatorFactory;
 import me.lucko.luckperms.bungee.contexts.BackendServerCalculator;
 import me.lucko.luckperms.bungee.contexts.BungeeContextManager;
@@ -39,8 +38,8 @@ import me.lucko.luckperms.bungee.listeners.BungeePermissionCheckListener;
 import me.lucko.luckperms.bungee.messaging.BungeeMessagingFactory;
 import me.lucko.luckperms.bungee.util.RedisBungeeUtil;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
-import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
+import me.lucko.luckperms.common.api.ApiSingletonUtils;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.UpdateTaskBuffer;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
@@ -57,6 +56,7 @@ import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.NoopLocaleManager;
 import me.lucko.luckperms.common.locale.SimpleLocaleManager;
+import me.lucko.luckperms.common.logging.Logger;
 import me.lucko.luckperms.common.logging.SenderLogger;
 import me.lucko.luckperms.common.managers.GenericGroupManager;
 import me.lucko.luckperms.common.managers.GenericTrackManager;
@@ -188,15 +188,15 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         // setup context manager
         contextManager = new BungeeContextManager(this);
         contextManager.registerCalculator(new BackendServerCalculator(this));
-        contextManager.registerCalculator(new LuckPermsCalculator<>(getConfiguration()), true);
+        contextManager.registerStaticCalculator(new LuckPermsCalculator(getConfiguration()));
 
         if (getProxy().getPluginManager().getPlugin("RedisBungee") != null) {
-            contextManager.registerCalculator(new RedisBungeeCalculator(), true);
+            contextManager.registerStaticCalculator(new RedisBungeeCalculator());
         }
 
         // register with the LP API
         apiProvider = new ApiProvider(this);
-        ApiHandler.registerProvider(apiProvider);
+        ApiSingletonUtils.registerProvider(apiProvider);
 
         // schedule update tasks
         int mins = getConfiguration().get(ConfigKeys.SYNC_TIME);
@@ -234,7 +234,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
             messagingService.close();
         }
 
-        ApiHandler.unregisterProvider();
+        ApiSingletonUtils.unregisterProvider();
 
         getLog().info("Shutting down internal scheduler...");
         scheduler.shutdown();

@@ -35,7 +35,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public class BungeeContextManager extends AbstractContextManager<ProxiedPlayer> {
     public BungeeContextManager(LPBungeePlugin plugin) {
-        super(plugin);
+        super(plugin, ProxiedPlayer.class);
     }
 
     @Override

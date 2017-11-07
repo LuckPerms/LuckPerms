@@ -23,47 +23,34 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api;
+package me.lucko.luckperms.api.platform;
 
-import me.lucko.luckperms.LuckPerms;
-import me.lucko.luckperms.api.LuckPermsApi;
+import javax.annotation.Nonnull;
 
-import java.lang.reflect.Method;
+/**
+ * Represents a type of platform which LuckPerms can run on.
+ *
+ * @since 2.7
+ */
+public enum PlatformType {
 
-public class ApiHandler {
-    private static final Method REGISTER;
-    private static final Method UNREGISTER;
-    static {
-        Method register = null;
-        Method unregister = null;
-        try {
-            register = LuckPerms.class.getDeclaredMethod("registerProvider", LuckPermsApi.class);
-            register.setAccessible(true);
+    BUKKIT("Bukkit"),
+    BUNGEE("Bungee"),
+    SPONGE("Sponge");
 
-            unregister = LuckPerms.class.getDeclaredMethod("unregisterProvider");
-            unregister.setAccessible(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private final String friendlyName;
 
-        REGISTER = register;
-        UNREGISTER = unregister;
+    PlatformType(String friendlyName) {
+        this.friendlyName = friendlyName;
     }
 
-    public static void registerProvider(LuckPermsApi luckPermsApi) {
-        try {
-            REGISTER.invoke(null, luckPermsApi);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    /**
+     * Gets a readable name for the platform type.
+     *
+     * @return a readable name
+     */
+    @Nonnull
+    public String getFriendlyName() {
+        return friendlyName;
     }
-
-    public static void unregisterProvider() {
-        try {
-            UNREGISTER.invoke(null);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
 }

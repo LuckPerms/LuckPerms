@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.delegates;
+package me.lucko.luckperms.common.api.delegates.model;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -32,21 +32,17 @@ import lombok.NonNull;
 
 import com.google.common.base.Preconditions;
 
+import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Track;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
 
-/**
- * Provides a link between {@link Track} and {@link me.lucko.luckperms.common.model.Track}
- */
 @AllArgsConstructor
-public final class TrackDelegate implements Track {
+public final class ApiTrack implements Track {
     public static me.lucko.luckperms.common.model.Track cast(Track g) {
-        Preconditions.checkState(g instanceof TrackDelegate, "Illegal instance " + g.getClass() + " cannot be handled by this implementation.");
-        return ((TrackDelegate) g).getHandle();
+        Preconditions.checkState(g instanceof ApiTrack, "Illegal instance " + g.getClass() + " cannot be handled by this implementation.");
+        return ((ApiTrack) g).getHandle();
     }
 
     @Getter(AccessLevel.PACKAGE)
@@ -68,46 +64,46 @@ public final class TrackDelegate implements Track {
     }
 
     @Override
-    public String getNext(@NonNull Group current) throws ObjectLacksException {
+    public String getNext(@NonNull Group current) {
         try {
-            return handle.getNext(GroupDelegate.cast(current));
+            return handle.getNext(ApiGroup.cast(current));
         } catch (IllegalArgumentException e) {
-            throw new ObjectLacksException();
+            return null;
         }
     }
 
     @Override
-    public String getPrevious(@NonNull Group current) throws ObjectLacksException {
+    public String getPrevious(@NonNull Group current) {
         try {
-            return handle.getPrevious(GroupDelegate.cast(current));
+            return handle.getPrevious(ApiGroup.cast(current));
         } catch (IllegalArgumentException e) {
-            throw new ObjectLacksException();
+            return null;
         }
     }
 
     @Override
-    public void appendGroup(@NonNull Group group) throws ObjectAlreadyHasException {
-        handle.appendGroup(GroupDelegate.cast(group)).throwException();
+    public DataMutateResult appendGroup(@NonNull Group group) {
+        return handle.appendGroup(ApiGroup.cast(group));
     }
 
     @Override
-    public void insertGroup(@NonNull Group group, @NonNull int position) throws ObjectAlreadyHasException, IndexOutOfBoundsException {
-        handle.insertGroup(GroupDelegate.cast(group), position).throwException();
+    public DataMutateResult insertGroup(@NonNull Group group, @NonNull int position) throws IndexOutOfBoundsException {
+        return handle.insertGroup(ApiGroup.cast(group), position);
     }
 
     @Override
-    public void removeGroup(@NonNull Group group) throws ObjectLacksException {
-        handle.removeGroup(GroupDelegate.cast(group)).throwException();
+    public DataMutateResult removeGroup(@NonNull Group group) {
+        return handle.removeGroup(ApiGroup.cast(group));
     }
 
     @Override
-    public void removeGroup(@NonNull String group) throws ObjectLacksException {
-        handle.removeGroup(group).throwException();
+    public DataMutateResult removeGroup(@NonNull String group) {
+        return handle.removeGroup(group);
     }
 
     @Override
     public boolean containsGroup(@NonNull Group group) {
-        return handle.containsGroup(GroupDelegate.cast(group));
+        return handle.containsGroup(ApiGroup.cast(group));
     }
 
     @Override
@@ -122,9 +118,9 @@ public final class TrackDelegate implements Track {
 
     public boolean equals(Object o) {
         if (o == this) return true;
-        if (!(o instanceof TrackDelegate)) return false;
+        if (!(o instanceof ApiTrack)) return false;
 
-        TrackDelegate other = (TrackDelegate) o;
+        ApiTrack other = (ApiTrack) o;
         return handle.equals(other.handle);
     }
 

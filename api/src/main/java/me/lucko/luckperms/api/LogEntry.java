@@ -25,352 +25,79 @@
 
 package me.lucko.luckperms.api;
 
-import com.google.common.base.Preconditions;
-
-import java.util.Comparator;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * A single entry in the log.
+ * Represents a logged action.
  */
-public class LogEntry implements Comparable<LogEntry> {
+public interface LogEntry extends Comparable<LogEntry> {
 
     /**
-     * Compares two LogEntries
+     * Gets the time in unix seconds when the action occurred.
+     *
+     * @return the timestamp
+     */
+    long getTimestamp();
+
+    /**
+     * Gets the id of the object which performed the action.
+     *
+     * <p>This is the players uuid in most cases.</p>
+     *
+     * @return the actor id
+     */
+    UUID getActor();
+
+    /**
+     * Gets the name describing the actor.
+     *
+     * @return the name of the actor
+     */
+    String getActorName();
+
+    /**
+     * Gets the type of action.
+     *
+     * @return the action type
+     */
+    Type getType();
+
+    /**
+     * Gets the uuid of the object which was acted upon.
+     *
+     * <p>Will only return a value for {@link Type#USER} entries.</p>
+     *
+     * @return the uuid of acted object
+     */
+    Optional<UUID> getActed();
+
+    /**
+     * Gets the name describing the object which was acted upon
+     *
+     * @return the name of the acted object
+     */
+    String getActedName();
+
+    /**
+     * Returns a string describing the action which took place.
+     *
+     * <p>In most instances, this returns a variation of the command string which caused
+     * the change.</p>
+     *
+     * @return the action
+     */
+    String getAction();
+
+    /**
+     * Represents the type of a {@link LogEntry}.
      *
      * @since 3.3
      */
-    public static final Comparator<LogEntry> COMPARATOR = Comparator
-            .comparingLong(LogEntry::getTimestamp)
-            .thenComparing(LogEntry::getActor)
-            .thenComparing(LogEntry::getActorName, String.CASE_INSENSITIVE_ORDER)
-            .thenComparing(LogEntry::getEntryType)
-            .thenComparing(e -> {
-                UUID u = e.getActed();
-                return u == null ? "" : u.toString();
-            })
-            .thenComparing(LogEntry::getActedName, String.CASE_INSENSITIVE_ORDER)
-            .thenComparing(LogEntry::getAction);
-
-    /**
-     * Compares two LogEntries in reverse order
-     *
-     * @since 3.3
-     * @see #COMPARATOR
-     */
-    public static final Comparator<LogEntry> REVERSE_ORDER = COMPARATOR.reversed();
-
-    private static final String FORMAT = "&8(&e%s&8) [&a%s&8] (&b%s&8) &7--> &f%s";
-
-    /**
-     * Creates a new LogEntry builder
-     *
-     * @return a new builder
-     */
-    @Nonnull
-    public static LogEntryBuilder builder() {
-        return new LogEntryBuilder();
-    }
-
-    /**
-     * The time when the log event occurred in unix seconds.
-     */
-    private long timestamp;
-
-    /**
-     * The player who enacted the change
-     */
-    @Nonnull
-    private UUID actor;
-
-    /**
-     * The name of the player who enacted the change
-     */
-    @Nonnull
-    private String actorName;
-
-    /**
-     * The entry type.
-     */
-    @Nonnull
-    private Type type;
-
-    /**
-     * The user who was acted upon
-     */
-    @Nullable
-    private UUID acted;
-
-    /**
-     * The name of the object who was acted upon
-     */
-    @Nonnull
-    private String actedName;
-
-    /**
-     * A description of the action
-     */
-    @Nonnull
-    private String action;
-
-    /**
-     * Creates a new log entry
-     *
-     * @param timestamp the timestamp
-     * @param actor the actor
-     * @param actorName the actorName
-     * @param type the type
-     * @param acted the acted object, or null
-     * @param actedName the acted object name
-     * @param action the action
-     * @since 3.3
-     */
-    public LogEntry(long timestamp, @Nonnull UUID actor, @Nonnull String actorName, @Nonnull Type type, @Nullable UUID acted, @Nonnull String actedName, @Nonnull String action) {
-        Preconditions.checkNotNull(actor, "actor");
-        Preconditions.checkNotNull(actorName, "actorName");
-        Preconditions.checkNotNull(type, "type");
-        Preconditions.checkNotNull(actedName, "actedName");
-        Preconditions.checkNotNull(action, "action");
-
-        this.timestamp = timestamp;
-        this.actor = actor;
-        this.actorName = actorName;
-        this.type = type;
-        this.acted = acted;
-        this.actedName = actedName;
-        this.action = action;
-    }
-
-    /**
-     * Creates a new log entry
-     *
-     * @param timestamp the timestamp
-     * @param actor the actor
-     * @param actorName the actorName
-     * @param type the type code
-     * @param acted the acted object, or null
-     * @param actedName the acted object name
-     * @param action the action
-     */
-    public LogEntry(long timestamp, @Nonnull UUID actor, @Nonnull String actorName, char type, @Nullable UUID acted, @Nonnull String actedName, @Nonnull String action) {
-        Preconditions.checkNotNull(actor, "actor");
-        Preconditions.checkNotNull(actorName, "actorName");
-        Preconditions.checkNotNull(actedName, "actedName");
-        Preconditions.checkNotNull(action, "action");
-
-        this.timestamp = timestamp;
-        this.actor = actor;
-        this.actorName = actorName;
-        this.type = Type.valueOf(type);
-        this.acted = acted;
-        this.actedName = actedName;
-        this.action = action;
-    }
-
-    /**
-     * Creates a new LogEntry and copies the values from another
-     *
-     * @param other the entry to copy values from
-     * @since 3.3
-     */
-    protected LogEntry(@Nonnull LogEntry other) {
-        this.timestamp = other.timestamp;
-        this.actor = other.actor;
-        this.actorName = other.actorName;
-        this.type = other.type;
-        this.acted = other.acted;
-        this.actedName = other.actedName;
-        this.action = other.action;
-    }
-
-    protected LogEntry() {
-        this.timestamp = 0L;
-        this.actor = null;
-        this.actorName = null;
-        this.type = null;
-        this.acted = null;
-        this.actedName = null;
-        this.action = null;
-    }
-
-    @Override
-    public int compareTo(@Nonnull LogEntry other) {
-        Preconditions.checkNotNull(other, "other");
-        return COMPARATOR.compare(this, other);
-    }
-
-    /**
-     * Creates a copy of this log entry
-     *
-     * @return a copy of this log entry
-     * @since 3.3
-     */
-    public LogEntry copy() {
-        return new LogEntry(this);
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    @Nonnull
-    public UUID getActor() {
-        return Preconditions.checkNotNull(actor, "actor");
-    }
-
-    void setActor(@Nonnull UUID actor) {
-        this.actor = Preconditions.checkNotNull(actor, "actor");
-    }
-
-    @Nonnull
-    public String getActorName() {
-        return Preconditions.checkNotNull(actorName, "actorName");
-    }
-
-    void setActorName(@Nonnull String actorName) {
-        this.actorName = Preconditions.checkNotNull(actorName, "actorName");
-    }
-
-    /**
-     * Gets the type of this entry
-     *
-     * @return the type of this entry
-     * @since 3.3
-     */
-    @Nonnull
-    public Type getEntryType() {
-        return Preconditions.checkNotNull(type, "type");
-    }
-
-    /**
-     * Sets the type of this entry
-     *
-     * @param type the new type
-     * @since 3.3
-     */
-    public void setEntryType(@Nonnull Type type) {
-        this.type = Preconditions.checkNotNull(type, "type");
-    }
-
-    /**
-     * Gets the code representing this entry type
-     *
-     * @return the code representing this entry type
-     * @deprecated in favour of {@link #getEntryType()}
-     */
-    @Deprecated
-    public char getType() {
-        return getEntryType().getCode();
-    }
-
-    /**
-     * Sets the type of this entry by code
-     *
-     * @param code the code type
-     * @deprecated in favour of {@link #setEntryType(Type)}
-     */
-    @Deprecated
-    void setType(char code) {
-        setEntryType(Type.valueOf(code));
-    }
-
-    @Nullable
-    public UUID getActed() {
-        return acted;
-    }
-
-    void setActed(@Nullable UUID acted) {
-        this.acted = acted;
-    }
-
-    @Nonnull
-    public String getActedName() {
-        return Preconditions.checkNotNull(actedName, "actedName");
-    }
-
-    void setActedName(@Nonnull String actedName) {
-        this.actedName = Preconditions.checkNotNull(actedName, "actedName");
-    }
-
-    @Nonnull
-    public String getAction() {
-        return Preconditions.checkNotNull(action, "action");
-    }
-
-    void setAction(@Nonnull String action) {
-        this.action = Preconditions.checkNotNull(action, "action");
-    }
-
-    public boolean matchesSearch(@Nonnull String query) {
-        query = Preconditions.checkNotNull(query, "query").toLowerCase();
-        return actorName.toLowerCase().contains(query) ||
-                actedName.toLowerCase().contains(query) ||
-                action.toLowerCase().contains(query);
-    }
-
-    @Nonnull
-    public String getFormatted() {
-        return String.format(FORMAT,
-                String.valueOf(actorName).equals("null") ? actor.toString() : actorName,
-                Character.toString(type.getCode()),
-                String.valueOf(actedName).equals("null") && acted != null ? acted.toString() : actedName,
-                action
-        );
-    }
-
-    @Override
-    public String toString() {
-        return "LogEntry(" +
-                "timestamp=" + this.getTimestamp() + ", " +
-                "actor=" + this.getActor() + ", " +
-                "actorName=" + this.getActorName() + ", " +
-                "type=" + this.getEntryType() + ", " +
-                "acted=" + this.getActed() + ", " +
-                "actedName=" + this.getActedName() + ", " +
-                "action=" + this.getAction() + ")";
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) return true;
-        if (!(o instanceof LogEntry)) return false;
-        final LogEntry other = (LogEntry) o;
-
-        return this.getTimestamp() == other.getTimestamp() &&
-                this.getActor().equals(other.getActor()) &&
-                this.getActorName().equals(other.getActorName()) &&
-                this.getEntryType() == other.getEntryType() &&
-                (this.getActed() == null ? other.getActed() == null : this.getActed().equals(other.getActed())) &&
-                this.getActedName().equals(other.getActedName()) &&
-                this.getAction().equals(other.getAction());
-    }
-
-    @Override
-    public int hashCode() {
-        final int PRIME = 59;
-        int result = 1;
-        result = result * PRIME + (int) (this.getTimestamp() >>> 32 ^ this.getTimestamp());
-        result = result * PRIME + this.getActor().hashCode();
-        result = result * PRIME + this.getActorName().hashCode();
-        result = result * PRIME + this.getEntryType().hashCode();
-        result = result * PRIME + (this.getActed() == null ? 43 : this.getActed().hashCode());
-        result = result * PRIME + this.getActedName().hashCode();
-        result = result * PRIME + this.getAction().hashCode();
-        return result;
-    }
-
-    /**
-     * The LogEntry type
-     * @since 3.3
-     */
-    public enum Type {
+    enum Type {
         USER('U'),
         GROUP('G'),
         TRACK('T');
@@ -403,152 +130,34 @@ public class LogEntry implements Comparable<LogEntry> {
     }
 
     /**
-     * Builds LogEntry instances
+     * Builds a LogEntry instance
      */
-    public static class LogEntryBuilder extends AbstractLogEntryBuilder<LogEntry, LogEntry.LogEntryBuilder> {
-
-        @Override
-        protected LogEntry createEmptyLog() {
-            return new LogEntry();
-        }
-
-        @Override
-        protected LogEntryBuilder getThisBuilder() {
-            return this;
-        }
-
-    }
-
-    /**
-     * An abstract log entry builder
-     *
-     * @param <T> the log type
-     * @param <B> the log builder type
-     */
-    public static abstract class AbstractLogEntryBuilder<T extends LogEntry, B extends AbstractLogEntryBuilder<T, B>> {
-        private final T obj;
-        private final B thisObj;
-
-        public AbstractLogEntryBuilder() {
-            obj = createEmptyLog();
-            thisObj = getThisBuilder();
-        }
-
-        protected abstract T createEmptyLog();
-
-        protected abstract B getThisBuilder();
-
-        public long getTimestamp() {
-            return obj.getTimestamp();
-        }
+    interface Builder {
 
         @Nonnull
-        public UUID getActor() {
-            return obj.getActor();
-        }
+        Builder setTimestamp(long timestamp);
 
         @Nonnull
-        public String getActorName() {
-            return obj.getActorName();
-        }
+        Builder setActor(@Nonnull UUID actor);
 
         @Nonnull
-        public Type getEntryType() {
-            return obj.getEntryType();
-        }
+        Builder setActorName(@Nonnull String actorName);
 
         @Nonnull
-        @Deprecated
-        public char getType() {
-            return obj.getType();
-        }
-
-        @Nullable
-        public UUID getActed() {
-            return obj.getActed();
-        }
+        Builder setType(@Nonnull Type type);
 
         @Nonnull
-        public String getActedName() {
-            return obj.getActedName();
-        }
+        Builder setActed(@Nullable UUID acted);
 
         @Nonnull
-        public String getAction() {
-            return obj.getAction();
-        }
+        Builder setActedName(@Nonnull String actedName);
 
         @Nonnull
-        public B timestamp(long timestamp) {
-            obj.setTimestamp(timestamp);
-            return thisObj;
-        }
+        Builder setAction(@Nonnull String action);
 
         @Nonnull
-        public B actor(@Nonnull UUID actor) {
-            obj.setActor(actor);
-            return thisObj;
-        }
+        LogEntry build();
 
-        @Nonnull
-        public B actorName(@Nonnull String actorName) {
-            obj.setActorName(actorName);
-            return thisObj;
-        }
-
-        @Nonnull
-        public B entryType(@Nonnull Type type) {
-            obj.setEntryType(type);
-            return thisObj;
-        }
-
-        @Nonnull
-        @Deprecated
-        public B type(char type) {
-            obj.setType(type);
-            return thisObj;
-        }
-
-        @Nonnull
-        public B acted(@Nullable UUID acted) {
-            obj.setActed(acted);
-            return thisObj;
-        }
-
-        @Nonnull
-        public B actedName(@Nonnull String actedName) {
-            obj.setActedName(actedName);
-            return thisObj;
-        }
-
-        @Nonnull
-        public B action(@Nonnull String action) {
-            obj.setAction(action);
-            return thisObj;
-        }
-
-        @Nonnull
-        public T build() {
-            Preconditions.checkNotNull(getActor(), "actor");
-            Preconditions.checkNotNull(getActorName(), "actorName");
-            Preconditions.checkNotNull(getEntryType(), "type");
-            Preconditions.checkNotNull(getActedName(), "actedName");
-            Preconditions.checkNotNull(getAction(), "action");
-
-            return obj;
-        }
-
-        @Override
-        public String toString() {
-            return "LogEntry.LogEntryBuilder(" +
-                    "timestamp=" + this.getTimestamp() + ", " +
-                    "actor=" + this.getActor() + ", " +
-                    "actorName=" + this.getActorName() + ", " +
-                    "type=" + this.getEntryType() + ", " +
-                    "acted=" + this.getActed() + ", " +
-                    "actedName=" + this.getActedName() + ", " +
-                    "action=" + this.getAction() + ")";
-        }
     }
 
 }

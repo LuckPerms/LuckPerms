@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.commands.impl.log;
 
-import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -114,11 +114,11 @@ public class LogUserHistory extends SubCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        SortedMap<Integer, LogEntry> entries = log.getUserHistory(page, user);
+        SortedMap<Integer, ExtendedLogEntry> entries = log.getUserHistory(page, user);
         String name = entries.values().stream().findAny().get().getActedName();
         Message.LOG_HISTORY_USER_HEADER.send(sender, name, page, maxPage);
 
-        for (Map.Entry<Integer, LogEntry> e : entries.entrySet()) {
+        for (Map.Entry<Integer, ExtendedLogEntry> e : entries.entrySet()) {
             long time = e.getValue().getTimestamp();
             long now = DateUtil.unixSecondsNow();
             Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatTimeShort(now - time), e.getValue().getFormatted());

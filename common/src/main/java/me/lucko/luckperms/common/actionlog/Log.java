@@ -46,7 +46,7 @@ public class Log {
         return new Builder();
     }
 
-    private static SortedMap<Integer, LogEntry> getPage(Set<LogEntry> set, int pageNo, int entries) {
+    private static SortedMap<Integer, ExtendedLogEntry> getPage(Set<ExtendedLogEntry> set, int pageNo, int entries) {
         if (pageNo < 1) {
             throw new IllegalArgumentException("pageNo cannot be less than 1: " + pageNo);
         }
@@ -57,11 +57,11 @@ public class Log {
                     "Requested: " + minimumEntries + ", Log Count: " + set.size());
         }
 
-        final SortedMap<Integer, LogEntry> out = new TreeMap<>();
+        final SortedMap<Integer, ExtendedLogEntry> out = new TreeMap<>();
 
         final int max = minimumEntries + entries - 1;
         int index = 0;
-        for (LogEntry e : set) {
+        for (ExtendedLogEntry e : set) {
             index++;
             if (index >= minimumEntries) {
                 out.put(index, e);
@@ -83,17 +83,17 @@ public class Log {
     }
 
     @Getter
-    private final SortedSet<LogEntry> content;
+    private final SortedSet<ExtendedLogEntry> content;
 
-    public Log(SortedSet<LogEntry> content) {
+    public Log(SortedSet<ExtendedLogEntry> content) {
         this.content = ImmutableSortedSet.copyOfSorted(content);
     }
 
-    public SortedSet<LogEntry> getRecent() {
+    public SortedSet<ExtendedLogEntry> getRecent() {
         return content;
     }
 
-    public SortedMap<Integer, LogEntry> getRecent(int pageNo) {
+    public SortedMap<Integer, ExtendedLogEntry> getRecent(int pageNo) {
         return getPage(content, pageNo, PAGE_ENTRIES);
     }
 
@@ -101,13 +101,13 @@ public class Log {
         return getMaxPages(content.size(), PAGE_ENTRIES);
     }
 
-    public SortedSet<LogEntry> getRecent(UUID actor) {
+    public SortedSet<ExtendedLogEntry> getRecent(UUID actor) {
         return content.stream()
                 .filter(e -> e.getActor().equals(actor))
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public SortedMap<Integer, LogEntry> getRecent(int pageNo, UUID actor) {
+    public SortedMap<Integer, ExtendedLogEntry> getRecent(int pageNo, UUID actor) {
         return getPage(getRecent(actor), pageNo, PAGE_ENTRIES);
     }
 
@@ -117,69 +117,69 @@ public class Log {
                 .count(), PAGE_ENTRIES);
     }
 
-    public SortedSet<LogEntry> getUserHistory(UUID uuid) {
+    public SortedSet<ExtendedLogEntry> getUserHistory(UUID uuid) {
         return content.stream()
-                .filter(e -> e.getEntryType() == LogEntry.Type.USER)
+                .filter(e -> e.getType() == LogEntry.Type.USER)
                 .filter(e -> e.getActed() != null)
                 .filter(e -> e.getActed().equals(uuid))
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public SortedMap<Integer, LogEntry> getUserHistory(int pageNo, UUID uuid) {
+    public SortedMap<Integer, ExtendedLogEntry> getUserHistory(int pageNo, UUID uuid) {
         return getPage(getUserHistory(uuid), pageNo, PAGE_ENTRIES);
     }
 
     public int getUserHistoryMaxPages(UUID uuid) {
         return getMaxPages(content.stream()
-                .filter(e -> e.getEntryType() == LogEntry.Type.USER)
+                .filter(e -> e.getType() == LogEntry.Type.USER)
                 .filter(e -> e.getActed() != null)
                 .filter(e -> e.getActed().equals(uuid))
                 .count(), PAGE_ENTRIES);
     }
 
-    public SortedSet<LogEntry> getGroupHistory(String name) {
+    public SortedSet<ExtendedLogEntry> getGroupHistory(String name) {
         return content.stream()
-                .filter(e -> e.getEntryType() == LogEntry.Type.GROUP)
+                .filter(e -> e.getType() == LogEntry.Type.GROUP)
                 .filter(e -> e.getActedName().equals(name))
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public SortedMap<Integer, LogEntry> getGroupHistory(int pageNo, String name) {
+    public SortedMap<Integer, ExtendedLogEntry> getGroupHistory(int pageNo, String name) {
         return getPage(getGroupHistory(name), pageNo, PAGE_ENTRIES);
     }
 
     public int getGroupHistoryMaxPages(String name) {
         return getMaxPages(content.stream()
-                .filter(e -> e.getEntryType() == LogEntry.Type.GROUP)
+                .filter(e -> e.getType() == LogEntry.Type.GROUP)
                 .filter(e -> e.getActedName().equals(name))
                 .count(), PAGE_ENTRIES);
     }
 
-    public SortedSet<LogEntry> getTrackHistory(String name) {
+    public SortedSet<ExtendedLogEntry> getTrackHistory(String name) {
         return content.stream()
-                .filter(e -> e.getEntryType() == LogEntry.Type.TRACK)
+                .filter(e -> e.getType() == LogEntry.Type.TRACK)
                 .filter(e -> e.getActedName().equals(name))
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public SortedMap<Integer, LogEntry> getTrackHistory(int pageNo, String name) {
+    public SortedMap<Integer, ExtendedLogEntry> getTrackHistory(int pageNo, String name) {
         return getPage(getTrackHistory(name), pageNo, PAGE_ENTRIES);
     }
 
     public int getTrackHistoryMaxPages(String name) {
         return getMaxPages(content.stream()
-                .filter(e -> e.getEntryType() == LogEntry.Type.TRACK)
+                .filter(e -> e.getType() == LogEntry.Type.TRACK)
                 .filter(e -> e.getActedName().equals(name))
                 .count(), PAGE_ENTRIES);
     }
 
-    public SortedSet<LogEntry> getSearch(String query) {
+    public SortedSet<ExtendedLogEntry> getSearch(String query) {
         return content.stream()
                 .filter(e -> e.matchesSearch(query))
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public SortedMap<Integer, LogEntry> getSearch(int pageNo, String query) {
+    public SortedMap<Integer, ExtendedLogEntry> getSearch(int pageNo, String query) {
         return getPage(getSearch(query), pageNo, PAGE_ENTRIES);
     }
 
@@ -191,9 +191,9 @@ public class Log {
 
     @SuppressWarnings("WeakerAccess")
     public static class Builder {
-        private final SortedSet<LogEntry> content = new TreeSet<>();
+        private final SortedSet<ExtendedLogEntry> content = new TreeSet<>();
 
-        public Builder add(LogEntry e) {
+        public Builder add(ExtendedLogEntry e) {
             content.add(e);
             return this;
         }

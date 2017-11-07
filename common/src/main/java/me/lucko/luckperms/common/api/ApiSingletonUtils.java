@@ -23,18 +23,47 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.exceptions;
+package me.lucko.luckperms.common.api;
 
-/**
- * Thrown when an object already has something.
- *
- * <p>For example, when:</p>
- * <p></p>
- * <ul>
- *     <li>a permission holding object already has a permission</li>
- *     <li>a permission holding object is already a member of a group</li>
- *     <li>a track already contains a group</li>
- * </ul>
- */
-public class ObjectAlreadyHasException extends MembershipException {
+import me.lucko.luckperms.LuckPerms;
+import me.lucko.luckperms.api.LuckPermsApi;
+
+import java.lang.reflect.Method;
+
+public class ApiSingletonUtils {
+    private static final Method REGISTER;
+    private static final Method UNREGISTER;
+    static {
+        Method register = null;
+        Method unregister = null;
+        try {
+            register = LuckPerms.class.getDeclaredMethod("registerProvider", LuckPermsApi.class);
+            register.setAccessible(true);
+
+            unregister = LuckPerms.class.getDeclaredMethod("unregisterProvider");
+            unregister.setAccessible(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        REGISTER = register;
+        UNREGISTER = unregister;
+    }
+
+    public static void registerProvider(LuckPermsApi luckPermsApi) {
+        try {
+            REGISTER.invoke(null, luckPermsApi);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void unregisterProvider() {
+        try {
+            UNREGISTER.invoke(null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

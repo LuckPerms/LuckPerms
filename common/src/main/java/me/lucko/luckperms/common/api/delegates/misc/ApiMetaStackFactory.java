@@ -23,29 +23,42 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.delegates;
+package me.lucko.luckperms.common.api.delegates.misc;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
-import me.lucko.luckperms.api.UuidCache;
+import com.google.common.collect.ImmutableList;
 
-import java.util.UUID;
+import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
+import me.lucko.luckperms.api.metastacking.MetaStackElement;
+import me.lucko.luckperms.api.metastacking.MetaStackFactory;
+import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
+import me.lucko.luckperms.common.metastacking.StandardStackElements;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-/**
- * Provides a link between {@link UuidCache} and {@link me.lucko.luckperms.common.utils.UuidCache}
- */
+import java.util.List;
+import java.util.Optional;
+
 @AllArgsConstructor
-public class UuidCacheDelegate implements UuidCache {
-    private final me.lucko.luckperms.common.utils.UuidCache handle;
+public class ApiMetaStackFactory implements MetaStackFactory {
+    public final LuckPermsPlugin plugin;
 
     @Override
-    public UUID getUUID(@NonNull UUID external) {
-        return handle.getUUID(external);
+    public Optional<MetaStackElement> fromString(@NonNull String definition) {
+        return StandardStackElements.parseFromString(plugin, definition);
     }
 
     @Override
-    public UUID getExternalUUID(@NonNull UUID internal) {
-        return handle.getExternalUUID(internal);
+    public List<MetaStackElement> fromStrings(@NonNull List<String> definitions) {
+        if (definitions.isEmpty()) {
+            return ImmutableList.of();
+        }
+        return StandardStackElements.parseList(plugin, definitions);
+    }
+
+    @Override
+    public MetaStackDefinition createDefinition(List<MetaStackElement> elements, String startSpacer, String middleSpacer, String endSpacer) {
+        return new SimpleMetaStackDefinition(elements, startSpacer, middleSpacer, endSpacer);
     }
 }

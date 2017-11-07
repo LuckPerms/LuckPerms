@@ -25,80 +25,101 @@
 
 package me.lucko.luckperms.common.api;
 
+import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NonNull;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.LPConfiguration;
-import me.lucko.luckperms.api.Logger;
+import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.MessagingService;
-import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.NodeFactory;
-import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.Storage;
-import me.lucko.luckperms.api.Track;
-import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.UuidCache;
-import me.lucko.luckperms.api.context.ContextCalculator;
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.common.api.delegates.MetaStackFactoryDelegate;
-import me.lucko.luckperms.common.api.delegates.NodeFactoryDelegate;
-import me.lucko.luckperms.common.api.delegates.UserDelegate;
-import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.api.context.ContextManager;
+import me.lucko.luckperms.api.event.EventBus;
+import me.lucko.luckperms.api.manager.GroupManager;
+import me.lucko.luckperms.api.manager.TrackManager;
+import me.lucko.luckperms.api.manager.UserManager;
+import me.lucko.luckperms.api.metastacking.MetaStackFactory;
+import me.lucko.luckperms.api.platform.PlatformInfo;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.api.delegates.manager.ApiContextManager;
+import me.lucko.luckperms.common.api.delegates.manager.ApiGroupManager;
+import me.lucko.luckperms.common.api.delegates.manager.ApiTrackManager;
+import me.lucko.luckperms.common.api.delegates.manager.ApiUserManager;
+import me.lucko.luckperms.common.api.delegates.misc.ApiMetaStackFactory;
+import me.lucko.luckperms.common.api.delegates.misc.ApiNodeFactory;
+import me.lucko.luckperms.common.api.delegates.misc.ApiPlatformInfo;
 import me.lucko.luckperms.common.event.EventFactory;
 import me.lucko.luckperms.common.event.LuckPermsEventBus;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.references.UserIdentifier;
 
-import java.util.Collections;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Implements the LuckPerms API using the plugin instance
  */
 public class ApiProvider implements LuckPermsApi {
+
+    @Getter(AccessLevel.NONE)
     private final LuckPermsPlugin plugin;
 
-    @Getter
+    private final PlatformInfo platformInfo;
+    private final UserManager userManager;
+    private final GroupManager groupManager;
+    private final TrackManager trackManager;
     private final LuckPermsEventBus eventBus;
-
-    @Getter
+    private final ContextManager contextManager;
+    private final MetaStackFactory metaStackFactory;
     private final EventFactory eventFactory;
-
-    @Getter
-    private final MetaStackFactoryDelegate metaStackFactory;
 
     public ApiProvider(LuckPermsPlugin plugin) {
         this.plugin = plugin;
+
+        this.platformInfo = new ApiPlatformInfo(plugin);
+        this.userManager = new ApiUserManager(plugin, plugin.getUserManager());
+        this.groupManager = new ApiGroupManager(plugin.getGroupManager());
+        this.trackManager = new ApiTrackManager(plugin.getTrackManager());
         this.eventBus = new LuckPermsEventBus(plugin);
+        this.contextManager = new ApiContextManager(plugin, plugin.getContextManager());
+        this.metaStackFactory = new ApiMetaStackFactory(plugin);
         this.eventFactory = new EventFactory(eventBus);
-        this.metaStackFactory = new MetaStackFactoryDelegate(plugin);
+    }
+
+    public EventFactory getEventFactory() {
+        return eventFactory;
     }
 
     @Override
-    public void runUpdateTask() {
-        plugin.getUpdateTaskBuffer().request();
+    public PlatformInfo getPlatformInfo() {
+        return platformInfo;
     }
 
     @Override
-    public double getApiVersion() {
-        return 3.4;
+    public UserManager getUserManager() {
+        return userManager;
     }
 
     @Override
-    public String getVersion() {
-        return plugin.getVersion();
+    public GroupManager getGroupManager() {
+        return groupManager;
     }
 
     @Override
-    public PlatformType getPlatformType() {
-        return plugin.getServerType();
+    public TrackManager getTrackManager() {
+        return trackManager;
+    }
+
+    @Override
+    public CompletableFuture<Void> runUpdateTask() {
+        return plugin.getUpdateTaskBuffer().request();
+    }
+
+    @Override
+    public EventBus getEventBus() {
+        return eventBus;
     }
 
     @Override
@@ -122,132 +143,22 @@ public class ApiProvider implements LuckPermsApi {
     }
 
     @Override
-    public Logger getLogger() {
-        return plugin.getLog();
-    }
-
-    @Override
-    public User getUser(@NonNull UUID uuid) {
-        final me.lucko.luckperms.common.model.User user = plugin.getUserManager().getIfLoaded(uuid);
-        return user == null ? null : user.getDelegate();
-    }
-
-    @Override
-    public Optional<User> getUserSafe(@NonNull UUID uuid) {
-        return Optional.ofNullable(getUser(uuid));
-    }
-
-    @Override
-    public User getUser(@NonNull String name) {
-        final me.lucko.luckperms.common.model.User user = plugin.getUserManager().getByUsername(name);
-        return user == null ? null : user.getDelegate();
-    }
-
-    @Override
-    public Optional<User> getUserSafe(@NonNull String name) {
-        return Optional.ofNullable(getUser(name));
-    }
-
-    @Override
-    public Set<User> getUsers() {
-        return plugin.getUserManager().getAll().values().stream().map(me.lucko.luckperms.common.model.User::getDelegate).collect(Collectors.toSet());
-    }
-
-    @Override
-    public boolean isUserLoaded(@NonNull UUID uuid) {
-        return plugin.getUserManager().isLoaded(UserIdentifier.of(uuid, null));
-    }
-
-    @Override
-    public void cleanupUser(@NonNull User user) {
-        plugin.getUserManager().scheduleUnload(plugin.getUuidCache().getExternalUUID(UserDelegate.cast(user).getUuid()));
-    }
-
-    @Override
-    public Group getGroup(@NonNull String name) {
-        final me.lucko.luckperms.common.model.Group group = plugin.getGroupManager().getIfLoaded(name);
-        return group == null ? null : group.getDelegate();
-    }
-
-    @Override
-    public Optional<Group> getGroupSafe(@NonNull String name) {
-        return Optional.ofNullable(getGroup(name));
-    }
-
-    @Override
-    public Set<Group> getGroups() {
-        return plugin.getGroupManager().getAll().values().stream().map(me.lucko.luckperms.common.model.Group::getDelegate).collect(Collectors.toSet());
-    }
-
-    @Override
-    public boolean isGroupLoaded(@NonNull String name) {
-        return plugin.getGroupManager().isLoaded(name);
-    }
-
-    @Override
-    public Track getTrack(@NonNull String name) {
-        final me.lucko.luckperms.common.model.Track track = plugin.getTrackManager().getIfLoaded(name);
-        return track == null ? null : track.getDelegate();
-    }
-
-    @Override
-    public Optional<Track> getTrackSafe(@NonNull String name) {
-        return Optional.ofNullable(getTrack(name));
-    }
-
-    @Override
-    public Set<Track> getTracks() {
-        return plugin.getTrackManager().getAll().values().stream().map(me.lucko.luckperms.common.model.Track::getDelegate).collect(Collectors.toSet());
-    }
-
-    @Override
-    public boolean isTrackLoaded(@NonNull String name) {
-        return plugin.getTrackManager().isLoaded(name);
+    public ContextManager getContextManager() {
+        return contextManager;
     }
 
     @Override
     public NodeFactory getNodeFactory() {
-        return NodeFactoryDelegate.INSTANCE;
+        return ApiNodeFactory.INSTANCE;
     }
 
     @Override
-    public Node.Builder buildNode(@NonNull String permission) throws IllegalArgumentException {
-        return me.lucko.luckperms.common.node.NodeFactory.newBuilder(permission);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void registerContextCalculator(@NonNull ContextCalculator<?> contextCalculator) {
-        ContextManager contextManager = plugin.getContextManager();
-        contextManager.registerCalculator(contextCalculator);
+    public MetaStackFactory getMetaStackFactory() {
+        return metaStackFactory;
     }
 
     @Override
-    public Optional<Contexts> getContextForUser(@NonNull User user) {
-        return Optional.ofNullable(plugin.getContextForUser(UserDelegate.cast(user)));
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public ContextSet getContextForPlayer(@NonNull Object player) {
-        ContextManager contextManager = plugin.getContextManager();
-        return contextManager.getApplicableContext(player);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Contexts getContextsForPlayer(@NonNull Object player) {
-        ContextManager contextManager = plugin.getContextManager();
-        return contextManager.getApplicableContexts(player);
-    }
-
-    @Override
-    public Set<UUID> getUniqueConnections() {
-        return Collections.unmodifiableSet(plugin.getUniqueConnections());
-    }
-
-    @Override
-    public long getStartTime() {
-        return plugin.getStartTime();
+    public LogEntry.Builder newLogEntryBuilder() {
+        return ExtendedLogEntry.build();
     }
 }

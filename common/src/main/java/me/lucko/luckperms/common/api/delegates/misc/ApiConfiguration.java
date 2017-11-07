@@ -23,24 +23,20 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.delegates;
+package me.lucko.luckperms.common.api.delegates.misc;
 
 import me.lucko.luckperms.api.LPConfiguration;
-import me.lucko.luckperms.api.data.DatastoreConfiguration;
 import me.lucko.luckperms.common.config.ConfigKey;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 
 import java.util.Map;
 
-/**
- * Provides a link between {@link LPConfiguration} and {@link LuckPermsConfiguration}
- */
-public class LPConfigurationDelegate implements LPConfiguration {
+public class ApiConfiguration implements LPConfiguration {
     private final LuckPermsConfiguration handle;
     private final Unsafe unsafe;
 
-    public LPConfigurationDelegate(LuckPermsConfiguration handle) {
+    public ApiConfiguration(LuckPermsConfiguration handle) {
         this.handle = handle;
         this.unsafe = new UnsafeImpl();
     }
@@ -48,11 +44,6 @@ public class LPConfigurationDelegate implements LPConfiguration {
     @Override
     public String getServer() {
         return handle.get(ConfigKeys.SERVER);
-    }
-
-    @Override
-    public int getSyncTime() {
-        return handle.get(ConfigKeys.SYNC_TIME);
     }
 
     @Override
@@ -73,61 +64,6 @@ public class LPConfigurationDelegate implements LPConfiguration {
     @Override
     public boolean getApplyGlobalWorldGroups() {
         return handle.get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS);
-    }
-
-    @Override
-    public boolean getOnlineMode() {
-        return handle.get(ConfigKeys.USE_SERVER_UUIDS);
-    }
-
-    @Override
-    public boolean getApplyWildcards() {
-        return handle.get(ConfigKeys.APPLYING_WILDCARDS);
-    }
-
-    @Override
-    public boolean getApplyRegex() {
-        return handle.get(ConfigKeys.APPLYING_REGEX);
-    }
-
-    @Override
-    public boolean getApplyShorthand() {
-        return handle.get(ConfigKeys.APPLYING_SHORTHAND);
-    }
-
-    @Override
-    public boolean getLogNotify() {
-        return handle.get(ConfigKeys.LOG_NOTIFY);
-    }
-
-    @Override
-    public boolean getEnableOps() {
-        return handle.get(ConfigKeys.OPS_ENABLED);
-    }
-
-    @Override
-    public boolean getCommandsAllowOp() {
-        return handle.get(ConfigKeys.COMMANDS_ALLOW_OP);
-    }
-
-    @Override
-    public boolean getAutoOp() {
-        return handle.get(ConfigKeys.AUTO_OP);
-    }
-
-    @Override
-    public String getVaultServer() {
-        return handle.get(ConfigKeys.VAULT_SERVER);
-    }
-
-    @Override
-    public boolean getVaultIncludeGlobal() {
-        return handle.get(ConfigKeys.VAULT_INCLUDING_GLOBAL);
-    }
-
-    @Override
-    public DatastoreConfiguration getDatastoreConfig() {
-        return handle.get(ConfigKeys.DATABASE_VALUES);
     }
 
     @Override

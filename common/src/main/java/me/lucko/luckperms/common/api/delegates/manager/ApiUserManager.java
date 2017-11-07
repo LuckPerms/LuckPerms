@@ -23,42 +23,50 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.delegates;
+package me.lucko.luckperms.common.api.delegates.manager;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
-import com.google.common.collect.ImmutableList;
-
-import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
-import me.lucko.luckperms.api.metastacking.MetaStackElement;
-import me.lucko.luckperms.api.metastacking.MetaStackFactory;
-import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
-import me.lucko.luckperms.common.metastacking.StandardStackElements;
+import me.lucko.luckperms.api.User;
+import me.lucko.luckperms.api.manager.UserManager;
+import me.lucko.luckperms.common.api.delegates.model.ApiUser;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.references.UserIdentifier;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
-public class MetaStackFactoryDelegate implements MetaStackFactory {
-    public final LuckPermsPlugin plugin;
+public class ApiUserManager implements UserManager {
+    private final LuckPermsPlugin plugin;
+    private final me.lucko.luckperms.common.managers.UserManager handle;
 
     @Override
-    public Optional<MetaStackElement> fromString(@NonNull String definition) {
-        return StandardStackElements.parseFromString(plugin, definition);
+    public User getUser(@NonNull UUID uuid) {
+        me.lucko.luckperms.common.model.User user = handle.getIfLoaded(uuid);
+        return user == null ? null : user.getDelegate();
     }
 
     @Override
-    public List<MetaStackElement> fromStrings(@NonNull List<String> definitions) {
-        if (definitions.isEmpty()) {
-            return ImmutableList.of();
-        }
-        return StandardStackElements.parseList(plugin, definitions);
+    public User getUser(@NonNull String name) {
+        me.lucko.luckperms.common.model.User user = handle.getByUsername(name);
+        return user == null ? null : user.getDelegate();
     }
 
     @Override
-    public MetaStackDefinition createDefinition(List<MetaStackElement> elements, String startSpacer, String middleSpacer, String endSpacer) {
-        return new SimpleMetaStackDefinition(elements, startSpacer, middleSpacer, endSpacer);
+    public Set<User> getLoadedUsers() {
+        return handle.getAll().values().stream().map(me.lucko.luckperms.common.model.User::getDelegate).collect(Collectors.toSet());
+    }
+
+    @Override
+    public boolean isLoaded(@NonNull UUID uuid) {
+        return handle.isLoaded(UserIdentifier.of(uuid, null));
+    }
+
+    @Override
+    public void cleanupUser(@NonNull User user) {
+        handle.scheduleUnload(plugin.getUuidCache().getExternalUUID(ApiUser.cast(user).getUuid()));
     }
 }

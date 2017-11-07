@@ -25,11 +25,10 @@
 
 package me.lucko.luckperms.common.contexts;
 
-import lombok.NonNull;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.context.StaticContextCalculator;
 
 import java.util.Optional;
 
@@ -42,12 +41,11 @@ import java.util.Optional;
 public interface ContextManager<T> {
 
     /**
-     * Queries the ContextManager for current context values for the subject.
+     * Gets the class of the subject handled by this instance
      *
-     * @param subject the subject
-     * @return the applicable context for the subject
+     * @return the subject class
      */
-    ImmutableContextSet getApplicableContext(@NonNull T subject);
+    Class<T> getSubjectClass();
 
     /**
      * Queries the ContextManager for current context values for the subject.
@@ -55,7 +53,15 @@ public interface ContextManager<T> {
      * @param subject the subject
      * @return the applicable context for the subject
      */
-    Contexts getApplicableContexts(@NonNull T subject);
+    ImmutableContextSet getApplicableContext(T subject);
+
+    /**
+     * Queries the ContextManager for current context values for the subject.
+     *
+     * @param subject the subject
+     * @return the applicable context for the subject
+     */
+    Contexts getApplicableContexts(T subject);
 
     /**
      * Gets the contexts from the static calculators in this manager.
@@ -102,24 +108,21 @@ public interface ContextManager<T> {
      *
      * @param calculator the calculator
      */
-    default void registerCalculator(ContextCalculator<T> calculator) {
-        registerCalculator(calculator, false);
-    }
+    void registerCalculator(ContextCalculator<T> calculator);
 
     /**
-     * Registers a context calculator with the manager.
+     * Registers a static context calculator with the manager.
      *
      * @param calculator the calculator
-     * @param isStatic if the calculator is static. (if it allows a null subject parameter)
      */
-    void registerCalculator(ContextCalculator<T> calculator, boolean isStatic);
+    void registerStaticCalculator(StaticContextCalculator calculator);
 
     /**
      * Invalidates the lookup cache for a given subject
      *
      * @param subject the subject
      */
-    void invalidateCache(@NonNull T subject);
+    void invalidateCache(T subject);
 
     /**
      * Gets the number of calculators registered with the manager.

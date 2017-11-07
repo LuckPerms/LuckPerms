@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.commands.impl.log;
 
-import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -127,7 +127,7 @@ public class LogRecent extends SubCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        SortedMap<Integer, LogEntry> entries = (filter != null) ? log.getRecent(page, filter) : log.getRecent(page);
+        SortedMap<Integer, ExtendedLogEntry> entries = (filter != null) ? log.getRecent(page, filter) : log.getRecent(page);
         if (filter != null) {
             String name = entries.values().stream().findAny().get().getActorName();
             Message.LOG_RECENT_BY_HEADER.send(sender, name, page, maxPage);
@@ -135,7 +135,7 @@ public class LogRecent extends SubCommand<Log> {
             Message.LOG_RECENT_HEADER.send(sender, page, maxPage);
         }
 
-        for (Map.Entry<Integer, LogEntry> e : entries.entrySet()) {
+        for (Map.Entry<Integer, ExtendedLogEntry> e : entries.entrySet()) {
             long time = e.getValue().getTimestamp();
             long now = DateUtil.unixSecondsNow();
             Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatTimeShort(now - time), e.getValue().getFormatted());

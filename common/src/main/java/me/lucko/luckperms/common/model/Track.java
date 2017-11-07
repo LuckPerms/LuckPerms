@@ -33,7 +33,7 @@ import lombok.ToString;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.DataMutateResult;
-import me.lucko.luckperms.common.api.delegates.TrackDelegate;
+import me.lucko.luckperms.common.api.delegates.model.ApiTrack;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.Identifiable;
 
@@ -65,7 +65,7 @@ public class Track implements Identifiable<String> {
     private List<String> groups = Collections.synchronizedList(new ArrayList<>());
 
     @Getter
-    private final TrackDelegate delegate = new TrackDelegate(this);
+    private final ApiTrack delegate = new ApiTrack(this);
 
     @Override
     public String getId() {

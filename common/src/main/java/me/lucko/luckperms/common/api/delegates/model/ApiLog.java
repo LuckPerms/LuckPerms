@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.delegates;
+package me.lucko.luckperms.common.api.delegates.model;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -37,26 +37,24 @@ import java.util.UUID;
 
 import static me.lucko.luckperms.common.api.ApiUtils.checkName;
 
-/**
- * Provides a link between {@link Log} and {@link me.lucko.luckperms.common.actionlog.Log}
- */
+@SuppressWarnings("unchecked")
 @AllArgsConstructor
-public class LogDelegate implements Log {
+public class ApiLog implements Log {
     private final me.lucko.luckperms.common.actionlog.Log handle;
 
     @Override
     public SortedSet<LogEntry> getContent() {
-        return handle.getContent();
+        return (SortedSet) handle.getContent();
     }
 
     @Override
     public SortedSet<LogEntry> getRecent() {
-        return handle.getRecent();
+        return (SortedSet) handle.getRecent();
     }
 
     @Override
     public SortedMap<Integer, LogEntry> getRecent(int pageNo) {
-        return handle.getRecent(pageNo);
+        return (SortedMap) handle.getRecent(pageNo);
     }
 
     @Override
@@ -66,12 +64,12 @@ public class LogDelegate implements Log {
 
     @Override
     public SortedSet<LogEntry> getRecent(@NonNull UUID actor) {
-        return handle.getRecent(actor);
+        return (SortedSet) handle.getRecent(actor);
     }
 
     @Override
     public SortedMap<Integer, LogEntry> getRecent(int pageNo, @NonNull UUID actor) {
-        return handle.getRecent(pageNo, actor);
+        return (SortedMap) handle.getRecent(pageNo, actor);
     }
 
     @Override
@@ -81,12 +79,12 @@ public class LogDelegate implements Log {
 
     @Override
     public SortedSet<LogEntry> getUserHistory(@NonNull UUID uuid) {
-        return handle.getUserHistory(uuid);
+        return (SortedSet) handle.getUserHistory(uuid);
     }
 
     @Override
     public SortedMap<Integer, LogEntry> getUserHistory(int pageNo, @NonNull UUID uuid) {
-        return handle.getUserHistory(pageNo, uuid);
+        return (SortedMap) handle.getUserHistory(pageNo, uuid);
     }
 
     @Override
@@ -96,12 +94,12 @@ public class LogDelegate implements Log {
 
     @Override
     public SortedSet<LogEntry> getGroupHistory(@NonNull String name) {
-        return handle.getGroupHistory(checkName(name));
+        return (SortedSet) handle.getGroupHistory(checkName(name));
     }
 
     @Override
     public SortedMap<Integer, LogEntry> getGroupHistory(int pageNo, @NonNull String name) {
-        return handle.getGroupHistory(pageNo, checkName(name));
+        return (SortedMap) handle.getGroupHistory(pageNo, checkName(name));
     }
 
     @Override
@@ -111,12 +109,12 @@ public class LogDelegate implements Log {
 
     @Override
     public SortedSet<LogEntry> getTrackHistory(@NonNull String name) {
-        return handle.getTrackHistory(checkName(name));
+        return (SortedSet) handle.getTrackHistory(checkName(name));
     }
 
     @Override
     public SortedMap<Integer, LogEntry> getTrackHistory(int pageNo, @NonNull String name) {
-        return handle.getTrackHistory(pageNo, checkName(name));
+        return (SortedMap) handle.getTrackHistory(pageNo, checkName(name));
     }
 
     @Override
@@ -126,12 +124,12 @@ public class LogDelegate implements Log {
 
     @Override
     public SortedSet<LogEntry> getSearch(@NonNull String query) {
-        return handle.getSearch(query);
+        return (SortedSet) handle.getSearch(query);
     }
 
     @Override
     public SortedMap<Integer, LogEntry> getSearch(int pageNo, @NonNull String query) {
-        return handle.getSearch(pageNo, query);
+        return (SortedMap) handle.getSearch(pageNo, query);
     }
 
     @Override
