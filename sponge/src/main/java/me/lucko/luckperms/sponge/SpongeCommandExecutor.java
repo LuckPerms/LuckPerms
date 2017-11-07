@@ -47,6 +47,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 public class SpongeCommandExecutor extends CommandManager implements CommandCallable {
+    private static final Splitter TAB_COMPLETE_ARGUMENT_SPLITTER = Splitter.on(COMMAND_SEPARATOR_PATTERN);
     private static final Splitter ARGUMENT_SPLITTER = Splitter.on(COMMAND_SEPARATOR_PATTERN).omitEmptyStrings();
 
     private final LPSpongePlugin plugin;
@@ -68,7 +69,7 @@ public class SpongeCommandExecutor extends CommandManager implements CommandCall
     @Override
     public List<String> getSuggestions(CommandSource source, String s, @Nullable Location<World> location) {
         Sender lpSender = plugin.getSenderFactory().wrap(source);
-        List<String> arguments = processSelectors(source, Util.stripQuotes(ARGUMENT_SPLITTER.splitToList(s)));
+        List<String> arguments = processSelectors(source, Util.stripQuotes(TAB_COMPLETE_ARGUMENT_SPLITTER.splitToList(s)));
 
         return onTabComplete(lpSender, arguments);
     }

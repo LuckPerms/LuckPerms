@@ -40,6 +40,7 @@ import org.bukkit.command.TabExecutor;
 import java.util.List;
 
 public class BukkitCommandExecutor extends CommandManager implements CommandExecutor, TabExecutor {
+    private static final Splitter TAB_COMPLETE_ARGUMENT_SPLITTER = Splitter.on(COMMAND_SEPARATOR_PATTERN);
     private static final Splitter ARGUMENT_SPLITTER = Splitter.on(COMMAND_SEPARATOR_PATTERN).omitEmptyStrings();
     private static final Joiner ARGUMENT_JOINER = Joiner.on(' ');
 
@@ -62,7 +63,7 @@ public class BukkitCommandExecutor extends CommandManager implements CommandExec
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         Sender lpSender = plugin.getSenderFactory().wrap(sender);
-        List<String> arguments = Util.stripQuotes(ARGUMENT_SPLITTER.splitToList(ARGUMENT_JOINER.join(args)));
+        List<String> arguments = Util.stripQuotes(TAB_COMPLETE_ARGUMENT_SPLITTER.splitToList(ARGUMENT_JOINER.join(args)));
 
         return onTabComplete(lpSender, arguments);
     }
