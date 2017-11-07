@@ -28,8 +28,9 @@ package me.lucko.luckperms.bukkit.vault;
 import lombok.Getter;
 import lombok.NonNull;
 
+import com.google.common.base.Preconditions;
+
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
@@ -419,36 +420,26 @@ public class VaultPermissionHook extends Permission {
     // utility methods for modifying the state of PermissionHolders
 
     private void holderAddPermission(PermissionHolder holder, String permission, String world) {
+        Preconditions.checkNotNull(permission, "permission is null");
+        Preconditions.checkArgument(!permission.isEmpty(), "permission is an empty string");
         executor.execute(() -> {
-            DataMutateResult result;
-            if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
-                result = holder.setPermission(NodeFactory.make(permission, true, getServer(), world));
-            } else {
-                result = holder.setPermission(NodeFactory.make(permission, true, getServer()));
-            }
-
-            if (result.asBoolean()) {
+            if (holder.setPermission(NodeFactory.make(permission, true, getServer(), world)).asBoolean()) {
                 holderSave(holder);
             }
         });
     }
 
     private void holderRemovePermission(PermissionHolder holder, String permission, String world) {
+        Preconditions.checkNotNull(permission, "permission is null");
+        Preconditions.checkArgument(!permission.isEmpty(), "permission is an empty string");
         executor.execute(() -> {
-            DataMutateResult result;
-            if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
-                result = holder.unsetPermission(NodeFactory.make(permission, getServer(), world));
-            } else {
-                result = holder.unsetPermission(NodeFactory.make(permission, getServer()));
-            }
-
-            if (result.asBoolean()) {
+            if (holder.unsetPermission(NodeFactory.make(permission, getServer(), world)).asBoolean()) {
                 holderSave(holder);
             }
         });
     }
 
-    public void holderSave(PermissionHolder holder) {
+    void holderSave(PermissionHolder holder) {
         if (holder instanceof User) {
             User u = (User) holder;
             plugin.getStorage().saveUser(u).thenRunAsync(() -> u.getRefreshBuffer().request(), plugin.getScheduler().async());
