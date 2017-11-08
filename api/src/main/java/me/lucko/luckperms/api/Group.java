@@ -25,7 +25,10 @@
 
 package me.lucko.luckperms.api;
 
+import me.lucko.luckperms.api.caching.GroupData;
+
 import java.util.OptionalInt;
+import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nonnull;
 
@@ -50,5 +53,24 @@ public interface Group extends PermissionHolder {
      */
     @Nonnull
     OptionalInt getWeight();
+
+    /**
+     * Gets the groups's {@link GroupData} cache.
+     *
+     * @return the groups cached data.
+     * @since 4.0
+     */
+    @Nonnull
+    @Override
+    GroupData getCachedData();
+
+    /**
+     * Refreshes and applies any changes to the cached group data.
+     *
+     * @return the task future
+     * @since 4.0
+     */
+    @Nonnull
+    CompletableFuture<Void> refreshCachedData();
 
 }

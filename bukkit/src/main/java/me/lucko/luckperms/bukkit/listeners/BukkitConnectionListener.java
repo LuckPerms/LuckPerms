@@ -28,8 +28,8 @@ package me.lucko.luckperms.bukkit.listeners;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.bukkit.model.Injector;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
+import me.lucko.luckperms.bukkit.model.PermissibleInjector;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
@@ -165,7 +165,7 @@ public class BukkitConnectionListener implements Listener {
             LPPermissible lpPermissible = new LPPermissible(player, user, plugin);
 
             // Inject into the player
-            Injector.inject(player, lpPermissible);
+            PermissibleInjector.inject(player, lpPermissible);
 
         } catch (Throwable t) {
             t.printStackTrace();
@@ -209,7 +209,7 @@ public class BukkitConnectionListener implements Listener {
 
         // Remove the custom permissible
         try {
-            Injector.unInject(player, true);
+            PermissibleInjector.unInject(player, true);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

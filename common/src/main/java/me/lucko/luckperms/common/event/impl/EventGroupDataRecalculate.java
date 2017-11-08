@@ -23,36 +23,23 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.calculators;
+package me.lucko.luckperms.common.event.impl;
 
-import me.lucko.luckperms.api.Contexts;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
 
-import java.util.List;
+import me.lucko.luckperms.api.Group;
+import me.lucko.luckperms.api.caching.GroupData;
+import me.lucko.luckperms.api.event.group.GroupDataRecalculateEvent;
+import me.lucko.luckperms.common.event.AbstractEvent;
 
-/**
- * Creates a calculator instance given a set of contexts
- */
-public interface CalculatorFactory {
+@Getter
+@ToString
+@AllArgsConstructor
+public class EventGroupDataRecalculate extends AbstractEvent implements GroupDataRecalculateEvent {
 
-    /**
-     * Builds a PermissionCalculator for the user in the given context
-     *
-     * @param contexts the contexts to build the calculator in
-     * @param metadata the calculator metadata
-     * @return a permission calculator instance
-     */
-    PermissionCalculator build(Contexts contexts, PermissionCalculatorMetadata metadata);
-
-    /**
-     * Gets the processors which are currently being added to built calculators
-     *
-     * @return a list of processors
-     */
-    List<String> getActiveProcessors();
-
-    /**
-     * Invalidates all calculators build by this factory
-     */
-    void invalidateAll();
+    private final Group group;
+    private final GroupData data;
 
 }

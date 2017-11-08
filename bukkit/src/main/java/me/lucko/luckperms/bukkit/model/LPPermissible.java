@@ -96,13 +96,13 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public boolean isPermissionSet(@NonNull String permission) {
-        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(permission, CheckOrigin.PLATFORM_LOOKUP_CHECK);
+        Tristate ts = user.getCachedData().getPermissionData(calculateContexts()).getPermissionValue(permission, CheckOrigin.PLATFORM_LOOKUP_CHECK);
         return ts != Tristate.UNDEFINED || Permission.DEFAULT_PERMISSION.getValue(isOp());
     }
 
     @Override
     public boolean isPermissionSet(@NonNull Permission permission) {
-        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(permission.getName(), CheckOrigin.PLATFORM_LOOKUP_CHECK);
+        Tristate ts = user.getCachedData().getPermissionData(calculateContexts()).getPermissionValue(permission.getName(), CheckOrigin.PLATFORM_LOOKUP_CHECK);
         if (ts != Tristate.UNDEFINED) {
             return true;
         }
@@ -116,13 +116,13 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public boolean hasPermission(@NonNull String permission) {
-        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(permission, CheckOrigin.PLATFORM_PERMISSION_CHECK);
+        Tristate ts = user.getCachedData().getPermissionData(calculateContexts()).getPermissionValue(permission, CheckOrigin.PLATFORM_PERMISSION_CHECK);
         return ts != Tristate.UNDEFINED ? ts.asBoolean() : Permission.DEFAULT_PERMISSION.getValue(isOp());
     }
 
     @Override
     public boolean hasPermission(@NonNull Permission permission) {
-        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(permission.getName(), CheckOrigin.PLATFORM_PERMISSION_CHECK);
+        Tristate ts = user.getCachedData().getPermissionData(calculateContexts()).getPermissionValue(permission.getName(), CheckOrigin.PLATFORM_PERMISSION_CHECK);
         if (ts != Tristate.UNDEFINED) {
             return ts.asBoolean();
         }
@@ -164,7 +164,7 @@ public class LPPermissible extends PermissibleBase {
     public Set<PermissionAttachmentInfo> getEffectivePermissions() {
         Set<PermissionAttachmentInfo> perms = new HashSet<>();
         perms.addAll(
-                user.getUserData().getPermissionData(calculateContexts()).getImmutableBacking().entrySet().stream()
+                user.getCachedData().getPermissionData(calculateContexts()).getImmutableBacking().entrySet().stream()
                         .map(e -> new PermissionAttachmentInfo(player, e.getKey(), null, e.getValue()))
                         .collect(Collectors.toList())
         );

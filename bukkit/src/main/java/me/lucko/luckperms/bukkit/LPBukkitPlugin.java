@@ -36,8 +36,8 @@ import me.lucko.luckperms.bukkit.contexts.WorldCalculator;
 import me.lucko.luckperms.bukkit.listeners.BukkitConnectionListener;
 import me.lucko.luckperms.bukkit.listeners.BukkitPlatformListener;
 import me.lucko.luckperms.bukkit.messaging.BukkitMessagingFactory;
-import me.lucko.luckperms.bukkit.model.Injector;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
+import me.lucko.luckperms.bukkit.model.PermissibleInjector;
 import me.lucko.luckperms.bukkit.model.SubscriptionMapInjector;
 import me.lucko.luckperms.bukkit.processors.BukkitProcessorsSetupTask;
 import me.lucko.luckperms.bukkit.processors.ChildPermissionProvider;
@@ -305,7 +305,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
                     scheduler.doSync(() -> {
                         try {
                             LPPermissible lpPermissible = new LPPermissible(player, user, this);
-                            Injector.inject(player, lpPermissible);
+                            PermissibleInjector.inject(player, lpPermissible);
                         } catch (Throwable t) {
                             t.printStackTrace();
                         }
@@ -335,7 +335,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         // uninject from players
         for (Player player : getServer().getOnlinePlayers()) {
             try {
-                Injector.unInject(player, false);
+                PermissibleInjector.unInject(player, false);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -346,7 +346,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
             final User user = getUserManager().getIfLoaded(getUuidCache().getUUID(player.getUniqueId()));
             if (user != null) {
-                user.getUserData().invalidateCaches();
+                user.getCachedData().invalidateCaches();
                 getUserManager().unload(user);
             }
         }
@@ -406,7 +406,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }
 
         if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
-            Map<String, Boolean> backing = user.getUserData().getPermissionData(contextManager.getApplicableContexts(player)).getImmutableBacking();
+            Map<String, Boolean> backing = user.getCachedData().getPermissionData(contextManager.getApplicableContexts(player)).getImmutableBacking();
             boolean op = Optional.ofNullable(backing.get("luckperms.autoop")).orElse(false);
             player.setOp(op);
         }

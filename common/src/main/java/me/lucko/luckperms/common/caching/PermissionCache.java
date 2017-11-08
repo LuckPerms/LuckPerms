@@ -32,7 +32,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.PermissionData;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
-import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
 
 import java.util.Collections;
@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Holds a user's cached permissions for a given context
+ * Holds cached permissions data for a given context
  */
 public class PermissionCache implements PermissionData {
 
@@ -61,11 +61,13 @@ public class PermissionCache implements PermissionData {
      */
     private final PermissionCalculator calculator;
 
-    public PermissionCache(Contexts contexts, User user, CalculatorFactory calculatorFactory) {
+    public PermissionCache(Contexts contexts, String friendlyName, CalculatorFactory calculatorFactory) {
         permissions = new ConcurrentHashMap<>();
         permissionsUnmodifiable = Collections.unmodifiableMap(permissions);
 
-        calculator = calculatorFactory.build(contexts, user);
+        PermissionCalculatorMetadata metadata = PermissionCalculatorMetadata.of(friendlyName, contexts.getContexts());
+
+        calculator = calculatorFactory.build(contexts, metadata);
         calculator.updateBacking(permissions); // Initial setup.
     }
 
@@ -74,16 +76,16 @@ public class PermissionCache implements PermissionData {
         calculator.invalidateCache();
     }
 
-    public void setPermissions(Map<String, Boolean> permissions) {
+    private void setPermissionsInternal(Map<String, Boolean> permissions) {
         this.permissions.clear();
         this.permissions.putAll(permissions);
         calculator.updateBacking(this.permissions);
         invalidateCache();
     }
 
-    public void comparePermissions(Map<String, Boolean> toApply) {
+    public void setPermissions(Map<String, Boolean> toApply) {
         if (!permissions.equals(toApply)) {
-            setPermissions(toApply);
+            setPermissionsInternal(toApply);
         }
     }
 

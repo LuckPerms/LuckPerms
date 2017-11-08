@@ -28,6 +28,7 @@ package me.lucko.luckperms.api;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
 
+import me.lucko.luckperms.api.caching.CachedData;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 
@@ -69,6 +70,15 @@ public interface PermissionHolder {
      */
     @Nonnull
     String getFriendlyName();
+
+    /**
+     * Gets the holders {@link CachedData} cache.
+     *
+     * @return the holders cached data.
+     * @since 3.2
+     */
+    @Nonnull
+    CachedData getCachedData();
 
     /**
      * Gets the backing multimap containing every permission this holder has.

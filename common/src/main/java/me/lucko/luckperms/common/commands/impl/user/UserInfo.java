@@ -106,7 +106,7 @@ public class UserInfo extends SubCommand<User> {
                     .map(e -> Util.contextToString(e.getKey(), e.getValue()))
                     .collect(Collectors.joining(" "));
 
-            MetaData meta = user.getUserData().getMetaData(contexts);
+            MetaData meta = user.getCachedData().getMetaData(contexts);
             if (meta.getPrefix() != null) {
                 prefix = "&f\"" + meta.getPrefix() + "&f\"";
             }

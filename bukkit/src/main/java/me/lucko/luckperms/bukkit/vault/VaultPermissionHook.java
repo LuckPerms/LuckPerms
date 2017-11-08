@@ -144,7 +144,7 @@ public class VaultPermissionHook extends Permission {
         }
 
         // Effectively fallback to the standard Bukkit #hasPermission check.
-        return user.getUserData().getPermissionData(createContextForWorldLookup(player, world)).getPermissionValue(permission, CheckOrigin.INTERNAL).asBoolean();
+        return user.getCachedData().getPermissionData(createContextForWorldLookup(player, world)).getPermissionValue(permission, CheckOrigin.INTERNAL).asBoolean();
     }
 
     @Override

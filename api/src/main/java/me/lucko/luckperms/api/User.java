@@ -84,6 +84,7 @@ public interface User extends PermissionHolder {
      * @since 3.2
      */
     @Nonnull
+    @Override
     UserData getCachedData();
 
     /**

@@ -181,7 +181,7 @@ public class LPSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>
                 return result;
             }
 
-            // then try the map, if we haven't already
+            // then try the permissible, if we haven't already
             if (!isPlayer && key instanceof Permissible) {
                 Permissible p = (Permissible) key;
                 if (p.isPermissionSet(permission)) {
@@ -195,8 +195,8 @@ public class LPSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>
 
         @Override
         public boolean containsKey(Object key) {
-            // check the backing map, as well as if the permissible has the perm set
-            return backing.containsKey(key) || (key instanceof Permissible && ((Permissible) key).isPermissionSet(permission));
+            // delegate through the get method
+            return get(key) != null;
         }
 
         @Override

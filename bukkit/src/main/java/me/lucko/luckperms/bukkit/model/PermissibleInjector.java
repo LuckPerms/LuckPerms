@@ -43,7 +43,7 @@ import java.util.List;
  * checks made by plugins.
  */
 @UtilityClass
-public class Injector {
+public class PermissibleInjector {
 
     /**
      * All permission checks made on standard Bukkit objects are effectively proxied to a

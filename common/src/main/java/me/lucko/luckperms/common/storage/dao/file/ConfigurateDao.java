@@ -400,6 +400,7 @@ public abstract class ConfigurateDao extends AbstractDao {
         } finally {
             user.getIoLock().unlock();
         }
+        user.getRefreshBuffer().requestDirectly();
         return true;
     }
 
@@ -495,6 +496,7 @@ public abstract class ConfigurateDao extends AbstractDao {
         } finally {
             group.getIoLock().unlock();
         }
+        group.getRefreshBuffer().requestDirectly();
         return true;
     }
 
@@ -528,6 +530,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                 group.getIoLock().unlock();
             }
         }
+        group.getRefreshBuffer().requestDirectly();
         return true;
     }
 

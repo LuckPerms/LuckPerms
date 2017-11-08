@@ -29,8 +29,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import org.spongepowered.api.plugin.PluginContainer;
@@ -82,8 +80,6 @@ public interface LPPermissionService {
 
     // utils
     ImmutableList<SubjectReference> sortSubjects(Collection<SubjectReference> s);
-
-    Contexts calculateContexts(ImmutableContextSet contextSet);
 
     void invalidateAllCaches(LPSubject.CacheLevel cacheLevel);
 }

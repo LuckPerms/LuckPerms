@@ -35,8 +35,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
@@ -228,11 +226,6 @@ public class LuckPermsService implements LPPermissionService {
             return Integer.compare(g1.getWeight().orElse(0), g2.getWeight().orElse(0)) == 1 ? 1 : -1;
         }));
         return ImmutableList.copyOf(ret);
-    }
-
-    @Override
-    public Contexts calculateContexts(ImmutableContextSet contextSet) {
-        return plugin.getContextManager().formContexts(null, contextSet);
     }
 
     @Override

@@ -171,12 +171,6 @@ public class SpongeConnectionListener {
         }
     }
 
-    @Listener(order = Order.EARLY)
-    public void onClientJoin(ClientConnectionEvent.Join e) {
-        // Refresh permissions again
-        plugin.getScheduler().doAsync(() -> LoginHelper.refreshPlayer(plugin, e.getTargetEntity().getUniqueId()));
-    }
-
     @Listener(order = Order.POST)
     public void onClientLeave(ClientConnectionEvent.Disconnect e) {
         /* We don't actually remove the user instance here, as Sponge likes to keep performing checks

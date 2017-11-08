@@ -36,7 +36,6 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.ImmutableTransientNode;
 import me.lucko.luckperms.common.node.NodeFactory;
 
-import org.bukkit.permissions.PermissibleBase;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionRemovedExecutor;
 import org.bukkit.plugin.Plugin;
@@ -64,7 +63,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
     static {
         Field permissionAttachmentPermissionsField;
         try {
-            permissionAttachmentPermissionsField = PermissibleBase.class.getDeclaredField("permissions");
+            permissionAttachmentPermissionsField = PermissionAttachment.class.getDeclaredField("permissions");
             permissionAttachmentPermissionsField.setAccessible(true);
         } catch (NoSuchFieldException e) {
             throw new RuntimeException(e);
@@ -131,9 +130,8 @@ public class LPPermissionAttachment extends PermissionAttachment {
         FakeBackingMap fakeMap = new FakeBackingMap();
 
         try {
-            // what's this doing, ay?
-            // the field we need to modify is in the superclass - it's set to private
-            // so we have to use reflection to modify it.
+            // the field we need to modify is in the superclass - it has private
+            // and final modifiers so we have to use reflection to modify it.
             PERMISSION_ATTACHMENT_PERMISSIONS_FIELD.set(this, fakeMap);
         } catch (Exception e) {
             e.printStackTrace();
@@ -172,7 +170,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
         // set the transient node
         User user = permissible.getUser();
         if (user.setTransientPermission(transientNode).asBoolean()) {
-            user.getRefreshBuffer().request();
+            user.reloadCachedData();
         }
     }
 
@@ -184,7 +182,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
         // remove transient permissions from the holder which were added by this attachment & equal the permission
         User user = permissible.getUser();
         if (user.removeIfTransient(n -> n instanceof ImmutableTransientNode && ((ImmutableTransientNode) n).getOwner() == this && n.getPermission().equals(name))) {
-            user.getRefreshBuffer().request();
+            user.reloadCachedData();
         }
     }
 
@@ -192,7 +190,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
         // remove all transient permissions added by this attachment
         User user = permissible.getUser();
         if (user.removeIfTransient(n -> n instanceof ImmutableTransientNode && ((ImmutableTransientNode) n).getOwner() == this)) {
-            user.getRefreshBuffer().request();
+            user.reloadCachedData();
         }
     }
 
@@ -228,7 +226,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
             return;
         }
 
-        // if we're not hooked, thn don't actually apply the change
+        // if we're not hooked, then don't actually apply the change
         // it will get applied on hook - if that ever happens
         if (!hooked) {
             return;
@@ -253,7 +251,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
             return;
         }
 
-        // if we're not hooked, thn don't actually apply the change
+        // if we're not hooked, then don't actually apply the change
         // it will get applied on hook - if that ever happens
         if (!hooked) {
             return;
@@ -296,7 +294,6 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
         @Override
         public Boolean put(String key, Boolean value) {
-
             // grab the previous result, so we can still satisfy the method signature of Map
             Boolean previous = perms.get(key);
 

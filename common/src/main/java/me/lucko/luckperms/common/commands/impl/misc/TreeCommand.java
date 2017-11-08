@@ -86,7 +86,7 @@ public class TreeCommand extends SingleCommand {
                 return CommandResult.STATE_ERROR;
             }
 
-            PermissionCache permissionData = user.getUserData().getPermissionData(plugin.getContextForUser(user));
+            PermissionCache permissionData = user.getCachedData().getPermissionData(plugin.getContextForUser(user));
             TreeView view = TreeViewBuilder.newBuilder().rootPosition(selection).maxLevels(maxLevel).build(plugin.getPermissionVault());
 
             if (!view.hasData()) {

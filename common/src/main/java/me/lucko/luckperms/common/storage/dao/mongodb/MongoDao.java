@@ -331,8 +331,8 @@ public class MongoDao extends AbstractDao {
             return reportException(e);
         } finally {
             user.getIoLock().unlock();
-            user.getRefreshBuffer().requestDirectly();
         }
+        user.getRefreshBuffer().requestDirectly();
         return true;
     }
 
@@ -433,6 +433,7 @@ public class MongoDao extends AbstractDao {
         } finally {
             group.getIoLock().unlock();
         }
+        group.getRefreshBuffer().requestDirectly();
         return true;
     }
 
@@ -444,22 +445,23 @@ public class MongoDao extends AbstractDao {
             MongoCollection<Document> c = database.getCollection(prefix + "groups");
 
             try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
-                if (cursor.hasNext()) {
-                    Document d = cursor.next();
-
-                    group.setEnduringNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
-                            .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
-                            .collect(Collectors.toSet())
-                    );
-                    return true;
+                if (!cursor.hasNext()) {
+                    return false;
                 }
-                return false;
+
+                Document d = cursor.next();
+                group.setEnduringNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
+                        .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                        .collect(Collectors.toSet())
+                );
             }
         } catch (Exception e) {
             return reportException(e);
         } finally {
             group.getIoLock().unlock();
         }
+        group.getRefreshBuffer().requestDirectly();
+        return true;
     }
 
     @Override

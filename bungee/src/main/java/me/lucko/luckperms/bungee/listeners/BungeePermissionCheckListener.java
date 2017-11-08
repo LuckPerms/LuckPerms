@@ -60,7 +60,7 @@ public class BungeePermissionCheckListener implements Listener {
         }
 
         Contexts contexts = plugin.getContextManager().getApplicableContexts(player);
-        Tristate result = user.getUserData().getPermissionData(contexts).getPermissionValue(e.getPermission(), CheckOrigin.PLATFORM_PERMISSION_CHECK);
+        Tristate result = user.getCachedData().getPermissionData(contexts).getPermissionValue(e.getPermission(), CheckOrigin.PLATFORM_PERMISSION_CHECK);
         if (result == Tristate.UNDEFINED && plugin.getConfiguration().get(ConfigKeys.APPLY_BUNGEE_CONFIG_PERMISSIONS)) {
             return; // just use the result provided by the proxy when the event was created
         }
@@ -83,7 +83,7 @@ public class BungeePermissionCheckListener implements Listener {
         }
 
         Contexts contexts = plugin.getContextManager().getApplicableContexts(player);
-        Tristate result = user.getUserData().getPermissionData(contexts).getPermissionValue(e.getPermission(), CheckOrigin.PLATFORM_LOOKUP_CHECK);
+        Tristate result = user.getCachedData().getPermissionData(contexts).getPermissionValue(e.getPermission(), CheckOrigin.PLATFORM_LOOKUP_CHECK);
         if (result == Tristate.UNDEFINED && plugin.getConfiguration().get(ConfigKeys.APPLY_BUNGEE_CONFIG_PERMISSIONS)) {
             return; // just use the result provided by the proxy when the event was created
         }

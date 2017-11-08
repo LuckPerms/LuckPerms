@@ -45,7 +45,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * Holds a user's cached meta for a given context
+ * Holds cached meta for a given context
  */
 @Getter
 @NoArgsConstructor

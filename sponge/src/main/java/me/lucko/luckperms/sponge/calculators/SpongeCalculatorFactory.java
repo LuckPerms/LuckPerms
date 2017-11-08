@@ -34,7 +34,6 @@ import me.lucko.luckperms.common.calculators.AbstractCalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
 import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.processors.MapProcessor;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
 import me.lucko.luckperms.common.processors.RegexProcessor;
@@ -50,7 +49,7 @@ public class SpongeCalculatorFactory extends AbstractCalculatorFactory {
     private final LPSpongePlugin plugin;
 
     @Override
-    public PermissionCalculator build(Contexts contexts, User user) {
+    public PermissionCalculator build(Contexts contexts, PermissionCalculatorMetadata metadata) {
         ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
 
         processors.add(new MapProcessor());
@@ -71,8 +70,7 @@ public class SpongeCalculatorFactory extends AbstractCalculatorFactory {
             processors.add(new DefaultsProcessor(plugin.getService(), contexts.getContexts().makeImmutable()));
         }
 
-        PermissionCalculatorMetadata meta = PermissionCalculatorMetadata.of(user.getFriendlyName(), contexts.getContexts());
-        return registerCalculator(new PermissionCalculator(plugin, meta, processors.build()));
+        return registerCalculator(new PermissionCalculator(plugin, metadata, processors.build()));
     }
 
     @Override

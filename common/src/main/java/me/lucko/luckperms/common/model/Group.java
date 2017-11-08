@@ -32,12 +32,15 @@ import lombok.ToString;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.api.delegates.model.ApiGroup;
+import me.lucko.luckperms.common.buffers.BufferedRequest;
+import me.lucko.luckperms.common.caching.GroupCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.GroupReference;
 import me.lucko.luckperms.common.references.Identifiable;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @ToString(of = {"name"})
 @EqualsAndHashCode(of = {"name"}, callSuper = false)
@@ -52,9 +55,25 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     @Getter
     private final ApiGroup delegate = new ApiGroup(this);
 
+    /**
+     * The groups data cache instance
+     */
+    @Getter
+    private final GroupCache cachedData;
+
+    @Getter
+    private BufferedRequest<Void> refreshBuffer;
+
     public Group(String name, LuckPermsPlugin plugin) {
         super(name, plugin);
         this.name = name.toLowerCase();
+
+        this.refreshBuffer = new GroupRefreshBuffer(plugin, this);
+        this.cachedData = new GroupCache(this);
+        getPlugin().getApiProvider().getEventFactory().handleGroupCacheLoad(this, cachedData);
+
+        // invalidate out caches when data is updated
+        getStateListeners().add(() -> refreshBuffer.request());
     }
 
     @Override
@@ -91,4 +110,25 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     public GroupReference toReference() {
         return GroupReference.of(getId());
     }
+
+    private CompletableFuture<Void> reloadCachedData() {
+        return CompletableFuture.allOf(cachedData.reloadPermissions(), cachedData.reloadMeta()).thenAccept(n -> {
+            getPlugin().getApiProvider().getEventFactory().handleGroupDataRecalculate(this, cachedData);
+        });
+    }
+
+    private static final class GroupRefreshBuffer extends BufferedRequest<Void> {
+        private final Group group;
+
+        private GroupRefreshBuffer(LuckPermsPlugin plugin, Group group) {
+            super(50L, 5L, plugin.getScheduler().async());
+            this.group = group;
+        }
+
+        @Override
+        protected Void perform() {
+            return group.reloadCachedData().join();
+        }
+    }
+
 }

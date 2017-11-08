@@ -47,6 +47,7 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.api.delegates.model.ApiPermissionHolder;
 import me.lucko.luckperms.common.buffers.Cache;
+import me.lucko.luckperms.common.caching.HolderCache;
 import me.lucko.luckperms.common.caching.MetaAccumulator;
 import me.lucko.luckperms.common.caching.handlers.StateListener;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -249,6 +250,13 @@ public abstract class PermissionHolder {
      * @return the holders "friendly" name
      */
     public abstract String getFriendlyName();
+
+    /**
+     * Gets the holders cached data
+     *
+     * @return the holders cached data
+     */
+    public abstract HolderCache<?> getCachedData();
 
     /**
      * Forms a HolderReference for this PermissionHolder.

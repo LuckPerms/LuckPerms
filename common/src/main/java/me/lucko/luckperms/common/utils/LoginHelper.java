@@ -102,10 +102,4 @@ public class LoginHelper {
         return user;
     }
 
-    public static void refreshPlayer(LuckPermsPlugin plugin, UUID uuid) {
-        final User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(uuid));
-        if (user != null) {
-            user.getRefreshBuffer().requestDirectly();
-        }
-    }
 }

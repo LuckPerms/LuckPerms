@@ -54,16 +54,16 @@ public class BungeeConfigAdapter implements ConfigurationAdapter {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private File makeFile(String file) throws IOException {
-        File cfg = new File(plugin.getDataFolder(), file);
+        File configFile = new File(plugin.getDataFolder(), file);
 
-        if (!cfg.exists()) {
+        if (!configFile.exists()) {
             plugin.getDataFolder().mkdir();
             try (InputStream is = plugin.getResourceAsStream(file)) {
-                Files.copy(is, cfg.toPath());
+                Files.copy(is, configFile.toPath());
             }
         }
 
-        return cfg;
+        return configFile;
     }
 
     @Override

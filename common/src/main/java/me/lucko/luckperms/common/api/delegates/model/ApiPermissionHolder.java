@@ -38,6 +38,7 @@ import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.PermissionHolder;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.caching.CachedData;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.model.Group;
@@ -69,6 +70,11 @@ public class ApiPermissionHolder implements PermissionHolder {
             return group.getDisplayName().orElse(group.getName());
         }
         return handle.getFriendlyName();
+    }
+
+    @Override
+    public CachedData getCachedData() {
+        return handle.getCachedData();
     }
 
     @Override

@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.tasks;
 
 import lombok.RequiredArgsConstructor;
 
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -37,7 +38,10 @@ public class CacheHousekeepingTask implements Runnable {
     @Override
     public void run() {
         for (User user : plugin.getUserManager().getAll().values()) {
-            user.getUserData().doCacheCleanup();
+            user.getCachedData().doCacheCleanup();
+        }
+        for (Group group : plugin.getGroupManager().getAll().values()) {
+            group.getCachedData().doCacheCleanup();
         }
     }
 }

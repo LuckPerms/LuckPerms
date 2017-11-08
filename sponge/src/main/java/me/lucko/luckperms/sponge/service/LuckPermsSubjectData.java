@@ -353,7 +353,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
 
             toRemove.forEach(makeUnsetConsumer(enduring));
 
-            MetaAccumulator metaAccumulator = holder.accumulateMeta(null, null, service.calculateContexts(context));
+            MetaAccumulator metaAccumulator = holder.accumulateMeta(null, null, service.getPlugin().getContextManager().formContexts(context));
             int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0);
             priority += 10;
 
@@ -451,23 +451,21 @@ public class LuckPermsSubjectData implements LPSubjectData {
         } else {
             if (t instanceof User) {
                 User user = ((User) t);
-                return service.getPlugin().getStorage().saveUser(user).thenApplyAsync(success -> {
+                return service.getPlugin().getStorage().saveUser(user).thenComposeAsync(success -> {
                     if (!success) {
-                        return null;
+                        return CompletableFuture.completedFuture(null);
                     }
 
-                    user.getRefreshBuffer().request().join();
-                    return null;
+                    return user.getRefreshBuffer().request();
                 }, service.getPlugin().getScheduler().async());
             } else {
                 Group group = ((Group) t);
-                return service.getPlugin().getStorage().saveGroup(group).thenApplyAsync(success -> {
+                return service.getPlugin().getStorage().saveGroup(group).thenComposeAsync(success -> {
                     if (!success) {
-                        return null;
+                        return CompletableFuture.completedFuture(null);
                     }
 
-                    service.getPlugin().getUpdateTaskBuffer().request().join();
-                    return null;
+                    return service.getPlugin().getUpdateTaskBuffer().request();
                 }, service.getPlugin().getScheduler().async());
             }
         }

@@ -304,7 +304,7 @@ public class VaultChatHook extends Chat {
         world = perms.correctWorld(world);
         perms.log("Getting meta: '" + node + "' for user " + user.getFriendlyName() + " on world " + world + ", server " + perms.getServer());
 
-        String ret = user.getUserData().getMetaData(perms.createContextForWorldLookup(perms.getPlugin().getPlayer(user), world)).getMeta().get(node);
+        String ret = user.getCachedData().getMetaData(perms.createContextForWorldLookup(perms.getPlugin().getPlayer(user), world)).getMeta().get(node);
         return ret != null ? ret : defaultValue;
     }
 
@@ -316,7 +316,7 @@ public class VaultChatHook extends Chat {
         world = perms.correctWorld(world);
         perms.log("Getting " + type.name().toLowerCase() + " for user " + user.getFriendlyName() + " on world " + world + ", server " + perms.getServer());
 
-        MetaData data = user.getUserData().getMetaData(perms.createContextForWorldLookup(perms.getPlugin().getPlayer(user), world));
+        MetaData data = user.getCachedData().getMetaData(perms.createContextForWorldLookup(perms.getPlugin().getPlayer(user), world));
         String ret = type == ChatMetaType.PREFIX ? data.getPrefix() : data.getSuffix();
         return ret != null ? ret : "";
     }

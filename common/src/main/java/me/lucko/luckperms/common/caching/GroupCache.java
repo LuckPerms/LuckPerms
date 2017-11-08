@@ -23,36 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.calculators;
+package me.lucko.luckperms.common.caching;
 
-import me.lucko.luckperms.api.Contexts;
-
-import java.util.List;
+import me.lucko.luckperms.api.caching.GroupData;
+import me.lucko.luckperms.common.model.Group;
 
 /**
- * Creates a calculator instance given a set of contexts
+ * Holds an easily accessible cache of a groups's data in a number of contexts
  */
-public interface CalculatorFactory {
+public class GroupCache extends HolderCache<Group> implements GroupData {
 
-    /**
-     * Builds a PermissionCalculator for the user in the given context
-     *
-     * @param contexts the contexts to build the calculator in
-     * @param metadata the calculator metadata
-     * @return a permission calculator instance
-     */
-    PermissionCalculator build(Contexts contexts, PermissionCalculatorMetadata metadata);
+    public GroupCache(Group holder) {
+        super(holder);
+    }
 
-    /**
-     * Gets the processors which are currently being added to built calculators
-     *
-     * @return a list of processors
-     */
-    List<String> getActiveProcessors();
-
-    /**
-     * Invalidates all calculators build by this factory
-     */
-    void invalidateAll();
-
+    @Override
+    protected String getHolderName() {
+        return holder.getName();
+    }
 }

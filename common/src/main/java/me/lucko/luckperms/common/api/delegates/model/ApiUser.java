@@ -82,7 +82,7 @@ public final class ApiUser extends ApiPermissionHolder implements User {
 
     @Override
     public UserData getCachedData() {
-        return handle.getUserData();
+        return handle.getCachedData();
     }
 
     @Override

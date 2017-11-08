@@ -23,36 +23,35 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.calculators;
+package me.lucko.luckperms.api.event.group;
 
-import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.Group;
+import me.lucko.luckperms.api.caching.GroupData;
+import me.lucko.luckperms.api.event.LuckPermsEvent;
 
-import java.util.List;
+import javax.annotation.Nonnull;
 
 /**
- * Creates a calculator instance given a set of contexts
+ * Called when a groups cached data is refreshed
+ *
+ * @since 4.0
  */
-public interface CalculatorFactory {
+public interface GroupDataRecalculateEvent extends LuckPermsEvent {
 
     /**
-     * Builds a PermissionCalculator for the user in the given context
+     * Gets the group whose data was recalculated
      *
-     * @param contexts the contexts to build the calculator in
-     * @param metadata the calculator metadata
-     * @return a permission calculator instance
+     * @return the group
      */
-    PermissionCalculator build(Contexts contexts, PermissionCalculatorMetadata metadata);
+    @Nonnull
+    Group getGroup();
 
     /**
-     * Gets the processors which are currently being added to built calculators
+     * Gets the data that was recalculated
      *
-     * @return a list of processors
+     * @return the data
      */
-    List<String> getActiveProcessors();
-
-    /**
-     * Invalidates all calculators build by this factory
-     */
-    void invalidateAll();
+    @Nonnull
+    GroupData getData();
 
 }

@@ -45,12 +45,12 @@ import me.lucko.luckperms.sponge.service.model.SubjectReference;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 public class SpongeUser extends User {
 
@@ -100,13 +100,7 @@ public class SpongeUser extends User {
         @Override
         public Optional<CommandSource> getCommandSource() {
             final UUID uuid = plugin.getUuidCache().getExternalUUID(parent.getUuid());
-
-            Optional<Player> p = Sponge.getServer().getPlayer(uuid);
-            if (p.isPresent()) {
-                return Optional.of(p.get());
-            }
-
-            return Optional.empty();
+            return Sponge.getServer().getPlayer(uuid).map(Function.identity());
         }
 
         @Override
@@ -126,7 +120,7 @@ public class SpongeUser extends User {
 
         @Override
         public Tristate getPermissionValue(ImmutableContextSet contexts, String permission) {
-            return parent.getUserData().getPermissionData(plugin.getService().calculateContexts(contexts)).getPermissionValue(permission, CheckOrigin.PLATFORM_LOOKUP_CHECK);
+            return parent.getCachedData().getPermissionData(plugin.getContextManager().formContexts(contexts)).getPermissionValue(permission, CheckOrigin.PLATFORM_LOOKUP_CHECK);
         }
 
         @Override
@@ -138,7 +132,7 @@ public class SpongeUser extends User {
         public ImmutableList<SubjectReference> getParents(ImmutableContextSet contexts) {
             ImmutableSet.Builder<SubjectReference> subjects = ImmutableSet.builder();
 
-            for (String perm : parent.getUserData().getPermissionData(plugin.getService().calculateContexts(contexts)).getImmutableBacking().keySet()) {
+            for (String perm : parent.getCachedData().getPermissionData(plugin.getContextManager().formContexts(contexts)).getImmutableBacking().keySet()) {
                 if (!perm.startsWith("group.")) {
                     continue;
                 }
@@ -157,7 +151,7 @@ public class SpongeUser extends User {
 
         @Override
         public Optional<String> getOption(ImmutableContextSet contexts, String s) {
-            MetaData data = parent.getUserData().getMetaData(plugin.getService().calculateContexts(contexts));
+            MetaData data = parent.getCachedData().getMetaData(plugin.getContextManager().formContexts(contexts));
             if (s.equalsIgnoreCase("prefix")) {
                 if (data.getPrefix() != null) {
                     return Optional.of(data.getPrefix());
@@ -191,7 +185,7 @@ public class SpongeUser extends User {
         @Override
         public void invalidateCaches(CacheLevel cacheLevel) {
             // invalidate for all changes
-            parent.getUserData().invalidateCaches();
+            parent.getCachedData().invalidateCaches();
         }
     }
 

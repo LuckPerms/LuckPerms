@@ -32,13 +32,16 @@ import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.caching.GroupData;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.api.event.log.LogBroadcastEvent;
 import me.lucko.luckperms.common.event.impl.EventConfigReload;
+import me.lucko.luckperms.common.event.impl.EventGroupCacheLoad;
 import me.lucko.luckperms.common.event.impl.EventGroupCreate;
+import me.lucko.luckperms.common.event.impl.EventGroupDataRecalculate;
 import me.lucko.luckperms.common.event.impl.EventGroupDelete;
 import me.lucko.luckperms.common.event.impl.EventGroupLoad;
 import me.lucko.luckperms.common.event.impl.EventGroupLoadAll;
@@ -88,8 +91,18 @@ public final class EventFactory {
         eventBus.fireEvent(event);
     }
 
+    public void handleGroupCacheLoad(Group group, GroupData data) {
+        EventGroupCacheLoad event = new EventGroupCacheLoad(group.getDelegate(), data);
+        fireEventAsync(event);
+    }
+
     public void handleGroupCreate(Group group, CreationCause cause) {
         EventGroupCreate event = new EventGroupCreate(group.getDelegate(), cause);
+        fireEventAsync(event);
+    }
+
+    public void handleGroupDataRecalculate(Group group, GroupData data) {
+        EventGroupDataRecalculate event = new EventGroupDataRecalculate(group.getDelegate(), data);
         fireEventAsync(event);
     }
 

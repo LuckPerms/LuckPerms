@@ -388,12 +388,11 @@ public class SqlDao extends AbstractDao {
                     plugin.getUserManager().giveDefaultIfNeeded(user, false);
                 }
             }
-
-            return true;
         } finally {
             user.getIoLock().unlock();
-            user.getRefreshBuffer().requestDirectly();
         }
+        user.getRefreshBuffer().requestDirectly();
+        return true;
     }
 
     @Override
@@ -659,11 +658,11 @@ public class SqlDao extends AbstractDao {
             } else {
                 group.clearNodes();
             }
-
-            return true;
         } finally {
             group.getIoLock().unlock();
         }
+        group.getRefreshBuffer().requestDirectly();
+        return true;
     }
 
     @Override
