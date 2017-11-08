@@ -35,7 +35,6 @@ import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.caching.UserData;
 
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public final class ApiUser extends ApiPermissionHolder implements User {
     public static me.lucko.luckperms.common.model.User cast(User u) {
@@ -83,11 +82,6 @@ public final class ApiUser extends ApiPermissionHolder implements User {
     @Override
     public UserData getCachedData() {
         return handle.getCachedData();
-    }
-
-    @Override
-    public CompletableFuture<Void> refreshCachedData() {
-        return handle.getRefreshBuffer().request();
     }
 
     @Override

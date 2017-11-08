@@ -35,7 +35,6 @@ import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.caching.GroupData;
 
 import java.util.OptionalInt;
-import java.util.concurrent.CompletableFuture;
 
 public final class ApiGroup extends ApiPermissionHolder implements Group {
     public static me.lucko.luckperms.common.model.Group cast(Group g) {
@@ -64,11 +63,6 @@ public final class ApiGroup extends ApiPermissionHolder implements Group {
     @Override
     public GroupData getCachedData() {
         return handle.getCachedData();
-    }
-
-    @Override
-    public CompletableFuture<Void> refreshCachedData() {
-        return handle.getRefreshBuffer().request();
     }
 
     public boolean equals(Object o) {

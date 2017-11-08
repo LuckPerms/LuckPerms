@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 @AllArgsConstructor
@@ -75,6 +76,11 @@ public class ApiPermissionHolder implements PermissionHolder {
     @Override
     public CachedData getCachedData() {
         return handle.getCachedData();
+    }
+
+    @Override
+    public CompletableFuture<Void> refreshCachedData() {
+        return handle.getRefreshBuffer().request();
     }
 
     @Override

@@ -28,7 +28,6 @@ package me.lucko.luckperms.api;
 import me.lucko.luckperms.api.caching.UserData;
 
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -86,15 +85,6 @@ public interface User extends PermissionHolder {
     @Nonnull
     @Override
     UserData getCachedData();
-
-    /**
-     * Refreshes and applies any changes to the cached user data.
-     *
-     * @return the task future
-     * @since 4.0
-     */
-    @Nonnull
-    CompletableFuture<Void> refreshCachedData();
 
     /**
      * Refresh and re-assign the users permissions.

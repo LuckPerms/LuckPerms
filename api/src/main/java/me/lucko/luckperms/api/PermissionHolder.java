@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
@@ -79,6 +80,15 @@ public interface PermissionHolder {
      */
     @Nonnull
     CachedData getCachedData();
+
+    /**
+     * Refreshes and applies any changes to the cached holder data.
+     *
+     * @return the task future
+     * @since 4.0
+     */
+    @Nonnull
+    CompletableFuture<Void> refreshCachedData();
 
     /**
      * Gets the backing multimap containing every permission this holder has.
