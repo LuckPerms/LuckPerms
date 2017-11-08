@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.api;
 
-import me.lucko.luckperms.api.context.ContextSet;
-
 import java.util.OptionalInt;
 
 import javax.annotation.Nonnull;
@@ -43,28 +41,6 @@ public interface Group extends PermissionHolder {
      */
     @Nonnull
     String getName();
-
-    /**
-     * Check to see if a group inherits another group directly
-     *
-     * @param group The group to check membership of
-     * @return true if the group inherits the other group
-     * @throws NullPointerException  if the group is null
-     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
-     */
-    boolean inheritsGroup(@Nonnull Group group);
-
-    /**
-     * Check to see if a group inherits another group directly
-     *
-     * @param group The group to check membership of
-     * @param contextSet the context set to filter by
-     * @return true if the group inherits the other group
-     * @throws NullPointerException  if the group is null
-     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
-     * @since 3.2
-     */
-    boolean inheritsGroup(@Nonnull Group group, @Nonnull ContextSet contextSet);
 
     /**
      * Gets the weight of this group, if present.

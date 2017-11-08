@@ -285,6 +285,29 @@ public interface PermissionHolder {
     Tristate inheritsPermission(@Nonnull Node node);
 
     /**
+     * Check to see if this holder inherits another group directly
+     *
+     * @param group The group to check membership of
+     * @return true if the group inherits the other group
+     * @throws NullPointerException  if the group is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @since 4.0
+     */
+    boolean inheritsGroup(@Nonnull Group group);
+
+    /**
+     * Check to see if this holder inherits another group directly
+     *
+     * @param group The group to check membership of
+     * @param contextSet the context set to filter by
+     * @return true if the group inherits the other group
+     * @throws NullPointerException  if the group is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @since 4.0
+     */
+    boolean inheritsGroup(@Nonnull Group group, @Nonnull ContextSet contextSet);
+
+    /**
      * Sets a permission for the object
      *
      * @param node The node to be set

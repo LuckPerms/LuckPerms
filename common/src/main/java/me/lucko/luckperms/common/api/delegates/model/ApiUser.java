@@ -31,10 +31,8 @@ import lombok.NonNull;
 import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.DataMutateResult;
-import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.caching.UserData;
-import me.lucko.luckperms.api.context.ContextSet;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -90,16 +88,6 @@ public final class ApiUser extends ApiPermissionHolder implements User {
     @Override
     public CompletableFuture<Void> refreshCachedData() {
         return handle.getRefreshBuffer().request();
-    }
-
-    @Override
-    public boolean isInGroup(@NonNull Group group) {
-        return handle.inheritsGroup(ApiGroup.cast(group));
-    }
-
-    @Override
-    public boolean isInGroup(@NonNull Group group, @NonNull ContextSet contextSet) {
-        return handle.inheritsGroup(ApiGroup.cast(group), contextSet);
     }
 
     @Override

@@ -137,6 +137,16 @@ public class ApiPermissionHolder implements PermissionHolder {
     }
 
     @Override
+    public boolean inheritsGroup(@NonNull me.lucko.luckperms.api.Group group) {
+        return handle.inheritsGroup(ApiGroup.cast(group));
+    }
+
+    @Override
+    public boolean inheritsGroup(@NonNull me.lucko.luckperms.api.Group group, @NonNull ContextSet contextSet) {
+        return handle.inheritsGroup(ApiGroup.cast(group), contextSet);
+    }
+
+    @Override
     public DataMutateResult setPermission(@NonNull Node node) {
         return handle.setPermission(node);
     }

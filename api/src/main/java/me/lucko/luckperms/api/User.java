@@ -26,7 +26,6 @@
 package me.lucko.luckperms.api;
 
 import me.lucko.luckperms.api.caching.UserData;
-import me.lucko.luckperms.api.context.ContextSet;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -95,27 +94,6 @@ public interface User extends PermissionHolder {
      */
     @Nonnull
     CompletableFuture<Void> refreshCachedData();
-
-    /**
-     * Check to see if the user is a direct member of a group
-     *
-     * @param group The group to check membership of
-     * @return true if the user is a member of the group
-     * @throws NullPointerException if the group is null
-     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
-     */
-    boolean isInGroup(@Nonnull Group group);
-
-    /**
-     * Check to see if the user is a direct member of a group in a specific context
-     *
-     * @param group the group to check membership of
-     * @param contextSet the context set to filter by
-     * @return true if the user is a member of the group
-     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
-     * @since 3.2
-     */
-    boolean isInGroup(@Nonnull Group group, @Nonnull ContextSet contextSet);
 
     /**
      * Refresh and re-assign the users permissions.

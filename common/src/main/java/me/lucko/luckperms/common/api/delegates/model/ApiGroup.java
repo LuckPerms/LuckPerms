@@ -32,7 +32,6 @@ import lombok.NonNull;
 import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.Group;
-import me.lucko.luckperms.api.context.ContextSet;
 
 import java.util.OptionalInt;
 
@@ -53,16 +52,6 @@ public final class ApiGroup extends ApiPermissionHolder implements Group {
     @Override
     public String getName() {
         return handle.getName();
-    }
-
-    @Override
-    public boolean inheritsGroup(@NonNull Group group) {
-        return handle.inheritsGroup(cast(group));
-    }
-
-    @Override
-    public boolean inheritsGroup(@NonNull Group group, @NonNull ContextSet contextSet) {
-        return handle.inheritsGroup(cast(group), contextSet);
     }
 
     @Override
