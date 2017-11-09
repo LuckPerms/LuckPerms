@@ -234,7 +234,7 @@ public class SqlDao extends AbstractDao {
                 ps.setString(2, entry.getActor().toString());
                 ps.setString(3, entry.getActorName());
                 ps.setString(4, Character.toString(entry.getType().getCode()));
-                ps.setString(5, String.valueOf(entry.getActed()));
+                ps.setString(5, entry.getActed().map(UUID::toString).orElse("null"));
                 ps.setString(6, entry.getActedName());
                 ps.setString(7, entry.getAction());
                 ps.execute();

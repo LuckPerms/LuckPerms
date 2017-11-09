@@ -33,6 +33,8 @@ import javax.annotation.Nullable;
 
 /**
  * Represents a logged action.
+ *
+ * @see LuckPermsApi#newLogEntryBuilder() for creating an instance
  */
 public interface LogEntry extends Comparable<LogEntry> {
 
@@ -50,6 +52,7 @@ public interface LogEntry extends Comparable<LogEntry> {
      *
      * @return the actor id
      */
+    @Nonnull
     UUID getActor();
 
     /**
@@ -57,6 +60,7 @@ public interface LogEntry extends Comparable<LogEntry> {
      *
      * @return the name of the actor
      */
+    @Nonnull
     String getActorName();
 
     /**
@@ -64,6 +68,7 @@ public interface LogEntry extends Comparable<LogEntry> {
      *
      * @return the action type
      */
+    @Nonnull
     Type getType();
 
     /**
@@ -73,6 +78,7 @@ public interface LogEntry extends Comparable<LogEntry> {
      *
      * @return the uuid of acted object
      */
+    @Nonnull
     Optional<UUID> getActed();
 
     /**
@@ -80,6 +86,7 @@ public interface LogEntry extends Comparable<LogEntry> {
      *
      * @return the name of the acted object
      */
+    @Nonnull
     String getActedName();
 
     /**
@@ -90,6 +97,7 @@ public interface LogEntry extends Comparable<LogEntry> {
      *
      * @return the action
      */
+    @Nonnull
     String getAction();
 
     /**
@@ -112,6 +120,7 @@ public interface LogEntry extends Comparable<LogEntry> {
             return this.code;
         }
 
+        @Nonnull
         public static Type valueOf(char code) {
             switch (code) {
                 case 'U':

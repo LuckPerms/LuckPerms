@@ -45,10 +45,10 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 /**
  * PermissibleBase for LuckPerms.
@@ -162,13 +162,14 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public Set<PermissionAttachmentInfo> getEffectivePermissions() {
-        Set<PermissionAttachmentInfo> perms = new HashSet<>();
-        perms.addAll(
-                user.getCachedData().getPermissionData(calculateContexts()).getImmutableBacking().entrySet().stream()
-                        .map(e -> new PermissionAttachmentInfo(player, e.getKey(), null, e.getValue()))
-                        .collect(Collectors.toList())
-        );
-        return perms;
+        Set<Map.Entry<String, Boolean>> permissions = user.getCachedData().getPermissionData(calculateContexts()).getImmutableBacking().entrySet();
+        Set<PermissionAttachmentInfo> ret = new HashSet<>(permissions.size());
+
+        for (Map.Entry<String, Boolean> entry : permissions) {
+            ret.add(new PermissionAttachmentInfo(player, entry.getKey(), null, entry.getValue()));
+        }
+
+        return ret;
     }
 
     @Override

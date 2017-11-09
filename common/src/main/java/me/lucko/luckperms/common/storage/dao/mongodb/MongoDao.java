@@ -170,8 +170,8 @@ public class MongoDao extends AbstractDao {
                     .append("actedName", entry.getActedName())
                     .append("action", entry.getAction());
 
-            if (entry.getActed() != null) {
-                doc.append("acted", entry.getActed());
+            if (entry.getActed().isPresent()) {
+                doc.append("acted", entry.getActed().get());
             }
 
             c.insertOne(doc, new InsertOneOptions());

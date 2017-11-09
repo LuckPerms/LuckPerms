@@ -291,7 +291,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                 (entry.getActor().equals(Constants.CONSOLE_UUID) ? "" : entry.getActor() + " "),
                 entry.getActorName(),
                 Character.toString(entry.getType().getCode()),
-                (entry.getActed() == null ? "" : entry.getActed().toString() + " "),
+                entry.getActed().map(e -> e.toString() + " ").orElse(""),
                 entry.getActedName(),
                 entry.getAction())
         );

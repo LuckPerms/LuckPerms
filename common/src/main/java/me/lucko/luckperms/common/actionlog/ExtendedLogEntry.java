@@ -72,10 +72,7 @@ public class ExtendedLogEntry implements LogEntry {
             .thenComparing(LogEntry::getActor)
             .thenComparing(LogEntry::getActorName, String.CASE_INSENSITIVE_ORDER)
             .thenComparing(LogEntry::getType)
-            .thenComparing(e -> {
-                UUID u = e.getActed().orElse(null);
-                return u == null ? "" : u.toString();
-            })
+            .thenComparing(e -> e.getActed().map(UUID::toString).orElse(""))
             .thenComparing(LogEntry::getActedName, String.CASE_INSENSITIVE_ORDER)
             .thenComparing(LogEntry::getAction);
 
@@ -187,7 +184,7 @@ public class ExtendedLogEntry implements LogEntry {
                 this.getActor().equals(other.getActor()) &&
                 this.getActorName().equals(other.getActorName()) &&
                 this.getType() == other.getType() &&
-                (this.getActed() == null ? other.getActed() == null : this.getActed().equals(other.getActed())) &&
+                this.getActed().equals(other.getActed()) &&
                 this.getActedName().equals(other.getActedName()) &&
                 this.getAction().equals(other.getAction());
     }
@@ -200,7 +197,7 @@ public class ExtendedLogEntry implements LogEntry {
         result = result * PRIME + this.getActor().hashCode();
         result = result * PRIME + this.getActorName().hashCode();
         result = result * PRIME + this.getType().hashCode();
-        result = result * PRIME + (this.getActed() == null ? 43 : this.getActed().hashCode());
+        result = result * PRIME + this.getActed().hashCode();
         result = result * PRIME + this.getActedName().hashCode();
         result = result * PRIME + this.getAction().hashCode();
         return result;
@@ -365,8 +362,8 @@ public class ExtendedLogEntry implements LogEntry {
         data.add("actor", new JsonPrimitive(entry.getActor().toString()));
         data.add("actorName", new JsonPrimitive(entry.getActorName()));
         data.add("type", new JsonPrimitive(entry.getType().name()));
-        if (entry.getActed() != null) {
-            data.add("acted", new JsonPrimitive(entry.getActed().toString()));
+        if (entry.getActed().isPresent()) {
+            data.add("acted", new JsonPrimitive(entry.getActed().get().toString()));
         }
         data.add("actedName", new JsonPrimitive(entry.getActedName()));
         data.add("action", new JsonPrimitive(entry.getAction()));

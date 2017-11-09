@@ -349,6 +349,7 @@ public interface LuckPermsApi {
      * @return a new builder
      * @since 4.0
      */
+    @Nonnull
     LogEntry.Builder newLogEntryBuilder();
 
     /**

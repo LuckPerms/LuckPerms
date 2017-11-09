@@ -120,8 +120,8 @@ public class Log {
     public SortedSet<ExtendedLogEntry> getUserHistory(UUID uuid) {
         return content.stream()
                 .filter(e -> e.getType() == LogEntry.Type.USER)
-                .filter(e -> e.getActed() != null)
-                .filter(e -> e.getActed().equals(uuid))
+                .filter(e -> e.getActed().isPresent())
+                .filter(e -> e.getActed().get().equals(uuid))
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
@@ -132,8 +132,8 @@ public class Log {
     public int getUserHistoryMaxPages(UUID uuid) {
         return getMaxPages(content.stream()
                 .filter(e -> e.getType() == LogEntry.Type.USER)
-                .filter(e -> e.getActed() != null)
-                .filter(e -> e.getActed().equals(uuid))
+                .filter(e -> e.getActed().isPresent())
+                .filter(e -> e.getActed().get().equals(uuid))
                 .count(), PAGE_ENTRIES);
     }
 
