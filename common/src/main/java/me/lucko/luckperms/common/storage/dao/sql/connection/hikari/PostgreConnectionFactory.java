@@ -35,16 +35,6 @@ public class PostgreConnectionFactory extends HikariConnectionFactory {
     }
 
     @Override
-    protected String getDriverClass() {
-        return "org.postgresql.ds.PGSimpleDataSource";
-    }
-
-    @Override
-    protected void appendProperties(HikariConfig config) {
-
-    }
-
-    @Override
     protected void appendConfigurationInfo(HikariConfig config) {
         String address = configuration.getAddress();
         String[] addressSplit = address.split(":");
@@ -56,7 +46,7 @@ public class PostgreConnectionFactory extends HikariConnectionFactory {
         String password = configuration.getPassword();
 
         config.setMaximumPoolSize(configuration.getPoolSize());
-        config.setDataSourceClassName(getDriverClass());
+        config.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
         config.addDataSourceProperty("serverName", address);
         config.addDataSourceProperty("portNumber", port);
         config.addDataSourceProperty("databaseName", database);

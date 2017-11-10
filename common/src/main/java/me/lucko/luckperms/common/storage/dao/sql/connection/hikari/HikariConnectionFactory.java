@@ -48,9 +48,13 @@ public abstract class HikariConnectionFactory extends AbstractConnectionFactory 
         this.configuration = configuration;
     }
 
-    protected abstract String getDriverClass();
+    protected String getDriverClass() {
+        return null;
+    }
 
-    protected abstract void appendProperties(HikariConfig config);
+    protected void appendProperties(HikariConfig config) {
+
+    }
 
     protected void appendConfigurationInfo(HikariConfig config) {
         String address = configuration.getAddress();
@@ -58,17 +62,13 @@ public abstract class HikariConnectionFactory extends AbstractConnectionFactory 
         address = addressSplit[0];
         String port = addressSplit.length > 1 ? addressSplit[1] : "3306";
 
-        String database = configuration.getDatabase();
-        String username = configuration.getUsername();
-        String password = configuration.getPassword();
-
         config.setMaximumPoolSize(configuration.getPoolSize());
         config.setDataSourceClassName(getDriverClass());
         config.addDataSourceProperty("serverName", address);
         config.addDataSourceProperty("port", port);
-        config.addDataSourceProperty("databaseName", database);
-        config.setUsername(username);
-        config.setPassword(password);
+        config.addDataSourceProperty("databaseName", configuration.getDatabase());
+        config.setUsername(configuration.getUsername());
+        config.setPassword(configuration.getPassword());
     }
 
     @Override

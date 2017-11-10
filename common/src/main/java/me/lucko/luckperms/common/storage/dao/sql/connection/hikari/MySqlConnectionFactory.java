@@ -35,8 +35,17 @@ public class MySqlConnectionFactory extends HikariConnectionFactory {
     }
 
     @Override
-    protected String getDriverClass() {
-        return "com.mysql.jdbc.jdbc2.optional.MysqlDataSource";
+    protected void appendConfigurationInfo(HikariConfig config) {
+        String address = configuration.getAddress();
+        String[] addressSplit = address.split(":");
+        address = addressSplit[0];
+        String port = addressSplit.length > 1 ? addressSplit[1] : "3306";
+        String database = configuration.getDatabase();
+
+        config.setMaximumPoolSize(configuration.getPoolSize());
+        config.setJdbcUrl("jdbc:mysql://" + address + ":" + port + "/" + database);
+        config.setUsername(configuration.getUsername());
+        config.setPassword(configuration.getPassword());
     }
 
     @Override
