@@ -32,11 +32,13 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 /**
  * Stores a collection of all permissions known to the platform.
@@ -96,6 +98,10 @@ public class PermissionVault implements Runnable {
 
     public Set<String> getKnownPermissions() {
         return ImmutableSet.copyOf(knownPermissions);
+    }
+
+    public List<String> rootAsList() {
+        return rootNode.makeImmutableCopy().getNodeEndings().stream().map(Map.Entry::getValue).collect(Collectors.toList());
     }
 
     public int getSize() {

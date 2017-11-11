@@ -30,6 +30,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.stream.JsonWriter;
 
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
@@ -63,10 +64,8 @@ import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
     private static final String USER_ID_PATTERN = "user/";
@@ -84,22 +83,40 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
             return CommandResult.NO_PERMISSION;
         }
 
-        JsonObject data = new JsonObject();
-        Set<NodeModel> nodes = holder.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
-        data.addProperty("who", id(holder));
-        data.addProperty("cmdAlias", label);
-        data.addProperty("uploadedBy", sender.getNameWithLocation());
-        data.addProperty("time", System.currentTimeMillis());
-        data.add("nodes", serializePermissions(nodes));
+        // form the payload data
+        JsonObject payload = new JsonObject();
+        payload.addProperty("who", id(holder));
+        payload.addProperty("whoFriendly", holder.getFriendlyName());
+        if (holder instanceof User) {
+            payload.addProperty("whoUuid", ((User) holder).getUuid().toString());
+        }
+        payload.addProperty("cmdAlias", label);
+        payload.addProperty("uploadedBy", sender.getNameWithLocation());
+        payload.addProperty("uploadedByUuid", sender.getUuid().toString());
+        payload.addProperty("time", System.currentTimeMillis());
 
-        String dataUrl = paste(new GsonBuilder().setPrettyPrinting().create().toJson(data));
+        // attach the holders permissions
+        payload.add("nodes", serializePermissions(holder.getEnduringNodes().values().stream().map(NodeModel::fromNode)));
+
+        // attach an array of all permissions known to the server, to use for tab completion in the editor
+        JsonArray knownPermsArray = new JsonArray();
+        for (String perm : plugin.getPermissionVault().rootAsList()) {
+            knownPermsArray.add(new JsonPrimitive(perm));
+        }
+        payload.add("knownPermissions", knownPermsArray);
+
+        // upload the payload data to gist
+        String dataUrl = paste(new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(payload));
         if (dataUrl == null) {
             Message.EDITOR_UPLOAD_FAILURE.send(sender);
             return CommandResult.STATE_ERROR;
         }
 
+        // extract the information we need from the gist url
         List<String> parts = Splitter.on('/').splitToList(dataUrl);
         String id = "?" + parts.get(4) + "/" + parts.get(6);
+
+        // form a url for the editor
         String url = plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + id;
 
         Message.EDITOR_URL.send(sender);
@@ -171,10 +188,9 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
         }
     }
 
-    private static JsonArray serializePermissions(Set<NodeModel> nodes) {
+    private static JsonArray serializePermissions(Stream<NodeModel> nodes) {
         JsonArray arr = new JsonArray();
-
-        for (NodeModel node : nodes) {
+        nodes.forEach(node -> {
             JsonObject attributes = new JsonObject();
             attributes.addProperty("permission", node.getPermission());
             attributes.addProperty("value", node.getValue());
@@ -196,8 +212,7 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
             }
 
             arr.add(attributes);
-        }
-
+        });
         return arr;
     }
 }
