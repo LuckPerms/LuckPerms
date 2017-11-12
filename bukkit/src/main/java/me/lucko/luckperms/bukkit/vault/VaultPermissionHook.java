@@ -32,7 +32,6 @@ import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -462,21 +461,23 @@ public class VaultPermissionHook extends Permission {
     }
 
     public Contexts createContextForWorldLookup(String world) {
-        MutableContextSet context = MutableContextSet.create();
-        if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
+        MutableContextSet context = plugin.getContextManager().getStaticContext().mutableCopy();
+
+        // worlds & servers get set depending on the config setting
+        context.removeAll("world");
+        context.removeAll("server");
+
+        // add the vault settings
+        if (world != null && !world.isEmpty() && !world.equalsIgnoreCase("global")) {
             context.add("world", world.toLowerCase());
         }
         context.add("server", getServer());
-        context.addAll(plugin.getConfiguration().getContextsFile().getStaticContexts());
+
         return new Contexts(context, isIncludeGlobal(), true, true, true, true, false);
     }
 
     public Contexts createContextForWorldLookup(@NonNull Player player, String world) {
-        MutableContextSet context = MutableContextSet.create();
-
-        // use player context
-        ImmutableContextSet applicableContext = plugin.getContextManager().getApplicableContext(player);
-        context.addAll(applicableContext);
+        MutableContextSet context = plugin.getContextManager().getApplicableContext(player).mutableCopy();
 
         // worlds & servers get set depending on the config setting
         context.removeAll("world");

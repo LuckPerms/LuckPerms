@@ -124,22 +124,8 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         maxWeight += 5;
 
         for (PermissionUser user : manager.getUsers()) {
-            UUID u;
-            try {
-                u = UUID.fromString(user.getIdentifier());
-            } catch (IllegalArgumentException e) {
-                u = ni.nameToUUID(user.getIdentifier());
-                if (u == null) {
-                    try {
-                        u = Bukkit.getOfflinePlayer(user.getIdentifier()).getUniqueId();
-                    } catch (Exception ex) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
+            UUID u = BukkitMigrationUtils.lookupUuid(log, user.getIdentifier());
             if (u == null) {
-                log.logErr("Unable to get a UUID for user identifier: " + user.getIdentifier());
                 continue;
             }
 

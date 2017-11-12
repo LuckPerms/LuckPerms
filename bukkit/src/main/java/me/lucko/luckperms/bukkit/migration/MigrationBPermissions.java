@@ -48,7 +48,6 @@ import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -156,20 +155,8 @@ public class MigrationBPermissions extends SubCommand<Object> {
             AtomicInteger userCount = new AtomicInteger(0);
             for (Calculable user : world.getAll(CalculableType.USER)) {
                 // There is no mention of UUIDs in the API. I assume that name = uuid. idk?
-                UUID uuid = null;
-                try {
-                    uuid = UUID.fromString(user.getName());
-                } catch (IllegalArgumentException e) {
-                    try {
-                        //noinspection deprecation
-                        uuid = Bukkit.getOfflinePlayer(user.getName()).getUniqueId();
-                    } catch (Exception ex) {
-                        e.printStackTrace();
-                    }
-                }
-
+                UUID uuid = BukkitMigrationUtils.lookupUuid(log, user.getName());
                 if (uuid == null) {
-                    log.logErr("Unable to migrate user " + user.getName() + ". Cannot to get UUID.");
                     continue;
                 }
 

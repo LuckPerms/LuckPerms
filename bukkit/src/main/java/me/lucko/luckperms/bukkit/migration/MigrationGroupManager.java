@@ -185,11 +185,8 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
             AtomicInteger userWorldCount = new AtomicInteger(0);
             for (User user : wdh.getUserList()) {
-                UUID uuid;
-                try {
-                    uuid = UUID.fromString(user.getUUID());
-                } catch (IllegalArgumentException e) {
-                    log.logErr("Could not parse UUID for user: " + user.getUUID());
+                UUID uuid = BukkitMigrationUtils.lookupUuid(log, user.getUUID());
+                if (uuid == null) {
                     continue;
                 }
 

@@ -33,7 +33,6 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -118,7 +117,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
             // store user data for later
             Set<Membership> members = entity.getMemberships();
             for (Membership membership : members) {
-                UUID uuid = Util.parseUuid(membership.getMember());
+                UUID uuid = BukkitMigrationUtils.lookupUuid(log, membership.getMember());
                 if (uuid == null) {
                     continue;
                 }

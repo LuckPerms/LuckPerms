@@ -35,7 +35,6 @@ import me.lucko.luckperms.common.utils.TextUtils;
 import net.kyori.text.Component;
 import net.kyori.text.serializer.ComponentSerializers;
 import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.UUID;
@@ -63,17 +62,12 @@ public class BungeeSenderFactory extends SenderFactory<CommandSender> {
 
     @Override
     protected void sendMessage(CommandSender sender, String s) {
-        sender.sendMessage(new TextComponent(s));
+        sendMessage(sender, TextUtils.fromLegacy(s));
     }
 
     @Override
     protected void sendMessage(CommandSender sender, Component message) {
-        try {
-            sender.sendMessage(net.md_5.bungee.chat.ComponentSerializer.parse(ComponentSerializers.JSON.serialize(message)));
-        } catch (Exception e) {
-            //noinspection deprecation
-            sendMessage(sender, TextUtils.toLegacy(message));
-        }
+        sender.sendMessage(net.md_5.bungee.chat.ComponentSerializer.parse(ComponentSerializers.JSON.serialize(message)));
     }
 
     @Override
