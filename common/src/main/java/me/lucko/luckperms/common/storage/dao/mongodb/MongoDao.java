@@ -53,7 +53,7 @@ import me.lucko.luckperms.common.node.NodeHeldPermission;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
-import me.lucko.luckperms.common.storage.DatastoreConfiguration;
+import me.lucko.luckperms.common.storage.StorageCredentials;
 import me.lucko.luckperms.common.storage.dao.AbstractDao;
 
 import org.bson.Document;
@@ -74,14 +74,14 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unchecked")
 public class MongoDao extends AbstractDao {
 
-    private final DatastoreConfiguration configuration;
+    private final StorageCredentials configuration;
     private MongoClient mongoClient;
     private MongoDatabase database;
 
     @Getter
     private final String prefix;
 
-    public MongoDao(LuckPermsPlugin plugin, DatastoreConfiguration configuration, String prefix) {
+    public MongoDao(LuckPermsPlugin plugin, StorageCredentials configuration, String prefix) {
         super(plugin, "MongoDB");
         this.configuration = configuration;
         this.prefix = prefix;

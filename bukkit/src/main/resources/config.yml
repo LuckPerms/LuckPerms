@@ -295,7 +295,35 @@ data:
   database: minecraft
   username: root
   password: ''
-  pool-size: 10 # The size of the MySQL connection pool.
+
+  # These settings apply to the MySQL connection pool.
+  # The default values will be suitable for the majority of users.
+  # Do not change these settings unless you know what you're doing!
+  pool-settings:
+
+    # Sets the maximum size of the MySQL connection pool.
+    # Basically this value will determine the maximum number of actual
+    # connections to the database backend.
+    #
+    # More information about determining the size of connection pools can be found here:
+    # https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing
+    maximum-pool-size: 10
+
+    # Sets the minimum number of idle connections that the pool will try to maintain.
+    #
+    # For maximum performance and responsiveness to spike demands, it is recommended to not set
+    # this value and instead allow the pool to act as a fixed size connection pool.
+    # (set this value to the same as 'maximum-pool-size')
+    minimum-idle: 10
+
+    # This setting controls the maximum lifetime of a connection in the pool in milliseconds.
+    # The value should be at least 30 seconds less than any database or infrastructure imposed
+    # connection time limit.
+    maximum-lifetime: 1800000 # 30 minutes
+
+    # This setting controls the maximum number of milliseconds that the plugin will wait for a
+    # connection from the pool, before timing out.
+    connection-timeout: 15000 # 15 seconds
 
   # The prefix for all LuckPerms tables. Change this is you want to use different tables for
   # different servers.

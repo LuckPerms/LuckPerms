@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.storage.dao.sql.connection.hikari;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-import me.lucko.luckperms.common.storage.DatastoreConfiguration;
+import me.lucko.luckperms.common.storage.StorageCredentials;
 import me.lucko.luckperms.common.storage.dao.sql.connection.AbstractConnectionFactory;
 
 import java.sql.Connection;
@@ -40,10 +40,10 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class HikariConnectionFactory extends AbstractConnectionFactory {
 
-    protected final DatastoreConfiguration configuration;
+    protected final StorageCredentials configuration;
     private HikariDataSource hikari;
 
-    public HikariConnectionFactory(String name, DatastoreConfiguration configuration) {
+    public HikariConnectionFactory(String name, StorageCredentials configuration) {
         super(name);
         this.configuration = configuration;
     }
@@ -62,7 +62,6 @@ public abstract class HikariConnectionFactory extends AbstractConnectionFactory 
         address = addressSplit[0];
         String port = addressSplit.length > 1 ? addressSplit[1] : "3306";
 
-        config.setMaximumPoolSize(configuration.getPoolSize());
         config.setDataSourceClassName(getDriverClass());
         config.addDataSourceProperty("serverName", address);
         config.addDataSourceProperty("port", port);
@@ -79,9 +78,10 @@ public abstract class HikariConnectionFactory extends AbstractConnectionFactory 
         appendConfigurationInfo(config);
         appendProperties(config);
 
-        // We will wait for 15 seconds to get a connection from the pool.
-        // Default is 30, but it shouldn't be taking that long.
-        config.setConnectionTimeout(TimeUnit.SECONDS.toMillis(15)); // 15000
+        config.setMaximumPoolSize(configuration.getMaxPoolSize());
+        config.setMinimumIdle(configuration.getMinIdleConnections());
+        config.setMaxLifetime(configuration.getMaxLifetime());
+        config.setConnectionTimeout(configuration.getConnectionTimeout());
 
         // If a connection is not returned within 10 seconds, it's probably safe to assume it's been leaked.
         config.setLeakDetectionThreshold(TimeUnit.SECONDS.toMillis(10)); // 10000

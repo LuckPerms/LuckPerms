@@ -30,12 +30,15 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class DatastoreConfiguration {
+public class StorageCredentials {
 
     private final String address;
     private final String database;
     private final String username;
     private final String password;
-    private int poolSize;
+    private int maxPoolSize;
+    private int minIdleConnections;
+    private int maxLifetime;
+    private int connectionTimeout;
 
 }

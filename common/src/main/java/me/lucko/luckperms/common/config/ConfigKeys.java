@@ -48,7 +48,7 @@ import me.lucko.luckperms.common.primarygroup.AllParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.ParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
 import me.lucko.luckperms.common.primarygroup.StoredHolder;
-import me.lucko.luckperms.common.storage.DatastoreConfiguration;
+import me.lucko.luckperms.common.storage.StorageCredentials;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.lang.reflect.Field;
@@ -358,13 +358,17 @@ public class ConfigKeys {
     /**
      * The database settings, username, password, etc for use by any database
      */
-    public static final ConfigKey<DatastoreConfiguration> DATABASE_VALUES = EnduringKey.wrap(AbstractKey.of(c -> {
-        return new DatastoreConfiguration(
+    public static final ConfigKey<StorageCredentials> DATABASE_VALUES = EnduringKey.wrap(AbstractKey.of(c -> {
+        int maxPoolSize = c.getInt("data.pool-settings.maximum-pool-size", c.getInt("data.pool-size", 10));
+        int minIdle = c.getInt("data.pool-settings.minimum-idle", maxPoolSize);
+        int maxLifetime = c.getInt("data.pool-settings.maximum-lifetime", 1800000);
+        int connectionTimeout = c.getInt("data.pool-settings.connection-timeout", 15000);
+        return new StorageCredentials(
                 c.getString("data.address", null),
                 c.getString("data.database", null),
                 c.getString("data.username", null),
                 c.getString("data.password", null),
-                c.getInt("data.pool-size", 10)
+                maxPoolSize, minIdle, maxLifetime, connectionTimeout
         );
     }));
 

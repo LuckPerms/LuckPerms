@@ -27,10 +27,10 @@ package me.lucko.luckperms.common.storage.dao.sql.connection.hikari;
 
 import com.zaxxer.hikari.HikariConfig;
 
-import me.lucko.luckperms.common.storage.DatastoreConfiguration;
+import me.lucko.luckperms.common.storage.StorageCredentials;
 
 public class MariaDbConnectionFactory extends HikariConnectionFactory {
-    public MariaDbConnectionFactory(DatastoreConfiguration configuration) {
+    public MariaDbConnectionFactory(StorageCredentials configuration) {
         super("MariaDB", configuration);
     }
 

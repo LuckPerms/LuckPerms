@@ -27,10 +27,10 @@ package me.lucko.luckperms.common.storage.dao.sql.connection.hikari;
 
 import com.zaxxer.hikari.HikariConfig;
 
-import me.lucko.luckperms.common.storage.DatastoreConfiguration;
+import me.lucko.luckperms.common.storage.StorageCredentials;
 
 public class MySqlConnectionFactory extends HikariConnectionFactory {
-    public MySqlConnectionFactory(DatastoreConfiguration configuration) {
+    public MySqlConnectionFactory(StorageCredentials configuration) {
         super("MySQL", configuration);
     }
 
@@ -42,7 +42,6 @@ public class MySqlConnectionFactory extends HikariConnectionFactory {
         String port = addressSplit.length > 1 ? addressSplit[1] : "3306";
         String database = configuration.getDatabase();
 
-        config.setMaximumPoolSize(configuration.getPoolSize());
         config.setJdbcUrl("jdbc:mysql://" + address + ":" + port + "/" + database);
         config.setUsername(configuration.getUsername());
         config.setPassword(configuration.getPassword());

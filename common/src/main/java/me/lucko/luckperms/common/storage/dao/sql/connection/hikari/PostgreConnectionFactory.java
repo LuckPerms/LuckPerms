@@ -27,10 +27,10 @@ package me.lucko.luckperms.common.storage.dao.sql.connection.hikari;
 
 import com.zaxxer.hikari.HikariConfig;
 
-import me.lucko.luckperms.common.storage.DatastoreConfiguration;
+import me.lucko.luckperms.common.storage.StorageCredentials;
 
 public class PostgreConnectionFactory extends HikariConnectionFactory {
-    public PostgreConnectionFactory(DatastoreConfiguration configuration) {
+    public PostgreConnectionFactory(StorageCredentials configuration) {
         super("PostgreSQL", configuration);
     }
 
@@ -45,7 +45,6 @@ public class PostgreConnectionFactory extends HikariConnectionFactory {
         String username = configuration.getUsername();
         String password = configuration.getPassword();
 
-        config.setMaximumPoolSize(configuration.getPoolSize());
         config.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
         config.addDataSourceProperty("serverName", address);
         config.addDataSourceProperty("portNumber", port);
