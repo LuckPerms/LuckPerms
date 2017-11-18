@@ -27,8 +27,6 @@ package me.lucko.luckperms.common.node;
 
 import lombok.experimental.UtilityClass;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
 
@@ -40,107 +38,19 @@ import me.lucko.luckperms.common.utils.PatternCache;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 /**
  * Utility class to make Node(Builder) instances from serialised strings or existing Nodes
  */
-@SuppressWarnings("deprecation")
 @UtilityClass
 public class NodeFactory {
 
     // used to split prefix/suffix/meta nodes
     private static final Splitter META_SPLITTER = Splitter.on(PatternCache.compileDelimitedMatcher(".", "\\")).limit(2);
-
-    // legacy node format delimiters
-    private static final Pattern LEGACY_SERVER_DELIM = PatternCache.compileDelimitedMatcher("/", "\\");
-    private static final Splitter LEGACY_SERVER_SPLITTER = Splitter.on(LEGACY_SERVER_DELIM).limit(2);
-    private static final Pattern LEGACY_WORLD_DELIM = PatternCache.compileDelimitedMatcher("-", "\\");
-    private static final Splitter LEGACY_WORLD_SPLITTER = Splitter.on(LEGACY_WORLD_DELIM).limit(2);
-    private static final Pattern LEGACY_EXPIRY_DELIM = PatternCache.compileDelimitedMatcher("$", "\\");
-    private static final Splitter LEGACY_EXPIRY_SPLITTER = Splitter.on(LEGACY_EXPIRY_DELIM).limit(2);
-
     private static final String[] DELIMS = new String[]{".", "/", "-", "$"};
 
-    // caches the conversion between legacy node strings --> node instances
-    private static final LoadingCache<String, Node> LEGACY_SERIALIZATION_CACHE = Caffeine.newBuilder()
-            .expireAfterAccess(10, TimeUnit.MINUTES)
-            .build(s -> builderFromLegacyString(s, true).build());
-
-    private static final LoadingCache<String, Node> LEGACY_SERIALIZATION_CACHE_NEGATED = Caffeine.newBuilder()
-            .expireAfterAccess(10, TimeUnit.MINUTES)
-            .build(s -> builderFromLegacyString(s, false).build());
-
-    public static Node fromSerializedNode(String s, Boolean b) {
-        try {
-            return b ? LEGACY_SERIALIZATION_CACHE.get(s) : LEGACY_SERIALIZATION_CACHE_NEGATED.get(s);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
-
     public static Node.Builder newBuilder(String s) {
-        return new NodeBuilder(s, false);
-    }
-
-    public static Node.Builder builderFromLegacyString(String s, Boolean b) {
-        // if contains /
-        if (LEGACY_SERVER_DELIM.matcher(s).find()) {
-            // 0=server(+world)   1=node
-            Iterator<String> parts = LEGACY_SERVER_SPLITTER.split(s).iterator();
-            String parts0 = parts.next();
-            String parts1 = parts.next();
-
-            // WORLD SPECIFIC
-            // if parts[0] contains -
-            if (LEGACY_WORLD_DELIM.matcher(parts0).find()) {
-                // 0=server   1=world
-                Iterator<String> serverParts = LEGACY_WORLD_SPLITTER.split(parts0).iterator();
-                String serverParts0 = serverParts.next();
-                String serverParts1 = serverParts.next();
-
-                // if parts[1] contains $
-                if (LEGACY_EXPIRY_DELIM.matcher(parts1).find()) {
-                    // 0=node   1=expiry
-                    Iterator<String> tempParts = LEGACY_EXPIRY_SPLITTER.split(parts1).iterator();
-                    String tempParts0 = tempParts.next();
-                    String tempParts1 = tempParts.next();
-
-                    return new NodeBuilder(tempParts0, true).setServer(serverParts0).setWorld(serverParts1).setExpiry(Long.parseLong(tempParts1)).setValue(b);
-                } else {
-                    return new NodeBuilder(parts1, true).setServer(serverParts0).setWorld(serverParts1).setValue(b);
-                }
-            } else {
-                // SERVER BUT NOT WORLD SPECIFIC
-
-                // if parts[1] contains $
-                if (LEGACY_EXPIRY_DELIM.matcher(parts1).find()) {
-                    // 0=node   1=expiry
-                    Iterator<String> tempParts = LEGACY_EXPIRY_SPLITTER.split(parts1).iterator();
-                    String tempParts0 = tempParts.next();
-                    String tempParts1 = tempParts.next();
-
-                    return new NodeBuilder(tempParts0, true).setServer(parts0).setExpiry(Long.parseLong(tempParts1)).setValue(b);
-                } else {
-                    return new NodeBuilder(parts1, true).setServer(parts0).setValue(b);
-                }
-            }
-        } else {
-            // NOT SERVER SPECIFIC
-
-            // if s contains $
-            if (LEGACY_EXPIRY_DELIM.matcher(s).find()) {
-                // 0=node   1=expiry
-                Iterator<String> tempParts = LEGACY_EXPIRY_SPLITTER.split(s).iterator();
-                String tempParts0 = tempParts.next();
-                String tempParts1 = tempParts.next();
-
-                return new NodeBuilder(tempParts0, true).setExpiry(Long.parseLong(tempParts1)).setValue(b);
-            } else {
-                return new NodeBuilder(s, true).setValue(b);
-            }
-        }
+        return new NodeBuilder(s);
     }
 
     public static Node.Builder builderFromExisting(Node other) {
@@ -263,13 +173,6 @@ public class NodeFactory {
         return sb;
     }
 
-    /**
-     * Escapes special characters used within LuckPerms, so the string can be saved without issues
-     *
-     * @param s the string to escape
-     * @return an escaped string
-     * @throws NullPointerException if the string is null
-     */
     public static String escapeCharacters(String s) {
         if (s == null) {
             throw new NullPointerException();
@@ -278,13 +181,6 @@ public class NodeFactory {
         return escapeDelimiters(s, DELIMS);
     }
 
-    /**
-     * Unescapes special characters used within LuckPerms, the inverse of {@link #escapeCharacters(String)}
-     *
-     * @param s the string to unescape
-     * @return an unescaped string
-     * @throws NullPointerException if the string is null
-     */
     public static String unescapeCharacters(String s) {
         if (s == null) {
             throw new NullPointerException();

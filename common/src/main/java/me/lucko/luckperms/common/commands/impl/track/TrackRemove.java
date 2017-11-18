@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -61,7 +61,7 @@ public class TrackRemove extends SubCommand<Track> {
         if (result.asBoolean()) {
             Message.TRACK_REMOVE_SUCCESS.send(sender, groupName, track.getName());
             if (track.getGroups().size() > 1) {
-                Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups()));
+                Message.EMPTY.send(sender, CommandUtils.listToArrowSep(track.getGroups()));
             }
 
             ExtendedLogEntry.build().actor(sender).acted(track)

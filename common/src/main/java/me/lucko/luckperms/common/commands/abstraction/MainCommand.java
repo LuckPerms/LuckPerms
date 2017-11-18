@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.locale.LocalizedSpec;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -173,7 +173,7 @@ public abstract class MainCommand<T, I> extends Command<Void, T> {
                 .collect(Collectors.toList());
 
         if (subs.size() > 0) {
-            Util.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format(getUsage(), label) + " ...)");
+            CommandUtils.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format(getUsage(), label) + " ...)");
 
             for (Command s : subs) {
                 s.sendUsage(sender, label);

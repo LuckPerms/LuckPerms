@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.abstraction.Command;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -382,13 +382,13 @@ public interface LuckPermsPlugin {
     }
 
     static void sendStartupBanner(Sender sender, LuckPermsPlugin plugin) {
-        sender.sendMessage(Util.color("&b               __       &3 __   ___  __         __  "));
-        sender.sendMessage(Util.color("&b    |    |  | /  ` |__/ &3|__) |__  |__)  |\\/| /__` "));
-        sender.sendMessage(Util.color("&b    |___ \\__/ \\__, |  \\ &3|    |___ |  \\  |  | .__/ "));
-        sender.sendMessage(Util.color(" "));
-        sender.sendMessage(Util.color("&2  Loading version &bv" + plugin.getVersion() + "&2 on " + plugin.getServerType().getFriendlyName() + " - " + plugin.getServerName()));
-        sender.sendMessage(Util.color("&8  Running on server version " + plugin.getServerVersion()));
-        sender.sendMessage(Util.color(" "));
+        sender.sendMessage(CommandUtils.color("&b               __       &3 __   ___  __         __  "));
+        sender.sendMessage(CommandUtils.color("&b    |    |  | /  ` |__/ &3|__) |__  |__)  |\\/| /__` "));
+        sender.sendMessage(CommandUtils.color("&b    |___ \\__/ \\__, |  \\ &3|    |___ |  \\  |  | .__/ "));
+        sender.sendMessage(CommandUtils.color(" "));
+        sender.sendMessage(CommandUtils.color("&2  Loading version &bv" + plugin.getVersion() + "&2 on " + plugin.getServerType().getFriendlyName() + " - " + plugin.getServerName()));
+        sender.sendMessage(CommandUtils.color("&8  Running on server version " + plugin.getServerVersion()));
+        sender.sendMessage(CommandUtils.color(" "));
     }
 
 }

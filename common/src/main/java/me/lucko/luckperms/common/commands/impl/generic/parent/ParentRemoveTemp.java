@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -76,7 +76,7 @@ public class ParentRemoveTemp extends SharedSubCommand {
         DataMutateResult result = holder.unsetPermission(NodeFactory.newBuilder("group." + groupName).setExpiry(10L).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            Message.UNSET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), groupName, Util.contextSetToString(context));
+            Message.UNSET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), groupName, CommandUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("parent", "removetemp", groupName, context)
@@ -85,7 +85,7 @@ public class ParentRemoveTemp extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_TEMP_INHERIT.send(sender, holder.getFriendlyName(), groupName, Util.contextSetToString(context));
+            Message.DOES_NOT_TEMP_INHERIT.send(sender, holder.getFriendlyName(), groupName, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

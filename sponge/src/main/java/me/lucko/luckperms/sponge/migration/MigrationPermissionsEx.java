@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -174,7 +174,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         maxWeight += 5;
 
         for (Subject pexUser : pexService.getUserSubjects().getAllSubjects()) {
-            UUID uuid = Util.parseUuid(pexUser.getIdentifier());
+            UUID uuid = CommandUtils.parseUuid(pexUser.getIdentifier());
             if (uuid == null) {
                 log.logErr("Could not parse UUID for user: " + pexUser.getIdentifier());
                 continue;

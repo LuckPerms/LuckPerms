@@ -37,14 +37,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 @UtilityClass
-public class Util {
+public class CommandUtils {
     private static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + String.valueOf('§') + "[0-9A-FK-OR]");
 
     /**
@@ -59,28 +58,6 @@ public class Util {
             prefix = Message.PREFIX.getMessage();
         }
         sender.sendMessage(color(prefix + message));
-    }
-
-    /**
-     * Strips outer quote marks from a list of parsed arguments.
-     *
-     * @param input the list of arguments to strip quotes from
-     * @return an ArrayList containing the contents of input without quotes
-     */
-    public static List<String> stripQuotes(List<String> input) {
-        input = new ArrayList<>(input);
-        ListIterator<String> iterator = input.listIterator();
-        while (iterator.hasNext()) {
-            String value = iterator.next();
-            if (value.length() < 3) {
-                continue;
-            }
-
-            if (value.charAt(0) == '"' && value.charAt(value.length() - 1) == '"') {
-                iterator.set(value.substring(1, value.length() - 1));
-            }
-        }
-        return input;
     }
 
     /**

@@ -63,4 +63,9 @@ public class GenericGroupManager extends AbstractManager<String, Group> implemen
 
         return null;
     }
+
+    @Override
+    protected String sanitizeIdentifier(String s) {
+        return s.toLowerCase();
+    }
 }

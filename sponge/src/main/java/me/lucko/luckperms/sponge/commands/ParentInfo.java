@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -54,25 +54,25 @@ public class ParentInfo extends SubCommand<LPSubjectData> {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
         ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(0, args);
         if (contextSet.isEmpty()) {
-            Util.sendPluginMessage(sender, "&aShowing parents matching contexts &bANY&a.");
+            CommandUtils.sendPluginMessage(sender, "&aShowing parents matching contexts &bANY&a.");
             Map<ImmutableContextSet, ImmutableList<SubjectReference>> parents = subjectData.getAllParents();
             if (parents.isEmpty()) {
-                Util.sendPluginMessage(sender, "That subject does not have any parents defined.");
+                CommandUtils.sendPluginMessage(sender, "That subject does not have any parents defined.");
                 return CommandResult.SUCCESS;
             }
 
             for (Map.Entry<ImmutableContextSet, ImmutableList<SubjectReference>> e : parents.entrySet()) {
-                Util.sendPluginMessage(sender, "&3>> &bContext: " + SpongeUtils.contextToString(e.getKey()) + "\n" + SpongeUtils.parentsToString(e.getValue()));
+                CommandUtils.sendPluginMessage(sender, "&3>> &bContext: " + SpongeUtils.contextToString(e.getKey()) + "\n" + SpongeUtils.parentsToString(e.getValue()));
             }
 
         } else {
             List<SubjectReference> parents = subjectData.getParents(contextSet);
             if (parents.isEmpty()) {
-                Util.sendPluginMessage(sender, "That subject does not have any parents defined in those contexts.");
+                CommandUtils.sendPluginMessage(sender, "That subject does not have any parents defined in those contexts.");
                 return CommandResult.SUCCESS;
             }
 
-            Util.sendPluginMessage(sender, "&aShowing parents matching contexts &b" +
+            CommandUtils.sendPluginMessage(sender, "&aShowing parents matching contexts &b" +
                     SpongeUtils.contextToString(contextSet) + "&a.\n" + SpongeUtils.parentsToString(parents));
 
         }

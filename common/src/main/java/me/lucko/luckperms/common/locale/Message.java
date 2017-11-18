@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.locale;
 import lombok.Getter;
 
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.utils.TextUtils;
 
 /**
@@ -474,7 +474,7 @@ public enum Message {
         }
 
         s = format(s.replace("{PREFIX}", prefix).replace("\\n", "\n"), objects);
-        return Util.color(showPrefix ? prefix + s : s);
+        return CommandUtils.color(showPrefix ? prefix + s : s);
     }
 
     public void send(Sender sender, Object... objects) {

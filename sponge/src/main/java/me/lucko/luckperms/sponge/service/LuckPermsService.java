@@ -38,7 +38,7 @@ import com.google.common.collect.ImmutableSet;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
-import me.lucko.luckperms.sponge.contexts.SpongeCalculatorLink;
+import me.lucko.luckperms.sponge.contexts.ProxiedContextCalculator;
 import me.lucko.luckperms.sponge.managers.SpongeGroupManager;
 import me.lucko.luckperms.sponge.managers.SpongeUserManager;
 import me.lucko.luckperms.sponge.service.legacy.LegacyDataMigrator;
@@ -185,7 +185,7 @@ public class LuckPermsService implements LPPermissionService {
 
     @Override
     public void registerContextCalculator(org.spongepowered.api.service.context.ContextCalculator<Subject> calculator) {
-        plugin.getContextManager().registerCalculator(new SpongeCalculatorLink(calculator));
+        plugin.getContextManager().registerCalculator(new ProxiedContextCalculator(calculator));
     }
 
     @Override

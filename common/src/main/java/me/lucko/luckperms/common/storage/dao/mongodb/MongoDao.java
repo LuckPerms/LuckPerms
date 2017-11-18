@@ -48,6 +48,7 @@ import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.LegacyNodeFactory;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.node.NodeHeldPermission;
 import me.lucko.luckperms.common.node.NodeModel;
@@ -231,7 +232,7 @@ public class MongoDao extends AbstractDao {
 
                         Set<NodeModel> nodes = new HashSet<>();
                         for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                            Node node = NodeFactory.fromSerializedNode(e.getKey(), e.getValue());
+                            Node node = LegacyNodeFactory.fromSerializedNode(e.getKey(), e.getValue());
                             nodes.add(NodeModel.fromNode(node));
                         }
 
@@ -265,7 +266,7 @@ public class MongoDao extends AbstractDao {
 
                         Set<NodeModel> nodes = new HashSet<>();
                         for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                            Node node = NodeFactory.fromSerializedNode(e.getKey(), e.getValue());
+                            Node node = LegacyNodeFactory.fromSerializedNode(e.getKey(), e.getValue());
                             nodes.add(NodeModel.fromNode(node));
                         }
 
@@ -305,7 +306,7 @@ public class MongoDao extends AbstractDao {
                     // User exists, let's load.
                     Document d = cursor.next();
                     user.setEnduringNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
-                            .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                            .map(e -> LegacyNodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
                             .collect(Collectors.toSet())
                     );
                     user.getPrimaryGroup().setStoredValue(d.getString("primaryGroup"));
@@ -393,7 +394,7 @@ public class MongoDao extends AbstractDao {
                     Map<String, Boolean> perms = revert((Map<String, Boolean>) d.get("perms"));
 
                     for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                        Node node = NodeFactory.fromSerializedNode(e.getKey(), e.getValue());
+                        Node node = LegacyNodeFactory.fromSerializedNode(e.getKey(), e.getValue());
                         if (!node.getPermission().equalsIgnoreCase(permission)) {
                             continue;
                         }
@@ -421,7 +422,7 @@ public class MongoDao extends AbstractDao {
                     // Group exists, let's load.
                     Document d = cursor.next();
                     group.setEnduringNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
-                            .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                            .map(e -> LegacyNodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
                             .collect(Collectors.toSet())
                     );
                 } else {
@@ -451,7 +452,7 @@ public class MongoDao extends AbstractDao {
 
                 Document d = cursor.next();
                 group.setEnduringNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
-                        .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                        .map(e -> LegacyNodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
                         .collect(Collectors.toSet())
                 );
             }
@@ -534,7 +535,7 @@ public class MongoDao extends AbstractDao {
                     Map<String, Boolean> perms = revert((Map<String, Boolean>) d.get("perms"));
 
                     for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                        Node node = NodeFactory.fromSerializedNode(e.getKey(), e.getValue());
+                        Node node = LegacyNodeFactory.fromSerializedNode(e.getKey(), e.getValue());
                         if (!node.getPermission().equalsIgnoreCase(permission)) {
                             continue;
                         }

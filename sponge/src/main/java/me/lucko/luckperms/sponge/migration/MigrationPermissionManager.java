@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -121,7 +121,7 @@ public class MigrationPermissionManager extends SubCommand<Object> {
         log.log("Starting user migration.");
         AtomicInteger userCount = new AtomicInteger(0);
         for (Subject pmUser : pmService.getUserSubjects().getAllSubjects()) {
-            UUID uuid = Util.parseUuid(pmUser.getIdentifier());
+            UUID uuid = CommandUtils.parseUuid(pmUser.getIdentifier());
             if (uuid == null) {
                 log.logErr("Could not parse UUID for user: " + pmUser.getIdentifier());
                 continue;

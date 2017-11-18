@@ -23,22 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.caching;
+package me.lucko.luckperms.sponge.service.calculated;
 
-import me.lucko.luckperms.api.caching.UserData;
-import me.lucko.luckperms.common.model.User;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
-/**
- * Holds an easily accessible cache of a user's data in a number of contexts
- */
-public class UserCache extends HolderCache<User> implements UserData {
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 
-    public UserCache(User holder) {
-        super(holder);
-    }
+@Getter
+@ToString
+@EqualsAndHashCode
+@AllArgsConstructor(staticName = "of")
+public final class PermissionLookupKey {
 
-    @Override
-    protected String getHolderName() {
-        return holder.getFriendlyName();
-    }
+    private final String node;
+    private final ImmutableContextSet contexts;
+
 }

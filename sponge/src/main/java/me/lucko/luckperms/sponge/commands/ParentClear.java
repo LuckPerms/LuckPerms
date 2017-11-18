@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -51,10 +51,10 @@ public class ParentClear extends SubCommand<LPSubjectData> {
         ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(0, args);
         if (contextSet.isEmpty()) {
             subjectData.clearParents();
-            Util.sendPluginMessage(sender, "&aCleared parents matching contexts &bANY&a.");
+            CommandUtils.sendPluginMessage(sender, "&aCleared parents matching contexts &bANY&a.");
         } else {
             subjectData.clearParents(contextSet);
-            Util.sendPluginMessage(sender, "&aCleared parents matching contexts &b" + SpongeUtils.contextToString(contextSet));
+            CommandUtils.sendPluginMessage(sender, "&aCleared parents matching contexts &b" + SpongeUtils.contextToString(contextSet));
         }
         return CommandResult.SUCCESS;
     }

@@ -77,6 +77,4 @@ public interface LPSubjectCollection {
 
     LPSubject getDefaults();
 
-    void suggestUnload(String identifier);
-
 }

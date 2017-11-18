@@ -39,7 +39,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -118,7 +118,7 @@ public class ApplyEditsCommand extends SingleCommand {
             }
         } else if (who.startsWith("user/")) {
             String user = who.substring("user/".length());
-            UUID uuid = Util.parseUuid(user);
+            UUID uuid = CommandUtils.parseUuid(user);
             if (uuid == null) {
                 Message.APPLY_EDITS_TARGET_USER_NOT_UUID.send(sender, user);
                 return CommandResult.STATE_ERROR;

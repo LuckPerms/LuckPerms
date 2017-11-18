@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -86,7 +86,7 @@ public class PermissionSetTemp extends SharedSubCommand {
 
         if (result.getKey().asBoolean()) {
             duration = result.getValue().getExpiryUnixTime();
-            Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, b, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), Util.contextSetToString(context));
+            Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, b, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), CommandUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("permission", "settemp", node, b, duration, context)
@@ -95,7 +95,7 @@ public class PermissionSetTemp extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, holder.getFriendlyName(), node, Util.contextSetToString(context));
+            Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, holder.getFriendlyName(), node, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

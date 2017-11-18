@@ -34,8 +34,8 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.commands.utils.MetaComparator;
-import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -125,7 +125,7 @@ public class MetaInfo extends SharedSubCommand {
         for (LocalizedNode m : meta) {
             String location = processLocation(m, holder);
             if (m.hasSpecificContext()) {
-                String context = Util.getAppendableNodeContextString(m);
+                String context = CommandUtils.getAppendableNodeContextString(m);
                 TextComponent.Builder builder = TextUtils.fromLegacy(Message.META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), m.getMeta().getKey(), m.getMeta().getValue(), location, context), Constants.COLOR_CHAR).toBuilder();
                 builder.applyDeep(makeFancy(holder, label, m));
                 sender.sendMessage(builder.build());
@@ -141,7 +141,7 @@ public class MetaInfo extends SharedSubCommand {
         for (Map.Entry<Integer, LocalizedNode> e : meta) {
             String location = processLocation(e.getValue(), holder);
             if (e.getValue().hasSpecificContext()) {
-                String context = Util.getAppendableNodeContextString(e.getValue());
+                String context = CommandUtils.getAppendableNodeContextString(e.getValue());
                 TextComponent.Builder builder = TextUtils.fromLegacy(Message.CHAT_META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), e.getKey(), type.getEntry(e.getValue()).getValue(), location, context), Constants.COLOR_CHAR).toBuilder();
                 builder.applyDeep(makeFancy(type, holder, label, e.getValue()));
                 sender.sendMessage(builder.build());

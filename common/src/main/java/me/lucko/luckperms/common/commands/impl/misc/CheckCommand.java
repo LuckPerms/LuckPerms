@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -56,7 +56,7 @@ public class CheckCommand extends SingleCommand {
         String permission = args.get(1);
 
         User user;
-        UUID u = Util.parseUuid(target);
+        UUID u = CommandUtils.parseUuid(target);
         if (u != null) {
             user = plugin.getUserManager().getIfLoaded(u);
         } else {
@@ -69,7 +69,7 @@ public class CheckCommand extends SingleCommand {
         }
 
         Tristate tristate = user.getCachedData().getPermissionData(plugin.getContextForUser(user)).getPermissionValue(permission, CheckOrigin.INTERNAL);
-        Message.CHECK_RESULT.send(sender, user.getFriendlyName(), permission, Util.formatTristate(tristate));
+        Message.CHECK_RESULT.send(sender, user.getFriendlyName(), permission, CommandUtils.formatTristate(tristate));
         return CommandResult.SUCCESS;
     }
 

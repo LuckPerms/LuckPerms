@@ -25,9 +25,7 @@
 
 package me.lucko.luckperms.common.locale;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.ToString;
 
 import com.google.common.collect.ImmutableList;
 
@@ -36,7 +34,6 @@ import me.lucko.luckperms.common.commands.Arg;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 
 /**
  * An enumeration of the command defintion/usage messages used in the plugin.
@@ -563,18 +560,6 @@ public enum CommandSpec {
      */
     public LocalizedSpec spec(LocaleManager localeManager) {
         return new SimpleLocalizedSpec(this, localeManager);
-    }
-
-    /**
-     * The localized data for a {@link CommandSpec}.
-     */
-    @Getter
-    @ToString
-    @AllArgsConstructor
-    public static final class CommandSpecData {
-        private final String description;
-        private final String usage;
-        private final Map<String, String> args;
     }
 
     private static final class SimpleLocalizedSpec implements LocalizedSpec {

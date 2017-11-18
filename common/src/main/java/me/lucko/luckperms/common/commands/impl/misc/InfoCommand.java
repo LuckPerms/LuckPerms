@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.commands.impl.misc;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -94,7 +94,7 @@ public class InfoCommand extends SingleCommand {
 
     private static String formatValue(String value) {
         if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
-            return Util.formatBoolean(Boolean.parseBoolean(value));
+            return CommandUtils.formatBoolean(Boolean.parseBoolean(value));
         }
 
         try {

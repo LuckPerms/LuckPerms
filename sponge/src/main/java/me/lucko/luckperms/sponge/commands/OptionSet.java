@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -53,9 +53,9 @@ public class OptionSet extends SubCommand<LPSubjectData> {
         ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(2, args);
 
         if (subjectData.setOption(contextSet, key, value).join()) {
-            Util.sendPluginMessage(sender, "&aSet &f\"" + key + "&f\"&a to &f\"" + value + "&f\"&a in context " + SpongeUtils.contextToString(contextSet));
+            CommandUtils.sendPluginMessage(sender, "&aSet &f\"" + key + "&f\"&a to &f\"" + value + "&f\"&a in context " + SpongeUtils.contextToString(contextSet));
         } else {
-            Util.sendPluginMessage(sender, "Unable to set option. Does the Subject already have it set?");
+            CommandUtils.sendPluginMessage(sender, "Unable to set option. Does the Subject already have it set?");
         }
 
         return CommandResult.SUCCESS;

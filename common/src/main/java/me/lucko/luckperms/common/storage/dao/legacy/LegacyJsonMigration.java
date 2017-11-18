@@ -35,7 +35,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.LegacyNodeFactory;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.dao.file.JsonDao;
@@ -112,7 +112,7 @@ public class LegacyJsonMigration implements Runnable {
 
 
                         Set<NodeModel> nodes = perms.entrySet().stream()
-                                .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                                .map(e -> LegacyNodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
                                 .map(NodeModel::fromNode)
                                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
@@ -162,7 +162,7 @@ public class LegacyJsonMigration implements Runnable {
                         }
 
                         Set<NodeModel> nodes = perms.entrySet().stream()
-                                .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                                .map(e -> LegacyNodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
                                 .map(NodeModel::fromNode)
                                 .collect(Collectors.toCollection(LinkedHashSet::new));
 

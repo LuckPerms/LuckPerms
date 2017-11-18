@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -70,7 +70,7 @@ public class MetaUnset extends SharedSubCommand {
         }
 
         if (holder.clearMetaKeys(key, context, false)) {
-            Message.UNSET_META_SUCCESS.send(sender, key, holder.getFriendlyName(), Util.contextSetToString(context));
+            Message.UNSET_META_SUCCESS.send(sender, key, holder.getFriendlyName(), CommandUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("meta", "unset", key, context)
@@ -79,7 +79,7 @@ public class MetaUnset extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOESNT_HAVE_META.send(sender, holder.getFriendlyName(), key, Util.contextSetToString(context));
+            Message.DOESNT_HAVE_META.send(sender, holder.getFriendlyName(), key, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

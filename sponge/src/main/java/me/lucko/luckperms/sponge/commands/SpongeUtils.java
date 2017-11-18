@@ -30,7 +30,7 @@ import lombok.experimental.UtilityClass;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
 
 import java.util.List;
@@ -89,7 +89,7 @@ public class SpongeUtils {
     }
 
     public static String contextToString(ContextSet set) {
-        return Util.contextSetToString(set);
+        return CommandUtils.contextSetToString(set);
     }
 
 }

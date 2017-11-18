@@ -36,7 +36,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
@@ -94,7 +94,7 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
         if (ret.getKey().asBoolean()) {
             duration = ret.getValue().getExpiryUnixTime();
 
-            TextComponent.Builder builder = TextUtils.fromLegacy(Message.ADD_TEMP_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, DateUtil.formatDateDiff(duration), Util.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
+            TextComponent.Builder builder = TextUtils.fromLegacy(Message.ADD_TEMP_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, DateUtil.formatDateDiff(duration), CommandUtils.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
             HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
                     "¥3Raw " + type.name().toLowerCase() + ": ¥r" + meta,
                     '¥'
@@ -109,7 +109,7 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_TEMP_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, Util.contextSetToString(context));
+            Message.ALREADY_HAS_TEMP_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

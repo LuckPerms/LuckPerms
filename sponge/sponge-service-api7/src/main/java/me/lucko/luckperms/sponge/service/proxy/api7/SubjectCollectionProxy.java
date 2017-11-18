@@ -129,7 +129,7 @@ public class SubjectCollectionProxy implements SubjectCollection {
 
     @Override
     public void suggestUnload(String s) {
-        handle.suggestUnload(s);
+        // unused by lp
     }
 
 }

@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -91,7 +91,7 @@ public class ParentRemove extends SharedSubCommand {
 
         DataMutateResult result = holder.unsetPermission(NodeFactory.newBuilder("group." + groupName).withExtraContext(context).build());
         if (result.asBoolean()) {
-            Message.UNSET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), groupName, Util.contextSetToString(context));
+            Message.UNSET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), groupName, CommandUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("parent", "remove", groupName, context)
@@ -104,7 +104,7 @@ public class ParentRemove extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_INHERIT.send(sender, holder.getFriendlyName(), groupName, Util.contextSetToString(context));
+            Message.DOES_NOT_INHERIT.send(sender, holder.getFriendlyName(), groupName, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

@@ -33,7 +33,7 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.api.delegates.model.ApiGroup;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
-import me.lucko.luckperms.common.caching.GroupCache;
+import me.lucko.luckperms.common.caching.GroupCachedData;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.GroupReference;
@@ -59,7 +59,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
      * The groups data cache instance
      */
     @Getter
-    private final GroupCache cachedData;
+    private final GroupCachedData cachedData;
 
     @Getter
     private BufferedRequest<Void> refreshBuffer;
@@ -69,7 +69,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
         this.name = name.toLowerCase();
 
         this.refreshBuffer = new GroupRefreshBuffer(plugin, this);
-        this.cachedData = new GroupCache(this);
+        this.cachedData = new GroupCachedData(this);
         getPlugin().getApiProvider().getEventFactory().handleGroupCacheLoad(this, cachedData);
 
         // invalidate out caches when data is updated

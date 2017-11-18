@@ -40,7 +40,7 @@ import java.util.Map;
 public class SimpleLocaleManager implements LocaleManager {
 
     private Map<Message, String> messages = ImmutableMap.of();
-    private Map<CommandSpec, CommandSpec.CommandSpecData> commands = ImmutableMap.of();
+    private Map<CommandSpec, CommandSpecData> commands = ImmutableMap.of();
 
     public void tryLoad(LuckPermsPlugin plugin, File file) {
         if (file.exists()) {
@@ -57,7 +57,7 @@ public class SimpleLocaleManager implements LocaleManager {
     public void loadFromFile(File file) throws Exception {
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             ImmutableMap.Builder<Message, String> messages = ImmutableMap.builder();
-            ImmutableMap.Builder<CommandSpec, CommandSpec.CommandSpecData> commands = ImmutableMap.builder();
+            ImmutableMap.Builder<CommandSpec, CommandSpecData> commands = ImmutableMap.builder();
 
             Map<String, Object> data = (Map<String, Object>) new Yaml().load(reader);
             for (Map.Entry<String, Object> entry : data.entrySet()) {
@@ -97,7 +97,7 @@ public class SimpleLocaleManager implements LocaleManager {
                                 args = null;
                             }
 
-                            CommandSpec.CommandSpecData specData = new CommandSpec.CommandSpecData(description, usage, args == null ? null : ImmutableMap.copyOf(args));
+                            CommandSpecData specData = new CommandSpecData(description, usage, args == null ? null : ImmutableMap.copyOf(args));
                             commands.put(spec, specData);
 
                         } catch (IllegalArgumentException e) {
@@ -125,7 +125,7 @@ public class SimpleLocaleManager implements LocaleManager {
     }
 
     @Override
-    public CommandSpec.CommandSpecData getTranslation(CommandSpec key) {
+    public CommandSpecData getTranslation(CommandSpec key) {
         return commands.get(key);
     }
 

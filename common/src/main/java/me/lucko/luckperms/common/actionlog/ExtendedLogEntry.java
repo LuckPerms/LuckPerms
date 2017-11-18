@@ -77,14 +77,6 @@ public class ExtendedLogEntry implements LogEntry {
             .thenComparing(LogEntry::getAction);
 
     /**
-     * Compares two LogEntries in reverse order
-     *
-     * @since 3.3
-     * @see #COMPARATOR
-     */
-    public static final Comparator<LogEntry> REVERSE_ORDER = COMPARATOR.reversed();
-
-    /**
      * Creates a new log entry builder
      *
      * @return a new builder

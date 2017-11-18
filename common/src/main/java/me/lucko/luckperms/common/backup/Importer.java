@@ -34,7 +34,7 @@ import com.google.common.collect.ImmutableSet;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.utils.Cycle;
 
@@ -97,7 +97,7 @@ public class Importer implements Runnable {
         }
 
         // divide commands up into pools
-        Cycle<List<ImportCommand>> commandPools = new Cycle<>(Util.nInstances(128, ArrayList::new));
+        Cycle<List<ImportCommand>> commandPools = new Cycle<>(CommandUtils.nInstances(128, ArrayList::new));
 
         String lastTarget = null;
         for (ImportCommand cmd : toExecute) {
@@ -191,7 +191,7 @@ public class Importer implements Runnable {
     }
 
     @Getter
-    private static class ImportCommand extends ImporterSender {
+    private static class ImportCommand extends DummySender {
         private static final Splitter SPACE_SPLIT = Splitter.on(" ");
 
         private final CommandManager commandManager;
@@ -230,7 +230,7 @@ public class Importer implements Runnable {
                 CommandResult result = commandManager.onCommand(
                         this,
                         "lp",
-                        Util.stripQuotes(Splitter.on(CommandManager.COMMAND_SEPARATOR_PATTERN).omitEmptyStrings().splitToList(getCommand()))
+                        CommandManager.stripQuotes(Splitter.on(CommandManager.COMMAND_SEPARATOR_PATTERN).omitEmptyStrings().splitToList(getCommand()))
                 ).get();
                 setResult(result);
 

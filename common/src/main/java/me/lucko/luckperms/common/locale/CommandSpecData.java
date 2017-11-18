@@ -23,22 +23,24 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.calculated;
+package me.lucko.luckperms.common.locale;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
+import java.util.Map;
 
+/**
+ * The localized data for a {@link CommandSpec}.
+ */
 @Getter
 @ToString
 @EqualsAndHashCode
-@AllArgsConstructor(staticName = "of")
-public final class PermissionLookup {
-
-    private final String node;
-    private final ImmutableContextSet contexts;
-
+@AllArgsConstructor
+public final class CommandSpecData {
+    private final String description;
+    private final String usage;
+    private final Map<String, String> args;
 }

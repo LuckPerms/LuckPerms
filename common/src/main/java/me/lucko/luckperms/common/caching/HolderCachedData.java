@@ -36,6 +36,9 @@ import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.caching.CachedData;
 import me.lucko.luckperms.api.caching.MetaContexts;
+import me.lucko.luckperms.common.caching.type.MetaAccumulator;
+import me.lucko.luckperms.common.caching.type.MetaCache;
+import me.lucko.luckperms.common.caching.type.PermissionCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStack;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -50,7 +53,7 @@ import java.util.concurrent.TimeUnit;
  * Holds an easily accessible cache of a holders data in a number of contexts
  */
 @RequiredArgsConstructor
-public abstract class HolderCache<T extends PermissionHolder> implements CachedData {
+public abstract class HolderCachedData<T extends PermissionHolder> implements CachedData {
 
     /**
      * The holder whom this data instance is representing

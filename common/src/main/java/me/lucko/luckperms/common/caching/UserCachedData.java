@@ -25,20 +25,20 @@
 
 package me.lucko.luckperms.common.caching;
 
-import me.lucko.luckperms.api.caching.GroupData;
-import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.api.caching.UserData;
+import me.lucko.luckperms.common.model.User;
 
 /**
- * Holds an easily accessible cache of a groups's data in a number of contexts
+ * Holds an easily accessible cache of a user's data in a number of contexts
  */
-public class GroupCache extends HolderCache<Group> implements GroupData {
+public class UserCachedData extends HolderCachedData<User> implements UserData {
 
-    public GroupCache(Group holder) {
+    public UserCachedData(User holder) {
         super(holder);
     }
 
     @Override
     protected String getHolderName() {
-        return holder.getName();
+        return holder.getFriendlyName();
     }
 }

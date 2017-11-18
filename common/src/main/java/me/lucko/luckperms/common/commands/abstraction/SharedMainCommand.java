@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.locale.LocalizedSpec;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -147,9 +147,9 @@ public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T>
 
         if (subs.size() > 0) {
             if (user) {
-                Util.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format("/%s user <user> " + getName().toLowerCase() + " ...)", label));
+                CommandUtils.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format("/%s user <user> " + getName().toLowerCase() + " ...)", label));
             } else {
-                Util.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format("/%s group <group> " + getName().toLowerCase() + " ...)", label));
+                CommandUtils.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format("/%s group <group> " + getName().toLowerCase() + " ...)", label));
             }
 
             for (SharedSubCommand s : subs) {

@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
@@ -66,7 +66,7 @@ public class LogUserHistory extends SubCommand<Log> {
             }
         }
 
-        UUID uuid = Util.parseUuid(target.toLowerCase());
+        UUID uuid = CommandUtils.parseUuid(target.toLowerCase());
         if (uuid == null) {
             if (!plugin.getConfiguration().get(ConfigKeys.ALLOW_INVALID_USERNAMES)) {
                 if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {

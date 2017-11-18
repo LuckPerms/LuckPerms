@@ -27,7 +27,7 @@ package me.lucko.luckperms.bukkit.migration;
 
 import lombok.experimental.UtilityClass;
 
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.logging.ProgressLogger;
 
 import org.bukkit.Bukkit;
@@ -39,7 +39,7 @@ public class BukkitMigrationUtils {
 
     @SuppressWarnings("deprecation")
     public static UUID lookupUuid(ProgressLogger log, String s) {
-        UUID uuid = Util.parseUuid(s);
+        UUID uuid = CommandUtils.parseUuid(s);
         if (uuid == null) {
             try {
                 uuid = Bukkit.getOfflinePlayer(s).getUniqueId();

@@ -51,7 +51,7 @@ public class BungeePermissionCheckListener implements Listener {
             return;
         }
 
-        final ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
+        ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
 
         User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
         if (user == null) {
@@ -74,7 +74,7 @@ public class BungeePermissionCheckListener implements Listener {
             return;
         }
 
-        final ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
+        ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
 
         User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
         if (user == null) {

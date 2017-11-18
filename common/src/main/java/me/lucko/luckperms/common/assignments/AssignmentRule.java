@@ -23,34 +23,43 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.defaults;
+package me.lucko.luckperms.common.assignments;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.LegacyNodeFactory;
+import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.util.List;
 
 @Getter
 @ToString
-@AllArgsConstructor
-public class Rule {
-    private final String hasTrueExpression;
-    private final String hasFalseExpression;
-    private final String lacksExpression;
+public class AssignmentRule {
+    private final AssignmentExpression hasTrueExpression;
+    private final AssignmentExpression hasFalseExpression;
+    private final AssignmentExpression lacksExpression;
 
-    private final List<String> toGive;
-    private final List<String> toTake;
+    private final List<Node> toGive;
+    private final List<Node> toTake;
     private final String setPrimaryGroup;
+
+    public AssignmentRule(String hasTrueExpression, String hasFalseExpression, String lacksExpression, List<String> toGive, List<String> toTake, String setPrimaryGroup) {
+        this.hasTrueExpression = AssignmentExpression.compile(hasTrueExpression);
+        this.hasFalseExpression = AssignmentExpression.compile(hasFalseExpression);
+        this.lacksExpression = AssignmentExpression.compile(lacksExpression);
+        this.toGive = toGive.stream().map(s -> LegacyNodeFactory.fromSerializedNode(s, true)).collect(ImmutableCollectors.toImmutableList());;
+        this.toTake = toTake.stream().map(s -> LegacyNodeFactory.fromSerializedNode(s, true)).collect(ImmutableCollectors.toImmutableList());
+        this.setPrimaryGroup = setPrimaryGroup;
+    }
 
     public boolean apply(User user) {
         if (hasTrueExpression != null) {
             try {
-                boolean b = LogicParser.parse(hasTrueExpression, user, Tristate.TRUE);
+                boolean b = hasTrueExpression.parse(user, Tristate.TRUE);
                 if (!b) {
                     // The holder does not meet this requirement
                     return false;
@@ -64,7 +73,7 @@ public class Rule {
 
         if (hasFalseExpression != null) {
             try {
-                boolean b = LogicParser.parse(hasFalseExpression, user, Tristate.FALSE);
+                boolean b = hasFalseExpression.parse(user, Tristate.FALSE);
                 if (!b) {
                     // The holder does not meet this requirement
                     return false;
@@ -78,7 +87,7 @@ public class Rule {
 
         if (lacksExpression != null) {
             try {
-                boolean b = LogicParser.parse(lacksExpression, user, Tristate.UNDEFINED);
+                boolean b = lacksExpression.parse(user, Tristate.UNDEFINED);
                 if (!b) {
                     // The holder does not meet this requirement
                     return false;
@@ -91,12 +100,12 @@ public class Rule {
         }
 
         // The holder meets all of the requirements of this rule.
-        for (String s : toTake) {
-            user.unsetPermission(NodeFactory.fromSerializedNode(s, true));
+        for (Node n : toTake) {
+            user.unsetPermission(n);
         }
 
-        for (String s : toGive) {
-            user.setPermission(NodeFactory.fromSerializedNode(s, true));
+        for (Node n : toGive) {
+            user.setPermission(n);
         }
 
         if (setPrimaryGroup != null) {

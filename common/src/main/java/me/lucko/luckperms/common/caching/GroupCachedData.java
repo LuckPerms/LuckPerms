@@ -23,22 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.calculated;
+package me.lucko.luckperms.common.caching;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import me.lucko.luckperms.api.caching.GroupData;
+import me.lucko.luckperms.common.model.Group;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
+/**
+ * Holds an easily accessible cache of a groups's data in a number of contexts
+ */
+public class GroupCachedData extends HolderCachedData<Group> implements GroupData {
 
-@Getter
-@ToString
-@EqualsAndHashCode
-@AllArgsConstructor(staticName = "of")
-public final class OptionLookup {
+    public GroupCachedData(Group holder) {
+        super(holder);
+    }
 
-    private final String key;
-    private final ImmutableContextSet contexts;
-
+    @Override
+    protected String getHolderName() {
+        return holder.getName();
+    }
 }

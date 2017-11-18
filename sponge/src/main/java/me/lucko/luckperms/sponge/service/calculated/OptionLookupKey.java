@@ -23,37 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.locale;
+package me.lucko.luckperms.sponge.service.calculated;
 
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
-import java.io.File;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 
-public class NoopLocaleManager implements LocaleManager {
+@Getter
+@ToString
+@EqualsAndHashCode
+@AllArgsConstructor(staticName = "of")
+public final class OptionLookupKey {
 
-    @Override
-    public void tryLoad(LuckPermsPlugin plugin, File file) {
-
-    }
-
-    @Override
-    public void loadFromFile(File file) throws Exception {
-
-    }
-
-    @Override
-    public int getSize() {
-        return 0;
-    }
-
-    @Override
-    public String getTranslation(Message key) {
-        return null;
-    }
-
-    @Override
-    public CommandSpecData getTranslation(CommandSpec key) {
-        return null;
-    }
+    private final String key;
+    private final ImmutableContextSet contexts;
 
 }

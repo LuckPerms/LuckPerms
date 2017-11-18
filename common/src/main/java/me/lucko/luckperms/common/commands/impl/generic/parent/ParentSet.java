@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -90,7 +90,7 @@ public class ParentSet extends SharedSubCommand {
             ((User) holder).getPrimaryGroup().setStoredValue(group.getName());
         }
 
-        Message.SET_PARENT_SUCCESS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), Util.contextSetToString(context));
+        Message.SET_PARENT_SUCCESS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), CommandUtils.contextSetToString(context));
 
         ExtendedLogEntry.build().actor(sender).acted(holder)
                 .action("parent", "set", group.getName(), context)

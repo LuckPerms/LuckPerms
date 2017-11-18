@@ -39,4 +39,8 @@ public class GenericTrackManager extends AbstractManager<String, Track> implemen
         return new Track(name, plugin);
     }
 
+    @Override
+    protected String sanitizeIdentifier(String s) {
+        return s.toLowerCase();
+    }
 }

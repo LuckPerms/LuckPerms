@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -153,7 +153,7 @@ public class PermissionInfo extends SharedSubCommand {
         }
 
         int index = pageNumber - 1;
-        List<List<Node>> pages = Util.divideList(l, 15);
+        List<List<Node>> pages = CommandUtils.divideList(l, 15);
 
         if (index < 0 || index >= pages.size()) {
             pageNumber = 1;
@@ -171,7 +171,7 @@ public class PermissionInfo extends SharedSubCommand {
         }
 
         for (Node node : page) {
-            String s = "&3> " + (node.getValuePrimitive() ? "&a" : "&c") + node.getPermission() + (console ? " &7(" + node.getValuePrimitive() + "&7)" : "") + Util.getAppendableNodeContextString(node) + "\n";
+            String s = "&3> " + (node.getValuePrimitive() ? "&a" : "&c") + node.getPermission() + (console ? " &7(" + node.getValuePrimitive() + "&7)" : "") + CommandUtils.getAppendableNodeContextString(node) + "\n";
             if (temp) {
                 s += "&2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()) + "\n";
             }

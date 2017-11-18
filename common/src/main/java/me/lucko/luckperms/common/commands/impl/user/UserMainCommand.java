@@ -38,7 +38,7 @@ import me.lucko.luckperms.common.commands.impl.generic.other.HolderShowTracks;
 import me.lucko.luckperms.common.commands.impl.generic.parent.CommandParent;
 import me.lucko.luckperms.common.commands.impl.generic.permission.CommandPermission;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -82,7 +82,7 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
 
     @Override
     protected UserIdentifier parseTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        UUID uuid = Util.parseUuid(target.toLowerCase());
+        UUID uuid = CommandUtils.parseUuid(target.toLowerCase());
         if (uuid == null) {
             if (!plugin.getConfiguration().get(ConfigKeys.ALLOW_INVALID_USERNAMES)) {
                 if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {

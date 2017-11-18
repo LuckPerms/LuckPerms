@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -76,7 +76,7 @@ public class PermissionUnsetTemp extends SharedSubCommand {
         DataMutateResult result = holder.unsetPermission(NodeFactory.newBuilder(node).setExpiry(10L).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, holder.getFriendlyName(), Util.contextSetToString(context));
+            Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, holder.getFriendlyName(), CommandUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("permission", "unsettemp", node, context)
@@ -85,7 +85,7 @@ public class PermissionUnsetTemp extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_HAVE_TEMP_PERMISSION.send(sender, holder.getFriendlyName(), node, Util.contextSetToString(context));
+            Message.DOES_NOT_HAVE_TEMP_PERMISSION.send(sender, holder.getFriendlyName(), node, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

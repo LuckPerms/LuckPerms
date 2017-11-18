@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -95,7 +95,7 @@ public class ParentInfo extends SharedSubCommand {
 
         TextComponent.Builder message = TextComponent.builder("");
         for (Node node : page) {
-            String s = "&3> &a" + node.getGroupName() + Util.getAppendableNodeContextString(node) + "\n";
+            String s = "&3> &a" + node.getGroupName() + CommandUtils.getAppendableNodeContextString(node) + "\n";
             message.append(TextUtils.fromLegacy(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build());
         }
         return message.build();
@@ -115,7 +115,7 @@ public class ParentInfo extends SharedSubCommand {
 
         TextComponent.Builder message = TextComponent.builder("");
         for (Node node : page) {
-            String s = "&3> &a" + node.getGroupName() + Util.getAppendableNodeContextString(node) + "\n&2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()) + "\n";
+            String s = "&3> &a" + node.getGroupName() + CommandUtils.getAppendableNodeContextString(node) + "\n&2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()) + "\n";
             message.append(TextUtils.fromLegacy(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build());
         }
         return message.build();

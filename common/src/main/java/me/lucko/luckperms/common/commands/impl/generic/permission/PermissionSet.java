@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -78,7 +78,7 @@ public class PermissionSet extends SharedSubCommand {
         DataMutateResult result = holder.setPermission(NodeFactory.newBuilder(node).setValue(b).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            Message.SETPERMISSION_SUCCESS.send(sender, node, b, holder.getFriendlyName(), Util.contextSetToString(context));
+            Message.SETPERMISSION_SUCCESS.send(sender, node, b, holder.getFriendlyName(), CommandUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("permission", "set", node, b, context)
@@ -87,7 +87,7 @@ public class PermissionSet extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HASPERMISSION.send(sender, holder.getFriendlyName(), node, Util.contextSetToString(context));
+            Message.ALREADY_HASPERMISSION.send(sender, holder.getFriendlyName(), node, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

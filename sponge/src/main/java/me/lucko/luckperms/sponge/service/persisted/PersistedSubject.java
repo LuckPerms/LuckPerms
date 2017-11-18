@@ -39,8 +39,8 @@ import me.lucko.luckperms.common.verbose.CheckOrigin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
-import me.lucko.luckperms.sponge.service.calculated.OptionLookup;
-import me.lucko.luckperms.sponge.service.calculated.PermissionLookup;
+import me.lucko.luckperms.sponge.service.calculated.OptionLookupKey;
+import me.lucko.luckperms.sponge.service.calculated.PermissionLookupKey;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorageModel;
@@ -67,7 +67,7 @@ public class PersistedSubject implements LPSubject {
     private final PersistedSubjectData subjectData;
     private final CalculatedSubjectData transientSubjectData;
 
-    private final LoadingCache<PermissionLookup, Tristate> permissionLookupCache = Caffeine.newBuilder()
+    private final LoadingCache<PermissionLookupKey, Tristate> permissionLookupCache = Caffeine.newBuilder()
             .expireAfterAccess(20, TimeUnit.MINUTES)
             .build(lookup -> lookupPermissionValue(lookup.getContexts(), lookup.getNode()));
 
@@ -75,7 +75,7 @@ public class PersistedSubject implements LPSubject {
             .expireAfterAccess(20, TimeUnit.MINUTES)
             .build(this::lookupParents);
 
-    private final LoadingCache<OptionLookup, Optional<String>> optionLookupCache = Caffeine.newBuilder()
+    private final LoadingCache<OptionLookupKey, Optional<String>> optionLookupCache = Caffeine.newBuilder()
             .expireAfterAccess(20, TimeUnit.MINUTES)
             .build(lookup -> lookupOptionValue(lookup.getContexts(), lookup.getKey()));
 
@@ -254,7 +254,7 @@ public class PersistedSubject implements LPSubject {
 
     @Override
     public Tristate getPermissionValue(@NonNull ImmutableContextSet contexts, @NonNull String node) {
-        Tristate t = permissionLookupCache.get(PermissionLookup.of(node, contexts));
+        Tristate t = permissionLookupCache.get(PermissionLookupKey.of(node, contexts));
         service.getPlugin().getVerboseHandler().offerCheckData(CheckOrigin.INTERNAL, getParentCollection().getIdentifier() + "/" + identifier, contexts, node, t);
         return t;
     }
@@ -279,7 +279,7 @@ public class PersistedSubject implements LPSubject {
 
     @Override
     public Optional<String> getOption(ImmutableContextSet contexts, String key) {
-        return optionLookupCache.get(OptionLookup.of(key, contexts));
+        return optionLookupCache.get(OptionLookupKey.of(key, contexts));
     }
 
     @Override

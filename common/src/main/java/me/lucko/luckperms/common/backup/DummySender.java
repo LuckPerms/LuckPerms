@@ -38,19 +38,19 @@ import net.kyori.text.Component;
 import java.util.UUID;
 
 @Getter
-public abstract class ImporterSender implements Sender {
+public abstract class DummySender implements Sender {
     private final LuckPermsPlugin platform;
 
     private final UUID uuid;
     private final String name;
 
-    public ImporterSender(LuckPermsPlugin plugin, UUID uuid, String name) {
+    public DummySender(LuckPermsPlugin plugin, UUID uuid, String name) {
         this.platform = plugin;
         this.uuid = uuid;
         this.name = name;
     }
 
-    public ImporterSender(LuckPermsPlugin plugin) {
+    public DummySender(LuckPermsPlugin plugin) {
         this(plugin, Constants.IMPORT_UUID, Constants.IMPORT_NAME);
     }
 

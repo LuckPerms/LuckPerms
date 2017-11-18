@@ -38,24 +38,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 @AllArgsConstructor
-public class SpongeCalculatorLink implements ContextCalculator<Subject> {
+public class ProxiedContextCalculator implements ContextCalculator<Subject> {
     private final org.spongepowered.api.service.context.ContextCalculator<Subject> delegate;
 
     @Override
     public MutableContextSet giveApplicableContext(Subject subject, MutableContextSet accumulator) {
-        Set<Context> contexts = new HashSet<Context>() {
-
-            // don't allow null elements
-            @Override
-            public boolean add(Context context) {
-                if (context == null) {
-                    throw new NullPointerException("context");
-                }
-
-                return super.add(context);
-            }
-        };
-
+        Set<Context> contexts = new NonNullContextHashSet();
         try {
             delegate.accumulateContexts(subject, contexts);
             accumulator.addAll(CompatibilityUtil.convertContexts(contexts));
@@ -65,4 +53,16 @@ public class SpongeCalculatorLink implements ContextCalculator<Subject> {
 
         return accumulator;
     }
+
+    private final class NonNullContextHashSet extends HashSet<Context> {
+        @Override
+        public boolean add(Context context) {
+            if (context == null) {
+                throw new NullPointerException("context");
+            }
+
+            return super.add(context);
+        }
+    }
+
 }

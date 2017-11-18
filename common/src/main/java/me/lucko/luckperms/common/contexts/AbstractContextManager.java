@@ -66,6 +66,15 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
             .expireAfterWrite(50L, TimeUnit.MILLISECONDS) // expire roughly every tick
             .build(new Loader());
 
+    // caches static context lookups
+    private final LoadingCache<Object, Contexts> staticLookupCache = Caffeine.newBuilder()
+            .initialCapacity(1)
+            .expireAfterWrite(50L, TimeUnit.MILLISECONDS) // expire roughly every tick
+            .build(new StaticLoader());
+
+    // the single key used in the static lookup cache
+    private final Object staticCacheKey = new Object();
+
     protected AbstractContextManager(LuckPermsPlugin plugin, Class<T> subjectClass) {
         this.plugin = plugin;
         this.subjectClass = subjectClass;
@@ -90,16 +99,14 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
 
     @Override
     public ImmutableContextSet getStaticContext() {
-        MutableContextSet accumulator = MutableContextSet.create();
-        for (ContextCalculator<?> calculator : staticCalculators) {
-            calculator.giveApplicableContext(null, accumulator);
-        }
-        return accumulator.makeImmutable();
+        // this is actually already immutable, but the Contexts method signature returns the interface.
+        // using the makeImmutable method is faster than casting
+        return getStaticContexts().getContexts().makeImmutable();
     }
 
     @Override
     public Contexts getStaticContexts() {
-        return formContexts(getStaticContext());
+        return staticLookupCache.get(staticCacheKey);
     }
 
     @Override
@@ -156,26 +163,39 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
         return calculators.size();
     }
 
-    // iterates the calculators in this manager and accumulates contexts from them all.
-    private void calculateApplicableContext(T subject, MutableContextSet accumulator) {
-        for (ContextCalculator<T> calculator : calculators) {
-            try {
-                calculator.giveApplicableContext(subject, accumulator);
-            } catch (Exception e) {
-                new RuntimeException("Exception thrown by ContextCalculator: " + calculator.getClass().getName(), e).printStackTrace();
-            }
-        }
-    }
-
     private final class Loader implements CacheLoader<T, Contexts> {
-
         @Override
         public Contexts load(T subject) {
             MutableContextSet accumulator = MutableContextSet.create();
-            calculateApplicableContext(subject, accumulator);
 
-            ImmutableContextSet ret = accumulator.makeImmutable();
-            return formContexts(subject, ret);
+            for (ContextCalculator<T> calculator : calculators) {
+                try {
+                    calculator.giveApplicableContext(subject, accumulator);
+                } catch (Exception e) {
+                    plugin.getLog().warn("An exception was thrown whilst calculating the context of subject " + subject);
+                    e.printStackTrace();
+                }
+            }
+
+            return formContexts(subject, accumulator.makeImmutable());
+        }
+    }
+
+    private final class StaticLoader implements CacheLoader<Object, Contexts> {
+        @Override
+        public Contexts load(Object o) {
+            MutableContextSet accumulator = MutableContextSet.create();
+
+            for (StaticContextCalculator calculator : staticCalculators) {
+                try {
+                    calculator.giveApplicableContext(accumulator);
+                } catch (Exception e) {
+                    plugin.getLog().warn("An exception was thrown whilst calculating static contexts");
+                    e.printStackTrace();
+                }
+            }
+
+            return formContexts(accumulator.makeImmutable());
         }
     }
 

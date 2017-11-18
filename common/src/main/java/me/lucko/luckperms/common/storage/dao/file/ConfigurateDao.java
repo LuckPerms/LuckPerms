@@ -37,7 +37,7 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.contexts.ContextSetConfigurateSerializer;
 import me.lucko.luckperms.common.managers.GenericUserManager;
@@ -248,7 +248,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                 }
 
                 String user = s.substring(0, s.length() - fileExtension.length());
-                UUID uuid = Util.parseUuid(user);
+                UUID uuid = CommandUtils.parseUuid(user);
                 if (uuid == null) {
                     return;
                 }

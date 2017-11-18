@@ -30,7 +30,6 @@ import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -54,7 +53,7 @@ public class BukkitCommandExecutor extends CommandManager implements CommandExec
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         Sender lpSender = plugin.getSenderFactory().wrap(sender);
-        List<String> arguments = Util.stripQuotes(ARGUMENT_SPLITTER.splitToList(ARGUMENT_JOINER.join(args)));
+        List<String> arguments = stripQuotes(ARGUMENT_SPLITTER.splitToList(ARGUMENT_JOINER.join(args)));
 
         onCommand(lpSender, label, arguments);
         return true;
@@ -63,7 +62,7 @@ public class BukkitCommandExecutor extends CommandManager implements CommandExec
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         Sender lpSender = plugin.getSenderFactory().wrap(sender);
-        List<String> arguments = Util.stripQuotes(TAB_COMPLETE_ARGUMENT_SPLITTER.splitToList(ARGUMENT_JOINER.join(args)));
+        List<String> arguments = stripQuotes(TAB_COMPLETE_ARGUMENT_SPLITTER.splitToList(ARGUMENT_JOINER.join(args)));
 
         return onTabComplete(lpSender, arguments);
     }

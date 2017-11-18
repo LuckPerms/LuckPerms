@@ -48,9 +48,9 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.api.delegates.model.ApiPermissionHolder;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.Cache;
-import me.lucko.luckperms.common.caching.HolderCache;
-import me.lucko.luckperms.common.caching.MetaAccumulator;
+import me.lucko.luckperms.common.caching.HolderCachedData;
 import me.lucko.luckperms.common.caching.handlers.StateListener;
+import me.lucko.luckperms.common.caching.type.MetaAccumulator;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.contexts.ContextSetComparator;
 import me.lucko.luckperms.common.node.ImmutableLocalizedNode;
@@ -257,7 +257,7 @@ public abstract class PermissionHolder {
      *
      * @return the holders cached data
      */
-    public abstract HolderCache<?> getCachedData();
+    public abstract HolderCachedData<?> getCachedData();
 
     public abstract BufferedRequest<Void> getRefreshBuffer();
 

@@ -32,7 +32,7 @@ import lombok.ToString;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.common.api.delegates.model.ApiUser;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
-import me.lucko.luckperms.common.caching.UserCache;
+import me.lucko.luckperms.common.caching.UserCachedData;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
@@ -69,7 +69,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      * The users data cache instance
      */
     @Getter
-    private final UserCache cachedData;
+    private final UserCachedData cachedData;
 
     @Getter
     private BufferedRequest<Void> refreshBuffer;
@@ -84,7 +84,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         this.refreshBuffer = new UserRefreshBuffer(plugin, this);
         this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
 
-        this.cachedData = new UserCache(this);
+        this.cachedData = new UserCachedData(this);
         getPlugin().getApiProvider().getEventFactory().handleUserCacheLoad(this, cachedData);
     }
 
@@ -96,7 +96,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         this.refreshBuffer = new UserRefreshBuffer(plugin, this);
         this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
 
-        this.cachedData = new UserCache(this);
+        this.cachedData = new UserCachedData(this);
         getPlugin().getApiProvider().getEventFactory().handleUserCacheLoad(this, cachedData);
     }
 

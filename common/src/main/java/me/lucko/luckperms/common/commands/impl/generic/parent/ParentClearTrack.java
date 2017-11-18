@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -110,9 +110,9 @@ public class ParentClearTrack extends SharedSubCommand {
         int changed = before - holder.getEnduringNodes().size();
 
         if (changed == 1) {
-            Message.PARENT_CLEAR_TRACK_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), track.getName(), Util.contextSetToString(context), changed);
+            Message.PARENT_CLEAR_TRACK_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), track.getName(), CommandUtils.contextSetToString(context), changed);
         } else {
-            Message.PARENT_CLEAR_TRACK_SUCCESS.send(sender, holder.getFriendlyName(), track.getName(), Util.contextSetToString(context), changed);
+            Message.PARENT_CLEAR_TRACK_SUCCESS.send(sender, holder.getFriendlyName(), track.getName(), CommandUtils.contextSetToString(context), changed);
         }
 
         ExtendedLogEntry.build().actor(sender).acted(holder)

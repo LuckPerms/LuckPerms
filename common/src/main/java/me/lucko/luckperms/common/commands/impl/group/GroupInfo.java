@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -81,14 +81,14 @@ public class GroupInfo extends SubCommand<Group> {
         if (!parents.isEmpty()) {
             Message.INFO_PARENT_HEADER.send(sender);
             for (Node node : parents) {
-                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + Util.getAppendableNodeContextString(node));
+                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + CommandUtils.getAppendableNodeContextString(node));
             }
         }
 
         if (!tempParents.isEmpty()) {
             Message.INFO_TEMP_PARENT_HEADER.send(sender);
             for (Node node : tempParents) {
-                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + Util.getAppendableNodeContextString(node));
+                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + CommandUtils.getAppendableNodeContextString(node));
                 Message.EMPTY.send(sender, "&f-    &2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()));
             }
         }

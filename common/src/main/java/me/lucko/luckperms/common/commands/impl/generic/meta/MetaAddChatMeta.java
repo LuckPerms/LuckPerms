@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -84,7 +84,7 @@ public class MetaAddChatMeta extends SharedSubCommand {
 
         DataMutateResult result = holder.setPermission(NodeFactory.makeChatMetaNode(type, priority, meta).withExtraContext(context).build());
         if (result.asBoolean()) {
-            TextComponent.Builder builder = TextUtils.fromLegacy(Message.ADD_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, Util.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
+            TextComponent.Builder builder = TextUtils.fromLegacy(Message.ADD_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
             HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
                     "¥3Raw " + type.name().toLowerCase() + ": ¥r" + meta,
                     '¥'
@@ -99,7 +99,7 @@ public class MetaAddChatMeta extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, Util.contextSetToString(context));
+            Message.ALREADY_HAS_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

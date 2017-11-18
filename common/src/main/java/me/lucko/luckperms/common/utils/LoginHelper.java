@@ -27,8 +27,8 @@ package me.lucko.luckperms.common.utils;
 
 import lombok.experimental.UtilityClass;
 
+import me.lucko.luckperms.common.assignments.AssignmentRule;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.defaults.Rule;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -79,7 +79,7 @@ public class LoginHelper {
         } else {
             // Setup defaults for the user
             boolean save = false;
-            for (Rule rule : plugin.getConfiguration().get(ConfigKeys.DEFAULT_ASSIGNMENTS)) {
+            for (AssignmentRule rule : plugin.getConfiguration().get(ConfigKeys.DEFAULT_ASSIGNMENTS)) {
                 if (rule.apply(user)) {
                     save = true;
                 }

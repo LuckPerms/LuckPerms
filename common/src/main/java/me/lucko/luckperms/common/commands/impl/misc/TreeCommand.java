@@ -25,13 +25,13 @@
 
 package me.lucko.luckperms.common.commands.impl.misc;
 
-import me.lucko.luckperms.common.caching.PermissionCache;
+import me.lucko.luckperms.common.caching.type.PermissionCache;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -74,7 +74,7 @@ public class TreeCommand extends SingleCommand {
 
         if (player != null) {
             User user;
-            UUID u = Util.parseUuid(player);
+            UUID u = CommandUtils.parseUuid(player);
             if (u != null) {
                 user = plugin.getUserManager().getIfLoaded(u);
             } else {

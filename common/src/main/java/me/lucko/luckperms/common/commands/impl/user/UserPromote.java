@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -118,7 +118,7 @@ public class UserPromote extends SubCommand<User> {
 
             user.setPermission(NodeFactory.newBuilder("group." + first).withExtraContext(context).build());
 
-            Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFriendlyName(), first, Util.contextSetToString(context));
+            Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFriendlyName(), first, CommandUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(user)
                     .action("promote", track.getName(), context)
@@ -172,9 +172,9 @@ public class UserPromote extends SubCommand<User> {
             user.getPrimaryGroup().setStoredValue(nextGroup.getName());
         }
 
-        Message.USER_PROMOTE_SUCCESS.send(sender, user.getFriendlyName(), track.getName(), old, nextGroup.getFriendlyName(), Util.contextSetToString(context));
+        Message.USER_PROMOTE_SUCCESS.send(sender, user.getFriendlyName(), track.getName(), old, nextGroup.getFriendlyName(), CommandUtils.contextSetToString(context));
         if (!silent) {
-            Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), old, nextGroup.getFriendlyName(), false));
+            Message.EMPTY.send(sender, CommandUtils.listToArrowSep(track.getGroups(), old, nextGroup.getFriendlyName(), false));
         }
 
         ExtendedLogEntry.build().actor(sender).acted(user)

@@ -36,7 +36,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -160,9 +160,9 @@ public class UserDemote extends SubCommand<User> {
             user.getPrimaryGroup().setStoredValue(previousGroup.getName());
         }
 
-        Message.USER_DEMOTE_SUCCESS.send(sender, track.getName(), old, previousGroup.getFriendlyName(), Util.contextSetToString(context));
+        Message.USER_DEMOTE_SUCCESS.send(sender, track.getName(), old, previousGroup.getFriendlyName(), CommandUtils.contextSetToString(context));
         if (!silent) {
-            Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), previousGroup.getFriendlyName(), old, true));
+            Message.EMPTY.send(sender, CommandUtils.listToArrowSep(track.getGroups(), previousGroup.getFriendlyName(), old, true));
         }
 
         ExtendedLogEntry.build().actor(sender).acted(user)

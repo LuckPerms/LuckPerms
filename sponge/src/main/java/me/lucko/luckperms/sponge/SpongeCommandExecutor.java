@@ -29,7 +29,6 @@ import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
 
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandResult;
@@ -60,7 +59,7 @@ public class SpongeCommandExecutor extends CommandManager implements CommandCall
     @Override
     public CommandResult process(CommandSource source, String s) {
         Sender lpSender = plugin.getSenderFactory().wrap(source);
-        List<String> arguments = processSelectors(source, Util.stripQuotes(ARGUMENT_SPLITTER.splitToList(s)));
+        List<String> arguments = processSelectors(source, CommandManager.stripQuotes(ARGUMENT_SPLITTER.splitToList(s)));
 
         onCommand(lpSender, "lp", arguments);
         return CommandResult.success();
@@ -69,7 +68,7 @@ public class SpongeCommandExecutor extends CommandManager implements CommandCall
     @Override
     public List<String> getSuggestions(CommandSource source, String s, @Nullable Location<World> location) {
         Sender lpSender = plugin.getSenderFactory().wrap(source);
-        List<String> arguments = processSelectors(source, Util.stripQuotes(TAB_COMPLETE_ARGUMENT_SPLITTER.splitToList(s)));
+        List<String> arguments = processSelectors(source, CommandManager.stripQuotes(TAB_COMPLETE_ARGUMENT_SPLITTER.splitToList(s)));
 
         return onTabComplete(lpSender, arguments);
     }

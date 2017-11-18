@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.backup;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.logging.ProgressLogger;
 import me.lucko.luckperms.common.model.Group;
@@ -180,7 +180,7 @@ public class Exporter implements Runnable {
             write(writer, "# Export users");
 
             // divide into 16 pools.
-            Cycle<List<UUID>> userPools = new Cycle<>(Util.nInstances(32, ArrayList::new));
+            Cycle<List<UUID>> userPools = new Cycle<>(CommandUtils.nInstances(32, ArrayList::new));
             for (UUID uuid : users) {
                 userPools.next().add(uuid);
             }

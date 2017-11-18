@@ -285,11 +285,6 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
     }
 
     @Override
-    public void suggestUnload(String identifier) {
-        // noop
-    }
-
-    @Override
     public Group getByDisplayName(String name) {
         // try to get an exact match first
         Group g = getIfLoaded(name);

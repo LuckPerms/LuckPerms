@@ -33,7 +33,7 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.utils.DateUtil;
@@ -142,7 +142,7 @@ public class VerboseListener {
                 // build the text
                 List<String> hover = new ArrayList<>();
                 hover.add("&bOrigin: &2" + data.getCheckOrigin().name());
-                hover.add("&bContext: &r" + Util.contextSetToString(data.getCheckContext()));
+                hover.add("&bContext: &r" + CommandUtils.contextSetToString(data.getCheckContext()));
                 hover.add("&bTrace: &r");
 
                 int overflow = readStack(data, 15, e -> hover.add("&7" + e.getClassName() + "." + e.getMethodName() + (e.getLineNumber() >= 0 ? ":" + e.getLineNumber() : "")));
@@ -245,7 +245,7 @@ public class VerboseListener {
 
                 // append the spoiler text
                 prettyOutput.add("<br><b>Origin:</b> <code>" + c.getCheckOrigin().name() + "</code>");
-                prettyOutput.add("<br><b>Context:</b> <code>" + Util.stripColor(Util.contextSetToString(c.getCheckContext())) + "</code>");
+                prettyOutput.add("<br><b>Context:</b> <code>" + CommandUtils.stripColor(CommandUtils.contextSetToString(c.getCheckContext())) + "</code>");
                 prettyOutput.add("<br><b>Trace:</b><pre>");
 
                 int overflow = readStack(c, 30, e -> prettyOutput.add(e.getClassName() + "." + e.getMethodName() + (e.getLineNumber() >= 0 ? ":" + e.getLineNumber() : "")));

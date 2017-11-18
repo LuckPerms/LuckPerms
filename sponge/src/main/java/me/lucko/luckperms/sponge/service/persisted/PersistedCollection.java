@@ -170,8 +170,4 @@ public class PersistedCollection implements LPSubjectCollection {
         return service.getDefaultSubjects().loadSubject(getIdentifier()).join();
     }
 
-    @Override
-    public void suggestUnload(String identifier) {
-        // ignore
-    }
 }

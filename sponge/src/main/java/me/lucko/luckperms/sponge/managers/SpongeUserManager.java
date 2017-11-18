@@ -381,9 +381,4 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
         return getService().getDefaultSubjects().loadSubject(getIdentifier()).join();
     }
 
-    @Override
-    public void suggestUnload(String identifier) {
-        // noop
-    }
-
 }

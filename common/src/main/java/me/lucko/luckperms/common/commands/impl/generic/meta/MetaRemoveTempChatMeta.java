@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -90,7 +90,7 @@ public class MetaRemoveTempChatMeta extends SharedSubCommand {
                     !n.isPermanent() &&
                     n.getFullContexts().makeImmutable().equals(context.makeImmutable())
             );
-            Message.BULK_REMOVE_TEMP_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), priority, Util.contextSetToString(context));
+            Message.BULK_REMOVE_TEMP_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), priority, CommandUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("meta" , "removetemp" + type.name().toLowerCase(), priority, "*", context)
@@ -103,7 +103,7 @@ public class MetaRemoveTempChatMeta extends SharedSubCommand {
         DataMutateResult result = holder.unsetPermission(NodeFactory.makeChatMetaNode(type, priority, meta).setExpiry(10L).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            TextComponent.Builder builder = TextUtils.fromLegacy(Message.REMOVE_TEMP_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, Util.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
+            TextComponent.Builder builder = TextUtils.fromLegacy(Message.REMOVE_TEMP_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
             HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
                     "¥3Raw " + type.name().toLowerCase() + ": ¥r" + meta,
                     '¥'
@@ -118,7 +118,7 @@ public class MetaRemoveTempChatMeta extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_HAVE_TEMP_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, Util.contextSetToString(context));
+            Message.DOES_NOT_HAVE_TEMP_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

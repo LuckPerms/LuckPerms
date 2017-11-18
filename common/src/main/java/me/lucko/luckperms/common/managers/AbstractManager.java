@@ -62,23 +62,23 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> implements M
 
     @Override
     public T getOrMake(I id) {
-        return objects.get(lowerCase(id));
+        return objects.get(sanitizeIdentifier(id));
     }
 
     @Override
     public T getIfLoaded(I id) {
-        return objects.getIfPresent(lowerCase(id));
+        return objects.getIfPresent(sanitizeIdentifier(id));
     }
 
     @Override
     public boolean isLoaded(I id) {
-        return objects.asMap().containsKey(lowerCase(id));
+        return objects.asMap().containsKey(sanitizeIdentifier(id));
     }
 
     @Override
     public void unload(I id) {
         if (id != null) {
-            objects.invalidate(lowerCase(id));
+            objects.invalidate(sanitizeIdentifier(id));
         }
     }
 
@@ -94,13 +94,8 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> implements M
         objects.invalidateAll();
     }
 
-    @SuppressWarnings("unchecked")
-    private static <I> I lowerCase(I i) {
-        if (i instanceof String) {
-            return (I) ((String) i).toLowerCase();
-        } else {
-            return i;
-        }
+    protected I sanitizeIdentifier(I i) {
+        return i;
     }
 
 }

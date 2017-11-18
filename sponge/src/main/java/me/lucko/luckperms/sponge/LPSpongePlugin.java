@@ -35,7 +35,7 @@ import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.api.ApiSingletonUtils;
-import me.lucko.luckperms.common.backup.ImporterSender;
+import me.lucko.luckperms.common.backup.DummySender;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.UpdateTaskBuffer;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
@@ -456,7 +456,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public Sender getConsoleSender() {
         if (!game.isServerAvailable()) {
-            return new ImporterSender(this, Constants.CONSOLE_UUID, Constants.CONSOLE_NAME) {
+            return new DummySender(this, Constants.CONSOLE_UUID, Constants.CONSOLE_NAME) {
                 @Override
                 protected void consumeMessage(String s) {
                     logger.info(s);

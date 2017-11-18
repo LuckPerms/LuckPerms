@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.caching;
+package me.lucko.luckperms.common.caching.type;
 
 import lombok.AccessLevel;
 import lombok.Getter;

@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -93,7 +93,7 @@ public class ParentAddTemp extends SharedSubCommand {
         }
 
         if (group.getName().equalsIgnoreCase(holder.getObjectName())) {
-            Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), Util.contextSetToString(context));
+            Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
 
@@ -101,7 +101,7 @@ public class ParentAddTemp extends SharedSubCommand {
 
         if (ret.getKey().asBoolean()) {
             duration = ret.getValue().getExpiryUnixTime();
-            Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), DateUtil.formatDateDiff(duration), Util.contextSetToString(context));
+            Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), DateUtil.formatDateDiff(duration), CommandUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("parent", "addtemp", group.getName(), duration, context)
@@ -110,7 +110,7 @@ public class ParentAddTemp extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), Util.contextSetToString(context));
+            Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }
