@@ -42,6 +42,9 @@ import javax.script.ScriptEngine;
 public class AssignmentExpression {
 
     public static AssignmentExpression compile(String expression) {
+        if (expression == null) {
+            return null;
+        }
         return new AssignmentExpression(expression);
     }
 
