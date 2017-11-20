@@ -37,7 +37,7 @@ public enum Dependency {
     MYSQL_DRIVER("mysql", "mysql-connector-java", "5.1.44"),
     POSTGRESQL_DRIVER("org.postgresql", "postgresql", "9.4.1212"),
     H2_DRIVER("com.h2database", "h2", "1.4.196"),
-    SQLITE_DRIVER("org.xerial", "sqlite-jdbc", "3.20.1"),
+    SQLITE_DRIVER("org.xerial", "sqlite-jdbc", "3.21.0"),
     HIKARI("com.zaxxer", "HikariCP", "2.7.3"),
     SLF4J_SIMPLE("org.slf4j", "slf4j-simple", "1.7.25"),
     SLF4J_API("org.slf4j", "slf4j-api", "1.7.25"),
