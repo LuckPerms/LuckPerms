@@ -53,7 +53,7 @@ public class CompatibilityUtil {
 
     private static final LoadingCache<ImmutableContextSet, ImmutableSet<Context>> LP_TO_SPONGE_CACHE = Caffeine.newBuilder()
             .expireAfterAccess(10, TimeUnit.MINUTES)
-            .build(set -> set.toSet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(ImmutableCollectors.toImmutableSet()));
+            .build(set -> set.toSet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(ImmutableCollectors.toSet()));
 
     public static ImmutableContextSet convertContexts(@NonNull Set<Context> contexts) {
         return SPONGE_TO_LP_CACHE.get(ImmutableSet.copyOf(contexts));

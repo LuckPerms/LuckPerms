@@ -59,7 +59,7 @@ public class SubjectDataProxy implements SubjectData {
     public Map<Set<Context>, Map<String, Boolean>> getAllPermissions() {
         return (Map) getHandle().thenApply(handle -> {
             return handle.getAllPermissions().entrySet().stream()
-                    .collect(ImmutableCollectors.toImmutableMap(
+                    .collect(ImmutableCollectors.toMap(
                             e -> CompatibilityUtil.convertContexts(e.getKey()),
                             Map.Entry::getValue
                     ));
@@ -96,11 +96,11 @@ public class SubjectDataProxy implements SubjectData {
     @Override
     public Map<Set<Context>, List<Subject>> getAllParents() {
         return (Map) getHandle().thenApply(handle -> handle.getAllParents().entrySet().stream()
-                .collect(ImmutableCollectors.toImmutableMap(
+                .collect(ImmutableCollectors.toMap(
                         e -> CompatibilityUtil.convertContexts(e.getKey()),
                         e -> e.getValue().stream()
                                 .map(s -> new SubjectProxy(service, s))
-                                .collect(ImmutableCollectors.toImmutableList())
+                                .collect(ImmutableCollectors.toList())
                         )
                 )).join();
     }
@@ -109,7 +109,7 @@ public class SubjectDataProxy implements SubjectData {
     public List<Subject> getParents(Set<Context> contexts) {
         return (List) getHandle().thenApply(handle -> handle.getParents(CompatibilityUtil.convertContexts(contexts)).stream()
                 .map(s -> new SubjectProxy(service, s))
-                .collect(ImmutableCollectors.toImmutableList())).join();
+                .collect(ImmutableCollectors.toList())).join();
     }
 
     @Override
@@ -151,7 +151,7 @@ public class SubjectDataProxy implements SubjectData {
     @Override
     public Map<Set<Context>, Map<String, String>> getAllOptions() {
         return (Map) getHandle().thenApply(handle -> handle.getAllOptions().entrySet().stream()
-                .collect(ImmutableCollectors.toImmutableMap(
+                .collect(ImmutableCollectors.toMap(
                         e -> CompatibilityUtil.convertContexts(e.getKey()),
                         Map.Entry::getValue
                 ))).join();

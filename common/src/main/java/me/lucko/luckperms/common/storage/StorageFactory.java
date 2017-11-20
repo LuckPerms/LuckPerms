@@ -68,7 +68,7 @@ public class StorageFactory {
             Set<String> neededTypes = new HashSet<>();
             neededTypes.addAll(types.values());
 
-            return neededTypes.stream().map(StorageType::parse).collect(ImmutableCollectors.toImmutableSet());
+            return neededTypes.stream().map(StorageType::parse).collect(ImmutableCollectors.toSet());
         } else {
             String method = plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);
             StorageType type = StorageType.parse(method);

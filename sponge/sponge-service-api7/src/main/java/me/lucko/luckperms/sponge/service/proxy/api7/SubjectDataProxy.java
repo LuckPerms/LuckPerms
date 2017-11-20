@@ -60,7 +60,7 @@ public class SubjectDataProxy implements SubjectData {
     @Override
     public Map<Set<Context>, Map<String, Boolean>> getAllPermissions() {
         return (Map) getHandle().thenApply(handle -> handle.getAllPermissions().entrySet().stream()
-                .collect(ImmutableCollectors.toImmutableMap(
+                .collect(ImmutableCollectors.toMap(
                         e -> CompatibilityUtil.convertContexts(e.getKey()),
                         Map.Entry::getValue
                 ))).join();
@@ -93,7 +93,7 @@ public class SubjectDataProxy implements SubjectData {
     @Override
     public Map<Set<Context>, List<org.spongepowered.api.service.permission.SubjectReference>> getAllParents() {
         return (Map) getHandle().thenApply(handle -> handle.getAllParents().entrySet().stream()
-                .collect(ImmutableCollectors.toImmutableMap(
+                .collect(ImmutableCollectors.toMap(
                         e -> CompatibilityUtil.convertContexts(e.getKey()),
                         Map.Entry::getValue
                 ))).join();
@@ -127,7 +127,7 @@ public class SubjectDataProxy implements SubjectData {
     @Override
     public Map<Set<Context>, Map<String, String>> getAllOptions() {
         return (Map) getHandle().thenApply(handle -> handle.getAllOptions().entrySet().stream()
-                .collect(ImmutableCollectors.toImmutableMap(
+                .collect(ImmutableCollectors.toMap(
                         e -> CompatibilityUtil.convertContexts(e.getKey()),
                         Map.Entry::getValue
                 ))).join();

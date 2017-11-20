@@ -64,7 +64,7 @@ public class PermissionDescriptionProxy implements PermissionDescription {
     @Override
     public Map<Subject, Boolean> getAssignedSubjects(String s) {
         return handle.getAssignedSubjects(s).entrySet().stream()
-                .collect(ImmutableCollectors.toImmutableMap(
+                .collect(ImmutableCollectors.toMap(
                         e -> new SubjectProxy(service, e.getKey().toReference()),
                         Map.Entry::getValue
                 ));

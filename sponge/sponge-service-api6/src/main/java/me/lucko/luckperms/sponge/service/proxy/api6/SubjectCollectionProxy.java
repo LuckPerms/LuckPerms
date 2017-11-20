@@ -72,7 +72,7 @@ public class SubjectCollectionProxy implements SubjectCollection {
         return (List) handle.getAllIdentifiers()
                 .thenApply(ids -> ids.stream()
                         .map(s -> new SubjectProxy(service, service.newSubjectReference(getIdentifier(), s)))
-                        .collect(ImmutableCollectors.toImmutableList())
+                        .collect(ImmutableCollectors.toList())
                 ).join();
     }
 
@@ -81,7 +81,7 @@ public class SubjectCollectionProxy implements SubjectCollection {
         // again, these methods will lazily load subjects.
         return (Map) handle.getAllWithPermission(s)
                 .thenApply(map -> map.entrySet().stream()
-                        .collect(ImmutableCollectors.toImmutableMap(
+                        .collect(ImmutableCollectors.toMap(
                                 e -> new SubjectProxy(service, e.getKey()),
                                 Map.Entry::getValue
                         ))
@@ -92,7 +92,7 @@ public class SubjectCollectionProxy implements SubjectCollection {
     public Map<Subject, Boolean> getAllWithPermission(Set<Context> set, String s) {
         return (Map) handle.getAllWithPermission(CompatibilityUtil.convertContexts(set), s)
                 .thenApply(map -> map.entrySet().stream()
-                        .collect(ImmutableCollectors.toImmutableMap(
+                        .collect(ImmutableCollectors.toMap(
                                 e -> new SubjectProxy(service, e.getKey()),
                                 Map.Entry::getValue
                         ))

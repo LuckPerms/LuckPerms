@@ -311,7 +311,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
 
     @Override
     public ImmutableCollection<LPSubject> getLoadedSubjects() {
-        return getAll().values().stream().map(SpongeUser::sponge).collect(ImmutableCollectors.toImmutableSet());
+        return getAll().values().stream().map(SpongeUser::sponge).collect(ImmutableCollectors.toSet());
     }
 
     @Override
@@ -364,7 +364,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
                 .map(SpongeUser::sponge)
                 .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(ImmutableContextSet.empty(), permission)))
                 .filter(pair -> pair.getValue() != Tristate.UNDEFINED)
-                .collect(ImmutableCollectors.toImmutableMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
     }
 
     @Override
@@ -373,7 +373,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
                 .map(SpongeUser::sponge)
                 .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(contexts, permission)))
                 .filter(pair -> pair.getValue() != Tristate.UNDEFINED)
-                .collect(ImmutableCollectors.toImmutableMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
     }
 
     @Override

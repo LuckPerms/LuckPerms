@@ -51,8 +51,8 @@ public class AssignmentRule {
         this.hasTrueExpression = AssignmentExpression.compile(hasTrueExpression);
         this.hasFalseExpression = AssignmentExpression.compile(hasFalseExpression);
         this.lacksExpression = AssignmentExpression.compile(lacksExpression);
-        this.toGive = toGive.stream().map(s -> LegacyNodeFactory.fromSerializedNode(s, true)).collect(ImmutableCollectors.toImmutableList());;
-        this.toTake = toTake.stream().map(s -> LegacyNodeFactory.fromSerializedNode(s, true)).collect(ImmutableCollectors.toImmutableList());
+        this.toGive = toGive.stream().map(s -> LegacyNodeFactory.fromSerializedNode(s, true)).collect(ImmutableCollectors.toList());;
+        this.toTake = toTake.stream().map(s -> LegacyNodeFactory.fromSerializedNode(s, true)).collect(ImmutableCollectors.toList());
         this.setPrimaryGroup = setPrimaryGroup;
     }
 

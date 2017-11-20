@@ -117,14 +117,14 @@ public class SubjectProxy implements Subject {
     public List<Subject> getParents() {
         return (List) getHandle().thenApply(handle -> handle.getParents(ImmutableContextSet.empty()).stream()
                 .map(s -> new SubjectProxy(service, s))
-                .collect(ImmutableCollectors.toImmutableList())).join();
+                .collect(ImmutableCollectors.toList())).join();
     }
 
     @Override
     public List<Subject> getParents(Set<Context> contexts) {
         return (List) getHandle().thenApply(handle -> handle.getParents(CompatibilityUtil.convertContexts(contexts)).stream()
                 .map(s -> new SubjectProxy(service, s))
-                .collect(ImmutableCollectors.toImmutableList())).join();
+                .collect(ImmutableCollectors.toList())).join();
     }
 
     @Override

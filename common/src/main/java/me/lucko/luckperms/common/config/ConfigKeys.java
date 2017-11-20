@@ -241,7 +241,7 @@ public class ConfigKeys {
      * The configured group weightings
      */
     public static final ConfigKey<Map<String, Integer>> GROUP_WEIGHTS = AbstractKey.of(c -> {
-        return c.getMap("group-weight", ImmutableMap.of()).entrySet().stream().collect(ImmutableCollectors.toImmutableMap(
+        return c.getMap("group-weight", ImmutableMap.of()).entrySet().stream().collect(ImmutableCollectors.toMap(
                 e -> e.getKey().toLowerCase(),
                 e -> {
                     try {
@@ -352,7 +352,7 @@ public class ConfigKeys {
             List<String> take = ImmutableList.copyOf(c.getList("default-assignments." + name + ".take", ImmutableList.of()));
             String pg = c.getString("default-assignments." + name + ".set-primary-group", null);
             return new AssignmentRule(hasTrue, hasFalse, lacks, give, take, pg);
-        }).collect(ImmutableCollectors.toImmutableList());
+        }).collect(ImmutableCollectors.toList());
     });
 
     /**

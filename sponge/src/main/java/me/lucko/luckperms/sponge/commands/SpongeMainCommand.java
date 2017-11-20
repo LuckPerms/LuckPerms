@@ -222,7 +222,7 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
     }
 
     public List<Command<LPSubjectData, ?>> getSubCommands() {
-        return subCommands.values().stream().flatMap(List::stream).collect(ImmutableCollectors.toImmutableList());
+        return subCommands.values().stream().flatMap(List::stream).collect(ImmutableCollectors.toList());
     }
 
     @Override

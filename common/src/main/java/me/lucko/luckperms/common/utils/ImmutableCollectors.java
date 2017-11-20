@@ -51,17 +51,17 @@ public class ImmutableCollectors {
             ImmutableSet.Builder::build
     );
 
-    public static <T> Collector<T, ImmutableList.Builder<T>, ImmutableList<T>> toImmutableList() {
+    public static <T> Collector<T, ImmutableList.Builder<T>, ImmutableList<T>> toList() {
         //noinspection unchecked
         return (Collector) LIST;
     }
 
-    public static <T> Collector<T, ImmutableSet.Builder<T>, ImmutableSet<T>> toImmutableSet() {
+    public static <T> Collector<T, ImmutableSet.Builder<T>, ImmutableSet<T>> toSet() {
         //noinspection unchecked
         return (Collector) SET;
     }
 
-    public static <T, K, V> Collector<T, ImmutableMap.Builder<K, V>, ImmutableMap<K, V>> toImmutableMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
+    public static <T, K, V> Collector<T, ImmutableMap.Builder<K, V>, ImmutableMap<K, V>> toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
         return Collector.of(
                 ImmutableMap.Builder<K, V>::new,
                 (r, t) -> r.put(keyMapper.apply(t), valueMapper.apply(t)),

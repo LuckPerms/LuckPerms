@@ -221,7 +221,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
 
     @Override
     public ImmutableCollection<LPSubject> getLoadedSubjects() {
-        return getAll().values().stream().map(SpongeGroup::sponge).collect(ImmutableCollectors.toImmutableSet());
+        return getAll().values().stream().map(SpongeGroup::sponge).collect(ImmutableCollectors.toSet());
     }
 
     @Override
@@ -267,7 +267,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
                 .map(SpongeGroup::sponge)
                 .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(ImmutableContextSet.empty(), permission)))
                 .filter(pair -> pair.getValue() != Tristate.UNDEFINED)
-                .collect(ImmutableCollectors.toImmutableMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
     }
 
     @Override
@@ -276,7 +276,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
                 .map(SpongeGroup::sponge)
                 .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(contexts, permission)))
                 .filter(pair -> pair.getValue() != Tristate.UNDEFINED)
-                .collect(ImmutableCollectors.toImmutableMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
     }
 
     @Override

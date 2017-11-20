@@ -29,7 +29,6 @@ import lombok.Getter;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.reflect.TypeToken;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
@@ -53,6 +52,7 @@ import me.lucko.luckperms.common.references.UserIdentifier;
 import me.lucko.luckperms.common.storage.dao.AbstractDao;
 import me.lucko.luckperms.common.storage.dao.legacy.LegacyJsonMigration;
 import me.lucko.luckperms.common.storage.dao.legacy.LegacyYamlMigration;
+import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.SimpleConfigurationNode;
@@ -628,7 +628,10 @@ public abstract class ConfigurateDao extends AbstractDao {
             ConfigurationNode object = readFile(StorageLocation.TRACK, name);
 
             if (object != null) {
-                List<String> groups = object.getNode("groups").getList(TypeToken.of(String.class));
+                List<String> groups = object.getNode("groups").getChildrenList().stream()
+                        .map(ConfigurationNode::getString)
+                        .collect(ImmutableCollectors.toList());
+
                 track.setGroups(groups);
             } else {
                 ConfigurationNode data = SimpleConfigurationNode.root();
@@ -664,7 +667,10 @@ public abstract class ConfigurateDao extends AbstractDao {
                 track.getIoLock().lock();
             }
 
-            List<String> groups = object.getNode("groups").getList(TypeToken.of(String.class));
+            List<String> groups = object.getNode("groups").getChildrenList().stream()
+                    .map(ConfigurationNode::getString)
+                    .collect(ImmutableCollectors.toList());
+
             track.setGroups(groups);
 
         } catch (Exception e) {

@@ -110,7 +110,7 @@ public class StandardStackElements {
                 .map(s -> parseFromString(plugin, s))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(ImmutableCollectors.toImmutableList());
+                .collect(ImmutableCollectors.toList());
     }
 
     /**

@@ -218,7 +218,7 @@ public class LPSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>
                         return ret != null ? Maps.immutableEntry(p, ret) : null;
                     })
                     .filter(Objects::nonNull)
-                    .collect(ImmutableCollectors.toImmutableSet());
+                    .collect(ImmutableCollectors.toSet());
         }
 
         @Override

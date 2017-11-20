@@ -70,7 +70,7 @@ public class PermissionServiceProxy implements PermissionService {
     @Override
     public Map<String, SubjectCollection> getKnownSubjects() {
         return handle.getLoadedCollections().entrySet().stream()
-                .collect(ImmutableCollectors.toImmutableMap(
+                .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> e.getValue().sponge()
                 ));
@@ -93,7 +93,7 @@ public class PermissionServiceProxy implements PermissionService {
 
     @Override
     public Collection<PermissionDescription> getDescriptions() {
-        return handle.getDescriptions().stream().map(LPPermissionDescription::sponge).collect(ImmutableCollectors.toImmutableSet());
+        return handle.getDescriptions().stream().map(LPPermissionDescription::sponge).collect(ImmutableCollectors.toSet());
     }
 
     @Override

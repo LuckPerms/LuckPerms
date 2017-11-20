@@ -76,12 +76,12 @@ public class SubjectCollectionProxy implements SubjectCollection {
 
     @Override
     public CompletableFuture<Map<String, Subject>> loadSubjects(Set<String> set) {
-        return handle.loadSubjects(set).thenApply(subs -> subs.stream().collect(ImmutableCollectors.toImmutableMap(LPSubject::getIdentifier, LPSubject::sponge)));
+        return handle.loadSubjects(set).thenApply(subs -> subs.stream().collect(ImmutableCollectors.toMap(LPSubject::getIdentifier, LPSubject::sponge)));
     }
 
     @Override
     public Collection<Subject> getLoadedSubjects() {
-        return handle.getLoadedSubjects().stream().map(LPSubject::sponge).collect(ImmutableCollectors.toImmutableSet());
+        return handle.getLoadedSubjects().stream().map(LPSubject::sponge).collect(ImmutableCollectors.toSet());
     }
 
     @Override
@@ -107,7 +107,7 @@ public class SubjectCollectionProxy implements SubjectCollection {
     @Override
     public Map<Subject, Boolean> getLoadedWithPermission(String s) {
         return handle.getLoadedWithPermission(s).entrySet().stream()
-                .collect(ImmutableCollectors.toImmutableMap(
+                .collect(ImmutableCollectors.toMap(
                         sub -> sub.getKey().sponge(),
                         Map.Entry::getValue
                 ));
@@ -116,7 +116,7 @@ public class SubjectCollectionProxy implements SubjectCollection {
     @Override
     public Map<Subject, Boolean> getLoadedWithPermission(Set<Context> set, String s) {
         return handle.getLoadedWithPermission(CompatibilityUtil.convertContexts(set), s).entrySet().stream()
-                .collect(ImmutableCollectors.toImmutableMap(
+                .collect(ImmutableCollectors.toMap(
                         sub -> sub.getKey().sponge(),
                         Map.Entry::getValue
                 ));
