@@ -254,13 +254,13 @@ public class VaultChatHook extends Chat {
         }
 
         String finalWorld = perms.correctWorld(world);
-        perms.log("Setting meta: '" + key + "' for " + holder.getObjectName() + " on world " + world + ", server " + perms.getServer());
+        perms.log("Setting meta: '" + key + "' for " + holder.getObjectName() + " on world " + world + ", server " + perms.getVaultServer());
 
         perms.getExecutor().execute(() -> {
             holder.removeIf(n -> n.isMeta() && n.getMeta().getKey().equals(key));
 
             Node.Builder metaNode = NodeFactory.makeMetaNode(key, value).setValue(true);
-            metaNode.setServer(perms.getServer());
+            metaNode.setServer(perms.getVaultServer());
             metaNode.setWorld(finalWorld);
 
             holder.setPermission(metaNode.build());
@@ -274,7 +274,7 @@ public class VaultChatHook extends Chat {
         }
 
         String finalWorld = perms.correctWorld(world);
-        perms.log("Setting " + type.name().toLowerCase() + " for " + holder.getObjectName() + " on world " + world + ", server " + perms.getServer());
+        perms.log("Setting " + type.name().toLowerCase() + " for " + holder.getObjectName() + " on world " + world + ", server " + perms.getVaultServer());
 
         perms.getExecutor().execute(() -> {
             // remove all prefixes/suffixes directly set on the user/group
@@ -286,7 +286,7 @@ public class VaultChatHook extends Chat {
                     .mapToInt(e -> e).max().orElse(0) + 10;
 
             Node.Builder chatMetaNode = NodeFactory.makeChatMetaNode(type, priority, value);
-            chatMetaNode.setServer(perms.getServer());
+            chatMetaNode.setServer(perms.getVaultServer());
             chatMetaNode.setWorld(finalWorld);
 
             holder.setPermission(chatMetaNode.build());
@@ -300,7 +300,6 @@ public class VaultChatHook extends Chat {
         }
 
         world = perms.correctWorld(world);
-        perms.log("Getting meta: '" + node + "' for holder " + holder.getFriendlyName() + " on world " + world + ", server " + perms.getServer());
 
         Contexts contexts;
         if (holder instanceof User) {
@@ -308,6 +307,8 @@ public class VaultChatHook extends Chat {
         } else {
             contexts = perms.createContextForWorldLookup(world);
         }
+
+        perms.log("Getting meta: '" + node + "' for holder " + holder.getFriendlyName() + " in contexts " + contexts);
 
         String ret = holder.getCachedData().getMetaData(contexts).getMeta().get(node);
         return ret != null ? ret : defaultValue;
@@ -319,7 +320,6 @@ public class VaultChatHook extends Chat {
         }
 
         world = perms.correctWorld(world);
-        perms.log("Getting " + type.name().toLowerCase() + " for holder " + holder.getFriendlyName() + " on world " + world + ", server " + perms.getServer());
 
         Contexts contexts;
         if (holder instanceof User) {
@@ -327,6 +327,8 @@ public class VaultChatHook extends Chat {
         } else {
             contexts = perms.createContextForWorldLookup(world);
         }
+
+        perms.log("Getting " + type.name().toLowerCase() + " for holder " + holder.getFriendlyName() + " in contexts " + contexts);
 
         MetaData data = holder.getCachedData().getMetaData(contexts);
         String ret = type == ChatMetaType.PREFIX ? data.getPrefix() : data.getSuffix();

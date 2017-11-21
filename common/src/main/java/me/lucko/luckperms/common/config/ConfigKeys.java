@@ -304,11 +304,16 @@ public class ConfigKeys {
     public static final ConfigKey<Boolean> COMMANDS_ALLOW_OP = EnduringKey.wrap(BooleanKey.of("commands-allow-op", true));
 
     /**
+     * If the vault server option should be used
+     */
+    public static final ConfigKey<Boolean> USE_VAULT_SERVER = BooleanKey.of("use-vault-server", true);
+
+    /**
      * The name of the server to use for Vault.
      */
     public static final ConfigKey<String> VAULT_SERVER = AbstractKey.of(c -> {
         // default to true for backwards compatibility
-        if (c.getBoolean("use-vault-server", true)) {
+        if (USE_VAULT_SERVER.get(c)) {
             return c.getString("vault-server", "global").toLowerCase();
         } else {
             return SERVER.get(c);

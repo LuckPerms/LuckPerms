@@ -32,6 +32,7 @@ import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -49,8 +50,6 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.Map;
 
 /**
  * An implementation of the Vault {@link Permission} API using LuckPerms.
@@ -131,7 +130,6 @@ public class VaultPermissionHook extends Permission {
 
     private boolean playerHas(String world, Player player, String permission) {
         world = correctWorld(world);
-        log("Checking if player " + player + " has permission: " + permission + " on world " + world + ", server " + getServer());
 
         if (player == null) {
             return false;
@@ -142,8 +140,11 @@ public class VaultPermissionHook extends Permission {
             return false;
         }
 
+        Contexts contexts = createContextForWorldLookup(player, world);
+        log("Checking if player " + player + " has permission: " + permission + " in contexts " + contexts);
+
         // Effectively fallback to the standard Bukkit #hasPermission check.
-        return user.getCachedData().getPermissionData(createContextForWorldLookup(player, world)).getPermissionValue(permission, CheckOrigin.INTERNAL).asBoolean();
+        return user.getCachedData().getPermissionData(contexts).getPermissionValue(permission, CheckOrigin.INTERNAL).asBoolean();
     }
 
     @Override
@@ -164,7 +165,7 @@ public class VaultPermissionHook extends Permission {
 
     private boolean playerAdd(String world, Player player, String permission) {
         world = correctWorld(world);
-        log("Adding permission to player " + player + ": '" + permission + "' on world " + world + ", server " + getServer());
+        log("Adding permission to player " + player + ": '" + permission + "' on world " + world + ", server " + getVaultServer());
 
         if (player == null) {
             return false;
@@ -197,7 +198,7 @@ public class VaultPermissionHook extends Permission {
 
     private boolean playerRemove(String world, Player player, String permission) {
         world = correctWorld(world);
-        log("Removing permission from player " + player + ": '" + permission + "' on world " + world + ", server " + getServer());
+        log("Removing permission from player " + player + ": '" + permission + "' on world " + world + ", server " + getVaultServer());
 
         if (player == null) {
             return false;
@@ -215,20 +216,23 @@ public class VaultPermissionHook extends Permission {
     @Override
     public boolean groupHas(String world, @NonNull String groupName, @NonNull String permission) {
         world = correctWorld(world);
-        log("Checking if group " + groupName + " has permission: " + permission + " on world " + world + ", server " + getServer());
 
         final Group group = plugin.getGroupManager().getByDisplayName(groupName);
-        if (group == null) return false;
+        if (group == null) {
+            return false;
+        }
 
-        // This is a nasty call. Groups aren't cached. :(
-        Map<String, Boolean> permissions = group.exportNodesAndShorthand(createContextForWorldLookup(world), true);
-        return permissions.containsKey(permission.toLowerCase()) && permissions.get(permission.toLowerCase());
+        Contexts contexts = createContextForWorldLookup(world);
+        log("Checking if group " + groupName + " has permission: " + permission + " in contexts " + contexts);
+
+        // Effectively fallback to the standard Bukkit #hasPermission check.
+        return group.getCachedData().getPermissionData(createContextForWorldLookup(world)).getPermissionValue(permission, CheckOrigin.INTERNAL).asBoolean();
     }
 
     @Override
     public boolean groupAdd(String world, @NonNull String groupName, @NonNull String permission) {
         world = correctWorld(world);
-        log("Adding permission to group " + groupName + ": '" + permission + "' on world " + world + ", server " + getServer());
+        log("Adding permission to group " + groupName + ": '" + permission + "' on world " + world + ", server " + getVaultServer());
 
         final Group group = plugin.getGroupManager().getByDisplayName(groupName);
         if (group == null) return false;
@@ -240,7 +244,7 @@ public class VaultPermissionHook extends Permission {
     @Override
     public boolean groupRemove(String world, @NonNull String groupName, @NonNull String permission) {
         world = correctWorld(world);
-        log("Removing permission from group " + groupName + ": '" + permission + "' on world " + world + ", server " + getServer());
+        log("Removing permission from group " + groupName + ": '" + permission + "' on world " + world + ", server " + getVaultServer());
 
         final Group group = plugin.getGroupManager().getByDisplayName(groupName);
         if (group == null) return false;
@@ -342,7 +346,6 @@ public class VaultPermissionHook extends Permission {
 
     private String[] getPlayerGroups(String world, Player player) {
         world = correctWorld(world);
-        log("Getting groups of player: " + player + ", on world " + world + ", server " + getServer());
 
         if (player == null) {
             return new String[0];
@@ -353,10 +356,12 @@ public class VaultPermissionHook extends Permission {
             return new String[0];
         }
 
-        String w = world; // screw effectively final
+        ContextSet contexts = createContextForWorldLookup(player, world).getContexts();
+        log("Getting groups of player: " + player + " in contexts " + contexts);
+
         return user.getEnduringNodes().values().stream()
                 .filter(Node::isGroupNode)
-                .filter(n -> n.shouldApplyWithContext(createContextForWorldLookup(player, w).getContexts()))
+                .filter(n -> n.shouldApplyWithContext(contexts))
                 .map(n -> {
                     Group group = plugin.getGroupManager().getIfLoaded(n.getGroupName());
                     if (group != null) {
@@ -422,7 +427,7 @@ public class VaultPermissionHook extends Permission {
         Preconditions.checkNotNull(permission, "permission is null");
         Preconditions.checkArgument(!permission.isEmpty(), "permission is an empty string");
         executor.execute(() -> {
-            if (holder.setPermission(NodeFactory.make(permission, true, getServer(), world)).asBoolean()) {
+            if (holder.setPermission(NodeFactory.make(permission, true, getVaultServer(), world)).asBoolean()) {
                 holderSave(holder);
             }
         });
@@ -432,7 +437,7 @@ public class VaultPermissionHook extends Permission {
         Preconditions.checkNotNull(permission, "permission is null");
         Preconditions.checkArgument(!permission.isEmpty(), "permission is an empty string");
         executor.execute(() -> {
-            if (holder.unsetPermission(NodeFactory.make(permission, getServer(), world)).asBoolean()) {
+            if (holder.unsetPermission(NodeFactory.make(permission, getVaultServer(), world)).asBoolean()) {
                 holderSave(holder);
             }
         });
@@ -456,22 +461,29 @@ public class VaultPermissionHook extends Permission {
         if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
             context.add("world", world.toLowerCase());
         }
-        context.add("server", getServer());
+        context.add("server", getVaultServer());
         return new Contexts(context, isIncludeGlobal(), true, true, true, true, false);
     }
 
     public Contexts createContextForWorldLookup(String world) {
         MutableContextSet context = plugin.getContextManager().getStaticContext().mutableCopy();
 
-        // worlds & servers get set depending on the config setting
-        context.removeAll("world");
-        context.removeAll("server");
+        if (useVaultServer()) {
+            // remove already accumulated worlds
+            context.removeAll("world");
+            // add the vault world
+            if (world != null && !world.isEmpty() && !world.equalsIgnoreCase("global")) {
+                context.add("world", world.toLowerCase());
+            }
 
-        // add the vault settings
-        if (world != null && !world.isEmpty() && !world.equalsIgnoreCase("global")) {
-            context.add("world", world.toLowerCase());
+            // remove the server context from global
+            context.remove("server", getServer());
+
+            // add the vault specific server
+            if (!getVaultServer().equals("global")) {
+                context.add("server", getVaultServer());
+            }
         }
-        context.add("server", getServer());
 
         return new Contexts(context, isIncludeGlobal(), true, true, true, true, false);
     }
@@ -479,15 +491,22 @@ public class VaultPermissionHook extends Permission {
     public Contexts createContextForWorldLookup(@NonNull Player player, String world) {
         MutableContextSet context = plugin.getContextManager().getApplicableContext(player).mutableCopy();
 
-        // worlds & servers get set depending on the config setting
-        context.removeAll("world");
-        context.removeAll("server");
+        if (useVaultServer()) {
+            // remove already accumulated worlds
+            context.removeAll("world");
+            // add the vault world
+            if (world != null && !world.isEmpty() && !world.equalsIgnoreCase("global")) {
+                context.add("world", world.toLowerCase());
+            }
 
-        // add the vault settings
-        if (world != null && !world.isEmpty() && !world.equalsIgnoreCase("global")) {
-            context.add("world", world.toLowerCase());
+            // remove the server context from global
+            context.remove("server", getServer());
+
+            // add the vault specific server
+            if (!getVaultServer().equals("global")) {
+                context.add("server", getVaultServer());
+            }
         }
-        context.add("server", getServer());
 
         return new Contexts(context, isIncludeGlobal(), true, true, true, true, false);
     }
@@ -495,7 +514,15 @@ public class VaultPermissionHook extends Permission {
     // helper methods to just pull values from the config.
 
     String getServer() {
+        return plugin.getConfiguration().get(ConfigKeys.SERVER);
+    }
+
+    String getVaultServer() {
         return plugin.getConfiguration().get(ConfigKeys.VAULT_SERVER);
+    }
+
+    boolean useVaultServer() {
+        return plugin.getConfiguration().get(ConfigKeys.USE_VAULT_SERVER);
     }
 
     boolean isIncludeGlobal() {
