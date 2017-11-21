@@ -469,10 +469,6 @@ public enum Message {
             s = message;
         }
 
-        if (s.startsWith("&")) {
-            prefix = prefix.substring(0, prefix.length() - 2);
-        }
-
         s = format(s.replace("{PREFIX}", prefix).replace("\\n", "\n"), objects);
         return CommandUtils.color(showPrefix ? prefix + s : s);
     }
