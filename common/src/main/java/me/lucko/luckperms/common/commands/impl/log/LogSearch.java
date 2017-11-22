@@ -51,7 +51,7 @@ public class LogSearch extends SubCommand<Log> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) throws CommandException {
-        int page = -999;
+        int page = Integer.MIN_VALUE;
         if (args.size() > 1) {
             try {
                 page = Integer.parseInt(args.get(args.size() - 1));
@@ -68,7 +68,7 @@ public class LogSearch extends SubCommand<Log> {
             return CommandResult.STATE_ERROR;
         }
 
-        if (page == -999) {
+        if (page == Integer.MIN_VALUE) {
             page = maxPage;
         }
 

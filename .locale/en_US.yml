@@ -31,7 +31,6 @@ user-invalid-entry: "&4{0}&c is not a valid username/uuid."
 group-invalid-entry: "&4{0}&c is not a valid group name."
 track-invalid-entry: "&4{0}&c is not a valid track name."
 server-world-invalid-entry: "&cServer/world names can only contain alphanumeric characters and cannot exceed 36 characters in length."
-use-inherit-command: "&cUse the 'parent add' and 'parent remove' commands instead of specifying the node."
 verbose-invalid-filter: "&4{0}&c is not a valid verbose filter."
 verbose-on: "&bVerbose logging &aenabled &bfor checks matching &aANY&b."
 verbose-on-query: "&bVerbose logging &aenabled &bfor checks matching &a{0}&b."
@@ -57,7 +56,10 @@ apply-edits-target-group-not-exists: "&cTarget group &4{0}&c does not exist."
 apply-edits-target-user-not-uuid: "&cTarget user &4{0}&c is not a valid uuid."
 apply-edits-target-user-unable-to-load: "&cUnable to load target user &4{0}&c."
 apply-edits-target-unknown: "&cInvalid target. &7({0})"
-apply-edits-success: "&aSuccessfully applied &b{0}&a nodes to &b{1}&a."
+apply-edits-success: "&aWeb editor data was applied to &b{0}&a successfully."
+apply-edits-success-summary: "&7(&a{0} &7{1} and &c{2} &7{3})"
+apply-edits-diff-added: "&a+  &f{0}"
+apply-edits-diff-removed: "&c-  &f{0}"
 editor-upload-failure: "&cUnable to upload permission data to the editor."
 editor-url: "&aEditor URL:"
 check-result: "&aPermission check result on user &b{0}&a for permission &b{1}&a: &f{2}"
@@ -234,6 +236,11 @@ group-info-general: >
   {PREFIX}&f-    &3Suffixes: &a{6}\n
   {PREFIX}&f-    &3Meta: &a{7}
 group-set-weight: "&aSet weight to &b{0}&a for group &b{1}&a."
+group-set-display-name-doesnt-have: "&b{0}&a doesn't have a display name set."
+group-set-display-name-already-has: "&b{0}&a already has a display name of &b{1}&a."
+group-set-display-name-already-in-use: "&aThe display name &b{0}&a is already being used by &b{1}&a."
+group-set-display-name: "&aSet display name to &b{0}&a for group &b{1}&a."
+group-set-display-name-removed: "&aRemoved display name for group &b{0}&a."
 track-info: >
   {PREFIX}&b&l> &bShowing Track: &f{0}\n
   {PREFIX}&f- &7Path: &f{1}

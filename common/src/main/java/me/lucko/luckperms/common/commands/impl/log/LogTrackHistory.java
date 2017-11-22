@@ -52,7 +52,7 @@ public class LogTrackHistory extends SubCommand<Log> {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) throws CommandException {
         String track = args.get(0).toLowerCase();
-        int page = -999;
+        int page = Integer.MIN_VALUE;
 
         if (args.size() == 2) {
             try {
@@ -75,7 +75,7 @@ public class LogTrackHistory extends SubCommand<Log> {
             return CommandResult.STATE_ERROR;
         }
 
-        if (page == -999) {
+        if (page == Integer.MIN_VALUE) {
             page = maxPage;
         }
 

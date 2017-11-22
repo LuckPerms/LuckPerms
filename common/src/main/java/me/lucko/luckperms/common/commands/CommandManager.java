@@ -362,6 +362,7 @@ public class CommandManager {
                 case "e":
                     args.remove(2);
                     args.add(2, "editor");
+                    break;
 
                 // Provide backwards compatibility
                 case "setprimarygroup":

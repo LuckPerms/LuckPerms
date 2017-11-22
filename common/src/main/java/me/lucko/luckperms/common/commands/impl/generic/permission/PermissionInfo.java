@@ -121,14 +121,10 @@ public class PermissionInfo extends SharedSubCommand {
             context:
             if (index != -1) {
                 String key = filter.substring(0, index);
-                if (key.equals("")) {
-                    break context;
-                }
+                if (key.equals("")) break context;
 
                 String value = filter.substring(index + 1);
-                if (value.equals("")) {
-                    break context;
-                }
+                if (value.equals("")) break context;
 
                 contextFilter = Maps.immutableEntry(key, value);
             }
@@ -140,7 +136,9 @@ public class PermissionInfo extends SharedSubCommand {
 
         List<Node> l = new ArrayList<>();
         for (Node node : nodes) {
-            if (node.isGroupNode() || node.isPrefix() || node.isSuffix() || node.isMeta()) continue;
+            if ((node.isGroupNode() && node.getValuePrimitive()) || node.isPrefix() || node.isSuffix() || node.isMeta()) continue;
+
+            // check against filters
             if (nodeFilter != null && !node.getPermission().startsWith(nodeFilter)) continue;
             if (contextFilter != null && !node.getFullContexts().hasIgnoreCase(contextFilter.getKey(), contextFilter.getValue())) continue;
             if (temp != node.isTemporary()) continue;

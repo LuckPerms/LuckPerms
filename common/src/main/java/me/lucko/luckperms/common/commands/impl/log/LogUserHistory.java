@@ -55,7 +55,7 @@ public class LogUserHistory extends SubCommand<Log> {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) throws CommandException {
         String target = args.get(0);
-        int page = -999;
+        int page = Integer.MIN_VALUE;
 
         if (args.size() == 2) {
             try {
@@ -95,7 +95,7 @@ public class LogUserHistory extends SubCommand<Log> {
             }
         }
 
-        if (page == -999) {
+        if (page == Integer.MIN_VALUE) {
             page = log.getUserHistoryMaxPages(uuid);
         }
 

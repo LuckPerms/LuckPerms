@@ -62,7 +62,7 @@ public class PermissionSet extends SharedSubCommand {
         }
 
         String node = ArgumentUtils.handleString(0, args);
-        boolean b = ArgumentUtils.handleBoolean(1, args);
+        boolean value = ArgumentUtils.handleBoolean(1, args);
         MutableContextSet context = ArgumentUtils.handleContext(2, args, plugin);
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
@@ -75,13 +75,13 @@ public class PermissionSet extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        DataMutateResult result = holder.setPermission(NodeFactory.newBuilder(node).setValue(b).withExtraContext(context).build());
+        DataMutateResult result = holder.setPermission(NodeFactory.newBuilder(node).setValue(value).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            Message.SETPERMISSION_SUCCESS.send(sender, node, b, holder.getFriendlyName(), CommandUtils.contextSetToString(context));
+            Message.SETPERMISSION_SUCCESS.send(sender, node, value, holder.getFriendlyName(), CommandUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("permission", "set", node, b, context)
+                    .action("permission", "set", node, value, context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);

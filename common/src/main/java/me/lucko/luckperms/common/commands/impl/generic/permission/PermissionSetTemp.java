@@ -67,7 +67,7 @@ public class PermissionSetTemp extends SharedSubCommand {
         }
 
         String node = ArgumentUtils.handleString(0, args);
-        boolean b = ArgumentUtils.handleBoolean(1, args);
+        boolean value = ArgumentUtils.handleBoolean(1, args);
         long duration = ArgumentUtils.handleDuration(2, args);
         MutableContextSet context = ArgumentUtils.handleContext(3, args, plugin);
 
@@ -82,14 +82,14 @@ public class PermissionSetTemp extends SharedSubCommand {
         }
 
         TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
-        Map.Entry<DataMutateResult, Node> result = holder.setPermission(NodeFactory.newBuilder(node).setValue(b).withExtraContext(context).setExpiry(duration).build(), modifier);
+        Map.Entry<DataMutateResult, Node> result = holder.setPermission(NodeFactory.newBuilder(node).setValue(value).withExtraContext(context).setExpiry(duration).build(), modifier);
 
         if (result.getKey().asBoolean()) {
             duration = result.getValue().getExpiryUnixTime();
-            Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, b, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), CommandUtils.contextSetToString(context));
+            Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, value, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), CommandUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("permission", "settemp", node, b, duration, context)
+                    .action("permission", "settemp", node, value, duration, context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);

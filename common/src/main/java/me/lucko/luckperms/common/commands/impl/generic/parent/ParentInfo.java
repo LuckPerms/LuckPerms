@@ -85,6 +85,7 @@ public class ParentInfo extends SharedSubCommand {
         List<Node> page = new ArrayList<>();
         for (Node node : nodes) {
             if (!node.isGroupNode()) continue;
+            if (!node.getValuePrimitive()) continue;
             if (node.isTemporary()) continue;
             page.add(node);
         }
@@ -105,6 +106,7 @@ public class ParentInfo extends SharedSubCommand {
         List<Node> page = new ArrayList<>();
         for (Node node : nodes) {
             if (!node.isGroupNode()) continue;
+            if (!node.getValuePrimitive()) continue;
             if (node.isPermanent()) continue;
             page.add(node);
         }

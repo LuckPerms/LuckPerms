@@ -125,7 +125,10 @@ public enum Message {
     APPLY_EDITS_TARGET_USER_NOT_UUID("&cTarget user &4{}&c is not a valid uuid.", true),
     APPLY_EDITS_TARGET_USER_UNABLE_TO_LOAD("&cUnable to load target user &4{}&c.", true),
     APPLY_EDITS_TARGET_UNKNOWN("&cInvalid target. &7({})", true),
-    APPLY_EDITS_SUCCESS("&aSuccessfully applied &b{}&a nodes to &b{}&a.", true),
+    APPLY_EDITS_SUCCESS("&aWeb editor data was applied to &b{}&a successfully.", true),
+    APPLY_EDITS_SUCCESS_SUMMARY("&7(&a{} &7{} and &c{} &7{})", true),
+    APPLY_EDITS_DIFF_ADDED("&a+  &f{}", false),
+    APPLY_EDITS_DIFF_REMOVED("&c-  &f{}", false),
 
     EDITOR_UPLOAD_FAILURE("&cUnable to upload permission data to the editor.", true),
     EDITOR_URL("&aEditor URL:", true),
