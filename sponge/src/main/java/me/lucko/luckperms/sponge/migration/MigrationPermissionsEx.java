@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.SafeIterator;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 
@@ -48,7 +49,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.SubjectCollection;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -89,33 +89,32 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
         // Migrate defaults
         log.log("Migrating default subjects.");
-        for (SubjectCollection collection : pexService.getKnownSubjects().values()) {
+        SafeIterator.iterate(pexService.getKnownSubjects().values(), collection -> {
             migrateSubjectData(
                     collection.getDefaults().getSubjectData(),
                     lpService.getCollection("defaults").loadSubject(collection.getIdentifier()).join().sponge().getSubjectData()
             );
-        }
+        });
         migrateSubjectData(pexService.getDefaults().getSubjectData(), lpService.getDefaults().sponge().getSubjectData());
 
         log.log("Calculating group weightings.");
-        int maxWeight = 0;
+        int i = 0;
         for (Subject pexGroup : pexService.getGroupSubjects().getAllSubjects()) {
             Optional<String> pos = pexGroup.getOption("rank");
             if (pos.isPresent()) {
                 try {
-                    int i = Integer.parseInt(pos.get());
-                    maxWeight = Math.max(maxWeight, i);
+                    i = Math.max(i, Integer.parseInt(pos.get()));
                 } catch (NumberFormatException ignored) {}
             }
         }
-        maxWeight += 5;
+        int maxWeight = i + 5;
 
         Map<String, TreeMap<Integer, String>> tracks = new HashMap<>();
 
         // Migrate groups
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
-        for (Subject pexGroup : pexService.getGroupSubjects().getAllSubjects()) {
+        SafeIterator.iterate(pexService.getGroupSubjects().getAllSubjects(), pexGroup -> {
             String pexName = MigrationUtils.standardizeName(pexGroup.getIdentifier());
 
             Optional<String> rankString = pexGroup.getOption("rank");
@@ -149,12 +148,12 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
-        }
+        });
         log.log("Migrated " + groupCount.get() + " groups");
 
         // Migrate tracks
         log.log("Starting track migration.");
-        for (Map.Entry<String, TreeMap<Integer, String>> e : tracks.entrySet()) {
+        SafeIterator.iterate(tracks.entrySet(), e -> {
             plugin.getStorage().createAndLoadTrack(e.getKey(), CreationCause.INTERNAL).join();
             Track track = plugin.getTrackManager().getIfLoaded(e.getKey());
             for (String groupName : e.getValue().values()) {
@@ -163,7 +162,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                     track.appendGroup(group);
                 }
             }
-        }
+        });
         log.log("Migrated " + tracks.size() + " tracks");
 
         // Migrate users
@@ -171,13 +170,13 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         AtomicInteger userCount = new AtomicInteger(0);
 
         // Increment the max weight from the group migrations. All user meta should override.
-        maxWeight += 5;
+        int userWeight = maxWeight + 5;
 
-        for (Subject pexUser : pexService.getUserSubjects().getAllSubjects()) {
+        SafeIterator.iterate(pexService.getUserSubjects().getAllSubjects(), pexUser -> {
             UUID uuid = CommandUtils.parseUuid(pexUser.getIdentifier());
             if (uuid == null) {
                 log.logErr("Could not parse UUID for user: " + pexUser.getIdentifier());
-                continue;
+                return;
             }
 
             // Make a LuckPerms user for the one being migrated
@@ -186,12 +185,12 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             if (user.getEnduringNodes().size() <= 1) {
                 user.clearNodes(false);
             }
-            migrateSubject(pexUser, user, maxWeight);
+            migrateSubject(pexUser, user, userWeight);
             plugin.getStorage().saveUser(user);
             plugin.getUserManager().cleanup(user);
 
             log.logProgress("Migrated {} users so far.", userCount.incrementAndGet());
-        }
+        });
 
         log.log("Migrated " + userCount.get() + " users.");
         log.log("Success! Migration complete.");

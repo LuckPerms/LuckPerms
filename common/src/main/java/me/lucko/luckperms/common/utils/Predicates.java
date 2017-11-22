@@ -35,19 +35,18 @@ import java.util.stream.IntStream;
 /**
  * A collection of predicate utilities used mostly in command classes
  */
-@SuppressWarnings({"WeakerAccess", "unused"})
 @UtilityClass
 public class Predicates {
     private static final Predicate FALSE = o -> false;
     private static final Predicate TRUE = o -> true;
 
-    @SuppressWarnings("unchecked")
     public static <T> Predicate<T> alwaysFalse() {
+        //noinspection unchecked
         return FALSE;
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> Predicate<T> alwaysTrue() {
+        //noinspection unchecked
         return TRUE;
     }
 

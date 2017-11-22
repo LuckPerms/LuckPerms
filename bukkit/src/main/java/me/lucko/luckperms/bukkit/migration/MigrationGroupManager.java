@@ -40,11 +40,10 @@ import me.lucko.luckperms.common.logging.ProgressLogger;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.SafeIterator;
 
 import org.anjocaido.groupmanager.GlobalGroups;
 import org.anjocaido.groupmanager.GroupManager;
-import org.anjocaido.groupmanager.data.Group;
-import org.anjocaido.groupmanager.data.User;
 import org.anjocaido.groupmanager.dataholder.WorldDataHolder;
 import org.anjocaido.groupmanager.dataholder.worlds.WorldsHolder;
 import org.bukkit.Bukkit;
@@ -93,31 +92,24 @@ public class MigrationGroupManager extends SubCommand<Object> {
         GlobalGroups gg = GroupManager.getGlobalGroups();
 
         AtomicInteger globalGroupCount = new AtomicInteger(0);
-        for (Group g : gg.getGroupList()) {
+        SafeIterator.iterate(gg.getGroupList(), g -> {
             String groupName = MigrationUtils.standardizeName(g.getName());
 
             plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
             me.lucko.luckperms.common.model.Group group = plugin.getGroupManager().getIfLoaded(groupName);
 
             for (String node : g.getPermissionList()) {
-                if (node.isEmpty()) {
-                    continue;
-                }
-
+                if (node.isEmpty()) continue;
                 group.setPermission(MigrationUtils.parseNode(node, true).build());
             }
-
             for (String s : g.getInherits()) {
-                if (s.isEmpty()) {
-                    continue;
-                }
-
+                if (s.isEmpty()) continue;
                 group.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(s)));
             }
 
             plugin.getStorage().saveGroup(group);
             log.logAllProgress("Migrated {} groups so far.", globalGroupCount.incrementAndGet());
-        }
+        });
         log.log("Migrated " + globalGroupCount.get() + " global groups");
 
         // Collect data
@@ -129,47 +121,32 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
         // Collect data for all users and groups.
         log.log("Collecting user and group data.");
-        for (String world : worlds) {
-            world = world.toLowerCase();
+        SafeIterator.iterate(worlds, String::toLowerCase, world -> {
             log.log("Querying world " + world);
 
             WorldDataHolder wdh = wh.getWorldData(world);
 
             AtomicInteger groupWorldCount = new AtomicInteger(0);
-            for (Group group : wdh.getGroupList()) {
+            SafeIterator.iterate(wdh.getGroupList(), group -> {
                 String groupName = MigrationUtils.standardizeName(group.getName());
 
                 groups.putIfAbsent(groupName, new HashSet<>());
 
                 for (String node : group.getPermissionList()) {
-                    if (node.isEmpty()) {
-                        continue;
-                    }
-
+                    if (node.isEmpty()) continue;
                     groups.get(groupName).add(MigrationUtils.parseNode(node, true).setWorld(worldMappingFunc.apply(world)).build());
                 }
-
                 for (String s : group.getInherits()) {
-                    if (s.isEmpty()) {
-                        continue;
-                    }
-
+                    if (s.isEmpty()) continue;
                     groups.get(groupName).add(NodeFactory.make("group." + MigrationUtils.standardizeName(s), true, null, worldMappingFunc.apply(world)));
                 }
-
 
                 String[] metaKeys = group.getVariables().getVarKeyList();
                 for (String key : metaKeys) {
                     String value = group.getVariables().getVarString(key);
                     key = key.toLowerCase();
-
-                    if (key.isEmpty() || value.isEmpty()) {
-                        continue;
-                    }
-
-                    if (key.equals("build")) {
-                        continue;
-                    }
+                    if (key.isEmpty() || value.isEmpty()) continue;
+                    if (key.equals("build")) continue;
 
                     if (key.equals("prefix") || key.equals("suffix")) {
                         ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
@@ -180,23 +157,20 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 }
 
                 log.logAllProgress("Migrated {} groups so far in world " + world, groupWorldCount.incrementAndGet());
-            }
+            });
             log.log("Migrated " + groupWorldCount.get() + " groups in world " + world);
 
             AtomicInteger userWorldCount = new AtomicInteger(0);
-            for (User user : wdh.getUserList()) {
+            SafeIterator.iterate(wdh.getUserList(), user -> {
                 UUID uuid = BukkitMigrationUtils.lookupUuid(log, user.getUUID());
                 if (uuid == null) {
-                    continue;
+                    return;
                 }
 
                 users.putIfAbsent(uuid, new HashSet<>());
 
                 for (String node : user.getPermissionList()) {
-                    if (node.isEmpty()) {
-                        continue;
-                    }
-
+                    if (node.isEmpty()) continue;
                     users.get(uuid).add(MigrationUtils.parseNode(node, true).setWorld(worldMappingFunc.apply(world)).build());
                 }
 
@@ -216,14 +190,8 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 for (String key : metaKeys) {
                     String value = user.getVariables().getVarString(key);
                     key = key.toLowerCase();
-
-                    if (key.isEmpty() || value.isEmpty()) {
-                        continue;
-                    }
-
-                    if (key.equals("build")) {
-                        continue;
-                    }
+                    if (key.isEmpty() || value.isEmpty()) continue;
+                    if (key.equals("build")) continue;
 
                     if (key.equals("prefix") || key.equals("suffix")) {
                         ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
@@ -234,16 +202,16 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 }
 
                 log.logProgress("Migrated {} users so far in world " + world, userWorldCount.incrementAndGet());
-            }
+            });
             log.log("Migrated " + userWorldCount.get() + " users in world " + world);
-        }
+        });
 
         log.log("All data has now been processed, now starting the import process.");
         log.log("Found a total of " + users.size() + " users and " + groups.size() + " groups.");
 
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
-        for (Map.Entry<String, Set<Node>> e : groups.entrySet()) {
+        SafeIterator.iterate(groups.entrySet(), e -> {
             plugin.getStorage().createAndLoadGroup(e.getKey(), CreationCause.INTERNAL).join();
             me.lucko.luckperms.common.model.Group group = plugin.getGroupManager().getIfLoaded(e.getKey());
 
@@ -253,12 +221,12 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
             plugin.getStorage().saveGroup(group);
             log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
-        }
+        });
         log.log("Migrated " + groupCount.get() + " groups");
 
         log.log("Starting user migration.");
         AtomicInteger userCount = new AtomicInteger(0);
-        for (Map.Entry<UUID, Set<Node>> e : users.entrySet()) {
+        SafeIterator.iterate(users.entrySet(), e -> {
             plugin.getStorage().loadUser(e.getKey(), null).join();
             me.lucko.luckperms.common.model.User user = plugin.getUserManager().getIfLoaded(e.getKey());
 
@@ -276,7 +244,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
             plugin.getStorage().saveUser(user);
             plugin.getUserManager().cleanup(user);
             log.logProgress("Migrated {} users so far.", userCount.incrementAndGet());
-        }
+        });
 
         log.log("Migrated " + userCount.get() + " users.");
         log.log("Success! Migration complete.");
