@@ -117,6 +117,9 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      * @return true if a change was made
      */
     public boolean setName(String name, boolean weak) {
+        if (name != null && name.length() > 16) {
+            return false; // nope
+        }
 
         // if weak is true, only update the value in the User if it's null
         if (weak && this.name != null) {
