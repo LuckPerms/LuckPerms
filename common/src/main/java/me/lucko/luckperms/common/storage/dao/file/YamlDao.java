@@ -60,8 +60,10 @@ public class YamlDao extends ConfigurateDao {
 
     @Override
     protected void saveFile(File file, ConfigurationNode node) throws IOException {
-        if (node == null && file.exists()) {
-            file.delete();
+        if (node == null) {
+            if (file.exists()) {
+                file.delete();
+            }
             return;
         }
 
