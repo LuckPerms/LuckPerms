@@ -114,7 +114,7 @@ public class LegacyYamlMigration implements Runnable {
                         perms.putAll((Map<String, Boolean>) data.get("perms"));
 
                         Set<NodeModel> nodes = perms.entrySet().stream()
-                                .map(e -> LegacyNodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                                .map(e -> LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue()))
                                 .map(NodeModel::fromNode)
                                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
@@ -161,7 +161,7 @@ public class LegacyYamlMigration implements Runnable {
                         perms.putAll((Map<String, Boolean>) data.get("perms"));
 
                         Set<NodeModel> nodes = perms.entrySet().stream()
-                                .map(e -> LegacyNodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                                .map(e -> LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue()))
                                 .map(NodeModel::fromNode)
                                 .collect(Collectors.toCollection(LinkedHashSet::new));
 

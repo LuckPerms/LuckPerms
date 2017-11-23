@@ -40,6 +40,26 @@ import java.util.regex.Pattern;
 @UtilityClass
 public class LegacyNodeFactory {
 
+    /**
+     * The characters which are delimited when serializing a permission string
+     */
+    static final String[] PERMISSION_DELIMITERS = new String[]{"/", "-", "$", "(", ")", "=", ","};
+
+    /**
+     * The characters which are delimited when serializing a server or world string
+     */
+    static final String[] SERVER_WORLD_DELIMITERS = new String[]{"/", "-"};
+
+    /**
+     * The characters which are delimited when serializing a context set
+     */
+    static final String[] CONTEXT_DELIMITERS = new String[]{"=", "(", ")", ","};
+
+    /**
+     * The characters which are delimited when serializing meta/prefix/suffix strings
+     */
+    private static final String[] GENERIC_DELIMITERS = new String[]{".", "/", "-", "$"};
+
     // legacy node format delimiters
     private static final Pattern LEGACY_SERVER_DELIM = PatternCache.compileDelimitedMatcher("/", "\\");
     private static final Splitter LEGACY_SERVER_SPLITTER = Splitter.on(LEGACY_SERVER_DELIM).limit(2);
@@ -47,8 +67,44 @@ public class LegacyNodeFactory {
     private static final Splitter LEGACY_WORLD_SPLITTER = Splitter.on(LEGACY_WORLD_DELIM).limit(2);
     private static final Pattern LEGACY_EXPIRY_DELIM = PatternCache.compileDelimitedMatcher("$", "\\");
     private static final Splitter LEGACY_EXPIRY_SPLITTER = Splitter.on(LEGACY_EXPIRY_DELIM).limit(2);
+    private static final Pattern LEGACY_CONTEXT_DELIM = PatternCache.compileDelimitedMatcher(")", "\\");
+    private static final Splitter CONTEXT_SPLITTER = Splitter.on(LEGACY_CONTEXT_DELIM).limit(2);
+    private static final Pattern LEGACY_CONTEXT_PAIR_DELIM = PatternCache.compileDelimitedMatcher(",", "\\");
+    private static final Pattern LEGACY_CONTEXT_PAIR_PART_DELIM = PatternCache.compileDelimitedMatcher("=", "\\");
+    private static final Splitter.MapSplitter LEGACY_CONTEXT_PART_SPLITTER = Splitter.on(LEGACY_CONTEXT_PAIR_DELIM)
+            .withKeyValueSeparator(Splitter.on(LEGACY_CONTEXT_PAIR_PART_DELIM));
 
-    public static Node fromSerializedNode(String s, boolean b) {
+    public static String toSerializedNode(Node node) {
+        StringBuilder builder = new StringBuilder();
+
+        if (node.getServer().orElse(null) != null) {
+            builder.append(escapeDelimiters(node.getServer().orElse(null), SERVER_WORLD_DELIMITERS));
+            if (node.getWorld().orElse(null) != null) {
+                builder.append("-").append(escapeDelimiters(node.getWorld().orElse(null), SERVER_WORLD_DELIMITERS));
+            }
+            builder.append("/");
+        } else {
+            if (node.getWorld().orElse(null) != null) {
+                builder.append("global-").append(escapeDelimiters(node.getWorld().orElse(null), SERVER_WORLD_DELIMITERS)).append("/");
+            }
+        }
+
+        if (!node.getContexts().isEmpty()) {
+            builder.append("(");
+            for (Map.Entry<String, String> entry : node.getContexts().toSet()) {
+                builder.append(escapeDelimiters(entry.getKey(), CONTEXT_DELIMITERS))
+                        .append("=").append(escapeDelimiters(entry.getValue(), CONTEXT_DELIMITERS)).append(",");
+            }
+            builder.deleteCharAt(builder.length() - 1);
+            builder.append(")");
+        }
+
+        builder.append(escapeDelimiters(node.getPermission(), PERMISSION_DELIMITERS));
+        if (node.isTemporary()) builder.append("$").append(node.getExpiryUnixTime());
+        return builder.toString();
+    }
+
+    public static Node fromLegacyString(String s, boolean b) {
         if (b) {
             return builderFromLegacyString(s, true).build();
         } else {
@@ -115,6 +171,51 @@ public class LegacyNodeFactory {
         }
     }
 
+    static String escapeCharacters(String s) {
+        if (s == null) {
+            throw new NullPointerException();
+        }
+
+        return escapeDelimiters(s, GENERIC_DELIMITERS);
+    }
+
+    static String unescapeCharacters(String s) {
+        if (s == null) {
+            throw new NullPointerException();
+        }
+
+        // super old hack - this format is no longer used for escaping,
+        // but we'll keep supporting it when unescaping
+        s = s.replace("{SEP}", ".");
+        s = s.replace("{FSEP}", "/");
+        s = s.replace("{DSEP}", "$");
+        s = unescapeDelimiters(s, GENERIC_DELIMITERS);
+
+        return s;
+    }
+
+    private static String escapeDelimiters(String s, String... delimiters) {
+        if (s == null) {
+            return null;
+        }
+
+        for (String d : delimiters) {
+            s = s.replace(d, "\\" + d);
+        }
+        return s;
+    }
+
+    static String unescapeDelimiters(String s, String... delimiters) {
+        if (s == null) {
+            return null;
+        }
+
+        for (String d : delimiters) {
+            s = s.replace("\\" + d, d);
+        }
+        return s;
+    }
+
     private static final class LegacyNodeBuilder extends NodeBuilder {
         private static final Pattern NODE_CONTEXTS_PATTERN = Pattern.compile("\\(.+\\).*");
 
@@ -122,14 +223,17 @@ public class LegacyNodeFactory {
             if (!NODE_CONTEXTS_PATTERN.matcher(permission).matches()) {
                 this.permission = permission;
             } else {
-                List<String> contextParts = Splitter.on(PatternCache.compileDelimitedMatcher(")", "\\")).limit(2).splitToList(permission.substring(1));
+                List<String> contextParts = CONTEXT_SPLITTER.splitToList(permission.substring(1));
                 // 0 = context, 1 = node
 
                 this.permission = contextParts.get(1);
                 try {
-                    Map<String, String> map = Splitter.on(PatternCache.compileDelimitedMatcher(",", "\\")).withKeyValueSeparator(Splitter.on(PatternCache.compileDelimitedMatcher("=", "\\"))).split(contextParts.get(0));
+                    Map<String, String> map = LEGACY_CONTEXT_PART_SPLITTER.split(contextParts.get(0));
                     for (Map.Entry<String, String> e : map.entrySet()) {
-                        this.withExtraContext(NodeFactory.unescapeDelimiters(e.getKey(), "=", "(", ")", ","), NodeFactory.unescapeDelimiters(e.getValue(), "=", "(", ")", ","));
+                        this.withExtraContext(
+                                unescapeDelimiters(e.getKey(), CONTEXT_DELIMITERS),
+                                unescapeDelimiters(e.getValue(), CONTEXT_DELIMITERS)
+                        );
                     }
 
                 } catch (IllegalArgumentException e) {

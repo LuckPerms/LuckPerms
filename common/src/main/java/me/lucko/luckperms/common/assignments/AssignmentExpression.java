@@ -138,7 +138,7 @@ public class AssignmentExpression {
 
         private PermissionToken(String permission) {
             this.permission = permission;
-            this.node = LegacyNodeFactory.fromSerializedNode(permission, true);
+            this.node = LegacyNodeFactory.fromLegacyString(permission, true);
         }
 
         @Override

@@ -40,14 +40,13 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Utility class to make Node(Builder) instances from serialised strings or existing Nodes
+ * Utility class to make Node(Builder) instances from strings or existing Nodes
  */
 @UtilityClass
 public class NodeFactory {
 
     // used to split prefix/suffix/meta nodes
     private static final Splitter META_SPLITTER = Splitter.on(PatternCache.compileDelimitedMatcher(".", "\\")).limit(2);
-    private static final String[] DELIMS = new String[]{".", "/", "-", "$"};
 
     public static Node.Builder newBuilder(String s) {
         return new NodeBuilder(s);
@@ -65,7 +64,7 @@ public class NodeFactory {
             return makeSuffixNode(100, value);
         }
 
-        return new NodeBuilder("meta." + escapeCharacters(key) + "." + escapeCharacters(value));
+        return new NodeBuilder("meta." + LegacyNodeFactory.escapeCharacters(key) + "." + LegacyNodeFactory.escapeCharacters(value));
     }
 
     public static Node.Builder makeChatMetaNode(ChatMetaType type, int priority, String s) {
@@ -73,11 +72,11 @@ public class NodeFactory {
     }
 
     public static Node.Builder makePrefixNode(int priority, String prefix) {
-        return new NodeBuilder("prefix." + priority + "." + escapeCharacters(prefix));
+        return new NodeBuilder("prefix." + priority + "." + LegacyNodeFactory.escapeCharacters(prefix));
     }
 
     public static Node.Builder makeSuffixNode(int priority, String suffix) {
-        return new NodeBuilder("suffix." + priority + "." + escapeCharacters(suffix));
+        return new NodeBuilder("suffix." + priority + "." + LegacyNodeFactory.escapeCharacters(suffix));
     }
 
     public static String nodeAsCommand(Node node, String id, boolean group, boolean set) {
@@ -173,49 +172,6 @@ public class NodeFactory {
         return sb;
     }
 
-    public static String escapeCharacters(String s) {
-        if (s == null) {
-            throw new NullPointerException();
-        }
-
-        return escapeDelimiters(s, DELIMS);
-    }
-
-    public static String unescapeCharacters(String s) {
-        if (s == null) {
-            throw new NullPointerException();
-        }
-
-        s = s.replace("{SEP}", ".");
-        s = s.replace("{FSEP}", "/");
-        s = s.replace("{DSEP}", "$");
-        s = unescapeDelimiters(s, DELIMS);
-
-        return s;
-    }
-
-    public static String escapeDelimiters(String s, String... delims) {
-        if (s == null) {
-            return null;
-        }
-
-        for (String delim : delims) {
-            s = s.replace(delim, "\\" + delim);
-        }
-        return s;
-    }
-
-    public static String unescapeDelimiters(String s, String... delims) {
-        if (s == null) {
-            return null;
-        }
-
-        for (String delim : delims) {
-            s = s.replace("\\" + delim, delim);
-        }
-        return s;
-    }
-
     public static String parseGroupNode(String s) {
         String lower = s.toLowerCase();
         if (!lower.startsWith("group.")) {
@@ -237,7 +193,7 @@ public class NodeFactory {
         if (!metaParts.hasNext()) return null;
         String value = metaParts.next();
 
-        return Maps.immutableEntry(unescapeCharacters(key).intern(), unescapeCharacters(value).intern());
+        return Maps.immutableEntry(LegacyNodeFactory.unescapeCharacters(key).intern(), LegacyNodeFactory.unescapeCharacters(value).intern());
     }
 
     private static Map.Entry<Integer, String> parseChatMetaNode(String type, String s) {
@@ -255,7 +211,7 @@ public class NodeFactory {
 
         try {
             int p = Integer.parseInt(priority);
-            String v = unescapeCharacters(value).intern();
+            String v = LegacyNodeFactory.unescapeCharacters(value).intern();
             return Maps.immutableEntry(p, v);
         } catch (NumberFormatException e) {
             return null;

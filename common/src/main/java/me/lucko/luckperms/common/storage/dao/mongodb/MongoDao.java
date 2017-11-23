@@ -49,7 +49,6 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.LegacyNodeFactory;
-import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.node.NodeHeldPermission;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -232,7 +231,7 @@ public class MongoDao extends AbstractDao {
 
                         Set<NodeModel> nodes = new HashSet<>();
                         for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                            Node node = LegacyNodeFactory.fromSerializedNode(e.getKey(), e.getValue());
+                            Node node = LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue());
                             nodes.add(NodeModel.fromNode(node));
                         }
 
@@ -266,7 +265,7 @@ public class MongoDao extends AbstractDao {
 
                         Set<NodeModel> nodes = new HashSet<>();
                         for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                            Node node = LegacyNodeFactory.fromSerializedNode(e.getKey(), e.getValue());
+                            Node node = LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue());
                             nodes.add(NodeModel.fromNode(node));
                         }
 
@@ -306,7 +305,7 @@ public class MongoDao extends AbstractDao {
                     // User exists, let's load.
                     Document d = cursor.next();
                     user.setEnduringNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
-                            .map(e -> LegacyNodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                            .map(e -> LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue()))
                             .collect(Collectors.toSet())
                     );
                     user.getPrimaryGroup().setStoredValue(d.getString("primaryGroup"));
@@ -394,7 +393,7 @@ public class MongoDao extends AbstractDao {
                     Map<String, Boolean> perms = revert((Map<String, Boolean>) d.get("perms"));
 
                     for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                        Node node = LegacyNodeFactory.fromSerializedNode(e.getKey(), e.getValue());
+                        Node node = LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue());
                         if (!node.getPermission().equalsIgnoreCase(permission)) {
                             continue;
                         }
@@ -422,7 +421,7 @@ public class MongoDao extends AbstractDao {
                     // Group exists, let's load.
                     Document d = cursor.next();
                     group.setEnduringNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
-                            .map(e -> LegacyNodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                            .map(e -> LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue()))
                             .collect(Collectors.toSet())
                     );
                 } else {
@@ -452,7 +451,7 @@ public class MongoDao extends AbstractDao {
 
                 Document d = cursor.next();
                 group.setEnduringNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
-                        .map(e -> LegacyNodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                        .map(e -> LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue()))
                         .collect(Collectors.toSet())
                 );
             }
@@ -535,7 +534,7 @@ public class MongoDao extends AbstractDao {
                     Map<String, Boolean> perms = revert((Map<String, Boolean>) d.get("perms"));
 
                     for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                        Node node = LegacyNodeFactory.fromSerializedNode(e.getKey(), e.getValue());
+                        Node node = LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue());
                         if (!node.getPermission().equalsIgnoreCase(permission)) {
                             continue;
                         }
@@ -755,39 +754,8 @@ public class MongoDao extends AbstractDao {
         Map<String, Boolean> m = new HashMap<>();
         for (Node node : nodes) {
             //noinspection deprecation
-            m.put(toSerializedNode(node), node.getValuePrimitive());
+            m.put(LegacyNodeFactory.toSerializedNode(node), node.getValuePrimitive());
         }
         return m;
-    }
-
-    private static final String[] SERVER_WORLD_DELIMITERS = new String[]{"/", "-"};
-
-    private static String toSerializedNode(Node node) {
-        StringBuilder builder = new StringBuilder();
-
-        if (node.getServer().orElse(null) != null) {
-            builder.append(NodeFactory.escapeDelimiters(node.getServer().orElse(null), SERVER_WORLD_DELIMITERS));
-            if (node.getWorld().orElse(null) != null) {
-                builder.append("-").append(NodeFactory.escapeDelimiters(node.getWorld().orElse(null), SERVER_WORLD_DELIMITERS));
-            }
-            builder.append("/");
-        } else {
-            if (node.getWorld().orElse(null) != null) {
-                builder.append("global-").append(NodeFactory.escapeDelimiters(node.getWorld().orElse(null), SERVER_WORLD_DELIMITERS)).append("/");
-            }
-        }
-
-        if (!node.getContexts().isEmpty()) {
-            builder.append("(");
-            for (Map.Entry<String, String> entry : node.getContexts().toSet()) {
-                builder.append(NodeFactory.escapeDelimiters(entry.getKey(), "=", "(", ")", ",")).append("=").append(NodeFactory.escapeDelimiters(entry.getValue(), "=", "(", ")", ",")).append(",");
-            }
-            builder.deleteCharAt(builder.length() - 1);
-            builder.append(")");
-        }
-
-        builder.append(NodeFactory.escapeDelimiters(node.getPermission(), "/", "-", "$", "(", ")", "=", ","));
-        if (node.isTemporary()) builder.append("$").append(node.getExpiryUnixTime());
-        return builder.toString();
     }
 }

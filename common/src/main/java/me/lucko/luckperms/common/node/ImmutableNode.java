@@ -54,17 +54,6 @@ public final class ImmutableNode implements Node {
      */
     private static final int NODE_SEPARATOR_CHAR = Character.getNumericValue('.');
 
-    /**
-     * The characters which are delimited when serializing a permission string
-     */
-    private static final String[] PERMISSION_DELIMITERS = new String[]{"/", "-", "$", "(", ")", "=", ","};
-
-    /**
-     * The characters which are delimited when serializing a server or world string
-     */
-    private static final String[] SERVER_WORLD_DELIMITERS = new String[]{"/", "-"};
-
-
     /*
      * NODE STATE
      *
@@ -146,12 +135,12 @@ public final class ImmutableNode implements Node {
         world = standardizeServerWorld(world);
 
         // define core attributes
-        this.permission = NodeFactory.unescapeDelimiters(permission, PERMISSION_DELIMITERS).intern();
+        this.permission = LegacyNodeFactory.unescapeDelimiters(permission, LegacyNodeFactory.PERMISSION_DELIMITERS).intern();
         this.value = value;
         this.override = override;
         this.expireAt = expireAt;
-        this.server = internString(NodeFactory.unescapeDelimiters(server, SERVER_WORLD_DELIMITERS));
-        this.world = internString(NodeFactory.unescapeDelimiters(world, SERVER_WORLD_DELIMITERS));
+        this.server = internString(LegacyNodeFactory.unescapeDelimiters(server, LegacyNodeFactory.SERVER_WORLD_DELIMITERS));
+        this.world = internString(LegacyNodeFactory.unescapeDelimiters(world, LegacyNodeFactory.SERVER_WORLD_DELIMITERS));
         this.contexts = contexts == null ? ContextSet.empty() : contexts.makeImmutable();
 
         // define cached state

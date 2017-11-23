@@ -154,7 +154,7 @@ public class LegacySqlMigration implements Runnable {
             }
 
             Set<NodeModel> nodes = convertedPerms.entrySet().stream()
-                    .map(e -> LegacyNodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                    .map(e -> LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue()))
                     .map(NodeModel::fromNode)
                     .collect(Collectors.toSet());
 
@@ -233,7 +233,7 @@ public class LegacySqlMigration implements Runnable {
             }
 
             Set<NodeModel> nodes = convertedPerms.entrySet().stream()
-                    .map(ent -> LegacyNodeFactory.fromSerializedNode(ent.getKey(), ent.getValue()))
+                    .map(ent -> LegacyNodeFactory.fromLegacyString(ent.getKey(), ent.getValue()))
                     .map(NodeModel::fromNode)
                     .collect(Collectors.toSet());
 
