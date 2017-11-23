@@ -29,11 +29,11 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class HoconDao extends ConfigurateDao {
 
@@ -42,33 +42,10 @@ public class HoconDao extends ConfigurateDao {
     }
 
     @Override
-    protected ConfigurationNode readFile(File file) throws IOException {
-        if (!file.exists()) {
-            return null;
-        }
-
-        HoconConfigurationLoader loader = HoconConfigurationLoader.builder()
-                .setSource(() -> Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8))
-                .setSink(() -> Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8))
+    protected ConfigurationLoader<? extends ConfigurationNode> loader(Path path) {
+        return HoconConfigurationLoader.builder()
+                .setSource(() -> Files.newBufferedReader(path, StandardCharsets.UTF_8))
+                .setSink(() -> Files.newBufferedWriter(path, StandardCharsets.UTF_8))
                 .build();
-
-        return loader.load();
-    }
-
-    @Override
-    protected void saveFile(File file, ConfigurationNode node) throws IOException {
-        if (node == null) {
-            if (file.exists()) {
-                file.delete();
-            }
-            return;
-        }
-
-        HoconConfigurationLoader loader = HoconConfigurationLoader.builder()
-                .setSource(() -> Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8))
-                .setSink(() -> Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8))
-                .build();
-
-        loader.save(node);
     }
 }

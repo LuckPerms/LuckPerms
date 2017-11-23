@@ -30,12 +30,12 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import org.yaml.snakeyaml.DumperOptions;
 
 import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class YamlDao extends ConfigurateDao {
 
@@ -44,36 +44,12 @@ public class YamlDao extends ConfigurateDao {
     }
 
     @Override
-    protected ConfigurationNode readFile(File file) throws IOException {
-        if (!file.exists()) {
-            return null;
-        }
-
-        YAMLConfigurationLoader loader = YAMLConfigurationLoader.builder()
-                .setFlowStyle(DumperOptions.FlowStyle.BLOCK)
-                .setSource(() -> Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8))
-                .setSink(() -> Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8))
-                .build();
-
-        return loader.load();
-    }
-
-    @Override
-    protected void saveFile(File file, ConfigurationNode node) throws IOException {
-        if (node == null) {
-            if (file.exists()) {
-                file.delete();
-            }
-            return;
-        }
-
-        YAMLConfigurationLoader loader = YAMLConfigurationLoader.builder()
+    protected ConfigurationLoader<? extends ConfigurationNode> loader(Path path) {
+        return YAMLConfigurationLoader.builder()
                 .setFlowStyle(DumperOptions.FlowStyle.BLOCK)
                 .setIndent(2)
-                .setSource(() -> Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8))
-                .setSink(() -> Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8))
+                .setSource(() -> Files.newBufferedReader(path, StandardCharsets.UTF_8))
+                .setSink(() -> Files.newBufferedWriter(path, StandardCharsets.UTF_8))
                 .build();
-
-        loader.save(node);
     }
 }

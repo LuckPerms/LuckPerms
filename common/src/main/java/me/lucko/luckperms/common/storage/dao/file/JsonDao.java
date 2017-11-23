@@ -29,11 +29,11 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.gson.GsonConfigurationLoader;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class JsonDao extends ConfigurateDao {
 
@@ -42,35 +42,11 @@ public class JsonDao extends ConfigurateDao {
     }
 
     @Override
-    protected ConfigurationNode readFile(File file) throws IOException {
-        if (!file.exists()) {
-            return null;
-        }
-
-        GsonConfigurationLoader loader = GsonConfigurationLoader.builder()
+    protected ConfigurationLoader<? extends ConfigurationNode> loader(Path path) {
+        return GsonConfigurationLoader.builder()
                 .setIndent(2)
-                .setSource(() -> Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8))
-                .setSink(() -> Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8))
+                .setSource(() -> Files.newBufferedReader(path, StandardCharsets.UTF_8))
+                .setSink(() -> Files.newBufferedWriter(path, StandardCharsets.UTF_8))
                 .build();
-
-        return loader.load();
-    }
-
-    @Override
-    protected void saveFile(File file, ConfigurationNode node) throws IOException {
-        if (node == null) {
-            if (file.exists()) {
-                file.delete();
-            }
-            return;
-        }
-
-        GsonConfigurationLoader loader = GsonConfigurationLoader.builder()
-                .setIndent(2)
-                .setSource(() -> Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8))
-                .setSink(() -> Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8))
-                .build();
-
-        loader.save(node);
     }
 }

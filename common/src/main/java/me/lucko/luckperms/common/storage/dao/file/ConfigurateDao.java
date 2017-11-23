@@ -57,10 +57,12 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.SimpleConfigurationNode;
 import ninja.leaping.configurate.Types;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -104,13 +106,21 @@ public abstract class ConfigurateDao extends AbstractDao {
         this.dataFolderName = dataFolderName;
     }
 
+    protected abstract ConfigurationLoader<? extends ConfigurationNode> loader(Path path);
+
     private ConfigurationNode readFile(StorageLocation location, String name) throws IOException {
         File file = new File(getDirectory(location), name + fileExtension);
         registerFileAction(location, file);
         return readFile(file);
     }
 
-    protected abstract ConfigurationNode readFile(File file) throws IOException;
+    private ConfigurationNode readFile(File file) throws IOException {
+        if (!file.exists()) {
+            return null;
+        }
+
+        return loader(file.toPath()).load();
+    }
 
     private void saveFile(StorageLocation location, String name, ConfigurationNode node) throws IOException {
         File file = new File(getDirectory(location), name + fileExtension);
@@ -118,7 +128,16 @@ public abstract class ConfigurateDao extends AbstractDao {
         saveFile(file, node);
     }
 
-    protected abstract void saveFile(File file, ConfigurationNode node) throws IOException;
+    private void saveFile(File file, ConfigurationNode node) throws IOException {
+        if (node == null) {
+            if (file.exists()) {
+                file.delete();
+            }
+            return;
+        }
+
+        loader(file.toPath()).save(node);
+    }
 
     private File getDirectory(StorageLocation location) {
         switch (location) {
