@@ -187,7 +187,7 @@ bulk-update-invalid-data-type: "Nieprawidłowy typ. Spodziewane 'all', 'users' l
 bulk-update-invalid-constraint: "Nieprawidłowe ograniczenie &4{0}&c. Ograniczenia powinny być w formacie '&f<field> <comparison operator> <value>&c'."
 bulk-update-invalid-comparison: "Nieprawidłowy operator porównania '&4{0}&c'. Oczekiwany jeden z poniższych: &f==  !=  ~~  ~!"
 bulk-update-queued: "&aOperacja aktualizacji została w kolejce. &7(&f{0}&7)"
-bulk-update-confirm: "&aUruchom &b/{0} uaktualnianie zbiorcze {1} &a i wykonaj aktualizacje."
+bulk-update-confirm: "&aUruchom &b/{0} bulkupdate confirm {1}&a i wykonaj aktualizacje."
 bulk-update-unknown-id: "&aOperacja z id &b{0}&a nie istnieje lub upłynął."
 bulk-update-starting: "&aUaktualnianie zbiorcze."
 bulk-update-success: "&bAktualizacja zbiorcza powiodła się pomyślnie."
