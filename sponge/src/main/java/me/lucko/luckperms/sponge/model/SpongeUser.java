@@ -48,6 +48,7 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -132,12 +133,16 @@ public class SpongeUser extends User {
         public ImmutableList<SubjectReference> getParents(ImmutableContextSet contexts) {
             ImmutableSet.Builder<SubjectReference> subjects = ImmutableSet.builder();
 
-            for (String perm : parent.getCachedData().getPermissionData(plugin.getContextManager().formContexts(contexts)).getImmutableBacking().keySet()) {
-                if (!perm.startsWith("group.")) {
+            for (Map.Entry<String, Boolean> entry : parent.getCachedData().getPermissionData(plugin.getContextManager().formContexts(contexts)).getImmutableBacking().entrySet()) {
+                if (!entry.getValue()) {
                     continue;
                 }
 
-                String groupName = perm.substring("group.".length());
+                if (!entry.getKey().startsWith("group.")) {
+                    continue;
+                }
+
+                String groupName = entry.getKey().substring("group.".length());
                 if (plugin.getGroupManager().isLoaded(groupName)) {
                     subjects.add(plugin.getService().getGroupSubjects().loadSubject(groupName).join().toReference());
                 }

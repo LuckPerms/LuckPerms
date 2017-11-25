@@ -132,7 +132,7 @@ import java.util.stream.Stream;
         id = "luckperms",
         name = "LuckPerms",
         version = VersionData.VERSION,
-        authors = {"Luck"},
+        authors = "Luck",
         description = "A permissions plugin",
         url = "https://github.com/lucko/LuckPerms"
 )

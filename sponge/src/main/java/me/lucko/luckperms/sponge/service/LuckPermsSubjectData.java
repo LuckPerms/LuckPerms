@@ -57,7 +57,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"OptionalGetWithoutIsPresent", "unused"})
 @AllArgsConstructor
 public class LuckPermsSubjectData implements LPSubjectData {
     private final boolean enduring;

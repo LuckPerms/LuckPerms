@@ -28,7 +28,7 @@ package me.lucko.luckperms.sponge.service.proxy.api7;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
+import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
@@ -48,7 +48,7 @@ import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor
-public class SubjectProxy implements Subject {
+public final class SubjectProxy implements Subject {
     private final LPPermissionService service;
     private final SubjectReference ref;
 
@@ -144,5 +144,20 @@ public class SubjectProxy implements Subject {
     @Override
     public Set<Context> getActiveContexts() {
         return getHandle().thenApply(handle -> CompatibilityUtil.convertContexts(handle.getActiveContextSet())).join();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o == this || o instanceof SubjectProxy && ref.equals(((SubjectProxy) o).ref);
+    }
+
+    @Override
+    public int hashCode() {
+        return ref.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "luckperms.api7.SubjectProxy(ref=" + this.ref + ")";
     }
 }

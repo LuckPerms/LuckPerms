@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.model;
+package me.lucko.luckperms.sponge.service;
 
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
@@ -34,7 +34,8 @@ import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.utils.ImmutableCollectors;
+import me.lucko.luckperms.sponge.service.context.DelegatingContextSet;
+import me.lucko.luckperms.sponge.service.context.DelegatingImmutableContextSet;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.util.Tristate;
@@ -51,15 +52,19 @@ public class CompatibilityUtil {
             .expireAfterAccess(10, TimeUnit.MINUTES)
             .build(ImmutableContextSet::fromEntries);
 
-    private static final LoadingCache<ImmutableContextSet, ImmutableSet<Context>> LP_TO_SPONGE_CACHE = Caffeine.newBuilder()
+    private static final LoadingCache<ImmutableContextSet, Set<Context>> LP_TO_SPONGE_CACHE = Caffeine.newBuilder()
             .expireAfterAccess(10, TimeUnit.MINUTES)
-            .build(set -> set.toSet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(ImmutableCollectors.toSet()));
+            .build(DelegatingImmutableContextSet::new);
 
     public static ImmutableContextSet convertContexts(@NonNull Set<Context> contexts) {
+        if (contexts instanceof DelegatingContextSet) {
+            return ((DelegatingContextSet) contexts).getDelegate().makeImmutable();
+        }
+
         return SPONGE_TO_LP_CACHE.get(ImmutableSet.copyOf(contexts));
     }
 
-    public static ImmutableSet<Context> convertContexts(@NonNull ContextSet contexts) {
+    public static Set<Context> convertContexts(@NonNull ContextSet contexts) {
         return LP_TO_SPONGE_CACHE.get(contexts.makeImmutable());
     }
 

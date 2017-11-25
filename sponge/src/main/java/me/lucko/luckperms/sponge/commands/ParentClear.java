@@ -54,7 +54,7 @@ public class ParentClear extends SubCommand<LPSubjectData> {
             CommandUtils.sendPluginMessage(sender, "&aCleared parents matching contexts &bANY&a.");
         } else {
             subjectData.clearParents(contextSet);
-            CommandUtils.sendPluginMessage(sender, "&aCleared parents matching contexts &b" + SpongeUtils.contextToString(contextSet));
+            CommandUtils.sendPluginMessage(sender, "&aCleared parents matching contexts &b" + SpongeCommandUtils.contextToString(contextSet));
         }
         return CommandResult.SUCCESS;
     }

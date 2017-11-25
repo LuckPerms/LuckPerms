@@ -28,7 +28,7 @@ package me.lucko.luckperms.sponge.service.proxy.api7;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
-import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
+import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 
@@ -46,7 +46,7 @@ import java.util.function.Predicate;
 
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor
-public class SubjectCollectionProxy implements SubjectCollection {
+public final class SubjectCollectionProxy implements SubjectCollection {
     private final LPSubjectCollection handle;
 
     @Override
@@ -130,6 +130,21 @@ public class SubjectCollectionProxy implements SubjectCollection {
     @Override
     public void suggestUnload(String s) {
         // unused by lp
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o == this || o instanceof SubjectCollectionProxy && handle.equals(((SubjectCollectionProxy) o).handle);
+    }
+
+    @Override
+    public int hashCode() {
+        return handle.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "luckperms.api7.SubjectCollectionProxy(handle=" + this.handle + ")";
     }
 
 }

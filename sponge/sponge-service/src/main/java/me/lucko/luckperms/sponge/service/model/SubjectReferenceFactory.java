@@ -71,7 +71,7 @@ public final class SubjectReferenceFactory {
         if (reference instanceof SubjectReference) {
             return ((SubjectReference) reference);
         } else {
-            return SubjectReferenceFactory.obtain(service, reference.getCollectionIdentifier(), reference.getSubjectIdentifier());
+            return obtain(service, reference.getCollectionIdentifier(), reference.getSubjectIdentifier());
         }
     }
 

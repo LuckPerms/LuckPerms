@@ -50,11 +50,11 @@ public class PermissionSet extends SubCommand<LPSubjectData> {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
         String node = args.get(0);
-        Tristate tristate = SpongeUtils.parseTristate(1, args);
+        Tristate tristate = SpongeCommandUtils.parseTristate(1, args);
         ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(2, args);
 
         if (subjectData.setPermission(contextSet, node, tristate).join()) {
-            CommandUtils.sendPluginMessage(sender, "&aSet &b" + node + "&a to &b" + tristate.toString().toLowerCase() + "&a in context " + SpongeUtils.contextToString(contextSet));
+            CommandUtils.sendPluginMessage(sender, "&aSet &b" + node + "&a to &b" + tristate.toString().toLowerCase() + "&a in context " + SpongeCommandUtils.contextToString(contextSet));
         } else {
             CommandUtils.sendPluginMessage(sender, "Unable to set permission. Does the Subject already have it set?");
         }

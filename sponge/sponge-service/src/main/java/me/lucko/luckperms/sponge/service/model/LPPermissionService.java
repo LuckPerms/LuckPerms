@@ -56,10 +56,6 @@ public interface LPPermissionService {
 
     LPSubjectCollection getDefaultSubjects();
 
-    default LPSubjectData getDefaultData() {
-        return getDefaults().getSubjectData();
-    }
-
     LPSubject getDefaults();
 
     Predicate<String> getIdentifierValidityPredicate();

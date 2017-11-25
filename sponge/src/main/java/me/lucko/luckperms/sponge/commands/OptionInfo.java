@@ -61,7 +61,7 @@ public class OptionInfo extends SubCommand<LPSubjectData> {
             }
 
             for (Map.Entry<ImmutableContextSet, ImmutableMap<String, String>> e : options.entrySet()) {
-                CommandUtils.sendPluginMessage(sender, "&3>> &bContext: " + SpongeUtils.contextToString(e.getKey()) + "\n" + SpongeUtils.optionsToString(e.getValue()));
+                CommandUtils.sendPluginMessage(sender, "&3>> &bContext: " + SpongeCommandUtils.contextToString(e.getKey()) + "\n" + SpongeCommandUtils.optionsToString(e.getValue()));
             }
 
         } else {
@@ -72,7 +72,7 @@ public class OptionInfo extends SubCommand<LPSubjectData> {
             }
 
             CommandUtils.sendPluginMessage(sender, "&aShowing options matching contexts &b" +
-                    SpongeUtils.contextToString(contextSet) + "&a.\n" + SpongeUtils.optionsToString(options));
+                    SpongeCommandUtils.contextToString(contextSet) + "&a.\n" + SpongeCommandUtils.optionsToString(options));
 
         }
         return CommandResult.SUCCESS;

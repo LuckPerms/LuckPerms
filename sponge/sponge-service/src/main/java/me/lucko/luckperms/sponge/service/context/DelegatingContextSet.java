@@ -23,28 +23,19 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.contexts;
+package me.lucko.luckperms.sponge.service.context;
 
-import lombok.AllArgsConstructor;
-
-import me.lucko.luckperms.api.context.ContextCalculator;
-import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.sponge.service.context.DelegatingMutableContextSet;
+import me.lucko.luckperms.api.context.ContextSet;
 
 import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.service.permission.Subject;
 
 import java.util.Set;
 
-@AllArgsConstructor
-public class ProxiedContextCalculator implements ContextCalculator<Subject> {
-    private final org.spongepowered.api.service.context.ContextCalculator<Subject> delegate;
+/**
+ * Represents an object which is a {@link Set} of {@link Context}s, delegating all calls to a {@link ContextSet}.
+ */
+public interface DelegatingContextSet extends Set<Context> {
 
-    @Override
-    public MutableContextSet giveApplicableContext(Subject subject, MutableContextSet accumulator) {
-        Set<Context> contexts = new DelegatingMutableContextSet(accumulator);
-        delegate.accumulateContexts(subject, contexts);
-        return accumulator;
-    }
+    ContextSet getDelegate();
 
 }

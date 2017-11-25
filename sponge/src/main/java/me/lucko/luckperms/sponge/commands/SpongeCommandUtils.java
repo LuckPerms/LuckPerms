@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 @UtilityClass
-public class SpongeUtils {
+public class SpongeCommandUtils {
 
     public static Tristate parseTristate(int index, List<String> args) throws ArgumentUtils.ArgumentException {
         String s = args.get(index).toLowerCase();

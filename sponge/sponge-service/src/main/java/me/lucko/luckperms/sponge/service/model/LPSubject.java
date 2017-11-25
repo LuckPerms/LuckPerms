@@ -50,10 +50,6 @@ public interface LPSubject {
         return getService().newSubjectReference(getParentCollection().getIdentifier(), getIdentifier());
     }
 
-    default LPSubjectData getDefaultData() {
-        return getDefaults().getSubjectData();
-    }
-
     default LPSubject getDefaults() {
         return getService().getDefaultSubjects().loadSubject(getIdentifier()).join();
     }

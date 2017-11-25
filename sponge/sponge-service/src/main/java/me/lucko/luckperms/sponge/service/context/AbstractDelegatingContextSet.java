@@ -23,28 +23,41 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.contexts;
-
-import lombok.AllArgsConstructor;
-
-import me.lucko.luckperms.api.context.ContextCalculator;
-import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.sponge.service.context.DelegatingMutableContextSet;
+package me.lucko.luckperms.sponge.service.context;
 
 import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.service.permission.Subject;
 
+import java.util.AbstractSet;
 import java.util.Set;
 
-@AllArgsConstructor
-public class ProxiedContextCalculator implements ContextCalculator<Subject> {
-    private final org.spongepowered.api.service.context.ContextCalculator<Subject> delegate;
+abstract class AbstractDelegatingContextSet extends AbstractSet<Context> implements DelegatingContextSet {
 
     @Override
-    public MutableContextSet giveApplicableContext(Subject subject, MutableContextSet accumulator) {
-        Set<Context> contexts = new DelegatingMutableContextSet(accumulator);
-        delegate.accumulateContexts(subject, contexts);
-        return accumulator;
+    public int hashCode() {
+        return getDelegate().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+
+        if (o instanceof DelegatingContextSet) {
+            return getDelegate().equals(((DelegatingContextSet) o).getDelegate());
+        }
+
+        if (o instanceof Set) {
+            Set<?> set = (Set<?>) o;
+
+            try {
+                return size() == set.size() && containsAll(set);
+            } catch (NullPointerException | ClassCastException ignored) {
+                return false;
+            }
+        }
+
+        return false;
     }
 
 }

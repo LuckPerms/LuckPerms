@@ -47,6 +47,7 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 
+import java.util.Map;
 import java.util.Optional;
 
 public class SpongeGroup extends Group {
@@ -62,7 +63,7 @@ public class SpongeGroup extends Group {
         return this.spongeData;
     }
 
-    public static class GroupSubject implements LPSubject {
+    public class GroupSubject implements LPSubject {
         private final SpongeGroup parent;
         private final LPSpongePlugin plugin;
 
@@ -123,12 +124,16 @@ public class SpongeGroup extends Group {
         public ImmutableList<SubjectReference> getParents(ImmutableContextSet contexts) {
             ImmutableSet.Builder<SubjectReference> subjects = ImmutableSet.builder();
 
-            for (String perm : parent.getCachedData().getPermissionData(plugin.getContextManager().formContexts(contexts)).getImmutableBacking().keySet()) {
-                if (!perm.startsWith("group.")) {
+            for (Map.Entry<String, Boolean> entry : parent.getCachedData().getPermissionData(plugin.getContextManager().formContexts(contexts)).getImmutableBacking().entrySet()) {
+                if (!entry.getValue()) {
                     continue;
                 }
 
-                String groupName = perm.substring("group.".length());
+                if (!entry.getKey().startsWith("group.")) {
+                    continue;
+                }
+
+                String groupName = entry.getKey().substring("group.".length());
                 if (plugin.getGroupManager().isLoaded(groupName)) {
                     subjects.add(plugin.getService().getGroupSubjects().loadSubject(groupName).join().toReference());
                 }

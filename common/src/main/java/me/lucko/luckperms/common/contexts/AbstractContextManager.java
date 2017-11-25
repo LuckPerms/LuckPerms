@@ -170,7 +170,12 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
 
             for (ContextCalculator<T> calculator : calculators) {
                 try {
-                    calculator.giveApplicableContext(subject, accumulator);
+                    MutableContextSet ret = calculator.giveApplicableContext(subject, accumulator);
+                    //noinspection ConstantConditions
+                    if (ret == null) {
+                        throw new IllegalStateException(calculator.getClass() + " returned a null context set");
+                    }
+                    accumulator = ret;
                 } catch (Exception e) {
                     plugin.getLog().warn("An exception was thrown whilst calculating the context of subject " + subject);
                     e.printStackTrace();
@@ -188,7 +193,12 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
 
             for (StaticContextCalculator calculator : staticCalculators) {
                 try {
-                    calculator.giveApplicableContext(accumulator);
+                    MutableContextSet ret = calculator.giveApplicableContext(accumulator);
+                    //noinspection ConstantConditions
+                    if (ret == null) {
+                        throw new IllegalStateException(calculator.getClass() + " returned a null context set");
+                    }
+                    accumulator = ret;
                 } catch (Exception e) {
                     plugin.getLog().warn("An exception was thrown whilst calculating static contexts");
                     e.printStackTrace();

@@ -36,7 +36,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
 import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
@@ -76,11 +75,11 @@ public class CalculatedSubjectData implements LPSubjectData {
     private final Map<ImmutableContextSet, Set<SubjectReference>> parents = new ConcurrentHashMap<>();
     private final Map<ImmutableContextSet, Map<String, String>> options = new ConcurrentHashMap<>();
 
-    private final LoadingCache<ContextSet, CalculatorHolder> permissionCache = Caffeine.newBuilder()
+    private final LoadingCache<ImmutableContextSet, CalculatorHolder> permissionCache = Caffeine.newBuilder()
             .expireAfterAccess(10, TimeUnit.MINUTES)
-            .build(new CacheLoader<ContextSet, CalculatorHolder>() {
+            .build(new CacheLoader<ImmutableContextSet, CalculatorHolder>() {
                 @Override
-                public CalculatorHolder load(ContextSet contexts) {
+                public CalculatorHolder load(ImmutableContextSet contexts) {
                     ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
                     processors.add(new MapProcessor());
                     processors.add(new SpongeWildcardProcessor());
@@ -100,7 +99,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         permissionCache.invalidateAll();
     }
 
-    public Tristate getPermissionValue(ContextSet contexts, String permission) {
+    public Tristate getPermissionValue(ImmutableContextSet contexts, String permission) {
         return permissionCache.get(contexts).getCalculator().getPermissionValue(permission, CheckOrigin.INTERNAL);
     }
 
@@ -301,7 +300,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         return ImmutableMap.copyOf(map);
     }
 
-    private static <K, V> SortedMap<ImmutableContextSet, Map<K, V>> getRelevantEntries(ContextSet set, Map<ImmutableContextSet, Map<K, V>> map) {
+    private static <K, V> SortedMap<ImmutableContextSet, Map<K, V>> getRelevantEntries(ImmutableContextSet set, Map<ImmutableContextSet, Map<K, V>> map) {
         ImmutableSortedMap.Builder<ImmutableContextSet, Map<K, V>> perms = ImmutableSortedMap.orderedBy(ContextSetComparator.reverse());
 
         for (Map.Entry<ImmutableContextSet, Map<K, V>> e : map.entrySet()) {

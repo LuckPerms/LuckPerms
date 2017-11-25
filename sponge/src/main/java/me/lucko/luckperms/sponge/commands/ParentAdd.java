@@ -71,7 +71,7 @@ public class ParentAdd extends SubCommand<LPSubjectData> {
 
         if (subjectData.addParent(contextSet, subject.toReference()).join()) {
             CommandUtils.sendPluginMessage(sender, "&aAdded parent &b" + subject.getParentCollection().getIdentifier() +
-                    "&a/&b" + subject.getIdentifier() + "&a in context " + SpongeUtils.contextToString(contextSet));
+                    "&a/&b" + subject.getIdentifier() + "&a in context " + SpongeCommandUtils.contextToString(contextSet));
         } else {
             CommandUtils.sendPluginMessage(sender, "Unable to add parent. Does the Subject already have it added?");
         }

@@ -153,7 +153,7 @@ public final class SubjectReference implements org.spongepowered.api.service.per
     @Override
     public String toString() {
         return "SubjectReference(" +
-                "collectionIdentifier=" + this.collectionIdentifier + ", " +
-                "subjectIdentifier=" + this.subjectIdentifier + ")";
+                "collection=" + this.collectionIdentifier + ", " +
+                "subject=" + this.subjectIdentifier + ")";
     }
 }

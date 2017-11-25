@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
-import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
+import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
@@ -48,17 +48,17 @@ import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor
-public class SubjectProxy implements Subject {
+public final class SubjectProxy implements Subject {
     private final LPPermissionService service;
     private final SubjectReference ref;
 
-    private CompletableFuture<LPSubject> getHandle() {
+    private CompletableFuture<LPSubject> handle() {
         return ref.resolveLp();
     }
 
     @Override
     public Optional<CommandSource> getCommandSource() {
-        return getHandle().thenApply(LPSubject::getCommandSource).join();
+        return handle().thenApply(LPSubject::getCommandSource).join();
     }
 
     @Override
@@ -78,22 +78,22 @@ public class SubjectProxy implements Subject {
 
     @Override
     public boolean hasPermission(Set<Context> contexts, String permission) {
-        return getHandle().thenApply(handle -> handle.getPermissionValue(CompatibilityUtil.convertContexts(contexts), permission).asBoolean()).join();
+        return handle().thenApply(handle -> handle.getPermissionValue(CompatibilityUtil.convertContexts(contexts), permission).asBoolean()).join();
     }
 
     @Override
     public boolean hasPermission(String permission) {
-        return getHandle().thenApply(handle -> handle.getPermissionValue(ImmutableContextSet.empty(), permission).asBoolean()).join();
+        return handle().thenApply(handle -> handle.getPermissionValue(ImmutableContextSet.empty(), permission).asBoolean()).join();
     }
 
     @Override
     public Tristate getPermissionValue(Set<Context> contexts, String permission) {
-        return getHandle().thenApply(handle -> CompatibilityUtil.convertTristate(handle.getPermissionValue(CompatibilityUtil.convertContexts(contexts), permission))).join();
+        return handle().thenApply(handle -> CompatibilityUtil.convertTristate(handle.getPermissionValue(CompatibilityUtil.convertContexts(contexts), permission))).join();
     }
 
     @Override
     public boolean isChildOf(Subject parent) {
-        return getHandle().thenApply(handle -> handle.isChildOf(
+        return handle().thenApply(handle -> handle.isChildOf(
                 ImmutableContextSet.empty(),
                 service.newSubjectReference(
                         parent.getContainingCollection().getIdentifier(),
@@ -104,7 +104,7 @@ public class SubjectProxy implements Subject {
 
     @Override
     public boolean isChildOf(Set<Context> contexts, Subject parent) {
-        return getHandle().thenApply(handle -> handle.isChildOf(
+        return handle().thenApply(handle -> handle.isChildOf(
                 CompatibilityUtil.convertContexts(contexts),
                 service.newSubjectReference(
                         parent.getContainingCollection().getIdentifier(),
@@ -115,26 +115,26 @@ public class SubjectProxy implements Subject {
 
     @Override
     public List<Subject> getParents() {
-        return (List) getHandle().thenApply(handle -> handle.getParents(ImmutableContextSet.empty()).stream()
+        return (List) handle().thenApply(handle -> handle.getParents(ImmutableContextSet.empty()).stream()
                 .map(s -> new SubjectProxy(service, s))
                 .collect(ImmutableCollectors.toList())).join();
     }
 
     @Override
     public List<Subject> getParents(Set<Context> contexts) {
-        return (List) getHandle().thenApply(handle -> handle.getParents(CompatibilityUtil.convertContexts(contexts)).stream()
+        return (List) handle().thenApply(handle -> handle.getParents(CompatibilityUtil.convertContexts(contexts)).stream()
                 .map(s -> new SubjectProxy(service, s))
                 .collect(ImmutableCollectors.toList())).join();
     }
 
     @Override
     public Optional<String> getOption(Set<Context> contexts, String key) {
-        return getHandle().thenApply(handle -> handle.getOption(CompatibilityUtil.convertContexts(contexts), key)).join();
+        return handle().thenApply(handle -> handle.getOption(CompatibilityUtil.convertContexts(contexts), key)).join();
     }
 
     @Override
     public Optional<String> getOption(String key) {
-        return getHandle().thenApply(handle -> handle.getOption(ImmutableContextSet.empty(), key)).join();
+        return handle().thenApply(handle -> handle.getOption(ImmutableContextSet.empty(), key)).join();
     }
 
     @Override
@@ -144,6 +144,21 @@ public class SubjectProxy implements Subject {
 
     @Override
     public Set<Context> getActiveContexts() {
-        return getHandle().thenApply(handle -> CompatibilityUtil.convertContexts(handle.getActiveContextSet())).join();
+        return handle().thenApply(handle -> CompatibilityUtil.convertContexts(handle.getActiveContextSet())).join();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o == this || o instanceof SubjectProxy && ref.equals(((SubjectProxy) o).ref);
+    }
+
+    @Override
+    public int hashCode() {
+        return ref.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "luckperms.api6.SubjectProxy(ref=" + this.ref + ")";
     }
 }

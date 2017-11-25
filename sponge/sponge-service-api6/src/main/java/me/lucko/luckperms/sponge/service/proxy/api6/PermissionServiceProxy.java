@@ -44,7 +44,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-public class PermissionServiceProxy implements PermissionService {
+public final class PermissionServiceProxy implements PermissionService {
     private final LPPermissionService handle;
 
     @Override
@@ -99,5 +99,20 @@ public class PermissionServiceProxy implements PermissionService {
     @Override
     public void registerContextCalculator(ContextCalculator<Subject> contextCalculator) {
         handle.registerContextCalculator(contextCalculator);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o == this || o instanceof PermissionServiceProxy && handle.equals(((PermissionServiceProxy) o).handle);
+    }
+
+    @Override
+    public int hashCode() {
+        return handle.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "luckperms.api6.PermissionServiceProxy(handle=" + this.handle + ")";
     }
 }

@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.calculated;
+package me.lucko.luckperms.sponge.service.persisted;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;

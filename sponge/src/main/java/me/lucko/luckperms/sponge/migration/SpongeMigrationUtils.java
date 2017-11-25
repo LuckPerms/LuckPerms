@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.NodeFactory;
-import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
+import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;

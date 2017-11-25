@@ -39,8 +39,6 @@ import me.lucko.luckperms.common.verbose.CheckOrigin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
-import me.lucko.luckperms.sponge.service.calculated.OptionLookupKey;
-import me.lucko.luckperms.sponge.service.calculated.PermissionLookupKey;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorageModel;

@@ -29,7 +29,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.commands.sender.SenderFactory;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
+import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 
 import net.kyori.text.Component;
 import net.kyori.text.serializer.ComponentSerializers;

@@ -40,7 +40,7 @@ import org.spongepowered.api.text.Text;
 import java.util.Map;
 
 @RequiredArgsConstructor
-public class PermissionDescriptionProxy implements PermissionDescription {
+public final class PermissionDescriptionProxy implements PermissionDescription {
     private final LPPermissionService service;
     private final LPPermissionDescription handle;
 
@@ -66,5 +66,20 @@ public class PermissionDescriptionProxy implements PermissionDescription {
                         e -> new SubjectProxy(service, e.getKey().toReference()),
                         Map.Entry::getValue
                 ));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o == this || o instanceof PermissionDescriptionProxy && handle.equals(((PermissionDescriptionProxy) o).handle);
+    }
+
+    @Override
+    public int hashCode() {
+        return handle.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "luckperms.api6.PermissionDescriptionProxy(handle=" + this.handle + ")";
     }
 }
