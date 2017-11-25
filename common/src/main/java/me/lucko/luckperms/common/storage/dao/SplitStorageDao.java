@@ -55,13 +55,10 @@ public class SplitStorageDao extends AbstractDao {
     @Override
     public void init() {
         boolean success = true;
-        backing.values().forEach(AbstractDao::init);
         for (AbstractDao ds : backing.values()) {
-            if (!ds.isAcceptingLogins()) {
-                success = false;
-            }
+            ds.init();
+            success = success && ds.isAcceptingLogins();
         }
-
         setAcceptingLogins(success);
     }
 

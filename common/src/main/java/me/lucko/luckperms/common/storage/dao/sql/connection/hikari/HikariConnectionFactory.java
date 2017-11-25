@@ -52,8 +52,10 @@ public abstract class HikariConnectionFactory extends AbstractConnectionFactory 
         return null;
     }
 
-    protected void appendProperties(HikariConfig config) {
-
+    protected void appendProperties(HikariConfig config, StorageCredentials credentials) {
+        for (Map.Entry<String, String> property : credentials.getProperties().entrySet()) {
+            config.addDataSourceProperty(property.getKey(), property.getValue());
+        }
     }
 
     protected void appendConfigurationInfo(HikariConfig config) {
@@ -76,7 +78,7 @@ public abstract class HikariConnectionFactory extends AbstractConnectionFactory 
         config.setPoolName("luckperms");
 
         appendConfigurationInfo(config);
-        appendProperties(config);
+        appendProperties(config, configuration);
 
         config.setMaximumPoolSize(configuration.getMaxPoolSize());
         config.setMinimumIdle(configuration.getMinIdleConnections());

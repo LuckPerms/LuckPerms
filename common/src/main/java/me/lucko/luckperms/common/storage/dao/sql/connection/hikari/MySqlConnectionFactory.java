@@ -48,7 +48,7 @@ public class MySqlConnectionFactory extends HikariConnectionFactory {
     }
 
     @Override
-    protected void appendProperties(HikariConfig config) {
+    protected void appendProperties(HikariConfig config, StorageCredentials credentials) {
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("alwaysSendSetIsolation", "false");
         config.addDataSourceProperty("cacheServerConfiguration", "true");
@@ -60,9 +60,8 @@ public class MySqlConnectionFactory extends HikariConnectionFactory {
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
         config.addDataSourceProperty("cacheCallableStmts", "true");
 
-        // make sure unicode characters can be used.
-        config.addDataSourceProperty("characterEncoding", "utf8");
-        config.addDataSourceProperty("useUnicode", "true");
+        // append configurable properties
+        super.appendProperties(config, credentials);
     }
 
 }

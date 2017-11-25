@@ -52,5 +52,4 @@ public class PostgreConnectionFactory extends HikariConnectionFactory {
         config.addDataSourceProperty("user", username);
         config.addDataSourceProperty("password", password);
     }
-
 }

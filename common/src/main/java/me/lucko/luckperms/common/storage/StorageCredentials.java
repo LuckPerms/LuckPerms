@@ -28,6 +28,8 @@ package me.lucko.luckperms.common.storage;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Map;
+
 @Getter
 @AllArgsConstructor
 public class StorageCredentials {
@@ -40,5 +42,6 @@ public class StorageCredentials {
     private int minIdleConnections;
     private int maxLifetime;
     private int connectionTimeout;
+    private Map<String, String> properties;
 
 }
