@@ -119,7 +119,7 @@ public class BungeeConfigAdapter implements ConfigurationAdapter {
         }
 
         for (String key : section.getKeys()) {
-            map.put(key, section.getString(key));
+            map.put(key, section.get(key).toString());
         }
 
         return map;
