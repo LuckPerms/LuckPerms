@@ -31,6 +31,14 @@
         </license>
     </licenses>
 
+    <developers>
+        <developer>
+            <name>Luck</name>
+            <email>git@lucko.me</email>
+            <url>https://github.com/lucko</url>
+        </developer>
+    </developers>
+
     <scm>
         <connection>scm:git:https://github.com/lucko/LuckPerms.git</connection>
         <developerConnection>scm:git:git@github.com:lucko/LuckPerms.git</developerConnection>
@@ -58,7 +66,6 @@
         <compiler.version>3.7.0</compiler.version>
         <shade.version>3.1.0</shade.version>
         <lombok.version>1.16.18</lombok.version>
-        <gpg.version>1.6</gpg.version>
     </properties>
 
     <distributionManagement>
@@ -104,6 +111,43 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>sign</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>ossrh</id>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                </snapshotRepository>
+                <repository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+    </profiles>
 
     <repositories>
         <repository>
