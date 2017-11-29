@@ -201,8 +201,8 @@ public class SqlDao extends AbstractDao {
             if (!(provider instanceof SQLiteConnectionFactory)) {
                 try (Connection connection = provider.getConnection()) {
                     try (Statement s = connection.createStatement()) {
-                        s.execute(prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN actor_name VARCHAR(100)"));
-                        s.execute(prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN action VARCHAR(300)"));
+                        s.execute(prefix.apply("ALTER TABLE {prefix}actions ALTER COLUMN actor_name TYPE VARCHAR(100)"));
+                        s.execute(prefix.apply("ALTER TABLE {prefix}actions ALTER COLUMN action TYPE VARCHAR(300)"));
                     }
                 }
             }
