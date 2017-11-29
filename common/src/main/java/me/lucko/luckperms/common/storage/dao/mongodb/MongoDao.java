@@ -246,7 +246,7 @@ public class MongoDao extends AbstractDao {
                                 permsDoc.append(e.getKey(), e.getValue());
                             }
 
-                            d.put("perms", perms);
+                            d.put("perms", permsDoc);
                             c.replaceOne(new Document("_id", uuid), d);
                         }
                     }
@@ -280,7 +280,7 @@ public class MongoDao extends AbstractDao {
                                 permsDoc.append(e.getKey(), e.getValue());
                             }
 
-                            d.put("perms", perms);
+                            d.put("perms", permsDoc);
                             c.replaceOne(new Document("_id", holder), d);
                         }
                     }
