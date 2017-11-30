@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.storage.dao.mongodb;
 
 import lombok.Getter;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
@@ -34,11 +35,14 @@ import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.InsertOneOptions;
+import com.mongodb.client.model.UpdateOptions;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
@@ -60,7 +64,6 @@ import org.bson.Document;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -68,10 +71,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("unchecked")
 public class MongoDao extends AbstractDao {
 
     private final StorageCredentials configuration;
@@ -96,20 +97,12 @@ public class MongoDao extends AbstractDao {
     @Override
     public void init() {
         MongoCredential credential = null;
-
-        if (configuration.getUsername() != null && !configuration.getUsername().equals("") && configuration.getDatabase() != null && !configuration.getDatabase().equals("")) {
-            if (configuration.getPassword() == null || configuration.getPassword().equals("")) {
-                credential = MongoCredential.createCredential(
-                        configuration.getUsername(),
-                        configuration.getDatabase(), null
-                );
-            } else {
-                credential = MongoCredential.createCredential(
-                        configuration.getUsername(),
-                        configuration.getDatabase(),
-                        configuration.getPassword().toCharArray()
-                );
-            }
+        if (!Strings.isNullOrEmpty(configuration.getUsername())) {
+            credential = MongoCredential.createCredential(
+                    configuration.getUsername(),
+                    configuration.getDatabase(),
+                    Strings.isNullOrEmpty(configuration.getPassword()) ? null : configuration.getPassword().toCharArray()
+            );
         }
 
         String[] addressSplit = configuration.getAddress().split(":");
@@ -161,7 +154,6 @@ public class MongoDao extends AbstractDao {
     public boolean logAction(LogEntry entry) {
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "action");
-
             Document doc = new Document()
                     .append("timestamp", entry.getTimestamp())
                     .append("actor", entry.getActor())
@@ -174,7 +166,7 @@ public class MongoDao extends AbstractDao {
                 doc.append("acted", entry.getActed().get());
             }
 
-            c.insertOne(doc, new InsertOneOptions());
+            c.insertOne(doc);
         } catch (Exception e) {
             return reportException(e);
         }
@@ -186,7 +178,6 @@ public class MongoDao extends AbstractDao {
         Log.Builder log = Log.builder();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "action");
-
             try (MongoCursor<Document> cursor = c.find().iterator()) {
                 while (cursor.hasNext()) {
                     Document d = cursor.next();
@@ -221,33 +212,23 @@ public class MongoDao extends AbstractDao {
         try {
             if (bulkUpdate.getDataType().isIncludingUsers()) {
                 MongoCollection<Document> c = database.getCollection(prefix + "users");
-
                 try (MongoCursor<Document> cursor = c.find().iterator()) {
                     while (cursor.hasNext()) {
                         Document d = cursor.next();
 
                         UUID uuid = d.get("_id", UUID.class);
-                        Map<String, Boolean> perms = revert((Map<String, Boolean>) d.get("perms"));
-
-                        Set<NodeModel> nodes = new HashSet<>();
-                        for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                            Node node = LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue());
-                            nodes.add(NodeModel.fromNode(node));
-                        }
-
+                        Set<NodeModel> nodes = new HashSet<>(nodesFromDoc(d));
                         Set<NodeModel> results = nodes.stream()
                                 .map(bulkUpdate::apply)
                                 .filter(Objects::nonNull)
                                 .collect(Collectors.toSet());
 
                         if (!nodes.equals(results)) {
-                            Document permsDoc = new Document();
-                            for (Map.Entry<String, Boolean> e : convert(exportToLegacy(results.stream().map(NodeModel::toNode).collect(Collectors.toList()))).entrySet()) {
-                                permsDoc.append(e.getKey(), e.getValue());
-                            }
+                            List<Document> newNodes = results.stream()
+                                    .map(MongoDao::nodeToDoc)
+                                    .collect(Collectors.toList());
 
-                            d.put("perms", permsDoc);
-                            c.replaceOne(new Document("_id", uuid), d);
+                            c.replaceOne(new Document("_id", uuid), d.append("permissions", newNodes));
                         }
                     }
                 }
@@ -255,33 +236,23 @@ public class MongoDao extends AbstractDao {
 
             if (bulkUpdate.getDataType().isIncludingGroups()) {
                 MongoCollection<Document> c = database.getCollection(prefix + "groups");
-
                 try (MongoCursor<Document> cursor = c.find().iterator()) {
                     while (cursor.hasNext()) {
                         Document d = cursor.next();
 
                         String holder = d.getString("_id");
-                        Map<String, Boolean> perms = revert((Map<String, Boolean>) d.get("perms"));
-
-                        Set<NodeModel> nodes = new HashSet<>();
-                        for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                            Node node = LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue());
-                            nodes.add(NodeModel.fromNode(node));
-                        }
-
+                        Set<NodeModel> nodes = new HashSet<>(nodesFromDoc(d));
                         Set<NodeModel> results = nodes.stream()
                                 .map(bulkUpdate::apply)
                                 .filter(Objects::nonNull)
                                 .collect(Collectors.toSet());
 
                         if (!nodes.equals(results)) {
-                            Document permsDoc = new Document();
-                            for (Map.Entry<String, Boolean> e : convert(exportToLegacy(results.stream().map(NodeModel::toNode).collect(Collectors.toList()))).entrySet()) {
-                                permsDoc.append(e.getKey(), e.getValue());
-                            }
+                            List<Document> newNodes = results.stream()
+                                    .map(MongoDao::nodeToDoc)
+                                    .collect(Collectors.toList());
 
-                            d.put("perms", permsDoc);
-                            c.replaceOne(new Document("_id", holder), d);
+                            c.replaceOne(new Document("_id", holder), d.append("permissions", newNodes));
                         }
                     }
                 }
@@ -299,17 +270,16 @@ public class MongoDao extends AbstractDao {
         user.getIoLock().lock();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "users");
-
             try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUuid())).iterator()) {
                 if (cursor.hasNext()) {
                     // User exists, let's load.
                     Document d = cursor.next();
-                    user.setEnduringNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
-                            .map(e -> LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue()))
-                            .collect(Collectors.toSet())
-                    );
+
                     user.getPrimaryGroup().setStoredValue(d.getString("primaryGroup"));
-                    user.setName(name, true);
+                    user.setName(d.getString("name"), true);
+
+                    Set<Node> nodes = nodesFromDoc(d).stream().map(NodeModel::toNode).collect(Collectors.toSet());
+                    user.setEnduringNodes(nodes);
 
                     boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
                     if (user.getName().isPresent() && (name == null || !user.getName().get().equalsIgnoreCase(name))) {
@@ -317,7 +287,7 @@ public class MongoDao extends AbstractDao {
                     }
 
                     if (save) {
-                        c.replaceOne(new Document("_id", user.getUuid()), fromUser(user));
+                        c.replaceOne(new Document("_id", user.getUuid()), userToDoc(user));
                     }
                 } else {
                     if (GenericUserManager.shouldSave(user)) {
@@ -340,25 +310,17 @@ public class MongoDao extends AbstractDao {
     public boolean saveUser(User user) {
         user.getIoLock().lock();
         try {
-            if (!GenericUserManager.shouldSave(user)) {
-                MongoCollection<Document> c = database.getCollection(prefix + "users");
-                return c.deleteOne(new Document("_id", user.getUuid())).wasAcknowledged();
-            }
-
             MongoCollection<Document> c = database.getCollection(prefix + "users");
-            try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUuid())).iterator()) {
-                if (!cursor.hasNext()) {
-                    c.insertOne(fromUser(user));
-                } else {
-                    c.replaceOne(new Document("_id", user.getUuid()), fromUser(user));
-                }
+            if (!GenericUserManager.shouldSave(user)) {
+                return c.deleteOne(new Document("_id", user.getUuid())).wasAcknowledged();
+            } else {
+                return c.replaceOne(new Document("_id", user.getUuid()), userToDoc(user), new UpdateOptions().upsert(true)).wasAcknowledged();
             }
         } catch (Exception e) {
             return reportException(e);
         } finally {
             user.getIoLock().unlock();
         }
-        return true;
     }
 
     @Override
@@ -366,7 +328,6 @@ public class MongoDao extends AbstractDao {
         Set<UUID> uuids = new HashSet<>();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "users");
-
             try (MongoCursor<Document> cursor = c.find().iterator()) {
                 while (cursor.hasNext()) {
                     Document d = cursor.next();
@@ -374,6 +335,7 @@ public class MongoDao extends AbstractDao {
                 }
             }
         } catch (Exception e) {
+            reportException(e);
             return null;
         }
         return uuids;
@@ -384,21 +346,17 @@ public class MongoDao extends AbstractDao {
         ImmutableList.Builder<HeldPermission<UUID>> held = ImmutableList.builder();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "users");
-
             try (MongoCursor<Document> cursor = c.find().iterator()) {
                 while (cursor.hasNext()) {
                     Document d = cursor.next();
-
                     UUID holder = d.get("_id", UUID.class);
-                    Map<String, Boolean> perms = revert((Map<String, Boolean>) d.get("perms"));
 
-                    for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                        Node node = LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue());
-                        if (!node.getPermission().equalsIgnoreCase(permission)) {
+                    Set<NodeModel> nodes = new HashSet<>(nodesFromDoc(d));
+                    for (NodeModel e : nodes) {
+                        if (!e.getPermission().equalsIgnoreCase(permission)) {
                             continue;
                         }
-
-                        held.add(NodeHeldPermission.of(holder, node));
+                        held.add(NodeHeldPermission.of(holder, e));
                     }
                 }
             }
@@ -415,17 +373,13 @@ public class MongoDao extends AbstractDao {
         group.getIoLock().lock();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "groups");
-
             try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
                 if (cursor.hasNext()) {
-                    // Group exists, let's load.
                     Document d = cursor.next();
-                    group.setEnduringNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
-                            .map(e -> LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue()))
-                            .collect(Collectors.toSet())
-                    );
+                    Set<Node> nodes = nodesFromDoc(d).stream().map(NodeModel::toNode).collect(Collectors.toSet());
+                    group.setEnduringNodes(nodes);
                 } else {
-                    c.insertOne(fromGroup(group));
+                    c.insertOne(groupToDoc(group));
                 }
             }
         } catch (Exception e) {
@@ -443,17 +397,14 @@ public class MongoDao extends AbstractDao {
         group.getIoLock().lock();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "groups");
-
             try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
                 if (!cursor.hasNext()) {
                     return false;
                 }
 
                 Document d = cursor.next();
-                group.setEnduringNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
-                        .map(e -> LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue()))
-                        .collect(Collectors.toSet())
-                );
+                Set<Node> nodes = nodesFromDoc(d).stream().map(NodeModel::toNode).collect(Collectors.toSet());
+                group.setEnduringNodes(nodes);
             }
         } catch (Exception e) {
             return reportException(e);
@@ -469,11 +420,9 @@ public class MongoDao extends AbstractDao {
         List<String> groups = new ArrayList<>();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "groups");
-
             try (MongoCursor<Document> cursor = c.find().iterator()) {
                 while (cursor.hasNext()) {
                     String name = cursor.next().getString("_id");
-                    loadGroup(name);
                     groups.add(name);
                 }
             }
@@ -481,6 +430,8 @@ public class MongoDao extends AbstractDao {
             reportException(e);
             return false;
         }
+
+        groups.forEach(this::loadGroup);
 
         GroupManager gm = plugin.getGroupManager();
         gm.getAll().values().stream()
@@ -494,7 +445,7 @@ public class MongoDao extends AbstractDao {
         group.getIoLock().lock();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "groups");
-            return c.replaceOne(new Document("_id", group.getName()), fromGroup(group)).wasAcknowledged();
+            return c.replaceOne(new Document("_id", group.getName()), groupToDoc(group), new UpdateOptions().upsert(true)).wasAcknowledged();
         } catch (Exception e) {
             return reportException(e);
         } finally {
@@ -507,17 +458,12 @@ public class MongoDao extends AbstractDao {
         group.getIoLock().lock();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "groups");
-            if (!c.deleteOne(new Document("_id", group.getName())).wasAcknowledged()) {
-                throw new RuntimeException();
-            }
+            return c.deleteOne(new Document("_id", group.getName())).wasAcknowledged();
         } catch (Exception e) {
             return reportException(e);
         } finally {
             group.getIoLock().unlock();
         }
-
-        plugin.getGroupManager().unload(group);
-        return true;
     }
 
     @Override
@@ -525,21 +471,17 @@ public class MongoDao extends AbstractDao {
         ImmutableList.Builder<HeldPermission<String>> held = ImmutableList.builder();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "groups");
-
             try (MongoCursor<Document> cursor = c.find().iterator()) {
                 while (cursor.hasNext()) {
                     Document d = cursor.next();
 
                     String holder = d.getString("_id");
-                    Map<String, Boolean> perms = revert((Map<String, Boolean>) d.get("perms"));
-
-                    for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                        Node node = LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue());
-                        if (!node.getPermission().equalsIgnoreCase(permission)) {
+                    Set<NodeModel> nodes = new HashSet<>(nodesFromDoc(d));
+                    for (NodeModel e : nodes) {
+                        if (!e.getPermission().equalsIgnoreCase(permission)) {
                             continue;
                         }
-
-                        held.add(NodeHeldPermission.of(holder, node));
+                        held.add(NodeHeldPermission.of(holder, e));
                     }
                 }
             }
@@ -556,12 +498,12 @@ public class MongoDao extends AbstractDao {
         track.getIoLock().lock();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "tracks");
-
             try (MongoCursor<Document> cursor = c.find(new Document("_id", track.getName())).iterator()) {
                 if (!cursor.hasNext()) {
-                    c.insertOne(fromTrack(track));
+                    c.insertOne(trackToDoc(track));
                 } else {
                     Document d = cursor.next();
+                    //noinspection unchecked
                     track.setGroups((List<String>) d.get("groups"));
                 }
             }
@@ -579,10 +521,10 @@ public class MongoDao extends AbstractDao {
         track.getIoLock().lock();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "tracks");
-
             try (MongoCursor<Document> cursor = c.find(new Document("_id", track.getName())).iterator()) {
                 if (cursor.hasNext()) {
                     Document d = cursor.next();
+                    //noinspection unchecked
                     track.setGroups((List<String>) d.get("groups"));
                     return true;
                 }
@@ -600,11 +542,9 @@ public class MongoDao extends AbstractDao {
         List<String> tracks = new ArrayList<>();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "tracks");
-
             try (MongoCursor<Document> cursor = c.find().iterator()) {
                 while (cursor.hasNext()) {
                     String name = cursor.next().getString("_id");
-                    loadTrack(name);
                     tracks.add(name);
                 }
             }
@@ -612,6 +552,8 @@ public class MongoDao extends AbstractDao {
             reportException(e);
             return false;
         }
+
+        tracks.forEach(this::loadTrack);
 
         TrackManager tm = plugin.getTrackManager();
         tm.getAll().values().stream()
@@ -625,7 +567,7 @@ public class MongoDao extends AbstractDao {
         track.getIoLock().lock();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "tracks");
-            return c.replaceOne(new Document("_id", track.getName()), fromTrack(track)).wasAcknowledged();
+            return c.replaceOne(new Document("_id", track.getName()), trackToDoc(track)).wasAcknowledged();
         } catch (Exception e) {
             return reportException(e);
         } finally {
@@ -638,31 +580,19 @@ public class MongoDao extends AbstractDao {
         track.getIoLock().lock();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "tracks");
-            if (!c.deleteOne(new Document("_id", track.getName())).wasAcknowledged()) {
-                throw new RuntimeException();
-            }
+            return c.deleteOne(new Document("_id", track.getName())).wasAcknowledged();
         } catch (Exception e) {
             return reportException(e);
         } finally {
             track.getIoLock().unlock();
         }
-
-        plugin.getTrackManager().unload(track);
-        return true;
     }
 
     @Override
     public boolean saveUUIDData(UUID uuid, String username) {
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "uuid");
-
-            try (MongoCursor<Document> cursor = c.find(new Document("_id", uuid)).iterator()) {
-                if (cursor.hasNext()) {
-                    c.replaceOne(new Document("_id", uuid), new Document("_id", uuid).append("name", username.toLowerCase()));
-                } else {
-                    c.insertOne(new Document("_id", uuid).append("name", username.toLowerCase()));
-                }
-            }
+            c.replaceOne(new Document("_id", uuid), new Document("_id", uuid).append("name", username.toLowerCase()), new UpdateOptions().upsert(true));
         } catch (Exception e) {
             return reportException(e);
         }
@@ -673,7 +603,6 @@ public class MongoDao extends AbstractDao {
     public UUID getUUID(String username) {
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "uuid");
-
             try (MongoCursor<Document> cursor = c.find(new Document("name", username.toLowerCase())).iterator()) {
                 if (cursor.hasNext()) {
                     return cursor.next().get("_id", UUID.class);
@@ -690,7 +619,6 @@ public class MongoDao extends AbstractDao {
     public String getName(UUID uuid) {
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "uuid");
-
             try (MongoCursor<Document> cursor = c.find(new Document("_id", uuid)).iterator()) {
                 if (cursor.hasNext()) {
                     return cursor.next().get("name", String.class);
@@ -703,59 +631,126 @@ public class MongoDao extends AbstractDao {
         }
     }
 
-    /*  MongoDB does not allow '.' or '$' in key names.
-        See: https://docs.mongodb.com/manual/reference/limits/#Restrictions-on-Field-Names
-        The following two methods convert the node maps so they can be stored. */
+    private static Document userToDoc(User user) {
+        List<Document> nodes = user.getEnduringNodes().values().stream()
+                .map(NodeModel::fromNode)
+                .map(MongoDao::nodeToDoc)
+                .collect(Collectors.toList());
 
-    private static final Function<String, String> CONVERT_STRING = s -> s.replace(".", "[**DOT**]").replace("$", "[**DOLLAR**]");
-    private static final Function<String, String> REVERT_STRING = s -> s.replace("[**DOT**]", ".").replace("[**DOLLAR**]", "$");
-
-    private static <V> Map<String, V> convert(Map<String, V> map) {
-        return map.entrySet().stream()
-                .collect(Collectors.toMap(e -> CONVERT_STRING.apply(e.getKey()), Map.Entry::getValue));
-    }
-
-    private static <V> Map<String, V> revert(Map<String, V> map) {
-        return map.entrySet().stream()
-                .collect(Collectors.toMap(e -> REVERT_STRING.apply(e.getKey()), Map.Entry::getValue));
-    }
-
-    private static Document fromUser(User user) {
-        Document main = new Document("_id", user.getUuid())
+        return new Document("_id", user.getUuid())
                 .append("name", user.getName().orElse("null"))
-                .append("primaryGroup", user.getPrimaryGroup().getStoredValue().orElse("default"));
-
-        Document perms = new Document();
-        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(user.getEnduringNodes().values())).entrySet()) {
-            perms.append(e.getKey(), e.getValue());
-        }
-
-        main.append("perms", perms);
-        return main;
+                .append("primaryGroup", user.getPrimaryGroup().getStoredValue().orElse("default"))
+                .append("permissions", nodes);
     }
 
-    private static Document fromGroup(Group group) {
-        Document main = new Document("_id", group.getName());
+    private static List<NodeModel> nodesFromDoc(Document document) {
+        List<NodeModel> nodes = new ArrayList<>();
 
-        Document perms = new Document();
-        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(group.getEnduringNodes().values())).entrySet()) {
-            perms.append(e.getKey(), e.getValue());
+        // legacy
+        if (document.containsKey("perms") && document.get("perms") instanceof Map) {
+            //noinspection unchecked
+            Map<String, Boolean> permsMap = (Map<String, Boolean>) document.get("perms");
+            for (Map.Entry<String, Boolean> e : permsMap.entrySet()) {
+                // legacy permission key deserialisation
+                String permission = e.getKey().replace("[**DOT**]", ".").replace("[**DOLLAR**]", "$");
+                nodes.add(NodeModel.fromNode(LegacyNodeFactory.fromLegacyString(permission, e.getValue())));
+            }
         }
 
-        main.append("perms", perms);
-        return main;
+        // new format
+        if (document.containsKey("permissions") && document.get("permissions") instanceof List) {
+            //noinspection unchecked
+            List<Document> permsList = (List<Document>) document.get("permissions");
+            for (Document d : permsList) {
+                nodes.add(nodeFromDoc(d));
+            }
+        }
+
+        return nodes;
     }
 
-    private static Document fromTrack(Track track) {
+    private static Document groupToDoc(Group group) {
+        List<Document> nodes = group.getEnduringNodes().values().stream()
+                .map(NodeModel::fromNode)
+                .map(MongoDao::nodeToDoc)
+                .collect(Collectors.toList());
+
+        return new Document("_id", group.getName()).append("permissions", nodes);
+    }
+
+    private static Document trackToDoc(Track track) {
         return new Document("_id", track.getName()).append("groups", track.getGroups());
     }
 
-    public static Map<String, Boolean> exportToLegacy(Iterable<Node> nodes) {
-        Map<String, Boolean> m = new HashMap<>();
-        for (Node node : nodes) {
-            //noinspection deprecation
-            m.put(LegacyNodeFactory.toSerializedNode(node), node.getValuePrimitive());
+    private static Document nodeToDoc(NodeModel node) {
+        Document document = new Document();
+
+        document.append("permission", node.getPermission());
+        document.append("value", node.getValue());
+
+        if (!node.getServer().equals("global")) {
+            document.append("server", node.getServer());
         }
-        return m;
+
+        if (!node.getWorld().equals("global")) {
+            document.append("world", node.getWorld());
+        }
+
+        if (node.getExpiry() != 0L) {
+            document.append("expiry", node.getExpiry());
+        }
+
+        if (!node.getContexts().isEmpty()) {
+            document.append("context", contextSetToDocs(node.getContexts()));
+        }
+
+        return document;
     }
+
+    private static NodeModel nodeFromDoc(Document document) {
+        String permission = document.getString("permission");
+        boolean value = true;
+        String server = "global";
+        String world = "global";
+        long expiry = 0L;
+        ImmutableContextSet context = ImmutableContextSet.empty();
+
+        if (document.containsKey("value")) {
+            value = document.getBoolean("value");
+        }
+        if (document.containsKey("server")) {
+            server = document.getString("server");
+        }
+        if (document.containsKey("world")) {
+            world = document.getString("world");
+        }
+        if (document.containsKey("expiry")) {
+            expiry = document.getLong("expiry");
+        }
+
+        if (document.containsKey("context") && document.get("context") instanceof List) {
+            //noinspection unchecked
+            List<Document> contexts = (List<Document>) document.get("context");
+            context = docsToContextSet(contexts).makeImmutable();
+        }
+
+        return NodeModel.of(permission, value, server, world, expiry, context);
+    }
+
+    private static List<Document> contextSetToDocs(ContextSet contextSet) {
+        List<Document> contexts = new ArrayList<>();
+        for (Map.Entry<String, String> e : contextSet.toSet()) {
+            contexts.add(new Document().append("key", e.getKey()).append("value", e.getValue()));
+        }
+        return contexts;
+    }
+
+    private static MutableContextSet docsToContextSet(List<Document> documents) {
+        MutableContextSet map = MutableContextSet.create();
+        for (Document doc : documents) {
+            map.add(doc.getString("key"), doc.getString("value"));
+        }
+        return map;
+    }
+
 }

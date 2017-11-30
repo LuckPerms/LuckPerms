@@ -74,36 +74,6 @@ public class LegacyNodeFactory {
     private static final Splitter.MapSplitter LEGACY_CONTEXT_PART_SPLITTER = Splitter.on(LEGACY_CONTEXT_PAIR_DELIM)
             .withKeyValueSeparator(Splitter.on(LEGACY_CONTEXT_PAIR_PART_DELIM));
 
-    public static String toSerializedNode(Node node) {
-        StringBuilder builder = new StringBuilder();
-
-        if (node.getServer().orElse(null) != null) {
-            builder.append(escapeDelimiters(node.getServer().orElse(null), SERVER_WORLD_DELIMITERS));
-            if (node.getWorld().orElse(null) != null) {
-                builder.append("-").append(escapeDelimiters(node.getWorld().orElse(null), SERVER_WORLD_DELIMITERS));
-            }
-            builder.append("/");
-        } else {
-            if (node.getWorld().orElse(null) != null) {
-                builder.append("global-").append(escapeDelimiters(node.getWorld().orElse(null), SERVER_WORLD_DELIMITERS)).append("/");
-            }
-        }
-
-        if (!node.getContexts().isEmpty()) {
-            builder.append("(");
-            for (Map.Entry<String, String> entry : node.getContexts().toSet()) {
-                builder.append(escapeDelimiters(entry.getKey(), CONTEXT_DELIMITERS))
-                        .append("=").append(escapeDelimiters(entry.getValue(), CONTEXT_DELIMITERS)).append(",");
-            }
-            builder.deleteCharAt(builder.length() - 1);
-            builder.append(")");
-        }
-
-        builder.append(escapeDelimiters(node.getPermission(), PERMISSION_DELIMITERS));
-        if (node.isTemporary()) builder.append("$").append(node.getExpiryUnixTime());
-        return builder.toString();
-    }
-
     public static Node fromLegacyString(String s, boolean b) {
         if (b) {
             return builderFromLegacyString(s, true).build();

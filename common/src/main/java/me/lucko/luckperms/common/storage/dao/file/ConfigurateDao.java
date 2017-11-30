@@ -394,8 +394,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                 String name = object.getNode("name").getString();
                 user.getPrimaryGroup().setStoredValue(object.getNode(this instanceof JsonDao ? "primaryGroup" : "primary-group").getString());
 
-                Set<NodeModel> data = readNodes(object);
-                Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
+                Set<Node> nodes = readNodes(object).stream().map(NodeModel::toNode).collect(Collectors.toSet());
                 user.setEnduringNodes(nodes);
                 user.setName(name, true);
 
@@ -498,8 +497,7 @@ public abstract class ConfigurateDao extends AbstractDao {
             ConfigurationNode object = readFile(StorageLocation.GROUP, name);
 
             if (object != null) {
-                Set<NodeModel> data = readNodes(object);
-                Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
+                Set<Node> nodes = readNodes(object).stream().map(NodeModel::toNode).collect(Collectors.toSet());
                 group.setEnduringNodes(nodes);
             } else {
                 ConfigurationNode data = SimpleConfigurationNode.root();
