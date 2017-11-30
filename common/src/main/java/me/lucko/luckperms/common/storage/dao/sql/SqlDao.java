@@ -54,6 +54,7 @@ import me.lucko.luckperms.common.storage.dao.AbstractDao;
 import me.lucko.luckperms.common.storage.dao.legacy.LegacySqlMigration;
 import me.lucko.luckperms.common.storage.dao.sql.connection.AbstractConnectionFactory;
 import me.lucko.luckperms.common.storage.dao.sql.connection.file.SQLiteConnectionFactory;
+import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.PostgreConnectionFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -198,7 +199,7 @@ public class SqlDao extends AbstractDao {
             }
 
             // migrations
-            if (!(provider instanceof SQLiteConnectionFactory)) {
+            if (!(provider instanceof SQLiteConnectionFactory) && !(provider instanceof PostgreConnectionFactory)) {
                 try (Connection connection = provider.getConnection()) {
                     try (Statement s = connection.createStatement()) {
                         s.execute(prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN actor_name VARCHAR(100)"));
