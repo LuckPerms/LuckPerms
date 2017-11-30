@@ -304,6 +304,7 @@ public class MongoDao extends AbstractDao {
                 if (cursor.hasNext()) {
                     // User exists, let's load.
                     Document d = cursor.next();
+                    String name = d.getString("name");
                     user.setEnduringNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
                             .map(e -> LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue()))
                             .collect(Collectors.toSet())
