@@ -11,8 +11,7 @@ The main features of the project are detailed on this wiki page: [Why LuckPerms?
 * [Sponge Plugin Release Page](https://forums.spongepowered.org/t/luckperms-an-advanced-permissions-system/14274 "Sponge Plugin Page")
 
 ## Useful Links
-* **Development Builds** - <https://ci.lucko.me/job/LuckPerms>
-* **Javadocs** - <https://luckperms.lucko.me/javadocs/>
+* **Downloads** - <https://ci.lucko.me/job/LuckPerms>
 * **Wiki** - <https://github.com/lucko/LuckPerms/wiki>
 
 ## Building
