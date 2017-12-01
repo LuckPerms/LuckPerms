@@ -80,15 +80,15 @@ public class WebEditorUtils {
     }
 
     public static PermissionHolder getHolderFromIdentifier(LuckPermsPlugin plugin, Sender sender, String who) {
-        if (who.startsWith("group/")) {
-            String group = who.substring("group/".length());
+        if (who.startsWith(GROUP_ID_PATTERN)) {
+            String group = who.substring(GROUP_ID_PATTERN.length());
             Group holder = plugin.getGroupManager().getIfLoaded(group);
             if (holder == null) {
                 Message.APPLY_EDITS_TARGET_GROUP_NOT_EXISTS.send(sender, group);
             }
             return holder;
-        } else if (who.startsWith("user/")) {
-            String user = who.substring("user/".length());
+        } else if (who.startsWith(USER_ID_PATTERN)) {
+            String user = who.substring(USER_ID_PATTERN.length());
             UUID uuid = CommandUtils.parseUuid(user);
             if (uuid == null) {
                 Message.APPLY_EDITS_TARGET_USER_NOT_UUID.send(sender, user);

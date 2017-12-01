@@ -72,13 +72,14 @@ public class BulkUpdateCommand extends SingleCommand {
             }
 
             Message.BULK_UPDATE_STARTING.send(sender);
-            plugin.getStorage().applyBulkUpdate(operation).thenAccept(b -> {
+            plugin.getStorage().applyBulkUpdate(operation).thenAcceptAsync(b -> {
                 if (b) {
+                    plugin.getUpdateTaskBuffer().requestDirectly();
                     Message.BULK_UPDATE_SUCCESS.send(sender);
                 } else {
                     Message.BULK_UPDATE_FAILURE.send(sender);
                 }
-            });
+            }, plugin.getScheduler().async());
             return CommandResult.SUCCESS;
         }
 

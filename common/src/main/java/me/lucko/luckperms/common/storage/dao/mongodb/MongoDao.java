@@ -228,7 +228,8 @@ public class MongoDao extends AbstractDao {
                                     .map(MongoDao::nodeToDoc)
                                     .collect(Collectors.toList());
 
-                            c.replaceOne(new Document("_id", uuid), d.append("permissions", newNodes));
+                            d.append("permissions", newNodes).remove("perms");
+                            c.replaceOne(new Document("_id", uuid), d);
                         }
                     }
                 }
@@ -252,7 +253,8 @@ public class MongoDao extends AbstractDao {
                                     .map(MongoDao::nodeToDoc)
                                     .collect(Collectors.toList());
 
-                            c.replaceOne(new Document("_id", holder), d.append("permissions", newNodes));
+                            d.append("permissions", newNodes).remove("perms");
+                            c.replaceOne(new Document("_id", holder), d);
                         }
                     }
                 }
