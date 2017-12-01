@@ -1,10 +1,11 @@
 ![alt text](https://i.imgur.com/7TwJZ5e.png "Banner")
-# LuckPerms [![Build Status](https://ci.lucko.me/job/LuckPerms/badge/icon)](https://ci.lucko.me/job/LuckPerms/)
+# LuckPerms [![Build Status](https://ci.lucko.me/job/LuckPerms/badge/icon)](https://ci.lucko.me/job/LuckPerms/) [![Javadocs](https://javadoc.io/badge/me.lucko.luckperms/luckperms-api.svg)](https://javadoc.io/doc/me.lucko.luckperms/luckperms-api) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/me.lucko.luckperms/luckperms-api/badge.svg)](https://maven-badges.herokuapp.com/maven-central/me.lucko.luckperms/luckperms-api)
+
 LuckPerms is an advanced permissions implementation aiming to be a fast, reliable and flexible alternative to existing permission plugins. The project's main goals are centered around high performance and a wide feature set, filling the gaps of functionality and building upon existing features found in other plugins.
 
 LuckPerms also includes an extensive API for developers, and support for a variety of Minecraft server software & data storage options.
 
-[See the charts below](https://github.com/lucko/LuckPerms#luckperms-vs-other-plugins) for a partial list of features & comparison with other providers.
+The main features of the project are detailed on this wiki page: [Why LuckPerms?](https://github.com/lucko/LuckPerms/wiki/Why-LuckPerms)
 
 * [Spigot Plugin Release Page](https://www.spigotmc.org/resources/luckperms-an-advanced-permissions-system.28140/ "Spigot Plugin Page")
 * [Sponge Plugin Release Page](https://forums.spongepowered.org/t/luckperms-an-advanced-permissions-system/14274 "Sponge Plugin Page")
@@ -35,29 +36,19 @@ You can find the output jars in the `target` directories.
 In order to contribute to and make changes to the plugin, you will need the dependencies listed above, plus the [Lombok plugin](https://projectlombok.org/download.html) for your IDE. 
 
 #### Pull Requests
-If you make any changes or improvements to the plugin which you think would be beneficial upstream, please consider making a Pull Request to merge your changes back into the upstream project. (especially if your changes are bug fixes!)
+If you make any changes or improvements to the plugin which you think would be beneficial to others, please consider making a pull request to merge your changes back into the upstream project. (especially if your changes are bug fixes!)
 
-LuckPerms loosely follows the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html), with a few minor changes here and there. Generally, try to copy the style of code found in the class you're editing. 
+LuckPerms loosely follows the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html). Generally, try to copy the style of code found in the class you're editing. 
 
 #### Project Layout
 The project is split up into 5 seperate modules.
 
-* **API** - The public facing API classes used by other plugins when integrating with LuckPerms. This is basically just a collection of interfaces implemented inside of the plugin.
-* **Common** - This includes all of the classes shared by separate implementations of LuckPerms. This is where the bulk of the project is.
-* **Bukkit, BungeeCord & Sponge** - Includes all of the platform specific classes used to implement LuckPerms on each of the 3 supported platforms.
+* **API** - The public, semantically versioned API used by other plugins wishing to integrate with and retrieve data from LuckPerms. This module (for the most part) does not contain any implementation itself, and is provided by the plugin.
+* **Common** - The common module contains most of the code which implements the respective LuckPerms plugins. This abstract module reduces duplicated code throughout the project.
+* **Bukkit, BungeeCord & Sponge** - Each use the common module to implement plugins on the respective server platforms.
 
 ## License
 LuckPerms is licensed under the permissive MIT license. Please see [`LICENSE.txt`](https://github.com/lucko/LuckPerms/blob/master/LICENSE.txt) for more info.
-
-## Why use LuckPerms?
-The main features of LuckPerms are detailed on this wiki page: [Why LuckPerms?](https://github.com/lucko/LuckPerms/wiki/Why-LuckPerms)
-
-### Bukkit
-See [here](https://luckperms.lucko.me/assets/bukkit-compare.png) for a comparison chart showing the differences between LuckPerms and other permission plugins for Bukkit.
-
-### Sponge
-LuckPerms is currently the only maintained and 'working' permissions plugin for Sponge servers.
-
 
 ## Thanks
 Thanks to ej-technologies for granting LuckPerms an open source licence to their [Java Profiling Software](http://www.ej-technologies.com/products/jprofiler/overview.html "Java Profiler").
