@@ -93,7 +93,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         // Migrate all groups.
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
-        List<String> ladders = Collections.synchronizedList(new ArrayList<>());
+        Set<String> ladders = new HashSet<>();
         SafeIterator.iterate(manager.getGroupList(), group -> {
             int groupWeight = maxWeight - group.getRank();
 
@@ -107,7 +107,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             migrateEntity(group, lpGroup, groupWeight);
 
             // remember known ladders
-            if (group.isRanked() && !ladders.contains(group.getRankLadder().toLowerCase())) {
+            if (group.isRanked()) {
                 ladders.add(group.getRankLadder().toLowerCase());
             }
 
@@ -123,14 +123,13 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             Track track = plugin.getTrackManager().getIfLoaded(rankLadder);
 
             // Get a list of all groups in a ladder
-            List<String> ladder = new TreeMap<Integer, PermissionGroup>(manager.getRankLadder(rankLadder)).values().stream().map(ladderGroup -> MigrationUtils.standardizeName(ladderGroup.getName())).collect(Collectors.toList());
+            List<String> ladder = manager.getRankLadder(rankLadder).entrySet().stream()
+                                  .sorted(Comparator.<Map.Entry<Integer, PermissionGroup>>comparingInt(e -> e.getKey()).reversed())
+                                  .map(e -> MigrationUtils.standardizeName(e.getValue().getName()))
+                                  .collect(Collectors.toList());
 
-            // Inverse because of pex #logic
-            Collections.reverse(ladder);
-
-            // Copy over the groups
-            ladder.forEach(groupName -> track.appendGroup(plugin.getGroupManager().getIfLoaded(groupName)));
-            plugin.getStorage().saveTrack(track).join();
+            track.setGroups(ladder);
+            plugin.getStorage().saveTrack(track);
         }
         log.log("Migrated " + ladders.size() + " tracks");
 
