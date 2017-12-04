@@ -110,14 +110,14 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             if (group.isRanked()) {
                 String rankLadder = group.getRankLadder().toLowerCase();
                 Track track = tracks.get(rankLadder);
-                if (track != null && (track = plugin.getTrackManager().getIfLoaded(rankLadder)) == null) {
+                if (track == null && (track = plugin.getTrackManager().getIfLoaded(rankLadder)) == null) {
                     plugin.getStorage().createAndLoadTrack(rankLadder, CreationCause.INTERNAL).join();
                     track = plugin.getTrackManager().getIfLoaded(rankLadder);
                 }
                 // sort and store groups
                 List<String> ladder = new TreeMap<Integer, PermissionGroup>(manager.getRankLadder(rankLadder)).values().stream().map(ladderGroup -> MigrationUtils.standardizeName(ladderGroup.getName())).collect(Collectors.toList());
                 Collections.reverse(ladder);
-                track.insertGroup(lpGroup, ladder.indexOf(groupName));
+                track.insertGroup(lpGroup, Math.min(ladder.indexOf(groupName), track.getGroups().size()));
                 tracks.put(rankLadder, track);
             }
             plugin.getStorage().saveGroup(lpGroup).join();
