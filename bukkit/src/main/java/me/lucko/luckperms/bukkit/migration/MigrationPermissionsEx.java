@@ -86,8 +86,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             i = Math.max(i, group.getRank());
         }
         int maxWeight = i + 5;
-        Comparator<Group> groupWeightSorter = (g1, g2) -> Integer.compare(
-                g1.getWeight().orElse(0), g2.getWeight().orElse(0));
+        Comparator<Group> groupWeightSorter = Comparator.comparingInt(g -> g.getWeight().orElse(0));
 
         // Migrate all groups.
         log.log("Starting group migration.");
@@ -112,7 +111,6 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                     plugin.getStorage().createAndLoadTrack(rankLadder, CreationCause.INTERNAL).join();
                     track = plugin.getTrackManager().getIfLoaded(rankLadder);
                 }
-                track.getGroups().forEach(trackGroupName -> plugin.getStorage().loadGroup(trackGroupName).join());
                 List<Group> trackGroups = track.getGroups().stream().map(trackGroupName -> plugin.getGroupManager().getIfLoaded(trackGroupName)).sorted(groupWeightSorter).collect(Collectors.toList());
                 int position = 0;
                 for (Group trackGroup : trackGroups) {
@@ -120,10 +118,8 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                         position++;
                     }
                 }
-                if (!track.containsGroup(lpGroup)) {
-                    track.insertGroup(lpGroup, position);
-                    plugin.getStorage().saveTrack(track);
-                }
+                track.insertGroup(lpGroup, position);
+                plugin.getStorage().saveTrack(track);
             }
             plugin.getStorage().saveGroup(lpGroup);
             log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
