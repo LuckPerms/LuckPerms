@@ -51,13 +51,13 @@ import ru.tehkode.permissions.PermissionGroup;
 import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -93,7 +93,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         // Migrate all groups.
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
-        ConcurrentHashMap<String, Track> tracks = new ConcurrentHashMap<>();
+        List<String> ladders = Collections.synchronizedList(new ArrayList<>());
         SafeIterator.iterate(manager.getGroupList(), group -> {
             int groupWeight = maxWeight - group.getRank();
 
@@ -106,26 +106,33 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             // migrate data
             migrateEntity(group, lpGroup, groupWeight);
 
-            // migrate ladder/track
-            if (group.isRanked()) {
-                String rankLadder = group.getRankLadder().toLowerCase();
-                Track track = tracks.get(rankLadder);
-                if (track == null && (track = plugin.getTrackManager().getIfLoaded(rankLadder)) == null) {
-                    plugin.getStorage().createAndLoadTrack(rankLadder, CreationCause.INTERNAL).join();
-                    track = plugin.getTrackManager().getIfLoaded(rankLadder);
-                }
-                // sort and store groups
-                List<String> ladder = new TreeMap<Integer, PermissionGroup>(manager.getRankLadder(rankLadder)).values().stream().map(ladderGroup -> MigrationUtils.standardizeName(ladderGroup.getName())).collect(Collectors.toList());
-                Collections.reverse(ladder);
-                track.insertGroup(lpGroup, Math.min(ladder.indexOf(groupName), track.getGroups().size()));
-                tracks.put(rankLadder, track);
+            // remember known ladders
+            if (group.isRanked() && !ladders.contains(group.getRankLadder().toLowerCase())) {
+                ladders.add(group.getRankLadder().toLowerCase());
             }
+
             plugin.getStorage().saveGroup(lpGroup).join();
             log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
         });
         log.log("Migrated " + groupCount.get() + " groups");
-        tracks.values().forEach(track -> plugin.getStorage().saveTrack(track));
-        log.log("Migrated " + tracks.size() + " tracks");
+
+        // Migrate all ladders/tracks.
+        log.log("Starting tracks migration.");
+        for (String rankLadder : ladders) {
+            plugin.getStorage().createAndLoadTrack(rankLadder, CreationCause.INTERNAL).join();
+            Track track = plugin.getTrackManager().getIfLoaded(rankLadder);
+
+            // Get a list of all groups in a ladder
+            List<String> ladder = new TreeMap<Integer, PermissionGroup>(manager.getRankLadder(rankLadder)).values().stream().map(ladderGroup -> MigrationUtils.standardizeName(ladderGroup.getName())).collect(Collectors.toList());
+
+            // Inverse because of pex #logic
+            Collections.reverse(ladder);
+
+            // Copy over the groups
+            ladder.forEach(groupName -> track.appendGroup(plugin.getGroupManager().getIfLoaded(groupName)));
+            plugin.getStorage().saveTrack(track).join();
+        }
+        log.log("Migrated " + ladders.size() + " tracks");
 
         // Migrate all users
         log.log("Starting user migration.");
