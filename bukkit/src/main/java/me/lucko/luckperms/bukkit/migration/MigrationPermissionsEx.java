@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -92,6 +93,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         // Migrate all groups.
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
+        ConcurrentHashMap<String, Track> tracks = new ConcurrentHashMap<>();
         SafeIterator.iterate(manager.getGroupList(), group -> {
             int groupWeight = maxWeight - group.getRank();
 
@@ -106,9 +108,9 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
             // migrate ladder/track
             if (group.isRanked()) {
-                String rankLadder = group.getRankLadder();
-                Track track;
-                if ((track = plugin.getTrackManager().getIfLoaded(rankLadder)) == null) {
+                String rankLadder = group.getRankLadder().toLowerCase();
+                Track track = tracks.get(rankLadder);
+                if (track != null && (track = plugin.getTrackManager().getIfLoaded(rankLadder)) == null) {
                     plugin.getStorage().createAndLoadTrack(rankLadder, CreationCause.INTERNAL).join();
                     track = plugin.getTrackManager().getIfLoaded(rankLadder);
                 }
@@ -116,12 +118,14 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 List<String> ladder = new TreeMap<Integer, PermissionGroup>(manager.getRankLadder(rankLadder)).values().stream().map(ladderGroup -> MigrationUtils.standardizeName(ladderGroup.getName())).collect(Collectors.toList());
                 Collections.reverse(ladder);
                 track.insertGroup(lpGroup, ladder.indexOf(groupName));
-                plugin.getStorage().saveTrack(track);
+                tracks.put(rankLadder, track);
             }
             plugin.getStorage().saveGroup(lpGroup).join();
             log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
         });
         log.log("Migrated " + groupCount.get() + " groups");
+        tracks.values().forEach(track -> plugin.getStorage().saveTrack(track));
+        log.log("Migrated " + tracks.size() + " tracks");
 
         // Migrate all users
         log.log("Starting user migration.");
