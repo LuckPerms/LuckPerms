@@ -51,9 +51,11 @@ import ru.tehkode.permissions.PermissionGroup;
 import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -86,7 +88,6 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             i = Math.max(i, group.getRank());
         }
         int maxWeight = i + 5;
-        Comparator<Group> groupWeightSorter = Comparator.comparingInt(g -> g.getWeight().orElse(0));
 
         // Migrate all groups.
         log.log("Starting group migration.");
@@ -111,17 +112,13 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                     plugin.getStorage().createAndLoadTrack(rankLadder, CreationCause.INTERNAL).join();
                     track = plugin.getTrackManager().getIfLoaded(rankLadder);
                 }
-                List<Group> trackGroups = track.getGroups().stream().map(trackGroupName -> plugin.getGroupManager().getIfLoaded(trackGroupName)).sorted(groupWeightSorter).collect(Collectors.toList());
-                int position = 0;
-                for (Group trackGroup : trackGroups) {
-                    if (lpGroup.getWeight().orElse(0) > trackGroup.getWeight().orElse(0)) {
-                        position++;
-                    }
-                }
-                track.insertGroup(lpGroup, position);
+                // sort and store groups
+                List<String> ladder = new TreeMap<Integer, PermissionGroup>(manager.getRankLadder(rankLadder)).values().stream().map(ladderGroup -> MigrationUtils.standardizeName(ladderGroup.getName())).collect(Collectors.toList());
+                Collections.reverse(ladder);
+                track.insertGroup(lpGroup, ladder.indexOf(groupName));
                 plugin.getStorage().saveTrack(track);
             }
-            plugin.getStorage().saveGroup(lpGroup);
+            plugin.getStorage().saveGroup(lpGroup).join();
             log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
         });
         log.log("Migrated " + groupCount.get() + " groups");
