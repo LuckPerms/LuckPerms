@@ -35,13 +35,15 @@ import java.util.Map;
 
 public class ContextSetComparator implements Comparator<ImmutableContextSet> {
 
-    private static final ContextSetComparator INSTANCE = new ContextSetComparator();
-    public static Comparator<ImmutableContextSet> get() {
+    private static final Comparator<ImmutableContextSet> INSTANCE = new ContextSetComparator();
+    private static final Comparator<ImmutableContextSet> REVERSE = INSTANCE.reversed();
+
+    public static Comparator<ImmutableContextSet> normal() {
         return INSTANCE;
     }
 
     public static Comparator<ImmutableContextSet> reverse() {
-        return INSTANCE.reversed();
+        return REVERSE;
     }
 
     @Override

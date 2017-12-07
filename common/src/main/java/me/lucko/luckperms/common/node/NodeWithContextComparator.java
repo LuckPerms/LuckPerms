@@ -28,16 +28,11 @@ package me.lucko.luckperms.common.node;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
-
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.utils.CollationKeyCache;
 
-import java.text.CollationKey;
-import java.text.Collator;
 import java.util.Comparator;
-import java.util.Locale;
 
 /**
  * Compares permission nodes based upon their supposed "priority".
@@ -45,16 +40,16 @@ import java.util.Locale;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class NodeWithContextComparator implements Comparator<LocalizedNode> {
 
-    private static final NodeWithContextComparator INSTANCE = new NodeWithContextComparator();
-    public static NodeWithContextComparator get() {
+    private static final Comparator<LocalizedNode> INSTANCE = new NodeWithContextComparator();
+    private static final Comparator<LocalizedNode> REVERSE = INSTANCE.reversed();
+
+    public static Comparator<LocalizedNode> normal() {
         return INSTANCE;
     }
-    public static Comparator<LocalizedNode> reverse() {
-        return INSTANCE.reversed();
-    }
 
-    private final Collator collator = Collator.getInstance(Locale.ENGLISH);
-    private final LoadingCache<String, CollationKey> collationKeyCache = Caffeine.newBuilder().build(collator::getCollationKey);
+    public static Comparator<LocalizedNode> reverse() {
+        return REVERSE;
+    }
 
     @Override
     public int compare(LocalizedNode one, LocalizedNode two) {
@@ -97,27 +92,8 @@ public class NodeWithContextComparator implements Comparator<LocalizedNode> {
             return o1.getWildcardLevel() > o2.getWildcardLevel() ? 1 : -1;
         }
 
-        return compareStrings(o1.getPermission(), o2.getPermission()) == 1 ? -1 : 1;
+        return CollationKeyCache.compareStrings(o1.getPermission(), o2.getPermission()) == 1 ? -1 : 1;
     }
 
-    public int compareStrings(String o1, String o2) {
-        if (o1.equals(o2)) {
-            return 0;
-        }
 
-        try {
-            CollationKey o1c = collationKeyCache.get(o1);
-            CollationKey o2c = collationKeyCache.get(o2);
-            int i = o1c.compareTo(o2c);
-            if (i != 0) {
-                return i;
-            }
-
-            // fallback to standard string comparison
-            return o1.compareTo(o2);
-        } catch (Exception e) {
-            // ignored
-        }
-        return 1;
-    }
 }

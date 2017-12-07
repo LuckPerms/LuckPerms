@@ -26,17 +26,21 @@
 package me.lucko.luckperms.common.node;
 
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.utils.CollationKeyCache;
 
 import java.util.Comparator;
 
 public class NodeComparator implements Comparator<Node> {
-    private static final NodeComparator INSTANCE = new NodeComparator();
-    public static Comparator<Node> get() {
+
+    private static final Comparator<Node> INSTANCE = new NodeComparator();
+    private static final Comparator<Node> REVERSE = INSTANCE.reversed();
+
+    public static Comparator<Node> normal() {
         return INSTANCE;
     }
 
     public static Comparator<Node> reverse() {
-        return INSTANCE.reversed();
+        return REVERSE;
     }
 
     @Override
@@ -61,7 +65,7 @@ public class NodeComparator implements Comparator<Node> {
             return o1.getWildcardLevel() > o2.getWildcardLevel() ? 1 : -1;
         }
 
-        return NodeWithContextComparator.get().compareStrings(o1.getPermission(), o2.getPermission()) == 1 ? -1 : 1;
+        return CollationKeyCache.compareStrings(o1.getPermission(), o2.getPermission()) == 1 ? -1 : 1;
     }
 
 }

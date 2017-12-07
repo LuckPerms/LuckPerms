@@ -198,6 +198,7 @@ public final class MutableContextSet implements ContextSet {
 
     @Nonnull
     @Override
+    @Deprecated
     public Map<String, String> toMap() {
         ImmutableMap.Builder<String, String> m = ImmutableMap.builder();
         for (Map.Entry<String, String> e : map.entries()) {

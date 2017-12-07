@@ -61,9 +61,13 @@ public class ContextSetConfigurateSerializer {
         return data;
     }
 
-    public static MutableContextSet deserializeContextSet(ConfigurationNode data) {
+    public static ContextSet deserializeContextSet(ConfigurationNode data) {
         Preconditions.checkArgument(data.hasMapChildren());
         Map<Object, ? extends ConfigurationNode> dataMap = data.getChildrenMap();
+
+        if (dataMap.isEmpty()) {
+            return ContextSet.empty();
+        }
 
         MutableContextSet map = MutableContextSet.create();
         for (Map.Entry<Object, ? extends ConfigurationNode> e : dataMap.entrySet()) {

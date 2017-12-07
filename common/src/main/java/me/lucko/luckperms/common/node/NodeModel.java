@@ -74,13 +74,13 @@ public final class NodeModel {
 
     public synchronized Node toNode() {
         if (node == null) {
-            Node.Builder builder = NodeFactory.newBuilder(permission);
-            builder.setValue(value);
-            builder.setServer(server);
-            builder.setWorld(world);
-            builder.setExpiry(expiry);
-            builder.withExtraContext(contexts);
-            node = builder.build();
+            node = NodeFactory.newBuilder(permission)
+                    .setValue(value)
+                    .setServer(server)
+                    .setWorld(world)
+                    .setExpiry(expiry)
+                    .withExtraContext(contexts)
+                    .build();
         }
 
         return node;

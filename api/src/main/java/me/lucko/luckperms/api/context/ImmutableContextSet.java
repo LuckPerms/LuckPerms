@@ -163,27 +163,28 @@ public final class ImmutableContextSet implements ContextSet {
         return true;
     }
 
+    @Nonnull
     @Override
     @Deprecated // This set is already immutable!
-    @Nonnull
     public ImmutableContextSet makeImmutable() {
         return this;
     }
 
-    @Override
     @Nonnull
+    @Override
     public MutableContextSet mutableCopy() {
         return MutableContextSet.fromSet(this);
     }
 
-    @Override
     @Nonnull
+    @Override
     public Set<Map.Entry<String, String>> toSet() {
         return map.entries();
     }
 
-    @Override
     @Nonnull
+    @Override
+    @Deprecated
     public Map<String, String> toMap() {
         ImmutableMap.Builder<String, String> m = ImmutableMap.builder();
         for (Map.Entry<String, String> e : map.entries()) {
@@ -193,33 +194,33 @@ public final class ImmutableContextSet implements ContextSet {
         return m.build();
     }
 
-    @Override
     @Nonnull
+    @Override
     public Multimap<String, String> toMultimap() {
         return map;
     }
 
-    @Override
     @Nonnull
+    @Override
     public boolean containsKey(@Nonnull String key) {
         return map.containsKey(checkNotNull(key, "key").toLowerCase().intern());
     }
 
-    @Override
     @Nonnull
+    @Override
     public Set<String> getValues(@Nonnull String key) {
         Collection<String> values = map.get(checkNotNull(key, "key").toLowerCase().intern());
         return values != null ? ImmutableSet.copyOf(values) : ImmutableSet.of();
     }
 
-    @Override
     @Nonnull
+    @Override
     public boolean has(@Nonnull String key, @Nonnull String value) {
         return map.containsEntry(checkNotNull(key, "key").toLowerCase().intern(), checkNotNull(value, "value").intern());
     }
 
-    @Override
     @Nonnull
+    @Override
     public boolean hasIgnoreCase(@Nonnull String key, @Nonnull String value) {
         value = checkNotNull(value, "value").intern();
         Collection<String> values = map.get(checkNotNull(key, "key").toLowerCase().intern());

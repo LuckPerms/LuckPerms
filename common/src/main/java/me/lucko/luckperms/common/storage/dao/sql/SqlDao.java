@@ -30,7 +30,6 @@ import lombok.Getter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 import me.lucko.luckperms.api.HeldPermission;
@@ -1129,7 +1128,6 @@ public class SqlDao extends AbstractDao {
     }
 
     private NodeModel deserializeNode(String permission, boolean value, String server, String world, long expiry, String contexts) {
-        JsonObject context = gson.fromJson(contexts, JsonObject.class);
-        return NodeModel.of(permission, value, server, world, expiry, ContextSetJsonSerializer.deserializeContextSet(context).makeImmutable());
+        return NodeModel.of(permission, value, server, world, expiry, ContextSetJsonSerializer.deserializeContextSet(gson, contexts).makeImmutable());
     }
 }

@@ -45,7 +45,7 @@ public class BukkitSchedulerAdapter implements SchedulerAdapter {
 
     @Getter
     @Accessors(fluent = true)
-    private ExecutorService asyncLp;
+    private ExecutorService asyncFallback;
 
     @Getter
     @Accessors(fluent = true)
@@ -61,17 +61,17 @@ public class BukkitSchedulerAdapter implements SchedulerAdapter {
 
     @Getter
     @Setter
-    private boolean useBukkitAsync = false;
+    private boolean useFallback = true;
 
     private final Set<BukkitTask> tasks = ConcurrentHashMap.newKeySet();
 
     public BukkitSchedulerAdapter(LPBukkitPlugin plugin) {
         this.plugin = plugin;
 
-        this.asyncLp = Executors.newCachedThreadPool();
-        this.asyncBukkit = r -> plugin.getServer().getScheduler().runTaskAsynchronously(plugin, r);
-        this.sync = r -> plugin.getServer().getScheduler().runTask(plugin, r);
-        this.async = r -> (useBukkitAsync ? asyncBukkit : asyncLp).execute(r);
+        this.sync = new SyncExecutor();
+        this.asyncFallback = Executors.newCachedThreadPool();
+        this.asyncBukkit = new BukkitAsyncExecutor();
+        this.async = new AsyncExecutor();
     }
 
     @Override
@@ -103,19 +103,45 @@ public class BukkitSchedulerAdapter implements SchedulerAdapter {
 
     @Override
     public void syncLater(Runnable runnable, long delayTicks) {
-        plugin.getServer().getScheduler().runTaskLater(plugin, runnable, delayTicks);
+        plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, runnable, delayTicks);
     }
 
     @Override
     public void shutdown() {
         tasks.forEach(BukkitTask::cancel);
+
         // wait for executor
-        asyncLp.shutdown();
+        asyncFallback.shutdown();
         try {
-            asyncLp.awaitTermination(30, TimeUnit.SECONDS);
+            asyncFallback.awaitTermination(30, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
     }
+
+    private final class SyncExecutor implements Executor {
+        @Override
+        public void execute(Runnable runnable) {
+            plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, runnable);
+        }
+    }
+
+    private final class AsyncExecutor implements Executor {
+        @Override
+        public void execute(Runnable runnable) {
+            if (useFallback || !plugin.isEnabled()) {
+                asyncFallback.execute(runnable);
+            } else {
+                asyncBukkit.execute(runnable);
+            }
+        }
+    }
+
+    private final class BukkitAsyncExecutor implements Executor {
+        @Override
+        public void execute(Runnable runnable) {
+            plugin.getServer().getScheduler().runTaskAsynchronously(plugin, runnable);
+        }
+    }
+
 }
