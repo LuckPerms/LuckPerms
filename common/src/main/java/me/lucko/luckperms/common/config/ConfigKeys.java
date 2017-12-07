@@ -49,15 +49,15 @@ import me.lucko.luckperms.common.primarygroup.ParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
 import me.lucko.luckperms.common.primarygroup.StoredHolder;
 import me.lucko.luckperms.common.storage.StorageCredentials;
+import me.lucko.luckperms.common.storage.dao.cassandra.CassandraConfig;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.net.InetSocketAddress;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * All of the {@link ConfigKey}s used by LuckPerms.
@@ -379,6 +379,19 @@ public class ConfigKeys {
         );
     }));
 
+    public static final ConfigKey<CassandraConfig> CASSANDRA_CONFIG = EnduringKey.wrap(AbstractKey.of(c -> {
+        List<String> socketAddresses = c.getList("cassandra.addresses", Collections.emptyList());
+        Set<InetSocketAddress> inetSocketAddresses = socketAddresses.stream()
+                .map(s -> s.split(":"))
+                .map(s -> new InetSocketAddress(s[0], Integer.valueOf(s[1])))
+                .collect(Collectors.toSet());
+        boolean ssl = c.getBoolean("cassandra.ssl", false);
+        String keyspace = c.getString("cassandra.keyspace", "luckperms");
+        String username = c.getString("cassandra.username", null);
+        String password = c.getString("cassandra.password", null);
+        return new CassandraConfig(inetSocketAddresses, ssl, keyspace, username, password);
+    }));
+
     /**
      * The prefix for any SQL tables
      */
@@ -388,6 +401,11 @@ public class ConfigKeys {
      * The prefix for any MongoDB collections
      */
     public static final ConfigKey<String> MONGODB_COLLECTION_PREFIX = EnduringKey.wrap(StringKey.of("data.mongodb_collection_prefix", ""));
+
+    /**
+     * The prefix for any Cassandra tables
+     */
+    public static final ConfigKey<String> CASSANDRA_TABLE_PREFIX = EnduringKey.wrap(StringKey.of("data.cassandra_table_prefix", ""));
 
     /**
      * The name of the storage method being used

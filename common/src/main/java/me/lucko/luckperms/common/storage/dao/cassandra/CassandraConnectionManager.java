@@ -3,24 +3,22 @@ package me.lucko.luckperms.common.storage.dao.cassandra;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 
-import java.net.InetSocketAddress;
-import java.util.List;
-
 public class CassandraConnectionManager implements AutoCloseable {
 
     private final Cluster cluster;
     private final Session session;
 
-    public CassandraConnectionManager(List<InetSocketAddress> socketAddresses, boolean ssl, String username, String password, String keyspace) {
-        Cluster.Builder builder = Cluster.builder().addContactPointsWithPorts(socketAddresses);
-        if(ssl) builder.withSSL();
-        if(username != null && username.length() > 0 &&
-                password != null && password.length() > 0) builder.withCredentials(username, password);
+    public CassandraConnectionManager(CassandraConfig config) {
+        Cluster.Builder builder = Cluster.builder().addContactPointsWithPorts(config.getNodes());
+        if(config.isSsl()) builder.withSSL();
+        String username = config.getUsername();
+        String password = config.getPassword();
+        if(isNotEmpty(username) && isNotEmpty(password)) builder.withCredentials(username, password);
         this.cluster = builder.build();
-        this.session = cluster.connect(keyspace);
+        this.session = cluster.connect(config.getKeyspace());
     }
 
-    public Session getSession() {
+    protected Session getSession() {
         return session;
     }
 
@@ -31,5 +29,9 @@ public class CassandraConnectionManager implements AutoCloseable {
     @Override
     public void close() throws Exception {
         cluster.close();
+    }
+
+    private static boolean isNotEmpty(String str) {
+        return str != null && str.length() != 0;
     }
 }

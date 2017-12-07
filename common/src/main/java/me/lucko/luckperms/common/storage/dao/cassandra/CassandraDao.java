@@ -4,6 +4,7 @@ import com.datastax.driver.core.*;
 import com.datastax.driver.core.exceptions.DriverException;
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
@@ -30,32 +31,64 @@ public class CassandraDao extends AbstractDao {
     private final Function<String, String> prefix;
     private final CassandraConnectionManager connectionManager;
 
+    private final PreparedStatement ACTION_INSERT;
+    private final PreparedStatement ACTION_SELECT_ALL;
+
     private final PreparedStatement USER_SELECT_ALL_UUID;
     private final PreparedStatement USER_SELECT_PERMISSIONS;
     private final PreparedStatement USER_SELECT;
     private final PreparedStatement USER_DELETE;
     private final PreparedStatement USER_INSERT;
     private final PreparedStatement USER_RENAME;
+    private final PreparedStatement USER_UPDATE_PERMISSIONS;
 
-    private final PreparedStatement ACTION_INSERT;
-    private final PreparedStatement ACTION_SELECT_ALL;
+    private final PreparedStatement GROUP_SELECT_ALL;
+    private final PreparedStatement GROUP_SELECT;
+    private final PreparedStatement GROUP_INSERT;
+    private final PreparedStatement GROUP_DELETE;
 
-    protected CassandraDao(LuckPermsPlugin plugin, CassandraConnectionManager connectionManager, String prefix) {
+    private final PreparedStatement TRACK_SELECT;
+    private final PreparedStatement TRACK_SELECT_ALL;
+    private final PreparedStatement TRACK_INSERT;
+    private final PreparedStatement TRACK_DELETE;
+
+    private final PreparedStatement UUID_TO_NAME_SELECT;
+    private final PreparedStatement NAME_TO_UUID_SELECT;
+    private final PreparedStatement UUID_TO_NAME_INSERT;
+    private final PreparedStatement NAME_TO_UUID_INSERT;
+
+    public CassandraDao(LuckPermsPlugin plugin, CassandraConnectionManager connectionManager, String prefix) {
         super(plugin, "Cassandra");
         this.prefix = str -> str.replace("{prefix}", prefix);
         this.connectionManager = connectionManager;
 
         Session cluster = connectionManager.getSession();
 
-        USER_SELECT_ALL_UUID = cluster.prepare(this.prefix.apply("SELECT uuid FROM {prefix}users"));
-        USER_SELECT_PERMISSIONS = cluster.prepare(this.prefix.apply("SELECT uuid, permissions FROM {prefix}users"));
-        USER_SELECT = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}users WHERE uuid=?"));
-        USER_DELETE = cluster.prepare(this.prefix.apply("DELETE FROM {prefix}users WHERE uuid=?"));
-        USER_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}users(uuid, name, permissions, primaryGroup) VALUES(?, ?, ?, ?)"));
-        USER_RENAME = cluster.prepare(this.prefix.apply("UPDATE {prefix}users SET name=? WHERE uuid=?"));
-
         ACTION_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}actions(time, actor_uuid, actor_name, type, acted_uuid, acted_name, action) VALUES(?, ?, ?, ?, ?, ?, ?)"));
         ACTION_SELECT_ALL = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}actions"));
+
+        USER_SELECT_ALL_UUID = cluster.prepare(this.prefix.apply("SELECT uuid FROM {prefix}users"));
+        USER_SELECT_PERMISSIONS = cluster.prepare(this.prefix.apply("SELECT uuid, permissions FROM {prefix}users"));
+        USER_SELECT = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}users WHERE uuid=? LIMIT 1"));
+        USER_DELETE = cluster.prepare(this.prefix.apply("DELETE FROM {prefix}users WHERE uuid=? LIMIT 1"));
+        USER_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}users(uuid, name, permissions, primaryGroup) VALUES(?, ?, ?, ?)"));
+        USER_RENAME = cluster.prepare(this.prefix.apply("UPDATE {prefix}users SET name=? WHERE uuid=?"));
+        USER_UPDATE_PERMISSIONS = cluster.prepare(this.prefix.apply("UPDATE {prefix}users SET permissions=? WHERE uuid=?"));
+
+        GROUP_SELECT_ALL = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}groups"));
+        GROUP_SELECT = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}groups WHERE name=? LIMIT 1"));
+        GROUP_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}groups(name, permissions) VALUES(?, ?)"));
+        GROUP_DELETE = cluster.prepare(this.prefix.apply("DELETE FROM {prefix}groups WHERE name=? LIMIT 1"));
+
+        TRACK_SELECT = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}tracks WHERE name=? LIMIT 1"));
+        TRACK_SELECT_ALL = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}tracks"));
+        TRACK_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}tracks(name, groups) VALUES(?, ?)"));
+        TRACK_DELETE = cluster.prepare(this.prefix.apply("DELETE FROM {prefix}tracks WHERE name=?"));
+
+        UUID_TO_NAME_SELECT = cluster.prepare(this.prefix.apply("SELECT FROM {prefix}uuid_to_name WHERE uuid=? LIMIT 1"));
+        NAME_TO_UUID_SELECT = cluster.prepare(this.prefix.apply("SELECT FROM {prefix}name_to_uuid WHERE name=? LIMIT 1"));
+        UUID_TO_NAME_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}uuid_to_name(uuid, name) VALUES(?, ?)"));
+        NAME_TO_UUID_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}name_to_uuid(name, uuid) VALUES(?, ?)"));
     }
 
     @Override
@@ -145,7 +178,44 @@ public class CassandraDao extends AbstractDao {
 
     @Override
     public boolean applyBulkUpdate(BulkUpdate bulkUpdate) {
-        return false; //todo: implement
+        try {
+            if(bulkUpdate.getDataType().isIncludingUsers()) {
+                BoundStatement bind = USER_SELECT_PERMISSIONS.bind();
+                ResultSet rs = connectionManager.getSession().execute(bind);
+                for (Row row : rs) {
+                    Set<NodeModel> permissions = row.getSet("permissions", NodeModel.class);
+                    Set<NodeModel> collect = permissions.stream()
+                            .map(bulkUpdate::apply)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toSet());
+                    if(!collect.equals(permissions)) {
+                        BoundStatement bs = USER_UPDATE_PERMISSIONS.bind(row.getUUID("uuid"), collect);
+                        connectionManager.getSession().execute(bs);
+                    }
+                }
+            }
+
+            if(bulkUpdate.getDataType().isIncludingGroups()) {
+                BoundStatement bind = GROUP_SELECT_ALL.bind();
+                ResultSet rs = connectionManager.getSession().execute(bind);
+                for (Row row : rs) {
+                    Set<NodeModel> permissions = row.getSet("permissions", NodeModel.class);
+                    Set<NodeModel> collect = permissions.stream()
+                            .map(bulkUpdate::apply)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toSet());
+                    if(!collect.equals(permissions)) {
+                        BoundStatement bs = GROUP_INSERT.bind(row.getString("name"), collect);
+                        connectionManager.getSession().execute(bs);
+                    }
+                }
+            }
+
+            return true;
+        } catch (DriverException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @SuppressWarnings("Duplicates")
@@ -258,78 +328,265 @@ public class CassandraDao extends AbstractDao {
         group.getIoLock().lock();
         try {
             // if store contains group, load from store else save
+            BoundStatement bind = GROUP_SELECT.bind(name);
+            ResultSet rs = connectionManager.getSession().execute(bind);
+            Row row = rs.one();
+            if(row != null) {
+                Set<NodeModel> permissions = row.getSet("permissions", NodeModel.class);
+                group.setEnduringNodes(permissions.stream().map(NodeModel::toNode).collect(Collectors.toSet()));
+            } else {
+                saveGroup(group);
+            }
+            group.getRefreshBuffer().requestDirectly();
+            return true;
         } catch (DriverException e) {
             e.printStackTrace();
             return false;
         } finally {
             group.getIoLock().unlock();
         }
-        group.getRefreshBuffer().requestDirectly();
-        return false;
+
     }
 
     @Override
     public boolean loadGroup(String name) {
-        return false;
+        Group group = null;
+        try {
+            // if store contains group, load from store else save
+            BoundStatement bind = GROUP_SELECT.bind(name);
+            ResultSet rs = connectionManager.getSession().execute(bind);
+            Row row = rs.one();
+            if(row != null) {
+                group = plugin.getGroupManager().getOrMake(name);
+                group.getIoLock().lock();
+                Set<NodeModel> permissions = row.getSet("permissions", NodeModel.class);
+                group.setEnduringNodes(permissions.stream().map(NodeModel::toNode).collect(Collectors.toSet()));
+                group.getRefreshBuffer().requestDirectly();
+                return true;
+            }
+            return false;
+        } catch (DriverException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            if(group != null) group.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean loadAllGroups() {
-        return false;
+        try {
+            BoundStatement bind = GROUP_SELECT_ALL.bind();
+            ResultSet rs = connectionManager.getSession().execute(bind);
+            for (Row row : rs) {
+                String name = row.getString("name");
+                Set<Node> permissions = row.getSet("permissions", NodeModel.class).stream()
+                        .map(NodeModel::toNode)
+                        .collect(Collectors.toSet());
+
+                Group group = plugin.getGroupManager().getOrMake(name);
+                group.getIoLock().lock();
+                group.setEnduringNodes(permissions);
+                group.getIoLock().unlock();
+            }
+            return true;
+        } catch (DriverException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
     public boolean saveGroup(Group group) {
-        return false;
+        group.getIoLock().lock();
+        try {
+            String name = group.getName();
+            Set<NodeModel> permissions = group.getEnduringNodes().values().stream()
+                    .map(NodeModel::fromNode)
+                    .collect(Collectors.toSet());
+            BoundStatement bind = GROUP_INSERT.bind(name, permissions);
+            connectionManager.getSession().execute(bind);
+            return true;
+        } catch (DriverException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            group.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean deleteGroup(Group group) {
-        return false;
+        group.getIoLock().lock();
+        try {
+            BoundStatement bind = GROUP_DELETE.bind(group.getName());
+            connectionManager.getSession().execute(bind);
+            return true;
+        } catch (DriverException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            group.getIoLock().unlock();
+        }
     }
 
     @Override
     public List<HeldPermission<String>> getGroupsWithPermission(String permission) {
-        return null;
+        //https://issues.apache.org/jira/browse/CASSANDRA-7396
+        try {
+            List<HeldPermission<String>> list = new ArrayList<>();
+            BoundStatement bind = GROUP_SELECT_ALL.bind();
+            ResultSet rs = connectionManager.getSession().execute(bind);
+            for (Row row : rs) {
+                String name = row.getString("name");
+                Set<NodeModel> permissions = row.getSet("permissions", NodeModel.class);
+                for (NodeModel perm : permissions) {
+                    if(perm.getPermission().equalsIgnoreCase(permission)) {
+                        list.add(NodeHeldPermission.of(name, perm));
+                    }
+                }
+            }
+            return Collections.unmodifiableList(list);
+        } catch (DriverException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
     public boolean createAndLoadTrack(String name) {
-        return false;
+        Track track = plugin.getTrackManager().getOrMake(name);
+        track.getIoLock().lock();
+        try {
+            BoundStatement bind = TRACK_SELECT.bind(name);
+            ResultSet rs = connectionManager.getSession().execute(bind);
+            Row row = rs.one();
+            if(row != null) {
+                List<String> groups = row.getList("groups", String.class);
+                track.setGroups(groups);
+            } else {
+                saveTrack(track);
+            }
+            return true;
+        } catch (DriverException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            track.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean loadTrack(String name) {
-        return false;
+        Track track = plugin.getTrackManager().getOrMake(name);
+        track.getIoLock().lock();
+        try {
+            BoundStatement bind = TRACK_SELECT.bind(name);
+            ResultSet rs = connectionManager.getSession().execute(bind);
+            Row row = rs.one();
+            if(row != null) {
+                List<String> groups = row.getList("groups", String.class);
+                track.setGroups(groups);
+            } else {
+                return false;
+            }
+            return true;
+        } catch (DriverException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            track.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean loadAllTracks() {
-        return false;
+        try {
+            BoundStatement bind = TRACK_SELECT_ALL.bind();
+            ResultSet rs = connectionManager.getSession().execute(bind);
+            for (Row row : rs) {
+                String name = row.getString("name");
+                List<String> groups = row.getList("groups", String.class);
+                Track track = plugin.getTrackManager().getOrMake(name);
+                track.getIoLock().lock();
+                track.setGroups(groups);
+                track.getIoLock().unlock();
+            }
+            return true;
+        } catch (DriverException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
     public boolean saveTrack(Track track) {
-        return false;
+        track.getIoLock().lock();
+        try {
+            BoundStatement bind = TRACK_INSERT.bind(track.getName(), track.getGroups());
+            connectionManager.getSession().execute(bind);
+            return true;
+        } catch (DriverException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            track.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean deleteTrack(Track track) {
-        return false;
+        track.getIoLock().lock();
+        try {
+            BoundStatement bind = TRACK_DELETE.bind(track.getName());
+            connectionManager.getSession().execute(bind);
+            return true;
+        } catch (DriverException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            track.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean saveUUIDData(UUID uuid, String username) {
-        return false;
+        try {
+            BatchStatement bs = new BatchStatement();
+            BoundStatement bind = UUID_TO_NAME_INSERT.bind(uuid, username);
+            BoundStatement bind1 = NAME_TO_UUID_INSERT.bind(username, uuid);
+            bs.add(bind).add(bind1);
+            connectionManager.getSession().execute(bs);
+            return true;
+        } catch (DriverException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
     public UUID getUUID(String username) {
-        return null;
+        try {
+            BoundStatement bind = NAME_TO_UUID_SELECT.bind(username);
+            ResultSet rs = connectionManager.getSession().execute(bind);
+            Row row = rs.one();
+            return row != null ? row.getUUID("uuid") : null;
+        } catch (DriverException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
     public String getName(UUID uuid) {
-        return null;
+        try {
+            BoundStatement bind = UUID_TO_NAME_SELECT.bind(uuid);
+            ResultSet rs = connectionManager.getSession().execute(bind);
+            Row row = rs.one();
+            return row != null ? row.getString("name") : null;
+        } catch (DriverException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

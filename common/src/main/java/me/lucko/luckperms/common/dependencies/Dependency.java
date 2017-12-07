@@ -43,6 +43,7 @@ public enum Dependency {
     SLF4J_API("org.slf4j", "slf4j-api", "1.7.25"),
     MONGODB_DRIVER("org.mongodb", "mongo-java-driver", "3.5.0"),
     JEDIS("https://github.com/lucko/jedis/releases/download/jedis-2.9.1-shaded/jedis-2.9.1-shaded.jar", "2.9.1-shaded"),
+    CASSANDRA_DRIVER("com.datastax.cassandra", "cassandra-driver-core", "3.3.2"),
     CONFIGURATE_CORE("ninja.leaping.configurate", "configurate-core", "3.3"),
     CONFIGURATE_GSON("ninja.leaping.configurate", "configurate-gson", "3.3"),
     CONFIGURATE_YAML("ninja.leaping.configurate", "configurate-yaml", "3.3"),
