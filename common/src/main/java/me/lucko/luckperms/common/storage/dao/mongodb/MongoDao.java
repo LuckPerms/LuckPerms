@@ -277,11 +277,12 @@ public class MongoDao extends AbstractDao {
                     // User exists, let's load.
                     Document d = cursor.next();
 
+                    String name = d.getString("name");
                     user.getPrimaryGroup().setStoredValue(d.getString("primaryGroup"));
-                    user.setName(d.getString("name"), true);
 
                     Set<Node> nodes = nodesFromDoc(d).stream().map(NodeModel::toNode).collect(Collectors.toSet());
                     user.setEnduringNodes(nodes);
+                    user.setName(name, true);
 
                     boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
                     if (user.getName().isPresent() && (name == null || !user.getName().get().equalsIgnoreCase(name))) {
