@@ -220,7 +220,6 @@ public class CassandraDao extends AbstractDao {
         }
     }
 
-    @SuppressWarnings("Duplicates")
     @Override
     public boolean loadUser(UUID uuid, String username) {
         User user = plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
@@ -257,7 +256,6 @@ public class CassandraDao extends AbstractDao {
         return true;
     }
 
-    @SuppressWarnings("Duplicates")
     @Override
     public boolean saveUser(User user) {
         user.getIoLock().lock();
