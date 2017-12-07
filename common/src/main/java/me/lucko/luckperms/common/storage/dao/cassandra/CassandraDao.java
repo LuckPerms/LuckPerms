@@ -94,11 +94,9 @@ public class CassandraDao extends AbstractDao {
     @Override
     public void init() {
         Session session = connectionManager.getSession();
-        String keyspace = session.getLoggedKeyspace();
-        TableMetadata testTable = session.getCluster()
-                .getMetadata()
-                .getKeyspace(keyspace)
-                .getTable(prefix.apply("user_permissions"));
+        String keyspaceName = session.getLoggedKeyspace();
+        KeyspaceMetadata keyspace = session.getCluster().getMetadata().getKeyspace(keyspaceName);
+        TableMetadata testTable = keyspace.getTable(prefix.apply("user_permissions"));
         if(testTable == null) {
             // create tables
             String schemaFileName = "schema/cassandra.cql";
@@ -122,6 +120,10 @@ public class CassandraDao extends AbstractDao {
                 shutdown();
             }
         }
+
+        TypeCodec<UDTValue> codec = CodecRegistry.DEFAULT_INSTANCE.codecFor(keyspace.getUserType("permission"));
+        NodeCodec nodeCodec = new NodeCodec(codec);
+        CodecRegistry.DEFAULT_INSTANCE.register(nodeCodec);
     }
 
     @Override
