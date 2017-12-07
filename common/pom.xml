@@ -121,6 +121,13 @@
             <version>3.5.0</version>
             <scope>provided</scope>
         </dependency>
+        <!-- Cassandra -->
+        <dependency>
+            <groupId>com.datastax.cassandra</groupId>
+            <artifactId>cassandra-driver-core</artifactId>
+            <version>3.3.2</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- SnakeYAML -->
         <dependency>
             <groupId>org.yaml</groupId>
