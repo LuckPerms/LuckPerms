@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.storage.wrappings;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.Delegate;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
@@ -59,14 +58,28 @@ public class PhasedStorage implements Storage {
         return new PhasedStorage(storage);
     }
 
-    @Delegate(types = Delegated.class)
     private final Storage delegate;
 
     private final Phaser phaser = new Phaser();
 
     @Override
+    public ApiStorage getDelegate() {
+        return delegate.getDelegate();
+    }
+
+    @Override
+    public String getName() {
+        return delegate.getName();
+    }
+
+    @Override
     public Storage noBuffer() {
         return this;
+    }
+
+    @Override
+    public void init() {
+        delegate.init();
     }
 
     @Override
@@ -79,6 +92,11 @@ public class PhasedStorage implements Storage {
         }
 
         delegate.shutdown();
+    }
+
+    @Override
+    public Map<String, String> getMeta() {
+        return delegate.getMeta();
     }
 
     @Override
@@ -289,14 +307,5 @@ public class PhasedStorage implements Storage {
         } finally {
             phaser.arriveAndDeregister();
         }
-    }
-
-    private interface Delegated {
-        ApiStorage getDelegate();
-        String getName();
-        boolean isAcceptingLogins();
-        void setAcceptingLogins(boolean b);
-        void init();
-        Map<String, String> getMeta();
     }
 }

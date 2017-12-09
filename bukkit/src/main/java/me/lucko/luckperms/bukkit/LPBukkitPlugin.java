@@ -134,7 +134,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private ContextManager<Player> contextManager;
     private CalculatorFactory calculatorFactory;
     private BufferedRequest<Void> updateTaskBuffer;
-    private boolean started = false;
     private CountDownLatch enableLatch = new CountDownLatch(1);
     private VerboseHandler verboseHandler;
     private BukkitSenderFactory senderFactory;
@@ -174,7 +173,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         try {
             enable();
-            started = true;
         } finally {
             // count down the latch when onEnable has been called
             // we don't care about the result here
@@ -327,8 +325,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         // Switch back to the fallback executor, the bukkit one won't allow new tasks
         scheduler.setUseFallback(true);
-
-        started = false;
 
         defaultsProvider.close();
         permissionVault.shutdown();

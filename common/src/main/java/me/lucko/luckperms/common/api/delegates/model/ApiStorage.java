@@ -61,7 +61,7 @@ public class ApiStorage implements Storage {
 
     @Override
     public boolean isAcceptingLogins() {
-        return handle.isAcceptingLogins();
+        return true;
     }
 
     @Override

@@ -29,6 +29,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import me.lucko.luckperms.common.plugin.SchedulerAdapter;
 
 import org.bukkit.scheduler.BukkitTask;
@@ -37,7 +39,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class BukkitSchedulerAdapter implements SchedulerAdapter {
@@ -69,7 +72,7 @@ public class BukkitSchedulerAdapter implements SchedulerAdapter {
         this.plugin = plugin;
 
         this.sync = new SyncExecutor();
-        this.asyncFallback = Executors.newCachedThreadPool();
+        this.asyncFallback = new FallbackAsyncExecutor();
         this.asyncBukkit = new BukkitAsyncExecutor();
         this.async = new AsyncExecutor();
     }
@@ -141,6 +144,12 @@ public class BukkitSchedulerAdapter implements SchedulerAdapter {
         @Override
         public void execute(Runnable runnable) {
             plugin.getServer().getScheduler().runTaskAsynchronously(plugin, runnable);
+        }
+    }
+
+    private static final class FallbackAsyncExecutor extends ThreadPoolExecutor {
+        private FallbackAsyncExecutor() {
+            super(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), new ThreadFactoryBuilder().setNameFormat("luckperms-fallback-%d").build());
         }
     }
 

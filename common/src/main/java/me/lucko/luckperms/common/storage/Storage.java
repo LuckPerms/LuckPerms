@@ -51,10 +51,6 @@ public interface Storage {
 
     String getName();
 
-    boolean isAcceptingLogins();
-
-    void setAcceptingLogins(boolean acceptingLogins);
-
     Storage noBuffer();
 
     void init();

@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.storage;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.Delegate;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
@@ -64,8 +63,6 @@ public class AbstractStorage implements Storage {
     }
 
     private final LuckPermsPlugin plugin;
-
-    @Delegate(types = Delegated.class)
     private final AbstractDao dao;
 
     @Getter
@@ -82,8 +79,38 @@ public class AbstractStorage implements Storage {
     }
 
     @Override
+    public String getName() {
+        return dao.getName();
+    }
+
+    @Override
     public Storage noBuffer() {
         return this;
+    }
+
+    @Override
+    public void init() {
+        try {
+            dao.init();
+        } catch (Exception e) {
+            plugin.getLog().severe("Failed to init storage dao");
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void shutdown() {
+        try {
+            dao.shutdown();
+        } catch (Exception e) {
+            plugin.getLog().severe("Failed to shutdown storage dao");
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public Map<String, String> getMeta() {
+        return dao.getMeta();
     }
 
     @Override
@@ -258,14 +285,5 @@ public class AbstractStorage implements Storage {
     @Override
     public CompletableFuture<String> getName(UUID uuid) {
         return makeFuture(() -> dao.getName(uuid));
-    }
-
-    private interface Delegated {
-        String getName();
-        boolean isAcceptingLogins();
-        void setAcceptingLogins(boolean b);
-        void init();
-        void shutdown();
-        Map<String, String> getMeta();
     }
 }

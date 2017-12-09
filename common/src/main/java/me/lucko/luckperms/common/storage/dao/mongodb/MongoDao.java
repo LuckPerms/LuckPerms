@@ -117,7 +117,6 @@ public class MongoDao extends AbstractDao {
         }
 
         database = mongoClient.getDatabase(configuration.getDatabase());
-        setAcceptingLogins(true);
     }
 
     @Override

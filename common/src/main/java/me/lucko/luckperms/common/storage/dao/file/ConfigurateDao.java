@@ -192,8 +192,6 @@ public abstract class ConfigurateDao extends AbstractDao {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        setAcceptingLogins(true);
     }
 
     private static void mkdir(File file) throws IOException {

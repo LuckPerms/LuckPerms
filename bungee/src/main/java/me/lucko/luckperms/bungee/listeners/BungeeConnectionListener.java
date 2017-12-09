@@ -68,25 +68,6 @@ public class BungeeConnectionListener implements Listener {
             plugin.getLog().info("Processing pre-login for " + c.getUniqueId() + " - " + c.getName());
         }
 
-        /* there was an issue connecting to the DB, performing file i/o, etc.
-           as this is bungeecord, we will still allow the login, as players can't really do much harm without permissions data.
-           the proxy will just fallback to using the config file perms. */
-        if (!plugin.getStorage().isAcceptingLogins()) {
-
-            if (plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {
-                // cancel the login attempt
-                e.setCancelReason(TextComponent.fromLegacyText(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
-                e.setCancelled(true);
-            } else {
-                // log that the user tried to login, but was denied at this stage.
-                plugin.getLog().warn("Permissions storage is not loaded. No permissions data will be loaded for: " + c.getUniqueId() + " - " + c.getName());
-            }
-
-            e.completeIntent(plugin);
-            return;
-        }
-
-
         plugin.getScheduler().doAsync(() -> {
             plugin.getUniqueConnections().add(c.getUniqueId());
 
@@ -103,6 +84,7 @@ public class BungeeConnectionListener implements Listener {
                 User user = LoginHelper.loadUser(plugin, c.getUniqueId(), c.getName(), true);
                 plugin.getApiProvider().getEventFactory().handleUserLoginProcess(c.getUniqueId(), c.getName(), user);
             } catch (Exception ex) {
+                plugin.getLog().severe("Exception occured whilst loading data for " + c.getUniqueId() + " - " + c.getName());
                 ex.printStackTrace();
 
                 // there was some error loading
@@ -110,10 +92,7 @@ public class BungeeConnectionListener implements Listener {
                     // cancel the login attempt
                     e.setCancelReason(TextComponent.fromLegacyText(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
                     e.setCancelled(true);
-                } else {
-                    plugin.getLog().warn("Error loading data. No permissions data will be loaded for: " + c.getUniqueId() + " - " + c.getName());
                 }
-
             }
 
             // finally, complete our intent to modify state, so the proxy can continue handling the connection.

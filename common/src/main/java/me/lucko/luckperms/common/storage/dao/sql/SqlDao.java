@@ -207,10 +207,9 @@ public class SqlDao extends AbstractDao {
                 }
             }
 
-            setAcceptingLogins(true);
         } catch (Exception e) {
-            e.printStackTrace();
             plugin.getLog().severe("Error occurred whilst initialising the database.");
+            e.printStackTrace();
             shutdown();
         }
     }

@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.storage.dao;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
@@ -53,10 +52,6 @@ public abstract class AbstractDao {
 
     @Getter
     public final String name;
-
-    @Getter
-    @Setter
-    private boolean acceptingLogins = false;
 
     public abstract void init();
 
