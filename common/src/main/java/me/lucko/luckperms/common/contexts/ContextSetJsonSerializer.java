@@ -74,7 +74,7 @@ public class ContextSetJsonSerializer {
         }
 
         JsonObject context = gson.fromJson(json, JsonObject.class);
-        if (context == null || context.size() == 0) {
+        if (context == null) {
             return ContextSet.empty();
         }
 
@@ -85,7 +85,7 @@ public class ContextSetJsonSerializer {
         Preconditions.checkArgument(element.isJsonObject());
         JsonObject data = element.getAsJsonObject();
 
-        if (data.size() == 0) {
+        if (data.entrySet().isEmpty()) {
             return ContextSet.empty();
         }
 
