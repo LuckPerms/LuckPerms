@@ -25,10 +25,9 @@
 
 package me.lucko.luckperms.common.dependencies;
 
-import lombok.experimental.UtilityClass;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.ByteStreams;
 
 import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -43,7 +42,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -52,17 +54,16 @@ import java.util.Set;
 /**
  * Responsible for loading runtime dependencies.
  */
-@UtilityClass
 public class DependencyManager {
     private static final Method ADD_URL_METHOD;
 
     static {
-        Method addUrlMethod = null;
+        Method addUrlMethod;
         try {
             addUrlMethod = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
             addUrlMethod.setAccessible(true);
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            throw new ExceptionInInitializerError(e);
         }
         ADD_URL_METHOD = addUrlMethod;
     }
@@ -79,7 +80,19 @@ public class DependencyManager {
             .put(StorageType.H2, ImmutableList.of(Dependency.H2_DRIVER))
             .build();
 
-    public static void loadStorageDependencies(LuckPermsPlugin plugin, Set<StorageType> storageTypes) {
+    private final LuckPermsPlugin plugin;
+    private final MessageDigest digest;
+
+    public DependencyManager(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+        try {
+            this.digest = MessageDigest.getInstance("SHA-1");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void loadStorageDependencies(Set<StorageType> storageTypes) {
         Set<Dependency> dependencies = new LinkedHashSet<>();
         for (StorageType storageType : storageTypes) {
             dependencies.addAll(STORAGE_DEPENDENCIES.get(storageType));
@@ -104,10 +117,10 @@ public class DependencyManager {
             dependencies.remove(Dependency.HOCON_CONFIG);
         }
 
-        loadDependencies(plugin, dependencies);
+        loadDependencies(dependencies);
     }
 
-    public static void loadDependencies(LuckPermsPlugin plugin, Set<Dependency> dependencies) {
+    public void loadDependencies(Set<Dependency> dependencies) {
         plugin.getLog().info("Identified the following dependencies: " + dependencies.toString());
 
         File libDir = new File(plugin.getDataDirectory(), "lib");
@@ -119,7 +132,7 @@ public class DependencyManager {
         List<File> filesToLoad = new ArrayList<>();
         for (Dependency dependency : dependencies) {
             try {
-                filesToLoad.add(downloadDependency(plugin, libDir, dependency));
+                filesToLoad.add(downloadDependency(libDir, dependency));
             } catch (Throwable e) {
                 plugin.getLog().severe("Exception whilst downloading dependency " + dependency.name());
                 e.printStackTrace();
@@ -129,7 +142,7 @@ public class DependencyManager {
         // Load classes.
         for (File file : filesToLoad) {
             try {
-                loadJar(plugin, file);
+                loadJar(file);
             } catch (Throwable t) {
                 plugin.getLog().severe("Failed to load dependency jar " + file.getName());
                 t.printStackTrace();
@@ -137,7 +150,7 @@ public class DependencyManager {
         }
     }
 
-    private static File downloadDependency(LuckPermsPlugin plugin, File libDir, Dependency dependency) throws Exception {
+    private File downloadDependency(File libDir, Dependency dependency) throws Exception {
         String fileName = dependency.name().toLowerCase() + "-" + dependency.getVersion() + ".jar";
 
         File file = new File(libDir, fileName);
@@ -149,7 +162,17 @@ public class DependencyManager {
 
         plugin.getLog().info("Dependency '" + fileName + "' could not be found. Attempting to download.");
         try (InputStream in = url.openStream()) {
-            Files.copy(in, file.toPath());
+            byte[] bytes = ByteStreams.toByteArray(in);
+            if (bytes.length == 0) {
+                throw new RuntimeException("Empty stream");
+            }
+
+            byte[] hash = this.digest.digest(bytes);
+            if (!Arrays.equals(hash, dependency.getChecksum())) {
+                throw new RuntimeException("Downloaded file had an invalid hash.");
+            }
+
+            Files.write(file.toPath(), bytes);
         }
 
         if (!file.exists()) {
@@ -160,7 +183,7 @@ public class DependencyManager {
         }
     }
 
-    private static void loadJar(LuckPermsPlugin plugin, File file) {
+    private  void loadJar(File file) {
         // get the classloader to load into
         ClassLoader classLoader = plugin.getClass().getClassLoader();
 

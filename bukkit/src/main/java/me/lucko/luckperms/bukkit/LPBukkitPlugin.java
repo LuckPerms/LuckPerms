@@ -129,6 +129,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private DefaultsProvider defaultsProvider;
     private ChildPermissionProvider childPermissionProvider;
     private LocaleManager localeManager;
+    private DependencyManager dependencyManager;
     private CachedStateManager cachedStateManager;
     private ContextManager<Player> contextManager;
     private CalculatorFactory calculatorFactory;
@@ -153,7 +154,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         senderFactory = new BukkitSenderFactory(this);
         log = new SenderLogger(this, getConsoleSender());
 
-        DependencyManager.loadDependencies(this, Collections.singleton(Dependency.CAFFEINE));
+        dependencyManager = new DependencyManager(this);
+        dependencyManager.loadDependencies(Collections.singleton(Dependency.CAFFEINE));
     }
 
     @Override
@@ -192,7 +194,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         configuration.init();
 
         Set<StorageType> storageTypes = StorageFactory.getRequiredTypes(this, StorageType.H2);
-        DependencyManager.loadStorageDependencies(this, storageTypes);
+        dependencyManager.loadStorageDependencies(storageTypes);
 
         // setup the Bukkit defaults hook
         defaultsProvider = new DefaultsProvider();

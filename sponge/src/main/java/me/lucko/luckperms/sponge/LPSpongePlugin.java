@@ -178,6 +178,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private me.lucko.luckperms.common.logging.Logger log;
     private LuckPermsService service;
     private LocaleManager localeManager;
+    private DependencyManager dependencyManager;
     private CachedStateManager cachedStateManager;
     private ContextManager<Subject> contextManager;
     private CalculatorFactory calculatorFactory;
@@ -195,6 +196,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         localeManager = new NoopLocaleManager();
         senderFactory = new SpongeSenderFactory(this);
         log = new SenderLogger(this, getConsoleSender());
+        dependencyManager = new DependencyManager(this);
 
         LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
         verboseHandler = new VerboseHandler(scheduler.async(), getVersion());
@@ -206,7 +208,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         configuration.init();
 
         Set<StorageType> storageTypes = StorageFactory.getRequiredTypes(this, StorageType.H2);
-        DependencyManager.loadStorageDependencies(this, storageTypes);
+        dependencyManager.loadStorageDependencies(storageTypes);
 
         // register events
         game.getEventManager().registerListeners(this, new SpongeConnectionListener(this));

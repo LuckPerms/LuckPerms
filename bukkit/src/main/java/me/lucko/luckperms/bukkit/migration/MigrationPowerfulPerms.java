@@ -40,7 +40,6 @@ import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.logging.ProgressLogger;
@@ -95,7 +94,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
         if (type == null || type != StorageType.MYSQL) {
             // We need to load the Hikari/MySQL stuff.
-            DependencyManager.loadStorageDependencies(plugin, ImmutableSet.of(StorageType.MYSQL));
+            plugin.getDependencyManager().loadStorageDependencies(ImmutableSet.of(StorageType.MYSQL));
         }
 
         String address = args.get(0);
