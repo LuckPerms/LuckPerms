@@ -61,46 +61,46 @@ public abstract class AbstractDao {
         return Collections.emptyMap();
     }
 
-    public abstract boolean logAction(LogEntry entry);
+    public abstract boolean logAction(LogEntry entry) throws Exception;
 
-    public abstract Log getLog();
+    public abstract Log getLog() throws Exception;
 
-    public abstract boolean applyBulkUpdate(BulkUpdate bulkUpdate);
+    public abstract boolean applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception;
 
-    public abstract boolean loadUser(UUID uuid, String username);
+    public abstract boolean loadUser(UUID uuid, String username) throws Exception;
 
-    public abstract boolean saveUser(User user);
+    public abstract boolean saveUser(User user) throws Exception;
 
-    public abstract Set<UUID> getUniqueUsers();
+    public abstract Set<UUID> getUniqueUsers() throws Exception;
 
-    public abstract List<HeldPermission<UUID>> getUsersWithPermission(String permission);
+    public abstract List<HeldPermission<UUID>> getUsersWithPermission(String permission) throws Exception;
 
-    public abstract boolean createAndLoadGroup(String name);
+    public abstract boolean createAndLoadGroup(String name) throws Exception;
 
-    public abstract boolean loadGroup(String name);
+    public abstract boolean loadGroup(String name) throws Exception;
 
-    public abstract boolean loadAllGroups();
+    public abstract boolean loadAllGroups() throws Exception;
 
-    public abstract boolean saveGroup(Group group);
+    public abstract boolean saveGroup(Group group) throws Exception;
 
-    public abstract boolean deleteGroup(Group group);
+    public abstract boolean deleteGroup(Group group) throws Exception;
 
-    public abstract List<HeldPermission<String>> getGroupsWithPermission(String permission);
+    public abstract List<HeldPermission<String>> getGroupsWithPermission(String permission) throws Exception;
 
-    public abstract boolean createAndLoadTrack(String name);
+    public abstract boolean createAndLoadTrack(String name) throws Exception;
 
-    public abstract boolean loadTrack(String name);
+    public abstract boolean loadTrack(String name) throws Exception;
 
-    public abstract boolean loadAllTracks();
+    public abstract boolean loadAllTracks() throws Exception;
 
-    public abstract boolean saveTrack(Track track);
+    public abstract boolean saveTrack(Track track) throws Exception;
 
-    public abstract boolean deleteTrack(Track track);
+    public abstract boolean deleteTrack(Track track) throws Exception;
 
-    public abstract boolean saveUUIDData(UUID uuid, String username);
+    public abstract boolean saveUUIDData(UUID uuid, String username) throws Exception;
 
-    public abstract UUID getUUID(String username);
+    public abstract UUID getUUID(String username) throws Exception;
 
-    public abstract String getName(UUID uuid);
+    public abstract String getName(UUID uuid) throws Exception;
 
 }

@@ -367,7 +367,7 @@ public class ConfigKeys {
         int maxPoolSize = c.getInt("data.pool-settings.maximum-pool-size", c.getInt("data.pool-size", 10));
         int minIdle = c.getInt("data.pool-settings.minimum-idle", maxPoolSize);
         int maxLifetime = c.getInt("data.pool-settings.maximum-lifetime", 1800000);
-        int connectionTimeout = c.getInt("data.pool-settings.connection-timeout", 15000);
+        int connectionTimeout = c.getInt("data.pool-settings.connection-timeout", 5000);
         Map<String, String> props = ImmutableMap.copyOf(c.getMap("data.pool-settings.properties", ImmutableMap.of("useUnicode", "true", "characterEncoding", "utf8")));
 
         return new StorageCredentials(

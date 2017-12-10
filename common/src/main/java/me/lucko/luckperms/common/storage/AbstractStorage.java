@@ -29,6 +29,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import com.google.common.base.Throwables;
+
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.cause.CreationCause;
@@ -48,8 +50,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
+import java.util.concurrent.CompletionException;
 
 /**
  * Converts a {@link AbstractDao} to use {@link CompletableFuture}s
@@ -74,8 +77,15 @@ public class AbstractStorage implements Storage {
         this.delegate = new ApiStorage(plugin, this);
     }
 
-    private <T> CompletableFuture<T> makeFuture(Supplier<T> supplier) {
-        return CompletableFuture.supplyAsync(supplier, dao.getPlugin().getScheduler().async());
+    private <T> CompletableFuture<T> makeFuture(Callable<T> supplier) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return supplier.call();
+            } catch (Exception e) {
+                Throwables.propagateIfPossible(e);
+                throw new CompletionException(e);
+            }
+        }, dao.getPlugin().getScheduler().async());
     }
 
     @Override

@@ -210,7 +210,6 @@ public class SqlDao extends AbstractDao {
         } catch (Exception e) {
             plugin.getLog().severe("Error occurred whilst initialising the database.");
             e.printStackTrace();
-            shutdown();
         }
     }
 
@@ -229,7 +228,7 @@ public class SqlDao extends AbstractDao {
     }
 
     @Override
-    public boolean logAction(LogEntry entry) {
+    public boolean logAction(LogEntry entry) throws SQLException {
         try (Connection c = provider.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(prefix.apply(ACTION_INSERT))) {
                 ps.setLong(1, entry.getTimestamp());
@@ -240,16 +239,13 @@ public class SqlDao extends AbstractDao {
                 ps.setString(6, entry.getActedName());
                 ps.setString(7, entry.getAction());
                 ps.execute();
+                return true;
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
         }
-        return true;
     }
 
     @Override
-    public Log getLog() {
+    public Log getLog() throws SQLException {
         final Log.Builder log = Log.builder();
         try (Connection c = provider.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(prefix.apply(ACTION_SELECT_ALL))) {
@@ -270,51 +266,35 @@ public class SqlDao extends AbstractDao {
                     }
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
         }
         return log.build();
     }
 
     @Override
-    public boolean applyBulkUpdate(BulkUpdate bulkUpdate) {
-        boolean success = true;
+    public boolean applyBulkUpdate(BulkUpdate bulkUpdate) throws SQLException {
         String queryString = bulkUpdate.buildAsSql();
 
         try (Connection c = provider.getConnection()) {
+
             if (bulkUpdate.getDataType().isIncludingUsers()) {
                 String table = prefix.apply("{prefix}user_permissions");
-
                 try (Statement s = c.createStatement()) {
                     s.execute(queryString.replace("{table}", table));
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    success = false;
                 }
             }
 
             if (bulkUpdate.getDataType().isIncludingGroups()) {
                 String table = prefix.apply("{prefix}group_permissions");
-
                 try (Statement s = c.createStatement()) {
                     s.execute(queryString.replace("{table}", table));
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    success = false;
                 }
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            success = false;
         }
-
-        return success;
+        return true;
     }
 
     @Override
-    public boolean loadUser(UUID uuid, String username) {
+    public boolean loadUser(UUID uuid, String username) throws SQLException {
         User user = plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
         user.getIoLock().lock();
         try {
@@ -339,9 +319,6 @@ public class SqlDao extends AbstractDao {
                         }
                     }
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return false;
             }
 
             // Collect user meta (username & primary group)
@@ -356,9 +333,6 @@ public class SqlDao extends AbstractDao {
                         }
                     }
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return false;
             }
 
             // update username & primary group
@@ -398,7 +372,7 @@ public class SqlDao extends AbstractDao {
     }
 
     @Override
-    public boolean saveUser(User user) {
+    public boolean saveUser(User user) throws SQLException {
         user.getIoLock().lock();
         try {
             // Empty data - just delete from the DB.
@@ -413,9 +387,6 @@ public class SqlDao extends AbstractDao {
                         ps.setString(2, user.getUuid().toString());
                         ps.execute();
                     }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    return false;
                 }
                 return true;
             }
@@ -438,8 +409,6 @@ public class SqlDao extends AbstractDao {
                         }
                     }
                 }
-            } catch (SQLException e) {
-                return false;
             }
 
             Set<NodeModel> local = user.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toSet());
@@ -464,9 +433,6 @@ public class SqlDao extends AbstractDao {
                         }
                         ps.executeBatch();
                     }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    return false;
                 }
             }
 
@@ -485,9 +451,6 @@ public class SqlDao extends AbstractDao {
                         }
                         ps.executeBatch();
                     }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    return false;
                 }
             }
 
@@ -518,9 +481,6 @@ public class SqlDao extends AbstractDao {
                     }
                 }
 
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return false;
             }
 
             return true;
@@ -530,7 +490,7 @@ public class SqlDao extends AbstractDao {
     }
 
     @Override
-    public Set<UUID> getUniqueUsers() {
+    public Set<UUID> getUniqueUsers() throws SQLException {
         Set<UUID> uuids = new HashSet<>();
         try (Connection c = provider.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_SELECT_DISTINCT))) {
@@ -541,15 +501,12 @@ public class SqlDao extends AbstractDao {
                     }
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
         }
         return uuids;
     }
 
     @Override
-    public List<HeldPermission<UUID>> getUsersWithPermission(String permission) {
+    public List<HeldPermission<UUID>> getUsersWithPermission(String permission) throws SQLException {
         ImmutableList.Builder<HeldPermission<UUID>> held = ImmutableList.builder();
         try (Connection c = provider.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_SELECT_PERMISSION))) {
@@ -568,15 +525,12 @@ public class SqlDao extends AbstractDao {
                     }
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
         }
         return held.build();
     }
 
     @Override
-    public boolean createAndLoadGroup(String name) {
+    public boolean createAndLoadGroup(String name) throws SQLException {
         String query;
         switch (provider.getName()) {
             case "H2":
@@ -598,16 +552,13 @@ public class SqlDao extends AbstractDao {
                 ps.setString(1, name);
                 ps.execute();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
         }
 
         return loadGroup(name);
     }
 
     @Override
-    public boolean loadGroup(String name) {
+    public boolean loadGroup(String name) throws SQLException {
         // Check the group actually exists
         List<String> groups = new ArrayList<>();
         try (Connection c = provider.getConnection()) {
@@ -619,9 +570,6 @@ public class SqlDao extends AbstractDao {
                 }
             }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
         }
 
         if (!groups.contains(name)) {
@@ -649,9 +597,6 @@ public class SqlDao extends AbstractDao {
                         }
                     }
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return false;
             }
 
             if (!data.isEmpty()) {
@@ -668,7 +613,7 @@ public class SqlDao extends AbstractDao {
     }
 
     @Override
-    public boolean loadAllGroups() {
+    public boolean loadAllGroups() throws SQLException {
         List<String> groups = new ArrayList<>();
         try (Connection c = provider.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_SELECT_ALL))) {
@@ -678,30 +623,32 @@ public class SqlDao extends AbstractDao {
                     }
                 }
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
         }
 
         boolean success = true;
         for (String g : groups) {
-            if (!loadGroup(g)) {
+            try {
+                loadGroup(g);
+            } catch (Exception e) {
+                e.printStackTrace();
                 success = false;
             }
         }
 
-        if (success) {
-            GroupManager gm = plugin.getGroupManager();
-            gm.getAll().values().stream()
-                    .filter(g -> !groups.contains(g.getName()))
-                    .forEach(gm::unload);
+        if (!success) {
+            throw new RuntimeException("Exception occurred whilst loading a group");
         }
-        return success;
+
+        GroupManager gm = plugin.getGroupManager();
+        gm.getAll().values().stream()
+                .filter(g -> !groups.contains(g.getName()))
+                .forEach(gm::unload);
+
+        return true;
     }
 
     @Override
-    public boolean saveGroup(Group group) {
+    public boolean saveGroup(Group group) throws SQLException {
         group.getIoLock().lock();
         try {
             // Empty data, just delete.
@@ -711,9 +658,6 @@ public class SqlDao extends AbstractDao {
                         ps.setString(1, group.getName());
                         ps.execute();
                     }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    return false;
                 }
                 return true;
             }
@@ -736,9 +680,6 @@ public class SqlDao extends AbstractDao {
                         }
                     }
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return false;
             }
 
             Set<NodeModel> local = group.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toSet());
@@ -763,9 +704,6 @@ public class SqlDao extends AbstractDao {
                         }
                         ps.executeBatch();
                     }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    return false;
                 }
             }
 
@@ -784,9 +722,6 @@ public class SqlDao extends AbstractDao {
                         }
                         ps.executeBatch();
                     }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    return false;
                 }
             }
 
@@ -797,7 +732,7 @@ public class SqlDao extends AbstractDao {
     }
 
     @Override
-    public boolean deleteGroup(Group group) {
+    public boolean deleteGroup(Group group) throws SQLException {
         group.getIoLock().lock();
         try {
             try (Connection c = provider.getConnection()) {
@@ -810,20 +745,15 @@ public class SqlDao extends AbstractDao {
                     ps.setString(1, group.getName());
                     ps.execute();
                 }
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return false;
             }
             return true;
-
         } finally {
             group.getIoLock().unlock();
         }
     }
 
     @Override
-    public List<HeldPermission<String>> getGroupsWithPermission(String permission) {
+    public List<HeldPermission<String>> getGroupsWithPermission(String permission) throws SQLException {
         ImmutableList.Builder<HeldPermission<String>> held = ImmutableList.builder();
         try (Connection c = provider.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_SELECT_PERMISSION))) {
@@ -842,15 +772,12 @@ public class SqlDao extends AbstractDao {
                     }
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
         }
         return held.build();
     }
 
     @Override
-    public boolean createAndLoadTrack(String name) {
+    public boolean createAndLoadTrack(String name) throws SQLException {
         Track track = plugin.getTrackManager().getOrMake(name);
         track.getIoLock().lock();
         try {
@@ -867,9 +794,6 @@ public class SqlDao extends AbstractDao {
                         }
                     }
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return false;
             }
 
             if (exists.get()) {
@@ -884,9 +808,6 @@ public class SqlDao extends AbstractDao {
                         ps.setString(2, json);
                         ps.execute();
                     }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    return false;
                 }
                 return true;
             }
@@ -897,7 +818,7 @@ public class SqlDao extends AbstractDao {
     }
 
     @Override
-    public boolean loadTrack(String name) {
+    public boolean loadTrack(String name) throws SQLException {
         Track track = plugin.getTrackManager().getOrMake(name);
         track.getIoLock().lock();
         try {
@@ -913,9 +834,6 @@ public class SqlDao extends AbstractDao {
                         }
                     }
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return false;
             }
 
             track.setGroups(gson.fromJson(groups.get(), LIST_STRING_TYPE));
@@ -927,7 +845,7 @@ public class SqlDao extends AbstractDao {
     }
 
     @Override
-    public boolean loadAllTracks() {
+    public boolean loadAllTracks() throws SQLException {
         List<String> tracks = new ArrayList<>();
         try (Connection c = provider.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(prefix.apply(TRACK_SELECT_ALL))) {
@@ -937,29 +855,32 @@ public class SqlDao extends AbstractDao {
                     }
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
         }
 
         boolean success = true;
         for (String t : tracks) {
-            if (!loadTrack(t)) {
+            try {
+                loadTrack(t);
+            } catch (Exception e) {
+                e.printStackTrace();
                 success = false;
             }
         }
 
-        if (success) {
-            TrackManager tm = plugin.getTrackManager();
-            tm.getAll().values().stream()
-                    .filter(t -> !tracks.contains(t.getName()))
-                    .forEach(tm::unload);
+        if (!success) {
+            throw new RuntimeException("Exception occurred whilst loading a track");
         }
-        return success;
+
+        TrackManager tm = plugin.getTrackManager();
+        tm.getAll().values().stream()
+                .filter(t -> !tracks.contains(t.getName()))
+                .forEach(tm::unload);
+
+        return true;
     }
 
     @Override
-    public boolean saveTrack(Track track) {
+    public boolean saveTrack(Track track) throws SQLException {
         track.getIoLock().lock();
         try {
             String s = gson.toJson(track.getGroups());
@@ -969,9 +890,6 @@ public class SqlDao extends AbstractDao {
                     ps.setString(2, track.getName());
                     ps.execute();
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return false;
             }
             return true;
         } finally {
@@ -980,7 +898,7 @@ public class SqlDao extends AbstractDao {
     }
 
     @Override
-    public boolean deleteTrack(Track track) {
+    public boolean deleteTrack(Track track) throws SQLException {
         track.getIoLock().lock();
         try {
             try (Connection c = provider.getConnection()) {
@@ -988,9 +906,6 @@ public class SqlDao extends AbstractDao {
                     ps.setString(1, track.getName());
                     ps.execute();
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return false;
             }
         } finally {
             track.getIoLock().unlock();
@@ -1001,7 +916,7 @@ public class SqlDao extends AbstractDao {
     }
 
     @Override
-    public boolean saveUUIDData(UUID uuid, String username) {
+    public boolean saveUUIDData(UUID uuid, String username) throws SQLException {
         final String u = username.toLowerCase();
         AtomicReference<String> remoteUserName = new AtomicReference<>(null);
 
@@ -1012,8 +927,6 @@ public class SqlDao extends AbstractDao {
                 ps.setString(2, uuid.toString());
                 ps.execute();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
 
         try (Connection c = provider.getConnection()) {
@@ -1025,9 +938,6 @@ public class SqlDao extends AbstractDao {
                     }
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
         }
 
         if (remoteUserName.get() != null) {
@@ -1042,9 +952,6 @@ public class SqlDao extends AbstractDao {
                     ps.setString(2, uuid.toString());
                     ps.execute();
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return false;
             }
             return true;
         } else {
@@ -1056,16 +963,13 @@ public class SqlDao extends AbstractDao {
                     ps.setString(3, "default");
                     ps.execute();
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return false;
             }
             return true;
         }
     }
 
     @Override
-    public UUID getUUID(String username) {
+    public UUID getUUID(String username) throws SQLException {
         final String u = username.toLowerCase();
         final AtomicReference<UUID> uuid = new AtomicReference<>(null);
 
@@ -1078,16 +982,13 @@ public class SqlDao extends AbstractDao {
                     }
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
         }
 
         return uuid.get();
     }
 
     @Override
-    public String getName(UUID uuid) {
+    public String getName(UUID uuid) throws SQLException {
         final AtomicReference<String> name = new AtomicReference<>(null);
 
         try (Connection c = provider.getConnection()) {
@@ -1099,9 +1000,6 @@ public class SqlDao extends AbstractDao {
                     }
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
         }
 
         return name.get();

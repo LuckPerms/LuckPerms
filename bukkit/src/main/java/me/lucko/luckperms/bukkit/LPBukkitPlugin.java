@@ -299,17 +299,21 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         // Load any online users (in the case of a reload)
         for (Player player : getServer().getOnlinePlayers()) {
             scheduler.doAsync(() -> {
-                LoginHelper.loadUser(this, player.getUniqueId(), player.getName(), false);
-                User user = getUserManager().getIfLoaded(getUuidCache().getUUID(player.getUniqueId()));
-                if (user != null) {
-                    scheduler.doSync(() -> {
-                        try {
-                            LPPermissible lpPermissible = new LPPermissible(player, user, this);
-                            PermissibleInjector.inject(player, lpPermissible);
-                        } catch (Throwable t) {
-                            t.printStackTrace();
-                        }
-                    });
+                try {
+                    LoginHelper.loadUser(this, player.getUniqueId(), player.getName(), false);
+                    User user = getUserManager().getIfLoaded(getUuidCache().getUUID(player.getUniqueId()));
+                    if (user != null) {
+                        scheduler.doSync(() -> {
+                            try {
+                                LPPermissible lpPermissible = new LPPermissible(player, user, this);
+                                PermissibleInjector.inject(player, lpPermissible);
+                            } catch (Throwable t) {
+                                t.printStackTrace();
+                            }
+                        });
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             });
         }

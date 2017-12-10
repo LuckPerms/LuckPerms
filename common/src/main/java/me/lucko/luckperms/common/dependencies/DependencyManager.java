@@ -46,6 +46,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +87,7 @@ public class DependencyManager {
     public DependencyManager(LuckPermsPlugin plugin) {
         this.plugin = plugin;
         try {
-            this.digest = MessageDigest.getInstance("SHA-1");
+            this.digest = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
@@ -168,8 +169,11 @@ public class DependencyManager {
             }
 
             byte[] hash = this.digest.digest(bytes);
+
+            plugin.getLog().info("Successfully downloaded '" + fileName + "' with checksum: " + Base64.getEncoder().encodeToString(hash));
+
             if (!Arrays.equals(hash, dependency.getChecksum())) {
-                throw new RuntimeException("Downloaded file had an invalid hash.");
+                throw new RuntimeException("Downloaded file had an invalid hash. Expected: " + Base64.getEncoder().encodeToString(dependency.getChecksum()));
             }
 
             Files.write(file.toPath(), bytes);
@@ -178,7 +182,6 @@ public class DependencyManager {
         if (!file.exists()) {
             throw new IllegalStateException("File not present. - " + file.toString());
         } else {
-            plugin.getLog().info("Dependency '" + fileName + "' successfully downloaded.");
             return file;
         }
     }

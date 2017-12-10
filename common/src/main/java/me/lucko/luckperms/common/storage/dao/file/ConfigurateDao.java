@@ -156,10 +156,10 @@ public abstract class ConfigurateDao extends AbstractDao {
         return (dir, name) -> name.endsWith(fileExtension);
     }
 
-    private boolean reportException(String file, Exception ex) {
+    private Exception reportException(String file, Exception ex) throws Exception {
         plugin.getLog().warn("Exception thrown whilst performing i/o: " + file);
         ex.printStackTrace();
-        return false;
+        throw ex;
     }
 
     private void registerFileAction(StorageLocation type, File file) {
@@ -322,68 +322,63 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public boolean applyBulkUpdate(BulkUpdate bulkUpdate) {
-        try {
-            if (bulkUpdate.getDataType().isIncludingUsers()) {
-                File[] files = getDirectory(StorageLocation.USER).listFiles(getFileTypeFilter());
-                if (files == null) {
-                    throw new IllegalStateException("Users directory matched no files.");
-                }
-
-                for (File file : files) {
-                    try {
-                        registerFileAction(StorageLocation.USER, file);
-                        ConfigurationNode object = readFile(file);
-                        Set<NodeModel> nodes = readNodes(object);
-                        Set<NodeModel> results = nodes.stream()
-                                .map(bulkUpdate::apply)
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toSet());
-
-                        if (!nodes.equals(results)) {
-                            writeNodes(object, results);
-                            saveFile(file, object);
-                        }
-                    } catch (Exception e) {
-                        reportException(file.getName(), e);
-                    }
-                }
+    public boolean applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception {
+        if (bulkUpdate.getDataType().isIncludingUsers()) {
+            File[] files = getDirectory(StorageLocation.USER).listFiles(getFileTypeFilter());
+            if (files == null) {
+                throw new IllegalStateException("Users directory matched no files.");
             }
 
-            if (bulkUpdate.getDataType().isIncludingGroups()) {
-                File[] files = getDirectory(StorageLocation.GROUP).listFiles(getFileTypeFilter());
-                if (files == null) {
-                    throw new IllegalStateException("Groups directory matched no files.");
-                }
+            for (File file : files) {
+                try {
+                    registerFileAction(StorageLocation.USER, file);
+                    ConfigurationNode object = readFile(file);
+                    Set<NodeModel> nodes = readNodes(object);
+                    Set<NodeModel> results = nodes.stream()
+                            .map(bulkUpdate::apply)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toSet());
 
-                for (File file : files) {
-                    try {
-                        registerFileAction(StorageLocation.GROUP, file);
-                        ConfigurationNode object = readFile(file);
-                        Set<NodeModel> nodes = readNodes(object);
-                        Set<NodeModel> results = nodes.stream()
-                                .map(bulkUpdate::apply)
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toSet());
-
-                        if (!nodes.equals(results)) {
-                            writeNodes(object, results);
-                            saveFile(file, object);
-                        }
-                    } catch (Exception e) {
-                        reportException(file.getName(), e);
+                    if (!nodes.equals(results)) {
+                        writeNodes(object, results);
+                        saveFile(file, object);
                     }
+                } catch (Exception e) {
+                    throw reportException(file.getName(), e);
                 }
             }
-        } catch (Exception e) {
-            reportException("bulk update", e);
-            return false;
+        }
+
+        if (bulkUpdate.getDataType().isIncludingGroups()) {
+            File[] files = getDirectory(StorageLocation.GROUP).listFiles(getFileTypeFilter());
+            if (files == null) {
+                throw new IllegalStateException("Groups directory matched no files.");
+            }
+
+            for (File file : files) {
+                try {
+                    registerFileAction(StorageLocation.GROUP, file);
+                    ConfigurationNode object = readFile(file);
+                    Set<NodeModel> nodes = readNodes(object);
+                    Set<NodeModel> results = nodes.stream()
+                            .map(bulkUpdate::apply)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toSet());
+
+                    if (!nodes.equals(results)) {
+                        writeNodes(object, results);
+                        saveFile(file, object);
+                    }
+                } catch (Exception e) {
+                    throw reportException(file.getName(), e);
+                }
+            }
         }
         return true;
     }
 
     @Override
-    public boolean loadUser(UUID uuid, String username) {
+    public boolean loadUser(UUID uuid, String username) throws Exception {
         User user = plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
         user.getIoLock().lock();
         try {
@@ -412,7 +407,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                 }
             }
         } catch (Exception e) {
-            return reportException(uuid.toString(), e);
+            throw reportException(uuid.toString(), e);
         } finally {
             user.getIoLock().unlock();
         }
@@ -421,7 +416,7 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public boolean saveUser(User user) {
+    public boolean saveUser(User user) throws Exception {
         user.getIoLock().lock();
         try {
             if (!GenericUserManager.shouldSave(user)) {
@@ -438,7 +433,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                 saveFile(StorageLocation.USER, user.getUuid().toString(), data);
             }
         } catch (Exception e) {
-            return reportException(user.getUuid().toString(), e);
+            throw reportException(user.getUuid().toString(), e);
         } finally {
             user.getIoLock().unlock();
         }
@@ -456,39 +451,34 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public List<HeldPermission<UUID>> getUsersWithPermission(String permission) {
+    public List<HeldPermission<UUID>> getUsersWithPermission(String permission) throws Exception {
         ImmutableList.Builder<HeldPermission<UUID>> held = ImmutableList.builder();
-        try {
-            File[] files = getDirectory(StorageLocation.USER).listFiles(getFileTypeFilter());
-            if (files == null) {
-                throw new IllegalStateException("Users directory matched no files.");
-            }
+        File[] files = getDirectory(StorageLocation.USER).listFiles(getFileTypeFilter());
+        if (files == null) {
+            throw new IllegalStateException("Users directory matched no files.");
+        }
 
-            for (File file : files) {
-                try {
-                    registerFileAction(StorageLocation.USER, file);
-                    ConfigurationNode object = readFile(file);
-                    UUID holder = UUID.fromString(file.getName().substring(0, file.getName().length() - fileExtension.length()));
-                    Set<NodeModel> nodes = readNodes(object);
-                    for (NodeModel e : nodes) {
-                        if (!e.getPermission().equalsIgnoreCase(permission)) {
-                            continue;
-                        }
-                        held.add(NodeHeldPermission.of(holder, e));
+        for (File file : files) {
+            try {
+                registerFileAction(StorageLocation.USER, file);
+                ConfigurationNode object = readFile(file);
+                UUID holder = UUID.fromString(file.getName().substring(0, file.getName().length() - fileExtension.length()));
+                Set<NodeModel> nodes = readNodes(object);
+                for (NodeModel e : nodes) {
+                    if (!e.getPermission().equalsIgnoreCase(permission)) {
+                        continue;
                     }
-                } catch (Exception e) {
-                    reportException(file.getName(), e);
+                    held.add(NodeHeldPermission.of(holder, e));
                 }
+            } catch (Exception e) {
+                throw reportException(file.getName(), e);
             }
-        } catch (Exception e) {
-            reportException("users", e);
-            return null;
         }
         return held.build();
     }
 
     @Override
-    public boolean createAndLoadGroup(String name) {
+    public boolean createAndLoadGroup(String name) throws Exception {
         Group group = plugin.getGroupManager().getOrMake(name);
         group.getIoLock().lock();
         try {
@@ -507,7 +497,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                 saveFile(StorageLocation.GROUP, name, data);
             }
         } catch (Exception e) {
-            return reportException(name, e);
+            throw reportException(name, e);
         } finally {
             group.getIoLock().unlock();
         }
@@ -516,7 +506,7 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public boolean loadGroup(String name) {
+    public boolean loadGroup(String name) throws Exception {
         Group group = plugin.getGroupManager().getIfLoaded(name);
         if (group != null) {
             group.getIoLock().lock();
@@ -539,7 +529,7 @@ public abstract class ConfigurateDao extends AbstractDao {
             group.setEnduringNodes(nodes);
 
         } catch (Exception e) {
-            return reportException(name, e);
+            throw reportException(name, e);
         } finally {
             if (group != null) {
                 group.getIoLock().unlock();
@@ -557,17 +547,30 @@ public abstract class ConfigurateDao extends AbstractDao {
                 .map(s -> s.substring(0, s.length() - fileExtension.length()))
                 .collect(Collectors.toList());
 
-        groups.forEach(this::loadGroup);
+        boolean success = true;
+        for (String g : groups) {
+            try {
+                loadGroup(g);
+            } catch (Exception e) {
+                e.printStackTrace();
+                success = false;
+            }
+        }
+
+        if (!success) {
+            throw new RuntimeException("Exception occurred whilst loading a group");
+        }
 
         GroupManager gm = plugin.getGroupManager();
         gm.getAll().values().stream()
                 .filter(g -> !groups.contains(g.getName()))
                 .forEach(gm::unload);
+
         return true;
     }
 
     @Override
-    public boolean saveGroup(Group group) {
+    public boolean saveGroup(Group group) throws Exception {
         group.getIoLock().lock();
         try {
             ConfigurationNode data = SimpleConfigurationNode.root();
@@ -578,7 +581,7 @@ public abstract class ConfigurateDao extends AbstractDao {
 
             saveFile(StorageLocation.GROUP, group.getName(), data);
         } catch (Exception e) {
-            return reportException(group.getName(), e);
+            throw reportException(group.getName(), e);
         } finally {
             group.getIoLock().unlock();
         }
@@ -586,7 +589,7 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public boolean deleteGroup(Group group) {
+    public boolean deleteGroup(Group group) throws Exception {
         group.getIoLock().lock();
         try {
             File groupFile = new File(groupsDirectory, group.getName() + fileExtension);
@@ -596,7 +599,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                 groupFile.delete();
             }
         } catch (Exception e) {
-            return reportException(group.getName(), e);
+            throw reportException(group.getName(), e);
         } finally {
             group.getIoLock().unlock();
         }
@@ -604,39 +607,34 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public List<HeldPermission<String>> getGroupsWithPermission(String permission) {
+    public List<HeldPermission<String>> getGroupsWithPermission(String permission) throws Exception {
         ImmutableList.Builder<HeldPermission<String>> held = ImmutableList.builder();
-        try {
-            File[] files = getDirectory(StorageLocation.GROUP).listFiles(getFileTypeFilter());
-            if (files == null) {
-                throw new IllegalStateException("Groups directory matched no files.");
-            }
+        File[] files = getDirectory(StorageLocation.GROUP).listFiles(getFileTypeFilter());
+        if (files == null) {
+            throw new IllegalStateException("Groups directory matched no files.");
+        }
 
-            for (File file : files) {
-                try {
-                    registerFileAction(StorageLocation.GROUP, file);
-                    ConfigurationNode object = readFile(file);
-                    String holder = file.getName().substring(0, file.getName().length() - fileExtension.length());
-                    Set<NodeModel> nodes = readNodes(object);
-                    for (NodeModel e : nodes) {
-                        if (!e.getPermission().equalsIgnoreCase(permission)) {
-                            continue;
-                        }
-                        held.add(NodeHeldPermission.of(holder, e));
+        for (File file : files) {
+            try {
+                registerFileAction(StorageLocation.GROUP, file);
+                ConfigurationNode object = readFile(file);
+                String holder = file.getName().substring(0, file.getName().length() - fileExtension.length());
+                Set<NodeModel> nodes = readNodes(object);
+                for (NodeModel e : nodes) {
+                    if (!e.getPermission().equalsIgnoreCase(permission)) {
+                        continue;
                     }
-                } catch (Exception e) {
-                    reportException(file.getName(), e);
+                    held.add(NodeHeldPermission.of(holder, e));
                 }
+            } catch (Exception e) {
+                throw reportException(file.getName(), e);
             }
-        } catch (Exception e) {
-            reportException("groups", e);
-            return null;
         }
         return held.build();
     }
 
     @Override
-    public boolean createAndLoadTrack(String name) {
+    public boolean createAndLoadTrack(String name) throws Exception {
         Track track = plugin.getTrackManager().getOrMake(name);
         track.getIoLock().lock();
         try {
@@ -656,7 +654,7 @@ public abstract class ConfigurateDao extends AbstractDao {
             }
 
         } catch (Exception e) {
-            return reportException(name, e);
+            throw reportException(name, e);
         } finally {
             track.getIoLock().unlock();
         }
@@ -664,7 +662,7 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public boolean loadTrack(String name) {
+    public boolean loadTrack(String name) throws Exception {
         Track track = plugin.getTrackManager().getIfLoaded(name);
         if (track != null) {
             track.getIoLock().lock();
@@ -689,7 +687,7 @@ public abstract class ConfigurateDao extends AbstractDao {
             track.setGroups(groups);
 
         } catch (Exception e) {
-            return reportException(name, e);
+            throw reportException(name, e);
         } finally {
             if (track != null) {
                 track.getIoLock().unlock();
@@ -706,17 +704,30 @@ public abstract class ConfigurateDao extends AbstractDao {
                 .map(s -> s.substring(0, s.length() - fileExtension.length()))
                 .collect(Collectors.toList());
 
-        tracks.forEach(this::loadTrack);
+        boolean success = true;
+        for (String t : tracks) {
+            try {
+                loadTrack(t);
+            } catch (Exception e) {
+                e.printStackTrace();
+                success = false;
+            }
+        }
+
+        if (!success) {
+            throw new RuntimeException("Exception occurred whilst loading a track");
+        }
 
         TrackManager tm = plugin.getTrackManager();
         tm.getAll().values().stream()
                 .filter(t -> !tracks.contains(t.getName()))
                 .forEach(tm::unload);
+
         return true;
     }
 
     @Override
-    public boolean saveTrack(Track track) {
+    public boolean saveTrack(Track track) throws Exception {
         track.getIoLock().lock();
         try {
             ConfigurationNode data = SimpleConfigurationNode.root();
@@ -724,7 +735,7 @@ public abstract class ConfigurateDao extends AbstractDao {
             data.getNode("groups").setValue(track.getGroups());
             saveFile(StorageLocation.TRACK, track.getName(), data);
         } catch (Exception e) {
-            return reportException(track.getName(), e);
+            throw reportException(track.getName(), e);
         } finally {
             track.getIoLock().unlock();
         }
@@ -732,7 +743,7 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public boolean deleteTrack(Track track) {
+    public boolean deleteTrack(Track track) throws Exception {
         track.getIoLock().lock();
         try {
             File trackFile = new File(tracksDirectory, track.getName() + fileExtension);
@@ -742,7 +753,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                 trackFile.delete();
             }
         } catch (Exception e) {
-            return reportException(track.getName(), e);
+            throw reportException(track.getName(), e);
         } finally {
             track.getIoLock().unlock();
         }

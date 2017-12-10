@@ -70,7 +70,13 @@ public class SplitStorageDao extends AbstractDao {
 
     @Override
     public void shutdown() {
-        backing.values().forEach(AbstractDao::shutdown);
+        for (AbstractDao ds : backing.values()) {
+            try {
+                ds.shutdown();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -84,17 +90,17 @@ public class SplitStorageDao extends AbstractDao {
     }
 
     @Override
-    public boolean logAction(LogEntry entry) {
+    public boolean logAction(LogEntry entry) throws Exception {
         return backing.get(types.get("log")).logAction(entry);
     }
 
     @Override
-    public Log getLog() {
+    public Log getLog() throws Exception {
         return backing.get(types.get("log")).getLog();
     }
 
     @Override
-    public boolean applyBulkUpdate(BulkUpdate bulkUpdate) {
+    public boolean applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception {
         String userType = types.get("user");
         String groupType = types.get("group");
 
@@ -108,92 +114,92 @@ public class SplitStorageDao extends AbstractDao {
     }
 
     @Override
-    public boolean loadUser(UUID uuid, String username) {
+    public boolean loadUser(UUID uuid, String username) throws Exception {
         return backing.get(types.get("user")).loadUser(uuid, username);
     }
 
     @Override
-    public boolean saveUser(User user) {
+    public boolean saveUser(User user) throws Exception {
         return backing.get(types.get("user")).saveUser(user);
     }
 
     @Override
-    public Set<UUID> getUniqueUsers() {
+    public Set<UUID> getUniqueUsers() throws Exception {
         return backing.get(types.get("user")).getUniqueUsers();
     }
 
     @Override
-    public List<HeldPermission<UUID>> getUsersWithPermission(String permission) {
+    public List<HeldPermission<UUID>> getUsersWithPermission(String permission) throws Exception {
         return backing.get(types.get("user")).getUsersWithPermission(permission);
     }
 
     @Override
-    public boolean createAndLoadGroup(String name) {
+    public boolean createAndLoadGroup(String name) throws Exception {
         return backing.get(types.get("group")).createAndLoadGroup(name);
     }
 
     @Override
-    public boolean loadGroup(String name) {
+    public boolean loadGroup(String name) throws Exception {
         return backing.get(types.get("group")).loadGroup(name);
     }
 
     @Override
-    public boolean loadAllGroups() {
+    public boolean loadAllGroups() throws Exception {
         return backing.get(types.get("group")).loadAllGroups();
     }
 
     @Override
-    public boolean saveGroup(Group group) {
+    public boolean saveGroup(Group group) throws Exception {
         return backing.get(types.get("group")).saveGroup(group);
     }
 
     @Override
-    public boolean deleteGroup(Group group) {
+    public boolean deleteGroup(Group group) throws Exception {
         return backing.get(types.get("group")).deleteGroup(group);
     }
 
     @Override
-    public List<HeldPermission<String>> getGroupsWithPermission(String permission) {
+    public List<HeldPermission<String>> getGroupsWithPermission(String permission) throws Exception {
         return backing.get(types.get("group")).getGroupsWithPermission(permission);
     }
 
     @Override
-    public boolean createAndLoadTrack(String name) {
+    public boolean createAndLoadTrack(String name) throws Exception {
         return backing.get(types.get("track")).createAndLoadTrack(name);
     }
 
     @Override
-    public boolean loadTrack(String name) {
+    public boolean loadTrack(String name) throws Exception {
         return backing.get(types.get("track")).loadTrack(name);
     }
 
     @Override
-    public boolean loadAllTracks() {
+    public boolean loadAllTracks() throws Exception {
         return backing.get(types.get("track")).loadAllTracks();
     }
 
     @Override
-    public boolean saveTrack(Track track) {
+    public boolean saveTrack(Track track) throws Exception {
         return backing.get(types.get("track")).saveTrack(track);
     }
 
     @Override
-    public boolean deleteTrack(Track track) {
+    public boolean deleteTrack(Track track) throws Exception {
         return backing.get(types.get("track")).deleteTrack(track);
     }
 
     @Override
-    public boolean saveUUIDData(UUID uuid, String username) {
+    public boolean saveUUIDData(UUID uuid, String username) throws Exception {
         return backing.get(types.get("uuid")).saveUUIDData(uuid, username);
     }
 
     @Override
-    public UUID getUUID(String username) {
+    public UUID getUUID(String username) throws Exception {
         return backing.get(types.get("uuid")).getUUID(username);
     }
 
     @Override
-    public String getName(UUID uuid) {
+    public String getName(UUID uuid) throws Exception {
         return backing.get(types.get("uuid")).getName(uuid);
     }
 }
