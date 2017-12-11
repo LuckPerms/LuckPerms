@@ -74,7 +74,6 @@ public class LoginHelper {
         plugin.getStorage().noBuffer().loadUser(cache.getUUID(u), username).join();
         User user = plugin.getUserManager().getIfLoaded(cache.getUUID(u));
         if (user == null) {
-            plugin.getLog().warn("Failed to load user: " + username);
             throw new RuntimeException("Failed to load user");
         } else {
             // Setup defaults for the user

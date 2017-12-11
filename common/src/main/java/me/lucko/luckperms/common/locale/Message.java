@@ -43,9 +43,9 @@ public enum Message {
     /*
      * General & Commands
      */
-    PREFIX("&7&l[&b&lL&3&lP&7&l] &c", false),
+    PREFIX("&7&l[&b&lL&3&lP&7&l] ", false),
 
-    EMPTY("{}", true),
+    EMPTY("&c{}", true),
     PLAYER_ONLINE("&aOnline", false),
     PLAYER_OFFLINE("&cOffline", false),
     LOADING_ERROR("&cPermissions data could not be loaded. Please try again later.", true),
