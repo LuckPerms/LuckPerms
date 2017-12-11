@@ -68,7 +68,16 @@ public class ConfigKeys {
     /**
      * The name of the server
      */
-    public static final ConfigKey<String> SERVER = LowercaseStringKey.of("server", "global");
+    public static final ConfigKey<String> SERVER = AbstractKey.of(c -> {
+        if (c.getBoolean("use-server-properties-name", false)) {
+            String serverName = c.getPlugin().getServerName();
+            if (serverName != null && !serverName.equals("Unknown Server")) {
+                return serverName.toLowerCase();
+            }
+        }
+
+        return c.getString("server", "global").toLowerCase();
+    });
 
     /**
      * How many minutes to wait between syncs. A value <= 0 will disable syncing.

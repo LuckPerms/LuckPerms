@@ -55,7 +55,7 @@ public class InfoCommand extends SingleCommand {
         Message.INFO_TOP.send(sender,
                 plugin.getVersion(),
                 plugin.getServerType().getFriendlyName(),
-                plugin.getServerName(),
+                plugin.getServerBrand(),
                 plugin.getServerVersion()
         );
 

@@ -411,7 +411,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public String getServerName() {
+    public String getServerBrand() {
         return getGame().getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getName();
     }
 

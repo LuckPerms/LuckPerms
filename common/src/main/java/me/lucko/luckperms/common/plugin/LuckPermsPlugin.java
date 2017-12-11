@@ -230,7 +230,7 @@ public interface LuckPermsPlugin {
      *
      * @return the server brand
      */
-    String getServerName();
+    String getServerBrand();
 
     /**
      * Gets the version of the running platform
@@ -238,6 +238,15 @@ public interface LuckPermsPlugin {
      * @return the server version
      */
     String getServerVersion();
+
+    /**
+     * Gets the name associated with this server
+     *
+     * @return the server name
+     */
+    default String getServerName() {
+        return null;
+    }
 
     /**
      * Gets the time when the plugin first started in millis.
@@ -394,7 +403,7 @@ public interface LuckPermsPlugin {
         sender.sendMessage(CommandUtils.color("&b    |    |  | /  ` |__/ &3|__) |__  |__)  |\\/| /__` "));
         sender.sendMessage(CommandUtils.color("&b    |___ \\__/ \\__, |  \\ &3|    |___ |  \\  |  | .__/ "));
         sender.sendMessage(CommandUtils.color(" "));
-        sender.sendMessage(CommandUtils.color("&2  Loading version &bv" + plugin.getVersion() + "&2 on " + plugin.getServerType().getFriendlyName() + " - " + plugin.getServerName()));
+        sender.sendMessage(CommandUtils.color("&2  Loading version &bv" + plugin.getVersion() + "&2 on " + plugin.getServerType().getFriendlyName() + " - " + plugin.getServerBrand()));
         sender.sendMessage(CommandUtils.color("&8  Running on server version " + plugin.getServerVersion()));
         sender.sendMessage(CommandUtils.color(" "));
     }
