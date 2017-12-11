@@ -50,7 +50,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @since 2.16
  */
-public final class MutableContextSet implements ContextSet {
+public final class MutableContextSet extends AbstractContextSet implements ContextSet {
 
     /**
      * Make a singleton MutableContextSet from a context pair
@@ -86,7 +86,7 @@ public final class MutableContextSet implements ContextSet {
         checkNotNull(value1, "value1");
         checkNotNull(key2, "key2");
         checkNotNull(value2, "value2");
-        MutableContextSet set = MutableContextSet.create();
+        MutableContextSet set = create();
         set.add(key1, value1);
         set.add(key2, value2);
         return set;
@@ -102,7 +102,7 @@ public final class MutableContextSet implements ContextSet {
     @Nonnull
     public static MutableContextSet fromEntries(@Nonnull Iterable<? extends Map.Entry<String, String>> iterable) {
         checkNotNull(iterable, "iterable");
-        MutableContextSet set = MutableContextSet.create();
+        MutableContextSet set = create();
         set.addAll(iterable);
         return set;
     }
@@ -117,7 +117,7 @@ public final class MutableContextSet implements ContextSet {
     @Nonnull
     public static MutableContextSet fromMap(@Nonnull Map<String, String> map) {
         checkNotNull(map, "map");
-        MutableContextSet set = MutableContextSet.create();
+        MutableContextSet set = create();
         set.addAll(map);
         return set;
     }
@@ -132,7 +132,7 @@ public final class MutableContextSet implements ContextSet {
     @Nonnull
     public static MutableContextSet fromMultimap(@Nonnull Multimap<String, String> multimap) {
         checkNotNull(multimap, "multimap");
-        MutableContextSet set = MutableContextSet.create();
+        MutableContextSet set = create();
         set.addAll(multimap);
         return set;
     }
@@ -148,8 +148,8 @@ public final class MutableContextSet implements ContextSet {
     @Nonnull
     public static MutableContextSet fromSet(@Nonnull ContextSet contextSet) {
         Preconditions.checkNotNull(contextSet, "contextSet");
-        MutableContextSet set = new MutableContextSet();
-        set.addAll(contextSet.toSet());
+        MutableContextSet set = create();
+        set.addAll(contextSet);
         return set;
     }
 
@@ -174,6 +174,11 @@ public final class MutableContextSet implements ContextSet {
     }
 
     @Override
+    protected Multimap<String, String> backing() {
+        return map;
+    }
+
+    @Override
     public boolean isImmutable() {
         return false;
     }
@@ -181,6 +186,9 @@ public final class MutableContextSet implements ContextSet {
     @Nonnull
     @Override
     public ImmutableContextSet makeImmutable() {
+        if (map.isEmpty()) {
+            return ImmutableContextSet.empty();
+        }
         return new ImmutableContextSet(ImmutableSetMultimap.copyOf(map));
     }
 
@@ -204,7 +212,6 @@ public final class MutableContextSet implements ContextSet {
         for (Map.Entry<String, String> e : map.entries()) {
             m.put(e.getKey(), e.getValue());
         }
-
         return m.build();
     }
 
@@ -212,53 +219,6 @@ public final class MutableContextSet implements ContextSet {
     @Override
     public Multimap<String, String> toMultimap() {
         return ImmutableSetMultimap.copyOf(map);
-    }
-
-    @Nonnull
-    @Override
-    public boolean containsKey(@Nonnull String key) {
-        return map.containsKey(checkNotNull(key, "key").toLowerCase().intern());
-    }
-
-    @Nonnull
-    @Override
-    public Set<String> getValues(@Nonnull String key) {
-        Collection<String> values = map.get(checkNotNull(key, "key").toLowerCase().intern());
-        return values != null ? ImmutableSet.copyOf(values) : ImmutableSet.of();
-    }
-
-    @Nonnull
-    @Override
-    public boolean has(@Nonnull String key, @Nonnull String value) {
-        return map.containsEntry(checkNotNull(key, "key").toLowerCase().intern(), checkNotNull(value, "value").intern());
-    }
-
-    @Nonnull
-    @Override
-    public boolean hasIgnoreCase(@Nonnull String key, @Nonnull String value) {
-        value = checkNotNull(value, "value").intern();
-        Collection<String> values = map.get(checkNotNull(key, "key").toLowerCase().intern());
-
-        if (values == null || values.isEmpty()) {
-            return false;
-        }
-
-        for (String val : values) {
-            if (val.equalsIgnoreCase(value)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return map.isEmpty();
-    }
-
-    @Override
-    public int size() {
-        return map.size();
     }
 
     /**
@@ -269,7 +229,7 @@ public final class MutableContextSet implements ContextSet {
      * @throws NullPointerException if the key or value is null
      */
     public void add(@Nonnull String key, @Nonnull String value) {
-        map.put(checkNotNull(key, "key").toLowerCase().intern(), checkNotNull(value, "value").intern());
+        map.put(sanitizeKey(key), sanitizeValue(value));
     }
 
     /**
@@ -327,6 +287,9 @@ public final class MutableContextSet implements ContextSet {
         if (contextSet instanceof MutableContextSet) {
             MutableContextSet other = ((MutableContextSet) contextSet);
             this.map.putAll(other.map);
+        } else if (contextSet instanceof ImmutableContextSet) {
+            ImmutableContextSet other = ((ImmutableContextSet) contextSet);
+            this.map.putAll(other.backing());
         } else {
             addAll(contextSet.toMultimap());
         }
@@ -340,11 +303,7 @@ public final class MutableContextSet implements ContextSet {
      * @throws NullPointerException if the key or value is null
      */
     public void remove(@Nonnull String key, @Nonnull String value) {
-        String k = checkNotNull(key, "key").toLowerCase().intern();
-        String v = checkNotNull(value, "value").intern();
-
-        //noinspection StringEquality
-        map.entries().removeIf(entry -> entry.getKey() == k && entry.getValue() == v);
+        map.remove(sanitizeKey(key), sanitizeValue(value));
     }
 
     /**
@@ -355,11 +314,11 @@ public final class MutableContextSet implements ContextSet {
      * @throws NullPointerException if the key or value is null
      */
     public void removeIgnoreCase(@Nonnull String key, @Nonnull String value) {
-        String k = checkNotNull(key, "key").toLowerCase().intern();
-        String v = checkNotNull(value, "value").intern();
-
-        //noinspection StringEquality
-        map.entries().removeIf(e -> e.getKey() == k && e.getValue().equalsIgnoreCase(v));
+        String v = sanitizeValue(value);
+        Collection<String> strings = map.asMap().get(sanitizeKey(key));
+        if (strings != null) {
+            strings.removeIf(e -> e.equalsIgnoreCase(v));
+        }
     }
 
     /**
@@ -369,7 +328,7 @@ public final class MutableContextSet implements ContextSet {
      * @throws NullPointerException if the key is null
      */
     public void removeAll(@Nonnull String key) {
-        map.removeAll(checkNotNull(key, "key").toLowerCase());
+        map.removeAll(sanitizeKey(key));
     }
 
     /**

@@ -26,11 +26,10 @@
 package me.lucko.luckperms.api.context;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
 
-import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -46,8 +45,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @since 2.16
  */
-public final class ImmutableContextSet implements ContextSet {
+public final class ImmutableContextSet extends AbstractContextSet implements ContextSet {
     private static final ImmutableContextSet EMPTY = new ImmutableContextSet(ImmutableSetMultimap.of());
+
+    /**
+     * Creates a builder
+     *
+     * @return a new ImmutableContextSet builder
+     */
+    @Nonnull
+    public static Builder builder() {
+        return new Builder();
+    }
 
     /**
      * Creates an ImmutableContextSet from a context pair
@@ -59,10 +68,7 @@ public final class ImmutableContextSet implements ContextSet {
      */
     @Nonnull
     public static ImmutableContextSet singleton(@Nonnull String key, @Nonnull String value) {
-        return new ImmutableContextSet(ImmutableSetMultimap.of(
-                checkNotNull(key, "key").toLowerCase().intern(),
-                checkNotNull(value, "value").intern()
-        ));
+        return new ImmutableContextSet(ImmutableSetMultimap.of(sanitizeKey(key), sanitizeValue(value)));
     }
 
     /**
@@ -79,10 +85,10 @@ public final class ImmutableContextSet implements ContextSet {
     @Nonnull
     public static ImmutableContextSet of(@Nonnull String key1, @Nonnull String value1, @Nonnull String key2, @Nonnull String value2) {
         return new ImmutableContextSet(ImmutableSetMultimap.of(
-                checkNotNull(key1, "key1").toLowerCase().intern(),
-                checkNotNull(value1, "value1").intern(),
-                checkNotNull(key2, "key2").toLowerCase().intern(),
-                checkNotNull(value2, "value2").intern()
+                sanitizeKey(key1),
+                sanitizeValue(value1),
+                sanitizeKey(key2),
+                sanitizeValue(value2)
         ));
     }
 
@@ -97,11 +103,16 @@ public final class ImmutableContextSet implements ContextSet {
     public static ImmutableContextSet fromEntries(@Nonnull Iterable<? extends Map.Entry<String, String>> iterable) {
         checkNotNull(iterable, "iterable");
 
-        ImmutableSetMultimap.Builder<String, String> b = ImmutableSetMultimap.builder();
-        for (Map.Entry<String, String> e : iterable) {
-            b.put(checkNotNull(e.getKey()).toLowerCase().intern(), checkNotNull(e.getValue()).intern());
+        Iterator<? extends Map.Entry<String, String>> iterator = iterable.iterator();
+        if (!iterator.hasNext()) {
+            return empty();
         }
 
+        ImmutableSetMultimap.Builder<String, String> b = ImmutableSetMultimap.builder();
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> e = checkNotNull(iterator.next(), "entry");
+            b.put(sanitizeKey(e.getKey()), sanitizeValue(e.getValue()));
+        }
         return new ImmutableContextSet(b.build());
     }
 
@@ -159,6 +170,11 @@ public final class ImmutableContextSet implements ContextSet {
     }
 
     @Override
+    protected Multimap<String, String> backing() {
+        return map;
+    }
+
+    @Override
     public boolean isImmutable() {
         return true;
     }
@@ -200,67 +216,21 @@ public final class ImmutableContextSet implements ContextSet {
         return map;
     }
 
-    @Nonnull
-    @Override
-    public boolean containsKey(@Nonnull String key) {
-        return map.containsKey(checkNotNull(key, "key").toLowerCase().intern());
-    }
-
-    @Nonnull
-    @Override
-    public Set<String> getValues(@Nonnull String key) {
-        Collection<String> values = map.get(checkNotNull(key, "key").toLowerCase().intern());
-        return values != null ? ImmutableSet.copyOf(values) : ImmutableSet.of();
-    }
-
-    @Nonnull
-    @Override
-    public boolean has(@Nonnull String key, @Nonnull String value) {
-        return map.containsEntry(checkNotNull(key, "key").toLowerCase().intern(), checkNotNull(value, "value").intern());
-    }
-
-    @Nonnull
-    @Override
-    public boolean hasIgnoreCase(@Nonnull String key, @Nonnull String value) {
-        value = checkNotNull(value, "value").intern();
-        Collection<String> values = map.get(checkNotNull(key, "key").toLowerCase().intern());
-
-        if (values == null || values.isEmpty()) {
-            return false;
-        }
-
-        for (String val : values) {
-            if (val.equalsIgnoreCase(value)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return map.isEmpty();
-    }
-
-    @Override
-    public int size() {
-        return map.size();
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof ContextSet)) return false;
         final ContextSet other = (ContextSet) o;
 
-        // saves on copying the multimap
+        final Multimap<String, String> otherContexts;
+
         if (other instanceof MutableContextSet) {
-            return other.equals(this);
+            otherContexts = ((MutableContextSet) other).backing();
+        } else {
+            otherContexts = other.toMultimap();
         }
 
-        final Multimap<String, String> thisContexts = this.toMultimap();
-        final Multimap<String, String> otherContexts = other.toMultimap();
-        return thisContexts.equals(otherContexts);
+        return this.map.equals(otherContexts);
     }
 
     @Override
@@ -271,5 +241,108 @@ public final class ImmutableContextSet implements ContextSet {
     @Override
     public String toString() {
         return "ImmutableContextSet(contexts=" + this.map + ")";
+    }
+
+    /**
+     * A builder for {@link ImmutableContextSet}
+     */
+    public static final class Builder {
+        private final ImmutableSetMultimap.Builder<String, String> builder = ImmutableSetMultimap.builder();
+
+        private Builder() {
+
+        }
+
+        /**
+         * Adds a new key value pair to the set
+         *
+         * @param key   the key to add
+         * @param value the value to add
+         * @throws NullPointerException if the key or value is null
+         */
+        @Nonnull
+        public Builder add(@Nonnull String key, @Nonnull String value) {
+            builder.put(sanitizeKey(key), sanitizeValue(value));
+            return this;
+        }
+
+        /**
+         * Adds a new key value pair to the set
+         *
+         * @param entry the entry to add
+         * @throws NullPointerException if the entry is null
+         */
+        @Nonnull
+        public Builder add(@Nonnull Map.Entry<String, String> entry) {
+            checkNotNull(entry, "entry");
+            add(entry.getKey(), entry.getValue());
+            return this;
+        }
+
+        /**
+         * Adds an iterable containing contexts to the set
+         *
+         * @param iterable an iterable of key value context pairs
+         * @throws NullPointerException if iterable is null
+         */
+        @Nonnull
+        public Builder addAll(@Nonnull Iterable<? extends Map.Entry<String, String>> iterable) {
+            for (Map.Entry<String, String> e : checkNotNull(iterable, "iterable")) {
+                add(e);
+            }
+            return this;
+        }
+
+        /**
+         * Adds the entry set of a map to the set
+         *
+         * @param map the map to add from
+         * @throws NullPointerException if the map is null
+         */
+        @Nonnull
+        public Builder addAll(@Nonnull Map<String, String> map) {
+            addAll(checkNotNull(map, "map").entrySet());
+            return this;
+        }
+
+        /**
+         * Adds the entries of a multimap to the set
+         *
+         * @param multimap the multimap to add from
+         * @throws NullPointerException if the map is null
+         * @since 3.4
+         */
+        @Nonnull
+        public Builder addAll(@Nonnull Multimap<String, String> multimap) {
+            addAll(checkNotNull(multimap, "multimap").entries());
+            return this;
+        }
+
+        /**
+         * Adds of of the values in another ContextSet to this set
+         *
+         * @param contextSet the set to add from
+         * @throws NullPointerException if the contextSet is null
+         */
+        @Nonnull
+        public Builder addAll(@Nonnull ContextSet contextSet) {
+            checkNotNull(contextSet, "contextSet");
+            if (contextSet instanceof MutableContextSet) {
+                MutableContextSet other = ((MutableContextSet) contextSet);
+                builder.putAll(other.backing());
+            } else if (contextSet instanceof ImmutableContextSet) {
+                ImmutableContextSet other = ((ImmutableContextSet) contextSet);
+                builder.putAll(other.backing());
+            } else {
+                addAll(contextSet.toMultimap());
+            }
+            return this;
+        }
+
+        @Nonnull
+        public ImmutableContextSet build() {
+            return new ImmutableContextSet(builder.build());
+        }
+
     }
 }
