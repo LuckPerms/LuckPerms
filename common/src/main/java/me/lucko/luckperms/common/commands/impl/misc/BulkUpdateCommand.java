@@ -72,13 +72,14 @@ public class BulkUpdateCommand extends SingleCommand {
             }
 
             Message.BULK_UPDATE_STARTING.send(sender);
-            plugin.getStorage().applyBulkUpdate(operation).thenAccept(b -> {
+            plugin.getStorage().applyBulkUpdate(operation).thenAcceptAsync(b -> {
                 if (b) {
+                    plugin.getUpdateTaskBuffer().requestDirectly();
                     Message.BULK_UPDATE_SUCCESS.send(sender);
                 } else {
                     Message.BULK_UPDATE_FAILURE.send(sender);
                 }
-            });
+            }, plugin.getScheduler().async());
             return CommandResult.SUCCESS;
         }
 
@@ -141,10 +142,7 @@ public class BulkUpdateCommand extends SingleCommand {
             bulkUpdateBuilder.constraint(Constraint.of(field, comparison, expr));
         }
 
-        String id = "" + ThreadLocalRandom.current().nextInt(9) +
-                ThreadLocalRandom.current().nextInt(9) +
-                ThreadLocalRandom.current().nextInt(9) +
-                ThreadLocalRandom.current().nextInt(9);
+        String id = String.format("%04d", ThreadLocalRandom.current().nextInt(10000));
 
         BulkUpdate bulkUpdate = bulkUpdateBuilder.build();
 

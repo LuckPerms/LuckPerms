@@ -28,10 +28,12 @@ package me.lucko.luckperms.common.commands.sender;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
+import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.text.Component;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -54,6 +56,33 @@ public interface Sender {
     String getName();
 
     /**
+     * Gets a string representing the senders username, and their current location
+     * within the network.
+     *
+     * @return a friendly identifier for the sender
+     */
+    default String getNameWithLocation() {
+        String name = getName();
+
+        ContextManager<?> contextManager = getPlatform().getContextManager();
+        if (contextManager == null) {
+            return name;
+        }
+
+
+        String location = contextManager.getStaticContextString().orElse(null);
+        if (location == null) {
+            return name;
+        }
+
+        if (isConsole()) {
+            return name.toLowerCase() + "@" + location;
+        } else {
+            return name + "@" + location;
+        }
+    }
+
+    /**
      * Gets the sender's unique id. See {@link Constants#CONSOLE_UUID} for the console's UUID representation.
      *
      * @return the sender's uuid
@@ -63,9 +92,9 @@ public interface Sender {
     /**
      * Send a message back to the Sender
      *
-     * @param s the message to send. Supports '§' for message formatting.
+     * @param message the message to send. Supports '§' for message formatting.
      */
-    void sendMessage(String s);
+    void sendMessage(String message);
 
     /**
      * Send a json message to the Sender.
@@ -96,27 +125,45 @@ public interface Sender {
      * @param permission the permission to check for
      * @return true if the sender has the permission
      */
-    boolean hasPermission(CommandPermission permission);
+    default boolean hasPermission(CommandPermission permission) {
+        return hasPermission(permission.getPermission());
+    }
 
     /**
      * Gets whether this sender is the console
      *
      * @return if the sender is the console
      */
-    boolean isConsole();
+    default boolean isConsole() {
+        return Constants.CONSOLE_UUID.equals(getUuid()) || Constants.IMPORT_UUID.equals(getUuid());
+    }
 
     /**
      * Gets whether this sender is an import process
      *
      * @return if the sender is an import process
      */
-    boolean isImport();
+    default boolean isImport() {
+        return Constants.IMPORT_UUID.equals(getUuid());
+    }
 
     /**
      * Gets whether this sender is still valid & receiving messages.
      *
      * @return if this sender is valid
      */
-    boolean isValid();
+    default boolean isValid() {
+        return true;
+    }
+
+    /**
+     * Gets the handle object for this sender. (In most cases, the real
+     * CommandSender/CommandSource object from the platform)
+     *
+     * @return the handle
+     */
+    default Optional<Object> getHandle() {
+        return Optional.empty();
+    }
 
 }

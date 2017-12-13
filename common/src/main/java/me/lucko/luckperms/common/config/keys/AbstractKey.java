@@ -28,16 +28,16 @@ package me.lucko.luckperms.common.config.keys;
 import lombok.AllArgsConstructor;
 
 import me.lucko.luckperms.common.config.ConfigKey;
-import me.lucko.luckperms.common.config.LuckPermsConfiguration;
+import me.lucko.luckperms.common.config.ConfigurationAdapter;
 
 import java.util.function.Function;
 
 @AllArgsConstructor(staticName = "of")
 public class AbstractKey<T> implements ConfigKey<T> {
-    private final Function<LuckPermsConfiguration, T> function;
+    private final Function<ConfigurationAdapter, T> function;
 
     @Override
-    public T get(LuckPermsConfiguration config) {
-        return function.apply(config);
+    public T get(ConfigurationAdapter adapter) {
+        return function.apply(adapter);
     }
 }

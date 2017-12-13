@@ -31,15 +31,18 @@ import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.storage.backing.AbstractBacking;
-import me.lucko.luckperms.common.storage.backing.file.JSONBacking;
-import me.lucko.luckperms.common.storage.backing.file.YAMLBacking;
-import me.lucko.luckperms.common.storage.backing.mongodb.MongoDBBacking;
-import me.lucko.luckperms.common.storage.backing.sql.SQLBacking;
-import me.lucko.luckperms.common.storage.backing.sql.provider.H2Provider;
-import me.lucko.luckperms.common.storage.backing.sql.provider.MySQLProvider;
-import me.lucko.luckperms.common.storage.backing.sql.provider.PostgreSQLProvider;
-import me.lucko.luckperms.common.storage.backing.sql.provider.SQLiteProvider;
+import me.lucko.luckperms.common.storage.dao.AbstractDao;
+import me.lucko.luckperms.common.storage.dao.SplitStorageDao;
+import me.lucko.luckperms.common.storage.dao.file.HoconDao;
+import me.lucko.luckperms.common.storage.dao.file.JsonDao;
+import me.lucko.luckperms.common.storage.dao.file.YamlDao;
+import me.lucko.luckperms.common.storage.dao.mongodb.MongoDao;
+import me.lucko.luckperms.common.storage.dao.sql.SqlDao;
+import me.lucko.luckperms.common.storage.dao.sql.connection.file.H2ConnectionFactory;
+import me.lucko.luckperms.common.storage.dao.sql.connection.file.SQLiteConnectionFactory;
+import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.MariaDbConnectionFactory;
+import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.MySqlConnectionFactory;
+import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.PostgreConnectionFactory;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.io.File;
@@ -65,7 +68,7 @@ public class StorageFactory {
             Set<String> neededTypes = new HashSet<>();
             neededTypes.addAll(types.values());
 
-            return neededTypes.stream().map(StorageType::parse).collect(ImmutableCollectors.toImmutableSet());
+            return neededTypes.stream().map(StorageType::parse).collect(ImmutableCollectors.toSet());
         } else {
             String method = plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);
             StorageType type = StorageType.parse(method);
@@ -90,13 +93,13 @@ public class StorageFactory {
             Set<String> neededTypes = new HashSet<>();
             neededTypes.addAll(types.values());
 
-            Map<String, AbstractBacking> backing = new HashMap<>();
+            Map<String, AbstractDao> backing = new HashMap<>();
 
             for (String type : neededTypes) {
-                backing.put(type, makeBacking(StorageType.parse(type), plugin));
+                backing.put(type, makeDao(StorageType.parse(type), plugin));
             }
 
-            storage = AbstractStorage.wrap(plugin, new SplitBacking(plugin, backing, types));
+            storage = AbstractStorage.create(plugin, new SplitStorageDao(plugin, backing, types));
 
         } else {
             String method = plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);
@@ -114,50 +117,48 @@ public class StorageFactory {
     }
 
     private static Storage makeInstance(StorageType type, LuckPermsPlugin plugin) {
-        return AbstractStorage.wrap(plugin, makeBacking(type, plugin));
+        return AbstractStorage.create(plugin, makeDao(type, plugin));
     }
 
-    private static AbstractBacking makeBacking(StorageType method, LuckPermsPlugin plugin) {
+    private static AbstractDao makeDao(StorageType method, LuckPermsPlugin plugin) {
         switch (method) {
             case MARIADB:
-                return new SQLBacking(plugin, new MySQLProvider(
-                        "MariaDB",
-                        "org.mariadb.jdbc.MySQLDataSource",
+                return new SqlDao(plugin, new MariaDbConnectionFactory(
                         plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
                         plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case MYSQL:
-                return new SQLBacking(plugin, new MySQLProvider(
-                        "MySQL",
-                        "com.mysql.jdbc.jdbc2.optional.MysqlDataSource",
+                return new SqlDao(plugin, new MySqlConnectionFactory(
                         plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
                         plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case SQLITE:
-                return new SQLBacking(plugin, new SQLiteProvider(
+                return new SqlDao(plugin, new SQLiteConnectionFactory(
                         new File(plugin.getDataDirectory(), "luckperms-sqlite.db")),
                         plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case H2:
-                return new SQLBacking(plugin, new H2Provider(
+                return new SqlDao(plugin, new H2ConnectionFactory(
                         new File(plugin.getDataDirectory(), "luckperms-h2")),
                         plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case POSTGRESQL:
-                return new SQLBacking(plugin, new PostgreSQLProvider(
+                return new SqlDao(plugin, new PostgreConnectionFactory(
                         plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
                         plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case MONGODB:
-                return new MongoDBBacking(
+                return new MongoDao(
                         plugin,
                         plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES),
                         plugin.getConfiguration().get(ConfigKeys.MONGODB_COLLECTION_PREFIX)
                 );
             case YAML:
-                return new YAMLBacking(plugin, plugin.getDataDirectory(), "yaml-storage");
+                return new YamlDao(plugin, "yaml-storage");
+            case HOCON:
+                return new HoconDao(plugin, "hocon-storage");
             default:
-                return new JSONBacking(plugin, plugin.getDataDirectory(), "json-storage");
+                return new JsonDao(plugin, "json-storage");
         }
     }
 }

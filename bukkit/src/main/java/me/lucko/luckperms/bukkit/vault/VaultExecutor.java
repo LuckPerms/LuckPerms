@@ -29,8 +29,8 @@ import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 
 /**
@@ -39,7 +39,7 @@ import java.util.concurrent.Executor;
 public class VaultExecutor implements Runnable, Executor {
 
     private BukkitTask task = null;
-    private final List<Runnable> tasks = new ArrayList<>();
+    private final Queue<Runnable> tasks = new ConcurrentLinkedQueue<>();
 
     public VaultExecutor(LPBukkitPlugin plugin) {
         task = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, this, 1L, 1L);
@@ -47,25 +47,12 @@ public class VaultExecutor implements Runnable, Executor {
 
     @Override
     public void execute(Runnable r) {
-        synchronized (tasks) {
-            tasks.add(r);
-        }
+        tasks.offer(r);
     }
 
     @Override
     public void run() {
-        List<Runnable> toRun;
-        synchronized (tasks) {
-            if (tasks.isEmpty()) {
-                return;
-            }
-
-            toRun = new ArrayList<>(tasks.size());
-            toRun.addAll(tasks);
-            tasks.clear();
-        }
-
-        for (Runnable runnable : toRun) {
+        for (Runnable runnable; (runnable = tasks.poll()) != null; ) {
             try {
                 runnable.run();
             } catch (Exception e) {

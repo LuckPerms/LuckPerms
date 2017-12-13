@@ -45,7 +45,7 @@ public class DefaultsProcessor implements PermissionProcessor {
 
     @Override
     public Tristate hasPermission(String permission) {
-        Tristate t = defaultsProvider.hasDefault(permission, isOp);
+        Tristate t = defaultsProvider.lookup(permission, isOp);
         if (t != Tristate.UNDEFINED) {
             return t;
         }

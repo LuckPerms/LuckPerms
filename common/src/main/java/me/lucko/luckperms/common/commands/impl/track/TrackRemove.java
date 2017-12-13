@@ -25,12 +25,13 @@
 
 package me.lucko.luckperms.common.commands.impl.track;
 
+import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -39,7 +40,6 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
 
@@ -56,18 +56,21 @@ public class TrackRemove extends SubCommand<Track> {
             return CommandResult.INVALID_ARGS;
         }
 
-        try {
-            track.removeGroup(groupName);
+        DataMutateResult result = track.removeGroup(groupName);
+
+        if (result.asBoolean()) {
             Message.TRACK_REMOVE_SUCCESS.send(sender, groupName, track.getName());
             if (track.getGroups().size() > 1) {
-                Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups()));
+                Message.EMPTY.send(sender, CommandUtils.listToArrowSep(track.getGroups()));
             }
+
             ExtendedLogEntry.build().actor(sender).acted(track)
-                    .action("remove " + groupName)
+                    .action("remove", groupName)
                     .build().submit(plugin, sender);
+
             save(track, sender, plugin);
             return CommandResult.SUCCESS;
-        } catch (ObjectLacksException e) {
+        } else {
             Message.TRACK_DOES_NOT_CONTAIN.send(sender, track.getName(), groupName);
             return CommandResult.STATE_ERROR;
         }

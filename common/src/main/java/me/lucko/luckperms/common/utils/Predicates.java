@@ -35,19 +35,18 @@ import java.util.stream.IntStream;
 /**
  * A collection of predicate utilities used mostly in command classes
  */
-@SuppressWarnings({"WeakerAccess", "unused"})
 @UtilityClass
 public class Predicates {
     private static final Predicate FALSE = o -> false;
     private static final Predicate TRUE = o -> true;
 
-    @SuppressWarnings("unchecked")
     public static <T> Predicate<T> alwaysFalse() {
+        //noinspection unchecked
         return FALSE;
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> Predicate<T> alwaysTrue() {
+        //noinspection unchecked
         return TRUE;
     }
 
@@ -66,7 +65,7 @@ public class Predicates {
     public static <T> Predicate<T> isOneOf(Set<T> ta) {
         return t -> {
             for (T i : ta) {
-                if (i == t) {
+                if (i.equals(t)) {
                     return true;
                 }
             }
@@ -79,7 +78,7 @@ public class Predicates {
     }
 
     public static <T> Predicate<T> is(T t) {
-        return t2 -> t == t2;
+        return t::equals;
     }
 
     public static <T> Predicate<T> inverse(Predicate<T> t) {

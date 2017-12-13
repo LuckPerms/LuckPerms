@@ -25,11 +25,6 @@
 
 package me.lucko.luckperms.api;
 
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
-
-import java.util.function.Supplier;
-
 /**
  * Represents the result of a mutation call.
  */
@@ -38,35 +33,27 @@ public enum DataMutateResult {
     /**
      * Indicates the mutation was a success
      */
-    SUCCESS(true, null),
+    SUCCESS(true),
 
     /**
      * Indicates the mutation failed because the subject already has something
      */
-    ALREADY_HAS(false, ObjectAlreadyHasException::new),
+    ALREADY_HAS(false),
 
     /**
      * Indicates the mutation failed because the subject lacks something
      */
-    LACKS(false, ObjectLacksException::new),
+    LACKS(false),
 
     /**
      * Indicates the mutation failed
      */
-    FAIL(false, RuntimeException::new);
+    FAIL(false);
 
-    private boolean value;
-    private final Supplier<? extends Exception> exceptionSupplier;
+    private final boolean value;
 
-    DataMutateResult(boolean value, Supplier<? extends Exception> exceptionSupplier) {
+    DataMutateResult(boolean value) {
         this.value = value;
-        this.exceptionSupplier = exceptionSupplier;
-    }
-
-    public void throwException() {
-        if (exceptionSupplier != null) {
-            sneakyThrow(exceptionSupplier.get());
-        }
     }
 
     /**
@@ -96,16 +83,6 @@ public enum DataMutateResult {
      */
     public boolean wasFailure() {
         return !value;
-    }
-
-    // allows us to throw checked exceptions without declaring it, as #throwException throws a number of
-    // exception types.
-    private static void sneakyThrow(Throwable t) {
-        sneakyThrow0(t);
-    }
-
-    private static <T extends Throwable> void sneakyThrow0(Throwable t) throws T {
-        throw (T) t;
     }
 
 }

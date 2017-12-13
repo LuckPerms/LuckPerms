@@ -32,11 +32,10 @@ import lombok.ToString;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.common.api.delegates.TrackDelegate;
+import me.lucko.luckperms.api.DataMutateResult;
+import me.lucko.luckperms.common.api.delegates.model.ApiTrack;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.Identifiable;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,7 +65,7 @@ public class Track implements Identifiable<String> {
     private List<String> groups = Collections.synchronizedList(new ArrayList<>());
 
     @Getter
-    private final TrackDelegate delegate = new TrackDelegate(this);
+    private final ApiTrack delegate = new ApiTrack(this);
 
     @Override
     public String getId() {
@@ -101,9 +100,9 @@ public class Track implements Identifiable<String> {
      *
      * @param current the group before the group being requested
      * @return the group name, or null if the end of the track has been reached
-     * @throws ObjectLacksException if the track does not contain the group given
+     * @throws IllegalArgumentException if the track does not contain the group given
      */
-    public String getNext(Group current) throws ObjectLacksException {
+    public String getNext(Group current) throws IllegalArgumentException {
         return getNext(current.getName());
     }
 
@@ -112,9 +111,9 @@ public class Track implements Identifiable<String> {
      *
      * @param current the group after the group being requested
      * @return the group name, or null if the start of the track has been reached
-     * @throws ObjectLacksException if the track does not contain the group given
+     * @throws IllegalArgumentException if the track does not contain the group given
      */
-    public String getPrevious(Group current) throws ObjectLacksException {
+    public String getPrevious(Group current) throws IllegalArgumentException {
         return getPrevious(current.getName());
     }
 
@@ -123,10 +122,12 @@ public class Track implements Identifiable<String> {
      *
      * @param current the group before the group being requested
      * @return the group name, or null if the end of the track has been reached
-     * @throws ObjectLacksException if the track does not contain the group given
+     * @throws IllegalArgumentException if the track does not contain the group given
      */
-    public String getNext(String current) throws ObjectLacksException {
-        assertContains(current);
+    public String getNext(String current) throws IllegalArgumentException {
+        if (!containsGroup(current)) {
+            throw new IllegalArgumentException();
+        }
 
         if (groups.indexOf(current) == groups.size() - 1) {
             return null;
@@ -140,10 +141,12 @@ public class Track implements Identifiable<String> {
      *
      * @param current the group after the group being requested
      * @return the group name, or null if the start of the track has been reached
-     * @throws ObjectLacksException if the track does not contain the group given
+     * @throws IllegalArgumentException if the track does not contain the group given
      */
-    public String getPrevious(String current) throws ObjectLacksException {
-        assertContains(current);
+    public String getPrevious(String current) throws IllegalArgumentException {
+        if (!containsGroup(current)) {
+            throw new IllegalArgumentException();
+        }
 
         if (groups.indexOf(current) == 0) {
             return null;
@@ -156,16 +159,19 @@ public class Track implements Identifiable<String> {
      * Appends a group to the end of this track
      *
      * @param group the group to append
-     * @throws ObjectAlreadyHasException if the group is already on this track somewhere
+     * @return the result of the operation
      */
-    public void appendGroup(Group group) throws ObjectAlreadyHasException {
+    public DataMutateResult appendGroup(Group group) {
+        if (containsGroup(group)) {
+            return DataMutateResult.ALREADY_HAS;
+        }
+
         List<String> before = ImmutableList.copyOf(groups);
-
-        assertNotContains(group);
         groups.add(group.getName());
-
         List<String> after = ImmutableList.copyOf(groups);
+
         plugin.getApiProvider().getEventFactory().handleTrackAddGroup(this, group.getName(), before, after);
+        return DataMutateResult.SUCCESS;
     }
 
     /**
@@ -173,42 +179,49 @@ public class Track implements Identifiable<String> {
      *
      * @param group    the group to be inserted
      * @param position the index position (a value of 0 inserts at the start)
-     * @throws ObjectAlreadyHasException if the group is already on this track somewhere
      * @throws IndexOutOfBoundsException if the position is less than 0 or greater than the size of the track
+     * @return the result of the operation
      */
-    public void insertGroup(Group group, int position) throws ObjectAlreadyHasException, IndexOutOfBoundsException {
-        List<String> before = ImmutableList.copyOf(groups);
+    public DataMutateResult insertGroup(Group group, int position) throws IndexOutOfBoundsException {
+        if (containsGroup(group)) {
+            return DataMutateResult.ALREADY_HAS;
+        }
 
-        assertNotContains(group);
+        List<String> before = ImmutableList.copyOf(groups);
         groups.add(position, group.getName());
-
         List<String> after = ImmutableList.copyOf(groups);
+
         plugin.getApiProvider().getEventFactory().handleTrackAddGroup(this, group.getName(), before, after);
+        return DataMutateResult.SUCCESS;
     }
 
     /**
      * Removes a group from this track
      *
      * @param group the group to remove
-     * @throws ObjectLacksException if the group is not on this track
+     * @return the result of the operation
      */
-    public void removeGroup(Group group) throws ObjectLacksException {
-        removeGroup(group.getName());
+    public DataMutateResult removeGroup(Group group) {
+        return removeGroup(group.getName());
     }
 
     /**
      * Removes a group from this track
      *
      * @param group the group to remove
-     * @throws ObjectLacksException if the group is not on this track
+     * @return the result of the operation
      */
-    public void removeGroup(String group) throws ObjectLacksException {
+    public DataMutateResult removeGroup(String group) {
+        if (!containsGroup(group)) {
+            return DataMutateResult.LACKS;
+        }
+
         List<String> before = ImmutableList.copyOf(groups);
-        assertContains(group);
         groups.remove(group);
-
         List<String> after = ImmutableList.copyOf(groups);
+
         plugin.getApiProvider().getEventFactory().handleTrackRemoveGroup(this, group, before, after);
+        return DataMutateResult.SUCCESS;
     }
 
     /**
@@ -238,17 +251,5 @@ public class Track implements Identifiable<String> {
         List<String> before = ImmutableList.copyOf(groups);
         groups.clear();
         plugin.getApiProvider().getEventFactory().handleTrackClear(this, before);
-    }
-
-    private void assertNotContains(Group g) throws ObjectAlreadyHasException {
-        if (containsGroup(g)) {
-            throw new ObjectAlreadyHasException();
-        }
-    }
-
-    private void assertContains(String g) throws ObjectLacksException {
-        if (!containsGroup(g)) {
-            throw new ObjectLacksException();
-        }
     }
 }

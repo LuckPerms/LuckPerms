@@ -48,9 +48,9 @@ public abstract class SenderFactory<T> {
     @Getter(AccessLevel.PROTECTED)
     private final LuckPermsPlugin plugin;
 
-    protected abstract String getName(T t);
-
     protected abstract UUID getUuid(T t);
+
+    protected abstract String getName(T t);
 
     protected abstract void sendMessage(T t, String s);
 

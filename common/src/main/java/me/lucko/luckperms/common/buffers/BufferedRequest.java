@@ -49,7 +49,7 @@ public abstract class BufferedRequest<T> {
     private final Executor executor;
 
     private WeakReference<Processor<T>> processor = null;
-    private ReentrantLock lock = new ReentrantLock();
+    private final ReentrantLock lock = new ReentrantLock();
 
     public CompletableFuture<T> request() {
         lock.lock();

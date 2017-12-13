@@ -25,103 +25,135 @@
 
 package me.lucko.luckperms.sponge.service.model;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 
-import com.google.common.base.Splitter;
+import com.google.common.base.Preconditions;
 
 import org.spongepowered.api.service.permission.Subject;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-@ToString(of = {"collectionIdentifier", "subjectIdentifier"})
-@EqualsAndHashCode(of = {"collectionIdentifier", "subjectIdentifier"})
-@RequiredArgsConstructor(staticName = "of")
+import javax.annotation.Nonnull;
+
+/**
+ * Represents a reference to a given Subject.
+ *
+ * Use of this class (or interface) should have no negative impact on
+ * performance, as {@link #resolve()} calls are cached.
+ */
 public final class SubjectReference implements org.spongepowered.api.service.permission.SubjectReference {
 
-    @Deprecated
-    public static SubjectReference deserialize(LPPermissionService service, String s) {
-        List<String> parts = Splitter.on('/').limit(2).splitToList(s);
-        return of(service, parts.get(0), parts.get(1));
-    }
+    /**
+     * The time a subject instance should be cached in this reference
+     */
+    private static final long CACHE_TIME = TimeUnit.SECONDS.toMillis(60);
 
-    public static SubjectReference of(LPPermissionService service, Subject subject) {
-        return of(service, subject.getContainingCollection().getIdentifier(), subject.getIdentifier());
-    }
-
-    public static SubjectReference cast(LPPermissionService service, org.spongepowered.api.service.permission.SubjectReference reference) {
-        if (reference instanceof SubjectReference) {
-            return ((SubjectReference) reference);
-        } else {
-            return of(service, reference.getCollectionIdentifier(), reference.getSubjectIdentifier());
-        }
-    }
-
+    /**
+     * Reference to the permission service
+     */
     private final LPPermissionService service;
 
+    /**
+     * The identifier of the collection which holds the subject
+     */
     @Getter
+    @Nonnull
     private final String collectionIdentifier;
 
+    /**
+     * The identifier of the subject
+     */
     @Getter
+    @Nonnull
     private final String subjectIdentifier;
 
+    // cache
     private long lastLookup = 0L;
     private WeakReference<LPSubject> cache = null;
 
-    private synchronized LPSubject resolveDirectly() {
-        long sinceLast = System.currentTimeMillis() - lastLookup;
+    SubjectReference(LPPermissionService service, String collectionIdentifier, String subjectIdentifier) {
+        this.service = Preconditions.checkNotNull(service);
+        this.collectionIdentifier = Preconditions.checkNotNull(collectionIdentifier);
+        this.subjectIdentifier = Preconditions.checkNotNull(subjectIdentifier);
+    }
 
-        // try the cache
-        if (sinceLast < TimeUnit.SECONDS.toMillis(10)) {
+    private LPSubject tryCache() {
+        if ((System.currentTimeMillis() - lastLookup) < CACHE_TIME) {
             if (cache != null) {
-                LPSubject s = cache.get();
-                if (s != null) {
-                    return s;
-                }
+                return cache.get();
             }
         }
 
-        LPSubject s = service.getCollection(collectionIdentifier).loadSubject(subjectIdentifier).join();
+        return null;
+    }
+
+    private synchronized LPSubject resolveDirectly() {
+        /* As this method is synchronized, it's possible that since this was invoked
+           the subject has been cached.
+           Therefore, we check the cache again, and return if there's a value present.
+           This effectively means all calls to this method block, but all return the same value
+           at the same time once the data is loaded :) */
+
+        LPSubject s = tryCache();
+        if (s != null) {
+            return s;
+        }
+
+        // subject isn't cached, so make a call to load it
+        s = service.getCollection(collectionIdentifier).loadSubject(subjectIdentifier).join();
+
+        // cache the result
         lastLookup = System.currentTimeMillis();
         cache = new WeakReference<>(s);
         return s;
     }
 
     public CompletableFuture<LPSubject> resolveLp() {
-        long sinceLast = System.currentTimeMillis() - lastLookup;
-
-        // try the cache
-        if (sinceLast < TimeUnit.SECONDS.toMillis(10)) {
-            if (cache != null) {
-                LPSubject s = cache.get();
-                if (s != null) {
-                    return CompletableFuture.completedFuture(s);
-                }
-            }
+        // check if there is a cached value before loading
+        LPSubject s = tryCache();
+        if (s != null) {
+            return CompletableFuture.completedFuture(s);
         }
 
+        // load the subject
         return CompletableFuture.supplyAsync(this::resolveDirectly);
     }
 
     @Override
     public CompletableFuture<Subject> resolve() {
-        long sinceLast = System.currentTimeMillis() - lastLookup;
-
-        // try the cache
-        if (sinceLast < TimeUnit.SECONDS.toMillis(10)) {
-            if (cache != null) {
-                LPSubject s = cache.get();
-                if (s != null) {
-                    return CompletableFuture.completedFuture(s.sponge());
-                }
-            }
+        // check if there is a cached value before loading
+        LPSubject s = tryCache();
+        if (s != null) {
+            return CompletableFuture.completedFuture(s.sponge());
         }
 
+        // load the subject
         return CompletableFuture.supplyAsync(() -> resolveDirectly().sponge());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof SubjectReference)) return false;
+        final SubjectReference other = (SubjectReference) o;
+        return this.collectionIdentifier.equals(other.collectionIdentifier) && this.subjectIdentifier.equals(other.subjectIdentifier);
+    }
+
+    @Override
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        result = result * PRIME + this.collectionIdentifier.hashCode();
+        result = result * PRIME + this.subjectIdentifier.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "SubjectReference(" +
+                "collection=" + this.collectionIdentifier + ", " +
+                "subject=" + this.subjectIdentifier + ")";
     }
 }

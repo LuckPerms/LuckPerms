@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.references.Identifiable;
 import me.lucko.luckperms.common.references.UserIdentifier;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public interface UserManager extends Manager<UserIdentifier, User> {
 
@@ -73,6 +74,6 @@ public interface UserManager extends Manager<UserIdentifier, User> {
     /**
      * Reloads the data of all online users
      */
-    void updateAllUsers();
+    CompletableFuture<Void> updateAllUsers();
 
 }

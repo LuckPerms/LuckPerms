@@ -26,8 +26,7 @@
 package me.lucko.luckperms.common.plugin;
 
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.Logger;
-import me.lucko.luckperms.api.PlatformType;
+import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
@@ -36,18 +35,20 @@ import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.abstraction.Command;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.logging.Logger;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.UserManager;
-import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.storage.Storage;
-import me.lucko.luckperms.common.storage.backing.file.FileWatcher;
+import me.lucko.luckperms.common.storage.dao.file.FileWatcher;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
@@ -55,12 +56,12 @@ import me.lucko.luckperms.common.verbose.VerboseHandler;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * Main internal interface for LuckPerms plugins, providing the base for abstraction throughout the project.
@@ -109,7 +110,7 @@ public interface LuckPermsPlugin {
      *
      * @return the redis messaging service
      */
-    InternalMessagingService getMessagingService();
+    Optional<ExtendedMessagingService> getMessagingService();
 
     /**
      * Gets a wrapped logger instance for the platform.
@@ -147,12 +148,19 @@ public interface LuckPermsPlugin {
     LocaleManager getLocaleManager();
 
     /**
+     * Gets the dependency manager for the plugin
+     *
+     * @return the dependency manager
+     */
+    DependencyManager getDependencyManager();
+
+    /**
      * Gets the context manager.
      * This object handles context accumulation for all players on the platform.
      *
      * @return the context manager
      */
-    ContextManager getContextManager();
+    ContextManager<?> getContextManager();
 
     /**
      * Gets the cached state manager for the platform.
@@ -194,15 +202,14 @@ public interface LuckPermsPlugin {
      *
      * @return the scheduler
      */
-    LuckPermsScheduler getScheduler();
+    SchedulerAdapter getScheduler();
 
-    default void doAsync(Runnable runnable) {
-        getScheduler().doAsync(runnable);
-    }
-
-    default void doSync(Runnable runnable) {
-        getScheduler().doSync(runnable);
-    }
+    /**
+     * Gets the file watcher running on the platform
+     *
+     * @return the file watcher
+     */
+    Optional<FileWatcher> getFileWatcher();
 
     /**
      * Gets a string of the plugin's version
@@ -223,7 +230,7 @@ public interface LuckPermsPlugin {
      *
      * @return the server brand
      */
-    String getServerName();
+    String getServerBrand();
 
     /**
      * Gets the version of the running platform
@@ -233,25 +240,20 @@ public interface LuckPermsPlugin {
     String getServerVersion();
 
     /**
+     * Gets the name associated with this server
+     *
+     * @return the server name
+     */
+    default String getServerName() {
+        return null;
+    }
+
+    /**
      * Gets the time when the plugin first started in millis.
      *
      * @return the enable time
      */
     long getStartTime();
-
-    /**
-     * Gets the file watcher running on the platform, or null if it's not enabled.
-     *
-     * @return the file watcher, or null
-     */
-    FileWatcher getFileWatcher();
-
-    default void applyToFileWatcher(Consumer<FileWatcher> consumer) {
-        FileWatcher fw = getFileWatcher();
-        if (fw != null) {
-            consumer.accept(fw);
-        }
-    }
 
     /**
      * Gets the plugins main data storage directory
@@ -331,14 +333,14 @@ public interface LuckPermsPlugin {
      *
      * @return a {@link List} of usernames
      */
-    List<String> getPlayerList();
+    Stream<String> getPlayerList();
 
     /**
      * Gets the UUIDs of the users online on the platform
      *
      * @return a {@link Set} of UUIDs
      */
-    Set<UUID> getOnlinePlayers();
+    Stream<UUID> getOnlinePlayers();
 
     /**
      * Checks if a user is online
@@ -353,7 +355,7 @@ public interface LuckPermsPlugin {
      *
      * @return a {@link List} of senders online on the platform
      */
-    List<Sender> getOnlineSenders();
+    Stream<Sender> getOnlineSenders();
 
     /**
      * Gets the console.
@@ -369,14 +371,6 @@ public interface LuckPermsPlugin {
      */
     Set<UUID> getUniqueConnections();
 
-    /**
-     * Gets a set of Contexts that should be pre-processed in advance
-     *
-     * @param op if the user being processed is op
-     * @return a set of contexts
-     */
-    Set<Contexts> getPreProcessContexts(boolean op);
-
     default List<Command> getExtraCommands() {
         return Collections.emptyList();
     }
@@ -384,10 +378,10 @@ public interface LuckPermsPlugin {
     /**
      * Gets a map of extra information to be shown in the info command
      *
-     * @return a map of options, or null
+     * @return a map of options
      */
-    default LinkedHashMap<String, Object> getExtraInfo() {
-        return null;
+    default Map<String, Object> getExtraInfo() {
+        return Collections.emptyMap();
     }
 
     /**
@@ -404,23 +398,14 @@ public interface LuckPermsPlugin {
 
     }
 
-    /**
-     * Called when a users data is refreshed
-     *
-     * @param user the user
-     */
-    default void onUserRefresh(User user) {
-
-    }
-
     static void sendStartupBanner(Sender sender, LuckPermsPlugin plugin) {
-        sender.sendMessage(Util.color("&b               __       &3 __   ___  __         __  "));
-        sender.sendMessage(Util.color("&b    |    |  | /  ` |__/ &3|__) |__  |__)  |\\/| /__` "));
-        sender.sendMessage(Util.color("&b    |___ \\__/ \\__, |  \\ &3|    |___ |  \\  |  | .__/ "));
-        sender.sendMessage(Util.color(" "));
-        sender.sendMessage(Util.color("&2  Loading version &bv" + plugin.getVersion() + "&2 on " + plugin.getServerType().getFriendlyName() + " - " + plugin.getServerName()));
-        sender.sendMessage(Util.color("&8  Running on server version " + plugin.getServerVersion()));
-        sender.sendMessage(Util.color(" "));
+        sender.sendMessage(CommandUtils.color("&b               __       &3 __   ___  __         __  "));
+        sender.sendMessage(CommandUtils.color("&b    |    |  | /  ` |__/ &3|__) |__  |__)  |\\/| /__` "));
+        sender.sendMessage(CommandUtils.color("&b    |___ \\__/ \\__, |  \\ &3|    |___ |  \\  |  | .__/ "));
+        sender.sendMessage(CommandUtils.color(" "));
+        sender.sendMessage(CommandUtils.color("&2  Loading version &bv" + plugin.getVersion() + "&2 on " + plugin.getServerType().getFriendlyName() + " - " + plugin.getServerBrand()));
+        sender.sendMessage(CommandUtils.color("&8  Running on server version " + plugin.getServerVersion()));
+        sender.sendMessage(CommandUtils.color(" "));
     }
 
 }

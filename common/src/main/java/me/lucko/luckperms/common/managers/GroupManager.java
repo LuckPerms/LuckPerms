@@ -29,4 +29,12 @@ import me.lucko.luckperms.common.model.Group;
 
 public interface GroupManager extends Manager<String, Group> {
 
+    /**
+     * Get a group object by display name
+     *
+     * @param name The name to search by
+     * @return a {@link Group} object if the group is loaded, returns null if the group is not loaded
+     */
+    Group getByDisplayName(String name);
+
 }

@@ -25,12 +25,13 @@
 
 package me.lucko.luckperms.common.commands.impl.track;
 
+import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -40,7 +41,6 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
 
@@ -66,30 +66,36 @@ public class TrackInsert extends SubCommand<Track> {
         }
 
         if (!plugin.getStorage().loadGroup(groupName).join()) {
-            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, groupName);
             return CommandResult.INVALID_ARGS;
         }
 
         Group group = plugin.getGroupManager().getIfLoaded(groupName);
         if (group == null) {
-            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, groupName);
             return CommandResult.LOADING_ERROR;
         }
 
         try {
-            track.insertGroup(group, pos - 1);
-            Message.TRACK_INSERT_SUCCESS.send(sender, group.getName(), track.getName(), pos);
-            if (track.getGroups().size() > 1) {
-                Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), group.getName()));
+            DataMutateResult result = track.insertGroup(group, pos - 1);
+
+            if (result.asBoolean()) {
+                Message.TRACK_INSERT_SUCCESS.send(sender, group.getName(), track.getName(), pos);
+                if (track.getGroups().size() > 1) {
+                    Message.EMPTY.send(sender, CommandUtils.listToArrowSep(track.getGroups(), group.getName()));
+                }
+
+                ExtendedLogEntry.build().actor(sender).acted(track)
+                        .action("insert", group.getName(), pos)
+                        .build().submit(plugin, sender);
+
+                save(track, sender, plugin);
+                return CommandResult.SUCCESS;
+            } else {
+                Message.TRACK_ALREADY_CONTAINS.send(sender, track.getName(), group.getName());
+                return CommandResult.STATE_ERROR;
             }
-            ExtendedLogEntry.build().actor(sender).acted(track)
-                    .action("insert " + group.getName() + " " + pos)
-                    .build().submit(plugin, sender);
-            save(track, sender, plugin);
-            return CommandResult.SUCCESS;
-        } catch (ObjectAlreadyHasException e) {
-            Message.TRACK_ALREADY_CONTAINS.send(sender, track.getName(), group.getName());
-            return CommandResult.STATE_ERROR;
+
         } catch (IndexOutOfBoundsException e) {
             Message.TRACK_INSERT_ERROR_INVALID_POS.send(sender, pos);
             return CommandResult.INVALID_ARGS;

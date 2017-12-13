@@ -28,20 +28,21 @@ package me.lucko.luckperms.common.storage;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.Delegate;
+
+import com.google.common.base.Throwables;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.actionlog.Log;
-import me.lucko.luckperms.common.api.delegates.StorageDelegate;
+import me.lucko.luckperms.common.api.delegates.model.ApiStorage;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.storage.backing.AbstractBacking;
+import me.lucko.luckperms.common.storage.dao.AbstractDao;
 import me.lucko.luckperms.common.storage.wrappings.BufferedOutputStorage;
 import me.lucko.luckperms.common.storage.wrappings.PhasedStorage;
 
@@ -49,36 +50,47 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
+import java.util.concurrent.CompletionException;
 
 /**
- * Converts a {@link AbstractBacking} to use {@link CompletableFuture}s
+ * Converts a {@link AbstractDao} to use {@link CompletableFuture}s
  */
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class AbstractStorage implements Storage {
-    public static Storage wrap(LuckPermsPlugin plugin, AbstractBacking backing) {
+    public static Storage create(LuckPermsPlugin plugin, AbstractDao backing) {
         BufferedOutputStorage bufferedDs = BufferedOutputStorage.wrap(PhasedStorage.wrap(new AbstractStorage(plugin, backing)), 250L);
         plugin.getScheduler().asyncRepeating(bufferedDs, 2L);
         return bufferedDs;
     }
 
     private final LuckPermsPlugin plugin;
-
-    @Delegate(types = Delegated.class)
-    private final AbstractBacking backing;
+    private final AbstractDao dao;
 
     @Getter
-    private final StorageDelegate delegate;
+    private final ApiStorage delegate;
 
-    private AbstractStorage(LuckPermsPlugin plugin, AbstractBacking backing) {
+    private AbstractStorage(LuckPermsPlugin plugin, AbstractDao dao) {
         this.plugin = plugin;
-        this.backing = backing;
-        this.delegate = new StorageDelegate(plugin, this);
+        this.dao = dao;
+        this.delegate = new ApiStorage(plugin, this);
     }
 
-    private <T> CompletableFuture<T> makeFuture(Supplier<T> supplier) {
-        return CompletableFuture.supplyAsync(supplier, backing.getPlugin().getScheduler().async());
+    private <T> CompletableFuture<T> makeFuture(Callable<T> supplier) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return supplier.call();
+            } catch (Exception e) {
+                Throwables.propagateIfPossible(e);
+                throw new CompletionException(e);
+            }
+        }, dao.getPlugin().getScheduler().async());
+    }
+
+    @Override
+    public String getName() {
+        return dao.getName();
     }
 
     @Override
@@ -87,24 +99,49 @@ public class AbstractStorage implements Storage {
     }
 
     @Override
+    public void init() {
+        try {
+            dao.init();
+        } catch (Exception e) {
+            plugin.getLog().severe("Failed to init storage dao");
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void shutdown() {
+        try {
+            dao.shutdown();
+        } catch (Exception e) {
+            plugin.getLog().severe("Failed to shutdown storage dao");
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public Map<String, String> getMeta() {
+        return dao.getMeta();
+    }
+
+    @Override
     public CompletableFuture<Boolean> logAction(LogEntry entry) {
-        return makeFuture(() -> backing.logAction(entry));
+        return makeFuture(() -> dao.logAction(entry));
     }
 
     @Override
     public CompletableFuture<Log> getLog() {
-        return makeFuture(backing::getLog);
+        return makeFuture(dao::getLog);
     }
 
     @Override
     public CompletableFuture<Boolean> applyBulkUpdate(BulkUpdate bulkUpdate) {
-        return makeFuture(() -> backing.applyBulkUpdate(bulkUpdate));
+        return makeFuture(() -> dao.applyBulkUpdate(bulkUpdate));
     }
 
     @Override
     public CompletableFuture<Boolean> loadUser(UUID uuid, String username) {
         return makeFuture(() -> {
-            if (backing.loadUser(uuid, username)) {
+            if (dao.loadUser(uuid, username)) {
                 User u = plugin.getUserManager().getIfLoaded(uuid);
                 if (u != null) {
                     plugin.getApiProvider().getEventFactory().handleUserLoad(u);
@@ -117,28 +154,23 @@ public class AbstractStorage implements Storage {
 
     @Override
     public CompletableFuture<Boolean> saveUser(User user) {
-        return makeFuture(() -> backing.saveUser(user));
-    }
-
-    @Override
-    public CompletableFuture<Boolean> cleanupUsers() {
-        return makeFuture(backing::cleanupUsers);
+        return makeFuture(() -> dao.saveUser(user));
     }
 
     @Override
     public CompletableFuture<Set<UUID>> getUniqueUsers() {
-        return makeFuture(backing::getUniqueUsers);
+        return makeFuture(dao::getUniqueUsers);
     }
 
     @Override
     public CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(String permission) {
-        return makeFuture(() -> backing.getUsersWithPermission(permission));
+        return makeFuture(() -> dao.getUsersWithPermission(permission));
     }
 
     @Override
     public CompletableFuture<Boolean> createAndLoadGroup(String name, CreationCause cause) {
         return makeFuture(() -> {
-            if (backing.createAndLoadGroup(name)) {
+            if (dao.createAndLoadGroup(name)) {
                 Group g = plugin.getGroupManager().getIfLoaded(name);
                 if (g != null) {
                     plugin.getApiProvider().getEventFactory().handleGroupCreate(g, cause);
@@ -152,7 +184,7 @@ public class AbstractStorage implements Storage {
     @Override
     public CompletableFuture<Boolean> loadGroup(String name) {
         return makeFuture(() -> {
-            if (backing.loadGroup(name)) {
+            if (dao.loadGroup(name)) {
                 Group g = plugin.getGroupManager().getIfLoaded(name);
                 if (g != null) {
                     plugin.getApiProvider().getEventFactory().handleGroupLoad(g);
@@ -166,7 +198,7 @@ public class AbstractStorage implements Storage {
     @Override
     public CompletableFuture<Boolean> loadAllGroups() {
         return makeFuture(() -> {
-            if (backing.loadAllGroups()) {
+            if (dao.loadAllGroups()) {
                 plugin.getApiProvider().getEventFactory().handleGroupLoadAll();
                 return true;
             }
@@ -176,13 +208,13 @@ public class AbstractStorage implements Storage {
 
     @Override
     public CompletableFuture<Boolean> saveGroup(Group group) {
-        return makeFuture(() -> backing.saveGroup(group));
+        return makeFuture(() -> dao.saveGroup(group));
     }
 
     @Override
     public CompletableFuture<Boolean> deleteGroup(Group group, DeletionCause cause) {
         return makeFuture(() -> {
-            if (backing.deleteGroup(group)) {
+            if (dao.deleteGroup(group)) {
                 plugin.getApiProvider().getEventFactory().handleGroupDelete(group, cause);
                 return true;
             }
@@ -192,13 +224,13 @@ public class AbstractStorage implements Storage {
 
     @Override
     public CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(String permission) {
-        return makeFuture(() -> backing.getGroupsWithPermission(permission));
+        return makeFuture(() -> dao.getGroupsWithPermission(permission));
     }
 
     @Override
     public CompletableFuture<Boolean> createAndLoadTrack(String name, CreationCause cause) {
         return makeFuture(() -> {
-            if (backing.createAndLoadTrack(name)) {
+            if (dao.createAndLoadTrack(name)) {
                 Track t = plugin.getTrackManager().getIfLoaded(name);
                 if (t != null) {
                     plugin.getApiProvider().getEventFactory().handleTrackCreate(t, cause);
@@ -212,7 +244,7 @@ public class AbstractStorage implements Storage {
     @Override
     public CompletableFuture<Boolean> loadTrack(String name) {
         return makeFuture(() -> {
-            if (backing.loadTrack(name)) {
+            if (dao.loadTrack(name)) {
                 Track t = plugin.getTrackManager().getIfLoaded(name);
                 if (t != null) {
                     plugin.getApiProvider().getEventFactory().handleTrackLoad(t);
@@ -226,7 +258,7 @@ public class AbstractStorage implements Storage {
     @Override
     public CompletableFuture<Boolean> loadAllTracks() {
         return makeFuture(() -> {
-            if (backing.loadAllTracks()) {
+            if (dao.loadAllTracks()) {
                 plugin.getApiProvider().getEventFactory().handleTrackLoadAll();
                 return true;
             }
@@ -236,13 +268,13 @@ public class AbstractStorage implements Storage {
 
     @Override
     public CompletableFuture<Boolean> saveTrack(Track track) {
-        return makeFuture(() -> backing.saveTrack(track));
+        return makeFuture(() -> dao.saveTrack(track));
     }
 
     @Override
     public CompletableFuture<Boolean> deleteTrack(Track track, DeletionCause cause) {
         return makeFuture(() -> {
-            if (backing.deleteTrack(track)) {
+            if (dao.deleteTrack(track)) {
                 plugin.getApiProvider().getEventFactory().handleTrackDelete(track, cause);
                 return true;
             }
@@ -251,26 +283,17 @@ public class AbstractStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> saveUUIDData(String username, UUID uuid) {
-        return makeFuture(() -> backing.saveUUIDData(username, uuid));
+    public CompletableFuture<Boolean> saveUUIDData(UUID uuid, String username) {
+        return makeFuture(() -> dao.saveUUIDData(uuid, username));
     }
 
     @Override
     public CompletableFuture<UUID> getUUID(String username) {
-        return makeFuture(() -> backing.getUUID(username));
+        return makeFuture(() -> dao.getUUID(username));
     }
 
     @Override
     public CompletableFuture<String> getName(UUID uuid) {
-        return makeFuture(() -> backing.getName(uuid));
-    }
-
-    private interface Delegated {
-        String getName();
-        boolean isAcceptingLogins();
-        void setAcceptingLogins(boolean b);
-        void init();
-        void shutdown();
-        Map<String, String> getMeta();
+        return makeFuture(() -> dao.getName(uuid));
     }
 }

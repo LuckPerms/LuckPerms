@@ -31,44 +31,31 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.bukkit.model.Injector;
-import me.lucko.luckperms.bukkit.model.LPPermissible;
-import me.lucko.luckperms.bukkit.processors.AttachmentProcessor;
 import me.lucko.luckperms.bukkit.processors.ChildProcessor;
 import me.lucko.luckperms.bukkit.processors.DefaultsProcessor;
 import me.lucko.luckperms.common.calculators.AbstractCalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
 import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.processors.MapProcessor;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
 import me.lucko.luckperms.common.processors.RegexProcessor;
 import me.lucko.luckperms.common.processors.WildcardProcessor;
 
 import java.util.List;
-import java.util.UUID;
 
 @AllArgsConstructor
 public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
     private final LPBukkitPlugin plugin;
 
     @Override
-    public PermissionCalculator build(Contexts contexts, User user) {
+    public PermissionCalculator build(Contexts contexts, PermissionCalculatorMetadata metadata) {
         ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
 
         processors.add(new MapProcessor());
 
         if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_CHILD_PERMISSIONS)) {
             processors.add(new ChildProcessor(plugin.getChildPermissionProvider()));
-        }
-
-        if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_ATTACHMENT_PERMISSIONS)) {
-            final UUID uuid = plugin.getUuidCache().getExternalUUID(user.getUuid());
-            processors.add(new AttachmentProcessor(() -> {
-                LPPermissible permissible = Injector.getPermissible(uuid);
-                return permissible == null ? null : permissible.getAttachmentPermissions();
-            }));
         }
 
         if (plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) {
@@ -83,11 +70,7 @@ public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
             processors.add(new DefaultsProcessor(contexts.isOp(), plugin.getDefaultsProvider()));
         }
 
-        return registerCalculator(new PermissionCalculator(
-                plugin,
-                PermissionCalculatorMetadata.of(user.getFriendlyName(), contexts.getContexts()),
-                processors.build()
-        ));
+        return registerCalculator(new PermissionCalculator(plugin, metadata, processors.build()));
     }
 
     @Override

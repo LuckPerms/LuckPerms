@@ -30,8 +30,6 @@ import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -73,9 +71,9 @@ public class ProgressLogger {
 
     public void logAllProgress(String msg, int amount) {
         if (pluginName == null) {
-            listeners.forEach(s -> logProgressMessage.send(s, msg.replace("{}", "" + amount)));
+            listeners.forEach(s -> logProgressMessage.send(s, msg.replace("{}", Integer.toString(amount))));
         } else {
-            listeners.forEach(s -> logProgressMessage.send(s, pluginName, msg.replace("{}", "" + amount)));
+            listeners.forEach(s -> logProgressMessage.send(s, pluginName, msg.replace("{}", Integer.toString(amount))));
         }
     }
 
@@ -84,17 +82,5 @@ public class ProgressLogger {
             // migrated {} groups so far.
             logAllProgress(msg, amount);
         }
-    }
-
-    public void handleException(Exception ex) {
-        handleAndPrintException(ex);
-    }
-
-    public static void handleAndPrintException(Exception ex) {
-        if (ex instanceof ObjectAlreadyHasException || ex instanceof ObjectLacksException) {
-            return;
-        }
-
-        ex.printStackTrace();
     }
 }

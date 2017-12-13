@@ -28,14 +28,14 @@ package me.lucko.luckperms.common.config.keys;
 import lombok.AllArgsConstructor;
 
 import me.lucko.luckperms.common.config.ConfigKey;
-import me.lucko.luckperms.common.config.LuckPermsConfiguration;
+import me.lucko.luckperms.common.config.ConfigurationAdapter;
 
 @AllArgsConstructor(staticName = "of")
 public class StaticKey<T> implements ConfigKey<T> {
     private final T val;
 
     @Override
-    public T get(LuckPermsConfiguration config) {
+    public T get(ConfigurationAdapter adapter) {
         return val;
     }
 }

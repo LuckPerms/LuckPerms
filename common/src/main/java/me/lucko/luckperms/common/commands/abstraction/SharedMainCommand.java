@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.locale.LocalizedSpec;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -54,7 +54,7 @@ public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T>
     /**
      * If this instance of the shared command is targeting a user. Otherwise, it targets a group.
      */
-    private boolean user;
+    private final boolean user;
 
     public SharedMainCommand(LocalizedSpec spec, String name, boolean user, List<SharedSubCommand> secondaryCommands) {
         super(spec, name, null, Predicates.alwaysFalse());
@@ -147,9 +147,9 @@ public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T>
 
         if (subs.size() > 0) {
             if (user) {
-                Util.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format("/%s user <user> " + getName().toLowerCase() + " ...)", label));
+                CommandUtils.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format("/%s user <user> " + getName().toLowerCase() + " ...)", label));
             } else {
-                Util.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format("/%s group <group> " + getName().toLowerCase() + " ...)", label));
+                CommandUtils.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format("/%s group <group> " + getName().toLowerCase() + " ...)", label));
             }
 
             for (SharedSubCommand s : subs) {
@@ -165,11 +165,6 @@ public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T>
         if (e instanceof ArgumentUtils.ArgumentException) {
             if (e instanceof ArgumentUtils.DetailedUsageException) {
                 command.sendDetailedUsage(sender);
-                return CommandResult.INVALID_ARGS;
-            }
-
-            if (e instanceof ArgumentUtils.UseInheritException) {
-                Message.USE_INHERIT_COMMAND.send(sender);
                 return CommandResult.INVALID_ARGS;
             }
 

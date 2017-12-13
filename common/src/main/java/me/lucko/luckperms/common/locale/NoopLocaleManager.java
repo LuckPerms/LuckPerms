@@ -52,7 +52,7 @@ public class NoopLocaleManager implements LocaleManager {
     }
 
     @Override
-    public CommandSpec.CommandSpecData getTranslation(CommandSpec key) {
+    public CommandSpecData getTranslation(CommandSpec key) {
         return null;
     }
 

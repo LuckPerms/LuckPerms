@@ -25,12 +25,10 @@
 
 package me.lucko.luckperms.common.commands.impl.generic.other;
 
-import com.google.common.base.Splitter;
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonWriter;
+import com.google.gson.JsonPrimitive;
 
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -42,12 +40,12 @@ import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.webeditor.WebEditorUtils;
 
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
@@ -55,23 +53,9 @@ import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
 import net.kyori.text.format.TextColor;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.StringWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
-    private static final String USER_ID_PATTERN = "user/";
-    private static final String GROUP_ID_PATTERN = "group/";
-    private static final String FILE_NAME = "luckperms-data.json";
-
     public HolderEditor(LocaleManager locale, boolean user) {
         super(CommandSpec.HOLDER_EDITOR.spec(locale), "editor", user ? CommandPermission.USER_EDITOR : CommandPermission.GROUP_EDITOR, Predicates.alwaysFalse());
     }
@@ -83,23 +67,37 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
             return CommandResult.NO_PERMISSION;
         }
 
-        JsonObject data = new JsonObject();
-        Set<NodeModel> nodes = holder.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
-        data.addProperty("who", id(holder));
-        data.addProperty("cmdAlias", label);
-        data.addProperty("uploadedBy", sender.getName());
-        data.addProperty("time", System.currentTimeMillis());
-        data.add("nodes", serializePermissions(nodes));
+        // form the payload data
+        JsonObject payload = new JsonObject();
+        payload.addProperty("who", WebEditorUtils.getHolderIdentifier(holder));
+        payload.addProperty("whoFriendly", holder.getFriendlyName());
+        if (holder instanceof User) {
+            payload.addProperty("whoUuid", ((User) holder).getUuid().toString());
+        }
+        payload.addProperty("cmdAlias", label);
+        payload.addProperty("uploadedBy", sender.getNameWithLocation());
+        payload.addProperty("uploadedByUuid", sender.getUuid().toString());
+        payload.addProperty("time", System.currentTimeMillis());
 
-        String dataUrl = paste(new GsonBuilder().setPrettyPrinting().create().toJson(data));
-        if (dataUrl == null) {
+        // attach the holders permissions
+        payload.add("nodes", WebEditorUtils.serializePermissions(holder.getEnduringNodes().values().stream().map(NodeModel::fromNode)));
+
+        // attach an array of all permissions known to the server, to use for tab completion in the editor
+        JsonArray knownPermsArray = new JsonArray();
+        for (String perm : plugin.getPermissionVault().rootAsList()) {
+            knownPermsArray.add(new JsonPrimitive(perm));
+        }
+        payload.add("knownPermissions", knownPermsArray);
+
+        // upload the payload data to gist
+        String gistId = WebEditorUtils.postToGist(new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(payload));
+        if (gistId == null) {
             Message.EDITOR_UPLOAD_FAILURE.send(sender);
             return CommandResult.STATE_ERROR;
         }
 
-        List<String> parts = Splitter.on('/').splitToList(dataUrl);
-        String id = "?" + parts.get(4) + "/" + parts.get(6);
-        String url = plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + id;
+        // form a url for the editor
+        String url = plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + "?" + gistId;
 
         Message.EDITOR_URL.send(sender);
 
@@ -112,91 +110,4 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
         return CommandResult.SUCCESS;
     }
 
-    private static String id(PermissionHolder holder) {
-        if (holder instanceof User) {
-            User user = ((User) holder);
-            return USER_ID_PATTERN + user.getUuid().toString();
-        } else {
-            Group group = ((Group) holder);
-            return GROUP_ID_PATTERN + group.getName();
-        }
-    }
-
-    private static String paste(String content) {
-        HttpURLConnection connection = null;
-        try {
-            connection = (HttpURLConnection) new URL("https://api.github.com/gists").openConnection();
-            connection.setRequestMethod("POST");
-            connection.setDoInput(true);
-            connection.setDoOutput(true);
-
-            try (OutputStream os = connection.getOutputStream()) {
-                StringWriter sw = new StringWriter();
-                new JsonWriter(sw).beginObject()
-                        .name("description").value("LuckPerms Web Permissions Editor Data")
-                        .name("public").value(false)
-                        .name("files")
-                        .beginObject().name(FILE_NAME)
-                        .beginObject().name("content").value(content)
-                        .endObject()
-                        .endObject()
-                        .endObject();
-
-                os.write(sw.toString().getBytes(StandardCharsets.UTF_8));
-            }
-
-            if (connection.getResponseCode() >= 400) {
-                throw new RuntimeException("Connection returned response code: " + connection.getResponseCode() + " - " + connection.getResponseMessage());
-            }
-
-            try (InputStream inputStream = connection.getInputStream()) {
-                try (InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-                    JsonObject response = new Gson().fromJson(reader, JsonObject.class);
-                    return response.get("files").getAsJsonObject().get(FILE_NAME).getAsJsonObject().get("raw_url").getAsString();
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.disconnect();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private static JsonArray serializePermissions(Set<NodeModel> nodes) {
-        JsonArray arr = new JsonArray();
-
-        for (NodeModel node : nodes) {
-            JsonObject attributes = new JsonObject();
-            attributes.addProperty("permission", node.getPermission());
-            attributes.addProperty("value", node.isValue());
-
-            if (!node.getServer().equals("global")) {
-                attributes.addProperty("server", node.getServer());
-            }
-
-            if (!node.getWorld().equals("global")) {
-                attributes.addProperty("world", node.getWorld());
-            }
-
-            if (node.getExpiry() != 0L) {
-                attributes.addProperty("expiry", node.getExpiry());
-            }
-
-            if (!node.getContexts().isEmpty()) {
-                attributes.add("context", node.getContextsAsJson());
-            }
-
-            arr.add(attributes);
-        }
-
-        return arr;
-    }
 }

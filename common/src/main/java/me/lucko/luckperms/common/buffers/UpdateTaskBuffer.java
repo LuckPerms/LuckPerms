@@ -32,13 +32,13 @@ public class UpdateTaskBuffer extends BufferedRequest<Void> {
     private final LuckPermsPlugin plugin;
 
     public UpdateTaskBuffer(LuckPermsPlugin plugin) {
-        super(250L, 50L, plugin::doAsync);
+        super(250L, 50L, plugin.getScheduler().async());
         this.plugin = plugin;
     }
 
     @Override
     protected Void perform() {
-        new UpdateTask(plugin).run();
+        new UpdateTask(plugin, false).run();
         return null;
     }
 }

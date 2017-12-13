@@ -27,7 +27,6 @@ package me.lucko.luckperms.sponge.managers;
 
 import lombok.Getter;
 
-import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.base.Preconditions;
@@ -72,17 +71,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
     private SubjectCollection spongeProxy = null;
 
     private final LoadingCache<UserIdentifier, SpongeUser> objects = Caffeine.newBuilder()
-            .build(new CacheLoader<UserIdentifier, SpongeUser>() {
-                @Override
-                public SpongeUser load(UserIdentifier i) {
-                    return apply(i);
-                }
-
-                @Override
-                public SpongeUser reload(UserIdentifier i, SpongeUser t) {
-                    return t; // Never needs to be refreshed.
-                }
-            });
+            .build(this::apply);
 
     private final LoadingCache<UUID, LPSubject> subjectLoadingCache = Caffeine.<UUID, LPSubject>newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)
@@ -96,7 +85,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
                     user.getIoLock().unlock();
 
                     // ok, data is here, let's do the pre-calculation stuff.
-                    user.preCalculateData(false);
+                    user.preCalculateData();
                     return user.sponge();
                 }
 
@@ -108,7 +97,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
                     throw new RuntimeException();
                 }
 
-                user.preCalculateData(false);
+                user.preCalculateData();
                 return user.sponge();
             });
 
@@ -207,16 +196,13 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
     }
 
     @Override
-    public void updateAllUsers() {
-        plugin.doSync(() -> {
-            Set<UUID> players = plugin.getOnlinePlayers();
-            plugin.doAsync(() -> {
-                for (UUID uuid : players) {
-                    UUID internal = plugin.getUuidCache().getUUID(uuid);
-                    plugin.getStorage().loadUser(internal, "null").join();
-                }
-            });
-        });
+    public CompletableFuture<Void> updateAllUsers() {
+        return CompletableFuture.runAsync(
+                () -> plugin.getOnlinePlayers()
+                        .map(u -> plugin.getUuidCache().getUUID(u))
+                        .forEach(u -> plugin.getStorage().loadUser(u, null).join()),
+                plugin.getScheduler().async()
+        );
     }
 
     /* ------------------------------------------
@@ -325,7 +311,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
 
     @Override
     public ImmutableCollection<LPSubject> getLoadedSubjects() {
-        return getAll().values().stream().map(SpongeUser::sponge).collect(ImmutableCollectors.toImmutableSet());
+        return getAll().values().stream().map(SpongeUser::sponge).collect(ImmutableCollectors.toSet());
     }
 
     @Override
@@ -378,7 +364,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
                 .map(SpongeUser::sponge)
                 .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(ImmutableContextSet.empty(), permission)))
                 .filter(pair -> pair.getValue() != Tristate.UNDEFINED)
-                .collect(ImmutableCollectors.toImmutableMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
     }
 
     @Override
@@ -387,17 +373,12 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
                 .map(SpongeUser::sponge)
                 .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(contexts, permission)))
                 .filter(pair -> pair.getValue() != Tristate.UNDEFINED)
-                .collect(ImmutableCollectors.toImmutableMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
     }
 
     @Override
     public LPSubject getDefaults() {
         return getService().getDefaultSubjects().loadSubject(getIdentifier()).join();
-    }
-
-    @Override
-    public void suggestUnload(String identifier) {
-        // noop
     }
 
 }

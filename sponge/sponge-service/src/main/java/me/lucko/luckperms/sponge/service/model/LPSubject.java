@@ -50,10 +50,6 @@ public interface LPSubject {
         return getService().newSubjectReference(getParentCollection().getIdentifier(), getIdentifier());
     }
 
-    default LPSubjectData getDefaultData() {
-        return getDefaults().getSubjectData();
-    }
-
     default LPSubject getDefaults() {
         return getService().getDefaultSubjects().loadSubject(getIdentifier()).join();
     }
@@ -84,6 +80,19 @@ public interface LPSubject {
 
     default void performCleanup() {
 
+    }
+
+    void invalidateCaches(CacheLevel cacheLevel);
+
+    /**
+     * The level of cache for invalidation
+     *
+     * Invalidating at {@link #PARENT} will also invalidate at
+     * {@link #PERMISSION} and {@link #OPTION}, and invalidating at
+     * {@link #PERMISSION} will also invalidate at {@link #OPTION}.
+     */
+    enum CacheLevel {
+        PARENT, PERMISSION, OPTION
     }
 
 }

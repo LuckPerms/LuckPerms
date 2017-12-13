@@ -30,6 +30,9 @@ import lombok.experimental.UtilityClass;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+/**
+ * Nashorn provider utility
+ */
 @UtilityClass
 public class Scripting {
     private static ScriptEngine SCRIPT_ENGINE = null;

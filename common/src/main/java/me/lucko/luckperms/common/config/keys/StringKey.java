@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.config.keys;
 import lombok.AllArgsConstructor;
 
 import me.lucko.luckperms.common.config.ConfigKey;
-import me.lucko.luckperms.common.config.LuckPermsConfiguration;
+import me.lucko.luckperms.common.config.ConfigurationAdapter;
 
 @AllArgsConstructor(staticName = "of")
 public class StringKey implements ConfigKey<String> {
@@ -36,7 +36,7 @@ public class StringKey implements ConfigKey<String> {
     private final String def;
 
     @Override
-    public String get(LuckPermsConfiguration config) {
-        return config.getString(path, def);
+    public String get(ConfigurationAdapter adapter) {
+        return adapter.getString(path, def);
     }
 }

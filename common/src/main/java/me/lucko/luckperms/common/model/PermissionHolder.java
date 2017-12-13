@@ -45,12 +45,14 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.api.delegates.PermissionHolderDelegate;
+import me.lucko.luckperms.common.api.delegates.model.ApiPermissionHolder;
+import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.Cache;
-import me.lucko.luckperms.common.caching.MetaAccumulator;
+import me.lucko.luckperms.common.caching.HolderCachedData;
+import me.lucko.luckperms.common.caching.handlers.StateListener;
+import me.lucko.luckperms.common.caching.type.MetaAccumulator;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.contexts.ContextSetComparator;
-import me.lucko.luckperms.common.contexts.ExtractedContexts;
 import me.lucko.luckperms.common.node.ImmutableLocalizedNode;
 import me.lucko.luckperms.common.node.InheritanceInfo;
 import me.lucko.luckperms.common.node.MetaType;
@@ -59,11 +61,13 @@ import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.node.NodeTools;
 import me.lucko.luckperms.common.node.NodeWithContextComparator;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.primarygroup.GroupInheritanceComparator;
 import me.lucko.luckperms.common.references.GroupReference;
 import me.lucko.luckperms.common.references.HolderReference;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -205,10 +209,15 @@ public abstract class PermissionHolder {
     private final Lock ioLock = new ReentrantLock();
 
     /**
+     * Comparator used to ordering groups when calculating inheritance
+     */
+    private final Comparator<Group> inheritanceComparator = GroupInheritanceComparator.getFor(this);
+
+    /**
      * A set of runnables which are called when this objects state changes.
      */
     @Getter
-    private final Set<Runnable> stateListeners = ConcurrentHashMap.newKeySet();
+    private final Set<StateListener> stateListeners = ConcurrentHashMap.newKeySet();
 
     private void invalidateCache() {
         nodesCopy.invalidate();
@@ -216,9 +225,9 @@ public abstract class PermissionHolder {
         weightCache.invalidate();
 
         // Invalidate listeners
-        for (Runnable r : stateListeners) {
+        for (StateListener listener : stateListeners) {
             try {
-                r.run();
+                listener.onStateChange();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -244,6 +253,15 @@ public abstract class PermissionHolder {
     public abstract String getFriendlyName();
 
     /**
+     * Gets the holders cached data
+     *
+     * @return the holders cached data
+     */
+    public abstract HolderCachedData<?> getCachedData();
+
+    public abstract BufferedRequest<Void> getRefreshBuffer();
+
+    /**
      * Forms a HolderReference for this PermissionHolder.
      *
      * @return this holders reference
@@ -255,7 +273,7 @@ public abstract class PermissionHolder {
      *
      * @return the api delegate
      */
-    public abstract PermissionHolderDelegate getDelegate();
+    public abstract ApiPermissionHolder getDelegate();
 
     /**
      * Returns an immutable copy of this objects nodes
@@ -472,7 +490,7 @@ public abstract class PermissionHolder {
 
     public boolean removeIf(Predicate<Node> predicate) {
         boolean result;
-        ImmutableCollection<Node> before = getEnduringNodes().values();;
+        ImmutableCollection<Node> before = getEnduringNodes().values();
 
         nodesLock.lock();
         try {
@@ -516,7 +534,7 @@ public abstract class PermissionHolder {
      * @param context       context to decide if groups should be applied
      * @return a set of nodes
      */
-    public List<LocalizedNode> resolveInheritances(List<LocalizedNode> accumulator, Set<String> excludedGroups, ExtractedContexts context) {
+    public List<LocalizedNode> resolveInheritances(List<LocalizedNode> accumulator, Set<String> excludedGroups, Contexts context) {
         if (accumulator == null) {
             accumulator = new ArrayList<>();
         }
@@ -530,13 +548,11 @@ public abstract class PermissionHolder {
         }
 
         // get and add the objects own nodes
-        List<Node> nodes = filterNodes(context.getContextSet());
+        List<Node> nodes = filterNodes(context.getContexts());
         for (Node node : nodes) {
             ImmutableLocalizedNode localizedNode = ImmutableLocalizedNode.of(node, getObjectName());
             accumulator.add(localizedNode);
         }
-
-        Contexts contexts = context.getContexts();
 
         // resolve and process the objects parents
         List<Group> resolvedGroups = new ArrayList<>();
@@ -548,7 +564,7 @@ public abstract class PermissionHolder {
 
             if (!processedGroups.add(groupName) || excludedGroups.contains(groupName) || !n.getValuePrimitive()) continue;
 
-            if (!((contexts.isApplyGlobalGroups() || n.isServerSpecific()) && (contexts.isApplyGlobalWorldGroups() || n.isWorldSpecific()))) {
+            if (!((context.isApplyGlobalGroups() || n.isServerSpecific()) && (context.isApplyGlobalWorldGroups() || n.isWorldSpecific()))) {
                 continue;
             }
 
@@ -558,10 +574,8 @@ public abstract class PermissionHolder {
             }
         }
 
-        resolvedGroups.sort((o1, o2) -> {
-            int result = Integer.compare(o1.getWeight().orElse(0), o2.getWeight().orElse(0));
-            return result == 1 ? -1 : 1;
-        });
+        // sort the groups according to weight + other factors.
+        resolvedGroups.sort(inheritanceComparator);
 
         for (Group g : resolvedGroups) {
             g.resolveInheritances(accumulator, excludedGroups, context);
@@ -570,11 +584,11 @@ public abstract class PermissionHolder {
         return accumulator;
     }
 
-    public List<LocalizedNode> resolveInheritances(ExtractedContexts context) {
+    public List<LocalizedNode> resolveInheritances(Contexts context) {
         return resolveInheritances(null, null, context);
     }
 
-    public SortedSet<LocalizedNode> resolveInheritancesAlmostEqual(ExtractedContexts contexts) {
+    public SortedSet<LocalizedNode> resolveInheritancesAlmostEqual(Contexts contexts) {
         List<LocalizedNode> nodes = resolveInheritances(new LinkedList<>(), null, contexts);
         NodeTools.removeAlmostEqual(nodes.iterator());
         SortedSet<LocalizedNode> ret = new TreeSet<>(NodeWithContextComparator.reverse());
@@ -582,7 +596,7 @@ public abstract class PermissionHolder {
         return ret;
     }
 
-    public SortedSet<LocalizedNode> resolveInheritancesMergeTemp(ExtractedContexts contexts) {
+    public SortedSet<LocalizedNode> resolveInheritancesMergeTemp(Contexts contexts) {
         List<LocalizedNode> nodes = resolveInheritances(new LinkedList<>(), null, contexts);
         NodeTools.removeIgnoreValueOrTemp(nodes.iterator());
         SortedSet<LocalizedNode> ret = new TreeSet<>(NodeWithContextComparator.reverse());
@@ -632,10 +646,8 @@ public abstract class PermissionHolder {
             }
         }
 
-        resolvedGroups.sort((o1, o2) -> {
-            int result = Integer.compare(o1.getWeight().orElse(0), o2.getWeight().orElse(0));
-            return result == 1 ? -1 : 1;
-        });
+        // sort the groups according to weight + other factors.
+        resolvedGroups.sort(inheritanceComparator);
 
         for (Group g : resolvedGroups) {
             g.resolveInheritances(accumulator, excludedGroups);
@@ -664,24 +676,22 @@ public abstract class PermissionHolder {
         return ret;
     }
 
-    public SortedSet<LocalizedNode> getAllNodes(ExtractedContexts context) {
-        Contexts contexts = context.getContexts();
-
+    public SortedSet<LocalizedNode> getAllNodes(Contexts context) {
         List<LocalizedNode> entries;
-        if (contexts.isApplyGroups()) {
+        if (context.isApplyGroups()) {
             entries = resolveInheritances(new LinkedList<>(), null, context);
         } else {
             entries = new LinkedList<>();
-            for (Node n : filterNodes(context.getContextSet())) {
+            for (Node n : filterNodes(context.getContexts())) {
                 ImmutableLocalizedNode localizedNode = ImmutableLocalizedNode.of(n, getObjectName());
                 entries.add(localizedNode);
             }
         }
 
-        if (!contexts.isIncludeGlobal()) {
+        if (!context.isIncludeGlobal()) {
             entries.removeIf(n -> !n.isGroupNode() && !n.isServerSpecific());
         }
-        if (!contexts.isApplyGlobalWorldGroups()) {
+        if (!context.isApplyGlobalWorldGroups()) {
             entries.removeIf(n -> !n.isGroupNode() && !n.isWorldSpecific());
         }
 
@@ -691,24 +701,22 @@ public abstract class PermissionHolder {
         return ret;
     }
 
-    public Map<String, Boolean> exportNodesAndShorthand(ExtractedContexts context, boolean lowerCase) {
-        Contexts contexts = context.getContexts();
-
+    public Map<String, Boolean> exportNodesAndShorthand(Contexts context, boolean lowerCase) {
         List<LocalizedNode> entries;
-        if (contexts.isApplyGroups()) {
+        if (context.isApplyGroups()) {
             entries = resolveInheritances(new LinkedList<>(), null, context);
         } else {
             entries = new LinkedList<>();
-            for (Node n : filterNodes(context.getContextSet())) {
+            for (Node n : filterNodes(context.getContexts())) {
                 ImmutableLocalizedNode localizedNode = ImmutableLocalizedNode.of(n, getObjectName());
                 entries.add(localizedNode);
             }
         }
 
-        if (!contexts.isIncludeGlobal()) {
+        if (!context.isIncludeGlobal()) {
             entries.removeIf(n -> !n.isGroupNode() && !n.isServerSpecific());
         }
-        if (!contexts.isApplyGlobalWorldGroups()) {
+        if (!context.isApplyGlobalWorldGroups()) {
             entries.removeIf(n -> !n.isGroupNode() && !n.isWorldSpecific());
         }
 
@@ -736,13 +744,13 @@ public abstract class PermissionHolder {
         Map<String, Boolean> perms = new HashMap<>();
         boolean applyShorthand = plugin.getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND);
         for (Node node : entries) {
-            String perm = lowerCase ? node.getPermission().toLowerCase() : node.getPermission();
+            String perm = lowerCase ? node.getPermission().toLowerCase().intern() : node.getPermission();
 
-            if (perms.putIfAbsent(perm, node.getValuePrimitive()) == null) {
-                if (applyShorthand) {
-                    List<String> sh = node.resolveShorthand();
-                    if (!sh.isEmpty()) {
-                        sh.stream().map(s -> lowerCase ? s.toLowerCase() : s).forEach(s -> perms.putIfAbsent(s, node.getValuePrimitive()));
+            if (perms.putIfAbsent(perm, node.getValuePrimitive()) == null && applyShorthand) {
+                List<String> shorthand = node.resolveShorthand();
+                if (!shorthand.isEmpty()) {
+                    for (String s : shorthand) {
+                        perms.putIfAbsent((lowerCase ? s.toLowerCase() : s).intern(), node.getValuePrimitive());
                     }
                 }
             }
@@ -751,7 +759,7 @@ public abstract class PermissionHolder {
         return ImmutableMap.copyOf(perms);
     }
 
-    public MetaAccumulator accumulateMeta(MetaAccumulator accumulator, Set<String> excludedGroups, ExtractedContexts context) {
+    public MetaAccumulator accumulateMeta(MetaAccumulator accumulator, Set<String> excludedGroups, Contexts context) {
         if (accumulator == null) {
             accumulator = MetaAccumulator.makeFromConfig(plugin);
         }
@@ -764,16 +772,14 @@ public abstract class PermissionHolder {
             excludedGroups.add(getObjectName().toLowerCase());
         }
 
-        Contexts contexts = context.getContexts();
-
         // get and add the objects own nodes
-        List<Node> nodes = filterNodes(context.getContextSet());
+        List<Node> nodes = filterNodes(context.getContexts());
 
         for (Node node : nodes) {
             if (!node.getValuePrimitive()) continue;
             if (!node.isMeta() && !node.isPrefix() && !node.isSuffix()) continue;
 
-            if (!((contexts.isIncludeGlobal() || node.isServerSpecific()) && (contexts.isIncludeGlobalWorld() || node.isWorldSpecific()))) {
+            if (!((context.isIncludeGlobal() || node.isServerSpecific()) && (context.isIncludeGlobalWorld() || node.isWorldSpecific()))) {
                 continue;
             }
 
@@ -795,7 +801,7 @@ public abstract class PermissionHolder {
 
             if (!processedGroups.add(groupName) || excludedGroups.contains(groupName) || !n.getValuePrimitive()) continue;
 
-            if (!((contexts.isApplyGlobalGroups() || n.isServerSpecific()) && (contexts.isApplyGlobalWorldGroups() || n.isWorldSpecific()))) {
+            if (!((context.isApplyGlobalGroups() || n.isServerSpecific()) && (context.isApplyGlobalWorldGroups() || n.isWorldSpecific()))) {
                 continue;
             }
 
@@ -805,10 +811,8 @@ public abstract class PermissionHolder {
             }
         }
 
-        resolvedGroups.sort((o1, o2) -> {
-            int result = Integer.compare(o1.getWeight().orElse(0), o2.getWeight().orElse(0));
-            return result == 1 ? -1 : 1;
-        });
+        // sort the groups according to weight + other factors.
+        resolvedGroups.sort(inheritanceComparator);
 
         for (Group g : resolvedGroups) {
             g.accumulateMeta(accumulator, excludedGroups, context);
@@ -861,10 +865,8 @@ public abstract class PermissionHolder {
             }
         }
 
-        resolvedGroups.sort((o1, o2) -> {
-            int result = Integer.compare(o1.getWeight().orElse(0), o2.getWeight().orElse(0));
-            return result == 1 ? -1 : 1;
-        });
+        // sort the groups according to weight + other factors.
+        resolvedGroups.sort(inheritanceComparator);
 
         for (Group g : resolvedGroups) {
             g.accumulateMeta(accumulator, excludedGroups);
@@ -1049,7 +1051,7 @@ public abstract class PermissionHolder {
             return DataMutateResult.ALREADY_HAS;
         }
 
-        ImmutableCollection<Node> before = getEnduringNodes().values();;
+        ImmutableCollection<Node> before = getEnduringNodes().values();
 
         nodesLock.lock();
         try {
@@ -1503,7 +1505,7 @@ public abstract class PermissionHolder {
 
         boolean seen = false;
         int best = 0;
-        for (Node n : getOwnNodes()) {
+        for (Node n : getEnduringNodes().get(ImmutableContextSet.empty())) {
             if (!n.getPermission().startsWith("weight.")) {
                 continue;
             }

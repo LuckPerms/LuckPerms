@@ -28,26 +28,18 @@ package me.lucko.luckperms.common.node;
 import lombok.Getter;
 import lombok.ToString;
 
-import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 
-import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.utils.DateUtil;
-import me.lucko.luckperms.common.utils.PatternCache;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -56,18 +48,17 @@ import static com.google.common.base.Preconditions.checkState;
  */
 @ToString(of = {"permission", "value", "override", "server", "world", "expireAt", "contexts"})
 public final class ImmutableNode implements Node {
+
+    /**
+     * The character which separates each part of a permission node
+     */
     private static final int NODE_SEPARATOR_CHAR = Character.getNumericValue('.');
-
-    private static final String[] PERMISSION_DELIMS = new String[]{"/", "-", "$", "(", ")", "=", ","};
-    private static final String[] SERVER_WORLD_DELIMS = new String[]{"/", "-"};
-    private static final Splitter META_SPLITTER = Splitter.on(PatternCache.compileDelimitedMatcher(".", "\\")).limit(2);
-
 
     /*
      * NODE STATE
      *
-     * This are the actual node parameters, and are
-     * basically what this class wraps.
+     * This are the actual node attributes, and are
+     * really just what this class wraps.
      */
 
     @Getter
@@ -114,24 +105,14 @@ public final class ImmutableNode implements Node {
 
     private final int hashCode;
 
-    private final boolean isGroup;
+    // all nullable
     private String groupName;
-
-    private final boolean isWildcard;
     private final int wildcardLevel;
-
-    private final boolean isMeta;
     private Map.Entry<String, String> meta;
-
-    private final boolean isPrefix;
     private Map.Entry<Integer, String> prefix;
-
-    private final boolean isSuffix;
     private Map.Entry<Integer, String> suffix;
 
     private final List<String> resolvedShorthand;
-
-    private String serializedNode = null;
 
     /**
      * Make an immutable node instance
@@ -145,65 +126,34 @@ public final class ImmutableNode implements Node {
      */
     @SuppressWarnings("deprecation")
     ImmutableNode(String permission, boolean value, boolean override, long expireAt, String server, String world, ContextSet contexts) {
-        if (permission == null || permission.equals("")) {
+        if (permission == null || permission.isEmpty()) {
             throw new IllegalArgumentException("Empty permission");
         }
 
         // standardize server/world values.
-        if (server != null) {
-            server = server.toLowerCase();
-        }
-        if (world != null) {
-            world = world.toLowerCase();
-        }
-        if (server != null && (server.equals("global") || server.equals(""))) {
-            server = null;
-        }
-        if (world != null && (world.equals("global") || world.equals(""))) {
-            world = null;
-        }
+        server = standardizeServerWorld(server);
+        world = standardizeServerWorld(world);
 
-        this.permission = NodeFactory.unescapeDelimiters(permission, PERMISSION_DELIMS).intern();
+        // define core attributes
+        this.permission = LegacyNodeFactory.unescapeDelimiters(permission, LegacyNodeFactory.PERMISSION_DELIMITERS).intern();
         this.value = value;
         this.override = override;
         this.expireAt = expireAt;
-        this.server = internString(NodeFactory.unescapeDelimiters(server, SERVER_WORLD_DELIMS));
-        this.world = internString(NodeFactory.unescapeDelimiters(world, SERVER_WORLD_DELIMS));
+        this.server = internString(LegacyNodeFactory.unescapeDelimiters(server, LegacyNodeFactory.SERVER_WORLD_DELIMITERS));
+        this.world = internString(LegacyNodeFactory.unescapeDelimiters(world, LegacyNodeFactory.SERVER_WORLD_DELIMITERS));
         this.contexts = contexts == null ? ContextSet.empty() : contexts.makeImmutable();
 
-        String lowerCasePermission = this.permission.toLowerCase();
-
-        // Setup state
-        isGroup = lowerCasePermission.startsWith("group.");
-        if (isGroup) {
-            groupName = lowerCasePermission.substring("group.".length()).intern();
-        }
-
-        isWildcard = this.permission.endsWith(".*");
-        wildcardLevel = this.permission.chars().filter(num -> num == NODE_SEPARATOR_CHAR).sum();
-
-        isMeta = NodeFactory.isMetaNode(this.permission);
-        if (isMeta) {
-            List<String> metaPart = META_SPLITTER.splitToList(this.permission.substring("meta.".length()));
-            meta = Maps.immutableEntry(MetaUtils.unescapeCharacters(metaPart.get(0)).intern(), MetaUtils.unescapeCharacters(metaPart.get(1)).intern());
-        }
-
-        isPrefix = NodeFactory.isPrefixNode(this.permission);
-        if (isPrefix) {
-            List<String> prefixPart = META_SPLITTER.splitToList(this.permission.substring("prefix.".length()));
-            Integer i = Integer.parseInt(prefixPart.get(0));
-            prefix = Maps.immutableEntry(i, MetaUtils.unescapeCharacters(prefixPart.get(1)).intern());
-        }
-
-        isSuffix = NodeFactory.isSuffixNode(this.permission);
-        if (isSuffix) {
-            List<String> suffixPart = META_SPLITTER.splitToList(this.permission.substring("suffix.".length()));
-            Integer i = Integer.parseInt(suffixPart.get(0));
-            suffix = Maps.immutableEntry(i, MetaUtils.unescapeCharacters(suffixPart.get(1)).intern());
-        }
-
+        // define cached state
+        groupName = NodeFactory.parseGroupNode(this.permission);
+        wildcardLevel = this.permission.endsWith(".*") ? this.permission.chars().filter(num -> num == NODE_SEPARATOR_CHAR).sum() : -1;
+        meta = NodeFactory.parseMetaNode(this.permission);
+        prefix = NodeFactory.parsePrefixNode(this.permission);
+        suffix = NodeFactory.parseSuffixNode(this.permission);
         resolvedShorthand = ImmutableList.copyOf(ShorthandParser.parseShorthand(getPermission()));
+        optServer = Optional.ofNullable(this.server);
+        optWorld = Optional.ofNullable(this.world);
 
+        // calculate the "full" context set
         if (this.server != null || this.world != null) {
             MutableContextSet fullContexts = this.contexts.mutableCopy();
             if (this.server != null) {
@@ -218,8 +168,6 @@ public final class ImmutableNode implements Node {
             this.fullContexts = this.contexts;
         }
 
-        this.optServer = Optional.ofNullable(this.server);
-        this.optWorld = Optional.ofNullable(this.world);
         this.hashCode = calculateHashCode();
     }
 
@@ -288,7 +236,7 @@ public final class ImmutableNode implements Node {
 
     @Override
     public boolean isGroupNode() {
-        return isGroup;
+        return groupName != null;
     }
 
     @Override
@@ -299,17 +247,18 @@ public final class ImmutableNode implements Node {
 
     @Override
     public boolean isWildcard() {
-        return isWildcard;
+        return wildcardLevel != -1;
     }
 
     @Override
     public int getWildcardLevel() {
+        checkState(isWildcard(), "Node is not a wildcard");
         return wildcardLevel;
     }
 
     @Override
     public boolean isMeta() {
-        return isMeta;
+        return meta != null;
     }
 
     @Override
@@ -320,7 +269,7 @@ public final class ImmutableNode implements Node {
 
     @Override
     public boolean isPrefix() {
-        return isPrefix;
+        return prefix != null;
     }
 
     @Override
@@ -331,7 +280,7 @@ public final class ImmutableNode implements Node {
 
     @Override
     public boolean isSuffix() {
-        return isSuffix;
+        return suffix != null;
     }
 
     @Override
@@ -341,130 +290,13 @@ public final class ImmutableNode implements Node {
     }
 
     @Override
-    public boolean shouldApply(boolean includeGlobal, boolean includeGlobalWorld, String server, String world, ContextSet context, boolean applyRegex) {
-        return shouldApplyOnServer(server, includeGlobal, applyRegex) && shouldApplyOnWorld(world, includeGlobalWorld, applyRegex) && shouldApplyWithContext(context, false);
-    }
-
-    @Override
-    public boolean shouldApplyOnServer(String server, boolean includeGlobal, boolean applyRegex) {
-        if (server == null || server.equals("") || server.equalsIgnoreCase("global")) {
-            return !isServerSpecific();
-        }
-
-        return isServerSpecific() ? shouldApply(server, applyRegex, this.server) : includeGlobal;
-    }
-
-    @Override
-    public boolean shouldApplyOnWorld(String world, boolean includeGlobal, boolean applyRegex) {
-        if (world == null || world.equals("") || world.equalsIgnoreCase("null")) {
-            return !isWorldSpecific();
-        }
-
-        return isWorldSpecific() ? shouldApply(world, applyRegex, this.world) : includeGlobal;
-    }
-
-    @Override
-    public boolean shouldApplyWithContext(ContextSet context, boolean worldAndServer) {
-        if (contexts.isEmpty() && !isServerSpecific() && !isWorldSpecific()) {
-            return true;
-        }
-
-        if (worldAndServer) {
-            if (isWorldSpecific()) {
-                if (context == null) return false;
-                if (!context.hasIgnoreCase("world", world)) return false;
-            }
-
-            if (isServerSpecific()) {
-                if (context == null) return false;
-                if (!context.hasIgnoreCase("server", server)) return false;
-            }
-        }
-
-        if (!contexts.isEmpty()) {
-            if (context == null) return false;
-
-            for (Map.Entry<String, String> c : contexts.toSet()) {
-                if (!context.hasIgnoreCase(c.getKey(), c.getValue())) return false;
-            }
-        }
-
-        return true;
-    }
-
-    @Override
     public boolean shouldApplyWithContext(ContextSet context) {
-        return shouldApplyWithContext(context, true);
-    }
-
-    @Override
-    public boolean shouldApplyOnAnyServers(List<String> servers, boolean includeGlobal) {
-        for (String s : servers) {
-            if (shouldApplyOnServer(s, includeGlobal, false)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean shouldApplyOnAnyWorlds(List<String> worlds, boolean includeGlobal) {
-        for (String s : worlds) {
-            if (shouldApplyOnWorld(s, includeGlobal, false)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    @Override
-    public List<String> resolveWildcard(List<String> possibleNodes) {
-        if (!isWildcard() || possibleNodes == null) {
-            return Collections.emptyList();
-        }
-
-        String match = getPermission().substring(0, getPermission().length() - 2);
-        return possibleNodes.stream().filter(pn -> pn.startsWith(match)).collect(Collectors.toList());
+        return getFullContexts().isSatisfiedBy(context, false);
     }
 
     @Override
     public List<String> resolveShorthand() {
         return resolvedShorthand;
-    }
-
-    @Override
-    public synchronized String toSerializedNode() {
-        if (serializedNode == null) {
-            serializedNode = calculateSerializedNode();
-        }
-        return serializedNode;
-    }
-
-    private String calculateSerializedNode() {
-        StringBuilder builder = new StringBuilder();
-
-        if (server != null) {
-            builder.append(NodeFactory.escapeDelimiters(server, SERVER_WORLD_DELIMS));
-            if (world != null) builder.append("-").append(NodeFactory.escapeDelimiters(world, SERVER_WORLD_DELIMS));
-            builder.append("/");
-        } else {
-            if (world != null) builder.append("global-").append(NodeFactory.escapeDelimiters(world, SERVER_WORLD_DELIMS)).append("/");
-        }
-
-        if (!contexts.isEmpty()) {
-            builder.append("(");
-            for (Map.Entry<String, String> entry : contexts.toSet()) {
-                builder.append(NodeFactory.escapeDelimiters(entry.getKey(), "=", "(", ")", ",")).append("=").append(NodeFactory.escapeDelimiters(entry.getValue(), "=", "(", ")", ",")).append(",");
-            }
-            builder.deleteCharAt(builder.length() - 1);
-            builder.append(")");
-        }
-
-        builder.append(NodeFactory.escapeDelimiters(permission, "/", "-", "$", "(", ")", "=", ","));
-        if (expireAt != 0L) builder.append("$").append(expireAt);
-        return builder.toString();
     }
 
     @SuppressWarnings("StringEquality")
@@ -574,48 +406,20 @@ public final class ImmutableNode implements Node {
         return getPermission();
     }
 
-    private static boolean shouldApply(String str, boolean applyRegex, String thisStr) {
-        if (str.equalsIgnoreCase(thisStr)) {
-            return true;
-        }
-
-        Set<String> expandedStr = ShorthandParser.parseShorthand(str, false);
-        Set<String> expandedThisStr = ShorthandParser.parseShorthand(thisStr, false);
-
-        if (str.toLowerCase().startsWith("r=") && applyRegex) {
-            Pattern p = PatternCache.compile(str.substring(2));
-            if (p == null) {
-                return false;
-            }
-
-            for (String s : expandedThisStr) {
-                if (p.matcher(s).matches()) return true;
-            }
-            return false;
-        }
-
-        if (thisStr.toLowerCase().startsWith("r=") && applyRegex) {
-            Pattern p = PatternCache.compile(thisStr.substring(2));
-            if (p == null) return false;
-
-            for (String s : expandedStr) {
-                if (p.matcher(s).matches()) return true;
-            }
-            return false;
-        }
-
-        if (expandedStr.size() <= 1 && expandedThisStr.size() <= 1) return false;
-
-        for (String t : expandedThisStr) {
-            for (String s : expandedStr) {
-                if (t.equalsIgnoreCase(s)) return true;
-            }
-        }
-        return false;
-    }
-
     private static String internString(String s) {
         return s == null ? null : s.intern();
+    }
+
+    private static String standardizeServerWorld(String s) {
+        if (s != null) {
+            s = s.toLowerCase();
+
+            if (s.equals("global") || s.isEmpty()) {
+                s = null;
+            }
+        }
+
+        return s;
     }
 
 }

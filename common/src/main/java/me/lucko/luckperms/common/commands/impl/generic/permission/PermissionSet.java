@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -45,7 +45,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getBoolTabComplete;
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getPermissionTabComplete;
@@ -62,8 +61,8 @@ public class PermissionSet extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        boolean b = ArgumentUtils.handleBoolean(1, args);
-        String node = b ? ArgumentUtils.handleNode(0, args) : ArgumentUtils.handleString(0, args);
+        String node = ArgumentUtils.handleString(0, args);
+        boolean value = ArgumentUtils.handleBoolean(1, args);
         MutableContextSet context = ArgumentUtils.handleContext(2, args, plugin);
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
@@ -76,19 +75,19 @@ public class PermissionSet extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        DataMutateResult result = holder.setPermission(NodeFactory.newBuilder(node).setValue(b).withExtraContext(context).build());
+        DataMutateResult result = holder.setPermission(NodeFactory.newBuilder(node).setValue(value).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            Message.SETPERMISSION_SUCCESS.send(sender, node, b, holder.getFriendlyName(), Util.contextSetToString(context));
+            Message.SETPERMISSION_SUCCESS.send(sender, node, value, holder.getFriendlyName(), CommandUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("permission set " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("permission", "set", node, value, context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HASPERMISSION.send(sender, holder.getFriendlyName());
+            Message.ALREADY_HASPERMISSION.send(sender, holder.getFriendlyName(), node, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

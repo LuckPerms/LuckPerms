@@ -29,9 +29,10 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
-import me.lucko.luckperms.common.api.delegates.UserDelegate;
+import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.common.api.delegates.model.ApiUser;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
-import me.lucko.luckperms.common.caching.UserCache;
+import me.lucko.luckperms.common.caching.UserCachedData;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
@@ -41,6 +42,7 @@ import me.lucko.luckperms.common.references.UserReference;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @ToString(of = {"uuid"})
 @EqualsAndHashCode(of = {"uuid"}, callSuper = false)
@@ -64,32 +66,38 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     private final PrimaryGroupHolder primaryGroup;
 
     /**
-     * The users data cache instance, if present.
+     * The users data cache instance
      */
     @Getter
-    private final UserCache userData = new UserCache(this);
+    private final UserCachedData cachedData;
 
     @Getter
-    private BufferedRequest<Void> refreshBuffer = new UserRefreshBuffer(this);
+    private BufferedRequest<Void> refreshBuffer;
 
     @Getter
-    private final UserDelegate delegate = new UserDelegate(this);
+    private final ApiUser delegate = new ApiUser(this);
 
     public User(UUID uuid, LuckPermsPlugin plugin) {
         super(uuid.toString(), plugin);
         this.uuid = uuid;
 
+        this.refreshBuffer = new UserRefreshBuffer(plugin, this);
         this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
-        getPlugin().getApiProvider().getEventFactory().handleUserCacheLoad(this, userData);
+
+        this.cachedData = new UserCachedData(this);
+        getPlugin().getApiProvider().getEventFactory().handleUserCacheLoad(this, cachedData);
     }
 
     public User(UUID uuid, String name, LuckPermsPlugin plugin) {
         super(uuid.toString(), plugin);
         this.uuid = uuid;
-
         setName(name, false);
+
+        this.refreshBuffer = new UserRefreshBuffer(plugin, this);
         this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
-        getPlugin().getApiProvider().getEventFactory().handleUserCacheLoad(this, userData);
+
+        this.cachedData = new UserCachedData(this);
+        getPlugin().getApiProvider().getEventFactory().handleUserCacheLoad(this, cachedData);
     }
 
     @Override
@@ -109,6 +117,9 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      * @return true if a change was made
      */
     public boolean setName(String name, boolean weak) {
+        if (name != null && name.length() > 16) {
+            return false; // nope
+        }
 
         // if weak is true, only update the value in the User if it's null
         if (weak && this.name != null) {
@@ -161,27 +172,20 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      * Sets up the UserData cache
      * Blocking call.
      */
-    public synchronized void preCalculateData(boolean op) {
-        userData.preCalculate(getPlugin().getPreProcessContexts(op));
-        getPlugin().onUserRefresh(this);
+    public void preCalculateData() {
+        // first try to refresh any existing permissions
+        refreshBuffer.requestDirectly();
+
+        // pre-calc the allowall & global contexts
+        // since contexts change so frequently, it's not worth trying to calculate any more than this.
+        cachedData.preCalculate(Contexts.allowAll());
+        cachedData.preCalculate(Contexts.global());
     }
 
-    /**
-     * Removes the UserData cache from this user
-     */
-    public void unregisterData() {
-        userData.clear();
-    }
-
-    /**
-     * Refresh and re-assign the users permissions
-     * Blocking call.
-     */
-    private synchronized void refreshPermissions() {
-        userData.recalculatePermissions();
-        userData.recalculateMeta();
-        getPlugin().getApiProvider().getEventFactory().handleUserDataRecalculate(this, userData);
-        getPlugin().onUserRefresh(this);
+    public CompletableFuture<Void> reloadCachedData() {
+        return CompletableFuture.allOf(cachedData.reloadPermissions(), cachedData.reloadMeta()).thenAccept(n -> {
+            getPlugin().getApiProvider().getEventFactory().handleUserDataRecalculate(this, cachedData);
+        });
     }
 
     /**
@@ -205,22 +209,17 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         }
     }
 
-    public void cleanup() {
-        userData.cleanup();
-    }
-
     private static final class UserRefreshBuffer extends BufferedRequest<Void> {
         private final User user;
 
-        private UserRefreshBuffer(User user) {
-            super(250L, 50L, r -> user.getPlugin().doAsync(r));
+        private UserRefreshBuffer(LuckPermsPlugin plugin, User user) {
+            super(50L, 5L, plugin.getScheduler().async());
             this.user = user;
         }
 
         @Override
         protected Void perform() {
-            user.refreshPermissions();
-            return null;
+            return user.reloadCachedData().join();
         }
     }
 

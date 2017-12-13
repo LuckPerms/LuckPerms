@@ -27,17 +27,18 @@ package me.lucko.luckperms.common.treeview;
 
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 /**
  * Stores a collection of all permissions known to the platform.
@@ -55,7 +56,7 @@ public class PermissionVault implements Runnable {
     // a queue of permission strings to be processed by the tree
     private final Queue<String> queue;
 
-    @Setter
+    // if the handler should shutdown
     private boolean shutdown = false;
 
     public PermissionVault(Executor executor) {
@@ -72,6 +73,7 @@ public class PermissionVault implements Runnable {
             for (String e; (e = queue.poll()) != null; ) {
                 try {
                     String s = e.toLowerCase();
+                    // only attempt an insert if we're not seen this permission before
                     if (knownPermissions.add(s)) {
                         insert(s);
                     }
@@ -98,6 +100,10 @@ public class PermissionVault implements Runnable {
         return ImmutableSet.copyOf(knownPermissions);
     }
 
+    public List<String> rootAsList() {
+        return rootNode.makeImmutableCopy().getNodeEndings().stream().map(Map.Entry::getValue).collect(Collectors.toList());
+    }
+
     public int getSize() {
         return rootNode.getDeepSize();
     }
@@ -111,6 +117,10 @@ public class PermissionVault implements Runnable {
         for (String part : parts) {
             current = current.getChildMap().computeIfAbsent(part, s -> new TreeNode());
         }
+    }
+
+    public void shutdown() {
+        shutdown = true;
     }
 
 }

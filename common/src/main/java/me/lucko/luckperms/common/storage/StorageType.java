@@ -35,6 +35,7 @@ public enum StorageType {
 
     JSON("JSON", "json", "flatfile"),
     YAML("YAML", "yaml", "yml"),
+    HOCON("HOCON", "hocon"),
     MONGODB("MongoDB", "mongodb"),
     MARIADB("MariaDB", "mariadb"),
     MYSQL("MySQL", "mysql"),

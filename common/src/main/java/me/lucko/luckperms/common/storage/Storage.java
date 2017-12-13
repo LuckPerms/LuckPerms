@@ -30,7 +30,7 @@ import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.actionlog.Log;
-import me.lucko.luckperms.common.api.delegates.StorageDelegate;
+import me.lucko.luckperms.common.api.delegates.model.ApiStorage;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
@@ -47,13 +47,9 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface Storage {
 
-    StorageDelegate getDelegate();
+    ApiStorage getDelegate();
 
     String getName();
-
-    boolean isAcceptingLogins();
-
-    void setAcceptingLogins(boolean acceptingLogins);
 
     Storage noBuffer();
 
@@ -72,8 +68,6 @@ public interface Storage {
     CompletableFuture<Boolean> loadUser(UUID uuid, String username);
 
     CompletableFuture<Boolean> saveUser(User user);
-
-    CompletableFuture<Boolean> cleanupUsers();
 
     CompletableFuture<Set<UUID>> getUniqueUsers();
 
@@ -101,7 +95,7 @@ public interface Storage {
 
     CompletableFuture<Boolean> deleteTrack(Track track, DeletionCause cause);
 
-    CompletableFuture<Boolean> saveUUIDData(String username, UUID uuid);
+    CompletableFuture<Boolean> saveUUIDData(UUID uuid, String username);
 
     CompletableFuture<UUID> getUUID(String username);
 

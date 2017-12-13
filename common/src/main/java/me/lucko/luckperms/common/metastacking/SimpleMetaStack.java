@@ -50,7 +50,7 @@ public final class SimpleMetaStack implements MetaStack {
         this.targetType = targetType;
         this.entries = definition.getElements().stream()
                 .map(element -> new SimpleMetaStackEntry(this, element, targetType))
-                .collect(ImmutableCollectors.toImmutableList());
+                .collect(ImmutableCollectors.toList());
     }
 
     @Override

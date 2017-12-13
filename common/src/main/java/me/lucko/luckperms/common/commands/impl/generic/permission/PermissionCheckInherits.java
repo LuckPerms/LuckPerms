@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -69,8 +69,8 @@ public class PermissionCheckInherits extends SharedSubCommand {
             location = "self";
         }
 
-        String s = Util.formatTristate(result.getResult());
-        Message.CHECK_INHERITS_PERMISSION.send(sender, holder.getFriendlyName(), node, s, Util.contextSetToString(context), String.valueOf(location));
+        String s = CommandUtils.formatTristate(result.getResult());
+        Message.CHECK_INHERITS_PERMISSION.send(sender, holder.getFriendlyName(), node, s, CommandUtils.contextSetToString(context), String.valueOf(location));
         return CommandResult.SUCCESS;
     }
 

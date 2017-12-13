@@ -33,6 +33,7 @@ import javax.annotation.Nonnull;
  * @param <T> the subject type. Is ALWAYS the player class of the platform.
  * @since 2.13
  */
+@FunctionalInterface
 public interface ContextCalculator<T> {
 
     /**

@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.caching.PermissionCache;
+import me.lucko.luckperms.common.caching.type.PermissionCache;
 import me.lucko.luckperms.common.utils.PasteUtils;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
 

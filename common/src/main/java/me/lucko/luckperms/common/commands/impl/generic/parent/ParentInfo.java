@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -71,11 +71,11 @@ public class ParentInfo extends SharedSubCommand {
         }
 
         Component ent = permGroupsToMessage(holder.getOwnNodesSorted(), holder, label);
-        Message.LISTNODES.send(sender, holder.getFriendlyName());
+        Message.LISTPARENTS.send(sender, holder.getFriendlyName());
         sender.sendMessage(ent);
 
         Component tempEnt = tempGroupsToMessage(holder.getOwnNodesSorted(), holder, label);
-        Message.LISTNODES_TEMP.send(sender, holder.getFriendlyName());
+        Message.LISTPARENTS_TEMP.send(sender, holder.getFriendlyName());
         sender.sendMessage(tempEnt);
 
         return CommandResult.SUCCESS;
@@ -85,6 +85,7 @@ public class ParentInfo extends SharedSubCommand {
         List<Node> page = new ArrayList<>();
         for (Node node : nodes) {
             if (!node.isGroupNode()) continue;
+            if (!node.getValuePrimitive()) continue;
             if (node.isTemporary()) continue;
             page.add(node);
         }
@@ -95,7 +96,7 @@ public class ParentInfo extends SharedSubCommand {
 
         TextComponent.Builder message = TextComponent.builder("");
         for (Node node : page) {
-            String s = "&3> &a" + node.getGroupName() + Util.getAppendableNodeContextString(node) + "\n";
+            String s = "&3> &a" + node.getGroupName() + CommandUtils.getAppendableNodeContextString(node) + "\n";
             message.append(TextUtils.fromLegacy(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build());
         }
         return message.build();
@@ -105,6 +106,7 @@ public class ParentInfo extends SharedSubCommand {
         List<Node> page = new ArrayList<>();
         for (Node node : nodes) {
             if (!node.isGroupNode()) continue;
+            if (!node.getValuePrimitive()) continue;
             if (node.isPermanent()) continue;
             page.add(node);
         }
@@ -115,7 +117,7 @@ public class ParentInfo extends SharedSubCommand {
 
         TextComponent.Builder message = TextComponent.builder("");
         for (Node node : page) {
-            String s = "&3> &a" + node.getPermission() + Util.getAppendableNodeContextString(node) + "\n&2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()) + "\n";
+            String s = "&3> &a" + node.getGroupName() + CommandUtils.getAppendableNodeContextString(node) + "\n&2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()) + "\n";
             message.append(TextUtils.fromLegacy(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build());
         }
         return message.build();
@@ -129,8 +131,7 @@ public class ParentInfo extends SharedSubCommand {
         ), Constants.FORMAT_CHAR));
 
         boolean group = !(holder instanceof User);
-        String command = NodeFactory.nodeAsCommand(node, group ? holder.getObjectName() : holder.getFriendlyName(), group, false)
-                .replace("/luckperms", "/" + label);
+        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, group ? holder.getObjectName() : holder.getFriendlyName(), group, false);
 
         return component -> {
             component.hoverEvent(hoverEvent);

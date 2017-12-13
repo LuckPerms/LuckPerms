@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -121,14 +121,10 @@ public class PermissionInfo extends SharedSubCommand {
             context:
             if (index != -1) {
                 String key = filter.substring(0, index);
-                if (key.equals("")) {
-                    break context;
-                }
+                if (key.equals("")) break context;
 
                 String value = filter.substring(index + 1);
-                if (value.equals("")) {
-                    break context;
-                }
+                if (value.equals("")) break context;
 
                 contextFilter = Maps.immutableEntry(key, value);
             }
@@ -140,13 +136,13 @@ public class PermissionInfo extends SharedSubCommand {
 
         List<Node> l = new ArrayList<>();
         for (Node node : nodes) {
-            if (nodeFilter != null && !node.getPermission().startsWith(nodeFilter)) {
-                continue;
-            }
-            if (contextFilter != null && !node.getFullContexts().hasIgnoreCase(contextFilter.getKey(), contextFilter.getValue())) {
-                continue;
-            }
+            if ((node.isGroupNode() && node.getValuePrimitive()) || node.isPrefix() || node.isSuffix() || node.isMeta()) continue;
+
+            // check against filters
+            if (nodeFilter != null && !node.getPermission().startsWith(nodeFilter)) continue;
+            if (contextFilter != null && !node.getFullContexts().hasIgnoreCase(contextFilter.getKey(), contextFilter.getValue())) continue;
             if (temp != node.isTemporary()) continue;
+
             l.add(node);
         }
 
@@ -155,7 +151,7 @@ public class PermissionInfo extends SharedSubCommand {
         }
 
         int index = pageNumber - 1;
-        List<List<Node>> pages = Util.divideList(l, 15);
+        List<List<Node>> pages = CommandUtils.divideList(l, 15);
 
         if (index < 0 || index >= pages.size()) {
             pageNumber = 1;
@@ -173,7 +169,7 @@ public class PermissionInfo extends SharedSubCommand {
         }
 
         for (Node node : page) {
-            String s = "&3> " + (node.getValuePrimitive() ? "&a" : "&c") + node.getPermission() + (console ? " &7(" + node.getValuePrimitive() + "&7)" : "") + Util.getAppendableNodeContextString(node) + "\n";
+            String s = "&3> " + (node.getValuePrimitive() ? "&a" : "&c") + node.getPermission() + (console ? " &7(" + node.getValuePrimitive() + "&7)" : "") + CommandUtils.getAppendableNodeContextString(node) + "\n";
             if (temp) {
                 s += "&2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()) + "\n";
             }
@@ -192,8 +188,7 @@ public class PermissionInfo extends SharedSubCommand {
         ), '¥'));
 
         boolean group = !(holder instanceof User);
-        String command = NodeFactory.nodeAsCommand(node, group ? holder.getObjectName() : holder.getFriendlyName(), group, false)
-                .replace("/luckperms", "/" + label);
+        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, group ? holder.getObjectName() : holder.getFriendlyName(), group, false);
 
         return component -> {
             component.hoverEvent(hoverEvent);

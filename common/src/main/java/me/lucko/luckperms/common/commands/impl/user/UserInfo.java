@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -65,8 +65,8 @@ public class UserInfo extends SubCommand<User> {
                 user.getUuid(),
                 plugin.getPlayerStatus(user.getUuid()).asString(plugin.getLocaleManager()),
                 user.getPrimaryGroup().getValue(),
-                user.getPermanentNodes().size(),
-                user.getTemporaryNodes().size(),
+                user.getOwnNodes().size(),
+                user.getOwnNodes().stream().filter(n -> !(n.isGroupNode() || n.isPrefix() || n.isSuffix() || n.isMeta())).mapToInt(n -> 1).sum(),
                 user.getPrefixNodes().size(),
                 user.getSuffixNodes().size(),
                 user.getMetaNodes().size()
@@ -85,14 +85,14 @@ public class UserInfo extends SubCommand<User> {
         if (!parents.isEmpty()) {
             Message.INFO_PARENT_HEADER.send(sender);
             for (Node node : parents) {
-                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + Util.getAppendableNodeContextString(node));
+                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + CommandUtils.getAppendableNodeContextString(node));
             }
         }
 
         if (!tempParents.isEmpty()) {
             Message.INFO_TEMP_PARENT_HEADER.send(sender);
             for (Node node : tempParents) {
-                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + Util.getAppendableNodeContextString(node));
+                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + CommandUtils.getAppendableNodeContextString(node));
                 Message.EMPTY.send(sender, "&f-    &2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()));
             }
         }
@@ -103,10 +103,10 @@ public class UserInfo extends SubCommand<User> {
         Contexts contexts = plugin.getContextForUser(user);
         if (contexts != null) {
             context = contexts.getContexts().toSet().stream()
-                    .map(e -> Util.contextToString(e.getKey(), e.getValue()))
+                    .map(e -> CommandUtils.contextToString(e.getKey(), e.getValue()))
                     .collect(Collectors.joining(" "));
 
-            MetaData meta = user.getUserData().getMetaData(contexts);
+            MetaData meta = user.getCachedData().getMetaData(contexts);
             if (meta.getPrefix() != null) {
                 prefix = "&f\"" + meta.getPrefix() + "&f\"";
             }
@@ -115,7 +115,7 @@ public class UserInfo extends SubCommand<User> {
             }
         }
 
-        Message.USER_INFO_DATA.send(sender, Util.formatBoolean(contexts != null), context, prefix, suffix);
+        Message.USER_INFO_DATA.send(sender, CommandUtils.formatBoolean(contexts != null), context, prefix, suffix);
         return CommandResult.SUCCESS;
     }
 }

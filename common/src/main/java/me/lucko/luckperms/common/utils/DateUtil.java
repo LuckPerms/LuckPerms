@@ -165,8 +165,13 @@ public class DateUtil {
         return DateUtil.formatDateDiff(now, then);
     }
 
+    public static String formatDateDiffShort(long seconds) {
+        long now = unixSecondsNow();
+        return formatTimeShort(seconds - now);
+    }
+
     public static String formatTimeShort(long seconds) {
-        if (seconds == 0) {
+        if (seconds <= 0) {
             return "0s";
         }
 

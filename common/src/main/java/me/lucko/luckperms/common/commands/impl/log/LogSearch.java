@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.commands.impl.log;
 
-import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -51,7 +51,7 @@ public class LogSearch extends SubCommand<Log> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) throws CommandException {
-        int page = -999;
+        int page = Integer.MIN_VALUE;
         if (args.size() > 1) {
             try {
                 page = Integer.parseInt(args.get(args.size() - 1));
@@ -68,7 +68,7 @@ public class LogSearch extends SubCommand<Log> {
             return CommandResult.STATE_ERROR;
         }
 
-        if (page == -999) {
+        if (page == Integer.MIN_VALUE) {
             page = maxPage;
         }
 
@@ -77,10 +77,10 @@ public class LogSearch extends SubCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        SortedMap<Integer, LogEntry> entries = log.getSearch(page, query);
+        SortedMap<Integer, ExtendedLogEntry> entries = log.getSearch(page, query);
         Message.LOG_SEARCH_HEADER.send(sender, query, page, maxPage);
 
-        for (Map.Entry<Integer, LogEntry> e : entries.entrySet()) {
+        for (Map.Entry<Integer, ExtendedLogEntry> e : entries.entrySet()) {
             long time = e.getValue().getTimestamp();
             long now = DateUtil.unixSecondsNow();
             Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatTimeShort(now - time), e.getValue().getFormatted());

@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.commands.impl.log;
 
-import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -52,7 +52,7 @@ public class LogGroupHistory extends SubCommand<Log> {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) throws CommandException {
         String group = args.get(0).toLowerCase();
-        int page = -999;
+        int page = Integer.MIN_VALUE;
 
         if (args.size() == 2) {
             try {
@@ -65,7 +65,7 @@ public class LogGroupHistory extends SubCommand<Log> {
         }
 
         if (!DataConstraints.GROUP_NAME_TEST.test(group)) {
-            Message.GROUP_INVALID_ENTRY.send(sender);
+            Message.GROUP_INVALID_ENTRY.send(sender, group);
             return CommandResult.INVALID_ARGS;
         }
 
@@ -75,7 +75,7 @@ public class LogGroupHistory extends SubCommand<Log> {
             return CommandResult.STATE_ERROR;
         }
 
-        if (page == -999) {
+        if (page == Integer.MIN_VALUE) {
             page = maxPage;
         }
 
@@ -84,11 +84,11 @@ public class LogGroupHistory extends SubCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        SortedMap<Integer, LogEntry> entries = log.getGroupHistory(page, group);
+        SortedMap<Integer, ExtendedLogEntry> entries = log.getGroupHistory(page, group);
         String name = entries.values().stream().findAny().get().getActedName();
         Message.LOG_HISTORY_GROUP_HEADER.send(sender, name, page, maxPage);
 
-        for (Map.Entry<Integer, LogEntry> e : entries.entrySet()) {
+        for (Map.Entry<Integer, ExtendedLogEntry> e : entries.entrySet()) {
             long time = e.getValue().getTimestamp();
             long now = DateUtil.unixSecondsNow();
             Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatTimeShort(now - time), e.getValue().getFormatted());

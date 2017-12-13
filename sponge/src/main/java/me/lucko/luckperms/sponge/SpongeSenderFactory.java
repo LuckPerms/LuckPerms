@@ -29,8 +29,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.commands.sender.SenderFactory;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.TextUtils;
-import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
+import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 
 import net.kyori.text.Component;
 import net.kyori.text.serializer.ComponentSerializers;
@@ -70,12 +69,7 @@ public class SpongeSenderFactory extends SenderFactory<CommandSource> {
 
     @Override
     protected void sendMessage(CommandSource source, Component message) {
-        try {
-            source.sendMessage(TextSerializers.JSON.deserialize(ComponentSerializers.JSON.serialize(message)));
-        } catch (Exception e) {
-            //noinspection deprecation
-            sendMessage(source, TextUtils.toLegacy(message));
-        }
+        source.sendMessage(TextSerializers.JSON.deserialize(ComponentSerializers.JSON.serialize(message)));
     }
 
     @Override

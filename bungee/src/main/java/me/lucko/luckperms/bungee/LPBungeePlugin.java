@@ -28,24 +28,25 @@ package me.lucko.luckperms.bungee;
 import lombok.Getter;
 
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.Logger;
-import me.lucko.luckperms.api.PlatformType;
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.bungee.calculators.BungeeCalculatorFactory;
 import me.lucko.luckperms.bungee.contexts.BackendServerCalculator;
 import me.lucko.luckperms.bungee.contexts.BungeeContextManager;
+import me.lucko.luckperms.bungee.contexts.RedisBungeeCalculator;
+import me.lucko.luckperms.bungee.listeners.BungeeConnectionListener;
+import me.lucko.luckperms.bungee.listeners.BungeePermissionCheckListener;
 import me.lucko.luckperms.bungee.messaging.BungeeMessagingFactory;
 import me.lucko.luckperms.bungee.util.RedisBungeeUtil;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
-import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
+import me.lucko.luckperms.common.api.ApiSingletonUtils;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.UpdateTaskBuffer;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.config.AbstractConfiguration;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.contexts.ContextManager;
@@ -55,6 +56,7 @@ import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.NoopLocaleManager;
 import me.lucko.luckperms.common.locale.SimpleLocaleManager;
+import me.lucko.luckperms.common.logging.Logger;
 import me.lucko.luckperms.common.logging.SenderLogger;
 import me.lucko.luckperms.common.managers.GenericGroupManager;
 import me.lucko.luckperms.common.managers.GenericTrackManager;
@@ -62,16 +64,17 @@ import me.lucko.luckperms.common.managers.GenericUserManager;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.UserManager;
-import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.plugin.LuckPermsScheduler;
+import me.lucko.luckperms.common.plugin.SchedulerAdapter;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.storage.StorageType;
-import me.lucko.luckperms.common.storage.backing.file.FileWatcher;
+import me.lucko.luckperms.common.storage.dao.file.FileWatcher;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
+import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
@@ -82,19 +85,20 @@ import net.md_5.bungee.api.plugin.Plugin;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+/**
+ * LuckPerms implementation for the BungeeCord API.
+ */
 @Getter
 public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
     private long startTime;
-    private LuckPermsScheduler scheduler;
+    private SchedulerAdapter scheduler;
     private CommandManager commandManager;
     private LuckPermsConfiguration configuration;
     private UserManager userManager;
@@ -102,11 +106,12 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private TrackManager trackManager;
     private Storage storage;
     private FileWatcher fileWatcher = null;
-    private InternalMessagingService messagingService = null;
+    private ExtendedMessagingService messagingService = null;
     private UuidCache uuidCache;
     private ApiProvider apiProvider;
     private Logger log;
     private LocaleManager localeManager;
+    private DependencyManager dependencyManager;
     private CachedStateManager cachedStateManager;
     private ContextManager<ProxiedPlayer> contextManager;
     private CalculatorFactory calculatorFactory;
@@ -120,12 +125,13 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     @Override
     public void onLoad() {
         // setup minimal functionality in order to load initial dependencies
-        scheduler = new LPBungeeScheduler(this);
+        scheduler = new BungeeSchedulerAdapter(this);
         localeManager = new NoopLocaleManager();
         senderFactory = new BungeeSenderFactory(this);
         log = new SenderLogger(this, getConsoleSender());
 
-        DependencyManager.loadDependencies(this, Collections.singletonList(Dependency.CAFFEINE));
+        dependencyManager = new DependencyManager(this);
+        dependencyManager.loadDependencies(Collections.singleton(Dependency.CAFFEINE));
     }
 
     @Override
@@ -137,15 +143,15 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         logDispatcher = new LogDispatcher(this);
 
         getLog().info("Loading configuration...");
-        configuration = new BungeeConfig(this);
+        configuration = new AbstractConfiguration(this, new BungeeConfigAdapter(this));
         configuration.init();
-        configuration.loadAll();
 
         Set<StorageType> storageTypes = StorageFactory.getRequiredTypes(this, StorageType.H2);
-        DependencyManager.loadDependencies(this, storageTypes);
+        dependencyManager.loadStorageDependencies(storageTypes);
 
         // register events
-        getProxy().getPluginManager().registerListener(this, new BungeeListener(this));
+        getProxy().getPluginManager().registerListener(this, new BungeeConnectionListener(this));
+        getProxy().getPluginManager().registerListener(this, new BungeePermissionCheckListener(this));
 
         if (getConfiguration().get(ConfigKeys.WATCH_FILES)) {
             fileWatcher = new FileWatcher(this);
@@ -167,7 +173,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         // register commands
         commandManager = new CommandManager(this);
-        getProxy().getPluginManager().registerCommand(this, new BungeeCommand(this, commandManager));
+        getProxy().getPluginManager().registerCommand(this, new BungeeCommandExecutor(this, commandManager));
 
         // disable the default Bungee /perms command so it gets handled by the Bukkit plugin
         getProxy().getDisabledCommands().add("perms");
@@ -184,11 +190,15 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         // setup context manager
         contextManager = new BungeeContextManager(this);
         contextManager.registerCalculator(new BackendServerCalculator(this));
-        contextManager.registerCalculator(new LuckPermsCalculator<>(getConfiguration()), true);
+        contextManager.registerStaticCalculator(new LuckPermsCalculator(getConfiguration()));
+
+        if (getProxy().getPluginManager().getPlugin("RedisBungee") != null) {
+            contextManager.registerStaticCalculator(new RedisBungeeCalculator());
+        }
 
         // register with the LP API
         apiProvider = new ApiProvider(this);
-        ApiHandler.registerProvider(apiProvider);
+        ApiSingletonUtils.registerProvider(apiProvider);
 
         // schedule update tasks
         int mins = getConfiguration().get(ConfigKeys.SYNC_TIME);
@@ -200,7 +210,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         // run an update instantly.
         getLog().info("Performing initial data load...");
-        updateTaskBuffer.requestDirectly();
+        new UpdateTask(this, true).run();
 
         // register tasks
         scheduler.asyncRepeating(new ExpireTemporaryTask(this), 60L);
@@ -211,6 +221,9 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
     @Override
     public void onDisable() {
+        permissionVault.shutdown();
+        verboseHandler.shutdown();
+
         getLog().info("Closing storage...");
         storage.shutdown();
 
@@ -223,12 +236,23 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
             messagingService.close();
         }
 
-        ApiHandler.unregisterProvider();
+        ApiSingletonUtils.unregisterProvider();
 
         getLog().info("Shutting down internal scheduler...");
         scheduler.shutdown();
+
         getProxy().getScheduler().cancel(this);
         getProxy().getPluginManager().unregisterListeners(this);
+        getLog().info("Goodbye!");
+    }
+
+    @Override
+    public Optional<ExtendedMessagingService> getMessagingService() {
+        return Optional.ofNullable(messagingService);
+    }
+
+    public Optional<FileWatcher> getFileWatcher() {
+        return Optional.ofNullable(fileWatcher);
     }
 
     @Override
@@ -242,7 +266,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     }
 
     @Override
-    public String getServerName() {
+    public String getServerBrand() {
         return getProxy().getName();
     }
 
@@ -294,13 +318,13 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     }
 
     @Override
-    public List<String> getPlayerList() {
-        return getProxy().getPlayers().stream().map(ProxiedPlayer::getName).collect(Collectors.toList());
+    public Stream<String> getPlayerList() {
+        return getProxy().getPlayers().stream().map(ProxiedPlayer::getName);
     }
 
     @Override
-    public Set<UUID> getOnlinePlayers() {
-        return getProxy().getPlayers().stream().map(ProxiedPlayer::getUniqueId).collect(Collectors.toSet());
+    public Stream<UUID> getOnlinePlayers() {
+        return getProxy().getPlayers().stream().map(ProxiedPlayer::getUniqueId);
     }
 
     @Override
@@ -310,24 +334,15 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     }
 
     @Override
-    public List<Sender> getOnlineSenders() {
-        return getProxy().getPlayers().stream()
-                .map(p -> getSenderFactory().wrap(p))
-                .collect(Collectors.toList());
+    public Stream<Sender> getOnlineSenders() {
+        return Stream.concat(
+                Stream.of(getConsoleSender()),
+                getProxy().getPlayers().stream().map(p -> getSenderFactory().wrap(p))
+        );
     }
 
     @Override
     public Sender getConsoleSender() {
         return getSenderFactory().wrap(getProxy().getConsole());
-    }
-
-    @Override
-    public Set<Contexts> getPreProcessContexts(boolean op) {
-        Set<ImmutableContextSet> c = new HashSet<>();
-        c.add(ContextSet.empty());
-        c.add(ContextSet.singleton("server", getConfiguration().get(ConfigKeys.SERVER)));
-        return c.stream()
-                .map(set -> contextManager.formContexts(null, set))
-                .collect(Collectors.toSet());
     }
 }

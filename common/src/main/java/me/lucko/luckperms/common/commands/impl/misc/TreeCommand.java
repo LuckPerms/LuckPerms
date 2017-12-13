@@ -25,13 +25,13 @@
 
 package me.lucko.luckperms.common.commands.impl.misc;
 
-import me.lucko.luckperms.common.caching.PermissionCache;
+import me.lucko.luckperms.common.caching.type.PermissionCache;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -74,7 +74,7 @@ public class TreeCommand extends SingleCommand {
 
         if (player != null) {
             User user;
-            UUID u = Util.parseUuid(player);
+            UUID u = CommandUtils.parseUuid(player);
             if (u != null) {
                 user = plugin.getUserManager().getIfLoaded(u);
             } else {
@@ -86,7 +86,7 @@ public class TreeCommand extends SingleCommand {
                 return CommandResult.STATE_ERROR;
             }
 
-            PermissionCache permissionData = user.getUserData().getPermissionData(plugin.getContextForUser(user));
+            PermissionCache permissionData = user.getCachedData().getPermissionData(plugin.getContextForUser(user));
             TreeView view = TreeViewBuilder.newBuilder().rootPosition(selection).maxLevels(maxLevel).build(plugin.getPermissionVault());
 
             if (!view.hasData()) {
@@ -95,16 +95,12 @@ public class TreeCommand extends SingleCommand {
             }
 
             Message.TREE_UPLOAD_START.send(sender);
-
             String url = view.uploadPasteData(plugin.getVersion(), user.getFriendlyName(), permissionData);
-            if (url == null) {
-                url = "null";
-            }
 
             Message.TREE_URL.send(sender);
 
             Component message = TextComponent.builder(url).color(TextColor.AQUA)
-                    .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url))
+                    .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, String.valueOf(url)))
                     .hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to open the tree view.").color(TextColor.GRAY)))
                     .build();
 
@@ -120,16 +116,12 @@ public class TreeCommand extends SingleCommand {
         }
 
         Message.TREE_UPLOAD_START.send(sender);
-
         String url = view.uploadPasteData(plugin.getVersion());
-        if (url == null) {
-            url = "null";
-        }
 
         Message.TREE_URL.send(sender);
 
         Component message = TextComponent.builder(url).color(TextColor.AQUA)
-                .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url))
+                .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, String.valueOf(url)))
                 .hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to open the tree view.").color(TextColor.GRAY)))
                 .build();
 

@@ -51,7 +51,7 @@ public class TrackClone extends SubCommand<Track> {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) throws CommandException {
         String newTrackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(newTrackName)) {
-            Message.TRACK_INVALID_ENTRY.send(sender);
+            Message.TRACK_INVALID_ENTRY.send(sender, newTrackName);
             return CommandResult.INVALID_ARGS;
         }
 
@@ -66,7 +66,11 @@ public class TrackClone extends SubCommand<Track> {
         newTrack.setGroups(track.getGroups());
 
         Message.CLONE_SUCCESS.send(sender, track.getName(), newTrack.getName());
-        ExtendedLogEntry.build().actor(sender).acted(track).action("clone " + newTrack.getName()).build().submit(plugin, sender);
+
+        ExtendedLogEntry.build().actor(sender).acted(track)
+                .action("clone", newTrack.getName())
+                .build().submit(plugin, sender);
+
         save(newTrack, sender, plugin);
         return CommandResult.SUCCESS;
     }

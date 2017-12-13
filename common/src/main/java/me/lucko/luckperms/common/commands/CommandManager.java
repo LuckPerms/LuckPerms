@@ -55,7 +55,7 @@ import me.lucko.luckperms.common.commands.impl.track.TrackMainCommand;
 import me.lucko.luckperms.common.commands.impl.user.UserMainCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -70,6 +70,7 @@ import net.kyori.text.event.HoverEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
@@ -139,7 +140,7 @@ public class CommandManager {
     @SuppressWarnings("unchecked")
     private CommandResult execute(Sender sender, String label, List<String> args) {
         List<String> arguments = new ArrayList<>(args);
-        handleRewrites(arguments);
+        handleRewrites(arguments, true);
 
         // Handle no arguments
         if (arguments.size() == 0) {
@@ -200,7 +201,7 @@ public class CommandManager {
         List<String> arguments = new ArrayList<>(args);
 
         // we rewrite tab completions too!
-        handleRewrites(arguments);
+        handleRewrites(arguments, false);
 
         final List<Command> mains = mainCommands.stream()
                 .filter(Command::shouldDisplay)
@@ -211,7 +212,7 @@ public class CommandManager {
         if (arguments.size() <= 1) {
 
             // Nothing yet entered
-            if (arguments.isEmpty() || arguments.get(0).equalsIgnoreCase("")) {
+            if (arguments.isEmpty() || arguments.get(0).equals("")) {
                 return mains.stream()
                         .map(m -> m.getName().toLowerCase())
                         .collect(Collectors.toList());
@@ -227,8 +228,7 @@ public class CommandManager {
         // Find a main command matching the first arg
         Optional<Command> o = mains.stream()
                 .filter(m -> m.getName().equalsIgnoreCase(arguments.get(0)))
-                .limit(1)
-                .findAny();
+                .findFirst();
 
         arguments.remove(0); // remove the main command arg.
 
@@ -241,7 +241,7 @@ public class CommandManager {
     }
 
     private void sendCommandUsage(Sender sender, String label) {
-        Util.sendPluginMessage(sender, "&2Running &bLuckPerms v" + plugin.getVersion() + "&2.");
+        CommandUtils.sendPluginMessage(sender, "&2Running &bLuckPerms v" + plugin.getVersion() + "&2.");
         mainCommands.stream()
                 .filter(Command::shouldDisplay)
                 .filter(c -> c.isAuthorized(sender))
@@ -272,11 +272,6 @@ public class CommandManager {
                 return CommandResult.INVALID_ARGS;
             }
 
-            if (e instanceof ArgumentUtils.UseInheritException) {
-                Message.USE_INHERIT_COMMAND.send(sender);
-                return CommandResult.INVALID_ARGS;
-            }
-
             if (e instanceof ArgumentUtils.InvalidServerWorldException) {
                 Message.SERVER_WORLD_INVALID_ENTRY.send(sender);
                 return CommandResult.INVALID_ARGS;
@@ -303,28 +298,32 @@ public class CommandManager {
         return CommandResult.FAILURE;
     }
 
-    private static void handleRewrites(List<String> args) {
+    /**
+     * Handles aliases
+     *
+     * @param args the current args list
+     * @param rewriteLastArgument if the last argument should be rewritten - this is false when the method is called on tab completions
+     */
+    private static void handleRewrites(List<String> args, boolean rewriteLastArgument) {
         // Provide aliases
-        if (args.size() >= 1) {
-            if (args.get(0).equalsIgnoreCase("u")) {
+        if (args.size() >= 1 && (rewriteLastArgument || args.size() >= 2)) {
+            String arg0 = args.get(0);
+            if (arg0.equalsIgnoreCase("u") || arg0.equalsIgnoreCase("player") || arg0.equalsIgnoreCase("p")) {
                 args.remove(0);
                 args.add(0, "user");
-            }
-            if (args.get(0).equalsIgnoreCase("g")) {
+            } else if (arg0.equalsIgnoreCase("g")) {
                 args.remove(0);
                 args.add(0, "group");
-            }
-            if (args.get(0).equalsIgnoreCase("t")) {
+            } else if (arg0.equalsIgnoreCase("t")) {
                 args.remove(0);
                 args.add(0, "track");
-            }
-            if (args.get(0).equalsIgnoreCase("i")) {
+            } else if (arg0.equalsIgnoreCase("i")) {
                 args.remove(0);
                 args.add(0, "info");
             }
         }
 
-        if (args.size() >= 3) {
+        if (args.size() >= 3 && (rewriteLastArgument || args.size() >= 4)) {
             if (!args.get(0).equalsIgnoreCase("user") && !args.get(0).equalsIgnoreCase("group")) {
                 return;
             }
@@ -345,6 +344,7 @@ public class CommandManager {
                     break;
                 case "i":
                 case "about":
+                case "list":
                     args.remove(2);
                     args.add(2, "info");
                     break;
@@ -358,6 +358,10 @@ public class CommandManager {
                 case "parents":
                     args.remove(2);
                     args.add(2, "parent");
+                    break;
+                case "e":
+                    args.remove(2);
+                    args.add(2, "editor");
                     break;
 
                 // Provide backwards compatibility
@@ -441,9 +445,9 @@ public class CommandManager {
 
             // provide lazy info
             boolean lazyInfo = (
-                    args.size() >= 4 &&
+                    args.size() >= 4 && (rewriteLastArgument || args.size() >= 5) &&
                     (args.get(2).equalsIgnoreCase("permission") || args.get(2).equalsIgnoreCase("parent") || args.get(2).equalsIgnoreCase("meta")) &&
-                    (args.get(3).equalsIgnoreCase("i") || args.get(3).equalsIgnoreCase("about"))
+                    (args.get(3).equalsIgnoreCase("i") || args.get(3).equalsIgnoreCase("about") || args.get(3).equalsIgnoreCase("list"))
             );
 
             if (lazyInfo) {
@@ -453,7 +457,7 @@ public class CommandManager {
 
             // Provide lazy set rewrite
             boolean lazySet = (
-                    args.size() >= 6 &&
+                    args.size() >= 6 && (rewriteLastArgument || args.size() >= 7) &&
                     args.get(2).equalsIgnoreCase("permission") &&
                     args.get(3).toLowerCase().startsWith("set") &&
                     (args.get(5).equalsIgnoreCase("none") || args.get(5).equalsIgnoreCase("0"))
@@ -466,4 +470,27 @@ public class CommandManager {
             }
         }
     }
+
+    /**
+     * Strips outer quote marks from a list of parsed arguments.
+     *
+     * @param input the list of arguments to strip quotes from
+     * @return an ArrayList containing the contents of input without quotes
+     */
+    public static List<String> stripQuotes(List<String> input) {
+        input = new ArrayList<>(input);
+        ListIterator<String> iterator = input.listIterator();
+        while (iterator.hasNext()) {
+            String value = iterator.next();
+            if (value.length() < 3) {
+                continue;
+            }
+
+            if (value.charAt(0) == '"' && value.charAt(value.length() - 1) == '"') {
+                iterator.set(value.substring(1, value.length() - 1));
+            }
+        }
+        return input;
+    }
+
 }

@@ -25,16 +25,22 @@
 
 package me.lucko.luckperms.common.commands.utils;
 
+import me.lucko.luckperms.api.LocalizedNode;
+import me.lucko.luckperms.common.node.NodeWithContextComparator;
+
 import java.util.Comparator;
 import java.util.Map;
 
-public class MetaComparator implements Comparator<Map.Entry<Integer, ?>> {
+public class MetaComparator implements Comparator<Map.Entry<Integer, LocalizedNode>> {
     public static final MetaComparator INSTANCE = new MetaComparator();
 
     @Override
-    public int compare(Map.Entry<Integer, ?> o1, Map.Entry<Integer, ?> o2) {
+    public int compare(Map.Entry<Integer, LocalizedNode> o1, Map.Entry<Integer, LocalizedNode> o2) {
         int result = Integer.compare(o1.getKey(), o2.getKey());
-        return result != 0 ? result : 1;
+        if (result != 0) {
+            return result;
+        }
+        return NodeWithContextComparator.normal().compare(o1.getValue(), o2.getValue());
     }
 
 }

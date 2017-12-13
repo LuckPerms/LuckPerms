@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -50,14 +50,13 @@ import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getBoolTabComplete;
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getPermissionTabComplete;
 
 public class PermissionSetTemp extends SharedSubCommand {
     public PermissionSetTemp(LocaleManager locale) {
-        super(CommandSpec.PERMISSION_SETTEMP.spec(locale), "settemp", CommandPermission.USER_PERM_SETTEMP, CommandPermission.GROUP_PERM_SETTEMP, Predicates.inRange(0, 2));
+        super(CommandSpec.PERMISSION_SETTEMP.spec(locale), "settemp", CommandPermission.USER_PERM_SET_TEMP, CommandPermission.GROUP_PERM_SET_TEMP, Predicates.inRange(0, 2));
     }
 
     @Override
@@ -67,8 +66,8 @@ public class PermissionSetTemp extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        boolean b = ArgumentUtils.handleBoolean(1, args);
-        String node = b ? ArgumentUtils.handleNode(0, args) : ArgumentUtils.handleString(0, args);
+        String node = ArgumentUtils.handleString(0, args);
+        boolean value = ArgumentUtils.handleBoolean(1, args);
         long duration = ArgumentUtils.handleDuration(2, args);
         MutableContextSet context = ArgumentUtils.handleContext(3, args, plugin);
 
@@ -83,20 +82,20 @@ public class PermissionSetTemp extends SharedSubCommand {
         }
 
         TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
-        Map.Entry<DataMutateResult, Node> result = holder.setPermission(NodeFactory.newBuilder(node).setValue(b).withExtraContext(context).setExpiry(duration).build(), modifier);
+        Map.Entry<DataMutateResult, Node> result = holder.setPermission(NodeFactory.newBuilder(node).setValue(value).withExtraContext(context).setExpiry(duration).build(), modifier);
 
         if (result.getKey().asBoolean()) {
             duration = result.getValue().getExpiryUnixTime();
-            Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, b, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), Util.contextSetToString(context));
+            Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, value, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), CommandUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("permission settemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("permission", "settemp", node, value, duration, context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, holder.getFriendlyName());
+            Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, holder.getFriendlyName(), node, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

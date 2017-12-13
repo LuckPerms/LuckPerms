@@ -28,6 +28,7 @@ package me.lucko.luckperms.sponge.messaging;
 import com.google.common.collect.Iterables;
 
 import me.lucko.luckperms.common.messaging.AbstractMessagingService;
+import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 
 import org.spongepowered.api.Platform;
@@ -41,7 +42,7 @@ import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 /**
- * An implementation of {@link me.lucko.luckperms.api.MessagingService} using the plugin messaging channels.
+ * An implementation of {@link ExtendedMessagingService} using the plugin messaging channels.
  */
 public class BungeeMessagingService extends AbstractMessagingService implements RawDataListener {
     private final LPSpongePlugin plugin;
@@ -65,7 +66,7 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
     }
 
     @Override
-    protected void sendMessage(String channel, String message) {
+    protected void sendMessage(String message) {
         plugin.getSpongeScheduler().createTaskBuilder().interval(10, TimeUnit.SECONDS).execute(task -> {
             if (!plugin.getGame().isServerAvailable()) {
                 return;
@@ -86,6 +87,6 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
     @Override
     public void handlePayload(ChannelBuf buf, RemoteConnection connection, Platform.Type type) {
         String msg = buf.readUTF();
-        onMessage(CHANNEL, msg, null);
+        onMessage(msg, null);
     }
 }

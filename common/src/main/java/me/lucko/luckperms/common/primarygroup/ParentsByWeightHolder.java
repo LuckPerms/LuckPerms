@@ -25,38 +25,28 @@
 
 package me.lucko.luckperms.common.primarygroup;
 
-import lombok.NonNull;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-public class ParentsByWeightHolder extends StoredHolder {
-
-    private String cachedValue = null;
-    private boolean useCached = false;
-
-    public ParentsByWeightHolder(@NonNull User user) {
+public class ParentsByWeightHolder extends CachedPrimaryGroupHolder {
+    public ParentsByWeightHolder(User user) {
         super(user);
-        user.getStateListeners().add(() -> useCached = false);
     }
 
     @Override
-    public String getValue() {
-        if (useCached) {
-            return cachedValue;
+    protected String calculateValue() {
+        Contexts contexts = user.getPlugin().getContextForUser(user);
+        if (contexts == null) {
+            contexts = user.getPlugin().getContextManager().getStaticContexts();
         }
 
-        Contexts contexts = user.getPlugin().getContextForUser(user);
-        ContextSet contextSet = contexts != null ? contexts.getContexts() : user.getPlugin().getContextManager().getStaticContexts();
-
-        List<Group> groups = new ArrayList<>();
-        for (Node node : user.filterNodes(contextSet)) {
+        Set<Group> groups = new LinkedHashSet<>();
+        for (Node node : user.filterNodes(contexts.getContexts())) {
             if (!node.getValuePrimitive() || !node.isGroupNode()) {
                 continue;
             }
@@ -80,8 +70,6 @@ public class ParentsByWeightHolder extends StoredHolder {
             }
         }
 
-        cachedValue = bestGroup == null ? null : bestGroup.getName();
-        useCached = true;
-        return cachedValue;
+        return bestGroup == null ? null : bestGroup.getName();
     }
 }

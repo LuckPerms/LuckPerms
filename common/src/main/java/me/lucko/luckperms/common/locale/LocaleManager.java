@@ -71,6 +71,6 @@ public interface LocaleManager {
      * @param key the key
      * @return the translation data, or null if there isn't any translation available.
      */
-    CommandSpec.CommandSpecData getTranslation(CommandSpec key);
+    CommandSpecData getTranslation(CommandSpec key);
 
 }

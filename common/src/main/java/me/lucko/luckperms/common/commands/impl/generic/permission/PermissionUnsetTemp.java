@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -45,13 +45,12 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getPermissionTabComplete;
 
 public class PermissionUnsetTemp extends SharedSubCommand {
     public PermissionUnsetTemp(LocaleManager locale) {
-        super(CommandSpec.PERMISSION_UNSETTEMP.spec(locale), "unsettemp", CommandPermission.USER_PERM_UNSETTEMP, CommandPermission.GROUP_PERM_UNSETTEMP, Predicates.is(0));
+        super(CommandSpec.PERMISSION_UNSETTEMP.spec(locale), "unsettemp", CommandPermission.USER_PERM_UNSET_TEMP, CommandPermission.GROUP_PERM_UNSET_TEMP, Predicates.is(0));
     }
 
     @Override
@@ -77,16 +76,16 @@ public class PermissionUnsetTemp extends SharedSubCommand {
         DataMutateResult result = holder.unsetPermission(NodeFactory.newBuilder(node).setExpiry(10L).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, holder.getFriendlyName(), Util.contextSetToString(context));
+            Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, holder.getFriendlyName(), CommandUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("permission unsettemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("permission", "unsettemp", node, context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_HAVE_TEMP_PERMISSION.send(sender, holder.getFriendlyName());
+            Message.DOES_NOT_HAVE_TEMP_PERMISSION.send(sender, holder.getFriendlyName(), node, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

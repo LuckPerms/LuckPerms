@@ -29,6 +29,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -39,14 +40,26 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Uploads content to GitHub's GIST service.
+ */
 public class PasteUtils {
+    private static final String GIST_API = "https://api.github.com/gists";
+    private static final String SHORTEN_API = "https://git.io";
 
+    /**
+     * Uploads content to GIST, and returns a shortened URL.
+     *
+     * @param desc the description of the gist
+     * @param files the files to include in the gist (file name --> content)
+     * @return the url, or null
+     */
     public static String paste(String desc, List<Map.Entry<String, String>> files) {
         HttpURLConnection connection = null;
         try {
-            connection = (HttpURLConnection) new URL("https://api.github.com/gists").openConnection();
+            connection = (HttpURLConnection) new URL(GIST_API).openConnection();
+            connection.setRequestProperty("User-Agent", "luckperms");
             connection.setRequestMethod("POST");
-            connection.setDoInput(true);
             connection.setDoOutput(true);
             
             try (OutputStream os = connection.getOutputStream()) {
@@ -73,17 +86,21 @@ public class PasteUtils {
 
             String pasteUrl;
             try (InputStream inputStream = connection.getInputStream()) {
-                try (InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-                    JsonObject response = new Gson().fromJson(reader, JsonObject.class);
-                    pasteUrl = response.get("html_url").getAsString();
+                try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+                    try (BufferedReader reader = new BufferedReader(inputStreamReader)) {
+                        JsonObject response = new Gson().fromJson(reader, JsonObject.class);
+                        pasteUrl = response.get("html_url").getAsString();
+                    }
                 }
             }
 
             connection.disconnect();
 
             try {
-                connection = (HttpURLConnection) new URL("https://git.io").openConnection();
+                connection = (HttpURLConnection) new URL(SHORTEN_API).openConnection();
+                connection.setRequestProperty("User-Agent", "luckperms");
                 connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                connection.setRequestMethod("GET");
                 connection.setDoOutput(true);
                 try (OutputStream os = connection.getOutputStream()) {
                     os.write(("url=" + pasteUrl).getBytes(StandardCharsets.UTF_8));

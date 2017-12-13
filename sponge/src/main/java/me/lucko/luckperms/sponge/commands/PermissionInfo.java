@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -53,26 +53,26 @@ public class PermissionInfo extends SubCommand<LPSubjectData> {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
         ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(0, args);
         if (contextSet.isEmpty()) {
-            Util.sendPluginMessage(sender, "&aShowing permissions matching contexts &bANY&a.");
+            CommandUtils.sendPluginMessage(sender, "&aShowing permissions matching contexts &bANY&a.");
             Map<ImmutableContextSet, ImmutableMap<String, Boolean>> permissions = subjectData.getAllPermissions();
             if (permissions.isEmpty()) {
-                Util.sendPluginMessage(sender, "That subject does not have any permissions defined.");
+                CommandUtils.sendPluginMessage(sender, "That subject does not have any permissions defined.");
                 return CommandResult.SUCCESS;
             }
 
             for (Map.Entry<ImmutableContextSet, ImmutableMap<String, Boolean>> e : permissions.entrySet()) {
-                Util.sendPluginMessage(sender, "&3>> &bContext: " + SpongeUtils.contextToString(e.getKey()) + "\n" + SpongeUtils.nodesToString(e.getValue()));
+                CommandUtils.sendPluginMessage(sender, "&3>> &bContext: " + SpongeCommandUtils.contextToString(e.getKey()) + "\n" + SpongeCommandUtils.nodesToString(e.getValue()));
             }
 
         } else {
             Map<String, Boolean> permissions = subjectData.getPermissions(contextSet);
             if (permissions.isEmpty()) {
-                Util.sendPluginMessage(sender, "That subject does not have any permissions defined in those contexts.");
+                CommandUtils.sendPluginMessage(sender, "That subject does not have any permissions defined in those contexts.");
                 return CommandResult.SUCCESS;
             }
 
-            Util.sendPluginMessage(sender, "&aShowing permissions matching contexts &b" +
-                    SpongeUtils.contextToString(contextSet) + "&a.\n" + SpongeUtils.nodesToString(permissions));
+            CommandUtils.sendPluginMessage(sender, "&aShowing permissions matching contexts &b" +
+                    SpongeCommandUtils.contextToString(contextSet) + "&a.\n" + SpongeCommandUtils.nodesToString(permissions));
 
         }
         return CommandResult.SUCCESS;

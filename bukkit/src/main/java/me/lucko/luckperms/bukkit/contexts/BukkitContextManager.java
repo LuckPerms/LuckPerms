@@ -25,19 +25,18 @@
 
 package me.lucko.luckperms.bukkit.contexts;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.common.contexts.AbstractContextManager;
 
 import org.bukkit.entity.Player;
 
-@RequiredArgsConstructor
-public class BukkitContextManager extends ContextManager<Player> {
-    private final LPBukkitPlugin plugin;
+public class BukkitContextManager extends AbstractContextManager<Player> {
+    public BukkitContextManager(LPBukkitPlugin plugin) {
+        super(plugin, Player.class);
+    }
 
     @Override
     public Contexts formContexts(Player subject, ImmutableContextSet contextSet) {

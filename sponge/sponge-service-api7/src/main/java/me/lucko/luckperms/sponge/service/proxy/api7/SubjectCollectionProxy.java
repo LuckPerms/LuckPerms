@@ -28,7 +28,7 @@ package me.lucko.luckperms.sponge.service.proxy.api7;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
-import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
+import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 
@@ -46,7 +46,7 @@ import java.util.function.Predicate;
 
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor
-public class SubjectCollectionProxy implements SubjectCollection {
+public final class SubjectCollectionProxy implements SubjectCollection {
     private final LPSubjectCollection handle;
 
     @Override
@@ -76,12 +76,12 @@ public class SubjectCollectionProxy implements SubjectCollection {
 
     @Override
     public CompletableFuture<Map<String, Subject>> loadSubjects(Set<String> set) {
-        return handle.loadSubjects(set).thenApply(subs -> subs.stream().collect(ImmutableCollectors.toImmutableMap(LPSubject::getIdentifier, LPSubject::sponge)));
+        return handle.loadSubjects(set).thenApply(subs -> subs.stream().collect(ImmutableCollectors.toMap(LPSubject::getIdentifier, LPSubject::sponge)));
     }
 
     @Override
     public Collection<Subject> getLoadedSubjects() {
-        return handle.getLoadedSubjects().stream().map(LPSubject::sponge).collect(ImmutableCollectors.toImmutableSet());
+        return handle.getLoadedSubjects().stream().map(LPSubject::sponge).collect(ImmutableCollectors.toSet());
     }
 
     @Override
@@ -107,7 +107,7 @@ public class SubjectCollectionProxy implements SubjectCollection {
     @Override
     public Map<Subject, Boolean> getLoadedWithPermission(String s) {
         return handle.getLoadedWithPermission(s).entrySet().stream()
-                .collect(ImmutableCollectors.toImmutableMap(
+                .collect(ImmutableCollectors.toMap(
                         sub -> sub.getKey().sponge(),
                         Map.Entry::getValue
                 ));
@@ -116,7 +116,7 @@ public class SubjectCollectionProxy implements SubjectCollection {
     @Override
     public Map<Subject, Boolean> getLoadedWithPermission(Set<Context> set, String s) {
         return handle.getLoadedWithPermission(CompatibilityUtil.convertContexts(set), s).entrySet().stream()
-                .collect(ImmutableCollectors.toImmutableMap(
+                .collect(ImmutableCollectors.toMap(
                         sub -> sub.getKey().sponge(),
                         Map.Entry::getValue
                 ));
@@ -129,7 +129,22 @@ public class SubjectCollectionProxy implements SubjectCollection {
 
     @Override
     public void suggestUnload(String s) {
-        handle.suggestUnload(s);
+        // unused by lp
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o == this || o instanceof SubjectCollectionProxy && handle.equals(((SubjectCollectionProxy) o).handle);
+    }
+
+    @Override
+    public int hashCode() {
+        return handle.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "luckperms.api7.SubjectCollectionProxy(handle=" + this.handle + ")";
     }
 
 }

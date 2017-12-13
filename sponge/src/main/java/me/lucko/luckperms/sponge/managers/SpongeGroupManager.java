@@ -27,7 +27,6 @@ package me.lucko.luckperms.sponge.managers;
 
 import lombok.Getter;
 
-import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.base.Preconditions;
@@ -71,17 +70,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
     private SubjectCollection spongeProxy = null;
 
     private final LoadingCache<String, SpongeGroup> objects = Caffeine.newBuilder()
-            .build(new CacheLoader<String, SpongeGroup>() {
-                @Override
-                public SpongeGroup load(String i) {
-                    return apply(i);
-                }
-
-                @Override
-                public SpongeGroup reload(String i, SpongeGroup t) {
-                    return t; // Never needs to be refreshed.
-                }
-            });
+            .build(this::apply);
 
     private final LoadingCache<String, LPSubject> subjectLoadingCache = Caffeine.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)
@@ -232,7 +221,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
 
     @Override
     public ImmutableCollection<LPSubject> getLoadedSubjects() {
-        return getAll().values().stream().map(SpongeGroup::sponge).collect(ImmutableCollectors.toImmutableSet());
+        return getAll().values().stream().map(SpongeGroup::sponge).collect(ImmutableCollectors.toSet());
     }
 
     @Override
@@ -278,7 +267,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
                 .map(SpongeGroup::sponge)
                 .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(ImmutableContextSet.empty(), permission)))
                 .filter(pair -> pair.getValue() != Tristate.UNDEFINED)
-                .collect(ImmutableCollectors.toImmutableMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
     }
 
     @Override
@@ -287,7 +276,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
                 .map(SpongeGroup::sponge)
                 .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(contexts, permission)))
                 .filter(pair -> pair.getValue() != Tristate.UNDEFINED)
-                .collect(ImmutableCollectors.toImmutableMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
     }
 
     @Override
@@ -296,7 +285,27 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
     }
 
     @Override
-    public void suggestUnload(String identifier) {
-        // noop
+    public Group getByDisplayName(String name) {
+        // try to get an exact match first
+        Group g = getIfLoaded(name);
+        if (g != null) {
+            return g;
+        }
+
+        // then try exact display name matches
+        for (Group group : getAll().values()) {
+            if (group.getDisplayName().isPresent() && group.getDisplayName().get().equals(name)) {
+                return group;
+            }
+        }
+
+        // then try case insensitive name matches
+        for (Group group : getAll().values()) {
+            if (group.getDisplayName().isPresent() && group.getDisplayName().get().equalsIgnoreCase(name)) {
+                return group;
+            }
+        }
+
+        return null;
     }
 }

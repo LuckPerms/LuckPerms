@@ -39,7 +39,7 @@ public class BackendServerCalculator implements ContextCalculator<ProxiedPlayer>
     private static final String WORLD_KEY = "world";
 
     private static String getServer(ProxiedPlayer player) {
-        return player.getServer() == null ? null : (player.getServer().getInfo() == null ? null : player.getServer().getInfo().getName());
+        return player.getServer() == null ? null : (player.getServer().getInfo() == null ? null : player.getServer().getInfo().getName().toLowerCase());
     }
 
     private final LuckPermsPlugin plugin;
@@ -49,7 +49,7 @@ public class BackendServerCalculator implements ContextCalculator<ProxiedPlayer>
         String server = getServer(subject);
         while (server != null && !accumulator.has(WORLD_KEY, server)) {
             accumulator.add(WORLD_KEY, server);
-            server = plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(server, server);
+            server = plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(server, server).toLowerCase();
         }
 
         return accumulator;

@@ -47,8 +47,8 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.SafeIterator;
 
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -125,13 +125,14 @@ public class MigrationBPermissions extends SubCommand<Object> {
 
         // Migrate one world at a time.
         log.log("Starting world migration.");
-        for (World world : worldManager.getAllWorlds()) {
+        SafeIterator.iterate(worldManager.getAllWorlds(), world -> {
             log.log("Migrating world: " + world.getName());
 
             // Migrate all groups
             log.log("Starting group migration in world " + world.getName() + ".");
             AtomicInteger groupCount = new AtomicInteger(0);
-            for (Calculable group : world.getAll(CalculableType.GROUP)) {
+
+            SafeIterator.iterate(world.getAll(CalculableType.GROUP), group -> {
                 String groupName = MigrationUtils.standardizeName(group.getName());
                 if (group.getName().equalsIgnoreCase(world.getDefaultGroup())) {
                     groupName = "default";
@@ -147,34 +148,22 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 plugin.getStorage().saveGroup(lpGroup);
 
                 log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
-            }
+            });
             log.log("Migrated " + groupCount.get() + " groups in world " + world.getName() + ".");
 
 
             // Migrate all users
             log.log("Starting user migration in world " + world.getName() + ".");
             AtomicInteger userCount = new AtomicInteger(0);
-            for (Calculable user : world.getAll(CalculableType.USER)) {
+            SafeIterator.iterate(world.getAll(CalculableType.USER), user -> {
                 // There is no mention of UUIDs in the API. I assume that name = uuid. idk?
-                UUID uuid = null;
-                try {
-                    uuid = UUID.fromString(user.getName());
-                } catch (IllegalArgumentException e) {
-                    try {
-                        //noinspection deprecation
-                        uuid = Bukkit.getOfflinePlayer(user.getName()).getUniqueId();
-                    } catch (Exception ex) {
-                        e.printStackTrace();
-                    }
-                }
-
+                UUID uuid = BukkitMigrationUtils.lookupUuid(log, user.getName());
                 if (uuid == null) {
-                    log.logErr("Unable to migrate user " + user.getName() + ". Cannot to get UUID.");
-                    continue;
+                    return;
                 }
 
                 // Make a LuckPerms user for the one being migrated.
-                plugin.getStorage().loadUser(uuid, "null").join();
+                plugin.getStorage().loadUser(uuid, null).join();
                 User lpUser = plugin.getUserManager().getIfLoaded(uuid);
 
                 migrateHolder(world, user, lpUser);
@@ -183,10 +172,10 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 plugin.getUserManager().cleanup(lpUser);
 
                 log.logProgress("Migrated {} users so far.", userCount.incrementAndGet());
-            }
+            });
 
             log.log("Migrated " + userCount.get() + " users in world " + world.getName() + ".");
-        }
+        });
 
         log.log("Success! Migration complete.");
         return CommandResult.SUCCESS;

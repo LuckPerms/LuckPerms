@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.api;
 
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
-
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -68,67 +65,69 @@ public interface Track {
     /**
      * Gets the next group on the track, after the one provided
      *
+     * <p>{@code null} is returned if the group is not on the track.</p>
+     *
      * @param current the group before the group being requested
      * @return the group name, or null if the end of the track has been reached
-     * @throws ObjectLacksException  if the track does not contain the group given
      * @throws NullPointerException  if the group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
     @Nullable
-    String getNext(@Nonnull Group current) throws ObjectLacksException;
+    String getNext(@Nonnull Group current);
 
     /**
      * Gets the previous group on the track, before the one provided
      *
+     * <p>{@code null} is returned if the group is not on the track.</p>
+     *
      * @param current the group after the group being requested
      * @return the group name, or null if the start of the track has been reached
-     * @throws ObjectLacksException  if the track does not contain the group given
      * @throws NullPointerException  if the group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
     @Nullable
-    String getPrevious(@Nonnull Group current) throws ObjectLacksException;
+    String getPrevious(@Nonnull Group current);
 
     /**
      * Appends a group to the end of this track
      *
      * @param group the group to append
-     * @throws ObjectAlreadyHasException if the group is already on this track somewhere
+     * @return the result of the operation
      * @throws NullPointerException      if the group is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
      */
-    void appendGroup(@Nonnull Group group) throws ObjectAlreadyHasException;
+    DataMutateResult appendGroup(@Nonnull Group group);
 
     /**
      * Inserts a group at a certain position on this track
      *
      * @param group    the group to be inserted
      * @param position the index position (a value of 0 inserts at the start)
-     * @throws ObjectAlreadyHasException if the group is already on this track somewhere
+     * @return the result of the operation
      * @throws IndexOutOfBoundsException if the position is less than 0 or greater than the size of the track
      * @throws NullPointerException      if the group is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
      */
-    void insertGroup(@Nonnull Group group, int position) throws ObjectAlreadyHasException, IndexOutOfBoundsException;
+    DataMutateResult insertGroup(@Nonnull Group group, int position) throws IndexOutOfBoundsException;
 
     /**
      * Removes a group from this track
      *
      * @param group the group to remove
-     * @throws ObjectLacksException  if the group is not on this track
+     * @return the result of the operation
      * @throws NullPointerException  if the group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
-    void removeGroup(@Nonnull Group group) throws ObjectLacksException;
+    DataMutateResult removeGroup(@Nonnull Group group);
 
     /**
      * Removes a group from this track
      *
      * @param group the group to remove
-     * @throws ObjectLacksException if the group is not on this track
+     * @return the result of the operation
      * @throws NullPointerException if the group is null
      */
-    void removeGroup(@Nonnull String group) throws ObjectLacksException;
+    DataMutateResult removeGroup(@Nonnull String group);
 
     /**
      * Checks if a group features on this track

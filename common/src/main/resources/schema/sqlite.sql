@@ -43,11 +43,11 @@ CREATE TABLE `{prefix}actions` (
   `id`         INTEGER PRIMARY KEY NOT NULL,
   `time`       BIGINT              NOT NULL,
   `actor_uuid` VARCHAR(36)         NOT NULL,
-  `actor_name` VARCHAR(16)         NOT NULL,
+  `actor_name` VARCHAR(100)        NOT NULL,
   `type`       CHAR(1)             NOT NULL,
   `acted_uuid` VARCHAR(36)         NOT NULL,
   `acted_name` VARCHAR(36)         NOT NULL,
-  `action`     VARCHAR(256)        NOT NULL
+  `action`     VARCHAR(300)        NOT NULL
 );
 
 CREATE TABLE `{prefix}tracks` (

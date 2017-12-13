@@ -38,9 +38,9 @@ public interface ConfigKey<T> {
      * <p>The {@link LuckPermsConfiguration#get(ConfigKey)} method should be used to
      * retrieve the value, as opposed to calling this directly.</p>
      *
-     * @param config the config instance
+     * @param adapter the config adapter instance
      * @return the value mapped to this key
      */
-    T get(LuckPermsConfiguration config);
+    T get(ConfigurationAdapter adapter);
 
 }

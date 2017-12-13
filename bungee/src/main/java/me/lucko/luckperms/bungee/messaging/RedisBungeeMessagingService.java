@@ -31,12 +31,13 @@ import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.messaging.AbstractMessagingService;
+import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
 /**
- * An implementation of {@link me.lucko.luckperms.api.MessagingService} using Redis, via RedisBungee's API.
+ * An implementation of {@link ExtendedMessagingService} using Redis, via RedisBungee's API.
  */
 public class RedisBungeeMessagingService extends AbstractMessagingService implements Listener {
     private final LPBungeePlugin plugin;
@@ -63,12 +64,16 @@ public class RedisBungeeMessagingService extends AbstractMessagingService implem
     }
 
     @Override
-    protected void sendMessage(String channel, String message) {
-        redisBungee.sendChannelMessage(channel, message);
+    protected void sendMessage(String message) {
+        redisBungee.sendChannelMessage(CHANNEL, message);
     }
 
     @EventHandler
     public void onMessage(PubSubMessageEvent e) {
-        onMessage(e.getChannel(), e.getMessage(), null);
+        if (!e.getChannel().equals(CHANNEL)) {
+            return;
+        }
+
+        onMessage(e.getMessage(), null);
     }
 }

@@ -63,12 +63,12 @@ public class UserSwitchPrimaryGroup extends SubCommand<User> {
 
         Group group = plugin.getGroupManager().getIfLoaded(args.get(0).toLowerCase());
         if (group == null) {
-            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, args.get(0).toLowerCase());
             return CommandResult.INVALID_ARGS;
         }
 
-        if (user.getPrimaryGroup().getStoredValue().equalsIgnoreCase(group.getName())) {
-            Message.USER_PRIMARYGROUP_ERROR_ALREADYHAS.send(sender);
+        if (user.getPrimaryGroup().getStoredValue().orElse("default").equalsIgnoreCase(group.getName())) {
+            Message.USER_PRIMARYGROUP_ERROR_ALREADYHAS.send(sender, user.getFriendlyName(), group.getFriendlyName());
             return CommandResult.STATE_ERROR;
         }
 
@@ -78,9 +78,10 @@ public class UserSwitchPrimaryGroup extends SubCommand<User> {
         }
 
         user.getPrimaryGroup().setStoredValue(group.getName());
-        Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user.getFriendlyName(), group.getDisplayName());
+        Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user.getFriendlyName(), group.getFriendlyName());
+
         ExtendedLogEntry.build().actor(sender).acted(user)
-                .action("setprimarygroup " + group.getName())
+                .action("setprimarygroup", group.getName())
                 .build().submit(plugin, sender);
 
         save(user, sender, plugin);

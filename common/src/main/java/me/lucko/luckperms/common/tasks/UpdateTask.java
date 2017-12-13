@@ -31,12 +31,26 @@ import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import java.util.concurrent.CompletableFuture;
+
+/**
+ * System wide update task for LuckPerms.
+ *
+ * <p>Ensures that all local data is consistent with the storage.</p>
+ */
 @AllArgsConstructor
 public class UpdateTask implements Runnable {
     private final LuckPermsPlugin plugin;
 
     /**
-     * Called ASYNC
+     * If this task is being called before the server has fully started
+     */
+    private final boolean initialUpdate;
+
+    /**
+     * Runs the update task
+     *
+     * <p>Called <b>async</b>.</p>
      */
     @Override
     public void run() {
@@ -55,7 +69,10 @@ public class UpdateTask implements Runnable {
         plugin.getStorage().loadAllTracks().join();
 
         // Refresh all online users.
-        plugin.getUserManager().updateAllUsers();
+        CompletableFuture<Void> userUpdateFut = plugin.getUserManager().updateAllUsers();
+        if (!initialUpdate) {
+            userUpdateFut.join();
+        }
 
         plugin.onPostUpdate();
 

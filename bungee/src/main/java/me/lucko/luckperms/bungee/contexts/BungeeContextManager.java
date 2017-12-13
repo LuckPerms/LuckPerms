@@ -25,19 +25,18 @@
 
 package me.lucko.luckperms.bungee.contexts;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.common.contexts.AbstractContextManager;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-@RequiredArgsConstructor
-public class BungeeContextManager extends ContextManager<ProxiedPlayer> {
-    private final LPBungeePlugin plugin;
+public class BungeeContextManager extends AbstractContextManager<ProxiedPlayer> {
+    public BungeeContextManager(LPBungeePlugin plugin) {
+        super(plugin, ProxiedPlayer.class);
+    }
 
     @Override
     public Contexts formContexts(ProxiedPlayer subject, ImmutableContextSet contextSet) {

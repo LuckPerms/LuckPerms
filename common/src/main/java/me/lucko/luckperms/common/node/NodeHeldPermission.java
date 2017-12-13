@@ -29,8 +29,6 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-import com.google.common.collect.Multimap;
-
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
@@ -72,11 +70,6 @@ public final class NodeHeldPermission<T> implements HeldPermission<T> {
     @Override
     public OptionalLong getExpiry() {
         return node.isTemporary() ? OptionalLong.of(node.getExpiryUnixTime()) : OptionalLong.empty();
-    }
-
-    @Override
-    public Multimap<String, String> getContext() {
-        return node.getContexts().toMultimap();
     }
 
     @Override

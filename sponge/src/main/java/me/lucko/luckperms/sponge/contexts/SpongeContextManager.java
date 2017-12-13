@@ -25,19 +25,18 @@
 
 package me.lucko.luckperms.sponge.contexts;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.common.contexts.AbstractContextManager;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 
 import org.spongepowered.api.service.permission.Subject;
 
-@RequiredArgsConstructor
-public class SpongeContextManager extends ContextManager<Subject> {
-    private final LPSpongePlugin plugin;
+public class SpongeContextManager extends AbstractContextManager<Subject> {
+    public SpongeContextManager(LPSpongePlugin plugin) {
+        super(plugin, Subject.class);
+    }
 
     @Override
     public Contexts formContexts(Subject subject, ImmutableContextSet contextSet) {

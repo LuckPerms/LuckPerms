@@ -32,6 +32,9 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * A simple hikari wrapper
+ */
 @RequiredArgsConstructor
 public class HikariSupplier implements AutoCloseable {
 

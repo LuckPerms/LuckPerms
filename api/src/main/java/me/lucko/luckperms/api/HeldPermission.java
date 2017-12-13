@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.api;
 
-import com.google.common.collect.Multimap;
-
 import me.lucko.luckperms.api.context.ContextSet;
 
 import java.util.Optional;
@@ -87,16 +85,6 @@ public interface HeldPermission<T> {
      * @return the expiry time
      */
     OptionalLong getExpiry();
-
-    /**
-     * Gets the context for the permission.
-     *
-     * @return the context
-     * @deprecated in favour of {@link #getContexts()}.
-     */
-    @Nonnull
-    @Deprecated
-    Multimap<String, String> getContext();
 
     /**
      * Gets the extra context for the permission.

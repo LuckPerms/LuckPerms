@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.LocalizedSpec;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -63,17 +63,17 @@ public abstract class SingleCommand extends Command<Void, Void> {
             }
         }
 
-        Util.sendPluginMessage(sender, "&3> &a" + getName().toLowerCase() + sb.toString());
+        CommandUtils.sendPluginMessage(sender, "&3> &a" + getName().toLowerCase() + sb.toString());
     }
 
     @Override
     public void sendDetailedUsage(Sender sender, String label) {
-        Util.sendPluginMessage(sender, "&3&lCommand Usage &3- &b" + getName());
-        Util.sendPluginMessage(sender, "&b> &7" + getDescription());
+        CommandUtils.sendPluginMessage(sender, "&3&lCommand Usage &3- &b" + getName());
+        CommandUtils.sendPluginMessage(sender, "&b> &7" + getDescription());
         if (getArgs().isPresent()) {
-            Util.sendPluginMessage(sender, "&3Arguments:");
+            CommandUtils.sendPluginMessage(sender, "&3Arguments:");
             for (Arg arg : getArgs().get()) {
-                Util.sendPluginMessage(sender, "&b- " + arg.asPrettyString() + "&3 -> &7" + arg.getDescription());
+                CommandUtils.sendPluginMessage(sender, "&b- " + arg.asPrettyString() + "&3 -> &7" + arg.getDescription());
             }
         }
     }

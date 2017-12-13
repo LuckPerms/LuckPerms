@@ -30,22 +30,20 @@ import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class HolderClear<T extends PermissionHolder> extends SubCommand<T> {
     public HolderClear(LocaleManager locale, boolean user) {
@@ -76,21 +74,16 @@ public class HolderClear<T extends PermissionHolder> extends SubCommand<T> {
 
         int changed = before - holder.getEnduringNodes().size();
         if (changed == 1) {
-            Message.CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), Util.contextSetToString(context), changed);
+            Message.CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), CommandUtils.contextSetToString(context), changed);
         } else {
-            Message.CLEAR_SUCCESS.send(sender, holder.getFriendlyName(), Util.contextSetToString(context), changed);
+            Message.CLEAR_SUCCESS.send(sender, holder.getFriendlyName(), CommandUtils.contextSetToString(context), changed);
         }
 
         ExtendedLogEntry.build().actor(sender).acted(holder)
-                .action("clear " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                .action("clear", context)
                 .build().submit(plugin, sender);
 
-        if (holder instanceof User) {
-            save((User) holder, sender, plugin);
-        } else if (holder instanceof Group) {
-            save((Group) holder, sender, plugin);
-        }
-
+        SharedSubCommand.save(holder, sender, plugin);
         return CommandResult.SUCCESS;
     }
 }

@@ -28,11 +28,12 @@ package me.lucko.luckperms.sponge.service.proxy.api7;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
-import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
+import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.SubjectData;
@@ -47,120 +48,134 @@ import javax.annotation.Nullable;
 
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor
-public class SubjectDataProxy implements SubjectData {
+public final class SubjectDataProxy implements SubjectData {
     private final LPPermissionService service;
     private final SubjectReference ref;
     private final boolean enduring;
 
-    private CompletableFuture<LPSubjectData> getHandle() {
+    private CompletableFuture<LPSubjectData> handle() {
         return enduring ? ref.resolveLp().thenApply(LPSubject::getSubjectData) : ref.resolveLp().thenApply(LPSubject::getTransientSubjectData);
     }
 
     @Override
     public Map<Set<Context>, Map<String, Boolean>> getAllPermissions() {
-        return (Map) getHandle().thenApply(handle -> {
-            return handle.getAllPermissions().entrySet().stream()
-                    .collect(ImmutableCollectors.toImmutableMap(
-                            e -> CompatibilityUtil.convertContexts(e.getKey()),
-                            Map.Entry::getValue
-                    ));
-        }).join();
+        return (Map) handle().thenApply(handle -> handle.getAllPermissions().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        e -> CompatibilityUtil.convertContexts(e.getKey()),
+                        Map.Entry::getValue
+                ))).join();
     }
 
     @Override
     public Map<String, Boolean> getPermissions(Set<Context> contexts) {
-        return getHandle().thenApply(handle -> handle.getPermissions(CompatibilityUtil.convertContexts(contexts))).join();
+        return handle().thenApply(handle -> handle.getPermissions(CompatibilityUtil.convertContexts(contexts))).join();
     }
 
     @Override
     public CompletableFuture<Boolean> setPermission(Set<Context> contexts, String permission, Tristate value) {
-        return getHandle().thenCompose(handle -> {
-            return handle.setPermission(
-                    CompatibilityUtil.convertContexts(contexts),
-                    permission,
-                    CompatibilityUtil.convertTristate(value)
-            );
-        });
+        return handle().thenCompose(handle -> handle.setPermission(
+                CompatibilityUtil.convertContexts(contexts),
+                permission,
+                CompatibilityUtil.convertTristate(value)
+        ));
     }
 
     @Override
     public CompletableFuture<Boolean> clearPermissions() {
-        return getHandle().thenCompose(LPSubjectData::clearPermissions);
+        return handle().thenCompose(LPSubjectData::clearPermissions);
     }
 
     @Override
     public CompletableFuture<Boolean> clearPermissions(Set<Context> contexts) {
-        return getHandle().thenCompose(handle -> handle.clearPermissions(CompatibilityUtil.convertContexts(contexts)));
+        return handle().thenCompose(handle -> handle.clearPermissions(CompatibilityUtil.convertContexts(contexts)));
     }
 
     @Override
     public Map<Set<Context>, List<org.spongepowered.api.service.permission.SubjectReference>> getAllParents() {
-        return (Map) getHandle().thenApply(handle -> {
-            return handle.getAllParents().entrySet().stream()
-                    .collect(ImmutableCollectors.toImmutableMap(
-                            e -> CompatibilityUtil.convertContexts(e.getKey()),
-                            Map.Entry::getValue
-                    ));
-        }).join();
+        return (Map) handle().thenApply(handle -> handle.getAllParents().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        e -> CompatibilityUtil.convertContexts(e.getKey()),
+                        Map.Entry::getValue
+                ))).join();
     }
 
     @Override
     public List<org.spongepowered.api.service.permission.SubjectReference> getParents(Set<Context> contexts) {
-        return (List) getHandle().thenApply(handle -> handle.getParents(CompatibilityUtil.convertContexts(contexts))).join();
+        return (List) handle().thenApply(handle -> handle.getParents(CompatibilityUtil.convertContexts(contexts))).join();
     }
 
     @Override
     public CompletableFuture<Boolean> addParent(Set<Context> contexts, org.spongepowered.api.service.permission.SubjectReference ref) {
-        return getHandle().thenCompose(handle -> handle.addParent(CompatibilityUtil.convertContexts(contexts), SubjectReference.cast(service, ref)));
+        return handle().thenCompose(handle -> handle.addParent(CompatibilityUtil.convertContexts(contexts), SubjectReferenceFactory.obtain(service, ref)));
     }
 
     @Override
     public CompletableFuture<Boolean> removeParent(Set<Context> contexts, org.spongepowered.api.service.permission.SubjectReference ref) {
-        return getHandle().thenCompose(handle -> handle.removeParent(CompatibilityUtil.convertContexts(contexts), SubjectReference.cast(service, ref)));
+        return handle().thenCompose(handle -> handle.removeParent(CompatibilityUtil.convertContexts(contexts), SubjectReferenceFactory.obtain(service, ref)));
     }
 
     @Override
     public CompletableFuture<Boolean> clearParents() {
-        return getHandle().thenCompose(LPSubjectData::clearParents);
+        return handle().thenCompose(LPSubjectData::clearParents);
     }
 
     @Override
     public CompletableFuture<Boolean> clearParents(Set<Context> contexts) {
-        return getHandle().thenCompose(handle -> handle.clearParents(CompatibilityUtil.convertContexts(contexts)));
+        return handle().thenCompose(handle -> handle.clearParents(CompatibilityUtil.convertContexts(contexts)));
     }
 
     @Override
     public Map<Set<Context>, Map<String, String>> getAllOptions() {
-        return (Map) getHandle().thenApply(handle -> {
-            return handle.getAllOptions().entrySet().stream()
-                    .collect(ImmutableCollectors.toImmutableMap(
-                            e -> CompatibilityUtil.convertContexts(e.getKey()),
-                            Map.Entry::getValue
-                    ));
-        }).join();
+        return (Map) handle().thenApply(handle -> handle.getAllOptions().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        e -> CompatibilityUtil.convertContexts(e.getKey()),
+                        Map.Entry::getValue
+                ))).join();
     }
 
     @Override
     public Map<String, String> getOptions(Set<Context> contexts) {
-        return getHandle().thenApply(handle -> handle.getOptions(CompatibilityUtil.convertContexts(contexts))).join();
+        return handle().thenApply(handle -> handle.getOptions(CompatibilityUtil.convertContexts(contexts))).join();
     }
 
     @Override
     public CompletableFuture<Boolean> setOption(Set<Context> contexts, String key, @Nullable String value) {
         if (value == null) {
-            return getHandle().thenCompose(handle -> handle.unsetOption(CompatibilityUtil.convertContexts(contexts), key));
+            return handle().thenCompose(handle -> handle.unsetOption(CompatibilityUtil.convertContexts(contexts), key));
         } else {
-            return getHandle().thenCompose(handle -> handle.setOption(CompatibilityUtil.convertContexts(contexts), key, value));
+            return handle().thenCompose(handle -> handle.setOption(CompatibilityUtil.convertContexts(contexts), key, value));
         }
     }
 
     @Override
     public CompletableFuture<Boolean> clearOptions() {
-        return getHandle().thenCompose(LPSubjectData::clearOptions);
+        return handle().thenCompose(LPSubjectData::clearOptions);
     }
 
     @Override
     public CompletableFuture<Boolean> clearOptions(Set<Context> contexts) {
-        return getHandle().thenCompose(handle -> handle.clearOptions(CompatibilityUtil.convertContexts(contexts)));
+        return handle().thenCompose(handle -> handle.clearOptions(CompatibilityUtil.convertContexts(contexts)));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof SubjectDataProxy)) return false;
+        final SubjectDataProxy other = (SubjectDataProxy) o;
+        return this.ref.equals(other.ref) && this.enduring == other.enduring;
+    }
+
+    @Override
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        result = result * PRIME + this.ref.hashCode();
+        result = result * PRIME + (this.enduring ? 79 : 97);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "luckperms.api7.SubjectDataProxy(ref=" + this.ref + ", enduring=" + this.enduring + ")";
     }
 }

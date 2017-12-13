@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.commands.impl.group;
 
+import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -62,7 +63,7 @@ public class DeleteGroup extends SingleCommand {
         }
 
         if (!plugin.getStorage().loadGroup(groupName).join()) {
-            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, groupName);
             return CommandResult.INVALID_ARGS;
         }
 
@@ -73,12 +74,16 @@ public class DeleteGroup extends SingleCommand {
         }
 
         if (!plugin.getStorage().deleteGroup(group, DeletionCause.COMMAND).join()) {
-            Message.DELETE_GROUP_ERROR.send(sender);
+            Message.DELETE_ERROR.send(sender, group.getFriendlyName());
             return CommandResult.FAILURE;
         }
 
-        Message.DELETE_SUCCESS.send(sender, group.getDisplayName());
-        ExtendedLogEntry.build().actor(sender).actedName(groupName).type('G').action("delete").build().submit(plugin, sender);
+        Message.DELETE_SUCCESS.send(sender, group.getFriendlyName());
+
+        ExtendedLogEntry.build().actor(sender).actedName(groupName).type(LogEntry.Type.GROUP)
+                .action("delete")
+                .build().submit(plugin, sender);
+
         plugin.getUpdateTaskBuffer().request();
         return CommandResult.SUCCESS;
     }

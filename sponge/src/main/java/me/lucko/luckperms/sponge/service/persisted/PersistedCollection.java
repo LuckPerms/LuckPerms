@@ -130,13 +130,13 @@ public class PersistedCollection implements LPSubjectCollection {
     @Override
     public CompletableFuture<ImmutableMap<SubjectReference, Boolean>> getAllWithPermission(String permission) {
         return CompletableFuture.completedFuture(getLoadedWithPermission(permission).entrySet().stream()
-                .collect(ImmutableCollectors.toImmutableMap(e -> e.getKey().toReference(), Map.Entry::getValue)));
+                .collect(ImmutableCollectors.toMap(e -> e.getKey().toReference(), Map.Entry::getValue)));
     }
 
     @Override
     public CompletableFuture<ImmutableMap<SubjectReference, Boolean>> getAllWithPermission(ImmutableContextSet contexts, String permission) {
         return CompletableFuture.completedFuture(getLoadedWithPermission(contexts, permission).entrySet().stream()
-                .collect(ImmutableCollectors.toImmutableMap(e -> e.getKey().toReference(), Map.Entry::getValue)));
+                .collect(ImmutableCollectors.toMap(e -> e.getKey().toReference(), Map.Entry::getValue)));
     }
 
     @Override
@@ -170,8 +170,4 @@ public class PersistedCollection implements LPSubjectCollection {
         return service.getDefaultSubjects().loadSubject(getIdentifier()).join();
     }
 
-    @Override
-    public void suggestUnload(String identifier) {
-        // ignore
-    }
 }

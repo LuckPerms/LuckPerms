@@ -52,17 +52,17 @@ public class TrackRename extends SubCommand<Track> {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) throws CommandException {
         String newTrackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(newTrackName)) {
-            Message.TRACK_INVALID_ENTRY.send(sender);
+            Message.TRACK_INVALID_ENTRY.send(sender, newTrackName);
             return CommandResult.INVALID_ARGS;
         }
 
         if (plugin.getStorage().loadTrack(newTrackName).join()) {
-            Message.TRACK_ALREADY_EXISTS.send(sender);
+            Message.ALREADY_EXISTS.send(sender, newTrackName);
             return CommandResult.INVALID_ARGS;
         }
 
         if (!plugin.getStorage().createAndLoadTrack(newTrackName, CreationCause.COMMAND).join()) {
-            Message.CREATE_TRACK_ERROR.send(sender);
+            Message.CREATE_ERROR.send(sender, newTrackName);
             return CommandResult.FAILURE;
         }
 
@@ -73,14 +73,18 @@ public class TrackRename extends SubCommand<Track> {
         }
 
         if (!plugin.getStorage().deleteTrack(track, DeletionCause.COMMAND).join()) {
-            Message.DELETE_TRACK_ERROR.send(sender);
+            Message.DELETE_ERROR.send(sender, track.getName());
             return CommandResult.FAILURE;
         }
 
         newTrack.setGroups(track.getGroups());
 
         Message.RENAME_SUCCESS.send(sender, track.getName(), newTrack.getName());
-        ExtendedLogEntry.build().actor(sender).acted(track).action("rename " + newTrack.getName()).build().submit(plugin, sender);
+
+        ExtendedLogEntry.build().actor(sender).acted(track)
+                .action("rename", newTrack.getName())
+                .build().submit(plugin, sender);
+
         save(newTrack, sender, plugin);
         return CommandResult.SUCCESS;
     }

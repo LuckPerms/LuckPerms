@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -56,7 +56,7 @@ public class CheckCommand extends SingleCommand {
         String permission = args.get(1);
 
         User user;
-        UUID u = Util.parseUuid(target);
+        UUID u = CommandUtils.parseUuid(target);
         if (u != null) {
             user = plugin.getUserManager().getIfLoaded(u);
         } else {
@@ -68,19 +68,19 @@ public class CheckCommand extends SingleCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        Tristate tristate = user.getUserData().getPermissionData(plugin.getContextForUser(user)).getPermissionValue(permission, CheckOrigin.INTERNAL);
-        Message.CHECK_RESULT.send(sender, user.getFriendlyName(), permission, Util.formatTristate(tristate));
+        Tristate tristate = user.getCachedData().getPermissionData(plugin.getContextForUser(user)).getPermissionValue(permission, CheckOrigin.INTERNAL);
+        Message.CHECK_RESULT.send(sender, user.getFriendlyName(), permission, CommandUtils.formatTristate(tristate));
         return CommandResult.SUCCESS;
     }
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         if (args.isEmpty()) {
-            return plugin.getPlayerList();
+            return plugin.getPlayerList().collect(Collectors.toList());
         }
 
         if (args.size() == 1) {
-            return plugin.getPlayerList().stream().filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
+            return plugin.getPlayerList().filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
         }
 
         args.remove(0);

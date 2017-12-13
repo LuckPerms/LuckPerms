@@ -27,42 +27,28 @@ package me.lucko.luckperms.sponge.model;
 
 import lombok.Getter;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ListMultimap;
+import com.google.common.collect.ImmutableSet;
 
-import me.lucko.luckperms.api.ChatMetaType;
-import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.caching.MetaAccumulator;
-import me.lucko.luckperms.common.contexts.ExtractedContexts;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.verbose.CheckOrigin;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.LuckPermsSubjectData;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
-import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
-import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.service.permission.NodeTree;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 
-import co.aikar.timings.Timing;
-
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class SpongeGroup extends Group {
 
@@ -77,12 +63,8 @@ public class SpongeGroup extends Group {
         return this.spongeData;
     }
 
-    public static class GroupSubject implements LPSubject {
-
-        @Getter
+    public class GroupSubject implements LPSubject {
         private final SpongeGroup parent;
-
-        @Getter
         private final LPSpongePlugin plugin;
 
         @Getter
@@ -91,56 +73,11 @@ public class SpongeGroup extends Group {
         @Getter
         private final LuckPermsSubjectData transientSubjectData;
 
-        private final LoadingCache<ImmutableContextSet, NodeTree> permissionCache = Caffeine.newBuilder()
-                .expireAfterAccess(10, TimeUnit.MINUTES)
-                .build(contexts -> {
-                    // TODO move this away from NodeTree
-                    Map<String, Boolean> permissions = getParent().getAllNodes(ExtractedContexts.generate(getPlugin().getService().calculateContexts(contexts))).stream()
-                            .map(LocalizedNode::getNode)
-                            .collect(Collectors.toMap(Node::getPermission, Node::getValuePrimitive));
-
-                    return NodeTree.of(permissions);
-                });
-
-        private final LoadingCache<ImmutableContextSet, ImmutableList<SubjectReference>> parentCache = Caffeine.newBuilder()
-                .expireAfterWrite(10, TimeUnit.MINUTES)
-                .build(contexts -> {
-                    Set<SubjectReference> subjects = getParent().getAllNodes(ExtractedContexts.generate(getPlugin().getService().calculateContexts(contexts))).stream()
-                            .map(LocalizedNode::getNode)
-                            .filter(Node::isGroupNode)
-                            .map(Node::getGroupName)
-                            .distinct()
-                            .map(n -> Optional.ofNullable(getPlugin().getGroupManager().getIfLoaded(n)))
-                            .filter(Optional::isPresent)
-                            .map(Optional::get)
-                            .map(SpongeGroup::sponge)
-                            .map(LPSubject::toReference)
-                            .collect(Collectors.toSet());
-
-                    subjects.addAll(getPlugin().getService().getGroupSubjects().getDefaults().getParents(contexts));
-                    subjects.addAll(getPlugin().getService().getDefaults().getParents(contexts));
-
-                    return getService().sortSubjects(subjects);
-                });
-
         private GroupSubject(LPSpongePlugin plugin, SpongeGroup parent) {
             this.parent = parent;
             this.plugin = plugin;
             this.subjectData = new LuckPermsSubjectData(true, plugin.getService(), parent, this);
             this.transientSubjectData = new LuckPermsSubjectData(false, plugin.getService(), parent, this);
-
-            parent.getStateListeners().add(this::invalidateCaches);
-        }
-
-        public void invalidateCaches() {
-            permissionCache.invalidateAll();
-            parentCache.invalidateAll();
-        }
-
-        @Override
-        public void performCleanup() {
-            permissionCache.cleanUp();
-            parentCache.cleanUp();
         }
 
         @Override
@@ -150,8 +87,7 @@ public class SpongeGroup extends Group {
 
         @Override
         public Optional<String> getFriendlyIdentifier() {
-            String rawDisplayName = parent.getRawDisplayName();
-            return rawDisplayName.equals(getIdentifier()) ? Optional.empty() : Optional.of(rawDisplayName);
+            return parent.getDisplayName();
         }
 
         @Override
@@ -176,81 +112,77 @@ public class SpongeGroup extends Group {
 
         @Override
         public Tristate getPermissionValue(ImmutableContextSet contexts, String permission) {
-            try (Timing ignored = plugin.getTimings().time(LPTiming.GROUP_GET_PERMISSION_VALUE)) {
-                NodeTree nt = permissionCache.get(contexts);
-                Tristate t = CompatibilityUtil.convertTristate(nt.get(permission));
-                if (t != Tristate.UNDEFINED) {
-                    return t;
-                }
-
-                t = plugin.getService().getGroupSubjects().getDefaults().getPermissionValue(contexts, permission);
-                if (t != Tristate.UNDEFINED) {
-                    return t;
-                }
-
-                t = plugin.getService().getDefaults().getPermissionValue(contexts, permission);
-                return t;
-            }
+            return parent.getCachedData().getPermissionData(plugin.getContextManager().formContexts(contexts)).getPermissionValue(permission, CheckOrigin.PLATFORM_LOOKUP_CHECK);
         }
 
         @Override
         public boolean isChildOf(ImmutableContextSet contexts, SubjectReference parent) {
-            try (Timing ignored = plugin.getTimings().time(LPTiming.GROUP_IS_CHILD_OF)) {
-                return parent.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP) && getPermissionValue(contexts, "group." + parent.getSubjectIdentifier()).asBoolean();
-            }
+            return parent.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP) && getPermissionValue(contexts, "group." + parent.getSubjectIdentifier()).asBoolean();
         }
 
         @Override
         public ImmutableList<SubjectReference> getParents(ImmutableContextSet contexts) {
-            try (Timing ignored = plugin.getTimings().time(LPTiming.GROUP_GET_PARENTS)) {
-                return parentCache.get(contexts);
+            ImmutableSet.Builder<SubjectReference> subjects = ImmutableSet.builder();
+
+            for (Map.Entry<String, Boolean> entry : parent.getCachedData().getPermissionData(plugin.getContextManager().formContexts(contexts)).getImmutableBacking().entrySet()) {
+                if (!entry.getValue()) {
+                    continue;
+                }
+
+                if (!entry.getKey().startsWith("group.")) {
+                    continue;
+                }
+
+                String groupName = entry.getKey().substring("group.".length());
+                if (plugin.getGroupManager().isLoaded(groupName)) {
+                    subjects.add(plugin.getService().getGroupSubjects().loadSubject(groupName).join().toReference());
+                }
             }
+
+            subjects.addAll(plugin.getService().getGroupSubjects().getDefaults().getParents(contexts));
+            subjects.addAll(plugin.getService().getDefaults().getParents(contexts));
+
+            return getService().sortSubjects(subjects.build());
         }
 
         @Override
         public Optional<String> getOption(ImmutableContextSet contexts, String s) {
-            try (Timing ignored = plugin.getService().getPlugin().getTimings().time(LPTiming.GROUP_GET_OPTION)) {
-                Optional<String> option;
-                if (s.equalsIgnoreCase("prefix")) {
-                    option = getChatMeta(contexts, ChatMetaType.PREFIX);
-
-                } else if (s.equalsIgnoreCase("suffix")) {
-                    option = getChatMeta(contexts, ChatMetaType.SUFFIX);
-
-                } else {
-                    option = getMeta(contexts, s);
+            MetaData data = parent.getCachedData().getMetaData(plugin.getContextManager().formContexts(contexts));
+            if (s.equalsIgnoreCase("prefix")) {
+                if (data.getPrefix() != null) {
+                    return Optional.of(data.getPrefix());
                 }
-
-                if (option.isPresent()) {
-                    return option;
-                }
-
-                option = plugin.getService().getGroupSubjects().getDefaults().getOption(contexts, s);
-                if (option.isPresent()) {
-                    return option;
-                }
-
-                return plugin.getService().getDefaults().getOption(contexts, s);
             }
+
+            if (s.equalsIgnoreCase("suffix")) {
+                if (data.getSuffix() != null) {
+                    return Optional.of(data.getSuffix());
+                }
+            }
+
+            String val = data.getMeta().get(s);
+            if (val != null) {
+                return Optional.of(val);
+            }
+
+            Optional<String> v = plugin.getService().getGroupSubjects().getDefaults().getOption(contexts, s);
+            if (v.isPresent()) {
+                return v;
+            }
+
+            return plugin.getService().getDefaults().getOption(contexts, s);
         }
 
         @Override
         public ImmutableContextSet getActiveContextSet() {
-            try (Timing ignored = plugin.getTimings().time(LPTiming.GROUP_GET_ACTIVE_CONTEXTS)) {
-                return plugin.getContextManager().getApplicableContext(this.sponge()).makeImmutable();
-            }
+            return plugin.getContextManager().getApplicableContext(this.sponge());
         }
 
-        private Optional<String> getChatMeta(ImmutableContextSet contexts, ChatMetaType type) {
-            MetaAccumulator metaAccumulator = parent.accumulateMeta(null, null, ExtractedContexts.generate(plugin.getService().calculateContexts(contexts)));
-            return Optional.ofNullable(metaAccumulator.getStack(type).toFormattedString());
-        }
-
-        private Optional<String> getMeta(ImmutableContextSet contexts, String key) {
-            MetaAccumulator metaAccumulator = parent.accumulateMeta(null, null, ExtractedContexts.generate(plugin.getService().calculateContexts(contexts)));
-            ListMultimap<String, String> meta = metaAccumulator.getMeta();
-            List<String> ret = meta.get(key);
-            return ret.isEmpty() ? Optional.empty() : Optional.of(ret.get(0));
+        @Override
+        public void invalidateCaches(CacheLevel cacheLevel) {
+            // invalidate for all changes
+            parent.getCachedData().invalidateCaches();
         }
     }
+
 }

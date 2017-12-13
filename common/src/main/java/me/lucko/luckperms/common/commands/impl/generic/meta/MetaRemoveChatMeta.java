@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -51,7 +51,6 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MetaRemoveChatMeta extends SharedSubCommand {
     private final ChatMetaType type;
@@ -60,8 +59,8 @@ public class MetaRemoveChatMeta extends SharedSubCommand {
         super(
                 type == ChatMetaType.PREFIX ? CommandSpec.META_REMOVEPREFIX.spec(locale) : CommandSpec.META_REMOVESUFFIX.spec(locale),
                 "remove" + type.name().toLowerCase(),
-                type == ChatMetaType.PREFIX ? CommandPermission.USER_META_REMOVEPREFIX : CommandPermission.USER_META_REMOVESUFFIX,
-                type == ChatMetaType.PREFIX ? CommandPermission.GROUP_META_REMOVEPREFIX : CommandPermission.GROUP_META_REMOVESUFFIX,
+                type == ChatMetaType.PREFIX ? CommandPermission.USER_META_REMOVE_PREFIX : CommandPermission.USER_META_REMOVE_SUFFIX,
+                type == ChatMetaType.PREFIX ? CommandPermission.GROUP_META_REMOVE_PREFIX : CommandPermission.GROUP_META_REMOVE_SUFFIX,
                 Predicates.is(0)
         );
         this.type = type;
@@ -91,7 +90,12 @@ public class MetaRemoveChatMeta extends SharedSubCommand {
                     !n.isTemporary() &&
                     n.getFullContexts().makeImmutable().equals(context.makeImmutable())
             );
-            Message.BULK_REMOVE_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), priority, Util.contextSetToString(context));
+            Message.BULK_REMOVE_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), priority, CommandUtils.contextSetToString(context));
+
+            ExtendedLogEntry.build().actor(sender).acted(holder)
+                    .action("meta" , "remove" + type.name().toLowerCase(), priority, "*", context)
+                    .build().submit(plugin, sender);
+
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         }
@@ -99,7 +103,7 @@ public class MetaRemoveChatMeta extends SharedSubCommand {
         DataMutateResult result = holder.unsetPermission(NodeFactory.makeChatMetaNode(type, priority, meta).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            TextComponent.Builder builder = TextUtils.fromLegacy(Message.REMOVE_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, Util.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
+            TextComponent.Builder builder = TextUtils.fromLegacy(Message.REMOVE_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
             HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
                     "¥3Raw " + type.name().toLowerCase() + ": ¥r" + meta,
                     '¥'
@@ -108,13 +112,13 @@ public class MetaRemoveChatMeta extends SharedSubCommand {
             sender.sendMessage(builder.build());
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("meta remove" + type.name().toLowerCase() + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("meta" , "remove" + type.name().toLowerCase(), priority, meta, context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_HAVE_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase());
+            Message.DOES_NOT_HAVE_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

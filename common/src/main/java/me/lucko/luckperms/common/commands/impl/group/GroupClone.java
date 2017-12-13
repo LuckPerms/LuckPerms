@@ -57,7 +57,7 @@ public class GroupClone extends SubCommand<Group> {
 
         String newGroupName = args.get(0).toLowerCase();
         if (!DataConstraints.GROUP_NAME_TEST.test(newGroupName)) {
-            Message.GROUP_INVALID_ENTRY.send(sender);
+            Message.GROUP_INVALID_ENTRY.send(sender, newGroupName);
             return CommandResult.INVALID_ARGS;
         }
 
@@ -77,7 +77,11 @@ public class GroupClone extends SubCommand<Group> {
         newGroup.replaceEnduringNodes(group.getEnduringNodes());
 
         Message.CLONE_SUCCESS.send(sender, group.getName(), newGroup.getName());
-        ExtendedLogEntry.build().actor(sender).acted(group).action("clone " + newGroup.getName()).build().submit(plugin, sender);
+
+        ExtendedLogEntry.build().actor(sender).acted(group)
+                .action("clone", newGroup.getName())
+                .build().submit(plugin, sender);
+
         save(newGroup, sender, plugin);
         return CommandResult.SUCCESS;
     }

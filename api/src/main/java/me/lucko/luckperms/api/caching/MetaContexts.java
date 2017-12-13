@@ -58,6 +58,9 @@ public final class MetaContexts {
     private final MetaStackDefinition prefixStackDefinition;
     private final MetaStackDefinition suffixStackDefinition;
 
+    // cache hashcode - this class is immutable, and is used as an index in the permission cache.
+    private final int hashCode;
+
     /**
      * Creates a new meta contexts instance
      *
@@ -69,6 +72,7 @@ public final class MetaContexts {
         this.contexts = Preconditions.checkNotNull(contexts, "contexts");
         this.prefixStackDefinition = Preconditions.checkNotNull(prefixStackDefinition, "prefixStackDefinition");
         this.suffixStackDefinition = Preconditions.checkNotNull(suffixStackDefinition, "suffixStackDefinition");
+        this.hashCode = calculateHashCode();
     }
 
     @Nonnull
@@ -106,13 +110,17 @@ public final class MetaContexts {
                 this.getSuffixStackDefinition().equals(other.getSuffixStackDefinition());
     }
 
-    @Override
-    public int hashCode() {
+    private int calculateHashCode() {
         final int PRIME = 59;
         int result = 1;
         result = result * PRIME + this.getContexts().hashCode();
         result = result * PRIME + this.getPrefixStackDefinition().hashCode();
         result = result * PRIME + this.getSuffixStackDefinition().hashCode();
         return result;
+    }
+
+    @Override
+    public int hashCode() {
+        return hashCode;
     }
 }

@@ -41,7 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class ChildProcessor implements PermissionProcessor {
     private final ChildPermissionProvider provider;
-    private Map<String, Boolean> childPermissions = new ConcurrentHashMap<>();
+    private final Map<String, Boolean> childPermissions = new ConcurrentHashMap<>();
 
     @Override
     public Tristate hasPermission(String permission) {

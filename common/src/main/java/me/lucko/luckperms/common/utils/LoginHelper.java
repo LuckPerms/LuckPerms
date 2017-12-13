@@ -27,8 +27,8 @@ package me.lucko.luckperms.common.utils;
 
 import lombok.experimental.UtilityClass;
 
+import me.lucko.luckperms.common.assignments.AssignmentRule;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.defaults.Rule;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -41,7 +41,7 @@ import java.util.concurrent.CompletableFuture;
 @UtilityClass
 public class LoginHelper {
 
-    public static User loadUser(LuckPermsPlugin plugin, UUID u, String username, boolean joinUuidSave) {
+    public static User loadUser(LuckPermsPlugin plugin, UUID u, String username, boolean joinUuidSave) throws Exception {
         final long startTime = System.currentTimeMillis();
 
         final UuidCache cache = plugin.getUuidCache();
@@ -53,7 +53,7 @@ public class LoginHelper {
                 // No previous data for this player
                 plugin.getApiProvider().getEventFactory().handleUserFirstLogin(u, username);
                 cache.addToCache(u, u);
-                CompletableFuture<Boolean> future = plugin.getStorage().noBuffer().saveUUIDData(username, u);
+                CompletableFuture<Boolean> future = plugin.getStorage().noBuffer().saveUUIDData(u, username);
                 if (joinUuidSave) {
                     future.join();
                 }
@@ -65,7 +65,7 @@ public class LoginHelper {
             }
 
             // Online mode, no cache needed. This is just for name -> uuid lookup.
-            CompletableFuture<Boolean> future = plugin.getStorage().noBuffer().saveUUIDData(username, u);
+            CompletableFuture<Boolean> future = plugin.getStorage().noBuffer().saveUUIDData(u, username);
             if (joinUuidSave) {
                 future.join();
             }
@@ -74,12 +74,11 @@ public class LoginHelper {
         plugin.getStorage().noBuffer().loadUser(cache.getUUID(u), username).join();
         User user = plugin.getUserManager().getIfLoaded(cache.getUUID(u));
         if (user == null) {
-            plugin.getLog().warn("Failed to load user: " + username);
             throw new RuntimeException("Failed to load user");
         } else {
             // Setup defaults for the user
             boolean save = false;
-            for (Rule rule : plugin.getConfiguration().get(ConfigKeys.DEFAULT_ASSIGNMENTS)) {
+            for (AssignmentRule rule : plugin.getConfiguration().get(ConfigKeys.DEFAULT_ASSIGNMENTS)) {
                 if (rule.apply(user)) {
                     save = true;
                 }
@@ -90,7 +89,8 @@ public class LoginHelper {
                 plugin.getStorage().noBuffer().saveUser(user).join();
             }
 
-            user.preCalculateData(false); // Pretty nasty calculation call. Sets up the caching system so data is ready when the user joins.
+            // Does some minimum pre-calculations to (maybe) speed things up later.
+            user.preCalculateData();
         }
 
         final long time = System.currentTimeMillis() - startTime;
@@ -101,10 +101,4 @@ public class LoginHelper {
         return user;
     }
 
-    public static void refreshPlayer(LuckPermsPlugin plugin, UUID uuid) {
-        final User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(uuid));
-        if (user != null) {
-            user.getRefreshBuffer().requestDirectly();
-        }
-    }
 }

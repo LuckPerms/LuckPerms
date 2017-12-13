@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.commands.impl.group;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -71,14 +71,14 @@ public class ListGroups extends SingleCommand {
 
                     if (tracks.isEmpty()) {
                         component = TextUtils.fromLegacy(Message.GROUPS_LIST_ENTRY.asString(plugin.getLocaleManager(),
-                                group.getDisplayName(),
+                                group.getFriendlyName(),
                                 group.getWeight().orElse(0)
                         ), Constants.COLOR_CHAR);
                     } else {
                         component = TextUtils.fromLegacy(Message.GROUPS_LIST_ENTRY_WITH_TRACKS.asString(plugin.getLocaleManager(),
-                                group.getDisplayName(),
+                                group.getFriendlyName(),
                                 group.getWeight().orElse(0),
-                                Util.toCommaSep(tracks)
+                                CommandUtils.toCommaSep(tracks)
                         ), Constants.COLOR_CHAR);
                     }
 

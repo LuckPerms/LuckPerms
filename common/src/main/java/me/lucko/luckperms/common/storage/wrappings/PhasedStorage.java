@@ -27,14 +27,13 @@ package me.lucko.luckperms.common.storage.wrappings;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.Delegate;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.actionlog.Log;
-import me.lucko.luckperms.common.api.delegates.StorageDelegate;
+import me.lucko.luckperms.common.api.delegates.model.ApiStorage;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
@@ -59,14 +58,28 @@ public class PhasedStorage implements Storage {
         return new PhasedStorage(storage);
     }
 
-    @Delegate(types = Delegated.class)
-    private final Storage backing;
+    private final Storage delegate;
 
     private final Phaser phaser = new Phaser();
 
     @Override
+    public ApiStorage getDelegate() {
+        return delegate.getDelegate();
+    }
+
+    @Override
+    public String getName() {
+        return delegate.getName();
+    }
+
+    @Override
     public Storage noBuffer() {
         return this;
+    }
+
+    @Override
+    public void init() {
+        delegate.init();
     }
 
     @Override
@@ -78,14 +91,19 @@ public class PhasedStorage implements Storage {
             e.printStackTrace();
         }
 
-        backing.shutdown();
+        delegate.shutdown();
+    }
+
+    @Override
+    public Map<String, String> getMeta() {
+        return delegate.getMeta();
     }
 
     @Override
     public CompletableFuture<Boolean> logAction(LogEntry entry) {
         phaser.register();
         try {
-            return backing.logAction(entry);
+            return delegate.logAction(entry);
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -95,7 +113,7 @@ public class PhasedStorage implements Storage {
     public CompletableFuture<Log> getLog() {
         phaser.register();
         try {
-            return backing.getLog();
+            return delegate.getLog();
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -105,7 +123,7 @@ public class PhasedStorage implements Storage {
     public CompletableFuture<Boolean> applyBulkUpdate(BulkUpdate bulkUpdate) {
         phaser.register();
         try {
-            return backing.applyBulkUpdate(bulkUpdate);
+            return delegate.applyBulkUpdate(bulkUpdate);
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -115,7 +133,7 @@ public class PhasedStorage implements Storage {
     public CompletableFuture<Boolean> loadUser(UUID uuid, String username) {
         phaser.register();
         try {
-            return backing.loadUser(uuid, username);
+            return delegate.loadUser(uuid, username);
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -125,17 +143,7 @@ public class PhasedStorage implements Storage {
     public CompletableFuture<Boolean> saveUser(User user) {
         phaser.register();
         try {
-            return backing.saveUser(user);
-        } finally {
-            phaser.arriveAndDeregister();
-        }
-    }
-
-    @Override
-    public CompletableFuture<Boolean> cleanupUsers() {
-        phaser.register();
-        try {
-            return backing.cleanupUsers();
+            return delegate.saveUser(user);
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -145,7 +153,7 @@ public class PhasedStorage implements Storage {
     public CompletableFuture<Set<UUID>> getUniqueUsers() {
         phaser.register();
         try {
-            return backing.getUniqueUsers();
+            return delegate.getUniqueUsers();
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -155,7 +163,7 @@ public class PhasedStorage implements Storage {
     public CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(String permission) {
         phaser.register();
         try {
-            return backing.getUsersWithPermission(permission);
+            return delegate.getUsersWithPermission(permission);
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -165,7 +173,7 @@ public class PhasedStorage implements Storage {
     public CompletableFuture<Boolean> createAndLoadGroup(String name, CreationCause cause) {
         phaser.register();
         try {
-            return backing.createAndLoadGroup(name, cause);
+            return delegate.createAndLoadGroup(name, cause);
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -175,7 +183,7 @@ public class PhasedStorage implements Storage {
     public CompletableFuture<Boolean> loadGroup(String name) {
         phaser.register();
         try {
-            return backing.loadGroup(name);
+            return delegate.loadGroup(name);
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -185,7 +193,7 @@ public class PhasedStorage implements Storage {
     public CompletableFuture<Boolean> loadAllGroups() {
         phaser.register();
         try {
-            return backing.loadAllGroups();
+            return delegate.loadAllGroups();
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -195,7 +203,7 @@ public class PhasedStorage implements Storage {
     public CompletableFuture<Boolean> saveGroup(Group group) {
         phaser.register();
         try {
-            return backing.saveGroup(group);
+            return delegate.saveGroup(group);
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -205,7 +213,7 @@ public class PhasedStorage implements Storage {
     public CompletableFuture<Boolean> deleteGroup(Group group, DeletionCause cause) {
         phaser.register();
         try {
-            return backing.deleteGroup(group, cause);
+            return delegate.deleteGroup(group, cause);
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -215,7 +223,7 @@ public class PhasedStorage implements Storage {
     public CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(String permission) {
         phaser.register();
         try {
-            return backing.getGroupsWithPermission(permission);
+            return delegate.getGroupsWithPermission(permission);
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -225,7 +233,7 @@ public class PhasedStorage implements Storage {
     public CompletableFuture<Boolean> createAndLoadTrack(String name, CreationCause cause) {
         phaser.register();
         try {
-            return backing.createAndLoadTrack(name, cause);
+            return delegate.createAndLoadTrack(name, cause);
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -235,7 +243,7 @@ public class PhasedStorage implements Storage {
     public CompletableFuture<Boolean> loadTrack(String name) {
         phaser.register();
         try {
-            return backing.loadTrack(name);
+            return delegate.loadTrack(name);
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -245,7 +253,7 @@ public class PhasedStorage implements Storage {
     public CompletableFuture<Boolean> loadAllTracks() {
         phaser.register();
         try {
-            return backing.loadAllTracks();
+            return delegate.loadAllTracks();
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -255,7 +263,7 @@ public class PhasedStorage implements Storage {
     public CompletableFuture<Boolean> saveTrack(Track track) {
         phaser.register();
         try {
-            return backing.saveTrack(track);
+            return delegate.saveTrack(track);
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -265,17 +273,17 @@ public class PhasedStorage implements Storage {
     public CompletableFuture<Boolean> deleteTrack(Track track, DeletionCause cause) {
         phaser.register();
         try {
-            return backing.deleteTrack(track, cause);
+            return delegate.deleteTrack(track, cause);
         } finally {
             phaser.arriveAndDeregister();
         }
     }
 
     @Override
-    public CompletableFuture<Boolean> saveUUIDData(String username, UUID uuid) {
+    public CompletableFuture<Boolean> saveUUIDData(UUID uuid, String username) {
         phaser.register();
         try {
-            return backing.saveUUIDData(username, uuid);
+            return delegate.saveUUIDData(uuid, username);
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -285,7 +293,7 @@ public class PhasedStorage implements Storage {
     public CompletableFuture<UUID> getUUID(String username) {
         phaser.register();
         try {
-            return backing.getUUID(username);
+            return delegate.getUUID(username);
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -295,18 +303,9 @@ public class PhasedStorage implements Storage {
     public CompletableFuture<String> getName(UUID uuid) {
         phaser.register();
         try {
-            return backing.getName(uuid);
+            return delegate.getName(uuid);
         } finally {
             phaser.arriveAndDeregister();
         }
-    }
-
-    private interface Delegated {
-        StorageDelegate getDelegate();
-        String getName();
-        boolean isAcceptingLogins();
-        void setAcceptingLogins(boolean b);
-        void init();
-        Map<String, String> getMeta();
     }
 }

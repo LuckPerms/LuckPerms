@@ -42,7 +42,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
-public class PermissionDescriptionProxy implements PermissionDescription {
+public final class PermissionDescriptionProxy implements PermissionDescription {
     private final LPPermissionService service;
     private final LPPermissionDescription handle;
 
@@ -64,7 +64,7 @@ public class PermissionDescriptionProxy implements PermissionDescription {
     @Override
     public Map<Subject, Boolean> getAssignedSubjects(String s) {
         return handle.getAssignedSubjects(s).entrySet().stream()
-                .collect(ImmutableCollectors.toImmutableMap(
+                .collect(ImmutableCollectors.toMap(
                         e -> new SubjectProxy(service, e.getKey().toReference()),
                         Map.Entry::getValue
                 ));
@@ -74,5 +74,20 @@ public class PermissionDescriptionProxy implements PermissionDescription {
     @Override
     public CompletableFuture<Map<SubjectReference, Boolean>> findAssignedSubjects(String s) {
         return (CompletableFuture) handle.findAssignedSubjects(s);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o == this || o instanceof PermissionDescriptionProxy && handle.equals(((PermissionDescriptionProxy) o).handle);
+    }
+
+    @Override
+    public int hashCode() {
+        return handle.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "luckperms.api7.PermissionDescriptionProxy(handle=" + this.handle + ")";
     }
 }

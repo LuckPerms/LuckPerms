@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.NodeFactory;
-import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
+import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -47,13 +47,13 @@ import java.util.Set;
 @UtilityClass
 public class SpongeMigrationUtils {
 
-    public static void migrateSubject(Subject subject, PermissionHolder holder, int priority) {
-        if (holder instanceof Group) {
-            MigrationUtils.setGroupWeight((Group) holder, priority);
+    public static void migrateSubject(Subject from, PermissionHolder to, int priority) {
+        if (to instanceof Group) {
+            MigrationUtils.setGroupWeight((Group) to, priority);
         }
 
         // Migrate permissions
-        Map<Set<Context>, Map<String, Boolean>> perms = subject.getSubjectData().getAllPermissions();
+        Map<Set<Context>, Map<String, Boolean>> perms = from.getSubjectData().getAllPermissions();
         for (Map.Entry<Set<Context>, Map<String, Boolean>> e : perms.entrySet()) {
             ContextSet context = CompatibilityUtil.convertContexts(e.getKey());
 
@@ -62,12 +62,12 @@ public class SpongeMigrationUtils {
                     continue;
                 }
 
-                holder.setPermission(NodeFactory.newBuilder(perm.getKey()).withExtraContext(context).setValue(perm.getValue()).build());
+                to.setPermission(NodeFactory.newBuilder(perm.getKey()).withExtraContext(context).setValue(perm.getValue()).build());
             }
         }
 
         // Migrate options
-        Map<Set<Context>, Map<String, String>> opts = subject.getSubjectData().getAllOptions();
+        Map<Set<Context>, Map<String, String>> opts = from.getSubjectData().getAllOptions();
         for (Map.Entry<Set<Context>, Map<String, String>> e : opts.entrySet()) {
             ContextSet context = CompatibilityUtil.convertContexts(e.getKey());
 
@@ -77,17 +77,17 @@ public class SpongeMigrationUtils {
                 }
 
                 if (opt.getKey().equalsIgnoreCase("prefix")) {
-                    holder.setPermission(NodeFactory.makePrefixNode(priority, opt.getValue()).withExtraContext(context).setValue(true).build());
+                    to.setPermission(NodeFactory.makePrefixNode(priority, opt.getValue()).withExtraContext(context).setValue(true).build());
                 } else if (opt.getKey().equalsIgnoreCase("suffix")) {
-                    holder.setPermission(NodeFactory.makeSuffixNode(priority, opt.getValue()).withExtraContext(context).setValue(true).build());
+                    to.setPermission(NodeFactory.makeSuffixNode(priority, opt.getValue()).withExtraContext(context).setValue(true).build());
                 } else {
-                    holder.setPermission(NodeFactory.makeMetaNode(opt.getKey(), opt.getValue()).withExtraContext(context).setValue(true).build());
+                    to.setPermission(NodeFactory.makeMetaNode(opt.getKey(), opt.getValue()).withExtraContext(context).setValue(true).build());
                 }
             }
         }
 
         // Migrate parents
-        Map<Set<Context>, List<Subject>> parents = subject.getSubjectData().getAllParents();
+        Map<Set<Context>, List<Subject>> parents = from.getSubjectData().getAllParents();
         for (Map.Entry<Set<Context>, List<Subject>> e : parents.entrySet()) {
             ContextSet context = CompatibilityUtil.convertContexts(e.getKey());
 
@@ -96,7 +96,7 @@ public class SpongeMigrationUtils {
                     continue; // LuckPerms does not support persisting other subject types.
                 }
 
-                holder.setPermission(NodeFactory.newBuilder("group." + MigrationUtils.standardizeName(s.getIdentifier())).withExtraContext(context).setValue(true).build());
+                to.setPermission(NodeFactory.newBuilder("group." + MigrationUtils.standardizeName(s.getIdentifier())).withExtraContext(context).setValue(true).build());
             }
         }
     }

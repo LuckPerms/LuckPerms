@@ -31,13 +31,12 @@ import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.LocalizedSpec;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.messaging.InternalMessagingService;
-import me.lucko.luckperms.common.messaging.NoopMessagingService;
+import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -50,6 +49,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -78,17 +78,17 @@ public abstract class SubCommand<T> extends Command<T, Void> {
             }
         }
 
-        Util.sendPluginMessage(sender, "&3> &a" + getName().toLowerCase() + sb.toString());
+        CommandUtils.sendPluginMessage(sender, "&3> &a" + getName().toLowerCase() + sb.toString());
     }
 
     @Override
     public void sendDetailedUsage(Sender sender, String label) {
-        Util.sendPluginMessage(sender, "&3&lCommand Usage &3- &b" + getName());
-        Util.sendPluginMessage(sender, "&b> &7" + getDescription());
+        CommandUtils.sendPluginMessage(sender, "&3&lCommand Usage &3- &b" + getName());
+        CommandUtils.sendPluginMessage(sender, "&b> &7" + getDescription());
         if (getArgs().isPresent()) {
-            Util.sendPluginMessage(sender, "&3Arguments:");
+            CommandUtils.sendPluginMessage(sender, "&3Arguments:");
             for (Arg arg : getArgs().get()) {
-                Util.sendPluginMessage(sender, "&b- " + arg.asPrettyString() + "&3 -> &7" + arg.getDescription());
+                CommandUtils.sendPluginMessage(sender, "&b- " + arg.asPrettyString() + "&3 -> &7" + arg.getDescription());
             }
         }
     }
@@ -116,7 +116,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
             if (args.isEmpty() || args.get(0).equals("")) {
                 return cache.getRootNode().getChildren()
                         .map(Map::keySet)
-                        .map(s -> s.stream().collect(Collectors.toList()))
+                        .map(s -> (List<String>) new ArrayList<>(s))
                         .orElse(Collections.emptyList());
             }
 
@@ -182,14 +182,14 @@ public abstract class SubCommand<T> extends Command<T, Void> {
         }
 
         if (!sender.isImport()) {
-            InternalMessagingService messagingService = plugin.getMessagingService();
-            if (!(messagingService instanceof NoopMessagingService) && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
-                messagingService.getUpdateBuffer().request();
+            Optional<ExtendedMessagingService> messagingService = plugin.getMessagingService();
+            if (messagingService.isPresent() && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
+                messagingService.get().getUpdateBuffer().request();
             }
         }
 
         if (!success) {
-            Message.USER_SAVE_ERROR.send(sender);
+            Message.USER_SAVE_ERROR.send(sender, user.getFriendlyName());
         }
     }
 
@@ -203,14 +203,14 @@ public abstract class SubCommand<T> extends Command<T, Void> {
         }
 
         if (!sender.isImport()) {
-            InternalMessagingService messagingService = plugin.getMessagingService();
-            if (!(messagingService instanceof NoopMessagingService) && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
-                messagingService.getUpdateBuffer().request();
+            Optional<ExtendedMessagingService> messagingService = plugin.getMessagingService();
+            if (messagingService.isPresent() && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
+                messagingService.get().getUpdateBuffer().request();
             }
         }
 
         if (!success) {
-            Message.GROUP_SAVE_ERROR.send(sender);
+            Message.GROUP_SAVE_ERROR.send(sender, group.getFriendlyName());
         }
     }
 
@@ -224,14 +224,14 @@ public abstract class SubCommand<T> extends Command<T, Void> {
         }
 
         if (!sender.isImport()) {
-            InternalMessagingService messagingService = plugin.getMessagingService();
-            if (!(messagingService instanceof NoopMessagingService) && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
-                messagingService.getUpdateBuffer().request();
+            Optional<ExtendedMessagingService> messagingService = plugin.getMessagingService();
+            if (messagingService.isPresent() && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
+                messagingService.get().getUpdateBuffer().request();
             }
         }
 
         if (!success) {
-            Message.TRACK_SAVE_ERROR.send(sender);
+            Message.TRACK_SAVE_ERROR.send(sender, track.getName());
         }
     }
 }

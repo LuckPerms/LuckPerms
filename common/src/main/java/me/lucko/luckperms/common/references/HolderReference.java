@@ -33,7 +33,7 @@ import java.util.function.Consumer;
 /**
  * A reference to a specific {@link PermissionHolder}.
  *
- * @param <I> the holder type
+ * @param <S> the holder type
  * @param <I> the holder identifier type
  */
 public interface HolderReference<S, I> extends Identifiable<I> {

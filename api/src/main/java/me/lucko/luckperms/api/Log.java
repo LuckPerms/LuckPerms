@@ -39,7 +39,7 @@ import javax.annotation.Nonnull;
  * <p>Any changes made to log entries will only apply to this instance of the log.
  * You can add to the log using the {@link Storage}, and then request an updated copy.</p>
  *
- * <p>All methods are thread safe, and return immutable & thread safe collections.</p>
+ * <p>All methods are thread safe, and return immutable and thread safe collections.</p>
  */
 public interface Log {
 

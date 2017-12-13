@@ -38,7 +38,7 @@ import me.lucko.luckperms.common.commands.impl.generic.other.HolderShowTracks;
 import me.lucko.luckperms.common.commands.impl.generic.parent.CommandParent;
 import me.lucko.luckperms.common.commands.impl.generic.permission.CommandPermission;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 public class UserMainCommand extends MainCommand<User, UserIdentifier> {
 
@@ -81,23 +82,30 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
 
     @Override
     protected UserIdentifier parseTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        UUID uuid = Util.parseUuid(target.toLowerCase());
+        UUID uuid = CommandUtils.parseUuid(target.toLowerCase());
         if (uuid == null) {
-            if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {
-                Message.USER_INVALID_ENTRY.send(sender, target);
-                return null;
+            if (!plugin.getConfiguration().get(ConfigKeys.ALLOW_INVALID_USERNAMES)) {
+                if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {
+                    Message.USER_INVALID_ENTRY.send(sender, target);
+                    return null;
+                }
+            } else {
+                if (!DataConstraints.PLAYER_USERNAME_TEST_LENIENT.test(target)) {
+                    Message.USER_INVALID_ENTRY.send(sender, target);
+                    return null;
+                }
             }
 
             uuid = plugin.getStorage().getUUID(target.toLowerCase()).join();
             if (uuid == null) {
                 if (!plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
-                    Message.USER_NOT_FOUND.send(sender);
+                    Message.USER_NOT_FOUND.send(sender, target);
                     return null;
                 }
 
                 uuid = plugin.lookupUuid(target).orElse(null);
                 if (uuid == null) {
-                    Message.USER_NOT_FOUND.send(sender);
+                    Message.USER_NOT_FOUND.send(sender, target);
                     return null;
                 }
             }
@@ -136,6 +144,6 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
 
     @Override
     protected List<String> getTargets(LuckPermsPlugin plugin) {
-        return plugin.getPlayerList();
+        return plugin.getPlayerList().collect(Collectors.toList());
     }
 }

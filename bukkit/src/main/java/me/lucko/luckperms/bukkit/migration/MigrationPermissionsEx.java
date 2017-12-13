@@ -37,25 +37,30 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.logging.ProgressLogger;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.SafeIterator;
 
 import org.bukkit.Bukkit;
 
-import ru.tehkode.permissions.NativeInterface;
 import ru.tehkode.permissions.PermissionEntity;
 import ru.tehkode.permissions.PermissionGroup;
 import ru.tehkode.permissions.PermissionManager;
-import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
-import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class MigrationPermissionsEx extends SubCommand<Object> {
     public MigrationPermissionsEx(LocaleManager locale) {
@@ -79,27 +84,18 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         PermissionsEx pex = (PermissionsEx) Bukkit.getPluginManager().getPlugin("PermissionsEx");
         PermissionManager manager = pex.getPermissionsManager();
 
-        NativeInterface ni;
-        try {
-            Field f = manager.getClass().getDeclaredField("nativeI");
-            f.setAccessible(true);
-            ni = (NativeInterface) f.get(manager);
-        } catch (Throwable t) {
-            t.printStackTrace();
-            return CommandResult.FAILURE;
-        }
-
         log.log("Calculating group weightings.");
-        int maxWeight = 0;
+        int i = 0;
         for (PermissionGroup group : manager.getGroupList()) {
-            maxWeight = Math.max(maxWeight, group.getRank());
+            i = Math.max(i, group.getRank());
         }
-        maxWeight += 5;
+        int maxWeight = i + 5;
 
         // Migrate all groups.
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
-        for (PermissionGroup group : manager.getGroupList()) {
+        Set<String> ladders = new HashSet<>();
+        SafeIterator.iterate(manager.getGroupList(), group -> {
             int groupWeight = maxWeight - group.getRank();
 
             final String groupName = MigrationUtils.standardizeName(group.getName());
@@ -111,43 +107,52 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             // migrate data
             migrateEntity(group, lpGroup, groupWeight);
 
-            plugin.getStorage().saveGroup(lpGroup);
+            // remember known ladders
+            if (group.isRanked()) {
+                ladders.add(group.getRankLadder().toLowerCase());
+            }
+
+            plugin.getStorage().saveGroup(lpGroup).join();
             log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
-        }
+        });
         log.log("Migrated " + groupCount.get() + " groups");
+
+        // Migrate all ladders/tracks.
+        log.log("Starting tracks migration.");
+        for (String rankLadder : ladders) {
+            plugin.getStorage().createAndLoadTrack(rankLadder, CreationCause.INTERNAL).join();
+            Track track = plugin.getTrackManager().getIfLoaded(rankLadder);
+
+            // Get a list of all groups in a ladder
+            List<String> ladder = manager.getRankLadder(rankLadder).entrySet().stream()
+                                  .sorted(Comparator.<Map.Entry<Integer, PermissionGroup>>comparingInt(e -> e.getKey()).reversed())
+                                  .map(e -> MigrationUtils.standardizeName(e.getValue().getName()))
+                                  .collect(Collectors.toList());
+
+            track.setGroups(ladder);
+            plugin.getStorage().saveTrack(track);
+        }
+        log.log("Migrated " + ladders.size() + " tracks");
 
         // Migrate all users
         log.log("Starting user migration.");
         AtomicInteger userCount = new AtomicInteger(0);
 
         // Increment the max weight from the group migrations. All user meta should override.
-        maxWeight += 5;
+        int userWeight = maxWeight + 5;
 
-        for (PermissionUser user : manager.getUsers()) {
-            UUID u;
-            try {
-                u = UUID.fromString(user.getIdentifier());
-            } catch (IllegalArgumentException e) {
-                u = ni.nameToUUID(user.getIdentifier());
-                if (u == null) {
-                    try {
-                        u = Bukkit.getOfflinePlayer(user.getIdentifier()).getUniqueId();
-                    } catch (Exception ex) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
+        SafeIterator.iterate(manager.getUsers(), user -> {
+            UUID u = BukkitMigrationUtils.lookupUuid(log, user.getIdentifier());
             if (u == null) {
-                log.logErr("Unable to get a UUID for user identifier: " + user.getIdentifier());
-                continue;
+                return;
             }
 
+            // load in a user instance
             plugin.getStorage().loadUser(u, user.getName()).join();
             User lpUser = plugin.getUserManager().getIfLoaded(u);
 
             // migrate data
-            migrateEntity(user, lpUser, maxWeight);
+            migrateEntity(user, lpUser, userWeight);
 
             // Lowest rank is the highest group #logic
             String primary = null;
@@ -168,7 +173,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             plugin.getUserManager().cleanup(lpUser);
             plugin.getStorage().saveUser(lpUser);
             log.logProgress("Migrated {} users so far.", userCount.incrementAndGet());
-        }
+        });
 
         log.log("Migrated " + userCount.get() + " users.");
         log.log("Success! Migration complete.");
@@ -188,10 +193,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             for (String node : worldData.getValue()) {
-                if (node.isEmpty()) {
-                    continue;
-                }
-
+                if (node.isEmpty()) continue;
                 holder.setPermission(MigrationUtils.parseNode(node, true).setWorld(world).build());
             }
         }
@@ -241,7 +243,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 }
 
                 String key = opt.getKey().toLowerCase();
-                if (key.equals("prefix") || key.equals("suffix") || key.equals("weight") || key.equals("rank") || key.equals("name") || key.equals("username")) {
+                if (key.equals("prefix") || key.equals("suffix") || key.equals("weight") || key.equals("rank") || key.equals("rank-ladder") || key.equals("name") || key.equals("username")) {
                     continue;
                 }
 

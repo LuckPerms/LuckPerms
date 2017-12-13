@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.commands.impl.group;
 
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -44,7 +45,7 @@ import java.util.List;
 
 public class GroupSetWeight extends SubCommand<Group> {
     public GroupSetWeight(LocaleManager locale) {
-        super(CommandSpec.GROUP_SETWEIGHT.spec(locale), "setweight", CommandPermission.GROUP_SETWEIGHT, Predicates.not(1));
+        super(CommandSpec.GROUP_SETWEIGHT.spec(locale), "setweight", CommandPermission.GROUP_SET_WEIGHT, Predicates.not(1));
     }
 
     @Override
@@ -59,8 +60,13 @@ public class GroupSetWeight extends SubCommand<Group> {
         group.removeIf(n -> n.getPermission().startsWith("weight."));
         group.setPermission(NodeFactory.newBuilder("weight." + weight).build());
 
+        Message.GROUP_SET_WEIGHT.send(sender, weight, group.getFriendlyName());
+
+        ExtendedLogEntry.build().actor(sender).acted(group)
+                .action("setweight", weight)
+                .build().submit(plugin, sender);
+
         save(group, sender, plugin);
-        Message.GROUP_SET_WEIGHT.send(sender, weight, group.getDisplayName());
         return CommandResult.SUCCESS;
     }
 }

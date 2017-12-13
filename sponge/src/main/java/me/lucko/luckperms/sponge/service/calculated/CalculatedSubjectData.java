@@ -36,10 +36,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
 import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
+import me.lucko.luckperms.common.contexts.ContextSetComparator;
 import me.lucko.luckperms.common.processors.MapProcessor;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
@@ -49,7 +49,6 @@ import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +64,6 @@ import java.util.concurrent.TimeUnit;
  */
 @RequiredArgsConstructor
 public class CalculatedSubjectData implements LPSubjectData {
-    private static final ContextComparator CONTEXT_COMPARATOR = new ContextComparator();
 
     @Getter
     private final LPSubject parentSubject;
@@ -77,17 +75,17 @@ public class CalculatedSubjectData implements LPSubjectData {
     private final Map<ImmutableContextSet, Set<SubjectReference>> parents = new ConcurrentHashMap<>();
     private final Map<ImmutableContextSet, Map<String, String>> options = new ConcurrentHashMap<>();
 
-    private final LoadingCache<ContextSet, CalculatorHolder> permissionCache = Caffeine.newBuilder()
+    private final LoadingCache<ImmutableContextSet, CalculatorHolder> permissionCache = Caffeine.newBuilder()
             .expireAfterAccess(10, TimeUnit.MINUTES)
-            .build(new CacheLoader<ContextSet, CalculatorHolder>() {
+            .build(new CacheLoader<ImmutableContextSet, CalculatorHolder>() {
                 @Override
-                public CalculatorHolder load(ContextSet contexts) {
+                public CalculatorHolder load(ImmutableContextSet contexts) {
                     ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
                     processors.add(new MapProcessor());
                     processors.add(new SpongeWildcardProcessor());
 
                     CalculatorHolder holder = new CalculatorHolder(new PermissionCalculator(service.getPlugin(), PermissionCalculatorMetadata.of(calculatorDisplayName, contexts), processors.build()));
-                    holder.setPermissions(flattenMap(contexts, permissions));
+                    holder.setPermissions(flattenMap(getRelevantEntries(contexts, permissions)));
 
                     return holder;
                 }
@@ -101,7 +99,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         permissionCache.invalidateAll();
     }
 
-    public Tristate getPermissionValue(ContextSet contexts, String permission) {
+    public Tristate getPermissionValue(ImmutableContextSet contexts, String permission) {
         return permissionCache.get(contexts).getCalculator().getPermissionValue(permission, CheckOrigin.INTERNAL);
     }
 
@@ -111,7 +109,7 @@ public class CalculatedSubjectData implements LPSubjectData {
             permissions.put(e.getKey(), new ConcurrentHashMap<>(e.getValue()));
         }
         permissionCache.invalidateAll();
-        service.invalidatePermissionCaches();
+        service.invalidateAllCaches(LPSubject.CacheLevel.PERMISSION);
     }
 
     public void replaceParents(Map<ImmutableContextSet, List<SubjectReference>> map) {
@@ -121,7 +119,7 @@ public class CalculatedSubjectData implements LPSubjectData {
             set.addAll(e.getValue());
             parents.put(e.getKey(), set);
         }
-        service.invalidateParentCaches();
+        service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
     }
 
     public void replaceOptions(Map<ImmutableContextSet, Map<String, String>> map) {
@@ -129,7 +127,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         for (Map.Entry<ImmutableContextSet, Map<String, String>> e : map.entrySet()) {
             options.put(e.getKey(), new ConcurrentHashMap<>(e.getValue()));
         }
-        service.invalidateOptionCaches();
+        service.invalidateAllCaches(LPSubject.CacheLevel.OPTION);
     }
 
     @Override
@@ -153,7 +151,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         }
         if (b) {
             permissionCache.invalidateAll();
-            service.invalidatePermissionCaches();
+            service.invalidateAllCaches(LPSubject.CacheLevel.PERMISSION);
         }
         return CompletableFuture.completedFuture(b);
     }
@@ -165,7 +163,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         } else {
             permissions.clear();
             permissionCache.invalidateAll();
-            service.invalidatePermissionCaches();
+            service.invalidateAllCaches(LPSubject.CacheLevel.PERMISSION);
             return CompletableFuture.completedFuture(true);
         }
     }
@@ -180,7 +178,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         permissions.remove(contexts);
         if (!perms.isEmpty()) {
             permissionCache.invalidateAll();
-            service.invalidatePermissionCaches();
+            service.invalidateAllCaches(LPSubject.CacheLevel.PERMISSION);
             return CompletableFuture.completedFuture(true);
         }
         return CompletableFuture.completedFuture(false);
@@ -200,7 +198,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         Set<SubjectReference> set = parents.computeIfAbsent(contexts, c -> ConcurrentHashMap.newKeySet());
         boolean b = set.add(parent);
         if (b) {
-            service.invalidateParentCaches();
+            service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
         }
         return CompletableFuture.completedFuture(b);
     }
@@ -210,7 +208,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         Set<SubjectReference> set = parents.get(contexts);
         boolean b = set != null && set.remove(parent);
         if (b) {
-            service.invalidateParentCaches();
+            service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
         }
         return CompletableFuture.completedFuture(b);
     }
@@ -221,7 +219,7 @@ public class CalculatedSubjectData implements LPSubjectData {
             return CompletableFuture.completedFuture(false);
         } else {
             parents.clear();
-            service.invalidateOptionCaches();
+            service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
             return CompletableFuture.completedFuture(true);
         }
     }
@@ -234,7 +232,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         }
 
         parents.remove(contexts);
-        service.invalidateParentCaches();
+        service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
         return CompletableFuture.completedFuture(!set.isEmpty());
     }
 
@@ -252,7 +250,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         Map<String, String> options = this.options.computeIfAbsent(contexts, c -> new ConcurrentHashMap<>());
         boolean b = !stringEquals(options.put(key.toLowerCase(), value), value);
         if (b) {
-            service.invalidateOptionCaches();
+            service.invalidateAllCaches(LPSubject.CacheLevel.OPTION);
         }
         return CompletableFuture.completedFuture(b);
     }
@@ -262,7 +260,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         Map<String, String> options = this.options.get(contexts);
         boolean b = options != null && options.remove(key.toLowerCase()) != null;
         if (b) {
-            service.invalidateOptionCaches();
+            service.invalidateAllCaches(LPSubject.CacheLevel.OPTION);
         }
         return CompletableFuture.completedFuture(b);
     }
@@ -273,7 +271,7 @@ public class CalculatedSubjectData implements LPSubjectData {
             return CompletableFuture.completedFuture(false);
         } else {
             options.clear();
-            service.invalidateOptionCaches();
+            service.invalidateAllCaches(LPSubject.CacheLevel.OPTION);
             return CompletableFuture.completedFuture(true);
         }
     }
@@ -286,15 +284,14 @@ public class CalculatedSubjectData implements LPSubjectData {
         }
 
         options.remove(contexts);
-        service.invalidateOptionCaches();
+        service.invalidateAllCaches(LPSubject.CacheLevel.OPTION);
         return CompletableFuture.completedFuture(!map.isEmpty());
     }
 
-    private static <V> Map<String, V> flattenMap(ContextSet contexts, Map<ImmutableContextSet, Map<String, V>> source) {
+    private static <V> Map<String, V> flattenMap(SortedMap<ImmutableContextSet, Map<String, V>> data) {
         Map<String, V> map = new HashMap<>();
 
-        SortedMap<ImmutableContextSet, Map<String, V>> ret = getRelevantEntries(contexts, source);
-        for (Map<String, V> m : ret.values()) {
+        for (Map<String, V> m : data.values()) {
             for (Map.Entry<String, V> e : m.entrySet()) {
                 map.putIfAbsent(e.getKey(), e.getValue());
             }
@@ -303,8 +300,8 @@ public class CalculatedSubjectData implements LPSubjectData {
         return ImmutableMap.copyOf(map);
     }
 
-    private static <K, V> SortedMap<ImmutableContextSet, Map<K, V>> getRelevantEntries(ContextSet set, Map<ImmutableContextSet, Map<K, V>> map) {
-        ImmutableSortedMap.Builder<ImmutableContextSet, Map<K, V>> perms = ImmutableSortedMap.orderedBy(CONTEXT_COMPARATOR);
+    private static <K, V> SortedMap<ImmutableContextSet, Map<K, V>> getRelevantEntries(ImmutableContextSet set, Map<ImmutableContextSet, Map<K, V>> map) {
+        ImmutableSortedMap.Builder<ImmutableContextSet, Map<K, V>> perms = ImmutableSortedMap.orderedBy(ContextSetComparator.reverse());
 
         for (Map.Entry<ImmutableContextSet, Map<K, V>> e : map.entrySet()) {
             if (!e.getKey().isSatisfiedBy(set)) {
@@ -319,15 +316,6 @@ public class CalculatedSubjectData implements LPSubjectData {
 
     private static boolean stringEquals(String a, String b) {
         return a == null && b == null || a != null && b != null && a.equalsIgnoreCase(b);
-    }
-
-    private static class ContextComparator implements Comparator<ImmutableContextSet> {
-
-        @Override
-        public int compare(ImmutableContextSet o1, ImmutableContextSet o2) {
-            int i = Integer.compare(o1.size(), o2.size());
-            return i == 0 ? 1 : i;
-        }
     }
 
     private static class CalculatorHolder {

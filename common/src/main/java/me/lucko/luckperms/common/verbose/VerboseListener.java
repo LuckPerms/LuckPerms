@@ -33,7 +33,7 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.utils.DateUtil;
@@ -49,6 +49,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -96,71 +97,60 @@ public class VerboseListener {
      * @param data the data to process
      */
     public void acceptData(CheckData data) {
+        // increment handled counter
         counter.incrementAndGet();
+
+        // check if the data passes our filters
         if (!VerboseFilter.passesFilter(data, filter)) {
             return;
         }
+
+        // increment the matched filter
         matchedCounter.incrementAndGet();
 
+        // record the check, if we have space for it
         if (results.size() < DATA_TRUNCATION) {
             results.add(data);
         }
 
+        // handle notifications
         if (notify) {
             StringBuilder msgContent = new StringBuilder();
-            msgContent.append("&a")
-                    .append(data.getCheckTarget());
 
             if (notifiedSender.isConsole()) {
-                msgContent.append("&7 - &8[&2")
+                msgContent.append("&8[&2")
                         .append(data.getCheckOrigin().getCode())
-                        .append("&8]");
+                        .append("&8] ");
             }
 
-            msgContent.append("&7 - &a")
+            msgContent.append("&a")
+                    .append(data.getCheckTarget())
+                    .append("&7 - &a")
                     .append(data.getPermission())
                     .append("&7 - ")
                     .append(getTristateColor(data.getResult()))
                     .append(data.getResult().name().toLowerCase());
 
             if (notifiedSender.isConsole()) {
-                msgContent.append("&7 - ").append(Util.contextSetToString(data.getCheckContext()));
-            }
-
-            if (notifiedSender.isConsole()) {
+                // just send as a raw message
                 Message.VERBOSE_LOG.send(notifiedSender, msgContent.toString());
             } else {
+
+                // form a hoverevent from the check trace
                 TextComponent textComponent = TextUtils.fromLegacy(Message.VERBOSE_LOG.asString(notifiedSender.getPlatform().getLocaleManager(), msgContent.toString()));
+
+                // build the text
                 List<String> hover = new ArrayList<>();
                 hover.add("&bOrigin: &2" + data.getCheckOrigin().name());
-                hover.add("&bContext: &r" + Util.contextSetToString(data.getCheckContext()));
+                hover.add("&bContext: &r" + CommandUtils.contextSetToString(data.getCheckContext()));
                 hover.add("&bTrace: &r");
 
-                StackTraceElement[] checkTrace = data.getCheckTrace();
-
-                // how many lines have been printed
-                int count = 0;
-                // if we're printing elements yet
-                boolean printing = false;
-
-                for (StackTraceElement e : checkTrace) {
-                    // start printing when we escape LP internals code
-                    if (!printing && !e.getClassName().startsWith("me.lucko.luckperms.")) {
-                        printing = true;
-                    }
-
-                    if (!printing) continue;
-                    if (count >= 15) break;
-
-                    hover.add("&7" + e.getClassName() + "." + e.getMethodName() + (e.getLineNumber() >= 0 ? ":" + e.getLineNumber() : ""));
-                    count++;
+                int overflow = readStack(data, 15, e -> hover.add("&7" + e.getClassName() + "." + e.getMethodName() + (e.getLineNumber() >= 0 ? ":" + e.getLineNumber() : "")));
+                if (overflow != 0) {
+                    hover.add("&f... and " + overflow + " more");
                 }
 
-                if (checkTrace.length > 15) {
-                    int remain = checkTrace.length - 15;
-                    hover.add("&f... and " + remain + " more");
-                }
-
+                // send the message
                 HoverEvent e = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(hover.stream()), Constants.FORMAT_CHAR));
                 TextComponent msg = textComponent.toBuilder().applyDeep(comp -> comp.hoverEvent(e)).build();
                 notifiedSender.sendMessage(msg);
@@ -171,10 +161,14 @@ public class VerboseListener {
     /**
      * Uploads the captured data in this listener to a paste and returns the url
      *
+     * @param showTraces if stack traces should be included in the output
+     * @param attachRaw if the rawdata should be attached to the gist
      * @return the url
      * @see PasteUtils#paste(String, List)
      */
-    public String uploadPasteData(boolean showTraces) {
+    public String uploadPasteData(boolean showTraces, boolean attachRaw) {
+
+        // retrieve variables
         long now = System.currentTimeMillis();
         String startDate = DATE_FORMAT.format(new Date(startTime));
         String endDate = DATE_FORMAT.format(new Date(now));
@@ -188,6 +182,7 @@ public class VerboseListener {
             filter = "`" + filter + "`";
         }
 
+        // start building the message output
         ImmutableList.Builder<String> prettyOutput = ImmutableList.<String>builder()
                 .add("## Verbose Checking Output")
                 .add("#### This file was automatically generated by [LuckPerms](https://github.com/lucko/LuckPerms) " + pluginVersion)
@@ -199,84 +194,128 @@ public class VerboseListener {
                 .add("| End Time | " + endDate + " |")
                 .add("| Duration | " + duration +" |")
                 .add("| Count | **" + matchedCounter.get() + "** / " + counter.get() + " |")
-                .add("| User | " + notifiedSender.getName() + " |")
+                .add("| User | " + notifiedSender.getNameWithLocation() + " |")
                 .add("| Filter | " + filter + " |")
                 .add("| Include traces | " + showTraces + " |")
                 .add("");
 
+        // warn if data was truncated
         if (matchedCounter.get() > results.size()) {
             prettyOutput.add("**WARN:** Result set exceeded max size of " + DATA_TRUNCATION + ". The output below was truncated to " + DATA_TRUNCATION + " entries.");
             prettyOutput.add("");
         }
 
+        // explain why some traces may be missing
         if (showTraces && results.size() > TRACE_DATA_TRUNCATION) {
             prettyOutput.add("**WARN:** Result set exceeded size of " + TRACE_DATA_TRUNCATION + ". The traced output below was truncated to " + TRACE_DATA_TRUNCATION + " entries.   ");
             prettyOutput.add("Either refine the query using a more specific filter, or disable tracing by adding '--slim' to the end of the paste command.");
             prettyOutput.add("");
         }
 
+        // print the format of the output
         prettyOutput.add("### Output")
-                .add("Format: `<checked>` `<origin>` `<permission>` `<value>`")
+                .add("Format: `<checked>` `<permission>` `<value>`")
                 .add("")
                 .add("___")
                 .add("");
 
+        // build the csv output - will only be appended to if this is enabled.
         ImmutableList.Builder<String> csvOutput = ImmutableList.<String>builder()
                 .add("User,Permission,Result");
 
+        // how many instances have been printed so far
         AtomicInteger printedCount = new AtomicInteger(0);
 
-        results.forEach(c -> {
+        for (CheckData c : results) {
             if (!showTraces) {
+
+                // if traces aren't being shown, just append using raw markdown
                 prettyOutput.add("`" + c.getCheckTarget() + "` - " + c.getPermission() + " - " + getTristateSymbol(c.getResult()) + "   ");
+
             } else if (printedCount.incrementAndGet() > TRACE_DATA_TRUNCATION) {
+
+                // if we've gone over the trace truncation, just append the raw info.
+                // we still have to use html, as the rest of this section is still using it.
                 prettyOutput.add("<br><code>" + c.getCheckTarget() + "</code> - " + c.getPermission() + " - " + getTristateSymbol(c.getResult()));
+
             } else {
+
+                // append the full output.
                 prettyOutput.add("<details><summary><code>" + c.getCheckTarget() + "</code> - " + c.getPermission() + " - " + getTristateSymbol(c.getResult()) + "</summary><p>");
 
+                // append the spoiler text
                 prettyOutput.add("<br><b>Origin:</b> <code>" + c.getCheckOrigin().name() + "</code>");
-                prettyOutput.add("<br><b>Context:</b> <code>" + Util.stripColor(Util.contextSetToString(c.getCheckContext())) + "</code>");
+                prettyOutput.add("<br><b>Context:</b> <code>" + CommandUtils.stripColor(CommandUtils.contextSetToString(c.getCheckContext())) + "</code>");
                 prettyOutput.add("<br><b>Trace:</b><pre>");
 
-                // add trace
-                StackTraceElement[] checkTrace = c.getCheckTrace();
-
-                // how many lines have been printed
-                int count = 0;
-                // if we're printing elements yet
-                boolean printing = false;
-
-                for (StackTraceElement e : checkTrace) {
-                    // start printing when we escape LP internals code
-                    if (!printing && !e.getClassName().startsWith("me.lucko.luckperms.")) {
-                        printing = true;
-                    }
-
-                    if (!printing) continue;
-                    if (count >= 30) break;
-
-                    prettyOutput.add(e.getClassName() + "." + e.getMethodName() + (e.getLineNumber() >= 0 ? ":" + e.getLineNumber() : ""));
-                    count++;
-                }
-
-                if (checkTrace.length > 30) {
-                    int remain = checkTrace.length - 30;
-                    prettyOutput.add("... and " + remain + " more");
+                int overflow = readStack(c, 30, e -> prettyOutput.add(e.getClassName() + "." + e.getMethodName() + (e.getLineNumber() >= 0 ? ":" + e.getLineNumber() : "")));
+                if (overflow != 0) {
+                    prettyOutput.add("... and " + overflow + " more");
                 }
 
                 prettyOutput.add("</pre></p></details>");
             }
 
-            csvOutput.add(escapeCommas(c.getCheckTarget()) + "," + escapeCommas(c.getPermission()) + "," + c.getResult().name().toLowerCase());
-        });
+            // if we're including a raw csv output, append that too
+            if (attachRaw) {
+                csvOutput.add(escapeCommas(c.getCheckTarget()) + "," + escapeCommas(c.getPermission()) + "," + c.getResult().name().toLowerCase());
+            }
+        }
         results.clear();
 
-        List<Map.Entry<String, String>> content = ImmutableList.of(
-                Maps.immutableEntry("luckperms-verbose.md", prettyOutput.build().stream().collect(Collectors.joining("\n"))),
-                Maps.immutableEntry("raw-data.csv", csvOutput.build().stream().collect(Collectors.joining("\n")))
-        );
+        ImmutableList.Builder<Map.Entry<String, String>> content = ImmutableList.builder();
+        content.add(Maps.immutableEntry("luckperms-verbose.md", prettyOutput.build().stream().collect(Collectors.joining("\n"))));
 
-        return PasteUtils.paste("LuckPerms Verbose Checking Output", content);
+        if (attachRaw) {
+            content.add(Maps.immutableEntry("raw-data.csv", csvOutput.build().stream().collect(Collectors.joining("\n"))));
+        }
+
+        return PasteUtils.paste("LuckPerms Verbose Checking Output", content.build());
+    }
+
+    /**
+     * Reads a stack trace from a {@link CheckData} instance.
+     *
+     * @param data the data to read from
+     * @param truncateLength the length when we should stop reading the stack
+     * @param consumer the element consumer
+     * @return how many elements were left unread, or 0 if everything was read
+     */
+    private static int readStack(CheckData data, int truncateLength, Consumer<StackTraceElement> consumer) {
+        StackTraceElement[] stack = data.getCheckTrace();
+
+        // how many lines have been printed
+        int count = 0;
+        // if we're printing elements yet
+        boolean printing = false;
+
+        for (StackTraceElement e : stack) {
+            // start printing when we escape LP internals code
+            boolean shouldStartPrinting = !printing && (
+                    (data.getCheckOrigin() == CheckOrigin.API || data.getCheckOrigin() == CheckOrigin.INTERNAL) || (
+                            !e.getClassName().startsWith("me.lucko.luckperms.") &&
+                            // all used within the checking impl somewhere
+                            !e.getClassName().equals("java.util.concurrent.CompletableFuture") &&
+                            !e.getClassName().startsWith("com.github.benmanes.caffeine") &&
+                            !e.getClassName().equals("java.util.concurrent.ConcurrentHashMap")
+                    )
+            );
+
+            if (shouldStartPrinting) {
+                printing = true;
+            }
+
+            if (!printing) continue;
+            if (count >= truncateLength) break;
+
+            consumer.accept(e);
+            count++;
+        }
+
+        if (stack.length > truncateLength) {
+            return stack.length - truncateLength;
+        }
+        return 0;
     }
 
     private static String escapeCommas(String s) {

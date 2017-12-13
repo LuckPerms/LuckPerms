@@ -51,7 +51,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 @RequiredArgsConstructor
-public class PermissionServiceProxy implements PermissionService {
+public final class PermissionServiceProxy implements PermissionService {
     private final LPPermissionService handle;
 
     @Override
@@ -92,7 +92,7 @@ public class PermissionServiceProxy implements PermissionService {
     @Override
     public Map<String, SubjectCollection> getLoadedCollections() {
         return handle.getLoadedCollections().entrySet().stream()
-                .collect(ImmutableCollectors.toImmutableMap(
+                .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> e.getValue().sponge()
                 ));
@@ -125,11 +125,26 @@ public class PermissionServiceProxy implements PermissionService {
 
     @Override
     public Collection<PermissionDescription> getDescriptions() {
-        return handle.getDescriptions().stream().map(LPPermissionDescription::sponge).collect(ImmutableCollectors.toImmutableSet());
+        return handle.getDescriptions().stream().map(LPPermissionDescription::sponge).collect(ImmutableCollectors.toSet());
     }
 
     @Override
     public void registerContextCalculator(ContextCalculator<Subject> contextCalculator) {
         handle.registerContextCalculator(contextCalculator);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o == this || o instanceof PermissionServiceProxy && handle.equals(((PermissionServiceProxy) o).handle);
+    }
+
+    @Override
+    public int hashCode() {
+        return handle.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "luckperms.api7.PermissionServiceProxy(handle=" + this.handle + ")";
     }
 }

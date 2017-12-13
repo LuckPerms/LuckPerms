@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -59,21 +59,21 @@ public class ParentRemove extends SubCommand<LPSubjectData> {
 
         LuckPermsService service = Sponge.getServiceManager().provideUnchecked(LuckPermsService.class);
         if (service.getLoadedCollections().keySet().stream().map(String::toLowerCase).noneMatch(s -> s.equalsIgnoreCase(collection))) {
-            Util.sendPluginMessage(sender, "Warning: SubjectCollection '&4" + collection + "&c' doesn't exist.");
+            CommandUtils.sendPluginMessage(sender, "Warning: SubjectCollection '&4" + collection + "&c' doesn't exist.");
         }
 
         LPSubjectCollection c = service.getCollection(collection);
         if (!c.hasRegistered(name).join()) {
-            Util.sendPluginMessage(sender, "Warning: Subject '&4" + name + "&c' doesn't exist.");
+            CommandUtils.sendPluginMessage(sender, "Warning: Subject '&4" + name + "&c' doesn't exist.");
         }
 
         LPSubject subject = c.loadSubject(name).join();
 
         if (subjectData.removeParent(contextSet, subject.toReference()).join()) {
-            Util.sendPluginMessage(sender, "&aRemoved parent &b" + subject.getParentCollection().getIdentifier() +
-                    "&a/&b" + subject.getIdentifier() + "&a in context " + SpongeUtils.contextToString(contextSet));
+            CommandUtils.sendPluginMessage(sender, "&aRemoved parent &b" + subject.getParentCollection().getIdentifier() +
+                    "&a/&b" + subject.getIdentifier() + "&a in context " + SpongeCommandUtils.contextToString(contextSet));
         } else {
-            Util.sendPluginMessage(sender, "Unable to remove parent. Are you sure the Subject has it added?");
+            CommandUtils.sendPluginMessage(sender, "Unable to remove parent. Are you sure the Subject has it added?");
         }
         return CommandResult.SUCCESS;
     }

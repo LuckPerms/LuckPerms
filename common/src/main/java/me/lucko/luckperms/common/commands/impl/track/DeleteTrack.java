@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.commands.impl.track;
 
+import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -55,7 +56,7 @@ public class DeleteTrack extends SingleCommand {
 
         String trackName = args.get(0).toLowerCase();
         if (!plugin.getStorage().loadTrack(trackName).join()) {
-            Message.TRACK_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
 
@@ -66,13 +67,16 @@ public class DeleteTrack extends SingleCommand {
         }
 
         if (!plugin.getStorage().deleteTrack(track, DeletionCause.COMMAND).join()) {
-            Message.DELETE_TRACK_ERROR.send(sender);
+            Message.DELETE_ERROR.send(sender, track.getName());
             return CommandResult.FAILURE;
         }
 
         Message.DELETE_SUCCESS.send(sender, trackName);
-        ExtendedLogEntry.build().actor(sender).actedName(trackName).type('T').action("delete").build().submit(plugin, sender);
-        plugin.getUpdateTaskBuffer().request();
+
+        ExtendedLogEntry.build().actor(sender).actedName(trackName).type(LogEntry.Type.TRACK)
+                .action("delete")
+                .build().submit(plugin, sender);
+
         return CommandResult.SUCCESS;
     }
 

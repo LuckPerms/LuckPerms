@@ -35,8 +35,6 @@ import java.util.regex.Pattern;
 @UtilityClass
 public class DataConstraints {
 
-    public static final Pattern RESERVED_CHARACTERS_PATTERN = Pattern.compile("[\\/\\$\\.]");
-
     public static final int MAX_PERMISSION_LENGTH = 200;
 
     public static final int MAX_TRACK_NAME_LENGTH = 36;
@@ -68,6 +66,14 @@ public class DataConstraints {
         return true;
     };
 
+    public static final Predicate<String> PLAYER_USERNAME_TEST_LENIENT = s -> {
+        if (s.length() <= 0 || s.length() > MAX_PLAYER_USERNAME_LENGTH) {
+            return false;
+        }
+
+        return true;
+    };
+
     public static final Predicate<String> GROUP_NAME_TEST = s -> {
         if (s.length() <= 0 || s.length() > MAX_GROUP_NAME_LENGTH) {
             return false;
@@ -77,19 +83,11 @@ public class DataConstraints {
             return false;
         }
 
-        if (RESERVED_CHARACTERS_PATTERN.matcher(s).find()) {
-            return false;
-        }
-
         return true;
     };
 
     public static final Predicate<String> GROUP_NAME_TEST_ALLOW_SPACE = s -> {
         if (s.length() <= 0 || s.length() > MAX_GROUP_NAME_LENGTH) {
-            return false;
-        }
-
-        if (RESERVED_CHARACTERS_PATTERN.matcher(s).find()) {
             return false;
         }
 
@@ -105,19 +103,11 @@ public class DataConstraints {
             return false;
         }
 
-        if (RESERVED_CHARACTERS_PATTERN.matcher(s).find()) {
-            return false;
-        }
-
         return true;
     };
 
     public static final Predicate<String> TRACK_NAME_TEST_ALLOW_SPACE = s -> {
         if (s.length() <= 0 || s.length() > MAX_TRACK_NAME_LENGTH) {
-            return false;
-        }
-
-        if (RESERVED_CHARACTERS_PATTERN.matcher(s).find()) {
             return false;
         }
 
@@ -135,10 +125,6 @@ public class DataConstraints {
             return false;
         }
 
-        if (RESERVED_CHARACTERS_PATTERN.matcher(s).find()) {
-            return false;
-        }
-
         return true;
     };
 
@@ -148,10 +134,6 @@ public class DataConstraints {
         }
 
         if (s.contains(" ")) {
-            return false;
-        }
-
-        if (RESERVED_CHARACTERS_PATTERN.matcher(s).find()) {
             return false;
         }
 

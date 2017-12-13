@@ -25,13 +25,17 @@
 
 package me.lucko.luckperms.common.config;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
-import me.lucko.luckperms.common.api.delegates.LPConfigurationDelegate;
+import me.lucko.luckperms.common.api.delegates.misc.ApiConfiguration;
 import me.lucko.luckperms.common.config.keys.EnduringKey;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Optional;
 import java.util.Set;
@@ -40,16 +44,22 @@ import java.util.stream.Collectors;
 /**
  * An abstract implementation of {@link LuckPermsConfiguration}, backed by a cache.
  */
-public abstract class AbstractConfiguration implements LuckPermsConfiguration {
+@Getter
+@RequiredArgsConstructor
+public class AbstractConfiguration implements LuckPermsConfiguration, CacheLoader<ConfigKey<?>, Optional<Object>> {
 
     // the loading cache for config keys --> their value
     // the value is wrapped in an optional as null values don't get cached.
-    private final LoadingCache<ConfigKey<?>, Optional<Object>> cache = Caffeine.newBuilder().build(this::loadKeyValue);
+    @Getter(AccessLevel.NONE)
+    private final LoadingCache<ConfigKey<?>, Optional<Object>> cache = Caffeine.newBuilder().build(this);
 
-    @Getter
-    private final LPConfigurationDelegate delegate = new LPConfigurationDelegate(this);
-
-    @Getter
+    // the plugin instance
+    private final LuckPermsPlugin plugin;
+    // the adapter used to read values
+    private final ConfigurationAdapter adapter;
+    // the api delegate
+    private final ApiConfiguration delegate = new ApiConfiguration(this);
+    // the contextsfile handler
     private final ContextsFile contextsFile = new ContextsFile(this);
 
     @SuppressWarnings("unchecked")
@@ -69,6 +79,12 @@ public abstract class AbstractConfiguration implements LuckPermsConfiguration {
     }
 
     @Override
+    public void init() {
+        adapter.init();
+        loadAll();
+    }
+
+    @Override
     public void reload() {
         init();
 
@@ -79,7 +95,8 @@ public abstract class AbstractConfiguration implements LuckPermsConfiguration {
         getPlugin().getApiProvider().getEventFactory().handleConfigReload();
     }
 
-    private Optional<Object> loadKeyValue(ConfigKey<?> key) {
-        return Optional.ofNullable(key.get(this));
+    @Override
+    public Optional<Object> load(ConfigKey<?> key) {
+        return Optional.ofNullable(key.get(adapter));
     }
 }

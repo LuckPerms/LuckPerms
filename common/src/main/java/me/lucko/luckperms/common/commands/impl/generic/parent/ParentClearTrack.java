@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -46,7 +46,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getTrackTabComplete;
 
@@ -64,23 +63,23 @@ public class ParentClearTrack extends SharedSubCommand {
 
         final String trackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(trackName)) {
-            Message.TRACK_INVALID_ENTRY.send(sender);
+            Message.TRACK_INVALID_ENTRY.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
 
         if (!plugin.getStorage().loadTrack(trackName).join()) {
-            Message.TRACK_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
 
         Track track = plugin.getTrackManager().getIfLoaded(trackName);
         if (track == null) {
-            Message.TRACK_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.LOADING_ERROR;
         }
 
         if (track.getSize() <= 1) {
-            Message.TRACK_EMPTY.send(sender);
+            Message.TRACK_EMPTY.send(sender, track.getName());
             return CommandResult.STATE_ERROR;
         }
 
@@ -111,13 +110,13 @@ public class ParentClearTrack extends SharedSubCommand {
         int changed = before - holder.getEnduringNodes().size();
 
         if (changed == 1) {
-            Message.PARENT_CLEAR_TRACK_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), track.getName(), Util.contextSetToString(context), changed);
+            Message.PARENT_CLEAR_TRACK_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), track.getName(), CommandUtils.contextSetToString(context), changed);
         } else {
-            Message.PARENT_CLEAR_TRACK_SUCCESS.send(sender, holder.getFriendlyName(), track.getName(), Util.contextSetToString(context), changed);
+            Message.PARENT_CLEAR_TRACK_SUCCESS.send(sender, holder.getFriendlyName(), track.getName(), CommandUtils.contextSetToString(context), changed);
         }
 
         ExtendedLogEntry.build().actor(sender).acted(holder)
-                .action("parent cleartrack " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                .action("parent", "cleartrack", track.getName(), context)
                 .build().submit(plugin, sender);
 
         save(holder, sender, plugin);

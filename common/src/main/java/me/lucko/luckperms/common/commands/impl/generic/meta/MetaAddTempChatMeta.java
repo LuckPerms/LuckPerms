@@ -36,7 +36,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
@@ -56,7 +56,6 @@ import net.kyori.text.event.HoverEvent;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class MetaAddTempChatMeta extends SharedSubCommand {
     private final ChatMetaType type;
@@ -65,8 +64,8 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
         super(
                 type == ChatMetaType.PREFIX ? CommandSpec.META_ADDTEMP_PREFIX.spec(locale) : CommandSpec.META_ADDTEMP_SUFFIX.spec(locale),
                 "addtemp" + type.name().toLowerCase(),
-                type == ChatMetaType.PREFIX ? CommandPermission.USER_META_ADDTEMP_PREFIX : CommandPermission.USER_META_ADDTEMP_SUFFIX,
-                type == ChatMetaType.PREFIX ? CommandPermission.GROUP_META_ADDTEMP_PREFIX : CommandPermission.GROUP_META_ADDTEMP_SUFFIX,
+                type == ChatMetaType.PREFIX ? CommandPermission.USER_META_ADD_TEMP_PREFIX : CommandPermission.USER_META_ADD_TEMP_SUFFIX,
+                type == ChatMetaType.PREFIX ? CommandPermission.GROUP_META_ADD_TEMP_PREFIX : CommandPermission.GROUP_META_ADD_TEMP_SUFFIX,
                 Predicates.inRange(0, 2)
         );
         this.type = type;
@@ -95,7 +94,7 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
         if (ret.getKey().asBoolean()) {
             duration = ret.getValue().getExpiryUnixTime();
 
-            TextComponent.Builder builder = TextUtils.fromLegacy(Message.ADD_TEMP_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, DateUtil.formatDateDiff(duration), Util.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
+            TextComponent.Builder builder = TextUtils.fromLegacy(Message.ADD_TEMP_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, DateUtil.formatDateDiff(duration), CommandUtils.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
             HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
                     "¥3Raw " + type.name().toLowerCase() + ": ¥r" + meta,
                     '¥'
@@ -104,13 +103,13 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
             sender.sendMessage(builder.build());
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("meta addtemp" + type.name().toLowerCase() + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("meta" , "addtemp" + type.name().toLowerCase(), priority, meta, duration, context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase());
+            Message.ALREADY_HAS_TEMP_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

@@ -25,11 +25,8 @@
 
 package me.lucko.luckperms.common.config;
 
-import me.lucko.luckperms.common.api.delegates.LPConfigurationDelegate;
+import me.lucko.luckperms.common.api.delegates.misc.ApiConfiguration;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * The master configuration used by LuckPerms.
@@ -41,7 +38,7 @@ public interface LuckPermsConfiguration {
      *
      * @return the api delegate
      */
-    LPConfigurationDelegate getDelegate();
+    ApiConfiguration getDelegate();
 
     /**
      * Gets the main plugin instance.
@@ -80,23 +77,5 @@ public interface LuckPermsConfiguration {
      * @return the value mapped to the given key. May be null.
      */
     <T> T get(ConfigKey<T> key);
-
-
-
-    /* methods used by config keys to load their values */
-
-    boolean contains(String path);
-
-    String getString(String path, String def);
-
-    int getInt(String path, int def);
-
-    boolean getBoolean(String path, boolean def);
-
-    List<String> getList(String path, List<String> def);
-
-    List<String> getObjectList(String path, List<String> def);
-
-    Map<String, String> getMap(String path, Map<String, String> def);
 
 }

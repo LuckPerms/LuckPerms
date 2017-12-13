@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -51,7 +51,6 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MetaAddChatMeta extends SharedSubCommand {
     private final ChatMetaType type;
@@ -60,8 +59,8 @@ public class MetaAddChatMeta extends SharedSubCommand {
         super(
                 type == ChatMetaType.PREFIX ? CommandSpec.META_ADDPREFIX.spec(locale) : CommandSpec.META_ADDSUFFIX.spec(locale),
                 "add" + type.name().toLowerCase(),
-                type == ChatMetaType.PREFIX ? CommandPermission.USER_META_ADDPREFIX : CommandPermission.USER_META_ADDSUFFIX,
-                type == ChatMetaType.PREFIX ? CommandPermission.GROUP_META_ADDPREFIX : CommandPermission.GROUP_META_ADDSUFFIX,
+                type == ChatMetaType.PREFIX ? CommandPermission.USER_META_ADD_PREFIX : CommandPermission.USER_META_ADD_SUFFIX,
+                type == ChatMetaType.PREFIX ? CommandPermission.GROUP_META_ADD_PREFIX : CommandPermission.GROUP_META_ADD_SUFFIX,
                 Predicates.inRange(0, 1)
         );
         this.type = type;
@@ -85,7 +84,7 @@ public class MetaAddChatMeta extends SharedSubCommand {
 
         DataMutateResult result = holder.setPermission(NodeFactory.makeChatMetaNode(type, priority, meta).withExtraContext(context).build());
         if (result.asBoolean()) {
-            TextComponent.Builder builder = TextUtils.fromLegacy(Message.ADD_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, Util.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
+            TextComponent.Builder builder = TextUtils.fromLegacy(Message.ADD_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
             HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
                     "¥3Raw " + type.name().toLowerCase() + ": ¥r" + meta,
                     '¥'
@@ -94,13 +93,13 @@ public class MetaAddChatMeta extends SharedSubCommand {
             sender.sendMessage(builder.build());
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("meta add" + type.name().toLowerCase() + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("meta" , "add" + type.name().toLowerCase(), priority, meta, context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase());
+            Message.ALREADY_HAS_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

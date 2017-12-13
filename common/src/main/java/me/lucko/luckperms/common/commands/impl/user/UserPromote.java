@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -46,7 +46,6 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
 import java.util.Set;
@@ -66,23 +65,23 @@ public class UserPromote extends SubCommand<User> {
 
         final String trackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(trackName)) {
-            Message.TRACK_INVALID_ENTRY.send(sender);
+            Message.TRACK_INVALID_ENTRY.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
 
         if (!plugin.getStorage().loadTrack(trackName).join()) {
-            Message.TRACK_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
 
         Track track = plugin.getTrackManager().getIfLoaded(trackName);
         if (track == null) {
-            Message.TRACK_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.LOADING_ERROR;
         }
 
         if (track.getSize() <= 1) {
-            Message.TRACK_EMPTY.send(sender);
+            Message.TRACK_EMPTY.send(sender, track.getName());
             return CommandResult.STATE_ERROR;
         }
 
@@ -119,17 +118,19 @@ public class UserPromote extends SubCommand<User> {
 
             user.setPermission(NodeFactory.newBuilder("group." + first).withExtraContext(context).build());
 
-            Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFriendlyName(), first, Util.contextSetToString(context));
+            Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFriendlyName(), first, CommandUtils.contextSetToString(context));
+
             ExtendedLogEntry.build().actor(sender).acted(user)
-                    .action("promote " + args.stream().collect(Collectors.joining(" ")))
+                    .action("promote", track.getName(), context)
                     .build().submit(plugin, sender);
+
             save(user, sender, plugin);
             plugin.getApiProvider().getEventFactory().handleUserPromote(user, track, null, first);
             return CommandResult.SUCCESS;
         }
 
         if (nodes.size() != 1) {
-            Message.TRACK_AMBIGUOUS_CALL.send(sender);
+            Message.TRACK_AMBIGUOUS_CALL.send(sender, user.getFriendlyName());
             return CommandResult.FAILURE;
         }
 
@@ -138,13 +139,13 @@ public class UserPromote extends SubCommand<User> {
         final String next;
         try {
             next = track.getNext(old);
-        } catch (ObjectLacksException e) {
+        } catch (IllegalArgumentException e) {
             Message.TRACK_DOES_NOT_CONTAIN.send(sender, track.getName(), old);
             return CommandResult.STATE_ERROR;
         }
 
         if (next == null) {
-            Message.USER_PROMOTE_ERROR_ENDOFTRACK.send(sender, track.getName());
+            Message.USER_PROMOTE_ERROR_ENDOFTRACK.send(sender, track.getName(), user.getFriendlyName());
             return CommandResult.STATE_ERROR;
         }
 
@@ -167,17 +168,17 @@ public class UserPromote extends SubCommand<User> {
         user.unsetPermission(oldNode);
         user.setPermission(NodeFactory.newBuilder("group." + nextGroup.getName()).withExtraContext(context).build());
 
-        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().equalsIgnoreCase(old)) {
+        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse("default").equalsIgnoreCase(old)) {
             user.getPrimaryGroup().setStoredValue(nextGroup.getName());
         }
 
-        Message.USER_PROMOTE_SUCCESS.send(sender, track.getName(), old, nextGroup.getDisplayName(), Util.contextSetToString(context));
+        Message.USER_PROMOTE_SUCCESS.send(sender, user.getFriendlyName(), track.getName(), old, nextGroup.getFriendlyName(), CommandUtils.contextSetToString(context));
         if (!silent) {
-            Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), old, nextGroup.getDisplayName(), false));
+            Message.EMPTY.send(sender, CommandUtils.listToArrowSep(track.getGroups(), old, nextGroup.getFriendlyName(), false));
         }
 
         ExtendedLogEntry.build().actor(sender).acted(user)
-                .action("promote " + args.stream().collect(Collectors.joining(" ")))
+                .action("promote", track.getName(), context)
                 .build().submit(plugin, sender);
 
         save(user, sender, plugin);

@@ -28,19 +28,17 @@ package me.lucko.luckperms.common.commands.impl.misc;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.messaging.NoopMessagingService;
+import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -57,7 +55,7 @@ public class InfoCommand extends SingleCommand {
         Message.INFO_TOP.send(sender,
                 plugin.getVersion(),
                 plugin.getServerType().getFriendlyName(),
-                plugin.getServerName(),
+                plugin.getServerBrand(),
                 plugin.getServerVersion()
         );
 
@@ -70,8 +68,8 @@ public class InfoCommand extends SingleCommand {
         }
 
         Message.INFO_MIDDLE.send(sender,
-                plugin.getMessagingService() instanceof NoopMessagingService ? "None" : plugin.getMessagingService().getName(),
-                c.get(ConfigKeys.SERVER),
+                plugin.getMessagingService().map(ExtendedMessagingService::getName).orElse("None"),
+                plugin.getContextManager().getStaticContextString().orElse("None"),
                 plugin.getPlayerCount(),
                 plugin.getUniqueConnections().size(),
                 DateUtil.formatTimeShort((System.currentTimeMillis() - plugin.getStartTime()) / 1000L),
@@ -83,14 +81,12 @@ public class InfoCommand extends SingleCommand {
                 plugin.getCalculatorFactory().getActiveProcessors().stream().collect(Collectors.joining(", "))
         );
 
-        LinkedHashMap<String, Object> platformInfo = plugin.getExtraInfo();
-        if (platformInfo == null || platformInfo.isEmpty()) {
-            return CommandResult.SUCCESS;
-        }
-
-        Message.EMPTY.send(sender, "&f-  &bPlatform Info:");
-        for (Map.Entry<String, Object> e : platformInfo.entrySet()) {
-            Message.EMPTY.send(sender, "&f-     &3" + e.getKey() + ": " + formatValue(e.getValue().toString()));
+        Map<String, Object> platformInfo = plugin.getExtraInfo();
+        if (!platformInfo.isEmpty()) {
+            Message.EMPTY.send(sender, "&f-  &bPlatform Info:");
+            for (Map.Entry<String, Object> e : platformInfo.entrySet()) {
+                Message.EMPTY.send(sender, "&f-     &3" + e.getKey() + ": " + formatValue(e.getValue().toString()));
+            }
         }
 
         return CommandResult.SUCCESS;
@@ -98,7 +94,7 @@ public class InfoCommand extends SingleCommand {
 
     private static String formatValue(String value) {
         if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
-            return Util.formatBoolean(Boolean.parseBoolean(value));
+            return CommandUtils.formatBoolean(Boolean.parseBoolean(value));
         }
 
         try {

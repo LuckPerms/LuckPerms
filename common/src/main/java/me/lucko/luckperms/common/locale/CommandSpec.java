@@ -25,9 +25,7 @@
 
 package me.lucko.luckperms.common.locale;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.ToString;
 
 import com.google.common.collect.ImmutableList;
 
@@ -36,7 +34,6 @@ import me.lucko.luckperms.common.commands.Arg;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 
 /**
  * An enumeration of the command defintion/usage messages used in the plugin.
@@ -161,6 +158,11 @@ public enum CommandSpec {
     GROUP_SETWEIGHT("Set the groups weight",
             Arg.list(
                     Arg.create("weight", true, "the weight to set")
+            )
+    ),
+    GROUP_SET_DISPLAY_NAME("Set the groups display name",
+            Arg.list(
+                    Arg.create("name", true, "the name to set")
             )
     ),
     GROUP_RENAME("Rename the group",
@@ -558,18 +560,6 @@ public enum CommandSpec {
      */
     public LocalizedSpec spec(LocaleManager localeManager) {
         return new SimpleLocalizedSpec(this, localeManager);
-    }
-
-    /**
-     * The localized data for a {@link CommandSpec}.
-     */
-    @Getter
-    @ToString
-    @AllArgsConstructor
-    public static final class CommandSpecData {
-        private final String description;
-        private final String usage;
-        private final Map<String, String> args;
     }
 
     private static final class SimpleLocalizedSpec implements LocalizedSpec {

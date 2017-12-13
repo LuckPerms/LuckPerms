@@ -25,43 +25,54 @@
 
 package me.lucko.luckperms.common.dependencies;
 
-import lombok.experimental.UtilityClass;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
+import com.google.common.io.ByteStreams;
 
-import me.lucko.luckperms.api.PlatformType;
+import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@UtilityClass
+/**
+ * Responsible for loading runtime dependencies.
+ */
 public class DependencyManager {
-    private static Method ADD_URL_METHOD;
+    private static final Method ADD_URL_METHOD;
+
     static {
+        Method addUrlMethod;
         try {
-            ADD_URL_METHOD = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-            ADD_URL_METHOD.setAccessible(true);
+            addUrlMethod = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+            addUrlMethod.setAccessible(true);
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            throw new ExceptionInInitializerError(e);
         }
+        ADD_URL_METHOD = addUrlMethod;
     }
 
-    public static final Map<StorageType, List<Dependency>> STORAGE_DEPENDENCIES = ImmutableMap.<StorageType, List<Dependency>>builder()
-            .put(StorageType.JSON, ImmutableList.of())
-            .put(StorageType.YAML, ImmutableList.of())
+    private static final Map<StorageType, List<Dependency>> STORAGE_DEPENDENCIES = ImmutableMap.<StorageType, List<Dependency>>builder()
+            .put(StorageType.JSON, ImmutableList.of(Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_GSON))
+            .put(StorageType.YAML, ImmutableList.of(Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_YAML))
+            .put(StorageType.HOCON, ImmutableList.of(Dependency.HOCON_CONFIG, Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_HOCON))
             .put(StorageType.MONGODB, ImmutableList.of(Dependency.MONGODB_DRIVER))
             .put(StorageType.MARIADB, ImmutableList.of(Dependency.MARIADB_DRIVER, Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI))
             .put(StorageType.MYSQL, ImmutableList.of(Dependency.MYSQL_DRIVER, Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI))
@@ -70,8 +81,20 @@ public class DependencyManager {
             .put(StorageType.H2, ImmutableList.of(Dependency.H2_DRIVER))
             .build();
 
-    public static void loadDependencies(LuckPermsPlugin plugin, Set<StorageType> storageTypes) {
-        List<Dependency> dependencies = new ArrayList<>();
+    private final LuckPermsPlugin plugin;
+    private final MessageDigest digest;
+
+    public DependencyManager(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+        try {
+            this.digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void loadStorageDependencies(Set<StorageType> storageTypes) {
+        Set<Dependency> dependencies = new LinkedHashSet<>();
         for (StorageType storageType : storageTypes) {
             dependencies.addAll(STORAGE_DEPENDENCIES.get(storageType));
         }
@@ -80,20 +103,37 @@ public class DependencyManager {
             dependencies.add(Dependency.JEDIS);
         }
 
-        loadDependencies(plugin, dependencies);
+        // don't load slf4j if it's already present
+        if (classExists("org.slf4j.Logger") && classExists("org.slf4j.LoggerFactory")) {
+            dependencies.remove(Dependency.SLF4J_API);
+            dependencies.remove(Dependency.SLF4J_SIMPLE);
+        }
+
+        // don't load configurate dependencies on sponge
+        if (plugin.getServerType() == PlatformType.SPONGE) {
+            dependencies.remove(Dependency.CONFIGURATE_CORE);
+            dependencies.remove(Dependency.CONFIGURATE_GSON);
+            dependencies.remove(Dependency.CONFIGURATE_YAML);
+            dependencies.remove(Dependency.CONFIGURATE_HOCON);
+            dependencies.remove(Dependency.HOCON_CONFIG);
+        }
+
+        loadDependencies(dependencies);
     }
 
-    public static void loadDependencies(LuckPermsPlugin plugin, List<Dependency> dependencies) {
+    public void loadDependencies(Set<Dependency> dependencies) {
         plugin.getLog().info("Identified the following dependencies: " + dependencies.toString());
 
-        File data = new File(plugin.getDataDirectory(), "lib");
-        data.mkdirs();
+        File libDir = new File(plugin.getDataDirectory(), "lib");
+        if (!(libDir.exists() || libDir.mkdirs())) {
+            throw new RuntimeException("Unable to create lib dir - " + libDir.getPath());
+        }
 
         // Download files.
-        List<Map.Entry<Dependency, File>> toLoad = new ArrayList<>();
+        List<File> filesToLoad = new ArrayList<>();
         for (Dependency dependency : dependencies) {
             try {
-                toLoad.add(Maps.immutableEntry(dependency, downloadDependency(plugin, data, dependency)));
+                filesToLoad.add(downloadDependency(libDir, dependency));
             } catch (Throwable e) {
                 plugin.getLog().severe("Exception whilst downloading dependency " + dependency.name());
                 e.printStackTrace();
@@ -101,47 +141,73 @@ public class DependencyManager {
         }
 
         // Load classes.
-        for (Map.Entry<Dependency, File> e : toLoad) {
+        for (File file : filesToLoad) {
             try {
-                loadJar(plugin, e.getValue());
-            } catch (Throwable e1) {
-                plugin.getLog().severe("Failed to load jar for dependency " + e.getKey().name());
-                e1.printStackTrace();
+                loadJar(file);
+            } catch (Throwable t) {
+                plugin.getLog().severe("Failed to load dependency jar " + file.getName());
+                t.printStackTrace();
             }
         }
     }
 
-    private static File downloadDependency(LuckPermsPlugin plugin, File libDir, Dependency dependency) throws Exception {
-        String name = dependency.name().toLowerCase() + "-" + dependency.getVersion() + ".jar";
+    private File downloadDependency(File libDir, Dependency dependency) throws Exception {
+        String fileName = dependency.name().toLowerCase() + "-" + dependency.getVersion() + ".jar";
 
-        File file = new File(libDir, name);
+        File file = new File(libDir, fileName);
         if (file.exists()) {
             return file;
         }
 
         URL url = new URL(dependency.getUrl());
 
-        plugin.getLog().info("Dependency '" + name + "' could not be found. Attempting to download.");
+        plugin.getLog().info("Dependency '" + fileName + "' could not be found. Attempting to download.");
         try (InputStream in = url.openStream()) {
-            Files.copy(in, file.toPath());
+            byte[] bytes = ByteStreams.toByteArray(in);
+            if (bytes.length == 0) {
+                throw new RuntimeException("Empty stream");
+            }
+
+            byte[] hash = this.digest.digest(bytes);
+
+            plugin.getLog().info("Successfully downloaded '" + fileName + "' with checksum: " + Base64.getEncoder().encodeToString(hash));
+
+            if (!Arrays.equals(hash, dependency.getChecksum())) {
+                throw new RuntimeException("Downloaded file had an invalid hash. Expected: " + Base64.getEncoder().encodeToString(dependency.getChecksum()));
+            }
+
+            Files.write(file.toPath(), bytes);
         }
 
         if (!file.exists()) {
             throw new IllegalStateException("File not present. - " + file.toString());
         } else {
-            plugin.getLog().info("Dependency '" + name + "' successfully downloaded.");
             return file;
         }
     }
 
-    private static void loadJar(LuckPermsPlugin plugin, File file) throws Exception {
-        URLClassLoader classLoader = (URLClassLoader) plugin.getClass().getClassLoader();
+    private  void loadJar(File file) {
+        // get the classloader to load into
+        ClassLoader classLoader = plugin.getClass().getClassLoader();
 
-        if (plugin.getServerType() != PlatformType.SPONGE && !plugin.getServerName().equals("KCauldron") && !plugin.getServerName().equals("Uranium")) {
-            classLoader = (URLClassLoader) classLoader.getParent();
+        if (classLoader instanceof URLClassLoader) {
+            try {
+                ADD_URL_METHOD.invoke(classLoader, file.toURI().toURL());
+            } catch (IllegalAccessException | InvocationTargetException | MalformedURLException e) {
+                throw new RuntimeException("Unable to invoke URLClassLoader#addURL", e);
+            }
+        } else {
+            throw new RuntimeException("Unknown classloader type: " + classLoader.getClass());
         }
+    }
 
-        ADD_URL_METHOD.invoke(classLoader, file.toURI().toURL());
+    private static boolean classExists(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
 }

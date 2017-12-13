@@ -25,20 +25,18 @@
 
 package me.lucko.luckperms.common.commands.impl.misc;
 
-import com.google.common.base.Splitter;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
+import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -46,18 +44,14 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.webeditor.WebEditorUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ApplyEditsCommand extends SingleCommand {
@@ -70,27 +64,13 @@ public class ApplyEditsCommand extends SingleCommand {
         String code = args.get(0);
         String who = args.size() == 2 ? args.get(1) : null;
 
-        if (!code.contains("/")) {
+        if (code.isEmpty()) {
             Message.APPLY_EDITS_INVALID_CODE.send(sender, code);
             return CommandResult.INVALID_ARGS;
         }
 
-        Iterator<String> codeParts = Splitter.on('/').limit(2).split(code).iterator();
-        String part1 = codeParts.next();
-        String part2 = codeParts.next();
-
-        if (part1.isEmpty() || part2.isEmpty()) {
-            Message.APPLY_EDITS_INVALID_CODE.send(sender, code);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        String url = "https://gist.githubusercontent.com/anonymous/" + part1 + "/raw/" + part2 + "/luckperms-data.json";
-        JsonObject data;
-
-        try {
-            data = read(url);
-        } catch (Exception e) {
-            e.printStackTrace();
+        JsonObject data = WebEditorUtils.getDataFromGist(code);
+        if (data == null) {
             Message.APPLY_EDITS_UNABLE_TO_READ.send(sender, code);
             return CommandResult.FAILURE;
         }
@@ -104,34 +84,9 @@ public class ApplyEditsCommand extends SingleCommand {
             who = data.get("who").getAsString();
         }
 
-        PermissionHolder holder;
-
-        if (who.startsWith("group/")) {
-            String group = who.substring("group/".length());
-            holder = plugin.getGroupManager().getIfLoaded(group);
-
-            if (holder == null) {
-                Message.APPLY_EDITS_TARGET_GROUP_NOT_EXISTS.send(sender, group);
-                return CommandResult.STATE_ERROR;
-            }
-        } else if (who.startsWith("user/")) {
-            String user = who.substring("user/".length());
-            UUID uuid = Util.parseUuid(user);
-            if (uuid == null) {
-                Message.APPLY_EDITS_TARGET_USER_NOT_UUID.send(sender, user);
-                return CommandResult.STATE_ERROR;
-            }
-            holder = plugin.getUserManager().getIfLoaded(uuid);
-            if (holder == null) {
-                plugin.getStorage().loadUser(uuid, null).join();
-            }
-            holder = plugin.getUserManager().getIfLoaded(uuid);
-            if (holder == null) {
-                Message.APPLY_EDITS_TARGET_USER_UNABLE_TO_LOAD.send(sender, uuid.toString());
-                return CommandResult.STATE_ERROR;
-            }
-        } else {
-            Message.APPLY_EDITS_TARGET_UNKNOWN.send(sender, who);
+        PermissionHolder holder = WebEditorUtils.getHolderFromIdentifier(plugin, sender, who);
+        if (holder == null) {
+            // the #getHolderFromIdentifier method will send the error message onto the sender
             return CommandResult.STATE_ERROR;
         }
 
@@ -140,63 +95,55 @@ public class ApplyEditsCommand extends SingleCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        Set<NodeModel> nodes = deserializePermissions(data.getAsJsonArray("nodes"));
-        holder.setEnduringNodes(nodes.stream().map(NodeModel::toNode).collect(Collectors.toSet()));
-        Message.APPLY_EDITS_SUCCESS.send(sender, nodes.size(), holder.getFriendlyName());
+        ExtendedLogEntry.build().actor(sender).acted(holder)
+                .action("applyedits", code)
+                .build().submit(plugin, sender);
+
+        Set<NodeModel> rawNodes = WebEditorUtils.deserializePermissions(data.getAsJsonArray("nodes"));
+
+        Set<Node> before = new HashSet<>(holder.getEnduringNodes().values());
+        Set<Node> nodes = rawNodes.stream().map(NodeModel::toNode).collect(Collectors.toSet());
+        holder.setEnduringNodes(nodes);
+
+        Map.Entry<Set<Node>, Set<Node>> diff = diff(before, nodes);
+        int additions = diff.getKey().size();
+        int deletions = diff.getValue().size();
+        String additionsSummary = "addition" + (additions == 1 ? "" : "s");
+        String deletionsSummary = "deletion" + (deletions == 1 ? "" : "s");
+
+        Message.APPLY_EDITS_SUCCESS.send(sender, holder.getFriendlyName());
+        Message.APPLY_EDITS_SUCCESS_SUMMARY.send(sender, additions, additionsSummary, deletions, deletionsSummary);
+        for (Node n : diff.getKey()) {
+            Message.APPLY_EDITS_DIFF_ADDED.send(sender, formatNode(n));
+        }
+        for (Node n : diff.getValue()) {
+            Message.APPLY_EDITS_DIFF_REMOVED.send(sender, formatNode(n));
+        }
+
         SharedSubCommand.save(holder, sender, plugin);
         return CommandResult.SUCCESS;
+    }
+
+    private static String formatNode(Node n) {
+        return n.getPermission() + " &7(" + (n.getValuePrimitive() ? "&a" : "&c") + n.getValuePrimitive() + "&7)" + CommandUtils.getAppendableNodeContextString(n) +
+                (n.isTemporary() ? " &7(" + DateUtil.formatDateDiffShort(n.getExpiryUnixTime()) + ")" : "");
+    }
+
+    private static Map.Entry<Set<Node>, Set<Node>> diff(Set<Node> before, Set<Node> after) {
+        // entries in before but not after are being removed
+        // entries in after but not before are being added
+
+        Set<Node> added = new HashSet<>(after);
+        added.removeAll(before);
+
+        Set<Node> removed = new HashSet<>(before);
+        removed.removeAll(after);
+
+        return Maps.immutableEntry(added, removed);
     }
 
     @Override
     public boolean shouldDisplay() {
         return false;
-    }
-
-    private static JsonObject read(String address) throws IOException {
-        URL url = new URL(address);
-        try (InputStream in = url.openStream(); InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
-            return new Gson().fromJson(reader, JsonObject.class);
-        }
-    }
-
-    private static Set<NodeModel> deserializePermissions(JsonArray permissionsSection) {
-        Set<NodeModel> nodes = new HashSet<>();
-
-        for (JsonElement ent : permissionsSection) {
-            if (!ent.isJsonObject()) {
-                continue;
-            }
-
-            JsonObject data = ent.getAsJsonObject();
-
-            String permission = data.get("permission").getAsString();
-            boolean value = true;
-            String server = "global";
-            String world = "global";
-            long expiry = 0L;
-            ImmutableContextSet context = ImmutableContextSet.empty();
-
-            if (data.has("value")) {
-                value = data.get("value").getAsBoolean();
-            }
-            if (data.has("server")) {
-                server = data.get("server").getAsString();
-            }
-            if (data.has("world")) {
-                world = data.get("world").getAsString();
-            }
-            if (data.has("expiry")) {
-                expiry = data.get("expiry").getAsLong();
-            }
-
-            if (data.has("context") && data.get("context").isJsonObject()) {
-                JsonObject contexts = data.get("context").getAsJsonObject();
-                context = NodeModel.deserializeContextSet(contexts).makeImmutable();
-            }
-
-            nodes.add(NodeModel.of(permission, value, server, world, expiry, context));
-        }
-
-        return nodes;
     }
 }

@@ -25,30 +25,20 @@
 
 package me.lucko.luckperms.common.node;
 
-import lombok.AccessLevel;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
-import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.utils.PatternCache;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
- * Builds Nodes
+ * Builds node instances
  */
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 class NodeBuilder implements Node.Builder {
-    private static final Pattern NODE_CONTEXTS_PATTERN = Pattern.compile("\\(.+\\).*");
-
-    private final String permission;
+    protected String permission;
     private final MutableContextSet extraContexts = MutableContextSet.create();
     private Boolean value = true;
     private boolean override = false;
@@ -56,28 +46,12 @@ class NodeBuilder implements Node.Builder {
     private String world = null;
     private long expireAt = 0L;
 
-    NodeBuilder(String permission, boolean shouldConvertContexts) {
-        if (!shouldConvertContexts) {
-            this.permission = permission;
-        } else {
-            if (!NODE_CONTEXTS_PATTERN.matcher(permission).matches()) {
-                this.permission = permission;
-            } else {
-                List<String> contextParts = Splitter.on(PatternCache.compileDelimitedMatcher(")", "\\")).limit(2).splitToList(permission.substring(1));
-                // 0 = context, 1 = node
+    protected NodeBuilder() {
 
-                this.permission = contextParts.get(1);
-                try {
-                    Map<String, String> map = Splitter.on(PatternCache.compileDelimitedMatcher(",", "\\")).withKeyValueSeparator(Splitter.on(PatternCache.compileDelimitedMatcher("=", "\\"))).split(contextParts.get(0));
-                    for (Map.Entry<String, String> e : map.entrySet()) {
-                        this.withExtraContext(NodeFactory.unescapeDelimiters(e.getKey(), "=", "(", ")", ","), NodeFactory.unescapeDelimiters(e.getValue(), "=", "(", ")", ","));
-                    }
+    }
 
-                } catch (IllegalArgumentException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+    NodeBuilder(String permission) {
+        this.permission = permission;
     }
 
     NodeBuilder(Node other) {

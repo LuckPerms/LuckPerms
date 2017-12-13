@@ -25,22 +25,46 @@
 
 package me.lucko.luckperms.api;
 
+import com.google.common.base.Preconditions;
+
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 
 import javax.annotation.Nonnull;
 
 /**
- * Context and options for a permission lookup.
+ * Encapsulates the options and settings for a permission lookup.
  *
- * <p>All values are immutable.</p>
+ * <p>This class is immutable.</p>
  *
  * @since 2.11
  */
 public class Contexts {
+
+    /**
+     * The context key used to denote the subjects server
+     */
     public static final String SERVER_KEY = "server";
+
+    /**
+     * The context key used to denote the subjects world
+     */
     public static final String WORLD_KEY = "world";
 
-    private static final Contexts GLOBAL = new Contexts(ContextSet.empty(), true, true, true, true, true, false);
+    /**
+     * A 'global' or default contexts instance.
+     *
+     * Simply passes an empty context set, with all accumulation settings set to true.
+     */
+    private static final Contexts GLOBAL = new Contexts(
+            ContextSet.empty(),
+            true,
+            true,
+            true,
+            true,
+            true,
+            false
+    );
 
     /**
      * Gets the {@link FullySatisfiedContexts} instance.
@@ -69,12 +93,12 @@ public class Contexts {
 
     /**
      * The contexts that apply for this lookup
-     * The keys for servers and worlds are defined as static values.
      */
-    private final ContextSet context;
+    private final ImmutableContextSet context;
 
     /**
-     * The mode to parse defaults on Bukkit
+     * If the target subject is OP. This is used to parse defaults on Bukkit,
+     * and is ignored on all other platforms.
      *
      * @since 2.12
      */
@@ -105,18 +129,18 @@ public class Contexts {
      */
     private final boolean applyGlobalWorldGroups;
 
-    public Contexts(@Nonnull ContextSet context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
-        if (context == null) {
-            throw new NullPointerException("context");
-        }
+    // cache hashcode - this class is immutable, and is used as an index in the permission cache.
+    private final int hashCode;
 
-        this.context = context.makeImmutable();
+    public Contexts(@Nonnull ContextSet context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
+        this.context = Preconditions.checkNotNull(context, "context").makeImmutable();
         this.includeGlobal = includeGlobal;
         this.includeGlobalWorld = includeGlobalWorld;
         this.applyGroups = applyGroups;
         this.applyGlobalGroups = applyGlobalGroups;
         this.applyGlobalWorldGroups = applyGlobalWorldGroups;
         this.op = op;
+        this.hashCode = calculateHashCode();
     }
 
     /**
@@ -131,7 +155,8 @@ public class Contexts {
     }
 
     /**
-     * Gets if OP defaults should be included
+     * Gets if the target subject is OP. This is used to parse defaults on Bukkit,
+     * and is ignored on all other platforms.
      *
      * @return true if op defaults should be included
      */
@@ -198,10 +223,6 @@ public class Contexts {
                 ")";
     }
 
-    /*
-     * Ugly auto-generated lombok code
-     */
-
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
@@ -218,8 +239,7 @@ public class Contexts {
                 this.isApplyGlobalWorldGroups() == other.isApplyGlobalWorldGroups();
     }
 
-    @Override
-    public int hashCode() {
+    private int calculateHashCode() {
         final int PRIME = 59;
         int result = 1;
         final Object contexts = this.getContexts();
@@ -233,4 +253,8 @@ public class Contexts {
         return result;
     }
 
+    @Override
+    public int hashCode() {
+        return hashCode;
+    }
 }

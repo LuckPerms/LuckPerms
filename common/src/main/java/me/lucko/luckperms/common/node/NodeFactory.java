@@ -27,85 +27,29 @@ package me.lucko.luckperms.common.node;
 
 import lombok.experimental.UtilityClass;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.ChatMetaType;
-import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.utils.PatternCache;
 
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Utility class to make Node(Builder) instances from serialised strings or existing Nodes
+ * Utility class to make Node(Builder) instances from strings or existing Nodes
  */
 @UtilityClass
 public class NodeFactory {
-    private static final LoadingCache<String, Node> CACHE = Caffeine.newBuilder()
-            .build(s -> builderFromSerializedNode(s, true).build());
 
-    private static final LoadingCache<String, Node> CACHE_NEGATED = Caffeine.newBuilder()
-            .build(s -> builderFromSerializedNode(s, false).build());
-
-    public static Node fromSerializedNode(String s, Boolean b) {
-        try {
-            return b ? CACHE.get(s) : CACHE_NEGATED.get(s);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
+    // used to split prefix/suffix/meta nodes
+    private static final Splitter META_SPLITTER = Splitter.on(PatternCache.compileDelimitedMatcher(".", "\\")).limit(2);
 
     public static Node.Builder newBuilder(String s) {
-        return new NodeBuilder(s, false);
-    }
-
-    public static Node.Builder builderFromSerializedNode(String s, Boolean b) {
-        // if contains /
-        if (PatternCache.compileDelimitedMatcher("/", "\\").matcher(s).find()) {
-            List<String> parts = Splitter.on(PatternCache.compileDelimitedMatcher("/", "\\")).limit(2).splitToList(s);
-            // 0=server(+world)   1=node
-
-            // WORLD SPECIFIC
-            // if parts[0] contains -
-            if (PatternCache.compileDelimitedMatcher("-", "\\").matcher(parts.get(0)).find()) {
-                List<String> serverParts = Splitter.on(PatternCache.compileDelimitedMatcher("-", "\\")).limit(2).splitToList(parts.get(0));
-                // 0=server   1=world
-
-                // if parts[1] contains $
-                if (PatternCache.compileDelimitedMatcher("$", "\\").matcher(parts.get(1)).find()) {
-                    List<String> tempParts = Splitter.on('$').limit(2).splitToList(parts.get(1));
-                    return new NodeBuilder(tempParts.get(0), true).setServer(serverParts.get(0)).setWorld(serverParts.get(1))
-                            .setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
-                } else {
-                    return new NodeBuilder(parts.get(1), true).setServer(serverParts.get(0)).setWorld(serverParts.get(1)).setValue(b);
-                }
-            } else {
-                // SERVER BUT NOT WORLD SPECIFIC
-
-                // if parts[1] contains $
-                if (PatternCache.compileDelimitedMatcher("$", "\\").matcher(parts.get(1)).find()) {
-                    List<String> tempParts = Splitter.on(PatternCache.compileDelimitedMatcher("$", "\\")).limit(2).splitToList(parts.get(1));
-                    return new NodeBuilder(tempParts.get(0), true).setServer(parts.get(0)).setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
-                } else {
-                    return new NodeBuilder(parts.get(1), true).setServer(parts.get(0)).setValue(b);
-                }
-            }
-        } else {
-            // NOT SERVER SPECIFIC
-
-            // if s contains $
-            if (PatternCache.compileDelimitedMatcher("$", "\\").matcher(s).find()) {
-                List<String> tempParts = Splitter.on(PatternCache.compileDelimitedMatcher("$", "\\")).limit(2).splitToList(s);
-                return new NodeBuilder(tempParts.get(0), true).setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
-            } else {
-                return new NodeBuilder(s, true).setValue(b);
-            }
-        }
+        return new NodeBuilder(s);
     }
 
     public static Node.Builder builderFromExisting(Node other) {
@@ -120,7 +64,7 @@ public class NodeFactory {
             return makeSuffixNode(100, value);
         }
 
-        return new NodeBuilder("meta." + MetaUtils.escapeCharacters(key) + "." + MetaUtils.escapeCharacters(value));
+        return new NodeBuilder("meta." + LegacyNodeFactory.escapeCharacters(key) + "." + LegacyNodeFactory.escapeCharacters(value));
     }
 
     public static Node.Builder makeChatMetaNode(ChatMetaType type, int priority, String s) {
@@ -128,24 +72,23 @@ public class NodeFactory {
     }
 
     public static Node.Builder makePrefixNode(int priority, String prefix) {
-        return new NodeBuilder("prefix." + priority + "." + MetaUtils.escapeCharacters(prefix));
+        return new NodeBuilder("prefix." + priority + "." + LegacyNodeFactory.escapeCharacters(prefix));
     }
 
     public static Node.Builder makeSuffixNode(int priority, String suffix) {
-        return new NodeBuilder("suffix." + priority + "." + MetaUtils.escapeCharacters(suffix));
+        return new NodeBuilder("suffix." + priority + "." + LegacyNodeFactory.escapeCharacters(suffix));
     }
 
     public static String nodeAsCommand(Node node, String id, boolean group, boolean set) {
         StringBuilder sb = new StringBuilder();
-        sb.append("/luckperms ").append(group ? "group " : "user ").append(id).append(" ");
+        sb.append(group ? "group " : "user ").append(id).append(" ");
 
         if (node.isGroupNode()) {
-            if (node.isTemporary()) {
-                sb.append(set ? "parent addtemp " : "parent removetemp ");
-                sb.append(node.getGroupName());
-            } else {
-                sb.append(set ? "parent add " : "parent remove ");
-                sb.append(node.getGroupName());
+            sb.append(node.isTemporary() ? (set ? "parent addtemp " : "parent removetemp ") : (set ? "parent add " : "parent remove "));
+            sb.append(node.getGroupName());
+
+            if (node.isTemporary() && set) {
+                sb.append(" ").append(node.getExpiryUnixTime());
             }
 
             return appendContextToCommand(sb, node).toString();
@@ -155,7 +98,6 @@ public class NodeFactory {
             ChatMetaType type = node.isPrefix() ? ChatMetaType.PREFIX : ChatMetaType.SUFFIX;
             String typeName = type.name().toLowerCase();
 
-
             sb.append(node.isTemporary() ? (set ? "meta addtemp" + typeName + " " : "meta removetemp" + typeName + " ") : (set ? "meta add" + typeName + " " : "meta remove" + typeName + " "));
             sb.append(type.getEntry(node).getKey()).append(" ");
 
@@ -164,7 +106,7 @@ public class NodeFactory {
             } else {
                 sb.append(type.getEntry(node).getValue());
             }
-            if (node.isTemporary()) {
+            if (set && node.isTemporary()) {
                 sb.append(" ").append(node.getExpiryUnixTime());
             }
 
@@ -216,15 +158,10 @@ public class NodeFactory {
 
     private static StringBuilder appendContextToCommand(StringBuilder sb, Node node) {
         if (node.isServerSpecific()) {
-            sb.append(" ").append(node.getServer().get());
-
-            if (node.isWorldSpecific()) {
-                sb.append(" ").append(node.getWorld().get());
-            }
-        } else {
-            if (node.isWorldSpecific()) {
-                sb.append(" world=").append(node.getWorld().get());
-            }
+            sb.append(" server=").append(node.getServer().get());
+        }
+        if (node.isWorldSpecific()) {
+            sb.append(" world=").append(node.getWorld().get());
         }
 
         ContextSet contexts = node.getContexts();
@@ -235,62 +172,58 @@ public class NodeFactory {
         return sb;
     }
 
-    public static String escapeDelimiters(String s, String... delims) {
-        if (s == null) {
+    public static String parseGroupNode(String s) {
+        String lower = s.toLowerCase();
+        if (!lower.startsWith("group.")) {
             return null;
         }
-
-        for (String delim : delims) {
-            s = s.replace(delim, "\\" + delim);
-        }
-        return s;
+        return lower.substring("group.".length()).intern();
     }
 
-    public static String unescapeDelimiters(String s, String... delims) {
-        if (s == null) {
-            return null;
-        }
-
-        for (String delim : delims) {
-            s = s.replace("\\" + delim, delim);
-        }
-        return s;
-    }
-
-    public static boolean isMetaNode(String s) {
+    public static Map.Entry<String, String> parseMetaNode(String s) {
         if (!s.startsWith("meta.")) {
-            return false;
+            return null;
         }
-        String parts = s.substring("meta.".length());
-        return PatternCache.compileDelimitedMatcher(".", "\\").matcher(parts).find();
+
+        Iterator<String> metaParts = META_SPLITTER.split(s.substring("meta.".length())).iterator();
+
+        if (!metaParts.hasNext()) return null;
+        String key = metaParts.next();
+
+        if (!metaParts.hasNext()) return null;
+        String value = metaParts.next();
+
+        return Maps.immutableEntry(LegacyNodeFactory.unescapeCharacters(key).intern(), LegacyNodeFactory.unescapeCharacters(value).intern());
     }
 
-    private static boolean isChatMetaNode(String type, String s) {
+    private static Map.Entry<Integer, String> parseChatMetaNode(String type, String s) {
         if (!s.startsWith(type + ".")) {
-            return false;
-        }
-        String parts = s.substring((type + ".").length());
-
-        if (!PatternCache.compileDelimitedMatcher(".", "\\").matcher(parts).find()) {
-            return false;
+            return null;
         }
 
-        List<String> metaParts = Splitter.on(PatternCache.compileDelimitedMatcher(".", "\\")).limit(2).splitToList(parts);
-        String priority = metaParts.get(0);
+        Iterator<String> metaParts = META_SPLITTER.split(s.substring((type + ".").length())).iterator();
+
+        if (!metaParts.hasNext()) return null;
+        String priority = metaParts.next();
+
+        if (!metaParts.hasNext()) return null;
+        String value = metaParts.next();
+
         try {
-            Integer.parseInt(priority);
-            return true;
+            int p = Integer.parseInt(priority);
+            String v = LegacyNodeFactory.unescapeCharacters(value).intern();
+            return Maps.immutableEntry(p, v);
         } catch (NumberFormatException e) {
-            return false;
+            return null;
         }
     }
 
-    public static boolean isPrefixNode(String s) {
-        return isChatMetaNode("prefix", s);
+    public static Map.Entry<Integer, String> parsePrefixNode(String s) {
+        return parseChatMetaNode("prefix", s);
     }
 
-    public static boolean isSuffixNode(String s) {
-        return isChatMetaNode("suffix", s);
+    public static Map.Entry<Integer, String> parseSuffixNode(String s) {
+        return parseChatMetaNode("suffix", s);
     }
 
     public static Node make(String node) {

@@ -25,13 +25,12 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
-import lombok.SneakyThrows;
-
 import com.github.cheesesoftware.PowerfulPermsAPI.CachedGroup;
 import com.github.cheesesoftware.PowerfulPermsAPI.Group;
 import com.github.cheesesoftware.PowerfulPermsAPI.Permission;
 import com.github.cheesesoftware.PowerfulPermsAPI.PermissionManager;
 import com.github.cheesesoftware.PowerfulPermsAPI.PowerfulPermsPlugin;
+import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.cause.CreationCause;
@@ -41,7 +40,6 @@ import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.logging.ProgressLogger;
@@ -52,6 +50,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.utils.HikariSupplier;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.SafeIterator;
 
 import org.bukkit.Bukkit;
 
@@ -65,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -94,7 +94,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
         if (type == null || type != StorageType.MYSQL) {
             // We need to load the Hikari/MySQL stuff.
-            DependencyManager.loadDependencies(plugin, DependencyManager.STORAGE_DEPENDENCIES.get(StorageType.MYSQL));
+            plugin.getDependencyManager().loadStorageDependencies(ImmutableSet.of(StorageType.MYSQL));
         }
 
         String address = args.get(0);
@@ -112,7 +112,6 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
             try (Connection c = hikari.getConnection()) {
                 DatabaseMetaData meta = c.getMetaData();
-
                 try (ResultSet rs = meta.getTables(null, null, dbTable, null)) {
                     if (!rs.next()) {
                         log.log("Error - Couldn't find table.");
@@ -124,7 +123,6 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             try (Connection c = hikari.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement("SELECT COLUMN_NAME, COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME=?")) {
                     ps.setString(1, dbTable);
-
                     try (ResultSet rs = ps.executeQuery()) {
                         log.log("Found table: " + dbTable);
                         while (rs.next()) {
@@ -132,7 +130,6 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                         }
                     }
                 }
-
                 try (PreparedStatement ps = c.prepareStatement("SELECT `uuid` FROM " + dbTable)) {
                     try (ResultSet rs = ps.executeQuery()) {
                         while (rs.next()) {
@@ -157,17 +154,17 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
         Collection<Group> groups = pm.getGroups().values();
 
-        int maxWeight = 0;
+        AtomicInteger maxWeight = new AtomicInteger(0);
 
         // Groups first.
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
-        for (Group g : groups) {
-            maxWeight = Math.max(maxWeight, g.getRank());
+        SafeIterator.iterate(groups, g -> {
+            maxWeight.set(Math.max(maxWeight.get(), g.getRank()));
 
-            final String groupName = MigrationUtils.standardizeName(g.getName());
+            String groupName = MigrationUtils.standardizeName(g.getName());
             plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
-            final me.lucko.luckperms.common.model.Group group = plugin.getGroupManager().getIfLoaded(groupName);
+            me.lucko.luckperms.common.model.Group group = plugin.getGroupManager().getIfLoaded(groupName);
 
             MigrationUtils.setGroupWeight(group, g.getRank());
 
@@ -181,9 +178,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
             // server --> prefix afaik
             for (Map.Entry<String, String> prefix : g.getPrefixes().entrySet()) {
-                if (prefix.getValue().isEmpty()) {
-                    continue;
-                }
+                if (prefix.getValue().isEmpty()) continue;
 
                 String server = prefix.getKey().toLowerCase();
                 if (prefix.getKey().equals("*") || prefix.getKey().equals("all")) {
@@ -198,9 +193,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             }
 
             for (Map.Entry<String, String> suffix : g.getSuffixes().entrySet()) {
-                if (suffix.getValue().isEmpty()) {
-                    continue;
-                }
+                if (suffix.getValue().isEmpty()) continue;
 
                 String server = suffix.getKey().toLowerCase();
                 if (suffix.getKey().equals("*") || suffix.getKey().equals("all")) {
@@ -216,7 +209,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
             plugin.getStorage().saveGroup(group);
             log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
-        }
+        });
         log.log("Migrated " + groupCount.get() + " groups");
 
         // Migrate all users
@@ -224,13 +217,13 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         AtomicInteger userCount = new AtomicInteger(0);
 
         // Increment the max weight from the group migrations. All user meta should override.
-        maxWeight += 5;
+        maxWeight.addAndGet(5);
 
         // Migrate all users and their groups
-        for (UUID uuid : uuids) {
+        SafeIterator.iterate(uuids, uuid -> {
 
             // Create a LuckPerms user for the UUID
-            plugin.getStorage().loadUser(uuid, "null").join();
+            plugin.getStorage().loadUser(uuid, null).join();
             User user = plugin.getUserManager().getIfLoaded(uuid);
 
             List<Permission> permissions = joinFuture(pm.getPlayerOwnPermissions(uuid));
@@ -256,23 +249,26 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             String suffix = joinFuture(pm.getPlayerOwnSuffix(uuid));
 
             if (prefix != null && !prefix.isEmpty()) {
-                user.setPermission(NodeFactory.makePrefixNode(maxWeight, prefix).build());
+                user.setPermission(NodeFactory.makePrefixNode(maxWeight.get(), prefix).build());
             }
 
             if (suffix != null && !suffix.isEmpty()) {
-                user.setPermission(NodeFactory.makeSuffixNode(maxWeight, suffix).build());
+                user.setPermission(NodeFactory.makeSuffixNode(maxWeight.get(), suffix).build());
             }
 
-            String primary = joinFuture(pm.getPlayerPrimaryGroup(uuid)).getName().toLowerCase();
-            if (!primary.equals("default")) {
-                user.setPermission(NodeFactory.make("group." + primary));
-                user.getPrimaryGroup().setStoredValue(primary);
+            Group primaryGroup = joinFuture(pm.getPlayerPrimaryGroup(uuid));
+            if (primaryGroup != null && primaryGroup.getName() != null) {
+                String primary = primaryGroup.getName().toLowerCase();
+                if (!primary.equals("default")) {
+                    user.setPermission(NodeFactory.make("group." + primary));
+                    user.getPrimaryGroup().setStoredValue(primary);
+                }
             }
 
             plugin.getUserManager().cleanup(user);
             plugin.getStorage().saveUser(user);
             log.logProgress("Migrated {} users so far.", userCount.incrementAndGet());
-        }
+        });
 
         log.log("Migrated " + userCount.get() + " users.");
         log.log("Success! Migration complete.");
@@ -340,8 +336,11 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         holder.setPermission(nb.build());
     }
 
-    @SneakyThrows
     private static <T> T joinFuture(Future<T> future) {
-        return future.get();
+        try {
+            return future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

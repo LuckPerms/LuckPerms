@@ -28,9 +28,8 @@ package me.lucko.luckperms.common.logging;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
-import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -58,7 +57,7 @@ public class SenderLogger implements Logger {
     private void msg(Message message, String s) {
         String msg = message.asString(plugin.getLocaleManager(), s);
         if (plugin.getConfiguration() != null && !plugin.getConfiguration().get(ConfigKeys.USE_COLORED_LOGGER)) {
-            msg = Util.stripColor(msg);
+            msg = CommandUtils.stripColor(msg);
         }
         console.sendMessage(msg);
     }

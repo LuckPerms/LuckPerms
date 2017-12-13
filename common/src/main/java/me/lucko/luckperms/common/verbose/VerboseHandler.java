@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.verbose;
 
-import lombok.Setter;
-
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -54,7 +52,6 @@ public class VerboseHandler implements Runnable {
     private boolean listening = false;
 
     // if the handler should shutdown
-    @Setter
     private boolean shutdown = false;
 
     public VerboseHandler(Executor executor, String pluginVersion) {
@@ -98,8 +95,8 @@ public class VerboseHandler implements Runnable {
      * @param notify if the sender should be notified in chat on each check
      */
     public void registerListener(Sender sender, String filter, boolean notify) {
-        listening = true;
         listeners.put(sender.getUuid(), new VerboseListener(pluginVersion, sender, filter, notify));
+        listening = true;
     }
 
     /**
@@ -112,33 +109,29 @@ public class VerboseHandler implements Runnable {
         // immediately flush, so the listener gets all current data
         flush();
 
-        VerboseListener ret = listeners.remove(uuid);
-
-        // stop listening if there are no listeners left
-        if (listeners.isEmpty()) {
-            listening = false;
-        }
-
-        return ret;
+        return listeners.remove(uuid);
     }
 
     @Override
     public void run() {
         while (true) {
+
             // remove listeners where the sender is no longer valid
             listeners.values().removeIf(l -> !l.getNotifiedSender().isValid());
-            if (listeners.isEmpty()) {
-                listening = false;
-            }
 
+            // handle all checks in the queue
             flush();
 
+            // break the loop if the handler has been shutdown
             if (shutdown) {
                 return;
             }
 
+            // update listening state
+            listening = !listeners.isEmpty();
+
             try {
-                Thread.sleep(200);
+                Thread.sleep(100);
             } catch (InterruptedException ignored) {}
         }
     }
@@ -152,5 +145,9 @@ public class VerboseHandler implements Runnable {
                 listener.acceptData(e);
             }
         }
+    }
+
+    public void shutdown() {
+        shutdown = true;
     }
 }

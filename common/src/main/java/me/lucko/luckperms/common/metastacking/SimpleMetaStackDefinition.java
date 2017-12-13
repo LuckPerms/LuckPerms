@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.metastacking;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
@@ -38,7 +37,6 @@ import me.lucko.luckperms.api.metastacking.MetaStackElement;
 import java.util.List;
 
 @Getter
-@EqualsAndHashCode
 @ToString
 public final class SimpleMetaStackDefinition implements MetaStackDefinition {
 
@@ -47,10 +45,41 @@ public final class SimpleMetaStackDefinition implements MetaStackDefinition {
     private final String middleSpacer;
     private final String endSpacer;
 
+    // cache hashcode - this class is immutable, and used an index in MetaContexts
+    private final int hashCode;
+
     public SimpleMetaStackDefinition(@NonNull List<MetaStackElement> elements, @NonNull String startSpacer, @NonNull String middleSpacer, @NonNull String endSpacer) {
         this.elements = ImmutableList.copyOf(elements);
         this.startSpacer = startSpacer;
         this.middleSpacer = middleSpacer;
         this.endSpacer = endSpacer;
+        this.hashCode = calculateHashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof SimpleMetaStackDefinition)) return false;
+        final SimpleMetaStackDefinition other = (SimpleMetaStackDefinition) o;
+
+        return this.getElements().equals(other.getElements()) &&
+                this.getStartSpacer().equals(other.getStartSpacer()) &&
+                this.getMiddleSpacer().equals(other.getMiddleSpacer()) &&
+                this.getEndSpacer().equals(other.getEndSpacer());
+    }
+
+    private int calculateHashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        result = result * PRIME + this.getElements().hashCode();
+        result = result * PRIME + this.getStartSpacer().hashCode();
+        result = result * PRIME + this.getMiddleSpacer().hashCode();
+        result = result * PRIME + this.getEndSpacer().hashCode();
+        return result;
+    }
+
+    @Override
+    public int hashCode() {
+        return hashCode;
     }
 }

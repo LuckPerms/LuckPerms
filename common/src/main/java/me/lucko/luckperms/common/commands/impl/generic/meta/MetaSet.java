@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -49,7 +49,6 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MetaSet extends SharedSubCommand {
     public MetaSet(LocaleManager locale) {
@@ -80,14 +79,14 @@ public class MetaSet extends SharedSubCommand {
         Node n = NodeFactory.makeMetaNode(key, value).withExtraContext(context).build();
 
         if (holder.hasPermission(n).asBoolean()) {
-            Message.ALREADY_HAS_META.send(sender, holder.getFriendlyName());
+            Message.ALREADY_HAS_META.send(sender, holder.getFriendlyName(), key, value, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
 
         holder.clearMetaKeys(key, context, false);
         holder.setPermission(n);
 
-        TextComponent.Builder builder = TextUtils.fromLegacy(Message.SET_META_SUCCESS.asString(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), Util.contextSetToString(context))).toBuilder();
+        TextComponent.Builder builder = TextUtils.fromLegacy(Message.SET_META_SUCCESS.asString(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), CommandUtils.contextSetToString(context))).toBuilder();
         HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
                 TextUtils.joinNewline("¥3Raw key: ¥r" + key, "¥3Raw value: ¥r" + value),
                 '¥'
@@ -96,7 +95,7 @@ public class MetaSet extends SharedSubCommand {
         sender.sendMessage(builder.build());
 
         ExtendedLogEntry.build().actor(sender).acted(holder)
-                .action("meta set " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                .action("meta", "set", key, value, context)
                 .build().submit(plugin, sender);
 
         save(holder, sender, plugin);

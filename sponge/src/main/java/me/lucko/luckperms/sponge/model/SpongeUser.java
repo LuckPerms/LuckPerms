@@ -42,18 +42,16 @@ import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
-import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 
-import co.aikar.timings.Timing;
-
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 public class SpongeUser extends User {
 
@@ -73,7 +71,7 @@ public class SpongeUser extends User {
         return this.spongeData;
     }
 
-    public static class UserSubject implements LPSubject {
+    public static final class UserSubject implements LPSubject {
         private final SpongeUser parent;
         private final LPSpongePlugin plugin;
 
@@ -103,13 +101,7 @@ public class SpongeUser extends User {
         @Override
         public Optional<CommandSource> getCommandSource() {
             final UUID uuid = plugin.getUuidCache().getExternalUUID(parent.getUuid());
-
-            Optional<Player> p = Sponge.getServer().getPlayer(uuid);
-            if (p.isPresent()) {
-                return Optional.of(p.get());
-            }
-
-            return Optional.empty();
+            return Sponge.getServer().getPlayer(uuid).map(Function.identity());
         }
 
         @Override
@@ -129,75 +121,76 @@ public class SpongeUser extends User {
 
         @Override
         public Tristate getPermissionValue(ImmutableContextSet contexts, String permission) {
-            try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_PERMISSION_VALUE)) {
-                return parent.getUserData().getPermissionData(plugin.getService().calculateContexts(contexts)).getPermissionValue(permission, CheckOrigin.PLATFORM_LOOKUP_CHECK);
-            }
+            return parent.getCachedData().getPermissionData(plugin.getContextManager().formContexts(contexts)).getPermissionValue(permission, CheckOrigin.PLATFORM_LOOKUP_CHECK);
         }
 
         @Override
         public boolean isChildOf(ImmutableContextSet contexts, SubjectReference parent) {
-            try (Timing ignored = plugin.getTimings().time(LPTiming.USER_IS_CHILD_OF)) {
-                return parent.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP) && getPermissionValue(contexts, "group." + parent.getSubjectIdentifier()).asBoolean();
-            }
+            return parent.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP) && getPermissionValue(contexts, "group." + parent.getSubjectIdentifier()).asBoolean();
         }
 
         @Override
         public ImmutableList<SubjectReference> getParents(ImmutableContextSet contexts) {
-            try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_PARENTS)) {
-                ImmutableSet.Builder<SubjectReference> subjects = ImmutableSet.builder();
+            ImmutableSet.Builder<SubjectReference> subjects = ImmutableSet.builder();
 
-                for (String perm : parent.getUserData().getPermissionData(plugin.getService().calculateContexts(contexts)).getImmutableBacking().keySet()) {
-                    if (!perm.startsWith("group.")) {
-                        continue;
-                    }
-
-                    String groupName = perm.substring("group.".length());
-                    if (plugin.getGroupManager().isLoaded(groupName)) {
-                        subjects.add(plugin.getService().getGroupSubjects().loadSubject(groupName).join().toReference());
-                    }
+            for (Map.Entry<String, Boolean> entry : parent.getCachedData().getPermissionData(plugin.getContextManager().formContexts(contexts)).getImmutableBacking().entrySet()) {
+                if (!entry.getValue()) {
+                    continue;
                 }
 
-                subjects.addAll(plugin.getService().getUserSubjects().getDefaults().getParents(contexts));
-                subjects.addAll(plugin.getService().getDefaults().getParents(contexts));
+                if (!entry.getKey().startsWith("group.")) {
+                    continue;
+                }
 
-                return getService().sortSubjects(subjects.build());
+                String groupName = entry.getKey().substring("group.".length());
+                if (plugin.getGroupManager().isLoaded(groupName)) {
+                    subjects.add(plugin.getService().getGroupSubjects().loadSubject(groupName).join().toReference());
+                }
             }
+
+            subjects.addAll(plugin.getService().getUserSubjects().getDefaults().getParents(contexts));
+            subjects.addAll(plugin.getService().getDefaults().getParents(contexts));
+
+            return getService().sortSubjects(subjects.build());
         }
 
         @Override
         public Optional<String> getOption(ImmutableContextSet contexts, String s) {
-            try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_OPTION)) {
-                MetaData data = parent.getUserData().getMetaData(plugin.getService().calculateContexts(contexts));
-                if (s.equalsIgnoreCase("prefix")) {
-                    if (data.getPrefix() != null) {
-                        return Optional.of(data.getPrefix());
-                    }
+            MetaData data = parent.getCachedData().getMetaData(plugin.getContextManager().formContexts(contexts));
+            if (s.equalsIgnoreCase("prefix")) {
+                if (data.getPrefix() != null) {
+                    return Optional.of(data.getPrefix());
                 }
-
-                if (s.equalsIgnoreCase("suffix")) {
-                    if (data.getSuffix() != null) {
-                        return Optional.of(data.getSuffix());
-                    }
-                }
-
-                if (data.getMeta().containsKey(s)) {
-                    return Optional.of(data.getMeta().get(s));
-                }
-
-                Optional<String> v = plugin.getService().getUserSubjects().getDefaults().getOption(contexts, s);
-                if (v.isPresent()) {
-                    return v;
-                }
-
-                return plugin.getService().getDefaults().getOption(contexts, s);
             }
+
+            if (s.equalsIgnoreCase("suffix")) {
+                if (data.getSuffix() != null) {
+                    return Optional.of(data.getSuffix());
+                }
+            }
+
+            String val = data.getMeta().get(s);
+            if (val != null) {
+                return Optional.of(val);
+            }
+
+            Optional<String> v = plugin.getService().getUserSubjects().getDefaults().getOption(contexts, s);
+            if (v.isPresent()) {
+                return v;
+            }
+
+            return plugin.getService().getDefaults().getOption(contexts, s);
         }
 
         @Override
         public ImmutableContextSet getActiveContextSet() {
-            try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_ACTIVE_CONTEXTS)) {
-                return plugin.getContextManager().getApplicableContext(this.sponge());
-            }
+            return plugin.getContextManager().getApplicableContext(this.sponge());
+        }
+
+        @Override
+        public void invalidateCaches(CacheLevel cacheLevel) {
+            // invalidate for all changes
+            parent.getCachedData().invalidateCaches();
         }
     }
 

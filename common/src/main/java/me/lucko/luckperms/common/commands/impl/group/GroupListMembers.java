@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -67,7 +67,7 @@ import java.util.stream.Collectors;
 
 public class GroupListMembers extends SubCommand<Group> {
     public GroupListMembers(LocaleManager locale) {
-        super(CommandSpec.GROUP_LISTMEMBERS.spec(locale), "listmembers", CommandPermission.GROUP_LISTMEMBERS, Predicates.notInRange(0, 1));
+        super(CommandSpec.GROUP_LISTMEMBERS.spec(locale), "listmembers", CommandPermission.GROUP_LIST_MEMBERS, Predicates.notInRange(0, 1));
     }
 
     @Override
@@ -130,7 +130,7 @@ public class GroupListMembers extends SubCommand<Group> {
         sorted.sort(Comparator.comparing(HeldPermission::getHolder));
 
         int index = pageNumber - 1;
-        List<List<HeldPermission<UUID>>> pages = Util.divideList(sorted, 15);
+        List<List<HeldPermission<UUID>>> pages = CommandUtils.divideList(sorted, 15);
 
         if (index < 0 || index >= pages.size()) {
             pageNumber = 1;
@@ -146,7 +146,7 @@ public class GroupListMembers extends SubCommand<Group> {
         String title = "&7(page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + sorted.size() + "&7 entries)";
 
         for (Map.Entry<String, HeldPermission<UUID>> ent : uuidMappedPage) {
-            String s = "&3> &b" + ent.getKey() + " " + getNodeExpiryString(ent.getValue().asNode()) + Util.getAppendableNodeContextString(ent.getValue().asNode()) + "\n";
+            String s = "&3> &b" + ent.getKey() + " " + getNodeExpiryString(ent.getValue().asNode()) + CommandUtils.getAppendableNodeContextString(ent.getValue().asNode()) + "\n";
             message.append(TextUtils.fromLegacy(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), false, label, ent.getValue())).build());
         }
 
@@ -162,7 +162,7 @@ public class GroupListMembers extends SubCommand<Group> {
         sorted.sort(Comparator.comparing(HeldPermission::getHolder));
 
         int index = pageNumber - 1;
-        List<List<HeldPermission<String>>> pages = Util.divideList(sorted, 15);
+        List<List<HeldPermission<String>>> pages = CommandUtils.divideList(sorted, 15);
 
         if (index < 0 || index >= pages.size()) {
             pageNumber = 1;
@@ -175,7 +175,7 @@ public class GroupListMembers extends SubCommand<Group> {
         String title = "&7(page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + sorted.size() + "&7 entries)";
 
         for (HeldPermission<String> ent : page) {
-            String s = "&3> &b" + ent.getHolder() + " " + getNodeExpiryString(ent.asNode()) + Util.getAppendableNodeContextString(ent.asNode()) + "\n";
+            String s = "&3> &b" + ent.getHolder() + " " + getNodeExpiryString(ent.asNode()) + CommandUtils.getAppendableNodeContextString(ent.asNode()) + "\n";
             message.append(TextUtils.fromLegacy(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(ent.getHolder(), true, label, ent)).build());
         }
 
@@ -197,8 +197,7 @@ public class GroupListMembers extends SubCommand<Group> {
                 "&7Click to remove this parent from " + holderName
         ), Constants.FORMAT_CHAR));
 
-        String command = NodeFactory.nodeAsCommand(perm.asNode(), holderName, group, false)
-                .replace("/luckperms", "/" + label);
+        String command = "/" + label + " " + NodeFactory.nodeAsCommand(perm.asNode(), holderName, group, false);
 
         return component -> {
             component.hoverEvent(hoverEvent);

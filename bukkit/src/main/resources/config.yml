@@ -70,6 +70,16 @@ use-server-uuids: true
 # in the LuckPerms cache.
 use-server-uuid-cache: false
 
+# If LuckPerms should use the "server-name" property from the "server.properties"
+# file as the "server" option within LuckPerms.
+use-server-properties-name: false
+
+# If set to true, LuckPerms will allow usernames with non alphanumeric characters.
+#
+# Note that due to the design of the storage implementation, usernames must still be
+# 16 characters or less.
+allow-invalid-usernames: false
+
 # If LuckPerms should produce extra logging output when it handles logins.
 # Useful if you're having issues with UUID forwarding or data not being loaded.
 debug-logins: false
@@ -82,11 +92,6 @@ log-notify: true
 world-rewrite:
 #  world_nether: world
 #  world_the_end: world
-
-# Rewrites group names. The underlying name of the group does not change, just the output in
-# commands / placeholders / Vault.
-group-name-rewrite:
-#  default: Member
 
 # Controls how temporary permissions/parents/meta should be accumulated
 #
@@ -103,7 +108,7 @@ temporary-add-behaviour: deny
 # -> parents-by-weight      just use the users most highly weighted parent
 # -> all-parents-by-weight  same as above, but calculates based upon all parents inherited from both
 #                           directly and indirectly
-primary-group-calculation: stored
+primary-group-calculation: parents-by-weight
 
 # If set to false, the plugin will allow a Users primary group to be removed with the
 # 'parent remove' command, and will set their primary group back to default.
@@ -176,6 +181,8 @@ group-weight:
 # - lowest
 # - highest_own
 # - lowest_own
+# - highest_inherited
+# - lowest_inherited
 # - highest_on_track_<track>
 # - lowest_on_track_<track>
 # - highest_not_on_track_<track>
@@ -261,7 +268,7 @@ vault-debug: false
 # Which storage method the plugin should use.
 #
 # See: https://github.com/lucko/LuckPerms/wiki/Choosing-a-Storage-type
-# Currently supported: mysql, mariadb, postgresql, sqlite, h2, json, yaml, mongodb
+# Currently supported: mysql, mariadb, postgresql, sqlite, h2, json, yaml, hocon, mongodb
 #
 # Fill out connection info below if you're using MySQL, MariaDB, PostgreSQL or MongoDB
 # If your MySQL server supports it, the "mariadb" option is preferred over "mysql".
@@ -292,7 +299,40 @@ data:
   database: minecraft
   username: root
   password: ''
-  pool-size: 10 # The size of the MySQL connection pool.
+
+  # These settings apply to the MySQL connection pool.
+  # The default values will be suitable for the majority of users.
+  # Do not change these settings unless you know what you're doing!
+  pool-settings:
+
+    # Sets the maximum size of the MySQL connection pool.
+    # Basically this value will determine the maximum number of actual
+    # connections to the database backend.
+    #
+    # More information about determining the size of connection pools can be found here:
+    # https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing
+    maximum-pool-size: 10
+
+    # Sets the minimum number of idle connections that the pool will try to maintain.
+    #
+    # For maximum performance and responsiveness to spike demands, it is recommended to not set
+    # this value and instead allow the pool to act as a fixed size connection pool.
+    # (set this value to the same as 'maximum-pool-size')
+    minimum-idle: 10
+
+    # This setting controls the maximum lifetime of a connection in the pool in milliseconds.
+    # The value should be at least 30 seconds less than any database or infrastructure imposed
+    # connection time limit.
+    maximum-lifetime: 1800000 # 30 minutes
+
+    # This setting controls the maximum number of milliseconds that the plugin will wait for a
+    # connection from the pool, before timing out.
+    connection-timeout: 5000 # 5 seconds
+
+    # This setting allows you to define extra properties for connections.
+    properties:
+      useUnicode: true
+      characterEncoding: utf8
 
   # The prefix for all LuckPerms tables. Change this is you want to use different tables for
   # different servers.

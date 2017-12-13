@@ -33,7 +33,6 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -45,6 +44,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.SafeIterator;
 
 import org.bukkit.Bukkit;
 import org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService;
@@ -104,21 +104,21 @@ public class MigrationZPermissions extends SubCommand<Object> {
         Map<UUID, Set<Node>> userParents = new HashMap<>();
 
         AtomicInteger groupCount = new AtomicInteger(0);
-        int maxWeight = 0;
-        for (PermissionEntity entity : internalService.getEntities(true)) {
+        AtomicInteger maxWeight = new AtomicInteger(0);
+        SafeIterator.iterate(internalService.getEntities(true), entity -> {
             String groupName = MigrationUtils.standardizeName(entity.getDisplayName());
             plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
             Group group = plugin.getGroupManager().getIfLoaded(groupName);
 
             int weight = entity.getPriority();
-            maxWeight = Math.max(maxWeight, weight);
+            maxWeight.set(Math.max(maxWeight.get(), weight));
             migrateEntity(group, entity, weight);
             MigrationUtils.setGroupWeight(group, weight);
 
             // store user data for later
             Set<Membership> members = entity.getMemberships();
             for (Membership membership : members) {
-                UUID uuid = Util.parseUuid(membership.getMember());
+                UUID uuid = BukkitMigrationUtils.lookupUuid(log, membership.getMember());
                 if (uuid == null) {
                     continue;
                 }
@@ -134,13 +134,13 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
             plugin.getStorage().saveGroup(group);
             log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
-        }
+        });
         log.log("Migrated " + groupCount.get() + " groups");
 
         // Migrate all tracks
         log.log("Starting track migration.");
         AtomicInteger trackCount = new AtomicInteger(0);
-        for (String t : service.getAllTracks()) {
+        SafeIterator.iterate(service.getAllTracks(), t -> {
             String trackName = MigrationUtils.standardizeName(t);
 
             plugin.getStorage().createAndLoadTrack(trackName, CreationCause.INTERNAL).join();
@@ -149,18 +149,18 @@ public class MigrationZPermissions extends SubCommand<Object> {
             plugin.getStorage().saveTrack(track);
 
             log.logAllProgress("Migrated {} tracks so far.", trackCount.incrementAndGet());
-        }
+        });
         log.log("Migrated " + trackCount.get() + " tracks");
 
         // Migrate all users.
         log.log("Starting user migration.");
-        maxWeight += 10;
+        maxWeight.addAndGet(10);
         AtomicInteger userCount = new AtomicInteger(0);
 
         Set<UUID> usersToMigrate = new HashSet<>(userParents.keySet());
         usersToMigrate.addAll(service.getAllPlayersUUID());
 
-        for (UUID u : usersToMigrate) {
+        SafeIterator.iterate(usersToMigrate, u -> {
             PermissionEntity entity = internalService.getEntity(null, u, false);
 
             String username = null;
@@ -173,7 +173,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
             // migrate permissions & meta
             if (entity != null) {
-                migrateEntity(user, entity, maxWeight);
+                migrateEntity(user, entity, maxWeight.get());
             }
 
             // migrate groups
@@ -187,7 +187,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
             plugin.getUserManager().cleanup(user);
             plugin.getStorage().saveUser(user);
             log.logProgress("Migrated {} users so far.", userCount.incrementAndGet());
-        }
+        });
 
         log.log("Migrated " + userCount.get() + " users.");
         log.log("Success! Migration complete.");
@@ -196,9 +196,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
     private void migrateEntity(PermissionHolder holder, PermissionEntity entity, int weight) {
         for (Entry e : entity.getPermissions()) {
-            if (e.getPermission().isEmpty()) {
-                continue;
-            }
+            if (e.getPermission().isEmpty()) continue;
 
             if (e.getWorld() != null && !e.getWorld().getName().equals("")) {
                 holder.setPermission(NodeFactory.newBuilder(e.getPermission()).setValue(e.isValue()).setWorld(e.getWorld().getName()).build());
@@ -218,10 +216,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
         for (EntityMetadata metadata : entity.getMetadata()) {
             String key = metadata.getName().toLowerCase();
-
-            if (key.isEmpty() || metadata.getStringValue().isEmpty()) {
-                continue;
-            }
+            if (key.isEmpty() || metadata.getStringValue().isEmpty()) continue;
 
             if (key.equals("prefix") || key.equals("suffix")) {
                 ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());

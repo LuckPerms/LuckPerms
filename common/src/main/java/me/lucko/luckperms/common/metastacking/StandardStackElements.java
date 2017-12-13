@@ -47,24 +47,38 @@ import java.util.UUID;
  */
 @UtilityClass
 public class StandardStackElements {
+    private static final HighestPriority HIGHEST_PRIORITY = new HighestPriority();
+    private static final LowestPriority LOWEST_PRIORITY = new LowestPriority();
+    private static final HighestPriorityOwn HIGHEST_PRIORITY_OWN = new HighestPriorityOwn();
+    private static final LowestPriorityOwn LOWEST_PRIORITY_OWN = new LowestPriorityOwn();
+    private static final HighestPriorityInherited HIGHEST_PRIORITY_INHERITED = new HighestPriorityInherited();
+    private static final LowestPriorityInherited LOWEST_PRIORITY_INHERITED = new LowestPriorityInherited();
 
     public static Optional<MetaStackElement> parseFromString(LuckPermsPlugin plugin, String s) {
         s = s.toLowerCase();
 
         if (s.equals("highest")) {
-            return Optional.of(new HighestPriority());
+            return Optional.of(HIGHEST_PRIORITY);
         }
 
         if (s.equals("lowest")) {
-            return Optional.of(new LowestPriority());
+            return Optional.of(LOWEST_PRIORITY);
         }
 
         if (s.equals("highest_own")) {
-            return Optional.of(new HighestPriorityOwn());
+            return Optional.of(HIGHEST_PRIORITY_OWN);
         }
 
         if (s.equals("lowest_own")) {
-            return Optional.of(new LowestPriorityOwn());
+            return Optional.of(LOWEST_PRIORITY_OWN);
+        }
+
+        if (s.equals("highest_inherited")) {
+            return Optional.of(HIGHEST_PRIORITY_INHERITED);
+        }
+
+        if (s.equals("lowest_inherited")) {
+            return Optional.of(LOWEST_PRIORITY_INHERITED);
         }
 
         if (s.startsWith("highest_on_track_") && s.length() > "highest_on_track_".length()) {
@@ -96,7 +110,7 @@ public class StandardStackElements {
                 .map(s -> parseFromString(plugin, s))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(ImmutableCollectors.toImmutableList());
+                .collect(ImmutableCollectors.toList());
     }
 
     /**
@@ -125,10 +139,6 @@ public class StandardStackElements {
      * @return true if the accumulation should return
      */
     private static boolean checkOwnElement(LocalizedNode node) {
-        if (node.getLocation() == null || node.getLocation().equals("")) {
-            return true;
-        }
-
         try {
             UUID.fromString(node.getLocation());
             return false;
@@ -198,6 +208,23 @@ public class StandardStackElements {
         }
     }
 
+    @ToString
+    private static final class HighestPriorityInherited implements MetaStackElement {
+        @Override
+        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
+            if (type.shouldIgnore(node)) {
+                return false;
+            }
+
+            if (!checkOwnElement(node)) {
+                return false;
+            }
+
+            Map.Entry<Integer, String> newEntry = type.getEntry(node);
+            return !compareEntriesHighest(current, newEntry);
+        }
+    }
+
     @ToString(of = "trackName")
     @RequiredArgsConstructor
     @EqualsAndHashCode(of = "trackName")
@@ -256,6 +283,23 @@ public class StandardStackElements {
             }
 
             if (checkOwnElement(node)) {
+                return false;
+            }
+
+            Map.Entry<Integer, String> newEntry = type.getEntry(node);
+            return !compareEntriesLowest(current, newEntry);
+        }
+    }
+
+    @ToString
+    private static final class LowestPriorityInherited implements MetaStackElement {
+        @Override
+        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
+            if (type.shouldIgnore(node)) {
+                return false;
+            }
+
+            if (!checkOwnElement(node)) {
                 return false;
             }
 

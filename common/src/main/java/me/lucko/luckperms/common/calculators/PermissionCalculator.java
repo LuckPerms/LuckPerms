@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.calculators;
 
 import lombok.RequiredArgsConstructor;
 
+import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
@@ -42,14 +43,13 @@ import java.util.Map;
  * Calculates and caches permissions
  */
 @RequiredArgsConstructor
-public class PermissionCalculator {
+public class PermissionCalculator implements CacheLoader<String, Tristate> {
     private final LuckPermsPlugin plugin;
     private final PermissionCalculatorMetadata metadata;
     private final List<PermissionProcessor> processors;
 
     // caches lookup calls.
-    private final LoadingCache<String, Tristate> lookupCache = Caffeine.newBuilder()
-            .build(this::lookupPermissionValue);
+    private final LoadingCache<String, Tristate> lookupCache = Caffeine.newBuilder().build(this);
 
     public void invalidateCache() {
         lookupCache.invalidateAll();
@@ -59,7 +59,7 @@ public class PermissionCalculator {
 
         // convert the permission to lowercase, as all values in the backing map are also lowercase.
         // this allows fast case insensitive lookups
-        permission = permission.toLowerCase();
+        permission = permission.toLowerCase().intern();
 
         // get the result
         Tristate result = lookupCache.get(permission);
@@ -71,7 +71,8 @@ public class PermissionCalculator {
         return result;
     }
 
-    private Tristate lookupPermissionValue(String permission) {
+    @Override
+    public Tristate load(String permission) {
 
         // offer the permission to the permission vault
         // we only need to do this once per permission, so it doesn't matter

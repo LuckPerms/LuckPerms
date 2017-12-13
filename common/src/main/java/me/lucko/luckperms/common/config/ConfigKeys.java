@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
+import me.lucko.luckperms.common.assignments.AssignmentRule;
 import me.lucko.luckperms.common.config.keys.AbstractKey;
 import me.lucko.luckperms.common.config.keys.BooleanKey;
 import me.lucko.luckperms.common.config.keys.EnduringKey;
@@ -39,7 +40,6 @@ import me.lucko.luckperms.common.config.keys.LowercaseStringKey;
 import me.lucko.luckperms.common.config.keys.MapKey;
 import me.lucko.luckperms.common.config.keys.StaticKey;
 import me.lucko.luckperms.common.config.keys.StringKey;
-import me.lucko.luckperms.common.defaults.Rule;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
 import me.lucko.luckperms.common.model.TemporaryModifier;
@@ -48,7 +48,7 @@ import me.lucko.luckperms.common.primarygroup.AllParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.ParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
 import me.lucko.luckperms.common.primarygroup.StoredHolder;
-import me.lucko.luckperms.common.storage.DatastoreConfiguration;
+import me.lucko.luckperms.common.storage.StorageCredentials;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.lang.reflect.Field;
@@ -68,7 +68,16 @@ public class ConfigKeys {
     /**
      * The name of the server
      */
-    public static final ConfigKey<String> SERVER = LowercaseStringKey.of("server", "global");
+    public static final ConfigKey<String> SERVER = AbstractKey.of(c -> {
+        if (c.getBoolean("use-server-properties-name", false)) {
+            String serverName = c.getPlugin().getServerName();
+            if (serverName != null && !serverName.equals("Unknown Server")) {
+                return serverName.toLowerCase();
+            }
+        }
+
+        return c.getString("server", "global").toLowerCase();
+    });
 
     /**
      * How many minutes to wait between syncs. A value <= 0 will disable syncing.
@@ -123,9 +132,19 @@ public class ConfigKeys {
     public static final ConfigKey<Boolean> USE_SERVER_UUID_CACHE = BooleanKey.of("use-server-uuid-cache", false);
 
     /**
+     * If LuckPerms should allow usernames with non alphanumeric characters.
+     */
+    public static final ConfigKey<Boolean> ALLOW_INVALID_USERNAMES = BooleanKey.of("allow-invalid-usernames", false);
+
+    /**
      * If LuckPerms should produce extra logging output when it handles logins.
      */
     public static final ConfigKey<Boolean> DEBUG_LOGINS = BooleanKey.of("debug-logins", false);
+
+    /**
+     * If LP should cancel login attempts for players whose permission data could not be loaded.
+     */
+    public static final ConfigKey<Boolean> CANCEL_FAILED_LOGINS = BooleanKey.of("cancel-failed-logins", false);
 
     /**
      * Controls how temporary add commands should behave
@@ -231,7 +250,7 @@ public class ConfigKeys {
      * The configured group weightings
      */
     public static final ConfigKey<Map<String, Integer>> GROUP_WEIGHTS = AbstractKey.of(c -> {
-        return c.getMap("group-weight", ImmutableMap.of()).entrySet().stream().collect(ImmutableCollectors.toImmutableMap(
+        return c.getMap("group-weight", ImmutableMap.of()).entrySet().stream().collect(ImmutableCollectors.toMap(
                 e -> e.getKey().toLowerCase(),
                 e -> {
                     try {
@@ -294,11 +313,16 @@ public class ConfigKeys {
     public static final ConfigKey<Boolean> COMMANDS_ALLOW_OP = EnduringKey.wrap(BooleanKey.of("commands-allow-op", true));
 
     /**
+     * If the vault server option should be used
+     */
+    public static final ConfigKey<Boolean> USE_VAULT_SERVER = BooleanKey.of("use-vault-server", true);
+
+    /**
      * The name of the server to use for Vault.
      */
     public static final ConfigKey<String> VAULT_SERVER = AbstractKey.of(c -> {
         // default to true for backwards compatibility
-        if (c.getBoolean("use-vault-server", true)) {
+        if (USE_VAULT_SERVER.get(c)) {
             return c.getString("vault-server", "global").toLowerCase();
         } else {
             return SERVER.get(c);
@@ -314,12 +338,6 @@ public class ConfigKeys {
      * If any worlds provided with Vault lookups should be ignored
      */
     public static final ConfigKey<Boolean> VAULT_IGNORE_WORLD = BooleanKey.of("vault-ignore-world", false);
-
-    /* controls the settings for Vault primary group overrides. Likely to be removed in later versions */
-    public static final ConfigKey<Boolean> VAULT_PRIMARY_GROUP_OVERRIDES = BooleanKey.of("vault-primary-groups-overrides.enabled", false);
-    public static final ConfigKey<Boolean> VAULT_PRIMARY_GROUP_OVERRIDES_CHECK_INHERITED = BooleanKey.of("vault-primary-groups-overrides.check-inherited-permissions", false);
-    public static final ConfigKey<Boolean> VAULT_PRIMARY_GROUP_OVERRIDES_CHECK_EXISTS = BooleanKey.of("vault-primary-groups-overrides.check-group-exists", true);
-    public static final ConfigKey<Boolean> VAULT_PRIMARY_GROUP_OVERRIDES_CHECK_MEMBER_OF = BooleanKey.of("vault-primary-groups-overrides.check-user-member-of", true);
 
     /**
      * If Vault debug mode is enabled
@@ -339,7 +357,7 @@ public class ConfigKeys {
     /**
      * The default assignments being applied by the plugin
      */
-    public static final ConfigKey<List<Rule>> DEFAULT_ASSIGNMENTS = AbstractKey.of(c -> {
+    public static final ConfigKey<List<AssignmentRule>> DEFAULT_ASSIGNMENTS = AbstractKey.of(c -> {
         return c.getObjectList("default-assignments", ImmutableList.of()).stream().map(name -> {
             String hasTrue = c.getString("default-assignments." + name + ".if.has-true", null);
             String hasFalse = c.getString("default-assignments." + name + ".if.has-false", null);
@@ -347,20 +365,26 @@ public class ConfigKeys {
             List<String> give = ImmutableList.copyOf(c.getList("default-assignments." + name + ".give", ImmutableList.of()));
             List<String> take = ImmutableList.copyOf(c.getList("default-assignments." + name + ".take", ImmutableList.of()));
             String pg = c.getString("default-assignments." + name + ".set-primary-group", null);
-            return new Rule(hasTrue, hasFalse, lacks, give, take, pg);
-        }).collect(ImmutableCollectors.toImmutableList());
+            return new AssignmentRule(hasTrue, hasFalse, lacks, give, take, pg);
+        }).collect(ImmutableCollectors.toList());
     });
 
     /**
      * The database settings, username, password, etc for use by any database
      */
-    public static final ConfigKey<DatastoreConfiguration> DATABASE_VALUES = EnduringKey.wrap(AbstractKey.of(c -> {
-        return new DatastoreConfiguration(
+    public static final ConfigKey<StorageCredentials> DATABASE_VALUES = EnduringKey.wrap(AbstractKey.of(c -> {
+        int maxPoolSize = c.getInt("data.pool-settings.maximum-pool-size", c.getInt("data.pool-size", 10));
+        int minIdle = c.getInt("data.pool-settings.minimum-idle", maxPoolSize);
+        int maxLifetime = c.getInt("data.pool-settings.maximum-lifetime", 1800000);
+        int connectionTimeout = c.getInt("data.pool-settings.connection-timeout", 5000);
+        Map<String, String> props = ImmutableMap.copyOf(c.getMap("data.pool-settings.properties", ImmutableMap.of("useUnicode", "true", "characterEncoding", "utf8")));
+
+        return new StorageCredentials(
                 c.getString("data.address", null),
                 c.getString("data.database", null),
                 c.getString("data.username", null),
                 c.getString("data.password", null),
-                c.getInt("data.pool-size", 10)
+                maxPoolSize, minIdle, maxLifetime, connectionTimeout, props
         );
     }));
 

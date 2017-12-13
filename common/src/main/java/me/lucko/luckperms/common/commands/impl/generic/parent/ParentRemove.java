@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -47,7 +47,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getGroupTabComplete;
 
@@ -82,7 +81,7 @@ public class ParentRemove extends SharedSubCommand {
             boolean shouldPrevent = plugin.getConfiguration().get(ConfigKeys.PREVENT_PRIMARY_GROUP_REMOVAL) &&
                     context.isEmpty() &&
                     plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD).equals("stored") &&
-                    user.getPrimaryGroup().getStoredValue().equalsIgnoreCase(groupName);
+                    user.getPrimaryGroup().getStoredValue().orElse("default").equalsIgnoreCase(groupName);
 
             if (shouldPrevent) {
                 Message.USER_REMOVEGROUP_ERROR_PRIMARY.send(sender);
@@ -92,10 +91,10 @@ public class ParentRemove extends SharedSubCommand {
 
         DataMutateResult result = holder.unsetPermission(NodeFactory.newBuilder("group." + groupName).withExtraContext(context).build());
         if (result.asBoolean()) {
-            Message.UNSET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), groupName, Util.contextSetToString(context));
+            Message.UNSET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), groupName, CommandUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("parent remove " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("parent", "remove", groupName, context)
                     .build().submit(plugin, sender);
 
             if (holder instanceof User) {
@@ -105,7 +104,7 @@ public class ParentRemove extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_INHERIT.send(sender, holder.getFriendlyName(), groupName);
+            Message.DOES_NOT_INHERIT.send(sender, holder.getFriendlyName(), groupName, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

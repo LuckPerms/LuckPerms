@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 
 public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> {
     public HolderShowTracks(LocaleManager locale, boolean user) {
-        super(CommandSpec.HOLDER_SHOWTRACKS.spec(locale), "showtracks", user ? CommandPermission.USER_SHOWTRACKS : CommandPermission.GROUP_SHOWTRACKS, Predicates.alwaysFalse());
+        super(CommandSpec.HOLDER_SHOWTRACKS.spec(locale), "showtracks", user ? CommandPermission.USER_SHOW_TRACKS : CommandPermission.GROUP_SHOW_TRACKS, Predicates.alwaysFalse());
     }
 
     @Override
@@ -76,8 +76,8 @@ public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> 
                     .forEach(t -> sb.append("&a")
                             .append(t.getName())
                             .append(": ")
-                            .append(Util.listToArrowSep(t.getGroups(), name))
-                            .append(Util.getAppendableNodeContextString(node))
+                            .append(CommandUtils.listToArrowSep(t.getGroups(), name))
+                            .append(CommandUtils.getAppendableNodeContextString(node))
                             .append("\n")
                     );
         }

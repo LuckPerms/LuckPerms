@@ -36,11 +36,12 @@ import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.contexts.ContextSetComparator;
-import me.lucko.luckperms.common.node.NodeModel;
-import me.lucko.luckperms.common.node.NodeWithContextComparator;
+import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
+import me.lucko.luckperms.common.utils.CollationKeyCache;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,7 +107,7 @@ public class SubjectStorageModel {
             JsonObject context = section.get("context").getAsJsonObject();
             JsonObject data = section.get("data").getAsJsonObject();
             
-            ImmutableContextSet contextSet = NodeModel.deserializeContextSet(context).makeImmutable();
+            ImmutableContextSet contextSet = ContextSetJsonSerializer.deserializeContextSet(context).makeImmutable();
             ImmutableMap.Builder<String, Boolean> perms = ImmutableMap.builder();
             for (Map.Entry<String, JsonElement> perm : data.entrySet()) {
                 perms.put(perm.getKey(), perm.getValue().getAsBoolean());
@@ -129,7 +130,7 @@ public class SubjectStorageModel {
             JsonObject context = section.get("context").getAsJsonObject();
             JsonObject data = section.get("data").getAsJsonObject();
 
-            ImmutableContextSet contextSet = NodeModel.deserializeContextSet(context).makeImmutable();
+            ImmutableContextSet contextSet = ContextSetJsonSerializer.deserializeContextSet(context).makeImmutable();
             ImmutableMap.Builder<String, String> opts = ImmutableMap.builder();
             for (Map.Entry<String, JsonElement> opt : data.entrySet()) {
                 opts.put(opt.getKey(), opt.getValue().getAsString());
@@ -152,7 +153,7 @@ public class SubjectStorageModel {
             JsonObject context = section.get("context").getAsJsonObject();
             JsonArray data = section.get("data").getAsJsonArray();
 
-            ImmutableContextSet contextSet = NodeModel.deserializeContextSet(context).makeImmutable();
+            ImmutableContextSet contextSet = ContextSetJsonSerializer.deserializeContextSet(context).makeImmutable();
             ImmutableList.Builder<SubjectReference> pars = ImmutableList.builder();
             for (JsonElement p : data) {
                 if (!p.isJsonObject()) {
@@ -164,7 +165,7 @@ public class SubjectStorageModel {
                 String collection = parent.get("collection").getAsString();
                 String subject = parent.get("subject").getAsString();
                 
-                pars.add(SubjectReference.of(service, collection, subject));
+                pars.add(SubjectReferenceFactory.obtain(service, collection, subject));
             }
 
             parentsBuilder.put(contextSet, pars.build());
@@ -188,13 +189,13 @@ public class SubjectStorageModel {
             }
 
             JsonObject section = new JsonObject();
-            section.add("context", NodeModel.serializeContextSet(e.getKey()));
+            section.add("context", ContextSetJsonSerializer.serializeContextSet(e.getKey()));
             
             JsonObject data = new JsonObject();
 
             // sort alphabetically.
             List<Map.Entry<String, Boolean>> perms = new ArrayList<>(e.getValue().entrySet());
-            perms.sort((o1, o2) -> NodeWithContextComparator.get().compareStrings(o1.getKey(), o2.getKey()));
+            perms.sort(Map.Entry.comparingByKey(CollationKeyCache.comparator()));
 
             for (Map.Entry<String, Boolean> ent : perms) {
                 data.addProperty(ent.getKey(), ent.getValue());
@@ -212,13 +213,13 @@ public class SubjectStorageModel {
             }
 
             JsonObject section = new JsonObject();
-            section.add("context", NodeModel.serializeContextSet(e.getKey()));
+            section.add("context", ContextSetJsonSerializer.serializeContextSet(e.getKey()));
 
             JsonObject data = new JsonObject();
 
             // sort alphabetically.
             List<Map.Entry<String, String>> opts = new ArrayList<>(e.getValue().entrySet());
-            opts.sort((o1, o2) -> NodeWithContextComparator.get().compareStrings(o1.getKey(), o2.getKey()));
+            opts.sort(Map.Entry.comparingByKey(CollationKeyCache.comparator()));
 
             for (Map.Entry<String, String> ent : opts) {
                 data.addProperty(ent.getKey(), ent.getValue());
@@ -236,7 +237,7 @@ public class SubjectStorageModel {
             }
 
             JsonObject section = new JsonObject();
-            section.add("context", NodeModel.serializeContextSet(e.getKey()));
+            section.add("context", ContextSetJsonSerializer.serializeContextSet(e.getKey()));
 
             JsonArray data = new JsonArray();
             for (SubjectReference ref : e.getValue()) {

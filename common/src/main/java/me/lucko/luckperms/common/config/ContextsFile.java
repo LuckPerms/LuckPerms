@@ -34,7 +34,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.node.NodeModel;
+import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -75,16 +75,16 @@ public class ContextsFile {
             JsonObject data = new Gson().fromJson(reader, JsonObject.class);
 
             if (data.has("context")) {
-                staticContexts = NodeModel.deserializeContextSet(data.get("context").getAsJsonObject()).makeImmutable();
+                staticContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("context").getAsJsonObject()).makeImmutable();
                 save = true;
             }
 
             if (data.has("static-contexts")) {
-                staticContexts = NodeModel.deserializeContextSet(data.get("static-contexts").getAsJsonObject()).makeImmutable();
+                staticContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("static-contexts").getAsJsonObject()).makeImmutable();
             }
 
             if (data.has("default-contexts")) {
-                defaultContexts = NodeModel.deserializeContextSet(data.get("default-contexts").getAsJsonObject()).makeImmutable();
+                defaultContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("default-contexts").getAsJsonObject()).makeImmutable();
             }
 
         } catch (IOException e) {
@@ -102,8 +102,8 @@ public class ContextsFile {
         try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
 
             JsonObject data = new JsonObject();
-            data.add("static-contexts", NodeModel.serializeContextSet(staticContexts));
-            data.add("default-contexts", NodeModel.serializeContextSet(defaultContexts));
+            data.add("static-contexts", ContextSetJsonSerializer.serializeContextSet(staticContexts));
+            data.add("default-contexts", ContextSetJsonSerializer.serializeContextSet(defaultContexts));
 
             new GsonBuilder().setPrettyPrinting().create().toJson(data, writer);
             writer.flush();

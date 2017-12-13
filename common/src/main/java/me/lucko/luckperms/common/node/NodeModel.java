@@ -25,44 +25,21 @@
 
 package me.lucko.luckperms.common.node;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.ToString;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSetMultimap;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.context.MutableContextSet;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 /**
- * An stripped down version of {@link Node}, without methods and cached values for handling permission lookups.
+ * An stripped down version of {@link Node}, without methods and cached values
+ * for handling permission lookups.
  *
  * All values are non-null.
  */
-@Getter
-@ToString
-@EqualsAndHashCode
-@AllArgsConstructor(staticName = "of")
 public final class NodeModel {
-    private static final Gson GSON = new Gson();
 
     public static NodeModel fromNode(Node node) {
-        return NodeModel.of(
+        NodeModel model = of(
                 node.getPermission(),
                 node.getValuePrimitive(),
                 node.getServer().orElse("global"),
@@ -70,42 +47,67 @@ public final class NodeModel {
                 node.isTemporary() ? node.getExpiryUnixTime() : 0L,
                 node.getContexts().makeImmutable()
         );
+        model.node = node;
+        return model;
     }
 
-    public static NodeModel deserialize(String permission, boolean value, String server, String world, long expiry, String contexts) {
-        JsonObject context = GSON.fromJson(contexts, JsonObject.class);
-        return of(permission, value, server, world, expiry, deserializeContextSet(context).makeImmutable());
+    public static NodeModel of(String permission, boolean value, String server, String world, long expiry, ImmutableContextSet contexts) {
+        return new NodeModel(permission, value, server, world, expiry, contexts);
     }
 
-    @NonNull
     private final String permission;
-    @NonNull
     private final boolean value;
-    @NonNull
     private final String server;
-    @NonNull
     private final String world;
-    @NonNull
     private final long expiry;
-    @NonNull
     private final ImmutableContextSet contexts;
+    private Node node = null;
 
-    public String serializeContext() {
-        return GSON.toJson(getContextsAsJson());
+    private NodeModel(@NonNull String permission, boolean value, @NonNull String server, @NonNull String world, long expiry, @NonNull ImmutableContextSet contexts) {
+        this.permission = permission;
+        this.value = value;
+        this.server = server;
+        this.world = world;
+        this.expiry = expiry;
+        this.contexts = contexts;
     }
 
-    public JsonObject getContextsAsJson() {
-        return serializeContextSet(contexts);
+    public synchronized Node toNode() {
+        if (node == null) {
+            node = NodeFactory.newBuilder(permission)
+                    .setValue(value)
+                    .setServer(server)
+                    .setWorld(world)
+                    .setExpiry(expiry)
+                    .withExtraContext(contexts)
+                    .build();
+        }
+
+        return node;
     }
 
-    public Node toNode() {
-        Node.Builder builder = NodeFactory.newBuilder(permission);
-        builder.setValue(value);
-        builder.setServer(server);
-        builder.setWorld(world);
-        builder.setExpiry(expiry);
-        builder.withExtraContext(contexts);
-        return builder.build();
+    public String getPermission() {
+        return this.permission;
+    }
+
+    public boolean getValue() {
+        return this.value;
+    }
+
+    public String getServer() {
+        return this.server;
+    }
+
+    public String getWorld() {
+        return this.world;
+    }
+
+    public long getExpiry() {
+        return this.expiry;
+    }
+
+    public ImmutableContextSet getContexts() {
+        return this.contexts;
     }
 
     public NodeModel setPermission(String permission) {
@@ -132,47 +134,38 @@ public final class NodeModel {
         return of(permission, value, server, world, expiry, contexts);
     }
 
-    public static JsonObject serializeContextSet(ContextSet contextSet) {
-        JsonObject data = new JsonObject();
-        Map<String, Collection<String>> map = contextSet.toMultimap().asMap();
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof NodeModel)) return false;
+        final NodeModel other = (NodeModel) o;
 
-        map.forEach((k, v) -> {
-            List<String> values = new ArrayList<>(v);
-            int size = values.size();
-
-            if (size == 1) {
-                data.addProperty(k, values.get(0));
-            } else if (size > 1) {
-                JsonArray arr = new JsonArray();
-                for (String s : values) {
-                    arr.add(new JsonPrimitive(s));
-                }
-                data.add(k, arr);
-            }
-        });
-
-        return data;
+        return this.getPermission().equals(other.getPermission()) &&
+                this.getValue() == other.getValue() &&
+                this.getServer().equals(other.getServer()) &&
+                this.getWorld().equals(other.getWorld()) &&
+                this.getExpiry() == other.getExpiry() &&
+                this.getContexts().equals(other.getContexts());
     }
 
-    public static MutableContextSet deserializeContextSet(JsonElement element) {
-        Preconditions.checkArgument(element.isJsonObject());
-        JsonObject data = element.getAsJsonObject();
-
-        ImmutableSetMultimap.Builder<String, String> map = ImmutableSetMultimap.builder();
-        for (Map.Entry<String, JsonElement> e : data.entrySet()) {
-            String k = e.getKey();
-            JsonElement v = e.getValue();
-            if (v.isJsonArray()) {
-                JsonArray values = v.getAsJsonArray();
-                for (JsonElement value : values) {
-                    map.put(k, value.getAsString());
-                }
-            } else {
-                map.put(k, v.getAsString());
-            }
-        }
-
-        return MutableContextSet.fromMultimap(map.build());
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        result = result * PRIME + this.getPermission().hashCode();
+        result = result * PRIME + Boolean.hashCode(this.getValue());
+        result = result * PRIME + this.getServer().hashCode();
+        result = result * PRIME + this.getWorld().hashCode();
+        result = result * PRIME + Long.hashCode(this.getExpiry());
+        result = result * PRIME + this.getContexts().hashCode();
+        return result;
     }
 
+    public String toString() {
+        return "NodeModel(" +
+                "permission=" + this.getPermission() + ", " +
+                "value=" + this.getValue() + ", " +
+                "server=" + this.getServer() + ", " +
+                "world=" + this.getWorld() + ", " +
+                "expiry=" + this.getExpiry() + ", " +
+                "contexts=" + this.getContexts() + ")";
+    }
 }

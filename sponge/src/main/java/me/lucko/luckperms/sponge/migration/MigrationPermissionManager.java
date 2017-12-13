@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -40,14 +40,13 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.SafeIterator;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.SubjectCollection;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -93,18 +92,18 @@ public class MigrationPermissionManager extends SubCommand<Object> {
 
         // Migrate defaults
         log.log("Migrating default subjects.");
-        for (SubjectCollection collection : pmService.getKnownSubjects().values()) {
+        SafeIterator.iterate(pmService.getKnownSubjects().values(), collection -> {
             migrateSubjectData(
                     collection.getDefaults().getSubjectData(),
                     lpService.getCollection("defaults").loadSubject(collection.getIdentifier()).join().sponge().getSubjectData()
             );
-        }
+        });
         migrateSubjectData(pmService.getDefaults().getSubjectData(), lpService.getDefaults().sponge().getSubjectData());
 
         // Migrate groups
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
-        for (Subject pmGroup : pmService.getGroupSubjects().getAllSubjects()) {
+        SafeIterator.iterate(pmService.getGroupSubjects().getAllSubjects(), pmGroup -> {
             String pmName = MigrationUtils.standardizeName(pmGroup.getIdentifier());
 
             // Make a LuckPerms group for the one being migrated
@@ -114,17 +113,17 @@ public class MigrationPermissionManager extends SubCommand<Object> {
             plugin.getStorage().saveGroup(group);
 
             log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
-        }
+        });
         log.log("Migrated " + groupCount.get() + " groups");
 
         // Migrate users
         log.log("Starting user migration.");
         AtomicInteger userCount = new AtomicInteger(0);
-        for (Subject pmUser : pmService.getUserSubjects().getAllSubjects()) {
-            UUID uuid = Util.parseUuid(pmUser.getIdentifier());
+        SafeIterator.iterate(pmService.getUserSubjects().getAllSubjects(), pmUser -> {
+            UUID uuid = CommandUtils.parseUuid(pmUser.getIdentifier());
             if (uuid == null) {
                 log.logErr("Could not parse UUID for user: " + pmUser.getIdentifier());
-                continue;
+                return;
             }
 
             // Make a LuckPerms user for the one being migrated
@@ -138,7 +137,7 @@ public class MigrationPermissionManager extends SubCommand<Object> {
             plugin.getUserManager().cleanup(user);
 
             log.logProgress("Migrated {} users so far.", userCount.incrementAndGet());
-        }
+        });
 
         log.log("Migrated " + userCount.get() + " users.");
         log.log("Success! Migration complete.");

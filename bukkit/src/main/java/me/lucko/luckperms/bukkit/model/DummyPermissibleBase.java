@@ -35,77 +35,25 @@ import java.util.Collections;
 import java.util.Set;
 
 public class DummyPermissibleBase extends PermissibleBase {
-    public DummyPermissibleBase() {
+    public static final DummyPermissibleBase INSTANCE = new DummyPermissibleBase();
+
+    private DummyPermissibleBase() {
         super(null);
     }
 
-    @Override
-    public boolean isOp() {
-        return false;
-    }
+    @Override public boolean isOp() { return false; }
+    @Override public void setOp(boolean value) {}
+    @Override public boolean isPermissionSet(String name) { return false; }
+    @Override public boolean isPermissionSet(Permission perm) { return false; }
+    @Override public boolean hasPermission(String inName) { return false; }
+    @Override public boolean hasPermission(Permission perm) { return false; }
+    @Override public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value) { return null; }
+    @Override public PermissionAttachment addAttachment(Plugin plugin) { return null; }
+    @Override public void removeAttachment(PermissionAttachment attachment) {}
+    @Override public void recalculatePermissions() {}
+    @Override public void clearPermissions() {}
+    @Override public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value, int ticks) { return null; }
+    @Override public PermissionAttachment addAttachment(Plugin plugin, int ticks) { return null; }
+    @Override public Set<PermissionAttachmentInfo> getEffectivePermissions() { return Collections.emptySet(); }
 
-    @Override
-    public void setOp(boolean value) {
-
-    }
-
-    @Override
-    public boolean isPermissionSet(String name) {
-        return false;
-    }
-
-    @Override
-    public boolean isPermissionSet(Permission perm) {
-        return false;
-    }
-
-    @Override
-    public boolean hasPermission(String inName) {
-        return false;
-    }
-
-    @Override
-    public boolean hasPermission(Permission perm) {
-        return false;
-    }
-
-    @Override
-    public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value) {
-        return null;
-    }
-
-    @Override
-    public PermissionAttachment addAttachment(Plugin plugin) {
-        return null;
-    }
-
-    @Override
-    public void removeAttachment(PermissionAttachment attachment) {
-
-    }
-
-    @Override
-    public void recalculatePermissions() {
-
-    }
-
-    @Override
-    public synchronized void clearPermissions() {
-
-    }
-
-    @Override
-    public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value, int ticks) {
-        return null;
-    }
-
-    @Override
-    public PermissionAttachment addAttachment(Plugin plugin, int ticks) {
-        return null;
-    }
-
-    @Override
-    public Set<PermissionAttachmentInfo> getEffectivePermissions() {
-        return Collections.emptySet();
-    }
 }
