@@ -31,7 +31,6 @@ user-invalid-entry: "&4{0}&c不是有效的用户名/uuid。"
 group-invalid-entry: "&4{0}&c不是有效的组名称。"
 track-invalid-entry: "&4{0}&c不是有效的权限组轨道名称。"
 server-world-invalid-entry: "&c服务器/世界名称只能包含字母数字字符，长度不能超过36个字符。"
-use-inherit-command: "&c使用'parent add'和'parent remove'命令，而不是指定节点。"
 verbose-invalid-filter: "&4{0}&c不是有效的详细过滤器"
 verbose-on: "&b将匹配过滤器:&aANY&b的权限详细输出设置为&a开&b。"
 verbose-on-query: "&b将匹配过滤器:&a{0}&b的权限详细输出设置为&a开&b。"
@@ -57,7 +56,10 @@ apply-edits-target-group-not-exists: "&c目标组&4{0}&c不存在。"
 apply-edits-target-user-not-uuid: "&c目标用户&4{0}&c不是一个有效的uuid。"
 apply-edits-target-user-unable-to-load: "&c无法加载目标用户&4{0}&c。"
 apply-edits-target-unknown: "&c目标无效。&7({0})"
-apply-edits-success: "&a成功应用&b{0}&a节点到&b{1}&a。"
+apply-edits-success: "&a网页编辑器数据已成功应用于&b{0}&a。"
+apply-edits-success-summary: "&7(&a{0} &7{1} 和 &c{2} &7{3})"
+apply-edits-diff-added: "&a+  &f{0}"
+apply-edits-diff-removed: "&c-  &f{0}"
 editor-upload-failure: "&c无法将权限数据上传到编辑器。"
 editor-url: "&a编辑器URL:"
 check-result: "&a用户&b{0}&a获得允许&b{1}&a权限的检查结果&a: &f{2}"
@@ -234,6 +236,11 @@ group-info-general: >
   {PREFIX}&f-    &3后缀: &a{6}\n
   {PREFIX}&f-    &3元信息: &a{7}
 group-set-weight: "&a将组&b{1}&a的权重设置为&b{0}&a。"
+group-set-display-name-doesnt-have: "&b{0}&a没有设置显示名称。"
+group-set-display-name-already-has: "&b{0}&a已经有一个显示名称&b{1}&a。"
+group-set-display-name-already-in-use: "&a显示名称&b{0}&a已经被&b{1}&a占用。"
+group-set-display-name: "&a设置组&b{1}&a的显示名称为&b{0}&a。"
+group-set-display-name-removed: "&a删除组&b{0}&a的显示名称。"
 track-info: >
   {PREFIX}&b&l> &b显示权限组轨道: &f{0}\n
   {PREFIX}&f- &7路径: &f{1}
