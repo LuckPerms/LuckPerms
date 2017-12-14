@@ -162,7 +162,7 @@ public class UserDemote extends SubCommand<User> {
 
         Message.USER_DEMOTE_SUCCESS.send(sender, user.getFriendlyName(), track.getName(), old, previousGroup.getFriendlyName(), CommandUtils.contextSetToString(context));
         if (!silent) {
-            Message.EMPTY.send(sender, CommandUtils.listToArrowSep(track.getGroups(), previousGroup.getFriendlyName(), old, true));
+            Message.EMPTY.send(sender, CommandUtils.listToArrowSep(track.getGroups(), previousGroup.getName(), old, true));
         }
 
         ExtendedLogEntry.build().actor(sender).acted(user)

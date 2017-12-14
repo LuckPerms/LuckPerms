@@ -116,9 +116,9 @@ public class UserPromote extends SubCommand<User> {
                 return CommandResult.NO_PERMISSION;
             }
 
-            user.setPermission(NodeFactory.newBuilder("group." + first).withExtraContext(context).build());
+            user.setPermission(NodeFactory.newBuilder("group." + nextGroup.getId()).withExtraContext(context).build());
 
-            Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFriendlyName(), first, CommandUtils.contextSetToString(context));
+            Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFriendlyName(), nextGroup.getFriendlyName(), CommandUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(user)
                     .action("promote", track.getName(), context)
@@ -174,7 +174,7 @@ public class UserPromote extends SubCommand<User> {
 
         Message.USER_PROMOTE_SUCCESS.send(sender, user.getFriendlyName(), track.getName(), old, nextGroup.getFriendlyName(), CommandUtils.contextSetToString(context));
         if (!silent) {
-            Message.EMPTY.send(sender, CommandUtils.listToArrowSep(track.getGroups(), old, nextGroup.getFriendlyName(), false));
+            Message.EMPTY.send(sender, CommandUtils.listToArrowSep(track.getGroups(), old, nextGroup.getName(), false));
         }
 
         ExtendedLogEntry.build().actor(sender).acted(user)
