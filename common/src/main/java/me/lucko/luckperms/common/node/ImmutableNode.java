@@ -54,13 +54,6 @@ public final class ImmutableNode implements Node {
      */
     private static final int NODE_SEPARATOR_CHAR = Character.getNumericValue('.');
 
-    /*
-     * NODE STATE
-     *
-     * This are the actual node attributes, and are
-     * really just what this class wraps.
-     */
-
     @Getter
     private final String permission;
 

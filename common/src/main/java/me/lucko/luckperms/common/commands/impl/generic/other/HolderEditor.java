@@ -67,6 +67,8 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
             return CommandResult.NO_PERMISSION;
         }
 
+        Message.EDITOR_START.send(sender);
+
         // form the payload data
         JsonObject payload = new JsonObject();
         payload.addProperty("who", WebEditorUtils.getHolderIdentifier(holder));
