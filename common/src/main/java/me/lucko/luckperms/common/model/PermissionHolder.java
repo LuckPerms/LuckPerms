@@ -64,6 +64,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.primarygroup.GroupInheritanceComparator;
 import me.lucko.luckperms.common.references.GroupReference;
 import me.lucko.luckperms.common.references.HolderReference;
+import me.lucko.luckperms.common.references.HolderType;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -240,7 +241,7 @@ public abstract class PermissionHolder {
     protected void declareState() {
         /* only declare state of groups. the state manager isn't really being used now the caches in this class
            are gone, but it's useful for command output. */
-        if (this instanceof Group) {
+        if (this.getType().isGroup()) {
             plugin.getCachedStateManager().putAll(toReference(), getGroupReferences());
         }
     }
@@ -267,6 +268,13 @@ public abstract class PermissionHolder {
      * @return this holders reference
      */
     public abstract HolderReference<?, ?> toReference();
+
+    /**
+     * Returns the type of this PermissionHolder.
+     *
+     * @return this holders type
+     */
+    public abstract HolderType getType();
 
     /**
      * Gets the API delegate for this instance
@@ -543,7 +551,7 @@ public abstract class PermissionHolder {
             excludedGroups = new HashSet<>();
         }
 
-        if (this instanceof Group) {
+        if (this.getType().isGroup()) {
             excludedGroups.add(getObjectName().toLowerCase());
         }
 
@@ -619,7 +627,7 @@ public abstract class PermissionHolder {
             excludedGroups = new HashSet<>();
         }
 
-        if (this instanceof Group) {
+        if (this.getType().isGroup()) {
             excludedGroups.add(getObjectName().toLowerCase());
         }
 
@@ -768,7 +776,7 @@ public abstract class PermissionHolder {
             excludedGroups = new HashSet<>();
         }
 
-        if (this instanceof Group) {
+        if (this.getType().isGroup()) {
             excludedGroups.add(getObjectName().toLowerCase());
         }
 
@@ -830,7 +838,7 @@ public abstract class PermissionHolder {
             excludedGroups = new HashSet<>();
         }
 
-        if (this instanceof Group) {
+        if (this.getType().isGroup()) {
             excludedGroups.add(getObjectName().toLowerCase());
         }
 
@@ -956,7 +964,7 @@ public abstract class PermissionHolder {
      * @return a tristate
      */
     public Tristate hasPermission(Node node, boolean checkTransient) {
-        if (this instanceof Group && node.isGroupNode() && node.getGroupName().equalsIgnoreCase(getObjectName())) {
+        if (this.getType().isGroup() && node.isGroupNode() && node.getGroupName().equalsIgnoreCase(getObjectName())) {
             return Tristate.TRUE;
         }
 
@@ -1327,7 +1335,7 @@ public abstract class PermissionHolder {
             nodesLock.unlock();
         }
 
-        if (this instanceof User && giveDefault) {
+        if (this.getType().isUser() && giveDefault) {
             plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
         }
 
@@ -1355,7 +1363,7 @@ public abstract class PermissionHolder {
             nodesLock.unlock();
         }
 
-        if (this instanceof User && giveDefault) {
+        if (this.getType().isUser() && giveDefault) {
             plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
         }
         invalidateCache();
@@ -1501,7 +1509,7 @@ public abstract class PermissionHolder {
     }
 
     private OptionalInt calculateWeight() {
-        if (this instanceof User) return OptionalInt.empty();
+        if (this.getType().isUser()) return OptionalInt.empty();
 
         boolean seen = false;
         int best = 0;

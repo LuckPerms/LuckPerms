@@ -283,11 +283,11 @@ public class ExtendedLogEntry implements LogEntry {
         }
 
         public ExtendedLogEntryBuilder acted(PermissionHolder acted) {
-            if (acted instanceof User) {
+            if (acted.getType().isUser()) {
                 actedName(((User) acted).getName().orElse("null"));
                 acted(((User) acted).getUuid());
                 type(Type.USER);
-            } else if (acted instanceof Group) {
+            } else if (acted.getType().isGroup()) {
                 actedName(((Group) acted).getName());
                 type(Type.GROUP);
             }

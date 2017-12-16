@@ -66,7 +66,7 @@ public class ApiPermissionHolder implements PermissionHolder {
 
     @Override
     public String getFriendlyName() {
-        if (handle instanceof Group) {
+        if (handle.getType().isGroup()) {
             Group group = (Group) this.handle;
             return group.getDisplayName().orElse(group.getName());
         }
@@ -181,7 +181,7 @@ public class ApiPermissionHolder implements PermissionHolder {
     @Override
     public void clearMatching(Predicate<Node> test) {
         handle.removeIf(test);
-        if (handle instanceof User) {
+        if (handle.getType().isUser()) {
             handle.getPlugin().getUserManager().giveDefaultIfNeeded((User) handle, false);
         }
     }

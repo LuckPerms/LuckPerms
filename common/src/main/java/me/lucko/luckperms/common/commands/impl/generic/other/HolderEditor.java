@@ -71,7 +71,7 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
         JsonObject payload = new JsonObject();
         payload.addProperty("who", WebEditorUtils.getHolderIdentifier(holder));
         payload.addProperty("whoFriendly", holder.getFriendlyName());
-        if (holder instanceof User) {
+        if (holder.getType().isUser()) {
             payload.addProperty("whoUuid", ((User) holder).getUuid().toString());
         }
         payload.addProperty("cmdAlias", label);

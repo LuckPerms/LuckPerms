@@ -113,10 +113,9 @@ public enum Message {
     SEARCH_SEARCHING("&aSearching for users and groups with &b{}&a...", true),
     SEARCH_SEARCHING_MEMBERS("&aSearching for users and groups who inherit from &b{}&a...", true),
     SEARCH_RESULT("&aFound &b{}&a entries from &b{}&a users and &b{}&a groups.", true),
-    SEARCH_SHOWING_USERS("&bShowing user entries:", true),
-    SEARCH_SHOWING_GROUPS("&bShowing group entries:", true),
-    SEARCH_SHOWING_USERS_WITH_PAGE("&bShowing user entries:  {}", true),
-    SEARCH_SHOWING_GROUPS_WITH_PAGE("&bShowing group entries:  {}", true),
+
+    SEARCH_SHOWING_USERS("&bShowing user entries:    &7(showing page &f{}&7 of &f{}&7 - &f{}&7 entries)", true),
+    SEARCH_SHOWING_GROUPS("&bShowing group entries:    &7(showing page &f{}&7 of &f{}&7 - &f{}&7 entries)", true),
 
     APPLY_EDITS_INVALID_CODE("&cInvalid code. &7({})", true),
     APPLY_EDITS_UNABLE_TO_READ("&cUnable to read data using the given code. &7({})", true),
@@ -198,14 +197,14 @@ public enum Message {
 
     TRACKS_LIST("&aTracks: {}", true),
 
-    LISTNODES("&b{}'s Permissions:", true),
-    LISTNODES_WITH_PAGE("&b{}'s Permissions:  {}", true),
-    LISTNODES_TEMP("&b{}'s Temporary Permissions:", true),
-    LISTNODES_TEMP_WITH_PAGE("&b{}'s Temporary Permissions:  {}", true),
+    PERMISSION_INFO("&b{}'s Permissions:  &7(showing page &f{}&7 of &f{}&7 - &f{}&7 entries)", true),
+    PERMISSION_INFO_NO_DATA("&b{}&a does not have any permissions set.", true),
 
-    LISTPARENTS("&b{}'s Parent Groups:", true),
-    LISTPARENTS_TEMP("&b{}'s Temporary Parent Groups:", true),
-    LIST_TRACKS("&b{}'s Tracks:" + "\n" + "{}", true),
+    PARENT_INFO("&b{}'s Parents:  &7(showing page &f{}&7 of &f{}&7 - &f{}&7 entries)", true),
+    PARENT_INFO_NO_DATA("&b{}&a does not have any parents defined.", true),
+
+    LIST_TRACKS("&b{}'s Tracks:", true),
+    LIST_TRACKS_ENTRY("&a{}: {}", false),
     LIST_TRACKS_EMPTY("&b{}&a is not on any tracks.", true),
 
     CONTEXT_PAIR_INLINE("&3{}=&b{}", false),

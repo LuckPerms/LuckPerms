@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.caching.UserCachedData;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
+import me.lucko.luckperms.common.references.HolderType;
 import me.lucko.luckperms.common.references.Identifiable;
 import me.lucko.luckperms.common.references.UserIdentifier;
 import me.lucko.luckperms.common.references.UserReference;
@@ -166,6 +167,11 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     @Override
     public UserReference toReference() {
         return UserReference.of(getId());
+    }
+
+    @Override
+    public HolderType getType() {
+        return HolderType.USER;
     }
 
     /**

@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.references.HolderType;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.utils.Cycle;
 
@@ -124,7 +125,7 @@ public class Exporter implements Runnable {
 
                 write(writer, "# Export group: " + group.getName());
                 for (Node node : group.getEnduringNodes().values()) {
-                    write(writer, "/lp " + NodeFactory.nodeAsCommand(node, group.getName(), true, true));
+                    write(writer, "/lp " + NodeFactory.nodeAsCommand(node, group.getName(), HolderType.GROUP, true));
                 }
                 write(writer, "");
                 log.logAllProgress("Exported {} groups so far.", groupCount.incrementAndGet());
@@ -230,7 +231,7 @@ public class Exporter implements Runnable {
                                     continue;
                                 }
 
-                                output.add("/lp " + NodeFactory.nodeAsCommand(node, user.getUuid().toString(), false, true));
+                                output.add("/lp " + NodeFactory.nodeAsCommand(node, user.getUuid().toString(), HolderType.USER, true));
                             }
 
                             if (!user.getPrimaryGroup().getStoredValue().orElse("default").equalsIgnoreCase("default")) {

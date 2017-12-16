@@ -34,6 +34,7 @@ import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.references.HolderType;
 import me.lucko.luckperms.common.utils.PatternCache;
 
 import java.util.Iterator;
@@ -79,9 +80,9 @@ public class NodeFactory {
         return new NodeBuilder("suffix." + priority + "." + LegacyNodeFactory.escapeCharacters(suffix));
     }
 
-    public static String nodeAsCommand(Node node, String id, boolean group, boolean set) {
+    public static String nodeAsCommand(Node node, String id, HolderType type, boolean set) {
         StringBuilder sb = new StringBuilder();
-        sb.append(group ? "group " : "user ").append(id).append(" ");
+        sb.append(type.toString()).append(" ").append(id).append(" ");
 
         if (node.isGroupNode()) {
             sb.append(node.isTemporary() ? (set ? "parent addtemp " : "parent removetemp ") : (set ? "parent add " : "parent remove "));
@@ -95,16 +96,16 @@ public class NodeFactory {
         }
 
         if (node.getValuePrimitive() && (node.isPrefix() || node.isSuffix())) {
-            ChatMetaType type = node.isPrefix() ? ChatMetaType.PREFIX : ChatMetaType.SUFFIX;
+            ChatMetaType nodeType = node.isPrefix() ? ChatMetaType.PREFIX : ChatMetaType.SUFFIX;
             String typeName = type.name().toLowerCase();
 
             sb.append(node.isTemporary() ? (set ? "meta addtemp" + typeName + " " : "meta removetemp" + typeName + " ") : (set ? "meta add" + typeName + " " : "meta remove" + typeName + " "));
-            sb.append(type.getEntry(node).getKey()).append(" ");
+            sb.append(nodeType.getEntry(node).getKey()).append(" ");
 
-            if (type.getEntry(node).getValue().contains(" ")) {
-                sb.append("\"").append(type.getEntry(node).getValue()).append("\"");
+            if (nodeType.getEntry(node).getValue().contains(" ")) {
+                sb.append("\"").append(nodeType.getEntry(node).getValue()).append("\"");
             } else {
-                sb.append(type.getEntry(node).getValue());
+                sb.append(nodeType.getEntry(node).getValue());
             }
             if (set && node.isTemporary()) {
                 sb.append(" ").append(node.getExpiryUnixTime());

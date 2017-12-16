@@ -75,7 +75,7 @@ public class ParentRemove extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        if (holder instanceof User) {
+        if (holder.getType().isUser()) {
             User user = (User) holder;
 
             boolean shouldPrevent = plugin.getConfiguration().get(ConfigKeys.PREVENT_PRIMARY_GROUP_REMOVAL) &&
@@ -97,7 +97,7 @@ public class ParentRemove extends SharedSubCommand {
                     .action("parent", "remove", groupName, context)
                     .build().submit(plugin, sender);
 
-            if (holder instanceof User) {
+            if (holder.getType().isUser()) {
                 plugin.getUserManager().giveDefaultIfNeeded(((User) holder), false);
             }
 

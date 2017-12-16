@@ -1,8 +1,5 @@
 /*
- * This file is part of LuckPerms, licensed under the MIT License.
- *
- *  Copyright (c) lucko (Luck) <luck@lucko.me>
- *  Copyright (c) contributors
+ * Copyright (c) 2017 Lucko (Luck) <luck@lucko.me>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -23,26 +20,12 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.references;
+package me.lucko.luckperms.common.commands.utils;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+public enum SortType {
 
-import me.lucko.luckperms.common.model.PermissionHolder;
-
-@Getter
-@AllArgsConstructor
-public enum HolderType {
-
-    USER(true, false),
-    GROUP(false, true);
-
-    private final boolean user;
-    private final boolean group;
-
-    public boolean matches(PermissionHolder holder) {
-        return holder.getType() == this;
-    }
+    PRIORITY,
+    ALPHABETICALLY;
 
     @Override
     public String toString() {

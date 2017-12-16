@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.caching.GroupCachedData;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.GroupReference;
+import me.lucko.luckperms.common.references.HolderType;
 import me.lucko.luckperms.common.references.Identifiable;
 
 import java.util.Optional;
@@ -109,6 +110,11 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     @Override
     public GroupReference toReference() {
         return GroupReference.of(getId());
+    }
+
+    @Override
+    public HolderType getType() {
+        return HolderType.GROUP;
     }
 
     private CompletableFuture<Void> reloadCachedData() {

@@ -42,7 +42,7 @@ public class GroupInheritanceComparator implements Comparator<Group> {
     private static final Comparator<Group> NULL_ORIGIN = new GroupInheritanceComparator(null);
 
     public static Comparator<Group> getFor(PermissionHolder origin) {
-        if (origin instanceof User) {
+        if (origin.getType().isUser()) {
             return new GroupInheritanceComparator(((User) origin));
         }
         return NULL_ORIGIN;

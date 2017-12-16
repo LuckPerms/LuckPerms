@@ -43,7 +43,6 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -168,12 +167,12 @@ public class MetaInfo extends SharedSubCommand {
                 "¥7Click to remove this " + type.name().toLowerCase() + " from " + holder.getFriendlyName()
         ), '¥'));
 
-        boolean group = !(holder instanceof User);
-        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, group ? holder.getObjectName() : holder.getFriendlyName(), group, false);
+        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType().isGroup() ? holder.getObjectName() : holder.getFriendlyName(), holder.getType(), false);
+        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
 
         return component -> {
             component.hoverEvent(hoverEvent);
-            component.clickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command));
+            component.clickEvent(clickEvent);
         };
     }
 
@@ -192,12 +191,12 @@ public class MetaInfo extends SharedSubCommand {
                 "¥7Click to remove this meta pair from " + holder.getFriendlyName()
         ), '¥'));
 
-        boolean group = !(holder instanceof User);
-        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, group ? holder.getObjectName() : holder.getFriendlyName(), group, false);
+        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType().isGroup() ? holder.getObjectName() : holder.getFriendlyName(), holder.getType(), false);
+        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
 
         return component -> {
             component.hoverEvent(hoverEvent);
-            component.clickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command));
+            component.clickEvent(clickEvent);
         };
     }
 }

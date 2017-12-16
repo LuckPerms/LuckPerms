@@ -118,13 +118,13 @@ public abstract class SharedSubCommand {
     }
 
     public static void save(PermissionHolder holder, Sender sender, LuckPermsPlugin plugin) {
-        if (holder instanceof User) {
+        if (holder.getType().isUser()) {
             User user = ((User) holder);
             SubCommand.save(user, sender, plugin);
             return;
         }
 
-        if (holder instanceof Group) {
+        if (holder.getType().isGroup()) {
             Group group = ((Group) holder);
             SubCommand.save(group, sender, plugin);
             return;

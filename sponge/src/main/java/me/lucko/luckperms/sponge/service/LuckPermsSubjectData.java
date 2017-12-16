@@ -133,7 +133,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
             return CompletableFuture.completedFuture(false);
         }
 
-        if (holder instanceof User) {
+        if (holder.getType().isUser()) {
             service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) holder), false);
         }
 
@@ -158,7 +158,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
             return CompletableFuture.completedFuture(false);
         }
 
-        if (holder instanceof User) {
+        if (holder.getType().isUser()) {
             service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) holder), false);
         }
 
@@ -251,7 +251,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
             toRemove.forEach(makeUnsetConsumer(false));
             ret = !toRemove.isEmpty();
 
-            if (ret && holder instanceof User) {
+            if (ret && holder.getType().isUser()) {
                 service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) holder), false);
             }
         }
@@ -277,7 +277,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
             toRemove.forEach(makeUnsetConsumer(false));
             ret = !toRemove.isEmpty();
 
-            if (ret && holder instanceof User) {
+            if (ret && holder.getType().isUser()) {
                 service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) holder), false);
             }
         }
@@ -441,14 +441,14 @@ public class LuckPermsSubjectData implements LPSubjectData {
     private CompletableFuture<Void> objectSave(PermissionHolder t) {
         if (!enduring) {
             // don't bother saving to primary storage. just refresh
-            if (t instanceof User) {
+            if (t.getType().isUser()) {
                 User user = ((User) t);
                 return user.getRefreshBuffer().request();
             } else {
                 return service.getPlugin().getUpdateTaskBuffer().request();
             }
         } else {
-            if (t instanceof User) {
+            if (t.getType().isUser()) {
                 User user = ((User) t);
                 return service.getPlugin().getStorage().saveUser(user).thenComposeAsync(success -> {
                     if (!success) {

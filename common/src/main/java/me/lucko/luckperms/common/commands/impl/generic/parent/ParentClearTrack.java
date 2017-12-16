@@ -103,7 +103,7 @@ public class ParentClearTrack extends SharedSubCommand {
             holder.removeIf(node -> node.isGroupNode() && node.getFullContexts().equals(context) && track.containsGroup(node.getGroupName()));
         }
 
-        if (holder instanceof User) {
+        if (holder.getType().isUser()) {
             plugin.getUserManager().giveDefaultIfNeeded(((User) holder), false);
         }
 

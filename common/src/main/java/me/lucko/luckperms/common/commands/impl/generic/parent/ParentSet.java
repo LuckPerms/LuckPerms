@@ -86,7 +86,7 @@ public class ParentSet extends SharedSubCommand {
 
         holder.clearParents(context, false);
         holder.setInheritGroup(group, context);
-        if (holder instanceof User) {
+        if (holder.getType().isUser()) {
             ((User) holder).getPrimaryGroup().setStoredValue(group.getName());
         }
 

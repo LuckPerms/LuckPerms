@@ -302,7 +302,7 @@ public class VaultChatHook extends Chat {
         world = perms.correctWorld(world);
 
         Contexts contexts;
-        if (holder instanceof User) {
+        if (holder.getType().isUser()) {
             contexts = perms.createContextForWorldLookup(perms.getPlugin().getPlayer((User) holder), world);
         } else {
             contexts = perms.createContextForWorldLookup(world);
@@ -322,7 +322,7 @@ public class VaultChatHook extends Chat {
         world = perms.correctWorld(world);
 
         Contexts contexts;
-        if (holder instanceof User) {
+        if (holder.getType().isUser()) {
             contexts = perms.createContextForWorldLookup(perms.getPlugin().getPlayer((User) holder), world);
         } else {
             contexts = perms.createContextForWorldLookup(world);

@@ -48,7 +48,7 @@ import java.util.Set;
 public class SpongeMigrationUtils {
 
     public static void migrateSubject(Subject from, PermissionHolder to, int priority) {
-        if (to instanceof Group) {
+        if (to.getType().isGroup()) {
             MigrationUtils.setGroupWeight((Group) to, priority);
         }
 

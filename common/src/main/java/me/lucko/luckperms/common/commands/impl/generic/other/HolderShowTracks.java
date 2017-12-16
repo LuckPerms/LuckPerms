@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.commands.impl.generic.other;
 
+import com.google.common.collect.Maps;
+
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -37,10 +39,13 @@ import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -63,32 +68,32 @@ public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> 
 
         Set<Node> nodes = holder.getEnduringNodes().values().stream()
                 .filter(Node::isGroupNode)
+                .filter(Node::getValuePrimitive)
                 .filter(Node::isPermanent)
                 .collect(Collectors.toSet());
 
-        StringBuilder sb = new StringBuilder();
+        List<Map.Entry<Track, String>> lines = new ArrayList<>();
 
         for (Node node : nodes) {
             String name = node.getGroupName();
-
-            plugin.getTrackManager().getAll().values().stream()
+            List<Track> tracks = plugin.getTrackManager().getAll().values().stream()
                     .filter(t -> t.containsGroup(name))
-                    .forEach(t -> sb.append("&a")
-                            .append(t.getName())
-                            .append(": ")
-                            .append(CommandUtils.listToArrowSep(t.getGroups(), name))
-                            .append(CommandUtils.getAppendableNodeContextString(node))
-                            .append("\n")
-                    );
+                    .collect(Collectors.toList());
+
+            for (Track t : tracks) {
+                lines.add(Maps.immutableEntry(t, CommandUtils.listToArrowSep(t.getGroups(), name) + CommandUtils.getAppendableNodeContextString(node)));
+            }
         }
 
-        if (sb.length() == 0) {
+        if (lines.isEmpty()) {
             Message.LIST_TRACKS_EMPTY.send(sender, holder.getFriendlyName());
             return CommandResult.SUCCESS;
-        } else {
-            sb.deleteCharAt(sb.length() - 1);
-            Message.LIST_TRACKS.send(sender, holder.getFriendlyName(), sb.toString());
-            return CommandResult.SUCCESS;
         }
+
+        Message.LIST_TRACKS.send(sender, holder.getFriendlyName());
+        for (Map.Entry<Track, String> line : lines) {
+            Message.LIST_TRACKS_ENTRY.send(sender, line.getKey().getName(), line.getValue());
+        }
+        return CommandResult.SUCCESS;
     }
 }
