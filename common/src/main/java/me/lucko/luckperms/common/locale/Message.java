@@ -48,7 +48,7 @@ public enum Message {
     VIEW_AVAILABLE_COMMANDS_PROMPT("&3Use &a/{} help &3to view available commands.", true),
     NO_PERMISSION_FOR_SUBCOMMANDS("&3You do not have permission to use any sub commands.", true),
 
-    EMPTY("&c{}", true),
+    EMPTY("{}", true),
     PLAYER_ONLINE("&aOnline", false),
     PLAYER_OFFLINE("&cOffline", false),
     LOADING_ERROR("&cPermissions data could not be loaded. Please try again later.", true),
