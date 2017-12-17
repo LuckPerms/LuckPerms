@@ -67,9 +67,9 @@ public class UserInfo extends SubCommand<User> {
                 user.getPrimaryGroup().getValue(),
                 user.getOwnNodes().size(),
                 user.getOwnNodes().stream().filter(n -> !(n.isGroupNode() || n.isPrefix() || n.isSuffix() || n.isMeta())).mapToInt(n -> 1).sum(),
-                user.getPrefixNodes().size(),
-                user.getSuffixNodes().size(),
-                user.getMetaNodes().size()
+                user.getOwnNodes().stream().filter(Node::isPrefix).mapToInt(n -> 1).sum(),
+                user.getOwnNodes().stream().filter(Node::isSuffix).mapToInt(n -> 1).sum(),
+                user.getOwnNodes().stream().filter(Node::isMeta).mapToInt(n -> 1).sum()
         );
 
         Set<Node> parents = user.getOwnNodesSet().stream()

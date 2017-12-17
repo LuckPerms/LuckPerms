@@ -975,30 +975,6 @@ public abstract class PermissionHolder {
         return hasPermission(node, false);
     }
 
-    public boolean hasPermission(String node, boolean value) {
-        return hasPermission(NodeFactory.make(node, value)).asBoolean() == value;
-    }
-
-    public boolean hasPermission(String node, boolean value, String server) {
-        return hasPermission(NodeFactory.make(node, value, server)).asBoolean() == value;
-    }
-
-    public boolean hasPermission(String node, boolean value, String server, String world) {
-        return hasPermission(NodeFactory.make(node, value, server, world)).asBoolean() == value;
-    }
-
-    public boolean hasPermission(String node, boolean value, boolean temporary) {
-        return hasPermission(NodeFactory.make(node, value, temporary)).asBoolean() == value;
-    }
-
-    public boolean hasPermission(String node, boolean value, String server, boolean temporary) {
-        return hasPermission(NodeFactory.make(node, value, server, temporary)).asBoolean() == value;
-    }
-
-    public boolean hasPermission(String node, boolean value, String server, String world, boolean temporary) {
-        return hasPermission(NodeFactory.make(node, value, server, world, temporary)).asBoolean() == value;
-    }
-
     /**
      * Check if the holder inherits a node
      *
@@ -1023,30 +999,6 @@ public abstract class PermissionHolder {
      */
     public Tristate inheritsPermission(Node node) {
         return inheritsPermissionInfo(node).getResult();
-    }
-
-    public boolean inheritsPermission(String node, boolean value) {
-        return inheritsPermission(NodeFactory.make(node, value)).asBoolean() == value;
-    }
-
-    public boolean inheritsPermission(String node, boolean value, String server) {
-        return inheritsPermission(NodeFactory.make(node, value, server)).asBoolean() == value;
-    }
-
-    public boolean inheritsPermission(String node, boolean value, String server, String world) {
-        return inheritsPermission(NodeFactory.make(node, value, server, world)).asBoolean() == value;
-    }
-
-    public boolean inheritsPermission(String node, boolean value, boolean temporary) {
-        return inheritsPermission(NodeFactory.make(node, value, temporary)).asBoolean() == value;
-    }
-
-    public boolean inheritsPermission(String node, boolean value, String server, boolean temporary) {
-        return inheritsPermission(NodeFactory.make(node, value, server, temporary)).asBoolean() == value;
-    }
-
-    public boolean inheritsPermission(String node, boolean value, String server, String world, boolean temporary) {
-        return inheritsPermission(NodeFactory.make(node, value, server, world, temporary)).asBoolean() == value;
     }
 
     /**
@@ -1202,33 +1154,6 @@ public abstract class PermissionHolder {
     }
 
     /**
-     * Unsets a permission node
-     *
-     * @param node the node to unset
-     */
-    public DataMutateResult unsetPermissionExact(Node node) {
-        ImmutableCollection<Node> before = getEnduringNodes().values();
-
-        nodesLock.lock();
-        try {
-            nodes.get(node.getFullContexts().makeImmutable()).removeIf(e -> e.equals(node));
-        } finally {
-            nodesLock.unlock();
-        }
-
-        invalidateCache();
-
-        ImmutableCollection<Node> after = getEnduringNodes().values();
-
-        if (before.size() == after.size()) {
-            return DataMutateResult.LACKS;
-        }
-
-        plugin.getApiProvider().getEventFactory().handleNodeRemove(node, this, before, after);
-        return DataMutateResult.SUCCESS;
-    }
-
-    /**
      * Unsets a transient permission node
      *
      * @param node the node to unset
@@ -1255,27 +1180,11 @@ public abstract class PermissionHolder {
     }
 
     public boolean inheritsGroup(Group group) {
-        return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission("group." + group.getName(), true);
+        return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission(NodeFactory.make("group." + group.getName(), true)).asBoolean();
     }
 
     public boolean inheritsGroup(Group group, ContextSet contextSet) {
         return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission(NodeFactory.newBuilder("group." + group.getName()).withExtraContext(contextSet).build()).asBoolean();
-    }
-
-    public boolean inheritsGroup(Group group, String server) {
-        return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission("group." + group.getName(), true, server);
-    }
-
-    public boolean inheritsGroup(Group group, String server, String world) {
-        return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission("group." + group.getName(), true, server, world);
-    }
-
-    public DataMutateResult setInheritGroup(Group group, ContextSet contexts) {
-        return setPermission(NodeFactory.newBuilder("group." + group.getName()).withExtraContext(contexts).build());
-    }
-
-    public DataMutateResult unsetInheritGroup(Group group, ContextSet contexts) {
-        return unsetPermission(NodeFactory.newBuilder("group." + group.getName()).withExtraContext(contexts).build());
     }
 
     /**
@@ -1476,32 +1385,6 @@ public abstract class PermissionHolder {
 
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
         return true;
-    }
-
-    /**
-     * @return The temporary nodes held by the holder
-     */
-    public Set<Node> getTemporaryNodes() {
-        return getOwnNodes().stream().filter(Node::isTemporary).collect(Collectors.toSet());
-    }
-
-    /**
-     * @return The permanent nodes held by the holder
-     */
-    public Set<Node> getPermanentNodes() {
-        return getOwnNodes().stream().filter(Node::isPermanent).collect(Collectors.toSet());
-    }
-
-    public Set<Node> getPrefixNodes() {
-        return getOwnNodes().stream().filter(Node::isPrefix).collect(Collectors.toSet());
-    }
-
-    public Set<Node> getSuffixNodes() {
-        return getOwnNodes().stream().filter(Node::isSuffix).collect(Collectors.toSet());
-    }
-
-    public Set<Node> getMetaNodes() {
-        return getOwnNodes().stream().filter(Node::isMeta).collect(Collectors.toSet());
     }
 
     public OptionalInt getWeight() {

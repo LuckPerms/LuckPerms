@@ -76,6 +76,7 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
                 .add(new UserDemote(locale))
                 .add(new HolderShowTracks<>(locale, true))
                 .add(new HolderClear<>(locale, true))
+                .add(new UserClone(locale))
                 .build()
         );
     }

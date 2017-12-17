@@ -2,8 +2,8 @@
 # Locale: en_US (English)
 # Author: Luck
 
-prefix: "&7&l[&b&lL&3&lP&7&l] &c"
-empty: "{0}"
+prefix: "&7&l[&b&lL&3&lP&7&l] "
+empty: "&c{0}"
 player-online: "&aOnline"
 player-offline: "&cOffline"
 loading-error: "&cPermissions data could not be loaded. Please try again later."
@@ -45,10 +45,8 @@ tree-url: "&aPermission tree URL:"
 search-searching: "&aSearching for users and groups with &b{0}&a..."
 search-searching-members: "&aSearching for users and groups who inherit from &b{0}&a..."
 search-result: "&aFound &b{0}&a entries from &b{1}&a users and &b{2}&a groups."
-search-showing-users: "&bShowing user entries:"
-search-showing-groups: "&bShowing group entries:"
-search-showing-users-with-page: "&bShowing user entries:  {0}"
-search-showing-groups-with-page: "&bShowing group entries:  {0}"
+search-showing-users: "&bShowing user entries:    &7(showing page &f{0}&7 of &f{1}&7 - &f{2}&7 entries)"
+search-showing-groups: "&bShowing group entries:    &7(showing page &f{0}&7 of &f{1}&7 - &f{2}&7 entries)"
 apply-edits-invalid-code: "&cInvalid code. &7({0})"
 apply-edits-unable-to-read: "&cUnable to read data using the given code. &7({0})"
 apply-edits-no-target: "&cUnable to parse the target of the edit. Please supply it as an extra argument."
@@ -60,8 +58,9 @@ apply-edits-success: "&aWeb editor data was applied to &b{0}&a successfully."
 apply-edits-success-summary: "&7(&a{0} &7{1} and &c{2} &7{3})"
 apply-edits-diff-added: "&a+  &f{0}"
 apply-edits-diff-removed: "&c-  &f{0}"
+editor-start: "&7Preparing a new editor sesssion. Please wait..."
 editor-upload-failure: "&cUnable to upload permission data to the editor."
-editor-url: "&aEditor URL:"
+editor-url: "&aClick the link below to open the editor:"
 check-result: "&aPermission check result on user &b{0}&a for permission &b{1}&a: &f{2}"
 create-success: "&b{0}&a was successfully created."
 delete-success: "&b{0}&a was successfully deleted."
@@ -76,6 +75,7 @@ track-does-not-contain: "&b{0}&a doesn't contain &b{1}&a."
 track-ambiguous-call: "&4{0}&c is a member of multiple groups on this track. Unable to determine their location."
 already-exists: "&4{0}&c already exists!"
 does-not-exist: "&4{0}&c does not exist!"
+user-load-error: "&cAn unexpected error occurred. User not loaded."
 group-load-error: "&cAn unexpected error occurred. Group not loaded."
 groups-load-error: "&cAn unexpected error occurred. Unable to load all groups."
 track-load-error: "&cAn unexpected error occurred. Track not loaded."
@@ -111,15 +111,12 @@ groups-list: "&aGroups: &7(name, weight, tracks)"
 groups-list-entry: "&f-  &3{0} &7- &b{1}"
 groups-list-entry-with-tracks: "&f-  &3{0} &7- &b{1} &7- [&3{2}&7]"
 tracks-list: "&aTracks: {0}"
-listnodes: "&b{0}'s Permissions:"
-listnodes-with-page: "&b{0}'s Permissions:  {1}"
-listnodes-temp: "&b{0}'s Temporary Permissions:"
-listnodes-temp-with-page: "&b{0}'s Temporary Permissions:  {1}"
-listparents: "&b{0}'s Parent Groups:"
-listparents-temp: "&b{0}'s Temporary Parent Groups:"
-list-tracks: >
-  &b{0}'s Tracks:\n
-  {1}
+permission-info: "&b{0}'s Permissions:  &7(showing page &f{1}&7 of &f{2}&7 - &f{3}&7 entries)"
+permission-info-no-data: "&b{0}&a does not have any permissions set."
+parent-info: "&b{0}'s Parents:  &7(showing page &f{1}&7 of &f{2}&7 - &f{3}&7 entries)"
+parent-info-no-data: "&b{0}&a does not have any parents defined."
+list-tracks: "&b{0}'s Tracks:"
+list-tracks-entry: "&a{0}: {1}"
 list-tracks-empty: "&b{0}&a is not on any tracks."
 context-pair-inline: "&3{0}=&b{1}"
 context-pair--global-inline: "&eglobal"
@@ -413,6 +410,10 @@ command-specs:
     args:
       "track": "the track to demote the user down"
       "context...": "the contexts to demote the user in"
+  user-clone:
+    description: "Clone the user"
+    args:
+      "user": "the name/uuid of the user to clone onto"
   group-info:
     description: "Gives info about the group"
   group-listmembers:
@@ -423,6 +424,10 @@ command-specs:
     description: "Set the groups weight"
     args:
       "weight": "the weight to set"
+  group-set-display-name:
+    description: "Set the groups display name"
+    args:
+      "name": "the name to set"
   group-rename:
     description: "Rename the group"
     args:
@@ -449,7 +454,7 @@ command-specs:
     description: "Lists the permission nodes the object has"
     args:
       "page": "the page to view"
-      "filter": "the string to filter by"
+      "sort mode": "how to sort the entries"
   permission-set:
     description: "Sets a permission for the object"
     args:
@@ -485,6 +490,9 @@ command-specs:
       "context...": "the contexts to check in"
   parent-info:
     description: "Lists the groups that this object inherits from"
+    args:
+      "page": "the page to view"
+      "sort mode": "how to sort the entries"
   parent-set:
     description: "Removes all other groups the object inherits already and adds them to the one given"
     args:

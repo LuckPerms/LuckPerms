@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.impl.user;
 
-import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -39,6 +38,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -74,7 +74,7 @@ public class UserSwitchPrimaryGroup extends SubCommand<User> {
 
         if (!user.inheritsGroup(group)) {
             Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, user.getFriendlyName(), group.getName());
-            user.setInheritGroup(group, ContextSet.empty());
+            user.setPermission(NodeFactory.newBuilder("group." + group.getName()).build());
         }
 
         user.getPrimaryGroup().setStoredValue(group.getName());

@@ -63,9 +63,9 @@ public class GroupInfo extends SubCommand<Group> {
                 group.getWeight().isPresent() ? group.getWeight().getAsInt() : "None",
                 group.getOwnNodes().size(),
                 group.getOwnNodes().stream().filter(n -> !(n.isGroupNode() || n.isPrefix() || n.isSuffix() || n.isMeta())).mapToInt(n -> 1).sum(),
-                group.getPrefixNodes().size(),
-                group.getSuffixNodes().size(),
-                group.getMetaNodes().size()
+                group.getOwnNodes().stream().filter(Node::isPrefix).mapToInt(n -> 1).sum(),
+                group.getOwnNodes().stream().filter(Node::isSuffix).mapToInt(n -> 1).sum(),
+                group.getOwnNodes().stream().filter(Node::isMeta).mapToInt(n -> 1).sum()
         );
 
         Set<Node> parents = group.getOwnNodesSet().stream()

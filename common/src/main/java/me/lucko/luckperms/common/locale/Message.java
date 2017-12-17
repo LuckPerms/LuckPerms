@@ -152,6 +152,7 @@ public enum Message {
     ALREADY_EXISTS("&4{}&c already exists!", true),
     DOES_NOT_EXIST("&4{}&c does not exist!", true),
 
+    USER_LOAD_ERROR("&cAn unexpected error occurred. User not loaded.", true),
     GROUP_LOAD_ERROR("&cAn unexpected error occurred. Group not loaded.", true),
     GROUPS_LOAD_ERROR("&cAn unexpected error occurred. Unable to load all groups.", true),
 

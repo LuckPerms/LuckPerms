@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -84,7 +85,7 @@ public class ParentAdd extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        DataMutateResult result = holder.setInheritGroup(group, context);
+        DataMutateResult result = holder.setPermission(NodeFactory.newBuilder("group." + group.getName()).withExtraContext(context).build());
 
         if (result.asBoolean()) {
             Message.SET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), CommandUtils.contextSetToString(context));

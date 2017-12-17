@@ -148,6 +148,11 @@ public enum CommandSpec {
                     Arg.create("context...", false, "the contexts to demote the user in")
             )
     ),
+    USER_CLONE("Clone the user",
+            Arg.list(
+                    Arg.create("user", true, "the name/uuid of the user to clone onto")
+            )
+    ),
 
     GROUP_INFO("Gives info about the group"),
     GROUP_LISTMEMBERS("Show the users/groups who inherit from this group",

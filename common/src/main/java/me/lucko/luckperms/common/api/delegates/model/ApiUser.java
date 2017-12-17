@@ -33,6 +33,7 @@ import com.google.common.base.Preconditions;
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.caching.UserData;
+import me.lucko.luckperms.common.node.NodeFactory;
 
 import java.util.UUID;
 
@@ -71,7 +72,7 @@ public final class ApiUser extends ApiPermissionHolder implements User {
             return DataMutateResult.ALREADY_HAS;
         }
 
-        if (!handle.hasPermission("group." + s.toLowerCase(), true)) {
+        if (!handle.hasPermission(NodeFactory.make("group." + s.toLowerCase(), true)).asBoolean()) {
             return DataMutateResult.FAIL;
         }
 

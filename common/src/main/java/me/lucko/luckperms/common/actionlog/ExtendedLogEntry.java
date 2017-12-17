@@ -62,12 +62,7 @@ public class ExtendedLogEntry implements LogEntry {
 
     private static final String FORMAT = "&8(&e%s&8) [&a%s&8] (&b%s&8) &7--> &f%s";
 
-    /**
-     * Compares two LogEntries
-     *
-     * @since 3.3
-     */
-    public static final Comparator<LogEntry> COMPARATOR = Comparator
+    private static final Comparator<LogEntry> COMPARATOR = Comparator
             .comparingLong(LogEntry::getTimestamp)
             .thenComparing(LogEntry::getActor)
             .thenComparing(LogEntry::getActorName, String.CASE_INSENSITIVE_ORDER)

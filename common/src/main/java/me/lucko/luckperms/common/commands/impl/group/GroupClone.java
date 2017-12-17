@@ -78,8 +78,8 @@ public class GroupClone extends SubCommand<Group> {
 
         Message.CLONE_SUCCESS.send(sender, group.getName(), newGroup.getName());
 
-        ExtendedLogEntry.build().actor(sender).acted(group)
-                .action("clone", newGroup.getName())
+        ExtendedLogEntry.build().actor(sender).acted(newGroup)
+                .action("clone", group.getName())
                 .build().submit(plugin, sender);
 
         save(newGroup, sender, plugin);

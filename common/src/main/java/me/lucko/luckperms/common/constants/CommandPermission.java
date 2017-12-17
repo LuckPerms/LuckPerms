@@ -100,6 +100,7 @@ public enum CommandPermission {
     USER_PROMOTE("promote", USER),
     USER_DEMOTE("demote", USER),
     USER_CLEAR("clear", USER),
+    USER_CLONE("clone", USER),
 
     GROUP_INFO("info", GROUP),
     GROUP_PERM_INFO("permission.info", GROUP),
