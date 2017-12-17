@@ -143,8 +143,13 @@ public class CommandManager {
         handleRewrites(arguments, true);
 
         // Handle no arguments
-        if (arguments.size() == 0) {
-            sendCommandUsage(sender, label);
+        if (arguments.size() == 0 || (arguments.size() == 1 && arguments.get(0).trim().isEmpty())) {
+            CommandUtils.sendPluginMessage(sender, "&2Running &bLuckPerms v" + plugin.getVersion() + "&2.");
+            if (mainCommands.stream().anyMatch(c -> c.shouldDisplay() && c.isAuthorized(sender))) {
+                Message.VIEW_AVAILABLE_COMMANDS_PROMPT.send(sender, label);
+            } else {
+                Message.NO_PERMISSION_FOR_SUBCOMMANDS.send(sender);
+            }
             return CommandResult.INVALID_ARGS;
         }
 

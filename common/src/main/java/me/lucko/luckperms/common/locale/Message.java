@@ -45,6 +45,9 @@ public enum Message {
      */
     PREFIX("&7&l[&b&lL&3&lP&7&l] ", false),
 
+    VIEW_AVAILABLE_COMMANDS_PROMPT("&3Use &a/{} help &3to view available commands.", true),
+    NO_PERMISSION_FOR_SUBCOMMANDS("&3You do not have permission to use any sub commands.", true),
+
     EMPTY("&c{}", true),
     PLAYER_ONLINE("&aOnline", false),
     PLAYER_OFFLINE("&cOffline", false),
