@@ -130,7 +130,7 @@ public class ExtendedLogEntry implements LogEntry {
                 return acted.toString();
             }
         }
-        return String.valueOf(actorName);
+        return String.valueOf(actedName);
     }
 
     @Override

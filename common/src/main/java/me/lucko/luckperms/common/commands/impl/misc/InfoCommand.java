@@ -72,7 +72,7 @@ public class InfoCommand extends SingleCommand {
                 plugin.getContextManager().getStaticContextString().orElse("None"),
                 plugin.getPlayerCount(),
                 plugin.getUniqueConnections().size(),
-                DateUtil.formatTimeShort((System.currentTimeMillis() - plugin.getStartTime()) / 1000L),
+                DateUtil.formatTimeBrief((System.currentTimeMillis() - plugin.getStartTime()) / 1000L),
                 plugin.getUserManager().getAll().size(),
                 plugin.getGroupManager().getAll().size(),
                 plugin.getTrackManager().getAll().size(),

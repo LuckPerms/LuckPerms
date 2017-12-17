@@ -62,7 +62,11 @@ public enum Message {
     LOG_INFO("&7&l[&bL&3P&7&l] &3{}", false),
     LOG_WARN("&7&l[&bLuck&3Perms&7&l] &c[WARN] {}", false),
     LOG_ERROR("&7&l[&bLuck&3Perms&7&l] &4[ERROR] {}", false),
-    LOG("&3LOG &3&l> &8(&e{}&8) [&a{}&8] (&b{}&8)&f: {}", true),
+    LOG(
+            "{PREFIX}&3LOG &3&l> &8(&e{}&8) [&a{}&8] (&b{}&8)" + "\n" +
+            "{PREFIX}&3LOG &3&l> &f{}",
+            false
+    ),
     VERBOSE_LOG("&3VB &3&l> {}", true),
     EXPORT_LOG("&3EXPORT &3&l> &f{}", true),
     EXPORT_LOG_PROGRESS("&3EXPORT &3&l> &7{}", true),
@@ -390,7 +394,7 @@ public enum Message {
 
     LOG_ENTRY(
             "{PREFIX}&b#{} &8(&7{} ago&8) &8(&e{}&8) [&a{}&8] (&b{}&8)" + "\n" +
-            "{PERFIX}&7> &f{}",
+            "{PREFIX}&7> &f{}",
             false
     ),
 

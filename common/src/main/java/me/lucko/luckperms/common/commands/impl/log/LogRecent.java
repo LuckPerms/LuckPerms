@@ -145,7 +145,7 @@ public class LogRecent extends SubCommand<Log> {
             long time = e.getValue().getTimestamp();
             Message.LOG_ENTRY.send(sender,
                     e.getKey(),
-                    DateUtil.formatTimeShort(now - time),
+                    DateUtil.formatTimeBrief(now - time),
                     e.getValue().getActorFriendlyString(),
                     Character.toString(e.getValue().getType().getCode()),
                     e.getValue().getActedFriendlyString(),

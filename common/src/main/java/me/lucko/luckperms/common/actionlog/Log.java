@@ -50,7 +50,7 @@ public class Log {
             throw new IllegalArgumentException("pageNo cannot be less than 1: " + pageNo);
         }
 
-        int minimumEntries = ((pageNo * 5) - entries) + 1;
+        int minimumEntries = ((pageNo * entries) - entries) + 1;
         if (set.size() < minimumEntries) {
             throw new IllegalStateException("Log does not contain that many entries. " +
                     "Requested: " + minimumEntries + ", Log Count: " + set.size());
@@ -73,8 +73,8 @@ public class Log {
         return out;
     }
 
-    private static int getMaxPages(long size, int entries) {
-        return (int) Math.ceil((double) size / entries);
+    private static int getMaxPages(int size, int entries) {
+        return (int) Math.ceil((double) size / (double) entries);
     }
 
     @Getter
@@ -109,7 +109,7 @@ public class Log {
     public int getRecentMaxPages(UUID actor, int entriesPerPage) {
         return getMaxPages(content.stream()
                 .filter(e -> e.getActor().equals(actor))
-                .count(), entriesPerPage);
+                .mapToInt(x -> 1).sum(), entriesPerPage);
     }
 
     public SortedSet<ExtendedLogEntry> getUserHistory(UUID uuid) {
@@ -129,7 +129,7 @@ public class Log {
                 .filter(e -> e.getType() == LogEntry.Type.USER)
                 .filter(e -> e.getActed().isPresent())
                 .filter(e -> e.getActed().get().equals(uuid))
-                .count(), entriesPerPage);
+                .mapToInt(x -> 1).sum(), entriesPerPage);
     }
 
     public SortedSet<ExtendedLogEntry> getGroupHistory(String name) {
@@ -147,7 +147,7 @@ public class Log {
         return getMaxPages(content.stream()
                 .filter(e -> e.getType() == LogEntry.Type.GROUP)
                 .filter(e -> e.getActedName().equals(name))
-                .count(), entriesPerPage);
+                .mapToInt(x -> 1).sum(), entriesPerPage);
     }
 
     public SortedSet<ExtendedLogEntry> getTrackHistory(String name) {
@@ -165,7 +165,7 @@ public class Log {
         return getMaxPages(content.stream()
                 .filter(e -> e.getType() == LogEntry.Type.TRACK)
                 .filter(e -> e.getActedName().equals(name))
-                .count(), entriesPerPage);
+                .mapToInt(x -> 1).sum(), entriesPerPage);
     }
 
     public SortedSet<ExtendedLogEntry> getSearch(String query) {
@@ -181,7 +181,7 @@ public class Log {
     public int getSearchMaxPages(String query, int entriesPerPage) {
         return getMaxPages(content.stream()
                 .filter(e -> e.matchesSearch(query))
-                .count(), entriesPerPage);
+                .mapToInt(x -> 1).sum(), entriesPerPage);
     }
 
     @SuppressWarnings("WeakerAccess")
