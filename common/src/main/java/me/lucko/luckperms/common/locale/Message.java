@@ -62,7 +62,7 @@ public enum Message {
     LOG_INFO("&7&l[&bL&3P&7&l] &3{}", false),
     LOG_WARN("&7&l[&bLuck&3Perms&7&l] &c[WARN] {}", false),
     LOG_ERROR("&7&l[&bLuck&3Perms&7&l] &4[ERROR] {}", false),
-    LOG("&3LOG &3&l> {}", true),
+    LOG("&3LOG &3&l> &8(&e{}&8) [&a{}&8] (&b{}&8)&f: {}", true),
     VERBOSE_LOG("&3VB &3&l> {}", true),
     EXPORT_LOG("&3EXPORT &3&l> &f{}", true),
     EXPORT_LOG_PROGRESS("&3EXPORT &3&l> &7{}", true),
@@ -117,8 +117,8 @@ public enum Message {
     SEARCH_SEARCHING_MEMBERS("&aSearching for users and groups who inherit from &b{}&a...", true),
     SEARCH_RESULT("&aFound &b{}&a entries from &b{}&a users and &b{}&a groups.", true),
 
-    SEARCH_SHOWING_USERS("&bShowing user entries:    &7(showing page &f{}&7 of &f{}&7 - &f{}&7 entries)", true),
-    SEARCH_SHOWING_GROUPS("&bShowing group entries:    &7(showing page &f{}&7 of &f{}&7 - &f{}&7 entries)", true),
+    SEARCH_SHOWING_USERS("&bShowing user entries:    &7(page &f{}&7 of &f{}&7 - &f{}&7 entries)", true),
+    SEARCH_SHOWING_GROUPS("&bShowing group entries:    &7(page &f{}&7 of &f{}&7 - &f{}&7 entries)", true),
 
     APPLY_EDITS_INVALID_CODE("&cInvalid code. &7({})", true),
     APPLY_EDITS_UNABLE_TO_READ("&cUnable to read data using the given code. &7({})", true),
@@ -202,10 +202,10 @@ public enum Message {
 
     TRACKS_LIST("&aTracks: {}", true),
 
-    PERMISSION_INFO("&b{}'s Permissions:  &7(showing page &f{}&7 of &f{}&7 - &f{}&7 entries)", true),
+    PERMISSION_INFO("&b{}'s Permissions:  &7(page &f{}&7 of &f{}&7 - &f{}&7 entries)", true),
     PERMISSION_INFO_NO_DATA("&b{}&a does not have any permissions set.", true),
 
-    PARENT_INFO("&b{}'s Parents:  &7(showing page &f{}&7 of &f{}&7 - &f{}&7 entries)", true),
+    PARENT_INFO("&b{}'s Parents:  &7(page &f{}&7 of &f{}&7 - &f{}&7 entries)", true),
     PARENT_INFO_NO_DATA("&b{}&a does not have any parents defined.", true),
 
     LIST_TRACKS("&b{}'s Tracks:", true),
@@ -387,7 +387,12 @@ public enum Message {
     LOG_INVALID_PAGE("&cInvalid page number.", true),
     LOG_INVALID_PAGE_RANGE("&cInvalid page number. Please enter a value between &41&c and &4{}&c.", true),
     LOG_NO_ENTRIES("&bNo log entries to show.", true),
-    LOG_ENTRY("&b#{} -> &8(&7{} ago&8) {}", true),
+
+    LOG_ENTRY(
+            "{PREFIX}&b#{} &8(&7{} ago&8) &8(&e{}&8) [&a{}&8] (&b{}&8)" + "\n" +
+            "{PERFIX}&7> &f{}",
+            false
+    ),
 
     LOG_NOTIFY_CONSOLE("&cCannot toggle notifications for console.", true),
     LOG_NOTIFY_TOGGLE_ON("&aEnabled&b logging output.", true),
@@ -396,14 +401,12 @@ public enum Message {
     LOG_NOTIFY_ALREADY_OFF("&cYou aren't currently receiving notifications.", true),
     LOG_NOTIFY_UNKNOWN("&cState unknown. Expecting \"on\" or \"off\".", true),
 
-    LOG_SEARCH_HEADER("&aShowing recent actions for query &b{} &a(page &f{}&a of &f{}&a)", true),
-
-    LOG_RECENT_HEADER("&aShowing recent actions (page &f{}&a of &f{}&a)", true),
-    LOG_RECENT_BY_HEADER("&aShowing recent actions by &b{} &a(page &f{}&a of &f{}&a)", true),
-
-    LOG_HISTORY_USER_HEADER("&aShowing history for user &b{} &a(page &f{}&a of &f{}&a)", true),
-    LOG_HISTORY_GROUP_HEADER("&aShowing history for group &b{} &a(page &f{}&a of &f{}&a)", true),
-    LOG_HISTORY_TRACK_HEADER("&aShowing history for track &b{} &a(page &f{}&a of &f{}&a)", true),
+    LOG_SEARCH_HEADER("&aShowing recent actions for query &b{}  &7(page &f{}&7 of &f{}&7)", true),
+    LOG_RECENT_HEADER("&aShowing recent actions  &7(page &f{}&7 of &f{}&7)", true),
+    LOG_RECENT_BY_HEADER("&aShowing recent actions by &b{}  &7(page &f{}&7 of &f{}&7)", true),
+    LOG_HISTORY_USER_HEADER("&aShowing history for user &b{}  &7(page &f{}&7 of &f{}&7)", true),
+    LOG_HISTORY_GROUP_HEADER("&aShowing history for group &b{}  &7(page &f{}&7 of &f{}&7)", true),
+    LOG_HISTORY_TRACK_HEADER("&aShowing history for track &b{}  &7(page &f{}&7 of &f{}&7)", true),
 
     LOG_EXPORT_ALREADY_EXISTS("&cError: File &4{}&c already exists.", true),
     LOG_EXPORT_NOT_WRITABLE("&cError: File &4{}&c is not writable.", true),

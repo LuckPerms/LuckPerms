@@ -40,7 +40,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class Log {
-    private static final int PAGE_ENTRIES = 5;
 
     public static Builder builder() {
         return new Builder();
@@ -74,10 +73,6 @@ public class Log {
         return out;
     }
 
-    private static int getMaxPages(int size, int entries) {
-        return (int) Math.ceil((double) size / entries);
-    }
-
     private static int getMaxPages(long size, int entries) {
         return (int) Math.ceil((double) size / entries);
     }
@@ -93,12 +88,12 @@ public class Log {
         return content;
     }
 
-    public SortedMap<Integer, ExtendedLogEntry> getRecent(int pageNo) {
-        return getPage(content, pageNo, PAGE_ENTRIES);
+    public SortedMap<Integer, ExtendedLogEntry> getRecent(int pageNo, int entriesPerPage) {
+        return getPage(content, pageNo, entriesPerPage);
     }
 
-    public int getRecentMaxPages() {
-        return getMaxPages(content.size(), PAGE_ENTRIES);
+    public int getRecentMaxPages(int entriesPerPage) {
+        return getMaxPages(content.size(), entriesPerPage);
     }
 
     public SortedSet<ExtendedLogEntry> getRecent(UUID actor) {
@@ -107,14 +102,14 @@ public class Log {
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public SortedMap<Integer, ExtendedLogEntry> getRecent(int pageNo, UUID actor) {
-        return getPage(getRecent(actor), pageNo, PAGE_ENTRIES);
+    public SortedMap<Integer, ExtendedLogEntry> getRecent(int pageNo, UUID actor, int entriesPerPage) {
+        return getPage(getRecent(actor), pageNo, entriesPerPage);
     }
 
-    public int getRecentMaxPages(UUID actor) {
+    public int getRecentMaxPages(UUID actor, int entriesPerPage) {
         return getMaxPages(content.stream()
                 .filter(e -> e.getActor().equals(actor))
-                .count(), PAGE_ENTRIES);
+                .count(), entriesPerPage);
     }
 
     public SortedSet<ExtendedLogEntry> getUserHistory(UUID uuid) {
@@ -125,16 +120,16 @@ public class Log {
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public SortedMap<Integer, ExtendedLogEntry> getUserHistory(int pageNo, UUID uuid) {
-        return getPage(getUserHistory(uuid), pageNo, PAGE_ENTRIES);
+    public SortedMap<Integer, ExtendedLogEntry> getUserHistory(int pageNo, UUID uuid, int entriesPerPage) {
+        return getPage(getUserHistory(uuid), pageNo, entriesPerPage);
     }
 
-    public int getUserHistoryMaxPages(UUID uuid) {
+    public int getUserHistoryMaxPages(UUID uuid, int entriesPerPage) {
         return getMaxPages(content.stream()
                 .filter(e -> e.getType() == LogEntry.Type.USER)
                 .filter(e -> e.getActed().isPresent())
                 .filter(e -> e.getActed().get().equals(uuid))
-                .count(), PAGE_ENTRIES);
+                .count(), entriesPerPage);
     }
 
     public SortedSet<ExtendedLogEntry> getGroupHistory(String name) {
@@ -144,15 +139,15 @@ public class Log {
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public SortedMap<Integer, ExtendedLogEntry> getGroupHistory(int pageNo, String name) {
-        return getPage(getGroupHistory(name), pageNo, PAGE_ENTRIES);
+    public SortedMap<Integer, ExtendedLogEntry> getGroupHistory(int pageNo, String name, int entriesPerPage) {
+        return getPage(getGroupHistory(name), pageNo, entriesPerPage);
     }
 
-    public int getGroupHistoryMaxPages(String name) {
+    public int getGroupHistoryMaxPages(String name, int entriesPerPage) {
         return getMaxPages(content.stream()
                 .filter(e -> e.getType() == LogEntry.Type.GROUP)
                 .filter(e -> e.getActedName().equals(name))
-                .count(), PAGE_ENTRIES);
+                .count(), entriesPerPage);
     }
 
     public SortedSet<ExtendedLogEntry> getTrackHistory(String name) {
@@ -162,15 +157,15 @@ public class Log {
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public SortedMap<Integer, ExtendedLogEntry> getTrackHistory(int pageNo, String name) {
-        return getPage(getTrackHistory(name), pageNo, PAGE_ENTRIES);
+    public SortedMap<Integer, ExtendedLogEntry> getTrackHistory(int pageNo, String name, int entriesPerPage) {
+        return getPage(getTrackHistory(name), pageNo, entriesPerPage);
     }
 
-    public int getTrackHistoryMaxPages(String name) {
+    public int getTrackHistoryMaxPages(String name, int entriesPerPage) {
         return getMaxPages(content.stream()
                 .filter(e -> e.getType() == LogEntry.Type.TRACK)
                 .filter(e -> e.getActedName().equals(name))
-                .count(), PAGE_ENTRIES);
+                .count(), entriesPerPage);
     }
 
     public SortedSet<ExtendedLogEntry> getSearch(String query) {
@@ -179,14 +174,14 @@ public class Log {
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public SortedMap<Integer, ExtendedLogEntry> getSearch(int pageNo, String query) {
-        return getPage(getSearch(query), pageNo, PAGE_ENTRIES);
+    public SortedMap<Integer, ExtendedLogEntry> getSearch(int pageNo, String query, int entriesPerPage) {
+        return getPage(getSearch(query), pageNo, entriesPerPage);
     }
 
-    public int getSearchMaxPages(String query) {
+    public int getSearchMaxPages(String query, int entriesPerPage) {
         return getMaxPages(content.stream()
                 .filter(e -> e.matchesSearch(query))
-                .count(), PAGE_ENTRIES);
+                .count(), entriesPerPage);
     }
 
     @SuppressWarnings("WeakerAccess")

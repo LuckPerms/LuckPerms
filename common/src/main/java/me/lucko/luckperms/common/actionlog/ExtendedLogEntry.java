@@ -30,6 +30,7 @@ import lombok.AllArgsConstructor;
 import lombok.ToString;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -59,8 +60,6 @@ import java.util.stream.Collectors;
  */
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ExtendedLogEntry implements LogEntry {
-
-    private static final String FORMAT = "&8(&e%s&8) [&a%s&8] (&b%s&8) &7--> &f%s";
 
     private static final Comparator<LogEntry> COMPARATOR = Comparator
             .comparingLong(LogEntry::getTimestamp)
@@ -103,6 +102,13 @@ public class ExtendedLogEntry implements LogEntry {
         return actorName;
     }
 
+    public String getActorFriendlyString() {
+        if (Strings.isNullOrEmpty(actorName) || actorName.equals("null")) {
+            return actor.toString();
+        }
+        return actorName;
+    }
+
     @Override
     public Type getType() {
         return type;
@@ -116,6 +122,15 @@ public class ExtendedLogEntry implements LogEntry {
     @Override
     public String getActedName() {
         return actedName;
+    }
+
+    public String getActedFriendlyString() {
+        if (Strings.isNullOrEmpty(actedName) || actedName.equals("null")) {
+            if (acted != null) {
+                return acted.toString();
+            }
+        }
+        return String.valueOf(actorName);
     }
 
     @Override
@@ -134,15 +149,6 @@ public class ExtendedLogEntry implements LogEntry {
         return actorName.toLowerCase().contains(query) ||
                 actedName.toLowerCase().contains(query) ||
                 action.toLowerCase().contains(query);
-    }
-
-    public String getFormatted() {
-        return String.format(FORMAT,
-                String.valueOf(actorName).equals("null") ? actor.toString() : actorName,
-                Character.toString(type.getCode()),
-                String.valueOf(actedName).equals("null") && acted != null ? acted.toString() : actedName,
-                action
-        );
     }
 
     public void submit(LuckPermsPlugin plugin, Sender sender) {

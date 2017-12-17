@@ -45,6 +45,8 @@ import java.util.Map;
 import java.util.SortedMap;
 
 public class LogTrackHistory extends SubCommand<Log> {
+    private static final int ENTRIES_PER_PAGE = 10;
+
     public LogTrackHistory(LocaleManager locale) {
         super(CommandSpec.LOG_TRACK_HISTORY.spec(locale), "trackhistory", CommandPermission.LOG_TRACK_HISTORY, Predicates.notInRange(1, 2));
     }
@@ -69,7 +71,7 @@ public class LogTrackHistory extends SubCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        int maxPage = log.getTrackHistoryMaxPages(track);
+        int maxPage = log.getTrackHistoryMaxPages(track, ENTRIES_PER_PAGE);
         if (maxPage == 0) {
             Message.LOG_NO_ENTRIES.send(sender);
             return CommandResult.STATE_ERROR;
@@ -84,14 +86,21 @@ public class LogTrackHistory extends SubCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        SortedMap<Integer, ExtendedLogEntry> entries = log.getTrackHistory(page, track);
+        SortedMap<Integer, ExtendedLogEntry> entries = log.getTrackHistory(page, track, ENTRIES_PER_PAGE);
         String name = entries.values().stream().findAny().get().getActedName();
         Message.LOG_HISTORY_TRACK_HEADER.send(sender, name, page, maxPage);
 
+        long now = DateUtil.unixSecondsNow();
         for (Map.Entry<Integer, ExtendedLogEntry> e : entries.entrySet()) {
             long time = e.getValue().getTimestamp();
-            long now = DateUtil.unixSecondsNow();
-            Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatTimeShort(now - time), e.getValue().getFormatted());
+            Message.LOG_ENTRY.send(sender,
+                    e.getKey(),
+                    DateUtil.formatTimeShort(now - time),
+                    e.getValue().getActorFriendlyString(),
+                    Character.toString(e.getValue().getType().getCode()),
+                    e.getValue().getActedFriendlyString(),
+                    e.getValue().getAction()
+            );
         }
 
         return CommandResult.SUCCESS;

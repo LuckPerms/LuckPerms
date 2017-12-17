@@ -48,6 +48,8 @@ import java.util.SortedMap;
 import java.util.UUID;
 
 public class LogUserHistory extends SubCommand<Log> {
+    private static final int ENTRIES_PER_PAGE = 10;
+
     public LogUserHistory(LocaleManager locale) {
         super(CommandSpec.LOG_USER_HISTORY.spec(locale), "userhistory", CommandPermission.LOG_USER_HISTORY, Predicates.notInRange(1, 2));
     }
@@ -96,14 +98,14 @@ public class LogUserHistory extends SubCommand<Log> {
         }
 
         if (page == Integer.MIN_VALUE) {
-            page = log.getUserHistoryMaxPages(uuid);
+            page = log.getUserHistoryMaxPages(uuid, ENTRIES_PER_PAGE);
         }
 
         return showLog(page, uuid, sender, log);
     }
 
     private static CommandResult showLog(int page, UUID user, Sender sender, Log log) {
-        int maxPage = log.getUserHistoryMaxPages(user);
+        int maxPage = log.getUserHistoryMaxPages(user, ENTRIES_PER_PAGE);
         if (maxPage == 0) {
             Message.LOG_NO_ENTRIES.send(sender);
             return CommandResult.STATE_ERROR;
@@ -114,14 +116,21 @@ public class LogUserHistory extends SubCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        SortedMap<Integer, ExtendedLogEntry> entries = log.getUserHistory(page, user);
+        SortedMap<Integer, ExtendedLogEntry> entries = log.getUserHistory(page, user, ENTRIES_PER_PAGE);
         String name = entries.values().stream().findAny().get().getActedName();
         Message.LOG_HISTORY_USER_HEADER.send(sender, name, page, maxPage);
 
+        long now = DateUtil.unixSecondsNow();
         for (Map.Entry<Integer, ExtendedLogEntry> e : entries.entrySet()) {
             long time = e.getValue().getTimestamp();
-            long now = DateUtil.unixSecondsNow();
-            Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatTimeShort(now - time), e.getValue().getFormatted());
+            Message.LOG_ENTRY.send(sender,
+                    e.getKey(),
+                    DateUtil.formatTimeShort(now - time),
+                    e.getValue().getActorFriendlyString(),
+                    Character.toString(e.getValue().getType().getCode()),
+                    e.getValue().getActedFriendlyString(),
+                    e.getValue().getAction()
+            );
         }
 
         return CommandResult.SUCCESS;

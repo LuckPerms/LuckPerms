@@ -45,6 +45,8 @@ import java.util.SortedMap;
 import java.util.stream.Collectors;
 
 public class LogSearch extends SubCommand<Log> {
+    private static final int ENTRIES_PER_PAGE = 10;
+
     public LogSearch(LocaleManager locale) {
         super(CommandSpec.LOG_SEARCH.spec(locale), "search", CommandPermission.LOG_SEARCH, Predicates.is(0));
     }
@@ -62,7 +64,7 @@ public class LogSearch extends SubCommand<Log> {
 
         final String query = args.stream().collect(Collectors.joining(" "));
 
-        int maxPage = log.getSearchMaxPages(query);
+        int maxPage = log.getSearchMaxPages(query, ENTRIES_PER_PAGE);
         if (maxPage == 0) {
             Message.LOG_NO_ENTRIES.send(sender);
             return CommandResult.STATE_ERROR;
@@ -77,13 +79,20 @@ public class LogSearch extends SubCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        SortedMap<Integer, ExtendedLogEntry> entries = log.getSearch(page, query);
+        SortedMap<Integer, ExtendedLogEntry> entries = log.getSearch(page, query, ENTRIES_PER_PAGE);
         Message.LOG_SEARCH_HEADER.send(sender, query, page, maxPage);
 
+        long now = DateUtil.unixSecondsNow();
         for (Map.Entry<Integer, ExtendedLogEntry> e : entries.entrySet()) {
             long time = e.getValue().getTimestamp();
-            long now = DateUtil.unixSecondsNow();
-            Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatTimeShort(now - time), e.getValue().getFormatted());
+            Message.LOG_ENTRY.send(sender,
+                    e.getKey(),
+                    DateUtil.formatTimeShort(now - time),
+                    e.getValue().getActorFriendlyString(),
+                    Character.toString(e.getValue().getType().getCode()),
+                    e.getValue().getActedFriendlyString(),
+                    e.getValue().getAction()
+            );
         }
 
         return CommandResult.SUCCESS;

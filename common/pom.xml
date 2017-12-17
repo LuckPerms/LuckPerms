@@ -54,6 +54,10 @@
                     <groupId>com.google.guava</groupId>
                     <artifactId>guava</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>net.kyori</groupId>
+                    <artifactId>blizzard</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <!-- configurate -->
