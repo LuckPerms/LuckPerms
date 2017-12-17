@@ -123,7 +123,7 @@ public class PermissionInfo extends SharedSubCommand {
                 s += "\n&2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime());
             }
 
-            TextComponent message = TextUtils.fromLegacy(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build();
+            TextComponent message = TextUtils.fromLegacy(s, Constants.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build();
             sender.sendMessage(message);
         }
 

@@ -139,7 +139,7 @@ public class SearchCommand extends SingleCommand {
 
         for (Map.Entry<String, HeldPermission<T>> ent : mappedContent) {
             String s = "&3> &b" + ent.getKey() + " &7- " + (ent.getValue().getValue() ? "&a" : "&c") + ent.getValue().getValue() + getNodeExpiryString(ent.getValue().asNode()) + CommandUtils.getAppendableNodeContextString(ent.getValue().asNode());
-            TextComponent message = TextUtils.fromLegacy(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), holderType, label, ent.getValue())).build();
+            TextComponent message = TextUtils.fromLegacy(s, Constants.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), holderType, label, ent.getValue())).build();
             sender.sendMessage(message);
         }
     }
@@ -157,7 +157,7 @@ public class SearchCommand extends SingleCommand {
                 "&3> " + (perm.asNode().getValuePrimitive() ? "&a" : "&c") + perm.asNode().getPermission(),
                 " ",
                 "&7Click to remove this node from " + holderName
-        ), Constants.FORMAT_CHAR));
+        ), Constants.AMPERSAND_CHAR));
 
         String command = "/" + label + " " + NodeFactory.nodeAsCommand(perm.asNode(), holderName, holderType, false);
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);

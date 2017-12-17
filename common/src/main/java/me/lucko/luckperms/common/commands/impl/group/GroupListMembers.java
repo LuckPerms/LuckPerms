@@ -140,7 +140,7 @@ public class GroupListMembers extends SubCommand<Group> {
 
         for (Map.Entry<String, HeldPermission<T>> ent : mappedContent) {
             String s = "&3> &b" + ent.getKey() + " " + getNodeExpiryString(ent.getValue().asNode()) + CommandUtils.getAppendableNodeContextString(ent.getValue().asNode());
-            TextComponent message = TextUtils.fromLegacy(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), holderType, label, ent.getValue())).build();
+            TextComponent message = TextUtils.fromLegacy(s, Constants.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), holderType, label, ent.getValue())).build();
             sender.sendMessage(message);
         }
     }
@@ -158,7 +158,7 @@ public class GroupListMembers extends SubCommand<Group> {
                 "&3> &b" + perm.asNode().getGroupName(),
                 " ",
                 "&7Click to remove this parent from " + holderName
-        ), Constants.FORMAT_CHAR));
+        ), Constants.AMPERSAND_CHAR));
 
         String command = "/" + label + " " + NodeFactory.nodeAsCommand(perm.asNode(), holderName, holderType, false);
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);

@@ -151,7 +151,7 @@ public class VerboseListener {
                 }
 
                 // send the message
-                HoverEvent e = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(hover.stream()), Constants.FORMAT_CHAR));
+                HoverEvent e = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(hover.stream()), Constants.AMPERSAND_CHAR));
                 TextComponent msg = textComponent.toBuilder().applyDeep(comp -> comp.hoverEvent(e)).build();
                 notifiedSender.sendMessage(msg);
             }

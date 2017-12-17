@@ -125,11 +125,11 @@ public class MetaInfo extends SharedSubCommand {
             String location = processLocation(m, holder);
             if (m.hasSpecificContext()) {
                 String context = CommandUtils.getAppendableNodeContextString(m);
-                TextComponent.Builder builder = TextUtils.fromLegacy(Message.META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), m.getMeta().getKey(), m.getMeta().getValue(), location, context), Constants.COLOR_CHAR).toBuilder();
+                TextComponent.Builder builder = TextUtils.fromLegacy(Message.META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), m.getMeta().getKey(), m.getMeta().getValue(), location, context), Constants.SECTION_CHAR).toBuilder();
                 builder.applyDeep(makeFancy(holder, label, m));
                 sender.sendMessage(builder.build());
             } else {
-                TextComponent.Builder builder = TextUtils.fromLegacy(Message.META_ENTRY.asString(sender.getPlatform().getLocaleManager(), m.getMeta().getKey(), m.getMeta().getValue(), location), Constants.COLOR_CHAR).toBuilder();
+                TextComponent.Builder builder = TextUtils.fromLegacy(Message.META_ENTRY.asString(sender.getPlatform().getLocaleManager(), m.getMeta().getKey(), m.getMeta().getValue(), location), Constants.SECTION_CHAR).toBuilder();
                 builder.applyDeep(makeFancy(holder, label, m));
                 sender.sendMessage(builder.build());
             }
@@ -141,11 +141,11 @@ public class MetaInfo extends SharedSubCommand {
             String location = processLocation(e.getValue(), holder);
             if (e.getValue().hasSpecificContext()) {
                 String context = CommandUtils.getAppendableNodeContextString(e.getValue());
-                TextComponent.Builder builder = TextUtils.fromLegacy(Message.CHAT_META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), e.getKey(), type.getEntry(e.getValue()).getValue(), location, context), Constants.COLOR_CHAR).toBuilder();
+                TextComponent.Builder builder = TextUtils.fromLegacy(Message.CHAT_META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), e.getKey(), type.getEntry(e.getValue()).getValue(), location, context), Constants.SECTION_CHAR).toBuilder();
                 builder.applyDeep(makeFancy(type, holder, label, e.getValue()));
                 sender.sendMessage(builder.build());
             } else {
-                TextComponent.Builder builder = TextUtils.fromLegacy(Message.CHAT_META_ENTRY.asString(sender.getPlatform().getLocaleManager(), e.getKey(), type.getEntry(e.getValue()).getValue(), location), Constants.COLOR_CHAR).toBuilder();
+                TextComponent.Builder builder = TextUtils.fromLegacy(Message.CHAT_META_ENTRY.asString(sender.getPlatform().getLocaleManager(), e.getKey(), type.getEntry(e.getValue()).getValue(), location), Constants.SECTION_CHAR).toBuilder();
                 builder.applyDeep(makeFancy(type, holder, label, e.getValue()));
                 sender.sendMessage(builder.build());
             }

@@ -51,8 +51,6 @@ import ru.tehkode.permissions.PermissionGroup;
 import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -125,9 +123,9 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
             // Get a list of all groups in a ladder
             List<String> ladder = manager.getRankLadder(rankLadder).entrySet().stream()
-                                  .sorted(Comparator.<Map.Entry<Integer, PermissionGroup>>comparingInt(e -> e.getKey()).reversed())
-                                  .map(e -> MigrationUtils.standardizeName(e.getValue().getName()))
-                                  .collect(Collectors.toList());
+                    .sorted(Comparator.<Map.Entry<Integer, PermissionGroup>>comparingInt(Map.Entry::getKey).reversed())
+                    .map(e -> MigrationUtils.standardizeName(e.getValue().getName()))
+                    .collect(Collectors.toList());
 
             track.setGroups(ladder);
             plugin.getStorage().saveTrack(track);

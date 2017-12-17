@@ -249,7 +249,7 @@ public class CommandManager {
                     @SuppressWarnings("unchecked")
                     String permission = (String) c.getPermission().map(p -> ((CommandPermission) p).getPermission()).orElse("None");
 
-                    TextComponent component = TextUtils.fromLegacy("&3> &a" + String.format(c.getUsage(), label), Constants.FORMAT_CHAR)
+                    TextComponent component = TextUtils.fromLegacy("&3> &a" + String.format(c.getUsage(), label), Constants.AMPERSAND_CHAR)
                             .toBuilder().applyDeep(comp -> {
                                 comp.hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
                                         "&bCommand: &2" + c.getName(),
@@ -258,7 +258,7 @@ public class CommandManager {
                                         "&bPermission: &2" + permission,
                                         " ",
                                         "&7Click to auto-complete."
-                                ), Constants.FORMAT_CHAR)));
+                                ), Constants.AMPERSAND_CHAR)));
                                 comp.clickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format(c.getUsage(), label)));
                             }).build();
                     sender.sendMessage(component);

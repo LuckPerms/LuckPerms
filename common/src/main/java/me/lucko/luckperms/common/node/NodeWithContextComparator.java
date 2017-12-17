@@ -95,5 +95,4 @@ public class NodeWithContextComparator implements Comparator<LocalizedNode> {
         return CollationKeyCache.compareStrings(o1.getPermission(), o2.getPermission()) == 1 ? -1 : 1;
     }
 
-
 }

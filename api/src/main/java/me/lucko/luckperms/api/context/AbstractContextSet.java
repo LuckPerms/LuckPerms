@@ -39,7 +39,6 @@ abstract class AbstractContextSet implements ContextSet {
 
     protected abstract Multimap<String, String> backing();
 
-    @Nonnull
     @Override
     public boolean containsKey(@Nonnull String key) {
         return backing().containsKey(sanitizeKey(key));
@@ -52,13 +51,11 @@ abstract class AbstractContextSet implements ContextSet {
         return values != null ? ImmutableSet.copyOf(values) : ImmutableSet.of();
     }
 
-    @Nonnull
     @Override
     public boolean has(@Nonnull String key, @Nonnull String value) {
         return backing().containsEntry(sanitizeKey(key), sanitizeValue(value));
     }
 
-    @Nonnull
     @Override
     public boolean hasIgnoreCase(@Nonnull String key, @Nonnull String value) {
         String v = sanitizeValue(value);
@@ -88,6 +85,28 @@ abstract class AbstractContextSet implements ContextSet {
     @Override
     public int size() {
         return backing().size();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof ContextSet)) return false;
+        final ContextSet other = (ContextSet) o;
+
+        final Multimap<String, String> otherContexts;
+
+        if (other instanceof MutableContextSet) {
+            otherContexts = ((MutableContextSet) other).backing();
+        } else {
+            otherContexts = other.toMultimap();
+        }
+
+        return backing().equals(otherContexts);
+    }
+
+    @Override
+    public int hashCode() {
+        return backing().hashCode();
     }
 
     static String sanitizeKey(String key) {

@@ -57,7 +57,7 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
     protected final LuckPermsPlugin plugin;
     private final Class<T> subjectClass;
 
-    private final List<ContextCalculator<T>> calculators = new CopyOnWriteArrayList<>();
+    private final List<ContextCalculator<? super T>> calculators = new CopyOnWriteArrayList<>();
     private final List<StaticContextCalculator> staticCalculators = new CopyOnWriteArrayList<>();
 
     // caches context lookups
@@ -140,16 +140,14 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
     }
 
     @Override
-    public void registerCalculator(ContextCalculator<T> calculator) {
+    public void registerCalculator(ContextCalculator<? super T> calculator) {
         // calculators registered first should have priority (and be checked last.)
         calculators.add(0, calculator);
     }
 
     @Override
     public void registerStaticCalculator(StaticContextCalculator calculator) {
-        //noinspection unchecked
-        registerCalculator((ContextCalculator<T>) calculator);
-
+        registerCalculator(calculator);
         staticCalculators.add(0, calculator);
     }
 
@@ -168,7 +166,7 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
         public Contexts load(T subject) {
             MutableContextSet accumulator = MutableContextSet.create();
 
-            for (ContextCalculator<T> calculator : calculators) {
+            for (ContextCalculator<? super T> calculator : calculators) {
                 try {
                     MutableContextSet ret = calculator.giveApplicableContext(subject, accumulator);
                     //noinspection ConstantConditions

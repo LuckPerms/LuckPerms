@@ -118,7 +118,7 @@ public class ParentInfo extends SharedSubCommand {
                 s += "\n&2  expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime());
             }
 
-            TextComponent message = TextUtils.fromLegacy(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build();
+            TextComponent message = TextUtils.fromLegacy(s, Constants.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build();
             sender.sendMessage(message);
         }
 
@@ -140,7 +140,7 @@ public class ParentInfo extends SharedSubCommand {
                 "&3> &f" + node.getGroupName(),
                 " ",
                 "&7Click to remove this parent from " + holder.getFriendlyName()
-        ), Constants.FORMAT_CHAR));
+        ), Constants.AMPERSAND_CHAR));
 
         String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType().isGroup() ? holder.getObjectName() : holder.getFriendlyName(), holder.getType(), false);
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);

@@ -73,13 +73,13 @@ public class ListGroups extends SingleCommand {
                         component = TextUtils.fromLegacy(Message.GROUPS_LIST_ENTRY.asString(plugin.getLocaleManager(),
                                 group.getFriendlyName(),
                                 group.getWeight().orElse(0)
-                        ), Constants.COLOR_CHAR);
+                        ), Constants.SECTION_CHAR);
                     } else {
                         component = TextUtils.fromLegacy(Message.GROUPS_LIST_ENTRY_WITH_TRACKS.asString(plugin.getLocaleManager(),
                                 group.getFriendlyName(),
                                 group.getWeight().orElse(0),
                                 CommandUtils.toCommaSep(tracks)
-                        ), Constants.COLOR_CHAR);
+                        ), Constants.SECTION_CHAR);
                     }
 
                     component = component.toBuilder().applyDeep(c -> {

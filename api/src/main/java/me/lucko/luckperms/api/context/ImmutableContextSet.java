@@ -40,9 +40,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * An immutable implementation of {@link ContextSet}.
  *
- * <p>On construction, all keys/values are {@link String#intern()}ed, in order to increase
- * comparison speed.</p>
- *
  * @since 2.16
  */
 public final class ImmutableContextSet extends AbstractContextSet implements ContextSet {
@@ -164,9 +161,11 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
     }
 
     private final ImmutableSetMultimap<String, String> map;
+    private final int hashCode;
 
     ImmutableContextSet(ImmutableSetMultimap<String, String> contexts) {
         this.map = contexts;
+        this.hashCode = map.hashCode();
     }
 
     @Override
@@ -217,25 +216,8 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (o == this) return true;
-        if (!(o instanceof ContextSet)) return false;
-        final ContextSet other = (ContextSet) o;
-
-        final Multimap<String, String> otherContexts;
-
-        if (other instanceof MutableContextSet) {
-            otherContexts = ((MutableContextSet) other).backing();
-        } else {
-            otherContexts = other.toMultimap();
-        }
-
-        return this.map.equals(otherContexts);
-    }
-
-    @Override
     public int hashCode() {
-        return map.hashCode();
+        return hashCode;
     }
 
     @Override

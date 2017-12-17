@@ -45,9 +45,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A mutable implementation of {@link ContextSet}.
  *
- * <p>On construction, all keys/values are {@link String#intern()}ed, in order to increase
- * comparison speed.</p>
- *
  * @since 2.16
  */
 public final class MutableContextSet extends AbstractContextSet implements ContextSet {
@@ -336,28 +333,6 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
      */
     public void clear() {
         map.clear();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) return true;
-        if (!(o instanceof ContextSet)) return false;
-        final ContextSet other = (ContextSet) o;
-
-        final Multimap<String, String> otherContexts;
-
-        if (other instanceof MutableContextSet) {
-            otherContexts = ((MutableContextSet) other).map;
-        } else {
-            otherContexts = other.toMultimap();
-        }
-
-        return this.map.equals(otherContexts);
-    }
-
-    @Override
-    public int hashCode() {
-        return map.hashCode();
     }
 
     @Override
