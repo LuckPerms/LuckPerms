@@ -113,7 +113,7 @@ public class Exporter implements Runnable {
                     }).collect(Collectors.toList());
 
             for (Group group : groups) {
-                if (!group.getName().equals("default")) {
+                if (!group.getName().equals(NodeFactory.DEFAULT_GROUP_NAME)) {
                     write(writer, "/lp creategroup " + group.getName());
                 }
             }
@@ -226,7 +226,7 @@ public class Exporter implements Runnable {
 
                             boolean inDefault = false;
                             for (Node node : user.getEnduringNodes().values()) {
-                                if (node.isGroupNode() && node.getGroupName().equalsIgnoreCase("default")) {
+                                if (node.isGroupNode() && node.getGroupName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
                                     inDefault = true;
                                     continue;
                                 }
@@ -234,7 +234,7 @@ public class Exporter implements Runnable {
                                 output.add("/lp " + NodeFactory.nodeAsCommand(node, user.getUuid().toString(), HolderType.USER, true));
                             }
 
-                            if (!user.getPrimaryGroup().getStoredValue().orElse("default").equalsIgnoreCase("default")) {
+                            if (!user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
                                 output.add("/lp user " + user.getUuid().toString() + " switchprimarygroup " + user.getPrimaryGroup().getStoredValue().get());
                             }
 

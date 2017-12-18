@@ -36,8 +36,8 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.contexts.ContextSetConfigurateSerializer;
 import me.lucko.luckperms.common.managers.GenericUserManager;
 import me.lucko.luckperms.common.managers.GroupManager;
@@ -45,6 +45,7 @@ import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.node.NodeHeldPermission;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -306,7 +307,7 @@ public abstract class ConfigurateDao extends AbstractDao {
     @Override
     public void logAction(LogEntry entry) {
         actionLogger.info(String.format(LOG_FORMAT,
-                (entry.getActor().equals(Constants.CONSOLE_UUID) ? "" : entry.getActor() + " "),
+                (entry.getActor().equals(CommandManager.CONSOLE_UUID) ? "" : entry.getActor() + " "),
                 entry.getActorName(),
                 Character.toString(entry.getType().getCode()),
                 entry.getActed().map(e -> e.toString() + " ").orElse(""),
@@ -424,7 +425,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                 ConfigurationNode data = SimpleConfigurationNode.root();
                 data.getNode("uuid").setValue(user.getUuid().toString());
                 data.getNode("name").setValue(user.getName().orElse("null"));
-                data.getNode(this instanceof JsonDao ? "primaryGroup" : "primary-group").setValue(user.getPrimaryGroup().getStoredValue().orElse("default"));
+                data.getNode(this instanceof JsonDao ? "primaryGroup" : "primary-group").setValue(user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
 
                 Set<NodeModel> nodes = user.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
                 writeNodes(data, nodes);
@@ -843,7 +844,7 @@ public abstract class ConfigurateDao extends AbstractDao {
             for (ConfigurationNode ent : parts) {
                 String stringValue = ent.getValue(Types::strictAsString);
                 if (stringValue != null) {
-                    nodes.add(NodeModel.of("group." + stringValue, true, "global", "global", 0L, ImmutableContextSet.empty()));
+                    nodes.add(NodeModel.of(NodeFactory.groupNode(stringValue), true, "global", "global", 0L, ImmutableContextSet.empty()));
                     continue;
                 }
 
@@ -856,7 +857,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                     continue;
                 }
 
-                String permission = "group." + entry.getKey().toString();
+                String permission = NodeFactory.groupNode(entry.getKey().toString());
                 nodes.addAll(readAttributes(entry.getValue(), permission));
             }
         }

@@ -31,13 +31,13 @@ import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandManager;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.commands.utils.MetaComparator;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -125,11 +125,11 @@ public class MetaInfo extends SharedSubCommand {
             String location = processLocation(m, holder);
             if (m.hasSpecificContext()) {
                 String context = CommandUtils.getAppendableNodeContextString(m);
-                TextComponent.Builder builder = TextUtils.fromLegacy(Message.META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), m.getMeta().getKey(), m.getMeta().getValue(), location, context), Constants.SECTION_CHAR).toBuilder();
+                TextComponent.Builder builder = TextUtils.fromLegacy(Message.META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), m.getMeta().getKey(), m.getMeta().getValue(), location, context), CommandManager.SECTION_CHAR).toBuilder();
                 builder.applyDeep(makeFancy(holder, label, m));
                 sender.sendMessage(builder.build());
             } else {
-                TextComponent.Builder builder = TextUtils.fromLegacy(Message.META_ENTRY.asString(sender.getPlatform().getLocaleManager(), m.getMeta().getKey(), m.getMeta().getValue(), location), Constants.SECTION_CHAR).toBuilder();
+                TextComponent.Builder builder = TextUtils.fromLegacy(Message.META_ENTRY.asString(sender.getPlatform().getLocaleManager(), m.getMeta().getKey(), m.getMeta().getValue(), location), CommandManager.SECTION_CHAR).toBuilder();
                 builder.applyDeep(makeFancy(holder, label, m));
                 sender.sendMessage(builder.build());
             }
@@ -141,11 +141,11 @@ public class MetaInfo extends SharedSubCommand {
             String location = processLocation(e.getValue(), holder);
             if (e.getValue().hasSpecificContext()) {
                 String context = CommandUtils.getAppendableNodeContextString(e.getValue());
-                TextComponent.Builder builder = TextUtils.fromLegacy(Message.CHAT_META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), e.getKey(), type.getEntry(e.getValue()).getValue(), location, context), Constants.SECTION_CHAR).toBuilder();
+                TextComponent.Builder builder = TextUtils.fromLegacy(Message.CHAT_META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), e.getKey(), type.getEntry(e.getValue()).getValue(), location, context), CommandManager.SECTION_CHAR).toBuilder();
                 builder.applyDeep(makeFancy(type, holder, label, e.getValue()));
                 sender.sendMessage(builder.build());
             } else {
-                TextComponent.Builder builder = TextUtils.fromLegacy(Message.CHAT_META_ENTRY.asString(sender.getPlatform().getLocaleManager(), e.getKey(), type.getEntry(e.getValue()).getValue(), location), Constants.SECTION_CHAR).toBuilder();
+                TextComponent.Builder builder = TextUtils.fromLegacy(Message.CHAT_META_ENTRY.asString(sender.getPlatform().getLocaleManager(), e.getKey(), type.getEntry(e.getValue()).getValue(), location), CommandManager.SECTION_CHAR).toBuilder();
                 builder.applyDeep(makeFancy(type, holder, label, e.getValue()));
                 sender.sendMessage(builder.build());
             }

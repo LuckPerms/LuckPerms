@@ -29,11 +29,11 @@ import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.logging.ProgressLogger;
@@ -125,10 +125,10 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
                 Set<Node> nodes = userParents.computeIfAbsent(uuid, u -> new HashSet<>());
                 if (membership.getExpiration() == null) {
-                    nodes.add(NodeFactory.make("group." + groupName));
+                    nodes.add(NodeFactory.buildGroupNode(groupName).build());
                 } else {
                     long expiry = membership.getExpiration().toInstant().getEpochSecond();
-                    nodes.add(NodeFactory.newBuilder("group." + groupName).setExpiry(expiry).build());
+                    nodes.add(NodeFactory.buildGroupNode(groupName).setExpiry(expiry).build());
                 }
             }
 
@@ -199,9 +199,9 @@ public class MigrationZPermissions extends SubCommand<Object> {
             if (e.getPermission().isEmpty()) continue;
 
             if (e.getWorld() != null && !e.getWorld().getName().equals("")) {
-                holder.setPermission(NodeFactory.newBuilder(e.getPermission()).setValue(e.isValue()).setWorld(e.getWorld().getName()).build());
+                holder.setPermission(NodeFactory.builder(e.getPermission()).setValue(e.isValue()).setWorld(e.getWorld().getName()).build());
             } else {
-                holder.setPermission(NodeFactory.newBuilder(e.getPermission()).setValue(e.isValue()).build());
+                holder.setPermission(NodeFactory.builder(e.getPermission()).setValue(e.isValue()).build());
             }
         }
 
@@ -209,7 +209,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         if (entity.isGroup()) {
             for (PermissionEntity inheritance : entity.getParents()) {
                 if (!inheritance.getDisplayName().equals(holder.getObjectName())) {
-                    holder.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(inheritance.getDisplayName())));
+                    holder.setPermission(NodeFactory.buildGroupNode(MigrationUtils.standardizeName(inheritance.getDisplayName())).build());
                 }
             }
         }
@@ -218,11 +218,11 @@ public class MigrationZPermissions extends SubCommand<Object> {
             String key = metadata.getName().toLowerCase();
             if (key.isEmpty() || metadata.getStringValue().isEmpty()) continue;
 
-            if (key.equals("prefix") || key.equals("suffix")) {
+            if (key.equals(NodeFactory.PREFIX_KEY) || key.equals(NodeFactory.SUFFIX_KEY)) {
                 ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
-                holder.setPermission(NodeFactory.makeChatMetaNode(type, weight, metadata.getStringValue()).build());
+                holder.setPermission(NodeFactory.buildChatMetaNode(type, weight, metadata.getStringValue()).build());
             } else {
-                holder.setPermission(NodeFactory.makeMetaNode(key, metadata.getStringValue()).build());
+                holder.setPermission(NodeFactory.buildMetaNode(key, metadata.getStringValue()).build());
             }
         }
     }

@@ -59,7 +59,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static me.lucko.luckperms.common.constants.CommandPermission.MIGRATION;
+import static me.lucko.luckperms.common.commands.CommandPermission.MIGRATION;
 
 public class MigrationBPermissions extends SubCommand<Object> {
     private static Field uConfigField;
@@ -135,7 +135,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
             SafeIterator.iterate(world.getAll(CalculableType.GROUP), group -> {
                 String groupName = MigrationUtils.standardizeName(group.getName());
                 if (group.getName().equalsIgnoreCase(world.getDefaultGroup())) {
-                    groupName = "default";
+                    groupName = NodeFactory.DEFAULT_GROUP_NAME;
                 }
 
                 // Make a LuckPerms group for the one being migrated.
@@ -203,10 +203,10 @@ public class MigrationBPermissions extends SubCommand<Object> {
         for (Group parent : c.getGroups()) {
             String parentName = MigrationUtils.standardizeName(parent.getName());
             if (parent.getName().equalsIgnoreCase(world.getDefaultGroup())) {
-                parentName = "default";
+                parentName = NodeFactory.DEFAULT_GROUP_NAME;
             }
 
-            holder.setPermission(NodeFactory.make("group." + parentName, true, "global", world.getName()));
+            holder.setPermission(NodeFactory.make(NodeFactory.groupNode(parentName), true, "global", world.getName()));
         }
 
         // Migrate existing meta
@@ -215,13 +215,13 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 continue;
             }
 
-            if (meta.getKey().equalsIgnoreCase("prefix") || meta.getKey().equalsIgnoreCase("suffix")) {
+            if (meta.getKey().equalsIgnoreCase(NodeFactory.PREFIX_KEY) || meta.getKey().equalsIgnoreCase(NodeFactory.SUFFIX_KEY)) {
                 ChatMetaType type = ChatMetaType.valueOf(meta.getKey().toUpperCase());
-                holder.setPermission(NodeFactory.makeChatMetaNode(type, c.getPriority(), meta.getValue()).setWorld(world.getName()).build());
+                holder.setPermission(NodeFactory.buildChatMetaNode(type, c.getPriority(), meta.getValue()).setWorld(world.getName()).build());
                 continue;
             }
 
-            holder.setPermission(NodeFactory.makeMetaNode(meta.getKey(), meta.getValue()).setWorld(world.getName()).build());
+            holder.setPermission(NodeFactory.buildMetaNode(meta.getKey(), meta.getValue()).setWorld(world.getName()).build());
         }
     }
 }

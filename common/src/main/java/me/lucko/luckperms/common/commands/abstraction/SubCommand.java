@@ -30,10 +30,10 @@ import lombok.Getter;
 import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.LocalizedSpec;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.messaging.ExtendedMessagingService;

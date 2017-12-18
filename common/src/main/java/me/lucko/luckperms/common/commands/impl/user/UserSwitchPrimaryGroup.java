@@ -28,11 +28,11 @@ package me.lucko.luckperms.common.commands.impl.user;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -67,14 +67,14 @@ public class UserSwitchPrimaryGroup extends SubCommand<User> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (user.getPrimaryGroup().getStoredValue().orElse("default").equalsIgnoreCase(group.getName())) {
+        if (user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(group.getName())) {
             Message.USER_PRIMARYGROUP_ERROR_ALREADYHAS.send(sender, user.getFriendlyName(), group.getFriendlyName());
             return CommandResult.STATE_ERROR;
         }
 
         if (!user.inheritsGroup(group)) {
             Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, user.getFriendlyName(), group.getName());
-            user.setPermission(NodeFactory.newBuilder("group." + group.getName()).build());
+            user.setPermission(NodeFactory.buildGroupNode(group.getName()).build());
         }
 
         user.getPrimaryGroup().setStoredValue(group.getName());

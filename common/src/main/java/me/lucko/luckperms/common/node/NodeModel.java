@@ -74,7 +74,7 @@ public final class NodeModel {
 
     public synchronized Node toNode() {
         if (node == null) {
-            node = NodeFactory.newBuilder(permission)
+            node = NodeFactory.builder(permission)
                     .setValue(value)
                     .setServer(server)
                     .setWorld(world)

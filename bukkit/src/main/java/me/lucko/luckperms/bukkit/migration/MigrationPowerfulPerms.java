@@ -68,7 +68,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static me.lucko.luckperms.common.constants.CommandPermission.MIGRATION;
+import static me.lucko.luckperms.common.commands.CommandPermission.MIGRATION;
 
 // Only supports the latest versions of the PP API. (it seems to change randomly almost every release)
 public class MigrationPowerfulPerms extends SubCommand<Object> {
@@ -173,7 +173,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             }
 
             for (Group parent : g.getParents()) {
-                group.setPermission(NodeFactory.make("group." + parent.getName().toLowerCase(), true));
+                group.setPermission(NodeFactory.buildGroupNode(parent.getName().toLowerCase()).build());
             }
 
             // server --> prefix afaik
@@ -186,9 +186,9 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 }
 
                 if (server != null) {
-                    group.setPermission(NodeFactory.makePrefixNode(g.getRank(), prefix.getValue()).setServer(server).build());
+                    group.setPermission(NodeFactory.buildPrefixNode(g.getRank(), prefix.getValue()).setServer(server).build());
                 } else {
-                    group.setPermission(NodeFactory.makePrefixNode(g.getRank(), prefix.getValue()).build());
+                    group.setPermission(NodeFactory.buildPrefixNode(g.getRank(), prefix.getValue()).build());
                 }
             }
 
@@ -201,9 +201,9 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 }
 
                 if (server != null) {
-                    group.setPermission(NodeFactory.makeSuffixNode(g.getRank(), suffix.getValue()).setServer(server).build());
+                    group.setPermission(NodeFactory.buildSuffixNode(g.getRank(), suffix.getValue()).setServer(server).build());
                 } else {
-                    group.setPermission(NodeFactory.makeSuffixNode(g.getRank(), suffix.getValue()).build());
+                    group.setPermission(NodeFactory.buildSuffixNode(g.getRank(), suffix.getValue()).build());
                 }
             }
 
@@ -249,18 +249,18 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             String suffix = joinFuture(pm.getPlayerOwnSuffix(uuid));
 
             if (prefix != null && !prefix.isEmpty()) {
-                user.setPermission(NodeFactory.makePrefixNode(maxWeight.get(), prefix).build());
+                user.setPermission(NodeFactory.buildPrefixNode(maxWeight.get(), prefix).build());
             }
 
             if (suffix != null && !suffix.isEmpty()) {
-                user.setPermission(NodeFactory.makeSuffixNode(maxWeight.get(), suffix).build());
+                user.setPermission(NodeFactory.buildSuffixNode(maxWeight.get(), suffix).build());
             }
 
             Group primaryGroup = joinFuture(pm.getPlayerPrimaryGroup(uuid));
             if (primaryGroup != null && primaryGroup.getName() != null) {
                 String primary = primaryGroup.getName().toLowerCase();
-                if (!primary.equals("default")) {
-                    user.setPermission(NodeFactory.make("group." + primary));
+                if (!primary.equals(NodeFactory.DEFAULT_GROUP_NAME)) {
+                    user.setPermission(NodeFactory.buildGroupNode(primary).build());
                     user.getPrimaryGroup().setStoredValue(primary);
                 }
             }
@@ -306,7 +306,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             server = "global";
         }
 
-        Node.Builder nb = NodeFactory.newBuilder(node).setValue(value);
+        Node.Builder nb = NodeFactory.builder(node).setValue(value);
         if (expireAt != 0) nb.setExpiry(expireAt);
         if (server != null) nb.setServer(server);
         if (world != null) nb.setWorld(world);
@@ -316,14 +316,14 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
     private void applyGroup(PermissionManager pm, PermissionHolder holder, CachedGroup g, String server) {
         Group group = pm.getGroup(g.getGroupId());
-        String node = "group." + MigrationUtils.standardizeName(group.getName());
+        String node = NodeFactory.groupNode(MigrationUtils.standardizeName(group.getName()));
 
         long expireAt = 0L;
         if (g.willExpire()) {
             expireAt = g.getExpirationDate().getTime() / 1000L;
         }
 
-        Node.Builder nb = NodeFactory.newBuilder(node);
+        Node.Builder nb = NodeFactory.builder(node);
 
         if (expireAt != 0) {
             nb.setExpiry(expireAt);

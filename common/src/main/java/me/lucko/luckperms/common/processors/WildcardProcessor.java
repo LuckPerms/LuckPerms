@@ -26,10 +26,15 @@
 package me.lucko.luckperms.common.processors;
 
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.common.node.ImmutableNode;
 
 import java.util.Map;
 
 public class WildcardProcessor implements PermissionProcessor {
+    public static final String WILDCARD_SUFFIX = ".*";
+    private static final String GLOBAL_WILDCARD_1 = "*";
+    private static final String GLOBAL_WILDCARD_2 = "'*'";
+
     private Map<String, Boolean> map = null;
 
     @Override
@@ -37,31 +42,26 @@ public class WildcardProcessor implements PermissionProcessor {
         String node = permission;
 
         while (true) {
-            int endIndex = node.lastIndexOf('.');
+            int endIndex = node.lastIndexOf(ImmutableNode.NODE_SEPARATOR);
             if (endIndex == -1) {
                 break;
             }
 
             node = node.substring(0, endIndex);
             if (!node.isEmpty()) {
-                Boolean b = map.get(node + ".*");
-                if (b != null) {
-                    return Tristate.fromBoolean(b);
+                Tristate t = Tristate.fromNullableBoolean(map.get(node + WILDCARD_SUFFIX));
+                if (t != Tristate.UNDEFINED) {
+                    return t;
                 }
             }
         }
 
-        Boolean b = map.get("'*'");
-        if (b != null) {
-            return Tristate.fromBoolean(b);
+        Tristate t = Tristate.fromNullableBoolean(map.get(GLOBAL_WILDCARD_1));
+        if (t != Tristate.UNDEFINED) {
+            return t;
         }
 
-        b = map.get("*");
-        if (b != null) {
-            return Tristate.fromBoolean(b);
-        }
-
-        return Tristate.UNDEFINED;
+        return Tristate.fromNullableBoolean(map.get(GLOBAL_WILDCARD_2));
     }
 
     @Override

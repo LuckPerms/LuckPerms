@@ -255,23 +255,23 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerInGroup(String world, String player, @NonNull String group) {
-        return playerHas(world, player, "group." + rewriteGroupName(group));
+        return playerHas(world, player, NodeFactory.groupNode(rewriteGroupName(group)));
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public boolean playerInGroup(World world, String player, @NonNull String group) {
-        return playerHas(world, player, "group." + rewriteGroupName(group));
+        return playerHas(world, player, NodeFactory.groupNode(rewriteGroupName(group)));
     }
 
     @Override
     public boolean playerInGroup(String world, OfflinePlayer player, @NonNull String group) {
-        return playerHas(world, player, "group." + rewriteGroupName(group));
+        return playerHas(world, player, NodeFactory.groupNode(rewriteGroupName(group)));
     }
 
     @Override
     public boolean playerInGroup(Player player, @NonNull String group) {
-        return playerHas(player, "group." + rewriteGroupName(group));
+        return playerHas(player, NodeFactory.groupNode(rewriteGroupName(group)));
     }
 
     private boolean checkGroupExists(String group) {
@@ -288,44 +288,44 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerAddGroup(String world, String player, @NonNull String group) {
-        return checkGroupExists(group) && playerAdd(world, player, "group." + rewriteGroupName(group));
+        return checkGroupExists(group) && playerAdd(world, player, NodeFactory.groupNode(rewriteGroupName(group)));
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public boolean playerAddGroup(World world, String player, @NonNull String group) {
-        return checkGroupExists(group) && playerAdd(world, player, "group." + rewriteGroupName(group));
+        return checkGroupExists(group) && playerAdd(world, player, NodeFactory.groupNode(rewriteGroupName(group)));
     }
 
     @Override
     public boolean playerAddGroup(String world, OfflinePlayer player, @NonNull String group) {
-        return checkGroupExists(group) && playerAdd(world, player, "group." + rewriteGroupName(group));
+        return checkGroupExists(group) && playerAdd(world, player, NodeFactory.groupNode(rewriteGroupName(group)));
     }
 
     @Override
     public boolean playerAddGroup(Player player, @NonNull String group) {
-        return checkGroupExists(group) && playerAdd(player, "group." + rewriteGroupName(group));
+        return checkGroupExists(group) && playerAdd(player, NodeFactory.groupNode(rewriteGroupName(group)));
     }
 
     @Override
     public boolean playerRemoveGroup(String world, String player, @NonNull String group) {
-        return checkGroupExists(group) && playerRemove(world, player, "group." + rewriteGroupName(group));
+        return checkGroupExists(group) && playerRemove(world, player, NodeFactory.groupNode(rewriteGroupName(group)));
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public boolean playerRemoveGroup(World world, String player, @NonNull String group) {
-        return checkGroupExists(group) && playerRemove(world, player, "group." + rewriteGroupName(group));
+        return checkGroupExists(group) && playerRemove(world, player, NodeFactory.groupNode(rewriteGroupName(group)));
     }
 
     @Override
     public boolean playerRemoveGroup(String world, OfflinePlayer player, @NonNull String group) {
-        return checkGroupExists(group) && playerRemove(world, player, "group." + rewriteGroupName(group));
+        return checkGroupExists(group) && playerRemove(world, player, NodeFactory.groupNode(rewriteGroupName(group)));
     }
 
     @Override
     public boolean playerRemoveGroup(Player player, @NonNull String group) {
-        return checkGroupExists(group) && playerRemove(player, "group." + rewriteGroupName(group));
+        return checkGroupExists(group) && playerRemove(player, NodeFactory.groupNode(rewriteGroupName(group)));
     }
 
     @Override
@@ -459,9 +459,9 @@ public class VaultPermissionHook extends Permission {
     public Contexts createContextForWorldSet(String world) {
         MutableContextSet context = MutableContextSet.create();
         if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
-            context.add("world", world.toLowerCase());
+            context.add(Contexts.WORLD_KEY, world.toLowerCase());
         }
-        context.add("server", getVaultServer());
+        context.add(Contexts.SERVER_KEY, getVaultServer());
         return new Contexts(context, isIncludeGlobal(), true, true, true, true, false);
     }
 
@@ -470,18 +470,18 @@ public class VaultPermissionHook extends Permission {
 
         if (useVaultServer()) {
             // remove already accumulated worlds
-            context.removeAll("world");
+            context.removeAll(Contexts.WORLD_KEY);
             // add the vault world
             if (world != null && !world.isEmpty() && !world.equalsIgnoreCase("global")) {
-                context.add("world", world.toLowerCase());
+                context.add(Contexts.WORLD_KEY, world.toLowerCase());
             }
 
             // remove the server context from global
-            context.remove("server", getServer());
+            context.remove(Contexts.SERVER_KEY, getServer());
 
             // add the vault specific server
             if (!getVaultServer().equals("global")) {
-                context.add("server", getVaultServer());
+                context.add(Contexts.SERVER_KEY, getVaultServer());
             }
         }
 
@@ -493,18 +493,18 @@ public class VaultPermissionHook extends Permission {
 
         if (useVaultServer()) {
             // remove already accumulated worlds
-            context.removeAll("world");
+            context.removeAll(Contexts.WORLD_KEY);
             // add the vault world
             if (world != null && !world.isEmpty() && !world.equalsIgnoreCase("global")) {
-                context.add("world", world.toLowerCase());
+                context.add(Contexts.WORLD_KEY, world.toLowerCase());
             }
 
             // remove the server context from global
-            context.remove("server", getServer());
+            context.remove(Contexts.SERVER_KEY, getServer());
 
             // add the vault specific server
             if (!getVaultServer().equals("global")) {
-                context.add("server", getVaultServer());
+                context.add(Contexts.SERVER_KEY, getVaultServer());
             }
         }
 

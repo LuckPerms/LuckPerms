@@ -91,7 +91,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
     public CompletableFuture<Boolean> setPermission(@NonNull ImmutableContextSet contexts, @NonNull String permission, @NonNull Tristate tristate) {
         if (tristate == Tristate.UNDEFINED) {
             // Unset
-            Node node = NodeFactory.newBuilder(permission).withExtraContext(contexts).build();
+            Node node = NodeFactory.builder(permission).withExtraContext(contexts).build();
 
             if (enduring) {
                 holder.unsetPermission(node);
@@ -102,7 +102,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
             return objectSave(holder).thenApply(v -> true);
         }
 
-        Node node = NodeFactory.newBuilder(permission).setValue(tristate.asBoolean()).withExtraContext(contexts).build();
+        Node node = NodeFactory.builder(permission).setValue(tristate.asBoolean()).withExtraContext(contexts).build();
 
         // Workaround: unset the inverse, to allow false -> true, true -> false overrides.
         if (enduring) {
@@ -193,11 +193,11 @@ public class LuckPermsSubjectData implements LPSubjectData {
                 DataMutateResult result;
 
                 if (enduring) {
-                    result = holder.setPermission(NodeFactory.newBuilder("group." + sub.getIdentifier())
+                    result = holder.setPermission(NodeFactory.buildGroupNode(sub.getIdentifier())
                             .withExtraContext(contexts)
                             .build());
                 } else {
-                    result = holder.setTransientPermission(NodeFactory.newBuilder("group." + sub.getIdentifier())
+                    result = holder.setTransientPermission(NodeFactory.buildGroupNode(sub.getIdentifier())
                             .withExtraContext(contexts)
                             .build());
                 }
@@ -219,11 +219,11 @@ public class LuckPermsSubjectData implements LPSubjectData {
                 DataMutateResult result;
 
                 if (enduring) {
-                    result = holder.unsetPermission(NodeFactory.newBuilder("group." + sub.getIdentifier())
+                    result = holder.unsetPermission(NodeFactory.buildGroupNode(sub.getIdentifier())
                             .withExtraContext(contexts)
                             .build());
                 } else {
-                    result = holder.unsetTransientPermission(NodeFactory.newBuilder("group." + sub.getIdentifier())
+                    result = holder.unsetTransientPermission(NodeFactory.buildGroupNode(sub.getIdentifier())
                             .withExtraContext(contexts)
                             .build());
                 }
@@ -310,7 +310,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
             if (n.isPrefix()) {
                 Map.Entry<Integer, String> value = n.getPrefix();
                 if (value.getKey() > minPrefixPriority.get(immutableContexts)) {
-                    options.get(immutableContexts).put("prefix", value.getValue());
+                    options.get(immutableContexts).put(NodeFactory.PREFIX_KEY, value.getValue());
                     minPrefixPriority.put(immutableContexts, value.getKey());
                 }
                 continue;
@@ -319,7 +319,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
             if (n.isSuffix()) {
                 Map.Entry<Integer, String> value = n.getSuffix();
                 if (value.getKey() > minSuffixPriority.get(immutableContexts)) {
-                    options.get(immutableContexts).put("suffix", value.getValue());
+                    options.get(immutableContexts).put(NodeFactory.SUFFIX_KEY, value.getValue());
                     minSuffixPriority.put(immutableContexts, value.getKey());
                 }
                 continue;
@@ -340,7 +340,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
 
     @Override
     public CompletableFuture<Boolean> setOption(@NonNull ImmutableContextSet context, @NonNull String key, @NonNull String value) {
-        if (key.equalsIgnoreCase("prefix") || key.equalsIgnoreCase("suffix")) {
+        if (key.equalsIgnoreCase(NodeFactory.PREFIX_KEY) || key.equalsIgnoreCase(NodeFactory.SUFFIX_KEY)) {
             // special handling.
             ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
 
@@ -357,9 +357,9 @@ public class LuckPermsSubjectData implements LPSubjectData {
             priority += 10;
 
             if (enduring) {
-                holder.setPermission(NodeFactory.makeChatMetaNode(type, priority, value).withExtraContext(context).build());
+                holder.setPermission(NodeFactory.buildChatMetaNode(type, priority, value).withExtraContext(context).build());
             } else {
-                holder.setTransientPermission(NodeFactory.makeChatMetaNode(type, priority, value).withExtraContext(context).build());
+                holder.setTransientPermission(NodeFactory.buildChatMetaNode(type, priority, value).withExtraContext(context).build());
             }
 
         } else {
@@ -372,9 +372,9 @@ public class LuckPermsSubjectData implements LPSubjectData {
             toRemove.forEach(makeUnsetConsumer(enduring));
 
             if (enduring) {
-                holder.setPermission(NodeFactory.makeMetaNode(key, value).withExtraContext(context).build());
+                holder.setPermission(NodeFactory.buildMetaNode(key, value).withExtraContext(context).build());
             } else {
-                holder.setTransientPermission(NodeFactory.makeMetaNode(key, value).withExtraContext(context).build());
+                holder.setTransientPermission(NodeFactory.buildMetaNode(key, value).withExtraContext(context).build());
             }
         }
 
@@ -385,9 +385,9 @@ public class LuckPermsSubjectData implements LPSubjectData {
     public CompletableFuture<Boolean> unsetOption(ImmutableContextSet set, String key) {
         List<Node> toRemove = streamNodes(enduring)
                 .filter(n -> {
-                    if (key.equalsIgnoreCase("prefix")) {
+                    if (key.equalsIgnoreCase(NodeFactory.PREFIX_KEY)) {
                         return n.isPrefix();
-                    } else if (key.equalsIgnoreCase("suffix")) {
+                    } else if (key.equalsIgnoreCase(NodeFactory.SUFFIX_KEY)) {
                         return n.isSuffix();
                     } else {
                         return n.isMeta() && n.getMeta().getKey().equals(key);

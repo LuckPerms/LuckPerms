@@ -30,12 +30,12 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -75,7 +75,7 @@ public class PermissionSet extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        DataMutateResult result = holder.setPermission(NodeFactory.newBuilder(node).setValue(value).withExtraContext(context).build());
+        DataMutateResult result = holder.setPermission(NodeFactory.builder(node).setValue(value).withExtraContext(context).build());
 
         if (result.asBoolean()) {
             Message.SETPERMISSION_SUCCESS.send(sender, node, value, holder.getFriendlyName(), CommandUtils.contextSetToString(context));

@@ -37,26 +37,26 @@ public class MigrationUtils {
     public static Node.Builder parseNode(String permission, boolean value) {
         if (permission.startsWith("-") || permission.startsWith("!")) {
             if (permission.length() == 1) {
-                return NodeFactory.newBuilder(permission).setValue(value);
+                return NodeFactory.builder(permission).setValue(value);
             }
 
             permission = permission.substring(1);
             value = false;
         } else if (permission.startsWith("+")) {
             if (permission.length() == 1) {
-                return NodeFactory.newBuilder(permission).setValue(value);
+                return NodeFactory.builder(permission).setValue(value);
             }
 
             permission = permission.substring(1);
             value = true;
         }
 
-        return NodeFactory.newBuilder(permission).setValue(value);
+        return NodeFactory.builder(permission).setValue(value);
     }
 
     public static void setGroupWeight(Group group, int weight) {
-        group.removeIf(n -> n.getPermission().startsWith("weight."));
-        group.setPermission(NodeFactory.make("weight." + weight));
+        group.removeIf(n -> NodeFactory.parseWeightNode(n.getPermission()) != null);
+        group.setPermission(NodeFactory.buildWeightNode(weight).build());
     }
 
     public static String standardizeName(String string) {

@@ -72,7 +72,7 @@ public final class ApiUser extends ApiPermissionHolder implements User {
             return DataMutateResult.ALREADY_HAS;
         }
 
-        if (!handle.hasPermission(NodeFactory.make("group." + s.toLowerCase(), true)).asBoolean()) {
+        if (!handle.hasPermission(NodeFactory.buildGroupNode(s.toLowerCase()).build()).asBoolean()) {
             return DataMutateResult.FAIL;
         }
 

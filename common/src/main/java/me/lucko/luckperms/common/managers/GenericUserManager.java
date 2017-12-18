@@ -167,8 +167,8 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
         }
 
         if (!hasGroup) {
-            user.getPrimaryGroup().setStoredValue("default");
-            user.setPermission(NodeFactory.make("group.default"));
+            user.getPrimaryGroup().setStoredValue(NodeFactory.DEFAULT_GROUP_NAME);
+            user.setPermission(NodeFactory.buildGroupNode(NodeFactory.DEFAULT_GROUP_NAME).build());
             work = true;
         }
 
@@ -200,13 +200,13 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
                 return true;
             }
 
-            if (!node.getGroupName().equalsIgnoreCase("default")) {
+            if (!node.getGroupName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
                 // The user's only node is not the default group one.
                 return true;
             }
         }
 
         // Not in the default primary group
-        return !user.getPrimaryGroup().getStoredValue().orElse("default").equalsIgnoreCase("default");
+        return !user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME);
     }
 }

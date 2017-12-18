@@ -40,13 +40,12 @@ import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.UpdateTaskBuffer;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.abstraction.Command;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.AbstractConfiguration;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.LuckPermsCalculator;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
@@ -458,7 +457,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public Sender getConsoleSender() {
         if (!game.isServerAvailable()) {
-            return new DummySender(this, Constants.CONSOLE_UUID, Constants.CONSOLE_NAME) {
+            return new DummySender(this, me.lucko.luckperms.common.commands.CommandManager.CONSOLE_UUID, me.lucko.luckperms.common.commands.CommandManager.CONSOLE_NAME) {
                 @Override
                 protected void consumeMessage(String s) {
                     logger.info(s);

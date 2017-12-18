@@ -28,10 +28,10 @@ package me.lucko.luckperms.common.actionlog;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.event.log.LogBroadcastEvent;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.impl.log.LogNotify;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;

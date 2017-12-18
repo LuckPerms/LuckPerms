@@ -34,6 +34,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -126,7 +127,7 @@ public class SpongeUser extends User {
 
         @Override
         public boolean isChildOf(ImmutableContextSet contexts, SubjectReference parent) {
-            return parent.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP) && getPermissionValue(contexts, "group." + parent.getSubjectIdentifier()).asBoolean();
+            return parent.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP) && getPermissionValue(contexts, NodeFactory.groupNode(parent.getSubjectIdentifier())).asBoolean();
         }
 
         @Override
@@ -138,11 +139,11 @@ public class SpongeUser extends User {
                     continue;
                 }
 
-                if (!entry.getKey().startsWith("group.")) {
+                String groupName = NodeFactory.parseGroupNode(entry.getKey());
+                if (groupName == null) {
                     continue;
                 }
 
-                String groupName = entry.getKey().substring("group.".length());
                 if (plugin.getGroupManager().isLoaded(groupName)) {
                     subjects.add(plugin.getService().getGroupSubjects().loadSubject(groupName).join().toReference());
                 }
@@ -157,13 +158,13 @@ public class SpongeUser extends User {
         @Override
         public Optional<String> getOption(ImmutableContextSet contexts, String s) {
             MetaData data = parent.getCachedData().getMetaData(plugin.getContextManager().formContexts(contexts));
-            if (s.equalsIgnoreCase("prefix")) {
+            if (s.equalsIgnoreCase(NodeFactory.PREFIX_KEY)) {
                 if (data.getPrefix() != null) {
                     return Optional.of(data.getPrefix());
                 }
             }
 
-            if (s.equalsIgnoreCase("suffix")) {
+            if (s.equalsIgnoreCase(NodeFactory.SUFFIX_KEY)) {
                 if (data.getSuffix() != null) {
                     return Optional.of(data.getSuffix());
                 }

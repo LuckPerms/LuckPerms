@@ -31,13 +31,13 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -82,7 +82,7 @@ public class PermissionSetTemp extends SharedSubCommand {
         }
 
         TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
-        Map.Entry<DataMutateResult, Node> result = holder.setPermission(NodeFactory.newBuilder(node).setValue(value).withExtraContext(context).setExpiry(duration).build(), modifier);
+        Map.Entry<DataMutateResult, Node> result = holder.setPermission(NodeFactory.builder(node).setValue(value).withExtraContext(context).setExpiry(duration).build(), modifier);
 
         if (result.getKey().asBoolean()) {
             duration = result.getValue().getExpiryUnixTime();

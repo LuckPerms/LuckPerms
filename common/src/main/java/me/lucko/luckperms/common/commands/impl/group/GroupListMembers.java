@@ -33,13 +33,13 @@ import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandManager;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -76,7 +76,7 @@ public class GroupListMembers extends SubCommand<Group> {
             return CommandResult.NO_PERMISSION;
         }
 
-        String query = "group." + group.getName();
+        String query = NodeFactory.groupNode(group.getName());
         int page = ArgumentUtils.handleIntOrElse(0, args, 1);
 
         Message.SEARCH_SEARCHING_MEMBERS.send(sender, group.getName());
@@ -140,7 +140,7 @@ public class GroupListMembers extends SubCommand<Group> {
 
         for (Map.Entry<String, HeldPermission<T>> ent : mappedContent) {
             String s = "&3> &b" + ent.getKey() + " " + getNodeExpiryString(ent.getValue().asNode()) + CommandUtils.getAppendableNodeContextString(ent.getValue().asNode());
-            TextComponent message = TextUtils.fromLegacy(s, Constants.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), holderType, label, ent.getValue())).build();
+            TextComponent message = TextUtils.fromLegacy(s, CommandManager.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), holderType, label, ent.getValue())).build();
             sender.sendMessage(message);
         }
     }
@@ -158,7 +158,7 @@ public class GroupListMembers extends SubCommand<Group> {
                 "&3> &b" + perm.asNode().getGroupName(),
                 " ",
                 "&7Click to remove this parent from " + holderName
-        ), Constants.AMPERSAND_CHAR));
+        ), CommandManager.AMPERSAND_CHAR));
 
         String command = "/" + label + " " + NodeFactory.nodeAsCommand(perm.asNode(), holderName, holderType, false);
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);

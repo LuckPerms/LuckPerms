@@ -44,6 +44,7 @@ import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
 import me.lucko.luckperms.common.model.TemporaryModifier;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.primarygroup.AllParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.ParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
@@ -89,14 +90,14 @@ public class ConfigKeys {
      *
      * Constant since 2.6
      */
-    public static final ConfigKey<String> DEFAULT_GROUP_NODE = StaticKey.of("group.default");
+    public static final ConfigKey<String> DEFAULT_GROUP_NODE = StaticKey.of(NodeFactory.groupNode(NodeFactory.DEFAULT_GROUP_NAME));
 
     /**
      * The name of the default group
      *
      * Constant since 2.6
      */
-    public static final ConfigKey<String> DEFAULT_GROUP_NAME = StaticKey.of("default");
+    public static final ConfigKey<String> DEFAULT_GROUP_NAME = StaticKey.of(NodeFactory.DEFAULT_GROUP_NAME);
 
     /**
      * If permissions without a server context should be included.

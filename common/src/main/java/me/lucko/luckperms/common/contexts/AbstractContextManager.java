@@ -117,7 +117,7 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
         }
 
         // effectively: if entries contains any non-server keys
-        if (entries.stream().anyMatch(pair -> !pair.getKey().equals("server"))) {
+        if (entries.stream().anyMatch(pair -> !pair.getKey().equals(Contexts.SERVER_KEY))) {
             // return all entries in 'key=value' form
             return Optional.of(entries.stream().map(pair -> pair.getKey() + "=" + pair.getValue()).collect(Collectors.joining(";")));
         } else {

@@ -32,6 +32,7 @@ import com.google.gson.reflect.TypeToken;
 
 import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.node.LegacyNodeFactory;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.storage.dao.sql.SqlDao;
 
@@ -87,7 +88,7 @@ public class LegacySqlMigration implements Runnable {
                     for (Map.Entry<UUID, String> e : l) {
                         ps.setString(1, e.getKey().toString());
                         ps.setString(2, e.getValue().toLowerCase());
-                        ps.setString(3, "default");
+                        ps.setString(3, NodeFactory.DEFAULT_GROUP_NAME);
                         ps.addBatch();
                     }
                     ps.executeBatch();
@@ -176,7 +177,7 @@ public class LegacySqlMigration implements Runnable {
                 e.printStackTrace();
             }
 
-            if (!primaryGroup.equalsIgnoreCase("default")) {
+            if (!primaryGroup.equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
                 try (Connection c = backing.getProvider().getConnection()) {
                     try (PreparedStatement ps = c.prepareStatement(backing.getPrefix().apply("UPDATE {prefix}players SET primary_group=? WHERE uuid=?"))) {
                         ps.setString(1, primaryGroup);

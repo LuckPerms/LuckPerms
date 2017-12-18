@@ -30,12 +30,12 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -85,7 +85,7 @@ public class ParentAdd extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        DataMutateResult result = holder.setPermission(NodeFactory.newBuilder("group." + group.getName()).withExtraContext(context).build());
+        DataMutateResult result = holder.setPermission(NodeFactory.buildGroupNode(group.getName()).withExtraContext(context).build());
 
         if (result.asBoolean()) {
             Message.SET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), CommandUtils.contextSetToString(context));

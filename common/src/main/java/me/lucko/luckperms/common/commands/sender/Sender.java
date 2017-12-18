@@ -26,8 +26,8 @@
 package me.lucko.luckperms.common.commands.sender;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.Constants;
+import me.lucko.luckperms.common.commands.CommandManager;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -83,7 +83,7 @@ public interface Sender {
     }
 
     /**
-     * Gets the sender's unique id. See {@link Constants#CONSOLE_UUID} for the console's UUID representation.
+     * Gets the sender's unique id. See {@link CommandManager#CONSOLE_UUID} for the console's UUID representation.
      *
      * @return the sender's uuid
      */
@@ -135,7 +135,7 @@ public interface Sender {
      * @return if the sender is the console
      */
     default boolean isConsole() {
-        return Constants.CONSOLE_UUID.equals(getUuid()) || Constants.IMPORT_UUID.equals(getUuid());
+        return CommandManager.CONSOLE_UUID.equals(getUuid()) || CommandManager.IMPORT_UUID.equals(getUuid());
     }
 
     /**
@@ -144,7 +144,7 @@ public interface Sender {
      * @return if the sender is an import process
      */
     default boolean isImport() {
-        return Constants.IMPORT_UUID.equals(getUuid());
+        return CommandManager.IMPORT_UUID.equals(getUuid());
     }
 
     /**

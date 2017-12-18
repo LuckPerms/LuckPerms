@@ -45,6 +45,7 @@ import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.node.NodeHeldPermission;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -336,7 +337,7 @@ public class SqlDao extends AbstractDao {
             // update username & primary group
             String pg = primaryGroup.get();
             if (pg == null) {
-                pg = "default";
+                pg = NodeFactory.DEFAULT_GROUP_NAME;
             }
             user.getPrimaryGroup().setStoredValue(pg);
 
@@ -381,7 +382,7 @@ public class SqlDao extends AbstractDao {
                         ps.execute();
                     }
                     try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_UPDATE_PRIMARY_GROUP))) {
-                        ps.setString(1, "default");
+                        ps.setString(1, NodeFactory.DEFAULT_GROUP_NAME);
                         ps.setString(2, user.getUuid().toString());
                         ps.execute();
                     }
@@ -465,7 +466,7 @@ public class SqlDao extends AbstractDao {
                 if (hasPrimaryGroupSaved) {
                     // update
                     try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_UPDATE_PRIMARY_GROUP))) {
-                        ps.setString(1, user.getPrimaryGroup().getStoredValue().orElse("default"));
+                        ps.setString(1, user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
                         ps.setString(2, user.getUuid().toString());
                         ps.execute();
                     }
@@ -474,7 +475,7 @@ public class SqlDao extends AbstractDao {
                     try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_INSERT))) {
                         ps.setString(1, user.getUuid().toString());
                         ps.setString(2, user.getName().orElse("null"));
-                        ps.setString(3, user.getPrimaryGroup().getStoredValue().orElse("default"));
+                        ps.setString(3, user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
                         ps.execute();
                     }
                 }
@@ -956,7 +957,7 @@ public class SqlDao extends AbstractDao {
                 try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_INSERT))) {
                     ps.setString(1, uuid.toString());
                     ps.setString(2, u);
-                    ps.setString(3, "default");
+                    ps.setString(3, NodeFactory.DEFAULT_GROUP_NAME);
                     ps.execute();
                 }
             }

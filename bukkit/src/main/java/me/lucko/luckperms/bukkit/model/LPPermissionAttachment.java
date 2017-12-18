@@ -159,7 +159,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
         // construct a node for the permission being set
         // we use the servers static context to *try* to ensure that the node will apply
-        Node node = NodeFactory.newBuilder(name)
+        Node node = NodeFactory.builder(name)
                 .setValue(value)
                 .withExtraContext(permissible.getPlugin().getContextManager().getStaticContext())
                 .build();

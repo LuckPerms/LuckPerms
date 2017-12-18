@@ -26,6 +26,7 @@
 package me.lucko.luckperms.sponge.processors;
 
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.common.node.ImmutableNode;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
 
 import java.util.Map;
@@ -38,16 +39,16 @@ public class SpongeWildcardProcessor implements PermissionProcessor {
         String node = permission;
 
         while (true) {
-            int endIndex = node.lastIndexOf('.');
+            int endIndex = node.lastIndexOf(ImmutableNode.NODE_SEPARATOR);
             if (endIndex == -1) {
                 break;
             }
 
             node = node.substring(0, endIndex);
             if (!node.isEmpty()) {
-                Boolean b = map.get(node);
-                if (b != null) {
-                    return Tristate.fromBoolean(b);
+                Tristate t = Tristate.fromNullableBoolean(map.get(node));
+                if (t != Tristate.UNDEFINED) {
+                    return t;
                 }
             }
         }

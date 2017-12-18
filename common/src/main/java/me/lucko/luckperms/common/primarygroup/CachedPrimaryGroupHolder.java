@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.primarygroup;
 import me.lucko.luckperms.common.buffers.Cache;
 import me.lucko.luckperms.common.caching.handlers.StateListener;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.NodeFactory;
 
 /**
  * Abstract implementation of {@link StateListener} which caches all lookups.
@@ -52,7 +53,7 @@ public abstract class CachedPrimaryGroupHolder extends StoredHolder implements S
     @Override
     public String getValue() {
         String s = cache.get();
-        return s != null ? s : getStoredValue().orElse("default");
+        return s != null ? s : getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME);
     }
 
     @Override

@@ -29,7 +29,7 @@ import lombok.experimental.UtilityClass;
 
 import com.google.common.base.Preconditions;
 
-import me.lucko.luckperms.common.constants.DataConstraints;
+import me.lucko.luckperms.common.storage.DataConstraints;
 
 @UtilityClass
 public class ApiUtils {

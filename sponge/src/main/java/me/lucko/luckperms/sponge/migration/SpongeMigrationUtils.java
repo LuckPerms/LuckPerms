@@ -62,7 +62,7 @@ public class SpongeMigrationUtils {
                     continue;
                 }
 
-                to.setPermission(NodeFactory.newBuilder(perm.getKey()).withExtraContext(context).setValue(perm.getValue()).build());
+                to.setPermission(NodeFactory.builder(perm.getKey()).withExtraContext(context).setValue(perm.getValue()).build());
             }
         }
 
@@ -76,12 +76,12 @@ public class SpongeMigrationUtils {
                     continue;
                 }
 
-                if (opt.getKey().equalsIgnoreCase("prefix")) {
-                    to.setPermission(NodeFactory.makePrefixNode(priority, opt.getValue()).withExtraContext(context).setValue(true).build());
-                } else if (opt.getKey().equalsIgnoreCase("suffix")) {
-                    to.setPermission(NodeFactory.makeSuffixNode(priority, opt.getValue()).withExtraContext(context).setValue(true).build());
+                if (opt.getKey().equalsIgnoreCase(NodeFactory.PREFIX_KEY)) {
+                    to.setPermission(NodeFactory.buildPrefixNode(priority, opt.getValue()).withExtraContext(context).setValue(true).build());
+                } else if (opt.getKey().equalsIgnoreCase(NodeFactory.SUFFIX_KEY)) {
+                    to.setPermission(NodeFactory.buildSuffixNode(priority, opt.getValue()).withExtraContext(context).setValue(true).build());
                 } else {
-                    to.setPermission(NodeFactory.makeMetaNode(opt.getKey(), opt.getValue()).withExtraContext(context).setValue(true).build());
+                    to.setPermission(NodeFactory.buildMetaNode(opt.getKey(), opt.getValue()).withExtraContext(context).setValue(true).build());
                 }
             }
         }
@@ -96,7 +96,7 @@ public class SpongeMigrationUtils {
                     continue; // LuckPerms does not support persisting other subject types.
                 }
 
-                to.setPermission(NodeFactory.newBuilder("group." + MigrationUtils.standardizeName(s.getIdentifier())).withExtraContext(context).setValue(true).build());
+                to.setPermission(NodeFactory.buildGroupNode(MigrationUtils.standardizeName(s.getIdentifier())).withExtraContext(context).setValue(true).build());
             }
         }
     }

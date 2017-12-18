@@ -72,7 +72,6 @@ import java.util.function.Predicate;
  */
 @Getter
 public class LuckPermsService implements LPPermissionService {
-    public static final String SERVER_CONTEXT = "server";
 
     private final LPSpongePlugin plugin;
 

@@ -80,9 +80,7 @@ public class DefaultsProvider {
      */
     public Tristate lookup(String permission, boolean isOp) {
         Map<String, Boolean> map = isOp ? opDefaults : nonOpDefaults;
-
-        Boolean b = map.get(permission);
-        return b == null ? Tristate.UNDEFINED : Tristate.fromBoolean(b);
+        return Tristate.fromNullableBoolean(map.get(permission));
     }
 
     /**

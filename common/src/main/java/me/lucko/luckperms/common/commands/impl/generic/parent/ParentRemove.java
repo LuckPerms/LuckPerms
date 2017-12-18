@@ -30,13 +30,13 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -81,7 +81,7 @@ public class ParentRemove extends SharedSubCommand {
             boolean shouldPrevent = plugin.getConfiguration().get(ConfigKeys.PREVENT_PRIMARY_GROUP_REMOVAL) &&
                     context.isEmpty() &&
                     plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD).equals("stored") &&
-                    user.getPrimaryGroup().getStoredValue().orElse("default").equalsIgnoreCase(groupName);
+                    user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(groupName);
 
             if (shouldPrevent) {
                 Message.USER_REMOVEGROUP_ERROR_PRIMARY.send(sender);
@@ -89,7 +89,7 @@ public class ParentRemove extends SharedSubCommand {
             }
         }
 
-        DataMutateResult result = holder.unsetPermission(NodeFactory.newBuilder("group." + groupName).withExtraContext(context).build());
+        DataMutateResult result = holder.unsetPermission(NodeFactory.buildGroupNode(groupName).withExtraContext(context).build());
         if (result.asBoolean()) {
             Message.UNSET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), groupName, CommandUtils.contextSetToString(context));
 

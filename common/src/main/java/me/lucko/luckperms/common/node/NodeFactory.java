@@ -45,39 +45,168 @@ import java.util.Map;
  */
 @UtilityClass
 public class NodeFactory {
+    public static final String DEFAULT_GROUP_NAME = "default";
+
+    public static final String PREFIX_KEY = "prefix";
+    public static final String SUFFIX_KEY = "suffix";
+    public static final String META_KEY = "meta";
+    public static final String WEIGHT_KEY = "weight";
+
+    private static final String GROUP_NODE_MARKER = "group.";
+    private static final String PREFIX_NODE_MARKER = PREFIX_KEY + ".";
+    private static final String SUFFIX_NODE_MARKER = SUFFIX_KEY + ".";
+    private static final String META_NODE_MARKER = META_KEY + ".";
+    private static final String WEIGHT_NODE_MARKER = WEIGHT_KEY + ".";
 
     // used to split prefix/suffix/meta nodes
     private static final Splitter META_SPLITTER = Splitter.on(PatternCache.compileDelimitedMatcher(".", "\\")).limit(2);
 
-    public static Node.Builder newBuilder(String s) {
+    public static Node.Builder builder(String s) {
         return new NodeBuilder(s);
     }
 
-    public static Node.Builder builderFromExisting(Node other) {
+    public static Node.Builder builder(Node other) {
         return new NodeBuilder(other);
     }
 
-    public static Node.Builder makeMetaNode(String key, String value) {
-        if (key.equalsIgnoreCase("prefix")) {
-            return makePrefixNode(100, value);
-        }
-        if (key.equalsIgnoreCase("suffix")) {
-            return makeSuffixNode(100, value);
-        }
-
-        return new NodeBuilder("meta." + LegacyNodeFactory.escapeCharacters(key) + "." + LegacyNodeFactory.escapeCharacters(value));
+    public static Node.Builder buildGroupNode(String groupName) {
+        return new NodeBuilder(groupNode(groupName));
     }
 
-    public static Node.Builder makeChatMetaNode(ChatMetaType type, int priority, String s) {
-        return type == ChatMetaType.PREFIX ? makePrefixNode(priority, s) : makeSuffixNode(priority, s);
+    public static Node.Builder buildGroupNode(Group group) {
+        return new NodeBuilder(groupNode(group.getName()));
     }
 
-    public static Node.Builder makePrefixNode(int priority, String prefix) {
-        return new NodeBuilder("prefix." + priority + "." + LegacyNodeFactory.escapeCharacters(prefix));
+    public static Node.Builder buildMetaNode(String key, String value) {
+        return new NodeBuilder(metaNode(key, value));
     }
 
-    public static Node.Builder makeSuffixNode(int priority, String suffix) {
-        return new NodeBuilder("suffix." + priority + "." + LegacyNodeFactory.escapeCharacters(suffix));
+    public static Node.Builder buildChatMetaNode(ChatMetaType type, int priority, String s) {
+        return type == ChatMetaType.PREFIX ? buildPrefixNode(priority, s) : buildSuffixNode(priority, s);
+    }
+
+    public static Node.Builder buildPrefixNode(int priority, String prefix) {
+        return new NodeBuilder(prefixNode(priority, prefix));
+    }
+
+    public static Node.Builder buildSuffixNode(int priority, String suffix) {
+        return new NodeBuilder(suffixNode(priority, suffix));
+    }
+
+    public static Node.Builder buildWeightNode(int weight) {
+        return new NodeBuilder(weightNode(weight));
+    }
+
+    public static String groupNode(String groupName) {
+        return GROUP_NODE_MARKER + groupName;
+    }
+
+    public static String prefixNode(int priority, String prefix) {
+        return PREFIX_NODE_MARKER + priority + "." + LegacyNodeFactory.escapeCharacters(prefix);
+    }
+
+    public static String suffixNode(int priority, String suffix) {
+        return SUFFIX_NODE_MARKER + priority + "." + LegacyNodeFactory.escapeCharacters(suffix);
+    }
+
+    public static String metaNode(String key, String value) {
+        return META_NODE_MARKER + LegacyNodeFactory.escapeCharacters(key) + "." + LegacyNodeFactory.escapeCharacters(value);
+    }
+
+    public static String weightNode(int weight) {
+        return WEIGHT_NODE_MARKER + weight;
+    }
+
+    public static Node make(String node) {
+        return builder(node).build();
+    }
+
+    public static Node make(String node, boolean value) {
+        return builder(node).setValue(value).build();
+    }
+
+    public static Node make(String node, boolean value, String server) {
+        return builder(node).setValue(value).setServer(server).build();
+    }
+
+    public static Node make(String node, boolean value, String server, String world) {
+        return builder(node).setValue(value).setServer(server).setWorld(world).build();
+    }
+
+    public static Node make(String node, String server) {
+        return builder(node).setServer(server).build();
+    }
+
+    public static Node make(String node, String server, String world) {
+        return builder(node).setServer(server).setWorld(world).build();
+    }
+
+    public static Node make(String node, boolean value, boolean temporary) {
+        return builder(node).setValue(value).setExpiry(temporary ? 10L : 0L).build();
+    }
+
+    public static Node make(String node, boolean value, String server, boolean temporary) {
+        return builder(node).setValue(value).setServer(server).setExpiry(temporary ? 10L : 0L).build();
+    }
+
+    public static Node make(String node, boolean value, String server, String world, boolean temporary) {
+        return builder(node).setValue(value).setServer(server).setWorld(world).setExpiry(temporary ? 10L : 0L).build();
+    }
+
+    public static Node make(String node, String server, boolean temporary) {
+        return builder(node).setServer(server).setExpiry(temporary ? 10L : 0L).build();
+    }
+
+    public static Node make(String node, String server, String world, boolean temporary) {
+        return builder(node).setServer(server).setWorld(world).setExpiry(temporary ? 10L : 0L).build();
+    }
+
+    public static Node make(String node, boolean value, long expireAt) {
+        return builder(node).setValue(value).setExpiry(expireAt).build();
+    }
+
+    public static Node make(String node, boolean value, String server, long expireAt) {
+        return builder(node).setValue(value).setServer(server).setExpiry(expireAt).build();
+    }
+
+    public static Node make(String node, boolean value, String server, String world, long expireAt) {
+        return builder(node).setValue(value).setServer(server).setWorld(world).setExpiry(expireAt).build();
+    }
+
+    public static Node make(Group group, long expireAt) {
+        return NodeFactory.make(groupNode(group.getName()), true, expireAt);
+    }
+
+    public static Node make(Group group, String server, long expireAt) {
+        return NodeFactory.make(groupNode(group.getName()), true, server, expireAt);
+    }
+
+    public static Node make(Group group, String server, String world, long expireAt) {
+        return NodeFactory.make(groupNode(group.getName()), true, server, world, expireAt);
+    }
+
+    public static Node make(Group group) {
+        return make(groupNode(group.getName()));
+    }
+
+    public static Node make(Group group, boolean temporary) {
+        return make(groupNode(group.getName()), temporary);
+    }
+
+    public static Node make(Group group, String server) {
+        return make(groupNode(group.getName()), server);
+    }
+
+    public static Node make(Group group, String server, String world) {
+        return make(groupNode(group.getName()), server, world);
+    }
+
+    public static Node make(Group group, String server, boolean temporary) {
+        return make(groupNode(group.getName()), server, temporary);
+    }
+
+    public static Node make(Group group, String server, String world, boolean temporary) {
+        return make(groupNode(group.getName()), server, world, temporary);
     }
 
     public static String nodeAsCommand(Node node, String id, HolderType type, boolean set) {
@@ -175,18 +304,18 @@ public class NodeFactory {
 
     public static String parseGroupNode(String s) {
         String lower = s.toLowerCase();
-        if (!lower.startsWith("group.")) {
+        if (!lower.startsWith(GROUP_NODE_MARKER)) {
             return null;
         }
-        return lower.substring("group.".length()).intern();
+        return lower.substring(GROUP_NODE_MARKER.length()).intern();
     }
 
     public static Map.Entry<String, String> parseMetaNode(String s) {
-        if (!s.startsWith("meta.")) {
+        if (!s.startsWith(META_NODE_MARKER)) {
             return null;
         }
 
-        Iterator<String> metaParts = META_SPLITTER.split(s.substring("meta.".length())).iterator();
+        Iterator<String> metaParts = META_SPLITTER.split(s.substring(META_NODE_MARKER.length())).iterator();
 
         if (!metaParts.hasNext()) return null;
         String key = metaParts.next();
@@ -197,12 +326,12 @@ public class NodeFactory {
         return Maps.immutableEntry(LegacyNodeFactory.unescapeCharacters(key).intern(), LegacyNodeFactory.unescapeCharacters(value).intern());
     }
 
-    private static Map.Entry<Integer, String> parseChatMetaNode(String type, String s) {
-        if (!s.startsWith(type + ".")) {
+    private static Map.Entry<Integer, String> parseChatMetaNode(String marker, String s) {
+        if (!s.startsWith(marker)) {
             return null;
         }
 
-        Iterator<String> metaParts = META_SPLITTER.split(s.substring((type + ".").length())).iterator();
+        Iterator<String> metaParts = META_SPLITTER.split(s.substring(marker.length())).iterator();
 
         if (!metaParts.hasNext()) return null;
         String priority = metaParts.next();
@@ -220,103 +349,24 @@ public class NodeFactory {
     }
 
     public static Map.Entry<Integer, String> parsePrefixNode(String s) {
-        return parseChatMetaNode("prefix", s);
+        return parseChatMetaNode(PREFIX_NODE_MARKER, s);
     }
 
     public static Map.Entry<Integer, String> parseSuffixNode(String s) {
-        return parseChatMetaNode("suffix", s);
+        return parseChatMetaNode(SUFFIX_NODE_MARKER, s);
     }
 
-    public static Node make(String node) {
-        return newBuilder(node).build();
-    }
-
-    public static Node make(String node, boolean value) {
-        return newBuilder(node).setValue(value).build();
-    }
-
-    public static Node make(String node, boolean value, String server) {
-        return newBuilder(node).setValue(value).setServer(server).build();
-    }
-
-    public static Node make(String node, boolean value, String server, String world) {
-        return newBuilder(node).setValue(value).setServer(server).setWorld(world).build();
-    }
-
-    public static Node make(String node, String server) {
-        return newBuilder(node).setServer(server).build();
-    }
-
-    public static Node make(String node, String server, String world) {
-        return newBuilder(node).setServer(server).setWorld(world).build();
-    }
-
-    public static Node make(String node, boolean value, boolean temporary) {
-        return newBuilder(node).setValue(value).setExpiry(temporary ? 10L : 0L).build();
-    }
-
-    public static Node make(String node, boolean value, String server, boolean temporary) {
-        return newBuilder(node).setValue(value).setServer(server).setExpiry(temporary ? 10L : 0L).build();
-    }
-
-    public static Node make(String node, boolean value, String server, String world, boolean temporary) {
-        return newBuilder(node).setValue(value).setServer(server).setWorld(world).setExpiry(temporary ? 10L : 0L).build();
-    }
-
-    public static Node make(String node, String server, boolean temporary) {
-        return newBuilder(node).setServer(server).setExpiry(temporary ? 10L : 0L).build();
-    }
-
-    public static Node make(String node, String server, String world, boolean temporary) {
-        return newBuilder(node).setServer(server).setWorld(world).setExpiry(temporary ? 10L : 0L).build();
-    }
-
-    public static Node make(String node, boolean value, long expireAt) {
-        return newBuilder(node).setValue(value).setExpiry(expireAt).build();
-    }
-
-    public static Node make(String node, boolean value, String server, long expireAt) {
-        return newBuilder(node).setValue(value).setServer(server).setExpiry(expireAt).build();
-    }
-
-    public static Node make(String node, boolean value, String server, String world, long expireAt) {
-        return newBuilder(node).setValue(value).setServer(server).setWorld(world).setExpiry(expireAt).build();
-    }
-
-    public static Node make(Group group, long expireAt) {
-        return NodeFactory.make("group." + group.getName(), true, expireAt);
-    }
-
-    public static Node make(Group group, String server, long expireAt) {
-        return NodeFactory.make("group." + group.getName(), true, server, expireAt);
-    }
-
-    public static Node make(Group group, String server, String world, long expireAt) {
-        return NodeFactory.make("group." + group.getName(), true, server, world, expireAt);
-    }
-
-    public static Node make(Group group) {
-        return make("group." + group.getName());
-    }
-
-    public static Node make(Group group, boolean temporary) {
-        return make("group." + group.getName(), temporary);
-    }
-
-    public static Node make(Group group, String server) {
-        return make("group." + group.getName(), server);
-    }
-
-    public static Node make(Group group, String server, String world) {
-        return make("group." + group.getName(), server, world);
-    }
-
-    public static Node make(Group group, String server, boolean temporary) {
-        return make("group." + group.getName(), server, temporary);
-    }
-
-    public static Node make(Group group, String server, String world, boolean temporary) {
-        return make("group." + group.getName(), server, world, temporary);
+    public static Integer parseWeightNode(String s) {
+        String lower = s.toLowerCase();
+        if (!lower.startsWith(WEIGHT_NODE_MARKER)) {
+            return null;
+        }
+        String i = lower.substring(WEIGHT_NODE_MARKER.length());
+        try {
+            return Integer.parseInt(i);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
 }

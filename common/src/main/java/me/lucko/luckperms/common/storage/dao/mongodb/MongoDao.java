@@ -53,6 +53,7 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.LegacyNodeFactory;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.node.NodeHeldPermission;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -602,7 +603,7 @@ public class MongoDao extends AbstractDao {
 
         return new Document("_id", user.getUuid())
                 .append("name", user.getName().orElse("null"))
-                .append("primaryGroup", user.getPrimaryGroup().getStoredValue().orElse("default"))
+                .append("primaryGroup", user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME))
                 .append("permissions", nodes);
     }
 

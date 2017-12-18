@@ -29,6 +29,8 @@ import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandManager;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -36,8 +38,6 @@ import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.commands.utils.SortMode;
 import me.lucko.luckperms.common.commands.utils.SortType;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -123,7 +123,7 @@ public class PermissionInfo extends SharedSubCommand {
                 s += "\n&2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime());
             }
 
-            TextComponent message = TextUtils.fromLegacy(s, Constants.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build();
+            TextComponent message = TextUtils.fromLegacy(s, CommandManager.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build();
             sender.sendMessage(message);
         }
 

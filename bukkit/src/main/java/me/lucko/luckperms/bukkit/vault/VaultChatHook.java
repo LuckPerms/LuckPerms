@@ -259,7 +259,13 @@ public class VaultChatHook extends Chat {
         perms.getExecutor().execute(() -> {
             holder.removeIf(n -> n.isMeta() && n.getMeta().getKey().equals(key));
 
-            Node.Builder metaNode = NodeFactory.makeMetaNode(key, value).setValue(true);
+            Node.Builder metaNode;
+            if (key.equalsIgnoreCase(NodeFactory.PREFIX_KEY) || key.equalsIgnoreCase(NodeFactory.SUFFIX_KEY)) {
+                metaNode = NodeFactory.buildChatMetaNode(ChatMetaType.valueOf(key.toUpperCase()), 100, value);
+            } else {
+                metaNode = NodeFactory.buildMetaNode(key, value);
+            }
+
             metaNode.setServer(perms.getVaultServer());
             metaNode.setWorld(finalWorld);
 
@@ -285,7 +291,7 @@ public class VaultChatHook extends Chat {
             int priority = (type == ChatMetaType.PREFIX ? metaAccumulator.getPrefixes() : metaAccumulator.getSuffixes()).keySet().stream()
                     .mapToInt(e -> e).max().orElse(0) + 10;
 
-            Node.Builder chatMetaNode = NodeFactory.makeChatMetaNode(type, priority, value);
+            Node.Builder chatMetaNode = NodeFactory.buildChatMetaNode(type, priority, value);
             chatMetaNode.setServer(perms.getVaultServer());
             chatMetaNode.setWorld(finalWorld);
 

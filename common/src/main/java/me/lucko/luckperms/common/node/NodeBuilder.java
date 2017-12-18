@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.node;
 
 import lombok.NonNull;
 
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
@@ -103,10 +104,10 @@ class NodeBuilder implements Node.Builder {
     @Override
     public Node.Builder withExtraContext(@NonNull String key, @NonNull String value) {
         switch (key.toLowerCase()) {
-            case "server":
+            case Contexts.SERVER_KEY:
                 setServer(value);
                 break;
-            case "world":
+            case Contexts.WORLD_KEY:
                 setWorld(value);
                 break;
             default:

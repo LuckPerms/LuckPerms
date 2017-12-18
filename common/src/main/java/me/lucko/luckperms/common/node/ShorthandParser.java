@@ -40,18 +40,18 @@ import java.util.stream.IntStream;
 
 @UtilityClass
 public class ShorthandParser {
-    private static final List<Function<String, List<String>>> PARSERS = ImmutableList.<Function<String, List<String>>>builder()
+    private static final List<Function<String, Iterable<String>>> PARSERS = ImmutableList.<Function<String, Iterable<String>>>builder()
             .add(new ListParser())
             .add(new CharacterRangeParser())
             .add(new NumericRangeParser())
             .build();
 
     public static Set<String> parseShorthand(String s) {
-        Set<String> results = new HashSet<>();
+        Set<String> results = new HashSet<>(1);
         results.add(s);
 
         while (true) {
-            Set<String> working = new HashSet<>();
+            Set<String> working = new HashSet<>(results.size());
             int beforeSize = results.size();
 
             for (String str : results) {
@@ -94,10 +94,10 @@ public class ShorthandParser {
         String after = s.substring(closingIndex + 1);
         String between = s.substring(openingIndex + 1, closingIndex);
 
-        Set<String> results = new HashSet<>();
+        Set<String> results = new HashSet<>(10);
 
-        for (Function<String, List<String>> parser : PARSERS) {
-            List<String> res = parser.apply(between);
+        for (Function<String, Iterable<String>> parser : PARSERS) {
+            Iterable<String> res = parser.apply(between);
             if (res != null) {
                 for (String r : res) {
                     results.add(before + r + after);
@@ -108,47 +108,45 @@ public class ShorthandParser {
         return results;
     }
 
-    private static class ListParser implements Function<String, List<String>> {
+    private static class ListParser implements Function<String, Iterable<String>> {
+        private static final Splitter SPLITTER = Splitter.on(',');
 
         @Override
-        public List<String> apply(String s) {
+        public Iterable<String> apply(String s) {
             s = s.replace('|', ',');
             if (!s.contains(",")) {
                 return null;
             }
-            return Splitter.on(',').splitToList(s);
+            return SPLITTER.split(s);
         }
     }
 
-    private static class NumericRangeParser implements Function<String, List<String>> {
+    private static class NumericRangeParser implements Function<String, Iterable<String>> {
 
-        private static boolean isInt(String a) {
+        private static Integer parseInt(String a) {
             try {
-                Integer.parseInt(a);
-                return true;
+                return Integer.parseInt(a);
             } catch (NumberFormatException e) {
-                return false;
+                return null;
             }
         }
 
         @Override
-        public List<String> apply(String s) {
+        public Iterable<String> apply(String s) {
             int index = s.indexOf("-");
-            if (index == -1) {
-                return null;
-            }
-            String before = s.substring(0, index);
-            String after = s.substring(index + 1);
+            if (index == -1) return null;
 
-            if (isInt(before) && isInt(after)) {
-                return IntStream.rangeClosed(Integer.parseInt(before), Integer.parseInt(after))
-                        .boxed().map(i -> "" + i).collect(Collectors.toList());
-            }
-            return null;
+            Integer before = parseInt(s.substring(0, index));
+            if (before == null) return null;
+
+            Integer after = parseInt(s.substring(index + 1));
+            if (after == null) return null;
+
+            return IntStream.rangeClosed(before, after).mapToObj(Integer::toString).collect(Collectors.toList());
         }
     }
 
-    private static class CharacterRangeParser implements Function<String, List<String>> {
+    private static class CharacterRangeParser implements Function<String, Iterable<String>> {
 
         private static List<String> getCharRange(char a, char b) {
             List<String> s = new ArrayList<>();
@@ -159,18 +157,17 @@ public class ShorthandParser {
         }
 
         @Override
-        public List<String> apply(String s) {
+        public Iterable<String> apply(String s) {
             int index = s.indexOf("-");
-            if (index == -1) {
-                return null;
-            }
-            String before = s.substring(0, index);
-            String after = s.substring(index + 1);
+            if (index == -1) return null;
 
-            if (before.length() == 1 && after.length() == 1) {
-                return getCharRange(before.charAt(0), after.charAt(0));
-            }
-            return null;
+            String before = s.substring(0, index);
+            if (before.length() != 1) return null;
+
+            String after = s.substring(index + 1);
+            if (after.length() != 1) return null;
+
+            return getCharRange(before.charAt(0), after.charAt(0));
         }
     }
 

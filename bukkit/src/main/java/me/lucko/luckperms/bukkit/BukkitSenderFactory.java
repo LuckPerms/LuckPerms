@@ -31,8 +31,8 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.compat.BukkitJsonMessageHandler;
 import me.lucko.luckperms.bukkit.compat.ReflectionUtil;
 import me.lucko.luckperms.bukkit.compat.SpigotJsonMessageHandler;
+import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.sender.SenderFactory;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.TextUtils;
 
@@ -60,7 +60,7 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
         if (sender instanceof Player) {
             return sender.getName();
         }
-        return Constants.CONSOLE_NAME;
+        return CommandManager.CONSOLE_NAME;
     }
 
     @Override
@@ -68,7 +68,7 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
         if (sender instanceof Player) {
             return ((Player) sender).getUniqueId();
         }
-        return Constants.CONSOLE_UUID;
+        return CommandManager.CONSOLE_UUID;
     }
 
     @Override

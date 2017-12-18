@@ -1045,7 +1045,7 @@ public abstract class PermissionHolder {
                     Node previous = existing.get();
 
                     // Create a new node with the same properties, but add the expiry dates together
-                    Node newNode = NodeFactory.builderFromExisting(node).setExpiry(previous.getExpiryUnixTime() + node.getSecondsTilExpiry()).build();
+                    Node newNode = NodeFactory.builder(node).setExpiry(previous.getExpiryUnixTime() + node.getSecondsTilExpiry()).build();
 
                     ImmutableCollection<Node> before = getEnduringNodes().values();
 
@@ -1180,11 +1180,11 @@ public abstract class PermissionHolder {
     }
 
     public boolean inheritsGroup(Group group) {
-        return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission(NodeFactory.make("group." + group.getName(), true)).asBoolean();
+        return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission(NodeFactory.buildGroupNode(group.getName()).build()).asBoolean();
     }
 
     public boolean inheritsGroup(Group group, ContextSet contextSet) {
-        return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission(NodeFactory.newBuilder("group." + group.getName()).withExtraContext(contextSet).build()).asBoolean();
+        return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission(NodeFactory.buildGroupNode(group.getName()).withExtraContext(contextSet).build()).asBoolean();
     }
 
     /**
@@ -1397,22 +1397,14 @@ public abstract class PermissionHolder {
         boolean seen = false;
         int best = 0;
         for (Node n : getEnduringNodes().get(ImmutableContextSet.empty())) {
-            if (!n.getPermission().startsWith("weight.")) {
+            Integer weight = NodeFactory.parseWeightNode(n.getPermission());
+            if (weight == null) {
                 continue;
             }
 
-            String substring = n.getPermission().substring("weight.".length());
-
-            int i;
-            try {
-                i = Integer.parseInt(substring);
-            } catch (NumberFormatException e) {
-                continue;
-            }
-
-            if (!seen || i > best) {
+            if (!seen || weight > best) {
                 seen = true;
-                best = i;
+                best = weight;
             }
         }
         OptionalInt weight = seen ? OptionalInt.of(best) : OptionalInt.empty();

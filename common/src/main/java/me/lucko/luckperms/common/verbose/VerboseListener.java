@@ -32,9 +32,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.PasteUtils;
@@ -151,7 +151,7 @@ public class VerboseListener {
                 }
 
                 // send the message
-                HoverEvent e = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(hover.stream()), Constants.AMPERSAND_CHAR));
+                HoverEvent e = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(hover.stream()), CommandManager.AMPERSAND_CHAR));
                 TextComponent msg = textComponent.toBuilder().applyDeep(comp -> comp.hoverEvent(e)).build();
                 notifiedSender.sendMessage(msg);
             }

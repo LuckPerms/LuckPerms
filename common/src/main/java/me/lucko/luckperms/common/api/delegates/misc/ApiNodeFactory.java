@@ -42,41 +42,41 @@ public final class ApiNodeFactory implements me.lucko.luckperms.api.NodeFactory 
 
     @Override
     public Node.Builder newBuilder(@NonNull String permission) {
-        return NodeFactory.newBuilder(permission);
+        return NodeFactory.builder(permission);
     }
 
     @Override
     public Node.Builder newBuilderFromExisting(@NonNull Node other) {
-        return NodeFactory.builderFromExisting(other);
+        return NodeFactory.builder(other);
     }
 
     @Override
     public Node.Builder makeGroupNode(Group group) {
-        return NodeFactory.newBuilder("group." + ApiGroup.cast(group).getName());
+        return NodeFactory.buildGroupNode(ApiGroup.cast(group));
     }
 
     @Override
     public Node.Builder makeGroupNode(String groupName) {
-        return NodeFactory.newBuilder("group." + groupName);
+        return NodeFactory.buildGroupNode(groupName);
     }
 
     @Override
     public Node.Builder makeMetaNode(@NonNull String key, @NonNull String value) {
-        return NodeFactory.makeMetaNode(key, value);
+        return NodeFactory.buildMetaNode(key, value);
     }
 
     @Override
     public Node.Builder makeChatMetaNode(@NonNull ChatMetaType type, int priority, @NonNull String value) {
-        return NodeFactory.makeChatMetaNode(type, priority, value);
+        return NodeFactory.buildChatMetaNode(type, priority, value);
     }
 
     @Override
     public Node.Builder makePrefixNode(int priority, @NonNull String prefix) {
-        return NodeFactory.makePrefixNode(priority, prefix);
+        return NodeFactory.buildPrefixNode(priority, prefix);
     }
 
     @Override
     public Node.Builder makeSuffixNode(int priority, @NonNull String suffix) {
-        return NodeFactory.makeSuffixNode(priority, suffix);
+        return NodeFactory.buildSuffixNode(priority, suffix);
     }
 }

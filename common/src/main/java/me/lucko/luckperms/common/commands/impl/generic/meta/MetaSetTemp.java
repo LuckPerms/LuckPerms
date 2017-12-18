@@ -30,14 +30,14 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandManager;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -82,7 +82,7 @@ public class MetaSetTemp extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        Node n = NodeFactory.makeMetaNode(key, value).withExtraContext(context).setExpiry(duration).build();
+        Node n = NodeFactory.buildMetaNode(key, value).withExtraContext(context).setExpiry(duration).build();
 
         if (holder.hasPermission(n).asBoolean()) {
             Message.ALREADY_HAS_TEMP_META.send(sender, holder.getFriendlyName(), key, value, CommandUtils.contextSetToString(context));
@@ -92,7 +92,7 @@ public class MetaSetTemp extends SharedSubCommand {
         holder.clearMetaKeys(key, context, true);
         duration = holder.setPermission(n, modifier).getValue().getExpiryUnixTime();
 
-        TextComponent.Builder builder = TextUtils.fromLegacy(Message.SET_META_TEMP_SUCCESS.asString(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), CommandUtils.contextSetToString(context)), Constants.SECTION_CHAR).toBuilder();
+        TextComponent.Builder builder = TextUtils.fromLegacy(Message.SET_META_TEMP_SUCCESS.asString(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), CommandUtils.contextSetToString(context)), CommandManager.SECTION_CHAR).toBuilder();
         HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
                 TextUtils.joinNewline("¥3Raw key: ¥r" + key, "¥3Raw value: ¥r" + value),
                 '¥'

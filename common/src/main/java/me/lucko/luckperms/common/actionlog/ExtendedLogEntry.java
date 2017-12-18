@@ -35,6 +35,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -310,15 +311,15 @@ public class ExtendedLogEntry implements LogEntry {
                 if (o instanceof ContextSet) {
                     ContextSet set = (ContextSet) o;
 
-                    for (String value : set.getValues("server")) {
+                    for (String value : set.getValues(Contexts.SERVER_KEY)) {
                         parts.add("server=" + value);
                     }
-                    for (String value : set.getValues("world")) {
+                    for (String value : set.getValues(Contexts.WORLD_KEY)) {
                         parts.add("world=" + value);
                     }
 
                     for (Map.Entry<String, String> context : set.toSet()) {
-                        if (context.getKey().equals("server") || context.getKey().equals("world")) {
+                        if (context.getKey().equals(Contexts.SERVER_KEY) || context.getKey().equals(Contexts.WORLD_KEY)) {
                             continue;
                         }
                         parts.add(context.getKey() + "=" + context.getValue());

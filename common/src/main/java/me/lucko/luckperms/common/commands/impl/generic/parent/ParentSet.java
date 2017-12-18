@@ -29,12 +29,12 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -86,7 +86,7 @@ public class ParentSet extends SharedSubCommand {
         }
 
         holder.clearParents(context, false);
-        holder.setPermission(NodeFactory.newBuilder("group." + group.getName()).withExtraContext(context).build());
+        holder.setPermission(NodeFactory.buildGroupNode(group.getName()).withExtraContext(context).build());
         if (holder.getType().isUser()) {
             ((User) holder).getPrimaryGroup().setStoredValue(group.getName());
         }

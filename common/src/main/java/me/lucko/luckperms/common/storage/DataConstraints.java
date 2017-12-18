@@ -1,8 +1,5 @@
 /*
- * This file is part of LuckPerms, licensed under the MIT License.
- *
- *  Copyright (c) lucko (Luck) <luck@lucko.me>
- *  Copyright (c) contributors
+ * Copyright (c) 2017 Lucko (Luck) <luck@lucko.me>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.constants;
+package me.lucko.luckperms.common.storage;
 
 import lombok.experimental.UtilityClass;
 
