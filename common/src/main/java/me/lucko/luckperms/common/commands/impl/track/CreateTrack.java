@@ -59,12 +59,15 @@ public class CreateTrack extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (plugin.getStorage().loadTrack(trackName).join()) {
+        if (plugin.getStorage().loadTrack(trackName).join().isPresent()) {
             Message.ALREADY_EXISTS.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().createAndLoadTrack(trackName, CreationCause.COMMAND).join()) {
+        try {
+            plugin.getStorage().createAndLoadTrack(trackName, CreationCause.COMMAND).get();
+        } catch (Exception e) {
+            e.printStackTrace();
             Message.CREATE_ERROR.send(sender, trackName);
             return CommandResult.FAILURE;
         }

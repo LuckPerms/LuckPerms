@@ -48,6 +48,7 @@ import me.lucko.luckperms.common.storage.wrappings.PhasedStorage;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -88,6 +89,21 @@ public class AbstractStorage implements Storage {
         }, dao.getPlugin().getScheduler().async());
     }
 
+    private CompletableFuture<Void> makeFuture(ThrowingRunnable runnable) {
+        return CompletableFuture.runAsync(() -> {
+            try {
+                runnable.run();
+            } catch (Exception e) {
+                Throwables.propagateIfPossible(e);
+                throw new CompletionException(e);
+            }
+        }, dao.getPlugin().getScheduler().async());
+    }
+
+    private interface ThrowingRunnable {
+        void run() throws Exception;
+    }
+
     @Override
     public String getName() {
         return dao.getName();
@@ -124,7 +140,7 @@ public class AbstractStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> logAction(LogEntry entry) {
+    public CompletableFuture<Void> logAction(LogEntry entry) {
         return makeFuture(() -> dao.logAction(entry));
     }
 
@@ -134,26 +150,23 @@ public class AbstractStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> applyBulkUpdate(BulkUpdate bulkUpdate) {
+    public CompletableFuture<Void> applyBulkUpdate(BulkUpdate bulkUpdate) {
         return makeFuture(() -> dao.applyBulkUpdate(bulkUpdate));
     }
 
     @Override
-    public CompletableFuture<Boolean> loadUser(UUID uuid, String username) {
+    public CompletableFuture<User> loadUser(UUID uuid, String username) {
         return makeFuture(() -> {
-            if (dao.loadUser(uuid, username)) {
-                User u = plugin.getUserManager().getIfLoaded(uuid);
-                if (u != null) {
-                    plugin.getApiProvider().getEventFactory().handleUserLoad(u);
-                }
-                return true;
+            User user = dao.loadUser(uuid, username);
+            if (user != null) {
+                plugin.getApiProvider().getEventFactory().handleUserLoad(user);
             }
-            return false;
+            return user;
         });
     }
 
     @Override
-    public CompletableFuture<Boolean> saveUser(User user) {
+    public CompletableFuture<Void> saveUser(User user) {
         return makeFuture(() -> dao.saveUser(user));
     }
 
@@ -168,57 +181,45 @@ public class AbstractStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> createAndLoadGroup(String name, CreationCause cause) {
+    public CompletableFuture<Group> createAndLoadGroup(String name, CreationCause cause) {
         return makeFuture(() -> {
-            if (dao.createAndLoadGroup(name)) {
-                Group g = plugin.getGroupManager().getIfLoaded(name);
-                if (g != null) {
-                    plugin.getApiProvider().getEventFactory().handleGroupCreate(g, cause);
-                }
-                return true;
+            Group group = dao.createAndLoadGroup(name);
+            if (group != null) {
+                plugin.getApiProvider().getEventFactory().handleGroupCreate(group, cause);
             }
-            return false;
+            return group;
         });
     }
 
     @Override
-    public CompletableFuture<Boolean> loadGroup(String name) {
+    public CompletableFuture<Optional<Group>> loadGroup(String name) {
         return makeFuture(() -> {
-            if (dao.loadGroup(name)) {
-                Group g = plugin.getGroupManager().getIfLoaded(name);
-                if (g != null) {
-                    plugin.getApiProvider().getEventFactory().handleGroupLoad(g);
-                }
-                return true;
+            Optional<Group> group = dao.loadGroup(name);
+            if (group.isPresent()) {
+                plugin.getApiProvider().getEventFactory().handleGroupLoad(group.get());
             }
-            return false;
+            return group;
         });
     }
 
     @Override
-    public CompletableFuture<Boolean> loadAllGroups() {
+    public CompletableFuture<Void> loadAllGroups() {
         return makeFuture(() -> {
-            if (dao.loadAllGroups()) {
-                plugin.getApiProvider().getEventFactory().handleGroupLoadAll();
-                return true;
-            }
-            return false;
+            dao.loadAllGroups();
+            plugin.getApiProvider().getEventFactory().handleGroupLoadAll();
         });
     }
 
     @Override
-    public CompletableFuture<Boolean> saveGroup(Group group) {
+    public CompletableFuture<Void> saveGroup(Group group) {
         return makeFuture(() -> dao.saveGroup(group));
     }
 
     @Override
-    public CompletableFuture<Boolean> deleteGroup(Group group, DeletionCause cause) {
+    public CompletableFuture<Void> deleteGroup(Group group, DeletionCause cause) {
         return makeFuture(() -> {
-            if (dao.deleteGroup(group)) {
-                plugin.getApiProvider().getEventFactory().handleGroupDelete(group, cause);
-                return true;
-            }
-            return false;
+            dao.deleteGroup(group);
+            plugin.getApiProvider().getEventFactory().handleGroupDelete(group, cause);
         });
     }
 
@@ -228,62 +229,50 @@ public class AbstractStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> createAndLoadTrack(String name, CreationCause cause) {
+    public CompletableFuture<Track> createAndLoadTrack(String name, CreationCause cause) {
         return makeFuture(() -> {
-            if (dao.createAndLoadTrack(name)) {
-                Track t = plugin.getTrackManager().getIfLoaded(name);
-                if (t != null) {
-                    plugin.getApiProvider().getEventFactory().handleTrackCreate(t, cause);
-                }
-                return true;
+            Track track = dao.createAndLoadTrack(name);
+            if (track != null) {
+                plugin.getApiProvider().getEventFactory().handleTrackCreate(track, cause);
             }
-            return false;
+            return track;
         });
     }
 
     @Override
-    public CompletableFuture<Boolean> loadTrack(String name) {
+    public CompletableFuture<Optional<Track>> loadTrack(String name) {
         return makeFuture(() -> {
-            if (dao.loadTrack(name)) {
-                Track t = plugin.getTrackManager().getIfLoaded(name);
-                if (t != null) {
-                    plugin.getApiProvider().getEventFactory().handleTrackLoad(t);
-                }
-                return true;
+            Optional<Track> track = dao.loadTrack(name);
+            if (track.isPresent()) {
+                plugin.getApiProvider().getEventFactory().handleTrackLoad(track.get());
             }
-            return false;
+            return track;
         });
     }
 
     @Override
-    public CompletableFuture<Boolean> loadAllTracks() {
+    public CompletableFuture<Void> loadAllTracks() {
         return makeFuture(() -> {
-            if (dao.loadAllTracks()) {
-                plugin.getApiProvider().getEventFactory().handleTrackLoadAll();
-                return true;
-            }
-            return false;
+            dao.loadAllTracks();
+            plugin.getApiProvider().getEventFactory().handleTrackLoadAll();
         });
     }
 
     @Override
-    public CompletableFuture<Boolean> saveTrack(Track track) {
+    public CompletableFuture<Void> saveTrack(Track track) {
         return makeFuture(() -> dao.saveTrack(track));
     }
 
     @Override
-    public CompletableFuture<Boolean> deleteTrack(Track track, DeletionCause cause) {
+    public CompletableFuture<Void> deleteTrack(Track track, DeletionCause cause) {
         return makeFuture(() -> {
-            if (dao.deleteTrack(track)) {
-                plugin.getApiProvider().getEventFactory().handleTrackDelete(track, cause);
-                return true;
-            }
-            return false;
+            dao.deleteTrack(track);
+            plugin.getApiProvider().getEventFactory().handleTrackDelete(track, cause);
          });
     }
 
     @Override
-    public CompletableFuture<Boolean> saveUUIDData(UUID uuid, String username) {
+    public CompletableFuture<Void> saveUUIDData(UUID uuid, String username) {
         return makeFuture(() -> dao.saveUUIDData(uuid, username));
     }
 

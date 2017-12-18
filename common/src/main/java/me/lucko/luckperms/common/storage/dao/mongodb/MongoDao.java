@@ -69,6 +69,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -144,7 +145,7 @@ public class MongoDao extends AbstractDao {
     }
 
     @Override
-    public boolean logAction(LogEntry entry) {
+    public void logAction(LogEntry entry) {
         MongoCollection<Document> c = database.getCollection(prefix + "action");
         Document doc = new Document()
                 .append("timestamp", entry.getTimestamp())
@@ -159,7 +160,6 @@ public class MongoDao extends AbstractDao {
         }
 
         c.insertOne(doc);
-        return true;
     }
 
     @Override
@@ -192,7 +192,7 @@ public class MongoDao extends AbstractDao {
     }
 
     @Override
-    public boolean applyBulkUpdate(BulkUpdate bulkUpdate) {
+    public void applyBulkUpdate(BulkUpdate bulkUpdate) {
         if (bulkUpdate.getDataType().isIncludingUsers()) {
             MongoCollection<Document> c = database.getCollection(prefix + "users");
             try (MongoCursor<Document> cursor = c.find().iterator()) {
@@ -242,11 +242,10 @@ public class MongoDao extends AbstractDao {
                 }
             }
         }
-        return true;
     }
 
     @Override
-    public boolean loadUser(UUID uuid, String username) {
+    public User loadUser(UUID uuid, String username) {
         User user = plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
         user.getIoLock().lock();
         try {
@@ -283,18 +282,18 @@ public class MongoDao extends AbstractDao {
             user.getIoLock().unlock();
         }
         user.getRefreshBuffer().requestDirectly();
-        return true;
+        return user;
     }
 
     @Override
-    public boolean saveUser(User user) {
+    public void saveUser(User user) {
         user.getIoLock().lock();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "users");
             if (!GenericUserManager.shouldSave(user)) {
-                return c.deleteOne(new Document("_id", user.getUuid())).wasAcknowledged();
+                c.deleteOne(new Document("_id", user.getUuid()));
             } else {
-                return c.replaceOne(new Document("_id", user.getUuid()), userToDoc(user), new UpdateOptions().upsert(true)).wasAcknowledged();
+                c.replaceOne(new Document("_id", user.getUuid()), userToDoc(user), new UpdateOptions().upsert(true));
             }
         } finally {
             user.getIoLock().unlock();
@@ -336,7 +335,7 @@ public class MongoDao extends AbstractDao {
     }
 
     @Override
-    public boolean createAndLoadGroup(String name) {
+    public Group createAndLoadGroup(String name) {
         Group group = plugin.getGroupManager().getOrMake(name);
         group.getIoLock().lock();
         try {
@@ -354,18 +353,25 @@ public class MongoDao extends AbstractDao {
             group.getIoLock().unlock();
         }
         group.getRefreshBuffer().requestDirectly();
-        return true;
+        return group;
     }
 
     @Override
-    public boolean loadGroup(String name) {
-        Group group = plugin.getGroupManager().getOrMake(name);
-        group.getIoLock().lock();
+    public Optional<Group> loadGroup(String name) {
+        Group group = plugin.getGroupManager().getIfLoaded(name);
+        if (group != null) {
+            group.getIoLock().lock();
+        }
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "groups");
-            try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
+            try (MongoCursor<Document> cursor = c.find(new Document("_id", name)).iterator()) {
                 if (!cursor.hasNext()) {
-                    return false;
+                    return Optional.empty();
+                }
+
+                if (group == null) {
+                    group = plugin.getGroupManager().getOrMake(name);
+                    group.getIoLock().lock();
                 }
 
                 Document d = cursor.next();
@@ -373,14 +379,16 @@ public class MongoDao extends AbstractDao {
                 group.setEnduringNodes(nodes);
             }
         } finally {
-            group.getIoLock().unlock();
+            if (group != null) {
+                group.getIoLock().unlock();
+            }
         }
         group.getRefreshBuffer().requestDirectly();
-        return true;
+        return Optional.of(group);
     }
 
     @Override
-    public boolean loadAllGroups() {
+    public void loadAllGroups() {
         List<String> groups = new ArrayList<>();
         MongoCollection<Document> c = database.getCollection(prefix + "groups");
         try (MongoCursor<Document> cursor = c.find().iterator()) {
@@ -408,27 +416,25 @@ public class MongoDao extends AbstractDao {
         gm.getAll().values().stream()
                 .filter(g -> !groups.contains(g.getName()))
                 .forEach(gm::unload);
-
-        return true;
     }
 
     @Override
-    public boolean saveGroup(Group group) {
+    public void saveGroup(Group group) {
         group.getIoLock().lock();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "groups");
-            return c.replaceOne(new Document("_id", group.getName()), groupToDoc(group), new UpdateOptions().upsert(true)).wasAcknowledged();
+            c.replaceOne(new Document("_id", group.getName()), groupToDoc(group), new UpdateOptions().upsert(true));
         } finally {
             group.getIoLock().unlock();
         }
     }
 
     @Override
-    public boolean deleteGroup(Group group) {
+    public void deleteGroup(Group group) {
         group.getIoLock().lock();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "groups");
-            return c.deleteOne(new Document("_id", group.getName())).wasAcknowledged();
+            c.deleteOne(new Document("_id", group.getName()));
         } finally {
             group.getIoLock().unlock();
         }
@@ -456,7 +462,7 @@ public class MongoDao extends AbstractDao {
     }
 
     @Override
-    public boolean createAndLoadTrack(String name) {
+    public Track createAndLoadTrack(String name) {
         Track track = plugin.getTrackManager().getOrMake(name);
         track.getIoLock().lock();
         try {
@@ -473,31 +479,42 @@ public class MongoDao extends AbstractDao {
         } finally {
             track.getIoLock().unlock();
         }
-        return true;
+        return track;
     }
 
     @Override
-    public boolean loadTrack(String name) {
-        Track track = plugin.getTrackManager().getOrMake(name);
-        track.getIoLock().lock();
+    public Optional<Track> loadTrack(String name) {
+        Track track = plugin.getTrackManager().getIfLoaded(name);
+        if (track != null) {
+            track.getIoLock().lock();
+        }
+
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "tracks");
-            try (MongoCursor<Document> cursor = c.find(new Document("_id", track.getName())).iterator()) {
-                if (cursor.hasNext()) {
-                    Document d = cursor.next();
-                    //noinspection unchecked
-                    track.setGroups((List<String>) d.get("groups"));
-                    return true;
+            try (MongoCursor<Document> cursor = c.find(new Document("_id", name)).iterator()) {
+                if (!cursor.hasNext()) {
+                    return Optional.empty();
                 }
-                return false;
+
+                if (track == null) {
+                    track = plugin.getTrackManager().getOrMake(name);
+                    track.getIoLock().lock();
+                }
+
+                Document d = cursor.next();
+                //noinspection unchecked
+                track.setGroups((List<String>) d.get("groups"));
             }
         } finally {
-            track.getIoLock().unlock();
+            if (track != null) {
+                track.getIoLock().unlock();
+            }
         }
+        return Optional.of(track);
     }
 
     @Override
-    public boolean loadAllTracks() {
+    public void loadAllTracks() {
         List<String> tracks = new ArrayList<>();
         MongoCollection<Document> c = database.getCollection(prefix + "tracks");
         try (MongoCursor<Document> cursor = c.find().iterator()) {
@@ -525,37 +542,34 @@ public class MongoDao extends AbstractDao {
         tm.getAll().values().stream()
                 .filter(t -> !tracks.contains(t.getName()))
                 .forEach(tm::unload);
-
-        return true;
     }
 
     @Override
-    public boolean saveTrack(Track track) {
+    public void saveTrack(Track track) {
         track.getIoLock().lock();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "tracks");
-            return c.replaceOne(new Document("_id", track.getName()), trackToDoc(track)).wasAcknowledged();
+            c.replaceOne(new Document("_id", track.getName()), trackToDoc(track));
         } finally {
             track.getIoLock().unlock();
         }
     }
 
     @Override
-    public boolean deleteTrack(Track track) {
+    public void deleteTrack(Track track) {
         track.getIoLock().lock();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "tracks");
-            return c.deleteOne(new Document("_id", track.getName())).wasAcknowledged();
+            c.deleteOne(new Document("_id", track.getName()));
         } finally {
             track.getIoLock().unlock();
         }
     }
 
     @Override
-    public boolean saveUUIDData(UUID uuid, String username) {
+    public void saveUUIDData(UUID uuid, String username) {
         MongoCollection<Document> c = database.getCollection(prefix + "uuid");
         c.replaceOne(new Document("_id", uuid), new Document("_id", uuid).append("name", username.toLowerCase()), new UpdateOptions().upsert(true));
-        return true;
     }
 
     @Override

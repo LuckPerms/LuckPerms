@@ -73,6 +73,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.FileHandler;
@@ -303,7 +304,7 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public boolean logAction(LogEntry entry) {
+    public void logAction(LogEntry entry) {
         actionLogger.info(String.format(LOG_FORMAT,
                 (entry.getActor().equals(Constants.CONSOLE_UUID) ? "" : entry.getActor() + " "),
                 entry.getActorName(),
@@ -312,7 +313,6 @@ public abstract class ConfigurateDao extends AbstractDao {
                 entry.getActedName(),
                 entry.getAction())
         );
-        return true;
     }
 
     @Override
@@ -322,7 +322,7 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public boolean applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception {
+    public void applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception {
         if (bulkUpdate.getDataType().isIncludingUsers()) {
             File[] files = getDirectory(StorageLocation.USER).listFiles(getFileTypeFilter());
             if (files == null) {
@@ -374,11 +374,10 @@ public abstract class ConfigurateDao extends AbstractDao {
                 }
             }
         }
-        return true;
     }
 
     @Override
-    public boolean loadUser(UUID uuid, String username) throws Exception {
+    public User loadUser(UUID uuid, String username) throws Exception {
         User user = plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
         user.getIoLock().lock();
         try {
@@ -412,11 +411,11 @@ public abstract class ConfigurateDao extends AbstractDao {
             user.getIoLock().unlock();
         }
         user.getRefreshBuffer().requestDirectly();
-        return true;
+        return user;
     }
 
     @Override
-    public boolean saveUser(User user) throws Exception {
+    public void saveUser(User user) throws Exception {
         user.getIoLock().lock();
         try {
             if (!GenericUserManager.shouldSave(user)) {
@@ -437,7 +436,6 @@ public abstract class ConfigurateDao extends AbstractDao {
         } finally {
             user.getIoLock().unlock();
         }
-        return true;
     }
 
     @Override
@@ -478,7 +476,7 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public boolean createAndLoadGroup(String name) throws Exception {
+    public Group createAndLoadGroup(String name) throws Exception {
         Group group = plugin.getGroupManager().getOrMake(name);
         group.getIoLock().lock();
         try {
@@ -502,11 +500,11 @@ public abstract class ConfigurateDao extends AbstractDao {
             group.getIoLock().unlock();
         }
         group.getRefreshBuffer().requestDirectly();
-        return true;
+        return group;
     }
 
     @Override
-    public boolean loadGroup(String name) throws Exception {
+    public Optional<Group> loadGroup(String name) throws Exception {
         Group group = plugin.getGroupManager().getIfLoaded(name);
         if (group != null) {
             group.getIoLock().lock();
@@ -516,7 +514,7 @@ public abstract class ConfigurateDao extends AbstractDao {
             ConfigurationNode object = readFile(StorageLocation.GROUP, name);
 
             if (object == null) {
-                return false;
+                return Optional.empty();
             }
 
             if (group == null) {
@@ -536,13 +534,15 @@ public abstract class ConfigurateDao extends AbstractDao {
             }
         }
         group.getRefreshBuffer().requestDirectly();
-        return true;
+        return Optional.of(group);
     }
 
     @Override
-    public boolean loadAllGroups() {
+    public void loadAllGroups() throws IOException {
         String[] fileNames = groupsDirectory.list(getFileTypeFilter());
-        if (fileNames == null) return false;
+        if (fileNames == null) {
+            throw new IOException("Not a directory");
+        }
         List<String> groups = Arrays.stream(fileNames)
                 .map(s -> s.substring(0, s.length() - fileExtension.length()))
                 .collect(Collectors.toList());
@@ -565,12 +565,10 @@ public abstract class ConfigurateDao extends AbstractDao {
         gm.getAll().values().stream()
                 .filter(g -> !groups.contains(g.getName()))
                 .forEach(gm::unload);
-
-        return true;
     }
 
     @Override
-    public boolean saveGroup(Group group) throws Exception {
+    public void saveGroup(Group group) throws Exception {
         group.getIoLock().lock();
         try {
             ConfigurationNode data = SimpleConfigurationNode.root();
@@ -585,11 +583,10 @@ public abstract class ConfigurateDao extends AbstractDao {
         } finally {
             group.getIoLock().unlock();
         }
-        return true;
     }
 
     @Override
-    public boolean deleteGroup(Group group) throws Exception {
+    public void deleteGroup(Group group) throws Exception {
         group.getIoLock().lock();
         try {
             File groupFile = new File(groupsDirectory, group.getName() + fileExtension);
@@ -603,7 +600,7 @@ public abstract class ConfigurateDao extends AbstractDao {
         } finally {
             group.getIoLock().unlock();
         }
-        return true;
+        plugin.getGroupManager().unload(group);
     }
 
     @Override
@@ -634,7 +631,7 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public boolean createAndLoadTrack(String name) throws Exception {
+    public Track createAndLoadTrack(String name) throws Exception {
         Track track = plugin.getTrackManager().getOrMake(name);
         track.getIoLock().lock();
         try {
@@ -658,11 +655,11 @@ public abstract class ConfigurateDao extends AbstractDao {
         } finally {
             track.getIoLock().unlock();
         }
-        return true;
+        return track;
     }
 
     @Override
-    public boolean loadTrack(String name) throws Exception {
+    public Optional<Track> loadTrack(String name) throws Exception {
         Track track = plugin.getTrackManager().getIfLoaded(name);
         if (track != null) {
             track.getIoLock().lock();
@@ -672,7 +669,7 @@ public abstract class ConfigurateDao extends AbstractDao {
             ConfigurationNode object = readFile(StorageLocation.TRACK, name);
 
             if (object == null) {
-                return false;
+                return Optional.empty();
             }
 
             if (track == null) {
@@ -693,13 +690,15 @@ public abstract class ConfigurateDao extends AbstractDao {
                 track.getIoLock().unlock();
             }
         }
-        return true;
+        return Optional.of(track);
     }
 
     @Override
-    public boolean loadAllTracks() {
+    public void loadAllTracks() throws IOException {
         String[] fileNames = tracksDirectory.list(getFileTypeFilter());
-        if (fileNames == null) return false;
+        if (fileNames == null) {
+            throw new IOException("Not a directory");
+        }
         List<String> tracks = Arrays.stream(fileNames)
                 .map(s -> s.substring(0, s.length() - fileExtension.length()))
                 .collect(Collectors.toList());
@@ -722,12 +721,10 @@ public abstract class ConfigurateDao extends AbstractDao {
         tm.getAll().values().stream()
                 .filter(t -> !tracks.contains(t.getName()))
                 .forEach(tm::unload);
-
-        return true;
     }
 
     @Override
-    public boolean saveTrack(Track track) throws Exception {
+    public void saveTrack(Track track) throws Exception {
         track.getIoLock().lock();
         try {
             ConfigurationNode data = SimpleConfigurationNode.root();
@@ -739,11 +736,10 @@ public abstract class ConfigurateDao extends AbstractDao {
         } finally {
             track.getIoLock().unlock();
         }
-        return true;
     }
 
     @Override
-    public boolean deleteTrack(Track track) throws Exception {
+    public void deleteTrack(Track track) throws Exception {
         track.getIoLock().lock();
         try {
             File trackFile = new File(tracksDirectory, track.getName() + fileExtension);
@@ -757,13 +753,12 @@ public abstract class ConfigurateDao extends AbstractDao {
         } finally {
             track.getIoLock().unlock();
         }
-        return true;
+        plugin.getTrackManager().unload(track);
     }
 
     @Override
-    public boolean saveUUIDData(UUID uuid, String username) {
+    public void saveUUIDData(UUID uuid, String username) {
         uuidCache.addMapping(uuid, username);
-        return true;
     }
 
     @Override

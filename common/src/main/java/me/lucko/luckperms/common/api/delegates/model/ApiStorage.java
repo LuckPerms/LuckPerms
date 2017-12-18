@@ -41,6 +41,8 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -76,7 +78,7 @@ public class ApiStorage implements Storage {
 
     @Override
     public CompletableFuture<Boolean> logAction(@NonNull LogEntry entry) {
-        return handle.noBuffer().logAction(entry);
+        return handle.noBuffer().logAction(entry).thenApply(x -> true);
     }
 
     @Override
@@ -86,12 +88,12 @@ public class ApiStorage implements Storage {
 
     @Override
     public CompletableFuture<Boolean> loadUser(@NonNull UUID uuid, String username) {
-        return handle.noBuffer().loadUser(uuid, username == null ? null : checkUsername(username));
+        return handle.noBuffer().loadUser(uuid, username == null ? null : checkUsername(username)).thenApply(Objects::nonNull);
     }
 
     @Override
     public CompletableFuture<Boolean> saveUser(@NonNull User user) {
-        return handle.noBuffer().saveUser(ApiUser.cast(user));
+        return handle.noBuffer().saveUser(ApiUser.cast(user)).thenApply(x -> true);
     }
 
     @Override
@@ -106,22 +108,22 @@ public class ApiStorage implements Storage {
 
     @Override
     public CompletableFuture<Boolean> createAndLoadGroup(@NonNull String name) {
-        return handle.noBuffer().createAndLoadGroup(checkName(name), CreationCause.API);
+        return handle.noBuffer().createAndLoadGroup(checkName(name), CreationCause.API).thenApply(Objects::nonNull);
     }
 
     @Override
     public CompletableFuture<Boolean> loadGroup(@NonNull String name) {
-        return handle.noBuffer().loadGroup(checkName(name));
+        return handle.noBuffer().loadGroup(checkName(name)).thenApply(Optional::isPresent);
     }
 
     @Override
     public CompletableFuture<Boolean> loadAllGroups() {
-        return handle.noBuffer().loadAllGroups();
+        return handle.noBuffer().loadAllGroups().thenApply(x -> true);
     }
 
     @Override
     public CompletableFuture<Boolean> saveGroup(@NonNull Group group) {
-        return handle.noBuffer().saveGroup(ApiGroup.cast(group));
+        return handle.noBuffer().saveGroup(ApiGroup.cast(group)).thenApply(x -> true);
     }
 
     @Override
@@ -129,7 +131,7 @@ public class ApiStorage implements Storage {
         if (group.getName().equalsIgnoreCase(plugin.getConfiguration().get(ConfigKeys.DEFAULT_GROUP_NAME))) {
             throw new IllegalArgumentException("Cannot delete the default group.");
         }
-        return handle.noBuffer().deleteGroup(ApiGroup.cast(group), DeletionCause.API);
+        return handle.noBuffer().deleteGroup(ApiGroup.cast(group), DeletionCause.API).thenApply(x -> true);
     }
 
     @Override
@@ -139,32 +141,32 @@ public class ApiStorage implements Storage {
 
     @Override
     public CompletableFuture<Boolean> createAndLoadTrack(@NonNull String name) {
-        return handle.noBuffer().createAndLoadTrack(checkName(name), CreationCause.API);
+        return handle.noBuffer().createAndLoadTrack(checkName(name), CreationCause.API).thenApply(Objects::nonNull);
     }
 
     @Override
     public CompletableFuture<Boolean> loadTrack(@NonNull String name) {
-        return handle.noBuffer().loadTrack(checkName(name));
+        return handle.noBuffer().loadTrack(checkName(name)).thenApply(Optional::isPresent);
     }
 
     @Override
     public CompletableFuture<Boolean> loadAllTracks() {
-        return handle.noBuffer().loadAllTracks();
+        return handle.noBuffer().loadAllTracks().thenApply(x -> true);
     }
 
     @Override
     public CompletableFuture<Boolean> saveTrack(@NonNull Track track) {
-        return handle.noBuffer().saveTrack(ApiTrack.cast(track));
+        return handle.noBuffer().saveTrack(ApiTrack.cast(track)).thenApply(x -> true);
     }
 
     @Override
     public CompletableFuture<Boolean> deleteTrack(@NonNull Track track) {
-        return handle.noBuffer().deleteTrack(ApiTrack.cast(track), DeletionCause.API);
+        return handle.noBuffer().deleteTrack(ApiTrack.cast(track), DeletionCause.API).thenApply(x -> true);
     }
 
     @Override
     public CompletableFuture<Boolean> saveUUIDData(@NonNull String username, @NonNull UUID uuid) {
-        return handle.noBuffer().saveUUIDData(uuid, checkUsername(username));
+        return handle.noBuffer().saveUUIDData(uuid, checkUsername(username)).thenApply(x -> true);
     }
 
     @Override

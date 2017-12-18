@@ -56,12 +56,15 @@ public class GroupRename extends SubCommand<Group> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (plugin.getStorage().loadGroup(newGroupName).join()) {
+        if (plugin.getStorage().loadGroup(newGroupName).join().isPresent()) {
             Message.ALREADY_EXISTS.send(sender, newGroupName);
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().createAndLoadGroup(newGroupName, CreationCause.COMMAND).join()) {
+        try {
+            plugin.getStorage().createAndLoadGroup(newGroupName, CreationCause.COMMAND).get();
+        } catch (Exception e) {
+            e.printStackTrace();
             Message.CREATE_ERROR.send(sender, newGroupName);
             return CommandResult.FAILURE;
         }
@@ -72,7 +75,10 @@ public class GroupRename extends SubCommand<Group> {
             return CommandResult.LOADING_ERROR;
         }
 
-        if (!plugin.getStorage().deleteGroup(group, DeletionCause.COMMAND).join()) {
+        try {
+            plugin.getStorage().deleteGroup(group, DeletionCause.COMMAND).get();
+        } catch (Exception e) {
+            e.printStackTrace();
             Message.DELETE_ERROR.send(sender, group.getFriendlyName());
             return CommandResult.FAILURE;
         }

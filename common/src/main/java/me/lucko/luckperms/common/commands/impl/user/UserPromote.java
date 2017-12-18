@@ -69,7 +69,7 @@ public class UserPromote extends SubCommand<User> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().loadTrack(trackName).join()) {
+        if (!plugin.getStorage().loadTrack(trackName).join().isPresent()) {
             Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
@@ -149,7 +149,7 @@ public class UserPromote extends SubCommand<User> {
             return CommandResult.STATE_ERROR;
         }
 
-        if (!plugin.getStorage().loadGroup(next).join()) {
+        if (!plugin.getStorage().loadGroup(next).join().isPresent()) {
             Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, next);
             return CommandResult.STATE_ERROR;
         }

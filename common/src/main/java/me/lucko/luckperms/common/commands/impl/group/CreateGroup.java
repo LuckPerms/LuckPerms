@@ -59,12 +59,15 @@ public class CreateGroup extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (plugin.getStorage().loadGroup(groupName).join()) {
+        if (plugin.getStorage().loadGroup(groupName).join().isPresent()) {
             Message.ALREADY_EXISTS.send(sender, groupName);
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().createAndLoadGroup(groupName, CreationCause.COMMAND).join()) {
+        try {
+            plugin.getStorage().createAndLoadGroup(groupName, CreationCause.COMMAND).get();
+        } catch (Exception e) {
+            e.printStackTrace();
             Message.CREATE_ERROR.send(sender, groupName);
             return CommandResult.FAILURE;
         }

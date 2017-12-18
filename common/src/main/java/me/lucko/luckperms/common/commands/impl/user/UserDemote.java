@@ -71,7 +71,7 @@ public class UserDemote extends SubCommand<User> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().loadTrack(trackName).join()) {
+        if (!plugin.getStorage().loadTrack(trackName).join().isPresent()) {
             Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
@@ -142,7 +142,7 @@ public class UserDemote extends SubCommand<User> {
             return CommandResult.SUCCESS;
         }
 
-        if (!plugin.getStorage().loadGroup(previous).join()) {
+        if (!plugin.getStorage().loadGroup(previous).join().isPresent()) {
             Message.USER_DEMOTE_ERROR_MALFORMED.send(sender, previous);
             return CommandResult.STATE_ERROR;
         }

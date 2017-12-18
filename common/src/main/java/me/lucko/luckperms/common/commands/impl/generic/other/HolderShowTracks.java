@@ -61,7 +61,10 @@ public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> 
             return CommandResult.NO_PERMISSION;
         }
 
-        if (!plugin.getStorage().loadAllTracks().join()) {
+        try {
+            plugin.getStorage().loadAllTracks().get();
+        } catch (Exception e) {
+            e.printStackTrace();
             Message.TRACKS_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;
         }

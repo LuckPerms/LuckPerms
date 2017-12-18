@@ -44,17 +44,18 @@ public enum ChatMetaType {
      */
     PREFIX {
         @Override
-        public boolean matches(Node node) {
+        public boolean matches(@Nonnull Node node) {
             return Preconditions.checkNotNull(node, "node").isPrefix();
         }
 
         @Override
-        public boolean shouldIgnore(Node node) {
+        public boolean shouldIgnore(@Nonnull Node node) {
             return !Preconditions.checkNotNull(node, "node").isPrefix();
         }
 
+        @Nonnull
         @Override
-        public Map.Entry<Integer, String> getEntry(Node node) {
+        public Map.Entry<Integer, String> getEntry(@Nonnull Node node) {
             return Preconditions.checkNotNull(node, "node").getPrefix();
         }
     },
@@ -64,17 +65,18 @@ public enum ChatMetaType {
      */
     SUFFIX {
         @Override
-        public boolean matches(Node node) {
+        public boolean matches(@Nonnull Node node) {
             return Preconditions.checkNotNull(node, "node").isSuffix();
         }
 
         @Override
-        public boolean shouldIgnore(Node node) {
+        public boolean shouldIgnore(@Nonnull Node node) {
             return !Preconditions.checkNotNull(node, "node").isSuffix();
         }
 
+        @Nonnull
         @Override
-        public Map.Entry<Integer, String> getEntry(Node node) {
+        public Map.Entry<Integer, String> getEntry(@Nonnull Node node) {
             return Preconditions.checkNotNull(node, "node").getSuffix();
         }
     };

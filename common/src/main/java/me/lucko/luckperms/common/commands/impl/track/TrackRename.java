@@ -56,12 +56,15 @@ public class TrackRename extends SubCommand<Track> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (plugin.getStorage().loadTrack(newTrackName).join()) {
+        if (plugin.getStorage().loadTrack(newTrackName).join().isPresent()) {
             Message.ALREADY_EXISTS.send(sender, newTrackName);
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().createAndLoadTrack(newTrackName, CreationCause.COMMAND).join()) {
+        try {
+            plugin.getStorage().createAndLoadTrack(newTrackName, CreationCause.COMMAND).get();
+        } catch (Exception e) {
+            e.printStackTrace();
             Message.CREATE_ERROR.send(sender, newTrackName);
             return CommandResult.FAILURE;
         }
@@ -72,7 +75,10 @@ public class TrackRename extends SubCommand<Track> {
             return CommandResult.LOADING_ERROR;
         }
 
-        if (!plugin.getStorage().deleteTrack(track, DeletionCause.COMMAND).join()) {
+        try {
+            plugin.getStorage().deleteTrack(track, DeletionCause.COMMAND).get();
+        } catch (Exception e) {
+            e.printStackTrace();
             Message.DELETE_ERROR.send(sender, track.getName());
             return CommandResult.FAILURE;
         }

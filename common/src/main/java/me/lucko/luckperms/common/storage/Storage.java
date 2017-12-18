@@ -38,6 +38,7 @@ import me.lucko.luckperms.common.model.User;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -59,43 +60,43 @@ public interface Storage {
 
     Map<String, String> getMeta();
 
-    CompletableFuture<Boolean> logAction(LogEntry entry);
+    CompletableFuture<Void> logAction(LogEntry entry);
 
     CompletableFuture<Log> getLog();
 
-    CompletableFuture<Boolean> applyBulkUpdate(BulkUpdate bulkUpdate);
+    CompletableFuture<Void> applyBulkUpdate(BulkUpdate bulkUpdate);
 
-    CompletableFuture<Boolean> loadUser(UUID uuid, String username);
+    CompletableFuture<User> loadUser(UUID uuid, String username);
 
-    CompletableFuture<Boolean> saveUser(User user);
+    CompletableFuture<Void> saveUser(User user);
 
     CompletableFuture<Set<UUID>> getUniqueUsers();
 
     CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(String permission);
 
-    CompletableFuture<Boolean> createAndLoadGroup(String name, CreationCause cause);
+    CompletableFuture<Group> createAndLoadGroup(String name, CreationCause cause);
 
-    CompletableFuture<Boolean> loadGroup(String name);
+    CompletableFuture<Optional<Group>> loadGroup(String name);
 
-    CompletableFuture<Boolean> loadAllGroups();
+    CompletableFuture<Void> loadAllGroups();
 
-    CompletableFuture<Boolean> saveGroup(Group group);
+    CompletableFuture<Void> saveGroup(Group group);
 
-    CompletableFuture<Boolean> deleteGroup(Group group, DeletionCause cause);
+    CompletableFuture<Void> deleteGroup(Group group, DeletionCause cause);
 
     CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(String permission);
 
-    CompletableFuture<Boolean> createAndLoadTrack(String name, CreationCause cause);
+    CompletableFuture<Track> createAndLoadTrack(String name, CreationCause cause);
 
-    CompletableFuture<Boolean> loadTrack(String name);
+    CompletableFuture<Optional<Track>> loadTrack(String name);
 
-    CompletableFuture<Boolean> loadAllTracks();
+    CompletableFuture<Void> loadAllTracks();
 
-    CompletableFuture<Boolean> saveTrack(Track track);
+    CompletableFuture<Void> saveTrack(Track track);
 
-    CompletableFuture<Boolean> deleteTrack(Track track, DeletionCause cause);
+    CompletableFuture<Void> deleteTrack(Track track, DeletionCause cause);
 
-    CompletableFuture<Boolean> saveUUIDData(UUID uuid, String username);
+    CompletableFuture<Void> saveUUIDData(UUID uuid, String username);
 
     CompletableFuture<UUID> getUUID(String username);
 

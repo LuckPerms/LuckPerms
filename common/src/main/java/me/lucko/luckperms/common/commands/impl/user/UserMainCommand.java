@@ -118,7 +118,11 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
 
     @Override
     protected User getTarget(UserIdentifier target, LuckPermsPlugin plugin, Sender sender) {
-        if (!plugin.getStorage().loadUser(target.getUuid(), target.getUsername().orElse(null)).join()) {
+
+        try {
+            plugin.getStorage().loadUser(target.getUuid(), target.getUsername().orElse(null)).get();
+        } catch (Exception e) {
+            e.printStackTrace();
             Message.LOADING_ERROR.send(sender);
             return null;
         }

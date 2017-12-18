@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -90,8 +91,8 @@ public class SplitStorageDao extends AbstractDao {
     }
 
     @Override
-    public boolean logAction(LogEntry entry) throws Exception {
-        return backing.get(types.get("log")).logAction(entry);
+    public void logAction(LogEntry entry) throws Exception {
+        backing.get(types.get("log")).logAction(entry);
     }
 
     @Override
@@ -100,27 +101,26 @@ public class SplitStorageDao extends AbstractDao {
     }
 
     @Override
-    public boolean applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception {
+    public void applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception {
         String userType = types.get("user");
         String groupType = types.get("group");
 
-        boolean ret = backing.get(userType).applyBulkUpdate(bulkUpdate);
+        backing.get(userType).applyBulkUpdate(bulkUpdate);
+
+        // if differs
         if (!userType.equals(groupType)) {
-            if (!backing.get(groupType).applyBulkUpdate(bulkUpdate)) {
-                ret = false;
-            }
+            backing.get(groupType).applyBulkUpdate(bulkUpdate);
         }
-        return ret;
     }
 
     @Override
-    public boolean loadUser(UUID uuid, String username) throws Exception {
+    public User loadUser(UUID uuid, String username) throws Exception {
         return backing.get(types.get("user")).loadUser(uuid, username);
     }
 
     @Override
-    public boolean saveUser(User user) throws Exception {
-        return backing.get(types.get("user")).saveUser(user);
+    public void saveUser(User user) throws Exception {
+        backing.get(types.get("user")).saveUser(user);
     }
 
     @Override
@@ -134,28 +134,28 @@ public class SplitStorageDao extends AbstractDao {
     }
 
     @Override
-    public boolean createAndLoadGroup(String name) throws Exception {
+    public Group createAndLoadGroup(String name) throws Exception {
         return backing.get(types.get("group")).createAndLoadGroup(name);
     }
 
     @Override
-    public boolean loadGroup(String name) throws Exception {
+    public Optional<Group> loadGroup(String name) throws Exception {
         return backing.get(types.get("group")).loadGroup(name);
     }
 
     @Override
-    public boolean loadAllGroups() throws Exception {
-        return backing.get(types.get("group")).loadAllGroups();
+    public void loadAllGroups() throws Exception {
+        backing.get(types.get("group")).loadAllGroups();
     }
 
     @Override
-    public boolean saveGroup(Group group) throws Exception {
-        return backing.get(types.get("group")).saveGroup(group);
+    public void saveGroup(Group group) throws Exception {
+        backing.get(types.get("group")).saveGroup(group);
     }
 
     @Override
-    public boolean deleteGroup(Group group) throws Exception {
-        return backing.get(types.get("group")).deleteGroup(group);
+    public void deleteGroup(Group group) throws Exception {
+        backing.get(types.get("group")).deleteGroup(group);
     }
 
     @Override
@@ -164,33 +164,33 @@ public class SplitStorageDao extends AbstractDao {
     }
 
     @Override
-    public boolean createAndLoadTrack(String name) throws Exception {
+    public Track createAndLoadTrack(String name) throws Exception {
         return backing.get(types.get("track")).createAndLoadTrack(name);
     }
 
     @Override
-    public boolean loadTrack(String name) throws Exception {
+    public Optional<Track> loadTrack(String name) throws Exception {
         return backing.get(types.get("track")).loadTrack(name);
     }
 
     @Override
-    public boolean loadAllTracks() throws Exception {
-        return backing.get(types.get("track")).loadAllTracks();
+    public void loadAllTracks() throws Exception {
+        backing.get(types.get("track")).loadAllTracks();
     }
 
     @Override
-    public boolean saveTrack(Track track) throws Exception {
-        return backing.get(types.get("track")).saveTrack(track);
+    public void saveTrack(Track track) throws Exception {
+        backing.get(types.get("track")).saveTrack(track);
     }
 
     @Override
-    public boolean deleteTrack(Track track) throws Exception {
-        return backing.get(types.get("track")).deleteTrack(track);
+    public void deleteTrack(Track track) throws Exception {
+        backing.get(types.get("track")).deleteTrack(track);
     }
 
     @Override
-    public boolean saveUUIDData(UUID uuid, String username) throws Exception {
-        return backing.get(types.get("uuid")).saveUUIDData(uuid, username);
+    public void saveUUIDData(UUID uuid, String username) throws Exception {
+        backing.get(types.get("uuid")).saveUUIDData(uuid, username);
     }
 
     @Override

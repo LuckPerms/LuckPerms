@@ -69,6 +69,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -228,7 +229,7 @@ public class SqlDao extends AbstractDao {
     }
 
     @Override
-    public boolean logAction(LogEntry entry) throws SQLException {
+    public void logAction(LogEntry entry) throws SQLException {
         try (Connection c = provider.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(prefix.apply(ACTION_INSERT))) {
                 ps.setLong(1, entry.getTimestamp());
@@ -239,7 +240,6 @@ public class SqlDao extends AbstractDao {
                 ps.setString(6, entry.getActedName());
                 ps.setString(7, entry.getAction());
                 ps.execute();
-                return true;
             }
         }
     }
@@ -271,11 +271,10 @@ public class SqlDao extends AbstractDao {
     }
 
     @Override
-    public boolean applyBulkUpdate(BulkUpdate bulkUpdate) throws SQLException {
+    public void applyBulkUpdate(BulkUpdate bulkUpdate) throws SQLException {
         String queryString = bulkUpdate.buildAsSql();
 
         try (Connection c = provider.getConnection()) {
-
             if (bulkUpdate.getDataType().isIncludingUsers()) {
                 String table = prefix.apply("{prefix}user_permissions");
                 try (Statement s = c.createStatement()) {
@@ -290,11 +289,10 @@ public class SqlDao extends AbstractDao {
                 }
             }
         }
-        return true;
     }
 
     @Override
-    public boolean loadUser(UUID uuid, String username) throws SQLException {
+    public User loadUser(UUID uuid, String username) throws SQLException {
         User user = plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
         user.getIoLock().lock();
         try {
@@ -368,11 +366,11 @@ public class SqlDao extends AbstractDao {
             user.getIoLock().unlock();
         }
         user.getRefreshBuffer().requestDirectly();
-        return true;
+        return user;
     }
 
     @Override
-    public boolean saveUser(User user) throws SQLException {
+    public void saveUser(User user) throws SQLException {
         user.getIoLock().lock();
         try {
             // Empty data - just delete from the DB.
@@ -388,7 +386,7 @@ public class SqlDao extends AbstractDao {
                         ps.execute();
                     }
                 }
-                return true;
+                return;
             }
 
             // Get a snapshot of current data.
@@ -482,8 +480,6 @@ public class SqlDao extends AbstractDao {
                 }
 
             }
-
-            return true;
         } finally {
             user.getIoLock().unlock();
         }
@@ -530,7 +526,7 @@ public class SqlDao extends AbstractDao {
     }
 
     @Override
-    public boolean createAndLoadGroup(String name) throws SQLException {
+    public Group createAndLoadGroup(String name) throws SQLException {
         String query;
         switch (provider.getName()) {
             case "H2":
@@ -554,11 +550,11 @@ public class SqlDao extends AbstractDao {
             }
         }
 
-        return loadGroup(name);
+        return loadGroup(name).get();
     }
 
     @Override
-    public boolean loadGroup(String name) throws SQLException {
+    public Optional<Group> loadGroup(String name) throws SQLException {
         // Check the group actually exists
         List<String> groups = new ArrayList<>();
         try (Connection c = provider.getConnection()) {
@@ -573,7 +569,7 @@ public class SqlDao extends AbstractDao {
         }
 
         if (!groups.contains(name)) {
-            return false;
+            return Optional.empty();
         }
 
         Group group = plugin.getGroupManager().getOrMake(name);
@@ -609,11 +605,11 @@ public class SqlDao extends AbstractDao {
             group.getIoLock().unlock();
         }
         group.getRefreshBuffer().requestDirectly();
-        return true;
+        return Optional.of(group);
     }
 
     @Override
-    public boolean loadAllGroups() throws SQLException {
+    public void loadAllGroups() throws SQLException {
         List<String> groups = new ArrayList<>();
         try (Connection c = provider.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_SELECT_ALL))) {
@@ -643,12 +639,10 @@ public class SqlDao extends AbstractDao {
         gm.getAll().values().stream()
                 .filter(g -> !groups.contains(g.getName()))
                 .forEach(gm::unload);
-
-        return true;
     }
 
     @Override
-    public boolean saveGroup(Group group) throws SQLException {
+    public void saveGroup(Group group) throws SQLException {
         group.getIoLock().lock();
         try {
             // Empty data, just delete.
@@ -659,7 +653,7 @@ public class SqlDao extends AbstractDao {
                         ps.execute();
                     }
                 }
-                return true;
+                return;
             }
 
             // Get a snapshot of current data
@@ -724,15 +718,13 @@ public class SqlDao extends AbstractDao {
                     }
                 }
             }
-
-            return true;
         } finally {
             group.getIoLock().unlock();
         }
     }
 
     @Override
-    public boolean deleteGroup(Group group) throws SQLException {
+    public void deleteGroup(Group group) throws SQLException {
         group.getIoLock().lock();
         try {
             try (Connection c = provider.getConnection()) {
@@ -746,10 +738,11 @@ public class SqlDao extends AbstractDao {
                     ps.execute();
                 }
             }
-            return true;
         } finally {
             group.getIoLock().unlock();
         }
+
+        plugin.getGroupManager().unload(group);
     }
 
     @Override
@@ -777,7 +770,7 @@ public class SqlDao extends AbstractDao {
     }
 
     @Override
-    public boolean createAndLoadTrack(String name) throws SQLException {
+    public Track createAndLoadTrack(String name) throws SQLException {
         Track track = plugin.getTrackManager().getOrMake(name);
         track.getIoLock().lock();
         try {
@@ -799,7 +792,6 @@ public class SqlDao extends AbstractDao {
             if (exists.get()) {
                 // Track exists, let's load.
                 track.setGroups(gson.fromJson(groups.get(), LIST_STRING_TYPE));
-                return true;
             } else {
                 String json = gson.toJson(track.getGroups());
                 try (Connection c = provider.getConnection()) {
@@ -809,43 +801,52 @@ public class SqlDao extends AbstractDao {
                         ps.execute();
                     }
                 }
-                return true;
             }
-
         } finally {
             track.getIoLock().unlock();
         }
+        return track;
     }
 
     @Override
-    public boolean loadTrack(String name) throws SQLException {
-        Track track = plugin.getTrackManager().getOrMake(name);
-        track.getIoLock().lock();
+    public Optional<Track> loadTrack(String name) throws SQLException {
+        Track track = plugin.getTrackManager().getIfLoaded(name);
+        if (track != null) {
+            track.getIoLock().lock();
+        }
         try {
             AtomicReference<String> groups = new AtomicReference<>(null);
+
             try (Connection c = provider.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(prefix.apply(TRACK_SELECT))) {
-                    ps.setString(1, track.getName());
+                    ps.setString(1, name);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
                             groups.set(rs.getString("groups"));
                         } else {
-                            return false;
+                            return Optional.empty();
                         }
                     }
                 }
             }
 
+            if (track == null) {
+                track = plugin.getTrackManager().getOrMake(name);
+                track.getIoLock().lock();
+            }
+
             track.setGroups(gson.fromJson(groups.get(), LIST_STRING_TYPE));
-            return true;
+            return Optional.of(track);
 
         } finally {
-            track.getIoLock().unlock();
+            if (track != null) {
+                track.getIoLock().unlock();
+            }
         }
     }
 
     @Override
-    public boolean loadAllTracks() throws SQLException {
+    public void loadAllTracks() throws SQLException {
         List<String> tracks = new ArrayList<>();
         try (Connection c = provider.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(prefix.apply(TRACK_SELECT_ALL))) {
@@ -875,12 +876,10 @@ public class SqlDao extends AbstractDao {
         tm.getAll().values().stream()
                 .filter(t -> !tracks.contains(t.getName()))
                 .forEach(tm::unload);
-
-        return true;
     }
 
     @Override
-    public boolean saveTrack(Track track) throws SQLException {
+    public void saveTrack(Track track) throws SQLException {
         track.getIoLock().lock();
         try {
             String s = gson.toJson(track.getGroups());
@@ -891,14 +890,13 @@ public class SqlDao extends AbstractDao {
                     ps.execute();
                 }
             }
-            return true;
         } finally {
             track.getIoLock().unlock();
         }
     }
 
     @Override
-    public boolean deleteTrack(Track track) throws SQLException {
+    public void deleteTrack(Track track) throws SQLException {
         track.getIoLock().lock();
         try {
             try (Connection c = provider.getConnection()) {
@@ -912,11 +910,10 @@ public class SqlDao extends AbstractDao {
         }
 
         plugin.getTrackManager().unload(track);
-        return true;
     }
 
     @Override
-    public boolean saveUUIDData(UUID uuid, String username) throws SQLException {
+    public void saveUUIDData(UUID uuid, String username) throws SQLException {
         final String u = username.toLowerCase();
         AtomicReference<String> remoteUserName = new AtomicReference<>(null);
 
@@ -943,7 +940,7 @@ public class SqlDao extends AbstractDao {
         if (remoteUserName.get() != null) {
             // the value is already correct
             if (remoteUserName.get().equals(u)) {
-                return true;
+                return;
             }
 
             try (Connection c = provider.getConnection()) {
@@ -953,7 +950,6 @@ public class SqlDao extends AbstractDao {
                     ps.execute();
                 }
             }
-            return true;
         } else {
             // first time we've seen this uuid
             try (Connection c = provider.getConnection()) {
@@ -964,7 +960,6 @@ public class SqlDao extends AbstractDao {
                     ps.execute();
                 }
             }
-            return true;
         }
     }
 

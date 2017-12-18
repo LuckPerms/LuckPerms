@@ -53,7 +53,7 @@ public class LoginHelper {
                 // No previous data for this player
                 plugin.getApiProvider().getEventFactory().handleUserFirstLogin(u, username);
                 cache.addToCache(u, u);
-                CompletableFuture<Boolean> future = plugin.getStorage().noBuffer().saveUUIDData(u, username);
+                CompletableFuture<Void> future = plugin.getStorage().noBuffer().saveUUIDData(u, username);
                 if (joinUuidSave) {
                     future.join();
                 }
@@ -65,16 +65,15 @@ public class LoginHelper {
             }
 
             // Online mode, no cache needed. This is just for name -> uuid lookup.
-            CompletableFuture<Boolean> future = plugin.getStorage().noBuffer().saveUUIDData(u, username);
+            CompletableFuture<Void> future = plugin.getStorage().noBuffer().saveUUIDData(u, username);
             if (joinUuidSave) {
                 future.join();
             }
         }
 
-        plugin.getStorage().noBuffer().loadUser(cache.getUUID(u), username).join();
-        User user = plugin.getUserManager().getIfLoaded(cache.getUUID(u));
+        User user = plugin.getStorage().noBuffer().loadUser(cache.getUUID(u), username).join();
         if (user == null) {
-            throw new RuntimeException("Failed to load user");
+            throw new NullPointerException("User is null");
         } else {
             // Setup defaults for the user
             boolean save = false;

@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -61,43 +62,43 @@ public abstract class AbstractDao {
         return Collections.emptyMap();
     }
 
-    public abstract boolean logAction(LogEntry entry) throws Exception;
+    public abstract void logAction(LogEntry entry) throws Exception;
 
     public abstract Log getLog() throws Exception;
 
-    public abstract boolean applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception;
+    public abstract void applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception;
 
-    public abstract boolean loadUser(UUID uuid, String username) throws Exception;
+    public abstract User loadUser(UUID uuid, String username) throws Exception;
 
-    public abstract boolean saveUser(User user) throws Exception;
+    public abstract void saveUser(User user) throws Exception;
 
     public abstract Set<UUID> getUniqueUsers() throws Exception;
 
     public abstract List<HeldPermission<UUID>> getUsersWithPermission(String permission) throws Exception;
 
-    public abstract boolean createAndLoadGroup(String name) throws Exception;
+    public abstract Group createAndLoadGroup(String name) throws Exception;
 
-    public abstract boolean loadGroup(String name) throws Exception;
+    public abstract Optional<Group> loadGroup(String name) throws Exception;
 
-    public abstract boolean loadAllGroups() throws Exception;
+    public abstract void loadAllGroups() throws Exception;
 
-    public abstract boolean saveGroup(Group group) throws Exception;
+    public abstract void saveGroup(Group group) throws Exception;
 
-    public abstract boolean deleteGroup(Group group) throws Exception;
+    public abstract void deleteGroup(Group group) throws Exception;
 
     public abstract List<HeldPermission<String>> getGroupsWithPermission(String permission) throws Exception;
 
-    public abstract boolean createAndLoadTrack(String name) throws Exception;
+    public abstract Track createAndLoadTrack(String name) throws Exception;
 
-    public abstract boolean loadTrack(String name) throws Exception;
+    public abstract Optional<Track> loadTrack(String name) throws Exception;
 
-    public abstract boolean loadAllTracks() throws Exception;
+    public abstract void loadAllTracks() throws Exception;
 
-    public abstract boolean saveTrack(Track track) throws Exception;
+    public abstract void saveTrack(Track track) throws Exception;
 
-    public abstract boolean deleteTrack(Track track) throws Exception;
+    public abstract void deleteTrack(Track track) throws Exception;
 
-    public abstract boolean saveUUIDData(UUID uuid, String username) throws Exception;
+    public abstract void saveUUIDData(UUID uuid, String username) throws Exception;
 
     public abstract UUID getUUID(String username) throws Exception;
 

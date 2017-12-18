@@ -64,7 +64,7 @@ public class ParentSet extends SharedSubCommand {
         String groupName = ArgumentUtils.handleName(0, args);
         MutableContextSet context = ArgumentUtils.handleContext(1, args, plugin);
 
-        if (!plugin.getStorage().loadGroup(groupName).join()) {
+        if (!plugin.getStorage().loadGroup(groupName).join().isPresent()) {
             Message.DOES_NOT_EXIST.send(sender, groupName);
             return CommandResult.INVALID_ARGS;
         }
