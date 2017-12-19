@@ -39,6 +39,7 @@ import me.lucko.luckperms.api.caching.MetaContexts;
 import me.lucko.luckperms.common.caching.type.MetaAccumulator;
 import me.lucko.luckperms.common.caching.type.MetaCache;
 import me.lucko.luckperms.common.caching.type.PermissionCache;
+import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStack;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -85,7 +86,8 @@ public abstract class HolderCachedData<T extends PermissionHolder> implements Ca
      */
     private PermissionCache calculatePermissions(@NonNull Contexts contexts, PermissionCache data) {
         if (data == null) {
-            data = new PermissionCache(contexts, getHolderName(), holder.getPlugin().getCalculatorFactory());
+            PermissionCalculatorMetadata metadata = PermissionCalculatorMetadata.of(holder.getType(), getHolderName(), contexts.getContexts());
+            data = new PermissionCache(contexts, metadata, holder.getPlugin().getCalculatorFactory());
         }
 
         if (contexts == Contexts.allowAll()) {

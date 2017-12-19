@@ -61,11 +61,9 @@ public class PermissionCache implements PermissionData {
      */
     private final PermissionCalculator calculator;
 
-    public PermissionCache(Contexts contexts, String friendlyName, CalculatorFactory calculatorFactory) {
+    public PermissionCache(Contexts contexts, PermissionCalculatorMetadata metadata, CalculatorFactory calculatorFactory) {
         permissions = new ConcurrentHashMap<>();
         permissionsUnmodifiable = Collections.unmodifiableMap(permissions);
-
-        PermissionCalculatorMetadata metadata = PermissionCalculatorMetadata.of(friendlyName, contexts.getContexts());
 
         calculator = calculatorFactory.build(contexts, metadata);
         calculator.updateBacking(permissions); // Initial setup.

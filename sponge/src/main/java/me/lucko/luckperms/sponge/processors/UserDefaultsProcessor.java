@@ -23,31 +23,39 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.calculators;
+package me.lucko.luckperms.sponge.processors;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.common.references.HolderType;
+import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.processors.PermissionProcessor;
+import me.lucko.luckperms.sponge.service.LuckPermsService;
 
-@Getter
-@AllArgsConstructor(staticName = "of")
-public class PermissionCalculatorMetadata {
+import java.util.Map;
 
-    /**
-     * The type of the object which owns the permission calculator
-     */
-    private final HolderType holderType;
+@AllArgsConstructor
+public class UserDefaultsProcessor implements PermissionProcessor {
+    private final LuckPermsService service;
+    private final ImmutableContextSet contexts;
 
-    /**
-     * The name of the object which owns the permission calculator
-     */
-    private final String objectName;
+    @Override
+    public Tristate hasPermission(String permission) {
+        Tristate t = service.getUserSubjects().getDefaults().getPermissionValue(contexts, permission);
+        if (t != Tristate.UNDEFINED) {
+            return t;
+        }
 
-    /**
-     * The context the permission calculator works with
-     */
-    private final ContextSet context;
+        t = service.getDefaults().getPermissionValue(contexts, permission);
+        if (t != Tristate.UNDEFINED) {
+            return t;
+        }
 
+        return Tristate.UNDEFINED;
+    }
+
+    @Override
+    public void updateBacking(Map<String, Boolean> map) {
+        // Do nothing, this doesn't use the backing
+    }
 }

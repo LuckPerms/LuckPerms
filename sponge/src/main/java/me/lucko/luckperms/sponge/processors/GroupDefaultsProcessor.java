@@ -1,8 +1,5 @@
 /*
- * This file is part of LuckPerms, licensed under the MIT License.
- *
- *  Copyright (c) lucko (Luck) <luck@lucko.me>
- *  Copyright (c) contributors
+ * Copyright (c) 2017 Lucko (Luck) <luck@lucko.me>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -35,13 +32,13 @@ import me.lucko.luckperms.sponge.service.LuckPermsService;
 import java.util.Map;
 
 @AllArgsConstructor
-public class DefaultsProcessor implements PermissionProcessor {
+public class GroupDefaultsProcessor implements PermissionProcessor {
     private final LuckPermsService service;
     private final ImmutableContextSet contexts;
 
     @Override
     public Tristate hasPermission(String permission) {
-        Tristate t = service.getUserSubjects().getDefaults().getPermissionValue(contexts, permission);
+        Tristate t = service.getGroupSubjects().getDefaults().getPermissionValue(contexts, permission);
         if (t != Tristate.UNDEFINED) {
             return t;
         }
