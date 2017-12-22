@@ -279,7 +279,11 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         // run an update instantly.
         getLog().info("Performing initial data load...");
-        new UpdateTask(this, true).run();
+        try {
+            new UpdateTask(this, true).run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // register tasks
         scheduler.asyncRepeating(new ExpireTemporaryTask(this), 60L);
