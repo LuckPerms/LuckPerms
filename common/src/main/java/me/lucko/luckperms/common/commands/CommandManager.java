@@ -245,12 +245,8 @@ public class CommandManager {
 
         arguments.remove(0); // remove the main command arg.
 
-        if (!o.isPresent()) {
-            return Collections.emptyList();
-        }
-
         // Pass the processing onto the main command
-        return o.get().tabComplete(plugin, sender, arguments);
+        return o.map(cmd -> cmd.tabComplete(plugin, sender, arguments)).orElseGet(Collections::emptyList);
     }
 
     private void sendCommandUsage(Sender sender, String label) {

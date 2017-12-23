@@ -229,10 +229,17 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
      * A builder for {@link ImmutableContextSet}
      */
     public static final class Builder {
-        private final ImmutableSetMultimap.Builder<String, String> builder = ImmutableSetMultimap.builder();
+        private ImmutableSetMultimap.Builder<String, String> builder;
 
         private Builder() {
 
+        }
+
+        private synchronized ImmutableSetMultimap.Builder<String, String> builder() {
+            if (builder == null) {
+                builder = ImmutableSetMultimap.builder();
+            }
+            return builder;
         }
 
         /**
@@ -244,7 +251,7 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
          */
         @Nonnull
         public Builder add(@Nonnull String key, @Nonnull String value) {
-            builder.put(sanitizeKey(key), sanitizeValue(value));
+            builder().put(sanitizeKey(key), sanitizeValue(value));
             return this;
         }
 
@@ -309,12 +316,11 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
         @Nonnull
         public Builder addAll(@Nonnull ContextSet contextSet) {
             checkNotNull(contextSet, "contextSet");
-            if (contextSet instanceof MutableContextSet) {
-                MutableContextSet other = ((MutableContextSet) contextSet);
-                builder.putAll(other.backing());
-            } else if (contextSet instanceof ImmutableContextSet) {
-                ImmutableContextSet other = ((ImmutableContextSet) contextSet);
-                builder.putAll(other.backing());
+            if (contextSet instanceof AbstractContextSet) {
+                AbstractContextSet other = ((AbstractContextSet) contextSet);
+                if (!other.isEmpty()) {
+                    builder().putAll(other.backing());
+                }
             } else {
                 addAll(contextSet.toMultimap());
             }
@@ -323,7 +329,11 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
 
         @Nonnull
         public ImmutableContextSet build() {
-            return new ImmutableContextSet(builder.build());
+            if (builder == null) {
+                return empty();
+            } else {
+                return new ImmutableContextSet(builder.build());
+            }
         }
 
     }

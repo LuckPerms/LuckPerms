@@ -31,6 +31,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.function.Function;
 import java.util.stream.Collector;
 
@@ -61,12 +63,31 @@ public class ImmutableCollectors {
         return (Collector) SET;
     }
 
+    public static <T extends Enum<T>> Collector<T, EnumSet<T>, ImmutableSet<T>> toEnumSet(Class<T> clazz) {
+        //noinspection unchecked
+        return Collector.of(
+                () -> EnumSet.noneOf(clazz),
+                EnumSet::add,
+                (l, r) -> { l.addAll(r); return l; },
+                ImmutableSet::copyOf
+        );
+    }
+
     public static <T, K, V> Collector<T, ImmutableMap.Builder<K, V>, ImmutableMap<K, V>> toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
         return Collector.of(
                 ImmutableMap.Builder<K, V>::new,
                 (r, t) -> r.put(keyMapper.apply(t), valueMapper.apply(t)),
                 (l, r) -> l.putAll(r.build()),
                 ImmutableMap.Builder::build
+        );
+    }
+
+    public static <T, K extends Enum<K>, V> Collector<T, EnumMap<K, V>, ImmutableMap<K, V>> toEnumMap(Class<K> clazz, Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
+        return Collector.of(
+                () -> new EnumMap<>(clazz),
+                (r, t) -> r.put(keyMapper.apply(t), valueMapper.apply(t)),
+                (l, r) -> { l.putAll(r); return l; },
+                ImmutableMap::copyOf
         );
     }
 

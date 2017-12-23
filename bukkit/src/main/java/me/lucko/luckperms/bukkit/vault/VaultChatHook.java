@@ -30,7 +30,7 @@ import com.google.common.base.Preconditions;
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.caching.type.MetaAccumulator;
 import me.lucko.luckperms.common.caching.type.MetaCache;
@@ -319,11 +319,11 @@ public class VaultChatHook extends AbstractVaultChat {
     }
 
     private Contexts createContextForWorldSet(String world) {
-        MutableContextSet context = MutableContextSet.create();
+        ImmutableContextSet.Builder context = ImmutableContextSet.builder();
         if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
             context.add(Contexts.WORLD_KEY, world.toLowerCase());
         }
         context.add(Contexts.SERVER_KEY, permissionHook.getVaultServer());
-        return new Contexts(context, permissionHook.isIncludeGlobal(), true, true, true, true, false);
+        return new Contexts(context.build(), permissionHook.isIncludeGlobal(), true, true, true, true, false);
     }
 }

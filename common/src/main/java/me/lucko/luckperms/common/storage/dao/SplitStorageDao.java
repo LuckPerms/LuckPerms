@@ -35,6 +35,8 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.SplitStorageType;
+import me.lucko.luckperms.common.storage.StorageType;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,10 +46,10 @@ import java.util.Set;
 import java.util.UUID;
 
 public class SplitStorageDao extends AbstractDao {
-    private final Map<String, AbstractDao> backing;
-    private final Map<String, String> types;
-
-    public SplitStorageDao(LuckPermsPlugin plugin, Map<String, AbstractDao> backing, Map<String, String> types) {
+    private final Map<StorageType, AbstractDao> backing;
+    private final Map<SplitStorageType, StorageType> types;
+    
+    public SplitStorageDao(LuckPermsPlugin plugin, Map<StorageType, AbstractDao> backing, Map<SplitStorageType, StorageType> types) {
         super(plugin, "Split Storage");
         this.backing = ImmutableMap.copyOf(backing);
         this.types = ImmutableMap.copyOf(types);
@@ -92,18 +94,18 @@ public class SplitStorageDao extends AbstractDao {
 
     @Override
     public void logAction(LogEntry entry) throws Exception {
-        backing.get(types.get("log")).logAction(entry);
+        backing.get(types.get(SplitStorageType.LOG)).logAction(entry);
     }
 
     @Override
     public Log getLog() throws Exception {
-        return backing.get(types.get("log")).getLog();
+        return backing.get(types.get(SplitStorageType.LOG)).getLog();
     }
 
     @Override
     public void applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception {
-        String userType = types.get("user");
-        String groupType = types.get("group");
+        StorageType userType = types.get(SplitStorageType.USER);
+        StorageType groupType = types.get(SplitStorageType.GROUP);
 
         backing.get(userType).applyBulkUpdate(bulkUpdate);
 
@@ -115,91 +117,91 @@ public class SplitStorageDao extends AbstractDao {
 
     @Override
     public User loadUser(UUID uuid, String username) throws Exception {
-        return backing.get(types.get("user")).loadUser(uuid, username);
+        return backing.get(types.get(SplitStorageType.USER)).loadUser(uuid, username);
     }
 
     @Override
     public void saveUser(User user) throws Exception {
-        backing.get(types.get("user")).saveUser(user);
+        backing.get(types.get(SplitStorageType.USER)).saveUser(user);
     }
 
     @Override
     public Set<UUID> getUniqueUsers() throws Exception {
-        return backing.get(types.get("user")).getUniqueUsers();
+        return backing.get(types.get(SplitStorageType.USER)).getUniqueUsers();
     }
 
     @Override
     public List<HeldPermission<UUID>> getUsersWithPermission(String permission) throws Exception {
-        return backing.get(types.get("user")).getUsersWithPermission(permission);
+        return backing.get(types.get(SplitStorageType.USER)).getUsersWithPermission(permission);
     }
 
     @Override
     public Group createAndLoadGroup(String name) throws Exception {
-        return backing.get(types.get("group")).createAndLoadGroup(name);
+        return backing.get(types.get(SplitStorageType.GROUP)).createAndLoadGroup(name);
     }
 
     @Override
     public Optional<Group> loadGroup(String name) throws Exception {
-        return backing.get(types.get("group")).loadGroup(name);
+        return backing.get(types.get(SplitStorageType.GROUP)).loadGroup(name);
     }
 
     @Override
     public void loadAllGroups() throws Exception {
-        backing.get(types.get("group")).loadAllGroups();
+        backing.get(types.get(SplitStorageType.GROUP)).loadAllGroups();
     }
 
     @Override
     public void saveGroup(Group group) throws Exception {
-        backing.get(types.get("group")).saveGroup(group);
+        backing.get(types.get(SplitStorageType.GROUP)).saveGroup(group);
     }
 
     @Override
     public void deleteGroup(Group group) throws Exception {
-        backing.get(types.get("group")).deleteGroup(group);
+        backing.get(types.get(SplitStorageType.GROUP)).deleteGroup(group);
     }
 
     @Override
     public List<HeldPermission<String>> getGroupsWithPermission(String permission) throws Exception {
-        return backing.get(types.get("group")).getGroupsWithPermission(permission);
+        return backing.get(types.get(SplitStorageType.GROUP)).getGroupsWithPermission(permission);
     }
 
     @Override
     public Track createAndLoadTrack(String name) throws Exception {
-        return backing.get(types.get("track")).createAndLoadTrack(name);
+        return backing.get(types.get(SplitStorageType.TRACK)).createAndLoadTrack(name);
     }
 
     @Override
     public Optional<Track> loadTrack(String name) throws Exception {
-        return backing.get(types.get("track")).loadTrack(name);
+        return backing.get(types.get(SplitStorageType.TRACK)).loadTrack(name);
     }
 
     @Override
     public void loadAllTracks() throws Exception {
-        backing.get(types.get("track")).loadAllTracks();
+        backing.get(types.get(SplitStorageType.TRACK)).loadAllTracks();
     }
 
     @Override
     public void saveTrack(Track track) throws Exception {
-        backing.get(types.get("track")).saveTrack(track);
+        backing.get(types.get(SplitStorageType.TRACK)).saveTrack(track);
     }
 
     @Override
     public void deleteTrack(Track track) throws Exception {
-        backing.get(types.get("track")).deleteTrack(track);
+        backing.get(types.get(SplitStorageType.TRACK)).deleteTrack(track);
     }
 
     @Override
     public void saveUUIDData(UUID uuid, String username) throws Exception {
-        backing.get(types.get("uuid")).saveUUIDData(uuid, username);
+        backing.get(types.get(SplitStorageType.UUID)).saveUUIDData(uuid, username);
     }
 
     @Override
     public UUID getUUID(String username) throws Exception {
-        return backing.get(types.get("uuid")).getUUID(username);
+        return backing.get(types.get(SplitStorageType.UUID)).getUUID(username);
     }
 
     @Override
     public String getName(UUID uuid) throws Exception {
-        return backing.get(types.get("uuid")).getName(uuid);
+        return backing.get(types.get(SplitStorageType.UUID)).getName(uuid);
     }
 }

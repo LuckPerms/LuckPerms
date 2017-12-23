@@ -99,14 +99,11 @@ public class SpongeCommandExecutor extends CommandManager implements CommandCall
             String element = it.next();
             if (element.startsWith("@")) {
                 try {
-                    Player ret = Selector.parse(element).resolve(source).stream()
+                    Selector.parse(element).resolve(source).stream()
                             .filter(e -> e instanceof Player)
                             .map(e -> ((Player) e))
-                            .findFirst().orElse(null);
-
-                    if (ret != null) {
-                        it.set(ret.getUniqueId().toString());
-                    }
+                            .findFirst()
+                            .ifPresent(ret -> it.set(ret.getUniqueId().toString()));
                 } catch (IllegalArgumentException e) {
                     // ignored
                 }

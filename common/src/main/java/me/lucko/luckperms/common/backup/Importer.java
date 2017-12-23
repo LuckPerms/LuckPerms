@@ -155,12 +155,16 @@ public class Importer implements Runnable {
 
         int errors = (int) toExecute.stream().filter(v -> !v.getResult().asBoolean()).count();
 
-        if (errors == 0) {
-            notify.forEach(s -> Message.IMPORT_END_COMPLETE.send(s, seconds));
-        } else if (errors == 1) {
-            notify.forEach(s -> Message.IMPORT_END_COMPLETE_ERR_SIN.send(s, seconds, errors));
-        } else {
-            notify.forEach(s -> Message.IMPORT_END_COMPLETE_ERR.send(s, seconds, errors));
+        switch (errors) {
+            case 0:
+                notify.forEach(s -> Message.IMPORT_END_COMPLETE.send(s, seconds));
+                break;
+            case 1:
+                notify.forEach(s -> Message.IMPORT_END_COMPLETE_ERR_SIN.send(s, seconds, errors));
+                break;
+            default:
+                notify.forEach(s -> Message.IMPORT_END_COMPLETE_ERR.send(s, seconds, errors));
+                break;
         }
 
         AtomicInteger errIndex = new AtomicInteger(1);

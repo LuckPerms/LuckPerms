@@ -30,7 +30,7 @@ import lombok.NonNull;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 
 import java.util.Map;
 import java.util.Set;
@@ -40,7 +40,7 @@ import java.util.Set;
  */
 class NodeBuilder implements Node.Builder {
     protected String permission;
-    private final MutableContextSet extraContexts = MutableContextSet.create();
+    private final ImmutableContextSet.Builder extraContexts = ImmutableContextSet.builder();
     private Boolean value = true;
     private boolean override = false;
     private String server = null;
@@ -144,6 +144,6 @@ class NodeBuilder implements Node.Builder {
 
     @Override
     public Node build() {
-        return new ImmutableNode(permission, value, override, expireAt, server, world, extraContexts);
+        return new ImmutableNode(permission, value, override, expireAt, server, world, extraContexts.build());
     }
 }

@@ -75,7 +75,7 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
     protected void sendMessage(CommandSender sender, String s) {
         // send sync if command block
         if (sender instanceof BlockCommandSender) {
-            getPlugin().getScheduler().doSync(new BlockMessageAgent(((BlockCommandSender) sender), s));
+            getPlugin().getScheduler().doSync(new BlockMessengerAgent(((BlockCommandSender) sender), s));
             return;
         }
 
@@ -100,7 +100,7 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
         }
 
         // Fallback to legacy format
-        sender.sendMessage(TextUtils.toLegacy(message));
+        sendMessage(sender, TextUtils.toLegacy(message));
     }
 
     @Override
@@ -126,7 +126,7 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
     }
 
     @AllArgsConstructor
-    private static final class BlockMessageAgent implements Runnable {
+    private static final class BlockMessengerAgent implements Runnable {
         private final BlockCommandSender block;
         private final String message;
 

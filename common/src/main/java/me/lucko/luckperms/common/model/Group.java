@@ -63,7 +63,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     private final GroupCachedData cachedData;
 
     @Getter
-    private BufferedRequest<Void> refreshBuffer;
+    private final BufferedRequest<Void> refreshBuffer;
 
     public Group(String name, LuckPermsPlugin plugin) {
         super(name, plugin);
@@ -118,9 +118,10 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     }
 
     private CompletableFuture<Void> reloadCachedData() {
-        return CompletableFuture.allOf(cachedData.reloadPermissions(), cachedData.reloadMeta()).thenAccept(n -> {
-            getPlugin().getApiProvider().getEventFactory().handleGroupDataRecalculate(this, cachedData);
-        });
+        return CompletableFuture.allOf(
+                cachedData.reloadPermissions(),
+                cachedData.reloadMeta()
+        ).thenAccept(n -> getPlugin().getApiProvider().getEventFactory().handleGroupDataRecalculate(this, cachedData));
     }
 
     private static final class GroupRefreshBuffer extends BufferedRequest<Void> {

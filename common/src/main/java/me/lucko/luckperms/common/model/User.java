@@ -73,7 +73,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     private final UserCachedData cachedData;
 
     @Getter
-    private BufferedRequest<Void> refreshBuffer;
+    private final BufferedRequest<Void> refreshBuffer;
 
     @Getter
     private final ApiUser delegate = new ApiUser(this);
@@ -189,9 +189,10 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     }
 
     public CompletableFuture<Void> reloadCachedData() {
-        return CompletableFuture.allOf(cachedData.reloadPermissions(), cachedData.reloadMeta()).thenAccept(n -> {
-            getPlugin().getApiProvider().getEventFactory().handleUserDataRecalculate(this, cachedData);
-        });
+        return CompletableFuture.allOf(
+                cachedData.reloadPermissions(),
+                cachedData.reloadMeta()
+        ).thenAccept(n -> getPlugin().getApiProvider().getEventFactory().handleUserDataRecalculate(this, cachedData));
     }
 
     /**

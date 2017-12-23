@@ -50,7 +50,7 @@ public class BulkUpdateBuilder {
     private Action action = null;
 
     // a set of constraints which data must match to be acted upon
-    private Set<Constraint> constraints = new LinkedHashSet<>();
+    private final Set<Constraint> constraints = new LinkedHashSet<>();
 
     public BulkUpdateBuilder action(Action action) {
         this.action = action;

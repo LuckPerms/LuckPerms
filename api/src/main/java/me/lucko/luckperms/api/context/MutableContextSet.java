@@ -281,11 +281,8 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
      */
     public void addAll(@Nonnull ContextSet contextSet) {
         checkNotNull(contextSet, "contextSet");
-        if (contextSet instanceof MutableContextSet) {
-            MutableContextSet other = ((MutableContextSet) contextSet);
-            this.map.putAll(other.map);
-        } else if (contextSet instanceof ImmutableContextSet) {
-            ImmutableContextSet other = ((ImmutableContextSet) contextSet);
+        if (contextSet instanceof AbstractContextSet) {
+            AbstractContextSet other = ((AbstractContextSet) contextSet);
             this.map.putAll(other.backing());
         } else {
             addAll(contextSet.toMultimap());

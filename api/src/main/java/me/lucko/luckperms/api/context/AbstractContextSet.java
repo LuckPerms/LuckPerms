@@ -95,8 +95,8 @@ abstract class AbstractContextSet implements ContextSet {
 
         final Multimap<String, String> otherContexts;
 
-        if (other instanceof MutableContextSet) {
-            otherContexts = ((MutableContextSet) other).backing();
+        if (other instanceof AbstractContextSet) {
+            otherContexts = ((AbstractContextSet) other).backing();
         } else {
             otherContexts = other.toMultimap();
         }

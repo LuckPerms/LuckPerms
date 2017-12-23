@@ -174,7 +174,7 @@ public enum CommandPermission {
     private final String node;
 
     @Getter
-    private Type type;
+    private final Type type;
 
     CommandPermission(String node, Type type) {
         this.type = type;

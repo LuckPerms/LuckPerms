@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.storage;
 import lombok.experimental.UtilityClass;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -46,8 +47,6 @@ import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.PostgreConnec
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,19 +55,17 @@ public class StorageFactory {
 
     public static Set<StorageType> getRequiredTypes(LuckPermsPlugin plugin, StorageType defaultMethod) {
         if (plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE)) {
-            Map<String, String> types = new HashMap<>(plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS));
-            types.entrySet().stream()
-                    .filter(e -> StorageType.parse(e.getValue()) == null)
-                    .forEach(e -> {
-                        plugin.getLog().severe("Storage method for " + e.getKey() + " - " + e.getValue() + " not recognised. " +
-                                "Using the default instead.");
-                        e.setValue(defaultMethod.getIdentifiers().get(0));
-                    });
-
-            Set<String> neededTypes = new HashSet<>();
-            neededTypes.addAll(types.values());
-
-            return neededTypes.stream().map(StorageType::parse).collect(ImmutableCollectors.toSet());
+            return plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS).entrySet().stream()
+                    .map(e -> {
+                        StorageType type = StorageType.parse(e.getValue());
+                        if (type == null) {
+                            plugin.getLog().severe("Storage method for " + e.getKey() + " - " + e.getValue() + " not recognised. " +
+                                    "Using the default instead.");
+                            type = defaultMethod;
+                        }
+                        return type;
+                    })
+                    .collect(ImmutableCollectors.toEnumSet(StorageType.class));
         } else {
             String method = plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);
             StorageType type = StorageType.parse(method);
@@ -85,21 +82,21 @@ public class StorageFactory {
         if (plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE)) {
             plugin.getLog().info("Loading storage provider... [SPLIT STORAGE]");
 
-            Map<String, String> types = new HashMap<>(plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS));
-            types.entrySet().stream()
-                    .filter(e -> StorageType.parse(e.getValue()) == null)
-                    .forEach(e -> e.setValue(defaultMethod.getIdentifiers().get(0)));
+            Map<SplitStorageType, StorageType> mappedTypes = plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS).entrySet().stream()
+                    .map(e -> {
+                        StorageType type = StorageType.parse(e.getValue());
+                        if (type == null) {
+                            type = defaultMethod;
+                        }
+                        return Maps.immutableEntry(e.getKey(), type);
+                    })
+                    .collect(ImmutableCollectors.toEnumMap(SplitStorageType.class, Map.Entry::getKey, Map.Entry::getValue));
 
-            Set<String> neededTypes = new HashSet<>();
-            neededTypes.addAll(types.values());
+            Map<StorageType, AbstractDao> backing = mappedTypes.values().stream()
+                    .distinct()
+                    .collect(ImmutableCollectors.toEnumMap(StorageType.class, e -> e, e -> makeDao(e, plugin)));
 
-            Map<String, AbstractDao> backing = new HashMap<>();
-
-            for (String type : neededTypes) {
-                backing.put(type, makeDao(StorageType.parse(type), plugin));
-            }
-
-            storage = AbstractStorage.create(plugin, new SplitStorageDao(plugin, backing, types));
+            storage = AbstractStorage.create(plugin, new SplitStorageDao(plugin, backing, mappedTypes));
 
         } else {
             String method = plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);

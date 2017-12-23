@@ -49,12 +49,14 @@ import me.lucko.luckperms.common.primarygroup.AllParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.ParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
 import me.lucko.luckperms.common.primarygroup.StoredHolder;
+import me.lucko.luckperms.common.storage.SplitStorageType;
 import me.lucko.luckperms.common.storage.StorageCredentials;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -417,14 +419,14 @@ public class ConfigKeys {
     /**
      * The options for split storage
      */
-    public static final ConfigKey<Map<String, String>> SPLIT_STORAGE_OPTIONS = EnduringKey.wrap(AbstractKey.of(c -> {
-        return ImmutableMap.<String, String>builder()
-                .put("user", c.getString("split-storage.methods.user", "h2").toLowerCase())
-                .put("group", c.getString("split-storage.methods.group", "h2").toLowerCase())
-                .put("track", c.getString("split-storage.methods.track", "h2").toLowerCase())
-                .put("uuid", c.getString("split-storage.methods.uuid", "h2").toLowerCase())
-                .put("log", c.getString("split-storage.methods.log", "h2").toLowerCase())
-                .build();
+    public static final ConfigKey<Map<SplitStorageType, String>> SPLIT_STORAGE_OPTIONS = EnduringKey.wrap(AbstractKey.of(c -> {
+        EnumMap<SplitStorageType, String> map = new EnumMap<>(SplitStorageType.class);
+        map.put(SplitStorageType.USER, c.getString("split-storage.methods.user", "h2").toLowerCase());
+        map.put(SplitStorageType.GROUP, c.getString("split-storage.methods.group", "h2").toLowerCase());
+        map.put(SplitStorageType.TRACK, c.getString("split-storage.methods.track", "h2").toLowerCase());
+        map.put(SplitStorageType.UUID, c.getString("split-storage.methods.uuid", "h2").toLowerCase());
+        map.put(SplitStorageType.LOG, c.getString("split-storage.methods.log", "h2").toLowerCase());
+        return ImmutableMap.copyOf(map);
     }));
 
     /**

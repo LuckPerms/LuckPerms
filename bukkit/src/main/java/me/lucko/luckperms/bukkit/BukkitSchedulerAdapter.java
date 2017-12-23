@@ -48,19 +48,19 @@ public class BukkitSchedulerAdapter implements SchedulerAdapter {
 
     @Getter
     @Accessors(fluent = true)
-    private ExecutorService asyncFallback;
+    private final ExecutorService asyncFallback;
 
     @Getter
     @Accessors(fluent = true)
-    private Executor asyncBukkit;
+    private final Executor asyncBukkit;
 
     @Getter
     @Accessors(fluent = true)
-    private Executor sync;
+    private final Executor sync;
 
     @Getter
     @Accessors(fluent = true)
-    private Executor async;
+    private final Executor async;
 
     @Getter
     @Setter

@@ -149,11 +149,8 @@ public abstract class MainCommand<T, I> extends Command<Void, T> {
                 .filter(s -> s.getName().equalsIgnoreCase(args.get(1)))
                 .findFirst();
 
-        if (!o.isPresent()) {
-            return Collections.emptyList();
-        }
+        return o.map(cmd -> cmd.tabComplete(plugin, sender, args.subList(2, args.size()))).orElseGet(Collections::emptyList);
 
-        return o.get().tabComplete(plugin, sender, args.subList(2, args.size()));
     }
 
     protected abstract List<String> getTargets(LuckPermsPlugin plugin);
