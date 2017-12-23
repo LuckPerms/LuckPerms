@@ -50,7 +50,7 @@ import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.UUID;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -77,7 +77,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
     private final LPBukkitPlugin plugin;
 
     // an executor for Vault modifications.
-    private final Executor executor;
+    private final ExecutorService executor;
 
     public VaultPermissionHook(LPBukkitPlugin plugin) {
         this.plugin = plugin;
