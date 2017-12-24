@@ -26,6 +26,7 @@
 package me.lucko.luckperms.bukkit.vault;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Contexts;
@@ -94,7 +95,7 @@ public class VaultChatHook extends AbstractVaultChat {
         if (log()) {
             logMsg("#getPlayerPrefix: %s - %s - %s", user.getFriendlyName(), contexts.getContexts().toMultimap(), ret);
         }
-        return ret;
+        return Strings.nullToEmpty(ret);
     }
 
     @Override
@@ -110,7 +111,7 @@ public class VaultChatHook extends AbstractVaultChat {
         if (log()) {
             logMsg("#getPlayerSuffix: %s - %s - %s", user.getFriendlyName(), contexts.getContexts().toMultimap(), ret);
         }
-        return ret;
+        return Strings.nullToEmpty(ret);
     }
 
     @Override
@@ -174,7 +175,7 @@ public class VaultChatHook extends AbstractVaultChat {
         if (log()) {
             logMsg("#getGroupPrefix: %s - %s - %s", group.getName(), contexts.getContexts().toMultimap(), ret);
         }
-        return ret;
+        return Strings.nullToEmpty(ret);
     }
 
     @Override
@@ -190,7 +191,7 @@ public class VaultChatHook extends AbstractVaultChat {
         if (log()) {
             logMsg("#getGroupSuffix: %s - %s - %s", group.getName(), contexts.getContexts().toMultimap(), ret);
         }
-        return ret;
+        return Strings.nullToEmpty(ret);
     }
 
     @Override
