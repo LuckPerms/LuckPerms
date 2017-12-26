@@ -48,9 +48,9 @@ public class BufferedOutputStorage implements Storage, Runnable {
 
     private final long flushTime;
 
-    private final Buffer<User, Boolean> userOutputBuffer = Buffer.of(user -> BufferedOutputStorage.this.delegate.saveUser(user).join());
-    private final Buffer<Group, Boolean> groupOutputBuffer = Buffer.of(group -> BufferedOutputStorage.this.delegate.saveGroup(group).join());
-    private final Buffer<Track, Boolean> trackOutputBuffer = Buffer.of(track -> BufferedOutputStorage.this.delegate.saveTrack(track).join());
+    private final Buffer<User, Void> userOutputBuffer = Buffer.of(user -> BufferedOutputStorage.this.delegate.saveUser(user).join());
+    private final Buffer<Group, Void> groupOutputBuffer = Buffer.of(group -> BufferedOutputStorage.this.delegate.saveGroup(group).join());
+    private final Buffer<Track, Void> trackOutputBuffer = Buffer.of(track -> BufferedOutputStorage.this.delegate.saveTrack(track).join());
 
     @Override
     public void run() {
@@ -79,25 +79,25 @@ public class BufferedOutputStorage implements Storage, Runnable {
     }
 
     @Override
-    public CompletableFuture<Boolean> saveUser(User user) {
+    public CompletableFuture<Void> saveUser(User user) {
         return userOutputBuffer.enqueue(user);
     }
 
     @Override
-    public CompletableFuture<Boolean> saveGroup(Group group) {
+    public CompletableFuture<Void> saveGroup(Group group) {
         return groupOutputBuffer.enqueue(group);
     }
 
     @Override
-    public CompletableFuture<Boolean> saveTrack(Track track) {
+    public CompletableFuture<Void> saveTrack(Track track) {
         return trackOutputBuffer.enqueue(track);
     }
 
     private interface Exclude {
         Storage noBuffer();
-        CompletableFuture<Void> shutdown();
-        CompletableFuture<Boolean> saveUser(User user);
-        CompletableFuture<Boolean> saveGroup(Group group);
-        CompletableFuture<Boolean> saveTrack(Track track);
+        void shutdown();
+        CompletableFuture<Void> saveUser(User user);
+        CompletableFuture<Void> saveGroup(Group group);
+        CompletableFuture<Void> saveTrack(Track track);
     }
 }

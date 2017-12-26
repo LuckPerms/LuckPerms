@@ -28,15 +28,15 @@ package me.lucko.luckperms.common.commands.impl.track;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
@@ -59,12 +59,15 @@ public class CreateTrack extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (plugin.getStorage().loadTrack(trackName).join()) {
+        if (plugin.getStorage().loadTrack(trackName).join().isPresent()) {
             Message.ALREADY_EXISTS.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().createAndLoadTrack(trackName, CreationCause.COMMAND).join()) {
+        try {
+            plugin.getStorage().createAndLoadTrack(trackName, CreationCause.COMMAND).get();
+        } catch (Exception e) {
+            e.printStackTrace();
             Message.CREATE_ERROR.send(sender, trackName);
             return CommandResult.FAILURE;
         }

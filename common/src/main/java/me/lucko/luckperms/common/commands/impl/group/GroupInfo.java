@@ -28,11 +28,11 @@ package me.lucko.luckperms.common.commands.impl.group;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -63,9 +63,9 @@ public class GroupInfo extends SubCommand<Group> {
                 group.getWeight().isPresent() ? group.getWeight().getAsInt() : "None",
                 group.getOwnNodes().size(),
                 group.getOwnNodes().stream().filter(n -> !(n.isGroupNode() || n.isPrefix() || n.isSuffix() || n.isMeta())).mapToInt(n -> 1).sum(),
-                group.getPrefixNodes().size(),
-                group.getSuffixNodes().size(),
-                group.getMetaNodes().size()
+                group.getOwnNodes().stream().filter(Node::isPrefix).mapToInt(n -> 1).sum(),
+                group.getOwnNodes().stream().filter(Node::isSuffix).mapToInt(n -> 1).sum(),
+                group.getOwnNodes().stream().filter(Node::isMeta).mapToInt(n -> 1).sum()
         );
 
         Set<Node> parents = group.getOwnNodesSet().stream()

@@ -42,19 +42,15 @@ public enum ChatMetaType {
     /**
      * Represents a prefix
      */
-    PREFIX {
+    PREFIX("prefix") {
         @Override
-        public boolean matches(Node node) {
+        public boolean matches(@Nonnull Node node) {
             return Preconditions.checkNotNull(node, "node").isPrefix();
         }
 
+        @Nonnull
         @Override
-        public boolean shouldIgnore(Node node) {
-            return !Preconditions.checkNotNull(node, "node").isPrefix();
-        }
-
-        @Override
-        public Map.Entry<Integer, String> getEntry(Node node) {
+        public Map.Entry<Integer, String> getEntry(@Nonnull Node node) {
             return Preconditions.checkNotNull(node, "node").getPrefix();
         }
     },
@@ -62,22 +58,24 @@ public enum ChatMetaType {
     /**
      * Represents a suffix
      */
-    SUFFIX {
+    SUFFIX("suffix") {
         @Override
-        public boolean matches(Node node) {
+        public boolean matches(@Nonnull Node node) {
             return Preconditions.checkNotNull(node, "node").isSuffix();
         }
 
+        @Nonnull
         @Override
-        public boolean shouldIgnore(Node node) {
-            return !Preconditions.checkNotNull(node, "node").isSuffix();
-        }
-
-        @Override
-        public Map.Entry<Integer, String> getEntry(Node node) {
+        public Map.Entry<Integer, String> getEntry(@Nonnull Node node) {
             return Preconditions.checkNotNull(node, "node").getSuffix();
         }
     };
+
+    private final String str;
+
+    ChatMetaType(String str) {
+        this.str = str;
+    }
 
     /**
      * Returns if the passed node matches the type
@@ -93,7 +91,9 @@ public enum ChatMetaType {
      * @param node the node to test
      * @return true if the node does not share the same type
      */
-    public abstract boolean shouldIgnore(@Nonnull Node node);
+    public boolean shouldIgnore(@Nonnull Node node) {
+        return !matches(node);
+    }
 
     /**
      * Maps the corresponding entry from the given node
@@ -104,6 +104,11 @@ public enum ChatMetaType {
      */
     @Nonnull
     public abstract Map.Entry<Integer, String> getEntry(@Nonnull Node node);
+
+    @Override
+    public String toString() {
+        return str;
+    }
 
     /**
      * Parses a ChatMetaType from the given node.

@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.references.HolderType;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.utils.Cycle;
 
@@ -112,7 +113,7 @@ public class Exporter implements Runnable {
                     }).collect(Collectors.toList());
 
             for (Group group : groups) {
-                if (!group.getName().equals("default")) {
+                if (!group.getName().equals(NodeFactory.DEFAULT_GROUP_NAME)) {
                     write(writer, "/lp creategroup " + group.getName());
                 }
             }
@@ -124,7 +125,7 @@ public class Exporter implements Runnable {
 
                 write(writer, "# Export group: " + group.getName());
                 for (Node node : group.getEnduringNodes().values()) {
-                    write(writer, "/lp " + NodeFactory.nodeAsCommand(node, group.getName(), true, true));
+                    write(writer, "/lp " + NodeFactory.nodeAsCommand(node, group.getName(), HolderType.GROUP, true));
                 }
                 write(writer, "");
                 log.logAllProgress("Exported {} groups so far.", groupCount.incrementAndGet());
@@ -225,15 +226,15 @@ public class Exporter implements Runnable {
 
                             boolean inDefault = false;
                             for (Node node : user.getEnduringNodes().values()) {
-                                if (node.isGroupNode() && node.getGroupName().equalsIgnoreCase("default")) {
+                                if (node.isGroupNode() && node.getGroupName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
                                     inDefault = true;
                                     continue;
                                 }
 
-                                output.add("/lp " + NodeFactory.nodeAsCommand(node, user.getUuid().toString(), false, true));
+                                output.add("/lp " + NodeFactory.nodeAsCommand(node, user.getUuid().toString(), HolderType.USER, true));
                             }
 
-                            if (!user.getPrimaryGroup().getStoredValue().orElse("default").equalsIgnoreCase("default")) {
+                            if (!user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
                                 output.add("/lp user " + user.getUuid().toString() + " switchprimarygroup " + user.getPrimaryGroup().getStoredValue().get());
                             }
 

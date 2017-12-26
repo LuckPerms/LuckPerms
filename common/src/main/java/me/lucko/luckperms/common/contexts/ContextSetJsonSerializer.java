@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.contexts;
 import lombok.experimental.UtilityClass;
 
 import com.google.common.base.Preconditions;
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -66,9 +67,27 @@ public class ContextSetJsonSerializer {
         return data;
     }
 
-    public static MutableContextSet deserializeContextSet(JsonElement element) {
+    public static ContextSet deserializeContextSet(Gson gson, String json) {
+        Preconditions.checkNotNull(json, "json");
+        if (json.equals("{}")) {
+            return ContextSet.empty();
+        }
+
+        JsonObject context = gson.fromJson(json, JsonObject.class);
+        if (context == null) {
+            return ContextSet.empty();
+        }
+
+        return deserializeContextSet(context);
+    }
+
+    public static ContextSet deserializeContextSet(JsonElement element) {
         Preconditions.checkArgument(element.isJsonObject());
         JsonObject data = element.getAsJsonObject();
+
+        if (data.entrySet().isEmpty()) {
+            return ContextSet.empty();
+        }
 
         MutableContextSet map = MutableContextSet.create();
         for (Map.Entry<String, JsonElement> e : data.entrySet()) {

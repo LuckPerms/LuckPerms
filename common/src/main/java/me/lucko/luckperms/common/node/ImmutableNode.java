@@ -30,10 +30,12 @@ import lombok.ToString;
 
 import com.google.common.collect.ImmutableList;
 
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.processors.WildcardProcessor;
 import me.lucko.luckperms.common.utils.DateUtil;
 
 import java.util.Date;
@@ -52,14 +54,8 @@ public final class ImmutableNode implements Node {
     /**
      * The character which separates each part of a permission node
      */
-    private static final int NODE_SEPARATOR_CHAR = Character.getNumericValue('.');
-
-    /*
-     * NODE STATE
-     *
-     * This are the actual node attributes, and are
-     * really just what this class wraps.
-     */
+    public static final char NODE_SEPARATOR = '.';
+    public static final int NODE_SEPARATOR_CODE = Character.getNumericValue('.');
 
     @Getter
     private final String permission;
@@ -145,7 +141,7 @@ public final class ImmutableNode implements Node {
 
         // define cached state
         groupName = NodeFactory.parseGroupNode(this.permission);
-        wildcardLevel = this.permission.endsWith(".*") ? this.permission.chars().filter(num -> num == NODE_SEPARATOR_CHAR).sum() : -1;
+        wildcardLevel = this.permission.endsWith(WildcardProcessor.WILDCARD_SUFFIX) ? this.permission.chars().filter(num -> num == NODE_SEPARATOR_CODE).sum() : -1;
         meta = NodeFactory.parseMetaNode(this.permission);
         prefix = NodeFactory.parsePrefixNode(this.permission);
         suffix = NodeFactory.parseSuffixNode(this.permission);
@@ -157,10 +153,10 @@ public final class ImmutableNode implements Node {
         if (this.server != null || this.world != null) {
             MutableContextSet fullContexts = this.contexts.mutableCopy();
             if (this.server != null) {
-                fullContexts.add("server", this.server);
+                fullContexts.add(Contexts.SERVER_KEY, this.server);
             }
             if (this.world != null) {
-                fullContexts.add("world", this.world);
+                fullContexts.add(Contexts.WORLD_KEY, this.world);
             }
 
             this.fullContexts = fullContexts.makeImmutable();

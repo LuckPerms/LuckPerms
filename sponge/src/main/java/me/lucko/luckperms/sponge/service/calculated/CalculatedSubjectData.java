@@ -42,6 +42,7 @@ import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.contexts.ContextSetComparator;
 import me.lucko.luckperms.common.processors.MapProcessor;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
+import me.lucko.luckperms.common.references.HolderType;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
 import me.lucko.luckperms.sponge.processors.SpongeWildcardProcessor;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
@@ -84,7 +85,7 @@ public class CalculatedSubjectData implements LPSubjectData {
                     processors.add(new MapProcessor());
                     processors.add(new SpongeWildcardProcessor());
 
-                    CalculatorHolder holder = new CalculatorHolder(new PermissionCalculator(service.getPlugin(), PermissionCalculatorMetadata.of(calculatorDisplayName, contexts), processors.build()));
+                    CalculatorHolder holder = new CalculatorHolder(new PermissionCalculator(service.getPlugin(), PermissionCalculatorMetadata.of(HolderType.GROUP, calculatorDisplayName, contexts), processors.build()));
                     holder.setPermissions(flattenMap(getRelevantEntries(contexts, permissions)));
 
                     return holder;

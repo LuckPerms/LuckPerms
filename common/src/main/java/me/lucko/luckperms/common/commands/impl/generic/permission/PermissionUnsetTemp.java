@@ -30,12 +30,12 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -73,7 +73,7 @@ public class PermissionUnsetTemp extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        DataMutateResult result = holder.unsetPermission(NodeFactory.newBuilder(node).setExpiry(10L).withExtraContext(context).build());
+        DataMutateResult result = holder.unsetPermission(NodeFactory.builder(node).setExpiry(10L).withExtraContext(context).build());
 
         if (result.asBoolean()) {
             Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, holder.getFriendlyName(), CommandUtils.contextSetToString(context));

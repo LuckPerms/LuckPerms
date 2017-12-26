@@ -199,6 +199,35 @@ public class DateUtil {
         return time.toString().trim();
     }
 
+    public static String formatTimeBrief(long seconds) {
+        if (seconds <= 0) {
+            return "0s";
+        }
+
+        long minute = seconds / 60;
+        seconds = seconds % 60;
+        long hour = minute / 60;
+        minute = minute % 60;
+        long day = hour / 24;
+        hour = hour % 24;
+
+        StringBuilder time = new StringBuilder();
+        if (day != 0) {
+            time.append(day).append("d ");
+            time.append(hour).append("h ");
+        } else if (hour != 0) {
+            time.append(hour).append("h ");
+            time.append(minute).append("m ");
+        } else if (minute != 0) {
+            time.append(minute).append("m ");
+            time.append(seconds).append("s");
+        } else if (seconds != 0) {
+            time.append(seconds).append("s");
+        }
+
+        return time.toString().trim();
+    }
+
     private static String formatDateDiff(Calendar fromDate, Calendar toDate) {
         boolean future = false;
         if (toDate.equals(fromDate)) {

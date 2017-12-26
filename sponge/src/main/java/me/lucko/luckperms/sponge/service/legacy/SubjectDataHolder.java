@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
  * @deprecated Because this format is no longer being used to store data.
  * @see SubjectStorageModel
  */
+@SuppressWarnings("DeprecatedIsStillUsed")
 @ToString
 @Deprecated
 public class SubjectDataHolder {

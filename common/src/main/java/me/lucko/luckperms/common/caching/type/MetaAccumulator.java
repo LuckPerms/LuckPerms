@@ -38,6 +38,7 @@ import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.metastacking.MetaStack;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStack;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Comparator;
@@ -103,8 +104,8 @@ public class MetaAccumulator {
     // (it's not going to accumulate more nodes)
     // Therefore, it should be ok to set the weight meta key, if not already present.
     public ListMultimap<String, String> getMeta() {
-        if (!this.meta.containsKey("weight") && this.weight != 0) {
-            this.meta.put("weight", String.valueOf(this.weight));
+        if (!this.meta.containsKey(NodeFactory.WEIGHT_KEY) && this.weight != 0) {
+            this.meta.put(NodeFactory.WEIGHT_KEY, String.valueOf(this.weight));
         }
 
         return this.meta;

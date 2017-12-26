@@ -34,6 +34,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Represents a permission node.
@@ -354,43 +355,127 @@ public interface Node extends Map.Entry<String, Boolean> {
      */
     interface Builder {
 
+        /**
+         * Sets the value of negated for the node
+         *
+         * @param negated the value
+         * @return the builder
+         * @see Node#isNegated()
+         */
         @Nonnull
         Builder setNegated(boolean negated);
 
+        /**
+         * Sets the value of the node
+         *
+         * @param value the value
+         * @return the builder
+         * @see Node#getValuePrimitive()
+         */
         @Nonnull
         Builder setValue(boolean value);
 
         /**
-         * Warning: this value does not persist, and disappears when the holder is re-loaded.
-         * It is therefore only useful for transient nodes.
+         * Sets the override property for the node
+         *
+         * <p>Warning: this value does not persist, and disappears when the holder is re-loaded.
+         * It is therefore only useful for transient nodes.</p>
+         *
+         * @param override the override state
+         * @return the builder
+         * @see Node#isOverride()
          */
         @Nonnull
         Builder setOverride(boolean override);
 
+        /**
+         * Sets the nodes expiry as a unix timestamp in seconds
+         *
+         * @param expireAt the expiry time
+         * @return the builder
+         * @see Node#getExpiryUnixTime()
+         */
         @Nonnull
         Builder setExpiry(long expireAt);
 
+        /**
+         * Sets the world value for the node
+         *
+         * @param world the world value
+         * @return the builder
+         * @see Node#getWorld()
+         */
         @Nonnull
-        Builder setWorld(@Nonnull String world);
+        Builder setWorld(@Nullable String world);
 
+        /**
+         * Sets the server value for the node
+         *
+         * @param server the world value
+         * @return the builder
+         * @see Node#getServer()
+         */
         @Nonnull
-        Builder setServer(@Nonnull String server) throws IllegalArgumentException;
+        Builder setServer(@Nullable String server);
 
+        /**
+         * Appends an extra context onto the node
+         *
+         * @param key the context key
+         * @param value the context value
+         * @return the builder
+         * @see ContextSet
+         * @see Node#getContexts()
+         */
         @Nonnull
         Builder withExtraContext(@Nonnull String key, @Nonnull String value);
 
+        /**
+         * Appends extra contexts onto the node
+         *
+         * @param map a map of contexts
+         * @see ContextSet
+         * @see Node#getContexts()
+         */
         @Nonnull
         Builder withExtraContext(@Nonnull Map<String, String> map);
 
+        /**
+         * Appends extra contexts onto the node
+         *
+         * @param context a set of contexts
+         * @see ContextSet
+         * @see Node#getContexts()
+         */
         @Nonnull
         Builder withExtraContext(@Nonnull Set<Map.Entry<String, String>> context);
 
+        /**
+         * Appends an extra context onto the node
+         *
+         * @param entry the context
+         * @return the builder
+         * @see ContextSet
+         * @see Node#getContexts()
+         */
         @Nonnull
         Builder withExtraContext(@Nonnull Map.Entry<String, String> entry);
 
+        /**
+         * Appends extra contexts onto the node
+         *
+         * @param set a contextset
+         * @see ContextSet
+         * @see Node#getContexts()
+         */
         @Nonnull
         Builder withExtraContext(@Nonnull ContextSet set);
 
+        /**
+         * Creates a node instance from the builder
+         *
+         * @return a new node instance
+         */
         @Nonnull
         Node build();
     }

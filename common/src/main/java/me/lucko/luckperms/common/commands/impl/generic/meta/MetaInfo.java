@@ -31,19 +31,18 @@ import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandManager;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.commands.utils.MetaComparator;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -126,11 +125,11 @@ public class MetaInfo extends SharedSubCommand {
             String location = processLocation(m, holder);
             if (m.hasSpecificContext()) {
                 String context = CommandUtils.getAppendableNodeContextString(m);
-                TextComponent.Builder builder = TextUtils.fromLegacy(Message.META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), m.getMeta().getKey(), m.getMeta().getValue(), location, context), Constants.COLOR_CHAR).toBuilder();
+                TextComponent.Builder builder = TextUtils.fromLegacy(Message.META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), m.getMeta().getKey(), m.getMeta().getValue(), location, context), CommandManager.SECTION_CHAR).toBuilder();
                 builder.applyDeep(makeFancy(holder, label, m));
                 sender.sendMessage(builder.build());
             } else {
-                TextComponent.Builder builder = TextUtils.fromLegacy(Message.META_ENTRY.asString(sender.getPlatform().getLocaleManager(), m.getMeta().getKey(), m.getMeta().getValue(), location), Constants.COLOR_CHAR).toBuilder();
+                TextComponent.Builder builder = TextUtils.fromLegacy(Message.META_ENTRY.asString(sender.getPlatform().getLocaleManager(), m.getMeta().getKey(), m.getMeta().getValue(), location), CommandManager.SECTION_CHAR).toBuilder();
                 builder.applyDeep(makeFancy(holder, label, m));
                 sender.sendMessage(builder.build());
             }
@@ -142,11 +141,11 @@ public class MetaInfo extends SharedSubCommand {
             String location = processLocation(e.getValue(), holder);
             if (e.getValue().hasSpecificContext()) {
                 String context = CommandUtils.getAppendableNodeContextString(e.getValue());
-                TextComponent.Builder builder = TextUtils.fromLegacy(Message.CHAT_META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), e.getKey(), type.getEntry(e.getValue()).getValue(), location, context), Constants.COLOR_CHAR).toBuilder();
+                TextComponent.Builder builder = TextUtils.fromLegacy(Message.CHAT_META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), e.getKey(), type.getEntry(e.getValue()).getValue(), location, context), CommandManager.SECTION_CHAR).toBuilder();
                 builder.applyDeep(makeFancy(type, holder, label, e.getValue()));
                 sender.sendMessage(builder.build());
             } else {
-                TextComponent.Builder builder = TextUtils.fromLegacy(Message.CHAT_META_ENTRY.asString(sender.getPlatform().getLocaleManager(), e.getKey(), type.getEntry(e.getValue()).getValue(), location), Constants.COLOR_CHAR).toBuilder();
+                TextComponent.Builder builder = TextUtils.fromLegacy(Message.CHAT_META_ENTRY.asString(sender.getPlatform().getLocaleManager(), e.getKey(), type.getEntry(e.getValue()).getValue(), location), CommandManager.SECTION_CHAR).toBuilder();
                 builder.applyDeep(makeFancy(type, holder, label, e.getValue()));
                 sender.sendMessage(builder.build());
             }
@@ -168,12 +167,12 @@ public class MetaInfo extends SharedSubCommand {
                 "¥7Click to remove this " + type.name().toLowerCase() + " from " + holder.getFriendlyName()
         ), '¥'));
 
-        boolean group = !(holder instanceof User);
-        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, group ? holder.getObjectName() : holder.getFriendlyName(), group, false);
+        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType().isGroup() ? holder.getObjectName() : holder.getFriendlyName(), holder.getType(), false);
+        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
 
         return component -> {
             component.hoverEvent(hoverEvent);
-            component.clickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command));
+            component.clickEvent(clickEvent);
         };
     }
 
@@ -192,12 +191,12 @@ public class MetaInfo extends SharedSubCommand {
                 "¥7Click to remove this meta pair from " + holder.getFriendlyName()
         ), '¥'));
 
-        boolean group = !(holder instanceof User);
-        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, group ? holder.getObjectName() : holder.getFriendlyName(), group, false);
+        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType().isGroup() ? holder.getObjectName() : holder.getFriendlyName(), holder.getType(), false);
+        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
 
         return component -> {
             component.hoverEvent(hoverEvent);
-            component.clickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command));
+            component.clickEvent(clickEvent);
         };
     }
 }

@@ -29,18 +29,19 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -63,7 +64,7 @@ public class ParentSet extends SharedSubCommand {
         String groupName = ArgumentUtils.handleName(0, args);
         MutableContextSet context = ArgumentUtils.handleContext(1, args, plugin);
 
-        if (!plugin.getStorage().loadGroup(groupName).join()) {
+        if (!plugin.getStorage().loadGroup(groupName).join().isPresent()) {
             Message.DOES_NOT_EXIST.send(sender, groupName);
             return CommandResult.INVALID_ARGS;
         }
@@ -85,8 +86,8 @@ public class ParentSet extends SharedSubCommand {
         }
 
         holder.clearParents(context, false);
-        holder.setInheritGroup(group, context);
-        if (holder instanceof User) {
+        holder.setPermission(NodeFactory.buildGroupNode(group.getName()).withExtraContext(context).build());
+        if (holder.getType().isUser()) {
             ((User) holder).getPrimaryGroup().setStoredValue(group.getName());
         }
 

@@ -47,7 +47,7 @@ public class PermissibleInjector {
 
     /**
      * All permission checks made on standard Bukkit objects are effectively proxied to a
-     * {@link PermissibleBase} object, held as a parameter on the object.
+     * {@link PermissibleBase} object, held as a variable on the object.
      *
      * This field is where the permissible is stored on a HumanEntity.
      */

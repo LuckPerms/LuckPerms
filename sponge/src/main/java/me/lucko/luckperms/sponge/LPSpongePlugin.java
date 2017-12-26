@@ -40,13 +40,12 @@ import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.UpdateTaskBuffer;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.abstraction.Command;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.AbstractConfiguration;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.LuckPermsCalculator;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
@@ -178,6 +177,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private me.lucko.luckperms.common.logging.Logger log;
     private LuckPermsService service;
     private LocaleManager localeManager;
+    private DependencyManager dependencyManager;
     private CachedStateManager cachedStateManager;
     private ContextManager<Subject> contextManager;
     private CalculatorFactory calculatorFactory;
@@ -195,6 +195,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         localeManager = new NoopLocaleManager();
         senderFactory = new SpongeSenderFactory(this);
         log = new SenderLogger(this, getConsoleSender());
+        dependencyManager = new DependencyManager(this);
 
         LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
         verboseHandler = new VerboseHandler(scheduler.async(), getVersion());
@@ -206,7 +207,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         configuration.init();
 
         Set<StorageType> storageTypes = StorageFactory.getRequiredTypes(this, StorageType.H2);
-        DependencyManager.loadStorageDependencies(this, storageTypes);
+        dependencyManager.loadStorageDependencies(storageTypes);
 
         // register events
         game.getEventManager().registerListeners(this, new SpongeConnectionListener(this));
@@ -278,7 +279,11 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         // run an update instantly.
         getLog().info("Performing initial data load...");
-        new UpdateTask(this, true).run();
+        try {
+            new UpdateTask(this, true).run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // register tasks
         scheduler.asyncRepeating(new ExpireTemporaryTask(this), 60L);
@@ -409,7 +414,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public String getServerName() {
+    public String getServerBrand() {
         return getGame().getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getName();
     }
 
@@ -456,7 +461,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public Sender getConsoleSender() {
         if (!game.isServerAvailable()) {
-            return new DummySender(this, Constants.CONSOLE_UUID, Constants.CONSOLE_NAME) {
+            return new DummySender(this, me.lucko.luckperms.common.commands.CommandManager.CONSOLE_UUID, me.lucko.luckperms.common.commands.CommandManager.CONSOLE_NAME) {
                 @Override
                 protected void consumeMessage(String s) {
                     logger.info(s);

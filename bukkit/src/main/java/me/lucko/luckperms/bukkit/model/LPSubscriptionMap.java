@@ -74,7 +74,8 @@ public class LPSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>
         this.plugin = plugin;
     }
 
-    /* The get method is the only one which is actually used by SimplePluginManager
+    /*
+     * The get method is the only one which is actually used by SimplePluginManager
      * we override it to always return a value - which means the null check in
      * subscribeToDefaultPerms always fails - soo, we don't have to worry too much
      * about implementing #put.

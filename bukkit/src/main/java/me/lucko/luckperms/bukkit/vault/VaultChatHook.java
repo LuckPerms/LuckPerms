@@ -25,13 +25,18 @@
 
 package me.lucko.luckperms.bukkit.vault;
 
-import lombok.NonNull;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.caching.MetaData;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.caching.type.MetaAccumulator;
+import me.lucko.luckperms.common.caching.type.MetaCache;
+import me.lucko.luckperms.common.commands.CommandManager;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
@@ -39,8 +44,7 @@ import me.lucko.luckperms.common.node.NodeFactory;
 
 import net.milkbowl.vault.chat.Chat;
 
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import java.util.UUID;
 
 /**
  * An implementation of the Vault {@link Chat} API using LuckPerms.
@@ -59,280 +63,268 @@ import org.bukkit.entity.Player;
  * We cannot risk blocking the main thread to load in their data. Again, this is due to crap Vault
  * design. There is nothing I can do about it.
  */
-public class VaultChatHook extends Chat {
-    private final VaultPermissionHook perms;
+public class VaultChatHook extends AbstractVaultChat {
 
-    VaultChatHook(VaultPermissionHook perms) {
-        super(perms);
-        this.perms = perms;
+    // the plugin instance
+    private final LPBukkitPlugin plugin;
+
+    // the vault permission implementation
+    private final VaultPermissionHook permissionHook;
+
+    VaultChatHook(LPBukkitPlugin plugin, VaultPermissionHook permissionHook) {
+        super(permissionHook);
+        this.plugin = plugin;
+        this.permissionHook = permissionHook;
+        this.worldMappingFunction = world -> permissionHook.isIgnoreWorld() ? null : world;
     }
 
     public String getName() {
-        return perms.getName();
-    }
-
-    public boolean isEnabled() {
-        return perms.isEnabled();
-    }
-    
-    private User getUser(String username) {
-        Player player = Bukkit.getPlayerExact(username);
-        return player == null ? null : perms.getPlugin().getUserManager().getIfLoaded(perms.getPlugin().getUuidCache().getUUID(player.getUniqueId()));
+        return "LuckPerms";
     }
 
     @Override
-    public String getPlayerPrefix(String world, @NonNull String player) {
-        final User user = getUser(player);
-        return getHolderChatMeta(user, ChatMetaType.PREFIX, world);
+    public String getPlayerPrefix(String world, UUID uuid) {
+        Preconditions.checkNotNull(uuid, "uuid");
+        User user = getUser(uuid);
+        if (user == null) {
+            return null;
+        }
+        Contexts contexts = permissionHook.contextForLookup(user, world);
+        MetaCache metaData = user.getCachedData().getMetaData(contexts);
+        String ret = metaData.getPrefix();
+        if (log()) {
+            logMsg("#getPlayerPrefix: %s - %s - %s", user.getFriendlyName(), contexts.getContexts().toMultimap(), ret);
+        }
+        return Strings.nullToEmpty(ret);
     }
 
     @Override
-    public void setPlayerPrefix(String world, @NonNull String player, @NonNull String prefix) {
-        final User user = getUser(player);
+    public String getPlayerSuffix(String world, UUID uuid) {
+        Preconditions.checkNotNull(uuid, "uuid");
+        User user = getUser(uuid);
+        if (user == null) {
+            return null;
+        }
+        Contexts contexts = permissionHook.contextForLookup(user, world);
+        MetaCache metaData = user.getCachedData().getMetaData(contexts);
+        String ret = metaData.getSuffix();
+        if (log()) {
+            logMsg("#getPlayerSuffix: %s - %s - %s", user.getFriendlyName(), contexts.getContexts().toMultimap(), ret);
+        }
+        return Strings.nullToEmpty(ret);
+    }
+
+    @Override
+    public void setPlayerPrefix(String world, UUID uuid, String prefix) {
+        Preconditions.checkNotNull(uuid, "uuid");
+        User user = getUser(uuid);
+        if (user == null) {
+            return;
+        }
         setChatMeta(user, ChatMetaType.PREFIX, prefix, world);
     }
 
     @Override
-    public String getPlayerSuffix(String world, @NonNull String player) {
-        final User user = getUser(player);
-        return getHolderChatMeta(user, ChatMetaType.SUFFIX, world);
-    }
-
-    @Override
-    public void setPlayerSuffix(String world, @NonNull String player, @NonNull String suffix) {
-        final User user = getUser(player);
+    public void setPlayerSuffix(String world, UUID uuid, String suffix) {
+        Preconditions.checkNotNull(uuid, "uuid");
+        User user = getUser(uuid);
+        if (user == null) {
+            return;
+        }
         setChatMeta(user, ChatMetaType.SUFFIX, suffix, world);
     }
 
     @Override
-    public String getGroupPrefix(String world, @NonNull String group) {
-        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
-        return getHolderChatMeta(g, ChatMetaType.PREFIX, world);
-    }
-
-    @Override
-    public void setGroupPrefix(String world, @NonNull String group, @NonNull String prefix) {
-        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
-        setChatMeta(g, ChatMetaType.PREFIX, prefix, world);
-    }
-
-    @Override
-    public String getGroupSuffix(String world, @NonNull String group) {
-        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
-        return getHolderChatMeta(g, ChatMetaType.SUFFIX, world);
-    }
-
-    @Override
-    public void setGroupSuffix(String world, @NonNull String group, @NonNull String suffix) {
-        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
-        setChatMeta(g, ChatMetaType.SUFFIX, suffix, world);
-    }
-
-    @Override
-    public int getPlayerInfoInteger(String world, @NonNull String player, @NonNull String node, int defaultValue) {
-        final User user = getUser(player);
-        try {
-            return Integer.parseInt(getHolderMeta(user, node, world, String.valueOf(defaultValue)));
-        } catch (NumberFormatException e) {
-            return defaultValue;
+    public String getPlayerInfo(String world, UUID uuid, String key) {
+        Preconditions.checkNotNull(uuid, "uuid");
+        Preconditions.checkNotNull(key, "key");
+        User user = getUser(uuid);
+        if (user == null) {
+            return null;
         }
-    }
-
-    @Override
-    public void setPlayerInfoInteger(String world, @NonNull String player, @NonNull String node, int value) {
-        final User user = getUser(player);
-        setMeta(user, node, String.valueOf(value), world);
-    }
-
-    @Override
-    public int getGroupInfoInteger(String world, @NonNull String group, @NonNull String node, int defaultValue) {
-        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
-        try {
-            return Integer.parseInt(getHolderMeta(g, node, world, String.valueOf(defaultValue)));
-        } catch (NumberFormatException e) {
-            return defaultValue;
+        Contexts contexts = permissionHook.contextForLookup(user, world);
+        MetaCache metaData = user.getCachedData().getMetaData(contexts);
+        String ret = metaData.getMeta().get(key);
+        if (log()) {
+            logMsg("#getPlayerInfo: %s - %s - %s - %s", user.getFriendlyName(), contexts.getContexts().toMultimap(), key, ret);
         }
+        return ret;
     }
 
     @Override
-    public void setGroupInfoInteger(String world, @NonNull String group, @NonNull String node, int value) {
-        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
-        setMeta(g, node, String.valueOf(value), world);
-    }
-
-    @Override
-    public double getPlayerInfoDouble(String world, @NonNull String player, @NonNull String node, double defaultValue) {
-        final User user = getUser(player);
-        try {
-            return Double.parseDouble(getHolderMeta(user, node, world, String.valueOf(defaultValue)));
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
-    }
-
-    @Override
-    public void setPlayerInfoDouble(String world, @NonNull String player, @NonNull String node, double value) {
-        final User user = getUser(player);
-        setMeta(user, node, String.valueOf(value), world);
-    }
-
-    @Override
-    public double getGroupInfoDouble(String world, @NonNull String group, @NonNull String node, double defaultValue) {
-        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
-        try {
-            return Double.parseDouble(getHolderMeta(g, node, world, String.valueOf(defaultValue)));
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
-    }
-
-    @Override
-    public void setGroupInfoDouble(String world, @NonNull String group, @NonNull String node, double value) {
-        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
-        setMeta(g, node, String.valueOf(value), world);
-    }
-
-    @Override
-    public boolean getPlayerInfoBoolean(String world, @NonNull String player, @NonNull String node, boolean defaultValue) {
-        final User user = getUser(player);
-        String s = getHolderMeta(user, node, world, String.valueOf(defaultValue));
-        if (!s.equalsIgnoreCase("true") && !s.equalsIgnoreCase("false")) {
-            return defaultValue;
-        }
-        return Boolean.parseBoolean(s);
-    }
-
-    @Override
-    public void setPlayerInfoBoolean(String world, @NonNull String player, @NonNull String node, boolean value) {
-        final User user = getUser(player);
-        setMeta(user, node, String.valueOf(value), world);
-    }
-
-    @Override
-    public boolean getGroupInfoBoolean(String world, @NonNull String group, @NonNull String node, boolean defaultValue) {
-        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
-        String s = getHolderMeta(g, node, world, String.valueOf(defaultValue));
-        if (!s.equalsIgnoreCase("true") && !s.equalsIgnoreCase("false")) {
-            return defaultValue;
-        }
-        return Boolean.parseBoolean(s);
-    }
-
-    @Override
-    public void setGroupInfoBoolean(String world, @NonNull String group, @NonNull String node, boolean value) {
-        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
-        setMeta(g, node, String.valueOf(value), world);
-    }
-
-    @Override
-    public String getPlayerInfoString(String world, @NonNull String player, @NonNull String node, String defaultValue) {
-        final User user = getUser(player);
-        return getHolderMeta(user, node, world, defaultValue);
-    }
-
-    @Override
-    public void setPlayerInfoString(String world, @NonNull String player, @NonNull String node, String value) {
-        final User user = getUser(player);
-        setMeta(user, node, value, world);
-    }
-
-    @Override
-    public String getGroupInfoString(String world, @NonNull String group, @NonNull String node, String defaultValue) {
-        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
-        return getHolderMeta(g, node, world, defaultValue);
-    }
-
-    @Override
-    public void setGroupInfoString(String world, @NonNull String group, @NonNull String node, String value) {
-        final Group g = perms.getPlugin().getGroupManager().getByDisplayName(group);
-        setMeta(g, node, value, world);
-    }
-
-    private void setMeta(PermissionHolder holder, String key, String value, String world) {
-        if (holder == null || key.isEmpty()) {
+    public void setPlayerInfo(String world, UUID uuid, String key, Object value) {
+        Preconditions.checkNotNull(uuid, "uuid");
+        Preconditions.checkNotNull(key, "key");
+        User user = getUser(uuid);
+        if (user == null) {
             return;
         }
+        setMeta(user, key, value, world);
+    }
 
-        String finalWorld = perms.correctWorld(world);
-        perms.log("Setting meta: '" + key + "' for " + holder.getObjectName() + " on world " + world + ", server " + perms.getVaultServer());
+    @Override
+    public String getGroupsPrefix(String world, String name) {
+        Preconditions.checkNotNull(name, "name");
+        Group group = getGroup(name);
+        if (group == null) {
+            return null;
+        }
+        Contexts contexts = permissionHook.contextForLookup(null, world);
+        MetaCache metaData = group.getCachedData().getMetaData(contexts);
+        String ret = metaData.getPrefix();
+        if (log()) {
+            logMsg("#getGroupPrefix: %s - %s - %s", group.getName(), contexts.getContexts().toMultimap(), ret);
+        }
+        return Strings.nullToEmpty(ret);
+    }
 
-        perms.getExecutor().execute(() -> {
-            holder.removeIf(n -> n.isMeta() && n.getMeta().getKey().equals(key));
+    @Override
+    public String getGroupsSuffix(String world, String name) {
+        Preconditions.checkNotNull(name, "name");
+        Group group = getGroup(name);
+        if (group == null) {
+            return null;
+        }
+        Contexts contexts = permissionHook.contextForLookup(null, world);
+        MetaCache metaData = group.getCachedData().getMetaData(contexts);
+        String ret = metaData.getSuffix();
+        if (log()) {
+            logMsg("#getGroupSuffix: %s - %s - %s", group.getName(), contexts.getContexts().toMultimap(), ret);
+        }
+        return Strings.nullToEmpty(ret);
+    }
 
-            Node.Builder metaNode = NodeFactory.makeMetaNode(key, value).setValue(true);
-            metaNode.setServer(perms.getVaultServer());
-            metaNode.setWorld(finalWorld);
+    @Override
+    public void setGroupsPrefix(String world, String name, String prefix) {
+        Preconditions.checkNotNull(name, "name");
+        Group group = getGroup(name);
+        if (group == null) {
+            return;
+        }
+        setChatMeta(group, ChatMetaType.PREFIX, prefix, world);
+    }
 
-            holder.setPermission(metaNode.build());
-            perms.holderSave(holder);
-        });
+    @Override
+    public void setGroupsSuffix(String world, String name, String suffix) {
+        Preconditions.checkNotNull(name, "name");
+        Group group = getGroup(name);
+        if (group == null) {
+            return;
+        }
+        setChatMeta(group, ChatMetaType.SUFFIX, suffix, world);
+    }
+
+    @Override
+    public String getGroupInfo(String world, String name, String key) {
+        Preconditions.checkNotNull(name, "name");
+        Preconditions.checkNotNull(key, "key");
+        Group group = getGroup(name);
+        if (group == null) {
+            return null;
+        }
+        Contexts contexts = permissionHook.contextForLookup(null, world);
+        MetaCache metaData = group.getCachedData().getMetaData(contexts);
+        String ret = metaData.getMeta().get(key);
+        if (log()) {
+            logMsg("#getGroupInfo: %s - %s - %s - %s", group.getName(), contexts.getContexts().toMultimap(), key, ret);
+        }
+        return ret;
+    }
+
+    @Override
+    public void setGroupInfo(String world, String name, String key, Object value) {
+        Preconditions.checkNotNull(name, "name");
+        Preconditions.checkNotNull(key, "key");
+        Group group = getGroup(name);
+        if (group == null) {
+            return;
+        }
+        setMeta(group, key, value, world);
+    }
+
+    // utility methods for getting user and group instances
+
+    private User getUser(UUID uuid) {
+        return plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(uuid));
+    }
+
+    private Group getGroup(String name) {
+        return plugin.getGroupManager().getByDisplayName(name);
+    }
+
+    // logging
+    private boolean log() {
+        return plugin.getConfiguration().get(ConfigKeys.VAULT_DEBUG);
+    }
+    private void logMsg(String format, Object... args) {
+        plugin.getLog().info("[VAULT-CHAT] " + String.format(format, args)
+                .replace(CommandManager.SECTION_CHAR, '$')
+                .replace(CommandManager.AMPERSAND_CHAR, '$')
+        );
     }
 
     private void setChatMeta(PermissionHolder holder, ChatMetaType type, String value, String world) {
-        if (holder == null || value.equals("")) {
-            return;
+        if (log()) {
+            logMsg("#setChatMeta: %s - %s - %s - %s", holder.getFriendlyName(), type, value, world);
         }
 
-        String finalWorld = perms.correctWorld(world);
-        perms.log("Setting " + type.name().toLowerCase() + " for " + holder.getObjectName() + " on world " + world + ", server " + perms.getVaultServer());
-
-        perms.getExecutor().execute(() -> {
+        permissionHook.getExecutor().execute(() -> {
             // remove all prefixes/suffixes directly set on the user/group
             holder.removeIf(type::matches);
 
+            if (value == null) {
+                permissionHook.holderSave(holder);
+                return;
+            }
+
             // find the max inherited priority & add 10
-            MetaAccumulator metaAccumulator = holder.accumulateMeta(null, null, perms.createContextForWorldSet(finalWorld));
+            MetaAccumulator metaAccumulator = holder.accumulateMeta(null, null, createContextForWorldSet(world));
             int priority = (type == ChatMetaType.PREFIX ? metaAccumulator.getPrefixes() : metaAccumulator.getSuffixes()).keySet().stream()
                     .mapToInt(e -> e).max().orElse(0) + 10;
 
-            Node.Builder chatMetaNode = NodeFactory.makeChatMetaNode(type, priority, value);
-            chatMetaNode.setServer(perms.getVaultServer());
-            chatMetaNode.setWorld(finalWorld);
+            Node.Builder chatMetaNode = NodeFactory.buildChatMetaNode(type, priority, value);
+            chatMetaNode.setServer(permissionHook.getVaultServer());
+            chatMetaNode.setWorld(world);
 
             holder.setPermission(chatMetaNode.build());
-            perms.holderSave(holder);
+            permissionHook.holderSave(holder);
         });
     }
 
-    private String getHolderMeta(PermissionHolder holder, String node, String world, String defaultValue) {
-        if (holder == null) {
-            return defaultValue;
+    private void setMeta(PermissionHolder holder, String key, Object value, String world) {
+        if (log()) {
+            logMsg("#setMeta: %s - %s - %s - %s", holder.getFriendlyName(), key, value, world);
         }
 
-        world = perms.correctWorld(world);
+        permissionHook.getExecutor().execute(() -> {
+            holder.removeIf(n -> n.isMeta() && n.getMeta().getKey().equals(key));
 
-        Contexts contexts;
-        if (holder instanceof User) {
-            contexts = perms.createContextForWorldLookup(perms.getPlugin().getPlayer((User) holder), world);
-        } else {
-            contexts = perms.createContextForWorldLookup(world);
-        }
+            if (value == null) {
+                permissionHook.holderSave(holder);
+                return;
+            }
 
-        perms.log("Getting meta: '" + node + "' for holder " + holder.getFriendlyName() + " in contexts " + contexts);
+            Node.Builder metaNode;
+            if (key.equalsIgnoreCase(NodeFactory.PREFIX_KEY) || key.equalsIgnoreCase(NodeFactory.SUFFIX_KEY)) {
+                metaNode = NodeFactory.buildChatMetaNode(ChatMetaType.valueOf(key.toUpperCase()), 100, value.toString());
+            } else {
+                metaNode = NodeFactory.buildMetaNode(key, value.toString());
+            }
 
-        String ret = holder.getCachedData().getMetaData(contexts).getMeta().get(node);
-        return ret != null ? ret : defaultValue;
+            metaNode.setServer(permissionHook.getVaultServer());
+            metaNode.setWorld(world);
+
+            holder.setPermission(metaNode.build());
+            permissionHook.holderSave(holder);
+        });
     }
 
-    private String getHolderChatMeta(PermissionHolder holder, ChatMetaType type, String world) {
-        if (holder == null) {
-            return "";
+    private Contexts createContextForWorldSet(String world) {
+        ImmutableContextSet.Builder context = ImmutableContextSet.builder();
+        if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
+            context.add(Contexts.WORLD_KEY, world.toLowerCase());
         }
-
-        world = perms.correctWorld(world);
-
-        Contexts contexts;
-        if (holder instanceof User) {
-            contexts = perms.createContextForWorldLookup(perms.getPlugin().getPlayer((User) holder), world);
-        } else {
-            contexts = perms.createContextForWorldLookup(world);
-        }
-
-        perms.log("Getting " + type.name().toLowerCase() + " for holder " + holder.getFriendlyName() + " in contexts " + contexts);
-
-        MetaData data = holder.getCachedData().getMetaData(contexts);
-        String ret = type == ChatMetaType.PREFIX ? data.getPrefix() : data.getSuffix();
-        return ret != null ? ret : "";
+        context.add(Contexts.SERVER_KEY, permissionHook.getVaultServer());
+        return new Contexts(context.build(), permissionHook.isIncludeGlobal(), true, true, true, true, false);
     }
-
 }

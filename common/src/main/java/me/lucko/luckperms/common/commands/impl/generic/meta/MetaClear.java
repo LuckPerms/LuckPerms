@@ -29,17 +29,18 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.MetaType;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -66,13 +67,13 @@ public class MetaClear extends SharedSubCommand {
             if (typeId.equals("chat") || typeId.equals("chatmeta")) {
                 type = MetaType.CHAT;
             }
-            if (typeId.equals("meta")) {
+            if (typeId.equals(NodeFactory.META_KEY)) {
                 type = MetaType.META;
             }
-            if (typeId.equals("prefix") || typeId.equals("prefixes")) {
+            if (typeId.equals(NodeFactory.PREFIX_KEY) || typeId.equals("prefixes")) {
                 type = MetaType.PREFIX;
             }
-            if (typeId.equals("suffix") || typeId.equals("suffixes")) {
+            if (typeId.equals(NodeFactory.SUFFIX_KEY) || typeId.equals("suffixes")) {
                 type = MetaType.SUFFIX;
             }
 

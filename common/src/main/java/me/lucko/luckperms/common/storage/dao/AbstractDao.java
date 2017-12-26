@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.storage.dao;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
@@ -42,6 +41,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -54,10 +54,6 @@ public abstract class AbstractDao {
     @Getter
     public final String name;
 
-    @Getter
-    @Setter
-    private boolean acceptingLogins = false;
-
     public abstract void init();
 
     public abstract void shutdown();
@@ -66,46 +62,46 @@ public abstract class AbstractDao {
         return Collections.emptyMap();
     }
 
-    public abstract boolean logAction(LogEntry entry);
+    public abstract void logAction(LogEntry entry) throws Exception;
 
-    public abstract Log getLog();
+    public abstract Log getLog() throws Exception;
 
-    public abstract boolean applyBulkUpdate(BulkUpdate bulkUpdate);
+    public abstract void applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception;
 
-    public abstract boolean loadUser(UUID uuid, String username);
+    public abstract User loadUser(UUID uuid, String username) throws Exception;
 
-    public abstract boolean saveUser(User user);
+    public abstract void saveUser(User user) throws Exception;
 
-    public abstract Set<UUID> getUniqueUsers();
+    public abstract Set<UUID> getUniqueUsers() throws Exception;
 
-    public abstract List<HeldPermission<UUID>> getUsersWithPermission(String permission);
+    public abstract List<HeldPermission<UUID>> getUsersWithPermission(String permission) throws Exception;
 
-    public abstract boolean createAndLoadGroup(String name);
+    public abstract Group createAndLoadGroup(String name) throws Exception;
 
-    public abstract boolean loadGroup(String name);
+    public abstract Optional<Group> loadGroup(String name) throws Exception;
 
-    public abstract boolean loadAllGroups();
+    public abstract void loadAllGroups() throws Exception;
 
-    public abstract boolean saveGroup(Group group);
+    public abstract void saveGroup(Group group) throws Exception;
 
-    public abstract boolean deleteGroup(Group group);
+    public abstract void deleteGroup(Group group) throws Exception;
 
-    public abstract List<HeldPermission<String>> getGroupsWithPermission(String permission);
+    public abstract List<HeldPermission<String>> getGroupsWithPermission(String permission) throws Exception;
 
-    public abstract boolean createAndLoadTrack(String name);
+    public abstract Track createAndLoadTrack(String name) throws Exception;
 
-    public abstract boolean loadTrack(String name);
+    public abstract Optional<Track> loadTrack(String name) throws Exception;
 
-    public abstract boolean loadAllTracks();
+    public abstract void loadAllTracks() throws Exception;
 
-    public abstract boolean saveTrack(Track track);
+    public abstract void saveTrack(Track track) throws Exception;
 
-    public abstract boolean deleteTrack(Track track);
+    public abstract void deleteTrack(Track track) throws Exception;
 
-    public abstract boolean saveUUIDData(UUID uuid, String username);
+    public abstract void saveUUIDData(UUID uuid, String username) throws Exception;
 
-    public abstract UUID getUUID(String username);
+    public abstract UUID getUUID(String username) throws Exception;
 
-    public abstract String getName(UUID uuid);
+    public abstract String getName(UUID uuid) throws Exception;
 
 }

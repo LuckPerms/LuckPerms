@@ -29,20 +29,21 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
@@ -68,7 +69,7 @@ public class ParentSetTrack extends SharedSubCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().loadTrack(trackName).join()) {
+        if (!plugin.getStorage().loadTrack(trackName).join().isPresent()) {
             Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
@@ -103,7 +104,7 @@ public class ParentSetTrack extends SharedSubCommand {
 
         MutableContextSet context = ArgumentUtils.handleContext(2, args, plugin);
 
-        if (!plugin.getStorage().loadGroup(groupName).join()) {
+        if (!plugin.getStorage().loadGroup(groupName).join().isPresent()) {
             Message.DOES_NOT_EXIST.send(sender, groupName);
             return CommandResult.INVALID_ARGS;
         }
@@ -125,7 +126,7 @@ public class ParentSetTrack extends SharedSubCommand {
         }
 
         holder.removeIf(node -> node.isGroupNode() && node.getFullContexts().equals(context) && track.containsGroup(node.getGroupName()));
-        holder.setInheritGroup(group, context);
+        holder.setPermission(NodeFactory.buildGroupNode(group.getName()).withExtraContext(context).build());
 
         Message.SET_TRACK_PARENT_SUCCESS.send(sender, holder.getFriendlyName(), track.getName(), group.getFriendlyName(), CommandUtils.contextSetToString(context));
 

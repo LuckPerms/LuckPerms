@@ -74,13 +74,13 @@ public final class NodeModel {
 
     public synchronized Node toNode() {
         if (node == null) {
-            Node.Builder builder = NodeFactory.newBuilder(permission);
-            builder.setValue(value);
-            builder.setServer(server);
-            builder.setWorld(world);
-            builder.setExpiry(expiry);
-            builder.withExtraContext(contexts);
-            node = builder.build();
+            node = NodeFactory.builder(permission)
+                    .setValue(value)
+                    .setServer(server)
+                    .setWorld(world)
+                    .setExpiry(expiry)
+                    .withExtraContext(contexts)
+                    .build();
         }
 
         return node;
@@ -134,6 +134,7 @@ public final class NodeModel {
         return of(permission, value, server, world, expiry, contexts);
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof NodeModel)) return false;
@@ -147,6 +148,7 @@ public final class NodeModel {
                 this.getContexts().equals(other.getContexts());
     }
 
+    @Override
     public int hashCode() {
         final int PRIME = 59;
         int result = 1;
@@ -159,6 +161,7 @@ public final class NodeModel {
         return result;
     }
 
+    @Override
     public String toString() {
         return "NodeModel(" +
                 "permission=" + this.getPermission() + ", " +

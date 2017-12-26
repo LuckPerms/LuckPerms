@@ -64,28 +64,13 @@ public class BukkitConnectionListener implements Listener {
         /* wait for the plugin to enable. because these events are fired async, they can be called before
            the plugin has enabled.  */
         try {
-            plugin.getEnableLatch().await(30, TimeUnit.SECONDS);
+            plugin.getEnableLatch().await(60, TimeUnit.SECONDS);
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
 
         if (plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
             plugin.getLog().info("Processing pre-login for " + e.getUniqueId() + " - " + e.getName());
-        }
-
-        /* there was an issue connecting to the DB, performing file i/o, etc.
-           we don't let players join in this case, because it means they can connect to the server without their permissions data.
-           some server admins rely on negating perms to stop users from causing damage etc, so it's really important that
-           this data is loaded. */
-        if (!plugin.isStarted() || !plugin.getStorage().isAcceptingLogins()) {
-
-            // log that the user tried to login, but was denied at this stage.
-            deniedAsyncLogin.add(e.getUniqueId());
-
-            // actually deny the connection.
-            plugin.getLog().warn("Permissions storage is not loaded. Denying connection from: " + e.getUniqueId() + " - " + e.getName());
-            e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Message.LOADING_ERROR.asString(plugin.getLocaleManager()));
-            return;
         }
 
         plugin.getUniqueConnections().add(e.getUniqueId());
@@ -103,9 +88,10 @@ public class BukkitConnectionListener implements Listener {
             User user = LoginHelper.loadUser(plugin, e.getUniqueId(), e.getName(), false);
             plugin.getApiProvider().getEventFactory().handleUserLoginProcess(e.getUniqueId(), e.getName(), user);
         } catch (Exception ex) {
+            plugin.getLog().severe("Exception occured whilst loading data for " + e.getUniqueId() + " - " + e.getName());
             ex.printStackTrace();
 
-            // there was some error loading data. deny the connection
+            // deny the connection
             deniedAsyncLogin.add(e.getUniqueId());
             e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Message.LOADING_ERROR.asString(plugin.getLocaleManager()));
         }

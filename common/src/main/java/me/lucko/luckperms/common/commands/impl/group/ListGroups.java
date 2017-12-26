@@ -25,12 +25,12 @@
 
 package me.lucko.luckperms.common.commands.impl.group;
 
+import me.lucko.luckperms.common.commands.CommandManager;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -54,7 +54,11 @@ public class ListGroups extends SingleCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        if (!plugin.getStorage().loadAllGroups().join()) {
+
+        try {
+            plugin.getStorage().loadAllGroups().get();
+        } catch (Exception e) {
+            e.printStackTrace();
             Message.GROUPS_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;
         }
@@ -73,13 +77,13 @@ public class ListGroups extends SingleCommand {
                         component = TextUtils.fromLegacy(Message.GROUPS_LIST_ENTRY.asString(plugin.getLocaleManager(),
                                 group.getFriendlyName(),
                                 group.getWeight().orElse(0)
-                        ), Constants.COLOR_CHAR);
+                        ), CommandManager.SECTION_CHAR);
                     } else {
                         component = TextUtils.fromLegacy(Message.GROUPS_LIST_ENTRY_WITH_TRACKS.asString(plugin.getLocaleManager(),
                                 group.getFriendlyName(),
                                 group.getWeight().orElse(0),
                                 CommandUtils.toCommaSep(tracks)
-                        ), Constants.COLOR_CHAR);
+                        ), CommandManager.SECTION_CHAR);
                     }
 
                     component = component.toBuilder().applyDeep(c -> {

@@ -56,8 +56,6 @@ import me.lucko.luckperms.common.commands.impl.user.UserMainCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -72,12 +70,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class CommandManager {
     public static final Pattern COMMAND_SEPARATOR_PATTERN = Pattern.compile(" (?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
+
+    public static final UUID CONSOLE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    public static final String CONSOLE_NAME = "Console";
+
+    public static final UUID IMPORT_UUID = UUID.fromString("11111111-1111-1111-1111-111111111111");
+    public static final String IMPORT_NAME = "Import";
+
+    public static final char SECTION_CHAR = '\u00A7'; // §
+    public static final char AMPERSAND_CHAR = '&';
 
     @Getter
     private final LuckPermsPlugin plugin;
@@ -143,8 +151,13 @@ public class CommandManager {
         handleRewrites(arguments, true);
 
         // Handle no arguments
-        if (arguments.size() == 0) {
-            sendCommandUsage(sender, label);
+        if (arguments.size() == 0 || (arguments.size() == 1 && arguments.get(0).trim().isEmpty())) {
+            CommandUtils.sendPluginMessage(sender, "&2Running &bLuckPerms v" + plugin.getVersion() + "&2.");
+            if (mainCommands.stream().anyMatch(c -> c.shouldDisplay() && c.isAuthorized(sender))) {
+                Message.VIEW_AVAILABLE_COMMANDS_PROMPT.send(sender, label);
+            } else {
+                Message.NO_PERMISSION_FOR_SUBCOMMANDS.send(sender);
+            }
             return CommandResult.INVALID_ARGS;
         }
 
@@ -232,12 +245,8 @@ public class CommandManager {
 
         arguments.remove(0); // remove the main command arg.
 
-        if (!o.isPresent()) {
-            return Collections.emptyList();
-        }
-
         // Pass the processing onto the main command
-        return o.get().tabComplete(plugin, sender, arguments);
+        return o.map(cmd -> cmd.tabComplete(plugin, sender, arguments)).orElseGet(Collections::emptyList);
     }
 
     private void sendCommandUsage(Sender sender, String label) {
@@ -249,7 +258,7 @@ public class CommandManager {
                     @SuppressWarnings("unchecked")
                     String permission = (String) c.getPermission().map(p -> ((CommandPermission) p).getPermission()).orElse("None");
 
-                    TextComponent component = TextUtils.fromLegacy("&3> &a" + String.format(c.getUsage(), label), Constants.FORMAT_CHAR)
+                    TextComponent component = TextUtils.fromLegacy("&3> &a" + String.format(c.getUsage(), label), AMPERSAND_CHAR)
                             .toBuilder().applyDeep(comp -> {
                                 comp.hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
                                         "&bCommand: &2" + c.getName(),
@@ -258,7 +267,7 @@ public class CommandManager {
                                         "&bPermission: &2" + permission,
                                         " ",
                                         "&7Click to auto-complete."
-                                ), Constants.FORMAT_CHAR)));
+                                ), AMPERSAND_CHAR)));
                                 comp.clickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format(c.getUsage(), label)));
                             }).build();
                     sender.sendMessage(component);

@@ -67,24 +67,6 @@ public class SpongeConnectionListener {
             plugin.getLog().info("Processing auth event for " + p.getUniqueId() + " - " + p.getName());
         }
 
-        /* either the plugin hasn't finished starting yet, or there was an issue connecting to the DB, performing file i/o, etc.
-           we don't let players join in this case, because it means they can connect to the server without their permissions data.
-           some server admins rely on negating perms to stop users from causing damage etc, so it's really important that
-           this data is loaded. */
-        if (!plugin.getStorage().isAcceptingLogins()) {
-
-            // log that the user tried to login, but was denied at this stage.
-            deniedAsyncLogin.add(p.getUniqueId());
-
-            // actually deny the connection.
-            plugin.getLog().warn("Permissions storage is not loaded. Denying connection from: " + p.getUniqueId() + " - " + p.getName());
-            e.setCancelled(true);
-            e.setMessageCancelled(false);
-            //noinspection deprecation
-            e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
-            return;
-        }
-
         plugin.getUniqueConnections().add(p.getUniqueId());
 
         /* Actually process the login for the connection.
@@ -100,6 +82,7 @@ public class SpongeConnectionListener {
             User user = LoginHelper.loadUser(plugin, p.getUniqueId(), username, false);
             plugin.getApiProvider().getEventFactory().handleUserLoginProcess(p.getUniqueId(), username, user);
         } catch (Exception ex) {
+            plugin.getLog().severe("Exception occured whilst loading data for " + p.getUniqueId() + " - " + p.getName());
             ex.printStackTrace();
 
             deniedAsyncLogin.add(p.getUniqueId());

@@ -23,48 +23,39 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.vault;
+package me.lucko.luckperms.sponge.processors;
 
-import me.lucko.luckperms.bukkit.LPBukkitPlugin;
+import lombok.AllArgsConstructor;
 
-import org.bukkit.scheduler.BukkitTask;
+import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.processors.PermissionProcessor;
+import me.lucko.luckperms.sponge.service.LuckPermsService;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executor;
+import java.util.Map;
 
-/**
- * Sequential executor for Vault modifications
- */
-public class VaultExecutor implements Runnable, Executor {
+@AllArgsConstructor
+public class UserDefaultsProcessor implements PermissionProcessor {
+    private final LuckPermsService service;
+    private final ImmutableContextSet contexts;
 
-    private BukkitTask task = null;
-    private final Queue<Runnable> tasks = new ConcurrentLinkedQueue<>();
+    @Override
+    public Tristate hasPermission(String permission) {
+        Tristate t = service.getUserSubjects().getDefaults().getPermissionValue(contexts, permission);
+        if (t != Tristate.UNDEFINED) {
+            return t;
+        }
 
-    public VaultExecutor(LPBukkitPlugin plugin) {
-        task = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, this, 1L, 1L);
+        t = service.getDefaults().getPermissionValue(contexts, permission);
+        if (t != Tristate.UNDEFINED) {
+            return t;
+        }
+
+        return Tristate.UNDEFINED;
     }
 
     @Override
-    public void execute(Runnable r) {
-        tasks.offer(r);
-    }
-
-    @Override
-    public void run() {
-        for (Runnable runnable; (runnable = tasks.poll()) != null; ) {
-            try {
-                runnable.run();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void close() {
-        if (task != null) {
-            task.cancel();
-            task = null;
-        }
+    public void updateBacking(Map<String, Boolean> map) {
+        // Do nothing, this doesn't use the backing
     }
 }

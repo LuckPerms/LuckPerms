@@ -28,12 +28,12 @@ package me.lucko.luckperms.common.commands.impl.generic.permission;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -62,7 +62,7 @@ public class PermissionCheckInherits extends SharedSubCommand {
         String node = ArgumentUtils.handleString(0, args);
         MutableContextSet context = ArgumentUtils.handleContext(1, args, plugin);
 
-        InheritanceInfo result = holder.inheritsPermissionInfo(NodeFactory.newBuilder(node).withExtraContext(context).build());
+        InheritanceInfo result = holder.inheritsPermissionInfo(NodeFactory.builder(node).withExtraContext(context).build());
 
         String location = result.getLocation().orElse(null);
         if (location == null || location.equalsIgnoreCase(holder.getObjectName())) {

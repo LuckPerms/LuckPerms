@@ -73,7 +73,7 @@ public class TrackMainCommand extends MainCommand<Track, String> {
 
     @Override
     protected Track getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        if (!plugin.getStorage().loadTrack(target).join()) {
+        if (!plugin.getStorage().loadTrack(target).join().isPresent()) {
             Message.TRACK_NOT_FOUND.send(sender, target);
             return null;
         }

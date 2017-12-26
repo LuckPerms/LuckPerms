@@ -59,11 +59,27 @@ public enum Tristate {
      * Returns a {@link Tristate} from a boolean
      *
      * @param val the boolean value
-     * @return {@link #TRUE} or {@link #FALSE}, depending on the value of the boolean.
+     * @return {@link #TRUE} or {@link #FALSE}, if the value is <code>true</code> or <code>false</code>, respectively.
      */
     @Nonnull
     public static Tristate fromBoolean(boolean val) {
         return val ? TRUE : FALSE;
+    }
+
+    /**
+     * Returns a {@link Tristate} from a nullable boolean.
+     *
+     * <p>Unlike {@link #fromBoolean(boolean)}, this method returns {@link #UNDEFINED}
+     * if the value is null.</p>
+     *
+     * @param val the boolean value
+     * @return {@link #UNDEFINED}, {@link #TRUE} or {@link #FALSE}, if the value
+     *         is <code>null</code>, <code>true</code> or <code>false</code>, respectively.
+     * @since 4.1
+     */
+    @Nonnull
+    public static Tristate fromNullableBoolean(Boolean val) {
+        return val == null ? UNDEFINED : val ? TRUE : FALSE;
     }
 
     private final boolean booleanValue;

@@ -84,7 +84,7 @@ public class GroupMainCommand extends MainCommand<Group, String> {
 
     @Override
     protected Group getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        if (!plugin.getStorage().loadGroup(target).join()) {
+        if (!plugin.getStorage().loadGroup(target).join().isPresent()) {
             // failed to load, but it might be a display name.
 
             // nope, not a display name

@@ -70,6 +70,10 @@ use-server-uuids: true
 # in the LuckPerms cache.
 use-server-uuid-cache: false
 
+# If LuckPerms should use the "server-name" property from the "server.properties"
+# file as the "server" option within LuckPerms.
+use-server-properties-name: false
+
 # If set to true, LuckPerms will allow usernames with non alphanumeric characters.
 #
 # Note that due to the design of the storage implementation, usernames must still be
@@ -323,7 +327,7 @@ data:
 
     # This setting controls the maximum number of milliseconds that the plugin will wait for a
     # connection from the pool, before timing out.
-    connection-timeout: 15000 # 15 seconds
+    connection-timeout: 5000 # 5 seconds
 
     # This setting allows you to define extra properties for connections.
     properties:

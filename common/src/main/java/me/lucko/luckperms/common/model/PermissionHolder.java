@@ -64,6 +64,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.primarygroup.GroupInheritanceComparator;
 import me.lucko.luckperms.common.references.GroupReference;
 import me.lucko.luckperms.common.references.HolderReference;
+import me.lucko.luckperms.common.references.HolderType;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -240,7 +241,7 @@ public abstract class PermissionHolder {
     protected void declareState() {
         /* only declare state of groups. the state manager isn't really being used now the caches in this class
            are gone, but it's useful for command output. */
-        if (this instanceof Group) {
+        if (this.getType().isGroup()) {
             plugin.getCachedStateManager().putAll(toReference(), getGroupReferences());
         }
     }
@@ -267,6 +268,13 @@ public abstract class PermissionHolder {
      * @return this holders reference
      */
     public abstract HolderReference<?, ?> toReference();
+
+    /**
+     * Returns the type of this PermissionHolder.
+     *
+     * @return this holders type
+     */
+    public abstract HolderType getType();
 
     /**
      * Gets the API delegate for this instance
@@ -543,7 +551,7 @@ public abstract class PermissionHolder {
             excludedGroups = new HashSet<>();
         }
 
-        if (this instanceof Group) {
+        if (this.getType().isGroup()) {
             excludedGroups.add(getObjectName().toLowerCase());
         }
 
@@ -619,7 +627,7 @@ public abstract class PermissionHolder {
             excludedGroups = new HashSet<>();
         }
 
-        if (this instanceof Group) {
+        if (this.getType().isGroup()) {
             excludedGroups.add(getObjectName().toLowerCase());
         }
 
@@ -768,7 +776,7 @@ public abstract class PermissionHolder {
             excludedGroups = new HashSet<>();
         }
 
-        if (this instanceof Group) {
+        if (this.getType().isGroup()) {
             excludedGroups.add(getObjectName().toLowerCase());
         }
 
@@ -830,7 +838,7 @@ public abstract class PermissionHolder {
             excludedGroups = new HashSet<>();
         }
 
-        if (this instanceof Group) {
+        if (this.getType().isGroup()) {
             excludedGroups.add(getObjectName().toLowerCase());
         }
 
@@ -956,7 +964,7 @@ public abstract class PermissionHolder {
      * @return a tristate
      */
     public Tristate hasPermission(Node node, boolean checkTransient) {
-        if (this instanceof Group && node.isGroupNode() && node.getGroupName().equalsIgnoreCase(getObjectName())) {
+        if (this.getType().isGroup() && node.isGroupNode() && node.getGroupName().equalsIgnoreCase(getObjectName())) {
             return Tristate.TRUE;
         }
 
@@ -965,30 +973,6 @@ public abstract class PermissionHolder {
 
     public Tristate hasPermission(Node node) {
         return hasPermission(node, false);
-    }
-
-    public boolean hasPermission(String node, boolean value) {
-        return hasPermission(NodeFactory.make(node, value)).asBoolean() == value;
-    }
-
-    public boolean hasPermission(String node, boolean value, String server) {
-        return hasPermission(NodeFactory.make(node, value, server)).asBoolean() == value;
-    }
-
-    public boolean hasPermission(String node, boolean value, String server, String world) {
-        return hasPermission(NodeFactory.make(node, value, server, world)).asBoolean() == value;
-    }
-
-    public boolean hasPermission(String node, boolean value, boolean temporary) {
-        return hasPermission(NodeFactory.make(node, value, temporary)).asBoolean() == value;
-    }
-
-    public boolean hasPermission(String node, boolean value, String server, boolean temporary) {
-        return hasPermission(NodeFactory.make(node, value, server, temporary)).asBoolean() == value;
-    }
-
-    public boolean hasPermission(String node, boolean value, String server, String world, boolean temporary) {
-        return hasPermission(NodeFactory.make(node, value, server, world, temporary)).asBoolean() == value;
     }
 
     /**
@@ -1015,30 +999,6 @@ public abstract class PermissionHolder {
      */
     public Tristate inheritsPermission(Node node) {
         return inheritsPermissionInfo(node).getResult();
-    }
-
-    public boolean inheritsPermission(String node, boolean value) {
-        return inheritsPermission(NodeFactory.make(node, value)).asBoolean() == value;
-    }
-
-    public boolean inheritsPermission(String node, boolean value, String server) {
-        return inheritsPermission(NodeFactory.make(node, value, server)).asBoolean() == value;
-    }
-
-    public boolean inheritsPermission(String node, boolean value, String server, String world) {
-        return inheritsPermission(NodeFactory.make(node, value, server, world)).asBoolean() == value;
-    }
-
-    public boolean inheritsPermission(String node, boolean value, boolean temporary) {
-        return inheritsPermission(NodeFactory.make(node, value, temporary)).asBoolean() == value;
-    }
-
-    public boolean inheritsPermission(String node, boolean value, String server, boolean temporary) {
-        return inheritsPermission(NodeFactory.make(node, value, server, temporary)).asBoolean() == value;
-    }
-
-    public boolean inheritsPermission(String node, boolean value, String server, String world, boolean temporary) {
-        return inheritsPermission(NodeFactory.make(node, value, server, world, temporary)).asBoolean() == value;
     }
 
     /**
@@ -1085,7 +1045,7 @@ public abstract class PermissionHolder {
                     Node previous = existing.get();
 
                     // Create a new node with the same properties, but add the expiry dates together
-                    Node newNode = NodeFactory.builderFromExisting(node).setExpiry(previous.getExpiryUnixTime() + node.getSecondsTilExpiry()).build();
+                    Node newNode = NodeFactory.builder(node).setExpiry(previous.getExpiryUnixTime() + node.getSecondsTilExpiry()).build();
 
                     ImmutableCollection<Node> before = getEnduringNodes().values();
 
@@ -1194,33 +1154,6 @@ public abstract class PermissionHolder {
     }
 
     /**
-     * Unsets a permission node
-     *
-     * @param node the node to unset
-     */
-    public DataMutateResult unsetPermissionExact(Node node) {
-        ImmutableCollection<Node> before = getEnduringNodes().values();
-
-        nodesLock.lock();
-        try {
-            nodes.get(node.getFullContexts().makeImmutable()).removeIf(e -> e.equals(node));
-        } finally {
-            nodesLock.unlock();
-        }
-
-        invalidateCache();
-
-        ImmutableCollection<Node> after = getEnduringNodes().values();
-
-        if (before.size() == after.size()) {
-            return DataMutateResult.LACKS;
-        }
-
-        plugin.getApiProvider().getEventFactory().handleNodeRemove(node, this, before, after);
-        return DataMutateResult.SUCCESS;
-    }
-
-    /**
      * Unsets a transient permission node
      *
      * @param node the node to unset
@@ -1247,27 +1180,11 @@ public abstract class PermissionHolder {
     }
 
     public boolean inheritsGroup(Group group) {
-        return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission("group." + group.getName(), true);
+        return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission(NodeFactory.buildGroupNode(group.getName()).build()).asBoolean();
     }
 
     public boolean inheritsGroup(Group group, ContextSet contextSet) {
-        return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission(NodeFactory.newBuilder("group." + group.getName()).withExtraContext(contextSet).build()).asBoolean();
-    }
-
-    public boolean inheritsGroup(Group group, String server) {
-        return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission("group." + group.getName(), true, server);
-    }
-
-    public boolean inheritsGroup(Group group, String server, String world) {
-        return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission("group." + group.getName(), true, server, world);
-    }
-
-    public DataMutateResult setInheritGroup(Group group, ContextSet contexts) {
-        return setPermission(NodeFactory.newBuilder("group." + group.getName()).withExtraContext(contexts).build());
-    }
-
-    public DataMutateResult unsetInheritGroup(Group group, ContextSet contexts) {
-        return unsetPermission(NodeFactory.newBuilder("group." + group.getName()).withExtraContext(contexts).build());
+        return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission(NodeFactory.buildGroupNode(group.getName()).withExtraContext(contextSet).build()).asBoolean();
     }
 
     /**
@@ -1327,7 +1244,7 @@ public abstract class PermissionHolder {
             nodesLock.unlock();
         }
 
-        if (this instanceof User && giveDefault) {
+        if (this.getType().isUser() && giveDefault) {
             plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
         }
 
@@ -1355,7 +1272,7 @@ public abstract class PermissionHolder {
             nodesLock.unlock();
         }
 
-        if (this instanceof User && giveDefault) {
+        if (this.getType().isUser() && giveDefault) {
             plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
         }
         invalidateCache();
@@ -1470,58 +1387,24 @@ public abstract class PermissionHolder {
         return true;
     }
 
-    /**
-     * @return The temporary nodes held by the holder
-     */
-    public Set<Node> getTemporaryNodes() {
-        return getOwnNodes().stream().filter(Node::isTemporary).collect(Collectors.toSet());
-    }
-
-    /**
-     * @return The permanent nodes held by the holder
-     */
-    public Set<Node> getPermanentNodes() {
-        return getOwnNodes().stream().filter(Node::isPermanent).collect(Collectors.toSet());
-    }
-
-    public Set<Node> getPrefixNodes() {
-        return getOwnNodes().stream().filter(Node::isPrefix).collect(Collectors.toSet());
-    }
-
-    public Set<Node> getSuffixNodes() {
-        return getOwnNodes().stream().filter(Node::isSuffix).collect(Collectors.toSet());
-    }
-
-    public Set<Node> getMetaNodes() {
-        return getOwnNodes().stream().filter(Node::isMeta).collect(Collectors.toSet());
-    }
-
     public OptionalInt getWeight() {
         return weightCache.get();
     }
 
     private OptionalInt calculateWeight() {
-        if (this instanceof User) return OptionalInt.empty();
+        if (this.getType().isUser()) return OptionalInt.empty();
 
         boolean seen = false;
         int best = 0;
         for (Node n : getEnduringNodes().get(ImmutableContextSet.empty())) {
-            if (!n.getPermission().startsWith("weight.")) {
+            Integer weight = NodeFactory.parseWeightNode(n.getPermission());
+            if (weight == null) {
                 continue;
             }
 
-            String substring = n.getPermission().substring("weight.".length());
-
-            int i;
-            try {
-                i = Integer.parseInt(substring);
-            } catch (NumberFormatException e) {
-                continue;
-            }
-
-            if (!seen || i > best) {
+            if (!seen || weight > best) {
                 seen = true;
-                best = i;
+                best = weight;
             }
         }
         OptionalInt weight = seen ? OptionalInt.of(best) : OptionalInt.empty();

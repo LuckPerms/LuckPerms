@@ -108,7 +108,7 @@ public interface ContextManager<T> {
      *
      * @param calculator the calculator
      */
-    void registerCalculator(ContextCalculator<T> calculator);
+    void registerCalculator(ContextCalculator<? super T> calculator);
 
     /**
      * Registers a static context calculator with the manager.

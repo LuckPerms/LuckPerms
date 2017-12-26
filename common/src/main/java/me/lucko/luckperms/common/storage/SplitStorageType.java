@@ -23,25 +23,8 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.constants;
+package me.lucko.luckperms.common.storage;
 
-import lombok.experimental.UtilityClass;
-
-import java.util.UUID;
-
-/**
- * Random constants used throughout the plugin implementation.
- */
-@UtilityClass
-public class Constants {
-
-    public static final UUID CONSOLE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
-    public static final String CONSOLE_NAME = "Console";
-
-    public static final UUID IMPORT_UUID = UUID.fromString("11111111-1111-1111-1111-111111111111");
-    public static final String IMPORT_NAME = "Import";
-
-    public static final char COLOR_CHAR = '\u00A7';
-    public static final char FORMAT_CHAR = '&';
-
+public enum SplitStorageType {
+    LOG, USER, GROUP, TRACK, UUID
 }

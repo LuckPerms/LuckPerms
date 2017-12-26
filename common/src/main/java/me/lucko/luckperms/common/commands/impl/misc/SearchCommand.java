@@ -25,38 +25,37 @@
 
 package me.lucko.luckperms.common.commands.impl.misc;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandManager;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.references.HolderType;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.TextUtils;
 
 import net.kyori.text.BuildableComponent;
-import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
-import net.kyori.text.format.TextColor;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -84,32 +83,20 @@ public class SearchCommand extends SingleCommand {
 
         Message.SEARCH_RESULT.send(sender, users + groups, users, groups);
 
-        Map<UUID, String> uuidLookups = new HashMap<>();
-        Function<UUID, String> lookupFunc = uuid -> uuidLookups.computeIfAbsent(uuid, u -> {
-            String s = plugin.getStorage().getName(u).join();
-            if (s == null || s.isEmpty() || s.equals("null")) {
-                s = u.toString();
-            }
-            return s;
-        });
-
-        Map.Entry<Component, String> msgUsers = searchUserResultToMessage(matchedUsers, lookupFunc, label, page);
-        Map.Entry<Component, String> msgGroups = searchGroupResultToMessage(matchedGroups, label, page);
-
-        if (msgUsers.getValue() != null) {
-            Message.SEARCH_SHOWING_USERS_WITH_PAGE.send(sender, msgUsers.getValue());
-            sender.sendMessage(msgUsers.getKey());
-        } else {
-            Message.SEARCH_SHOWING_USERS.send(sender);
-            sender.sendMessage(msgUsers.getKey());
+        if (!matchedUsers.isEmpty()) {
+            LoadingCache<UUID, String> uuidLookups = Caffeine.newBuilder()
+                    .build(u -> {
+                        String s = plugin.getStorage().getName(u).join();
+                        if (s == null || s.isEmpty() || s.equals("null")) {
+                            s = u.toString();
+                        }
+                        return s;
+                    });
+            sendResult(sender, matchedUsers, uuidLookups::get, Message.SEARCH_SHOWING_USERS, HolderType.USER, label, page);
         }
 
-        if (msgGroups.getValue() != null) {
-            Message.SEARCH_SHOWING_GROUPS_WITH_PAGE.send(sender, msgGroups.getValue());
-            sender.sendMessage(msgGroups.getKey());
-        } else {
-            Message.SEARCH_SHOWING_GROUPS.send(sender);
-            sender.sendMessage(msgGroups.getKey());
+        if (!matchedGroups.isEmpty()) {
+            sendResult(sender, matchedGroups, Function.identity(), Message.SEARCH_SHOWING_GROUPS, HolderType.GROUP, label, page);
         }
 
         return CommandResult.SUCCESS;
@@ -120,65 +107,41 @@ public class SearchCommand extends SingleCommand {
         return SubCommand.getPermissionTabComplete(args, plugin.getPermissionVault());
     }
 
-    private static Map.Entry<Component, String> searchUserResultToMessage(List<HeldPermission<UUID>> results, Function<UUID, String> uuidLookup, String label, int pageNumber) {
-        if (results.isEmpty()) {
-            return Maps.immutableEntry(TextComponent.builder("None").color(TextColor.DARK_AQUA).build(), null);
+    private static <T> void sendResult(Sender sender, List<HeldPermission<T>> results, Function<T, String> lookupFunction, Message headerMessage, HolderType holderType, String label, int page) {
+        results = new ArrayList<>(results);
+
+        // we need a deterministic sort order
+        // even though we're comparing uuids here in some cases - it doesn't matter
+        // the import thing is that the order is the same each time the command is executed
+        results.sort((o1, o2) -> {
+            Comparable h1 = (Comparable) o1.getHolder();
+            Comparable h2 = (Comparable) o2.getHolder();
+            //noinspection unchecked
+            return h1.compareTo(h2);
+        });
+
+        int pageIndex = page - 1;
+        List<List<HeldPermission<T>>> pages = CommandUtils.divideList(results, 15);
+
+        if (pageIndex < 0 || pageIndex >= pages.size()) {
+            page = 1;
+            pageIndex = 0;
         }
 
-        List<HeldPermission<UUID>> sorted = new ArrayList<>(results);
-        sorted.sort(Comparator.comparing(HeldPermission::getHolder));
+        List<HeldPermission<T>> content = pages.get(pageIndex);
 
-        int index = pageNumber - 1;
-        List<List<HeldPermission<UUID>>> pages = CommandUtils.divideList(sorted, 15);
-
-        if (index < 0 || index >= pages.size()) {
-            pageNumber = 1;
-            index = 0;
-        }
-
-        List<HeldPermission<UUID>> page = pages.get(index);
-        List<Map.Entry<String, HeldPermission<UUID>>> uuidMappedPage = page.stream()
-                .map(hp -> Maps.immutableEntry(uuidLookup.apply(hp.getHolder()), hp))
+        List<Map.Entry<String, HeldPermission<T>>> mappedContent = content.stream()
+                .map(hp -> Maps.immutableEntry(lookupFunction.apply(hp.getHolder()), hp))
                 .collect(Collectors.toList());
 
-        TextComponent.Builder message = TextComponent.builder("");
-        String title = "&7(page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + sorted.size() + "&7 entries)";
+        // send header
+        headerMessage.send(sender, page, pages.size(), results.size());
 
-        for (Map.Entry<String, HeldPermission<UUID>> ent : uuidMappedPage) {
-            String s = "&3> &b" + ent.getKey() + " &7- " + (ent.getValue().getValue() ? "&a" : "&c") + ent.getValue().getValue() + getNodeExpiryString(ent.getValue().asNode()) + CommandUtils.getAppendableNodeContextString(ent.getValue().asNode()) + "\n";
-            message.append(TextUtils.fromLegacy(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), false, label, ent.getValue())).build());
+        for (Map.Entry<String, HeldPermission<T>> ent : mappedContent) {
+            String s = "&3> &b" + ent.getKey() + " &7- " + (ent.getValue().getValue() ? "&a" : "&c") + ent.getValue().getValue() + getNodeExpiryString(ent.getValue().asNode()) + CommandUtils.getAppendableNodeContextString(ent.getValue().asNode());
+            TextComponent message = TextUtils.fromLegacy(s, CommandManager.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), holderType, label, ent.getValue())).build();
+            sender.sendMessage(message);
         }
-
-        return Maps.immutableEntry(message.build(), title);
-    }
-
-    private static Map.Entry<Component, String> searchGroupResultToMessage(List<HeldPermission<String>> results, String label, int pageNumber) {
-        if (results.isEmpty()) {
-            return Maps.immutableEntry(TextComponent.builder("None").color(TextColor.DARK_AQUA).build(), null);
-        }
-
-        List<HeldPermission<String>> sorted = new ArrayList<>(results);
-        sorted.sort(Comparator.comparing(HeldPermission::getHolder));
-
-        int index = pageNumber - 1;
-        List<List<HeldPermission<String>>> pages = CommandUtils.divideList(sorted, 15);
-
-        if (index < 0 || index >= pages.size()) {
-            pageNumber = 1;
-            index = 0;
-        }
-
-        List<HeldPermission<String>> page = pages.get(index);
-
-        TextComponent.Builder message = TextComponent.builder("");
-        String title = "&7(page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + sorted.size() + "&7 entries)";
-
-        for (HeldPermission<String> ent : page) {
-            String s = "&3> &b" + ent.getHolder() + " &7- " + (ent.getValue() ? "&a" : "&c") + ent.getValue() + getNodeExpiryString(ent.asNode()) + CommandUtils.getAppendableNodeContextString(ent.asNode()) + "\n";
-            message.append(TextUtils.fromLegacy(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(ent.getHolder(), true, label, ent)).build());
-        }
-
-        return Maps.immutableEntry(message.build(), title);
     }
 
     private static String getNodeExpiryString(Node node) {
@@ -189,18 +152,19 @@ public class SearchCommand extends SingleCommand {
         return " &8(&7expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()) + "&8)";
     }
 
-    private static Consumer<BuildableComponent.Builder<?, ?>> makeFancy(String holderName, boolean group, String label, HeldPermission<?> perm) {
+    private static Consumer<BuildableComponent.Builder<?, ?>> makeFancy(String holderName, HolderType holderType, String label, HeldPermission<?> perm) {
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
                 "&3> " + (perm.asNode().getValuePrimitive() ? "&a" : "&c") + perm.asNode().getPermission(),
                 " ",
                 "&7Click to remove this node from " + holderName
-        ), Constants.FORMAT_CHAR));
+        ), CommandManager.AMPERSAND_CHAR));
 
-        String command = "/" + label + " " + NodeFactory.nodeAsCommand(perm.asNode(), holderName, group, false);
+        String command = "/" + label + " " + NodeFactory.nodeAsCommand(perm.asNode(), holderName, holderType, false);
+        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
 
         return component -> {
             component.hoverEvent(hoverEvent);
-            component.clickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command));
+            component.clickEvent(clickEvent);
         };
     }
 }

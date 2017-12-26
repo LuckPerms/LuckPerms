@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.caching.GroupCachedData;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.GroupReference;
+import me.lucko.luckperms.common.references.HolderType;
 import me.lucko.luckperms.common.references.Identifiable;
 
 import java.util.Optional;
@@ -62,7 +63,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     private final GroupCachedData cachedData;
 
     @Getter
-    private BufferedRequest<Void> refreshBuffer;
+    private final BufferedRequest<Void> refreshBuffer;
 
     public Group(String name, LuckPermsPlugin plugin) {
         super(name, plugin);
@@ -111,10 +112,16 @@ public class Group extends PermissionHolder implements Identifiable<String> {
         return GroupReference.of(getId());
     }
 
+    @Override
+    public HolderType getType() {
+        return HolderType.GROUP;
+    }
+
     private CompletableFuture<Void> reloadCachedData() {
-        return CompletableFuture.allOf(cachedData.reloadPermissions(), cachedData.reloadMeta()).thenAccept(n -> {
-            getPlugin().getApiProvider().getEventFactory().handleGroupDataRecalculate(this, cachedData);
-        });
+        return CompletableFuture.allOf(
+                cachedData.reloadPermissions(),
+                cachedData.reloadMeta()
+        ).thenAccept(n -> getPlugin().getApiProvider().getEventFactory().handleGroupDataRecalculate(this, cachedData));
     }
 
     private static final class GroupRefreshBuffer extends BufferedRequest<Void> {

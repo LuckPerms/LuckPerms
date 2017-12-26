@@ -62,7 +62,7 @@ public class Track implements Identifiable<String> {
     /**
      * The groups within this track
      */
-    private List<String> groups = Collections.synchronizedList(new ArrayList<>());
+    private final List<String> groups = Collections.synchronizedList(new ArrayList<>());
 
     @Getter
     private final ApiTrack delegate = new ApiTrack(this);

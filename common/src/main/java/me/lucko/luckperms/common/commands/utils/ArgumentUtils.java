@@ -28,11 +28,12 @@ package me.lucko.luckperms.common.commands.utils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.CommandException;
-import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.DateUtil;
 
 import java.util.ArrayList;
@@ -125,7 +126,7 @@ public class ArgumentUtils {
 
                 // one of the first two values, and doesn't have a key
                 if (i <= 1 && !pair.contains("=")) {
-                    String key = i == 0 ? "server" : "world";
+                    String key = i == 0 ? Contexts.SERVER_KEY : Contexts.WORLD_KEY;
                     set.add(key, pair);
                     continue;
                 }
@@ -156,28 +157,28 @@ public class ArgumentUtils {
 
     public static MutableContextSet sanitizeContexts(MutableContextSet set) throws ArgumentException {
         // remove any potential "global" context mappings
-        set.remove("server", "global");
-        set.remove("world", "global");
-        set.remove("server", "null");
-        set.remove("world", "null");
-        set.remove("server", "*");
-        set.remove("world", "*");
+        set.remove(Contexts.SERVER_KEY, "global");
+        set.remove(Contexts.WORLD_KEY, "global");
+        set.remove(Contexts.SERVER_KEY, "null");
+        set.remove(Contexts.WORLD_KEY, "null");
+        set.remove(Contexts.SERVER_KEY, "*");
+        set.remove(Contexts.WORLD_KEY, "*");
 
         // remove excess entries from the set.
         // (it can only have one server and one world.)
-        List<String> servers = new ArrayList<>(set.getValues("server"));
+        List<String> servers = new ArrayList<>(set.getValues(Contexts.SERVER_KEY));
         if (servers.size() > 1) {
             // start iterating at index 1
             for (int i = 1; i < servers.size(); i++) {
-                set.remove("server", servers.get(i));
+                set.remove(Contexts.SERVER_KEY, servers.get(i));
             }
         }
 
-        List<String> worlds = new ArrayList<>(set.getValues("world"));
+        List<String> worlds = new ArrayList<>(set.getValues(Contexts.WORLD_KEY));
         if (worlds.size() > 1) {
             // start iterating at index 1
             for (int i = 1; i < worlds.size(); i++) {
-                set.remove("world", worlds.get(i));
+                set.remove(Contexts.WORLD_KEY, worlds.get(i));
             }
         }
 

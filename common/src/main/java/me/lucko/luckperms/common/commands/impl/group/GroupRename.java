@@ -29,16 +29,16 @@ import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
@@ -56,12 +56,15 @@ public class GroupRename extends SubCommand<Group> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (plugin.getStorage().loadGroup(newGroupName).join()) {
+        if (plugin.getStorage().loadGroup(newGroupName).join().isPresent()) {
             Message.ALREADY_EXISTS.send(sender, newGroupName);
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().createAndLoadGroup(newGroupName, CreationCause.COMMAND).join()) {
+        try {
+            plugin.getStorage().createAndLoadGroup(newGroupName, CreationCause.COMMAND).get();
+        } catch (Exception e) {
+            e.printStackTrace();
             Message.CREATE_ERROR.send(sender, newGroupName);
             return CommandResult.FAILURE;
         }
@@ -72,7 +75,10 @@ public class GroupRename extends SubCommand<Group> {
             return CommandResult.LOADING_ERROR;
         }
 
-        if (!plugin.getStorage().deleteGroup(group, DeletionCause.COMMAND).join()) {
+        try {
+            plugin.getStorage().deleteGroup(group, DeletionCause.COMMAND).get();
+        } catch (Exception e) {
+            e.printStackTrace();
             Message.DELETE_ERROR.send(sender, group.getFriendlyName());
             return CommandResult.FAILURE;
         }

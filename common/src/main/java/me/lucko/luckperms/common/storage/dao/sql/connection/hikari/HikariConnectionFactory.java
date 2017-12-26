@@ -91,6 +91,16 @@ public abstract class HikariConnectionFactory extends AbstractConnectionFactory 
         // The drivers are really old in some of the older Spigot binaries, so Connection#isValid doesn't work.
         config.setConnectionTestQuery("/* LuckPerms ping */ SELECT 1");
 
+        try {
+            // don't perform any initial connection validation - we subsequently call #getConnection
+            // to setup the schema anyways
+            config.setInitializationFailTimeout(-1);
+        } catch (NoSuchMethodError e) {
+            //noinspection deprecation
+            config.setInitializationFailFast(false);
+        }
+
+
         hikari = new HikariDataSource(config);
     }
 

@@ -27,6 +27,7 @@ package me.lucko.luckperms.bukkit.contexts;
 
 import lombok.RequiredArgsConstructor;
 
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -36,15 +37,13 @@ import org.bukkit.entity.Player;
 
 @RequiredArgsConstructor
 public class WorldCalculator implements ContextCalculator<Player> {
-    private static final String WORLD_KEY = "world";
-
     private final LuckPermsPlugin plugin;
 
     @Override
     public MutableContextSet giveApplicableContext(Player subject, MutableContextSet accumulator) {
         String world = subject.getWorld().getName().toLowerCase();
-        while (!accumulator.has(WORLD_KEY, world)) {
-            accumulator.add(WORLD_KEY, world);
+        while (!accumulator.has(Contexts.WORLD_KEY, world)) {
+            accumulator.add(Contexts.WORLD_KEY, world);
             world = plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(world, world).toLowerCase();
         }
 

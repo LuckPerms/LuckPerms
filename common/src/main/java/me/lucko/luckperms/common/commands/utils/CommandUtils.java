@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.commands.utils;
 
 import lombok.experimental.UtilityClass;
 
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
@@ -208,10 +209,10 @@ public class CommandUtils {
     public static String getAppendableNodeContextString(Node node) {
         StringBuilder sb = new StringBuilder();
         if (node.isServerSpecific()) {
-            sb.append(" ").append(contextToString("server", node.getServer().get()));
+            sb.append(" ").append(contextToString(Contexts.SERVER_KEY, node.getServer().get()));
         }
         if (node.isWorldSpecific()) {
-            sb.append(" ").append(contextToString("world", node.getWorld().get()));
+            sb.append(" ").append(contextToString(Contexts.WORLD_KEY, node.getWorld().get()));
         }
         for (Map.Entry<String, String> c : node.getContexts().toSet()) {
             sb.append(" ").append(contextToString(c.getKey(), c.getValue()));

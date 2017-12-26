@@ -112,10 +112,6 @@ public class LogMainCommand extends MainCommand<Log, Object> {
                 .limit(1)
                 .findAny();
 
-        if (!o.isPresent()) {
-            return Collections.emptyList();
-        }
-
-        return o.get().tabComplete(plugin, sender, args.subList(1, args.size()));
+        return o.map(cmd -> cmd.tabComplete(plugin, sender, args.subList(1, args.size()))).orElseGet(Collections::emptyList);
     }
 }

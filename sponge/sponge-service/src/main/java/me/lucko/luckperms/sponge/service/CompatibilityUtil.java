@@ -32,13 +32,13 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.sponge.service.context.DelegatingContextSet;
 import me.lucko.luckperms.sponge.service.context.DelegatingImmutableContextSet;
 
 import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.util.Tristate;
 
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -68,7 +68,18 @@ public class CompatibilityUtil {
         return LP_TO_SPONGE_CACHE.get(contexts.makeImmutable());
     }
 
-    public static Tristate convertTristate(me.lucko.luckperms.api.Tristate tristate) {
+    public static org.spongepowered.api.util.Tristate convertTristate(Tristate tristate) {
+        switch (tristate) {
+            case TRUE:
+                return org.spongepowered.api.util.Tristate.TRUE;
+            case FALSE:
+                return org.spongepowered.api.util.Tristate.FALSE;
+            default:
+                return org.spongepowered.api.util.Tristate.UNDEFINED;
+        }
+    }
+
+    public static Tristate convertTristate(org.spongepowered.api.util.Tristate tristate) {
         switch (tristate) {
             case TRUE:
                 return Tristate.TRUE;
@@ -76,17 +87,6 @@ public class CompatibilityUtil {
                 return Tristate.FALSE;
             default:
                 return Tristate.UNDEFINED;
-        }
-    }
-
-    public static me.lucko.luckperms.api.Tristate convertTristate(Tristate tristate) {
-        switch (tristate) {
-            case TRUE:
-                return me.lucko.luckperms.api.Tristate.TRUE;
-            case FALSE:
-                return me.lucko.luckperms.api.Tristate.FALSE;
-            default:
-                return me.lucko.luckperms.api.Tristate.UNDEFINED;
         }
     }
 

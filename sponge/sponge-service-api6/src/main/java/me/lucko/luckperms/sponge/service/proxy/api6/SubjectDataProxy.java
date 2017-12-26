@@ -57,13 +57,11 @@ public final class SubjectDataProxy implements SubjectData {
 
     @Override
     public Map<Set<Context>, Map<String, Boolean>> getAllPermissions() {
-        return (Map) handle().thenApply(handle -> {
-            return handle.getAllPermissions().entrySet().stream()
-                    .collect(ImmutableCollectors.toMap(
-                            e -> CompatibilityUtil.convertContexts(e.getKey()),
-                            Map.Entry::getValue
-                    ));
-        }).join();
+        return (Map) handle().thenApply(handle -> handle.getAllPermissions().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        e -> CompatibilityUtil.convertContexts(e.getKey()),
+                        Map.Entry::getValue
+                ))).join();
     }
 
     @Override

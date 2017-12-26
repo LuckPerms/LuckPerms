@@ -218,7 +218,7 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
 
     @Override
     public boolean isAuthorized(Sender sender) {
-        return getSubCommands().stream().filter(sc -> sc.isAuthorized(sender)).count() != 0;
+        return getSubCommands().stream().anyMatch(sc -> sc.isAuthorized(sender));
     }
 
     public List<Command<LPSubjectData, ?>> getSubCommands() {

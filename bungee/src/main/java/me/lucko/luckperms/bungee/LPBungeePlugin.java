@@ -111,6 +111,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private ApiProvider apiProvider;
     private Logger log;
     private LocaleManager localeManager;
+    private DependencyManager dependencyManager;
     private CachedStateManager cachedStateManager;
     private ContextManager<ProxiedPlayer> contextManager;
     private CalculatorFactory calculatorFactory;
@@ -129,7 +130,8 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         senderFactory = new BungeeSenderFactory(this);
         log = new SenderLogger(this, getConsoleSender());
 
-        DependencyManager.loadDependencies(this, Collections.singleton(Dependency.CAFFEINE));
+        dependencyManager = new DependencyManager(this);
+        dependencyManager.loadDependencies(Collections.singleton(Dependency.CAFFEINE));
     }
 
     @Override
@@ -145,7 +147,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         configuration.init();
 
         Set<StorageType> storageTypes = StorageFactory.getRequiredTypes(this, StorageType.H2);
-        DependencyManager.loadStorageDependencies(this, storageTypes);
+        dependencyManager.loadStorageDependencies(storageTypes);
 
         // register events
         getProxy().getPluginManager().registerListener(this, new BungeeConnectionListener(this));
@@ -208,7 +210,12 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         // run an update instantly.
         getLog().info("Performing initial data load...");
-        new UpdateTask(this, true).run();
+        try {
+            new UpdateTask(this, true).run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
         // register tasks
         scheduler.asyncRepeating(new ExpireTemporaryTask(this), 60L);
@@ -264,7 +271,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     }
 
     @Override
-    public String getServerName() {
+    public String getServerBrand() {
         return getProxy().getName();
     }
 

@@ -27,11 +27,11 @@ package me.lucko.luckperms.bukkit.migration;
 
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.logging.ProgressLogger;
@@ -51,8 +51,6 @@ import ru.tehkode.permissions.PermissionGroup;
 import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -125,9 +123,9 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
             // Get a list of all groups in a ladder
             List<String> ladder = manager.getRankLadder(rankLadder).entrySet().stream()
-                                  .sorted(Comparator.<Map.Entry<Integer, PermissionGroup>>comparingInt(e -> e.getKey()).reversed())
-                                  .map(e -> MigrationUtils.standardizeName(e.getValue().getName()))
-                                  .collect(Collectors.toList());
+                    .sorted(Comparator.<Map.Entry<Integer, PermissionGroup>>comparingInt(Map.Entry::getKey).reversed())
+                    .map(e -> MigrationUtils.standardizeName(e.getValue().getName()))
+                    .collect(Collectors.toList());
 
             track.setGroups(ladder);
             plugin.getStorage().saveTrack(track);
@@ -164,10 +162,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 }
             }
 
-            if (primary != null && !primary.isEmpty() && !primary.equalsIgnoreCase("default")) {
-                lpUser.setPermission(NodeFactory.make("group." + primary.toLowerCase()));
+            if (primary != null && !primary.isEmpty() && !primary.equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
+                lpUser.setPermission(NodeFactory.buildGroupNode(primary.toLowerCase()).build());
                 lpUser.getPrimaryGroup().setStoredValue(primary);
-                lpUser.unsetPermission(NodeFactory.make("group.default"));
+                lpUser.unsetPermission(NodeFactory.buildGroupNode(NodeFactory.DEFAULT_GROUP_NAME).build());
             }
 
             plugin.getUserManager().cleanup(lpUser);
@@ -210,7 +208,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             for (PermissionGroup parent : worldData.getValue()) {
-                holder.setPermission(NodeFactory.newBuilder("group." + MigrationUtils.standardizeName(parent.getName())).setWorld(world).build());
+                holder.setPermission(NodeFactory.buildGroupNode(MigrationUtils.standardizeName(parent.getName())).setWorld(world).build());
             }
         }
 
@@ -219,11 +217,11 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         String suffix = entity.getOwnSuffix();
 
         if (prefix != null && !prefix.isEmpty()) {
-            holder.setPermission(NodeFactory.makePrefixNode(weight, prefix).build());
+            holder.setPermission(NodeFactory.buildPrefixNode(weight, prefix).build());
         }
 
         if (suffix != null && !suffix.isEmpty()) {
-            holder.setPermission(NodeFactory.makeSuffixNode(weight, suffix).build());
+            holder.setPermission(NodeFactory.buildSuffixNode(weight, suffix).build());
         }
 
         // migrate options
@@ -243,11 +241,11 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 }
 
                 String key = opt.getKey().toLowerCase();
-                if (key.equals("prefix") || key.equals("suffix") || key.equals("weight") || key.equals("rank") || key.equals("rank-ladder") || key.equals("name") || key.equals("username")) {
+                if (key.equals(NodeFactory.PREFIX_KEY) || key.equals(NodeFactory.SUFFIX_KEY) || key.equals(NodeFactory.WEIGHT_KEY) || key.equals("rank") || key.equals("rank-ladder") || key.equals("name") || key.equals("username")) {
                     continue;
                 }
 
-                holder.setPermission(NodeFactory.makeMetaNode(opt.getKey(), opt.getValue()).setWorld(world).build());
+                holder.setPermission(NodeFactory.buildMetaNode(opt.getKey(), opt.getValue()).setWorld(world).build());
             }
         }
     }

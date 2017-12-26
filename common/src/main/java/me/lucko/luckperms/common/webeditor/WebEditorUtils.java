@@ -70,7 +70,7 @@ public class WebEditorUtils {
     private static final String GROUP_ID_PATTERN = "group/";
 
     public static String getHolderIdentifier(PermissionHolder holder) {
-        if (holder instanceof User) {
+        if (holder.getType().isUser()) {
             User user = ((User) holder);
             return USER_ID_PATTERN + user.getUuid().toString();
         } else {

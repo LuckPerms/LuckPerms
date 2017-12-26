@@ -109,9 +109,8 @@ public class LegacyYamlMigration implements Runnable {
 
                         Map<String, Object> data = readMapFromFile(oldFile);
 
-                        Map<String, Boolean> perms = new HashMap<>();
                         String name = (String) data.get("name");
-                        perms.putAll((Map<String, Boolean>) data.get("perms"));
+                        Map<String, Boolean> perms = new HashMap<>((Map<String, Boolean>) data.get("perms"));
 
                         Set<NodeModel> nodes = perms.entrySet().stream()
                                 .map(e -> LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue()))
@@ -154,11 +153,10 @@ public class LegacyYamlMigration implements Runnable {
 
                         Map<String, Object> data = readMapFromFile(oldFile);
 
-                        Map<String, Boolean> perms = new HashMap<>();
                         String uuid = (String) data.get("uuid");
                         String name = (String) data.get("name");
                         String primaryGroup = (String) data.get("primary-group");
-                        perms.putAll((Map<String, Boolean>) data.get("perms"));
+                        Map<String, Boolean> perms = new HashMap<>((Map<String, Boolean>) data.get("perms"));
 
                         Set<NodeModel> nodes = perms.entrySet().stream()
                                 .map(e -> LegacyNodeFactory.fromLegacyString(e.getKey(), e.getValue()))

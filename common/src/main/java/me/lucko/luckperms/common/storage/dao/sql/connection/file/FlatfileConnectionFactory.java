@@ -39,7 +39,7 @@ abstract class FlatfileConnectionFactory extends AbstractConnectionFactory {
 
     protected final File file;
     private final ReentrantLock lock = new ReentrantLock();
-    private Connection connection;
+    private NonClosableConnection connection;
 
     FlatfileConnectionFactory(String name, File file) {
         super(name);
@@ -56,8 +56,8 @@ abstract class FlatfileConnectionFactory extends AbstractConnectionFactory {
 
     @Override
     public void shutdown() throws Exception {
-        if (connection != null && !connection.isClosed()) {
-            connection.close();
+        if (connection != null) {
+            connection.shutdown();
         }
     }
 

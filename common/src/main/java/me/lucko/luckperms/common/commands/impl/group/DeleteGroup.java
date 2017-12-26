@@ -28,12 +28,12 @@ package me.lucko.luckperms.common.commands.impl.group;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -62,7 +62,7 @@ public class DeleteGroup extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().loadGroup(groupName).join()) {
+        if (!plugin.getStorage().loadGroup(groupName).join().isPresent()) {
             Message.DOES_NOT_EXIST.send(sender, groupName);
             return CommandResult.INVALID_ARGS;
         }
@@ -73,7 +73,10 @@ public class DeleteGroup extends SingleCommand {
             return CommandResult.LOADING_ERROR;
         }
 
-        if (!plugin.getStorage().deleteGroup(group, DeletionCause.COMMAND).join()) {
+        try {
+            plugin.getStorage().deleteGroup(group, DeletionCause.COMMAND).get();
+        } catch (Exception e) {
+            e.printStackTrace();
             Message.DELETE_ERROR.send(sender, group.getFriendlyName());
             return CommandResult.FAILURE;
         }

@@ -29,6 +29,7 @@ import me.lucko.luckperms.api.LPConfiguration;
 import me.lucko.luckperms.common.config.ConfigKey;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
+import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.util.Map;
 
@@ -78,7 +79,8 @@ public class ApiConfiguration implements LPConfiguration {
 
     @Override
     public Map<String, String> getSplitStorageOptions() {
-        return handle.get(ConfigKeys.SPLIT_STORAGE_OPTIONS);
+        return handle.get(ConfigKeys.SPLIT_STORAGE_OPTIONS).entrySet().stream()
+                .collect(ImmutableCollectors.toMap(e -> e.getKey().name().toLowerCase(), Map.Entry::getValue));
     }
 
     @Override

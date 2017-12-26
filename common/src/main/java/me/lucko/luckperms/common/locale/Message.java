@@ -43,7 +43,10 @@ public enum Message {
     /*
      * General & Commands
      */
-    PREFIX("&7&l[&b&lL&3&lP&7&l] &c", false),
+    PREFIX("&7&l[&b&lL&3&lP&7&l] ", false),
+
+    VIEW_AVAILABLE_COMMANDS_PROMPT("&3Use &a/{} help &3to view available commands.", true),
+    NO_PERMISSION_FOR_SUBCOMMANDS("&3You do not have permission to use any sub commands.", true),
 
     EMPTY("{}", true),
     PLAYER_ONLINE("&aOnline", false),
@@ -59,7 +62,11 @@ public enum Message {
     LOG_INFO("&7&l[&bL&3P&7&l] &3{}", false),
     LOG_WARN("&7&l[&bLuck&3Perms&7&l] &c[WARN] {}", false),
     LOG_ERROR("&7&l[&bLuck&3Perms&7&l] &4[ERROR] {}", false),
-    LOG("&3LOG &3&l> {}", true),
+    LOG(
+            "{PREFIX}&3LOG &3&l> &8(&e{}&8) [&a{}&8] (&b{}&8)" + "\n" +
+            "{PREFIX}&3LOG &3&l> &f{}",
+            false
+    ),
     VERBOSE_LOG("&3VB &3&l> {}", true),
     EXPORT_LOG("&3EXPORT &3&l> &f{}", true),
     EXPORT_LOG_PROGRESS("&3EXPORT &3&l> &7{}", true),
@@ -113,10 +120,9 @@ public enum Message {
     SEARCH_SEARCHING("&aSearching for users and groups with &b{}&a...", true),
     SEARCH_SEARCHING_MEMBERS("&aSearching for users and groups who inherit from &b{}&a...", true),
     SEARCH_RESULT("&aFound &b{}&a entries from &b{}&a users and &b{}&a groups.", true),
-    SEARCH_SHOWING_USERS("&bShowing user entries:", true),
-    SEARCH_SHOWING_GROUPS("&bShowing group entries:", true),
-    SEARCH_SHOWING_USERS_WITH_PAGE("&bShowing user entries:  {}", true),
-    SEARCH_SHOWING_GROUPS_WITH_PAGE("&bShowing group entries:  {}", true),
+
+    SEARCH_SHOWING_USERS("&bShowing user entries:    &7(page &f{}&7 of &f{}&7 - &f{}&7 entries)", true),
+    SEARCH_SHOWING_GROUPS("&bShowing group entries:    &7(page &f{}&7 of &f{}&7 - &f{}&7 entries)", true),
 
     APPLY_EDITS_INVALID_CODE("&cInvalid code. &7({})", true),
     APPLY_EDITS_UNABLE_TO_READ("&cUnable to read data using the given code. &7({})", true),
@@ -130,8 +136,9 @@ public enum Message {
     APPLY_EDITS_DIFF_ADDED("&a+  &f{}", false),
     APPLY_EDITS_DIFF_REMOVED("&c-  &f{}", false),
 
+    EDITOR_START("&7Preparing a new editor sesssion. Please wait...", true),
     EDITOR_UPLOAD_FAILURE("&cUnable to upload permission data to the editor.", true),
-    EDITOR_URL("&aEditor URL:", true),
+    EDITOR_URL("&aClick the link below to open the editor:", true),
 
     CHECK_RESULT("&aPermission check result on user &b{}&a for permission &b{}&a: &f{}", true),
 
@@ -152,6 +159,7 @@ public enum Message {
     ALREADY_EXISTS("&4{}&c already exists!", true),
     DOES_NOT_EXIST("&4{}&c does not exist!", true),
 
+    USER_LOAD_ERROR("&cAn unexpected error occurred. User not loaded.", true),
     GROUP_LOAD_ERROR("&cAn unexpected error occurred. Group not loaded.", true),
     GROUPS_LOAD_ERROR("&cAn unexpected error occurred. Unable to load all groups.", true),
 
@@ -198,14 +206,14 @@ public enum Message {
 
     TRACKS_LIST("&aTracks: {}", true),
 
-    LISTNODES("&b{}'s Permissions:", true),
-    LISTNODES_WITH_PAGE("&b{}'s Permissions:  {}", true),
-    LISTNODES_TEMP("&b{}'s Temporary Permissions:", true),
-    LISTNODES_TEMP_WITH_PAGE("&b{}'s Temporary Permissions:  {}", true),
+    PERMISSION_INFO("&b{}'s Permissions:  &7(page &f{}&7 of &f{}&7 - &f{}&7 entries)", true),
+    PERMISSION_INFO_NO_DATA("&b{}&a does not have any permissions set.", true),
 
-    LISTPARENTS("&b{}'s Parent Groups:", true),
-    LISTPARENTS_TEMP("&b{}'s Temporary Parent Groups:", true),
-    LIST_TRACKS("&b{}'s Tracks:" + "\n" + "{}", true),
+    PARENT_INFO("&b{}'s Parents:  &7(page &f{}&7 of &f{}&7 - &f{}&7 entries)", true),
+    PARENT_INFO_NO_DATA("&b{}&a does not have any parents defined.", true),
+
+    LIST_TRACKS("&b{}'s Tracks:", true),
+    LIST_TRACKS_ENTRY("&a{}: {}", false),
     LIST_TRACKS_EMPTY("&b{}&a is not on any tracks.", true),
 
     CONTEXT_PAIR_INLINE("&3{}=&b{}", false),
@@ -383,7 +391,12 @@ public enum Message {
     LOG_INVALID_PAGE("&cInvalid page number.", true),
     LOG_INVALID_PAGE_RANGE("&cInvalid page number. Please enter a value between &41&c and &4{}&c.", true),
     LOG_NO_ENTRIES("&bNo log entries to show.", true),
-    LOG_ENTRY("&b#{} -> &8(&7{} ago&8) {}", true),
+
+    LOG_ENTRY(
+            "{PREFIX}&b#{} &8(&7{} ago&8) &8(&e{}&8) [&a{}&8] (&b{}&8)" + "\n" +
+            "{PREFIX}&7> &f{}",
+            false
+    ),
 
     LOG_NOTIFY_CONSOLE("&cCannot toggle notifications for console.", true),
     LOG_NOTIFY_TOGGLE_ON("&aEnabled&b logging output.", true),
@@ -392,14 +405,12 @@ public enum Message {
     LOG_NOTIFY_ALREADY_OFF("&cYou aren't currently receiving notifications.", true),
     LOG_NOTIFY_UNKNOWN("&cState unknown. Expecting \"on\" or \"off\".", true),
 
-    LOG_SEARCH_HEADER("&aShowing recent actions for query &b{} &a(page &f{}&a of &f{}&a)", true),
-
-    LOG_RECENT_HEADER("&aShowing recent actions (page &f{}&a of &f{}&a)", true),
-    LOG_RECENT_BY_HEADER("&aShowing recent actions by &b{} &a(page &f{}&a of &f{}&a)", true),
-
-    LOG_HISTORY_USER_HEADER("&aShowing history for user &b{} &a(page &f{}&a of &f{}&a)", true),
-    LOG_HISTORY_GROUP_HEADER("&aShowing history for group &b{} &a(page &f{}&a of &f{}&a)", true),
-    LOG_HISTORY_TRACK_HEADER("&aShowing history for track &b{} &a(page &f{}&a of &f{}&a)", true),
+    LOG_SEARCH_HEADER("&aShowing recent actions for query &b{}  &7(page &f{}&7 of &f{}&7)", true),
+    LOG_RECENT_HEADER("&aShowing recent actions  &7(page &f{}&7 of &f{}&7)", true),
+    LOG_RECENT_BY_HEADER("&aShowing recent actions by &b{}  &7(page &f{}&7 of &f{}&7)", true),
+    LOG_HISTORY_USER_HEADER("&aShowing history for user &b{}  &7(page &f{}&7 of &f{}&7)", true),
+    LOG_HISTORY_GROUP_HEADER("&aShowing history for group &b{}  &7(page &f{}&7 of &f{}&7)", true),
+    LOG_HISTORY_TRACK_HEADER("&aShowing history for track &b{}  &7(page &f{}&7 of &f{}&7)", true),
 
     LOG_EXPORT_ALREADY_EXISTS("&cError: File &4{}&c already exists.", true),
     LOG_EXPORT_NOT_WRITABLE("&cError: File &4{}&c is not writable.", true),

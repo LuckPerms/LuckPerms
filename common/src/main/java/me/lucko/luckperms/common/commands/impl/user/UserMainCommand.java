@@ -40,13 +40,13 @@ import me.lucko.luckperms.common.commands.impl.generic.permission.CommandPermiss
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
+import me.lucko.luckperms.common.storage.DataConstraints;
 
 import java.util.List;
 import java.util.UUID;
@@ -76,6 +76,7 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
                 .add(new UserDemote(locale))
                 .add(new HolderShowTracks<>(locale, true))
                 .add(new HolderClear<>(locale, true))
+                .add(new UserClone(locale))
                 .build()
         );
     }
@@ -117,7 +118,11 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
 
     @Override
     protected User getTarget(UserIdentifier target, LuckPermsPlugin plugin, Sender sender) {
-        if (!plugin.getStorage().loadUser(target.getUuid(), target.getUsername().orElse(null)).join()) {
+
+        try {
+            plugin.getStorage().loadUser(target.getUuid(), target.getUsername().orElse(null)).get();
+        } catch (Exception e) {
+            e.printStackTrace();
             Message.LOADING_ERROR.send(sender);
             return null;
         }

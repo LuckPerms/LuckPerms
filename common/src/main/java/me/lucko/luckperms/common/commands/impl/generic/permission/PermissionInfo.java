@@ -25,41 +25,40 @@
 
 package me.lucko.luckperms.common.commands.impl.generic.permission;
 
-import com.google.common.collect.Maps;
-
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandManager;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.Constants;
+import me.lucko.luckperms.common.commands.utils.SortMode;
+import me.lucko.luckperms.common.commands.utils.SortType;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.NodeWithContextComparator;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.CollationKeyCache;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.TextUtils;
 
 import net.kyori.text.BuildableComponent;
-import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
-import net.kyori.text.format.TextColor;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
 import java.util.function.Consumer;
 
 public class PermissionInfo extends SharedSubCommand {
@@ -74,111 +73,72 @@ public class PermissionInfo extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        String filter = null;
-        if (args.size() == 1) {
-            // it might be a filter, if it's a number, then it relates to a page.
-            try {
-                Integer.parseInt(args.get(0));
-            } catch (NumberFormatException e) {
-                // it's not a number, so assume it's the filter.
-                filter = args.get(0);
-            }
-        } else if (args.size() == 2) {
-            filter = args.get(1);
-        }
-
         int page = ArgumentUtils.handleIntOrElse(0, args, 1);
+        SortMode sortMode = SortMode.determine(args);
 
-        Map.Entry<Component, String> ent = nodesToMessage(false, filter, holder.getOwnNodesSorted(), holder, label, page, sender.isConsole());
-        if (ent.getValue() != null) {
-            Message.LISTNODES_WITH_PAGE.send(sender, holder.getFriendlyName(), ent.getValue());
-            sender.sendMessage(ent.getKey());
-        } else {
-            Message.LISTNODES.send(sender, holder.getFriendlyName());
-            sender.sendMessage(ent.getKey());
+        // get the holders nodes
+        List<LocalizedNode> nodes = new ArrayList<>(holder.getOwnNodesSorted());
+
+        // remove irrelevant types (these are displayed in the other info commands)
+        nodes.removeIf(node ->
+                // remove if the node is a group node, and if the value isn't false and if the group actually exists
+                (node.isGroupNode() && node.getValuePrimitive() && plugin.getGroupManager().isLoaded(node.getGroupName())) ||
+                // remove if the node is a meta node
+                node.isPrefix() || node.isSuffix() || node.isMeta()
+        );
+
+        // handle empty
+        if (nodes.isEmpty()) {
+            Message.PERMISSION_INFO_NO_DATA.send(sender, holder.getFriendlyName());
+            return CommandResult.SUCCESS;
         }
 
-        Map.Entry<Component, String> tempEnt = nodesToMessage(true, filter, holder.getOwnNodesSorted(), holder, label, page, sender.isConsole());
-        if (tempEnt.getValue() != null) {
-            Message.LISTNODES_TEMP_WITH_PAGE.send(sender, holder.getFriendlyName(), tempEnt.getValue());
-            sender.sendMessage(tempEnt.getKey());
-        } else {
-            Message.LISTNODES_TEMP.send(sender, holder.getFriendlyName());
-            sender.sendMessage(tempEnt.getKey());
+        // sort the list alphabetically instead
+        if (sortMode.getType() == SortType.ALPHABETICALLY) {
+            nodes.sort(ALPHABETICAL_NODE_COMPARATOR);
+        }
+
+        // reverse the order if necessary
+        if (!sortMode.isAscending()) {
+            Collections.reverse(nodes);
+        }
+
+        int pageIndex = page - 1;
+        List<List<LocalizedNode>> pages = CommandUtils.divideList(nodes, 19);
+
+        if (pageIndex < 0 || pageIndex >= pages.size()) {
+            page = 1;
+            pageIndex = 0;
+        }
+
+        List<LocalizedNode> content = pages.get(pageIndex);
+
+        // send header
+        Message.PERMISSION_INFO.send(sender, holder.getFriendlyName(), page, pages.size(), nodes.size());
+
+        // send content
+        for (LocalizedNode node : content) {
+            String s = "&3> " + (node.getValuePrimitive() ? "&a" : "&c") + node.getPermission() + (sender.isConsole() ? " &7(" + node.getValuePrimitive() + "&7)" : "") + CommandUtils.getAppendableNodeContextString(node);
+            if (node.isTemporary()) {
+                s += "\n&2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime());
+            }
+
+            TextComponent message = TextUtils.fromLegacy(s, CommandManager.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build();
+            sender.sendMessage(message);
         }
 
         return CommandResult.SUCCESS;
     }
 
-    private static Map.Entry<Component, String> nodesToMessage(boolean temp, String filter, SortedSet<LocalizedNode> nodes, PermissionHolder holder, String label, int pageNumber, boolean console) {
-        // parse the filter
-        String nodeFilter = null;
-        Map.Entry<String, String> contextFilter = null;
-
-        if (filter != null) {
-            int index = filter.indexOf('=');
-
-            context:
-            if (index != -1) {
-                String key = filter.substring(0, index);
-                if (key.equals("")) break context;
-
-                String value = filter.substring(index + 1);
-                if (value.equals("")) break context;
-
-                contextFilter = Maps.immutableEntry(key, value);
-            }
-
-            if (contextFilter == null) {
-                nodeFilter = filter;
-            }
+    private static final Comparator<LocalizedNode> ALPHABETICAL_NODE_COMPARATOR = (o1, o2) -> {
+        int i = CollationKeyCache.compareStrings(o1.getPermission(), o2.getPermission());
+        if (i != 0) {
+            return i;
         }
 
-        List<Node> l = new ArrayList<>();
-        for (Node node : nodes) {
-            if ((node.isGroupNode() && node.getValuePrimitive()) || node.isPrefix() || node.isSuffix() || node.isMeta()) continue;
-
-            // check against filters
-            if (nodeFilter != null && !node.getPermission().startsWith(nodeFilter)) continue;
-            if (contextFilter != null && !node.getFullContexts().hasIgnoreCase(contextFilter.getKey(), contextFilter.getValue())) continue;
-            if (temp != node.isTemporary()) continue;
-
-            l.add(node);
-        }
-
-        if (l.isEmpty()) {
-            return Maps.immutableEntry(TextComponent.builder("None").color(TextColor.DARK_AQUA).build(), null);
-        }
-
-        int index = pageNumber - 1;
-        List<List<Node>> pages = CommandUtils.divideList(l, 15);
-
-        if (index < 0 || index >= pages.size()) {
-            pageNumber = 1;
-            index = 0;
-        }
-
-        List<Node> page = pages.get(index);
-
-        TextComponent.Builder message = TextComponent.builder("");
-        String title = "&7(showing page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + l.size() + "&7 entries";
-        if (filter != null) {
-            title += " - filtered by &f\"" + filter + "\"&7)";
-        } else {
-            title += ")";
-        }
-
-        for (Node node : page) {
-            String s = "&3> " + (node.getValuePrimitive() ? "&a" : "&c") + node.getPermission() + (console ? " &7(" + node.getValuePrimitive() + "&7)" : "") + CommandUtils.getAppendableNodeContextString(node) + "\n";
-            if (temp) {
-                s += "&2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()) + "\n";
-            }
-
-            message.append(TextUtils.fromLegacy(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build());
-        }
-
-        return Maps.immutableEntry(message.build(), title);
-    }
+        // fallback to priority
+        return NodeWithContextComparator.reverse().compare(o1, o2);
+    };
 
     private static Consumer<BuildableComponent.Builder<?, ?>> makeFancy(PermissionHolder holder, String label, Node node) {
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
@@ -187,12 +147,12 @@ public class PermissionInfo extends SharedSubCommand {
                 "¥7Click to remove this node from " + holder.getFriendlyName()
         ), '¥'));
 
-        boolean group = !(holder instanceof User);
-        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, group ? holder.getObjectName() : holder.getFriendlyName(), group, false);
+        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType().isGroup() ? holder.getObjectName() : holder.getFriendlyName(), holder.getType(), false);
+        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
 
         return component -> {
             component.hoverEvent(hoverEvent);
-            component.clickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command));
+            component.clickEvent(clickEvent);
         };
     }
 }

@@ -56,7 +56,7 @@ public class VaultHookManager {
             }
 
             if (chatHook == null) {
-                chatHook = new VaultChatHook(permissionHook);
+                chatHook = new VaultChatHook(plugin, permissionHook);
             }
 
             final ServicesManager sm = plugin.getServer().getServicesManager();
@@ -78,7 +78,7 @@ public class VaultHookManager {
 
         if (permissionHook != null) {
             sm.unregister(Permission.class, permissionHook);
-            permissionHook.getExecutor().close();
+            permissionHook.getExecutor().shutdown();
             permissionHook = null;
         }
 

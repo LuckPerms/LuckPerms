@@ -277,7 +277,7 @@ public interface ContextSet {
      * @since 3.1
      */
     default boolean isSatisfiedBy(@Nonnull ContextSet other) {
-        return isSatisfiedBy(other, true);
+        return this == other || isSatisfiedBy(other, true);
     }
 
     /**
@@ -289,6 +289,10 @@ public interface ContextSet {
      * @since 3.4
      */
     default boolean isSatisfiedBy(@Nonnull ContextSet other, boolean caseSensitive) {
+        if (this == other) {
+            return true;
+        }
+
         Preconditions.checkNotNull(other, "other");
         if (this.isEmpty()) {
             // this is empty, so is therefore always satisfied.

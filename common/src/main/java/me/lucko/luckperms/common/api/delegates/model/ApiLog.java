@@ -40,6 +40,7 @@ import static me.lucko.luckperms.common.api.ApiUtils.checkName;
 @SuppressWarnings("unchecked")
 @AllArgsConstructor
 public class ApiLog implements Log {
+    private static final int ENTRIES_PER_PAGE = 5;
     private final me.lucko.luckperms.common.actionlog.Log handle;
 
     @Override
@@ -54,12 +55,12 @@ public class ApiLog implements Log {
 
     @Override
     public SortedMap<Integer, LogEntry> getRecent(int pageNo) {
-        return (SortedMap) handle.getRecent(pageNo);
+        return (SortedMap) handle.getRecent(pageNo, ENTRIES_PER_PAGE);
     }
 
     @Override
     public int getRecentMaxPages() {
-        return handle.getRecentMaxPages();
+        return handle.getRecentMaxPages(ENTRIES_PER_PAGE);
     }
 
     @Override
@@ -69,12 +70,12 @@ public class ApiLog implements Log {
 
     @Override
     public SortedMap<Integer, LogEntry> getRecent(int pageNo, @NonNull UUID actor) {
-        return (SortedMap) handle.getRecent(pageNo, actor);
+        return (SortedMap) handle.getRecent(pageNo, actor, ENTRIES_PER_PAGE);
     }
 
     @Override
     public int getRecentMaxPages(@NonNull UUID actor) {
-        return handle.getRecentMaxPages(actor);
+        return handle.getRecentMaxPages(actor, ENTRIES_PER_PAGE);
     }
 
     @Override
@@ -84,12 +85,12 @@ public class ApiLog implements Log {
 
     @Override
     public SortedMap<Integer, LogEntry> getUserHistory(int pageNo, @NonNull UUID uuid) {
-        return (SortedMap) handle.getUserHistory(pageNo, uuid);
+        return (SortedMap) handle.getUserHistory(pageNo, uuid, ENTRIES_PER_PAGE);
     }
 
     @Override
     public int getUserHistoryMaxPages(@NonNull UUID uuid) {
-        return handle.getUserHistoryMaxPages(uuid);
+        return handle.getUserHistoryMaxPages(uuid, ENTRIES_PER_PAGE);
     }
 
     @Override
@@ -99,12 +100,12 @@ public class ApiLog implements Log {
 
     @Override
     public SortedMap<Integer, LogEntry> getGroupHistory(int pageNo, @NonNull String name) {
-        return (SortedMap) handle.getGroupHistory(pageNo, checkName(name));
+        return (SortedMap) handle.getGroupHistory(pageNo, checkName(name), ENTRIES_PER_PAGE);
     }
 
     @Override
     public int getGroupHistoryMaxPages(@NonNull String name) {
-        return handle.getGroupHistoryMaxPages(checkName(name));
+        return handle.getGroupHistoryMaxPages(checkName(name), ENTRIES_PER_PAGE);
     }
 
     @Override
@@ -114,12 +115,12 @@ public class ApiLog implements Log {
 
     @Override
     public SortedMap<Integer, LogEntry> getTrackHistory(int pageNo, @NonNull String name) {
-        return (SortedMap) handle.getTrackHistory(pageNo, checkName(name));
+        return (SortedMap) handle.getTrackHistory(pageNo, checkName(name), ENTRIES_PER_PAGE);
     }
 
     @Override
     public int getTrackHistoryMaxPages(@NonNull String name) {
-        return handle.getTrackHistoryMaxPages(checkName(name));
+        return handle.getTrackHistoryMaxPages(checkName(name), ENTRIES_PER_PAGE);
     }
 
     @Override
@@ -129,11 +130,11 @@ public class ApiLog implements Log {
 
     @Override
     public SortedMap<Integer, LogEntry> getSearch(int pageNo, @NonNull String query) {
-        return (SortedMap) handle.getSearch(pageNo, query);
+        return (SortedMap) handle.getSearch(pageNo, query, ENTRIES_PER_PAGE);
     }
 
     @Override
     public int getSearchMaxPages(@NonNull String query) {
-        return handle.getSearchMaxPages(query);
+        return handle.getSearchMaxPages(query, ENTRIES_PER_PAGE);
     }
 }

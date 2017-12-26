@@ -37,11 +37,11 @@ import me.lucko.luckperms.common.bulkupdate.comparisons.ComparisonType;
 import me.lucko.luckperms.common.bulkupdate.constraint.Constraint;
 import me.lucko.luckperms.common.bulkupdate.constraint.QueryField;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -72,11 +72,12 @@ public class BulkUpdateCommand extends SingleCommand {
             }
 
             Message.BULK_UPDATE_STARTING.send(sender);
-            plugin.getStorage().applyBulkUpdate(operation).thenAcceptAsync(b -> {
-                if (b) {
+            plugin.getStorage().applyBulkUpdate(operation).whenCompleteAsync((v, ex) -> {
+                if (ex == null) {
                     plugin.getUpdateTaskBuffer().requestDirectly();
                     Message.BULK_UPDATE_SUCCESS.send(sender);
                 } else {
+                    ex.printStackTrace();
                     Message.BULK_UPDATE_FAILURE.send(sender);
                 }
             }, plugin.getScheduler().async());

@@ -28,8 +28,8 @@ package me.lucko.luckperms.common.backup;
 import lombok.Getter;
 
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.TextUtils;
 
@@ -51,7 +51,7 @@ public abstract class DummySender implements Sender {
     }
 
     public DummySender(LuckPermsPlugin plugin) {
-        this(plugin, Constants.IMPORT_UUID, Constants.IMPORT_NAME);
+        this(plugin, CommandManager.IMPORT_UUID, CommandManager.IMPORT_NAME);
     }
 
     protected abstract void consumeMessage(String s);

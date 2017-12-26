@@ -148,6 +148,11 @@ public enum CommandSpec {
                     Arg.create("context...", false, "the contexts to demote the user in")
             )
     ),
+    USER_CLONE("Clone the user",
+            Arg.list(
+                    Arg.create("user", true, "the name/uuid of the user to clone onto")
+            )
+    ),
 
     GROUP_INFO("Gives info about the group"),
     GROUP_LISTMEMBERS("Show the users/groups who inherit from this group",
@@ -191,7 +196,7 @@ public enum CommandSpec {
     PERMISSION_INFO("Lists the permission nodes the object has",
             Arg.list(
                     Arg.create("page", false, "the page to view"),
-                    Arg.create("filter", false, "the string to filter by")
+                    Arg.create("sort mode", false, "how to sort the entries")
             )
     ),
     PERMISSION_SET("Sets a permission for the object",
@@ -234,7 +239,12 @@ public enum CommandSpec {
             )
     ),
 
-    PARENT_INFO("Lists the groups that this object inherits from"),
+    PARENT_INFO("Lists the groups that this object inherits from",
+            Arg.list(
+                    Arg.create("page", false, "the page to view"),
+                    Arg.create("sort mode", false, "how to sort the entries")
+            )
+    ),
     PARENT_SET("Removes all other groups the object inherits already and adds them to the one given",
             Arg.list(
                     Arg.create("group", true, "the group to set to"),

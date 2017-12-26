@@ -25,11 +25,11 @@
 
 package me.lucko.luckperms.common.commands.impl.track;
 
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -46,7 +46,10 @@ public class ListTracks extends SingleCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        if (!plugin.getStorage().loadAllTracks().join()) {
+        try {
+            plugin.getStorage().loadAllTracks().get();
+        } catch (Exception e) {
+            e.printStackTrace();
             Message.TRACKS_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;
         }

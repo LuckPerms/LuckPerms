@@ -269,7 +269,7 @@ data:
 
     # This setting controls the maximum number of milliseconds that the plugin will wait for a
     # connection from the pool, before timing out.
-    connection-timeout: 15000 # 15 seconds
+    connection-timeout: 5000 # 5 seconds
 
     # This setting allows you to define extra properties for connections.
     properties:

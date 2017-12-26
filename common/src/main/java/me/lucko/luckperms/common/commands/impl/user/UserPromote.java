@@ -30,13 +30,12 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -45,6 +44,7 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
@@ -69,7 +69,7 @@ public class UserPromote extends SubCommand<User> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().loadTrack(trackName).join()) {
+        if (!plugin.getStorage().loadTrack(trackName).join().isPresent()) {
             Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
@@ -116,9 +116,9 @@ public class UserPromote extends SubCommand<User> {
                 return CommandResult.NO_PERMISSION;
             }
 
-            user.setPermission(NodeFactory.newBuilder("group." + first).withExtraContext(context).build());
+            user.setPermission(NodeFactory.buildGroupNode(nextGroup.getId()).withExtraContext(context).build());
 
-            Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFriendlyName(), first, CommandUtils.contextSetToString(context));
+            Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFriendlyName(), nextGroup.getFriendlyName(), CommandUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(user)
                     .action("promote", track.getName(), context)
@@ -149,7 +149,7 @@ public class UserPromote extends SubCommand<User> {
             return CommandResult.STATE_ERROR;
         }
 
-        if (!plugin.getStorage().loadGroup(next).join()) {
+        if (!plugin.getStorage().loadGroup(next).join().isPresent()) {
             Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, next);
             return CommandResult.STATE_ERROR;
         }
@@ -166,15 +166,15 @@ public class UserPromote extends SubCommand<User> {
         }
 
         user.unsetPermission(oldNode);
-        user.setPermission(NodeFactory.newBuilder("group." + nextGroup.getName()).withExtraContext(context).build());
+        user.setPermission(NodeFactory.buildGroupNode(nextGroup.getName()).withExtraContext(context).build());
 
-        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse("default").equalsIgnoreCase(old)) {
+        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(old)) {
             user.getPrimaryGroup().setStoredValue(nextGroup.getName());
         }
 
         Message.USER_PROMOTE_SUCCESS.send(sender, user.getFriendlyName(), track.getName(), old, nextGroup.getFriendlyName(), CommandUtils.contextSetToString(context));
         if (!silent) {
-            Message.EMPTY.send(sender, CommandUtils.listToArrowSep(track.getGroups(), old, nextGroup.getFriendlyName(), false));
+            Message.EMPTY.send(sender, CommandUtils.listToArrowSep(track.getGroups(), old, nextGroup.getName(), false));
         }
 
         ExtendedLogEntry.build().actor(sender).acted(user)

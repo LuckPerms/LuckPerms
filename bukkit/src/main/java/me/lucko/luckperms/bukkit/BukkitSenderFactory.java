@@ -31,8 +31,8 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.compat.BukkitJsonMessageHandler;
 import me.lucko.luckperms.bukkit.compat.ReflectionUtil;
 import me.lucko.luckperms.bukkit.compat.SpigotJsonMessageHandler;
+import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.sender.SenderFactory;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.TextUtils;
 
@@ -60,7 +60,7 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
         if (sender instanceof Player) {
             return sender.getName();
         }
-        return Constants.CONSOLE_NAME;
+        return CommandManager.CONSOLE_NAME;
     }
 
     @Override
@@ -68,14 +68,14 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
         if (sender instanceof Player) {
             return ((Player) sender).getUniqueId();
         }
-        return Constants.CONSOLE_UUID;
+        return CommandManager.CONSOLE_UUID;
     }
 
     @Override
     protected void sendMessage(CommandSender sender, String s) {
         // send sync if command block
         if (sender instanceof BlockCommandSender) {
-            getPlugin().getScheduler().doSync(new BlockMessageAgent(((BlockCommandSender) sender), s));
+            getPlugin().getScheduler().doSync(new BlockMessengerAgent(((BlockCommandSender) sender), s));
             return;
         }
 
@@ -100,7 +100,7 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
         }
 
         // Fallback to legacy format
-        sender.sendMessage(TextUtils.toLegacy(message));
+        sendMessage(sender, TextUtils.toLegacy(message));
     }
 
     @Override
@@ -126,7 +126,7 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
     }
 
     @AllArgsConstructor
-    private static final class BlockMessageAgent implements Runnable {
+    private static final class BlockMessengerAgent implements Runnable {
         private final BlockCommandSender block;
         private final String message;
 

@@ -27,11 +27,11 @@ package me.lucko.luckperms.bungee.migration;
 
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.logging.ProgressLogger;
@@ -155,7 +155,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         // Migrate any parent groups
         for (String inherit : parents) {
             if (inherit.isEmpty()) continue;
-            holder.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(inherit)));
+            holder.setPermission(NodeFactory.buildGroupNode(MigrationUtils.standardizeName(inherit)).build());
         }
 
         // Migrate prefix and suffix
@@ -163,10 +163,10 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         String suffix = entity.getSuffix();
 
         if (prefix != null && !prefix.isEmpty()) {
-            holder.setPermission(NodeFactory.makePrefixNode(weight, prefix).build());
+            holder.setPermission(NodeFactory.buildPrefixNode(weight, prefix).build());
         }
         if (suffix != null && !suffix.isEmpty()) {
-            holder.setPermission(NodeFactory.makeSuffixNode(weight, suffix).build());
+            holder.setPermission(NodeFactory.buildSuffixNode(weight, suffix).build());
         }
     }
 }

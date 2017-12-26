@@ -42,6 +42,10 @@ public final class NonClosableConnection implements Connection {
 
     }
 
+    public void shutdown() throws SQLException {
+        delegate.close();
+    }
+
     private interface Exclude {
         void close() throws SQLException;
     }

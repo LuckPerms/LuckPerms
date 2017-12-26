@@ -53,6 +53,7 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.LegacyNodeFactory;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.node.NodeHeldPermission;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -69,6 +70,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -86,12 +88,6 @@ public class MongoDao extends AbstractDao {
         super(plugin, "MongoDB");
         this.configuration = configuration;
         this.prefix = prefix;
-    }
-
-    private boolean reportException(Exception ex) {
-        plugin.getLog().warn("Exception thrown whilst performing i/o: ");
-        ex.printStackTrace();
-        return false;
     }
 
     @Override
@@ -117,7 +113,6 @@ public class MongoDao extends AbstractDao {
         }
 
         database = mongoClient.getDatabase(configuration.getDatabase());
-        setAcceptingLogins(true);
     }
 
     @Override
@@ -151,123 +146,107 @@ public class MongoDao extends AbstractDao {
     }
 
     @Override
-    public boolean logAction(LogEntry entry) {
-        try {
-            MongoCollection<Document> c = database.getCollection(prefix + "action");
-            Document doc = new Document()
-                    .append("timestamp", entry.getTimestamp())
-                    .append("actor", entry.getActor())
-                    .append("actorName", entry.getActorName())
-                    .append("type", Character.toString(entry.getType().getCode()))
-                    .append("actedName", entry.getActedName())
-                    .append("action", entry.getAction());
+    public void logAction(LogEntry entry) {
+        MongoCollection<Document> c = database.getCollection(prefix + "action");
+        Document doc = new Document()
+                .append("timestamp", entry.getTimestamp())
+                .append("actor", entry.getActor())
+                .append("actorName", entry.getActorName())
+                .append("type", Character.toString(entry.getType().getCode()))
+                .append("actedName", entry.getActedName())
+                .append("action", entry.getAction());
 
-            if (entry.getActed().isPresent()) {
-                doc.append("acted", entry.getActed().get());
-            }
-
-            c.insertOne(doc);
-        } catch (Exception e) {
-            return reportException(e);
+        if (entry.getActed().isPresent()) {
+            doc.append("acted", entry.getActed().get());
         }
-        return true;
+
+        c.insertOne(doc);
     }
 
     @Override
     public Log getLog() {
         Log.Builder log = Log.builder();
-        try {
-            MongoCollection<Document> c = database.getCollection(prefix + "action");
-            try (MongoCursor<Document> cursor = c.find().iterator()) {
-                while (cursor.hasNext()) {
-                    Document d = cursor.next();
+        MongoCollection<Document> c = database.getCollection(prefix + "action");
+        try (MongoCursor<Document> cursor = c.find().iterator()) {
+            while (cursor.hasNext()) {
+                Document d = cursor.next();
 
-                    UUID actedUuid = null;
-                    if (d.containsKey("acted")) {
-                        actedUuid = d.get("acted", UUID.class);
-                    }
-
-                    ExtendedLogEntry e = ExtendedLogEntry.build()
-                            .timestamp(d.getLong("timestamp"))
-                            .actor(d.get("actor", UUID.class))
-                            .actorName(d.getString("actorName"))
-                            .type(LogEntry.Type.valueOf(d.getString("type").toCharArray()[0]))
-                            .acted(actedUuid)
-                            .actedName(d.getString("actedName"))
-                            .action(d.getString("action"))
-                            .build();
-
-                    log.add(e);
+                UUID actedUuid = null;
+                if (d.containsKey("acted")) {
+                    actedUuid = d.get("acted", UUID.class);
                 }
+
+                ExtendedLogEntry e = ExtendedLogEntry.build()
+                        .timestamp(d.getLong("timestamp"))
+                        .actor(d.get("actor", UUID.class))
+                        .actorName(d.getString("actorName"))
+                        .type(LogEntry.Type.valueOf(d.getString("type").toCharArray()[0]))
+                        .acted(actedUuid)
+                        .actedName(d.getString("actedName"))
+                        .action(d.getString("action"))
+                        .build();
+
+                log.add(e);
             }
-        } catch (Exception e) {
-            reportException(e);
-            return null;
         }
         return log.build();
     }
 
     @Override
-    public boolean applyBulkUpdate(BulkUpdate bulkUpdate) {
-        try {
-            if (bulkUpdate.getDataType().isIncludingUsers()) {
-                MongoCollection<Document> c = database.getCollection(prefix + "users");
-                try (MongoCursor<Document> cursor = c.find().iterator()) {
-                    while (cursor.hasNext()) {
-                        Document d = cursor.next();
+    public void applyBulkUpdate(BulkUpdate bulkUpdate) {
+        if (bulkUpdate.getDataType().isIncludingUsers()) {
+            MongoCollection<Document> c = database.getCollection(prefix + "users");
+            try (MongoCursor<Document> cursor = c.find().iterator()) {
+                while (cursor.hasNext()) {
+                    Document d = cursor.next();
 
-                        UUID uuid = d.get("_id", UUID.class);
-                        Set<NodeModel> nodes = new HashSet<>(nodesFromDoc(d));
-                        Set<NodeModel> results = nodes.stream()
-                                .map(bulkUpdate::apply)
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toSet());
+                    UUID uuid = d.get("_id", UUID.class);
+                    Set<NodeModel> nodes = new HashSet<>(nodesFromDoc(d));
+                    Set<NodeModel> results = nodes.stream()
+                            .map(bulkUpdate::apply)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toSet());
 
-                        if (!nodes.equals(results)) {
-                            List<Document> newNodes = results.stream()
-                                    .map(MongoDao::nodeToDoc)
-                                    .collect(Collectors.toList());
+                    if (!nodes.equals(results)) {
+                        List<Document> newNodes = results.stream()
+                                .map(MongoDao::nodeToDoc)
+                                .collect(Collectors.toList());
 
-                            d.append("permissions", newNodes).remove("perms");
-                            c.replaceOne(new Document("_id", uuid), d);
-                        }
+                        d.append("permissions", newNodes).remove("perms");
+                        c.replaceOne(new Document("_id", uuid), d);
                     }
                 }
             }
-
-            if (bulkUpdate.getDataType().isIncludingGroups()) {
-                MongoCollection<Document> c = database.getCollection(prefix + "groups");
-                try (MongoCursor<Document> cursor = c.find().iterator()) {
-                    while (cursor.hasNext()) {
-                        Document d = cursor.next();
-
-                        String holder = d.getString("_id");
-                        Set<NodeModel> nodes = new HashSet<>(nodesFromDoc(d));
-                        Set<NodeModel> results = nodes.stream()
-                                .map(bulkUpdate::apply)
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toSet());
-
-                        if (!nodes.equals(results)) {
-                            List<Document> newNodes = results.stream()
-                                    .map(MongoDao::nodeToDoc)
-                                    .collect(Collectors.toList());
-
-                            d.append("permissions", newNodes).remove("perms");
-                            c.replaceOne(new Document("_id", holder), d);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            reportException(e);
-            return false;
         }
-        return true;
+
+        if (bulkUpdate.getDataType().isIncludingGroups()) {
+            MongoCollection<Document> c = database.getCollection(prefix + "groups");
+            try (MongoCursor<Document> cursor = c.find().iterator()) {
+                while (cursor.hasNext()) {
+                    Document d = cursor.next();
+
+                    String holder = d.getString("_id");
+                    Set<NodeModel> nodes = new HashSet<>(nodesFromDoc(d));
+                    Set<NodeModel> results = nodes.stream()
+                            .map(bulkUpdate::apply)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toSet());
+
+                    if (!nodes.equals(results)) {
+                        List<Document> newNodes = results.stream()
+                                .map(MongoDao::nodeToDoc)
+                                .collect(Collectors.toList());
+
+                        d.append("permissions", newNodes).remove("perms");
+                        c.replaceOne(new Document("_id", holder), d);
+                    }
+                }
+            }
+        }
     }
 
     @Override
-    public boolean loadUser(UUID uuid, String username) {
+    public User loadUser(UUID uuid, String username) {
         User user = plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
         user.getIoLock().lock();
         try {
@@ -300,27 +279,23 @@ public class MongoDao extends AbstractDao {
                     }
                 }
             }
-        } catch (Exception e) {
-            return reportException(e);
         } finally {
             user.getIoLock().unlock();
         }
         user.getRefreshBuffer().requestDirectly();
-        return true;
+        return user;
     }
 
     @Override
-    public boolean saveUser(User user) {
+    public void saveUser(User user) {
         user.getIoLock().lock();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "users");
             if (!GenericUserManager.shouldSave(user)) {
-                return c.deleteOne(new Document("_id", user.getUuid())).wasAcknowledged();
+                c.deleteOne(new Document("_id", user.getUuid()));
             } else {
-                return c.replaceOne(new Document("_id", user.getUuid()), userToDoc(user), new UpdateOptions().upsert(true)).wasAcknowledged();
+                c.replaceOne(new Document("_id", user.getUuid()), userToDoc(user), new UpdateOptions().upsert(true));
             }
-        } catch (Exception e) {
-            return reportException(e);
         } finally {
             user.getIoLock().unlock();
         }
@@ -329,17 +304,12 @@ public class MongoDao extends AbstractDao {
     @Override
     public Set<UUID> getUniqueUsers() {
         Set<UUID> uuids = new HashSet<>();
-        try {
-            MongoCollection<Document> c = database.getCollection(prefix + "users");
-            try (MongoCursor<Document> cursor = c.find().iterator()) {
-                while (cursor.hasNext()) {
-                    Document d = cursor.next();
-                    uuids.add(d.get("_id", UUID.class));
-                }
+        MongoCollection<Document> c = database.getCollection(prefix + "users");
+        try (MongoCursor<Document> cursor = c.find().iterator()) {
+            while (cursor.hasNext()) {
+                Document d = cursor.next();
+                uuids.add(d.get("_id", UUID.class));
             }
-        } catch (Exception e) {
-            reportException(e);
-            return null;
         }
         return uuids;
     }
@@ -347,31 +317,26 @@ public class MongoDao extends AbstractDao {
     @Override
     public List<HeldPermission<UUID>> getUsersWithPermission(String permission) {
         ImmutableList.Builder<HeldPermission<UUID>> held = ImmutableList.builder();
-        try {
-            MongoCollection<Document> c = database.getCollection(prefix + "users");
-            try (MongoCursor<Document> cursor = c.find().iterator()) {
-                while (cursor.hasNext()) {
-                    Document d = cursor.next();
-                    UUID holder = d.get("_id", UUID.class);
+        MongoCollection<Document> c = database.getCollection(prefix + "users");
+        try (MongoCursor<Document> cursor = c.find().iterator()) {
+            while (cursor.hasNext()) {
+                Document d = cursor.next();
+                UUID holder = d.get("_id", UUID.class);
 
-                    Set<NodeModel> nodes = new HashSet<>(nodesFromDoc(d));
-                    for (NodeModel e : nodes) {
-                        if (!e.getPermission().equalsIgnoreCase(permission)) {
-                            continue;
-                        }
-                        held.add(NodeHeldPermission.of(holder, e));
+                Set<NodeModel> nodes = new HashSet<>(nodesFromDoc(d));
+                for (NodeModel e : nodes) {
+                    if (!e.getPermission().equalsIgnoreCase(permission)) {
+                        continue;
                     }
+                    held.add(NodeHeldPermission.of(holder, e));
                 }
             }
-        } catch (Exception e) {
-            reportException(e);
-            return null;
         }
         return held.build();
     }
 
     @Override
-    public boolean createAndLoadGroup(String name) {
+    public Group createAndLoadGroup(String name) {
         Group group = plugin.getGroupManager().getOrMake(name);
         group.getIoLock().lock();
         try {
@@ -385,85 +350,92 @@ public class MongoDao extends AbstractDao {
                     c.insertOne(groupToDoc(group));
                 }
             }
-        } catch (Exception e) {
-            return reportException(e);
         } finally {
             group.getIoLock().unlock();
         }
         group.getRefreshBuffer().requestDirectly();
-        return true;
+        return group;
     }
 
     @Override
-    public boolean loadGroup(String name) {
-        Group group = plugin.getGroupManager().getOrMake(name);
-        group.getIoLock().lock();
+    public Optional<Group> loadGroup(String name) {
+        Group group = plugin.getGroupManager().getIfLoaded(name);
+        if (group != null) {
+            group.getIoLock().lock();
+        }
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "groups");
-            try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
+            try (MongoCursor<Document> cursor = c.find(new Document("_id", name)).iterator()) {
                 if (!cursor.hasNext()) {
-                    return false;
+                    return Optional.empty();
+                }
+
+                if (group == null) {
+                    group = plugin.getGroupManager().getOrMake(name);
+                    group.getIoLock().lock();
                 }
 
                 Document d = cursor.next();
                 Set<Node> nodes = nodesFromDoc(d).stream().map(NodeModel::toNode).collect(Collectors.toSet());
                 group.setEnduringNodes(nodes);
             }
-        } catch (Exception e) {
-            return reportException(e);
         } finally {
-            group.getIoLock().unlock();
+            if (group != null) {
+                group.getIoLock().unlock();
+            }
         }
         group.getRefreshBuffer().requestDirectly();
-        return true;
+        return Optional.of(group);
     }
 
     @Override
-    public boolean loadAllGroups() {
+    public void loadAllGroups() {
         List<String> groups = new ArrayList<>();
-        try {
-            MongoCollection<Document> c = database.getCollection(prefix + "groups");
-            try (MongoCursor<Document> cursor = c.find().iterator()) {
-                while (cursor.hasNext()) {
-                    String name = cursor.next().getString("_id");
-                    groups.add(name);
-                }
+        MongoCollection<Document> c = database.getCollection(prefix + "groups");
+        try (MongoCursor<Document> cursor = c.find().iterator()) {
+            while (cursor.hasNext()) {
+                String name = cursor.next().getString("_id");
+                groups.add(name);
             }
-        } catch (Exception e) {
-            reportException(e);
-            return false;
         }
 
-        groups.forEach(this::loadGroup);
+        boolean success = true;
+        for (String g : groups) {
+            try {
+                loadGroup(g);
+            } catch (Exception e) {
+                e.printStackTrace();
+                success = false;
+            }
+        }
+
+        if (!success) {
+            throw new RuntimeException("Exception occurred whilst loading a group");
+        }
 
         GroupManager gm = plugin.getGroupManager();
         gm.getAll().values().stream()
                 .filter(g -> !groups.contains(g.getName()))
                 .forEach(gm::unload);
-        return true;
     }
 
     @Override
-    public boolean saveGroup(Group group) {
+    public void saveGroup(Group group) {
         group.getIoLock().lock();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "groups");
-            return c.replaceOne(new Document("_id", group.getName()), groupToDoc(group), new UpdateOptions().upsert(true)).wasAcknowledged();
-        } catch (Exception e) {
-            return reportException(e);
+            c.replaceOne(new Document("_id", group.getName()), groupToDoc(group), new UpdateOptions().upsert(true));
         } finally {
             group.getIoLock().unlock();
         }
     }
 
     @Override
-    public boolean deleteGroup(Group group) {
+    public void deleteGroup(Group group) {
         group.getIoLock().lock();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "groups");
-            return c.deleteOne(new Document("_id", group.getName())).wasAcknowledged();
-        } catch (Exception e) {
-            return reportException(e);
+            c.deleteOne(new Document("_id", group.getName()));
         } finally {
             group.getIoLock().unlock();
         }
@@ -472,31 +444,26 @@ public class MongoDao extends AbstractDao {
     @Override
     public List<HeldPermission<String>> getGroupsWithPermission(String permission) {
         ImmutableList.Builder<HeldPermission<String>> held = ImmutableList.builder();
-        try {
-            MongoCollection<Document> c = database.getCollection(prefix + "groups");
-            try (MongoCursor<Document> cursor = c.find().iterator()) {
-                while (cursor.hasNext()) {
-                    Document d = cursor.next();
+        MongoCollection<Document> c = database.getCollection(prefix + "groups");
+        try (MongoCursor<Document> cursor = c.find().iterator()) {
+            while (cursor.hasNext()) {
+                Document d = cursor.next();
 
-                    String holder = d.getString("_id");
-                    Set<NodeModel> nodes = new HashSet<>(nodesFromDoc(d));
-                    for (NodeModel e : nodes) {
-                        if (!e.getPermission().equalsIgnoreCase(permission)) {
-                            continue;
-                        }
-                        held.add(NodeHeldPermission.of(holder, e));
+                String holder = d.getString("_id");
+                Set<NodeModel> nodes = new HashSet<>(nodesFromDoc(d));
+                for (NodeModel e : nodes) {
+                    if (!e.getPermission().equalsIgnoreCase(permission)) {
+                        continue;
                     }
+                    held.add(NodeHeldPermission.of(holder, e));
                 }
             }
-        } catch (Exception e) {
-            reportException(e);
-            return null;
         }
         return held.build();
     }
 
     @Override
-    public boolean createAndLoadTrack(String name) {
+    public Track createAndLoadTrack(String name) {
         Track track = plugin.getTrackManager().getOrMake(name);
         track.getIoLock().lock();
         try {
@@ -510,128 +477,122 @@ public class MongoDao extends AbstractDao {
                     track.setGroups((List<String>) d.get("groups"));
                 }
             }
-        } catch (Exception e) {
-            return reportException(e);
         } finally {
             track.getIoLock().unlock();
         }
-        return true;
+        return track;
     }
 
     @Override
-    public boolean loadTrack(String name) {
-        Track track = plugin.getTrackManager().getOrMake(name);
-        track.getIoLock().lock();
+    public Optional<Track> loadTrack(String name) {
+        Track track = plugin.getTrackManager().getIfLoaded(name);
+        if (track != null) {
+            track.getIoLock().lock();
+        }
+
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "tracks");
-            try (MongoCursor<Document> cursor = c.find(new Document("_id", track.getName())).iterator()) {
-                if (cursor.hasNext()) {
-                    Document d = cursor.next();
-                    //noinspection unchecked
-                    track.setGroups((List<String>) d.get("groups"));
-                    return true;
+            try (MongoCursor<Document> cursor = c.find(new Document("_id", name)).iterator()) {
+                if (!cursor.hasNext()) {
+                    return Optional.empty();
                 }
-                return false;
+
+                if (track == null) {
+                    track = plugin.getTrackManager().getOrMake(name);
+                    track.getIoLock().lock();
+                }
+
+                Document d = cursor.next();
+                //noinspection unchecked
+                track.setGroups((List<String>) d.get("groups"));
             }
-        } catch (Exception e) {
-            return reportException(e);
         } finally {
-            track.getIoLock().unlock();
+            if (track != null) {
+                track.getIoLock().unlock();
+            }
         }
+        return Optional.of(track);
     }
 
     @Override
-    public boolean loadAllTracks() {
+    public void loadAllTracks() {
         List<String> tracks = new ArrayList<>();
-        try {
-            MongoCollection<Document> c = database.getCollection(prefix + "tracks");
-            try (MongoCursor<Document> cursor = c.find().iterator()) {
-                while (cursor.hasNext()) {
-                    String name = cursor.next().getString("_id");
-                    tracks.add(name);
-                }
+        MongoCollection<Document> c = database.getCollection(prefix + "tracks");
+        try (MongoCursor<Document> cursor = c.find().iterator()) {
+            while (cursor.hasNext()) {
+                String name = cursor.next().getString("_id");
+                tracks.add(name);
             }
-        } catch (Exception e) {
-            reportException(e);
-            return false;
         }
 
-        tracks.forEach(this::loadTrack);
+        boolean success = true;
+        for (String t : tracks) {
+            try {
+                loadTrack(t);
+            } catch (Exception e) {
+                e.printStackTrace();
+                success = false;
+            }
+        }
+
+        if (!success) {
+            throw new RuntimeException("Exception occurred whilst loading a track");
+        }
 
         TrackManager tm = plugin.getTrackManager();
         tm.getAll().values().stream()
                 .filter(t -> !tracks.contains(t.getName()))
                 .forEach(tm::unload);
-        return true;
     }
 
     @Override
-    public boolean saveTrack(Track track) {
+    public void saveTrack(Track track) {
         track.getIoLock().lock();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "tracks");
-            return c.replaceOne(new Document("_id", track.getName()), trackToDoc(track)).wasAcknowledged();
-        } catch (Exception e) {
-            return reportException(e);
+            c.replaceOne(new Document("_id", track.getName()), trackToDoc(track));
         } finally {
             track.getIoLock().unlock();
         }
     }
 
     @Override
-    public boolean deleteTrack(Track track) {
+    public void deleteTrack(Track track) {
         track.getIoLock().lock();
         try {
             MongoCollection<Document> c = database.getCollection(prefix + "tracks");
-            return c.deleteOne(new Document("_id", track.getName())).wasAcknowledged();
-        } catch (Exception e) {
-            return reportException(e);
+            c.deleteOne(new Document("_id", track.getName()));
         } finally {
             track.getIoLock().unlock();
         }
     }
 
     @Override
-    public boolean saveUUIDData(UUID uuid, String username) {
-        try {
-            MongoCollection<Document> c = database.getCollection(prefix + "uuid");
-            c.replaceOne(new Document("_id", uuid), new Document("_id", uuid).append("name", username.toLowerCase()), new UpdateOptions().upsert(true));
-        } catch (Exception e) {
-            return reportException(e);
-        }
-        return true;
+    public void saveUUIDData(UUID uuid, String username) {
+        MongoCollection<Document> c = database.getCollection(prefix + "uuid");
+        c.replaceOne(new Document("_id", uuid), new Document("_id", uuid).append("name", username.toLowerCase()), new UpdateOptions().upsert(true));
     }
 
     @Override
     public UUID getUUID(String username) {
-        try {
-            MongoCollection<Document> c = database.getCollection(prefix + "uuid");
-            try (MongoCursor<Document> cursor = c.find(new Document("name", username.toLowerCase())).iterator()) {
-                if (cursor.hasNext()) {
-                    return cursor.next().get("_id", UUID.class);
-                }
+        MongoCollection<Document> c = database.getCollection(prefix + "uuid");
+        try (MongoCursor<Document> cursor = c.find(new Document("name", username.toLowerCase())).iterator()) {
+            if (cursor.hasNext()) {
+                return cursor.next().get("_id", UUID.class);
             }
-            return null;
-        } catch (Exception e) {
-            reportException(e);
-            return null;
         }
+        return null;
     }
 
     @Override
     public String getName(UUID uuid) {
-        try {
-            MongoCollection<Document> c = database.getCollection(prefix + "uuid");
-            try (MongoCursor<Document> cursor = c.find(new Document("_id", uuid)).iterator()) {
-                if (cursor.hasNext()) {
-                    return cursor.next().get("name", String.class);
-                }
+        MongoCollection<Document> c = database.getCollection(prefix + "uuid");
+        try (MongoCursor<Document> cursor = c.find(new Document("_id", uuid)).iterator()) {
+            if (cursor.hasNext()) {
+                return cursor.next().get("name", String.class);
             }
-            return null;
-        } catch (Exception e) {
-            reportException(e);
-            return null;
         }
+        return null;
     }
 
     private static Document userToDoc(User user) {
@@ -642,7 +603,7 @@ public class MongoDao extends AbstractDao {
 
         return new Document("_id", user.getUuid())
                 .append("name", user.getName().orElse("null"))
-                .append("primaryGroup", user.getPrimaryGroup().getStoredValue().orElse("default"))
+                .append("primaryGroup", user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME))
                 .append("permissions", nodes);
     }
 

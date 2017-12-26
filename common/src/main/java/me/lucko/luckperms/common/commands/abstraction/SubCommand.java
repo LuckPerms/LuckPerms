@@ -30,10 +30,10 @@ import lombok.Getter;
 import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.LocalizedSpec;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
@@ -173,7 +173,13 @@ public abstract class SubCommand<T> extends Command<T, Void> {
     }
 
     public static void save(User user, Sender sender, LuckPermsPlugin plugin) {
-        boolean success = plugin.getStorage().noBuffer().saveUser(user).join();
+        try {
+            plugin.getStorage().noBuffer().saveUser(user).get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Message.USER_SAVE_ERROR.send(sender, user.getFriendlyName());
+            return;
+        }
 
         if (sender.isImport()) {
             user.getRefreshBuffer().request();
@@ -187,14 +193,16 @@ public abstract class SubCommand<T> extends Command<T, Void> {
                 messagingService.get().getUpdateBuffer().request();
             }
         }
-
-        if (!success) {
-            Message.USER_SAVE_ERROR.send(sender, user.getFriendlyName());
-        }
     }
 
     public static void save(Group group, Sender sender, LuckPermsPlugin plugin) {
-        boolean success = plugin.getStorage().noBuffer().saveGroup(group).join();
+        try {
+            plugin.getStorage().noBuffer().saveGroup(group).get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Message.GROUP_SAVE_ERROR.send(sender, group.getFriendlyName());
+            return;
+        }
 
         if (sender.isImport()) {
             plugin.getUpdateTaskBuffer().request();
@@ -207,15 +215,17 @@ public abstract class SubCommand<T> extends Command<T, Void> {
             if (messagingService.isPresent() && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
                 messagingService.get().getUpdateBuffer().request();
             }
-        }
-
-        if (!success) {
-            Message.GROUP_SAVE_ERROR.send(sender, group.getFriendlyName());
         }
     }
 
     public static void save(Track track, Sender sender, LuckPermsPlugin plugin) {
-        boolean success = plugin.getStorage().noBuffer().saveTrack(track).join();
+        try {
+            plugin.getStorage().noBuffer().saveTrack(track).get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Message.TRACK_SAVE_ERROR.send(sender, track.getName());
+            return;
+        }
 
         if (sender.isImport()) {
             plugin.getUpdateTaskBuffer().request();
@@ -228,10 +238,6 @@ public abstract class SubCommand<T> extends Command<T, Void> {
             if (messagingService.isPresent() && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
                 messagingService.get().getUpdateBuffer().request();
             }
-        }
-
-        if (!success) {
-            Message.TRACK_SAVE_ERROR.send(sender, track.getName());
         }
     }
 }

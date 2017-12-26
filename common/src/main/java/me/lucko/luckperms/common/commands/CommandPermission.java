@@ -23,19 +23,19 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.constants;
+package me.lucko.luckperms.common.commands;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import me.lucko.luckperms.common.commands.sender.Sender;
 
-import static me.lucko.luckperms.common.constants.CommandPermission.Type.GROUP;
-import static me.lucko.luckperms.common.constants.CommandPermission.Type.LOG;
-import static me.lucko.luckperms.common.constants.CommandPermission.Type.NONE;
-import static me.lucko.luckperms.common.constants.CommandPermission.Type.SPONGE;
-import static me.lucko.luckperms.common.constants.CommandPermission.Type.TRACK;
-import static me.lucko.luckperms.common.constants.CommandPermission.Type.USER;
+import static me.lucko.luckperms.common.commands.CommandPermission.Type.GROUP;
+import static me.lucko.luckperms.common.commands.CommandPermission.Type.LOG;
+import static me.lucko.luckperms.common.commands.CommandPermission.Type.NONE;
+import static me.lucko.luckperms.common.commands.CommandPermission.Type.SPONGE;
+import static me.lucko.luckperms.common.commands.CommandPermission.Type.TRACK;
+import static me.lucko.luckperms.common.commands.CommandPermission.Type.USER;
 
 /**
  * An enumeration of the permissions required to execute built in LuckPerms commands.
@@ -100,6 +100,7 @@ public enum CommandPermission {
     USER_PROMOTE("promote", USER),
     USER_DEMOTE("demote", USER),
     USER_CLEAR("clear", USER),
+    USER_CLONE("clone", USER),
 
     GROUP_INFO("info", GROUP),
     GROUP_PERM_INFO("permission.info", GROUP),
@@ -173,7 +174,7 @@ public enum CommandPermission {
     private final String node;
 
     @Getter
-    private Type type;
+    private final Type type;
 
     CommandPermission(String node, Type type) {
         this.type = type;

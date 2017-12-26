@@ -25,12 +25,12 @@
 
 package me.lucko.luckperms.common.commands.impl.misc;
 
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -55,7 +55,7 @@ public class InfoCommand extends SingleCommand {
         Message.INFO_TOP.send(sender,
                 plugin.getVersion(),
                 plugin.getServerType().getFriendlyName(),
-                plugin.getServerName(),
+                plugin.getServerBrand(),
                 plugin.getServerVersion()
         );
 
@@ -72,7 +72,7 @@ public class InfoCommand extends SingleCommand {
                 plugin.getContextManager().getStaticContextString().orElse("None"),
                 plugin.getPlayerCount(),
                 plugin.getUniqueConnections().size(),
-                DateUtil.formatTimeShort((System.currentTimeMillis() - plugin.getStartTime()) / 1000L),
+                DateUtil.formatTimeBrief((System.currentTimeMillis() - plugin.getStartTime()) / 1000L),
                 plugin.getUserManager().getAll().size(),
                 plugin.getGroupManager().getAll().size(),
                 plugin.getTrackManager().getAll().size(),

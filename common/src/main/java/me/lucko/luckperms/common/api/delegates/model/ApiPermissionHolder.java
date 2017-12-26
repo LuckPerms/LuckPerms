@@ -54,6 +54,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 public class ApiPermissionHolder implements PermissionHolder {
@@ -66,7 +67,7 @@ public class ApiPermissionHolder implements PermissionHolder {
 
     @Override
     public String getFriendlyName() {
-        if (handle instanceof Group) {
+        if (handle.getType().isGroup()) {
             Group group = (Group) this.handle;
             return group.getDisplayName().orElse(group.getName());
         }
@@ -179,15 +180,15 @@ public class ApiPermissionHolder implements PermissionHolder {
     }
 
     @Override
-    public void clearMatching(Predicate<Node> test) {
+    public void clearMatching(@NonNull Predicate<Node> test) {
         handle.removeIf(test);
-        if (handle instanceof User) {
+        if (handle.getType().isUser()) {
             handle.getPlugin().getUserManager().giveDefaultIfNeeded((User) handle, false);
         }
     }
 
     @Override
-    public void clearMatchingTransient(Predicate<Node> test) {
+    public void clearMatchingTransient(@NonNull Predicate<Node> test) {
         handle.removeIfTransient(test);
     }
 
@@ -227,11 +228,6 @@ public class ApiPermissionHolder implements PermissionHolder {
     }
 
     @Override
-    public Set<Node> getTemporaryPermissionNodes() {
-        return handle.getTemporaryNodes();
-    }
-
-    @Override
     public List<LocalizedNode> resolveInheritances(Contexts contexts) {
         return handle.resolveInheritances(contexts);
     }
@@ -243,7 +239,12 @@ public class ApiPermissionHolder implements PermissionHolder {
 
     @Override
     public Set<Node> getPermanentPermissionNodes() {
-        return handle.getPermanentNodes();
+        return handle.getOwnNodes().stream().filter(Node::isPermanent).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<Node> getTemporaryPermissionNodes() {
+        return handle.getOwnNodes().stream().filter(Node::isPrefix).collect(Collectors.toSet());
     }
 
     @Override

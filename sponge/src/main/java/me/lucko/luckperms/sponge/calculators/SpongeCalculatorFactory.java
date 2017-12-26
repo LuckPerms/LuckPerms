@@ -38,9 +38,11 @@ import me.lucko.luckperms.common.processors.MapProcessor;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
 import me.lucko.luckperms.common.processors.RegexProcessor;
 import me.lucko.luckperms.common.processors.WildcardProcessor;
+import me.lucko.luckperms.common.references.HolderType;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
-import me.lucko.luckperms.sponge.processors.DefaultsProcessor;
+import me.lucko.luckperms.sponge.processors.GroupDefaultsProcessor;
 import me.lucko.luckperms.sponge.processors.SpongeWildcardProcessor;
+import me.lucko.luckperms.sponge.processors.UserDefaultsProcessor;
 
 import java.util.List;
 
@@ -67,7 +69,11 @@ public class SpongeCalculatorFactory extends AbstractCalculatorFactory {
         }
 
         if (plugin.getConfiguration().get(ConfigKeys.APPLY_SPONGE_DEFAULT_SUBJECTS)) {
-            processors.add(new DefaultsProcessor(plugin.getService(), contexts.getContexts().makeImmutable()));
+            if (metadata.getHolderType() == HolderType.USER) {
+                processors.add(new UserDefaultsProcessor(plugin.getService(), contexts.getContexts().makeImmutable()));
+            } else if (metadata.getHolderType() == HolderType.GROUP) {
+                processors.add(new GroupDefaultsProcessor(plugin.getService(), contexts.getContexts().makeImmutable()));
+            }
         }
 
         return registerCalculator(new PermissionCalculator(plugin, metadata, processors.build()));

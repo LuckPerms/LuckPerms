@@ -40,7 +40,7 @@ public class MetaComparator implements Comparator<Map.Entry<Integer, LocalizedNo
         if (result != 0) {
             return result;
         }
-        return NodeWithContextComparator.get().compare(o1.getValue(), o2.getValue());
+        return NodeWithContextComparator.normal().compare(o1.getValue(), o2.getValue());
     }
 
 }

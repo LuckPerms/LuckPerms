@@ -29,10 +29,10 @@ import lombok.Getter;
 
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.LocalizedSpec;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -118,13 +118,13 @@ public abstract class SharedSubCommand {
     }
 
     public static void save(PermissionHolder holder, Sender sender, LuckPermsPlugin plugin) {
-        if (holder instanceof User) {
+        if (holder.getType().isUser()) {
             User user = ((User) holder);
             SubCommand.save(user, sender, plugin);
             return;
         }
 
-        if (holder instanceof Group) {
+        if (holder.getType().isGroup()) {
             Group group = ((Group) holder);
             SubCommand.save(group, sender, plugin);
             return;

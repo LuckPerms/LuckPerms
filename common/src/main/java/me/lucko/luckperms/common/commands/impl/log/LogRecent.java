@@ -28,17 +28,17 @@ package me.lucko.luckperms.common.commands.impl.log;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -48,6 +48,8 @@ import java.util.SortedMap;
 import java.util.UUID;
 
 public class LogRecent extends SubCommand<Log> {
+    private static final int ENTRIES_PER_PAGE = 10;
+    
     public LogRecent(LocaleManager locale) {
         super(CommandSpec.LOG_RECENT.spec(locale), "recent", CommandPermission.LOG_RECENT, Predicates.notInRange(0, 2));
     }
@@ -56,7 +58,7 @@ public class LogRecent extends SubCommand<Log> {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) throws CommandException {
         if (args.size() == 0) {
             // No page or user
-            return showLog(log.getRecentMaxPages(), null, sender, log);
+            return showLog(log.getRecentMaxPages(ENTRIES_PER_PAGE), null, sender, log);
         }
 
         if (args.size() == 1) {
@@ -102,7 +104,7 @@ public class LogRecent extends SubCommand<Log> {
 
         if (args.size() != 2) {
             // Just user
-            return showLog(log.getRecentMaxPages(uuid), uuid, sender, log);
+            return showLog(log.getRecentMaxPages(uuid, ENTRIES_PER_PAGE), uuid, sender, log);
         } else {
             try {
                 int p = Integer.parseInt(args.get(1));
@@ -116,7 +118,7 @@ public class LogRecent extends SubCommand<Log> {
     }
 
     private static CommandResult showLog(int page, UUID filter, Sender sender, Log log) {
-        int maxPage = (filter != null) ? log.getRecentMaxPages(filter) : log.getRecentMaxPages();
+        int maxPage = (filter != null) ? log.getRecentMaxPages(filter, ENTRIES_PER_PAGE) : log.getRecentMaxPages(ENTRIES_PER_PAGE);
         if (maxPage == 0) {
             Message.LOG_NO_ENTRIES.send(sender);
             return CommandResult.STATE_ERROR;
@@ -127,18 +129,28 @@ public class LogRecent extends SubCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        SortedMap<Integer, ExtendedLogEntry> entries = (filter != null) ? log.getRecent(page, filter) : log.getRecent(page);
+        SortedMap<Integer, ExtendedLogEntry> entries = (filter != null) ? log.getRecent(page, filter, ENTRIES_PER_PAGE) : log.getRecent(page, ENTRIES_PER_PAGE);
         if (filter != null) {
             String name = entries.values().stream().findAny().get().getActorName();
+            if (name.contains("@")) {
+                name = name.split("@")[0];
+            }
             Message.LOG_RECENT_BY_HEADER.send(sender, name, page, maxPage);
         } else {
             Message.LOG_RECENT_HEADER.send(sender, page, maxPage);
         }
 
+        long now = DateUtil.unixSecondsNow();
         for (Map.Entry<Integer, ExtendedLogEntry> e : entries.entrySet()) {
             long time = e.getValue().getTimestamp();
-            long now = DateUtil.unixSecondsNow();
-            Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatTimeShort(now - time), e.getValue().getFormatted());
+            Message.LOG_ENTRY.send(sender,
+                    e.getKey(),
+                    DateUtil.formatTimeBrief(now - time),
+                    e.getValue().getActorFriendlyString(),
+                    Character.toString(e.getValue().getType().getCode()),
+                    e.getValue().getActedFriendlyString(),
+                    e.getValue().getAction()
+            );
         }
         return CommandResult.SUCCESS;
     }

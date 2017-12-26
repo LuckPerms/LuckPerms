@@ -29,10 +29,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.references.HolderType;
 
 @Getter
 @AllArgsConstructor(staticName = "of")
 public class PermissionCalculatorMetadata {
+
+    /**
+     * The type of the object which owns the permission calculator
+     */
+    private final HolderType holderType;
 
     /**
      * The name of the object which owns the permission calculator

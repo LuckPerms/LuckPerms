@@ -50,11 +50,11 @@ import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.UpdateTaskBuffer;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.AbstractConfiguration;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
-import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.LuckPermsCalculator;
 import me.lucko.luckperms.common.dependencies.Dependency;
@@ -129,11 +129,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private DefaultsProvider defaultsProvider;
     private ChildPermissionProvider childPermissionProvider;
     private LocaleManager localeManager;
+    private DependencyManager dependencyManager;
     private CachedStateManager cachedStateManager;
     private ContextManager<Player> contextManager;
     private CalculatorFactory calculatorFactory;
     private BufferedRequest<Void> updateTaskBuffer;
-    private boolean started = false;
     private CountDownLatch enableLatch = new CountDownLatch(1);
     private VerboseHandler verboseHandler;
     private BukkitSenderFactory senderFactory;
@@ -153,7 +153,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         senderFactory = new BukkitSenderFactory(this);
         log = new SenderLogger(this, getConsoleSender());
 
-        DependencyManager.loadDependencies(this, Collections.singleton(Dependency.CAFFEINE));
+        dependencyManager = new DependencyManager(this);
+        dependencyManager.loadDependencies(Collections.singleton(Dependency.CAFFEINE));
     }
 
     @Override
@@ -172,7 +173,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         try {
             enable();
-            started = true;
         } finally {
             // count down the latch when onEnable has been called
             // we don't care about the result here
@@ -192,7 +192,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         configuration.init();
 
         Set<StorageType> storageTypes = StorageFactory.getRequiredTypes(this, StorageType.H2);
-        DependencyManager.loadStorageDependencies(this, storageTypes);
+        dependencyManager.loadStorageDependencies(storageTypes);
 
         // setup the Bukkit defaults hook
         defaultsProvider = new DefaultsProvider();
@@ -271,7 +271,12 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         // run an update instantly.
         getLog().info("Performing initial data load...");
-        new UpdateTask(this, true).run();
+        try {
+            new UpdateTask(this, true).run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
         // register tasks
         scheduler.asyncRepeating(new ExpireTemporaryTask(this), 60L);
@@ -294,22 +299,26 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }
 
         // replace the temporary executor when the Bukkit one starts
-        getServer().getScheduler().runTaskAsynchronously(this, () -> scheduler.setUseBukkitAsync(true));
+        getServer().getScheduler().runTaskAsynchronously(this, () -> scheduler.setUseFallback(false));
 
         // Load any online users (in the case of a reload)
         for (Player player : getServer().getOnlinePlayers()) {
             scheduler.doAsync(() -> {
-                LoginHelper.loadUser(this, player.getUniqueId(), player.getName(), false);
-                User user = getUserManager().getIfLoaded(getUuidCache().getUUID(player.getUniqueId()));
-                if (user != null) {
-                    scheduler.doSync(() -> {
-                        try {
-                            LPPermissible lpPermissible = new LPPermissible(player, user, this);
-                            PermissibleInjector.inject(player, lpPermissible);
-                        } catch (Throwable t) {
-                            t.printStackTrace();
-                        }
-                    });
+                try {
+                    LoginHelper.loadUser(this, player.getUniqueId(), player.getName(), false);
+                    User user = getUserManager().getIfLoaded(getUuidCache().getUUID(player.getUniqueId()));
+                    if (user != null) {
+                        scheduler.doSync(() -> {
+                            try {
+                                LPPermissible lpPermissible = new LPPermissible(player, user, this);
+                                PermissibleInjector.inject(player, lpPermissible);
+                            } catch (Throwable t) {
+                                t.printStackTrace();
+                            }
+                        });
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             });
         }
@@ -323,10 +332,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             return;
         }
 
-        // Switch back to the LP executor, the bukkit one won't allow new tasks
-        scheduler.setUseBukkitAsync(false);
-
-        started = false;
+        // Switch back to the fallback executor, the bukkit one won't allow new tasks
+        scheduler.setUseFallback(true);
 
         defaultsProvider.close();
         permissionVault.shutdown();
@@ -432,13 +439,18 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public String getServerName() {
+    public String getServerBrand() {
         return getServer().getName();
     }
 
     @Override
     public String getServerVersion() {
         return getServer().getVersion() + " - " + getServer().getBukkitVersion();
+    }
+
+    @Override
+    public String getServerName() {
+        return getServer().getServerName();
     }
 
     @Override

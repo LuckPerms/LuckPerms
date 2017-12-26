@@ -35,13 +35,13 @@ import me.lucko.luckperms.sponge.service.LuckPermsService;
 import java.util.Map;
 
 @AllArgsConstructor
-public class DefaultsProcessor implements PermissionProcessor {
+public class GroupDefaultsProcessor implements PermissionProcessor {
     private final LuckPermsService service;
     private final ImmutableContextSet contexts;
 
     @Override
     public Tristate hasPermission(String permission) {
-        Tristate t = service.getUserSubjects().getDefaults().getPermissionValue(contexts, permission);
+        Tristate t = service.getGroupSubjects().getDefaults().getPermissionValue(contexts, permission);
         if (t != Tristate.UNDEFINED) {
             return t;
         }

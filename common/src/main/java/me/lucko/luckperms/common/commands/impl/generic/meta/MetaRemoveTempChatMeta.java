@@ -31,13 +31,13 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandManager;
+import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -100,10 +100,10 @@ public class MetaRemoveTempChatMeta extends SharedSubCommand {
             return CommandResult.SUCCESS;
         }
 
-        DataMutateResult result = holder.unsetPermission(NodeFactory.makeChatMetaNode(type, priority, meta).setExpiry(10L).withExtraContext(context).build());
+        DataMutateResult result = holder.unsetPermission(NodeFactory.buildChatMetaNode(type, priority, meta).setExpiry(10L).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            TextComponent.Builder builder = TextUtils.fromLegacy(Message.REMOVE_TEMP_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
+            TextComponent.Builder builder = TextUtils.fromLegacy(Message.REMOVE_TEMP_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context)), CommandManager.SECTION_CHAR).toBuilder();
             HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
                     "¥3Raw " + type.name().toLowerCase() + ": ¥r" + meta,
                     '¥'

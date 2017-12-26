@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.processors.MapProcessor;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
 import me.lucko.luckperms.common.processors.RegexProcessor;
 import me.lucko.luckperms.common.processors.WildcardProcessor;
+import me.lucko.luckperms.common.references.HolderType;
 
 import java.util.List;
 
@@ -66,7 +67,7 @@ public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
             processors.add(new WildcardProcessor());
         }
 
-        if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
+        if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS) && metadata.getHolderType() == HolderType.USER) {
             processors.add(new DefaultsProcessor(contexts.isOp(), plugin.getDefaultsProvider()));
         }
 

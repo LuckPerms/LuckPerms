@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.contexts;
 
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 
 import java.util.ArrayList;
@@ -35,13 +36,15 @@ import java.util.Map;
 
 public class ContextSetComparator implements Comparator<ImmutableContextSet> {
 
-    private static final ContextSetComparator INSTANCE = new ContextSetComparator();
-    public static Comparator<ImmutableContextSet> get() {
+    private static final Comparator<ImmutableContextSet> INSTANCE = new ContextSetComparator();
+    private static final Comparator<ImmutableContextSet> REVERSE = INSTANCE.reversed();
+
+    public static Comparator<ImmutableContextSet> normal() {
         return INSTANCE;
     }
 
     public static Comparator<ImmutableContextSet> reverse() {
-        return INSTANCE.reversed();
+        return REVERSE;
     }
 
     @Override
@@ -50,14 +53,14 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
             return 0;
         }
 
-        boolean o1ServerSpecific = o1.containsKey("server");
-        boolean o2ServerSpecific = o2.containsKey("server");
+        boolean o1ServerSpecific = o1.containsKey(Contexts.SERVER_KEY);
+        boolean o2ServerSpecific = o2.containsKey(Contexts.SERVER_KEY);
         if (o1ServerSpecific != o2ServerSpecific) {
             return o1ServerSpecific ? 1 : -1;
         }
 
-        boolean o1WorldSpecific = o1.containsKey("world");
-        boolean o2WorldSpecific = o2.containsKey("world");
+        boolean o1WorldSpecific = o1.containsKey(Contexts.WORLD_KEY);
+        boolean o2WorldSpecific = o2.containsKey(Contexts.WORLD_KEY);
         if (o1WorldSpecific != o2WorldSpecific) {
             return o1WorldSpecific ? 1 : -1;
         }

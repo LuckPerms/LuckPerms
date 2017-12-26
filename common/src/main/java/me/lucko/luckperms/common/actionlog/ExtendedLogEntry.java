@@ -30,10 +30,12 @@ import lombok.AllArgsConstructor;
 import lombok.ToString;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -60,14 +62,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ExtendedLogEntry implements LogEntry {
 
-    private static final String FORMAT = "&8(&e%s&8) [&a%s&8] (&b%s&8) &7--> &f%s";
-
-    /**
-     * Compares two LogEntries
-     *
-     * @since 3.3
-     */
-    public static final Comparator<LogEntry> COMPARATOR = Comparator
+    private static final Comparator<LogEntry> COMPARATOR = Comparator
             .comparingLong(LogEntry::getTimestamp)
             .thenComparing(LogEntry::getActor)
             .thenComparing(LogEntry::getActorName, String.CASE_INSENSITIVE_ORDER)
@@ -108,6 +103,13 @@ public class ExtendedLogEntry implements LogEntry {
         return actorName;
     }
 
+    public String getActorFriendlyString() {
+        if (Strings.isNullOrEmpty(actorName) || actorName.equals("null")) {
+            return actor.toString();
+        }
+        return actorName;
+    }
+
     @Override
     public Type getType() {
         return type;
@@ -121,6 +123,15 @@ public class ExtendedLogEntry implements LogEntry {
     @Override
     public String getActedName() {
         return actedName;
+    }
+
+    public String getActedFriendlyString() {
+        if (Strings.isNullOrEmpty(actedName) || actedName.equals("null")) {
+            if (acted != null) {
+                return acted.toString();
+            }
+        }
+        return String.valueOf(actedName);
     }
 
     @Override
@@ -139,15 +150,6 @@ public class ExtendedLogEntry implements LogEntry {
         return actorName.toLowerCase().contains(query) ||
                 actedName.toLowerCase().contains(query) ||
                 action.toLowerCase().contains(query);
-    }
-
-    public String getFormatted() {
-        return String.format(FORMAT,
-                String.valueOf(actorName).equals("null") ? actor.toString() : actorName,
-                Character.toString(type.getCode()),
-                String.valueOf(actedName).equals("null") && acted != null ? acted.toString() : actedName,
-                action
-        );
     }
 
     public void submit(LuckPermsPlugin plugin, Sender sender) {
@@ -283,11 +285,11 @@ public class ExtendedLogEntry implements LogEntry {
         }
 
         public ExtendedLogEntryBuilder acted(PermissionHolder acted) {
-            if (acted instanceof User) {
+            if (acted.getType().isUser()) {
                 actedName(((User) acted).getName().orElse("null"));
                 acted(((User) acted).getUuid());
                 type(Type.USER);
-            } else if (acted instanceof Group) {
+            } else if (acted.getType().isGroup()) {
                 actedName(((Group) acted).getName());
                 type(Type.GROUP);
             }
@@ -309,15 +311,15 @@ public class ExtendedLogEntry implements LogEntry {
                 if (o instanceof ContextSet) {
                     ContextSet set = (ContextSet) o;
 
-                    for (String value : set.getValues("server")) {
+                    for (String value : set.getValues(Contexts.SERVER_KEY)) {
                         parts.add("server=" + value);
                     }
-                    for (String value : set.getValues("world")) {
+                    for (String value : set.getValues(Contexts.WORLD_KEY)) {
                         parts.add("world=" + value);
                     }
 
                     for (Map.Entry<String, String> context : set.toSet()) {
-                        if (context.getKey().equals("server") || context.getKey().equals("world")) {
+                        if (context.getKey().equals(Contexts.SERVER_KEY) || context.getKey().equals(Contexts.WORLD_KEY)) {
                             continue;
                         }
                         parts.add(context.getKey() + "=" + context.getValue());
