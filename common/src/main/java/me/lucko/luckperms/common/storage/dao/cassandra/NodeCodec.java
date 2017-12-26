@@ -58,7 +58,7 @@ public class NodeCodec extends TypeCodec<NodeModel> {
         udtValue.setBool("value", model.getValue());
         udtValue.setString("server", model.getServer());
         udtValue.setString("world", model.getWorld());
-        // Lucko, i don't like you again.
+        // Lucko, i don't like this shit again.
         udtValue.setTimestamp("expiry", new Date(model.getExpiry() * 1000L));
         return udtValue;
     }
