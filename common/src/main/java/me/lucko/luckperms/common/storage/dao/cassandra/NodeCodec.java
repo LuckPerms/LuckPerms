@@ -41,23 +41,25 @@ public class NodeCodec extends TypeCodec<NodeModel> {
 
     private NodeModel toInstance(UDTValue value) {
         if(value == null) return null;
-        String permission = value.getString("permission");
+        String permission = value.getString("id");
         boolean enabled = value.getBool("value");
         String server = value.getString("server");
         String world = value.getString("world");
         Date expiry = value.getTimestamp("expiry");
         Map<String, String> contexts = value.getMap("contexts", String.class, String.class);
-        return NodeModel.of(permission, enabled, server, world, expiry.getTime(), ImmutableContextSet.fromMap(contexts));
+        // Lucko, i don't like this shit.
+        return NodeModel.of(permission, enabled, server, world, expiry.getTime() / 1000L, ImmutableContextSet.fromMap(contexts));
     }
 
     private UDTValue toUDTValue(NodeModel model) {
         if(model == null) return null;
         UDTValue udtValue = userType.newValue();
-        udtValue.setString("permission", model.getPermission());
+        udtValue.setString("id", model.getPermission());
         udtValue.setBool("value", model.getValue());
         udtValue.setString("server", model.getServer());
         udtValue.setString("world", model.getWorld());
-        udtValue.setTimestamp("expiry", model.toNode().getExpiry());
+        // Lucko, i don't like you again.
+        udtValue.setTimestamp("expiry", new Date(model.getExpiry() * 1000L));
         return udtValue;
     }
 }
