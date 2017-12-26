@@ -136,7 +136,7 @@ public class CassandraDao extends AbstractDao {
     }
 
     @Override
-    public boolean logAction(LogEntry entry) {
+    public void logAction(LogEntry entry) throws DriverException {
         BoundStatement bind = ACTION_INSERT.bind(entry.getTimestamp(),
                 entry.getActor(),
                 entry.getActorName(),
@@ -144,84 +144,66 @@ public class CassandraDao extends AbstractDao {
                 entry.getActed().orElse(null),
                 entry.getActedName(),
                 entry.getAction());
-        try {
-            connectionManager.getSession().execute(bind);
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
+        connectionManager.getSession().execute(bind);
     }
 
     @Override
-    public Log getLog() {
+    public Log getLog() throws DriverException {
         Log.Builder builder = Log.builder();
         BoundStatement bind = ACTION_SELECT_ALL.bind();
-        try {
+        ResultSet rs = connectionManager.getSession().execute(bind);
+        for (Row row : rs) {
+            ExtendedLogEntry e = ExtendedLogEntry.build()
+                    .timestamp(row.getTimestamp("time").getTime())
+                    .actor(row.getUUID("actor_uuid"))
+                    .actorName(row.getString("actor_name"))
+                    .type(LogEntry.Type.valueOf(row.getString("type").charAt(0)))
+                    .acted(row.getUUID("acted_uuid"))
+                    .actedName(row.getString("acted_name"))
+                    .action(row.getString("action"))
+                    .build();
+            builder.add(e);
+        }
+        return builder.build();
+    }
+
+    @Override
+    public void applyBulkUpdate(BulkUpdate bulkUpdate) {
+        if(bulkUpdate.getDataType().isIncludingUsers()) {
+            BoundStatement bind = USER_SELECT_PERMISSIONS.bind();
             ResultSet rs = connectionManager.getSession().execute(bind);
             for (Row row : rs) {
-                ExtendedLogEntry e = ExtendedLogEntry.build()
-                        .timestamp(row.getTimestamp("time").getTime())
-                        .actor(row.getUUID("actor_uuid"))
-                        .actorName(row.getString("actor_name"))
-                        .type(LogEntry.Type.valueOf(row.getString("type").charAt(0)))
-                        .acted(row.getUUID("acted_uuid"))
-                        .actedName(row.getString("acted_name"))
-                        .action(row.getString("action"))
-                        .build();
-                builder.add(e);
+                Set<NodeModel> permissions = row.getSet("permissions", NodeModel.class);
+                Set<NodeModel> collect = permissions.stream()
+                        .map(bulkUpdate::apply)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet());
+                if(!collect.equals(permissions)) {
+                    BoundStatement bs = USER_UPDATE_PERMISSIONS.bind(row.getUUID("uuid"), collect);
+                    connectionManager.getSession().execute(bs);
+                }
             }
-            return builder.build();
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return null;
+        }
+
+        if(bulkUpdate.getDataType().isIncludingGroups()) {
+            BoundStatement bind = GROUP_SELECT_ALL.bind();
+            ResultSet rs = connectionManager.getSession().execute(bind);
+            for (Row row : rs) {
+                Set<NodeModel> permissions = row.getSet("permissions", NodeModel.class);
+                Set<NodeModel> collect = permissions.stream()
+                        .map(bulkUpdate::apply)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet());
+                if(!collect.equals(permissions)) {
+                    BoundStatement bs = GROUP_INSERT.bind(row.getString("name"), collect);
+                    connectionManager.getSession().execute(bs);
+                }
+            }
         }
     }
 
     @Override
-    public boolean applyBulkUpdate(BulkUpdate bulkUpdate) {
-        try {
-            if(bulkUpdate.getDataType().isIncludingUsers()) {
-                BoundStatement bind = USER_SELECT_PERMISSIONS.bind();
-                ResultSet rs = connectionManager.getSession().execute(bind);
-                for (Row row : rs) {
-                    Set<NodeModel> permissions = row.getSet("permissions", NodeModel.class);
-                    Set<NodeModel> collect = permissions.stream()
-                            .map(bulkUpdate::apply)
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toSet());
-                    if(!collect.equals(permissions)) {
-                        BoundStatement bs = USER_UPDATE_PERMISSIONS.bind(row.getUUID("uuid"), collect);
-                        connectionManager.getSession().execute(bs);
-                    }
-                }
-            }
-
-            if(bulkUpdate.getDataType().isIncludingGroups()) {
-                BoundStatement bind = GROUP_SELECT_ALL.bind();
-                ResultSet rs = connectionManager.getSession().execute(bind);
-                for (Row row : rs) {
-                    Set<NodeModel> permissions = row.getSet("permissions", NodeModel.class);
-                    Set<NodeModel> collect = permissions.stream()
-                            .map(bulkUpdate::apply)
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toSet());
-                    if(!collect.equals(permissions)) {
-                        BoundStatement bs = GROUP_INSERT.bind(row.getString("name"), collect);
-                        connectionManager.getSession().execute(bs);
-                    }
-                }
-            }
-
-            return true;
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    @Override
-    public boolean loadUser(UUID uuid, String username) {
+    public User loadUser(UUID uuid, String username) {
         User user = plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
         user.getIoLock().lock();
         try {
@@ -246,24 +228,20 @@ public class CassandraDao extends AbstractDao {
                     plugin.getUserManager().giveDefaultIfNeeded(user, false);
                 }
             }
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return false;
         } finally {
             user.getIoLock().unlock();
         }
         user.getRefreshBuffer().requestDirectly();
-        return true;
+        return user;
     }
 
     @Override
-    public boolean saveUser(User user) {
+    public void saveUser(User user) {
         user.getIoLock().lock();
         try {
             if (!GenericUserManager.shouldSave(user)) {
                 BoundStatement bind = USER_DELETE.bind(user.getUuid());
                 connectionManager.getSession().execute(bind);
-                return true;
             } else {
                 Set<NodeModel> nodes = user.getEnduringNodes().values().stream()
                         .map(NodeModel::fromNode).collect(Collectors.toSet());
@@ -272,12 +250,7 @@ public class CassandraDao extends AbstractDao {
                         nodes,
                         user.getPrimaryGroup().getStoredValue().orElse("default"));
                 connectionManager.getSession().execute(bind);
-                return true;
             }
-
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return false;
         } finally {
             user.getIoLock().unlock();
         }
@@ -285,45 +258,35 @@ public class CassandraDao extends AbstractDao {
 
     @Override
     public Set<UUID> getUniqueUsers() {
-        try {
-            BoundStatement bind = USER_SELECT_ALL_UUID.bind();
-            ResultSet rs = connectionManager.getSession().execute(bind);
-            Set<UUID> ids = new HashSet<>();
-            for (Row row : rs) {
-                ids.add(row.getUUID("uuid"));
-            }
-            return ids;
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return null;
+        Set<UUID> ids = new HashSet<>();
+        BoundStatement bind = USER_SELECT_ALL_UUID.bind();
+        ResultSet rs = connectionManager.getSession().execute(bind);
+        for (Row row : rs) {
+            ids.add(row.getUUID("uuid"));
         }
+        return ids;
     }
 
     @Override
     public List<HeldPermission<UUID>> getUsersWithPermission(String permission) {
         //https://issues.apache.org/jira/browse/CASSANDRA-7396
-        try {
-            List<HeldPermission<UUID>> list = new ArrayList<>();
-            BoundStatement bind = USER_SELECT_PERMISSIONS.bind();
-            ResultSet rs = connectionManager.getSession().execute(bind);
-            for (Row row : rs) {
-                UUID uuid = row.getUUID("uuid");
-                Set<NodeModel> permissions = row.getSet("permissions", NodeModel.class);
-                for (NodeModel perm : permissions) {
-                    if(perm.getPermission().equalsIgnoreCase(permission)) {
-                        list.add(NodeHeldPermission.of(uuid, perm));
-                    }
+        List<HeldPermission<UUID>> list = new ArrayList<>();
+        BoundStatement bind = USER_SELECT_PERMISSIONS.bind();
+        ResultSet rs = connectionManager.getSession().execute(bind);
+        for (Row row : rs) {
+            UUID uuid = row.getUUID("uuid");
+            Set<NodeModel> permissions = row.getSet("permissions", NodeModel.class);
+            for (NodeModel perm : permissions) {
+                if(perm.getPermission().equalsIgnoreCase(permission)) {
+                    list.add(NodeHeldPermission.of(uuid, perm));
                 }
             }
-            return Collections.unmodifiableList(list);
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return null;
         }
+        return Collections.unmodifiableList(list);
     }
 
     @Override
-    public boolean createAndLoadGroup(String name) {
+    public Group createAndLoadGroup(String name) {
         Group group = plugin.getGroupManager().getOrMake(name);
         group.getIoLock().lock();
         try {
@@ -338,18 +301,14 @@ public class CassandraDao extends AbstractDao {
                 saveGroup(group);
             }
             group.getRefreshBuffer().requestDirectly();
-            return true;
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return false;
         } finally {
             group.getIoLock().unlock();
         }
-
+        return group;
     }
 
     @Override
-    public boolean loadGroup(String name) {
+    public Optional<Group> loadGroup(String name) {
         Group group = null;
         try {
             // if store contains group, load from store else save
@@ -362,42 +321,32 @@ public class CassandraDao extends AbstractDao {
                 Set<NodeModel> permissions = row.getSet("permissions", NodeModel.class);
                 group.setEnduringNodes(permissions.stream().map(NodeModel::toNode).collect(Collectors.toSet()));
                 group.getRefreshBuffer().requestDirectly();
-                return true;
             }
-            return false;
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return false;
         } finally {
             if(group != null) group.getIoLock().unlock();
         }
+        return Optional.ofNullable(group);
     }
 
     @Override
-    public boolean loadAllGroups() {
-        try {
-            BoundStatement bind = GROUP_SELECT_ALL.bind();
-            ResultSet rs = connectionManager.getSession().execute(bind);
-            for (Row row : rs) {
-                String name = row.getString("name");
-                Set<Node> permissions = row.getSet("permissions", NodeModel.class).stream()
-                        .map(NodeModel::toNode)
-                        .collect(Collectors.toSet());
+    public void loadAllGroups() {
+        BoundStatement bind = GROUP_SELECT_ALL.bind();
+        ResultSet rs = connectionManager.getSession().execute(bind);
+        for (Row row : rs) {
+            String name = row.getString("name");
+            Set<Node> permissions = row.getSet("permissions", NodeModel.class).stream()
+                    .map(NodeModel::toNode)
+                    .collect(Collectors.toSet());
 
-                Group group = plugin.getGroupManager().getOrMake(name);
-                group.getIoLock().lock();
-                group.setEnduringNodes(permissions);
-                group.getIoLock().unlock();
-            }
-            return true;
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return false;
+            Group group = plugin.getGroupManager().getOrMake(name);
+            group.getIoLock().lock();
+            group.setEnduringNodes(permissions);
+            group.getIoLock().unlock();
         }
     }
 
     @Override
-    public boolean saveGroup(Group group) {
+    public void saveGroup(Group group) {
         group.getIoLock().lock();
         try {
             String name = group.getName();
@@ -406,25 +355,17 @@ public class CassandraDao extends AbstractDao {
                     .collect(Collectors.toSet());
             BoundStatement bind = GROUP_INSERT.bind(name, permissions);
             connectionManager.getSession().execute(bind);
-            return true;
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return false;
         } finally {
             group.getIoLock().unlock();
         }
     }
 
     @Override
-    public boolean deleteGroup(Group group) {
+    public void deleteGroup(Group group) {
         group.getIoLock().lock();
         try {
             BoundStatement bind = GROUP_DELETE.bind(group.getName());
             connectionManager.getSession().execute(bind);
-            return true;
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return false;
         } finally {
             group.getIoLock().unlock();
         }
@@ -433,28 +374,23 @@ public class CassandraDao extends AbstractDao {
     @Override
     public List<HeldPermission<String>> getGroupsWithPermission(String permission) {
         //https://issues.apache.org/jira/browse/CASSANDRA-7396
-        try {
-            List<HeldPermission<String>> list = new ArrayList<>();
-            BoundStatement bind = GROUP_SELECT_ALL.bind();
-            ResultSet rs = connectionManager.getSession().execute(bind);
-            for (Row row : rs) {
-                String name = row.getString("name");
-                Set<NodeModel> permissions = row.getSet("permissions", NodeModel.class);
-                for (NodeModel perm : permissions) {
-                    if(perm.getPermission().equalsIgnoreCase(permission)) {
-                        list.add(NodeHeldPermission.of(name, perm));
-                    }
+        List<HeldPermission<String>> list = new ArrayList<>();
+        BoundStatement bind = GROUP_SELECT_ALL.bind();
+        ResultSet rs = connectionManager.getSession().execute(bind);
+        for (Row row : rs) {
+            String name = row.getString("name");
+            Set<NodeModel> permissions = row.getSet("permissions", NodeModel.class);
+            for (NodeModel perm : permissions) {
+                if(perm.getPermission().equalsIgnoreCase(permission)) {
+                    list.add(NodeHeldPermission.of(name, perm));
                 }
             }
-            return Collections.unmodifiableList(list);
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return null;
         }
+        return Collections.unmodifiableList(list);
     }
 
     @Override
-    public boolean createAndLoadTrack(String name) {
+    public Track createAndLoadTrack(String name) {
         Track track = plugin.getTrackManager().getOrMake(name);
         track.getIoLock().lock();
         try {
@@ -467,17 +403,14 @@ public class CassandraDao extends AbstractDao {
             } else {
                 saveTrack(track);
             }
-            return true;
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return false;
         } finally {
             track.getIoLock().unlock();
         }
+        return track;
     }
 
     @Override
-    public boolean loadTrack(String name) {
+    public Optional<Track> loadTrack(String name) {
         Track track = plugin.getTrackManager().getOrMake(name);
         track.getIoLock().lock();
         try {
@@ -487,106 +420,71 @@ public class CassandraDao extends AbstractDao {
             if(row != null) {
                 List<String> groups = row.getList("groups", String.class);
                 track.setGroups(groups);
-            } else {
-                return false;
             }
-            return true;
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return false;
         } finally {
+            track.getIoLock().unlock();
+        }
+        return Optional.of(track);
+    }
+
+    @Override
+    public void loadAllTracks() {
+        BoundStatement bind = TRACK_SELECT_ALL.bind();
+        ResultSet rs = connectionManager.getSession().execute(bind);
+        for (Row row : rs) {
+            String name = row.getString("name");
+            List<String> groups = row.getList("groups", String.class);
+            Track track = plugin.getTrackManager().getOrMake(name);
+            track.getIoLock().lock();
+            track.setGroups(groups);
             track.getIoLock().unlock();
         }
     }
 
     @Override
-    public boolean loadAllTracks() {
-        try {
-            BoundStatement bind = TRACK_SELECT_ALL.bind();
-            ResultSet rs = connectionManager.getSession().execute(bind);
-            for (Row row : rs) {
-                String name = row.getString("name");
-                List<String> groups = row.getList("groups", String.class);
-                Track track = plugin.getTrackManager().getOrMake(name);
-                track.getIoLock().lock();
-                track.setGroups(groups);
-                track.getIoLock().unlock();
-            }
-            return true;
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    @Override
-    public boolean saveTrack(Track track) {
+    public void saveTrack(Track track) {
         track.getIoLock().lock();
         try {
             BoundStatement bind = TRACK_INSERT.bind(track.getName(), track.getGroups());
             connectionManager.getSession().execute(bind);
-            return true;
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return false;
         } finally {
             track.getIoLock().unlock();
         }
     }
 
     @Override
-    public boolean deleteTrack(Track track) {
+    public void deleteTrack(Track track) {
         track.getIoLock().lock();
         try {
             BoundStatement bind = TRACK_DELETE.bind(track.getName());
             connectionManager.getSession().execute(bind);
-            return true;
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return false;
         } finally {
             track.getIoLock().unlock();
         }
     }
 
     @Override
-    public boolean saveUUIDData(UUID uuid, String username) {
-        try {
-            BatchStatement bs = new BatchStatement();
-            BoundStatement bind = UUID_TO_NAME_INSERT.bind(uuid, username);
-            BoundStatement bind1 = NAME_TO_UUID_INSERT.bind(username, uuid);
-            bs.add(bind).add(bind1);
-            connectionManager.getSession().execute(bs);
-            return true;
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return false;
-        }
+    public void saveUUIDData(UUID uuid, String username) {
+        BatchStatement bs = new BatchStatement();
+        BoundStatement bind = UUID_TO_NAME_INSERT.bind(uuid, username);
+        BoundStatement bind1 = NAME_TO_UUID_INSERT.bind(username, uuid);
+        bs.add(bind).add(bind1);
+        connectionManager.getSession().execute(bs);
     }
 
     @Override
     public UUID getUUID(String username) {
-        try {
-            BoundStatement bind = NAME_TO_UUID_SELECT.bind(username);
-            ResultSet rs = connectionManager.getSession().execute(bind);
-            Row row = rs.one();
-            return row != null ? row.getUUID("uuid") : null;
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return null;
-        }
+        BoundStatement bind = NAME_TO_UUID_SELECT.bind(username);
+        ResultSet rs = connectionManager.getSession().execute(bind);
+        Row row = rs.one();
+        return row != null ? row.getUUID("uuid") : null;
     }
 
     @Override
     public String getName(UUID uuid) {
-        try {
-            BoundStatement bind = UUID_TO_NAME_SELECT.bind(uuid);
-            ResultSet rs = connectionManager.getSession().execute(bind);
-            Row row = rs.one();
-            return row != null ? row.getString("name") : null;
-        } catch (DriverException e) {
-            e.printStackTrace();
-            return null;
-        }
+        BoundStatement bind = UUID_TO_NAME_SELECT.bind(uuid);
+        ResultSet rs = connectionManager.getSession().execute(bind);
+        Row row = rs.one();
+        return row != null ? row.getString("name") : null;
     }
 }
