@@ -16,10 +16,7 @@ public class CassandraConnectionManager implements AutoCloseable {
         String password = config.getPassword();
         if(isNotEmpty(username) && isNotEmpty(password)) builder.withCredentials(username, password);
         this.cluster = builder.build();
-        if (this.cluster.getMetadata().getKeyspace(config.getKeyspace()) == null) {
-            cluster.connect().execute("CREATE KEYSPACE IF NOT EXISTS " + config.getKeyspace() + " WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1};");
-        }
-        this.session = cluster.connect(config.getKeyspace());
+        this.session = cluster.connect();
     }
 
     protected Session getSession() {

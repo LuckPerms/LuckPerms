@@ -29,7 +29,8 @@ import java.util.stream.Collectors;
 public class CassandraDao extends AbstractDao {
 
     private final Function<String, String> prefix;
-    private final CassandraConnectionManager connectionManager;
+    private final CassandraConfig config;
+    private CassandraConnectionManager connectionManager;
 
     private PreparedStatement ACTION_INSERT;
     private PreparedStatement ACTION_SELECT_ALL;
@@ -60,14 +61,21 @@ public class CassandraDao extends AbstractDao {
     public CassandraDao(LuckPermsPlugin plugin, CassandraConfig config) {
         super(plugin, "Cassandra");
         this.prefix = str -> str.replace("{prefix}", config.getPrefix());
-        this.connectionManager = new CassandraConnectionManager(config);
+        this.config = config;
     }
 
     @Override
     public void init() {
+        this.connectionManager = new CassandraConnectionManager(config);
         Session session = connectionManager.getSession();
-        String keyspaceName = session.getLoggedKeyspace();
-        KeyspaceMetadata keyspace = session.getCluster().getMetadata().getKeyspace(keyspaceName);
+        Cluster cluster = connectionManager.getCluster();
+        if (cluster.getMetadata().getKeyspace(config.getKeyspace()) == null) {
+            cluster.connect().execute("CREATE KEYSPACE IF NOT EXISTS " + config.getKeyspace() + " WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1};");
+            session.execute("USE " + config.getKeyspace());
+        } else {
+            session.execute("USE " + config.getKeyspace());
+        }
+        KeyspaceMetadata keyspace = session.getCluster().getMetadata().getKeyspace(config.getKeyspace());
         UserType testTable = keyspace.getUserType(prefix.apply("permission"));
         if(testTable == null) {
             // create tables
@@ -101,32 +109,31 @@ public class CassandraDao extends AbstractDao {
         NodeCodec nodeCodec = new NodeCodec(codec);
         CodecRegistry.DEFAULT_INSTANCE.register(nodeCodec);
 
-        Session cluster = connectionManager.getSession();
-        ACTION_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}actions(time, actor_uuid, actor_name, type, acted_uuid, acted_name, action) VALUES(?, ?, ?, ?, ?, ?, ?)"));
-        ACTION_SELECT_ALL = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}actions"));
+        ACTION_INSERT = session.prepare(this.prefix.apply("INSERT INTO {prefix}actions(time, actor_uuid, actor_name, type, acted_uuid, acted_name, action) VALUES(?, ?, ?, ?, ?, ?, ?)"));
+        ACTION_SELECT_ALL = session.prepare(this.prefix.apply("SELECT * FROM {prefix}actions"));
 
-        USER_SELECT_ALL_UUID = cluster.prepare(this.prefix.apply("SELECT uuid FROM {prefix}users"));
-        USER_SELECT_PERMISSIONS = cluster.prepare(this.prefix.apply("SELECT uuid, permissions FROM {prefix}users"));
-        USER_SELECT = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}users WHERE uuid=?"));
-        USER_DELETE = cluster.prepare(this.prefix.apply("DELETE FROM {prefix}users WHERE uuid=?"));
-        USER_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}users(uuid, name, permissions, primaryGroup) VALUES(?, ?, ?, ?)"));
-        USER_RENAME = cluster.prepare(this.prefix.apply("UPDATE {prefix}users SET name=? WHERE uuid=?"));
-        USER_UPDATE_PERMISSIONS = cluster.prepare(this.prefix.apply("UPDATE {prefix}users SET permissions=? WHERE uuid=?"));
+        USER_SELECT_ALL_UUID = session.prepare(this.prefix.apply("SELECT uuid FROM {prefix}users"));
+        USER_SELECT_PERMISSIONS = session.prepare(this.prefix.apply("SELECT uuid, permissions FROM {prefix}users"));
+        USER_SELECT = session.prepare(this.prefix.apply("SELECT * FROM {prefix}users WHERE uuid=?"));
+        USER_DELETE = session.prepare(this.prefix.apply("DELETE FROM {prefix}users WHERE uuid=?"));
+        USER_INSERT = session.prepare(this.prefix.apply("INSERT INTO {prefix}users(uuid, name, permissions, primaryGroup) VALUES(?, ?, ?, ?)"));
+        USER_RENAME = session.prepare(this.prefix.apply("UPDATE {prefix}users SET name=? WHERE uuid=?"));
+        USER_UPDATE_PERMISSIONS = session.prepare(this.prefix.apply("UPDATE {prefix}users SET permissions=? WHERE uuid=?"));
 
-        GROUP_SELECT_ALL = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}groups"));
-        GROUP_SELECT = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}groups WHERE name=?"));
-        GROUP_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}groups(name, permissions) VALUES(?, ?)"));
-        GROUP_DELETE = cluster.prepare(this.prefix.apply("DELETE FROM {prefix}groups WHERE name=?"));
+        GROUP_SELECT_ALL = session.prepare(this.prefix.apply("SELECT * FROM {prefix}groups"));
+        GROUP_SELECT = session.prepare(this.prefix.apply("SELECT * FROM {prefix}groups WHERE name=?"));
+        GROUP_INSERT = session.prepare(this.prefix.apply("INSERT INTO {prefix}groups(name, permissions) VALUES(?, ?)"));
+        GROUP_DELETE = session.prepare(this.prefix.apply("DELETE FROM {prefix}groups WHERE name=?"));
 
-        TRACK_SELECT = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}tracks WHERE name=?"));
-        TRACK_SELECT_ALL = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}tracks"));
-        TRACK_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}tracks(name, groups) VALUES(?, ?)"));
-        TRACK_DELETE = cluster.prepare(this.prefix.apply("DELETE FROM {prefix}tracks WHERE name=?"));
+        TRACK_SELECT = session.prepare(this.prefix.apply("SELECT * FROM {prefix}tracks WHERE name=?"));
+        TRACK_SELECT_ALL = session.prepare(this.prefix.apply("SELECT * FROM {prefix}tracks"));
+        TRACK_INSERT = session.prepare(this.prefix.apply("INSERT INTO {prefix}tracks(name, groups) VALUES(?, ?)"));
+        TRACK_DELETE = session.prepare(this.prefix.apply("DELETE FROM {prefix}tracks WHERE name=?"));
 
-        UUID_TO_NAME_SELECT = cluster.prepare(this.prefix.apply("SELECT name FROM {prefix}uuid_to_name WHERE uuid=?"));
-        NAME_TO_UUID_SELECT = cluster.prepare(this.prefix.apply("SELECT uuid FROM {prefix}name_to_uuid WHERE name=?"));
-        UUID_TO_NAME_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}uuid_to_name(uuid, name) VALUES(?, ?)"));
-        NAME_TO_UUID_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}name_to_uuid(name, uuid) VALUES(?, ?)"));
+        UUID_TO_NAME_SELECT = session.prepare(this.prefix.apply("SELECT name FROM {prefix}uuid_to_name WHERE uuid=?"));
+        NAME_TO_UUID_SELECT = session.prepare(this.prefix.apply("SELECT uuid FROM {prefix}name_to_uuid WHERE name=?"));
+        UUID_TO_NAME_INSERT = session.prepare(this.prefix.apply("INSERT INTO {prefix}uuid_to_name(uuid, name) VALUES(?, ?)"));
+        NAME_TO_UUID_INSERT = session.prepare(this.prefix.apply("INSERT INTO {prefix}name_to_uuid(name, uuid) VALUES(?, ?)"));
     }
 
     @Override
