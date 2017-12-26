@@ -104,6 +104,24 @@ public enum Dependency {
             "3.3.2",
             "BauFwmXj/syIoOkmhlyKYVwv8+QiEVHvSoOHhz9OIXs="
     ),
+    DROPWIZARD_METRICS(
+            "io.dropwizard.metrics",
+            "metrics-core",
+            "3.2.2",
+            "XG9oXkFmTRDHDGWDfLqeWNOf84loEeO1cHqTSxHIWtA="
+    ),
+    JNR_FFI(
+            "com.github.jnr",
+            "jnr-ffi",
+            "2.0.7",
+            "lAbfqtWbw/wN6Xq/ikVecNRgwpTW9EVAfVCA25MjlkM="
+    ),
+    JNR_POSIX(
+            "com.github.jnr",
+            "jnr-posix",
+            "3.0.27",
+            "hNqwMaOGiMsuyAigEboCM8sNEUbTkCDhRHmSrVBfPXg="
+    ),
     JEDIS(
             "https://github.com/lucko/jedis/releases/download/jedis-2.9.1-shaded/jedis-2.9.1-shaded.jar",
             "2.9.1-shaded",

@@ -9,13 +9,15 @@ public class CassandraConfig {
     private final String keyspace;
     private final String username;
     private final String password;
+    private final String prefix;
 
-    public CassandraConfig(Set<InetSocketAddress> nodes, boolean ssl, String keyspace, String username, String password) {
+    public CassandraConfig(Set<InetSocketAddress> nodes, boolean ssl, String keyspace, String username, String password, String prefix) {
         this.nodes = nodes;
         this.ssl = ssl;
         this.keyspace = keyspace;
         this.username = username;
         this.password = password;
+        this.prefix = prefix;
     }
 
     public Set<InetSocketAddress> getNodes() {
@@ -36,5 +38,9 @@ public class CassandraConfig {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getPrefix() {
+        return prefix;
     }
 }

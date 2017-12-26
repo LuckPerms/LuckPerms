@@ -1,3 +1,12 @@
+CREATE TYPE permission (
+  id text,
+  value boolean,
+  server text,
+  world text,
+  expiry timestamp,
+  contexts map<text,text>,
+);
+
 CREATE TABLE {prefix}actions (
   time timestamp,
   actor_uuid uuid,
@@ -5,7 +14,7 @@ CREATE TABLE {prefix}actions (
   type ascii,
   acted_uuid uuid,
   acted_name text,
-  action text
+  action text,
   PRIMARY KEY(time)
 );
 
@@ -39,13 +48,4 @@ CREATE TABLE {prefix}name_to_uuid (
   name text,
   uuid uuid,
   PRIMARY KEY(name)
-);
-
-CREATE TYPE permission (
-  id text,
-  value boolean,
-  server text,
-  world text,
-  expiry timestamp,
-  contexts map<text,text>,
 );

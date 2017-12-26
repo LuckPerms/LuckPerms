@@ -400,7 +400,8 @@ public class ConfigKeys {
         String keyspace = c.getString("cassandra.keyspace", "luckperms");
         String username = c.getString("cassandra.username", null);
         String password = c.getString("cassandra.password", null);
-        return new CassandraConfig(inetSocketAddresses, ssl, keyspace, username, password);
+        String prefix = c.getString("cassandra.prefix", "");
+        return new CassandraConfig(inetSocketAddresses, ssl, keyspace, username, password, prefix);
     }));
 
     /**
@@ -412,11 +413,6 @@ public class ConfigKeys {
      * The prefix for any MongoDB collections
      */
     public static final ConfigKey<String> MONGODB_COLLECTION_PREFIX = EnduringKey.wrap(StringKey.of("data.mongodb_collection_prefix", ""));
-
-    /**
-     * The prefix for any Cassandra tables
-     */
-    public static final ConfigKey<String> CASSANDRA_TABLE_PREFIX = EnduringKey.wrap(StringKey.of("data.cassandra_table_prefix", ""));
 
 
     /**

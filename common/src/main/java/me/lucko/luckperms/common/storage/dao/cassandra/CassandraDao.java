@@ -31,64 +31,36 @@ public class CassandraDao extends AbstractDao {
     private final Function<String, String> prefix;
     private final CassandraConnectionManager connectionManager;
 
-    private final PreparedStatement ACTION_INSERT;
-    private final PreparedStatement ACTION_SELECT_ALL;
+    private PreparedStatement ACTION_INSERT;
+    private PreparedStatement ACTION_SELECT_ALL;
 
-    private final PreparedStatement USER_SELECT_ALL_UUID;
-    private final PreparedStatement USER_SELECT_PERMISSIONS;
-    private final PreparedStatement USER_SELECT;
-    private final PreparedStatement USER_DELETE;
-    private final PreparedStatement USER_INSERT;
-    private final PreparedStatement USER_RENAME;
-    private final PreparedStatement USER_UPDATE_PERMISSIONS;
+    private PreparedStatement USER_SELECT_ALL_UUID;
+    private PreparedStatement USER_SELECT_PERMISSIONS;
+    private PreparedStatement USER_SELECT;
+    private PreparedStatement USER_DELETE;
+    private PreparedStatement USER_INSERT;
+    private PreparedStatement USER_RENAME;
+    private PreparedStatement USER_UPDATE_PERMISSIONS;
 
-    private final PreparedStatement GROUP_SELECT_ALL;
-    private final PreparedStatement GROUP_SELECT;
-    private final PreparedStatement GROUP_INSERT;
-    private final PreparedStatement GROUP_DELETE;
+    private PreparedStatement GROUP_SELECT_ALL;
+    private PreparedStatement GROUP_SELECT;
+    private PreparedStatement GROUP_INSERT;
+    private PreparedStatement GROUP_DELETE;
 
-    private final PreparedStatement TRACK_SELECT;
-    private final PreparedStatement TRACK_SELECT_ALL;
-    private final PreparedStatement TRACK_INSERT;
-    private final PreparedStatement TRACK_DELETE;
+    private PreparedStatement TRACK_SELECT;
+    private PreparedStatement TRACK_SELECT_ALL;
+    private PreparedStatement TRACK_INSERT;
+    private PreparedStatement TRACK_DELETE;
 
-    private final PreparedStatement UUID_TO_NAME_SELECT;
-    private final PreparedStatement NAME_TO_UUID_SELECT;
-    private final PreparedStatement UUID_TO_NAME_INSERT;
-    private final PreparedStatement NAME_TO_UUID_INSERT;
+    private PreparedStatement UUID_TO_NAME_SELECT;
+    private PreparedStatement NAME_TO_UUID_SELECT;
+    private PreparedStatement UUID_TO_NAME_INSERT;
+    private PreparedStatement NAME_TO_UUID_INSERT;
 
-    public CassandraDao(LuckPermsPlugin plugin, CassandraConnectionManager connectionManager, String prefix) {
+    public CassandraDao(LuckPermsPlugin plugin, CassandraConfig config) {
         super(plugin, "Cassandra");
-        this.prefix = str -> str.replace("{prefix}", prefix);
-        this.connectionManager = connectionManager;
-
-        Session cluster = connectionManager.getSession();
-
-        ACTION_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}actions(time, actor_uuid, actor_name, type, acted_uuid, acted_name, action) VALUES(?, ?, ?, ?, ?, ?, ?)"));
-        ACTION_SELECT_ALL = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}actions"));
-
-        USER_SELECT_ALL_UUID = cluster.prepare(this.prefix.apply("SELECT uuid FROM {prefix}users"));
-        USER_SELECT_PERMISSIONS = cluster.prepare(this.prefix.apply("SELECT uuid, permissions FROM {prefix}users"));
-        USER_SELECT = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}users WHERE uuid=? LIMIT 1"));
-        USER_DELETE = cluster.prepare(this.prefix.apply("DELETE FROM {prefix}users WHERE uuid=? LIMIT 1"));
-        USER_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}users(uuid, name, permissions, primaryGroup) VALUES(?, ?, ?, ?)"));
-        USER_RENAME = cluster.prepare(this.prefix.apply("UPDATE {prefix}users SET name=? WHERE uuid=?"));
-        USER_UPDATE_PERMISSIONS = cluster.prepare(this.prefix.apply("UPDATE {prefix}users SET permissions=? WHERE uuid=?"));
-
-        GROUP_SELECT_ALL = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}groups"));
-        GROUP_SELECT = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}groups WHERE name=? LIMIT 1"));
-        GROUP_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}groups(name, permissions) VALUES(?, ?)"));
-        GROUP_DELETE = cluster.prepare(this.prefix.apply("DELETE FROM {prefix}groups WHERE name=? LIMIT 1"));
-
-        TRACK_SELECT = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}tracks WHERE name=? LIMIT 1"));
-        TRACK_SELECT_ALL = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}tracks"));
-        TRACK_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}tracks(name, groups) VALUES(?, ?)"));
-        TRACK_DELETE = cluster.prepare(this.prefix.apply("DELETE FROM {prefix}tracks WHERE name=?"));
-
-        UUID_TO_NAME_SELECT = cluster.prepare(this.prefix.apply("SELECT FROM {prefix}uuid_to_name WHERE uuid=? LIMIT 1"));
-        NAME_TO_UUID_SELECT = cluster.prepare(this.prefix.apply("SELECT FROM {prefix}name_to_uuid WHERE name=? LIMIT 1"));
-        UUID_TO_NAME_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}uuid_to_name(uuid, name) VALUES(?, ?)"));
-        NAME_TO_UUID_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}name_to_uuid(name, uuid) VALUES(?, ?)"));
+        this.prefix = str -> str.replace("{prefix}", config.getPrefix());
+        this.connectionManager = new CassandraConnectionManager(config);
     }
 
     @Override
@@ -96,7 +68,7 @@ public class CassandraDao extends AbstractDao {
         Session session = connectionManager.getSession();
         String keyspaceName = session.getLoggedKeyspace();
         KeyspaceMetadata keyspace = session.getCluster().getMetadata().getKeyspace(keyspaceName);
-        TableMetadata testTable = keyspace.getTable(prefix.apply("user_permissions"));
+        UserType testTable = keyspace.getUserType(prefix.apply("permission"));
         if(testTable == null) {
             // create tables
             String schemaFileName = "schema/cassandra.cql";
@@ -111,8 +83,12 @@ public class CassandraDao extends AbstractDao {
                     while ((line = reader.readLine()) != null) {
                         if (line.startsWith("--") || line.startsWith("#")) continue;
                         sb.append(line);
+                        if (line.endsWith(";")) {
+                            String result = prefix.apply(sb.toString());
+                            if(!result.isEmpty()) session.execute(result);
+                            sb = new StringBuilder();
+                        }
                     }
-                    session.execute(prefix.apply(sb.toString()));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -124,6 +100,33 @@ public class CassandraDao extends AbstractDao {
         TypeCodec<UDTValue> codec = CodecRegistry.DEFAULT_INSTANCE.codecFor(keyspace.getUserType("permission"));
         NodeCodec nodeCodec = new NodeCodec(codec);
         CodecRegistry.DEFAULT_INSTANCE.register(nodeCodec);
+
+        Session cluster = connectionManager.getSession();
+        ACTION_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}actions(time, actor_uuid, actor_name, type, acted_uuid, acted_name, action) VALUES(?, ?, ?, ?, ?, ?, ?)"));
+        ACTION_SELECT_ALL = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}actions"));
+
+        USER_SELECT_ALL_UUID = cluster.prepare(this.prefix.apply("SELECT uuid FROM {prefix}users"));
+        USER_SELECT_PERMISSIONS = cluster.prepare(this.prefix.apply("SELECT uuid, permissions FROM {prefix}users"));
+        USER_SELECT = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}users WHERE uuid=?"));
+        USER_DELETE = cluster.prepare(this.prefix.apply("DELETE FROM {prefix}users WHERE uuid=?"));
+        USER_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}users(uuid, name, permissions, primaryGroup) VALUES(?, ?, ?, ?)"));
+        USER_RENAME = cluster.prepare(this.prefix.apply("UPDATE {prefix}users SET name=? WHERE uuid=?"));
+        USER_UPDATE_PERMISSIONS = cluster.prepare(this.prefix.apply("UPDATE {prefix}users SET permissions=? WHERE uuid=?"));
+
+        GROUP_SELECT_ALL = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}groups"));
+        GROUP_SELECT = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}groups WHERE name=?"));
+        GROUP_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}groups(name, permissions) VALUES(?, ?)"));
+        GROUP_DELETE = cluster.prepare(this.prefix.apply("DELETE FROM {prefix}groups WHERE name=?"));
+
+        TRACK_SELECT = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}tracks WHERE name=?"));
+        TRACK_SELECT_ALL = cluster.prepare(this.prefix.apply("SELECT * FROM {prefix}tracks"));
+        TRACK_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}tracks(name, groups) VALUES(?, ?)"));
+        TRACK_DELETE = cluster.prepare(this.prefix.apply("DELETE FROM {prefix}tracks WHERE name=?"));
+
+        UUID_TO_NAME_SELECT = cluster.prepare(this.prefix.apply("SELECT name FROM {prefix}uuid_to_name WHERE uuid=?"));
+        NAME_TO_UUID_SELECT = cluster.prepare(this.prefix.apply("SELECT uuid FROM {prefix}name_to_uuid WHERE name=?"));
+        UUID_TO_NAME_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}uuid_to_name(uuid, name) VALUES(?, ?)"));
+        NAME_TO_UUID_INSERT = cluster.prepare(this.prefix.apply("INSERT INTO {prefix}name_to_uuid(name, uuid) VALUES(?, ?)"));
     }
 
     @Override
