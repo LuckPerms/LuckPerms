@@ -33,12 +33,16 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 
 /**
  * Represents an element within a {@link MetaStackDefinition}.
  *
+ * <p>The element itself does not contain any mutable state.</p>
+ *
  * @since 3.2
  */
+@Immutable
 public interface MetaStackElement {
 
     /**

@@ -25,15 +25,14 @@
 
 package me.lucko.luckperms.api.context;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -42,13 +41,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @since 2.16
  */
+@Immutable
 public final class ImmutableContextSet extends AbstractContextSet implements ContextSet {
     private static final ImmutableContextSet EMPTY = new ImmutableContextSet(ImmutableSetMultimap.of());
 
     /**
-     * Creates a builder
+     * Creates an {@link ImmutableContextSet.Builder}.
      *
      * @return a new ImmutableContextSet builder
+     * @since 4.1
      */
     @Nonnull
     public static Builder builder() {
@@ -56,11 +57,11 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
     }
 
     /**
-     * Creates an ImmutableContextSet from a context pair
+     * Creates an {@link ImmutableContextSet} from a context pair.
      *
      * @param key   the key
      * @param value the value
-     * @return a new ImmutableContextSet containing one KV pair
+     * @return a new ImmutableContextSet containing one context pair
      * @throws NullPointerException if key or value is null
      */
     @Nonnull
@@ -69,7 +70,7 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
     }
 
     /**
-     * Creates an ImmutableContextSet from two context pairs
+     * Creates an {@link ImmutableContextSet} from two context pairs.
      *
      * @param key1 the first key
      * @param value1 the first value
@@ -90,7 +91,7 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
     }
 
     /**
-     * Creates an ImmutableContextSet from an existing iterable of Map Entries
+     * Creates an {@link ImmutableContextSet} from an existing {@link Iterable} of {@link Map.Entry}s.
      *
      * @param iterable the iterable to copy from
      * @return a new ImmutableContextSet representing the pairs in the iterable
@@ -99,22 +100,15 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
     @Nonnull
     public static ImmutableContextSet fromEntries(@Nonnull Iterable<? extends Map.Entry<String, String>> iterable) {
         checkNotNull(iterable, "iterable");
-
-        Iterator<? extends Map.Entry<String, String>> iterator = iterable.iterator();
-        if (!iterator.hasNext()) {
-            return empty();
+        ImmutableContextSet.Builder builder = builder();
+        for (Map.Entry<String, String> entry : iterable) {
+            builder.add(entry);
         }
-
-        ImmutableSetMultimap.Builder<String, String> b = ImmutableSetMultimap.builder();
-        while (iterator.hasNext()) {
-            Map.Entry<String, String> e = checkNotNull(iterator.next(), "entry");
-            b.put(sanitizeKey(e.getKey()), sanitizeValue(e.getValue()));
-        }
-        return new ImmutableContextSet(b.build());
+        return builder.build();
     }
 
     /**
-     * Creates an ImmutableContextSet from an existing map
+     * Creates an {@link ImmutableContextSet} from an existing {@link Map}.
      *
      * @param map the map to copy from
      * @return a new ImmutableContextSet representing the pairs from the map
@@ -126,11 +120,12 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
     }
 
     /**
-     * Creates an ImmutableContextSet from an existing multimap
+     * Creates an {@link ImmutableContextSet} from an existing {@link Multimap}.
      *
      * @param multimap the multimap to copy from
      * @return a new ImmutableContextSet representing the pairs in the multimap
      * @throws NullPointerException if the multimap is null
+     * @since 2.16
      */
     @Nonnull
     public static ImmutableContextSet fromMultimap(@Nonnull Multimap<String, String> multimap) {
@@ -138,8 +133,9 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
     }
 
     /**
-     * Creates a new ImmutableContextSet from an existing set.
-     * Only really useful for converting between mutable and immutable types.
+     * Creates an new {@link ImmutableContextSet} from an existing {@link Set}.
+     *
+     * <p>Only really useful for converting between mutable and immutable types.</p>
      *
      * @param contextSet the context set to copy from
      * @return a new ImmutableContextSet with the same content and the one provided
@@ -151,9 +147,9 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
     }
 
     /**
-     * Creates an new empty ContextSet.
+     * Returns an empty {@link ImmutableContextSet}.
      *
-     * @return a new ContextSet
+     * @return an empty ImmutableContextSet
      */
     @Nonnull
     public static ImmutableContextSet empty() {
@@ -199,18 +195,6 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
 
     @Nonnull
     @Override
-    @Deprecated
-    public Map<String, String> toMap() {
-        ImmutableMap.Builder<String, String> m = ImmutableMap.builder();
-        for (Map.Entry<String, String> e : map.entries()) {
-            m.put(e.getKey(), e.getValue());
-        }
-
-        return m.build();
-    }
-
-    @Nonnull
-    @Override
     public Multimap<String, String> toMultimap() {
         return map;
     }
@@ -226,7 +210,9 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
     }
 
     /**
-     * A builder for {@link ImmutableContextSet}
+     * A builder for {@link ImmutableContextSet}.
+     *
+     * @since 4.1
      */
     public static final class Builder {
         private ImmutableSetMultimap.Builder<String, String> builder;
@@ -242,24 +228,32 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
             return builder;
         }
 
+        private void put(String key, String value) {
+            builder().put(key, value);
+        }
+
         /**
-         * Adds a new key value pair to the set
+         * Adds a context to the set.
          *
          * @param key   the key to add
          * @param value the value to add
+         * @return the builder
          * @throws NullPointerException if the key or value is null
+         * @see MutableContextSet#add(String, String)
          */
         @Nonnull
         public Builder add(@Nonnull String key, @Nonnull String value) {
-            builder().put(sanitizeKey(key), sanitizeValue(value));
+            put(sanitizeKey(key), sanitizeValue(value));
             return this;
         }
 
         /**
-         * Adds a new key value pair to the set
+         * Adds a context to the set.
          *
          * @param entry the entry to add
+         * @return the builder
          * @throws NullPointerException if the entry is null
+         * @see MutableContextSet#add(Map.Entry)
          */
         @Nonnull
         public Builder add(@Nonnull Map.Entry<String, String> entry) {
@@ -269,10 +263,12 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
         }
 
         /**
-         * Adds an iterable containing contexts to the set
+         * Adds the contexts contained in the given {@link Iterable} to the set.
          *
          * @param iterable an iterable of key value context pairs
+         * @return the builder
          * @throws NullPointerException if iterable is null
+         * @see MutableContextSet#addAll(Iterable)
          */
         @Nonnull
         public Builder addAll(@Nonnull Iterable<? extends Map.Entry<String, String>> iterable) {
@@ -283,10 +279,12 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
         }
 
         /**
-         * Adds the entry set of a map to the set
+         * Adds the contexts contained in the given {@link Map} to the set.
          *
          * @param map the map to add from
+         * @return the builder
          * @throws NullPointerException if the map is null
+         * @see MutableContextSet#addAll(Map)
          */
         @Nonnull
         public Builder addAll(@Nonnull Map<String, String> map) {
@@ -295,11 +293,13 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
         }
 
         /**
-         * Adds the entries of a multimap to the set
+         * Adds the contexts contained in the given {@link Multimap} to the set.
          *
          * @param multimap the multimap to add from
+         * @return the builder
          * @throws NullPointerException if the map is null
          * @since 3.4
+         * @see MutableContextSet#addAll(Multimap)
          */
         @Nonnull
         public Builder addAll(@Nonnull Multimap<String, String> multimap) {
@@ -308,10 +308,12 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
         }
 
         /**
-         * Adds of of the values in another ContextSet to this set
+         * Adds of of the contexts in another {@link ContextSet} to the set.
          *
          * @param contextSet the set to add from
+         * @return the builder
          * @throws NullPointerException if the contextSet is null
+         * @see MutableContextSet#addAll(ContextSet)
          */
         @Nonnull
         public Builder addAll(@Nonnull ContextSet contextSet) {
@@ -327,6 +329,12 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
             return this;
         }
 
+        /**
+         * Creates a {@link ImmutableContextSet} from the values previously
+         * added to the builder.
+         *
+         * @return an {@link ImmutableContextSet} from the builder
+         */
         @Nonnull
         public ImmutableContextSet build() {
             if (builder == null) {
@@ -335,6 +343,5 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
                 return new ImmutableContextSet(builder.build());
             }
         }
-
     }
 }

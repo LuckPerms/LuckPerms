@@ -31,14 +31,16 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 /**
- * Encapsulates the options and settings for a permission lookup.
+ * Encapsulates the options and settings for a permission or meta lookup.
  *
  * <p>This class is immutable.</p>
  *
  * @since 2.11
  */
+@Immutable
 public class Contexts {
 
     /**

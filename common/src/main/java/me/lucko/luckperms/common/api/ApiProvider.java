@@ -28,8 +28,8 @@ package me.lucko.luckperms.common.api;
 import lombok.AccessLevel;
 import lombok.Getter;
 
+import me.lucko.luckperms.api.ActionLogger;
 import me.lucko.luckperms.api.LPConfiguration;
-import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.MessagingService;
 import me.lucko.luckperms.api.NodeFactory;
@@ -42,11 +42,11 @@ import me.lucko.luckperms.api.manager.TrackManager;
 import me.lucko.luckperms.api.manager.UserManager;
 import me.lucko.luckperms.api.metastacking.MetaStackFactory;
 import me.lucko.luckperms.api.platform.PlatformInfo;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.api.delegates.manager.ApiContextManager;
 import me.lucko.luckperms.common.api.delegates.manager.ApiGroupManager;
 import me.lucko.luckperms.common.api.delegates.manager.ApiTrackManager;
 import me.lucko.luckperms.common.api.delegates.manager.ApiUserManager;
+import me.lucko.luckperms.common.api.delegates.misc.ApiActionLogger;
 import me.lucko.luckperms.common.api.delegates.misc.ApiMetaStackFactory;
 import me.lucko.luckperms.common.api.delegates.misc.ApiNodeFactory;
 import me.lucko.luckperms.common.api.delegates.misc.ApiPlatformInfo;
@@ -71,6 +71,7 @@ public class ApiProvider implements LuckPermsApi {
     private final GroupManager groupManager;
     private final TrackManager trackManager;
     private final LuckPermsEventBus eventBus;
+    private final ActionLogger actionLogger;
     private final ContextManager contextManager;
     private final MetaStackFactory metaStackFactory;
     private final EventFactory eventFactory;
@@ -83,6 +84,7 @@ public class ApiProvider implements LuckPermsApi {
         this.groupManager = new ApiGroupManager(plugin.getGroupManager());
         this.trackManager = new ApiTrackManager(plugin.getTrackManager());
         this.eventBus = new LuckPermsEventBus(plugin);
+        this.actionLogger = new ApiActionLogger(plugin);
         this.contextManager = new ApiContextManager(plugin, plugin.getContextManager());
         this.metaStackFactory = new ApiMetaStackFactory(plugin);
         this.eventFactory = new EventFactory(eventBus);
@@ -138,6 +140,11 @@ public class ApiProvider implements LuckPermsApi {
     }
 
     @Override
+    public ActionLogger getActionLogger() {
+        return actionLogger;
+    }
+
+    @Override
     public UuidCache getUuidCache() {
         return plugin.getUuidCache().getDelegate();
     }
@@ -157,8 +164,4 @@ public class ApiProvider implements LuckPermsApi {
         return metaStackFactory;
     }
 
-    @Override
-    public LogEntry.Builder newLogEntryBuilder() {
-        return ExtendedLogEntry.build();
-    }
 }

@@ -23,58 +23,25 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.event;
+package me.lucko.luckperms.api.caching;
 
-import java.util.function.Consumer;
+import me.lucko.luckperms.api.Contexts;
 
 import javax.annotation.Nonnull;
 
 /**
- * Represents a handler for a LuckPerms event
+ * Holds cached lookup data in a specific set of contexts.
  *
- * @param <T> the event class
+ * @since 4.1
  */
-public interface EventHandler<T extends LuckPermsEvent> extends AutoCloseable {
+public interface CachedDataContainer {
 
     /**
-     * Gets the class this handler is listening to
+     * Gets the contexts this container is holding data for.
      *
-     * @return the event class
+     * @return the contexts this container is caching
      */
     @Nonnull
-    Class<T> getEventClass();
+    Contexts getContexts();
 
-    /**
-     * Returns true if this handler is active
-     *
-     * @return true if this handler is still active
-     */
-    boolean isActive();
-
-    /**
-     * Unregisters this handler from the event bus
-     *
-     * @return true if the handler wasn't already unregistered
-     */
-    boolean unregister();
-
-    /**
-     * Gets the event consumer responsible for handling the event
-     *
-     * @return the event consumer
-     */
-    @Nonnull
-    Consumer<T> getConsumer();
-
-    /**
-     * Gets the number of times this handler has been called
-     *
-     * @return the number of times this handler has been called
-     */
-    int getCallCount();
-
-    @Override
-    default void close() {
-        unregister();
-    }
 }

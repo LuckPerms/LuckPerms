@@ -42,6 +42,21 @@ import java.util.Optional;
 public class LogDispatcher {
     private final LuckPermsPlugin plugin;
 
+    private void broadcast(ExtendedLogEntry entry, LogBroadcastEvent.Origin origin, Sender sender) {
+        plugin.getOnlineSenders()
+                .filter(CommandPermission.LOG_NOTIFY::isAuthorized)
+                .filter(s -> {
+                    boolean shouldCancel = LogNotify.isIgnoring(plugin, s.getUuid()) || (sender != null && s.getUuid().equals(sender.getUuid()));
+                    return !plugin.getApiProvider().getEventFactory().handleLogNotify(shouldCancel, entry, origin, s);
+                })
+                .forEach(s -> Message.LOG.send(s,
+                        entry.getActorFriendlyString(),
+                        Character.toString(entry.getType().getCode()),
+                        entry.getActedFriendlyString(),
+                        entry.getAction()
+                ));
+    }
+
     public void dispatch(ExtendedLogEntry entry, Sender sender) {
         // set the event to cancelled if the sender is import
         if (!plugin.getApiProvider().getEventFactory().handleLogPublish(sender.isImport(), entry)) {
@@ -58,35 +73,37 @@ public class LogDispatcher {
             messagingService.get().pushLog(entry);
         }
 
-        if (!plugin.getApiProvider().getEventFactory().handleLogBroadcast(!plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY), entry, LogBroadcastEvent.Origin.LOCAL)) {
-            plugin.getOnlineSenders()
-                    .filter(CommandPermission.LOG_NOTIFY::isAuthorized)
-                    .filter(s -> !LogNotify.isIgnoring(plugin, s.getUuid()))
-                    .filter(s -> !s.getUuid().equals(sender.getUuid()))
-                    .forEach(s -> Message.LOG.send(s,
-                            entry.getActorFriendlyString(),
-                            Character.toString(entry.getType().getCode()),
-                            entry.getActedFriendlyString(),
-                            entry.getAction()
-                    ));
+        boolean shouldCancel = !plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
+        if (!plugin.getApiProvider().getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.LOCAL)) {
+            broadcast(entry, LogBroadcastEvent.Origin.LOCAL, sender);
+        }
+    }
+
+    public void dispatchFromApi(ExtendedLogEntry entry) {
+        if (!plugin.getApiProvider().getEventFactory().handleLogPublish(false, entry)) {
+            try {
+                plugin.getStorage().logAction(entry).get();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        broadcastFromApi(entry);
+    }
+
+    public void broadcastFromApi(ExtendedLogEntry entry) {
+        plugin.getMessagingService().ifPresent(extendedMessagingService -> extendedMessagingService.pushLog(entry));
+
+        boolean shouldCancel = !plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
+        if (!plugin.getApiProvider().getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.LOCAL_API)) {
+            broadcast(entry, LogBroadcastEvent.Origin.LOCAL_API, null);
         }
     }
 
     public void dispatchFromRemote(ExtendedLogEntry entry) {
-        if (!plugin.getConfiguration().get(ConfigKeys.BROADCAST_RECEIVED_LOG_ENTRIES)) {
-            return;
-        }
-
-        if (!plugin.getApiProvider().getEventFactory().handleLogBroadcast(!plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY), entry, LogBroadcastEvent.Origin.REMOTE)) {
-            plugin.getOnlineSenders()
-                    .filter(CommandPermission.LOG_NOTIFY::isAuthorized)
-                    .filter(s -> !LogNotify.isIgnoring(plugin, s.getUuid()))
-                    .forEach(s -> Message.LOG.send(s,
-                            entry.getActorFriendlyString(),
-                            Character.toString(entry.getType().getCode()),
-                            entry.getActedFriendlyString(),
-                            entry.getAction()
-                    ));
+        boolean shouldCancel = !plugin.getConfiguration().get(ConfigKeys.BROADCAST_RECEIVED_LOG_ENTRIES) || !plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
+        if (!plugin.getApiProvider().getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.REMOTE)) {
+            broadcast(entry, LogBroadcastEvent.Origin.LOCAL_API, null);
         }
     }
 }

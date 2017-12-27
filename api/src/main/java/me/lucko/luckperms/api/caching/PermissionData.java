@@ -32,14 +32,14 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 /**
- * Holds cached Permission lookup data for a specific set of contexts
+ * Holds cached permission lookup data for a specific set of contexts.
  *
  * @since 2.13
  */
-public interface PermissionData {
+public interface PermissionData extends CachedDataContainer {
 
     /**
-     * Gets a permission value for the given permission node
+     * Gets a permission check result for the given permission node.
      *
      * @param permission the permission node
      * @return a tristate result

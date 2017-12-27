@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.caching.type;
 
+import lombok.Getter;
 import lombok.NonNull;
 
 import me.lucko.luckperms.api.Contexts;
@@ -45,6 +46,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PermissionCache implements PermissionData {
 
     /**
+     * The contexts this container is holding data for
+     */
+    @Getter
+    private final Contexts contexts;
+
+    /**
      * The raw set of permission strings.
      */
     private final Map<String, Boolean> permissions;
@@ -62,6 +69,7 @@ public class PermissionCache implements PermissionData {
     private final PermissionCalculator calculator;
 
     public PermissionCache(Contexts contexts, PermissionCalculatorMetadata metadata, CalculatorFactory calculatorFactory) {
+        this.contexts = contexts;
         permissions = new ConcurrentHashMap<>();
         permissionsUnmodifiable = Collections.unmodifiableMap(permissions);
 

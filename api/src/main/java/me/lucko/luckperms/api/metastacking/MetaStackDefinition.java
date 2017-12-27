@@ -28,6 +28,7 @@ package me.lucko.luckperms.api.metastacking;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 /**
  * Represents a meta stack model, consisting of a chain of elements, separated by spacers.
@@ -40,6 +41,7 @@ import javax.annotation.Nonnull;
  *
  * @since 2.3
  */
+@Immutable
 public interface MetaStackDefinition {
 
     /**

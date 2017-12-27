@@ -108,7 +108,7 @@ public abstract class HolderCachedData<T extends PermissionHolder> implements Ca
      */
     private MetaCache calculateMeta(@NonNull MetaContexts contexts, MetaCache data) {
         if (data == null) {
-            data = new MetaCache();
+            data = new MetaCache(contexts);
         }
 
         if (contexts.getContexts() == Contexts.allowAll()) {

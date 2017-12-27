@@ -29,17 +29,27 @@ import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.Cancellable;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import javax.annotation.Nonnull;
 
 /**
- * Called when a log entry is about to be sent to notifiable players on the platform
+ * Called when a log entry is about to be sent to specific notifiable object on
+ * the platform.
+ *
+ * <p>This event is not called for players without the notify permission,
+ * but is called for objects which are ignoring log notifications (called with
+ * the cancelled flag set to true).</p>
+ *
+ * @since 4.1
  */
-public interface LogBroadcastEvent extends LuckPermsEvent, Cancellable {
+public interface LogNotifyEvent extends LuckPermsEvent, Cancellable {
 
     /**
-     * Gets the log entry to be broadcasted
+     * Gets the log entry to be sent
      *
-     * @return the log entry to be broadcasted
+     * @return the log entry to be sent
      */
     @Nonnull
     LogEntry getEntry();
@@ -48,32 +58,56 @@ public interface LogBroadcastEvent extends LuckPermsEvent, Cancellable {
      * Gets where the log entry originated from.
      *
      * @return the origin of the log
-     * @since 3.3
      */
     @Nonnull
-    Origin getOrigin();
+    LogBroadcastEvent.Origin getOrigin();
 
     /**
-     * Represents where a log entry is from
+     * Gets the object to be notified.
      *
-     * @since 3.3
+     * @return the object to notify
      */
-    enum Origin {
+    @Nonnull
+    Notifiable getNotifiable();
+
+    /**
+     * Represents an object which could be notified as a result of a
+     * {@link LogNotifyEvent}.
+     */
+    interface Notifiable {
 
         /**
-         * Marks a log entry which originated from the current server instance
+         * Gets a {@link UUID} for the object, if it has one.
+         *
+         * <p>For Players, this method returns their unique id.</p>
+         *
+         * @return the uuid of the object, if available
          */
-        LOCAL,
+        @Nonnull
+        Optional<UUID> getUuid();
 
         /**
-         * Marks a log entry which originated from an API call on the current server instance
+         * Gets the name of the object
+         *
+         * @return the name
          */
-        LOCAL_API,
+        @Nonnull
+        String getName();
 
         /**
-         * Marks a log entry which was sent to this server via the messaging service
+         * Gets if the object is a console
+         *
+         * @return if the object is a console
          */
-        REMOTE
+        boolean isConsole();
+
+        /**
+         * Gets if the object is a player
+         *
+         * @return if the object is a player
+         */
+        boolean isPlayer();
+
     }
 
 }

@@ -38,6 +38,7 @@ import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.api.event.log.LogBroadcastEvent;
+import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.event.impl.EventConfigReload;
 import me.lucko.luckperms.common.event.impl.EventGroupCacheLoad;
 import me.lucko.luckperms.common.event.impl.EventGroupCreate;
@@ -47,6 +48,7 @@ import me.lucko.luckperms.common.event.impl.EventGroupLoad;
 import me.lucko.luckperms.common.event.impl.EventGroupLoadAll;
 import me.lucko.luckperms.common.event.impl.EventLogBroadcast;
 import me.lucko.luckperms.common.event.impl.EventLogNetworkPublish;
+import me.lucko.luckperms.common.event.impl.EventLogNotify;
 import me.lucko.luckperms.common.event.impl.EventLogPublish;
 import me.lucko.luckperms.common.event.impl.EventLogReceive;
 import me.lucko.luckperms.common.event.impl.EventNodeAdd;
@@ -138,6 +140,13 @@ public final class EventFactory {
     public boolean handleLogNetworkPublish(boolean initialState, UUID id, LogEntry entry) {
         AtomicBoolean cancel = new AtomicBoolean(initialState);
         EventLogNetworkPublish event = new EventLogNetworkPublish(cancel, id, entry);
+        fireEvent(event);
+        return cancel.get();
+    }
+
+    public boolean handleLogNotify(boolean initialState, LogEntry entry, LogBroadcastEvent.Origin origin, Sender sender) {
+        AtomicBoolean cancel = new AtomicBoolean(initialState);
+        EventLogNotify event = new EventLogNotify(cancel, entry, origin, sender);
         fireEvent(event);
         return cancel.get();
     }

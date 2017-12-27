@@ -25,10 +25,12 @@
 
 package me.lucko.luckperms.api.context;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -38,6 +40,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 abstract class AbstractContextSet implements ContextSet {
 
     protected abstract Multimap<String, String> backing();
+
+    @Nonnull
+    @Override
+    @Deprecated
+    public Map<String, String> toMap() {
+        ImmutableMap.Builder<String, String> m = ImmutableMap.builder();
+        for (Map.Entry<String, String> e : backing().entries()) {
+            m.put(e.getKey(), e.getValue());
+        }
+        return m.build();
+    }
 
     @Override
     public boolean containsKey(@Nonnull String key) {

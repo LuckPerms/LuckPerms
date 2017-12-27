@@ -27,7 +27,6 @@ package me.lucko.luckperms.api.context;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
@@ -50,11 +49,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class MutableContextSet extends AbstractContextSet implements ContextSet {
 
     /**
-     * Make a singleton MutableContextSet from a context pair
+     * Creates a {@link MutableContextSet} from a context pair.
      *
      * @param key   the key
      * @param value the value
-     * @return a new MutableContextSet containing one KV pair
+     * @return a new MutableContextSet containing one context pair
      * @throws NullPointerException if key or value is null
      */
     @Nonnull
@@ -67,7 +66,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
     }
 
     /**
-     * Makes a MutableContextSet from two context pairs
+     * Creates a {@link MutableContextSet} from two context pairs.
      *
      * @param key1 the first key
      * @param value1 the first value
@@ -90,7 +89,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
     }
 
     /**
-     * Creates a MutableContextSet from an existing iterable of Map Entries
+     * Creates a {@link MutableContextSet} from an existing {@link Iterable} of {@link Map.Entry}s.
      *
      * @param iterable the iterable to copy from
      * @return a new MutableContextSet representing the pairs in the iterable
@@ -105,7 +104,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
     }
 
     /**
-     * Creates a MutableContextSet from an existing map
+     * Creates a {@link MutableContextSet} from an existing {@link Map}.
      *
      * @param map the map to copy from
      * @return a new MutableContextSet representing the pairs from the map
@@ -120,11 +119,12 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
     }
 
     /**
-     * Creates a MutableContextSet from an existing multimap
+     * Creates a {@link MutableContextSet} from an existing {@link Multimap}.
      *
      * @param multimap the multimap to copy from
      * @return a new MutableContextSet representing the pairs in the multimap
      * @throws NullPointerException if the multimap is null
+     * @since 2.16
      */
     @Nonnull
     public static MutableContextSet fromMultimap(@Nonnull Multimap<String, String> multimap) {
@@ -135,8 +135,9 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
     }
 
     /**
-     * Creates a new MutableContextSet from an existing set.
-     * Only really useful for converting between mutable and immutable types.
+     * Creates a new {@link MutableContextSet} from an existing {@link Set}.
+     *
+     * <p>Only really useful for converting between mutable and immutable types.</p>
      *
      * @param contextSet the context set to copy from
      * @return a new MutableContextSet with the same content and the one provided
@@ -183,6 +184,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
     @Nonnull
     @Override
     public ImmutableContextSet makeImmutable() {
+        // if the map is empty, don't create a new instance
         if (map.isEmpty()) {
             return ImmutableContextSet.empty();
         }
@@ -203,23 +205,12 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
 
     @Nonnull
     @Override
-    @Deprecated
-    public Map<String, String> toMap() {
-        ImmutableMap.Builder<String, String> m = ImmutableMap.builder();
-        for (Map.Entry<String, String> e : map.entries()) {
-            m.put(e.getKey(), e.getValue());
-        }
-        return m.build();
-    }
-
-    @Nonnull
-    @Override
     public Multimap<String, String> toMultimap() {
         return ImmutableSetMultimap.copyOf(map);
     }
 
     /**
-     * Adds a new key value pair to the set
+     * Adds a context to this set.
      *
      * @param key   the key to add
      * @param value the value to add
@@ -230,7 +221,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
     }
 
     /**
-     * Adds a new key value pair to the set
+     * Adds a context to this set.
      *
      * @param entry the entry to add
      * @throws NullPointerException if the entry is null
@@ -241,7 +232,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
     }
 
     /**
-     * Adds an iterable containing contexts to the set
+     * Adds the contexts contained in the given {@link Iterable} to this set.
      *
      * @param iterable an iterable of key value context pairs
      * @throws NullPointerException if iterable is null
@@ -253,7 +244,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
     }
 
     /**
-     * Adds the entry set of a map to the set
+     * Adds the contexts contained in the given {@link Map} to this set.
      *
      * @param map the map to add from
      * @throws NullPointerException if the map is null
@@ -263,7 +254,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
     }
 
     /**
-     * Adds the entries of a multimap to the set
+     * Adds the contexts contained in the given {@link Multimap} to this set.
      *
      * @param multimap the multimap to add from
      * @throws NullPointerException if the map is null
@@ -274,7 +265,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
     }
 
     /**
-     * Adds of of the values in another ContextSet to this set
+     * Adds of of the contexts in another {@link ContextSet} to this set.
      *
      * @param contextSet the set to add from
      * @throws NullPointerException if the contextSet is null
@@ -290,7 +281,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
     }
 
     /**
-     * Remove a key value pair from this set
+     * Removes a context from this set.
      *
      * @param key   the key to remove
      * @param value the value to remove (case sensitive)
@@ -301,7 +292,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
     }
 
     /**
-     * Same as {@link #remove(String, String)}, except ignores the case of the value
+     * Removes a context from this set. (case-insensitive)
      *
      * @param key   the key to remove
      * @param value the value to remove
@@ -316,7 +307,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
     }
 
     /**
-     * Removes all pairs with the given key
+     * Removes all contexts from this set with the given key.
      *
      * @param key the key to remove
      * @throws NullPointerException if the key is null
@@ -326,7 +317,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
     }
 
     /**
-     * Clears the set
+     * Removes all contexts from the set.
      */
     public void clear() {
         map.clear();

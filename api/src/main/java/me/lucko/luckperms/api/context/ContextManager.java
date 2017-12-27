@@ -40,9 +40,14 @@ import javax.annotation.Nonnull;
  * on specific server implementations. In all cases, the "player" or "subject" type for
  * the platform must be used.
  *
- * Specifically, {@code org.bukkit.entity.Player},
- * {@code net.md_5.bungee.api.connection.ProxiedPlayer} and
- * {@code org.spongepowered.api.service.permission.Subject}.
+ * Specifically:
+ *
+ * <p></p>
+ * <ul>
+ *     <li>{@code org.bukkit.entity.Player}</li>
+ *     <li>{@code net.md_5.bungee.api.connection.ProxiedPlayer}</li>
+ *     <li>{@code org.spongepowered.api.service.permission.Subject}</li>
+ * </ul>
  *
  * @since 4.0
  */

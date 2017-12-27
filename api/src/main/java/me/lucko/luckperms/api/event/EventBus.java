@@ -31,14 +31,16 @@ import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 
 /**
- * The LuckPerms event bus. Used for subscribing (or registering listeners) to events.
+ * The internal LuckPerms event bus.
+ *
+ * <p>LuckPerms events are posted to any listeners registered with the bus.</p>
  *
  * @since 3.0
  */
 public interface EventBus {
 
     /**
-     * Subscribe to an event
+     * Subscribes to an event.
      *
      * @param eventClass the event class
      * @param handler    the event handler
@@ -49,7 +51,7 @@ public interface EventBus {
     <T extends LuckPermsEvent> EventHandler<T> subscribe(@Nonnull Class<T> eventClass, @Nonnull Consumer<T> handler);
 
     /**
-     * Gets a set of all registered handlers for a given event
+     * Gets a set of all registered handlers for a given event.
      *
      * @param eventClass the event to find handlers for
      * @param <T>        the event class

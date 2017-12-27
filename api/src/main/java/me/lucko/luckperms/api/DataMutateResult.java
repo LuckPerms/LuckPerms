@@ -36,12 +36,12 @@ public enum DataMutateResult {
     SUCCESS(true),
 
     /**
-     * Indicates the mutation failed because the subject already has something
+     * Indicates the mutation failed because the subject of the action already has something
      */
     ALREADY_HAS(false),
 
     /**
-     * Indicates the mutation failed because the subject lacks something
+     * Indicates the mutation failed because the subject of the action lacks something
      */
     LACKS(false),
 

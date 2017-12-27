@@ -26,12 +26,14 @@
 package me.lucko.luckperms.api;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 /**
  * A node with a traceable origin
  *
  * @since 2.11
  */
+@Immutable
 public interface LocalizedNode extends Node {
 
     /**

@@ -27,13 +27,15 @@ package me.lucko.luckperms.common.caching.type;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.ListMultimap;
 
+import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.caching.MetaContexts;
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.MetaStack;
@@ -48,10 +50,15 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * Holds cached meta for a given context
  */
 @Getter
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class MetaCache implements MetaData {
     @Getter(AccessLevel.NONE)
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
+
+    /**
+     * The contexts this container is holding data for
+     */
+    private final MetaContexts metaContexts;
 
     private ListMultimap<String, String> metaMultimap = ImmutableListMultimap.of();
     private Map<String, String> meta = ImmutableMap.of();
@@ -116,6 +123,11 @@ public class MetaCache implements MetaData {
     @Override
     public MetaStackDefinition getSuffixStackDefinition() {
         return suffixStack.getDefinition();
+    }
+
+    @Override
+    public Contexts getContexts() {
+        return metaContexts.getContexts();
     }
 
 }
