@@ -220,7 +220,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
         String value = user.getPrimaryGroup().getValue();
         Group group = getGroup(value);
         if (group != null) {
-            return group.getDisplayName().orElse(group.getName());
+            value = group.getDisplayName().orElse(group.getName());
         }
 
         if (log()) {
