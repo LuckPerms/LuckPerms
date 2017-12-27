@@ -2,8 +2,8 @@ package me.lucko.luckperms.common.storage.dao.cassandra;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
-import com.datastax.driver.core.Statement;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.driver.core.exceptions.DriverException;
+import com.google.common.base.Strings;
 
 public class CassandraConnectionManager implements AutoCloseable {
     private final Cluster cluster;
@@ -14,7 +14,7 @@ public class CassandraConnectionManager implements AutoCloseable {
         if(config.isSsl()) builder.withSSL();
         String username = config.getUsername();
         String password = config.getPassword();
-        if(isNotEmpty(username) && isNotEmpty(password)) builder.withCredentials(username, password);
+        if(!Strings.isNullOrEmpty(username) && !Strings.isNullOrEmpty(password)) builder.withCredentials(username, password);
         this.cluster = builder.build();
         this.session = cluster.connect();
     }
@@ -28,11 +28,7 @@ public class CassandraConnectionManager implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() throws DriverException {
         cluster.close();
-    }
-
-    private static boolean isNotEmpty(String str) {
-        return str != null && str.length() != 0;
     }
 }
