@@ -190,7 +190,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
         if (!sender.isImport()) {
             Optional<ExtendedMessagingService> messagingService = plugin.getMessagingService();
             if (messagingService.isPresent() && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
-                messagingService.get().getUpdateBuffer().request();
+                messagingService.get().pushUserUpdate(user);
             }
         }
     }

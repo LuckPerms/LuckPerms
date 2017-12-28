@@ -349,10 +349,10 @@ public class ExtendedLogEntry implements LogEntry {
         }
     }
 
-    public static JsonObject serializeWithId(UUID id, LogEntry entry) {
+    public static JsonObject serializeWithId(String id, LogEntry entry) {
         JsonObject data = new JsonObject();
 
-        data.add("id", new JsonPrimitive(id.toString()));
+        data.add("id", new JsonPrimitive(id));
         data.add("actor", new JsonPrimitive(entry.getActor().toString()));
         data.add("actorName", new JsonPrimitive(entry.getActorName()));
         data.add("type", new JsonPrimitive(entry.getType().name()));
@@ -365,10 +365,10 @@ public class ExtendedLogEntry implements LogEntry {
         return data;
     }
 
-    public static Map.Entry<UUID, ExtendedLogEntry> deserialize(JsonObject object) {
+    public static Map.Entry<String, ExtendedLogEntry> deserialize(JsonObject object) {
         ExtendedLogEntryBuilder builder = build();
 
-        UUID id = UUID.fromString(object.get("id").getAsString());
+        String id = object.get("id").getAsString();
 
         builder.actor(UUID.fromString(object.get("actor").getAsString()));
         builder.actorName(object.get("actorName").getAsString());
