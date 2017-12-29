@@ -29,6 +29,7 @@ import lombok.Getter;
 
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.api.LogEntry;
@@ -73,7 +74,7 @@ public abstract class AbstractMessagingService implements ExtendedMessagingServi
         this.plugin = plugin;
         this.name = name;
         this.receivedMessages = Collections.synchronizedSet(new HashSet<>());
-        this.gson = new Gson();
+        this.gson = new GsonBuilder().disableHtmlEscaping().create();
         this.updateBuffer = new PushUpdateBuffer(plugin);
     }
 
@@ -124,7 +125,7 @@ public abstract class AbstractMessagingService implements ExtendedMessagingServi
                 return;
             }
 
-            plugin.getLog().info("[" + name + " Messaging] Received user update ping for '" + user.getFriendlyName() + "' with id: " + requestId.toString());
+            plugin.getLog().info("[" + name + " Messaging] Received user update ping for '" + user.getFriendlyName() + "' with id: " + uuidToString(requestId));
 
             if (plugin.getApiProvider().getEventFactory().handleNetworkPreSync(false, requestId)) {
                 return;
@@ -175,7 +176,7 @@ public abstract class AbstractMessagingService implements ExtendedMessagingServi
             String strId = uuidToString(requestId);
 
             plugin.getLog().info("[" + name + " Messaging] Sending ping with id: " + strId);
-            sendMessage("update:" + strId);
+            sendMessage(UPDATE_HEADER + strId);
         });
     }
 
@@ -186,7 +187,7 @@ public abstract class AbstractMessagingService implements ExtendedMessagingServi
             String strId = uuidToString(requestId);
 
             plugin.getLog().info("[" + name + " Messaging] Sending user ping for '" + user.getFriendlyName() + "' with id: " + strId);
-            sendMessage("userupdate:" + uuidsToString(requestId, user.getUuid()));
+            sendMessage(USER_UPDATE_HEADER + uuidsToString(requestId, user.getUuid()));
         });
     }
 
@@ -201,7 +202,7 @@ public abstract class AbstractMessagingService implements ExtendedMessagingServi
             }
 
             plugin.getLog().info("[" + name + " Messaging] Sending log with id: " + strId);
-            sendMessage("log:" + gson.toJson(ExtendedLogEntry.serializeWithId(strId, logEntry)));
+            sendMessage(LOG_HEADER + gson.toJson(ExtendedLogEntry.serializeWithId(strId, logEntry)));
         });
     }
 
