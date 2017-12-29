@@ -64,6 +64,6 @@ public class DataConstraints {
 
     public static final Predicate<String> SERVER_NAME_TEST = s -> s.length() > 0 && s.length() <= MAX_SERVER_LENGTH && !s.contains(" ");
 
-    public static final Predicate<String> WORLD_NAME_TEST = s -> s.length() > 0 && s.length() <= MAX_WORLD_LENGTH && !s.contains(" ");
+    public static final Predicate<String> WORLD_NAME_TEST = s -> s.length() > 0 && s.length() <= MAX_WORLD_LENGTH;
 
 }
