@@ -103,10 +103,14 @@ public class DependencyManager {
             dependencies.add(Dependency.JEDIS);
         }
 
-        // don't load slf4j or configurate dependencies on sponge, as they're already present
-        if (plugin.getServerType() == PlatformType.SPONGE) {
+        // don't load slf4j if it's already present
+        if (classExists("org.slf4j.Logger") && classExists("org.slf4j.LoggerFactory")) {
             dependencies.remove(Dependency.SLF4J_API);
             dependencies.remove(Dependency.SLF4J_SIMPLE);
+        }
+
+        // don't load configurate dependencies on sponge
+        if (plugin.getServerType() == PlatformType.SPONGE) {
             dependencies.remove(Dependency.CONFIGURATE_CORE);
             dependencies.remove(Dependency.CONFIGURATE_GSON);
             dependencies.remove(Dependency.CONFIGURATE_YAML);
@@ -182,24 +186,27 @@ public class DependencyManager {
         }
     }
 
-    private void loadJar(File file) {
+    private  void loadJar(File file) {
         // get the classloader to load into
-        try {
-            plugin.loadUrlIntoClasspath(file.toURI().toURL());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+        ClassLoader classLoader = plugin.getClass().getClassLoader();
 
-    public static void loadUrlIntoClassLoader(URL url, ClassLoader classLoader) {
         if (classLoader instanceof URLClassLoader) {
             try {
-                ADD_URL_METHOD.invoke(classLoader, url);
-            } catch (IllegalAccessException | InvocationTargetException e) {
+                ADD_URL_METHOD.invoke(classLoader, file.toURI().toURL());
+            } catch (IllegalAccessException | InvocationTargetException | MalformedURLException e) {
                 throw new RuntimeException("Unable to invoke URLClassLoader#addURL", e);
             }
         } else {
             throw new RuntimeException("Unknown classloader type: " + classLoader.getClass());
+        }
+    }
+
+    private static boolean classExists(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
         }
     }
 
