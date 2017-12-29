@@ -186,18 +186,12 @@ public class DependencyManager {
         }
     }
 
-    private  void loadJar(File file) {
+    private void loadJar(File file) {
         // get the classloader to load into
-        ClassLoader classLoader = plugin.getClass().getClassLoader();
-
-        if (classLoader instanceof URLClassLoader) {
-            try {
-                ADD_URL_METHOD.invoke(classLoader, file.toURI().toURL());
-            } catch (IllegalAccessException | InvocationTargetException | MalformedURLException e) {
-                throw new RuntimeException("Unable to invoke URLClassLoader#addURL", e);
-            }
-        } else {
-            throw new RuntimeException("Unknown classloader type: " + classLoader.getClass());
+        try {
+            plugin.loadUrlIntoClasspath(file.toURI().toURL());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -207,6 +201,18 @@ public class DependencyManager {
             return true;
         } catch (ClassNotFoundException e) {
             return false;
+        }
+    }
+
+    public static void loadUrlIntoClassLoader(URL url, ClassLoader classLoader) {
+        if (classLoader instanceof URLClassLoader) {
+            try {
+                ADD_URL_METHOD.invoke(classLoader, url);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException("Unable to invoke URLClassLoader#addURL", e);
+            }
+        } else {
+            throw new RuntimeException("Unknown classloader type: " + classLoader.getClass());
         }
     }
 

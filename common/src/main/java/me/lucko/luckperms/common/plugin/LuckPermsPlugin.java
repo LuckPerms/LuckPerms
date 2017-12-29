@@ -55,6 +55,7 @@ import me.lucko.luckperms.common.verbose.VerboseHandler;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -153,6 +154,15 @@ public interface LuckPermsPlugin {
      * @return the dependency manager
      */
     DependencyManager getDependencyManager();
+
+    /**
+     * Loads a dependency into the plugins classpath
+     *
+     * @param url the url to load
+     */
+    default void loadUrlIntoClasspath(URL url) {
+        DependencyManager.loadUrlIntoClassLoader(url, getClass().getClassLoader());
+    }
 
     /**
      * Gets the context manager.

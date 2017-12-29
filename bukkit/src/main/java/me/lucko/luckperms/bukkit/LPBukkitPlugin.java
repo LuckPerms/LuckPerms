@@ -31,6 +31,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.bukkit.calculators.BukkitCalculatorFactory;
+import me.lucko.luckperms.bukkit.classloader.LPClassLoader;
 import me.lucko.luckperms.bukkit.contexts.BukkitContextManager;
 import me.lucko.luckperms.bukkit.contexts.WorldCalculator;
 import me.lucko.luckperms.bukkit.listeners.BukkitConnectionListener;
@@ -95,6 +96,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -129,6 +131,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private DefaultsProvider defaultsProvider;
     private ChildPermissionProvider childPermissionProvider;
     private LocaleManager localeManager;
+    private LPClassLoader lpClassLoader;
     private DependencyManager dependencyManager;
     private CachedStateManager cachedStateManager;
     private ContextManager<Player> contextManager;
@@ -153,6 +156,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         senderFactory = new BukkitSenderFactory(this);
         log = new SenderLogger(this, getConsoleSender());
 
+        lpClassLoader = LPClassLoader.obtainFor(this);
         dependencyManager = new DependencyManager(this);
         dependencyManager.loadDependencies(Collections.singleton(Dependency.CAFFEINE));
     }
@@ -387,6 +391,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         getServer().getScheduler().cancelTasks(this);
         HandlerList.unregisterAll(this);
         getLog().info("Goodbye!");
+    }
+
+    @Override
+    public void loadUrlIntoClasspath(URL url) {
+        lpClassLoader.addURL(url);
     }
 
     public void tryVaultHook(boolean force) {
