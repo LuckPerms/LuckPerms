@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * A fake classloader instance which sits in-front of a PluginClassLoader, which
+ * A fake classloader instance which sits in-front of a PluginClassLoader, and
  * attempts to load classes from it's own sources before allowing the PCL to load
  * the class.
  *

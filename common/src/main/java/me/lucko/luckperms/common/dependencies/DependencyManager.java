@@ -103,14 +103,10 @@ public class DependencyManager {
             dependencies.add(Dependency.JEDIS);
         }
 
-        // don't load slf4j if it's already present
-        if (classExists("org.slf4j.Logger") && classExists("org.slf4j.LoggerFactory")) {
+        // don't load slf4j or configurate dependencies on sponge, as they're already present
+        if (plugin.getServerType() == PlatformType.SPONGE) {
             dependencies.remove(Dependency.SLF4J_API);
             dependencies.remove(Dependency.SLF4J_SIMPLE);
-        }
-
-        // don't load configurate dependencies on sponge
-        if (plugin.getServerType() == PlatformType.SPONGE) {
             dependencies.remove(Dependency.CONFIGURATE_CORE);
             dependencies.remove(Dependency.CONFIGURATE_GSON);
             dependencies.remove(Dependency.CONFIGURATE_YAML);
@@ -192,15 +188,6 @@ public class DependencyManager {
             plugin.loadUrlIntoClasspath(file.toURI().toURL());
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private static boolean classExists(String className) {
-        try {
-            Class.forName(className);
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
         }
     }
 
