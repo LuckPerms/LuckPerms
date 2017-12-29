@@ -25,11 +25,11 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
-import com.github.cheesesoftware.PowerfulPermsAPI.CachedGroup;
-import com.github.cheesesoftware.PowerfulPermsAPI.Group;
-import com.github.cheesesoftware.PowerfulPermsAPI.Permission;
-import com.github.cheesesoftware.PowerfulPermsAPI.PermissionManager;
-import com.github.cheesesoftware.PowerfulPermsAPI.PowerfulPermsPlugin;
+import com.github.gustav9797.PowerfulPermsAPI.CachedGroup;
+import com.github.gustav9797.PowerfulPermsAPI.Group;
+import com.github.gustav9797.PowerfulPermsAPI.Permission;
+import com.github.gustav9797.PowerfulPermsAPI.PermissionManager;
+import com.github.gustav9797.PowerfulPermsAPI.PowerfulPermsPlugin;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.Node;

@@ -141,20 +141,10 @@
         </dependency>
         <!-- PowerfulPerms -->
         <dependency>
-            <groupId>com.github.cheesesoftware</groupId>
+            <groupId>com.github.gustav9797</groupId>
             <artifactId>PowerfulPermsAPI</artifactId>
-            <version>1.4.0</version>
+            <version>4.5.2</version>
             <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>redis.clients</groupId>
-                    <artifactId>jedis</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <!-- GroupManager -->
         <dependency>

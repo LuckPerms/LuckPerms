@@ -50,7 +50,7 @@ public class MigrationMainCommand extends MainCommand<Object, Object> {
     private static final Map<String, String> PLUGINS = ImmutableMap.<String, String>builder()
             .put("org.anjocaido.groupmanager.GroupManager", "me.lucko.luckperms.bukkit.migration.MigrationGroupManager")
             .put("ru.tehkode.permissions.bukkit.PermissionsEx", "me.lucko.luckperms.bukkit.migration.MigrationPermissionsEx")
-            .put("com.github.cheesesoftware.PowerfulPermsAPI.PowerfulPermsPlugin", "me.lucko.luckperms.bukkit.migration.MigrationPowerfulPerms")
+            .put("com.github.gustav9797.PowerfulPermsAPI.PowerfulPermsPlugin", "me.lucko.luckperms.bukkit.migration.MigrationPowerfulPerms")
             .put("org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService", "me.lucko.luckperms.bukkit.migration.MigrationZPermissions")
             .put("net.alpenblock.bungeeperms.BungeePerms", "me.lucko.luckperms.bungee.migration.MigrationBungeePerms")
             .put("de.bananaco.bpermissions.api.WorldManager", "me.lucko.luckperms.bukkit.migration.MigrationBPermissions")
