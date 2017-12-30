@@ -83,7 +83,7 @@ public final class SubjectReferenceFactory {
      */
     private final LoadingCache<SubjectReferenceAttributes, SubjectReference> referenceCache = Caffeine.newBuilder()
             .expireAfterAccess(1, TimeUnit.HOURS)
-            .build(a -> new SubjectReference(service, a.collectionId, a.id));
+            .build(a -> new SubjectReference(SubjectReferenceFactory.this.service, a.collectionId, a.id));
 
     @Deprecated
     public SubjectReference deserialize(@NonNull String serialisedReference) {
