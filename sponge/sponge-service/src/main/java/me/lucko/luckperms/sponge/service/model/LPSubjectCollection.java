@@ -49,10 +49,6 @@ public interface LPSubjectCollection {
 
     String getIdentifier();
 
-    default SubjectReference newSubjectReference(String identifier) {
-        return getService().newSubjectReference(getIdentifier(), identifier);
-    }
-
     Predicate<String> getIdentifierValidityPredicate();
 
     CompletableFuture<LPSubject> loadSubject(String identifier);

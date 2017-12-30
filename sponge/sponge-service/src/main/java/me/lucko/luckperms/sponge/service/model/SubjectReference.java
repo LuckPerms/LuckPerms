@@ -48,7 +48,7 @@ public final class SubjectReference implements org.spongepowered.api.service.per
     /**
      * The time a subject instance should be cached in this reference
      */
-    private static final long CACHE_TIME = TimeUnit.SECONDS.toMillis(60);
+    private static final long CACHE_TIME = TimeUnit.MINUTES.toMillis(5);
 
     /**
      * Reference to the permission service
@@ -77,6 +77,19 @@ public final class SubjectReference implements org.spongepowered.api.service.per
         this.service = Preconditions.checkNotNull(service);
         this.collectionIdentifier = Preconditions.checkNotNull(collectionIdentifier);
         this.subjectIdentifier = Preconditions.checkNotNull(subjectIdentifier);
+    }
+
+    void fillCache(LPSubject subject) {
+        LPSubject sub = tryCache();
+
+        if (sub == null) {
+            // if no value is currently cached, populate with the passed value
+            lastLookup = System.currentTimeMillis();
+            cache = new WeakReference<>(subject);
+        } else if (sub == subject) {
+            // if equal, reset the cache timeout
+            lastLookup = System.currentTimeMillis();
+        }
     }
 
     private LPSubject tryCache() {
@@ -152,7 +165,7 @@ public final class SubjectReference implements org.spongepowered.api.service.per
 
     @Override
     public String toString() {
-        return "SubjectReference(" +
+        return "luckperms.SubjectReference(" +
                 "collection=" + this.collectionIdentifier + ", " +
                 "subject=" + this.subjectIdentifier + ")";
     }

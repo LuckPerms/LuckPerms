@@ -47,7 +47,6 @@ import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
-import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorage;
 
@@ -140,11 +139,6 @@ public class LuckPermsService implements LPPermissionService {
     @Override
     public ImmutableMap<String, LPSubjectCollection> getLoadedCollections() {
         return ImmutableMap.copyOf(collections.asMap());
-    }
-
-    @Override
-    public SubjectReference newSubjectReference(String collectionIdentifier, String subjectIdentifier) {
-        return SubjectReferenceFactory.obtain(this, collectionIdentifier, subjectIdentifier);
     }
 
     @Override

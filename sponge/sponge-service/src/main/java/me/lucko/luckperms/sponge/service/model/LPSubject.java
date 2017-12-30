@@ -47,7 +47,7 @@ public interface LPSubject {
     String getIdentifier();
 
     default SubjectReference toReference() {
-        return getService().newSubjectReference(getParentCollection().getIdentifier(), getIdentifier());
+        return SubjectReferenceFactory.obtain(getService(), this);
     }
 
     default LPSubject getDefaults() {

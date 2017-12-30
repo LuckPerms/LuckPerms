@@ -64,8 +64,6 @@ public interface LPPermissionService {
 
     ImmutableMap<String, LPSubjectCollection> getLoadedCollections();
 
-    SubjectReference newSubjectReference(String collectionIdentifier, String subjectIdentifier);
-
     LPPermissionDescription registerPermissionDescription(String id, Text description, PluginContainer owner);
 
     Optional<LPPermissionDescription> getDescription(String permission);

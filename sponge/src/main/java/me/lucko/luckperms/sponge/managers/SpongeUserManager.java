@@ -50,6 +50,7 @@ import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
 
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -334,7 +335,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             List<HeldPermission<UUID>> lookup = plugin.getStorage().getUsersWithPermission(permission).join();
             for (HeldPermission<UUID> holder : lookup) {
                 if (holder.asNode().getFullContexts().equals(ImmutableContextSet.empty())) {
-                    ret.put(getService().newSubjectReference(getIdentifier(), holder.getHolder().toString()), holder.getValue());
+                    ret.put(SubjectReferenceFactory.obtain(getService(), getIdentifier(), holder.getHolder().toString()), holder.getValue());
                 }
             }
 
@@ -350,7 +351,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             List<HeldPermission<UUID>> lookup = plugin.getStorage().getUsersWithPermission(permission).join();
             for (HeldPermission<UUID> holder : lookup) {
                 if (holder.asNode().getFullContexts().equals(contexts)) {
-                    ret.put(getService().newSubjectReference(getIdentifier(), holder.getHolder().toString()), holder.getValue());
+                    ret.put(SubjectReferenceFactory.obtain(getService(), getIdentifier(), holder.getHolder().toString()), holder.getValue());
                 }
             }
 

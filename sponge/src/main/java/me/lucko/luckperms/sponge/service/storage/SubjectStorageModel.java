@@ -58,7 +58,7 @@ public class SubjectStorageModel {
     private final Map<ImmutableContextSet, List<SubjectReference>> parents;
 
     public SubjectStorageModel(LPPermissionService service, Map<ImmutableContextSet, ? extends Map<String, Boolean>> permissions, Map<ImmutableContextSet, ? extends Map<String, String>> options, Map<ImmutableContextSet, ? extends List<SubjectReference>> parents) {
-        this.service  = service;
+        this.service = service;
 
         ImmutableMap.Builder<ImmutableContextSet, Map<String, Boolean>> permissionsBuilder = ImmutableMap.builder();
         for (Map.Entry<ImmutableContextSet, ? extends Map<String, Boolean>> e : permissions.entrySet()) {

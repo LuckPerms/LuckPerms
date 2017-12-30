@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
@@ -91,7 +92,7 @@ public final class SubjectCollectionProxy implements SubjectCollection {
 
     @Override
     public SubjectReference newSubjectReference(String s) {
-        return handle.newSubjectReference(s);
+        return SubjectReferenceFactory.obtain(handle.getService(), getIdentifier(), s);
     }
 
     @Override

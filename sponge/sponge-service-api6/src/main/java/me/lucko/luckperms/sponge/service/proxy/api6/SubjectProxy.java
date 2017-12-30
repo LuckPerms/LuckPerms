@@ -32,7 +32,9 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
+import me.lucko.luckperms.sponge.service.model.ProxiedSubject;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
@@ -48,12 +50,17 @@ import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor
-public final class SubjectProxy implements Subject {
+public final class SubjectProxy implements Subject, ProxiedSubject {
     private final LPPermissionService service;
     private final SubjectReference ref;
 
     private CompletableFuture<LPSubject> handle() {
         return ref.resolveLp();
+    }
+
+    @Override
+    public SubjectReference getReference() {
+        return ref;
     }
 
     @Override
@@ -95,10 +102,7 @@ public final class SubjectProxy implements Subject {
     public boolean isChildOf(Subject parent) {
         return handle().thenApply(handle -> handle.isChildOf(
                 ImmutableContextSet.empty(),
-                service.newSubjectReference(
-                        parent.getContainingCollection().getIdentifier(),
-                        parent.getIdentifier()
-                )
+                SubjectReferenceFactory.obtain(service, parent)
         )).join();
     }
 
@@ -106,10 +110,7 @@ public final class SubjectProxy implements Subject {
     public boolean isChildOf(Set<Context> contexts, Subject parent) {
         return handle().thenApply(handle -> handle.isChildOf(
                 CompatibilityUtil.convertContexts(contexts),
-                service.newSubjectReference(
-                        parent.getContainingCollection().getIdentifier(),
-                        parent.getIdentifier()
-                )
+                SubjectReferenceFactory.obtain(service, parent)
         )).join();
     }
 

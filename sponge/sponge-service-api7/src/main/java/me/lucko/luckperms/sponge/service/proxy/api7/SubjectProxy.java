@@ -31,6 +31,7 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
+import me.lucko.luckperms.sponge.service.model.ProxiedSubject;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
 import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
 
@@ -48,12 +49,17 @@ import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor
-public final class SubjectProxy implements Subject {
+public final class SubjectProxy implements Subject, ProxiedSubject {
     private final LPPermissionService service;
     private final SubjectReference ref;
 
     private CompletableFuture<LPSubject> getHandle() {
         return ref.resolveLp();
+    }
+
+    @Override
+    public SubjectReference getReference() {
+        return ref;
     }
 
     @Override

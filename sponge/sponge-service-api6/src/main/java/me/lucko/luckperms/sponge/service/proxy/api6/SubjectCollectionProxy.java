@@ -32,6 +32,7 @@ import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
@@ -71,7 +72,7 @@ public final class SubjectCollectionProxy implements SubjectCollection {
         // this behaviour should be replaced when CompletableFutures are added to Sponge
         return (List) handle.getAllIdentifiers()
                 .thenApply(ids -> ids.stream()
-                        .map(s -> new SubjectProxy(service, service.newSubjectReference(getIdentifier(), s)))
+                        .map(s -> new SubjectProxy(service, SubjectReferenceFactory.obtain(service, getIdentifier(), s)))
                         .collect(ImmutableCollectors.toList())
                 ).join();
     }

@@ -63,7 +63,17 @@ public final class SubjectReferenceFactory {
         return obtain(service, parts.get(0), parts.get(1));
     }
 
+    public static SubjectReference obtain(@NonNull LPPermissionService service, @NonNull LPSubject subject) {
+        SubjectReference ret = obtain(service, subject.getParentCollection().getIdentifier(), subject.getIdentifier());
+        ret.fillCache(subject);
+        return ret;
+    }
+
     public static SubjectReference obtain(@NonNull LPPermissionService service, @NonNull Subject subject) {
+        if (subject instanceof ProxiedSubject) {
+            return ((ProxiedSubject) subject).getReference();
+        }
+
         return obtain(service, subject.getContainingCollection().getIdentifier(), subject.getIdentifier());
     }
 

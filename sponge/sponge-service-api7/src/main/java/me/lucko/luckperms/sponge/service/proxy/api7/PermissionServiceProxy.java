@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -105,7 +106,7 @@ public final class PermissionServiceProxy implements PermissionService {
 
     @Override
     public SubjectReference newSubjectReference(String s, String s1) {
-        return handle.newSubjectReference(s, s1);
+        return SubjectReferenceFactory.obtain(handle, s, s1);
     }
 
     @Override

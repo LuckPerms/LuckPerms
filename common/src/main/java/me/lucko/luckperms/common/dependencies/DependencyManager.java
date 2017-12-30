@@ -186,7 +186,7 @@ public class DependencyManager {
         }
     }
 
-    private  void loadJar(File file) {
+    private void loadJar(File file) {
         // get the classloader to load into
         ClassLoader classLoader = plugin.getClass().getClassLoader();
 

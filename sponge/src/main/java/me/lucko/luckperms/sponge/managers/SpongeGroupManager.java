@@ -50,6 +50,7 @@ import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
 
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -237,7 +238,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
             List<HeldPermission<String>> lookup = plugin.getStorage().getGroupsWithPermission(permission).join();
             for (HeldPermission<String> holder : lookup) {
                 if (holder.asNode().getFullContexts().equals(ImmutableContextSet.empty())) {
-                    ret.put(getService().newSubjectReference(getIdentifier(), holder.getHolder()), holder.getValue());
+                    ret.put(SubjectReferenceFactory.obtain(getService(), getIdentifier(), holder.getHolder()), holder.getValue());
                 }
             }
 
@@ -253,7 +254,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
             List<HeldPermission<String>> lookup = plugin.getStorage().getGroupsWithPermission(permission).join();
             for (HeldPermission<String> holder : lookup) {
                 if (holder.asNode().getFullContexts().equals(contexts)) {
-                    ret.put(getService().newSubjectReference(getIdentifier(), holder.getHolder()), holder.getValue());
+                    ret.put(SubjectReferenceFactory.obtain(getService(), getIdentifier(), holder.getHolder()), holder.getValue());
                 }
             }
 
