@@ -47,6 +47,7 @@ import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorage;
 
@@ -77,6 +78,7 @@ public class LuckPermsService implements LPPermissionService {
     @Getter(AccessLevel.NONE)
     private final PermissionService spongeProxy;
 
+    private final SubjectReferenceFactory referenceFactory;
     private final SubjectStorage storage;
     private final SpongeUserManager userSubjects;
     private final SpongeGroupManager groupSubjects;
@@ -89,6 +91,7 @@ public class LuckPermsService implements LPPermissionService {
 
     public LuckPermsService(LPSpongePlugin plugin) {
         this.plugin = plugin;
+        this.referenceFactory = new SubjectReferenceFactory(this);
         this.spongeProxy = ProxyFactory.toSponge(this);
 
         storage = new SubjectStorage(this, new File(plugin.getDataDirectory(), "sponge-data"));

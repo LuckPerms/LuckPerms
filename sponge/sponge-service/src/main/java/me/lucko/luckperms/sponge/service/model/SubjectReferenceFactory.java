@@ -27,7 +27,7 @@ package me.lucko.luckperms.sponge.service.model;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import lombok.experimental.UtilityClass;
+import lombok.RequiredArgsConstructor;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -41,8 +41,36 @@ import java.util.concurrent.TimeUnit;
 /**
  * Caches the creation of {@link SubjectReference}s.
  */
-@UtilityClass
+@RequiredArgsConstructor
 public final class SubjectReferenceFactory {
+
+    // static util access
+
+    @Deprecated
+    public static SubjectReference deserialize(@NonNull LPPermissionService service, String serialisedReference) {
+        return service.getReferenceFactory().deserialize(serialisedReference);
+    }
+
+    public static SubjectReference obtain(@NonNull LPPermissionService service, LPSubject subject) {
+        return service.getReferenceFactory().obtain(subject);
+    }
+
+    public static SubjectReference obtain(@NonNull LPPermissionService service, Subject subject) {
+        return service.getReferenceFactory().obtain(subject);
+    }
+
+    public static SubjectReference obtain(@NonNull LPPermissionService service, org.spongepowered.api.service.permission.SubjectReference reference) {
+        return service.getReferenceFactory().obtain(reference);
+    }
+
+    public static SubjectReference obtain(@NonNull LPPermissionService service, String collectionIdentifier, String subjectIdentifier) {
+        return service.getReferenceFactory().obtain(collectionIdentifier, subjectIdentifier);
+    }
+
+    /**
+     * The permission service to obtain real subject instances from
+     */
+    private final LPPermissionService service;
 
     /**
      * Cache based factory for SubjectReferences.
@@ -53,40 +81,40 @@ public final class SubjectReferenceFactory {
      *
      * It's perfectly ok if two instances of the same SubjectReference exist. (hence the 1 hour expiry)
      */
-    private static final LoadingCache<SubjectReferenceAttributes, SubjectReference> REFERENCE_CACHE = Caffeine.newBuilder()
+    private final LoadingCache<SubjectReferenceAttributes, SubjectReference> referenceCache = Caffeine.newBuilder()
             .expireAfterAccess(1, TimeUnit.HOURS)
-            .build(a -> new SubjectReference(a.permissionService, a.collectionId, a.id));
+            .build(a -> new SubjectReference(service, a.collectionId, a.id));
 
     @Deprecated
-    public static SubjectReference deserialize(@NonNull LPPermissionService service, @NonNull String serialisedReference) {
+    public SubjectReference deserialize(@NonNull String serialisedReference) {
         List<String> parts = Splitter.on('/').limit(2).splitToList(serialisedReference);
-        return obtain(service, parts.get(0), parts.get(1));
+        return obtain(parts.get(0), parts.get(1));
     }
 
-    public static SubjectReference obtain(@NonNull LPPermissionService service, @NonNull LPSubject subject) {
-        SubjectReference ret = obtain(service, subject.getParentCollection().getIdentifier(), subject.getIdentifier());
+    public SubjectReference obtain(@NonNull LPSubject subject) {
+        SubjectReference ret = obtain(subject.getParentCollection().getIdentifier(), subject.getIdentifier());
         ret.fillCache(subject);
         return ret;
     }
 
-    public static SubjectReference obtain(@NonNull LPPermissionService service, @NonNull Subject subject) {
+    public SubjectReference obtain(@NonNull Subject subject) {
         if (subject instanceof ProxiedSubject) {
             return ((ProxiedSubject) subject).getReference();
         }
 
-        return obtain(service, subject.getContainingCollection().getIdentifier(), subject.getIdentifier());
+        return obtain(subject.getContainingCollection().getIdentifier(), subject.getIdentifier());
     }
 
-    public static SubjectReference obtain(@NonNull LPPermissionService service, @NonNull org.spongepowered.api.service.permission.SubjectReference reference) {
+    public SubjectReference obtain(@NonNull org.spongepowered.api.service.permission.SubjectReference reference) {
         if (reference instanceof SubjectReference) {
             return ((SubjectReference) reference);
         } else {
-            return obtain(service, reference.getCollectionIdentifier(), reference.getSubjectIdentifier());
+            return obtain(reference.getCollectionIdentifier(), reference.getSubjectIdentifier());
         }
     }
 
-    public static SubjectReference obtain(@NonNull LPPermissionService service, @NonNull String collectionIdentifier, @NonNull String subjectIdentifier) {
-        return REFERENCE_CACHE.get(new SubjectReferenceAttributes(service, collectionIdentifier, subjectIdentifier));
+    public SubjectReference obtain(@NonNull String collectionIdentifier, @NonNull String subjectIdentifier) {
+        return referenceCache.get(new SubjectReferenceAttributes(collectionIdentifier, subjectIdentifier));
     }
 
     /**
@@ -94,8 +122,6 @@ public final class SubjectReferenceFactory {
      */
     @AllArgsConstructor
     private static final class SubjectReferenceAttributes {
-        private final LPPermissionService permissionService;
-
         private final String collectionId;
         private final String id;
 

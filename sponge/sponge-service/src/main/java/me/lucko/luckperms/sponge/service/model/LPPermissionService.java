@@ -48,6 +48,8 @@ public interface LPPermissionService {
 
     LuckPermsPlugin getPlugin();
 
+    SubjectReferenceFactory getReferenceFactory();
+
     PermissionService sponge();
 
     LPSubjectCollection getUserSubjects();
