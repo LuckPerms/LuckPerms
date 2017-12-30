@@ -196,7 +196,8 @@ public class Importer implements Runnable {
 
     @Getter
     private static class ImportCommand extends DummySender {
-        private static final Splitter SPACE_SPLIT = Splitter.on(" ");
+        private static final Splitter ARGUMENT_SPLITTER = Splitter.on(CommandManager.COMMAND_SEPARATOR_PATTERN).omitEmptyStrings();
+        private static final Splitter SPACE_SPLITTER = Splitter.on(" ");
 
         private final CommandManager commandManager;
         private final int id;
@@ -231,13 +232,9 @@ public class Importer implements Runnable {
             }
 
             try {
-                CommandResult result = commandManager.onCommand(
-                        this,
-                        "lp",
-                        CommandManager.stripQuotes(Splitter.on(CommandManager.COMMAND_SEPARATOR_PATTERN).omitEmptyStrings().splitToList(getCommand()))
-                ).get();
+                List<String> args = CommandManager.stripQuotes(ARGUMENT_SPLITTER.splitToList(getCommand()));
+                CommandResult result = commandManager.onCommand(this, "lp", args, Runnable::run).get();
                 setResult(result);
-
             } catch (Exception e) {
                 setResult(CommandResult.FAILURE);
                 e.printStackTrace();
@@ -253,7 +250,7 @@ public class Importer implements Runnable {
                     return null;
                 }
 
-                String targetUser = SPACE_SPLIT.split(subCmd).iterator().next();
+                String targetUser = SPACE_SPLITTER.split(subCmd).iterator().next();
                 return "u:" + targetUser;
             }
 
@@ -263,7 +260,7 @@ public class Importer implements Runnable {
                     return null;
                 }
 
-                String targetGroup = SPACE_SPLIT.split(subCmd).iterator().next();
+                String targetGroup = SPACE_SPLITTER.split(subCmd).iterator().next();
                 return "g:" + targetGroup;
             }
 
@@ -273,7 +270,7 @@ public class Importer implements Runnable {
                     return null;
                 }
 
-                String targetTrack = SPACE_SPLIT.split(subCmd).iterator().next();
+                String targetTrack = SPACE_SPLITTER.split(subCmd).iterator().next();
                 return "t:" + targetTrack;
             }
 

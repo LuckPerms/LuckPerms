@@ -72,6 +72,9 @@ import java.util.ListIterator;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -89,6 +92,9 @@ public class CommandManager {
 
     @Getter
     private final LuckPermsPlugin plugin;
+
+    // the default executor to run commands on
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Getter
     private final List<Command> mainCommands;
@@ -126,14 +132,11 @@ public class CommandManager {
                 .build();
     }
 
-    /**
-     * Generic on command method to be called from the command executor object of the platform
-     * Unlike {@link #execute(Sender, String, List)}, this method is called in a new thread
-     * @param sender who sent the command
-     * @param label  the command label used
-     * @param args   the arguments provided
-     */
     public CompletableFuture<CommandResult> onCommand(Sender sender, String label, List<String> args) {
+        return onCommand(sender, label, args, executor);
+    }
+
+    public CompletableFuture<CommandResult> onCommand(Sender sender, String label, List<String> args, Executor executor) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return execute(sender, label, args);
@@ -142,7 +145,7 @@ public class CommandManager {
                 e.printStackTrace();
                 return null;
             }
-        }, plugin.getScheduler().async());
+        }, executor);
     }
 
     @SuppressWarnings("unchecked")
