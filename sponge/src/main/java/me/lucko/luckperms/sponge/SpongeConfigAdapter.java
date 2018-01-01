@@ -25,12 +25,11 @@
 
 package me.lucko.luckperms.sponge;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import com.google.common.base.Splitter;
 
-import me.lucko.luckperms.common.config.ConfigurationAdapter;
+import me.lucko.luckperms.common.config.adapter.AbstractConfigurationAdapter;
+import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.SimpleConfigurationNode;
@@ -38,48 +37,32 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
-public class SpongeConfigAdapter implements ConfigurationAdapter {
+public class SpongeConfigAdapter extends AbstractConfigurationAdapter implements ConfigurationAdapter {
 
-    @Getter
-    private final LPSpongePlugin plugin;
-
+    private final Path path;
     private ConfigurationNode root;
 
-    private Path makeFile(Path file) throws IOException {
-        File cfg = file.toFile();
-        //noinspection ResultOfMethodCallIgnored
-        cfg.getParentFile().mkdirs();
-
-        if (!cfg.exists()) {
-            try (InputStream is = plugin.getClass().getClassLoader().getResourceAsStream("luckperms.conf")) {
-                Files.copy(is, cfg.toPath());
-            }
-        }
-
-        return cfg.toPath();
+    public SpongeConfigAdapter(LuckPermsPlugin plugin, Path path) {
+        super(plugin);
+        this.path = path;
+        reload();
     }
 
     @Override
-    public void init() {
-        try {
-            ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder()
-                    .setPath(makeFile(plugin.getConfigDir().resolve("luckperms.conf")))
-                    .build();
+    public void reload() {
+        ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder().setPath(path).build();
 
+        try {
             root = loader.load();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 

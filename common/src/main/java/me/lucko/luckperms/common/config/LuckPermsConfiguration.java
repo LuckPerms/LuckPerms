@@ -55,11 +55,6 @@ public interface LuckPermsConfiguration {
     ContextsFile getContextsFile();
 
     /**
-     * Initialises the configuration.
-     */
-    void init();
-
-    /**
      * Reloads the configuration.
      */
     void reload();

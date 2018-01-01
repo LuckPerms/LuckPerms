@@ -514,7 +514,7 @@ public abstract class PermissionHolder {
         invalidateCache();
 
         ImmutableCollection<Node> after = getEnduringNodes().values();
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
@@ -940,7 +940,7 @@ public abstract class PermissionHolder {
         ImmutableSet<Node> after = ImmutableSet.copyOf(getOwnNodesSet());
 
         for (Node r : removed) {
-            plugin.getApiProvider().getEventFactory().handleNodeRemove(r, this, before, after);
+            plugin.getEventFactory().handleNodeRemove(r, this, before, after);
         }
 
         return true;
@@ -1023,7 +1023,7 @@ public abstract class PermissionHolder {
 
         ImmutableCollection<Node> after = getEnduringNodes().values();
 
-        plugin.getApiProvider().getEventFactory().handleNodeAdd(node, this, before, after);
+        plugin.getEventFactory().handleNodeAdd(node, this, before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -1060,7 +1060,7 @@ public abstract class PermissionHolder {
 
                     invalidateCache();
                     ImmutableCollection<Node> after = getEnduringNodes().values();
-                    plugin.getApiProvider().getEventFactory().handleNodeAdd(newNode, this, before, after);
+                    plugin.getEventFactory().handleNodeAdd(newNode, this, before, after);
                     return Maps.immutableEntry(DataMutateResult.SUCCESS, newNode);
                 }
 
@@ -1087,7 +1087,7 @@ public abstract class PermissionHolder {
 
                         invalidateCache();
                         ImmutableCollection<Node> after = getEnduringNodes().values();
-                        plugin.getApiProvider().getEventFactory().handleNodeAdd(node, this, before, after);
+                        plugin.getEventFactory().handleNodeAdd(node, this, before, after);
                         return Maps.immutableEntry(DataMutateResult.SUCCESS, node);
                     }
                 }
@@ -1123,7 +1123,7 @@ public abstract class PermissionHolder {
 
         ImmutableCollection<Node> after = getTransientNodes().values();
 
-        plugin.getApiProvider().getEventFactory().handleNodeAdd(node, this, before, after);
+        plugin.getEventFactory().handleNodeAdd(node, this, before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -1149,7 +1149,7 @@ public abstract class PermissionHolder {
         invalidateCache();
 
         ImmutableCollection<Node> after = getEnduringNodes().values();
-        plugin.getApiProvider().getEventFactory().handleNodeRemove(node, this, before, after);
+        plugin.getEventFactory().handleNodeRemove(node, this, before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -1175,7 +1175,7 @@ public abstract class PermissionHolder {
         invalidateCache();
 
         ImmutableCollection<Node> after = getTransientNodes().values();
-        plugin.getApiProvider().getEventFactory().handleNodeRemove(node, this, before, after);
+        plugin.getEventFactory().handleNodeRemove(node, this, before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -1207,7 +1207,7 @@ public abstract class PermissionHolder {
             return false;
         }
 
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
@@ -1227,7 +1227,7 @@ public abstract class PermissionHolder {
             return false;
         }
 
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
@@ -1250,7 +1250,7 @@ public abstract class PermissionHolder {
 
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
@@ -1277,7 +1277,7 @@ public abstract class PermissionHolder {
         }
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
@@ -1295,7 +1295,7 @@ public abstract class PermissionHolder {
 
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
@@ -1319,7 +1319,7 @@ public abstract class PermissionHolder {
 
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
@@ -1338,7 +1338,7 @@ public abstract class PermissionHolder {
 
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
@@ -1362,7 +1362,7 @@ public abstract class PermissionHolder {
 
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
@@ -1383,7 +1383,7 @@ public abstract class PermissionHolder {
             return false;
         }
 
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 

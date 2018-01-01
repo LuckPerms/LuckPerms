@@ -23,20 +23,47 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.config.keys;
+package me.lucko.luckperms.common.api;
 
-import lombok.AllArgsConstructor;
+import me.lucko.luckperms.LuckPerms;
+import me.lucko.luckperms.api.LuckPermsApi;
 
-import me.lucko.luckperms.common.config.ConfigKey;
-import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
+import java.lang.reflect.Method;
 
-@AllArgsConstructor(staticName = "of")
-public class StringKey implements ConfigKey<String> {
-    private final String path;
-    private final String def;
+public class ApiRegistrationUtil {
+    private static final Method REGISTER;
+    private static final Method UNREGISTER;
+    static {
+        Method register = null;
+        Method unregister = null;
+        try {
+            register = LuckPerms.class.getDeclaredMethod("registerProvider", LuckPermsApi.class);
+            register.setAccessible(true);
 
-    @Override
-    public String get(ConfigurationAdapter adapter) {
-        return adapter.getString(path, def);
+            unregister = LuckPerms.class.getDeclaredMethod("unregisterProvider");
+            unregister.setAccessible(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        REGISTER = register;
+        UNREGISTER = unregister;
     }
+
+    public static void registerProvider(LuckPermsApi luckPermsApi) {
+        try {
+            REGISTER.invoke(null, luckPermsApi);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void unregisterProvider() {
+        try {
+            UNREGISTER.invoke(null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

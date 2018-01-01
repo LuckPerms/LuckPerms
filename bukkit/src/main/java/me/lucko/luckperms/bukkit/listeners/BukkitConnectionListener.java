@@ -86,7 +86,7 @@ public class BukkitConnectionListener implements Listener {
            - setting up cached data. */
         try {
             User user = LoginHelper.loadUser(plugin, e.getUniqueId(), e.getName(), false);
-            plugin.getApiProvider().getEventFactory().handleUserLoginProcess(e.getUniqueId(), e.getName(), user);
+            plugin.getEventFactory().handleUserLoginProcess(e.getUniqueId(), e.getName(), user);
         } catch (Exception ex) {
             plugin.getLog().severe("Exception occured whilst loading data for " + e.getUniqueId() + " - " + e.getName());
             ex.printStackTrace();

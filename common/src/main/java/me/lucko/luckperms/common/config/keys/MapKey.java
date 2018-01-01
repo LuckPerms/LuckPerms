@@ -30,7 +30,7 @@ import lombok.AllArgsConstructor;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.config.ConfigKey;
-import me.lucko.luckperms.common.config.ConfigurationAdapter;
+import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 
 import java.util.Map;
 

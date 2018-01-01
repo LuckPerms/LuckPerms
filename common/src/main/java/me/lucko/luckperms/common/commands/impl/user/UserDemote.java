@@ -138,7 +138,7 @@ public class UserDemote extends SubCommand<User> {
                     .build().submit(plugin, sender);
 
             save(user, sender, plugin);
-            plugin.getApiProvider().getEventFactory().handleUserDemote(user, track, old, null);
+            plugin.getEventFactory().handleUserDemote(user, track, old, null);
             return CommandResult.SUCCESS;
         }
 
@@ -170,7 +170,7 @@ public class UserDemote extends SubCommand<User> {
                 .build().submit(plugin, sender);
 
         save(user, sender, plugin);
-        plugin.getApiProvider().getEventFactory().handleUserDemote(user, track, old, previousGroup.getName());
+        plugin.getEventFactory().handleUserDemote(user, track, old, previousGroup.getName());
         return CommandResult.SUCCESS;
     }
 

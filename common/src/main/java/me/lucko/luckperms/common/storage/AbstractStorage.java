@@ -159,7 +159,7 @@ public class AbstractStorage implements Storage {
         return makeFuture(() -> {
             User user = dao.loadUser(uuid, username);
             if (user != null) {
-                plugin.getApiProvider().getEventFactory().handleUserLoad(user);
+                plugin.getEventFactory().handleUserLoad(user);
             }
             return user;
         });
@@ -185,7 +185,7 @@ public class AbstractStorage implements Storage {
         return makeFuture(() -> {
             Group group = dao.createAndLoadGroup(name);
             if (group != null) {
-                plugin.getApiProvider().getEventFactory().handleGroupCreate(group, cause);
+                plugin.getEventFactory().handleGroupCreate(group, cause);
             }
             return group;
         });
@@ -196,7 +196,7 @@ public class AbstractStorage implements Storage {
         return makeFuture(() -> {
             Optional<Group> group = dao.loadGroup(name);
             if (group.isPresent()) {
-                plugin.getApiProvider().getEventFactory().handleGroupLoad(group.get());
+                plugin.getEventFactory().handleGroupLoad(group.get());
             }
             return group;
         });
@@ -206,7 +206,7 @@ public class AbstractStorage implements Storage {
     public CompletableFuture<Void> loadAllGroups() {
         return makeFuture(() -> {
             dao.loadAllGroups();
-            plugin.getApiProvider().getEventFactory().handleGroupLoadAll();
+            plugin.getEventFactory().handleGroupLoadAll();
         });
     }
 
@@ -219,7 +219,7 @@ public class AbstractStorage implements Storage {
     public CompletableFuture<Void> deleteGroup(Group group, DeletionCause cause) {
         return makeFuture(() -> {
             dao.deleteGroup(group);
-            plugin.getApiProvider().getEventFactory().handleGroupDelete(group, cause);
+            plugin.getEventFactory().handleGroupDelete(group, cause);
         });
     }
 
@@ -233,7 +233,7 @@ public class AbstractStorage implements Storage {
         return makeFuture(() -> {
             Track track = dao.createAndLoadTrack(name);
             if (track != null) {
-                plugin.getApiProvider().getEventFactory().handleTrackCreate(track, cause);
+                plugin.getEventFactory().handleTrackCreate(track, cause);
             }
             return track;
         });
@@ -244,7 +244,7 @@ public class AbstractStorage implements Storage {
         return makeFuture(() -> {
             Optional<Track> track = dao.loadTrack(name);
             if (track.isPresent()) {
-                plugin.getApiProvider().getEventFactory().handleTrackLoad(track.get());
+                plugin.getEventFactory().handleTrackLoad(track.get());
             }
             return track;
         });
@@ -254,7 +254,7 @@ public class AbstractStorage implements Storage {
     public CompletableFuture<Void> loadAllTracks() {
         return makeFuture(() -> {
             dao.loadAllTracks();
-            plugin.getApiProvider().getEventFactory().handleTrackLoadAll();
+            plugin.getEventFactory().handleTrackLoadAll();
         });
     }
 
@@ -267,7 +267,7 @@ public class AbstractStorage implements Storage {
     public CompletableFuture<Void> deleteTrack(Track track, DeletionCause cause) {
         return makeFuture(() -> {
             dao.deleteTrack(track);
-            plugin.getApiProvider().getEventFactory().handleTrackDelete(track, cause);
+            plugin.getEventFactory().handleTrackDelete(track, cause);
          });
     }
 

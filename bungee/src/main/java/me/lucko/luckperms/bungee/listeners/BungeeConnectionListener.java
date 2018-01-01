@@ -82,7 +82,7 @@ public class BungeeConnectionListener implements Listener {
                - setting up cached data. */
             try {
                 User user = LoginHelper.loadUser(plugin, c.getUniqueId(), c.getName(), true);
-                plugin.getApiProvider().getEventFactory().handleUserLoginProcess(c.getUniqueId(), c.getName(), user);
+                plugin.getEventFactory().handleUserLoginProcess(c.getUniqueId(), c.getName(), user);
             } catch (Exception ex) {
                 plugin.getLog().severe("Exception occured whilst loading data for " + c.getUniqueId() + " - " + c.getName());
                 ex.printStackTrace();

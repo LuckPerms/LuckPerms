@@ -34,6 +34,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import me.lucko.luckperms.common.api.delegates.misc.ApiConfiguration;
+import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.config.keys.EnduringKey;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -79,20 +80,14 @@ public class AbstractConfiguration implements LuckPermsConfiguration, CacheLoade
     }
 
     @Override
-    public void init() {
-        adapter.init();
-        loadAll();
-    }
-
-    @Override
     public void reload() {
-        init();
+        adapter.reload();
 
         Set<ConfigKey<?>> toInvalidate = cache.asMap().keySet().stream().filter(k -> !(k instanceof EnduringKey)).collect(Collectors.toSet());
         cache.invalidateAll(toInvalidate);
 
         loadAll();
-        getPlugin().getApiProvider().getEventFactory().handleConfigReload();
+        getPlugin().getEventFactory().handleConfigReload();
     }
 
     @Override

@@ -60,10 +60,12 @@ public class UserInfo extends SubCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
+        Message status = plugin.isPlayerOnline(plugin.getUuidCache().getExternalUUID(user.getUuid())) ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
+
         Message.USER_INFO_GENERAL.send(sender,
                 user.getName().orElse("Unknown"),
                 user.getUuid(),
-                plugin.getPlayerStatus(user.getUuid()).asString(plugin.getLocaleManager()),
+                status.asString(plugin.getLocaleManager()),
                 user.getPrimaryGroup().getValue(),
                 user.getOwnNodes().size(),
                 user.getOwnNodes().stream().filter(n -> !(n.isGroupNode() || n.isPrefix() || n.isSuffix() || n.isMeta())).mapToInt(n -> 1).sum(),

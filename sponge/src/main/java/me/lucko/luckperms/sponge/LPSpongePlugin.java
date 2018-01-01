@@ -33,8 +33,8 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
-import me.lucko.luckperms.common.api.ApiProvider;
-import me.lucko.luckperms.common.api.ApiSingletonUtils;
+import me.lucko.luckperms.common.api.ApiRegistrationUtil;
+import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.backup.DummySender;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.UpdateTaskBuffer;
@@ -49,6 +49,7 @@ import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.LuckPermsCalculator;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
+import me.lucko.luckperms.common.event.EventFactory;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.NoopLocaleManager;
 import me.lucko.luckperms.common.locale.SimpleLocaleManager;
@@ -108,7 +109,9 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.AbstractCollection;
 import java.util.Collections;
@@ -145,7 +148,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Inject
     @ConfigDir(sharedRoot = false)
-    private Path configDir;
+    private Path configDirectory;
 
     private Scheduler spongeScheduler = Sponge.getScheduler();
 
@@ -173,7 +176,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private FileWatcher fileWatcher = null;
     private ExtendedMessagingService messagingService = null;
     private UuidCache uuidCache;
-    private ApiProvider apiProvider;
+    private LuckPermsApiProvider apiProvider;
+    private EventFactory eventFactory;
     private me.lucko.luckperms.common.logging.Logger log;
     private LuckPermsService service;
     private LocaleManager localeManager;
@@ -197,16 +201,17 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         log = new SenderLogger(this, getConsoleSender());
         dependencyManager = new DependencyManager(this);
 
-        LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
+        sendStartupBanner(getConsoleSender());
         verboseHandler = new VerboseHandler(scheduler.async(), getVersion());
         permissionVault = new PermissionVault(scheduler.async());
         logDispatcher = new LogDispatcher(this);
 
         getLog().info("Loading configuration...");
-        configuration = new AbstractConfiguration(this, new SpongeConfigAdapter(this));
-        configuration.init();
+        configuration = new AbstractConfiguration(this, new SpongeConfigAdapter(this, resolveConfig("luckperms.conf")));
+        configuration.loadAll();
 
-        Set<StorageType> storageTypes = StorageFactory.getRequiredTypes(this, StorageType.H2);
+        StorageFactory storageFactory = new StorageFactory(this);
+        Set<StorageType> storageTypes = storageFactory.getRequiredTypes(StorageType.H2);
         dependencyManager.loadStorageDependencies(storageTypes);
 
         // register events
@@ -219,7 +224,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         }
 
         // initialise datastore
-        storage = StorageFactory.getInstance(this, StorageType.H2);
+        storage = storageFactory.getInstance(StorageType.H2);
 
         // initialise messaging
         messagingService = new SpongeMessagingFactory(this).getInstance();
@@ -265,8 +270,12 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         }
 
         // register with the LP API
-        apiProvider = new ApiProvider(this);
-        ApiSingletonUtils.registerProvider(apiProvider);
+        apiProvider = new LuckPermsApiProvider(this);
+
+        // setup event factory
+        eventFactory = new EventFactory(this, apiProvider);
+
+        ApiRegistrationUtil.registerProvider(apiProvider);
         game.getServiceManager().setProvider(this, LuckPermsApi.class, apiProvider);
 
         // schedule update tasks
@@ -325,7 +334,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
             messagingService.close();
         }
 
-        ApiSingletonUtils.unregisterProvider();
+        ApiRegistrationUtil.unregisterProvider();
 
         getLog().info("Shutting down internal scheduler...");
         scheduler.shutdown();
@@ -343,6 +352,23 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
     }
 
+    private Path resolveConfig(String file) {
+        Path path = configDirectory.resolve(file);
+
+        if (!Files.exists(path)) {
+            try {
+                Files.createDirectories(configDirectory);
+                try (InputStream is = getClass().getClassLoader().getResourceAsStream(file)) {
+                    Files.copy(is, path);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return path;
+    }
+
     @Override
     public Optional<ExtendedMessagingService> getMessagingService() {
         return Optional.ofNullable(messagingService);
@@ -354,15 +380,15 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Override
     public File getDataDirectory() {
-        File base = configDir.toFile().getParentFile().getParentFile();
-        File luckPermsDir = new File(base, "luckperms");
-        luckPermsDir.mkdirs();
-        return luckPermsDir;
+        File serverRoot = configDirectory.toFile().getParentFile().getParentFile();
+        File dataDirectory = new File(serverRoot, "luckperms");
+        dataDirectory.mkdirs();
+        return dataDirectory;
     }
 
     @Override
     public File getConfigDirectory() {
-        return configDir.toFile();
+        return configDirectory.toFile();
     }
 
     @Override

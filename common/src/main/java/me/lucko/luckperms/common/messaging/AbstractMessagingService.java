@@ -95,7 +95,7 @@ public abstract class AbstractMessagingService implements ExtendedMessagingServi
 
             plugin.getLog().info("[" + name + " Messaging] Received update ping with id: " + requestId.toString());
 
-            if (plugin.getApiProvider().getEventFactory().handleNetworkPreSync(false, requestId)) {
+            if (plugin.getEventFactory().handleNetworkPreSync(false, requestId)) {
                 return;
             }
 
@@ -127,7 +127,7 @@ public abstract class AbstractMessagingService implements ExtendedMessagingServi
 
             plugin.getLog().info("[" + name + " Messaging] Received user update ping for '" + user.getFriendlyName() + "' with id: " + uuidToString(requestId));
 
-            if (plugin.getApiProvider().getEventFactory().handleNetworkPreSync(false, requestId)) {
+            if (plugin.getEventFactory().handleNetworkPreSync(false, requestId)) {
                 return;
             }
 
@@ -160,7 +160,7 @@ public abstract class AbstractMessagingService implements ExtendedMessagingServi
                 return;
             }
 
-            plugin.getApiProvider().getEventFactory().handleLogReceive(requestId, entry.getValue());
+            plugin.getEventFactory().handleLogReceive(requestId, entry.getValue());
             plugin.getLogDispatcher().dispatchFromRemote(entry.getValue());
 
             if (callback != null) {
@@ -197,7 +197,7 @@ public abstract class AbstractMessagingService implements ExtendedMessagingServi
             UUID requestId = generatePingId();
             String strId = uuidToString(requestId);
 
-            if (plugin.getApiProvider().getEventFactory().handleLogNetworkPublish(!plugin.getConfiguration().get(ConfigKeys.PUSH_LOG_ENTRIES), requestId, logEntry)) {
+            if (plugin.getEventFactory().handleLogNetworkPublish(!plugin.getConfiguration().get(ConfigKeys.PUSH_LOG_ENTRIES), requestId, logEntry)) {
                 return;
             }
 

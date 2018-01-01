@@ -170,7 +170,7 @@ public class Track implements Identifiable<String> {
         groups.add(group.getName());
         List<String> after = ImmutableList.copyOf(groups);
 
-        plugin.getApiProvider().getEventFactory().handleTrackAddGroup(this, group.getName(), before, after);
+        plugin.getEventFactory().handleTrackAddGroup(this, group.getName(), before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -191,7 +191,7 @@ public class Track implements Identifiable<String> {
         groups.add(position, group.getName());
         List<String> after = ImmutableList.copyOf(groups);
 
-        plugin.getApiProvider().getEventFactory().handleTrackAddGroup(this, group.getName(), before, after);
+        plugin.getEventFactory().handleTrackAddGroup(this, group.getName(), before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -220,7 +220,7 @@ public class Track implements Identifiable<String> {
         groups.remove(group);
         List<String> after = ImmutableList.copyOf(groups);
 
-        plugin.getApiProvider().getEventFactory().handleTrackRemoveGroup(this, group, before, after);
+        plugin.getEventFactory().handleTrackRemoveGroup(this, group, before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -250,6 +250,6 @@ public class Track implements Identifiable<String> {
     public void clearGroups() {
         List<String> before = ImmutableList.copyOf(groups);
         groups.clear();
-        plugin.getApiProvider().getEventFactory().handleTrackClear(this, before);
+        plugin.getEventFactory().handleTrackClear(this, before);
     }
 }

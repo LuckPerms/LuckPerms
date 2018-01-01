@@ -54,7 +54,7 @@ public class UpdateTask implements Runnable {
      */
     @Override
     public void run() {
-        if (plugin.getApiProvider().getEventFactory().handlePreSync(false)) {
+        if (plugin.getEventFactory().handlePreSync(false)) {
             return;
         }
 
@@ -76,6 +76,6 @@ public class UpdateTask implements Runnable {
 
         plugin.onPostUpdate();
 
-        plugin.getApiProvider().getEventFactory().handlePostSync();
+        plugin.getEventFactory().handlePostSync();
     }
 }

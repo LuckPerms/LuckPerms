@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.storage;
 
-import lombok.experimental.UtilityClass;
+import lombok.AllArgsConstructor;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -50,10 +50,12 @@ import java.io.File;
 import java.util.Map;
 import java.util.Set;
 
-@UtilityClass
+@AllArgsConstructor
 public class StorageFactory {
 
-    public static Set<StorageType> getRequiredTypes(LuckPermsPlugin plugin, StorageType defaultMethod) {
+    private final LuckPermsPlugin plugin;
+
+    public Set<StorageType> getRequiredTypes(StorageType defaultMethod) {
         if (plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE)) {
             return plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS).entrySet().stream()
                     .map(e -> {
@@ -77,7 +79,7 @@ public class StorageFactory {
         }
     }
 
-    public static Storage getInstance(LuckPermsPlugin plugin, StorageType defaultMethod) {
+    public Storage getInstance(StorageType defaultMethod) {
         Storage storage;
         if (plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE)) {
             plugin.getLog().info("Loading storage provider... [SPLIT STORAGE]");
@@ -94,7 +96,7 @@ public class StorageFactory {
 
             Map<StorageType, AbstractDao> backing = mappedTypes.values().stream()
                     .distinct()
-                    .collect(ImmutableCollectors.toEnumMap(StorageType.class, e -> e, e -> makeDao(e, plugin)));
+                    .collect(ImmutableCollectors.toEnumMap(StorageType.class, e -> e, this::makeDao));
 
             storage = AbstractStorage.create(plugin, new SplitStorageDao(plugin, backing, mappedTypes));
 
@@ -106,18 +108,18 @@ public class StorageFactory {
             }
 
             plugin.getLog().info("Loading storage provider... [" + type.name() + "]");
-            storage = makeInstance(type, plugin);
+            storage = makeInstance(type);
         }
 
         storage.init();
         return storage;
     }
 
-    private static Storage makeInstance(StorageType type, LuckPermsPlugin plugin) {
-        return AbstractStorage.create(plugin, makeDao(type, plugin));
+    private Storage makeInstance(StorageType type) {
+        return AbstractStorage.create(plugin, makeDao(type));
     }
 
-    private static AbstractDao makeDao(StorageType method, LuckPermsPlugin plugin) {
+    private AbstractDao makeDao(StorageType method) {
         switch (method) {
             case MARIADB:
                 return new SqlDao(plugin, new MariaDbConnectionFactory(

@@ -25,10 +25,9 @@
 
 package me.lucko.luckperms.bungee;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
-import me.lucko.luckperms.common.config.ConfigurationAdapter;
+import me.lucko.luckperms.common.config.adapter.AbstractConfigurationAdapter;
+import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -36,42 +35,29 @@ import net.md_5.bungee.config.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@RequiredArgsConstructor
-public class BungeeConfigAdapter implements ConfigurationAdapter {
+public class BungeeConfigAdapter extends AbstractConfigurationAdapter implements ConfigurationAdapter {
 
-    @Getter
-    private final LPBungeePlugin plugin;
-
+    private final File file;
     private Configuration configuration;
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private File makeFile(String file) throws IOException {
-        File configFile = new File(plugin.getDataFolder(), file);
-
-        if (!configFile.exists()) {
-            plugin.getDataFolder().mkdir();
-            try (InputStream is = plugin.getResourceAsStream(file)) {
-                Files.copy(is, configFile.toPath());
-            }
-        }
-
-        return configFile;
+    public BungeeConfigAdapter(LuckPermsPlugin plugin, File file) {
+        super(plugin);
+        this.file = file;
+        reload();
     }
 
     @Override
-    public void init() {
+    public void reload() {
         try {
-            configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(makeFile("config.yml"));
+            configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(file);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 

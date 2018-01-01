@@ -50,8 +50,6 @@ import me.lucko.luckperms.common.api.delegates.misc.ApiActionLogger;
 import me.lucko.luckperms.common.api.delegates.misc.ApiMetaStackFactory;
 import me.lucko.luckperms.common.api.delegates.misc.ApiNodeFactory;
 import me.lucko.luckperms.common.api.delegates.misc.ApiPlatformInfo;
-import me.lucko.luckperms.common.event.EventFactory;
-import me.lucko.luckperms.common.event.LuckPermsEventBus;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Optional;
@@ -61,7 +59,7 @@ import java.util.function.Function;
 /**
  * Implements the LuckPerms API using the plugin instance
  */
-public class ApiProvider implements LuckPermsApi {
+public class LuckPermsApiProvider implements LuckPermsApi {
 
     @Getter(AccessLevel.NONE)
     private final LuckPermsPlugin plugin;
@@ -70,28 +68,20 @@ public class ApiProvider implements LuckPermsApi {
     private final UserManager userManager;
     private final GroupManager groupManager;
     private final TrackManager trackManager;
-    private final LuckPermsEventBus eventBus;
     private final ActionLogger actionLogger;
     private final ContextManager contextManager;
     private final MetaStackFactory metaStackFactory;
-    private final EventFactory eventFactory;
 
-    public ApiProvider(LuckPermsPlugin plugin) {
+    public LuckPermsApiProvider(LuckPermsPlugin plugin) {
         this.plugin = plugin;
 
         this.platformInfo = new ApiPlatformInfo(plugin);
         this.userManager = new ApiUserManager(plugin, plugin.getUserManager());
         this.groupManager = new ApiGroupManager(plugin.getGroupManager());
         this.trackManager = new ApiTrackManager(plugin.getTrackManager());
-        this.eventBus = new LuckPermsEventBus(plugin);
         this.actionLogger = new ApiActionLogger(plugin);
         this.contextManager = new ApiContextManager(plugin, plugin.getContextManager());
         this.metaStackFactory = new ApiMetaStackFactory(plugin);
-        this.eventFactory = new EventFactory(eventBus);
-    }
-
-    public EventFactory getEventFactory() {
-        return eventFactory;
     }
 
     @Override
@@ -121,7 +111,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public EventBus getEventBus() {
-        return eventBus;
+        return plugin.getEventFactory().getEventBus();
     }
 
     @Override

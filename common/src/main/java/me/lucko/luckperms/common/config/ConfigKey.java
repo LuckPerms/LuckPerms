@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.config;
 
+import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
+
 /**
  * Represents a key in the configuration.
  *

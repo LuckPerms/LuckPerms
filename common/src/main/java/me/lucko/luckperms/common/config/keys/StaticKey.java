@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.config.keys;
 import lombok.AllArgsConstructor;
 
 import me.lucko.luckperms.common.config.ConfigKey;
-import me.lucko.luckperms.common.config.ConfigurationAdapter;
+import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 
 @AllArgsConstructor(staticName = "of")
 public class StaticKey<T> implements ConfigKey<T> {

@@ -71,7 +71,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
 
         this.refreshBuffer = new GroupRefreshBuffer(plugin, this);
         this.cachedData = new GroupCachedData(this);
-        getPlugin().getApiProvider().getEventFactory().handleGroupCacheLoad(this, cachedData);
+        getPlugin().getEventFactory().handleGroupCacheLoad(this, cachedData);
 
         // invalidate out caches when data is updated
         getStateListeners().add(() -> refreshBuffer.request());
@@ -121,7 +121,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
         return CompletableFuture.allOf(
                 cachedData.reloadPermissions(),
                 cachedData.reloadMeta()
-        ).thenAccept(n -> getPlugin().getApiProvider().getEventFactory().handleGroupDataRecalculate(this, cachedData));
+        ).thenAccept(n -> getPlugin().getEventFactory().handleGroupDataRecalculate(this, cachedData));
     }
 
     private static final class GroupRefreshBuffer extends BufferedRequest<Void> {

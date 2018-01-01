@@ -51,7 +51,7 @@ public class LoginHelper {
                 cache.addToCache(u, uuid);
             } else {
                 // No previous data for this player
-                plugin.getApiProvider().getEventFactory().handleUserFirstLogin(u, username);
+                plugin.getEventFactory().handleUserFirstLogin(u, username);
                 cache.addToCache(u, u);
                 CompletableFuture<Void> future = plugin.getStorage().noBuffer().saveUUIDData(u, username);
                 if (joinUuidSave) {
@@ -61,7 +61,7 @@ public class LoginHelper {
         } else {
             String name = plugin.getStorage().noBuffer().getName(u).join();
             if (name == null) {
-                plugin.getApiProvider().getEventFactory().handleUserFirstLogin(u, username);
+                plugin.getEventFactory().handleUserFirstLogin(u, username);
             }
 
             // Online mode, no cache needed. This is just for name -> uuid lookup.

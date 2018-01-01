@@ -35,6 +35,7 @@ import me.lucko.luckperms.api.event.Cancellable;
 import me.lucko.luckperms.api.event.EventBus;
 import me.lucko.luckperms.api.event.EventHandler;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
+import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Map;
@@ -47,6 +48,9 @@ public class LuckPermsEventBus implements EventBus {
 
     @Getter
     private final LuckPermsPlugin plugin;
+
+    private final LuckPermsApiProvider apiProvider;
+
     private final Map<Class<? extends LuckPermsEvent>, Set<LuckPermsEventHandler<?>>> handlerMap = new ConcurrentHashMap<>();
 
     @Override
@@ -91,7 +95,7 @@ public class LuckPermsEventBus implements EventBus {
 
     public void fireEvent(LuckPermsEvent event) {
         if (event instanceof AbstractEvent) {
-            ((AbstractEvent) event).setApi(plugin.getApiProvider());
+            ((AbstractEvent) event).setApi(apiProvider);
         }
 
         for (Map.Entry<Class<? extends LuckPermsEvent>, Set<LuckPermsEventHandler<?>>> ent : handlerMap.entrySet()) {

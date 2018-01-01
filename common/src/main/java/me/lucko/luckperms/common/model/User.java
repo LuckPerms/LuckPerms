@@ -86,7 +86,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
 
         this.cachedData = new UserCachedData(this);
-        getPlugin().getApiProvider().getEventFactory().handleUserCacheLoad(this, cachedData);
+        getPlugin().getEventFactory().handleUserCacheLoad(this, cachedData);
     }
 
     public User(UUID uuid, String name, LuckPermsPlugin plugin) {
@@ -98,7 +98,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
 
         this.cachedData = new UserCachedData(this);
-        getPlugin().getApiProvider().getEventFactory().handleUserCacheLoad(this, cachedData);
+        getPlugin().getEventFactory().handleUserCacheLoad(this, cachedData);
     }
 
     @Override
@@ -192,7 +192,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         return CompletableFuture.allOf(
                 cachedData.reloadPermissions(),
                 cachedData.reloadMeta()
-        ).thenAccept(n -> getPlugin().getApiProvider().getEventFactory().handleUserDataRecalculate(this, cachedData));
+        ).thenAccept(n -> getPlugin().getEventFactory().handleUserDataRecalculate(this, cachedData));
     }
 
     /**

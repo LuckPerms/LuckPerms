@@ -80,7 +80,7 @@ public class SpongeConnectionListener {
            - setting up cached data. */
         try {
             User user = LoginHelper.loadUser(plugin, p.getUniqueId(), username, false);
-            plugin.getApiProvider().getEventFactory().handleUserLoginProcess(p.getUniqueId(), username, user);
+            plugin.getEventFactory().handleUserLoginProcess(p.getUniqueId(), username, user);
         } catch (Exception ex) {
             plugin.getLog().severe("Exception occured whilst loading data for " + p.getUniqueId() + " - " + p.getName());
             ex.printStackTrace();

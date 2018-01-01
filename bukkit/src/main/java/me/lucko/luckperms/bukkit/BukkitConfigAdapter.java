@@ -25,10 +25,9 @@
 
 package me.lucko.luckperms.bukkit;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
-import me.lucko.luckperms.common.config.ConfigurationAdapter;
+import me.lucko.luckperms.common.config.adapter.AbstractConfigurationAdapter;
+import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -40,24 +39,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@RequiredArgsConstructor
-public class BukkitConfigAdapter implements ConfigurationAdapter {
+public class BukkitConfigAdapter extends AbstractConfigurationAdapter implements ConfigurationAdapter {
 
-    @Getter
-    private final LPBukkitPlugin plugin;
-
+    private final File file;
     private YamlConfiguration configuration;
 
+    public BukkitConfigAdapter(LuckPermsPlugin plugin, File file) {
+        super(plugin);
+        this.file = file;
+        reload();
+    }
+
     @Override
-    public void init() {
-        File configFile = new File(plugin.getDataFolder(), "config.yml");
-
-        if (!configFile.exists()) {
-            configFile.getParentFile().mkdirs();
-            plugin.saveResource("config.yml", false);
-        }
-
-        configuration = YamlConfiguration.loadConfiguration(configFile);
+    public void reload() {
+        configuration = YamlConfiguration.loadConfiguration(file);
     }
 
     @Override

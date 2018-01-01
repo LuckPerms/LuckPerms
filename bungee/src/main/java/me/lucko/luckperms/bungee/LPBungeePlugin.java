@@ -38,8 +38,8 @@ import me.lucko.luckperms.bungee.listeners.BungeePermissionCheckListener;
 import me.lucko.luckperms.bungee.messaging.BungeeMessagingFactory;
 import me.lucko.luckperms.bungee.util.RedisBungeeUtil;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
-import me.lucko.luckperms.common.api.ApiProvider;
-import me.lucko.luckperms.common.api.ApiSingletonUtils;
+import me.lucko.luckperms.common.api.ApiRegistrationUtil;
+import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.UpdateTaskBuffer;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
@@ -53,6 +53,7 @@ import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.LuckPermsCalculator;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
+import me.lucko.luckperms.common.event.EventFactory;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.NoopLocaleManager;
 import me.lucko.luckperms.common.locale.SimpleLocaleManager;
@@ -83,7 +84,9 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
@@ -108,7 +111,8 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private FileWatcher fileWatcher = null;
     private ExtendedMessagingService messagingService = null;
     private UuidCache uuidCache;
-    private ApiProvider apiProvider;
+    private LuckPermsApiProvider apiProvider;
+    private EventFactory eventFactory;
     private Logger log;
     private LocaleManager localeManager;
     private DependencyManager dependencyManager;
@@ -137,16 +141,17 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     @Override
     public void onEnable() {
         startTime = System.currentTimeMillis();
-        LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
+        sendStartupBanner(getConsoleSender());
         verboseHandler = new VerboseHandler(scheduler.async(), getVersion());
         permissionVault = new PermissionVault(scheduler.async());
         logDispatcher = new LogDispatcher(this);
 
         getLog().info("Loading configuration...");
-        configuration = new AbstractConfiguration(this, new BungeeConfigAdapter(this));
-        configuration.init();
+        configuration = new AbstractConfiguration(this, new BungeeConfigAdapter(this, resolveConfig("config.yml")));
+        configuration.loadAll();
 
-        Set<StorageType> storageTypes = StorageFactory.getRequiredTypes(this, StorageType.H2);
+        StorageFactory storageFactory = new StorageFactory(this);
+        Set<StorageType> storageTypes = storageFactory.getRequiredTypes(StorageType.H2);
         dependencyManager.loadStorageDependencies(storageTypes);
 
         // register events
@@ -159,7 +164,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         }
 
         // initialise datastore
-        storage = StorageFactory.getInstance(this, StorageType.H2);
+        storage = storageFactory.getInstance(StorageType.H2);
 
         // initialise messaging
         messagingService = new BungeeMessagingFactory(this).getInstance();
@@ -197,8 +202,12 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         }
 
         // register with the LP API
-        apiProvider = new ApiProvider(this);
-        ApiSingletonUtils.registerProvider(apiProvider);
+        apiProvider = new LuckPermsApiProvider(this);
+
+        // setup event factory
+        eventFactory = new EventFactory(this, apiProvider);
+
+        ApiRegistrationUtil.registerProvider(apiProvider);
 
         // schedule update tasks
         int mins = getConfiguration().get(ConfigKeys.SYNC_TIME);
@@ -241,7 +250,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
             messagingService.close();
         }
 
-        ApiSingletonUtils.unregisterProvider();
+        ApiRegistrationUtil.unregisterProvider();
 
         getLog().info("Shutting down internal scheduler...");
         scheduler.shutdown();
@@ -249,6 +258,21 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         getProxy().getScheduler().cancel(this);
         getProxy().getPluginManager().unregisterListeners(this);
         getLog().info("Goodbye!");
+    }
+
+    private File resolveConfig(String file) {
+        File configFile = new File(getDataFolder(), file);
+
+        if (!configFile.exists()) {
+            getDataFolder().mkdirs();
+            try (InputStream is = getResourceAsStream(file)) {
+                Files.copy(is, configFile.toPath());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return configFile;
     }
 
     @Override

@@ -47,7 +47,7 @@ public class LogDispatcher {
                 .filter(CommandPermission.LOG_NOTIFY::isAuthorized)
                 .filter(s -> {
                     boolean shouldCancel = LogNotify.isIgnoring(plugin, s.getUuid()) || (sender != null && s.getUuid().equals(sender.getUuid()));
-                    return !plugin.getApiProvider().getEventFactory().handleLogNotify(shouldCancel, entry, origin, s);
+                    return !plugin.getEventFactory().handleLogNotify(shouldCancel, entry, origin, s);
                 })
                 .forEach(s -> Message.LOG.send(s,
                         entry.getActorFriendlyString(),
@@ -59,7 +59,7 @@ public class LogDispatcher {
 
     public void dispatch(ExtendedLogEntry entry, Sender sender) {
         // set the event to cancelled if the sender is import
-        if (!plugin.getApiProvider().getEventFactory().handleLogPublish(sender.isImport(), entry)) {
+        if (!plugin.getEventFactory().handleLogPublish(sender.isImport(), entry)) {
             plugin.getStorage().logAction(entry);
         }
 
@@ -74,13 +74,13 @@ public class LogDispatcher {
         }
 
         boolean shouldCancel = !plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
-        if (!plugin.getApiProvider().getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.LOCAL)) {
+        if (!plugin.getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.LOCAL)) {
             broadcast(entry, LogBroadcastEvent.Origin.LOCAL, sender);
         }
     }
 
     public void dispatchFromApi(ExtendedLogEntry entry) {
-        if (!plugin.getApiProvider().getEventFactory().handleLogPublish(false, entry)) {
+        if (!plugin.getEventFactory().handleLogPublish(false, entry)) {
             try {
                 plugin.getStorage().logAction(entry).get();
             } catch (Exception e) {
@@ -95,14 +95,14 @@ public class LogDispatcher {
         plugin.getMessagingService().ifPresent(extendedMessagingService -> extendedMessagingService.pushLog(entry));
 
         boolean shouldCancel = !plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
-        if (!plugin.getApiProvider().getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.LOCAL_API)) {
+        if (!plugin.getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.LOCAL_API)) {
             broadcast(entry, LogBroadcastEvent.Origin.LOCAL_API, null);
         }
     }
 
     public void dispatchFromRemote(ExtendedLogEntry entry) {
         boolean shouldCancel = !plugin.getConfiguration().get(ConfigKeys.BROADCAST_RECEIVED_LOG_ENTRIES) || !plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
-        if (!plugin.getApiProvider().getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.REMOTE)) {
+        if (!plugin.getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.REMOTE)) {
             broadcast(entry, LogBroadcastEvent.Origin.LOCAL_API, null);
         }
     }
