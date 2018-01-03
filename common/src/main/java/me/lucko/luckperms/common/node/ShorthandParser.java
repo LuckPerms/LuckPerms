@@ -31,6 +31,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -115,7 +116,7 @@ public class ShorthandParser {
         public Iterable<String> apply(String s) {
             s = s.replace('|', ',');
             if (!s.contains(",")) {
-                return null;
+                return Collections.singleton(s);
             }
             return SPLITTER.split(s);
         }
