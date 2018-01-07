@@ -25,40 +25,43 @@
 
 package me.lucko.luckperms.common.logging;
 
-import lombok.AllArgsConstructor;
-import lombok.NonNull;
-
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-@AllArgsConstructor
+import java.util.Objects;
+
 public class SenderLogger implements Logger {
     private final LuckPermsPlugin plugin;
     private final Sender console;
 
-    @Override
-    public void info(@NonNull String s) {
-        msg(Message.LOG_INFO, s);
+    public SenderLogger(LuckPermsPlugin plugin, Sender console) {
+        this.plugin = plugin;
+        this.console = console;
     }
 
     @Override
-    public void warn(@NonNull String s) {
-        msg(Message.LOG_WARN, s);
+    public void info(String s) {
+        msg(Message.LOG_INFO, Objects.requireNonNull(s));
     }
 
     @Override
-    public void severe(@NonNull String s) {
-        msg(Message.LOG_ERROR, s);
+    public void warn(String s) {
+        msg(Message.LOG_WARN, Objects.requireNonNull(s));
+    }
+
+    @Override
+    public void severe(String s) {
+        msg(Message.LOG_ERROR, Objects.requireNonNull(s));
     }
 
     private void msg(Message message, String s) {
-        String msg = message.asString(plugin.getLocaleManager(), s);
-        if (plugin.getConfiguration() != null && !plugin.getConfiguration().get(ConfigKeys.USE_COLORED_LOGGER)) {
+        String msg = message.asString(this.plugin.getLocaleManager(), s);
+        if (this.plugin.getConfiguration() != null && !this.plugin.getConfiguration().get(ConfigKeys.USE_COLORED_LOGGER)) {
             msg = CommandUtils.stripColor(msg);
         }
-        console.sendMessage(msg);
+        this.console.sendMessage(msg);
     }
 }

@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.commands;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import me.lucko.luckperms.common.commands.sender.Sender;
 
 import static me.lucko.luckperms.common.commands.CommandPermission.Type.GROUP;
@@ -173,7 +170,6 @@ public enum CommandPermission {
 
     private final String node;
 
-    @Getter
     private final Type type;
 
     CommandPermission(String node, Type type) {
@@ -187,15 +183,17 @@ public enum CommandPermission {
     }
 
     public String getPermission() {
-        return node;
+        return this.node;
     }
 
     public boolean isAuthorized(Sender sender) {
         return sender.hasPermission(this);
     }
 
-    @Getter
-    @AllArgsConstructor
+    public Type getType() {
+        return this.type;
+    }
+
     public enum Type {
 
         NONE(null),
@@ -207,6 +205,13 @@ public enum CommandPermission {
 
         private final String tag;
 
+        Type(String tag) {
+            this.tag = tag;
+        }
+
+        public String getTag() {
+            return this.tag;
+        }
     }
 
 }

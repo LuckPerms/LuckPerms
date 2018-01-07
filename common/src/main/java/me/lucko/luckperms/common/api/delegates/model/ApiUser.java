@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.api.delegates.model;
 
-import lombok.Getter;
-import lombok.NonNull;
-
 import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.DataMutateResult;
@@ -35,7 +32,10 @@ import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.common.node.NodeFactory;
 
+import java.util.Objects;
 import java.util.UUID;
+
+import javax.annotation.Nonnull;
 
 public final class ApiUser extends ApiPermissionHolder implements User {
     public static me.lucko.luckperms.common.model.User cast(User u) {
@@ -43,69 +43,78 @@ public final class ApiUser extends ApiPermissionHolder implements User {
         return ((ApiUser) u).getHandle();
     }
 
-    @Getter
     private final me.lucko.luckperms.common.model.User handle;
 
-    public ApiUser(@NonNull me.lucko.luckperms.common.model.User handle) {
+    @Override
+    me.lucko.luckperms.common.model.User getHandle() {
+        return this.handle;
+    }
+
+    public ApiUser(me.lucko.luckperms.common.model.User handle) {
         super(handle);
         this.handle = handle;
     }
 
+    @Nonnull
     @Override
     public UUID getUuid() {
-        return handle.getUuid();
+        return this.handle.getUuid();
     }
 
     @Override
     public String getName() {
-        return handle.getName().orElse(null);
+        return this.handle.getName().orElse(null);
     }
 
+    @Nonnull
     @Override
     public String getPrimaryGroup() {
-        return handle.getPrimaryGroup().getValue();
+        return this.handle.getPrimaryGroup().getValue();
     }
 
     @Override
-    public DataMutateResult setPrimaryGroup(@NonNull String s) {
-        if (getPrimaryGroup().equalsIgnoreCase(s)) {
+    public DataMutateResult setPrimaryGroup(@Nonnull String group) {
+        Objects.requireNonNull(group, "group");
+        if (getPrimaryGroup().equalsIgnoreCase(group)) {
             return DataMutateResult.ALREADY_HAS;
         }
 
-        if (!handle.hasPermission(NodeFactory.buildGroupNode(s.toLowerCase()).build()).asBoolean()) {
+        if (!this.handle.hasPermission(NodeFactory.buildGroupNode(group.toLowerCase()).build()).asBoolean()) {
             return DataMutateResult.FAIL;
         }
 
-        handle.getPrimaryGroup().setStoredValue(s.toLowerCase());
+        this.handle.getPrimaryGroup().setStoredValue(group.toLowerCase());
         return DataMutateResult.SUCCESS;
     }
 
+    @Nonnull
     @Override
     public UserData getCachedData() {
-        return handle.getCachedData();
+        return this.handle.getCachedData();
     }
 
     @Override
     @Deprecated
     public void refreshPermissions() {
-        handle.getRefreshBuffer().requestDirectly();
+        this.handle.getRefreshBuffer().requestDirectly();
     }
 
     @Override
     @Deprecated
     public void setupDataCache() {
-        handle.preCalculateData();
+        this.handle.preCalculateData();
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof ApiUser)) return false;
-
-        ApiUser other = (ApiUser) o;
-        return handle.equals(other.handle);
+        ApiUser that = (ApiUser) o;
+        return this.handle.equals(that.handle);
     }
 
+    @Override
     public int hashCode() {
-        return handle.hashCode();
+        return this.handle.hashCode();
     }
 }

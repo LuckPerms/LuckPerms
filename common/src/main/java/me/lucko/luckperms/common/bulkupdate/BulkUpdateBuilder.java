@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.bulkupdate;
 
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.bulkupdate.action.Action;
@@ -39,9 +36,11 @@ import java.util.Set;
 /**
  * Responsible for building a {@link BulkUpdate}
  */
-@ToString
-@NoArgsConstructor(staticName = "create")
 public class BulkUpdateBuilder {
+
+    public static BulkUpdateBuilder create() {
+        return new BulkUpdateBuilder();
+    }
 
     // the data type this query should affect
     private DataType dataType = DataType.ALL;
@@ -51,6 +50,9 @@ public class BulkUpdateBuilder {
 
     // a set of constraints which data must match to be acted upon
     private final Set<Constraint> constraints = new LinkedHashSet<>();
+
+    private BulkUpdateBuilder() {
+    }
 
     public BulkUpdateBuilder action(Action action) {
         this.action = action;
@@ -63,15 +65,23 @@ public class BulkUpdateBuilder {
     }
 
     public BulkUpdateBuilder constraint(Constraint constraint) {
-        constraints.add(constraint);
+        this.constraints.add(constraint);
         return this;
     }
 
     public BulkUpdate build() {
-        if (action == null) {
+        if (this.action == null) {
             throw new IllegalStateException("no action specified");
         }
 
-        return new BulkUpdate(dataType, action, ImmutableList.copyOf(constraints));
+        return new BulkUpdate(this.dataType, this.action, ImmutableList.copyOf(this.constraints));
+    }
+
+    @Override
+    public String toString() {
+        return "BulkUpdateBuilder(" +
+                "dataType=" + this.dataType + ", " +
+                "action=" + this.action + ", " +
+                "constraints=" + this.constraints + ")";
     }
 }

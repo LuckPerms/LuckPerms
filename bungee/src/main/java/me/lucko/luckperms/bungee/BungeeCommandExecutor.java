@@ -53,17 +53,17 @@ public class BungeeCommandExecutor extends Command implements TabExecutor {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        Sender lpSender = plugin.getSenderFactory().wrap(sender);
+        Sender lpSender = this.plugin.getSenderFactory().wrap(sender);
         List<String> arguments = CommandManager.stripQuotes(ARGUMENT_SPLITTER.splitToList(ARGUMENT_JOINER.join(args)));
 
-        manager.onCommand(lpSender, "lpb", arguments);
+        this.manager.onCommand(lpSender, "lpb", arguments);
     }
 
     @Override
     public Iterable<String> onTabComplete(CommandSender sender, String[] args) {
-        Sender lpSender = plugin.getSenderFactory().wrap(sender);
+        Sender lpSender = this.plugin.getSenderFactory().wrap(sender);
         List<String> arguments = CommandManager.stripQuotes(TAB_COMPLETE_ARGUMENT_SPLITTER.splitToList(ARGUMENT_JOINER.join(args)));
 
-        return manager.onTabComplete(lpSender, arguments);
+        return this.manager.onTabComplete(lpSender, arguments);
     }
 }

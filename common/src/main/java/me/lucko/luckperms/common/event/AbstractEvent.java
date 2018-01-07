@@ -25,16 +25,22 @@
 
 package me.lucko.luckperms.common.event;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 
+import javax.annotation.Nonnull;
+
 public abstract class AbstractEvent implements LuckPermsEvent {
 
-    @Getter
-    @Setter
     private LuckPermsApi api = null;
 
+    @Nonnull
+    @Override
+    public LuckPermsApi getApi() {
+        return this.api;
+    }
+
+    public void setApi(LuckPermsApi api) {
+        this.api = api;
+    }
 }

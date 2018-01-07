@@ -25,55 +25,63 @@
 
 package me.lucko.luckperms.common.api.delegates.model;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NonNull;
-
 import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.caching.GroupData;
 
+import java.util.Objects;
 import java.util.OptionalInt;
 
+import javax.annotation.Nonnull;
+
 public final class ApiGroup extends ApiPermissionHolder implements Group {
-    public static me.lucko.luckperms.common.model.Group cast(Group g) {
-        Preconditions.checkState(g instanceof ApiGroup, "Illegal instance " + g.getClass() + " cannot be handled by this implementation.");
-        return ((ApiGroup) g).getHandle();
+    public static me.lucko.luckperms.common.model.Group cast(Group group) {
+        Objects.requireNonNull(group, "group");
+        Preconditions.checkState(group instanceof ApiGroup, "Illegal instance " + group.getClass() + " cannot be handled by this implementation.");
+        return ((ApiGroup) group).getHandle();
     }
 
-    @Getter(AccessLevel.PACKAGE)
     private final me.lucko.luckperms.common.model.Group handle;
 
-    public ApiGroup(@NonNull me.lucko.luckperms.common.model.Group handle) {
+    public ApiGroup(me.lucko.luckperms.common.model.Group handle) {
         super(handle);
         this.handle = handle;
     }
 
     @Override
-    public String getName() {
-        return handle.getName();
+    me.lucko.luckperms.common.model.Group getHandle() {
+        return this.handle;
     }
 
+    @Nonnull
+    @Override
+    public String getName() {
+        return this.handle.getName();
+    }
+
+    @Nonnull
     @Override
     public OptionalInt getWeight() {
-        return handle.getWeight();
+        return this.handle.getWeight();
+    }
+
+    @Nonnull
+    @Override
+    public GroupData getCachedData() {
+        return this.handle.getCachedData();
     }
 
     @Override
-    public GroupData getCachedData() {
-        return handle.getCachedData();
-    }
-
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof ApiGroup)) return false;
-
-        ApiGroup other = (ApiGroup) o;
-        return handle.equals(other.handle);
+        ApiGroup that = (ApiGroup) o;
+        return this.handle.equals(that.handle);
     }
 
+    @Override
     public int hashCode() {
-        return handle.hashCode();
+        return this.handle.hashCode();
     }
 }

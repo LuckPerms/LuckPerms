@@ -25,16 +25,13 @@
 
 package me.lucko.luckperms.common.utils;
 
-import lombok.experimental.UtilityClass;
-
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 /**
  * Nashorn provider utility
  */
-@UtilityClass
-public class Scripting {
+public final class Scripting {
     private static ScriptEngine SCRIPT_ENGINE = null;
 
     // Lazily load
@@ -44,5 +41,7 @@ public class Scripting {
         }
         return SCRIPT_ENGINE;
     }
+
+    private Scripting() {}
 
 }

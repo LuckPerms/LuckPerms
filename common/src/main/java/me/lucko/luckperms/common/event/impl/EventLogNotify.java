@@ -25,12 +25,6 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.log.LogBroadcastEvent;
 import me.lucko.luckperms.api.event.log.LogNotifyEvent;
@@ -41,9 +35,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@Getter
-@ToString
-@RequiredArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventLogNotify extends AbstractEvent implements LogNotifyEvent {
 
     private final AtomicBoolean cancellationState;
@@ -51,42 +44,81 @@ public class EventLogNotify extends AbstractEvent implements LogNotifyEvent {
     private final LogBroadcastEvent.Origin origin;
     private final Sender sender;
 
-    @Getter(AccessLevel.NONE)
     private Notifiable notifiable;
 
-    @Override
-    public synchronized Notifiable getNotifiable() {
-        if (notifiable == null) {
-            notifiable = new SenderNotifiable(sender);
-        }
-        return notifiable;
+    public EventLogNotify(AtomicBoolean cancellationState, LogEntry entry, LogBroadcastEvent.Origin origin, Sender sender) {
+        this.cancellationState = cancellationState;
+        this.entry = entry;
+        this.origin = origin;
+        this.sender = sender;
     }
 
-    @AllArgsConstructor
+    @Nonnull
+    @Override
+    public synchronized Notifiable getNotifiable() {
+        if (this.notifiable == null) {
+            this.notifiable = new SenderNotifiable(this.sender);
+        }
+        return this.notifiable;
+    }
+
+    @Nonnull
+    @Override
+    public AtomicBoolean getCancellationState() {
+        return this.cancellationState;
+    }
+
+    @Nonnull
+    @Override
+    public LogEntry getEntry() {
+        return this.entry;
+    }
+
+    @Nonnull
+    @Override
+    public LogBroadcastEvent.Origin getOrigin() {
+        return this.origin;
+    }
+
+    public Sender getSender() {
+        return this.sender;
+    }
+
+    @Override
+    public String toString() {
+        return "EventLogNotify(cancellationState=" + this.getCancellationState() + ", entry=" + this.getEntry() + ", origin=" + this.getOrigin() + ", sender=" + this.getSender() + ", notifiable=" + this.getNotifiable() + ")";
+    }
+
     private static final class SenderNotifiable implements Notifiable {
         private final Sender sender;
 
-        @Override
-        public Optional<UUID> getUuid() {
-            if (sender.isConsole()) {
-                return Optional.empty();
-            }
-            return Optional.of(sender.getUuid());
+        public SenderNotifiable(Sender sender) {
+            this.sender = sender;
         }
 
+        @Nonnull
+        @Override
+        public Optional<UUID> getUuid() {
+            if (this.sender.isConsole()) {
+                return Optional.empty();
+            }
+            return Optional.of(this.sender.getUuid());
+        }
+
+        @Nonnull
         @Override
         public String getName() {
-            return sender.getName();
+            return this.sender.getName();
         }
 
         @Override
         public boolean isConsole() {
-            return sender.isConsole();
+            return this.sender.isConsole();
         }
 
         @Override
         public boolean isPlayer() {
-            return !sender.isConsole();
+            return !this.sender.isConsole();
         }
     }
 

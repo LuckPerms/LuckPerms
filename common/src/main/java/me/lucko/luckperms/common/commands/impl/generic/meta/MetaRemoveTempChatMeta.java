@@ -85,40 +85,40 @@ public class MetaRemoveTempChatMeta extends SharedSubCommand {
         // Handle bulk removal
         if (meta.equalsIgnoreCase("null") || meta.equals("*")) {
             holder.removeIf(n ->
-                    type.matches(n) &&
-                    type.getEntry(n).getKey() == priority &&
+                    this.type.matches(n) &&
+                            this.type.getEntry(n).getKey() == priority &&
                     !n.isPermanent() &&
                     n.getFullContexts().makeImmutable().equals(context.makeImmutable())
             );
-            Message.BULK_REMOVE_TEMP_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), priority, CommandUtils.contextSetToString(context));
+            Message.BULK_REMOVE_TEMP_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), this.type.name().toLowerCase(), priority, CommandUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("meta" , "removetemp" + type.name().toLowerCase(), priority, "*", context)
+                    .action("meta" , "removetemp" + this.type.name().toLowerCase(), priority, "*", context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         }
 
-        DataMutateResult result = holder.unsetPermission(NodeFactory.buildChatMetaNode(type, priority, meta).setExpiry(10L).withExtraContext(context).build());
+        DataMutateResult result = holder.unsetPermission(NodeFactory.buildChatMetaNode(this.type, priority, meta).setExpiry(10L).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            TextComponent.Builder builder = TextUtils.fromLegacy(Message.REMOVE_TEMP_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context)), CommandManager.SECTION_CHAR).toBuilder();
+            TextComponent.Builder builder = TextUtils.fromLegacy(Message.REMOVE_TEMP_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), this.type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context)), CommandManager.SECTION_CHAR).toBuilder();
             HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
-                    "¥3Raw " + type.name().toLowerCase() + ": ¥r" + meta,
+                    "¥3Raw " + this.type.name().toLowerCase() + ": ¥r" + meta,
                     '¥'
             ));
             builder.applyDeep(c -> c.hoverEvent(event));
             sender.sendMessage(builder.build());
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("meta" , "removetemp" + type.name().toLowerCase(), priority, meta, context)
+                    .action("meta" , "removetemp" + this.type.name().toLowerCase(), priority, meta, context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_HAVE_TEMP_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context));
+            Message.DOES_NOT_HAVE_TEMP_CHAT_META.send(sender, holder.getFriendlyName(), this.type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

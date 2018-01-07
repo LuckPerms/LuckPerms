@@ -26,7 +26,6 @@
 package me.lucko.luckperms.sponge.commands;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -47,7 +46,7 @@ public class OptionClear extends SubCommand<LPSubjectData> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) {
         ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(0, args);
         if (contextSet.isEmpty()) {
             subjectData.clearOptions();

@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.node;
 
-import lombok.Getter;
-import lombok.ToString;
-
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Contexts;
@@ -43,12 +40,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
+
 import static com.google.common.base.Preconditions.checkState;
 
 /**
  * An immutable implementation of {@link Node}.
  */
-@ToString(of = {"permission", "value", "override", "server", "world", "expireAt", "contexts"})
 public final class ImmutableNode implements Node {
 
     /**
@@ -57,12 +55,10 @@ public final class ImmutableNode implements Node {
     public static final char NODE_SEPARATOR = '.';
     public static final int NODE_SEPARATOR_CODE = Character.getNumericValue('.');
 
-    @Getter
     private final String permission;
 
     private final boolean value;
 
-    @Getter
     private boolean override;
 
     // nullable
@@ -73,10 +69,8 @@ public final class ImmutableNode implements Node {
     // 0L for no expiry
     private final long expireAt;
 
-    @Getter
     private final ImmutableContextSet contexts;
 
-    @Getter
     private final ImmutableContextSet fullContexts;
 
     /*
@@ -140,14 +134,14 @@ public final class ImmutableNode implements Node {
         this.contexts = contexts == null ? ContextSet.empty() : contexts.makeImmutable();
 
         // define cached state
-        groupName = NodeFactory.parseGroupNode(this.permission);
-        wildcardLevel = this.permission.endsWith(WildcardProcessor.WILDCARD_SUFFIX) ? this.permission.chars().filter(num -> num == NODE_SEPARATOR_CODE).sum() : -1;
-        meta = NodeFactory.parseMetaNode(this.permission);
-        prefix = NodeFactory.parsePrefixNode(this.permission);
-        suffix = NodeFactory.parseSuffixNode(this.permission);
-        resolvedShorthand = ImmutableList.copyOf(ShorthandParser.parseShorthand(getPermission()));
-        optServer = Optional.ofNullable(this.server);
-        optWorld = Optional.ofNullable(this.world);
+        this.groupName = NodeFactory.parseGroupNode(this.permission);
+        this.wildcardLevel = this.permission.endsWith(WildcardProcessor.WILDCARD_SUFFIX) ? this.permission.chars().filter(num -> num == NODE_SEPARATOR_CODE).sum() : -1;
+        this.meta = NodeFactory.parseMetaNode(this.permission);
+        this.prefix = NodeFactory.parsePrefixNode(this.permission);
+        this.suffix = NodeFactory.parseSuffixNode(this.permission);
+        this.resolvedShorthand = ImmutableList.copyOf(ShorthandParser.parseShorthand(getPermission()));
+        this.optServer = Optional.ofNullable(this.server);
+        this.optWorld = Optional.ofNullable(this.world);
 
         // calculate the "full" context set
         if (this.server != null || this.world != null) {
@@ -167,132 +161,163 @@ public final class ImmutableNode implements Node {
         this.hashCode = calculateHashCode();
     }
 
+    @Nonnull
+    @Override
+    public String getPermission() {
+        return this.permission;
+    }
+
     @Override
     public boolean getValuePrimitive() {
-        return value;
+        return this.value;
     }
 
+    @Override
+    public boolean isOverride() {
+        return this.override;
+    }
+
+    @Nonnull
     @Override
     public Optional<String> getServer() {
-        return optServer;
+        return this.optServer;
     }
 
+    @Nonnull
     @Override
     public Optional<String> getWorld() {
-        return optWorld;
+        return this.optWorld;
     }
 
     @Override
     public boolean isServerSpecific() {
-        return server != null;
+        return this.server != null;
     }
 
     @Override
     public boolean isWorldSpecific() {
-        return world != null;
+        return this.world != null;
+    }
+
+    @Nonnull
+    @Override
+    public ImmutableContextSet getContexts() {
+        return this.contexts;
+    }
+
+    @Nonnull
+    @Override
+    public ImmutableContextSet getFullContexts() {
+        return this.fullContexts;
     }
 
     @Override
     public boolean appliesGlobally() {
-        return server == null && world == null && contexts.isEmpty();
+        return this.server == null && this.world == null && this.contexts.isEmpty();
     }
 
     @Override
     public boolean hasSpecificContext() {
-        return server != null || world != null || !contexts.isEmpty();
+        return this.server != null || this.world != null || !this.contexts.isEmpty();
     }
 
     @Override
     public boolean isTemporary() {
-        return expireAt != 0L;
+        return this.expireAt != 0L;
     }
 
     @Override
     public long getExpiryUnixTime() {
         checkState(isTemporary(), "Node does not have an expiry time.");
-        return expireAt;
+        return this.expireAt;
     }
 
+    @Nonnull
     @Override
     public Date getExpiry() {
         checkState(isTemporary(), "Node does not have an expiry time.");
-        return new Date(expireAt * 1000L);
+        return new Date(this.expireAt * 1000L);
     }
 
     @Override
     public long getSecondsTilExpiry() {
         checkState(isTemporary(), "Node does not have an expiry time.");
-        return expireAt - DateUtil.unixSecondsNow();
+        return this.expireAt - DateUtil.unixSecondsNow();
     }
 
     @Override
     public boolean hasExpired() {
-        return isTemporary() && expireAt < DateUtil.unixSecondsNow();
+        return isTemporary() && this.expireAt < DateUtil.unixSecondsNow();
     }
 
     @Override
     public boolean isGroupNode() {
-        return groupName != null;
+        return this.groupName != null;
     }
 
+    @Nonnull
     @Override
     public String getGroupName() {
         checkState(isGroupNode(), "Node is not a group node");
-        return groupName;
+        return this.groupName;
     }
 
     @Override
     public boolean isWildcard() {
-        return wildcardLevel != -1;
+        return this.wildcardLevel != -1;
     }
 
     @Override
     public int getWildcardLevel() {
         checkState(isWildcard(), "Node is not a wildcard");
-        return wildcardLevel;
+        return this.wildcardLevel;
     }
 
     @Override
     public boolean isMeta() {
-        return meta != null;
+        return this.meta != null;
     }
 
+    @Nonnull
     @Override
     public Map.Entry<String, String> getMeta() {
         checkState(isMeta(), "Node is not a meta node");
-        return meta;
+        return this.meta;
     }
 
     @Override
     public boolean isPrefix() {
-        return prefix != null;
+        return this.prefix != null;
     }
 
+    @Nonnull
     @Override
     public Map.Entry<Integer, String> getPrefix() {
         checkState(isPrefix(), "Node is not a prefix node");
-        return prefix;
+        return this.prefix;
     }
 
     @Override
     public boolean isSuffix() {
-        return suffix != null;
+        return this.suffix != null;
     }
 
+    @Nonnull
     @Override
     public Map.Entry<Integer, String> getSuffix() {
         checkState(isSuffix(), "Node is not a suffix node");
-        return suffix;
+        return this.suffix;
     }
 
     @Override
-    public boolean shouldApplyWithContext(ContextSet context) {
+    public boolean shouldApplyWithContext(@Nonnull ContextSet context) {
         return getFullContexts().isSatisfiedBy(context, false);
     }
 
+    @Nonnull
     @Override
     public List<String> resolveShorthand() {
-        return resolvedShorthand;
+        return this.resolvedShorthand;
     }
 
     @SuppressWarnings("StringEquality")
@@ -326,7 +351,6 @@ public final class ImmutableNode implements Node {
     private int calculateHashCode() {
         final int PRIME = 59;
         int result = 1;
-
         result = result * PRIME + this.permission.hashCode();
         result = result * PRIME + (this.value ? 79 : 97);
         result = result * PRIME + (this.override ? 79 : 97);
@@ -334,13 +358,12 @@ public final class ImmutableNode implements Node {
         result = result * PRIME + (this.world == null ? 43 : this.world.hashCode());
         result = result * PRIME + (int) (this.expireAt >>> 32 ^ this.expireAt);
         result = result * PRIME + this.contexts.hashCode();
-
         return result;
     }
 
     @SuppressWarnings("StringEquality")
     @Override
-    public boolean equalsIgnoringValue(Node other) {
+    public boolean equalsIgnoringValue(@Nonnull Node other) {
         if (this.permission != other.getPermission()) return false;
         if (this.override != other.isOverride()) return false;
 
@@ -358,7 +381,7 @@ public final class ImmutableNode implements Node {
 
     @SuppressWarnings("StringEquality")
     @Override
-    public boolean almostEquals(Node other) {
+    public boolean almostEquals(@Nonnull Node other) {
         if (this.permission != other.getPermission()) return false;
         if (this.override != other.isOverride()) return false;
 
@@ -377,7 +400,7 @@ public final class ImmutableNode implements Node {
 
     @SuppressWarnings("StringEquality")
     @Override
-    public boolean equalsIgnoringValueOrTemp(Node other) {
+    public boolean equalsIgnoringValueOrTemp(@Nonnull Node other) {
         if (this.permission != other.getPermission()) return false;
         if (this.override != other.isOverride()) return false;
 
@@ -418,4 +441,8 @@ public final class ImmutableNode implements Node {
         return s;
     }
 
+    @Override
+    public String toString() {
+        return "ImmutableNode(permission=" + this.permission + ", value=" + this.value + ", override=" + this.override + ", server=" + this.getServer() + ", world=" + this.getWorld() + ", expireAt=" + this.expireAt + ", contexts=" + this.contexts + ")";
+    }
 }

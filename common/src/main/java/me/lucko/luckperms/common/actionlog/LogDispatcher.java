@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.actionlog;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.api.event.log.LogBroadcastEvent;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.impl.log.LogNotify;
@@ -38,16 +36,19 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Optional;
 
-@RequiredArgsConstructor
 public class LogDispatcher {
     private final LuckPermsPlugin plugin;
 
+    public LogDispatcher(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+    }
+
     private void broadcast(ExtendedLogEntry entry, LogBroadcastEvent.Origin origin, Sender sender) {
-        plugin.getOnlineSenders()
+        this.plugin.getOnlineSenders()
                 .filter(CommandPermission.LOG_NOTIFY::isAuthorized)
                 .filter(s -> {
-                    boolean shouldCancel = LogNotify.isIgnoring(plugin, s.getUuid()) || (sender != null && s.getUuid().equals(sender.getUuid()));
-                    return !plugin.getEventFactory().handleLogNotify(shouldCancel, entry, origin, s);
+                    boolean shouldCancel = LogNotify.isIgnoring(this.plugin, s.getUuid()) || (sender != null && s.getUuid().equals(sender.getUuid()));
+                    return !this.plugin.getEventFactory().handleLogNotify(shouldCancel, entry, origin, s);
                 })
                 .forEach(s -> Message.LOG.send(s,
                         entry.getActorFriendlyString(),
@@ -59,8 +60,8 @@ public class LogDispatcher {
 
     public void dispatch(ExtendedLogEntry entry, Sender sender) {
         // set the event to cancelled if the sender is import
-        if (!plugin.getEventFactory().handleLogPublish(sender.isImport(), entry)) {
-            plugin.getStorage().logAction(entry);
+        if (!this.plugin.getEventFactory().handleLogPublish(sender.isImport(), entry)) {
+            this.plugin.getStorage().logAction(entry);
         }
 
         // don't dispatch log entries sent by an import process
@@ -68,21 +69,21 @@ public class LogDispatcher {
             return;
         }
 
-        Optional<ExtendedMessagingService> messagingService = plugin.getMessagingService();
+        Optional<ExtendedMessagingService> messagingService = this.plugin.getMessagingService();
         if (!sender.isImport() && messagingService.isPresent()) {
             messagingService.get().pushLog(entry);
         }
 
-        boolean shouldCancel = !plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
-        if (!plugin.getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.LOCAL)) {
+        boolean shouldCancel = !this.plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
+        if (!this.plugin.getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.LOCAL)) {
             broadcast(entry, LogBroadcastEvent.Origin.LOCAL, sender);
         }
     }
 
     public void dispatchFromApi(ExtendedLogEntry entry) {
-        if (!plugin.getEventFactory().handleLogPublish(false, entry)) {
+        if (!this.plugin.getEventFactory().handleLogPublish(false, entry)) {
             try {
-                plugin.getStorage().logAction(entry).get();
+                this.plugin.getStorage().logAction(entry).get();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -92,17 +93,17 @@ public class LogDispatcher {
     }
 
     public void broadcastFromApi(ExtendedLogEntry entry) {
-        plugin.getMessagingService().ifPresent(extendedMessagingService -> extendedMessagingService.pushLog(entry));
+        this.plugin.getMessagingService().ifPresent(extendedMessagingService -> extendedMessagingService.pushLog(entry));
 
-        boolean shouldCancel = !plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
-        if (!plugin.getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.LOCAL_API)) {
+        boolean shouldCancel = !this.plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
+        if (!this.plugin.getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.LOCAL_API)) {
             broadcast(entry, LogBroadcastEvent.Origin.LOCAL_API, null);
         }
     }
 
     public void dispatchFromRemote(ExtendedLogEntry entry) {
-        boolean shouldCancel = !plugin.getConfiguration().get(ConfigKeys.BROADCAST_RECEIVED_LOG_ENTRIES) || !plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
-        if (!plugin.getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.REMOTE)) {
+        boolean shouldCancel = !this.plugin.getConfiguration().get(ConfigKeys.BROADCAST_RECEIVED_LOG_ENTRIES) || !this.plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
+        if (!this.plugin.getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.REMOTE)) {
             broadcast(entry, LogBroadcastEvent.Origin.LOCAL_API, null);
         }
     }

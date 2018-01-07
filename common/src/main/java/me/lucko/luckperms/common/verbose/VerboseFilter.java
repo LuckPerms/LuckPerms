@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.verbose;
 
-import lombok.experimental.UtilityClass;
-
 import me.lucko.luckperms.common.utils.Scripting;
 
 import java.util.StringTokenizer;
@@ -36,8 +34,7 @@ import javax.script.ScriptEngine;
 /**
  * Tests verbose filters
  */
-@UtilityClass
-public class VerboseFilter {
+public final class VerboseFilter {
 
     /**
      * Evaluates whether the passed check data passes the filter
@@ -162,5 +159,7 @@ public class VerboseFilter {
                 token.equals(")") ||
                 token.equals("!");
     }
+
+    private VerboseFilter() {}
 
 }

@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.sponge.service.persisted;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -43,8 +40,6 @@ import java.util.function.Function;
 public class PersistedSubjectData extends CalculatedSubjectData implements Function<Boolean, Boolean> {
     private final PersistedSubject subject;
 
-    @Getter
-    @Setter
     private boolean save = true;
 
     public PersistedSubjectData(LuckPermsService service, String calculatorDisplayName, PersistedSubject subject) {
@@ -53,12 +48,12 @@ public class PersistedSubjectData extends CalculatedSubjectData implements Funct
     }
 
     private void save() {
-        if (!save) {
+        if (!this.save) {
             return;
         }
 
-        if (subject != null) {
-            subject.save();
+        if (this.subject != null) {
+            this.subject.save();
         }
     }
 
@@ -121,5 +116,13 @@ public class PersistedSubjectData extends CalculatedSubjectData implements Funct
     @Override
     public CompletableFuture<Boolean> clearOptions(ImmutableContextSet contexts) {
         return super.clearOptions(contexts).thenApply(this);
+    }
+
+    public boolean isSave() {
+        return this.save;
+    }
+
+    public void setSave(boolean save) {
+        this.save = save;
     }
 }

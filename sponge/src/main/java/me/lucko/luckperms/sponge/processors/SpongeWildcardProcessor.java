@@ -46,7 +46,7 @@ public class SpongeWildcardProcessor implements PermissionProcessor {
 
             node = node.substring(0, endIndex);
             if (!node.isEmpty()) {
-                Tristate t = Tristate.fromNullableBoolean(map.get(node));
+                Tristate t = Tristate.fromNullableBoolean(this.map.get(node));
                 if (t != Tristate.UNDEFINED) {
                     return t;
                 }

@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.utils;
 
-import lombok.RequiredArgsConstructor;
-
 import com.zaxxer.hikari.HikariDataSource;
 
 import java.sql.Connection;
@@ -35,7 +33,6 @@ import java.sql.SQLException;
 /**
  * A simple hikari wrapper
  */
-@RequiredArgsConstructor
 public class HikariSupplier implements AutoCloseable {
 
     private final String address;
@@ -45,24 +42,31 @@ public class HikariSupplier implements AutoCloseable {
 
     private HikariDataSource hikari;
 
+    public HikariSupplier(String address, String database, String username, String password) {
+        this.address = address;
+        this.database = database;
+        this.username = username;
+        this.password = password;
+    }
+
     public void setup(String poolName) {
-        hikari = new HikariDataSource();
-        hikari.setPoolName(poolName);
-        hikari.setMaximumPoolSize(2);
-        hikari.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
-        hikari.addDataSourceProperty("serverName", address.split(":")[0]);
-        hikari.addDataSourceProperty("port", address.split(":")[1]);
-        hikari.addDataSourceProperty("databaseName", database);
-        hikari.addDataSourceProperty("user", username);
-        hikari.addDataSourceProperty("password", password);
+        this.hikari = new HikariDataSource();
+        this.hikari.setPoolName(poolName);
+        this.hikari.setMaximumPoolSize(2);
+        this.hikari.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
+        this.hikari.addDataSourceProperty("serverName", this.address.split(":")[0]);
+        this.hikari.addDataSourceProperty("port", this.address.split(":")[1]);
+        this.hikari.addDataSourceProperty("databaseName", this.database);
+        this.hikari.addDataSourceProperty("user", this.username);
+        this.hikari.addDataSourceProperty("password", this.password);
     }
 
     @Override
     public void close() {
-        hikari.close();
+        this.hikari.close();
     }
 
     public Connection getConnection() throws SQLException {
-        return hikari.getConnection();
+        return this.hikari.getConnection();
     }
 }

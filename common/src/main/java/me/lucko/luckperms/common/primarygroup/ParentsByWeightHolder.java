@@ -40,18 +40,18 @@ public class ParentsByWeightHolder extends CachedPrimaryGroupHolder {
 
     @Override
     protected String calculateValue() {
-        Contexts contexts = user.getPlugin().getContextForUser(user);
+        Contexts contexts = this.user.getPlugin().getContextForUser(this.user);
         if (contexts == null) {
-            contexts = user.getPlugin().getContextManager().getStaticContexts();
+            contexts = this.user.getPlugin().getContextManager().getStaticContexts();
         }
 
         Set<Group> groups = new LinkedHashSet<>();
-        for (Node node : user.filterNodes(contexts.getContexts())) {
+        for (Node node : this.user.filterNodes(contexts.getContexts())) {
             if (!node.getValuePrimitive() || !node.isGroupNode()) {
                 continue;
             }
 
-            Group group = user.getPlugin().getGroupManager().getIfLoaded(node.getGroupName());
+            Group group = this.user.getPlugin().getGroupManager().getIfLoaded(node.getGroupName());
             if (group != null) {
                 groups.add(group);
             }

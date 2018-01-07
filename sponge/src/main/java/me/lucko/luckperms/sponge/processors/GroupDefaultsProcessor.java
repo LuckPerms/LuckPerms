@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.sponge.processors;
 
-import lombok.AllArgsConstructor;
-
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
@@ -34,19 +32,23 @@ import me.lucko.luckperms.sponge.service.LuckPermsService;
 
 import java.util.Map;
 
-@AllArgsConstructor
 public class GroupDefaultsProcessor implements PermissionProcessor {
     private final LuckPermsService service;
     private final ImmutableContextSet contexts;
 
+    public GroupDefaultsProcessor(LuckPermsService service, ImmutableContextSet contexts) {
+        this.service = service;
+        this.contexts = contexts;
+    }
+
     @Override
     public Tristate hasPermission(String permission) {
-        Tristate t = service.getGroupSubjects().getDefaults().getPermissionValue(contexts, permission);
+        Tristate t = this.service.getGroupSubjects().getDefaults().getPermissionValue(this.contexts, permission);
         if (t != Tristate.UNDEFINED) {
             return t;
         }
 
-        t = service.getDefaults().getPermissionValue(contexts, permission);
+        t = this.service.getDefaults().getPermissionValue(this.contexts, permission);
         if (t != Tristate.UNDEFINED) {
             return t;
         }

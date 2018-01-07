@@ -25,11 +25,8 @@
 
 package me.lucko.luckperms.sponge.managers;
 
-import lombok.Getter;
-
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -57,6 +54,7 @@ import org.spongepowered.api.service.permission.SubjectCollection;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -66,7 +64,6 @@ import java.util.function.Predicate;
 
 public class SpongeUserManager implements UserManager, LPSubjectCollection {
 
-    @Getter
     private final LPSpongePlugin plugin;
 
     private SubjectCollection spongeProxy = null;
@@ -109,8 +106,8 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
     @Override
     public SpongeUser apply(UserIdentifier id) {
         return !id.getUsername().isPresent() ?
-                new SpongeUser(id.getUuid(), plugin) :
-                new SpongeUser(id.getUuid(), id.getUsername().get(), plugin);
+                new SpongeUser(id.getUuid(), this.plugin) :
+                new SpongeUser(id.getUuid(), id.getUsername().get(), this.plugin);
     }
 
     /* ------------------------------------------
@@ -119,12 +116,12 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
 
     @Override
     public Map<UserIdentifier, SpongeUser> getAll() {
-        return ImmutableMap.copyOf(objects.asMap());
+        return ImmutableMap.copyOf(this.objects.asMap());
     }
 
     @Override
     public SpongeUser getOrMake(UserIdentifier id) {
-        SpongeUser ret = objects.get(id);
+        SpongeUser ret = this.objects.get(id);
         if (id.getUsername().isPresent()) {
             ret.setName(id.getUsername().get(), false);
         }
@@ -133,18 +130,18 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
 
     @Override
     public SpongeUser getIfLoaded(UserIdentifier id) {
-        return objects.getIfPresent(id);
+        return this.objects.getIfPresent(id);
     }
 
     @Override
     public boolean isLoaded(UserIdentifier id) {
-        return objects.asMap().containsKey(id);
+        return this.objects.asMap().containsKey(id);
     }
 
     @Override
     public void unload(UserIdentifier id) {
         if (id != null) {
-            objects.invalidate(id);
+            this.objects.invalidate(id);
         }
     }
 
@@ -157,7 +154,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
 
     @Override
     public void unloadAll() {
-        objects.invalidateAll();
+        this.objects.invalidateAll();
     }
 
     /* ------------------------------------------
@@ -182,7 +179,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
 
     @Override
     public boolean giveDefaultIfNeeded(User user, boolean save) {
-        return GenericUserManager.giveDefaultIfNeeded(user, save, plugin);
+        return GenericUserManager.giveDefaultIfNeeded(user, save, this.plugin);
     }
 
     @Override
@@ -199,10 +196,10 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
     @Override
     public CompletableFuture<Void> updateAllUsers() {
         return CompletableFuture.runAsync(
-                () -> plugin.getOnlinePlayers()
-                        .map(u -> plugin.getUuidCache().getUUID(u))
-                        .forEach(u -> plugin.getStorage().loadUser(u, null).join()),
-                plugin.getScheduler().async()
+                () -> this.plugin.getOnlinePlayers()
+                        .map(u -> this.plugin.getUuidCache().getUUID(u))
+                        .forEach(u -> this.plugin.getStorage().loadUser(u, null).join()),
+                this.plugin.getScheduler().async()
         );
     }
 
@@ -212,16 +209,16 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
 
     @Override
     public synchronized SubjectCollection sponge() {
-        if (spongeProxy == null) {
-            Preconditions.checkNotNull(plugin.getService(), "service");
-            spongeProxy = ProxyFactory.toSponge(this);
+        if (this.spongeProxy == null) {
+            Objects.requireNonNull(this.plugin.getService(), "service");
+            this.spongeProxy = ProxyFactory.toSponge(this);
         }
-        return spongeProxy;
+        return this.spongeProxy;
     }
 
     @Override
     public LuckPermsService getService() {
-        return plugin.getService();
+        return this.plugin.getService();
     }
 
     @Override
@@ -253,12 +250,12 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             return fut;
         }
 
-        LPSubject present = subjectLoadingCache.getIfPresent(uuid);
+        LPSubject present = this.subjectLoadingCache.getIfPresent(uuid);
         if (present != null) {
             return CompletableFuture.completedFuture(present);
         }
 
-        return CompletableFuture.supplyAsync(() -> subjectLoadingCache.get(uuid), plugin.getScheduler().async());
+        return CompletableFuture.supplyAsync(() -> this.subjectLoadingCache.get(uuid), this.plugin.getScheduler().async());
     }
 
     @Override
@@ -288,7 +285,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
         }
 
         UUID finalUuid = uuid;
-        return plugin.getStorage().getUniqueUsers().thenApply(set -> set.contains(finalUuid));
+        return this.plugin.getStorage().getUniqueUsers().thenApply(set -> set.contains(finalUuid));
     }
 
     @Override
@@ -307,7 +304,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             }
 
             return ret.build();
-        }, plugin.getScheduler().async());
+        }, this.plugin.getScheduler().async());
     }
 
     @Override
@@ -321,10 +318,10 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             ImmutableSet.Builder<String> ids = ImmutableSet.builder();
 
             getAll().keySet().forEach(uuid -> ids.add(uuid.getUuid().toString()));
-            plugin.getStorage().getUniqueUsers().join().forEach(uuid -> ids.add(uuid.toString()));
+            this.plugin.getStorage().getUniqueUsers().join().forEach(uuid -> ids.add(uuid.toString()));
 
             return ids.build();
-        }, plugin.getScheduler().async());
+        }, this.plugin.getScheduler().async());
     }
 
     @Override
@@ -332,7 +329,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
         return CompletableFuture.supplyAsync(() -> {
             ImmutableMap.Builder<SubjectReference, Boolean> ret = ImmutableMap.builder();
 
-            List<HeldPermission<UUID>> lookup = plugin.getStorage().getUsersWithPermission(permission).join();
+            List<HeldPermission<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(permission).join();
             for (HeldPermission<UUID> holder : lookup) {
                 if (holder.asNode().getFullContexts().equals(ImmutableContextSet.empty())) {
                     ret.put(SubjectReferenceFactory.obtain(getService(), getIdentifier(), holder.getHolder().toString()), holder.getValue());
@@ -340,7 +337,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             }
 
             return ret.build();
-        }, plugin.getScheduler().async());
+        }, this.plugin.getScheduler().async());
     }
 
     @Override
@@ -348,7 +345,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
         return CompletableFuture.supplyAsync(() -> {
             ImmutableMap.Builder<SubjectReference, Boolean> ret = ImmutableMap.builder();
 
-            List<HeldPermission<UUID>> lookup = plugin.getStorage().getUsersWithPermission(permission).join();
+            List<HeldPermission<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(permission).join();
             for (HeldPermission<UUID> holder : lookup) {
                 if (holder.asNode().getFullContexts().equals(contexts)) {
                     ret.put(SubjectReferenceFactory.obtain(getService(), getIdentifier(), holder.getHolder().toString()), holder.getValue());
@@ -356,12 +353,12 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             }
 
             return ret.build();
-        }, plugin.getScheduler().async());
+        }, this.plugin.getScheduler().async());
     }
 
     @Override
     public ImmutableMap<LPSubject, Boolean> getLoadedWithPermission(String permission) {
-        return objects.asMap().values().stream()
+        return this.objects.asMap().values().stream()
                 .map(SpongeUser::sponge)
                 .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(ImmutableContextSet.empty(), permission)))
                 .filter(pair -> pair.getValue() != Tristate.UNDEFINED)
@@ -370,7 +367,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
 
     @Override
     public ImmutableMap<LPSubject, Boolean> getLoadedWithPermission(ImmutableContextSet contexts, String permission) {
-        return objects.asMap().values().stream()
+        return this.objects.asMap().values().stream()
                 .map(SpongeUser::sponge)
                 .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(contexts, permission)))
                 .filter(pair -> pair.getValue() != Tristate.UNDEFINED)
@@ -380,6 +377,10 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
     @Override
     public LPSubject getDefaults() {
         return getService().getDefaultSubjects().loadSubject(getIdentifier()).join();
+    }
+
+    public LPSpongePlugin getPlugin() {
+        return this.plugin;
     }
 
 }

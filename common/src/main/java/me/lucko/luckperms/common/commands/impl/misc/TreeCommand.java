@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.impl.misc;
 
 import me.lucko.luckperms.common.caching.type.PermissionCache;
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
@@ -57,12 +56,12 @@ public class TreeCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         String selection = ".";
         int maxLevel = 5;
         String player = null;
 
-        if (args.size() > 0) {
+        if (!args.isEmpty()) {
             selection = args.get(0);
         }
         if (args.size() > 1) {

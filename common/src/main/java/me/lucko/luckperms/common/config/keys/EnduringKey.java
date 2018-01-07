@@ -25,19 +25,27 @@
 
 package me.lucko.luckperms.common.config.keys;
 
-import lombok.AllArgsConstructor;
-import lombok.experimental.Delegate;
-
 import me.lucko.luckperms.common.config.ConfigKey;
+import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 
 /**
  * Wrapper class to mark a config key as enduring (doesn't change in the event of a reload)
  * @param <T>
  */
-@AllArgsConstructor(staticName = "wrap")
 public class EnduringKey<T> implements ConfigKey<T> {
 
-    @Delegate
+    public static <T> EnduringKey<T> wrap(ConfigKey<T> delegate) {
+        return new EnduringKey<>(delegate);
+    }
+
     private final ConfigKey<T> delegate;
 
+    private EnduringKey(ConfigKey<T> delegate) {
+        this.delegate = delegate;
+    }
+
+    @Override
+    public T get(ConfigurationAdapter adapter) {
+        return this.delegate.get(adapter);
+    }
 }

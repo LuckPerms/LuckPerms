@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.buffers;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import java.lang.ref.WeakReference;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -42,7 +39,6 @@ import java.util.function.Supplier;
  *
  * @param <T> the return type
  */
-@RequiredArgsConstructor
 public abstract class BufferedRequest<T> {
     private final long bufferTimeMillis;
     private final long sleepInterval;
@@ -51,23 +47,29 @@ public abstract class BufferedRequest<T> {
     private WeakReference<Processor<T>> processor = null;
     private final ReentrantLock lock = new ReentrantLock();
 
+    public BufferedRequest(long bufferTimeMillis, long sleepInterval, Executor executor) {
+        this.bufferTimeMillis = bufferTimeMillis;
+        this.sleepInterval = sleepInterval;
+        this.executor = executor;
+    }
+
     public CompletableFuture<T> request() {
-        lock.lock();
+        this.lock.lock();
         try {
-            if (processor != null) {
-                Processor<T> p = processor.get();
+            if (this.processor != null) {
+                Processor<T> p = this.processor.get();
                 if (p != null && p.isUsable()) {
                     return p.getAndExtend();
                 }
             }
 
-            Processor<T> p = new Processor<>(bufferTimeMillis, sleepInterval, this::perform);
-            executor.execute(p);
-            processor = new WeakReference<>(p);
+            Processor<T> p = new Processor<>(this.bufferTimeMillis, this.sleepInterval, this::perform);
+            this.executor.execute(p);
+            this.processor = new WeakReference<>(p);
             return p.get();
 
         } finally {
-            lock.unlock();
+            this.lock.unlock();
         }
     }
 
@@ -77,62 +79,70 @@ public abstract class BufferedRequest<T> {
 
     protected abstract T perform();
 
-    @RequiredArgsConstructor
     private static class Processor<R> implements Runnable {
         private final long delayMillis;
         private final long sleepMillis;
         private final Supplier<R> supplier;
         private final ReentrantLock lock = new ReentrantLock();
         private final CompletableFuture<R> future = new CompletableFuture<>();
-        @Getter
         private boolean usable = true;
         private long executionTime;
 
+        public Processor(long delayMillis, long sleepMillis, Supplier<R> supplier) {
+            this.delayMillis = delayMillis;
+            this.sleepMillis = sleepMillis;
+            this.supplier = supplier;
+        }
+
         @Override
         public void run() {
-            lock.lock();
+            this.lock.lock();
             try {
-                executionTime = System.currentTimeMillis() + delayMillis;
+                this.executionTime = System.currentTimeMillis() + this.delayMillis;
             } finally {
-                lock.unlock();
+                this.lock.unlock();
             }
 
             while (true) {
-                lock.lock();
+                this.lock.lock();
                 try {
-                    if (System.currentTimeMillis() > executionTime) {
-                        usable = false;
+                    if (System.currentTimeMillis() > this.executionTime) {
+                        this.usable = false;
                         break;
                     }
 
                 } finally {
-                    lock.unlock();
+                    this.lock.unlock();
                 }
 
                 try {
-                    Thread.sleep(sleepMillis);
+                    Thread.sleep(this.sleepMillis);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
 
-            R result = supplier.get();
-            future.complete(result);
+            R result = this.supplier.get();
+            this.future.complete(result);
         }
 
         public CompletableFuture<R> get() {
-            return future;
+            return this.future;
         }
 
         public CompletableFuture<R> getAndExtend() {
-            lock.lock();
+            this.lock.lock();
             try {
-                executionTime = System.currentTimeMillis() + delayMillis;
+                this.executionTime = System.currentTimeMillis() + this.delayMillis;
             } finally {
-                lock.unlock();
+                this.lock.unlock();
             }
 
-            return future;
+            return this.future;
+        }
+
+        public boolean isUsable() {
+            return this.usable;
         }
     }
 

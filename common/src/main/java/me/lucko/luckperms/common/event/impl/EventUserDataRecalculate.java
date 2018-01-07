@@ -25,21 +25,37 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.event.user.UserDataRecalculateEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
-@Getter
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventUserDataRecalculate extends AbstractEvent implements UserDataRecalculateEvent {
 
     private final User user;
     private final UserData data;
 
+    public EventUserDataRecalculate(User user, UserData data) {
+        this.user = user;
+        this.data = data;
+    }
+
+    @Nonnull
+    @Override
+    public User getUser() {
+        return this.user;
+    }
+
+    @Nonnull
+    @Override
+    public UserData getData() {
+        return this.data;
+    }
+
+    @Override
+    public String toString() {
+        return "EventUserDataRecalculate(user=" + this.getUser() + ", data=" + this.getData() + ")";
+    }
 }

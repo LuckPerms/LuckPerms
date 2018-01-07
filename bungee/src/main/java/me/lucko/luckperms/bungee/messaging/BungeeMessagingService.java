@@ -51,13 +51,13 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
     }
 
     public void init() {
-        plugin.getProxy().getPluginManager().registerListener(plugin, this);
-        plugin.getProxy().registerChannel(CHANNEL);
+        this.plugin.getProxy().getPluginManager().registerListener(this.plugin, this);
+        this.plugin.getProxy().registerChannel(CHANNEL);
     }
 
     @Override
     public void close() {
-        plugin.getProxy().unregisterChannel(CHANNEL);
+        this.plugin.getProxy().unregisterChannel(CHANNEL);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
 
         byte[] data = out.toByteArray();
 
-        for (ServerInfo server : plugin.getProxy().getServers().values()) {
+        for (ServerInfo server : this.plugin.getProxy().getServers().values()) {
             server.sendData(CHANNEL, data, true);
         }
     }
@@ -90,7 +90,7 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
 
         onMessage(msg, u -> {
             // Forward to other servers
-            plugin.getScheduler().doAsync(() -> sendMessage(u));
+            this.plugin.getScheduler().doAsync(() -> sendMessage(u));
         });
     }
 }

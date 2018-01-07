@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.storage;
 
-import lombok.AllArgsConstructor;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
@@ -50,18 +48,20 @@ import java.io.File;
 import java.util.Map;
 import java.util.Set;
 
-@AllArgsConstructor
 public class StorageFactory {
-
     private final LuckPermsPlugin plugin;
 
+    public StorageFactory(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+    }
+
     public Set<StorageType> getRequiredTypes(StorageType defaultMethod) {
-        if (plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE)) {
-            return plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS).entrySet().stream()
+        if (this.plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE)) {
+            return this.plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS).entrySet().stream()
                     .map(e -> {
                         StorageType type = StorageType.parse(e.getValue());
                         if (type == null) {
-                            plugin.getLog().severe("Storage method for " + e.getKey() + " - " + e.getValue() + " not recognised. " +
+                            this.plugin.getLog().severe("Storage method for " + e.getKey() + " - " + e.getValue() + " not recognised. " +
                                     "Using the default instead.");
                             type = defaultMethod;
                         }
@@ -69,10 +69,10 @@ public class StorageFactory {
                     })
                     .collect(ImmutableCollectors.toEnumSet(StorageType.class));
         } else {
-            String method = plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);
+            String method = this.plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);
             StorageType type = StorageType.parse(method);
             if (type == null) {
-                plugin.getLog().severe("Storage method '" + method + "' not recognised. Using the default instead.");
+                this.plugin.getLog().severe("Storage method '" + method + "' not recognised. Using the default instead.");
                 type = defaultMethod;
             }
             return ImmutableSet.of(type);
@@ -81,10 +81,10 @@ public class StorageFactory {
 
     public Storage getInstance(StorageType defaultMethod) {
         Storage storage;
-        if (plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE)) {
-            plugin.getLog().info("Loading storage provider... [SPLIT STORAGE]");
+        if (this.plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE)) {
+            this.plugin.getLog().info("Loading storage provider... [SPLIT STORAGE]");
 
-            Map<SplitStorageType, StorageType> mappedTypes = plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS).entrySet().stream()
+            Map<SplitStorageType, StorageType> mappedTypes = this.plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS).entrySet().stream()
                     .map(e -> {
                         StorageType type = StorageType.parse(e.getValue());
                         if (type == null) {
@@ -98,16 +98,16 @@ public class StorageFactory {
                     .distinct()
                     .collect(ImmutableCollectors.toEnumMap(StorageType.class, e -> e, this::makeDao));
 
-            storage = AbstractStorage.create(plugin, new SplitStorageDao(plugin, backing, mappedTypes));
+            storage = AbstractStorage.create(this.plugin, new SplitStorageDao(this.plugin, backing, mappedTypes));
 
         } else {
-            String method = plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);
+            String method = this.plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);
             StorageType type = StorageType.parse(method);
             if (type == null) {
                 type = defaultMethod;
             }
 
-            plugin.getLog().info("Loading storage provider... [" + type.name() + "]");
+            this.plugin.getLog().info("Loading storage provider... [" + type.name() + "]");
             storage = makeInstance(type);
         }
 
@@ -116,48 +116,48 @@ public class StorageFactory {
     }
 
     private Storage makeInstance(StorageType type) {
-        return AbstractStorage.create(plugin, makeDao(type));
+        return AbstractStorage.create(this.plugin, makeDao(type));
     }
 
     private AbstractDao makeDao(StorageType method) {
         switch (method) {
             case MARIADB:
-                return new SqlDao(plugin, new MariaDbConnectionFactory(
-                        plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
-                        plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
+                return new SqlDao(this.plugin, new MariaDbConnectionFactory(
+                        this.plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
+                        this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case MYSQL:
-                return new SqlDao(plugin, new MySqlConnectionFactory(
-                        plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
-                        plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
+                return new SqlDao(this.plugin, new MySqlConnectionFactory(
+                        this.plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
+                        this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case SQLITE:
-                return new SqlDao(plugin, new SQLiteConnectionFactory(
-                        new File(plugin.getDataDirectory(), "luckperms-sqlite.db")),
-                        plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
+                return new SqlDao(this.plugin, new SQLiteConnectionFactory(
+                        new File(this.plugin.getDataDirectory(), "luckperms-sqlite.db")),
+                        this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case H2:
-                return new SqlDao(plugin, new H2ConnectionFactory(
-                        new File(plugin.getDataDirectory(), "luckperms-h2")),
-                        plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
+                return new SqlDao(this.plugin, new H2ConnectionFactory(
+                        new File(this.plugin.getDataDirectory(), "luckperms-h2")),
+                        this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case POSTGRESQL:
-                return new SqlDao(plugin, new PostgreConnectionFactory(
-                        plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
-                        plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
+                return new SqlDao(this.plugin, new PostgreConnectionFactory(
+                        this.plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
+                        this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case MONGODB:
                 return new MongoDao(
-                        plugin,
-                        plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES),
-                        plugin.getConfiguration().get(ConfigKeys.MONGODB_COLLECTION_PREFIX)
+                        this.plugin,
+                        this.plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES),
+                        this.plugin.getConfiguration().get(ConfigKeys.MONGODB_COLLECTION_PREFIX)
                 );
             case YAML:
-                return new YamlDao(plugin, "yaml-storage");
+                return new YamlDao(this.plugin, "yaml-storage");
             case HOCON:
-                return new HoconDao(plugin, "hocon-storage");
+                return new HoconDao(this.plugin, "hocon-storage");
             default:
-                return new JsonDao(plugin, "json-storage");
+                return new JsonDao(this.plugin, "json-storage");
         }
     }
 }

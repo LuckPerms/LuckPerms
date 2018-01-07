@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.node;
 
-import lombok.experimental.UtilityClass;
-
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 
@@ -39,8 +37,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@UtilityClass
-public class ShorthandParser {
+public final class ShorthandParser {
     private static final List<Function<String, Iterable<String>>> PARSERS = ImmutableList.<Function<String, Iterable<String>>>builder()
             .add(new ListParser())
             .add(new CharacterRangeParser())
@@ -171,5 +168,7 @@ public class ShorthandParser {
             return getCharRange(before.charAt(0), after.charAt(0));
         }
     }
+
+    private ShorthandParser() {}
 
 }

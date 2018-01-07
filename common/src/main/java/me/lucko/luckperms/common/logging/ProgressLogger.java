@@ -25,16 +25,12 @@
 
 package me.lucko.luckperms.common.logging;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.locale.Message;
 
 import java.util.HashSet;
 import java.util.Set;
 
-@RequiredArgsConstructor
 public class ProgressLogger {
     private static final int NOTIFY_FREQUENCY = 500;
 
@@ -42,38 +38,43 @@ public class ProgressLogger {
     private final Message logMessage;
     private final Message logProgressMessage;
 
-    @Getter
     private final Set<Sender> listeners = new HashSet<>();
 
     public ProgressLogger(String pluginName) {
         this(pluginName, Message.MIGRATION_LOG, Message.MIGRATION_LOG_PROGRESS);
     }
 
+    public ProgressLogger(String pluginName, Message logMessage, Message logProgressMessage) {
+        this.pluginName = pluginName;
+        this.logMessage = logMessage;
+        this.logProgressMessage = logProgressMessage;
+    }
+
     public void addListener(Sender sender) {
-        listeners.add(sender);
+        this.listeners.add(sender);
     }
 
     public void log(String msg) {
-        if (pluginName == null) {
-            listeners.forEach(s -> logMessage.send(s, msg));
+        if (this.pluginName == null) {
+            this.listeners.forEach(s -> this.logMessage.send(s, msg));
         } else {
-            listeners.forEach(s -> logMessage.send(s, pluginName, msg));
+            this.listeners.forEach(s -> this.logMessage.send(s, this.pluginName, msg));
         }
     }
 
     public void logErr(String msg) {
-        if (pluginName == null) {
-            listeners.forEach(s -> logMessage.send(s, "Error -> " + msg));
+        if (this.pluginName == null) {
+            this.listeners.forEach(s -> this.logMessage.send(s, "Error -> " + msg));
         } else {
-            listeners.forEach(s -> logMessage.send(s, pluginName, "Error -> " + msg));
+            this.listeners.forEach(s -> this.logMessage.send(s, this.pluginName, "Error -> " + msg));
         }
     }
 
     public void logAllProgress(String msg, int amount) {
-        if (pluginName == null) {
-            listeners.forEach(s -> logProgressMessage.send(s, msg.replace("{}", Integer.toString(amount))));
+        if (this.pluginName == null) {
+            this.listeners.forEach(s -> this.logProgressMessage.send(s, msg.replace("{}", Integer.toString(amount))));
         } else {
-            listeners.forEach(s -> logProgressMessage.send(s, pluginName, msg.replace("{}", Integer.toString(amount))));
+            this.listeners.forEach(s -> this.logProgressMessage.send(s, this.pluginName, msg.replace("{}", Integer.toString(amount))));
         }
     }
 
@@ -82,5 +83,9 @@ public class ProgressLogger {
             // migrated {} groups so far.
             logAllProgress(msg, amount);
         }
+    }
+
+    public Set<Sender> getListeners() {
+        return this.listeners;
     }
 }

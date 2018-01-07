@@ -25,11 +25,6 @@
 
 package me.lucko.luckperms.sponge.service;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
-
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
@@ -41,54 +36,89 @@ import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.text.Text;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-@RequiredArgsConstructor
-@EqualsAndHashCode(of = "id")
-@ToString(of = {"id", "description", "owner"})
+import javax.annotation.Nullable;
+
 public final class LuckPermsPermissionDescription implements LPPermissionDescription {
 
-    @Getter
     private final LPPermissionService service;
 
-    @Getter
     private final String id;
-
-    private final Text description;
-
-    private final PluginContainer owner;
+    @Nullable private final Text description;
+    @Nullable private final PluginContainer owner;
 
     private PermissionDescription spongeProxy = null;
 
+    public LuckPermsPermissionDescription(LPPermissionService service, String id, @Nullable Text description, @Nullable PluginContainer owner) {
+        this.service = service;
+        this.id = Objects.requireNonNull(id, "id");
+        this.description = description;
+        this.owner = owner;
+    }
+
     @Override
     public synchronized PermissionDescription sponge() {
-        if (spongeProxy == null) {
-            spongeProxy = ProxyFactory.toSponge(this);
+        if (this.spongeProxy == null) {
+            this.spongeProxy = ProxyFactory.toSponge(this);
         }
-        return spongeProxy;
+        return this.spongeProxy;
+    }
+
+    @Override
+    public LPPermissionService getService() {
+        return this.service;
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
     }
 
     @Override
     public Optional<Text> getDescription() {
-        return Optional.ofNullable(description);
+        return Optional.ofNullable(this.description);
     }
 
     @Override
     public Optional<PluginContainer> getOwner() {
-        return Optional.ofNullable(owner);
+        return Optional.ofNullable(this.owner);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public CompletableFuture<Map<SubjectReference, Boolean>> findAssignedSubjects(String id) {
-        LPSubjectCollection collection = service.getCollection(id);
+        LPSubjectCollection collection = this.service.getCollection(id);
         return (CompletableFuture) collection.getAllWithPermission(this.id);
     }
 
     @Override
     public Map<LPSubject, Boolean> getAssignedSubjects(String id) {
-        LPSubjectCollection collection = service.getCollection(id);
+        LPSubjectCollection collection = this.service.getCollection(id);
         return collection.getLoadedWithPermission(this.id);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof LuckPermsPermissionDescription)) return false;
+        final LuckPermsPermissionDescription other = (LuckPermsPermissionDescription) o;
+        return this.id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "LuckPermsPermissionDescription(" +
+                "id=" + this.id + ", " +
+                "description=" + this.description + ", " +
+                "owner=" + this.owner + ")";
+    }
+
 }

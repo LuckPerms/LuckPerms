@@ -31,8 +31,6 @@
 
 package me.lucko.luckperms.common.utils;
 
-import lombok.experimental.UtilityClass;
-
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.regex.Matcher;
@@ -41,8 +39,7 @@ import java.util.regex.Pattern;
 /**
  * Translates unix timestamps / durations into a readable format
  */
-@UtilityClass
-public class DateUtil {
+public final class DateUtil {
     private static final Pattern TIME_PATTERN = Pattern.compile("(?:([0-9]+)\\s*y[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*mo[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*w[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*d[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*h[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*m[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*(?:s[a-z]*)?)?", Pattern.CASE_INSENSITIVE);
     private static final int MAX_YEARS = 100000;
 
@@ -259,4 +256,7 @@ public class DateUtil {
     public static class IllegalDateException extends Exception {
 
     }
+
+    private DateUtil() {}
+
 }

@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.commands.abstraction;
 
-import lombok.Getter;
-
 import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.commands.Arg;
@@ -56,7 +54,6 @@ import java.util.stream.Collectors;
 /**
  * Abstract SubCommand class
  */
-@Getter
 public abstract class SubCommand<T> extends Command<T, Void> {
 
     public SubCommand(LocalizedSpec spec, String name, CommandPermission permission, Predicate<Integer> argumentCheck) {

@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.messaging;
 
-import lombok.Getter;
-
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -58,16 +56,10 @@ public abstract class AbstractMessagingService implements ExtendedMessagingServi
     private static final String USER_UPDATE_HEADER = "userupdate:";
     private static final String LOG_HEADER = "log";
 
-    @Getter
     private final LuckPermsPlugin plugin;
-
-    @Getter
     private final String name;
-
     private final Set<UUID> receivedMessages;
     private final Gson gson;
-
-    @Getter
     private final BufferedRequest<Void> updateBuffer;
 
     public AbstractMessagingService(LuckPermsPlugin plugin, String name) {
@@ -76,6 +68,20 @@ public abstract class AbstractMessagingService implements ExtendedMessagingServi
         this.receivedMessages = Collections.synchronizedSet(new HashSet<>());
         this.gson = new GsonBuilder().disableHtmlEscaping().create();
         this.updateBuffer = new PushUpdateBuffer(plugin);
+    }
+
+    public LuckPermsPlugin getPlugin() {
+        return this.plugin;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public BufferedRequest<Void> getUpdateBuffer() {
+        return this.updateBuffer;
     }
 
     protected abstract void sendMessage(String message);
@@ -89,17 +95,17 @@ public abstract class AbstractMessagingService implements ExtendedMessagingServi
                 return;
             }
 
-            if (!receivedMessages.add(requestId)) {
+            if (!this.receivedMessages.add(requestId)) {
                 return;
             }
 
-            plugin.getLog().info("[" + name + " Messaging] Received update ping with id: " + requestId.toString());
+            this.plugin.getLog().info("[" + this.name + " Messaging] Received update ping with id: " + requestId.toString());
 
-            if (plugin.getEventFactory().handleNetworkPreSync(false, requestId)) {
+            if (this.plugin.getEventFactory().handleNetworkPreSync(false, requestId)) {
                 return;
             }
 
-            plugin.getUpdateTaskBuffer().request();
+            this.plugin.getUpdateTaskBuffer().request();
 
             if (callback != null) {
                 callback.accept(msg);
@@ -116,22 +122,22 @@ public abstract class AbstractMessagingService implements ExtendedMessagingServi
             UUID requestId = entry.getKey();
             UUID userUuid = entry.getValue();
 
-            if (!receivedMessages.add(requestId)) {
+            if (!this.receivedMessages.add(requestId)) {
                 return;
             }
 
-            User user = plugin.getUserManager().getIfLoaded(userUuid);
+            User user = this.plugin.getUserManager().getIfLoaded(userUuid);
             if (user == null) {
                 return;
             }
 
-            plugin.getLog().info("[" + name + " Messaging] Received user update ping for '" + user.getFriendlyName() + "' with id: " + uuidToString(requestId));
+            this.plugin.getLog().info("[" + this.name + " Messaging] Received user update ping for '" + user.getFriendlyName() + "' with id: " + uuidToString(requestId));
 
-            if (plugin.getEventFactory().handleNetworkPreSync(false, requestId)) {
+            if (this.plugin.getEventFactory().handleNetworkPreSync(false, requestId)) {
                 return;
             }
 
-            plugin.getStorage().loadUser(user.getUuid(), null);
+            this.plugin.getStorage().loadUser(user.getUuid(), null);
 
             if (callback != null) {
                 callback.accept(msg);
@@ -142,7 +148,7 @@ public abstract class AbstractMessagingService implements ExtendedMessagingServi
 
             Map.Entry<String, ExtendedLogEntry> entry;
             try {
-                entry = ExtendedLogEntry.deserialize(gson.fromJson(content, JsonObject.class));
+                entry = ExtendedLogEntry.deserialize(this.gson.fromJson(content, JsonObject.class));
             } catch (Exception e) {
                 return;
             }
@@ -156,12 +162,12 @@ public abstract class AbstractMessagingService implements ExtendedMessagingServi
                 return;
             }
 
-            if (!receivedMessages.add(requestId)) {
+            if (!this.receivedMessages.add(requestId)) {
                 return;
             }
 
-            plugin.getEventFactory().handleLogReceive(requestId, entry.getValue());
-            plugin.getLogDispatcher().dispatchFromRemote(entry.getValue());
+            this.plugin.getEventFactory().handleLogReceive(requestId, entry.getValue());
+            this.plugin.getLogDispatcher().dispatchFromRemote(entry.getValue());
 
             if (callback != null) {
                 callback.accept(msg);
@@ -171,44 +177,44 @@ public abstract class AbstractMessagingService implements ExtendedMessagingServi
 
     @Override
     public void pushUpdate() {
-        plugin.getScheduler().doAsync(() -> {
+        this.plugin.getScheduler().doAsync(() -> {
             UUID requestId = generatePingId();
             String strId = uuidToString(requestId);
 
-            plugin.getLog().info("[" + name + " Messaging] Sending ping with id: " + strId);
+            this.plugin.getLog().info("[" + this.name + " Messaging] Sending ping with id: " + strId);
             sendMessage(UPDATE_HEADER + strId);
         });
     }
 
     @Override
     public void pushUserUpdate(User user) {
-        plugin.getScheduler().doAsync(() -> {
+        this.plugin.getScheduler().doAsync(() -> {
             UUID requestId = generatePingId();
             String strId = uuidToString(requestId);
 
-            plugin.getLog().info("[" + name + " Messaging] Sending user ping for '" + user.getFriendlyName() + "' with id: " + strId);
+            this.plugin.getLog().info("[" + this.name + " Messaging] Sending user ping for '" + user.getFriendlyName() + "' with id: " + strId);
             sendMessage(USER_UPDATE_HEADER + uuidsToString(requestId, user.getUuid()));
         });
     }
 
     @Override
     public void pushLog(LogEntry logEntry) {
-        plugin.getScheduler().doAsync(() -> {
+        this.plugin.getScheduler().doAsync(() -> {
             UUID requestId = generatePingId();
             String strId = uuidToString(requestId);
 
-            if (plugin.getEventFactory().handleLogNetworkPublish(!plugin.getConfiguration().get(ConfigKeys.PUSH_LOG_ENTRIES), requestId, logEntry)) {
+            if (this.plugin.getEventFactory().handleLogNetworkPublish(!this.plugin.getConfiguration().get(ConfigKeys.PUSH_LOG_ENTRIES), requestId, logEntry)) {
                 return;
             }
 
-            plugin.getLog().info("[" + name + " Messaging] Sending log with id: " + strId);
-            sendMessage(LOG_HEADER + gson.toJson(ExtendedLogEntry.serializeWithId(strId, logEntry)));
+            this.plugin.getLog().info("[" + this.name + " Messaging] Sending log with id: " + strId);
+            sendMessage(LOG_HEADER + this.gson.toJson(ExtendedLogEntry.serializeWithId(strId, logEntry)));
         });
     }
 
     private UUID generatePingId() {
         UUID uuid = UUID.randomUUID();
-        receivedMessages.add(uuid);
+        this.receivedMessages.add(uuid);
         return uuid;
     }
 

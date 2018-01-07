@@ -25,12 +25,6 @@
 
 package me.lucko.luckperms.bungee.event;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.Tristate;
 
 import net.md_5.bungee.api.CommandSender;
@@ -40,10 +34,6 @@ import net.md_5.bungee.api.plugin.Event;
 /**
  * Copy of the internal BungeeCord "PermissionCheckEvent", returning a tristate instead of a boolean.
  */
-@Getter
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-@ToString
 public class TristateCheckEvent extends Event {
     public static Tristate call(CommandSender sender, String permission) {
         return ProxyServer.getInstance().getPluginManager().callEvent(new TristateCheckEvent(sender, permission)).getResult();
@@ -52,11 +42,40 @@ public class TristateCheckEvent extends Event {
     private final CommandSender sender;
     private final String permission;
 
-    @Setter
     private Tristate result;
 
     public TristateCheckEvent(CommandSender sender, String permission) {
         this(sender, permission, sender.getPermissions().contains(permission) ? Tristate.TRUE : Tristate.UNDEFINED);
+    }
+
+    public TristateCheckEvent(CommandSender sender, String permission, Tristate result) {
+        this.sender = sender;
+        this.permission = permission;
+        this.result = result;
+    }
+
+    public CommandSender getSender() {
+        return this.sender;
+    }
+
+    public String getPermission() {
+        return this.permission;
+    }
+
+    public Tristate getResult() {
+        return this.result;
+    }
+
+    public void setResult(Tristate result) {
+        this.result = result;
+    }
+
+    @Override
+    public String toString() {
+        return "TristateCheckEvent(" +
+                "sender=" + this.sender + ", " +
+                "permission=" + this.permission + ", " +
+                "result=" + this.result + ")";
     }
 
 }

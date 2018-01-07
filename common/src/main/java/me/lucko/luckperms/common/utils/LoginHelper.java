@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.utils;
 
-import lombok.experimental.UtilityClass;
-
 import me.lucko.luckperms.common.assignments.AssignmentRule;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
@@ -38,10 +36,9 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Utilities for use in platform listeners
  */
-@UtilityClass
-public class LoginHelper {
+public final class LoginHelper {
 
-    public static User loadUser(LuckPermsPlugin plugin, UUID u, String username, boolean joinUuidSave) throws Exception {
+    public static User loadUser(LuckPermsPlugin plugin, UUID u, String username, boolean joinUuidSave) {
         final long startTime = System.currentTimeMillis();
 
         final UuidCache cache = plugin.getUuidCache();
@@ -99,5 +96,7 @@ public class LoginHelper {
 
         return user;
     }
+
+    private LoginHelper() {}
 
 }

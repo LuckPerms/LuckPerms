@@ -25,22 +25,23 @@
 
 package me.lucko.luckperms.common.messaging;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-@RequiredArgsConstructor
 public class MessagingFactory<P extends LuckPermsPlugin> {
-
-    @Getter(AccessLevel.PROTECTED)
     private final P plugin;
 
+    public MessagingFactory(P plugin) {
+        this.plugin = plugin;
+    }
+
+    protected P getPlugin() {
+        return this.plugin;
+    }
+
     public final ExtendedMessagingService getInstance() {
-        String messagingType = plugin.getConfiguration().get(ConfigKeys.MESSAGING_SERVICE).toLowerCase();
-        if (messagingType.equals("none") && plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
+        String messagingType = this.plugin.getConfiguration().get(ConfigKeys.MESSAGING_SERVICE).toLowerCase();
+        if (messagingType.equals("none") && this.plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
             messagingType = "redis";
         }
 
@@ -48,30 +49,30 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
             return null;
         }
 
-        plugin.getLog().info("Loading messaging service... [" + messagingType.toUpperCase() + "]");
+        this.plugin.getLog().info("Loading messaging service... [" + messagingType.toUpperCase() + "]");
 
         ExtendedMessagingService service = getServiceFor(messagingType);
         if (service != null) {
             return service;
         }
 
-        plugin.getLog().warn("Messaging service '" + messagingType + "' not recognised.");
+        this.plugin.getLog().warn("Messaging service '" + messagingType + "' not recognised.");
         return null;
     }
 
     protected ExtendedMessagingService getServiceFor(String messagingType) {
         if (messagingType.equals("redis")) {
-            if (plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
-                RedisMessagingService redis = new RedisMessagingService(plugin);
+            if (this.plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
+                RedisMessagingService redis = new RedisMessagingService(this.plugin);
                 try {
-                    redis.init(plugin.getConfiguration().get(ConfigKeys.REDIS_ADDRESS), plugin.getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
+                    redis.init(this.plugin.getConfiguration().get(ConfigKeys.REDIS_ADDRESS), this.plugin.getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
                     return redis;
                 } catch (Exception e) {
-                    plugin.getLog().warn("Couldn't load redis...");
+                    this.plugin.getLog().warn("Couldn't load redis...");
                     e.printStackTrace();
                 }
             } else {
-                plugin.getLog().warn("Messaging Service was set to redis, but redis is not enabled!");
+                this.plugin.getLog().warn("Messaging Service was set to redis, but redis is not enabled!");
             }
         }
 

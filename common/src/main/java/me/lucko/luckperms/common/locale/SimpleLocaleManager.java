@@ -42,6 +42,7 @@ public class SimpleLocaleManager implements LocaleManager {
     private Map<Message, String> messages = ImmutableMap.of();
     private Map<CommandSpec, CommandSpecData> commands = ImmutableMap.of();
 
+    @Override
     public void tryLoad(LuckPermsPlugin plugin, File file) {
         if (file.exists()) {
             plugin.getLog().info("Found lang.yml - loading messages...");
@@ -53,6 +54,7 @@ public class SimpleLocaleManager implements LocaleManager {
         }
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public void loadFromFile(File file) throws Exception {
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
@@ -116,17 +118,17 @@ public class SimpleLocaleManager implements LocaleManager {
 
     @Override
     public int getSize() {
-        return messages.size() + commands.size();
+        return this.messages.size() + this.commands.size();
     }
 
     @Override
     public String getTranslation(Message key) {
-        return messages.get(key);
+        return this.messages.get(key);
     }
 
     @Override
     public CommandSpecData getTranslation(CommandSpec key) {
-        return commands.get(key);
+        return this.commands.get(key);
     }
 
 }

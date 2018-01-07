@@ -42,11 +42,11 @@ public class BungeeContextManager extends AbstractContextManager<ProxiedPlayer> 
     public Contexts formContexts(ProxiedPlayer subject, ImmutableContextSet contextSet) {
         return new Contexts(
                 contextSet,
-                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
+                this.plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                this.plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
                 true,
-                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
+                this.plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                this.plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
                 false
         );
     }

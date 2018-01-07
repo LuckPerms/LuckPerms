@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.bukkit;
 
-import lombok.AllArgsConstructor;
-
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.compat.BukkitJsonMessageHandler;
 import me.lucko.luckperms.bukkit.compat.ReflectionUtil;
@@ -51,8 +49,8 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
 
     public BukkitSenderFactory(LuckPermsPlugin plugin) {
         super(plugin);
-        bukkitHandler = new BukkitJsonMessageHandler();
-        spigotHandler = isSpigot() ? new SpigotJsonMessageHandler() : null;
+        this.bukkitHandler = new BukkitJsonMessageHandler();
+        this.spigotHandler = isSpigot() ? new SpigotJsonMessageHandler() : null;
     }
 
     @Override
@@ -89,12 +87,12 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
             String json = ComponentSerializers.JSON.serialize(message);
 
             // Try Bukkit.
-            if (bukkitHandler.sendJsonMessage(player, json)) {
+            if (this.bukkitHandler.sendJsonMessage(player, json)) {
                 return;
             }
 
             // Try Spigot.
-            if (spigotHandler != null && spigotHandler.sendJsonMessage(player, json)) {
+            if (this.spigotHandler != null && this.spigotHandler.sendJsonMessage(player, json)) {
                 return;
             }
         }
@@ -125,14 +123,18 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
         }
     }
 
-    @AllArgsConstructor
     private static final class BlockMessengerAgent implements Runnable {
         private final BlockCommandSender block;
         private final String message;
 
+        private BlockMessengerAgent(BlockCommandSender block, String message) {
+            this.block = block;
+            this.message = message;
+        }
+
         @Override
         public void run() {
-            block.sendMessage(message);
+            this.block.sendMessage(this.message);
         }
     }
 

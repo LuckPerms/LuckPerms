@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.sponge.service.proxy.api7;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
@@ -41,49 +39,60 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-@RequiredArgsConstructor
+import javax.annotation.Nonnull;
+
 public final class PermissionDescriptionProxy implements PermissionDescription {
     private final LPPermissionService service;
     private final LPPermissionDescription handle;
 
+    public PermissionDescriptionProxy(LPPermissionService service, LPPermissionDescription handle) {
+        this.service = service;
+        this.handle = handle;
+    }
+
+    @Nonnull
     @Override
     public String getId() {
-        return handle.getId();
+        return this.handle.getId();
     }
 
+    @Nonnull
     @Override
     public Optional<Text> getDescription() {
-        return handle.getDescription();
+        return this.handle.getDescription();
     }
 
+    @Nonnull
     @Override
     public Optional<PluginContainer> getOwner() {
-        return handle.getOwner();
+        return this.handle.getOwner();
     }
 
+    @Nonnull
     @Override
-    public Map<Subject, Boolean> getAssignedSubjects(String s) {
-        return handle.getAssignedSubjects(s).entrySet().stream()
+    public Map<Subject, Boolean> getAssignedSubjects(@Nonnull String s) {
+        return this.handle.getAssignedSubjects(s).entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
-                        e -> new SubjectProxy(service, e.getKey().toReference()),
+                        e -> new SubjectProxy(this.service, e.getKey().toReference()),
                         Map.Entry::getValue
                 ));
     }
 
+    @Nonnull
     @SuppressWarnings("unchecked")
     @Override
-    public CompletableFuture<Map<SubjectReference, Boolean>> findAssignedSubjects(String s) {
-        return (CompletableFuture) handle.findAssignedSubjects(s);
+    public CompletableFuture<Map<SubjectReference, Boolean>> findAssignedSubjects(@Nonnull String s) {
+        return (CompletableFuture) this.handle.findAssignedSubjects(s);
     }
 
     @Override
     public boolean equals(Object o) {
-        return o == this || o instanceof PermissionDescriptionProxy && handle.equals(((PermissionDescriptionProxy) o).handle);
+        return o == this || o instanceof PermissionDescriptionProxy && this.handle.equals(((PermissionDescriptionProxy) o).handle);
     }
 
     @Override
     public int hashCode() {
-        return handle.hashCode();
+        return this.handle.hashCode();
     }
 
     @Override

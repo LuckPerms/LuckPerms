@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.primarygroup;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
@@ -38,7 +35,6 @@ import java.util.Comparator;
 /**
  * Determines the order of group inheritance in {@link PermissionHolder}.
  */
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class GroupInheritanceComparator implements Comparator<Group> {
     private static final Comparator<Group> NULL_ORIGIN = new GroupInheritanceComparator(null);
 
@@ -51,6 +47,10 @@ public class GroupInheritanceComparator implements Comparator<Group> {
 
     private final User origin;
 
+    private GroupInheritanceComparator(User origin) {
+        this.origin = origin;
+    }
+
     @Override
     public int compare(Group o1, Group o2) {
         int ret = Integer.compare(o1.getWeight().orElse(0), o2.getWeight().orElse(0));
@@ -60,9 +60,9 @@ public class GroupInheritanceComparator implements Comparator<Group> {
         }
 
         // failing differing group weights, check if one of the groups is a primary group
-        if (origin != null) {
-            boolean o1Primary = o1.getName().equalsIgnoreCase(origin.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
-            boolean o2Primary = o2.getName().equalsIgnoreCase(origin.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
+        if (this.origin != null) {
+            boolean o1Primary = o1.getName().equalsIgnoreCase(this.origin.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
+            boolean o2Primary = o2.getName().equalsIgnoreCase(this.origin.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
 
             // one of them is a primary group, and therefore has priority
             if (o1Primary != o2Primary) {

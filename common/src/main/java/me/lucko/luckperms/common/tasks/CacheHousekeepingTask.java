@@ -25,22 +25,23 @@
 
 package me.lucko.luckperms.common.tasks;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-@RequiredArgsConstructor
 public class CacheHousekeepingTask implements Runnable {
     private final LuckPermsPlugin plugin;
 
+    public CacheHousekeepingTask(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+    }
+
     @Override
     public void run() {
-        for (User user : plugin.getUserManager().getAll().values()) {
+        for (User user : this.plugin.getUserManager().getAll().values()) {
             user.getCachedData().doCacheCleanup();
         }
-        for (Group group : plugin.getGroupManager().getAll().values()) {
+        for (Group group : this.plugin.getGroupManager().getAll().values()) {
             group.getCachedData().doCacheCleanup();
         }
     }

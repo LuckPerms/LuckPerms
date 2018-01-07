@@ -25,15 +25,10 @@
 
 package me.lucko.luckperms.common.buffers;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
@@ -60,17 +55,19 @@ public class Buffer<T, R> implements Runnable {
         this.dequeueFunc = dequeueFunc;
     }
 
-    public CompletableFuture<R> enqueue(@NonNull T t) {
-        lock.lock();
+    public CompletableFuture<R> enqueue(T object) {
+        Objects.requireNonNull(object, "object");
+
+        this.lock.lock();
         try {
-            ListIterator<BufferedObject<T, R>> it = buffer.listIterator();
+            ListIterator<BufferedObject<T, R>> it = this.buffer.listIterator();
 
             BufferedObject<T, R> o = null;
 
             while (it.hasNext()) {
                 BufferedObject<T, R> obj = it.next();
 
-                if (obj.getObject().equals(t)) {
+                if (obj.getObject().equals(object)) {
                     o = obj;
                     it.remove();
                     break;
@@ -78,28 +75,28 @@ public class Buffer<T, R> implements Runnable {
             }
 
             if (o == null) {
-                o = new BufferedObject<>(System.currentTimeMillis(), t, new CompletableFuture<R>());
+                o = new BufferedObject<>(System.currentTimeMillis(), object, new CompletableFuture<R>());
             } else {
                 o.setBufferTime(System.currentTimeMillis());
             }
 
-            buffer.add(o);
+            this.buffer.add(o);
             return o.getFuture();
         } finally {
-            lock.unlock();
+            this.lock.unlock();
         }
     }
 
     protected R dequeue(T t) {
-        return dequeueFunc.apply(t);
+        return this.dequeueFunc.apply(t);
     }
 
     public void flush(long flushTime) {
         long time = System.currentTimeMillis();
 
-        lock.lock();
+        this.lock.lock();
         try {
-            ListIterator<BufferedObject<T, R>> it = buffer.listIterator(buffer.size());
+            ListIterator<BufferedObject<T, R>> it = this.buffer.listIterator(this.buffer.size());
 
             while (it.hasPrevious()) {
                 BufferedObject<T, R> obj = it.previous();
@@ -114,7 +111,7 @@ public class Buffer<T, R> implements Runnable {
                 }
             }
         } finally {
-            lock.unlock();
+            this.lock.unlock();
         }
     }
 
@@ -123,15 +120,45 @@ public class Buffer<T, R> implements Runnable {
         flush(DEFAULT_FLUSH_TIME);
     }
 
-    @Getter
-    @EqualsAndHashCode(of = "object")
-    @AllArgsConstructor
     private static final class BufferedObject<T, R> {
 
-        @Setter
         private long bufferTime;
         private final T object;
         private final CompletableFuture<R> future;
 
+        public BufferedObject(long bufferTime, T object, CompletableFuture<R> future) {
+            this.bufferTime = bufferTime;
+            this.object = object;
+            this.future = future;
+        }
+
+        public long getBufferTime() {
+            return this.bufferTime;
+        }
+
+        public void setBufferTime(long bufferTime) {
+            this.bufferTime = bufferTime;
+        }
+
+        public T getObject() {
+            return this.object;
+        }
+
+        public CompletableFuture<R> getFuture() {
+            return this.future;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) return true;
+            if (!(o instanceof Buffer.BufferedObject)) return false;
+            final BufferedObject that = (BufferedObject) o;
+            return Objects.equals(this.getObject(), that.getObject());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(this.object);
+        }
     }
 }

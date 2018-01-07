@@ -11,9 +11,6 @@ If you're unsure, feel free to ask using the above resources BEFORE making a rep
 Bugs or issues should be reported using the [GitHub Issues tab](https://github.com/lucko/LuckPerms/issues).
 
 ### :pencil: Want to contribute code?
-
-In order to contribute to and make changes to the plugin, you will need the dependencies listed in the [README](https://github.com/lucko/LuckPerms), plus the [Lombok plugin](https://projectlombok.org/download.html) for your IDE. 
-
 #### Pull Requests
 If you make any changes or improvements to the plugin which you think would be beneficial to others, please consider making a pull request to merge your changes back into the upstream project. (especially if your changes are bug fixes!)
 

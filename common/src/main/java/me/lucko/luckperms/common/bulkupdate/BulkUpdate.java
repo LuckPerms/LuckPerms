@@ -25,26 +25,18 @@
 
 package me.lucko.luckperms.common.bulkupdate;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.common.bulkupdate.action.Action;
 import me.lucko.luckperms.common.bulkupdate.constraint.Constraint;
 import me.lucko.luckperms.common.node.NodeModel;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a query to be applied to a set of data.
  * Queries can either be applied to im-memory sets of data, or converted to SQL syntax to be executed remotely.
  */
-@Getter
-@ToString
-@EqualsAndHashCode
-@AllArgsConstructor
-public class BulkUpdate {
+public final class BulkUpdate {
 
     // the data types which this query should apply to
     private final DataType dataType;
@@ -55,6 +47,12 @@ public class BulkUpdate {
     // a set of constraints which data must match to be acted upon
     private final List<Constraint> constraints;
 
+    public BulkUpdate(DataType dataType, Action action, List<Constraint> constraints) {
+        this.dataType = dataType;
+        this.action = action;
+        this.constraints = constraints;
+    }
+
     /**
      * Check to see if a Node instance satisfies the constrints of this query
      *
@@ -62,7 +60,7 @@ public class BulkUpdate {
      * @return true if satisfied
      */
     public boolean satisfiesConstraints(NodeModel node) {
-        for (Constraint constraint : constraints) {
+        for (Constraint constraint : this.constraints) {
             if (!constraint.isSatisfiedBy(node)) {
                 return false;
             }
@@ -81,7 +79,7 @@ public class BulkUpdate {
             return from; // make no change
         }
 
-        return action.apply(from);
+        return this.action.apply(from);
     }
 
     /**
@@ -97,17 +95,17 @@ public class BulkUpdate {
 
         // add the action
         // (DELETE FROM or UPDATE)
-        sb.append(action.getAsSql());
+        sb.append(this.action.getAsSql());
 
         // if there are no constraints, just return without a WHERE clause
-        if (constraints.isEmpty()) {
+        if (this.constraints.isEmpty()) {
             return sb.append(";").toString();
         }
 
         // append constraints
         sb.append(" WHERE");
-        for (int i = 0; i < constraints.size(); i++) {
-            Constraint constraint = constraints.get(i);
+        for (int i = 0; i < this.constraints.size(); i++) {
+            Constraint constraint = this.constraints.get(i);
 
             sb.append(" ");
             if (i != 0) {
@@ -141,4 +139,39 @@ public class BulkUpdate {
         return "'" + s + "'";
     }
 
+    public DataType getDataType() {
+        return this.dataType;
+    }
+
+    public Action getAction() {
+        return this.action;
+    }
+
+    public List<Constraint> getConstraints() {
+        return this.constraints;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof BulkUpdate)) return false;
+        final BulkUpdate that = (BulkUpdate) o;
+
+        return Objects.equals(this.getDataType(), that.getDataType()) &&
+                Objects.equals(this.getAction(), that.getAction()) &&
+                Objects.equals(this.getConstraints(), that.getConstraints());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getDataType(), getAction(), getConstraints());
+    }
+
+    @Override
+    public String toString() {
+        return "BulkUpdate(" +
+                "dataType=" + this.getDataType() + ", " +
+                "action=" + this.getAction() + ", " +
+                "constraints=" + this.getConstraints() + ")";
+    }
 }

@@ -25,11 +25,6 @@
 
 package me.lucko.luckperms.sponge.service.proxy.api6;
 
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
@@ -44,57 +39,99 @@ import org.spongepowered.api.text.Text;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
-@ToString(of = {"container", "roles", "id", "description"})
-@EqualsAndHashCode(of = {"container", "roles", "id", "description"})
-@RequiredArgsConstructor
+import javax.annotation.Nonnull;
+
 public final class SimpleDescriptionBuilder implements PermissionDescription.Builder {
-    private final LPPermissionService service;
-    private final PluginContainer container;
-    private final Map<String, Tristate> roles = new HashMap<>();
+    @Nonnull private final LPPermissionService service;
+    @Nonnull private final PluginContainer container;
+    @Nonnull private final Map<String, Tristate> roles = new HashMap<>();
     private String id = null;
     private Text description = null;
 
+    public SimpleDescriptionBuilder(@Nonnull LPPermissionService service, @Nonnull PluginContainer container) {
+        this.service = Objects.requireNonNull(service, "service");
+        this.container = Objects.requireNonNull(container, "container");
+    }
+
+    @Nonnull
     @Override
-    public PermissionDescription.Builder id(@NonNull String s) {
-        id = s;
+    public PermissionDescription.Builder id(@Nonnull String id) {
+        this.id = Objects.requireNonNull(id, "id");
         return this;
     }
 
+    @Nonnull
     @Override
-    public PermissionDescription.Builder description(Text text) {
-        description = text;
+    public PermissionDescription.Builder description(@Nonnull Text description) {
+        this.description = Objects.requireNonNull(description, "description");
         return this;
     }
 
+    @Nonnull
     @Override
-    public PermissionDescription.Builder assign(@NonNull String s, boolean b) {
-        roles.put(s, Tristate.fromBoolean(b));
+    public PermissionDescription.Builder assign(@Nonnull String permission, boolean value) {
+        Objects.requireNonNull(permission, "permission");
+        this.roles.put(permission, Tristate.fromBoolean(value));
         return this;
     }
 
+    @Nonnull
     @Override
     public PermissionDescription register() throws IllegalStateException {
-        if (id == null) {
+        if (this.id == null) {
             throw new IllegalStateException("id cannot be null");
         }
 
-        LPPermissionDescription d = service.registerPermissionDescription(id, description, container);
+        LPPermissionDescription d = this.service.registerPermissionDescription(this.id, this.description, this.container);
 
         // Set role-templates
-        LPSubjectCollection subjects = service.getCollection(PermissionService.SUBJECTS_ROLE_TEMPLATE);
-        for (Map.Entry<String, Tristate> assignment : roles.entrySet()) {
+        LPSubjectCollection subjects = this.service.getCollection(PermissionService.SUBJECTS_ROLE_TEMPLATE);
+        for (Map.Entry<String, Tristate> assignment : this.roles.entrySet()) {
             LPSubject subject = subjects.loadSubject(assignment.getKey()).join();
-            subject.getTransientSubjectData().setPermission(ContextSet.empty(), id, assignment.getValue());
+            subject.getTransientSubjectData().setPermission(ContextSet.empty(), this.id, assignment.getValue());
         }
 
-        service.getPlugin().getPermissionVault().offer(id);
+        this.service.getPlugin().getPermissionVault().offer(this.id);
 
         // null stuff so this instance can be reused
-        roles.clear();
-        id = null;
-        description = null;
+        this.roles.clear();
+        this.id = null;
+        this.description = null;
 
         return d.sponge();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof SimpleDescriptionBuilder)) return false;
+        final SimpleDescriptionBuilder other = (SimpleDescriptionBuilder) o;
+
+        return this.container.equals(other.container) &&
+                this.roles.equals(other.roles) &&
+                (this.id == null ? other.id == null : this.id.equals(other.id)) &&
+                (this.description == null ? other.description == null : this.description.equals(other.description));
+    }
+
+    @Override
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        result = result * PRIME + this.container.hashCode();
+        result = result * PRIME + this.roles.hashCode();
+        result = result * PRIME + (this.id == null ? 43 : this.id.hashCode());
+        result = result * PRIME + (this.description == null ? 43 : this.description.hashCode());
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "SimpleDescriptionBuilder(" +
+                "container=" + this.container + ", " +
+                "roles=" + this.roles + ", " +
+                "id=" + this.id + ", " +
+                "description=" + this.description + ")";
     }
 }

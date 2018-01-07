@@ -25,22 +25,38 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.log.LogReceiveEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
 import java.util.UUID;
 
-@Getter
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventLogReceive extends AbstractEvent implements LogReceiveEvent {
 
     private final UUID logId;
     private final LogEntry entry;
 
+    public EventLogReceive(UUID logId, LogEntry entry) {
+        this.logId = logId;
+        this.entry = entry;
+    }
+
+    @Nonnull
+    @Override
+    public UUID getLogId() {
+        return this.logId;
+    }
+
+    @Nonnull
+    @Override
+    public LogEntry getEntry() {
+        return this.entry;
+    }
+
+    @Override
+    public String toString() {
+        return "EventLogReceive(logId=" + this.getLogId() + ", entry=" + this.getEntry() + ")";
+    }
 }

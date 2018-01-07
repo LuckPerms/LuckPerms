@@ -34,7 +34,7 @@ public class MapProcessor implements PermissionProcessor {
 
     @Override
     public Tristate hasPermission(String permission) {
-        return Tristate.fromNullableBoolean(map.get(permission));
+        return Tristate.fromNullableBoolean(this.map.get(permission));
     }
 
     @Override

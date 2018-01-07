@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.commands.impl.log;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.actionlog.Log;
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -82,14 +81,14 @@ public class LogNotify extends SubCommand<Log> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
         if (sender.isConsole() || sender.isImport()) {
             Message.LOG_NOTIFY_CONSOLE.send(sender);
             return CommandResult.SUCCESS;
         }
 
         final UUID uuid = sender.getUuid();
-        if (args.size() == 0) {
+        if (args.isEmpty()) {
             if (isIgnoring(plugin, uuid)) {
                 // toggle on
                 setIgnoring(plugin, uuid, false);

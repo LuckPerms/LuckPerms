@@ -25,17 +25,12 @@
 
 package me.lucko.luckperms.common.verbose;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 
 /**
  * Holds the data from a permission check
  */
-@Getter
-@AllArgsConstructor
 public class CheckData {
 
     /**
@@ -68,4 +63,36 @@ public class CheckData {
      */
     private final Tristate result;
 
+    public CheckData(CheckOrigin checkOrigin, String checkTarget, ImmutableContextSet checkContext, StackTraceElement[] checkTrace, String permission, Tristate result) {
+        this.checkOrigin = checkOrigin;
+        this.checkTarget = checkTarget;
+        this.checkContext = checkContext;
+        this.checkTrace = checkTrace;
+        this.permission = permission;
+        this.result = result;
+    }
+
+    public CheckOrigin getCheckOrigin() {
+        return this.checkOrigin;
+    }
+
+    public String getCheckTarget() {
+        return this.checkTarget;
+    }
+
+    public ImmutableContextSet getCheckContext() {
+        return this.checkContext;
+    }
+
+    public StackTraceElement[] getCheckTrace() {
+        return this.checkTrace;
+    }
+
+    public String getPermission() {
+        return this.permission;
+    }
+
+    public Tristate getResult() {
+        return this.result;
+    }
 }

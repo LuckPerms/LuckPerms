@@ -89,7 +89,7 @@ public class TrackMainCommand extends MainCommand<Track, String> {
 
     @Override
     protected ReentrantLock getLockForTarget(String target) {
-        return locks.get(target);
+        return this.locks.get(target);
     }
 
     @Override

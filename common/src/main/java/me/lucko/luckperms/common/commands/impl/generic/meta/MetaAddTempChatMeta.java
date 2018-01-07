@@ -89,27 +89,27 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        Map.Entry<DataMutateResult, Node> ret = holder.setPermission(NodeFactory.buildChatMetaNode(type, priority, meta).setExpiry(duration).withExtraContext(context).build(), modifier);
+        Map.Entry<DataMutateResult, Node> ret = holder.setPermission(NodeFactory.buildChatMetaNode(this.type, priority, meta).setExpiry(duration).withExtraContext(context).build(), modifier);
 
         if (ret.getKey().asBoolean()) {
             duration = ret.getValue().getExpiryUnixTime();
 
-            TextComponent.Builder builder = TextUtils.fromLegacy(Message.ADD_TEMP_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, DateUtil.formatDateDiff(duration), CommandUtils.contextSetToString(context)), CommandManager.SECTION_CHAR).toBuilder();
+            TextComponent.Builder builder = TextUtils.fromLegacy(Message.ADD_TEMP_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), this.type.name().toLowerCase(), meta, priority, DateUtil.formatDateDiff(duration), CommandUtils.contextSetToString(context)), CommandManager.SECTION_CHAR).toBuilder();
             HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
-                    "¥3Raw " + type.name().toLowerCase() + ": ¥r" + meta,
+                    "¥3Raw " + this.type.name().toLowerCase() + ": ¥r" + meta,
                     '¥'
             ));
             builder.applyDeep(c -> c.hoverEvent(event));
             sender.sendMessage(builder.build());
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("meta" , "addtemp" + type.name().toLowerCase(), priority, meta, duration, context)
+                    .action("meta" , "addtemp" + this.type.name().toLowerCase(), priority, meta, duration, context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_TEMP_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context));
+            Message.ALREADY_HAS_TEMP_CHAT_META.send(sender, holder.getFriendlyName(), this.type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

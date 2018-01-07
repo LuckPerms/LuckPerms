@@ -25,14 +25,11 @@
 
 package me.lucko.luckperms.common.commands.impl.migration;
 
-import lombok.experimental.UtilityClass;
-
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.node.NodeFactory;
 
-@UtilityClass
-public class MigrationUtils {
+public final class MigrationUtils {
 
     public static Node.Builder parseNode(String permission, boolean value) {
         if (permission.startsWith("-") || permission.startsWith("!")) {
@@ -62,5 +59,7 @@ public class MigrationUtils {
     public static String standardizeName(String string) {
         return string.trim().replace(':', '-').replace(' ', '-').replace('.', '-').toLowerCase();
     }
+
+    private MigrationUtils() {}
 
 }

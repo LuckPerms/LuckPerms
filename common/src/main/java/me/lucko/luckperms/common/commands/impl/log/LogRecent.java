@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.commands.impl.log;
 
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -55,8 +54,8 @@ public class LogRecent extends SubCommand<Log> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) throws CommandException {
-        if (args.size() == 0) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
+        if (args.isEmpty()) {
             // No page or user
             return showLog(log.getRecentMaxPages(ENTRIES_PER_PAGE), null, sender, log);
         }

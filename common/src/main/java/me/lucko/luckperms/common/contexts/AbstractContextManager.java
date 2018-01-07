@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.contexts;
 
-import lombok.NonNull;
-
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -46,6 +44,8 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
 
 /**
  * An abstract implementation of {@link ContextManager} which caches content lookups.
@@ -82,19 +82,26 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
 
     @Override
     public Class<T> getSubjectClass() {
-        return subjectClass;
+        return this.subjectClass;
     }
 
     @Override
-    public ImmutableContextSet getApplicableContext(@NonNull T subject) {
+    public ImmutableContextSet getApplicableContext(T subject) {
+        if (subject == null) {
+            throw new NullPointerException("subject");
+        }
+
         // this is actually already immutable, but the Contexts method signature returns the interface.
         // using the makeImmutable method is faster than casting
         return getApplicableContexts(subject).getContexts().makeImmutable();
     }
 
     @Override
-    public Contexts getApplicableContexts(@NonNull T subject) {
-        return lookupCache.get(subject);
+    public Contexts getApplicableContexts(T subject) {
+        if (subject == null) {
+            throw new NullPointerException("subject");
+        }
+        return this.lookupCache.get(subject);
     }
 
     @Override
@@ -106,7 +113,7 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
 
     @Override
     public Contexts getStaticContexts() {
-        return staticLookupCache.get(staticCacheKey);
+        return this.staticLookupCache.get(this.staticCacheKey);
     }
 
     @Override
@@ -130,11 +137,11 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
     public Contexts formContexts(ImmutableContextSet contextSet) {
         return new Contexts(
                 contextSet,
-                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
+                this.plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                this.plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
                 true,
-                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
+                this.plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                this.plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
                 false
         );
     }
@@ -142,31 +149,35 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
     @Override
     public void registerCalculator(ContextCalculator<? super T> calculator) {
         // calculators registered first should have priority (and be checked last.)
-        calculators.add(0, calculator);
+        this.calculators.add(0, calculator);
     }
 
     @Override
     public void registerStaticCalculator(StaticContextCalculator calculator) {
         registerCalculator(calculator);
-        staticCalculators.add(0, calculator);
+        this.staticCalculators.add(0, calculator);
     }
 
     @Override
-    public void invalidateCache(@NonNull T subject){
-        lookupCache.invalidate(subject);
+    public void invalidateCache(T subject) {
+        if (subject == null) {
+            throw new NullPointerException("subject");
+        }
+
+        this.lookupCache.invalidate(subject);
     }
 
     @Override
     public int getCalculatorsSize() {
-        return calculators.size();
+        return this.calculators.size();
     }
 
     private final class Loader implements CacheLoader<T, Contexts> {
         @Override
-        public Contexts load(T subject) {
+        public Contexts load(@Nonnull T subject) {
             MutableContextSet accumulator = MutableContextSet.create();
 
-            for (ContextCalculator<? super T> calculator : calculators) {
+            for (ContextCalculator<? super T> calculator : AbstractContextManager.this.calculators) {
                 try {
                     MutableContextSet ret = calculator.giveApplicableContext(subject, accumulator);
                     //noinspection ConstantConditions
@@ -175,7 +186,7 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
                     }
                     accumulator = ret;
                 } catch (Exception e) {
-                    plugin.getLog().warn("An exception was thrown whilst calculating the context of subject " + subject);
+                    AbstractContextManager.this.plugin.getLog().warn("An exception was thrown whilst calculating the context of subject " + subject);
                     e.printStackTrace();
                 }
             }
@@ -186,10 +197,10 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
 
     private final class StaticLoader implements CacheLoader<Object, Contexts> {
         @Override
-        public Contexts load(Object o) {
+        public Contexts load(@Nonnull Object o) {
             MutableContextSet accumulator = MutableContextSet.create();
 
-            for (StaticContextCalculator calculator : staticCalculators) {
+            for (StaticContextCalculator calculator : AbstractContextManager.this.staticCalculators) {
                 try {
                     MutableContextSet ret = calculator.giveApplicableContext(accumulator);
                     //noinspection ConstantConditions
@@ -198,7 +209,7 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
                     }
                     accumulator = ret;
                 } catch (Exception e) {
-                    plugin.getLog().warn("An exception was thrown whilst calculating static contexts");
+                    AbstractContextManager.this.plugin.getLog().warn("An exception was thrown whilst calculating static contexts");
                     e.printStackTrace();
                 }
             }

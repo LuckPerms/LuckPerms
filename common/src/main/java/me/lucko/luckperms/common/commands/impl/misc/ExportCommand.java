@@ -52,7 +52,7 @@ public class ExportCommand extends SingleCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        if (running.get()) {
+        if (this.running.get()) {
             Message.EXPORT_ALREADY_RUNNING.send(sender);
             return CommandResult.STATE_ERROR;
         }
@@ -78,7 +78,7 @@ public class ExportCommand extends SingleCommand {
             return CommandResult.FAILURE;
         }
 
-        if (!running.compareAndSet(false, true)) {
+        if (!this.running.compareAndSet(false, true)) {
             Message.EXPORT_ALREADY_RUNNING.send(sender);
             return CommandResult.STATE_ERROR;
         }
@@ -90,7 +90,7 @@ public class ExportCommand extends SingleCommand {
             try {
                 exporter.run();
             } finally {
-                running.set(false);
+                this.running.set(false);
             }
         });
 

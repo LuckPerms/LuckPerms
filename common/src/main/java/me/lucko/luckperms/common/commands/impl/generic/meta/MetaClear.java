@@ -59,7 +59,7 @@ public class MetaClear extends SharedSubCommand {
         }
 
         MetaType type = null;
-        if (args.size() > 0) {
+        if (!args.isEmpty()) {
             String typeId = args.get(0).toLowerCase();
             if (typeId.equals("any") || typeId.equals("all") || typeId.equals("*")) {
                 type = MetaType.ANY;

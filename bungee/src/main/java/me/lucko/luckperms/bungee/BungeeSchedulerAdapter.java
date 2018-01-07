@@ -47,17 +47,17 @@ public class BungeeSchedulerAdapter implements SchedulerAdapter {
 
     @Override
     public Executor async() {
-        return asyncExecutor;
+        return this.asyncExecutor;
     }
 
     @Override
     public Executor sync() {
-        return asyncExecutor;
+        return this.asyncExecutor;
     }
 
     @Override
     public void doAsync(Runnable runnable) {
-        asyncExecutor.execute(runnable);
+        this.asyncExecutor.execute(runnable);
     }
 
     @Override
@@ -68,8 +68,8 @@ public class BungeeSchedulerAdapter implements SchedulerAdapter {
     @Override
     public void asyncRepeating(Runnable runnable, long intervalTicks) {
         long millis = intervalTicks * 50L; // convert from ticks to milliseconds
-        ScheduledTask task = plugin.getProxy().getScheduler().schedule(plugin, runnable, millis, millis, TimeUnit.MILLISECONDS);
-        tasks.add(task);
+        ScheduledTask task = this.plugin.getProxy().getScheduler().schedule(this.plugin, runnable, millis, millis, TimeUnit.MILLISECONDS);
+        this.tasks.add(task);
     }
 
     @Override
@@ -80,7 +80,7 @@ public class BungeeSchedulerAdapter implements SchedulerAdapter {
     @Override
     public void asyncLater(Runnable runnable, long delayTicks) {
         long millis = delayTicks * 50L; // convert from ticks to milliseconds
-        plugin.getProxy().getScheduler().schedule(plugin, runnable, millis, TimeUnit.MILLISECONDS);
+        this.plugin.getProxy().getScheduler().schedule(this.plugin, runnable, millis, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -90,6 +90,6 @@ public class BungeeSchedulerAdapter implements SchedulerAdapter {
 
     @Override
     public void shutdown() {
-        tasks.forEach(ScheduledTask::cancel);
+        this.tasks.forEach(ScheduledTask::cancel);
     }
 }

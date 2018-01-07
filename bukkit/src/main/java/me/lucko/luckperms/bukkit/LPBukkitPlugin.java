@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.bukkit;
 
-import lombok.Getter;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.platform.PlatformType;
@@ -110,7 +108,6 @@ import java.util.stream.Stream;
 /**
  * LuckPerms implementation for the Bukkit API.
  */
-@Getter
 public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     private long startTime;
@@ -150,13 +147,13 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }
 
         // setup minimal functionality in order to load initial dependencies
-        scheduler = new BukkitSchedulerAdapter(this);
-        localeManager = new NoopLocaleManager();
-        senderFactory = new BukkitSenderFactory(this);
-        log = new SenderLogger(this, getConsoleSender());
+        this.scheduler = new BukkitSchedulerAdapter(this);
+        this.localeManager = new NoopLocaleManager();
+        this.senderFactory = new BukkitSenderFactory(this);
+        this.log = new SenderLogger(this, getConsoleSender());
 
-        dependencyManager = new DependencyManager(this);
-        dependencyManager.loadDependencies(Collections.singleton(Dependency.CAFFEINE));
+        this.dependencyManager = new DependencyManager(this);
+        this.dependencyManager.loadDependencies(Collections.singleton(Dependency.CAFFEINE));
     }
 
     @Override
@@ -178,103 +175,103 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         } finally {
             // count down the latch when onEnable has been called
             // we don't care about the result here
-            enableLatch.countDown();
+            this.enableLatch.countDown();
         }
     }
 
     private void enable() {
-        startTime = System.currentTimeMillis();
+        this.startTime = System.currentTimeMillis();
         sendStartupBanner(getConsoleSender());
-        verboseHandler = new VerboseHandler(scheduler.asyncBukkit(), getVersion());
-        permissionVault = new PermissionVault(scheduler.asyncBukkit());
-        logDispatcher = new LogDispatcher(this);
+        this.verboseHandler = new VerboseHandler(this.scheduler.asyncBukkit(), getVersion());
+        this.permissionVault = new PermissionVault(this.scheduler.asyncBukkit());
+        this.logDispatcher = new LogDispatcher(this);
 
         getLog().info("Loading configuration...");
-        configuration = new AbstractConfiguration(this, new BukkitConfigAdapter(this, resolveConfig("config.yml")));
-        configuration.loadAll();
+        this.configuration = new AbstractConfiguration(this, new BukkitConfigAdapter(this, resolveConfig("config.yml")));
+        this.configuration.loadAll();
 
         StorageFactory storageFactory = new StorageFactory(this);
         Set<StorageType> storageTypes = storageFactory.getRequiredTypes(StorageType.H2);
-        dependencyManager.loadStorageDependencies(storageTypes);
+        this.dependencyManager.loadStorageDependencies(storageTypes);
 
         // setup the Bukkit defaults hook
-        defaultsProvider = new DefaultsProvider();
-        childPermissionProvider = new ChildPermissionProvider();
+        this.defaultsProvider = new DefaultsProvider();
+        this.childPermissionProvider = new ChildPermissionProvider();
 
         // give all plugins a chance to load their permissions, then refresh.
-        scheduler.syncLater(new BukkitProcessorsSetupTask(this), 1L);
+        this.scheduler.syncLater(new BukkitProcessorsSetupTask(this), 1L);
 
         // register events
         getServer().getPluginManager().registerEvents(new BukkitConnectionListener(this), this);
         getServer().getPluginManager().registerEvents(new BukkitPlatformListener(this), this);
 
         if (getConfiguration().get(ConfigKeys.WATCH_FILES)) {
-            fileWatcher = new FileWatcher(this);
-            getScheduler().asyncRepeating(fileWatcher, 30L);
+            this.fileWatcher = new FileWatcher(this);
+            getScheduler().asyncRepeating(this.fileWatcher, 30L);
         }
 
         // initialise datastore
-        storage = storageFactory.getInstance(StorageType.H2);
+        this.storage = storageFactory.getInstance(StorageType.H2);
 
         // initialise messaging
-        messagingService = new BukkitMessagingFactory(this).getInstance();
+        this.messagingService = new BukkitMessagingFactory(this).getInstance();
 
         // setup the update task buffer
-        updateTaskBuffer = new UpdateTaskBuffer(this);
+        this.updateTaskBuffer = new UpdateTaskBuffer(this);
 
         // load locale
-        localeManager = new SimpleLocaleManager();
-        localeManager.tryLoad(this, new File(getDataFolder(), "lang.yml"));
+        this.localeManager = new SimpleLocaleManager();
+        this.localeManager.tryLoad(this, new File(getDataFolder(), "lang.yml"));
 
         // register commands
-        commandManager = new BukkitCommandExecutor(this);
+        this.commandManager = new BukkitCommandExecutor(this);
         PluginCommand main = getServer().getPluginCommand("luckperms");
-        main.setExecutor(commandManager);
-        main.setTabCompleter(commandManager);
+        main.setExecutor(this.commandManager);
+        main.setTabCompleter(this.commandManager);
         main.setDescription("Manage permissions");
         main.setAliases(Arrays.asList("lp", "perm", "perms", "permission", "permissions"));
 
         // load internal managers
         getLog().info("Loading internal permission managers...");
-        uuidCache = new UuidCache(this);
-        userManager = new GenericUserManager(this);
-        groupManager = new GenericGroupManager(this);
-        trackManager = new GenericTrackManager(this);
-        calculatorFactory = new BukkitCalculatorFactory(this);
-        cachedStateManager = new CachedStateManager();
+        this.uuidCache = new UuidCache(this);
+        this.userManager = new GenericUserManager(this);
+        this.groupManager = new GenericGroupManager(this);
+        this.trackManager = new GenericTrackManager(this);
+        this.calculatorFactory = new BukkitCalculatorFactory(this);
+        this.cachedStateManager = new CachedStateManager();
 
         // setup context manager
-        contextManager = new BukkitContextManager(this);
-        contextManager.registerCalculator(new WorldCalculator(this));
-        contextManager.registerStaticCalculator(new LuckPermsCalculator(getConfiguration()));
+        this.contextManager = new BukkitContextManager(this);
+        this.contextManager.registerCalculator(new WorldCalculator(this));
+        this.contextManager.registerStaticCalculator(new LuckPermsCalculator(getConfiguration()));
 
         // inject our own subscription map
         new SubscriptionMapInjector(this).run();
 
         // schedule another injection after all plugins have loaded - the entire pluginmanager instance
         // is replaced by some plugins :(
-        scheduler.asyncLater(new SubscriptionMapInjector(this), 2L);
+        this.scheduler.asyncLater(new SubscriptionMapInjector(this), 2L);
 
         // Provide vault support
         tryVaultHook(false);
 
         // register with the LP API
-        apiProvider = new LuckPermsApiProvider(this);
+        this.apiProvider = new LuckPermsApiProvider(this);
 
         // setup event factory
-        eventFactory = new EventFactory(this, apiProvider);
+        this.eventFactory = new EventFactory(this, this.apiProvider);
 
-        ApiRegistrationUtil.registerProvider(apiProvider);
-        getServer().getServicesManager().register(LuckPermsApi.class, apiProvider, this, ServicePriority.Normal);
+        ApiRegistrationUtil.registerProvider(this.apiProvider);
+        getServer().getServicesManager().register(LuckPermsApi.class, this.apiProvider, this, ServicePriority.Normal);
 
 
         // schedule update tasks
         int mins = getConfiguration().get(ConfigKeys.SYNC_TIME);
         if (mins > 0) {
             long ticks = mins * 60 * 20;
-            scheduler.asyncRepeating(() -> updateTaskBuffer.request(), ticks);
+            this.scheduler.asyncRepeating(() -> this.updateTaskBuffer.request(), ticks);
         }
-        scheduler.asyncLater(() -> updateTaskBuffer.request(), 40L);
+        this.scheduler.asyncLater(() -> this.updateTaskBuffer.request(), 40L);
 
         // run an update instantly.
         getLog().info("Performing initial data load...");
@@ -286,8 +283,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
 
         // register tasks
-        scheduler.asyncRepeating(new ExpireTemporaryTask(this), 60L);
-        scheduler.asyncRepeating(new CacheHousekeepingTask(this), 2400L);
+        this.scheduler.asyncRepeating(new ExpireTemporaryTask(this), 60L);
+        this.scheduler.asyncRepeating(new CacheHousekeepingTask(this), 2400L);
 
         // register permissions
         try {
@@ -302,20 +299,20 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }
 
         if (!getConfiguration().get(ConfigKeys.OPS_ENABLED)) {
-            scheduler.doSync(() -> getServer().getOperators().forEach(o -> o.setOp(false)));
+            this.scheduler.doSync(() -> getServer().getOperators().forEach(o -> o.setOp(false)));
         }
 
         // replace the temporary executor when the Bukkit one starts
-        getServer().getScheduler().runTaskAsynchronously(this, () -> scheduler.setUseFallback(false));
+        getServer().getScheduler().runTaskAsynchronously(this, () -> this.scheduler.setUseFallback(false));
 
         // Load any online users (in the case of a reload)
         for (Player player : getServer().getOnlinePlayers()) {
-            scheduler.doAsync(() -> {
+            this.scheduler.doAsync(() -> {
                 try {
                     LoginHelper.loadUser(this, player.getUniqueId(), player.getName(), false);
                     User user = getUserManager().getIfLoaded(getUuidCache().getUUID(player.getUniqueId()));
                     if (user != null) {
-                        scheduler.doSync(() -> {
+                        this.scheduler.doSync(() -> {
                             try {
                                 LPPermissible lpPermissible = new LPPermissible(player, user, this);
                                 PermissibleInjector.inject(player, lpPermissible);
@@ -330,7 +327,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             });
         }
 
-        getLog().info("Successfully enabled. (took " + (System.currentTimeMillis() - startTime) + "ms)");
+        getLog().info("Successfully enabled. (took " + (System.currentTimeMillis() - this.startTime) + "ms)");
     }
 
     @Override
@@ -340,11 +337,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }
 
         // Switch back to the fallback executor, the bukkit one won't allow new tasks
-        scheduler.setUseFallback(true);
+        this.scheduler.setUseFallback(true);
 
-        defaultsProvider.close();
-        permissionVault.shutdown();
-        verboseHandler.shutdown();
+        this.defaultsProvider.close();
+        this.permissionVault.shutdown();
+        this.verboseHandler.shutdown();
 
         // uninject from players
         for (Player player : getServer().getOnlinePlayers()) {
@@ -369,26 +366,26 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         SubscriptionMapInjector.uninject();
 
         getLog().info("Closing storage...");
-        storage.shutdown();
+        this.storage.shutdown();
 
-        if (fileWatcher != null) {
-            fileWatcher.close();
+        if (this.fileWatcher != null) {
+            this.fileWatcher.close();
         }
 
-        if (messagingService != null) {
+        if (this.messagingService != null) {
             getLog().info("Closing messaging service...");
-            messagingService.close();
+            this.messagingService.close();
         }
 
         ApiRegistrationUtil.unregisterProvider();
         getServer().getServicesManager().unregisterAll(this);
 
-        if (vaultHookManager != null) {
-            vaultHookManager.unhook(this);
+        if (this.vaultHookManager != null) {
+            this.vaultHookManager.unhook(this);
         }
 
         getLog().info("Shutting down internal scheduler...");
-        scheduler.shutdown();
+        this.scheduler.shutdown();
 
         // Bukkit will do this again when #onDisable completes, but we do it early to prevent NPEs elsewhere.
         getServer().getScheduler().cancelTasks(this);
@@ -397,18 +394,18 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     public void tryVaultHook(boolean force) {
-        if (vaultHookManager != null) {
+        if (this.vaultHookManager != null) {
             return; // already hooked
         }
 
         try {
             if (force || getServer().getPluginManager().isPluginEnabled("Vault")) {
-                vaultHookManager = new VaultHookManager();
-                vaultHookManager.hook(this);
+                this.vaultHookManager = new VaultHookManager();
+                this.vaultHookManager.hook(this);
                 getLog().info("Registered Vault permission & chat hook.");
             }
         } catch (Exception e) {
-            vaultHookManager = null;
+            this.vaultHookManager = null;
             getLog().severe("Error occurred whilst hooking into Vault.");
             e.printStackTrace();
         }
@@ -420,7 +417,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }
 
         if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
-            Map<String, Boolean> backing = user.getCachedData().getPermissionData(contextManager.getApplicableContexts(player)).getImmutableBacking();
+            Map<String, Boolean> backing = user.getCachedData().getPermissionData(this.contextManager.getApplicableContexts(player)).getImmutableBacking();
             boolean op = Optional.ofNullable(backing.get("luckperms.autoop")).orElse(false);
             player.setOp(op);
         }
@@ -439,11 +436,12 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public Optional<ExtendedMessagingService> getMessagingService() {
-        return Optional.ofNullable(messagingService);
+        return Optional.ofNullable(this.messagingService);
     }
 
+    @Override
     public Optional<FileWatcher> getFileWatcher() {
-        return Optional.ofNullable(fileWatcher);
+        return Optional.ofNullable(this.fileWatcher);
     }
 
     @Override
@@ -483,7 +481,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public Player getPlayer(User user) {
-        return getServer().getPlayer(uuidCache.getExternalUUID(user.getUuid()));
+        return getServer().getPlayer(this.uuidCache.getExternalUUID(user.getUuid()));
     }
 
     @Override
@@ -503,7 +501,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         if (player == null) {
             return null;
         }
-        return contextManager.getApplicableContexts(player);
+        return this.contextManager.getApplicableContexts(player);
     }
 
     @Override
@@ -543,9 +541,9 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public Map<String, Object> getExtraInfo() {
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put("Vault Enabled", vaultHookManager != null);
-        map.put("Bukkit Defaults count", defaultsProvider.size());
-        map.put("Bukkit Child Permissions count", childPermissionProvider.getPermissions().size());
+        map.put("Vault Enabled", this.vaultHookManager != null);
+        map.put("Bukkit Defaults count", this.defaultsProvider.size());
+        map.put("Bukkit Child Permissions count", this.childPermissionProvider.getPermissions().size());
         return map;
     }
 
@@ -556,5 +554,135 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         } catch (ClassNotFoundException e) {
             return true;
         }
+    }
+
+    @Override
+    public long getStartTime() {
+        return this.startTime;
+    }
+
+    @Override
+    public BukkitSchedulerAdapter getScheduler() {
+        return this.scheduler;
+    }
+
+    @Override
+    public BukkitCommandExecutor getCommandManager() {
+        return this.commandManager;
+    }
+
+    public VaultHookManager getVaultHookManager() {
+        return this.vaultHookManager;
+    }
+
+    @Override
+    public LuckPermsConfiguration getConfiguration() {
+        return this.configuration;
+    }
+
+    @Override
+    public UserManager getUserManager() {
+        return this.userManager;
+    }
+
+    @Override
+    public GroupManager getGroupManager() {
+        return this.groupManager;
+    }
+
+    @Override
+    public TrackManager getTrackManager() {
+        return this.trackManager;
+    }
+
+    @Override
+    public Storage getStorage() {
+        return this.storage;
+    }
+
+    @Override
+    public UuidCache getUuidCache() {
+        return this.uuidCache;
+    }
+
+    @Override
+    public LuckPermsApiProvider getApiProvider() {
+        return this.apiProvider;
+    }
+
+    @Override
+    public EventFactory getEventFactory() {
+        return this.eventFactory;
+    }
+
+    @Override
+    public Logger getLog() {
+        return this.log;
+    }
+
+    public DefaultsProvider getDefaultsProvider() {
+        return this.defaultsProvider;
+    }
+
+    public ChildPermissionProvider getChildPermissionProvider() {
+        return this.childPermissionProvider;
+    }
+
+    @Override
+    public LocaleManager getLocaleManager() {
+        return this.localeManager;
+    }
+
+    @Override
+    public DependencyManager getDependencyManager() {
+        return this.dependencyManager;
+    }
+
+    @Override
+    public CachedStateManager getCachedStateManager() {
+        return this.cachedStateManager;
+    }
+
+    @Override
+    public ContextManager<Player> getContextManager() {
+        return this.contextManager;
+    }
+
+    @Override
+    public CalculatorFactory getCalculatorFactory() {
+        return this.calculatorFactory;
+    }
+
+    @Override
+    public BufferedRequest<Void> getUpdateTaskBuffer() {
+        return this.updateTaskBuffer;
+    }
+
+    public CountDownLatch getEnableLatch() {
+        return this.enableLatch;
+    }
+
+    @Override
+    public VerboseHandler getVerboseHandler() {
+        return this.verboseHandler;
+    }
+
+    public BukkitSenderFactory getSenderFactory() {
+        return this.senderFactory;
+    }
+
+    @Override
+    public PermissionVault getPermissionVault() {
+        return this.permissionVault;
+    }
+
+    @Override
+    public LogDispatcher getLogDispatcher() {
+        return this.logDispatcher;
+    }
+
+    @Override
+    public Set<UUID> getUniqueConnections() {
+        return this.uniqueConnections;
     }
 }

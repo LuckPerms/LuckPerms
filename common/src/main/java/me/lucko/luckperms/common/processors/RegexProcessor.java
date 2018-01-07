@@ -37,7 +37,7 @@ public class RegexProcessor implements PermissionProcessor {
 
     @Override
     public Tristate hasPermission(String permission) {
-        for (Map.Entry<Pattern, Boolean> e : regexPermissions.entrySet()) {
+        for (Map.Entry<Pattern, Boolean> e : this.regexPermissions.entrySet()) {
             if (e.getKey().matcher(permission).matches()) {
                 return Tristate.fromBoolean(e.getValue());
             }
@@ -48,7 +48,7 @@ public class RegexProcessor implements PermissionProcessor {
 
     @Override
     public void updateBacking(Map<String, Boolean> map) {
-        regexPermissions.clear();
+        this.regexPermissions.clear();
         for (Map.Entry<String, Boolean> e : map.entrySet()) {
             if (!e.getKey().startsWith("r=") && !e.getKey().startsWith("R=")) {
                 continue;
@@ -61,7 +61,7 @@ public class RegexProcessor implements PermissionProcessor {
                 continue;
             }
 
-            regexPermissions.put(p, e.getValue());
+            this.regexPermissions.put(p, e.getValue());
         }
     }
 }

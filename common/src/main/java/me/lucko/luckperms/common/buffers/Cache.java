@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.buffers;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -35,58 +33,56 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * @param <T> the type being stored
  */
-@RequiredArgsConstructor
 public abstract class Cache<T> {
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-
     private T cached = null;
 
     protected abstract T supply();
 
     public final T get() {
         // try to just read from the cached value
-        lock.readLock().lock();
+        this.lock.readLock().lock();
         try {
-            if (cached != null) {
-                return cached;
+            if (this.cached != null) {
+                return this.cached;
             }
         } finally {
             // we have to release the read lock, as it is not possible
             // to acquire the write lock whilst holding a read lock
-            lock.readLock().unlock();
+            this.lock.readLock().unlock();
         }
 
-        lock.writeLock().lock();
+        this.lock.writeLock().lock();
         try {
             // Since the lock was unlocked momentarily, we need
             // to check again for a cached value
-            if (cached != null) {
-                return cached;
+            if (this.cached != null) {
+                return this.cached;
             }
 
             // call the supplier and set the cached value
-            cached = supply();
-            return cached;
+            this.cached = supply();
+            return this.cached;
         } finally {
-            lock.writeLock().unlock();
+            this.lock.writeLock().unlock();
         }
     }
 
     public final Optional<T> getIfPresent() {
-        lock.readLock().lock();
+        this.lock.readLock().lock();
         try {
-            return Optional.ofNullable(cached);
+            return Optional.ofNullable(this.cached);
         } finally {
-            lock.readLock().unlock();
+            this.lock.readLock().unlock();
         }
     }
 
     public final void invalidate() {
-        lock.writeLock().lock();
+        this.lock.writeLock().lock();
         try {
-            cached = null;
+            this.cached = null;
         } finally {
-            lock.writeLock().unlock();
+            this.lock.writeLock().unlock();
         }
     }
 }

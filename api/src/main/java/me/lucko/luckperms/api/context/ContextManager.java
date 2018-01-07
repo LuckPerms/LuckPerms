@@ -153,7 +153,6 @@ public interface ContextManager {
      *
      * @param calculator the calculator
      */
-    @Nonnull
     void registerCalculator(@Nonnull ContextCalculator<?> calculator);
 
     /**
@@ -163,7 +162,6 @@ public interface ContextManager {
      *
      * @param calculator the calculator
      */
-    @Nonnull
     void registerStaticCalculator(@Nonnull StaticContextCalculator calculator);
 
     /**
@@ -171,7 +169,6 @@ public interface ContextManager {
      *
      * @param subject the subject
      */
-    @Nonnull
     void invalidateCache(@Nonnull Object subject);
 
 }

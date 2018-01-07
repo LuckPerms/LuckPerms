@@ -34,6 +34,8 @@ import me.lucko.luckperms.common.references.Identifiable;
 
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 /**
  * An abstract manager class
  *
@@ -45,40 +47,40 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> implements M
     private final LoadingCache<I, T> objects = Caffeine.newBuilder()
             .build(new CacheLoader<I, T>() {
                 @Override
-                public T load(I i) {
+                public T load(@Nonnull I i) {
                     return apply(i);
                 }
 
                 @Override
-                public T reload(I i, T t) {
+                public T reload(@Nonnull I i, @Nonnull T t) {
                     return t; // Never needs to be refreshed.
                 }
             });
 
     @Override
     public Map<I, T> getAll() {
-        return ImmutableMap.copyOf(objects.asMap());
+        return ImmutableMap.copyOf(this.objects.asMap());
     }
 
     @Override
     public T getOrMake(I id) {
-        return objects.get(sanitizeIdentifier(id));
+        return this.objects.get(sanitizeIdentifier(id));
     }
 
     @Override
     public T getIfLoaded(I id) {
-        return objects.getIfPresent(sanitizeIdentifier(id));
+        return this.objects.getIfPresent(sanitizeIdentifier(id));
     }
 
     @Override
     public boolean isLoaded(I id) {
-        return objects.asMap().containsKey(sanitizeIdentifier(id));
+        return this.objects.asMap().containsKey(sanitizeIdentifier(id));
     }
 
     @Override
     public void unload(I id) {
         if (id != null) {
-            objects.invalidate(sanitizeIdentifier(id));
+            this.objects.invalidate(sanitizeIdentifier(id));
         }
     }
 
@@ -91,7 +93,7 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> implements M
 
     @Override
     public void unloadAll() {
-        objects.invalidateAll();
+        this.objects.invalidateAll();
     }
 
     protected I sanitizeIdentifier(I i) {

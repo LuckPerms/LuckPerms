@@ -25,15 +25,17 @@
 
 package me.lucko.luckperms.common.config.adapter;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-@RequiredArgsConstructor
 public abstract class AbstractConfigurationAdapter implements ConfigurationAdapter {
-
-    @Getter
     private final LuckPermsPlugin plugin;
 
+    public AbstractConfigurationAdapter(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    @Override
+    public LuckPermsPlugin getPlugin() {
+        return this.plugin;
+    }
 }

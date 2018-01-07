@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.utils;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
@@ -41,40 +38,45 @@ import java.util.UUID;
 /**
  * @see me.lucko.luckperms.api.UuidCache for docs
  */
-@RequiredArgsConstructor
 public class UuidCache {
     private final LuckPermsPlugin plugin;
 
     // External UUID --> Internal UUID
     private final BiMap<UUID, UUID> cache = Maps.synchronizedBiMap(HashBiMap.create());
 
-    @Getter
     private final ApiUuidCache delegate = new ApiUuidCache(this);
 
+    public UuidCache(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+    }
+
     public UUID getUUID(UUID external) {
-        return inUse() ? external : cache.getOrDefault(external, external);
+        return inUse() ? external : this.cache.getOrDefault(external, external);
     }
 
     public UUID getExternalUUID(UUID internal) {
-        return inUse() ? internal : cache.inverse().getOrDefault(internal, internal);
+        return inUse() ? internal : this.cache.inverse().getOrDefault(internal, internal);
     }
 
     public void addToCache(UUID external, UUID internal) {
         if (inUse()) return;
-        cache.forcePut(external, internal);
+        this.cache.forcePut(external, internal);
     }
 
     public void clearCache(UUID external) {
         if (inUse()) return;
-        cache.remove(external);
+        this.cache.remove(external);
     }
 
     public int getSize() {
-        return inUse() ? 0 : cache.size();
+        return inUse() ? 0 : this.cache.size();
     }
 
     private boolean inUse() {
-        return plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUIDS);
+        return this.plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUIDS);
     }
 
+    public ApiUuidCache getDelegate() {
+        return this.delegate;
+    }
 }

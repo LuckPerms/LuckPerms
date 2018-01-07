@@ -25,12 +25,13 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.ToString;
-
 import me.lucko.luckperms.api.event.track.TrackLoadAllEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
-@ToString
 public class EventTrackLoadAll extends AbstractEvent implements TrackLoadAllEvent {
 
+    @Override
+    public String toString() {
+        return "EventTrackLoadAll()";
+    }
 }

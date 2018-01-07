@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.tasks;
 
-import lombok.AllArgsConstructor;
-
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -38,7 +36,6 @@ import java.util.concurrent.CompletableFuture;
  *
  * <p>Ensures that all local data is consistent with the storage.</p>
  */
-@AllArgsConstructor
 public class UpdateTask implements Runnable {
     private final LuckPermsPlugin plugin;
 
@@ -47,6 +44,11 @@ public class UpdateTask implements Runnable {
      */
     private final boolean initialUpdate;
 
+    public UpdateTask(LuckPermsPlugin plugin, boolean initialUpdate) {
+        this.plugin = plugin;
+        this.initialUpdate = initialUpdate;
+    }
+
     /**
      * Runs the update task
      *
@@ -54,28 +56,28 @@ public class UpdateTask implements Runnable {
      */
     @Override
     public void run() {
-        if (plugin.getEventFactory().handlePreSync(false)) {
+        if (this.plugin.getEventFactory().handlePreSync(false)) {
             return;
         }
 
         // Reload all groups
-        plugin.getStorage().loadAllGroups().join();
-        String defaultGroup = plugin.getConfiguration().get(ConfigKeys.DEFAULT_GROUP_NAME);
-        if (!plugin.getGroupManager().isLoaded(defaultGroup)) {
-            plugin.getStorage().createAndLoadGroup(defaultGroup, CreationCause.INTERNAL).join();
+        this.plugin.getStorage().loadAllGroups().join();
+        String defaultGroup = this.plugin.getConfiguration().get(ConfigKeys.DEFAULT_GROUP_NAME);
+        if (!this.plugin.getGroupManager().isLoaded(defaultGroup)) {
+            this.plugin.getStorage().createAndLoadGroup(defaultGroup, CreationCause.INTERNAL).join();
         }
 
         // Reload all tracks
-        plugin.getStorage().loadAllTracks().join();
+        this.plugin.getStorage().loadAllTracks().join();
 
         // Refresh all online users.
-        CompletableFuture<Void> userUpdateFut = plugin.getUserManager().updateAllUsers();
-        if (!initialUpdate) {
+        CompletableFuture<Void> userUpdateFut = this.plugin.getUserManager().updateAllUsers();
+        if (!this.initialUpdate) {
             userUpdateFut.join();
         }
 
-        plugin.onPostUpdate();
+        this.plugin.onPostUpdate();
 
-        plugin.getEventFactory().handlePostSync();
+        this.plugin.getEventFactory().handlePostSync();
     }
 }

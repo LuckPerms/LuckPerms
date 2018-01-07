@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.webeditor;
 
-import lombok.experimental.UtilityClass;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -60,8 +58,7 @@ import java.util.stream.Stream;
 /**
  * Utility methods for interacting with the LuckPerms web permission editor.
  */
-@UtilityClass
-public class WebEditorUtils {
+public final class WebEditorUtils {
 
     private static final String FILE_NAME = "luckperms-data.json";
     private static final String GIST_API_URL = "https://api.github.com/gists";
@@ -273,5 +270,7 @@ public class WebEditorUtils {
 
         return nodes;
     }
+
+    private WebEditorUtils() {}
 
 }

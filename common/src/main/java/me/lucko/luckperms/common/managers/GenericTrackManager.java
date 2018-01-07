@@ -25,18 +25,19 @@
 
 package me.lucko.luckperms.common.managers;
 
-import lombok.AllArgsConstructor;
-
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-@AllArgsConstructor
 public class GenericTrackManager extends AbstractManager<String, Track> implements TrackManager {
     private final LuckPermsPlugin plugin;
 
+    public GenericTrackManager(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+    }
+
     @Override
     public Track apply(String name) {
-        return new Track(name, plugin);
+        return new Track(name, this.plugin);
     }
 
     @Override

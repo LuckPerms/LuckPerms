@@ -89,15 +89,15 @@ public final class EventFactory {
     }
 
     public LuckPermsEventBus getEventBus() {
-        return eventBus;
+        return this.eventBus;
     }
 
     private void fireEventAsync(LuckPermsEvent event) {
-        eventBus.fireEventAsync(event);
+        this.eventBus.fireEventAsync(event);
     }
 
     private void fireEvent(LuckPermsEvent event) {
-        eventBus.fireEvent(event);
+        this.eventBus.fireEvent(event);
     }
 
     public void handleGroupCacheLoad(Group group, GroupData data) {

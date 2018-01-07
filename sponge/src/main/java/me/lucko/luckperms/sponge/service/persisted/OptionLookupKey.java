@@ -25,20 +25,50 @@
 
 package me.lucko.luckperms.sponge.service.persisted;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 
-@Getter
-@ToString
-@EqualsAndHashCode
-@AllArgsConstructor(staticName = "of")
 public final class OptionLookupKey {
+
+    public static OptionLookupKey of(String key, ImmutableContextSet contexts) {
+        return new OptionLookupKey(key, contexts);
+    }
 
     private final String key;
     private final ImmutableContextSet contexts;
 
+    private OptionLookupKey(String key, ImmutableContextSet contexts) {
+        this.key = key;
+        this.contexts = contexts;
+    }
+
+    public String getKey() {
+        return this.key;
+    }
+
+    public ImmutableContextSet getContexts() {
+        return this.contexts;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof OptionLookupKey)) return false;
+        final OptionLookupKey other = (OptionLookupKey) o;
+
+        return this.getKey().equals(other.getKey()) && this.getContexts().equals(other.getContexts());
+    }
+
+    @Override
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        result = result * PRIME + this.getKey().hashCode();
+        result = result * PRIME + this.getContexts().hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "OptionLookupKey(key=" + this.getKey() + ", contexts=" + this.getContexts() + ")";
+    }
 }

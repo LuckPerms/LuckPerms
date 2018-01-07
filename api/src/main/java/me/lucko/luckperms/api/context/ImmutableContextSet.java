@@ -29,12 +29,11 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An immutable implementation of {@link ContextSet}.
@@ -99,7 +98,7 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
      */
     @Nonnull
     public static ImmutableContextSet fromEntries(@Nonnull Iterable<? extends Map.Entry<String, String>> iterable) {
-        checkNotNull(iterable, "iterable");
+        Objects.requireNonNull(iterable, "iterable");
         ImmutableContextSet.Builder builder = builder();
         for (Map.Entry<String, String> entry : iterable) {
             builder.add(entry);
@@ -116,7 +115,7 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
      */
     @Nonnull
     public static ImmutableContextSet fromMap(@Nonnull Map<String, String> map) {
-        return fromEntries(checkNotNull(map, "map").entrySet());
+        return fromEntries(Objects.requireNonNull(map, "map").entrySet());
     }
 
     /**
@@ -129,7 +128,7 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
      */
     @Nonnull
     public static ImmutableContextSet fromMultimap(@Nonnull Multimap<String, String> multimap) {
-        return fromEntries(checkNotNull(multimap, "multimap").entries());
+        return fromEntries(Objects.requireNonNull(multimap, "multimap").entries());
     }
 
     /**
@@ -143,7 +142,7 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
      */
     @Nonnull
     public static ImmutableContextSet fromSet(@Nonnull ContextSet contextSet) {
-        return checkNotNull(contextSet, "contextSet").makeImmutable();
+        return Objects.requireNonNull(contextSet, "contextSet").makeImmutable();
     }
 
     /**
@@ -161,12 +160,12 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
 
     ImmutableContextSet(ImmutableSetMultimap<String, String> contexts) {
         this.map = contexts;
-        this.hashCode = map.hashCode();
+        this.hashCode = this.map.hashCode();
     }
 
     @Override
     protected Multimap<String, String> backing() {
-        return map;
+        return this.map;
     }
 
     @Override
@@ -190,18 +189,18 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
     @Nonnull
     @Override
     public Set<Map.Entry<String, String>> toSet() {
-        return map.entries();
+        return this.map.entries();
     }
 
     @Nonnull
     @Override
     public Multimap<String, String> toMultimap() {
-        return map;
+        return this.map;
     }
 
     @Override
     public int hashCode() {
-        return hashCode;
+        return this.hashCode;
     }
 
     @Override
@@ -222,10 +221,10 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
         }
 
         private synchronized ImmutableSetMultimap.Builder<String, String> builder() {
-            if (builder == null) {
-                builder = ImmutableSetMultimap.builder();
+            if (this.builder == null) {
+                this.builder = ImmutableSetMultimap.builder();
             }
-            return builder;
+            return this.builder;
         }
 
         private void put(String key, String value) {
@@ -257,7 +256,7 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
          */
         @Nonnull
         public Builder add(@Nonnull Map.Entry<String, String> entry) {
-            checkNotNull(entry, "entry");
+            Objects.requireNonNull(entry, "entry");
             add(entry.getKey(), entry.getValue());
             return this;
         }
@@ -272,7 +271,7 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
          */
         @Nonnull
         public Builder addAll(@Nonnull Iterable<? extends Map.Entry<String, String>> iterable) {
-            for (Map.Entry<String, String> e : checkNotNull(iterable, "iterable")) {
+            for (Map.Entry<String, String> e : Objects.requireNonNull(iterable, "iterable")) {
                 add(e);
             }
             return this;
@@ -288,7 +287,7 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
          */
         @Nonnull
         public Builder addAll(@Nonnull Map<String, String> map) {
-            addAll(checkNotNull(map, "map").entrySet());
+            addAll(Objects.requireNonNull(map, "map").entrySet());
             return this;
         }
 
@@ -303,7 +302,7 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
          */
         @Nonnull
         public Builder addAll(@Nonnull Multimap<String, String> multimap) {
-            addAll(checkNotNull(multimap, "multimap").entries());
+            addAll(Objects.requireNonNull(multimap, "multimap").entries());
             return this;
         }
 
@@ -317,7 +316,7 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
          */
         @Nonnull
         public Builder addAll(@Nonnull ContextSet contextSet) {
-            checkNotNull(contextSet, "contextSet");
+            Objects.requireNonNull(contextSet, "contextSet");
             if (contextSet instanceof AbstractContextSet) {
                 AbstractContextSet other = ((AbstractContextSet) contextSet);
                 if (!other.isEmpty()) {
@@ -337,10 +336,10 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
          */
         @Nonnull
         public ImmutableContextSet build() {
-            if (builder == null) {
+            if (this.builder == null) {
                 return empty();
             } else {
-                return new ImmutableContextSet(builder.build());
+                return new ImmutableContextSet(this.builder.build());
             }
         }
     }

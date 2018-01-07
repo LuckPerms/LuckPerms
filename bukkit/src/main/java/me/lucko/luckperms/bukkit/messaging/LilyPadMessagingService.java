@@ -51,13 +51,13 @@ public class LilyPadMessagingService extends AbstractMessagingService {
     }
 
     public void init() {
-        connect = plugin.getServer().getServicesManager().getRegistration(Connect.class).getProvider();
-        connect.registerEvents(this);
+        this.connect = this.plugin.getServer().getServicesManager().getRegistration(Connect.class).getProvider();
+        this.connect.registerEvents(this);
     }
 
     @Override
     public void close() {
-        connect.unregisterEvents(this);
+        this.connect.unregisterEvents(this);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class LilyPadMessagingService extends AbstractMessagingService {
         }
 
         try {
-            connect.request(request);
+            this.connect.request(request);
         } catch (RequestException e) {
             e.printStackTrace();
         }
@@ -80,7 +80,7 @@ public class LilyPadMessagingService extends AbstractMessagingService {
 
     @EventListener
     public void onMessage(MessageEvent event) {
-        plugin.getScheduler().doAsync(() -> {
+        this.plugin.getScheduler().doAsync(() -> {
             try {
                 String channel = event.getChannel();
 

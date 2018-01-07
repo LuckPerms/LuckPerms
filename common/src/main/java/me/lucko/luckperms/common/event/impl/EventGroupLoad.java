@@ -25,19 +25,28 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.event.group.GroupLoadEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
-@Getter
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventGroupLoad extends AbstractEvent implements GroupLoadEvent {
 
     private final Group group;
 
+    public EventGroupLoad(Group group) {
+        this.group = group;
+    }
+
+    @Nonnull
+    @Override
+    public Group getGroup() {
+        return this.group;
+    }
+
+    @Override
+    public String toString() {
+        return "EventGroupLoad(group=" + this.getGroup() + ")";
+    }
 }

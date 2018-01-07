@@ -25,17 +25,22 @@
 
 package me.lucko.luckperms.common.config.keys;
 
-import lombok.AllArgsConstructor;
-
 import me.lucko.luckperms.common.config.ConfigKey;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 
-@AllArgsConstructor(staticName = "of")
 public class StaticKey<T> implements ConfigKey<T> {
+    public static <T> StaticKey<T> of(T val) {
+        return new StaticKey<>(val);
+    }
+
     private final T val;
+
+    private StaticKey(T val) {
+        this.val = val;
+    }
 
     @Override
     public T get(ConfigurationAdapter adapter) {
-        return val;
+        return this.val;
     }
 }

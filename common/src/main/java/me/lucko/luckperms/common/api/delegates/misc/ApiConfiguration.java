@@ -33,6 +33,8 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 public class ApiConfiguration implements LPConfiguration {
     private final LuckPermsConfiguration handle;
     private final Unsafe unsafe;
@@ -42,61 +44,66 @@ public class ApiConfiguration implements LPConfiguration {
         this.unsafe = new UnsafeImpl();
     }
 
+    @Nonnull
     @Override
     public String getServer() {
-        return handle.get(ConfigKeys.SERVER);
+        return this.handle.get(ConfigKeys.SERVER);
     }
 
     @Override
     public boolean getIncludeGlobalPerms() {
-        return handle.get(ConfigKeys.INCLUDING_GLOBAL_PERMS);
+        return this.handle.get(ConfigKeys.INCLUDING_GLOBAL_PERMS);
     }
 
     @Override
     public boolean getIncludeGlobalWorldPerms() {
-        return handle.get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS);
+        return this.handle.get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS);
     }
 
     @Override
     public boolean getApplyGlobalGroups() {
-        return handle.get(ConfigKeys.APPLYING_GLOBAL_GROUPS);
+        return this.handle.get(ConfigKeys.APPLYING_GLOBAL_GROUPS);
     }
 
     @Override
     public boolean getApplyGlobalWorldGroups() {
-        return handle.get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS);
+        return this.handle.get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS);
     }
 
+    @Nonnull
     @Override
     public String getStorageMethod() {
-        return handle.get(ConfigKeys.STORAGE_METHOD);
+        return this.handle.get(ConfigKeys.STORAGE_METHOD);
     }
 
     @Override
     public boolean getSplitStorage() {
-        return handle.get(ConfigKeys.SPLIT_STORAGE);
+        return this.handle.get(ConfigKeys.SPLIT_STORAGE);
     }
 
+    @Nonnull
     @Override
     public Map<String, String> getSplitStorageOptions() {
-        return handle.get(ConfigKeys.SPLIT_STORAGE_OPTIONS).entrySet().stream()
+        return this.handle.get(ConfigKeys.SPLIT_STORAGE_OPTIONS).entrySet().stream()
                 .collect(ImmutableCollectors.toMap(e -> e.getKey().name().toLowerCase(), Map.Entry::getValue));
     }
 
+    @Nonnull
     @Override
     public Unsafe unsafe() {
-        return unsafe;
+        return this.unsafe;
     }
 
     private final class UnsafeImpl implements Unsafe {
 
+        @Nonnull
         @Override
         public Object getObject(String key) {
             ConfigKey<?> configKey = ConfigKeys.getAllKeys().get(key.toUpperCase());
             if (configKey == null) {
                 throw new IllegalArgumentException("Unknown key: " + key);
             }
-            return handle.get(configKey);
+            return ApiConfiguration.this.handle.get(configKey);
         }
     }
 }

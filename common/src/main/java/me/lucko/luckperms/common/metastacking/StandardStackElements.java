@@ -25,11 +25,6 @@
 
 package me.lucko.luckperms.common.metastacking;
 
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
-import lombok.experimental.UtilityClass;
-
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.metastacking.MetaStackElement;
@@ -42,11 +37,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.annotation.Nonnull;
+
 /**
  * Contains the standard {@link MetaStackElement}s provided by LuckPerms.
  */
-@UtilityClass
-public class StandardStackElements {
+public final class StandardStackElements {
     private static final HighestPriority HIGHEST_PRIORITY = new HighestPriority();
     private static final LowestPriority LOWEST_PRIORITY = new LowestPriority();
     private static final HighestPriorityOwn HIGHEST_PRIORITY_OWN = new HighestPriorityOwn();
@@ -178,10 +174,9 @@ public class StandardStackElements {
         return t == null || t.containsGroup(node.getLocation());
     }
 
-    @ToString
     private static final class HighestPriority implements MetaStackElement {
         @Override
-        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
             if (type.shouldIgnore(node)) {
                 return false;
             }
@@ -189,12 +184,16 @@ public class StandardStackElements {
             Map.Entry<Integer, String> newEntry = type.getEntry(node);
             return !compareEntriesHighest(current, newEntry);
         }
+
+        @Override
+        public String toString() {
+            return "StandardStackElements.HighestPriority()";
+        }
     }
 
-    @ToString
     private static final class HighestPriorityOwn implements MetaStackElement {
         @Override
-        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
             if (type.shouldIgnore(node)) {
                 return false;
             }
@@ -206,12 +205,16 @@ public class StandardStackElements {
             Map.Entry<Integer, String> newEntry = type.getEntry(node);
             return !compareEntriesHighest(current, newEntry);
         }
+
+        @Override
+        public String toString() {
+            return "StandardStackElements.HighestPriorityOwn()";
+        }
     }
 
-    @ToString
     private static final class HighestPriorityInherited implements MetaStackElement {
         @Override
-        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
             if (type.shouldIgnore(node)) {
                 return false;
             }
@@ -223,48 +226,92 @@ public class StandardStackElements {
             Map.Entry<Integer, String> newEntry = type.getEntry(node);
             return !compareEntriesHighest(current, newEntry);
         }
+
+        @Override
+        public String toString() {
+            return "StandardStackElements.HighestPriorityInherited()";
+        }
     }
 
-    @ToString(of = "trackName")
-    @RequiredArgsConstructor
-    @EqualsAndHashCode(of = "trackName")
     private static final class HighestPriorityTrack implements MetaStackElement {
         private final LuckPermsPlugin plugin;
         private final String trackName;
 
+        public HighestPriorityTrack(LuckPermsPlugin plugin, String trackName) {
+            this.plugin = plugin;
+            this.trackName = trackName;
+        }
+
         @Override
-        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
             if (type.shouldIgnore(node)) {
                 return false;
             }
 
             Map.Entry<Integer, String> newEntry = type.getEntry(node);
-            return !compareEntriesHighest(current, newEntry) && !checkTrackElement(plugin, node, trackName);
+            return !compareEntriesHighest(current, newEntry) && !checkTrackElement(this.plugin, node, this.trackName);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) return true;
+            if (!(o instanceof HighestPriorityTrack)) return false;
+            final HighestPriorityTrack other = (HighestPriorityTrack) o;
+            return this.trackName.equals(other.trackName);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.trackName.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return "StandardStackElements.HighestPriorityTrack(trackName=" + this.trackName + ")";
         }
     }
 
-    @ToString(of = "trackName")
-    @RequiredArgsConstructor
-    @EqualsAndHashCode(of = "trackName")
     private static final class HighestPriorityNotOnTrack implements MetaStackElement {
         private final LuckPermsPlugin plugin;
         private final String trackName;
 
+        public HighestPriorityNotOnTrack(LuckPermsPlugin plugin, String trackName) {
+            this.plugin = plugin;
+            this.trackName = trackName;
+        }
+
         @Override
-        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
             if (type.shouldIgnore(node)) {
                 return false;
             }
 
             Map.Entry<Integer, String> newEntry = type.getEntry(node);
-            return !compareEntriesHighest(current, newEntry) && !checkNotTrackElement(plugin, node, trackName);
+            return !compareEntriesHighest(current, newEntry) && !checkNotTrackElement(this.plugin, node, this.trackName);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) return true;
+            if (!(o instanceof HighestPriorityNotOnTrack)) return false;
+            final HighestPriorityNotOnTrack other = (HighestPriorityNotOnTrack) o;
+            return this.trackName.equals(other.trackName);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.trackName.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return "StandardStackElements.HighestPriorityNotOnTrack(trackName=" + this.trackName + ")";
         }
     }
 
-    @ToString
     private static final class LowestPriority implements MetaStackElement {
         @Override
-        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
             if (type.shouldIgnore(node)) {
                 return false;
             }
@@ -272,12 +319,16 @@ public class StandardStackElements {
             Map.Entry<Integer, String> newEntry = type.getEntry(node);
             return !compareEntriesLowest(current, newEntry);
         }
+
+        @Override
+        public String toString() {
+            return "StandardStackElements.LowestPriority()";
+        }
     }
 
-    @ToString
     private static final class LowestPriorityOwn implements MetaStackElement {
         @Override
-        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
             if (type.shouldIgnore(node)) {
                 return false;
             }
@@ -289,12 +340,16 @@ public class StandardStackElements {
             Map.Entry<Integer, String> newEntry = type.getEntry(node);
             return !compareEntriesLowest(current, newEntry);
         }
+
+        @Override
+        public String toString() {
+            return "StandardStackElements.LowestPriorityOwn()";
+        }
     }
 
-    @ToString
     private static final class LowestPriorityInherited implements MetaStackElement {
         @Override
-        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
             if (type.shouldIgnore(node)) {
                 return false;
             }
@@ -306,41 +361,89 @@ public class StandardStackElements {
             Map.Entry<Integer, String> newEntry = type.getEntry(node);
             return !compareEntriesLowest(current, newEntry);
         }
+
+        @Override
+        public String toString() {
+            return "StandardStackElements.LowestPriorityInherited()";
+        }
     }
 
-    @ToString(of = "trackName")
-    @RequiredArgsConstructor
-    @EqualsAndHashCode(of = "trackName")
     private static final class LowestPriorityTrack implements MetaStackElement {
         private final LuckPermsPlugin plugin;
         private final String trackName;
 
+        public LowestPriorityTrack(LuckPermsPlugin plugin, String trackName) {
+            this.plugin = plugin;
+            this.trackName = trackName;
+        }
+
         @Override
-        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
             if (type.shouldIgnore(node)) {
                 return false;
             }
 
             Map.Entry<Integer, String> entry = type.getEntry(node);
-            return !compareEntriesLowest(current, entry) && !checkTrackElement(plugin, node, trackName);
+            return !compareEntriesLowest(current, entry) && !checkTrackElement(this.plugin, node, this.trackName);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) return true;
+            if (!(o instanceof LowestPriorityTrack)) return false;
+            final LowestPriorityTrack other = (LowestPriorityTrack) o;
+            return this.trackName.equals(other.trackName);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.trackName.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return "StandardStackElements.LowestPriorityTrack(trackName=" + this.trackName + ")";
         }
     }
 
-    @ToString(of = "trackName")
-    @RequiredArgsConstructor
-    @EqualsAndHashCode(of = "trackName")
     private static final class LowestPriorityNotOnTrack implements MetaStackElement {
         private final LuckPermsPlugin plugin;
         private final String trackName;
 
+        public LowestPriorityNotOnTrack(LuckPermsPlugin plugin, String trackName) {
+            this.plugin = plugin;
+            this.trackName = trackName;
+        }
+
         @Override
-        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
             if (type.shouldIgnore(node)) {
                 return false;
             }
 
             Map.Entry<Integer, String> newEntry = type.getEntry(node);
-            return !compareEntriesLowest(current, newEntry) && !checkNotTrackElement(plugin, node, trackName);
+            return !compareEntriesLowest(current, newEntry) && !checkNotTrackElement(this.plugin, node, this.trackName);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) return true;
+            if (!(o instanceof LowestPriorityNotOnTrack)) return false;
+            final LowestPriorityNotOnTrack other = (LowestPriorityNotOnTrack) o;
+            return this.trackName.equals(other.trackName);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.trackName.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return "StandardStackElements.LowestPriorityNotOnTrack(trackName=" + this.trackName + ")";
         }
     }
+
+    private StandardStackElements() {}
+
 }

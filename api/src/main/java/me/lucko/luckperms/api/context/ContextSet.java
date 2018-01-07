@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.api.context;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -302,7 +302,7 @@ public interface ContextSet {
      * @throws NullPointerException if the key or value is null
      */
     default boolean has(@Nonnull Map.Entry<String, String> entry) {
-        Preconditions.checkNotNull(entry, "entry");
+        Objects.requireNonNull(entry, "entry");
         return has(entry.getKey(), entry.getValue());
     }
 
@@ -317,7 +317,7 @@ public interface ContextSet {
      * @throws NullPointerException if the key or value is null
      */
     default boolean hasIgnoreCase(@Nonnull Map.Entry<String, String> entry) {
-        Preconditions.checkNotNull(entry, "entry");
+        Objects.requireNonNull(entry, "entry");
         return hasIgnoreCase(entry.getKey(), entry.getValue());
     }
 
@@ -358,7 +358,7 @@ public interface ContextSet {
             return true;
         }
 
-        Preconditions.checkNotNull(other, "other");
+        Objects.requireNonNull(other, "other");
         if (this.isEmpty()) {
             // this is empty, so is therefore always satisfied.
             return true;

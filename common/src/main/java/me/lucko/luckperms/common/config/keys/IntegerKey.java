@@ -25,18 +25,24 @@
 
 package me.lucko.luckperms.common.config.keys;
 
-import lombok.AllArgsConstructor;
-
 import me.lucko.luckperms.common.config.ConfigKey;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 
-@AllArgsConstructor(staticName = "of")
 public class IntegerKey implements ConfigKey<Integer> {
+    public static IntegerKey of(String path, int def) {
+        return new IntegerKey(path, def);
+    }
+
     private final String path;
     private final int def;
 
+    private IntegerKey(String path, int def) {
+        this.path = path;
+        this.def = def;
+    }
+
     @Override
     public Integer get(ConfigurationAdapter adapter) {
-        return adapter.getInt(path, def);
+        return adapter.getInt(this.path, this.def);
     }
 }

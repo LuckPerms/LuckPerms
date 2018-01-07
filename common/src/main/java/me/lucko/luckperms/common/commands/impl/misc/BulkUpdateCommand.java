@@ -64,7 +64,7 @@ public class BulkUpdateCommand extends SingleCommand {
         if (args.size() == 2 && args.get(0).equalsIgnoreCase("confirm")) {
 
             String id = args.get(1);
-            BulkUpdate operation = pendingOperations.asMap().remove(id);
+            BulkUpdate operation = this.pendingOperations.asMap().remove(id);
 
             if (operation == null) {
                 Message.BULK_UPDATE_UNKNOWN_ID.send(sender, id);
@@ -147,7 +147,7 @@ public class BulkUpdateCommand extends SingleCommand {
 
         BulkUpdate bulkUpdate = bulkUpdateBuilder.build();
 
-        pendingOperations.put(id, bulkUpdate);
+        this.pendingOperations.put(id, bulkUpdate);
 
         Message.BULK_UPDATE_QUEUED.send(sender, bulkUpdate.buildAsSql().replace("{table}", bulkUpdate.getDataType().getName()));
         Message.BULK_UPDATE_CONFIRM.send(sender, label, id);

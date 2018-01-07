@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.api;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-
 import me.lucko.luckperms.api.ActionLogger;
 import me.lucko.luckperms.api.LPConfiguration;
 import me.lucko.luckperms.api.LuckPermsApi;
@@ -56,12 +53,13 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
+import javax.annotation.Nonnull;
+
 /**
  * Implements the LuckPerms API using the plugin instance
  */
 public class LuckPermsApiProvider implements LuckPermsApi {
 
-    @Getter(AccessLevel.NONE)
     private final LuckPermsPlugin plugin;
 
     private final PlatformInfo platformInfo;
@@ -84,74 +82,86 @@ public class LuckPermsApiProvider implements LuckPermsApi {
         this.metaStackFactory = new ApiMetaStackFactory(plugin);
     }
 
+    @Nonnull
     @Override
     public PlatformInfo getPlatformInfo() {
-        return platformInfo;
+        return this.platformInfo;
     }
 
+    @Nonnull
     @Override
     public UserManager getUserManager() {
-        return userManager;
+        return this.userManager;
     }
 
+    @Nonnull
     @Override
     public GroupManager getGroupManager() {
-        return groupManager;
+        return this.groupManager;
     }
 
+    @Nonnull
     @Override
     public TrackManager getTrackManager() {
-        return trackManager;
+        return this.trackManager;
     }
 
+    @Nonnull
     @Override
     public CompletableFuture<Void> runUpdateTask() {
-        return plugin.getUpdateTaskBuffer().request();
+        return this.plugin.getUpdateTaskBuffer().request();
     }
 
+    @Nonnull
     @Override
     public EventBus getEventBus() {
-        return plugin.getEventFactory().getEventBus();
+        return this.plugin.getEventFactory().getEventBus();
     }
 
+    @Nonnull
     @Override
     public LPConfiguration getConfiguration() {
-        return plugin.getConfiguration().getDelegate();
+        return this.plugin.getConfiguration().getDelegate();
     }
 
+    @Nonnull
     @Override
     public Storage getStorage() {
-        return plugin.getStorage().getDelegate();
+        return this.plugin.getStorage().getDelegate();
     }
 
+    @Nonnull
     @Override
     public Optional<MessagingService> getMessagingService() {
-        return plugin.getMessagingService().map(Function.identity());
+        return this.plugin.getMessagingService().map(Function.identity());
     }
 
     @Override
     public ActionLogger getActionLogger() {
-        return actionLogger;
+        return this.actionLogger;
     }
 
+    @Nonnull
     @Override
     public UuidCache getUuidCache() {
-        return plugin.getUuidCache().getDelegate();
+        return this.plugin.getUuidCache().getDelegate();
     }
 
     @Override
     public ContextManager getContextManager() {
-        return contextManager;
+        return this.contextManager;
     }
 
+    @Nonnull
     @Override
     public NodeFactory getNodeFactory() {
         return ApiNodeFactory.INSTANCE;
     }
 
+    @Nonnull
     @Override
     public MetaStackFactory getMetaStackFactory() {
-        return metaStackFactory;
+        return this.metaStackFactory;
     }
 
 }

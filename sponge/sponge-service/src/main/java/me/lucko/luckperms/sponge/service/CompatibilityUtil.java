@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.sponge.service;
 
-import lombok.NonNull;
-import lombok.experimental.UtilityClass;
-
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
@@ -40,14 +37,14 @@ import me.lucko.luckperms.sponge.service.context.DelegatingImmutableContextSet;
 
 import org.spongepowered.api.service.context.Context;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Utility class for converting between Sponge and LuckPerms context and tristate classes
  */
-@UtilityClass
-public class CompatibilityUtil {
+public final class CompatibilityUtil {
     private static final LoadingCache<Set<Context>, ImmutableContextSet> SPONGE_TO_LP_CACHE = Caffeine.newBuilder()
             .expireAfterAccess(10, TimeUnit.MINUTES)
             .build(ImmutableContextSet::fromEntries);
@@ -56,7 +53,9 @@ public class CompatibilityUtil {
             .expireAfterAccess(10, TimeUnit.MINUTES)
             .build(DelegatingImmutableContextSet::new);
 
-    public static ImmutableContextSet convertContexts(@NonNull Set<Context> contexts) {
+    public static ImmutableContextSet convertContexts(Set<Context> contexts) {
+        Objects.requireNonNull(contexts, "contexts");
+
         if (contexts instanceof DelegatingContextSet) {
             return ((DelegatingContextSet) contexts).getDelegate().makeImmutable();
         }
@@ -64,11 +63,13 @@ public class CompatibilityUtil {
         return SPONGE_TO_LP_CACHE.get(ImmutableSet.copyOf(contexts));
     }
 
-    public static Set<Context> convertContexts(@NonNull ContextSet contexts) {
+    public static Set<Context> convertContexts(ContextSet contexts) {
+        Objects.requireNonNull(contexts, "contexts");
         return LP_TO_SPONGE_CACHE.get(contexts.makeImmutable());
     }
 
     public static org.spongepowered.api.util.Tristate convertTristate(Tristate tristate) {
+        Objects.requireNonNull(tristate, "tristate");
         switch (tristate) {
             case TRUE:
                 return org.spongepowered.api.util.Tristate.TRUE;
@@ -80,6 +81,7 @@ public class CompatibilityUtil {
     }
 
     public static Tristate convertTristate(org.spongepowered.api.util.Tristate tristate) {
+        Objects.requireNonNull(tristate, "tristate");
         switch (tristate) {
             case TRUE:
                 return Tristate.TRUE;
@@ -89,5 +91,7 @@ public class CompatibilityUtil {
                 return Tristate.UNDEFINED;
         }
     }
+
+    private CompatibilityUtil() {}
 
 }

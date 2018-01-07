@@ -34,13 +34,13 @@ public abstract class AbstractCalculatorFactory implements CalculatorFactory {
     private final Set<PermissionCalculator> calculators = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
 
     protected PermissionCalculator registerCalculator(PermissionCalculator calculator) {
-        calculators.add(calculator);
+        this.calculators.add(calculator);
         return calculator;
     }
 
     @Override
     public void invalidateAll() {
-        for (PermissionCalculator calculator : calculators) {
+        for (PermissionCalculator calculator : this.calculators) {
             calculator.invalidateCache();
         }
     }

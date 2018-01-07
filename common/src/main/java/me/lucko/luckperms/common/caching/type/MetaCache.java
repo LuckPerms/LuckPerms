@@ -25,10 +25,6 @@
 
 package me.lucko.luckperms.common.caching.type;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
@@ -46,13 +42,12 @@ import java.util.SortedMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.annotation.Nonnull;
+
 /**
  * Holds cached meta for a given context
  */
-@Getter
-@RequiredArgsConstructor
 public class MetaCache implements MetaData {
-    @Getter(AccessLevel.NONE)
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     /**
@@ -67,8 +62,12 @@ public class MetaCache implements MetaData {
     private MetaStack prefixStack = null;
     private MetaStack suffixStack = null;
 
+    public MetaCache(MetaContexts metaContexts) {
+        this.metaContexts = metaContexts;
+    }
+
     public void loadMeta(MetaAccumulator meta) {
-        lock.writeLock().lock();
+        this.lock.writeLock().lock();
         try {
             this.metaMultimap = ImmutableListMultimap.copyOf(meta.getMeta());
 
@@ -91,43 +90,76 @@ public class MetaCache implements MetaData {
             this.prefixStack = meta.getPrefixStack();
             this.suffixStack = meta.getSuffixStack();
         } finally {
-            lock.writeLock().unlock();
+            this.lock.writeLock().unlock();
         }
     }
 
     @Override
     public String getPrefix() {
-        lock.readLock().lock();
+        this.lock.readLock().lock();
         try {
-            return prefixStack == null ? null : prefixStack.toFormattedString();
+            return this.prefixStack == null ? null : this.prefixStack.toFormattedString();
         } finally {
-            lock.readLock().unlock();
+            this.lock.readLock().unlock();
         }
     }
 
     @Override
     public String getSuffix() {
-        lock.readLock().lock();
+        this.lock.readLock().lock();
         try {
-            return suffixStack == null ? null : suffixStack.toFormattedString();
+            return this.suffixStack == null ? null : this.suffixStack.toFormattedString();
         } finally {
-            lock.readLock().unlock();
+            this.lock.readLock().unlock();
         }
     }
 
+    @Nonnull
     @Override
     public MetaStackDefinition getPrefixStackDefinition() {
-        return prefixStack.getDefinition();
+        return this.prefixStack.getDefinition();
     }
 
+    @Nonnull
     @Override
     public MetaStackDefinition getSuffixStackDefinition() {
-        return suffixStack.getDefinition();
+        return this.suffixStack.getDefinition();
     }
 
+    @Nonnull
     @Override
     public Contexts getContexts() {
-        return metaContexts.getContexts();
+        return this.metaContexts.getContexts();
+    }
+
+    @Nonnull
+    @Override
+    public MetaContexts getMetaContexts() {
+        return this.metaContexts;
+    }
+
+    @Nonnull
+    @Override
+    public ListMultimap<String, String> getMetaMultimap() {
+        return this.metaMultimap;
+    }
+
+    @Nonnull
+    @Override
+    public Map<String, String> getMeta() {
+        return this.meta;
+    }
+
+    @Nonnull
+    @Override
+    public SortedMap<Integer, String> getPrefixes() {
+        return this.prefixes;
+    }
+
+    @Nonnull
+    @Override
+    public SortedMap<Integer, String> getSuffixes() {
+        return this.suffixes;
     }
 
 }

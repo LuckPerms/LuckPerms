@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.bungee.calculators;
 
-import lombok.AllArgsConstructor;
-
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Contexts;
@@ -42,9 +40,12 @@ import me.lucko.luckperms.common.processors.WildcardProcessor;
 
 import java.util.List;
 
-@AllArgsConstructor
 public class BungeeCalculatorFactory extends AbstractCalculatorFactory {
     private final LPBungeePlugin plugin;
+
+    public BungeeCalculatorFactory(LPBungeePlugin plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public PermissionCalculator build(Contexts contexts, PermissionCalculatorMetadata metadata) {
@@ -52,23 +53,23 @@ public class BungeeCalculatorFactory extends AbstractCalculatorFactory {
 
         processors.add(new MapProcessor());
 
-        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) {
+        if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) {
             processors.add(new RegexProcessor());
         }
 
-        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) {
+        if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) {
             processors.add(new WildcardProcessor());
         }
 
-        return registerCalculator(new PermissionCalculator(plugin, metadata, processors.build()));
+        return registerCalculator(new PermissionCalculator(this.plugin, metadata, processors.build()));
     }
 
     @Override
     public List<String> getActiveProcessors() {
         ImmutableList.Builder<String> ret = ImmutableList.builder();
         ret.add("Map");
-        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ret.add("Regex");
-        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) ret.add("Wildcards");
+        if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ret.add("Regex");
+        if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) ret.add("Wildcards");
         return ret.build();
     }
 }

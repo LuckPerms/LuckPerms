@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.node;
 
-import lombok.experimental.UtilityClass;
-
 import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
 
@@ -43,8 +41,7 @@ import java.util.Map;
 /**
  * Utility class to make Node(Builder) instances from strings or existing Nodes
  */
-@UtilityClass
-public class NodeFactory {
+public final class NodeFactory {
     public static final String DEFAULT_GROUP_NAME = "default";
 
     public static final String PREFIX_KEY = "prefix";
@@ -424,5 +421,7 @@ public class NodeFactory {
             return null;
         }
     }
+
+    private NodeFactory() {}
 
 }

@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.api.delegates.misc;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.api.ActionLogger;
 import me.lucko.luckperms.api.Log;
 import me.lucko.luckperms.api.LogEntry;
@@ -36,32 +34,42 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.concurrent.CompletableFuture;
 
-@RequiredArgsConstructor
+import javax.annotation.Nonnull;
+
 public class ApiActionLogger implements ActionLogger {
     private final LuckPermsPlugin plugin;
 
+    public ApiActionLogger(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    @Nonnull
     @Override
     public LogEntry.Builder newEntryBuilder() {
         return ExtendedLogEntry.build();
     }
 
+    @Nonnull
     @Override
     public CompletableFuture<Log> getLog() {
-        return plugin.getStorage().noBuffer().getLog().thenApply(log -> log == null ? null : new ApiLog(log));
+        return this.plugin.getStorage().noBuffer().getLog().thenApply(log -> log == null ? null : new ApiLog(log));
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Void> submit(LogEntry entry) {
-        return CompletableFuture.runAsync(() -> plugin.getLogDispatcher().dispatchFromApi((ExtendedLogEntry) entry), plugin.getScheduler().async());
+    public CompletableFuture<Void> submit(@Nonnull LogEntry entry) {
+        return CompletableFuture.runAsync(() -> this.plugin.getLogDispatcher().dispatchFromApi((ExtendedLogEntry) entry), this.plugin.getScheduler().async());
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Void> submitToStorage(LogEntry entry) {
-        return plugin.getStorage().noBuffer().logAction(entry);
+    public CompletableFuture<Void> submitToStorage(@Nonnull LogEntry entry) {
+        return this.plugin.getStorage().noBuffer().logAction(entry);
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Void> broadcastAction(LogEntry entry) {
-        return CompletableFuture.runAsync(() -> plugin.getLogDispatcher().broadcastFromApi((ExtendedLogEntry) entry), plugin.getScheduler().async());
+    public CompletableFuture<Void> broadcastAction(@Nonnull LogEntry entry) {
+        return CompletableFuture.runAsync(() -> this.plugin.getLogDispatcher().broadcastFromApi((ExtendedLogEntry) entry), this.plugin.getScheduler().async());
     }
 }

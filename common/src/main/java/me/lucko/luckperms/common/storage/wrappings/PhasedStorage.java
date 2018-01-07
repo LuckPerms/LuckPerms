@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.storage.wrappings;
 
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.cause.CreationCause;
@@ -53,24 +50,26 @@ import java.util.concurrent.TimeoutException;
 /**
  * A Datastore wrapping that ensures all tasks are completed before {@link Storage#shutdown()} is called.
  */
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class PhasedStorage implements Storage {
     public static PhasedStorage wrap(Storage storage) {
         return new PhasedStorage(storage);
     }
 
     private final Storage delegate;
-
     private final Phaser phaser = new Phaser();
+
+    private PhasedStorage(Storage delegate) {
+        this.delegate = delegate;
+    }
 
     @Override
     public ApiStorage getDelegate() {
-        return delegate.getDelegate();
+        return this.delegate.getDelegate();
     }
 
     @Override
     public String getName() {
-        return delegate.getName();
+        return this.delegate.getName();
     }
 
     @Override
@@ -80,233 +79,233 @@ public class PhasedStorage implements Storage {
 
     @Override
     public void init() {
-        delegate.init();
+        this.delegate.init();
     }
 
     @Override
     public void shutdown() {
         // Wait for other threads to finish.
         try {
-            phaser.awaitAdvanceInterruptibly(phaser.getPhase(), 10, TimeUnit.SECONDS);
+            this.phaser.awaitAdvanceInterruptibly(this.phaser.getPhase(), 10, TimeUnit.SECONDS);
         } catch (InterruptedException | TimeoutException e) {
             e.printStackTrace();
         }
 
-        delegate.shutdown();
+        this.delegate.shutdown();
     }
 
     @Override
     public Map<String, String> getMeta() {
-        return delegate.getMeta();
+        return this.delegate.getMeta();
     }
 
     @Override
     public CompletableFuture<Void> logAction(LogEntry entry) {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.logAction(entry);
+            return this.delegate.logAction(entry);
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<Log> getLog() {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.getLog();
+            return this.delegate.getLog();
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<Void> applyBulkUpdate(BulkUpdate bulkUpdate) {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.applyBulkUpdate(bulkUpdate);
+            return this.delegate.applyBulkUpdate(bulkUpdate);
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<User> loadUser(UUID uuid, String username) {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.loadUser(uuid, username);
+            return this.delegate.loadUser(uuid, username);
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<Void> saveUser(User user) {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.saveUser(user);
+            return this.delegate.saveUser(user);
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<Set<UUID>> getUniqueUsers() {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.getUniqueUsers();
+            return this.delegate.getUniqueUsers();
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(String permission) {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.getUsersWithPermission(permission);
+            return this.delegate.getUsersWithPermission(permission);
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<Group> createAndLoadGroup(String name, CreationCause cause) {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.createAndLoadGroup(name, cause);
+            return this.delegate.createAndLoadGroup(name, cause);
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<Optional<Group>> loadGroup(String name) {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.loadGroup(name);
+            return this.delegate.loadGroup(name);
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<Void> loadAllGroups() {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.loadAllGroups();
+            return this.delegate.loadAllGroups();
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<Void> saveGroup(Group group) {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.saveGroup(group);
+            return this.delegate.saveGroup(group);
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<Void> deleteGroup(Group group, DeletionCause cause) {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.deleteGroup(group, cause);
+            return this.delegate.deleteGroup(group, cause);
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(String permission) {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.getGroupsWithPermission(permission);
+            return this.delegate.getGroupsWithPermission(permission);
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<Track> createAndLoadTrack(String name, CreationCause cause) {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.createAndLoadTrack(name, cause);
+            return this.delegate.createAndLoadTrack(name, cause);
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<Optional<Track>> loadTrack(String name) {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.loadTrack(name);
+            return this.delegate.loadTrack(name);
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<Void> loadAllTracks() {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.loadAllTracks();
+            return this.delegate.loadAllTracks();
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<Void> saveTrack(Track track) {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.saveTrack(track);
+            return this.delegate.saveTrack(track);
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<Void> deleteTrack(Track track, DeletionCause cause) {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.deleteTrack(track, cause);
+            return this.delegate.deleteTrack(track, cause);
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<Void> saveUUIDData(UUID uuid, String username) {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.saveUUIDData(uuid, username);
+            return this.delegate.saveUUIDData(uuid, username);
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<UUID> getUUID(String username) {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.getUUID(username);
+            return this.delegate.getUUID(username);
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 
     @Override
     public CompletableFuture<String> getName(UUID uuid) {
-        phaser.register();
+        this.phaser.register();
         try {
-            return delegate.getName(uuid);
+            return this.delegate.getName(uuid);
         } finally {
-            phaser.arriveAndDeregister();
+            this.phaser.arriveAndDeregister();
         }
     }
 }

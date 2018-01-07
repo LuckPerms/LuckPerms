@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.commands;
 
-import lombok.experimental.UtilityClass;
-
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -40,8 +38,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-@UtilityClass
-public class ArgumentPermissions {
+public final class ArgumentPermissions {
     private static final String USER_MODIFY_SELF = CommandPermission.ROOT + "modify.user.self";
     private static final String USER_MODIFY_OTHERS = CommandPermission.ROOT + "modify.user.others";
     private static final Function<String, String> GROUP_MODIFY = s -> CommandPermission.ROOT + "modify.group." + s;
@@ -217,5 +214,7 @@ public class ArgumentPermissions {
 
         return false;
     }
+
+    private ArgumentPermissions() {}
     
 }

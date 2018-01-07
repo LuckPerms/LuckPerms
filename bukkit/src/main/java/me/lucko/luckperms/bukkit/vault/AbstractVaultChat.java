@@ -146,7 +146,7 @@ public abstract class AbstractVaultChat extends Chat {
     }
 
     private String world(String world) {
-        return worldMappingFunction.apply(world);
+        return this.worldMappingFunction.apply(world);
     }
 
     private String world(Player player) {
@@ -525,67 +525,67 @@ public abstract class AbstractVaultChat extends Chat {
 
     @Override
     public boolean playerInGroup(String world, OfflinePlayer player, String group) {
-        return permissionApi.playerInGroup(world, player, group);
+        return this.permissionApi.playerInGroup(world, player, group);
     }
 
     @Override
     public boolean playerInGroup(String world, String player, String group) {
-        return permissionApi.playerInGroup(world, player, group);
+        return this.permissionApi.playerInGroup(world, player, group);
     }
 
     @Override
     public boolean playerInGroup(World world, String player, String group) {
-        return permissionApi.playerInGroup(world, player, group);
+        return this.permissionApi.playerInGroup(world, player, group);
     }
 
     @Override
     public boolean playerInGroup(Player player, String group) {
-        return permissionApi.playerInGroup(player, group);
+        return this.permissionApi.playerInGroup(player, group);
     }
 
     @Override
     public String[] getPlayerGroups(String world, OfflinePlayer player) {
-        return permissionApi.getPlayerGroups(world, player);
+        return this.permissionApi.getPlayerGroups(world, player);
     }
 
     @Override
     public String[] getPlayerGroups(String world, String player) {
-        return permissionApi.getPlayerGroups(world, player);
+        return this.permissionApi.getPlayerGroups(world, player);
     }
 
     @Override
     public String[] getPlayerGroups(World world, String player) {
-        return permissionApi.getPlayerGroups(world, player);
+        return this.permissionApi.getPlayerGroups(world, player);
     }
 
     @Override
     public String[] getPlayerGroups(Player player) {
-        return permissionApi.getPlayerGroups(player);
+        return this.permissionApi.getPlayerGroups(player);
     }
 
     @Override
     public String getPrimaryGroup(String world, OfflinePlayer player) {
-        return permissionApi.getPrimaryGroup(world, player);
+        return this.permissionApi.getPrimaryGroup(world, player);
     }
 
     @Override
     public String getPrimaryGroup(String world, String player) {
-        return permissionApi.getPrimaryGroup(world, player);
+        return this.permissionApi.getPrimaryGroup(world, player);
     }
 
     @Override
     public String getPrimaryGroup(World world, String player) {
-        return permissionApi.getPrimaryGroup(world, player);
+        return this.permissionApi.getPrimaryGroup(world, player);
     }
 
     @Override
     public String getPrimaryGroup(Player player) {
-        return permissionApi.getPrimaryGroup(player);
+        return this.permissionApi.getPrimaryGroup(player);
     }
 
     @Override
     public String[] getGroups() {
-        return permissionApi.getGroups();
+        return this.permissionApi.getGroups();
     }
 
 }

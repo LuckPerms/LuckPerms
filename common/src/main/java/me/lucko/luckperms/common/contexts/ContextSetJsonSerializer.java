@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.contexts;
 
-import lombok.experimental.UtilityClass;
-
 import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -41,9 +39,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-@UtilityClass
-public class ContextSetJsonSerializer {
+public final class ContextSetJsonSerializer {
 
     public static JsonObject serializeContextSet(ContextSet contextSet) {
         JsonObject data = new JsonObject();
@@ -68,7 +66,7 @@ public class ContextSetJsonSerializer {
     }
 
     public static ContextSet deserializeContextSet(Gson gson, String json) {
-        Preconditions.checkNotNull(json, "json");
+        Objects.requireNonNull(json, "json");
         if (json.equals("{}")) {
             return ContextSet.empty();
         }
@@ -105,5 +103,7 @@ public class ContextSetJsonSerializer {
 
         return map;
     }
+
+    private ContextSetJsonSerializer() {}
 
 }

@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.commands.impl.migration;
 
 import com.google.common.collect.ImmutableBiMap;
 
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.Command;
@@ -72,22 +71,22 @@ public class MigrationMainCommand extends MainCommand<Object, Object> {
 
     @Override
     public synchronized Optional<List<Command<Object, ?>>> getChildren() {
-        if (commands == null) {
-            commands = getAvailableCommands(getSpec().getLocaleManager());
+        if (this.commands == null) {
+            this.commands = getAvailableCommands(getSpec().getLocaleManager());
 
             // Add dummy command to show in the list.
-            if (commands.isEmpty()) {
-                display = false;
-                commands.add(new SubCommand<Object>(CommandSpec.MIGRATION_COMMAND.spec(getSpec().getLocaleManager()), "No available plugins to migrate from", CommandPermission.MIGRATION, Predicates.alwaysFalse()) {
+            if (this.commands.isEmpty()) {
+                this.display = false;
+                this.commands.add(new SubCommand<Object>(CommandSpec.MIGRATION_COMMAND.spec(getSpec().getLocaleManager()), "No available plugins to migrate from", CommandPermission.MIGRATION, Predicates.alwaysFalse()) {
                     @Override
-                    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
+                    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) {
                         return CommandResult.SUCCESS;
                     }
                 });
             }
         }
 
-        return Optional.of(commands);
+        return Optional.of(this.commands);
     }
 
     @Override
@@ -98,7 +97,7 @@ public class MigrationMainCommand extends MainCommand<Object, Object> {
     @Override
     public boolean shouldDisplay() {
         getChildren();
-        return display;
+        return this.display;
     }
 
     @SuppressWarnings("unchecked")
@@ -117,7 +116,7 @@ public class MigrationMainCommand extends MainCommand<Object, Object> {
 
     @Override
     protected ReentrantLock getLockForTarget(Object target) {
-        return lock; // share a lock between all migration commands
+        return this.lock; // share a lock between all migration commands
     }
 
     /* Dummy */

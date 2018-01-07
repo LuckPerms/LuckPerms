@@ -25,19 +25,28 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.event.user.UserLoadEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
-@Getter
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventUserLoad extends AbstractEvent implements UserLoadEvent {
 
     private final User user;
 
+    public EventUserLoad(User user) {
+        this.user = user;
+    }
+
+    @Nonnull
+    @Override
+    public User getUser() {
+        return this.user;
+    }
+
+    @Override
+    public String toString() {
+        return "EventUserLoad(user=" + this.getUser() + ")";
+    }
 }

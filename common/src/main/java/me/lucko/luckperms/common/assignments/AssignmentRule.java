@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.assignments;
 
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.model.User;
@@ -36,8 +33,6 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.util.List;
 
-@Getter
-@ToString
 public class AssignmentRule {
     private final AssignmentExpression hasTrueExpression;
     private final AssignmentExpression hasFalseExpression;
@@ -57,9 +52,9 @@ public class AssignmentRule {
     }
 
     public boolean apply(User user) {
-        if (hasTrueExpression != null) {
+        if (this.hasTrueExpression != null) {
             try {
-                boolean b = hasTrueExpression.parse(user, Tristate.TRUE);
+                boolean b = this.hasTrueExpression.parse(user, Tristate.TRUE);
                 if (!b) {
                     // The holder does not meet this requirement
                     return false;
@@ -71,9 +66,9 @@ public class AssignmentRule {
             }
         }
 
-        if (hasFalseExpression != null) {
+        if (this.hasFalseExpression != null) {
             try {
-                boolean b = hasFalseExpression.parse(user, Tristate.FALSE);
+                boolean b = this.hasFalseExpression.parse(user, Tristate.FALSE);
                 if (!b) {
                     // The holder does not meet this requirement
                     return false;
@@ -85,9 +80,9 @@ public class AssignmentRule {
             }
         }
 
-        if (lacksExpression != null) {
+        if (this.lacksExpression != null) {
             try {
-                boolean b = lacksExpression.parse(user, Tristate.UNDEFINED);
+                boolean b = this.lacksExpression.parse(user, Tristate.UNDEFINED);
                 if (!b) {
                     // The holder does not meet this requirement
                     return false;
@@ -100,18 +95,53 @@ public class AssignmentRule {
         }
 
         // The holder meets all of the requirements of this rule.
-        for (Node n : toTake) {
+        for (Node n : this.toTake) {
             user.unsetPermission(n);
         }
 
-        for (Node n : toGive) {
+        for (Node n : this.toGive) {
             user.setPermission(n);
         }
 
-        if (setPrimaryGroup != null) {
-            user.getPrimaryGroup().setStoredValue(setPrimaryGroup);
+        if (this.setPrimaryGroup != null) {
+            user.getPrimaryGroup().setStoredValue(this.setPrimaryGroup);
         }
 
         return true;
+    }
+
+    public AssignmentExpression getHasTrueExpression() {
+        return this.hasTrueExpression;
+    }
+
+    public AssignmentExpression getHasFalseExpression() {
+        return this.hasFalseExpression;
+    }
+
+    public AssignmentExpression getLacksExpression() {
+        return this.lacksExpression;
+    }
+
+    public List<Node> getToGive() {
+        return this.toGive;
+    }
+
+    public List<Node> getToTake() {
+        return this.toTake;
+    }
+
+    public String getSetPrimaryGroup() {
+        return this.setPrimaryGroup;
+    }
+
+    @Override
+    public String toString() {
+        return "AssignmentRule(" +
+                "hasTrueExpression=" + this.getHasTrueExpression() + ", " +
+                "hasFalseExpression=" + this.getHasFalseExpression() + ", " +
+                "lacksExpression=" + this.getLacksExpression() + ", " +
+                "toGive=" + this.getToGive() + ", " +
+                "toTake=" + this.getToTake() + ", " +
+                "setPrimaryGroup=" + this.getSetPrimaryGroup() + ")";
     }
 }

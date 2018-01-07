@@ -25,13 +25,15 @@
 
 package me.lucko.luckperms.common.api.delegates.misc;
 
-import lombok.NonNull;
-
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.api.delegates.model.ApiGroup;
 import me.lucko.luckperms.common.node.NodeFactory;
+
+import java.util.Objects;
+
+import javax.annotation.Nonnull;
 
 public final class ApiNodeFactory implements me.lucko.luckperms.api.NodeFactory {
     public static final ApiNodeFactory INSTANCE = new ApiNodeFactory();
@@ -40,43 +42,61 @@ public final class ApiNodeFactory implements me.lucko.luckperms.api.NodeFactory 
 
     }
 
+    @Nonnull
     @Override
-    public Node.Builder newBuilder(@NonNull String permission) {
+    public Node.Builder newBuilder(@Nonnull String permission) {
+        Objects.requireNonNull(permission, "permission");
         return NodeFactory.builder(permission);
     }
 
+    @Nonnull
     @Override
-    public Node.Builder newBuilderFromExisting(@NonNull Node other) {
+    public Node.Builder newBuilderFromExisting(@Nonnull Node other) {
+        Objects.requireNonNull(other, "other");
         return NodeFactory.builder(other);
     }
 
+    @Nonnull
     @Override
-    public Node.Builder makeGroupNode(Group group) {
+    public Node.Builder makeGroupNode(@Nonnull Group group) {
+        Objects.requireNonNull(group, "group");
         return NodeFactory.buildGroupNode(ApiGroup.cast(group));
     }
 
+    @Nonnull
     @Override
-    public Node.Builder makeGroupNode(String groupName) {
+    public Node.Builder makeGroupNode(@Nonnull String groupName) {
+        Objects.requireNonNull(groupName, "groupName");
         return NodeFactory.buildGroupNode(groupName);
     }
 
+    @Nonnull
     @Override
-    public Node.Builder makeMetaNode(@NonNull String key, @NonNull String value) {
+    public Node.Builder makeMetaNode(@Nonnull String key, @Nonnull String value) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(value, "value");
         return NodeFactory.buildMetaNode(key, value);
     }
 
+    @Nonnull
     @Override
-    public Node.Builder makeChatMetaNode(@NonNull ChatMetaType type, int priority, @NonNull String value) {
+    public Node.Builder makeChatMetaNode(@Nonnull ChatMetaType type, int priority, @Nonnull String value) {
+        Objects.requireNonNull(type, "type");
+        Objects.requireNonNull(value, "value");
         return NodeFactory.buildChatMetaNode(type, priority, value);
     }
 
+    @Nonnull
     @Override
-    public Node.Builder makePrefixNode(int priority, @NonNull String prefix) {
+    public Node.Builder makePrefixNode(int priority, @Nonnull String prefix) {
+        Objects.requireNonNull(prefix, "prefix");
         return NodeFactory.buildPrefixNode(priority, prefix);
     }
 
+    @Nonnull
     @Override
-    public Node.Builder makeSuffixNode(int priority, @NonNull String suffix) {
+    public Node.Builder makeSuffixNode(int priority, @Nonnull String suffix) {
+        Objects.requireNonNull(suffix, "suffix");
         return NodeFactory.buildSuffixNode(priority, suffix);
     }
 }

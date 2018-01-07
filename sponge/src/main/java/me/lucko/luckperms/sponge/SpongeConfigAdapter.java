@@ -57,10 +57,10 @@ public class SpongeConfigAdapter extends AbstractConfigurationAdapter implements
 
     @Override
     public void reload() {
-        ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder().setPath(path).build();
+        ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder().setPath(this.path).build();
 
         try {
-            root = loader.load();
+            this.root = loader.load();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -68,7 +68,7 @@ public class SpongeConfigAdapter extends AbstractConfigurationAdapter implements
 
     private ConfigurationNode resolvePath(String path) {
         Iterable<String> paths = Splitter.on('.').split(path);
-        ConfigurationNode node = root;
+        ConfigurationNode node = this.root;
 
         if (node == null) {
             throw new RuntimeException("Config is not loaded.");

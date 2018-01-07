@@ -25,32 +25,38 @@
 
 package me.lucko.luckperms.common.api.delegates.manager;
 
-import lombok.AllArgsConstructor;
-import lombok.NonNull;
-
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.manager.TrackManager;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class ApiTrackManager implements TrackManager {
     private final me.lucko.luckperms.common.managers.TrackManager handle;
 
+    public ApiTrackManager(me.lucko.luckperms.common.managers.TrackManager handle) {
+        this.handle = handle;
+    }
+
     @Override
-    public Track getTrack(@NonNull String name) {
-        me.lucko.luckperms.common.model.Track track = handle.getIfLoaded(name);
+    public Track getTrack(@Nonnull String name) {
+        Objects.requireNonNull(name, "name");
+        me.lucko.luckperms.common.model.Track track = this.handle.getIfLoaded(name);
         return track == null ? null : track.getDelegate();
     }
 
+    @Nonnull
     @Override
     public Set<Track> getLoadedTracks() {
-        return handle.getAll().values().stream().map(me.lucko.luckperms.common.model.Track::getDelegate).collect(Collectors.toSet());
+        return this.handle.getAll().values().stream().map(me.lucko.luckperms.common.model.Track::getDelegate).collect(Collectors.toSet());
     }
 
     @Override
-    public boolean isLoaded(@NonNull String name) {
-        return handle.isLoaded(name);
+    public boolean isLoaded(@Nonnull String name) {
+        Objects.requireNonNull(name, "name");
+        return this.handle.isLoaded(name);
     }
 }

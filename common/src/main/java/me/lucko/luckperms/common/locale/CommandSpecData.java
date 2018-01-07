@@ -25,22 +25,61 @@
 
 package me.lucko.luckperms.common.locale;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-
 import java.util.Map;
+import java.util.Objects;
+
+import javax.annotation.Nonnull;
 
 /**
  * The localized data for a {@link CommandSpec}.
  */
-@Getter
-@ToString
-@EqualsAndHashCode
-@AllArgsConstructor
 public final class CommandSpecData {
     private final String description;
     private final String usage;
     private final Map<String, String> args;
+
+    public CommandSpecData(String description, String usage, Map<String, String> args) {
+        this.description = description;
+        this.usage = usage;
+        this.args = args;
+    }
+
+    @Nonnull
+    public String getDescription() {
+        return this.description;
+    }
+
+    @Nonnull
+    public String getUsage() {
+        return this.usage;
+    }
+
+    @Nonnull
+    public Map<String, String> getArgs() {
+        return this.args;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof CommandSpecData)) return false;
+        final CommandSpecData that = (CommandSpecData) o;
+
+        return this.getDescription().equals(that.getDescription()) &&
+                this.getUsage().equals(that.getUsage()) &&
+                this.getArgs().equals(that.getArgs());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getDescription(), getUsage(), getArgs());
+    }
+
+    @Override
+    public String toString() {
+        return "CommandSpecData(" +
+                "description=" + this.getDescription() + ", " +
+                "usage=" + this.getUsage() + ", " +
+                "args=" + this.getArgs() + ")";
+    }
 }

@@ -50,7 +50,7 @@ public class DeleteGroup extends SingleCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        if (args.size() == 0) {
+        if (args.isEmpty()) {
             sendUsage(sender, label);
             return CommandResult.INVALID_ARGS;
         }

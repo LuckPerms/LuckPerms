@@ -72,7 +72,7 @@ public class TreeView {
      * @return true if the treeview has data
      */
     public boolean hasData() {
-        return view != null;
+        return this.view != null;
     }
 
     /**
@@ -125,15 +125,15 @@ public class TreeView {
     private List<Map.Entry<String, String>> asTreeList() {
         // work out the prefix to apply
         // since the view is relative, we need to prepend this to all permissions
-        String prefix = rootPosition.equals(".") ? "" : (rootPosition + ".");
+        String prefix = this.rootPosition.equals(".") ? "" : (this.rootPosition + ".");
 
 
         List<Map.Entry<String, String>> ret = new ArrayList<>();
 
         // iterate the node endings in the view
-        for (Map.Entry<Integer, String> s : view.getNodeEndings()) {
+        for (Map.Entry<Integer, String> s : this.view.getNodeEndings()) {
             // don't include the node if it exceeds the max level
-            if (s.getKey() >= maxLevel) {
+            if (s.getKey() >= this.maxLevel) {
                 continue;
             }
 
@@ -241,7 +241,7 @@ public class TreeView {
 
     private ImmutableList.Builder<String> getPasteHeader(String version, String referenceUser, int size) {
         String date = DATE_FORMAT.format(new Date(System.currentTimeMillis()));
-        String selection = rootPosition.equals(".") ? "any" : "`" + rootPosition + "`";
+        String selection = this.rootPosition.equals(".") ? "any" : "`" + this.rootPosition + "`";
 
         return ImmutableList.<String>builder()
                 .add("## Permission Tree")
@@ -250,7 +250,7 @@ public class TreeView {
                 .add("### Metadata")
                 .add("| Selection | Max Recursion | Reference User | Size | Produced at |")
                 .add("|-----------|---------------|----------------|------|-------------|")
-                .add("| " + selection + " | " + maxLevel + " | " + referenceUser + " | **" + size + "** | " + date + " |")
+                .add("| " + selection + " | " + this.maxLevel + " | " + referenceUser + " | **" + size + "** | " + date + " |")
                 .add("")
                 .add("### Output");
     }

@@ -25,10 +25,6 @@
 
 package me.lucko.luckperms.sponge.service.model;
 
-import lombok.AllArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.base.Splitter;
@@ -36,34 +32,39 @@ import com.google.common.base.Splitter;
 import org.spongepowered.api.service.permission.Subject;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Caches the creation of {@link SubjectReference}s.
  */
-@RequiredArgsConstructor
 public final class SubjectReferenceFactory {
 
     // static util access
 
     @Deprecated
-    public static SubjectReference deserialize(@NonNull LPPermissionService service, String serialisedReference) {
+    public static SubjectReference deserialize(LPPermissionService service, String serialisedReference) {
+        Objects.requireNonNull(service, "service");
         return service.getReferenceFactory().deserialize(serialisedReference);
     }
 
-    public static SubjectReference obtain(@NonNull LPPermissionService service, LPSubject subject) {
+    public static SubjectReference obtain(LPPermissionService service, LPSubject subject) {
+        Objects.requireNonNull(service, "service");
         return service.getReferenceFactory().obtain(subject);
     }
 
-    public static SubjectReference obtain(@NonNull LPPermissionService service, Subject subject) {
+    public static SubjectReference obtain(LPPermissionService service, Subject subject) {
+        Objects.requireNonNull(service, "service");
         return service.getReferenceFactory().obtain(subject);
     }
 
-    public static SubjectReference obtain(@NonNull LPPermissionService service, org.spongepowered.api.service.permission.SubjectReference reference) {
+    public static SubjectReference obtain(LPPermissionService service, org.spongepowered.api.service.permission.SubjectReference reference) {
+        Objects.requireNonNull(service, "service");
         return service.getReferenceFactory().obtain(reference);
     }
 
-    public static SubjectReference obtain(@NonNull LPPermissionService service, String collectionIdentifier, String subjectIdentifier) {
+    public static SubjectReference obtain(LPPermissionService service, String collectionIdentifier, String subjectIdentifier) {
+        Objects.requireNonNull(service, "service");
         return service.getReferenceFactory().obtain(collectionIdentifier, subjectIdentifier);
     }
 
@@ -85,19 +86,26 @@ public final class SubjectReferenceFactory {
             .expireAfterAccess(1, TimeUnit.HOURS)
             .build(a -> new SubjectReference(SubjectReferenceFactory.this.service, a.collectionId, a.id));
 
+    public SubjectReferenceFactory(LPPermissionService service) {
+        this.service = service;
+    }
+
     @Deprecated
-    public SubjectReference deserialize(@NonNull String serialisedReference) {
+    public SubjectReference deserialize(String serialisedReference) {
+        Objects.requireNonNull(serialisedReference, "serialisedReference");
         List<String> parts = Splitter.on('/').limit(2).splitToList(serialisedReference);
         return obtain(parts.get(0), parts.get(1));
     }
 
-    public SubjectReference obtain(@NonNull LPSubject subject) {
+    public SubjectReference obtain(LPSubject subject) {
+        Objects.requireNonNull(subject, "subject");
         SubjectReference ret = obtain(subject.getParentCollection().getIdentifier(), subject.getIdentifier());
         ret.fillCache(subject);
         return ret;
     }
 
-    public SubjectReference obtain(@NonNull Subject subject) {
+    public SubjectReference obtain(Subject subject) {
+        Objects.requireNonNull(subject, "subject");
         if (subject instanceof ProxiedSubject) {
             return ((ProxiedSubject) subject).getReference();
         }
@@ -105,7 +113,8 @@ public final class SubjectReferenceFactory {
         return obtain(subject.getContainingCollection().getIdentifier(), subject.getIdentifier());
     }
 
-    public SubjectReference obtain(@NonNull org.spongepowered.api.service.permission.SubjectReference reference) {
+    public SubjectReference obtain(org.spongepowered.api.service.permission.SubjectReference reference) {
+        Objects.requireNonNull(reference, "reference");
         if (reference instanceof SubjectReference) {
             return ((SubjectReference) reference);
         } else {
@@ -113,17 +122,23 @@ public final class SubjectReferenceFactory {
         }
     }
 
-    public SubjectReference obtain(@NonNull String collectionIdentifier, @NonNull String subjectIdentifier) {
-        return referenceCache.get(new SubjectReferenceAttributes(collectionIdentifier, subjectIdentifier));
+    public SubjectReference obtain(String collectionIdentifier, String subjectIdentifier) {
+        Objects.requireNonNull(collectionIdentifier, "collectionIdentifier");
+        Objects.requireNonNull(subjectIdentifier, "subjectIdentifier");
+        return this.referenceCache.get(new SubjectReferenceAttributes(collectionIdentifier, subjectIdentifier));
     }
 
     /**
      * Used as a cache key.
      */
-    @AllArgsConstructor
     private static final class SubjectReferenceAttributes {
         private final String collectionId;
         private final String id;
+
+        public SubjectReferenceAttributes(String collectionId, String id) {
+            this.collectionId = collectionId;
+            this.id = id;
+        }
 
         @Override
         public boolean equals(Object o) {

@@ -25,12 +25,9 @@
 
 package me.lucko.luckperms.bukkit.compat;
 
-import lombok.experimental.UtilityClass;
-
 import org.bukkit.Bukkit;
 
-@UtilityClass
-public class ReflectionUtil {
+public final class ReflectionUtil {
     private static final String SERVER_VERSION = _getServerVersion();
     private static final boolean CHAT_COMPATIBLE = !SERVER_VERSION.startsWith(".v1_7_");
 
@@ -71,4 +68,7 @@ public class ReflectionUtil {
     public static Class<?> obcClass(String className) throws ClassNotFoundException {
         return Class.forName(obc(className));
     }
+
+    private ReflectionUtil() {}
+
 }

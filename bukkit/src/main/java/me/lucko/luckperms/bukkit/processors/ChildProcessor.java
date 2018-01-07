@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.bukkit.processors;
 
-import lombok.RequiredArgsConstructor;
-
 import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.Tristate;
@@ -38,23 +36,26 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Permission Processor for Bukkits "child" permission system.
  */
-@RequiredArgsConstructor
 public class ChildProcessor implements PermissionProcessor {
     private final ChildPermissionProvider provider;
     private final Map<String, Boolean> childPermissions = new ConcurrentHashMap<>();
 
+    public ChildProcessor(ChildPermissionProvider provider) {
+        this.provider = provider;
+    }
+
     @Override
     public Tristate hasPermission(String permission) {
-        return Tristate.fromNullableBoolean(childPermissions.get(permission));
+        return Tristate.fromNullableBoolean(this.childPermissions.get(permission));
     }
 
     @Override
     public void updateBacking(Map<String, Boolean> map) {
-        childPermissions.clear();
+        this.childPermissions.clear();
         for (Map.Entry<String, Boolean> e : map.entrySet()) {
-            Map<String, Boolean> children = provider.getPermissions().get(Maps.immutableEntry(e.getKey(), e.getValue()));
+            Map<String, Boolean> children = this.provider.getPermissions().get(Maps.immutableEntry(e.getKey(), e.getValue()));
             if (children != null) {
-                childPermissions.putAll(children);
+                this.childPermissions.putAll(children);
             }
         }
     }

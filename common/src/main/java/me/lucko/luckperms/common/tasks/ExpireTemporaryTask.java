@@ -25,29 +25,30 @@
 
 package me.lucko.luckperms.common.tasks;
 
-import lombok.AllArgsConstructor;
-
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-@AllArgsConstructor
 public class ExpireTemporaryTask implements Runnable {
     private final LuckPermsPlugin plugin;
+
+    public ExpireTemporaryTask(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public void run() {
         boolean groupChanges = false;
-        for (Group group : plugin.getGroupManager().getAll().values()) {
+        for (Group group : this.plugin.getGroupManager().getAll().values()) {
             if (group.auditTemporaryPermissions()) {
-                plugin.getStorage().saveGroup(group);
+                this.plugin.getStorage().saveGroup(group);
                 groupChanges = true;
             }
         }
 
-        for (User user : plugin.getUserManager().getAll().values()) {
+        for (User user : this.plugin.getUserManager().getAll().values()) {
             if (user.auditTemporaryPermissions()) {
-                plugin.getStorage().saveUser(user);
+                this.plugin.getStorage().saveUser(user);
                 if (!groupChanges) {
                     user.getRefreshBuffer().request();
                 }
@@ -55,7 +56,7 @@ public class ExpireTemporaryTask implements Runnable {
         }
 
         if (groupChanges) {
-            plugin.getUpdateTaskBuffer().request();
+            this.plugin.getUpdateTaskBuffer().request();
         }
     }
 }

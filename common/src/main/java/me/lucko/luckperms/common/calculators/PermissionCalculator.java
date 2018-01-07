@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.calculators;
 
-import lombok.RequiredArgsConstructor;
-
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -39,10 +37,11 @@ import me.lucko.luckperms.common.verbose.CheckOrigin;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 /**
  * Calculates and caches permissions
  */
-@RequiredArgsConstructor
 public class PermissionCalculator implements CacheLoader<String, Tristate> {
     private final LuckPermsPlugin plugin;
     private final PermissionCalculatorMetadata metadata;
@@ -51,8 +50,14 @@ public class PermissionCalculator implements CacheLoader<String, Tristate> {
     // caches lookup calls.
     private final LoadingCache<String, Tristate> lookupCache = Caffeine.newBuilder().build(this);
 
+    public PermissionCalculator(LuckPermsPlugin plugin, PermissionCalculatorMetadata metadata, List<PermissionProcessor> processors) {
+        this.plugin = plugin;
+        this.metadata = metadata;
+        this.processors = processors;
+    }
+
     public void invalidateCache() {
-        lookupCache.invalidateAll();
+        this.lookupCache.invalidateAll();
     }
 
     public Tristate getPermissionValue(String permission, CheckOrigin origin) {
@@ -62,24 +67,24 @@ public class PermissionCalculator implements CacheLoader<String, Tristate> {
         permission = permission.toLowerCase().intern();
 
         // get the result
-        Tristate result = lookupCache.get(permission);
+        Tristate result = this.lookupCache.get(permission);
 
         // log this permission lookup to the verbose handler
-        plugin.getVerboseHandler().offerCheckData(origin, metadata.getObjectName(), metadata.getContext(), permission, result);
+        this.plugin.getVerboseHandler().offerCheckData(origin, this.metadata.getObjectName(), this.metadata.getContext(), permission, result);
 
         // return the result
         return result;
     }
 
     @Override
-    public Tristate load(String permission) {
+    public Tristate load(@Nonnull String permission) {
 
         // offer the permission to the permission vault
         // we only need to do this once per permission, so it doesn't matter
         // that this call is behind the cache.
-        plugin.getPermissionVault().offer(permission);
+        this.plugin.getPermissionVault().offer(permission);
 
-        for (PermissionProcessor processor : processors) {
+        for (PermissionProcessor processor : this.processors) {
             Tristate result = processor.hasPermission(permission);
             if (result == Tristate.UNDEFINED) {
                 continue;
@@ -92,7 +97,7 @@ public class PermissionCalculator implements CacheLoader<String, Tristate> {
     }
 
     public synchronized void updateBacking(Map<String, Boolean> map) {
-        for (PermissionProcessor processor : processors) {
+        for (PermissionProcessor processor : this.processors) {
             processor.updateBacking(map);
         }
     }

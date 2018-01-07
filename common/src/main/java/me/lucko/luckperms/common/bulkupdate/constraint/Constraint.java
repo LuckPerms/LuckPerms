@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.bulkupdate.constraint;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.comparisons.ComparisonType;
 import me.lucko.luckperms.common.node.NodeModel;
@@ -35,9 +32,11 @@ import me.lucko.luckperms.common.node.NodeModel;
 /**
  * Represents a query constraint
  */
-@Getter
-@AllArgsConstructor(staticName = "of")
 public class Constraint {
+
+    public static Constraint of(QueryField field, ComparisonType comparisonType, String value) {
+        return new Constraint(field, comparisonType, value);
+    }
 
     // the field this constraint is comparing against
     private final QueryField field;
@@ -48,6 +47,12 @@ public class Constraint {
     // the expression being compared against
     private final String value;
 
+    private Constraint(QueryField field, ComparisonType comparisonType, String value) {
+        this.field = field;
+        this.comparisonType = comparisonType;
+        this.value = value;
+    }
+
     /**
      * Returns if the given node satisfies this constraint
      *
@@ -55,31 +60,42 @@ public class Constraint {
      * @return true if satisfied
      */
     public boolean isSatisfiedBy(NodeModel node) {
-        switch (field) {
+        switch (this.field) {
             case PERMISSION:
-                return comparisonType.getComparison().matches(node.getPermission(), value);
+                return this.comparisonType.getComparison().matches(node.getPermission(), this.value);
             case SERVER:
-                return comparisonType.getComparison().matches(node.getServer(), value);
+                return this.comparisonType.getComparison().matches(node.getServer(), this.value);
             case WORLD:
-                return comparisonType.getComparison().matches(node.getWorld(), value);
+                return this.comparisonType.getComparison().matches(node.getWorld(), this.value);
             default:
                 throw new RuntimeException();
         }
     }
 
     public String getAsSql() {
-        switch (comparisonType) {
+        switch (this.comparisonType) {
             case EQUAL:
-                return field.getSqlName() + " = " + BulkUpdate.escapeStringForSql(value);
+                return this.field.getSqlName() + " = " + BulkUpdate.escapeStringForSql(this.value);
             case NOT_EQUAL:
-                return field.getSqlName() + " != " + BulkUpdate.escapeStringForSql(value);
+                return this.field.getSqlName() + " != " + BulkUpdate.escapeStringForSql(this.value);
             case SIMILAR:
-                return field.getSqlName() + " LIKE " + BulkUpdate.escapeStringForSql(value);
+                return this.field.getSqlName() + " LIKE " + BulkUpdate.escapeStringForSql(this.value);
             case NOT_SIMILAR:
-                return field.getSqlName() + " NOT LIKE " + BulkUpdate.escapeStringForSql(value);
+                return this.field.getSqlName() + " NOT LIKE " + BulkUpdate.escapeStringForSql(this.value);
             default:
                 throw new RuntimeException();
         }
     }
 
+    public QueryField getField() {
+        return this.field;
+    }
+
+    public ComparisonType getComparisonType() {
+        return this.comparisonType;
+    }
+
+    public String getValue() {
+        return this.value;
+    }
 }

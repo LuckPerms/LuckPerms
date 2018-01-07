@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.sponge.service.proxy.api6;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
@@ -39,43 +37,53 @@ import org.spongepowered.api.text.Text;
 
 import java.util.Map;
 
-@RequiredArgsConstructor
+import javax.annotation.Nonnull;
+
 public final class PermissionDescriptionProxy implements PermissionDescription {
     private final LPPermissionService service;
     private final LPPermissionDescription handle;
 
+    public PermissionDescriptionProxy(LPPermissionService service, LPPermissionDescription handle) {
+        this.service = service;
+        this.handle = handle;
+    }
+
+    @Nonnull
     @Override
     public String getId() {
-        return handle.getId();
+        return this.handle.getId();
     }
 
+    @Nonnull
     @Override
     public Text getDescription() {
-        return handle.getDescription().orElse(Text.EMPTY);
+        return this.handle.getDescription().orElse(Text.EMPTY);
     }
 
+    @Nonnull
     @Override
     public PluginContainer getOwner() {
-        return handle.getOwner().orElseGet(() -> Sponge.getGame().getPluginManager().fromInstance(service.getPlugin()).orElseThrow(() -> new RuntimeException("Unable to get LuckPerms instance.")));
+        return this.handle.getOwner().orElseGet(() -> Sponge.getGame().getPluginManager().fromInstance(this.service.getPlugin()).orElseThrow(() -> new RuntimeException("Unable to get LuckPerms instance.")));
     }
 
+    @Nonnull
     @Override
-    public Map<Subject, Boolean> getAssignedSubjects(String s) {
-        return handle.getAssignedSubjects(s).entrySet().stream()
+    public Map<Subject, Boolean> getAssignedSubjects(@Nonnull String s) {
+        return this.handle.getAssignedSubjects(s).entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
-                        e -> new SubjectProxy(service, e.getKey().toReference()),
+                        e -> new SubjectProxy(this.service, e.getKey().toReference()),
                         Map.Entry::getValue
                 ));
     }
 
     @Override
     public boolean equals(Object o) {
-        return o == this || o instanceof PermissionDescriptionProxy && handle.equals(((PermissionDescriptionProxy) o).handle);
+        return o == this || o instanceof PermissionDescriptionProxy && this.handle.equals(((PermissionDescriptionProxy) o).handle);
     }
 
     @Override
     public int hashCode() {
-        return handle.hashCode();
+        return this.handle.hashCode();
     }
 
     @Override

@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.utils;
 
-import lombok.experimental.UtilityClass;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -36,8 +34,7 @@ import java.util.EnumSet;
 import java.util.function.Function;
 import java.util.stream.Collector;
 
-@UtilityClass
-public class ImmutableCollectors {
+public final class ImmutableCollectors {
 
     private static final Collector<Object, ImmutableList.Builder<Object>, ImmutableList<Object>> LIST = Collector.of(
             ImmutableList.Builder::new,
@@ -90,5 +87,7 @@ public class ImmutableCollectors {
                 ImmutableMap::copyOf
         );
     }
+
+    private ImmutableCollectors() {}
 
 }

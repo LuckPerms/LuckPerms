@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.storage.dao.sql;
 
-import lombok.Getter;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -120,24 +118,33 @@ public class SqlDao extends AbstractDao {
     private static final String ACTION_SELECT_ALL = "SELECT * FROM {prefix}actions";
 
 
-    @Getter
     private final Gson gson;
 
-    @Getter
     private final AbstractConnectionFactory provider;
 
-    @Getter
     private final Function<String, String> prefix;
 
     public SqlDao(LuckPermsPlugin plugin, AbstractConnectionFactory provider, String prefix) {
         super(plugin, provider.getName());
         this.provider = provider;
         this.prefix = s -> s.replace("{prefix}", prefix);
-        gson = new Gson();
+        this.gson = new Gson();
+    }
+
+    public Gson getGson() {
+        return this.gson;
+    }
+
+    public AbstractConnectionFactory getProvider() {
+        return this.provider;
+    }
+
+    public Function<String, String> getPrefix() {
+        return this.prefix;
     }
 
     private boolean tableExists(String table) throws SQLException {
-        try (Connection connection = provider.getConnection()) {
+        try (Connection connection = this.provider.getConnection()) {
             try (ResultSet rs = connection.getMetaData().getTables(null, null, "%", null)) {
                 while (rs.next()) {
                     if (rs.getString(3).equalsIgnoreCase(table)) {
@@ -152,18 +159,18 @@ public class SqlDao extends AbstractDao {
     @Override
     public void init() {
         try {
-            provider.init();
+            this.provider.init();
 
             // Init tables
-            if (!tableExists(prefix.apply("{prefix}user_permissions"))) {
-                String schemaFileName = "schema/" + provider.getName().toLowerCase() + ".sql";
-                try (InputStream is = plugin.getResourceStream(schemaFileName)) {
+            if (!tableExists(this.prefix.apply("{prefix}user_permissions"))) {
+                String schemaFileName = "schema/" + this.provider.getName().toLowerCase() + ".sql";
+                try (InputStream is = this.plugin.getResourceStream(schemaFileName)) {
                     if (is == null) {
-                        throw new Exception("Couldn't locate schema file for " + provider.getName());
+                        throw new Exception("Couldn't locate schema file for " + this.provider.getName());
                     }
 
                     try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-                        try (Connection connection = provider.getConnection()) {
+                        try (Connection connection = this.provider.getConnection()) {
                             try (Statement s = connection.createStatement()) {
                                 StringBuilder sb = new StringBuilder();
                                 String line;
@@ -176,7 +183,7 @@ public class SqlDao extends AbstractDao {
                                     if (line.endsWith(";")) {
                                         sb.deleteCharAt(sb.length() - 1);
 
-                                        String result = prefix.apply(sb.toString().trim());
+                                        String result = this.prefix.apply(sb.toString().trim());
                                         if (!result.isEmpty()) s.addBatch(result);
 
                                         // reset
@@ -191,26 +198,26 @@ public class SqlDao extends AbstractDao {
 
                 // Try migration from legacy backing
                 if (tableExists("lp_users")) {
-                    plugin.getLog().severe("===== Legacy Schema Migration =====");
-                    plugin.getLog().severe("Starting migration from legacy schema. This could take a while....");
-                    plugin.getLog().severe("Please do not stop your server while the migration takes place.");
+                    this.plugin.getLog().severe("===== Legacy Schema Migration =====");
+                    this.plugin.getLog().severe("Starting migration from legacy schema. This could take a while....");
+                    this.plugin.getLog().severe("Please do not stop your server while the migration takes place.");
 
                     new LegacySqlMigration(this).run();
                 }
             }
 
             // migrations
-            if (!(provider instanceof SQLiteConnectionFactory) && !(provider instanceof PostgreConnectionFactory)) {
-                try (Connection connection = provider.getConnection()) {
+            if (!(this.provider instanceof SQLiteConnectionFactory) && !(this.provider instanceof PostgreConnectionFactory)) {
+                try (Connection connection = this.provider.getConnection()) {
                     try (Statement s = connection.createStatement()) {
-                        s.execute(prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN actor_name VARCHAR(100)"));
-                        s.execute(prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN action VARCHAR(300)"));
+                        s.execute(this.prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN actor_name VARCHAR(100)"));
+                        s.execute(this.prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN action VARCHAR(300)"));
                     }
                 }
             }
 
         } catch (Exception e) {
-            plugin.getLog().severe("Error occurred whilst initialising the database.");
+            this.plugin.getLog().severe("Error occurred whilst initialising the database.");
             e.printStackTrace();
         }
     }
@@ -218,7 +225,7 @@ public class SqlDao extends AbstractDao {
     @Override
     public void shutdown() {
         try {
-            provider.shutdown();
+            this.provider.shutdown();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -226,13 +233,13 @@ public class SqlDao extends AbstractDao {
 
     @Override
     public Map<String, String> getMeta() {
-        return provider.getMeta();
+        return this.provider.getMeta();
     }
 
     @Override
     public void logAction(LogEntry entry) throws SQLException {
-        try (Connection c = provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(prefix.apply(ACTION_INSERT))) {
+        try (Connection c = this.provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(ACTION_INSERT))) {
                 ps.setLong(1, entry.getTimestamp());
                 ps.setString(2, entry.getActor().toString());
                 ps.setString(3, entry.getActorName());
@@ -248,8 +255,8 @@ public class SqlDao extends AbstractDao {
     @Override
     public Log getLog() throws SQLException {
         final Log.Builder log = Log.builder();
-        try (Connection c = provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(prefix.apply(ACTION_SELECT_ALL))) {
+        try (Connection c = this.provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(ACTION_SELECT_ALL))) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         final String actedUuid = rs.getString("acted_uuid");
@@ -275,16 +282,16 @@ public class SqlDao extends AbstractDao {
     public void applyBulkUpdate(BulkUpdate bulkUpdate) throws SQLException {
         String queryString = bulkUpdate.buildAsSql();
 
-        try (Connection c = provider.getConnection()) {
+        try (Connection c = this.provider.getConnection()) {
             if (bulkUpdate.getDataType().isIncludingUsers()) {
-                String table = prefix.apply("{prefix}user_permissions");
+                String table = this.prefix.apply("{prefix}user_permissions");
                 try (Statement s = c.createStatement()) {
                     s.execute(queryString.replace("{table}", table));
                 }
             }
 
             if (bulkUpdate.getDataType().isIncludingGroups()) {
-                String table = prefix.apply("{prefix}group_permissions");
+                String table = this.prefix.apply("{prefix}group_permissions");
                 try (Statement s = c.createStatement()) {
                     s.execute(queryString.replace("{table}", table));
                 }
@@ -294,7 +301,7 @@ public class SqlDao extends AbstractDao {
 
     @Override
     public User loadUser(UUID uuid, String username) throws SQLException {
-        User user = plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
+        User user = this.plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
         user.getIoLock().lock();
         try {
             List<NodeModel> data = new ArrayList<>();
@@ -302,8 +309,8 @@ public class SqlDao extends AbstractDao {
             AtomicReference<String> userName = new AtomicReference<>(null);
 
             // Collect user permissions
-            try (Connection c = provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_SELECT))) {
+            try (Connection c = this.provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_SELECT))) {
                     ps.setString(1, user.getUuid().toString());
 
                     try (ResultSet rs = ps.executeQuery()) {
@@ -321,8 +328,8 @@ public class SqlDao extends AbstractDao {
             }
 
             // Collect user meta (username & primary group)
-            try (Connection c = provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_SELECT))) {
+            try (Connection c = this.provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT))) {
                     ps.setString(1, user.getUuid().toString());
 
                     try (ResultSet rs = ps.executeQuery()) {
@@ -350,7 +357,7 @@ public class SqlDao extends AbstractDao {
                 user.setEnduringNodes(nodes);
 
                 // Save back to the store if data was changed
-                if (plugin.getUserManager().giveDefaultIfNeeded(user, false)) {
+                if (this.plugin.getUserManager().giveDefaultIfNeeded(user, false)) {
                     // This should be fine, as the lock will be acquired by the same thread.
                     saveUser(user);
                 }
@@ -360,7 +367,7 @@ public class SqlDao extends AbstractDao {
                 if (GenericUserManager.shouldSave(user)) {
                     user.clearNodes();
                     user.getPrimaryGroup().setStoredValue(null);
-                    plugin.getUserManager().giveDefaultIfNeeded(user, false);
+                    this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
                 }
             }
         } finally {
@@ -376,12 +383,12 @@ public class SqlDao extends AbstractDao {
         try {
             // Empty data - just delete from the DB.
             if (!GenericUserManager.shouldSave(user)) {
-                try (Connection c = provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_DELETE))) {
+                try (Connection c = this.provider.getConnection()) {
+                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_DELETE))) {
                         ps.setString(1, user.getUuid().toString());
                         ps.execute();
                     }
-                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_UPDATE_PRIMARY_GROUP))) {
+                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_UPDATE_PRIMARY_GROUP))) {
                         ps.setString(1, NodeFactory.DEFAULT_GROUP_NAME);
                         ps.setString(2, user.getUuid().toString());
                         ps.execute();
@@ -392,8 +399,8 @@ public class SqlDao extends AbstractDao {
 
             // Get a snapshot of current data.
             Set<NodeModel> remote = new HashSet<>();
-            try (Connection c = provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_SELECT))) {
+            try (Connection c = this.provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_SELECT))) {
                     ps.setString(1, user.getUuid().toString());
 
                     try (ResultSet rs = ps.executeQuery()) {
@@ -418,8 +425,8 @@ public class SqlDao extends AbstractDao {
             Set<NodeModel> toRemove = diff.getValue();
 
             if (!toRemove.isEmpty()) {
-                try (Connection c = provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_DELETE_SPECIFIC))) {
+                try (Connection c = this.provider.getConnection()) {
+                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_DELETE_SPECIFIC))) {
                         for (NodeModel nd : toRemove) {
                             ps.setString(1, user.getUuid().toString());
                             ps.setString(2, nd.getPermission());
@@ -427,7 +434,7 @@ public class SqlDao extends AbstractDao {
                             ps.setString(4, nd.getServer());
                             ps.setString(5, nd.getWorld());
                             ps.setLong(6, nd.getExpiry());
-                            ps.setString(7, gson.toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
+                            ps.setString(7, this.gson.toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
                             ps.addBatch();
                         }
                         ps.executeBatch();
@@ -436,8 +443,8 @@ public class SqlDao extends AbstractDao {
             }
 
             if (!toAdd.isEmpty()) {
-                try (Connection c = provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_INSERT))) {
+                try (Connection c = this.provider.getConnection()) {
+                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_INSERT))) {
                         for (NodeModel nd : toAdd) {
                             ps.setString(1, user.getUuid().toString());
                             ps.setString(2, nd.getPermission());
@@ -445,7 +452,7 @@ public class SqlDao extends AbstractDao {
                             ps.setString(4, nd.getServer());
                             ps.setString(5, nd.getWorld());
                             ps.setLong(6, nd.getExpiry());
-                            ps.setString(7, gson.toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
+                            ps.setString(7, this.gson.toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
                             ps.addBatch();
                         }
                         ps.executeBatch();
@@ -453,10 +460,10 @@ public class SqlDao extends AbstractDao {
                 }
             }
 
-            try (Connection c = provider.getConnection()) {
+            try (Connection c = this.provider.getConnection()) {
                 boolean hasPrimaryGroupSaved;
 
-                try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_SELECT_PRIMARY_GROUP))) {
+                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT_PRIMARY_GROUP))) {
                     ps.setString(1, user.getUuid().toString());
                     try (ResultSet rs = ps.executeQuery()) {
                         hasPrimaryGroupSaved = rs.next();
@@ -465,14 +472,14 @@ public class SqlDao extends AbstractDao {
 
                 if (hasPrimaryGroupSaved) {
                     // update
-                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_UPDATE_PRIMARY_GROUP))) {
+                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_UPDATE_PRIMARY_GROUP))) {
                         ps.setString(1, user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
                         ps.setString(2, user.getUuid().toString());
                         ps.execute();
                     }
                 } else {
                     // insert
-                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_INSERT))) {
+                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_INSERT))) {
                         ps.setString(1, user.getUuid().toString());
                         ps.setString(2, user.getName().orElse("null"));
                         ps.setString(3, user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
@@ -489,8 +496,8 @@ public class SqlDao extends AbstractDao {
     @Override
     public Set<UUID> getUniqueUsers() throws SQLException {
         Set<UUID> uuids = new HashSet<>();
-        try (Connection c = provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_SELECT_DISTINCT))) {
+        try (Connection c = this.provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_SELECT_DISTINCT))) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         String uuid = rs.getString("uuid");
@@ -505,8 +512,8 @@ public class SqlDao extends AbstractDao {
     @Override
     public List<HeldPermission<UUID>> getUsersWithPermission(String permission) throws SQLException {
         ImmutableList.Builder<HeldPermission<UUID>> held = ImmutableList.builder();
-        try (Connection c = provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_SELECT_PERMISSION))) {
+        try (Connection c = this.provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_SELECT_PERMISSION))) {
                 ps.setString(1, permission);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -529,7 +536,7 @@ public class SqlDao extends AbstractDao {
     @Override
     public Group createAndLoadGroup(String name) throws SQLException {
         String query;
-        switch (provider.getName()) {
+        switch (this.provider.getName()) {
             case "H2":
                 query = H2_GROUP_INSERT;
                 break;
@@ -544,8 +551,8 @@ public class SqlDao extends AbstractDao {
                 break;
         }
 
-        try (Connection c = provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(prefix.apply(query))) {
+        try (Connection c = this.provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(query))) {
                 ps.setString(1, name);
                 ps.execute();
             }
@@ -558,8 +565,8 @@ public class SqlDao extends AbstractDao {
     public Optional<Group> loadGroup(String name) throws SQLException {
         // Check the group actually exists
         List<String> groups = new ArrayList<>();
-        try (Connection c = provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_SELECT_ALL))) {
+        try (Connection c = this.provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_SELECT_ALL))) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         groups.add(rs.getString("name").toLowerCase());
@@ -573,13 +580,13 @@ public class SqlDao extends AbstractDao {
             return Optional.empty();
         }
 
-        Group group = plugin.getGroupManager().getOrMake(name);
+        Group group = this.plugin.getGroupManager().getOrMake(name);
         group.getIoLock().lock();
         try {
             List<NodeModel> data = new ArrayList<>();
 
-            try (Connection c = provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_SELECT))) {
+            try (Connection c = this.provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_SELECT))) {
                     ps.setString(1, group.getName());
 
                     try (ResultSet rs = ps.executeQuery()) {
@@ -612,8 +619,8 @@ public class SqlDao extends AbstractDao {
     @Override
     public void loadAllGroups() throws SQLException {
         List<String> groups = new ArrayList<>();
-        try (Connection c = provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_SELECT_ALL))) {
+        try (Connection c = this.provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_SELECT_ALL))) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         groups.add(rs.getString("name").toLowerCase());
@@ -636,7 +643,7 @@ public class SqlDao extends AbstractDao {
             throw new RuntimeException("Exception occurred whilst loading a group");
         }
 
-        GroupManager gm = plugin.getGroupManager();
+        GroupManager gm = this.plugin.getGroupManager();
         gm.getAll().values().stream()
                 .filter(g -> !groups.contains(g.getName()))
                 .forEach(gm::unload);
@@ -648,8 +655,8 @@ public class SqlDao extends AbstractDao {
         try {
             // Empty data, just delete.
             if (group.getEnduringNodes().isEmpty()) {
-                try (Connection c = provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_DELETE))) {
+                try (Connection c = this.provider.getConnection()) {
+                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_DELETE))) {
                         ps.setString(1, group.getName());
                         ps.execute();
                     }
@@ -659,8 +666,8 @@ public class SqlDao extends AbstractDao {
 
             // Get a snapshot of current data
             Set<NodeModel> remote = new HashSet<>();
-            try (Connection c = provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_SELECT))) {
+            try (Connection c = this.provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_SELECT))) {
                     ps.setString(1, group.getName());
 
                     try (ResultSet rs = ps.executeQuery()) {
@@ -685,8 +692,8 @@ public class SqlDao extends AbstractDao {
             Set<NodeModel> toRemove = diff.getValue();
 
             if (!toRemove.isEmpty()) {
-                try (Connection c = provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_DELETE_SPECIFIC))) {
+                try (Connection c = this.provider.getConnection()) {
+                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_DELETE_SPECIFIC))) {
                         for (NodeModel nd : toRemove) {
                             ps.setString(1, group.getName());
                             ps.setString(2, nd.getPermission());
@@ -694,7 +701,7 @@ public class SqlDao extends AbstractDao {
                             ps.setString(4, nd.getServer());
                             ps.setString(5, nd.getWorld());
                             ps.setLong(6, nd.getExpiry());
-                            ps.setString(7, gson.toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
+                            ps.setString(7, this.gson.toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
                             ps.addBatch();
                         }
                         ps.executeBatch();
@@ -703,8 +710,8 @@ public class SqlDao extends AbstractDao {
             }
 
             if (!toAdd.isEmpty()) {
-                try (Connection c = provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_INSERT))) {
+                try (Connection c = this.provider.getConnection()) {
+                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_INSERT))) {
                         for (NodeModel nd : toAdd) {
                             ps.setString(1, group.getName());
                             ps.setString(2, nd.getPermission());
@@ -712,7 +719,7 @@ public class SqlDao extends AbstractDao {
                             ps.setString(4, nd.getServer());
                             ps.setString(5, nd.getWorld());
                             ps.setLong(6, nd.getExpiry());
-                            ps.setString(7, gson.toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
+                            ps.setString(7, this.gson.toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
                             ps.addBatch();
                         }
                         ps.executeBatch();
@@ -728,13 +735,13 @@ public class SqlDao extends AbstractDao {
     public void deleteGroup(Group group) throws SQLException {
         group.getIoLock().lock();
         try {
-            try (Connection c = provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_DELETE))) {
+            try (Connection c = this.provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_DELETE))) {
                     ps.setString(1, group.getName());
                     ps.execute();
                 }
 
-                try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_DELETE))) {
+                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_DELETE))) {
                     ps.setString(1, group.getName());
                     ps.execute();
                 }
@@ -743,14 +750,14 @@ public class SqlDao extends AbstractDao {
             group.getIoLock().unlock();
         }
 
-        plugin.getGroupManager().unload(group);
+        this.plugin.getGroupManager().unload(group);
     }
 
     @Override
     public List<HeldPermission<String>> getGroupsWithPermission(String permission) throws SQLException {
         ImmutableList.Builder<HeldPermission<String>> held = ImmutableList.builder();
-        try (Connection c = provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_SELECT_PERMISSION))) {
+        try (Connection c = this.provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_SELECT_PERMISSION))) {
                 ps.setString(1, permission);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -772,14 +779,14 @@ public class SqlDao extends AbstractDao {
 
     @Override
     public Track createAndLoadTrack(String name) throws SQLException {
-        Track track = plugin.getTrackManager().getOrMake(name);
+        Track track = this.plugin.getTrackManager().getOrMake(name);
         track.getIoLock().lock();
         try {
             AtomicBoolean exists = new AtomicBoolean(false);
             AtomicReference<String> groups = new AtomicReference<>(null);
 
-            try (Connection c = provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(prefix.apply(TRACK_SELECT))) {
+            try (Connection c = this.provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(TRACK_SELECT))) {
                     ps.setString(1, track.getName());
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
@@ -792,11 +799,11 @@ public class SqlDao extends AbstractDao {
 
             if (exists.get()) {
                 // Track exists, let's load.
-                track.setGroups(gson.fromJson(groups.get(), LIST_STRING_TYPE));
+                track.setGroups(this.gson.fromJson(groups.get(), LIST_STRING_TYPE));
             } else {
-                String json = gson.toJson(track.getGroups());
-                try (Connection c = provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(TRACK_INSERT))) {
+                String json = this.gson.toJson(track.getGroups());
+                try (Connection c = this.provider.getConnection()) {
+                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(TRACK_INSERT))) {
                         ps.setString(1, track.getName());
                         ps.setString(2, json);
                         ps.execute();
@@ -811,15 +818,15 @@ public class SqlDao extends AbstractDao {
 
     @Override
     public Optional<Track> loadTrack(String name) throws SQLException {
-        Track track = plugin.getTrackManager().getIfLoaded(name);
+        Track track = this.plugin.getTrackManager().getIfLoaded(name);
         if (track != null) {
             track.getIoLock().lock();
         }
         try {
             AtomicReference<String> groups = new AtomicReference<>(null);
 
-            try (Connection c = provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(prefix.apply(TRACK_SELECT))) {
+            try (Connection c = this.provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(TRACK_SELECT))) {
                     ps.setString(1, name);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
@@ -832,11 +839,11 @@ public class SqlDao extends AbstractDao {
             }
 
             if (track == null) {
-                track = plugin.getTrackManager().getOrMake(name);
+                track = this.plugin.getTrackManager().getOrMake(name);
                 track.getIoLock().lock();
             }
 
-            track.setGroups(gson.fromJson(groups.get(), LIST_STRING_TYPE));
+            track.setGroups(this.gson.fromJson(groups.get(), LIST_STRING_TYPE));
             return Optional.of(track);
 
         } finally {
@@ -849,8 +856,8 @@ public class SqlDao extends AbstractDao {
     @Override
     public void loadAllTracks() throws SQLException {
         List<String> tracks = new ArrayList<>();
-        try (Connection c = provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(prefix.apply(TRACK_SELECT_ALL))) {
+        try (Connection c = this.provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(TRACK_SELECT_ALL))) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         tracks.add(rs.getString("name").toLowerCase());
@@ -873,7 +880,7 @@ public class SqlDao extends AbstractDao {
             throw new RuntimeException("Exception occurred whilst loading a track");
         }
 
-        TrackManager tm = plugin.getTrackManager();
+        TrackManager tm = this.plugin.getTrackManager();
         tm.getAll().values().stream()
                 .filter(t -> !tracks.contains(t.getName()))
                 .forEach(tm::unload);
@@ -883,9 +890,9 @@ public class SqlDao extends AbstractDao {
     public void saveTrack(Track track) throws SQLException {
         track.getIoLock().lock();
         try {
-            String s = gson.toJson(track.getGroups());
-            try (Connection c = provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(prefix.apply(TRACK_UPDATE))) {
+            String s = this.gson.toJson(track.getGroups());
+            try (Connection c = this.provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(TRACK_UPDATE))) {
                     ps.setString(1, s);
                     ps.setString(2, track.getName());
                     ps.execute();
@@ -900,8 +907,8 @@ public class SqlDao extends AbstractDao {
     public void deleteTrack(Track track) throws SQLException {
         track.getIoLock().lock();
         try {
-            try (Connection c = provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(prefix.apply(TRACK_DELETE))) {
+            try (Connection c = this.provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(TRACK_DELETE))) {
                     ps.setString(1, track.getName());
                     ps.execute();
                 }
@@ -910,7 +917,7 @@ public class SqlDao extends AbstractDao {
             track.getIoLock().unlock();
         }
 
-        plugin.getTrackManager().unload(track);
+        this.plugin.getTrackManager().unload(track);
     }
 
     @Override
@@ -919,16 +926,16 @@ public class SqlDao extends AbstractDao {
         AtomicReference<String> remoteUserName = new AtomicReference<>(null);
 
         // cleanup any old values
-        try (Connection c = provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_DELETE))) {
+        try (Connection c = this.provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_DELETE))) {
                 ps.setString(1, u);
                 ps.setString(2, uuid.toString());
                 ps.execute();
             }
         }
 
-        try (Connection c = provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_SELECT_USERNAME))) {
+        try (Connection c = this.provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT_USERNAME))) {
                 ps.setString(1, uuid.toString());
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
@@ -944,8 +951,8 @@ public class SqlDao extends AbstractDao {
                 return;
             }
 
-            try (Connection c = provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_UPDATE))) {
+            try (Connection c = this.provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_UPDATE))) {
                     ps.setString(1, u);
                     ps.setString(2, uuid.toString());
                     ps.execute();
@@ -953,8 +960,8 @@ public class SqlDao extends AbstractDao {
             }
         } else {
             // first time we've seen this uuid
-            try (Connection c = provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_INSERT))) {
+            try (Connection c = this.provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_INSERT))) {
                     ps.setString(1, uuid.toString());
                     ps.setString(2, u);
                     ps.setString(3, NodeFactory.DEFAULT_GROUP_NAME);
@@ -969,8 +976,8 @@ public class SqlDao extends AbstractDao {
         final String u = username.toLowerCase();
         final AtomicReference<UUID> uuid = new AtomicReference<>(null);
 
-        try (Connection c = provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_SELECT_UUID))) {
+        try (Connection c = this.provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT_UUID))) {
                 ps.setString(1, u);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
@@ -987,8 +994,8 @@ public class SqlDao extends AbstractDao {
     public String getName(UUID uuid) throws SQLException {
         final AtomicReference<String> name = new AtomicReference<>(null);
 
-        try (Connection c = provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_SELECT_USERNAME))) {
+        try (Connection c = this.provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT_USERNAME))) {
                 ps.setString(1, uuid.toString());
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
@@ -1021,6 +1028,6 @@ public class SqlDao extends AbstractDao {
     }
 
     private NodeModel deserializeNode(String permission, boolean value, String server, String world, long expiry, String contexts) {
-        return NodeModel.of(permission, value, server, world, expiry, ContextSetJsonSerializer.deserializeContextSet(gson, contexts).makeImmutable());
+        return NodeModel.of(permission, value, server, world, expiry, ContextSetJsonSerializer.deserializeContextSet(this.gson, contexts).makeImmutable());
     }
 }

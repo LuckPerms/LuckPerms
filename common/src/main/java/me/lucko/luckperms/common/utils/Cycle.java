@@ -46,34 +46,34 @@ public class Cycle<E> {
     }
 
     public int getIndex() {
-        return index;
+        return this.index;
     }
 
     public E current() {
         synchronized (this) {
-            return objects.get(index);
+            return this.objects.get(this.index);
         }
     }
 
     public E next() {
         synchronized (this) {
-            index++;
-            index = index > objects.size() - 1 ? 0 : index;
+            this.index++;
+            this.index = this.index > this.objects.size() - 1 ? 0 : this.index;
 
-            return objects.get(index);
+            return this.objects.get(this.index);
         }
     }
 
     public E back() {
         synchronized (this) {
-            index--;
-            index = index == -1 ? objects.size() - 1 : index;
+            this.index--;
+            this.index = this.index == -1 ? this.objects.size() - 1 : this.index;
 
-            return objects.get(index);
+            return this.objects.get(this.index);
         }
     }
 
     public List<E> getBacking() {
-        return objects;
+        return this.objects;
     }
 }

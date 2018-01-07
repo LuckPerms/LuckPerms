@@ -65,7 +65,6 @@
         <!-- Standard versions used by the whole project -->
         <compiler.version>3.7.0</compiler.version>
         <shade.version>3.1.0</shade.version>
-        <lombok.version>1.16.18</lombok.version>
     </properties>
 
     <distributionManagement>

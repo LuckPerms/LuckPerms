@@ -25,15 +25,16 @@
 
 package me.lucko.luckperms.common.node;
 
-import lombok.NonNull;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+
+import javax.annotation.Nonnull;
 
 /**
  * Builds node instances
@@ -65,44 +66,53 @@ class NodeBuilder implements Node.Builder {
         this.extraContexts.addAll(other.getContexts());
     }
 
+    @Nonnull
     @Override
     public Node.Builder setNegated(boolean negated) {
-        value = !negated;
+        this.value = !negated;
         return this;
     }
 
+    @Nonnull
     @Override
     public Node.Builder setValue(boolean value) {
         this.value = value;
         return this;
     }
 
+    @Nonnull
     @Override
     public Node.Builder setOverride(boolean override) {
         this.override = override;
         return this;
     }
 
+    @Nonnull
     @Override
     public Node.Builder setExpiry(long expireAt) {
         this.expireAt = expireAt;
         return this;
     }
 
+    @Nonnull
     @Override
     public Node.Builder setWorld(String world) {
         this.world = world;
         return this;
     }
 
+    @Nonnull
     @Override
     public Node.Builder setServer(String server) {
         this.server = server;
         return this;
     }
 
+    @Nonnull
     @Override
-    public Node.Builder withExtraContext(@NonNull String key, @NonNull String value) {
+    public Node.Builder withExtraContext(@Nonnull String key, @Nonnull String value) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(value, "value");
         switch (key.toLowerCase()) {
             case Contexts.SERVER_KEY:
                 setServer(value);
@@ -118,32 +128,41 @@ class NodeBuilder implements Node.Builder {
         return this;
     }
 
+    @Nonnull
     @Override
-    public Node.Builder withExtraContext(Map.Entry<String, String> entry) {
+    public Node.Builder withExtraContext(@Nonnull Map.Entry<String, String> entry) {
+        Objects.requireNonNull(entry, "entry");
         withExtraContext(entry.getKey(), entry.getValue());
         return this;
     }
 
+    @Nonnull
     @Override
-    public Node.Builder withExtraContext(Map<String, String> map) {
+    public Node.Builder withExtraContext(@Nonnull Map<String, String> map) {
+        Objects.requireNonNull(map, "map");
         withExtraContext(ContextSet.fromMap(map));
         return this;
     }
 
+    @Nonnull
     @Override
-    public Node.Builder withExtraContext(Set<Map.Entry<String, String>> context) {
+    public Node.Builder withExtraContext(@Nonnull Set<Map.Entry<String, String>> context) {
+        Objects.requireNonNull(context, "context");
         withExtraContext(ContextSet.fromEntries(context));
         return this;
     }
 
+    @Nonnull
     @Override
-    public Node.Builder withExtraContext(ContextSet set) {
+    public Node.Builder withExtraContext(@Nonnull ContextSet set) {
+        Objects.requireNonNull(set, "set");
         set.toSet().forEach(this::withExtraContext);
         return this;
     }
 
+    @Nonnull
     @Override
     public Node build() {
-        return new ImmutableNode(permission, value, override, expireAt, server, world, extraContexts.build());
+        return new ImmutableNode(this.permission, this.value, this.override, this.expireAt, this.server, this.world, this.extraContexts.build());
     }
 }

@@ -62,7 +62,7 @@ public enum DataMutateResult {
      * @return a boolean representation
      */
     public boolean asBoolean() {
-        return value;
+        return this.value;
     }
 
     /**
@@ -72,7 +72,7 @@ public enum DataMutateResult {
      * @since 3.4
      */
     public boolean wasSuccess() {
-        return value;
+        return this.value;
     }
 
     /**
@@ -82,7 +82,7 @@ public enum DataMutateResult {
      * @since 3.4
      */
     public boolean wasFailure() {
-        return !value;
+        return !this.value;
     }
 
 }

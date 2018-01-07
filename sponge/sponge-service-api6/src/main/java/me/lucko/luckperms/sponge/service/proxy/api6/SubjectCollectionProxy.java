@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.sponge.service.proxy.api6;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
@@ -42,77 +40,89 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 @SuppressWarnings("unchecked")
-@RequiredArgsConstructor
 public final class SubjectCollectionProxy implements SubjectCollection {
     private final LPPermissionService service;
     private final LPSubjectCollection handle;
 
+    public SubjectCollectionProxy(LPPermissionService service, LPSubjectCollection handle) {
+        this.service = service;
+        this.handle = handle;
+    }
+
+    @Nonnull
     @Override
     public String getIdentifier() {
-        return handle.getIdentifier();
+        return this.handle.getIdentifier();
     }
 
+    @Nonnull
     @Override
-    public Subject get(String s) {
+    public Subject get(@Nonnull String s) {
         // force load the subject.
         // after this call, users will expect that the subject is loaded in memory.
-        return handle.loadSubject(s).thenApply(LPSubject::sponge).join();
+        return this.handle.loadSubject(s).thenApply(LPSubject::sponge).join();
     }
 
     @Override
-    public boolean hasRegistered(String s) {
-        return handle.hasRegistered(s).join();
+    public boolean hasRegistered(@Nonnull String s) {
+        return this.handle.hasRegistered(s).join();
     }
 
+    @Nonnull
     @Override
     public Iterable<Subject> getAllSubjects() {
         // this will lazily load all subjects. it will initially just get the identifiers of each subject, and will initialize dummy
         // providers for those identifiers. when any methods against the dummy are called, the actual data will be loaded.
         // this behaviour should be replaced when CompletableFutures are added to Sponge
-        return (List) handle.getAllIdentifiers()
+        return (List) this.handle.getAllIdentifiers()
                 .thenApply(ids -> ids.stream()
-                        .map(s -> new SubjectProxy(service, SubjectReferenceFactory.obtain(service, getIdentifier(), s)))
+                        .map(s -> new SubjectProxy(this.service, SubjectReferenceFactory.obtain(this.service, getIdentifier(), s)))
                         .collect(ImmutableCollectors.toList())
                 ).join();
     }
 
+    @Nonnull
     @Override
-    public Map<Subject, Boolean> getAllWithPermission(String s) {
+    public Map<Subject, Boolean> getAllWithPermission(@Nonnull String s) {
         // again, these methods will lazily load subjects.
-        return (Map) handle.getAllWithPermission(s)
+        return (Map) this.handle.getAllWithPermission(s)
                 .thenApply(map -> map.entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
-                                e -> new SubjectProxy(service, e.getKey()),
+                                e -> new SubjectProxy(this.service, e.getKey()),
                                 Map.Entry::getValue
                         ))
                 ).join();
     }
 
+    @Nonnull
     @Override
-    public Map<Subject, Boolean> getAllWithPermission(Set<Context> set, String s) {
-        return (Map) handle.getAllWithPermission(CompatibilityUtil.convertContexts(set), s)
+    public Map<Subject, Boolean> getAllWithPermission(@Nonnull Set<Context> set, @Nonnull String s) {
+        return (Map) this.handle.getAllWithPermission(CompatibilityUtil.convertContexts(set), s)
                 .thenApply(map -> map.entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
-                                e -> new SubjectProxy(service, e.getKey()),
+                                e -> new SubjectProxy(this.service, e.getKey()),
                                 Map.Entry::getValue
                         ))
                 ).join();
     }
 
+    @Nonnull
     @Override
     public Subject getDefaults() {
-        return handle.getDefaults().sponge();
+        return this.handle.getDefaults().sponge();
     }
 
     @Override
     public boolean equals(Object o) {
-        return o == this || o instanceof SubjectCollectionProxy && handle.equals(((SubjectCollectionProxy) o).handle);
+        return o == this || o instanceof SubjectCollectionProxy && this.handle.equals(((SubjectCollectionProxy) o).handle);
     }
 
     @Override
     public int hashCode() {
-        return handle.hashCode();
+        return this.handle.hashCode();
     }
 
     @Override

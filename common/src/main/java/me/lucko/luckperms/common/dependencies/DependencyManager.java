@@ -99,7 +99,7 @@ public class DependencyManager {
             dependencies.addAll(STORAGE_DEPENDENCIES.get(storageType));
         }
 
-        if (plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
+        if (this.plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
             dependencies.add(Dependency.JEDIS);
         }
 
@@ -110,7 +110,7 @@ public class DependencyManager {
         }
 
         // don't load configurate dependencies on sponge
-        if (plugin.getServerType() == PlatformType.SPONGE) {
+        if (this.plugin.getServerType() == PlatformType.SPONGE) {
             dependencies.remove(Dependency.CONFIGURATE_CORE);
             dependencies.remove(Dependency.CONFIGURATE_GSON);
             dependencies.remove(Dependency.CONFIGURATE_YAML);
@@ -122,9 +122,9 @@ public class DependencyManager {
     }
 
     public void loadDependencies(Set<Dependency> dependencies) {
-        plugin.getLog().info("Identified the following dependencies: " + dependencies.toString());
+        this.plugin.getLog().info("Identified the following dependencies: " + dependencies.toString());
 
-        File libDir = new File(plugin.getDataDirectory(), "lib");
+        File libDir = new File(this.plugin.getDataDirectory(), "lib");
         if (!(libDir.exists() || libDir.mkdirs())) {
             throw new RuntimeException("Unable to create lib dir - " + libDir.getPath());
         }
@@ -135,7 +135,7 @@ public class DependencyManager {
             try {
                 filesToLoad.add(downloadDependency(libDir, dependency));
             } catch (Throwable e) {
-                plugin.getLog().severe("Exception whilst downloading dependency " + dependency.name());
+                this.plugin.getLog().severe("Exception whilst downloading dependency " + dependency.name());
                 e.printStackTrace();
             }
         }
@@ -145,7 +145,7 @@ public class DependencyManager {
             try {
                 loadJar(file);
             } catch (Throwable t) {
-                plugin.getLog().severe("Failed to load dependency jar " + file.getName());
+                this.plugin.getLog().severe("Failed to load dependency jar " + file.getName());
                 t.printStackTrace();
             }
         }
@@ -161,7 +161,7 @@ public class DependencyManager {
 
         URL url = new URL(dependency.getUrl());
 
-        plugin.getLog().info("Dependency '" + fileName + "' could not be found. Attempting to download.");
+        this.plugin.getLog().info("Dependency '" + fileName + "' could not be found. Attempting to download.");
         try (InputStream in = url.openStream()) {
             byte[] bytes = ByteStreams.toByteArray(in);
             if (bytes.length == 0) {
@@ -170,7 +170,7 @@ public class DependencyManager {
 
             byte[] hash = this.digest.digest(bytes);
 
-            plugin.getLog().info("Successfully downloaded '" + fileName + "' with checksum: " + Base64.getEncoder().encodeToString(hash));
+            this.plugin.getLog().info("Successfully downloaded '" + fileName + "' with checksum: " + Base64.getEncoder().encodeToString(hash));
 
             if (!Arrays.equals(hash, dependency.getChecksum())) {
                 throw new RuntimeException("Downloaded file had an invalid hash. Expected: " + Base64.getEncoder().encodeToString(dependency.getChecksum()));
@@ -188,7 +188,7 @@ public class DependencyManager {
 
     private void loadJar(File file) {
         // get the classloader to load into
-        ClassLoader classLoader = plugin.getClass().getClassLoader();
+        ClassLoader classLoader = this.plugin.getClass().getClassLoader();
 
         if (classLoader instanceof URLClassLoader) {
             try {

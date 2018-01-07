@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.impl.misc;
 
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
@@ -44,7 +43,7 @@ public class ReloadConfigCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         plugin.getConfiguration().reload();
         Message.RELOAD_CONFIG_SUCCESS.send(sender);
         return CommandResult.SUCCESS;

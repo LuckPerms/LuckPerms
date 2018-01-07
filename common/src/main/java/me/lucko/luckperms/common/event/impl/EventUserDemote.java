@@ -25,10 +25,6 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.event.user.track.TrackAction;
@@ -37,31 +33,56 @@ import me.lucko.luckperms.common.event.AbstractEvent;
 
 import java.util.Optional;
 
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventUserDemote extends AbstractEvent implements UserDemoteEvent {
 
-    @Getter
     private final Track track;
-    @Getter
     private final User user;
 
     private final String groupFrom;
     private final String groupTo;
 
+    public EventUserDemote(Track track, User user, String groupFrom, String groupTo) {
+        this.track = track;
+        this.user = user;
+        this.groupFrom = groupFrom;
+        this.groupTo = groupTo;
+    }
+
+    @Nonnull
+    @Override
+    public Track getTrack() {
+        return this.track;
+    }
+
+    @Nonnull
+    @Override
+    public User getUser() {
+        return this.user;
+    }
+
+    @Nonnull
     @Override
     public TrackAction getAction() {
         return TrackAction.DEMOTION;
     }
 
+    @Nonnull
     @Override
     public Optional<String> getGroupFrom() {
-        return Optional.ofNullable(groupFrom);
+        return Optional.ofNullable(this.groupFrom);
+    }
+
+    @Nonnull
+    @Override
+    public Optional<String> getGroupTo() {
+        return Optional.ofNullable(this.groupTo);
     }
 
     @Override
-    public Optional<String> getGroupTo() {
-        return Optional.ofNullable(groupTo);
+    public String toString() {
+        return "EventUserDemote(track=" + this.track + ", user=" + this.user + ", groupFrom=" + this.getGroupFrom() + ", groupTo=" + this.getGroupTo() + ")";
     }
 
 }

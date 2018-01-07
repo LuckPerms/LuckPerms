@@ -25,14 +25,8 @@
 
 package me.lucko.luckperms.common.commands;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import com.google.common.collect.ImmutableList;
 
-@Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Arg {
     public static Arg create(String name, boolean required, String description) {
         return new Arg(name, required, description);
@@ -46,8 +40,25 @@ public class Arg {
     private final boolean required;
     private final String description;
 
-    public String asPrettyString() {
-        return required ? "&8<&7" + name + "&8>" : "&8[&7" + name + "&8]";
+    private Arg(String name, boolean required, String description) {
+        this.name = name;
+        this.required = required;
+        this.description = description;
     }
 
+    public String asPrettyString() {
+        return this.required ? "&8<&7" + this.name + "&8>" : "&8[&7" + this.name + "&8]";
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public boolean isRequired() {
+        return this.required;
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
 }

@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.backup;
 
-import lombok.Getter;
-
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -37,7 +35,6 @@ import net.kyori.text.Component;
 
 import java.util.UUID;
 
-@Getter
 public abstract class DummySender implements Sender {
     private final LuckPermsPlugin platform;
 
@@ -77,4 +74,18 @@ public abstract class DummySender implements Sender {
         return true;
     }
 
+    @Override
+    public LuckPermsPlugin getPlatform() {
+        return this.platform;
+    }
+
+    @Override
+    public UUID getUuid() {
+        return this.uuid;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
 }

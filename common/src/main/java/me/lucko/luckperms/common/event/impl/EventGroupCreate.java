@@ -25,21 +25,37 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.group.GroupCreateEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
-@Getter
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventGroupCreate extends AbstractEvent implements GroupCreateEvent {
 
     private final Group group;
     private final CreationCause cause;
 
+    public EventGroupCreate(Group group, CreationCause cause) {
+        this.group = group;
+        this.cause = cause;
+    }
+
+    @Nonnull
+    @Override
+    public Group getGroup() {
+        return this.group;
+    }
+
+    @Nonnull
+    @Override
+    public CreationCause getCause() {
+        return this.cause;
+    }
+
+    @Override
+    public String toString() {
+        return "EventGroupCreate(group=" + this.getGroup() + ", cause=" + this.getCause() + ")";
+    }
 }

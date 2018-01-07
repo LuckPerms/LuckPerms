@@ -106,7 +106,7 @@ public class GroupMainCommand extends MainCommand<Group, String> {
 
     @Override
     protected ReentrantLock getLockForTarget(String target) {
-        return locks.get(target);
+        return this.locks.get(target);
     }
 
     @Override

@@ -62,7 +62,7 @@ public class AssignmentExpression {
 
         Predicate<Node> checker = node -> holder.hasPermission(node) == tristate;
 
-        String exp = expression.stream().map(t -> t.forExpression(checker)).collect(Collectors.joining())
+        String exp = this.expression.stream().map(t -> t.forExpression(checker)).collect(Collectors.joining())
                 .replace("&", "&&").replace("|", "||");
 
         try {
@@ -123,12 +123,12 @@ public class AssignmentExpression {
 
         @Override
         public String forExpression(Predicate<Node> checker) {
-            return string;
+            return this.string;
         }
 
         @Override
         public String toString() {
-            return string;
+            return this.string;
         }
     }
 
@@ -143,12 +143,12 @@ public class AssignmentExpression {
 
         @Override
         public String forExpression(Predicate<Node> checker) {
-            return Boolean.toString(checker.test(node));
+            return Boolean.toString(checker.test(this.node));
         }
 
         @Override
         public String toString() {
-            return "<" + permission + ">";
+            return "<" + this.permission + ">";
         }
     }
 }

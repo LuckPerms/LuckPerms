@@ -25,12 +25,6 @@
 
 package me.lucko.luckperms.common.references;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.common.model.User;
 
 import java.util.Optional;
@@ -39,9 +33,6 @@ import java.util.UUID;
 /**
  * Used to identify a specific {@link User}.
  */
-@ToString
-@EqualsAndHashCode(of = "uuid")
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UserIdentifier implements Identifiable<UUID> {
     public static UserIdentifier of(UUID uuid, String username) {
         if (username == null || username.equalsIgnoreCase("null") || username.isEmpty()) {
@@ -51,9 +42,13 @@ public final class UserIdentifier implements Identifiable<UUID> {
         return new UserIdentifier(uuid, username);
     }
 
-    @Getter
     private final UUID uuid;
     private final String username;
+
+    private UserIdentifier(UUID uuid, String username) {
+        this.uuid = uuid;
+        this.username = username;
+    }
 
     @Override
     public UUID getId() {
@@ -61,6 +56,28 @@ public final class UserIdentifier implements Identifiable<UUID> {
     }
 
     public Optional<String> getUsername() {
-        return Optional.ofNullable(username);
+        return Optional.ofNullable(this.username);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof UserIdentifier)) return false;
+        final UserIdentifier other = (UserIdentifier) o;
+        return this.uuid.equals(other.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.uuid.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "UserIdentifier(uuid=" + this.uuid + ", username=" + this.getUsername() + ")";
+    }
+
+    public UUID getUuid() {
+        return this.uuid;
     }
 }

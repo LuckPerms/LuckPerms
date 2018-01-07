@@ -25,18 +25,19 @@
 
 package me.lucko.luckperms.common.managers;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-@RequiredArgsConstructor
 public class GenericGroupManager extends AbstractManager<String, Group> implements GroupManager {
     private final LuckPermsPlugin plugin;
 
+    public GenericGroupManager(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+    }
+
     @Override
     public Group apply(String name) {
-        return new Group(name, plugin);
+        return new Group(name, this.plugin);
     }
 
     @Override

@@ -25,10 +25,6 @@
 
 package me.lucko.luckperms.bukkit.model;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
@@ -46,6 +42,7 @@ import org.bukkit.plugin.Plugin;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -64,7 +61,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * This class is **thread safe**. This means that when LuckPerms is installed on the server,
  * is is safe to call Player#hasPermission asynchronously.
  */
-@Getter
 public class LPPermissible extends PermissibleBase {
 
     // the LuckPerms user this permissible references.
@@ -77,7 +73,6 @@ public class LPPermissible extends PermissibleBase {
     private final LPBukkitPlugin plugin;
 
     // the players previous permissible. (the one they had before this one was injected)
-    @Setter
     private PermissibleBase oldPermissible = null;
 
     // if the permissible is currently active.
@@ -87,27 +82,35 @@ public class LPPermissible extends PermissibleBase {
     // this collection is only modified by the attachments themselves
     final Set<LPPermissionAttachment> attachments = ConcurrentHashMap.newKeySet();
 
-    public LPPermissible(@NonNull Player player, @NonNull User user, @NonNull LPBukkitPlugin plugin) {
+    public LPPermissible(Player player, User user, LPBukkitPlugin plugin) {
         super(player);
-        this.user = user;
-        this.player = player;
-        this.plugin = plugin;
+        this.user = Objects.requireNonNull(user, "user");
+        this.player = Objects.requireNonNull(player, "player");
+        this.plugin = Objects.requireNonNull(plugin, "plugin");
     }
 
     @Override
-    public boolean isPermissionSet(@NonNull String permission) {
-        Tristate ts = user.getCachedData().getPermissionData(calculateContexts()).getPermissionValue(permission, CheckOrigin.PLATFORM_LOOKUP_CHECK);
+    public boolean isPermissionSet(String permission) {
+        if (permission == null) {
+            throw new NullPointerException("permission");
+        }
+
+        Tristate ts = this.user.getCachedData().getPermissionData(calculateContexts()).getPermissionValue(permission, CheckOrigin.PLATFORM_LOOKUP_CHECK);
         return ts != Tristate.UNDEFINED || Permission.DEFAULT_PERMISSION.getValue(isOp());
     }
 
     @Override
-    public boolean isPermissionSet(@NonNull Permission permission) {
-        Tristate ts = user.getCachedData().getPermissionData(calculateContexts()).getPermissionValue(permission.getName(), CheckOrigin.PLATFORM_LOOKUP_CHECK);
+    public boolean isPermissionSet(Permission permission) {
+        if (permission == null) {
+            throw new NullPointerException("permission");
+        }
+
+        Tristate ts = this.user.getCachedData().getPermissionData(calculateContexts()).getPermissionValue(permission.getName(), CheckOrigin.PLATFORM_LOOKUP_CHECK);
         if (ts != Tristate.UNDEFINED) {
             return true;
         }
 
-        if (!plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
+        if (!this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
             return Permission.DEFAULT_PERMISSION.getValue(isOp());
         } else {
             return permission.getDefault().getValue(isOp());
@@ -115,19 +118,27 @@ public class LPPermissible extends PermissibleBase {
     }
 
     @Override
-    public boolean hasPermission(@NonNull String permission) {
-        Tristate ts = user.getCachedData().getPermissionData(calculateContexts()).getPermissionValue(permission, CheckOrigin.PLATFORM_PERMISSION_CHECK);
+    public boolean hasPermission(String permission) {
+        if (permission == null) {
+            throw new NullPointerException("permission");
+        }
+
+        Tristate ts = this.user.getCachedData().getPermissionData(calculateContexts()).getPermissionValue(permission, CheckOrigin.PLATFORM_PERMISSION_CHECK);
         return ts != Tristate.UNDEFINED ? ts.asBoolean() : Permission.DEFAULT_PERMISSION.getValue(isOp());
     }
 
     @Override
-    public boolean hasPermission(@NonNull Permission permission) {
-        Tristate ts = user.getCachedData().getPermissionData(calculateContexts()).getPermissionValue(permission.getName(), CheckOrigin.PLATFORM_PERMISSION_CHECK);
+    public boolean hasPermission(Permission permission) {
+        if (permission == null) {
+            throw new NullPointerException("permission");
+        }
+
+        Tristate ts = this.user.getCachedData().getPermissionData(calculateContexts()).getPermissionValue(permission.getName(), CheckOrigin.PLATFORM_PERMISSION_CHECK);
         if (ts != Tristate.UNDEFINED) {
             return ts.asBoolean();
         }
 
-        if (!plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
+        if (!this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
             return Permission.DEFAULT_PERMISSION.getValue(isOp());
         } else {
             return permission.getDefault().getValue(isOp());
@@ -152,21 +163,21 @@ public class LPPermissible extends PermissibleBase {
      * @return the calculated contexts for the player.
      */
     private Contexts calculateContexts() {
-        return plugin.getContextManager().getApplicableContexts(player);
+        return this.plugin.getContextManager().getApplicableContexts(this.player);
     }
 
     @Override
     public void setOp(boolean value) {
-        player.setOp(value);
+        this.player.setOp(value);
     }
 
     @Override
     public Set<PermissionAttachmentInfo> getEffectivePermissions() {
-        Set<Map.Entry<String, Boolean>> permissions = user.getCachedData().getPermissionData(calculateContexts()).getImmutableBacking().entrySet();
+        Set<Map.Entry<String, Boolean>> permissions = this.user.getCachedData().getPermissionData(calculateContexts()).getImmutableBacking().entrySet();
         Set<PermissionAttachmentInfo> ret = new HashSet<>(permissions.size());
 
         for (Map.Entry<String, Boolean> entry : permissions) {
-            ret.add(new PermissionAttachmentInfo(player, entry.getKey(), null, entry.getValue()));
+            ret.add(new PermissionAttachmentInfo(this.player, entry.getKey(), null, entry.getValue()));
         }
 
         return ret;
@@ -174,20 +185,35 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public LPPermissionAttachment addAttachment(Plugin plugin) {
+        if (plugin == null) {
+            throw new NullPointerException("plugin");
+        }
+
         LPPermissionAttachment ret = new LPPermissionAttachment(this, plugin);
         ret.hook();
         return ret;
     }
 
     @Override
-    public PermissionAttachment addAttachment(Plugin plugin, @NonNull String name, boolean value) {
+    public PermissionAttachment addAttachment(Plugin plugin, String permission, boolean value) {
+        if (plugin == null) {
+            throw new NullPointerException("plugin");
+        }
+        if (permission == null) {
+            throw new NullPointerException("permission");
+        }
+
         PermissionAttachment ret = addAttachment(plugin);
-        ret.setPermission(name, value);
+        ret.setPermission(permission, value);
         return ret;
     }
 
     @Override
-    public LPPermissionAttachment addAttachment(@NonNull Plugin plugin, int ticks) {
+    public LPPermissionAttachment addAttachment(Plugin plugin, int ticks) {
+        if (plugin == null) {
+            throw new NullPointerException("plugin");
+        }
+
         if (!plugin.isEnabled()) {
             throw new IllegalArgumentException("Plugin " + plugin.getDescription().getFullName() + " is not enabled");
         }
@@ -195,20 +221,31 @@ public class LPPermissible extends PermissibleBase {
         LPPermissionAttachment ret = addAttachment(plugin);
         if (getPlugin().getServer().getScheduler().scheduleSyncDelayedTask(plugin, ret::remove, ticks) == -1) {
             ret.remove();
-            throw new RuntimeException("Could not add PermissionAttachment to " + player + " for plugin " + plugin.getDescription().getFullName() + ": Scheduler returned -1");
+            throw new RuntimeException("Could not add PermissionAttachment to " + this.player + " for plugin " + plugin.getDescription().getFullName() + ": Scheduler returned -1");
         }
         return ret;
     }
 
     @Override
-    public LPPermissionAttachment addAttachment(Plugin plugin, @NonNull String name, boolean value, int ticks) {
+    public LPPermissionAttachment addAttachment(Plugin plugin, String permission, boolean value, int ticks) {
+        if (plugin == null) {
+            throw new NullPointerException("plugin");
+        }
+        if (permission == null) {
+            throw new NullPointerException("permission");
+        }
+
         LPPermissionAttachment ret = addAttachment(plugin, ticks);
-        ret.setPermission(name, value);
+        ret.setPermission(permission, value);
         return ret;
     }
 
     @Override
-    public void removeAttachment(@NonNull PermissionAttachment attachment) {
+    public void removeAttachment(PermissionAttachment attachment) {
+        if (attachment == null) {
+            throw new NullPointerException("attachment");
+        }
+
         if (!(attachment instanceof LPPermissionAttachment)) {
             throw new IllegalArgumentException("Given attachment is not a LPPermissionAttachment.");
         }
@@ -228,6 +265,30 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public void clearPermissions() {
-        attachments.forEach(LPPermissionAttachment::remove);
+        this.attachments.forEach(LPPermissionAttachment::remove);
+    }
+
+    public User getUser() {
+        return this.user;
+    }
+
+    public Player getPlayer() {
+        return this.player;
+    }
+
+    public LPBukkitPlugin getPlugin() {
+        return this.plugin;
+    }
+
+    public PermissibleBase getOldPermissible() {
+        return this.oldPermissible;
+    }
+
+    public AtomicBoolean getActive() {
+        return this.active;
+    }
+
+    public void setOldPermissible(PermissibleBase oldPermissible) {
+        this.oldPermissible = oldPermissible;
     }
 }

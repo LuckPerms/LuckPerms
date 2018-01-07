@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class SpongeCommandExecutor extends CommandManager implements CommandCallable {
@@ -56,40 +57,45 @@ public class SpongeCommandExecutor extends CommandManager implements CommandCall
         this.plugin = plugin;
     }
 
+    @Nonnull
     @Override
-    public CommandResult process(CommandSource source, String s) {
-        Sender lpSender = plugin.getSenderFactory().wrap(source);
+    public CommandResult process(@Nonnull CommandSource source, @Nonnull String s) {
+        Sender lpSender = this.plugin.getSenderFactory().wrap(source);
         List<String> arguments = processSelectors(source, CommandManager.stripQuotes(ARGUMENT_SPLITTER.splitToList(s)));
 
         onCommand(lpSender, "lp", arguments);
         return CommandResult.success();
     }
 
+    @Nonnull
     @Override
-    public List<String> getSuggestions(CommandSource source, String s, @Nullable Location<World> location) {
-        Sender lpSender = plugin.getSenderFactory().wrap(source);
+    public List<String> getSuggestions(@Nonnull CommandSource source, @Nonnull String s, @Nullable Location<World> location) {
+        Sender lpSender = this.plugin.getSenderFactory().wrap(source);
         List<String> arguments = processSelectors(source, CommandManager.stripQuotes(TAB_COMPLETE_ARGUMENT_SPLITTER.splitToList(s)));
 
         return onTabComplete(lpSender, arguments);
     }
 
     @Override
-    public boolean testPermission(CommandSource source) {
+    public boolean testPermission(@Nonnull CommandSource source) {
         return true; // we run permission checks internally
     }
 
+    @Nonnull
     @Override
-    public Optional<Text> getShortDescription(CommandSource source) {
+    public Optional<Text> getShortDescription(@Nonnull CommandSource source) {
         return Optional.of(Text.of("Manage permissions"));
     }
 
+    @Nonnull
     @Override
-    public Optional<Text> getHelp(CommandSource source) {
+    public Optional<Text> getHelp(@Nonnull CommandSource source) {
         return Optional.of(Text.of("Run /luckperms to view usage."));
     }
 
+    @Nonnull
     @Override
-    public Text getUsage(CommandSource source) {
+    public Text getUsage(@Nonnull CommandSource source) {
         return Text.of("/luckperms");
     }
 

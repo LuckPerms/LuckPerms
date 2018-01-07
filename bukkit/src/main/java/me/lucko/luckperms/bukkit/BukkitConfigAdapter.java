@@ -52,38 +52,38 @@ public class BukkitConfigAdapter extends AbstractConfigurationAdapter implements
 
     @Override
     public void reload() {
-        configuration = YamlConfiguration.loadConfiguration(file);
+        this.configuration = YamlConfiguration.loadConfiguration(this.file);
     }
 
     @Override
     public boolean contains(String path) {
-        return configuration.contains(path);
+        return this.configuration.contains(path);
     }
 
     @Override
     public String getString(String path, String def) {
-        return configuration.getString(path, def);
+        return this.configuration.getString(path, def);
     }
 
     @Override
     public int getInt(String path, int def) {
-        return configuration.getInt(path, def);
+        return this.configuration.getInt(path, def);
     }
 
     @Override
     public boolean getBoolean(String path, boolean def) {
-        return configuration.getBoolean(path, def);
+        return this.configuration.getBoolean(path, def);
     }
 
     @Override
     public List<String> getList(String path, List<String> def) {
-        List<String> ret = configuration.getStringList(path);
+        List<String> ret = this.configuration.getStringList(path);
         return ret == null ? def : ret;
     }
 
     @Override
     public List<String> getObjectList(String path, List<String> def) {
-        ConfigurationSection section = configuration.getConfigurationSection(path);
+        ConfigurationSection section = this.configuration.getConfigurationSection(path);
         if (section == null) {
             return def;
         }
@@ -95,7 +95,7 @@ public class BukkitConfigAdapter extends AbstractConfigurationAdapter implements
     @Override
     public Map<String, String> getMap(String path, Map<String, String> def) {
         Map<String, String> map = new HashMap<>();
-        ConfigurationSection section = configuration.getConfigurationSection(path);
+        ConfigurationSection section = this.configuration.getConfigurationSection(path);
         if (section == null) {
             return def;
         }

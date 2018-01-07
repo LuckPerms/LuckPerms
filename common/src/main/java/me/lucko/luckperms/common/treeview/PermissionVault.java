@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.treeview;
 
-import lombok.Getter;
-import lombok.NonNull;
-
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 
@@ -47,7 +44,6 @@ public class PermissionVault implements Runnable {
     private static final Splitter DOT_SPLIT = Splitter.on('.').omitEmptyStrings();
 
     // the root node in the tree
-    @Getter
     private final TreeNode rootNode;
 
     // the known permissions already in the vault
@@ -60,21 +56,25 @@ public class PermissionVault implements Runnable {
     private boolean shutdown = false;
 
     public PermissionVault(Executor executor) {
-        rootNode = new TreeNode();
-        knownPermissions = ConcurrentHashMap.newKeySet(3000);
-        queue = new ConcurrentLinkedQueue<>();
+        this.rootNode = new TreeNode();
+        this.knownPermissions = ConcurrentHashMap.newKeySet(3000);
+        this.queue = new ConcurrentLinkedQueue<>();
 
         executor.execute(this);
+    }
+
+    public TreeNode getRootNode() {
+        return this.rootNode;
     }
 
     @Override
     public void run() {
         while (true) {
-            for (String e; (e = queue.poll()) != null; ) {
+            for (String e; (e = this.queue.poll()) != null; ) {
                 try {
                     String s = e.toLowerCase();
                     // only attempt an insert if we're not seen this permission before
-                    if (knownPermissions.add(s)) {
+                    if (this.knownPermissions.add(s)) {
                         insert(s);
                     }
                 } catch (Exception ex) {
@@ -82,7 +82,7 @@ public class PermissionVault implements Runnable {
                 }
             }
 
-            if (shutdown) {
+            if (this.shutdown) {
                 return;
             }
 
@@ -92,20 +92,23 @@ public class PermissionVault implements Runnable {
         }
     }
 
-    public void offer(@NonNull String permission) {
-        queue.offer(permission);
+    public void offer(String permission) {
+        if (permission == null) {
+            throw new NullPointerException("permission");
+        }
+        this.queue.offer(permission);
     }
 
     public Set<String> getKnownPermissions() {
-        return ImmutableSet.copyOf(knownPermissions);
+        return ImmutableSet.copyOf(this.knownPermissions);
     }
 
     public List<String> rootAsList() {
-        return rootNode.makeImmutableCopy().getNodeEndings().stream().map(Map.Entry::getValue).collect(Collectors.toList());
+        return this.rootNode.makeImmutableCopy().getNodeEndings().stream().map(Map.Entry::getValue).collect(Collectors.toList());
     }
 
     public int getSize() {
-        return rootNode.getDeepSize();
+        return this.rootNode.getDeepSize();
     }
 
     private void insert(String permission) {
@@ -113,14 +116,14 @@ public class PermissionVault implements Runnable {
         List<String> parts = DOT_SPLIT.splitToList(permission);
 
         // insert the permission into the node structure
-        TreeNode current = rootNode;
+        TreeNode current = this.rootNode;
         for (String part : parts) {
             current = current.getChildMap().computeIfAbsent(part, s -> new TreeNode());
         }
     }
 
     public void shutdown() {
-        shutdown = true;
+        this.shutdown = true;
     }
 
 }

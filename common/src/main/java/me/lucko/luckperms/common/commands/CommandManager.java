@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.commands;
 
-import lombok.Getter;
-
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.commands.abstraction.Command;
@@ -90,13 +88,11 @@ public class CommandManager {
     public static final char SECTION_CHAR = '\u00A7'; // §
     public static final char AMPERSAND_CHAR = '&';
 
-    @Getter
     private final LuckPermsPlugin plugin;
 
     // the default executor to run commands on
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    @Getter
     private final List<Command> mainCommands;
 
     public CommandManager(LuckPermsPlugin plugin) {
@@ -104,7 +100,7 @@ public class CommandManager {
 
         LocaleManager locale = plugin.getLocaleManager();
 
-        mainCommands = ImmutableList.<Command>builder()
+        this.mainCommands = ImmutableList.<Command>builder()
                 .add(new UserMainCommand(locale))
                 .add(new GroupMainCommand(locale))
                 .add(new TrackMainCommand(locale))
@@ -132,8 +128,12 @@ public class CommandManager {
                 .build();
     }
 
+    public LuckPermsPlugin getPlugin() {
+        return this.plugin;
+    }
+
     public CompletableFuture<CommandResult> onCommand(Sender sender, String label, List<String> args) {
-        return onCommand(sender, label, args, executor);
+        return onCommand(sender, label, args, this.executor);
     }
 
     public CompletableFuture<CommandResult> onCommand(Sender sender, String label, List<String> args, Executor executor) {
@@ -141,7 +141,7 @@ public class CommandManager {
             try {
                 return execute(sender, label, args);
             } catch (Throwable e) {
-                plugin.getLog().severe("Exception whilst executing command: " + args.toString());
+                this.plugin.getLog().severe("Exception whilst executing command: " + args.toString());
                 e.printStackTrace();
                 return null;
             }
@@ -154,9 +154,9 @@ public class CommandManager {
         handleRewrites(arguments, true);
 
         // Handle no arguments
-        if (arguments.size() == 0 || (arguments.size() == 1 && arguments.get(0).trim().isEmpty())) {
-            CommandUtils.sendPluginMessage(sender, "&2Running &bLuckPerms v" + plugin.getVersion() + "&2.");
-            if (mainCommands.stream().anyMatch(c -> c.shouldDisplay() && c.isAuthorized(sender))) {
+        if (arguments.isEmpty() || (arguments.size() == 1 && arguments.get(0).trim().isEmpty())) {
+            CommandUtils.sendPluginMessage(sender, "&2Running &bLuckPerms v" + this.plugin.getVersion() + "&2.");
+            if (this.mainCommands.stream().anyMatch(c -> c.shouldDisplay() && c.isAuthorized(sender))) {
                 Message.VIEW_AVAILABLE_COMMANDS_PROMPT.send(sender, label);
             } else {
                 Message.NO_PERMISSION_FOR_SUBCOMMANDS.send(sender);
@@ -165,7 +165,7 @@ public class CommandManager {
         }
 
         // Look for the main command.
-        Optional<Command> o = mainCommands.stream()
+        Optional<Command> o = this.mainCommands.stream()
                 .filter(m -> m.getName().equalsIgnoreCase(arguments.get(0)))
                 .limit(1)
                 .findAny();
@@ -194,7 +194,7 @@ public class CommandManager {
         // Try to execute the command.
         CommandResult result;
         try {
-            result = main.execute(plugin, sender, null, arguments, label);
+            result = main.execute(this.plugin, sender, null, arguments, label);
         } catch (CommandException e) {
             result = handleException(e, sender, label, main);
         } catch (Throwable e) {
@@ -219,7 +219,7 @@ public class CommandManager {
         // we rewrite tab completions too!
         handleRewrites(arguments, false);
 
-        final List<Command> mains = mainCommands.stream()
+        final List<Command> mains = this.mainCommands.stream()
                 .filter(Command::shouldDisplay)
                 .filter(m -> m.isAuthorized(sender))
                 .collect(Collectors.toList());
@@ -249,12 +249,12 @@ public class CommandManager {
         arguments.remove(0); // remove the main command arg.
 
         // Pass the processing onto the main command
-        return o.map(cmd -> cmd.tabComplete(plugin, sender, arguments)).orElseGet(Collections::emptyList);
+        return o.map(cmd -> cmd.tabComplete(this.plugin, sender, arguments)).orElseGet(Collections::emptyList);
     }
 
     private void sendCommandUsage(Sender sender, String label) {
-        CommandUtils.sendPluginMessage(sender, "&2Running &bLuckPerms v" + plugin.getVersion() + "&2.");
-        mainCommands.stream()
+        CommandUtils.sendPluginMessage(sender, "&2Running &bLuckPerms v" + this.plugin.getVersion() + "&2.");
+        this.mainCommands.stream()
                 .filter(Command::shouldDisplay)
                 .filter(c -> c.isAuthorized(sender))
                 .forEach(c -> {

@@ -39,29 +39,29 @@ public class TreeNode {
 
     // lazy init
     public synchronized Map<String, TreeNode> getChildMap() {
-        if (children == null) {
-            children = new ConcurrentHashMap<>();
+        if (this.children == null) {
+            this.children = new ConcurrentHashMap<>();
         }
-        return children;
+        return this.children;
     }
 
     public Optional<Map<String, TreeNode>> getChildren() {
-        return Optional.ofNullable(children);
+        return Optional.ofNullable(this.children);
     }
 
     public int getDeepSize() {
-        if (children == null) {
+        if (this.children == null) {
             return 1;
         } else {
-            return children.values().stream().mapToInt(TreeNode::getDeepSize).sum();
+            return this.children.values().stream().mapToInt(TreeNode::getDeepSize).sum();
         }
     }
 
     public ImmutableTreeNode makeImmutableCopy() {
-        if (children == null) {
+        if (this.children == null) {
             return new ImmutableTreeNode(null);
         } else {
-            return new ImmutableTreeNode(children.entrySet().stream()
+            return new ImmutableTreeNode(this.children.entrySet().stream()
                     .map(e -> Maps.immutableEntry(
                             e.getKey(),
                             e.getValue().makeImmutableCopy()

@@ -25,19 +25,20 @@
 
 package me.lucko.luckperms.sponge.tasks;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 
-@RequiredArgsConstructor
 public class ServiceCacheHousekeepingTask implements Runnable {
     private final LuckPermsService service;
 
+    public ServiceCacheHousekeepingTask(LuckPermsService service) {
+        this.service = service;
+    }
+
     @Override
     public void run() {
-        for (LPSubjectCollection collection : service.getLoadedCollections().values()) {
+        for (LPSubjectCollection collection : this.service.getLoadedCollections().values()) {
             for (LPSubject subject : collection.getLoadedSubjects()) {
                 subject.performCleanup();
             }

@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.node;
 
-import lombok.experimental.UtilityClass;
-
 import me.lucko.luckperms.api.Node;
 
 import java.util.ArrayList;
@@ -35,8 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-@UtilityClass
-public class NodeTools {
+public final class NodeTools {
 
     public static <T extends Node> void removeAlmostEqual(Iterator<T> it) {
         List<T> alreadyIn = new ArrayList<>();
@@ -100,4 +97,6 @@ public class NodeTools {
             }
         }
     }
+
+    private NodeTools() {}
 }

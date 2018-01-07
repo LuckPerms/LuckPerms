@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.locale;
 
-import lombok.Getter;
-
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.commands.Arg;
@@ -573,10 +571,7 @@ public enum CommandSpec {
     }
 
     private static final class SimpleLocalizedSpec implements LocalizedSpec {
-
-        @Getter
         private final LocaleManager localeManager;
-
         private final CommandSpec spec;
 
         public SimpleLocalizedSpec(CommandSpec spec, LocaleManager localeManager) {
@@ -584,34 +579,37 @@ public enum CommandSpec {
             this.spec = spec;
         }
 
+        @Override
         public String description() {
-            CommandSpecData translation = localeManager.getTranslation(spec);
+            CommandSpecData translation = this.localeManager.getTranslation(this.spec);
             if (translation != null && translation.getDescription() != null) {
                 return translation.getDescription();
             }
 
             // fallback
-            return spec.description;
+            return this.spec.description;
         }
 
+        @Override
         public String usage() {
-            CommandSpecData translation = localeManager.getTranslation(spec);
+            CommandSpecData translation = this.localeManager.getTranslation(this.spec);
             if (translation != null && translation.getUsage() != null) {
                 return translation.getUsage();
             }
 
             // fallback
-            return spec.usage;
+            return this.spec.usage;
         }
 
+        @Override
         public List<Arg> args() {
-            CommandSpecData translation = localeManager.getTranslation(spec);
+            CommandSpecData translation = this.localeManager.getTranslation(this.spec);
             if (translation == null || translation.getArgs() == null) {
                 // fallback
-                return spec.args;
+                return this.spec.args;
             }
 
-            List<Arg> args = new ArrayList<>(spec.args);
+            List<Arg> args = new ArrayList<>(this.spec.args);
             ListIterator<Arg> it = args.listIterator();
             while (it.hasNext()) {
                 Arg next = it.next();
@@ -624,6 +622,11 @@ public enum CommandSpec {
             }
 
             return ImmutableList.copyOf(args);
+        }
+
+        @Override
+        public LocaleManager getLocaleManager() {
+            return this.localeManager;
         }
     }
 

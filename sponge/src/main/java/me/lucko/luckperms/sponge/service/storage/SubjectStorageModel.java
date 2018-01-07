@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.sponge.service.storage;
 
-import lombok.Getter;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -50,7 +48,6 @@ import java.util.Map;
 /**
  * Used for converting a SubjectData instance to and from JSON
  */
-@Getter
 public class SubjectStorageModel {
     private final LPPermissionService service;
     private final Map<ImmutableContextSet, Map<String, Boolean>> permissions;
@@ -256,8 +253,13 @@ public class SubjectStorageModel {
     }
 
     public void applyToData(CalculatedSubjectData subjectData) {
-        subjectData.replacePermissions(permissions);
-        subjectData.replaceOptions(options);
-        subjectData.replaceParents(parents);
+        subjectData.replacePermissions(this.permissions);
+        subjectData.replaceOptions(this.options);
+        subjectData.replaceParents(this.parents);
     }
+
+    public LPPermissionService getService() {
+        return this.service;
+    }
+
 }

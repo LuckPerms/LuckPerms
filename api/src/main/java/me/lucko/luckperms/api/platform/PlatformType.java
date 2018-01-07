@@ -51,6 +51,6 @@ public enum PlatformType {
      */
     @Nonnull
     public String getFriendlyName() {
-        return friendlyName;
+        return this.friendlyName;
     }
 }

@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.commands.abstraction;
 
-import lombok.Getter;
-
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.commands.Arg;
@@ -50,13 +48,11 @@ import java.util.function.Predicate;
  */
 public abstract class Command<T, S> {
 
-    @Getter
     private final LocalizedSpec spec;
 
     /**
      * The name of the command. Should be properly capitalised.
      */
-    @Getter
     private final String name;
 
     /**
@@ -67,7 +63,6 @@ public abstract class Command<T, S> {
     /**
      * A predicate used for testing the size of the arguments list passed to this command
      */
-    @Getter
     private final Predicate<Integer> argumentCheck;
 
     /**
@@ -95,6 +90,18 @@ public abstract class Command<T, S> {
 
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return Collections.emptyList();
+    }
+
+    public LocalizedSpec getSpec() {
+        return this.spec;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public Predicate<Integer> getArgumentCheck() {
+        return this.argumentCheck;
     }
 
     /**
@@ -126,7 +133,7 @@ public abstract class Command<T, S> {
      * @return true if the sender has permission to use this command
      */
     public boolean isAuthorized(Sender sender) {
-        return permission == null || permission.isAuthorized(sender);
+        return this.permission == null || this.permission.isAuthorized(sender);
     }
 
     /**
@@ -139,7 +146,7 @@ public abstract class Command<T, S> {
     }
 
     public String getDescription() {
-        return spec.description();
+        return this.spec.description();
     }
 
     /**
@@ -148,20 +155,19 @@ public abstract class Command<T, S> {
      * @return the usage of this command.
      */
     public String getUsage() {
-        String usage = spec.usage();
+        String usage = this.spec.usage();
         return usage == null ? "" : usage;
     }
 
     public Optional<CommandPermission> getPermission() {
-        return Optional.ofNullable(permission);
+        return Optional.ofNullable(this.permission);
     }
 
     public Optional<List<Arg>> getArgs() {
-        return Optional.ofNullable(spec.args());
+        return Optional.ofNullable(this.spec.args());
     }
 
     public Optional<List<Command<S, ?>>> getChildren() {
-        return Optional.ofNullable(children);
+        return Optional.ofNullable(this.children);
     }
-
 }

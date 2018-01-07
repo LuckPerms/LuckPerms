@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.dependencies;
 
-import lombok.Getter;
-
 import com.google.common.io.ByteStreams;
 
 import java.io.InputStream;
@@ -35,7 +33,6 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Base64;
 
-@Getter
 public enum Dependency {
 
     CAFFEINE(
@@ -170,5 +167,17 @@ public enum Dependency {
                 }
             }
         }
+    }
+
+    public String getUrl() {
+        return this.url;
+    }
+
+    public String getVersion() {
+        return this.version;
+    }
+
+    public byte[] getChecksum() {
+        return this.checksum;
     }
 }

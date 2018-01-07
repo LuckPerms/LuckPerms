@@ -139,7 +139,7 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
 
     @Override
     protected ReentrantLock getLockForTarget(UserIdentifier target) {
-        return locks.get(target.getUuid());
+        return this.locks.get(target.getUuid());
     }
 
     @Override

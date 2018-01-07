@@ -44,6 +44,8 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 /**
  * A replacement map for the 'permSubs' instance in Bukkit's SimplePluginManager.
  *
@@ -171,13 +173,13 @@ public class LPSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>
             // if the key is a player, check their LPPermissible first
             if (isPlayer) {
                 Permissible p = (Permissible) key;
-                if (p.isPermissionSet(permission)) {
-                    return p.hasPermission(permission);
+                if (p.isPermissionSet(this.permission)) {
+                    return p.hasPermission(this.permission);
                 }
             }
 
             // then try the map
-            Boolean result = backing.get(key);
+            Boolean result = this.backing.get(key);
             if (result != null) {
                 return result;
             }
@@ -185,8 +187,8 @@ public class LPSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>
             // then try the permissible, if we haven't already
             if (!isPlayer && key instanceof Permissible) {
                 Permissible p = (Permissible) key;
-                if (p.isPermissionSet(permission)) {
-                    return p.hasPermission(permission);
+                if (p.isPermissionSet(this.permission)) {
+                    return p.hasPermission(this.permission);
                 }
             }
 
@@ -200,17 +202,19 @@ public class LPSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>
             return get(key) != null;
         }
 
+        @Nonnull
         @Override
         public Set<Permissible> keySet() {
             // gather players (LPPermissibles)
-            Set<Permissible> players = plugin.getServer().getOnlinePlayers().stream()
-                    .filter(player -> player.isPermissionSet(permission))
+            Set<Permissible> players = LPSubscriptionMap.this.plugin.getServer().getOnlinePlayers().stream()
+                    .filter(player -> player.isPermissionSet(this.permission))
                     .collect(Collectors.toSet());
 
             // then combine the players with the backing map
-            return Sets.union(players, backing.keySet());
+            return Sets.union(players, this.backing.keySet());
         }
 
+        @Nonnull
         @Override
         public Set<Entry<Permissible, Boolean>> entrySet() {
             return keySet().stream()
@@ -233,39 +237,40 @@ public class LPSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>
 
         @Override
         public Boolean put(Permissible key, Boolean value) {
-            return backing.put(key, value);
+            return this.backing.put(key, value);
         }
 
         @Override
         public Boolean remove(Object key) {
-            return backing.remove(key);
+            return this.backing.remove(key);
         }
 
         // the following methods are not used in the current impls of PluginManager, but just delegate them for now
 
         @Override
         public int size() {
-            return backing.size();
+            return this.backing.size();
         }
 
         @Override
         public boolean containsValue(Object value) {
-            return backing.containsValue(value);
+            return this.backing.containsValue(value);
         }
 
         @Override
-        public void putAll(Map<? extends Permissible, ? extends Boolean> m) {
-            backing.putAll(m);
+        public void putAll(@Nonnull Map<? extends Permissible, ? extends Boolean> m) {
+            this.backing.putAll(m);
         }
 
         @Override
         public void clear() {
-            backing.clear();
+            this.backing.clear();
         }
 
+        @Nonnull
         @Override
         public Collection<Boolean> values() {
-            return backing.values();
+            return this.backing.values();
         }
     }
 }

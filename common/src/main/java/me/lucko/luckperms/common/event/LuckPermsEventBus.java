@@ -25,10 +25,6 @@
 
 package me.lucko.luckperms.common.event;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.event.Cancellable;
@@ -39,22 +35,32 @@ import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
-@RequiredArgsConstructor
+import javax.annotation.Nonnull;
+
 public class LuckPermsEventBus implements EventBus {
 
-    @Getter
     private final LuckPermsPlugin plugin;
 
     private final LuckPermsApiProvider apiProvider;
 
     private final Map<Class<? extends LuckPermsEvent>, Set<LuckPermsEventHandler<?>>> handlerMap = new ConcurrentHashMap<>();
 
+    public LuckPermsEventBus(LuckPermsPlugin plugin, LuckPermsApiProvider apiProvider) {
+        this.plugin = plugin;
+        this.apiProvider = apiProvider;
+    }
+
+    @Nonnull
     @Override
-    public <T extends LuckPermsEvent> EventHandler<T> subscribe(@NonNull Class<T> eventClass, @NonNull Consumer<T> handler) {
+    public <T extends LuckPermsEvent> EventHandler<T> subscribe(@Nonnull Class<T> eventClass, @Nonnull Consumer<T> handler) {
+        Objects.requireNonNull(eventClass, "eventClass");
+        Objects.requireNonNull(handler, "handler");
+
         if (!eventClass.isInterface()) {
             throw new IllegalArgumentException("class " + eventClass + " is not an interface");
         }
@@ -62,7 +68,7 @@ public class LuckPermsEventBus implements EventBus {
             throw new IllegalArgumentException("class " + eventClass.getName() + " does not implement LuckPermsEvent");
         }
 
-        Set<LuckPermsEventHandler<?>> handlers = handlerMap.computeIfAbsent(eventClass, c -> ConcurrentHashMap.newKeySet());
+        Set<LuckPermsEventHandler<?>> handlers = this.handlerMap.computeIfAbsent(eventClass, c -> ConcurrentHashMap.newKeySet());
 
         LuckPermsEventHandler<T> eventHandler = new LuckPermsEventHandler<>(this, eventClass, handler);
         handlers.add(eventHandler);
@@ -70,10 +76,11 @@ public class LuckPermsEventBus implements EventBus {
         return eventHandler;
     }
 
+    @Nonnull
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends LuckPermsEvent> Set<EventHandler<T>> getHandlers(Class<T> eventClass) {
-        Set<LuckPermsEventHandler<?>> handlers = handlerMap.get(eventClass);
+    public <T extends LuckPermsEvent> Set<EventHandler<T>> getHandlers(@Nonnull Class<T> eventClass) {
+        Set<LuckPermsEventHandler<?>> handlers = this.handlerMap.get(eventClass);
         if (handlers == null) {
             return ImmutableSet.of();
         } else {
@@ -87,7 +94,7 @@ public class LuckPermsEventBus implements EventBus {
     }
 
     public void unregisterHandler(LuckPermsEventHandler<?> handler) {
-        Set<LuckPermsEventHandler<?>> handlers = handlerMap.get(handler.getEventClass());
+        Set<LuckPermsEventHandler<?>> handlers = this.handlerMap.get(handler.getEventClass());
         if (handlers != null) {
             handlers.remove(handler);
         }
@@ -95,10 +102,10 @@ public class LuckPermsEventBus implements EventBus {
 
     public void fireEvent(LuckPermsEvent event) {
         if (event instanceof AbstractEvent) {
-            ((AbstractEvent) event).setApi(apiProvider);
+            ((AbstractEvent) event).setApi(this.apiProvider);
         }
 
-        for (Map.Entry<Class<? extends LuckPermsEvent>, Set<LuckPermsEventHandler<?>>> ent : handlerMap.entrySet()) {
+        for (Map.Entry<Class<? extends LuckPermsEvent>, Set<LuckPermsEventHandler<?>>> ent : this.handlerMap.entrySet()) {
             if (!ent.getKey().isAssignableFrom(event.getClass())) {
                 continue;
             }
@@ -111,6 +118,10 @@ public class LuckPermsEventBus implements EventBus {
         if (event instanceof Cancellable) {
             throw new IllegalArgumentException("cannot call Cancellable event async");
         }
-        plugin.getScheduler().doAsync(() -> fireEvent(event));
+        this.plugin.getScheduler().doAsync(() -> fireEvent(event));
+    }
+
+    public LuckPermsPlugin getPlugin() {
+        return this.plugin;
     }
 }

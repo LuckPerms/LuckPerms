@@ -25,14 +25,9 @@
 
 package me.lucko.luckperms.common.verbose;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 /**
  * Represents the origin of a permission check
  */
-@Getter
-@AllArgsConstructor
 public enum CheckOrigin {
 
     /**
@@ -57,4 +52,11 @@ public enum CheckOrigin {
 
     private final char code;
 
+    CheckOrigin(char code) {
+        this.code = code;
+    }
+
+    public char getCode() {
+        return this.code;
+    }
 }

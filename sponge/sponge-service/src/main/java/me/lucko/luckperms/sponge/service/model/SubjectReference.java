@@ -25,13 +25,10 @@
 
 package me.lucko.luckperms.sponge.service.model;
 
-import lombok.Getter;
-
-import com.google.common.base.Preconditions;
-
 import org.spongepowered.api.service.permission.Subject;
 
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -58,14 +55,12 @@ public final class SubjectReference implements org.spongepowered.api.service.per
     /**
      * The identifier of the collection which holds the subject
      */
-    @Getter
     @Nonnull
     private final String collectionIdentifier;
 
     /**
      * The identifier of the subject
      */
-    @Getter
     @Nonnull
     private final String subjectIdentifier;
 
@@ -74,9 +69,21 @@ public final class SubjectReference implements org.spongepowered.api.service.per
     private WeakReference<LPSubject> cache = null;
 
     SubjectReference(LPPermissionService service, String collectionIdentifier, String subjectIdentifier) {
-        this.service = Preconditions.checkNotNull(service);
-        this.collectionIdentifier = Preconditions.checkNotNull(collectionIdentifier);
-        this.subjectIdentifier = Preconditions.checkNotNull(subjectIdentifier);
+        this.service = Objects.requireNonNull(service);
+        this.collectionIdentifier = Objects.requireNonNull(collectionIdentifier);
+        this.subjectIdentifier = Objects.requireNonNull(subjectIdentifier);
+    }
+
+    @Nonnull
+    @Override
+    public String getCollectionIdentifier() {
+        return this.collectionIdentifier;
+    }
+
+    @Nonnull
+    @Override
+    public String getSubjectIdentifier() {
+        return this.subjectIdentifier;
     }
 
     void fillCache(LPSubject subject) {
@@ -84,18 +91,18 @@ public final class SubjectReference implements org.spongepowered.api.service.per
 
         if (sub == null) {
             // if no value is currently cached, populate with the passed value
-            lastLookup = System.currentTimeMillis();
-            cache = new WeakReference<>(subject);
+            this.lastLookup = System.currentTimeMillis();
+            this.cache = new WeakReference<>(subject);
         } else if (sub == subject) {
             // if equal, reset the cache timeout
-            lastLookup = System.currentTimeMillis();
+            this.lastLookup = System.currentTimeMillis();
         }
     }
 
     private LPSubject tryCache() {
-        if ((System.currentTimeMillis() - lastLookup) < CACHE_TIME) {
-            if (cache != null) {
-                return cache.get();
+        if ((System.currentTimeMillis() - this.lastLookup) < CACHE_TIME) {
+            if (this.cache != null) {
+                return this.cache.get();
             }
         }
 
@@ -115,11 +122,11 @@ public final class SubjectReference implements org.spongepowered.api.service.per
         }
 
         // subject isn't cached, so make a call to load it
-        s = service.getCollection(collectionIdentifier).loadSubject(subjectIdentifier).join();
+        s = this.service.getCollection(this.collectionIdentifier).loadSubject(this.subjectIdentifier).join();
 
         // cache the result
-        lastLookup = System.currentTimeMillis();
-        cache = new WeakReference<>(s);
+        this.lastLookup = System.currentTimeMillis();
+        this.cache = new WeakReference<>(s);
         return s;
     }
 
@@ -134,6 +141,7 @@ public final class SubjectReference implements org.spongepowered.api.service.per
         return CompletableFuture.supplyAsync(this::resolveDirectly);
     }
 
+    @Nonnull
     @Override
     public CompletableFuture<Subject> resolve() {
         // check if there is a cached value before loading

@@ -55,7 +55,7 @@ public class BungeeConfigAdapter extends AbstractConfigurationAdapter implements
     @Override
     public void reload() {
         try {
-            configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(file);
+            this.configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(this.file);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -63,32 +63,32 @@ public class BungeeConfigAdapter extends AbstractConfigurationAdapter implements
 
     @Override
     public boolean contains(String path) {
-        return configuration.contains(path);
+        return this.configuration.contains(path);
     }
 
     @Override
     public String getString(String path, String def) {
-        return configuration.getString(path, def);
+        return this.configuration.getString(path, def);
     }
 
     @Override
     public int getInt(String path, int def) {
-        return configuration.getInt(path, def);
+        return this.configuration.getInt(path, def);
     }
 
     @Override
     public boolean getBoolean(String path, boolean def) {
-        return configuration.getBoolean(path, def);
+        return this.configuration.getBoolean(path, def);
     }
 
     @Override
     public List<String> getList(String path, List<String> def) {
-        return Optional.ofNullable(configuration.getStringList(path)).orElse(def);
+        return Optional.ofNullable(this.configuration.getStringList(path)).orElse(def);
     }
 
     @Override
     public List<String> getObjectList(String path, List<String> def) {
-        Configuration section = configuration.getSection(path);
+        Configuration section = this.configuration.getSection(path);
         if (section == null) {
             return def;
         }
@@ -99,7 +99,7 @@ public class BungeeConfigAdapter extends AbstractConfigurationAdapter implements
     @Override
     public Map<String, String> getMap(String path, Map<String, String> def) {
         Map<String, String> map = new HashMap<>();
-        Configuration section = configuration.getSection(path);
+        Configuration section = this.configuration.getSection(path);
         if (section == null) {
             return def;
         }
