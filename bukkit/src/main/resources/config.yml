@@ -57,18 +57,15 @@ apply-global-world-groups: true
 # This option only really exists for networks who for whatever reason cannot setup proper ip forwarding.
 use-server-uuids: true
 
-# If the servers own UUID cache/lookup facility should be used when there is no record for a player
-# in the LuckPerms cache.
+# If the servers own UUID cache/lookup facility should be used when there is no record for a player in the LuckPerms cache.
 use-server-uuid-cache: false
 
-# If LuckPerms should use the "server-name" property from the "server.properties"
-# file as the "server" option within LuckPerms.
+# If LuckPerms should use the "server-name" property from the "server.properties" file as the "server" option within LuckPerms.
 use-server-properties-name: false
 
 # If set to true, LuckPerms will allow usernames with non alphanumeric characters.
 #
-# Note that due to the design of the storage implementation, usernames must still be
-# 16 characters or less.
+# Note that due to the design of the storage implementation, usernames must still be 16 characters or less.
 allow-invalid-usernames: false
 
 # If LuckPerms should produce extra logging output when it handles logins.
@@ -78,8 +75,7 @@ debug-logins: false
 # If the plugin should send log notifications to users whenever permissions are modified.
 log-notify: true
 
-# Mirrors world names. Whenever LuckPerms checks what world a user is in, if the world name is in
-# this list, the value assigned will be sent forward for permission calculation instead.
+# Mirrors world names. Whenever LuckPerms checks what world a user is in, if the world name is in this list, the value assigned will be sent forward for permission calculation instead.
 world-rewrite:
 #  world_nether: world
 #  world_the_end: world
@@ -101,17 +97,14 @@ temporary-add-behaviour: deny
 #                           directly and indirectly
 primary-group-calculation: parents-by-weight
 
-# If set to false, the plugin will allow a Users primary group to be removed with the
-# 'parent remove' command, and will set their primary group back to default.
+# If set to false, the plugin will allow a Users primary group to be removed with the 'parent remove' command, and will set their primary group back to default.
 prevent-primary-group-removal: false
 
 # If the plugin should check for "extra" permissions with users run LP commands.
 #
-# These extra permissions allow finer control over what users can do with each command, and
-# who they have access to edit.
+# These extra permissions allow finer control over what users can do with each command, and who they have access to edit.
 #
-# The permissions are *not* static, unlike the 'base' permisssions, and will depend upon the
-# arguments given within the command.
+# The permissions are *not* static, unlike the 'base' permisssions, and will depend upon the arguments given within the command.
 argument-based-command-permissions: false
 
 
@@ -122,13 +115,11 @@ argument-based-command-permissions: false
 # +----------------------------------------------------------------------------------------------+ #
 
 # If the plugin should apply wildcard permissions.
-# If set to true, LuckPerms will detect wildcard permissions, and resolve & apply all registered
-# permissions matching the wildcard.
+# If set to true, LuckPerms will detect wildcard permissions, and resolve & apply all registered permissions matching the wildcard.
 apply-wildcards: true
 
 # If the plugin should parse regex permissions.
-# If set to true, LuckPerms will detect regex permissions, marked with "r=" at the start of the
-# node, and resolve & apply all registered permissions matching the regex.
+# If set to true, LuckPerms will detect regex permissions, marked with "r=" at the start of the node, and resolve & apply all registered permissions matching the regex.
 apply-regex: true
 
 # If the plugin should complete and apply shorthand permissions.
@@ -136,21 +127,16 @@ apply-regex: true
 apply-shorthand: true
 
 # If the plugin should apply Bukkit child permissions.
-# Plugin authors can define custom permissions structures for their plugin, which will be resolved
-# and used by LuckPerms if this setting is enabled.
+# Plugin authors can define custom permissions structures for their plugin, which will be resolved and used by LuckPerms if this setting is enabled.
 apply-bukkit-child-permissions: true
 
 # If the plugin should apply Bukkit default permissions.
-# Plugin authors can define permissions which should be given to all users by default, or setup
-# permissions which should/shouldn't be given to opped players.
+# Plugin authors can define permissions which should be given to all users by default, or setup permissions which should/shouldn't be given to opped players.
 # If this option is set to false, LuckPerms will ignore these defaults.
 apply-bukkit-default-permissions: true
 
 # If the plugin should apply attachment permissions.
-# Other plugins on the server are able to add their own "permission attachments" to players. This
-# allows them to grant players additional permissions which last until the end of the session, or
-# until they're removed. If this option is set to false, LuckPerms will not include these attachment
-# permissions when considering if a player should have access to a certain permission.
+# Other plugins on the server are able to add their own "permission attachments" to players. This allows them to grant players additional permissions which last until the end of the session, or until they're removed. If this option is set to false, LuckPerms will not include these attachment permissions when considering if a player should have access to a certain permission.
 apply-bukkit-attachment-permissions: true
 
 # Define special group weights for this server.
@@ -201,26 +187,19 @@ meta-formatting:
 # |                                 OP (Server Operator) Settings                                | #
 # +----------------------------------------------------------------------------------------------+ #
 
-# If the vanilla OP system is enabled. If set to false, all users will be de-opped, and the op/deop
-# commands will be disabled.
+# If the vanilla OP system is enabled. If set to false, all users will be de-opped, and the op/deop commands will be disabled.
 enable-ops: true
 
-# If set to true, any user with the permission "luckperms.autoop" will automatically be granted
-# server operator status. This permission can be inherited, or set on specific servers/worlds,
-# temporarily, etc.
+# If set to true, any user with the permission "luckperms.autoop" will automatically be granted server operator status. This permission can be inherited, or set on specific servers/worlds, temporarily, etc.
 #
-# Additionally, setting this to true will force the "enable-ops" option above to false. All users
-# will be de-opped unless they have the permission node, and the op/deop commands will be disabled.
+# Additionally, setting this to true will force the "enable-ops" option above to false. All users will be de-opped unless they have the permission node, and the op/deop commands will be disabled.
 #
-# It is important to note that this setting is only checked when a player first joins the server,
-# and when they switch worlds. Therefore, simply removing this permission from a user will not
-# automatically de-op them. A player needs to relog to have the change take effect.
+# It is important to note that this setting is only checked when a player first joins the server, and when they switch worlds. Therefore, simply removing this permission from a user will not automatically de-op them. A player needs to relog to have the change take effect.
 #
 # It is recommended that you use this option instead of assigning a single '*' permission.
 auto-op: false
 
-# If opped players should be allowed to use LuckPerms commands. Set to false to only allow users who
-# have the permissions access to the commands
+# If opped players should be allowed to use LuckPerms commands. Set to false to only allow users who have the permissions access to the commands
 commands-allow-op: true
 
 
@@ -234,8 +213,7 @@ commands-allow-op: true
 # When this option is set to false, the server value defined above under "server" is used.
 use-vault-server: false
 
-# The name of the server used within Vault operations. If you don't want Vault operations to be
-# server specific, set this to "global".
+# The name of the server used within Vault operations. If you don't want Vault operations to be server specific, set this to "global".
 #
 # Will only take effect if use-vault-server is set to true above.
 vault-server: global
