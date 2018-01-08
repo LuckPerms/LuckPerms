@@ -242,7 +242,16 @@ public class Contexts {
     }
 
     private int calculateHashCode() {
-        return Objects.hash(this.context, this.op, this.includeGlobal, this.includeGlobalWorld, this.applyGroups, this.applyGlobalGroups, this.applyGlobalWorldGroups);
+        final int PRIME = 59;
+        int result = 1;
+        result = result * PRIME + this.context.hashCode();
+        result = result * PRIME + (this.op ? 79 : 97);
+        result = result * PRIME + (this.includeGlobal ? 79 : 97);
+        result = result * PRIME + (this.includeGlobalWorld ? 79 : 97);
+        result = result * PRIME + (this.applyGroups ? 79 : 97);
+        result = result * PRIME + (this.applyGlobalGroups ? 79 : 97);
+        result = result * PRIME + (this.applyGlobalWorldGroups ? 79 : 97);
+        return result;
     }
 
     @Override

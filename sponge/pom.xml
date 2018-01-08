@@ -71,47 +71,42 @@
     </build>
 
     <dependencies>
-        <!-- LP Sponge Model -->
-        <dependency>
-            <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-sponge-service</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- LP Sponge Proxy for API6 -->
-        <dependency>
-            <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-sponge-service-api6</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- LP Sponge Proxy for API7 -->
-        <dependency>
-            <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-sponge-service-api7</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- Sponge API -->
-        <dependency>
-            <groupId>org.spongepowered</groupId>
-            <artifactId>spongeapi</artifactId>
-            <version>6.0.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- LuckPerms Common -->
+        <!-- common -->
         <dependency>
             <groupId>me.lucko.luckperms</groupId>
             <artifactId>luckperms-common</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
-        <!-- LuckPerms API -->
+
+        <!-- sponge service model -->
         <dependency>
             <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-api</artifactId>
+            <artifactId>luckperms-sponge-service</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <!-- api6 proxy -->
+        <dependency>
+            <groupId>me.lucko.luckperms</groupId>
+            <artifactId>luckperms-sponge-service-api6</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- api7 proxy -->
+        <dependency>
+            <groupId>me.lucko.luckperms</groupId>
+            <artifactId>luckperms-sponge-service-api7</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Sponge -->
+        <dependency>
+            <groupId>org.spongepowered</groupId>
+            <artifactId>spongeapi</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

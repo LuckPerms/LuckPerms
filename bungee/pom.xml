@@ -58,6 +58,22 @@
     </build>
 
     <dependencies>
+        <!-- common -->
+        <dependency>
+            <groupId>me.lucko.luckperms</groupId>
+            <artifactId>luckperms-common</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- jsr305 -->
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- BungeeCord -->
         <dependency>
             <groupId>net.md-5</groupId>
@@ -65,26 +81,8 @@
             <version>1.12-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-        <!-- LuckPerms Common -->
-        <dependency>
-            <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-common</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- LuckPerms API -->
-        <dependency>
-            <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-api</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>3.0.2</version>
-            <scope>provided</scope>
-        </dependency>
+
+
         <!-- RedisBungee -->
         <dependency>
             <groupId>com.imaginarycode.minecraft</groupId>
@@ -92,8 +90,6 @@
             <version>0.4</version>
             <scope>provided</scope>
         </dependency>
-
-        <!-- ************** Migration Plugins ************** -->
         <!-- BungeePerms -->
         <dependency>
             <groupId>net.alpenblock</groupId>

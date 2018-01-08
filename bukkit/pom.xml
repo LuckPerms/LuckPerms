@@ -58,13 +58,31 @@
     </build>
 
     <dependencies>
-        <!-- Spigot API -->
+        <!-- common -->
+        <dependency>
+            <groupId>me.lucko.luckperms</groupId>
+            <artifactId>luckperms-common</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- jsr305 -->
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Spigot -->
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
             <version>1.12.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+
+
         <!-- Vault -->
         <dependency>
             <groupId>net.milkbowl.vault</groupId>
@@ -78,26 +96,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- LuckPerms Common -->
-        <dependency>
-            <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-common</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- LuckPerms API -->
-        <dependency>
-            <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-api</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>3.0.2</version>
-            <scope>provided</scope>
-        </dependency>
         <!-- LilyPad -->
         <dependency>
             <groupId>lilypad.client.connect</groupId>
@@ -105,7 +103,6 @@
             <version>0.0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-        <!-- ************** Migration Plugins ************** -->
         <!-- zPermissions -->
         <dependency>
             <groupId>org.tyrannyofheaven.bukkit</groupId>

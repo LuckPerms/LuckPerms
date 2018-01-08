@@ -28,13 +28,22 @@
     </build>
 
     <dependencies>
-        <!-- LuckPerms API -->
+        <!-- api -->
         <dependency>
             <groupId>me.lucko.luckperms</groupId>
             <artifactId>luckperms-api</artifactId>
             <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- jsr305 -->
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
             <scope>provided</scope>
         </dependency>
+
         <!-- text -->
         <dependency>
             <groupId>net.kyori</groupId>
@@ -60,13 +69,37 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+
+        <!-- gson -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.7</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>19.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- caffeine -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>2.6.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+
         <!-- configurate -->
         <dependency>
             <groupId>ninja.leaping.configurate</groupId>
             <artifactId>configurate-core</artifactId>
             <version>3.3</version>
-            <scope>compile</scope>
-            <optional>true</optional>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.guava</groupId>
@@ -74,6 +107,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- configurate yaml -->
         <dependency>
             <groupId>ninja.leaping.configurate</groupId>
             <artifactId>configurate-yaml</artifactId>
@@ -86,6 +120,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- configurate gson -->
         <dependency>
             <groupId>ninja.leaping.configurate</groupId>
             <artifactId>configurate-gson</artifactId>
@@ -98,6 +133,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- configurate hocon -->
         <dependency>
             <groupId>ninja.leaping.configurate</groupId>
             <artifactId>configurate-hocon</artifactId>
@@ -130,33 +166,6 @@
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>1.14</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- gson -->
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.7</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- guava -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>19.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- caffeine -->
-        <dependency>
-            <groupId>com.github.ben-manes.caffeine</groupId>
-            <artifactId>caffeine</artifactId>
-            <version>2.6.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>3.0.2</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -140,9 +140,12 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private LogDispatcher logDispatcher;
     private Set<UUID> uniqueConnections = ConcurrentHashMap.newKeySet();
 
+    private boolean invalidVersion = false;
+
     @Override
     public void onLoad() {
         if (checkInvalidVersion()) {
+            this.invalidVersion = true;
             return;
         }
 
@@ -158,7 +161,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public void onEnable() {
-        if (checkInvalidVersion()) {
+        if (this.invalidVersion) {
             getLogger().severe("----------------------------------------------------------------------");
             getLogger().severe("Your server version is not compatible with this build of LuckPerms. :(");
             getLogger().severe("");
@@ -332,7 +335,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public void onDisable() {
-        if (checkInvalidVersion()) {
+        if (this.invalidVersion) {
             return;
         }
 
