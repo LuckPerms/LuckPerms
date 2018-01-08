@@ -243,8 +243,7 @@ vault-debug: false
 # If your MySQL server supports it, the "mariadb" option is preferred over "mysql".
 storage-method: h2
 
-# When using a file-based storage type, LuckPerms can monitor the data files for changes, and then
-# schedule automatic updates when changes are detected.
+# When using a file-based storage type, LuckPerms can monitor the data files for changes, and then schedule automatic updates when changes are detected.
 #
 # If you don't want this to happen, set this option to false.
 watch-files: true
@@ -275,27 +274,21 @@ data:
   pool-settings:
 
     # Sets the maximum size of the MySQL connection pool.
-    # Basically this value will determine the maximum number of actual
-    # connections to the database backend.
+    # Basically this value will determine the maximum number of actual connections to the database backend.
     #
-    # More information about determining the size of connection pools can be found here:
-    # https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing
+    # More information about determining the size of connection pools can be found here: https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing
     maximum-pool-size: 10
 
     # Sets the minimum number of idle connections that the pool will try to maintain.
     #
-    # For maximum performance and responsiveness to spike demands, it is recommended to not set
-    # this value and instead allow the pool to act as a fixed size connection pool.
-    # (set this value to the same as 'maximum-pool-size')
+    # For maximum performance and responsiveness to spike demands, it is recommended to not set this value and instead allow the pool to act as a fixed size connection pool. (set this value to the same as 'maximum-pool-size')
     minimum-idle: 10
 
     # This setting controls the maximum lifetime of a connection in the pool in milliseconds.
-    # The value should be at least 30 seconds less than any database or infrastructure imposed
-    # connection time limit.
+    # The value should be at least 30 seconds less than any database or infrastructure imposed connection time limit.
     maximum-lifetime: 1800000 # 30 minutes
 
-    # This setting controls the maximum number of milliseconds that the plugin will wait for a
-    # connection from the pool, before timing out.
+    # This setting controls the maximum number of milliseconds that the plugin will wait for a connection from the pool, before timing out.
     connection-timeout: 5000 # 5 seconds
 
     # This setting allows you to define extra properties for connections.
@@ -303,41 +296,32 @@ data:
       useUnicode: true
       characterEncoding: utf8
 
-  # The prefix for all LuckPerms tables. Change this is you want to use different tables for
-  # different servers.
+  # The prefix for all LuckPerms tables. Change this is you want to use different tables for different servers.
   #
-  # This should *not* be set to "lp_" if you have previously ran LuckPerms v2.16.81 or earlier with
-  # this database.
+  # This should *not* be set to "lp_" if you have previously ran LuckPerms v2.16.81 or earlier with this database.
   table_prefix: 'luckperms_'
 
-  # The prefix to use for all LuckPerms collections. Change this if you want to use different
-  # collections for different servers. The default is no prefix.
+  # The prefix to use for all LuckPerms collections. Change this if you want to use different collections for different servers. The default is no prefix.
   mongodb_collection_prefix: ''
 
   # This option controls how frequently LuckPerms will perform a sync task.
-  # A sync task will refresh all data from the storage, and ensure that the most up-to-date data is
-  # being used by the plugin.
+  # A sync task will refresh all data from the storage, and ensure that the most up-to-date data is being used by the plugin.
   #
-  # This is disabled by default, as most users will not need it. However, if you're using a remote
-  # storage type without a messaging service setup, you may wish to set this value to something like
-  # 3.
+  # This is disabled by default, as most users will not need it. However, if you're using a remote storage type without a messaging service setup, you may wish to set this value to something like 3.
   #
   # Set to -1 to disable the task completely.
   sync-minutes: -1
 
 # Settings for the messaging service
 #
-# If enabled and configured, LuckPerms will use the messaging system to inform other
-# connected servers of changes. Use the command "/luckperms networksync" to push changes.
+# If enabled and configured, LuckPerms will use the messaging system to inform other connected servers of changes. Use the command "/luckperms networksync" to push changes.
 # Data is NOT stored using this service. It is only used as a messaging platform.
 #
-# If you decide to enable this feature, you should set "sync-minutes" to -1, as there is no need for
-# LuckPerms to poll the database for changes.
+# If you decide to enable this feature, you should set "sync-minutes" to -1, as there is no need for LuckPerms to poll the database for changes.
 #
 # Available options:
 # -> bungee   uses the plugin messaging channels. Must be enabled on all connected servers to work.
-# -> lilypad  uses lilypad pub sub to push changes. You need to have the LilyPad-Connect plugin
-#             installed.
+# -> lilypad  uses lilypad pub sub to push changes. You need to have the LilyPad-Connect plugin installed.
 # -> redis    uses redis pub sub to push changes. Your redis server must be configured below.
 # -> none     nothing
 messaging-service: none
@@ -350,9 +334,7 @@ push-log-entries: true
 
 # If LuckPerms should broadcast received logging entries to players on this platform.
 #
-# If you have LuckPerms installed on your backend servers as well as a BungeeCord proxy, you should
-# set this option to false on either your backends or your proxies, to avoid players being messaged
-# twice about log entries.
+# If you have LuckPerms installed on your backend servers as well as a BungeeCord proxy, you should set this option to false on either your backends or your proxies, to avoid players being messaged twice about log entries.
 broadcast-received-log-entries: true
 
 # Settings for Redis.
@@ -372,25 +354,15 @@ redis:
 # This section allows you to define defaults to give users whenever they connect to the server.
 # The default assignments are highly configurable and conditional.
 #
-# There is one default assignment built into LuckPerms, which will add all users to the "default"
-# group if they are not a member of any other group. This setting cannot be disabled. However, you
-# can use this section to add more of your own.
+# There is one default assignment built into LuckPerms, which will add all users to the "default" group if they are not a member of any other group. This setting cannot be disabled. However, you can use this section to add more of your own.
 #
 # IMPORTANT:
-# In order to save storage space, LuckPerms does not store users who have no permissions defined,
-# and are only a member of the default group. Adding default assignments to this section will negate
-# this effect. It is HIGHLY RECCOMENDED that instead of assigning defaults here, you add permissions
-# to the "default" group, or set the "default" group to inherit other groups, and then use the
-# group-name-rewrite rule above.
+# In order to save storage space, LuckPerms does not store users who have no permissions defined, and are only a member of the default group. Adding default assignments to this section will negate this effect. It is HIGHLY RECCOMENDED that instead of assigning defaults here, you add permissions to the "default" group, or set the "default" group to inherit other groups, and then use the group-name-rewrite rule above.
 #
-# It is also important to note that these rules are considered every time a player logs into the
-# server, and are applied directly to the user's data. Simply removing a rule here will not reverse
-# the effect of that rule on any users who have already had it applied to them.
+# It is also important to note that these rules are considered every time a player logs into the server, and are applied directly to the user's data. Simply removing a rule here will not reverse the effect of that rule on any users who have already had it applied to them.
 #
-# The "has" and "lacks" conditions below support standard boolean logic, using the 'and' & 'or'
-# characters used in Java.
-# e.g. "(some.other.permission | some.permission.other) & some.thing.else" == a user has
-# 'some.other.permission', or 'some.permission.other', and they also have 'some.thing.else'
+# The "has" and "lacks" conditions below support standard boolean logic, using the 'and' & 'or' characters used in Java.
+# e.g. "(some.other.permission | some.permission.other) & some.thing.else" == a user has 'some.other.permission', or 'some.permission.other', and they also have 'some.thing.else'
 #
 # Groups are represented by the permission node: group.<group name>
 # Per server and per world nodes are represented by "server-world/permission" or "server/permission"
