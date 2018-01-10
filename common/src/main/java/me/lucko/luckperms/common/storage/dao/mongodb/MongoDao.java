@@ -44,9 +44,8 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.managers.GenericUserManager;
-import me.lucko.luckperms.common.managers.GroupManager;
-import me.lucko.luckperms.common.managers.TrackManager;
+import me.lucko.luckperms.common.managers.group.GroupManager;
+import me.lucko.luckperms.common.managers.track.TrackManager;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -268,7 +267,7 @@ public class MongoDao extends AbstractDao {
                         c.replaceOne(new Document("_id", user.getUuid()), userToDoc(user));
                     }
                 } else {
-                    if (GenericUserManager.shouldSave(user)) {
+                    if (this.plugin.getUserManager().shouldSave(user)) {
                         user.clearNodes();
                         user.getPrimaryGroup().setStoredValue(null);
                         this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
@@ -287,7 +286,7 @@ public class MongoDao extends AbstractDao {
         user.getIoLock().lock();
         try {
             MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
-            if (!GenericUserManager.shouldSave(user)) {
+            if (!this.plugin.getUserManager().shouldSave(user)) {
                 c.deleteOne(new Document("_id", user.getUuid()));
             } else {
                 c.replaceOne(new Document("_id", user.getUuid()), userToDoc(user), new UpdateOptions().upsert(true));
@@ -409,7 +408,7 @@ public class MongoDao extends AbstractDao {
             throw new RuntimeException("Exception occurred whilst loading a group");
         }
 
-        GroupManager gm = this.plugin.getGroupManager();
+        GroupManager<?> gm = this.plugin.getGroupManager();
         gm.getAll().values().stream()
                 .filter(g -> !groups.contains(g.getName()))
                 .forEach(gm::unload);
@@ -535,7 +534,7 @@ public class MongoDao extends AbstractDao {
             throw new RuntimeException("Exception occurred whilst loading a track");
         }
 
-        TrackManager tm = this.plugin.getTrackManager();
+        TrackManager<?> tm = this.plugin.getTrackManager();
         tm.getAll().values().stream()
                 .filter(t -> !tracks.contains(t.getName()))
                 .forEach(tm::unload);

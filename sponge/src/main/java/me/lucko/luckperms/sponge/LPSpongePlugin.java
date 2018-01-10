@@ -52,8 +52,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.NoopLocaleManager;
 import me.lucko.luckperms.common.locale.SimpleLocaleManager;
 import me.lucko.luckperms.common.logging.SenderLogger;
-import me.lucko.luckperms.common.managers.GenericTrackManager;
-import me.lucko.luckperms.common.managers.TrackManager;
+import me.lucko.luckperms.common.managers.track.StandardTrackManager;
 import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -168,7 +167,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private LuckPermsConfiguration configuration;
     private SpongeUserManager userManager;
     private SpongeGroupManager groupManager;
-    private TrackManager trackManager;
+    private StandardTrackManager trackManager;
     private Storage storage;
     private FileWatcher fileWatcher = null;
     private ExtendedMessagingService messagingService = null;
@@ -243,7 +242,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         this.uuidCache = new UuidCache(this);
         this.userManager = new SpongeUserManager(this);
         this.groupManager = new SpongeGroupManager(this);
-        this.trackManager = new GenericTrackManager(this);
+        this.trackManager = new StandardTrackManager(this);
         this.calculatorFactory = new SpongeCalculatorFactory(this);
         this.cachedStateManager = new CachedStateManager();
 
@@ -561,7 +560,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public TrackManager getTrackManager() {
+    public StandardTrackManager getTrackManager() {
         return this.trackManager;
     }
 

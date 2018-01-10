@@ -29,7 +29,7 @@ import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.utils.LoginHelper;
+import me.lucko.luckperms.common.utils.AbstractLoginListener;
 
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
@@ -43,10 +43,11 @@ import net.md_5.bungee.event.EventPriority;
 
 import java.util.concurrent.TimeUnit;
 
-public class BungeeConnectionListener implements Listener {
+public class BungeeConnectionListener extends AbstractLoginListener implements Listener {
     private final LPBungeePlugin plugin;
 
     public BungeeConnectionListener(LPBungeePlugin plugin) {
+        super(plugin);
         this.plugin = plugin;
     }
 
@@ -82,7 +83,7 @@ public class BungeeConnectionListener implements Listener {
                - creating a user instance in the UserManager for this connection.
                - setting up cached data. */
             try {
-                User user = LoginHelper.loadUser(this.plugin, c.getUniqueId(), c.getName(), true);
+                User user = loadUser(c.getUniqueId(), c.getName());
                 this.plugin.getEventFactory().handleUserLoginProcess(c.getUniqueId(), c.getName(), user);
             } catch (Exception ex) {
                 this.plugin.getLog().severe("Exception occured whilst loading data for " + c.getUniqueId() + " - " + c.getName());
@@ -98,10 +99,6 @@ public class BungeeConnectionListener implements Listener {
 
             // finally, complete our intent to modify state, so the proxy can continue handling the connection.
             e.completeIntent(this.plugin);
-
-            // schedule a cleanup of the users data in a few seconds.
-            // this should cover the eventuality that the login fails.
-            this.plugin.getUserManager().scheduleUnload(c.getUniqueId());
         });
     }
 
@@ -135,8 +132,9 @@ public class BungeeConnectionListener implements Listener {
     // Wait until the last priority to unload, so plugins can still perform permission checks on this event
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerQuit(PlayerDisconnectEvent e) {
-        // Request that the users data is unloaded.
-        this.plugin.getUserManager().scheduleUnload(e.getPlayer().getUniqueId());
+        // Register with the housekeeper, so the User's instance will stick
+        // around for a bit after they disconnect
+        this.plugin.getUserManager().getHouseKeeper().registerUsage(e.getPlayer().getUniqueId());
     }
 
 }

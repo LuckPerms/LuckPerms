@@ -63,12 +63,9 @@ import me.lucko.luckperms.common.locale.NoopLocaleManager;
 import me.lucko.luckperms.common.locale.SimpleLocaleManager;
 import me.lucko.luckperms.common.logging.Logger;
 import me.lucko.luckperms.common.logging.SenderLogger;
-import me.lucko.luckperms.common.managers.GenericGroupManager;
-import me.lucko.luckperms.common.managers.GenericTrackManager;
-import me.lucko.luckperms.common.managers.GenericUserManager;
-import me.lucko.luckperms.common.managers.GroupManager;
-import me.lucko.luckperms.common.managers.TrackManager;
-import me.lucko.luckperms.common.managers.UserManager;
+import me.lucko.luckperms.common.managers.group.StandardGroupManager;
+import me.lucko.luckperms.common.managers.track.StandardTrackManager;
+import me.lucko.luckperms.common.managers.user.StandardUserManager;
 import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -80,7 +77,6 @@ import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
-import me.lucko.luckperms.common.utils.LoginHelper;
 import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 
@@ -115,9 +111,9 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private BukkitCommandExecutor commandManager;
     private VaultHookManager vaultHookManager = null;
     private LuckPermsConfiguration configuration;
-    private UserManager userManager;
-    private GroupManager groupManager;
-    private TrackManager trackManager;
+    private StandardUserManager userManager;
+    private StandardGroupManager groupManager;
+    private StandardTrackManager trackManager;
     private Storage storage;
     private FileWatcher fileWatcher = null;
     private ExtendedMessagingService messagingService = null;
@@ -205,7 +201,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         this.scheduler.syncLater(new BukkitProcessorsSetupTask(this), 1L);
 
         // register events
-        getServer().getPluginManager().registerEvents(new BukkitConnectionListener(this), this);
+        BukkitConnectionListener connectionListener = new BukkitConnectionListener(this);
+        getServer().getPluginManager().registerEvents(connectionListener, this);
         getServer().getPluginManager().registerEvents(new BukkitPlatformListener(this), this);
 
         if (getConfiguration().get(ConfigKeys.WATCH_FILES)) {
@@ -237,9 +234,9 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         // load internal managers
         getLog().info("Loading internal permission managers...");
         this.uuidCache = new UuidCache(this);
-        this.userManager = new GenericUserManager(this);
-        this.groupManager = new GenericGroupManager(this);
-        this.trackManager = new GenericTrackManager(this);
+        this.userManager = new StandardUserManager(this);
+        this.groupManager = new StandardGroupManager(this);
+        this.trackManager = new StandardTrackManager(this);
         this.calculatorFactory = new BukkitCalculatorFactory(this);
         this.cachedStateManager = new CachedStateManager();
 
@@ -312,7 +309,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         for (Player player : getServer().getOnlinePlayers()) {
             this.scheduler.doAsync(() -> {
                 try {
-                    LoginHelper.loadUser(this, player.getUniqueId(), player.getName(), false);
+                    connectionListener.loadUser(player.getUniqueId(), player.getName());
                     User user = getUserManager().getIfLoaded(getUuidCache().getUUID(player.getUniqueId()));
                     if (user != null) {
                         this.scheduler.doSync(() -> {
@@ -584,17 +581,17 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public UserManager getUserManager() {
+    public StandardUserManager getUserManager() {
         return this.userManager;
     }
 
     @Override
-    public GroupManager getGroupManager() {
+    public StandardGroupManager getGroupManager() {
         return this.groupManager;
     }
 
     @Override
-    public TrackManager getTrackManager() {
+    public StandardTrackManager getTrackManager() {
         return this.trackManager;
     }
 

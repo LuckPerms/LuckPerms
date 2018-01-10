@@ -99,6 +99,11 @@ public class ApiStorage implements Storage {
     @Override
     public CompletableFuture<Boolean> loadUser(@Nonnull UUID uuid, String username) {
         Objects.requireNonNull(uuid, "uuid");
+
+        if (this.plugin.getUserManager().getIfLoaded(uuid) == null) {
+            this.plugin.getUserManager().getHouseKeeper().registerApiUsage(uuid);
+        }
+
         return this.handle.noBuffer().loadUser(uuid, username == null ? null : checkUsername(username)).thenApply(Objects::nonNull);
     }
 

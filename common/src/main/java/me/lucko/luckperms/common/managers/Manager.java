@@ -34,16 +34,17 @@ import java.util.function.Function;
  * A class which manages instances of a class
  *
  * @param <I> the class used to identify each object held in this manager
- * @param <T> the class this manager is "managing"
+ * @param <C> the super class being managed
+ * @param <T> the implementation class this manager is "managing"
  */
-public interface Manager<I, T extends Identifiable<I>> extends Function<I, T> {
+public interface Manager<I, C extends Identifiable<I>, T extends C> extends Function<I, T> {
 
     /**
      * Gets a map containing all cached instances held by this manager.
      *
      * @return all instances held in this manager
      */
-    Map<I, ? extends T> getAll();
+    Map<I, T> getAll();
 
     /**
      * Gets or creates an object by id
@@ -81,9 +82,9 @@ public interface Manager<I, T extends Identifiable<I>> extends Function<I, T> {
     /**
      * Removes and unloads the object from the manager
      *
-     * @param t The object to unload
+     * @param object The object to unload
      */
-    void unload(T t);
+    void unload(C object);
 
     /**
      * Unloads all objects from the manager

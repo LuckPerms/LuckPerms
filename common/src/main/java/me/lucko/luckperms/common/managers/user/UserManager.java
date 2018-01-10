@@ -23,16 +23,16 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.managers;
+package me.lucko.luckperms.common.managers.user;
 
+import me.lucko.luckperms.common.managers.Manager;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.references.Identifiable;
 import me.lucko.luckperms.common.references.UserIdentifier;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public interface UserManager extends Manager<UserIdentifier, User> {
+public interface UserManager<T extends User> extends Manager<UserIdentifier, User, T> {
 
     /**
      * Get a user object by name
@@ -40,7 +40,7 @@ public interface UserManager extends Manager<UserIdentifier, User> {
      * @param name The name to search by
      * @return a {@link User} object if the user is loaded, returns null if the user is not loaded
      */
-    User getByUsername(String name);
+    T getByUsername(String name);
 
     /**
      * Get a user object by uuid
@@ -48,7 +48,7 @@ public interface UserManager extends Manager<UserIdentifier, User> {
      * @param uuid The uuid to search by
      * @return a {@link User} object if the user is loaded, returns null if the user is not loaded
      */
-    User getIfLoaded(UUID uuid);
+    T getIfLoaded(UUID uuid);
 
     /**
      * Gives the user the default group if necessary.
@@ -58,18 +58,26 @@ public interface UserManager extends Manager<UserIdentifier, User> {
     boolean giveDefaultIfNeeded(User user, boolean save);
 
     /**
-     * Checks to see if the user is online, and if they are not, runs {@link #unload(Identifiable)}
+     * Check whether the user's state indicates that they should be persisted to storage.
      *
-     * @param user The user to be cleaned up
+     * @param user the user to check
+     * @return true if the user should be saved
      */
-    boolean cleanup(User user);
+    boolean shouldSave(User user);
 
     /**
-     * Schedules a task to cleanup a user after a certain period of time, if they're not on the server anymore.
+     * Gets the instance responsible for unloading unneeded users.
      *
-     * @param uuid external uuid of the player
+     * @return the housekeeper
      */
-    void scheduleUnload(UUID uuid);
+    UserHousekeeper getHouseKeeper();
+
+    /**
+     * Unloads the user if a corresponding player is not online
+     *
+     * @param user the user
+     */
+    void cleanup(User user);
 
     /**
      * Reloads the data of all online users

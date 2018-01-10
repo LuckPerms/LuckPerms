@@ -31,7 +31,7 @@ import me.lucko.luckperms.bukkit.model.PermissibleInjector;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.utils.LoginHelper;
+import me.lucko.luckperms.common.utils.AbstractLoginListener;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -47,13 +47,14 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public class BukkitConnectionListener implements Listener {
+public class BukkitConnectionListener extends AbstractLoginListener implements Listener {
     private final LPBukkitPlugin plugin;
 
     private final Set<UUID> deniedAsyncLogin = Collections.synchronizedSet(new HashSet<>());
     private final Set<UUID> deniedLogin = Collections.synchronizedSet(new HashSet<>());
 
     public BukkitConnectionListener(LPBukkitPlugin plugin) {
+        super(plugin);
         this.plugin = plugin;
     }
 
@@ -86,7 +87,7 @@ public class BukkitConnectionListener implements Listener {
            - creating a user instance in the UserManager for this connection.
            - setting up cached data. */
         try {
-            User user = LoginHelper.loadUser(this.plugin, e.getUniqueId(), e.getName(), false);
+            User user = loadUser(e.getUniqueId(), e.getName());
             this.plugin.getEventFactory().handleUserLoginProcess(e.getUniqueId(), e.getName(), user);
         } catch (Exception ex) {
             this.plugin.getLog().severe("Exception occured whilst loading data for " + e.getUniqueId() + " - " + e.getName());
@@ -114,12 +115,6 @@ public class BukkitConnectionListener implements Listener {
             }
 
             return;
-        }
-
-        // Login event was cancelled by another plugin, but it wasn't cancelled when we handled it at LOW
-        if (e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
-            // Schedule cleanup of this user.
-            this.plugin.getUserManager().scheduleUnload(e.getUniqueId());
         }
     }
 
@@ -180,8 +175,6 @@ public class BukkitConnectionListener implements Listener {
 
         // Login event was cancelled by another plugin since we first loaded their data
         if (denied || e.getResult() != PlayerLoginEvent.Result.ALLOWED) {
-            // Schedule cleanup of this user.
-            this.plugin.getUserManager().scheduleUnload(e.getPlayer().getUniqueId());
             return;
         }
 
@@ -206,8 +199,9 @@ public class BukkitConnectionListener implements Listener {
             player.setOp(false);
         }
 
-        // Request that the users data is unloaded.
-        this.plugin.getUserManager().scheduleUnload(player.getUniqueId());
+        // Register with the housekeeper, so the User's instance will stick
+        // around for a bit after they disconnect
+        this.plugin.getUserManager().getHouseKeeper().registerUsage(player.getUniqueId());
     }
 
 }

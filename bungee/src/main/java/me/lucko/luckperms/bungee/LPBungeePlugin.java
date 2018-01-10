@@ -57,12 +57,9 @@ import me.lucko.luckperms.common.locale.NoopLocaleManager;
 import me.lucko.luckperms.common.locale.SimpleLocaleManager;
 import me.lucko.luckperms.common.logging.Logger;
 import me.lucko.luckperms.common.logging.SenderLogger;
-import me.lucko.luckperms.common.managers.GenericGroupManager;
-import me.lucko.luckperms.common.managers.GenericTrackManager;
-import me.lucko.luckperms.common.managers.GenericUserManager;
-import me.lucko.luckperms.common.managers.GroupManager;
-import me.lucko.luckperms.common.managers.TrackManager;
-import me.lucko.luckperms.common.managers.UserManager;
+import me.lucko.luckperms.common.managers.group.StandardGroupManager;
+import me.lucko.luckperms.common.managers.track.StandardTrackManager;
+import me.lucko.luckperms.common.managers.user.StandardUserManager;
 import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -101,9 +98,9 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private SchedulerAdapter scheduler;
     private CommandManager commandManager;
     private LuckPermsConfiguration configuration;
-    private UserManager userManager;
-    private GroupManager groupManager;
-    private TrackManager trackManager;
+    private StandardUserManager userManager;
+    private StandardGroupManager groupManager;
+    private StandardTrackManager trackManager;
     private Storage storage;
     private FileWatcher fileWatcher = null;
     private ExtendedMessagingService messagingService = null;
@@ -183,9 +180,9 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         // load internal managers
         getLog().info("Loading internal permission managers...");
         this.uuidCache = new UuidCache(this);
-        this.userManager = new GenericUserManager(this);
-        this.groupManager = new GenericGroupManager(this);
-        this.trackManager = new GenericTrackManager(this);
+        this.userManager = new StandardUserManager(this);
+        this.groupManager = new StandardGroupManager(this);
+        this.trackManager = new StandardTrackManager(this);
         this.calculatorFactory = new BungeeCalculatorFactory(this);
         this.cachedStateManager = new CachedStateManager();
 
@@ -394,17 +391,17 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     }
 
     @Override
-    public UserManager getUserManager() {
+    public StandardUserManager getUserManager() {
         return this.userManager;
     }
 
     @Override
-    public GroupManager getGroupManager() {
+    public StandardGroupManager getGroupManager() {
         return this.groupManager;
     }
 
     @Override
-    public TrackManager getTrackManager() {
+    public StandardTrackManager getTrackManager() {
         return this.trackManager;
     }
 

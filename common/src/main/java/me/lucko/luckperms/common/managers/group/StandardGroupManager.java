@@ -23,40 +23,20 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.delegates.manager;
+package me.lucko.luckperms.common.managers.group;
 
-import me.lucko.luckperms.api.Group;
-import me.lucko.luckperms.api.manager.GroupManager;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+public class StandardGroupManager extends AbstractGroupManager<Group> {
+    private final LuckPermsPlugin plugin;
 
-import javax.annotation.Nonnull;
-
-public class ApiGroupManager implements GroupManager {
-    private final me.lucko.luckperms.common.managers.group.GroupManager<?> handle;
-
-    public ApiGroupManager(me.lucko.luckperms.common.managers.group.GroupManager<?> handle) {
-        this.handle = handle;
+    public StandardGroupManager(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
     }
 
     @Override
-    public Group getGroup(@Nonnull String name) {
-        Objects.requireNonNull(name, "name");
-        me.lucko.luckperms.common.model.Group group = this.handle.getIfLoaded(name);
-        return group == null ? null : group.getDelegate();
-    }
-
-    @Nonnull
-    @Override
-    public Set<Group> getLoadedGroups() {
-        return this.handle.getAll().values().stream().map(me.lucko.luckperms.common.model.Group::getDelegate).collect(Collectors.toSet());
-    }
-
-    @Override
-    public boolean isLoaded(@Nonnull String name) {
-        Objects.requireNonNull(name, "name");
-        return this.handle.isLoaded(name);
+    public Group apply(String name) {
+        return new Group(name, this.plugin);
     }
 }

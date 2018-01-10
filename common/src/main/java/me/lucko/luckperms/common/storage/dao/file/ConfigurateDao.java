@@ -37,9 +37,8 @@ import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.contexts.ContextSetConfigurateSerializer;
-import me.lucko.luckperms.common.managers.GenericUserManager;
-import me.lucko.luckperms.common.managers.GroupManager;
-import me.lucko.luckperms.common.managers.TrackManager;
+import me.lucko.luckperms.common.managers.group.GroupManager;
+import me.lucko.luckperms.common.managers.track.TrackManager;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -400,7 +399,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                     saveUser(user);
                 }
             } else {
-                if (GenericUserManager.shouldSave(user)) {
+                if (this.plugin.getUserManager().shouldSave(user)) {
                     user.clearNodes();
                     user.getPrimaryGroup().setStoredValue(null);
                     this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
@@ -419,7 +418,7 @@ public abstract class ConfigurateDao extends AbstractDao {
     public void saveUser(User user) throws Exception {
         user.getIoLock().lock();
         try {
-            if (!GenericUserManager.shouldSave(user)) {
+            if (!this.plugin.getUserManager().shouldSave(user)) {
                 saveFile(StorageLocation.USER, user.getUuid().toString(), null);
             } else {
                 ConfigurationNode data = SimpleConfigurationNode.root();
@@ -562,7 +561,7 @@ public abstract class ConfigurateDao extends AbstractDao {
             throw new RuntimeException("Exception occurred whilst loading a group");
         }
 
-        GroupManager gm = this.plugin.getGroupManager();
+        GroupManager<?> gm = this.plugin.getGroupManager();
         gm.getAll().values().stream()
                 .filter(g -> !groups.contains(g.getName()))
                 .forEach(gm::unload);
@@ -718,7 +717,7 @@ public abstract class ConfigurateDao extends AbstractDao {
             throw new RuntimeException("Exception occurred whilst loading a track");
         }
 
-        TrackManager tm = this.plugin.getTrackManager();
+        TrackManager<?> tm = this.plugin.getTrackManager();
         tm.getAll().values().stream()
                 .filter(t -> !tracks.contains(t.getName()))
                 .forEach(tm::unload);

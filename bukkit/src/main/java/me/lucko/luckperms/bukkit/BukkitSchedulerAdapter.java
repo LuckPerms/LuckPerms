@@ -28,7 +28,10 @@ package me.lucko.luckperms.bukkit;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import me.lucko.luckperms.common.plugin.SchedulerAdapter;
+import me.lucko.luckperms.common.plugin.SchedulerTask;
+import me.lucko.luckperms.common.utils.SafeIterator;
 
+import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Set;
@@ -51,7 +54,7 @@ public class BukkitSchedulerAdapter implements SchedulerAdapter {
 
     private boolean useFallback = true;
 
-    private final Set<BukkitTask> tasks = ConcurrentHashMap.newKeySet();
+    private final Set<SchedulerTask> tasks = ConcurrentHashMap.newKeySet();
 
     public BukkitSchedulerAdapter(LPBukkitPlugin plugin) {
         this.plugin = plugin;
@@ -60,6 +63,10 @@ public class BukkitSchedulerAdapter implements SchedulerAdapter {
         this.asyncFallback = new FallbackAsyncExecutor();
         this.asyncBukkit = new BukkitAsyncExecutor();
         this.async = new AsyncExecutor();
+    }
+
+    private BukkitScheduler scheduler() {
+        return this.plugin.getServer().getScheduler();
     }
 
     @Override
@@ -73,30 +80,32 @@ public class BukkitSchedulerAdapter implements SchedulerAdapter {
     }
 
     @Override
-    public void asyncRepeating(Runnable runnable, long intervalTicks) {
-        BukkitTask task = this.plugin.getServer().getScheduler().runTaskTimerAsynchronously(this.plugin, runnable, intervalTicks, intervalTicks);
+    public SchedulerTask asyncRepeating(Runnable runnable, long intervalTicks) {
+        SchedulerTask task = new BukkitSchedulerTask(scheduler().runTaskTimerAsynchronously(this.plugin, runnable, intervalTicks, intervalTicks));
         this.tasks.add(task);
+        return task;
     }
 
     @Override
-    public void syncRepeating(Runnable runnable, long intervalTicks) {
-        BukkitTask task = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, runnable, intervalTicks, intervalTicks);
+    public SchedulerTask syncRepeating(Runnable runnable, long intervalTicks) {
+        SchedulerTask task = new BukkitSchedulerTask(scheduler().runTaskTimer(this.plugin, runnable, intervalTicks, intervalTicks));
         this.tasks.add(task);
+        return task;
     }
 
     @Override
-    public void asyncLater(Runnable runnable, long delayTicks) {
-        this.plugin.getServer().getScheduler().runTaskLaterAsynchronously(this.plugin, runnable, delayTicks);
+    public SchedulerTask asyncLater(Runnable runnable, long delayTicks) {
+        return new BukkitSchedulerTask(scheduler().runTaskLaterAsynchronously(this.plugin, runnable, delayTicks));
     }
 
     @Override
-    public void syncLater(Runnable runnable, long delayTicks) {
-        this.plugin.getServer().getScheduler().scheduleSyncDelayedTask(this.plugin, runnable, delayTicks);
+    public SchedulerTask syncLater(Runnable runnable, long delayTicks) {
+        return new BukkitSchedulerTask(scheduler().runTaskLater(this.plugin, runnable, delayTicks));
     }
 
     @Override
     public void shutdown() {
-        this.tasks.forEach(BukkitTask::cancel);
+        SafeIterator.iterate(this.tasks, SchedulerTask::cancel);
 
         // wait for executor
         this.asyncFallback.shutdown();
@@ -158,6 +167,19 @@ public class BukkitSchedulerAdapter implements SchedulerAdapter {
     private static final class FallbackAsyncExecutor extends ThreadPoolExecutor {
         private FallbackAsyncExecutor() {
             super(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), new ThreadFactoryBuilder().setNameFormat("luckperms-fallback-%d").build());
+        }
+    }
+
+    private static final class BukkitSchedulerTask implements SchedulerTask {
+        private final BukkitTask task;
+
+        private BukkitSchedulerTask(BukkitTask task) {
+            this.task = task;
+        }
+
+        @Override
+        public void cancel() {
+            this.task.cancel();
         }
     }
 

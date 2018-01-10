@@ -23,40 +23,40 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.delegates.manager;
+package me.lucko.luckperms.common.managers.group;
 
-import me.lucko.luckperms.api.Group;
-import me.lucko.luckperms.api.manager.GroupManager;
+import me.lucko.luckperms.common.managers.AbstractManager;
+import me.lucko.luckperms.common.model.Group;
 
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+public abstract class AbstractGroupManager<T extends Group> extends AbstractManager<String, Group, T> implements GroupManager<T> {
 
-import javax.annotation.Nonnull;
+    @Override
+    public T getByDisplayName(String name) {
+        // try to get an exact match first
+        T g = getIfLoaded(name);
+        if (g != null) {
+            return g;
+        }
 
-public class ApiGroupManager implements GroupManager {
-    private final me.lucko.luckperms.common.managers.group.GroupManager<?> handle;
+        // then try exact display name matches
+        for (T group : getAll().values()) {
+            if (group.getDisplayName().isPresent() && group.getDisplayName().get().equals(name)) {
+                return group;
+            }
+        }
 
-    public ApiGroupManager(me.lucko.luckperms.common.managers.group.GroupManager<?> handle) {
-        this.handle = handle;
+        // then try case insensitive name matches
+        for (T group : getAll().values()) {
+            if (group.getDisplayName().isPresent() && group.getDisplayName().get().equalsIgnoreCase(name)) {
+                return group;
+            }
+        }
+
+        return null;
     }
 
     @Override
-    public Group getGroup(@Nonnull String name) {
-        Objects.requireNonNull(name, "name");
-        me.lucko.luckperms.common.model.Group group = this.handle.getIfLoaded(name);
-        return group == null ? null : group.getDelegate();
-    }
-
-    @Nonnull
-    @Override
-    public Set<Group> getLoadedGroups() {
-        return this.handle.getAll().values().stream().map(me.lucko.luckperms.common.model.Group::getDelegate).collect(Collectors.toSet());
-    }
-
-    @Override
-    public boolean isLoaded(@Nonnull String name) {
-        Objects.requireNonNull(name, "name");
-        return this.handle.isLoaded(name);
+    protected String sanitizeIdentifier(String s) {
+        return s.toLowerCase();
     }
 }

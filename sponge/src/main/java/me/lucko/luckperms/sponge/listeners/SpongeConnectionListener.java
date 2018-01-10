@@ -28,7 +28,7 @@ package me.lucko.luckperms.sponge.listeners;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.utils.LoginHelper;
+import me.lucko.luckperms.common.utils.AbstractLoginListener;
 import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 
@@ -45,13 +45,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public class SpongeConnectionListener {
+public class SpongeConnectionListener extends AbstractLoginListener {
     private final LPSpongePlugin plugin;
 
     private final Set<UUID> deniedAsyncLogin = Collections.synchronizedSet(new HashSet<>());
     private final Set<UUID> deniedLogin = Collections.synchronizedSet(new HashSet<>());
 
     public SpongeConnectionListener(LPSpongePlugin plugin) {
+        super(plugin);
         this.plugin = plugin;
     }
 
@@ -80,7 +81,7 @@ public class SpongeConnectionListener {
            - creating a user instance in the UserManager for this connection.
            - setting up cached data. */
         try {
-            User user = LoginHelper.loadUser(this.plugin, p.getUniqueId(), username, false);
+            User user = loadUser(p.getUniqueId(), username);
             this.plugin.getEventFactory().handleUserLoginProcess(p.getUniqueId(), username, user);
         } catch (Exception ex) {
             this.plugin.getLog().severe("Exception occured whilst loading data for " + p.getUniqueId() + " - " + p.getName());
@@ -165,6 +166,10 @@ public class SpongeConnectionListener {
 
         // Unload the user from memory when they disconnect
         cache.clearCache(e.getTargetEntity().getUniqueId());
+
+        // Register with the housekeeper, so the User's instance will stick
+        // around for a bit after they disconnect
+        this.plugin.getUserManager().getHouseKeeper().registerUsage(e.getTargetEntity().getUniqueId());
     }
 
 }

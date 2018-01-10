@@ -23,25 +23,16 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.managers;
+package me.lucko.luckperms.common.plugin;
 
-import me.lucko.luckperms.common.model.Track;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+/**
+ * Represents a scheduled task
+ */
+public interface SchedulerTask {
 
-public class GenericTrackManager extends AbstractManager<String, Track> implements TrackManager {
-    private final LuckPermsPlugin plugin;
+    /**
+     * Cancels the task.
+     */
+    void cancel();
 
-    public GenericTrackManager(LuckPermsPlugin plugin) {
-        this.plugin = plugin;
-    }
-
-    @Override
-    public Track apply(String name) {
-        return new Track(name, this.plugin);
-    }
-
-    @Override
-    protected String sanitizeIdentifier(String s) {
-        return s.toLowerCase();
-    }
 }

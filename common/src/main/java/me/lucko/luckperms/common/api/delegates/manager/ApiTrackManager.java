@@ -35,9 +35,9 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 public class ApiTrackManager implements TrackManager {
-    private final me.lucko.luckperms.common.managers.TrackManager handle;
+    private final me.lucko.luckperms.common.managers.track.TrackManager<?> handle;
 
-    public ApiTrackManager(me.lucko.luckperms.common.managers.TrackManager handle) {
+    public ApiTrackManager(me.lucko.luckperms.common.managers.track.TrackManager<?> handle) {
         this.handle = handle;
     }
 

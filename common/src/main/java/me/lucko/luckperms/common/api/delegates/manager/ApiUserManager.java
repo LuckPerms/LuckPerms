@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.api.delegates.manager;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.manager.UserManager;
 import me.lucko.luckperms.common.api.delegates.model.ApiUser;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
 
 import java.util.Objects;
@@ -39,11 +38,9 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 public class ApiUserManager implements UserManager {
-    private final LuckPermsPlugin plugin;
-    private final me.lucko.luckperms.common.managers.UserManager handle;
+    private final me.lucko.luckperms.common.managers.user.UserManager<?> handle;
 
-    public ApiUserManager(LuckPermsPlugin plugin, me.lucko.luckperms.common.managers.UserManager handle) {
-        this.plugin = plugin;
+    public ApiUserManager(me.lucko.luckperms.common.managers.user.UserManager<?> handle) {
         this.handle = handle;
     }
 
@@ -76,6 +73,6 @@ public class ApiUserManager implements UserManager {
     @Override
     public void cleanupUser(@Nonnull User user) {
         Objects.requireNonNull(user, "user");
-        this.handle.scheduleUnload(this.plugin.getUuidCache().getExternalUUID(ApiUser.cast(user).getUuid()));
+        this.handle.getHouseKeeper().clearApiUsage(ApiUser.cast(user).getUuid());
     }
 }

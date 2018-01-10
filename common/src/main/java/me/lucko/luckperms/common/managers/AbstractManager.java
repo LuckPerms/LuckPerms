@@ -40,9 +40,10 @@ import javax.annotation.Nonnull;
  * An abstract manager class
  *
  * @param <I> the class used to identify each object held in this manager
- * @param <T> the class this manager is "managing"
+ * @param <C> the super class being managed
+ * @param <T> the implementation class this manager is "managing"
  */
-public abstract class AbstractManager<I, T extends Identifiable<I>> implements Manager<I, T> {
+public abstract class AbstractManager<I, C extends Identifiable<I>, T extends C> implements Manager<I, C, T> {
 
     private final LoadingCache<I, T> objects = Caffeine.newBuilder()
             .build(new CacheLoader<I, T>() {
@@ -85,9 +86,9 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> implements M
     }
 
     @Override
-    public void unload(T t) {
-        if (t != null) {
-            unload(t.getId());
+    public void unload(C object) {
+        if (object != null) {
+            unload(object.getId());
         }
     }
 

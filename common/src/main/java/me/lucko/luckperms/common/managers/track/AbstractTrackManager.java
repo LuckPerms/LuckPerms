@@ -23,47 +23,12 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.managers;
+package me.lucko.luckperms.common.managers.track;
 
-import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.managers.AbstractManager;
+import me.lucko.luckperms.common.model.Track;
 
-public class GenericGroupManager extends AbstractManager<String, Group> implements GroupManager {
-    private final LuckPermsPlugin plugin;
-
-    public GenericGroupManager(LuckPermsPlugin plugin) {
-        this.plugin = plugin;
-    }
-
-    @Override
-    public Group apply(String name) {
-        return new Group(name, this.plugin);
-    }
-
-    @Override
-    public Group getByDisplayName(String name) {
-        // try to get an exact match first
-        Group g = getIfLoaded(name);
-        if (g != null) {
-            return g;
-        }
-
-        // then try exact display name matches
-        for (Group group : getAll().values()) {
-            if (group.getDisplayName().isPresent() && group.getDisplayName().get().equals(name)) {
-                return group;
-            }
-        }
-
-        // then try case insensitive name matches
-        for (Group group : getAll().values()) {
-            if (group.getDisplayName().isPresent() && group.getDisplayName().get().equalsIgnoreCase(name)) {
-                return group;
-            }
-        }
-
-        return null;
-    }
+public abstract class AbstractTrackManager<T extends Track> extends AbstractManager<String, Track, T> implements TrackManager<T> {
 
     @Override
     protected String sanitizeIdentifier(String s) {

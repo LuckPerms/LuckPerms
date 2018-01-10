@@ -23,10 +23,20 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.managers;
+package me.lucko.luckperms.common.managers.track;
 
 import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-public interface TrackManager extends Manager<String, Track> {
+public class StandardTrackManager extends AbstractTrackManager<Track> {
+    private final LuckPermsPlugin plugin;
 
+    public StandardTrackManager(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    @Override
+    public Track apply(String name) {
+        return new Track(name, this.plugin);
+    }
 }

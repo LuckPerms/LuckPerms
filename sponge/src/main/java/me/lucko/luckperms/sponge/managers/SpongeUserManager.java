@@ -35,9 +35,8 @@ import com.google.common.collect.Maps;
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.managers.GenericUserManager;
-import me.lucko.luckperms.common.managers.UserManager;
-import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.managers.user.AbstractUserManager;
+import me.lucko.luckperms.common.managers.user.UserHousekeeper;
 import me.lucko.luckperms.common.references.UserIdentifier;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
@@ -62,18 +61,16 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
-public class SpongeUserManager implements UserManager, LPSubjectCollection {
-
+public class SpongeUserManager extends AbstractUserManager<SpongeUser> implements LPSubjectCollection {
     private final LPSpongePlugin plugin;
-
     private SubjectCollection spongeProxy = null;
-
-    private final LoadingCache<UserIdentifier, SpongeUser> objects = Caffeine.newBuilder()
-            .build(this::apply);
 
     private final LoadingCache<UUID, LPSubject> subjectLoadingCache = Caffeine.<UUID, LPSubject>newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)
             .build(u -> {
+                // clock in with the housekeeper
+                getHouseKeeper().registerUsage(u);
+
                 // check if the user instance is already loaded.
                 SpongeUser user = getIfLoaded(u);
                 if (user != null) {
@@ -100,6 +97,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             });
 
     public SpongeUserManager(LPSpongePlugin plugin) {
+        super(plugin, UserHousekeeper.timeoutSettings(10, TimeUnit.MINUTES));
         this.plugin = plugin;
     }
 
@@ -110,103 +108,6 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
                 new SpongeUser(id.getUuid(), id.getUsername().get(), this.plugin);
     }
 
-    /* ------------------------------------------
-     * Manager methods
-     * ------------------------------------------ */
-
-    @Override
-    public Map<UserIdentifier, SpongeUser> getAll() {
-        return ImmutableMap.copyOf(this.objects.asMap());
-    }
-
-    @Override
-    public SpongeUser getOrMake(UserIdentifier id) {
-        SpongeUser ret = this.objects.get(id);
-        if (id.getUsername().isPresent()) {
-            ret.setName(id.getUsername().get(), false);
-        }
-        return ret;
-    }
-
-    @Override
-    public SpongeUser getIfLoaded(UserIdentifier id) {
-        return this.objects.getIfPresent(id);
-    }
-
-    @Override
-    public boolean isLoaded(UserIdentifier id) {
-        return this.objects.asMap().containsKey(id);
-    }
-
-    @Override
-    public void unload(UserIdentifier id) {
-        if (id != null) {
-            this.objects.invalidate(id);
-        }
-    }
-
-    @Override
-    public void unload(User t) {
-        if (t != null) {
-            unload(t.getId());
-        }
-    }
-
-    @Override
-    public void unloadAll() {
-        this.objects.invalidateAll();
-    }
-
-    /* ------------------------------------------
-     * UserManager methods
-     * ------------------------------------------ */
-
-    @Override
-    public SpongeUser getByUsername(String name) {
-        for (SpongeUser user : getAll().values()) {
-            Optional<String> n = user.getName();
-            if (n.isPresent() && n.get().equalsIgnoreCase(name)) {
-                return user;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public SpongeUser getIfLoaded(UUID uuid) {
-        return getIfLoaded(UserIdentifier.of(uuid, null));
-    }
-
-    @Override
-    public boolean giveDefaultIfNeeded(User user, boolean save) {
-        return GenericUserManager.giveDefaultIfNeeded(user, save, this.plugin);
-    }
-
-    @Override
-    public boolean cleanup(User user) {
-        // Do nothing - this instance uses other means in order to cleanup
-        return false;
-    }
-
-    @Override
-    public void scheduleUnload(UUID uuid) {
-        // Do nothing - this instance uses other means in order to cleanup
-    }
-
-    @Override
-    public CompletableFuture<Void> updateAllUsers() {
-        return CompletableFuture.runAsync(
-                () -> this.plugin.getOnlinePlayers()
-                        .map(u -> this.plugin.getUuidCache().getUUID(u))
-                        .forEach(u -> this.plugin.getStorage().loadUser(u, null).join()),
-                this.plugin.getScheduler().async()
-        );
-    }
-
-    /* ------------------------------------------
-     * SubjectCollection methods
-     * ------------------------------------------ */
-
     @Override
     public synchronized SubjectCollection sponge() {
         if (this.spongeProxy == null) {
@@ -214,6 +115,10 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             this.spongeProxy = ProxyFactory.toSponge(this);
         }
         return this.spongeProxy;
+    }
+
+    public LPSpongePlugin getPlugin() {
+        return this.plugin;
     }
 
     @Override
@@ -358,7 +263,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
 
     @Override
     public ImmutableMap<LPSubject, Boolean> getLoadedWithPermission(String permission) {
-        return this.objects.asMap().values().stream()
+        return getAll().values().stream()
                 .map(SpongeUser::sponge)
                 .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(ImmutableContextSet.empty(), permission)))
                 .filter(pair -> pair.getValue() != Tristate.UNDEFINED)
@@ -367,7 +272,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
 
     @Override
     public ImmutableMap<LPSubject, Boolean> getLoadedWithPermission(ImmutableContextSet contexts, String permission) {
-        return this.objects.asMap().values().stream()
+        return getAll().values().stream()
                 .map(SpongeUser::sponge)
                 .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(contexts, permission)))
                 .filter(pair -> pair.getValue() != Tristate.UNDEFINED)
@@ -377,10 +282,6 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
     @Override
     public LPSubject getDefaults() {
         return getService().getDefaultSubjects().loadSubject(getIdentifier()).join();
-    }
-
-    public LPSpongePlugin getPlugin() {
-        return this.plugin;
     }
 
 }

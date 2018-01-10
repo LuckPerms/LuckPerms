@@ -23,18 +23,26 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.managers;
+package me.lucko.luckperms.common.managers.user;
 
-import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.references.UserIdentifier;
 
-public interface GroupManager extends Manager<String, Group> {
+import java.util.concurrent.TimeUnit;
 
-    /**
-     * Get a group object by display name
-     *
-     * @param name The name to search by
-     * @return a {@link Group} object if the group is loaded, returns null if the group is not loaded
-     */
-    Group getByDisplayName(String name);
+public class StandardUserManager extends AbstractUserManager<User> {
+    private final LuckPermsPlugin plugin;
 
+    public StandardUserManager(LuckPermsPlugin plugin) {
+        super(plugin, UserHousekeeper.timeoutSettings(1, TimeUnit.MINUTES));
+        this.plugin = plugin;
+    }
+
+    @Override
+    public User apply(UserIdentifier id) {
+        return !id.getUsername().isPresent() ?
+                new User(id.getUuid(), this.plugin) :
+                new User(id.getUuid(), id.getUsername().get(), this.plugin);
+    }
 }
