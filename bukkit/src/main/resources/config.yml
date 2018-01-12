@@ -372,25 +372,17 @@ redis:
 # Explanation of the examples below: (they're just to demonstrate the features & use cases)
 #
 # rule1:
-# If a user is either in the vip or vip+ group, and they have the "titles.titlecollector" permission
-# set to true, and the "some.random.permission" set to false... if they're not in the group
-# "prison_titlepack" on the "prison" server, then give add them to the "prison_titlepack" group on
-# the "prison" server, and remove "some.random.permission".
+# If a user is either in the vip or vip+ group, and they have the "titles.titlecollector" permission set to true, and the "some.random.permission" set to false... if they're not in the group "prison_titlepack" on the "prison" server, then give add them to the "prison_titlepack" group on the "prison" server, and remove "some.random.permission".
 #
 # rule2:
-# If the user isn't in any of the following groups on the skyblock server: sb_level1, sb_level2,
-# sb_level3, then add them to sb_level1 on the skyblock server.
+# If the user isn't in any of the following groups on the skyblock server: sb_level1, sb_level2, sb_level3, then add them to sb_level1 on the skyblock server.
 #
 # rule3:
-# If the user is a member of the default group, remove them from default, add them to member, and
-# set their primary group to member.
+# If the user is a member of the default group, remove them from default, add them to member, and set their primary group to member.
 #
-# WARNING: Unlike internal commands, this system does not ensure that a group exists before adding
-# a user to it. It also does not unsure that a user is a member of a group before making that group
-# their primary group.
+# WARNING: Unlike internal commands, this system does not ensure that a group exists before adding a user to it. It also does not unsure that a user is a member of a group before making that group their primary group.
 #
-# Before you use "give: group.<name>" or "set-primary-group", make sure that the group exists, and
-# that the user is a member of the group.
+# Before you use "give: group.<name>" or "set-primary-group", make sure that the group exists, and that the user is a member of the group.
 default-assignments:
 #  rule1:
 #    if:
