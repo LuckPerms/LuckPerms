@@ -747,9 +747,11 @@ public abstract class PermissionHolder {
 
             if (perms.putIfAbsent(perm, node.getValuePrimitive()) == null) {
                 if (applyShorthand) {
-                    List<String> sh = node.resolveShorthand();
-                    if (!sh.isEmpty()) {
-                        sh.stream().map(s -> lowerCase ? s.toLowerCase() : s).forEach(s -> perms.putIfAbsent(s, node.getValuePrimitive()));
+                    List<String> shorthand = node.resolveShorthand();
+                    if (!shorthand.isEmpty()) {
+                        for (String s : shorthand) {
+                            perms.putIfAbsent(lowerCase ? s.toLowerCase() : s, node.getValuePrimitive());
+                        }
                     }
                 }
             }

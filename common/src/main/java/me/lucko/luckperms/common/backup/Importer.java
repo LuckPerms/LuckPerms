@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.sender.DummySender;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.locale.Message;

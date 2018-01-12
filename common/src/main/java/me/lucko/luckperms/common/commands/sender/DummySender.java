@@ -23,11 +23,10 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.backup;
+package me.lucko.luckperms.common.commands.sender;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.commands.CommandManager;
-import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.TextUtils;
 

@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.utils;
 import com.google.common.collect.ImmutableList;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A cycle of elements, backed by a list. All operations are thread safe.
@@ -35,42 +36,55 @@ import java.util.List;
  * @param <E> the element type
  */
 public class Cycle<E> {
-    protected final List<E> objects;
-    protected int index = 0;
+
+    /**
+     * The list that backs this instance
+     */
+    private final List<E> objects;
+
+    /**
+     * The number of elements in the cycle
+     */
+    private final int size;
+
+    /**
+     * The current position of the cursor
+     */
+    private AtomicInteger cursor = new AtomicInteger(0);
 
     public Cycle(List<E> objects) {
         if (objects == null || objects.isEmpty()) {
             throw new IllegalArgumentException("List of objects cannot be null/empty.");
         }
         this.objects = ImmutableList.copyOf(objects);
+        this.size = this.objects.size();
     }
 
-    public int getIndex() {
-        return this.index;
+    public int cursor() {
+        return this.cursor.get();
     }
 
     public E current() {
-        synchronized (this) {
-            return this.objects.get(this.index);
-        }
+        return this.objects.get(cursor());
     }
 
     public E next() {
-        synchronized (this) {
-            this.index++;
-            this.index = this.index > this.objects.size() - 1 ? 0 : this.index;
-
-            return this.objects.get(this.index);
-        }
+        return this.objects.get(this.cursor.updateAndGet(i -> {
+            int n = i + 1;
+            if (n >= this.size) {
+                return 0;
+            }
+            return n;
+        }));
     }
 
-    public E back() {
-        synchronized (this) {
-            this.index--;
-            this.index = this.index == -1 ? this.objects.size() - 1 : this.index;
-
-            return this.objects.get(this.index);
-        }
+    public E previous() {
+        return this.objects.get(this.cursor.updateAndGet(i -> {
+            if (i == 0) {
+                return this.size - 1;
+            }
+            return i - 1;
+        }));
     }
 
     public List<E> getBacking() {
