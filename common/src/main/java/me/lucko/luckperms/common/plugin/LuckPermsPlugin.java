@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
+import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.event.EventFactory;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.logging.Logger;
@@ -153,6 +154,13 @@ public interface LuckPermsPlugin {
      * @return the locale manager
      */
     LocaleManager getLocaleManager();
+
+    /**
+     * Gets the classloader wrapper for adding dependencies to the classpath
+     *
+     * @return the plugin classloader
+     */
+    PluginClassLoader getPluginClassLoader();
 
     /**
      * Gets the dependency manager for the plugin

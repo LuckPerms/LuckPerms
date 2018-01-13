@@ -57,6 +57,8 @@ import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.LuckPermsCalculator;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
+import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
+import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.event.EventFactory;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.NoopLocaleManager;
@@ -124,6 +126,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private DefaultsProvider defaultsProvider;
     private ChildPermissionProvider childPermissionProvider;
     private LocaleManager localeManager;
+    private PluginClassLoader pluginClassLoader;
     private DependencyManager dependencyManager;
     private CachedStateManager cachedStateManager;
     private ContextManager<Player> contextManager;
@@ -151,6 +154,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         this.senderFactory = new BukkitSenderFactory(this);
         this.log = new SenderLogger(this, getConsoleSender());
 
+        this.pluginClassLoader = new ReflectionClassLoader(this);
         this.dependencyManager = new DependencyManager(this);
         this.dependencyManager.loadDependencies(Collections.singleton(Dependency.CAFFEINE));
     }
@@ -631,6 +635,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public LocaleManager getLocaleManager() {
         return this.localeManager;
+    }
+
+    @Override
+    public PluginClassLoader getPluginClassLoader() {
+        return this.pluginClassLoader;
     }
 
     @Override

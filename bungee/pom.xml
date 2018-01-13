@@ -45,9 +45,64 @@
                             <minimizeJar>false</minimizeJar>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <relocations>
+                                <!-- shaded dependencies -->
                                 <relocation>
                                     <pattern>net.kyori.text</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.text</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>me.lucko.jarreloator</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.jarreloator</shadedPattern>
+                                </relocation>
+
+                                <!-- relocated dependencies -->
+                                <relocation>
+                                    <pattern>com.github.benmanes.caffeine</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.caffeine</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.mariadb.jdbc</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.mariadb</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.mysql</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.mysql</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.postgresql</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.postgresql</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.h2</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.h2</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.sqlite</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.sqlite</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.zaxxer.hikari</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.hikari</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.mongodb</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.mongodb</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.bson</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.bson</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>redis.clients.jedis.shaded</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.jedis</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>ninja.leaping.configurate</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.configurate</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.typesafe.config</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.hocon</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

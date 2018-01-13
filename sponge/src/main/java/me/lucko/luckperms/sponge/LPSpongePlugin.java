@@ -47,6 +47,8 @@ import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.LuckPermsCalculator;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
+import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
+import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.event.EventFactory;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.NoopLocaleManager;
@@ -177,6 +179,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private me.lucko.luckperms.common.logging.Logger log;
     private LuckPermsService service;
     private LocaleManager localeManager;
+    private PluginClassLoader pluginClassLoader;
     private DependencyManager dependencyManager;
     private CachedStateManager cachedStateManager;
     private ContextManager<Subject> contextManager;
@@ -195,6 +198,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         this.localeManager = new NoopLocaleManager();
         this.senderFactory = new SpongeSenderFactory(this);
         this.log = new SenderLogger(this, getConsoleSender());
+        this.pluginClassLoader = new ReflectionClassLoader(this);
         this.dependencyManager = new DependencyManager(this);
 
         sendStartupBanner(getConsoleSender());
@@ -596,6 +600,11 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public LocaleManager getLocaleManager() {
         return this.localeManager;
+    }
+
+    @Override
+    public PluginClassLoader getPluginClassLoader() {
+        return this.pluginClassLoader;
     }
 
     @Override
