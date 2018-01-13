@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.dependencies.relocation;
 
-import me.lucko.jarreloator.Relocation;
+import me.lucko.jarrelocator.Relocation;
 
 import java.util.ArrayList;
 import java.util.List;

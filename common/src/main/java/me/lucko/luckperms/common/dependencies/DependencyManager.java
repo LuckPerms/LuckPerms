@@ -27,8 +27,8 @@ package me.lucko.luckperms.common.dependencies;
 
 import com.google.common.io.ByteStreams;
 
-import me.lucko.jarreloator.JarRelocator;
-import me.lucko.jarreloator.Relocation;
+import me.lucko.jarrelocator.JarRelocator;
+import me.lucko.jarrelocator.Relocation;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
 

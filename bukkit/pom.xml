@@ -51,8 +51,8 @@
                                     <shadedPattern>me.lucko.luckperms.lib.text</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>me.lucko.jarreloator</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.jarreloator</shadedPattern>
+                                    <pattern>me.lucko.jarrelocator</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.jarrelocator</shadedPattern>
                                 </relocation>
 
                                 <!-- relocated dependencies -->
