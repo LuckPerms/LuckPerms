@@ -29,7 +29,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -79,12 +79,12 @@ public class PersistedSubjectData extends CalculatedSubjectData implements Funct
     }
 
     @Override
-    public CompletableFuture<Boolean> addParent(ImmutableContextSet contexts, SubjectReference parent) {
+    public CompletableFuture<Boolean> addParent(ImmutableContextSet contexts, LPSubjectReference parent) {
         return super.addParent(contexts, parent).thenApply(this);
     }
 
     @Override
-    public CompletableFuture<Boolean> removeParent(ImmutableContextSet contexts, SubjectReference parent) {
+    public CompletableFuture<Boolean> removeParent(ImmutableContextSet contexts, LPSubjectReference parent) {
         return super.removeParent(contexts, parent).thenApply(this);
     }
 

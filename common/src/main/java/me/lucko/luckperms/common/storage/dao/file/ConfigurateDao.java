@@ -35,7 +35,6 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.commands.CommandManager;
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.contexts.ContextSetConfigurateSerializer;
 import me.lucko.luckperms.common.managers.group.GroupManager;
 import me.lucko.luckperms.common.managers.track.TrackManager;
@@ -51,6 +50,7 @@ import me.lucko.luckperms.common.storage.dao.AbstractDao;
 import me.lucko.luckperms.common.storage.dao.legacy.LegacyJsonMigration;
 import me.lucko.luckperms.common.storage.dao.legacy.LegacyYamlMigration;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
+import me.lucko.luckperms.common.utils.Uuids;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.SimpleConfigurationNode;
@@ -266,7 +266,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                 }
 
                 String user = s.substring(0, s.length() - this.fileExtension.length());
-                UUID uuid = CommandUtils.parseUuid(user);
+                UUID uuid = Uuids.parseNullable(user);
                 if (uuid == null) {
                     return;
                 }

@@ -39,14 +39,15 @@ import me.lucko.luckperms.common.managers.user.AbstractUserManager;
 import me.lucko.luckperms.common.managers.user.UserHousekeeper;
 import me.lucko.luckperms.common.references.UserIdentifier;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
+import me.lucko.luckperms.common.utils.Uuids;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.model.SpongeUser;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
-import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -133,26 +134,14 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
 
     @Override
     public Predicate<String> getIdentifierValidityPredicate() {
-        return s -> {
-            try {
-                //noinspection ResultOfMethodCallIgnored
-                UUID.fromString(s);
-                return true;
-            } catch (IllegalArgumentException e) {
-                return false;
-            }
-        };
+        return Uuids.PREDICATE;
     }
 
     @Override
     public CompletableFuture<LPSubject> loadSubject(String identifier) {
-        UUID uuid;
-        try {
-            uuid = UUID.fromString(identifier);
-        } catch (IllegalArgumentException e) {
-            CompletableFuture<LPSubject> fut = new CompletableFuture<>();
-            fut.completeExceptionally(e);
-            return fut;
+        UUID uuid = Uuids.parseNullable(identifier);
+        if (uuid == null) {
+            throw new IllegalArgumentException("Identifier is not a UUID: " + identifier);
         }
 
         LPSubject present = this.subjectLoadingCache.getIfPresent(uuid);
@@ -165,32 +154,25 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
 
     @Override
     public Optional<LPSubject> getSubject(String identifier) {
-        UUID uuid = UUID.fromString(identifier);
+        UUID uuid = Uuids.parseNullable(identifier);
+        if (uuid == null) {
+            return Optional.empty();
+        }
         return Optional.ofNullable(getIfLoaded(uuid)).map(SpongeUser::sponge);
     }
 
     @Override
     public CompletableFuture<Boolean> hasRegistered(String identifier) {
-        UUID uuid = null;
-        IllegalArgumentException ex = null;
-        try {
-            uuid = UUID.fromString(identifier);
-        } catch (IllegalArgumentException e) {
-            ex = e;
+        UUID uuid = Uuids.parseNullable(identifier);
+        if (uuid == null) {
+            return CompletableFuture.completedFuture(false);
         }
 
-        if (uuid != null && isLoaded(UserIdentifier.of(uuid, null))) {
+        if (isLoaded(UserIdentifier.of(uuid, null))) {
             return CompletableFuture.completedFuture(true);
         }
 
-        if (uuid == null) {
-            CompletableFuture<Boolean> fut = new CompletableFuture<>();
-            fut.completeExceptionally(ex);
-            return fut;
-        }
-
-        UUID finalUuid = uuid;
-        return this.plugin.getStorage().getUniqueUsers().thenApply(set -> set.contains(finalUuid));
+        return this.plugin.getStorage().getUniqueUsers().thenApply(set -> set.contains(uuid));
     }
 
     @Override
@@ -198,13 +180,10 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
         return CompletableFuture.supplyAsync(() -> {
             ImmutableSet.Builder<LPSubject> ret = ImmutableSet.builder();
             for (String id : identifiers) {
-                UUID uuid;
-                try {
-                    uuid = UUID.fromString(id);
-                } catch (IllegalArgumentException e) {
+                UUID uuid = Uuids.parseNullable(id);
+                if (uuid == null) {
                     continue;
                 }
-
                 ret.add(loadSubject(uuid.toString()).join());
             }
 
@@ -230,9 +209,9 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
     }
 
     @Override
-    public CompletableFuture<ImmutableMap<SubjectReference, Boolean>> getAllWithPermission(String permission) {
+    public CompletableFuture<ImmutableMap<LPSubjectReference, Boolean>> getAllWithPermission(String permission) {
         return CompletableFuture.supplyAsync(() -> {
-            ImmutableMap.Builder<SubjectReference, Boolean> ret = ImmutableMap.builder();
+            ImmutableMap.Builder<LPSubjectReference, Boolean> ret = ImmutableMap.builder();
 
             List<HeldPermission<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(permission).join();
             for (HeldPermission<UUID> holder : lookup) {
@@ -246,9 +225,9 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
     }
 
     @Override
-    public CompletableFuture<ImmutableMap<SubjectReference, Boolean>> getAllWithPermission(ImmutableContextSet contexts, String permission) {
+    public CompletableFuture<ImmutableMap<LPSubjectReference, Boolean>> getAllWithPermission(ImmutableContextSet contexts, String permission) {
         return CompletableFuture.supplyAsync(() -> {
-            ImmutableMap.Builder<SubjectReference, Boolean> ret = ImmutableMap.builder();
+            ImmutableMap.Builder<LPSubjectReference, Boolean> ret = ImmutableMap.builder();
 
             List<HeldPermission<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(permission).join();
             for (HeldPermission<UUID> holder : lookup) {

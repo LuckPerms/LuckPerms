@@ -40,7 +40,7 @@ import me.lucko.luckperms.sponge.service.LuckPermsSubjectData;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
@@ -132,13 +132,13 @@ public class SpongeUser extends User {
         }
 
         @Override
-        public boolean isChildOf(ImmutableContextSet contexts, SubjectReference parent) {
+        public boolean isChildOf(ImmutableContextSet contexts, LPSubjectReference parent) {
             return parent.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP) && getPermissionValue(contexts, NodeFactory.groupNode(parent.getSubjectIdentifier())).asBoolean();
         }
 
         @Override
-        public ImmutableList<SubjectReference> getParents(ImmutableContextSet contexts) {
-            ImmutableSet.Builder<SubjectReference> subjects = ImmutableSet.builder();
+        public ImmutableList<LPSubjectReference> getParents(ImmutableContextSet contexts) {
+            ImmutableSet.Builder<LPSubjectReference> subjects = ImmutableSet.builder();
 
             for (Map.Entry<String, Boolean> entry : this.parent.getCachedData().getPermissionData(this.plugin.getContextManager().formContexts(contexts)).getImmutableBacking().entrySet()) {
                 if (!entry.getValue()) {
@@ -187,11 +187,6 @@ public class SpongeUser extends User {
             }
 
             return this.plugin.getService().getDefaults().getOption(contexts, s);
-        }
-
-        @Override
-        public ImmutableContextSet getActiveContextSet() {
-            return this.plugin.getContextManager().getApplicableContext(this.sponge());
         }
 
         @Override

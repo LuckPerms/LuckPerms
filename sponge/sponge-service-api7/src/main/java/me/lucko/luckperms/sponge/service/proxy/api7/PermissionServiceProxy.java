@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
+import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -44,6 +44,7 @@ import org.spongepowered.api.service.permission.SubjectReference;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -115,8 +116,20 @@ public final class PermissionServiceProxy implements PermissionService {
 
     @Nonnull
     @Override
-    public SubjectReference newSubjectReference(@Nonnull String s, @Nonnull String s1) {
-        return SubjectReferenceFactory.obtain(this.handle, s, s1);
+    public SubjectReference newSubjectReference(@Nonnull String collectionIdentifier, @Nonnull String subjectIdentifier) {
+        Objects.requireNonNull(collectionIdentifier, "collectionIdentifier");
+        Objects.requireNonNull(subjectIdentifier, "subjectIdentifier");
+
+        // test the identifiers
+        String collection = collectionIdentifier.toLowerCase();
+        if (collection.equals("user") && !this.handle.getUserSubjects().getIdentifierValidityPredicate().test(subjectIdentifier)) {
+            throw new IllegalArgumentException("Subject identifier '" + subjectIdentifier + "' does not pass the validity predicate for the user subject collection");
+        } else if (collection.equals("group") && !this.handle.getGroupSubjects().getIdentifierValidityPredicate().test(subjectIdentifier)) {
+            throw new IllegalArgumentException("Subject identifier '" + subjectIdentifier + "' does not pass the validity predicate for the group subject collection");
+        }
+
+        // obtain a reference
+        return SubjectReferenceFactory.obtain(this.handle, collectionIdentifier, subjectIdentifier);
     }
 
     @Override
@@ -126,7 +139,7 @@ public final class PermissionServiceProxy implements PermissionService {
             throw new IllegalArgumentException("Couldn't find a plugin container for " + o.getClass().getSimpleName());
         }
 
-        return new SimpleDescriptionBuilder(this.handle, container.get());
+        return new LPDescriptionBuilder(this.handle, container.get());
     }
 
     @Nonnull

@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
+import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
@@ -38,6 +38,7 @@ import org.spongepowered.api.service.permission.SubjectReference;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -103,8 +104,13 @@ public final class SubjectCollectionProxy implements SubjectCollection {
 
     @Nonnull
     @Override
-    public SubjectReference newSubjectReference(@Nonnull String s) {
-        return SubjectReferenceFactory.obtain(this.handle.getService(), getIdentifier(), s);
+    public SubjectReference newSubjectReference(@Nonnull String subjectIdentifier) {
+        Objects.requireNonNull(subjectIdentifier, "identifier");
+        if (!this.handle.getIdentifierValidityPredicate().test(subjectIdentifier)) {
+            throw new IllegalArgumentException("Subject identifier '" + subjectIdentifier + "' does not pass the validity predicate");
+        }
+
+        return SubjectReferenceFactory.obtain(this.handle.getService(), getIdentifier(), subjectIdentifier);
     }
 
     @Nonnull

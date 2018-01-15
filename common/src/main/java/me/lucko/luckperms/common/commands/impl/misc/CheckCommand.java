@@ -38,6 +38,7 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.Uuids;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
 
 import java.util.List;
@@ -55,7 +56,7 @@ public class CheckCommand extends SingleCommand {
         String permission = args.get(1);
 
         User user;
-        UUID u = CommandUtils.parseUuid(target);
+        UUID u = Uuids.parseNullable(target);
         if (u != null) {
             user = plugin.getUserManager().getIfLoaded(u);
         } else {

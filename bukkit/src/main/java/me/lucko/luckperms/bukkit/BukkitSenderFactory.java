@@ -37,8 +37,9 @@ import me.lucko.luckperms.common.utils.TextUtils;
 import net.kyori.text.Component;
 import net.kyori.text.serializer.ComponentSerializers;
 
-import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.command.RemoteConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
@@ -71,13 +72,14 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
 
     @Override
     protected void sendMessage(CommandSender sender, String s) {
-        // send sync if command block
-        if (sender instanceof BlockCommandSender) {
-            getPlugin().getScheduler().doSync(new BlockMessengerAgent(((BlockCommandSender) sender), s));
+        // we can safely send async for players and the console
+        if (sender instanceof Player || sender instanceof ConsoleCommandSender || sender instanceof RemoteConsoleCommandSender) {
+            sender.sendMessage(s);
             return;
         }
 
-        sender.sendMessage(s);
+        // otherwise, send the message sync
+        getPlugin().getScheduler().doSync(new SyncMessengerAgent(sender, s));
     }
 
     @Override
@@ -123,18 +125,18 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
         }
     }
 
-    private static final class BlockMessengerAgent implements Runnable {
-        private final BlockCommandSender block;
+    private static final class SyncMessengerAgent implements Runnable {
+        private final CommandSender sender;
         private final String message;
 
-        private BlockMessengerAgent(BlockCommandSender block, String message) {
-            this.block = block;
+        private SyncMessengerAgent(CommandSender sender, String message) {
+            this.sender = sender;
             this.message = message;
         }
 
         @Override
         public void run() {
-            this.block.sendMessage(this.message);
+            this.sender.sendMessage(this.message);
         }
     }
 

@@ -37,7 +37,7 @@ import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorageModel;
 
 import org.spongepowered.api.command.CommandSource;
@@ -66,7 +66,7 @@ public class PersistedSubject implements LPSubject {
             .expireAfterAccess(20, TimeUnit.MINUTES)
             .build(lookup -> lookupPermissionValue(lookup.getContexts(), lookup.getNode()));
 
-    private final LoadingCache<ImmutableContextSet, ImmutableList<SubjectReference>> parentLookupCache = Caffeine.newBuilder()
+    private final LoadingCache<ImmutableContextSet, ImmutableList<LPSubjectReference>> parentLookupCache = Caffeine.newBuilder()
             .expireAfterAccess(20, TimeUnit.MINUTES)
             .build(this::lookupParents);
 
@@ -194,7 +194,7 @@ public class PersistedSubject implements LPSubject {
             }
         }
 
-        for (SubjectReference parent : getParents(contexts)) {
+        for (LPSubjectReference parent : getParents(contexts)) {
             res = parent.resolveLp().join().getPermissionValue(contexts, node);
             if (res != Tristate.UNDEFINED) {
                 return res;
@@ -214,8 +214,8 @@ public class PersistedSubject implements LPSubject {
         return res;
     }
 
-    private ImmutableList<SubjectReference> lookupParents(ImmutableContextSet contexts) {
-        List<SubjectReference> s = new ArrayList<>();
+    private ImmutableList<LPSubjectReference> lookupParents(ImmutableContextSet contexts) {
+        List<LPSubjectReference> s = new ArrayList<>();
         s.addAll(this.subjectData.getParents(contexts));
         s.addAll(this.transientSubjectData.getParents(contexts));
 
@@ -253,7 +253,7 @@ public class PersistedSubject implements LPSubject {
             }
         }
 
-        for (SubjectReference parent : getParents(contexts)) {
+        for (LPSubjectReference parent : getParents(contexts)) {
             res = parent.resolveLp().join().getOption(contexts, key);
             if (res.isPresent()) {
                 return res;
@@ -283,7 +283,7 @@ public class PersistedSubject implements LPSubject {
     }
 
     @Override
-    public boolean isChildOf(ImmutableContextSet contexts, SubjectReference subject) {
+    public boolean isChildOf(ImmutableContextSet contexts, LPSubjectReference subject) {
         Objects.requireNonNull(contexts, "contexts");
         Objects.requireNonNull(subject, "subject");
 
@@ -299,7 +299,7 @@ public class PersistedSubject implements LPSubject {
     }
 
     @Override
-    public ImmutableList<SubjectReference> getParents(ImmutableContextSet contexts) {
+    public ImmutableList<LPSubjectReference> getParents(ImmutableContextSet contexts) {
         Objects.requireNonNull(contexts, "contexts");
         return this.parentLookupCache.get(contexts);
     }
@@ -307,10 +307,5 @@ public class PersistedSubject implements LPSubject {
     @Override
     public Optional<String> getOption(ImmutableContextSet contexts, String key) {
         return this.optionLookupCache.get(OptionLookupKey.of(key, contexts));
-    }
-
-    @Override
-    public ImmutableContextSet getActiveContextSet() {
-        return this.service.getPlugin().getContextManager().getApplicableContext(sponge());
     }
 }

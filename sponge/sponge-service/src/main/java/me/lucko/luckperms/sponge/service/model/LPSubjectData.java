@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
 
 import org.spongepowered.api.service.permission.SubjectData;
 
@@ -58,15 +59,15 @@ public interface LPSubjectData {
 
     /* parents */
 
-    ImmutableMap<ImmutableContextSet, ImmutableList<SubjectReference>> getAllParents();
+    ImmutableMap<ImmutableContextSet, ImmutableList<LPSubjectReference>> getAllParents();
 
-    default ImmutableList<SubjectReference> getParents(ImmutableContextSet contexts) {
+    default ImmutableList<LPSubjectReference> getParents(ImmutableContextSet contexts) {
         return ImmutableList.copyOf(getAllParents().getOrDefault(contexts, ImmutableList.of()));
     }
 
-    CompletableFuture<Boolean> addParent(ImmutableContextSet contexts, SubjectReference parent);
+    CompletableFuture<Boolean> addParent(ImmutableContextSet contexts, LPSubjectReference parent);
 
-    CompletableFuture<Boolean> removeParent(ImmutableContextSet contexts, SubjectReference parent);
+    CompletableFuture<Boolean> removeParent(ImmutableContextSet contexts, LPSubjectReference parent);
 
     CompletableFuture<Boolean> clearParents();
 

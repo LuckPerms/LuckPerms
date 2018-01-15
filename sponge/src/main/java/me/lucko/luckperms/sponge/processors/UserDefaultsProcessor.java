@@ -25,39 +25,18 @@
 
 package me.lucko.luckperms.sponge.processors;
 
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.model.LPSubject;
 
-import java.util.Map;
-
-public class UserDefaultsProcessor implements PermissionProcessor {
-    private final LuckPermsService service;
-    private final ImmutableContextSet contexts;
-
+public class UserDefaultsProcessor extends DefaultsProcessor implements PermissionProcessor {
     public UserDefaultsProcessor(LuckPermsService service, ImmutableContextSet contexts) {
-        this.service = service;
-        this.contexts = contexts;
+        super(service, contexts);
     }
 
     @Override
-    public Tristate hasPermission(String permission) {
-        Tristate t = this.service.getUserSubjects().getDefaults().getPermissionValue(this.contexts, permission);
-        if (t != Tristate.UNDEFINED) {
-            return t;
-        }
-
-        t = this.service.getDefaults().getPermissionValue(this.contexts, permission);
-        if (t != Tristate.UNDEFINED) {
-            return t;
-        }
-
-        return Tristate.UNDEFINED;
-    }
-
-    @Override
-    public void updateBacking(Map<String, Boolean> map) {
-        // Do nothing, this doesn't use the backing
+    protected LPSubject getTypeDefaults(LuckPermsService service) {
+        return service.getUserSubjects().getDefaults();
     }
 }

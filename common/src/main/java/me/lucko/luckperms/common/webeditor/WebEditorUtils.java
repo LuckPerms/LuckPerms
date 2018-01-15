@@ -33,7 +33,6 @@ import com.google.gson.stream.JsonWriter;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
@@ -41,6 +40,7 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.Uuids;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -86,7 +86,7 @@ public final class WebEditorUtils {
             return holder;
         } else if (who.startsWith(USER_ID_PATTERN)) {
             String user = who.substring(USER_ID_PATTERN.length());
-            UUID uuid = CommandUtils.parseUuid(user);
+            UUID uuid = Uuids.parseNullable(user);
             if (uuid == null) {
                 Message.APPLY_EDITS_TARGET_USER_NOT_UUID.send(sender, user);
                 return null;

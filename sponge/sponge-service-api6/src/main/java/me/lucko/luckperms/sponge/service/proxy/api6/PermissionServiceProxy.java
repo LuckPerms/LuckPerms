@@ -91,7 +91,7 @@ public final class PermissionServiceProxy implements PermissionService {
             throw new IllegalArgumentException("Couldn't find a plugin container for " + o.getClass().getSimpleName());
         }
 
-        return Optional.of(new SimpleDescriptionBuilder(this.handle, container.get()));
+        return Optional.of(new LPDescriptionBuilder(this.handle, container.get()));
     }
 
     @Nonnull

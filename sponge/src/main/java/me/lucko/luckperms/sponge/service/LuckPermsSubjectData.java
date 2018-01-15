@@ -40,7 +40,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
 
 import org.spongepowered.api.service.permission.PermissionService;
 
@@ -178,11 +178,11 @@ public class LuckPermsSubjectData implements LPSubjectData {
     }
 
     @Override
-    public ImmutableMap<ImmutableContextSet, ImmutableList<SubjectReference>> getAllParents() {
-        Map<ImmutableContextSet, ImmutableList.Builder<SubjectReference>> parents = new HashMap<>();
+    public ImmutableMap<ImmutableContextSet, ImmutableList<LPSubjectReference>> getAllParents() {
+        Map<ImmutableContextSet, ImmutableList.Builder<LPSubjectReference>> parents = new HashMap<>();
 
         for (Map.Entry<ImmutableContextSet, Collection<Node>> e : (this.enduring ? this.holder.getEnduringNodes() : this.holder.getTransientNodes()).asMap().entrySet()) {
-            ImmutableList.Builder<SubjectReference> results = ImmutableList.builder();
+            ImmutableList.Builder<LPSubjectReference> results = ImmutableList.builder();
             for (Node n : e.getValue()) {
                 if (n.isGroupNode()) {
                     results.add(this.service.getGroupSubjects().loadSubject(n.getGroupName()).join().toReference());
@@ -191,15 +191,15 @@ public class LuckPermsSubjectData implements LPSubjectData {
             parents.put(e.getKey(), results);
         }
 
-        ImmutableMap.Builder<ImmutableContextSet, ImmutableList<SubjectReference>> map = ImmutableMap.builder();
-        for (Map.Entry<ImmutableContextSet, ImmutableList.Builder<SubjectReference>> e : parents.entrySet()) {
+        ImmutableMap.Builder<ImmutableContextSet, ImmutableList<LPSubjectReference>> map = ImmutableMap.builder();
+        for (Map.Entry<ImmutableContextSet, ImmutableList.Builder<LPSubjectReference>> e : parents.entrySet()) {
             map.put(e.getKey(), e.getValue().build());
         }
         return map.build();
     }
 
     @Override
-    public CompletableFuture<Boolean> addParent(ImmutableContextSet contexts, SubjectReference subject) {
+    public CompletableFuture<Boolean> addParent(ImmutableContextSet contexts, LPSubjectReference subject) {
         Objects.requireNonNull(contexts, "contexts");
         Objects.requireNonNull(subject, "subject");
 
@@ -228,7 +228,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
     }
 
     @Override
-    public CompletableFuture<Boolean> removeParent(ImmutableContextSet contexts, SubjectReference subject) {
+    public CompletableFuture<Boolean> removeParent(ImmutableContextSet contexts, LPSubjectReference subject) {
         Objects.requireNonNull(contexts, "contexts");
         Objects.requireNonNull(subject, "subject");
 

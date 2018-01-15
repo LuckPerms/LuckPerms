@@ -31,8 +31,8 @@ import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.ProxiedSubject;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
-import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
@@ -51,9 +51,9 @@ import javax.annotation.Nonnull;
 @SuppressWarnings("unchecked")
 public final class SubjectProxy implements Subject, ProxiedSubject {
     private final LPPermissionService service;
-    private final SubjectReference ref;
+    private final LPSubjectReference ref;
 
-    public SubjectProxy(LPPermissionService service, SubjectReference ref) {
+    public SubjectProxy(LPPermissionService service, LPSubjectReference ref) {
         this.service = service;
         this.ref = ref;
     }
@@ -62,8 +62,9 @@ public final class SubjectProxy implements Subject, ProxiedSubject {
         return this.ref.resolveLp();
     }
 
+    @Nonnull
     @Override
-    public SubjectReference getReference() {
+    public LPSubjectReference asSubjectReference() {
         return this.ref;
     }
 
@@ -157,7 +158,7 @@ public final class SubjectProxy implements Subject, ProxiedSubject {
     @Nonnull
     @Override
     public Set<Context> getActiveContexts() {
-        return handle().thenApply(handle -> CompatibilityUtil.convertContexts(handle.getActiveContextSet())).join();
+        return CompatibilityUtil.convertContexts(this.service.getPlugin().getContextManager().getApplicableContext(this));
     }
 
     @Override

@@ -38,8 +38,8 @@ import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.utils.CollationKeyCache;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
-import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,9 +52,9 @@ public class SubjectStorageModel {
     private final LPPermissionService service;
     private final Map<ImmutableContextSet, Map<String, Boolean>> permissions;
     private final Map<ImmutableContextSet, Map<String, String>> options;
-    private final Map<ImmutableContextSet, List<SubjectReference>> parents;
+    private final Map<ImmutableContextSet, List<LPSubjectReference>> parents;
 
-    public SubjectStorageModel(LPPermissionService service, Map<ImmutableContextSet, ? extends Map<String, Boolean>> permissions, Map<ImmutableContextSet, ? extends Map<String, String>> options, Map<ImmutableContextSet, ? extends List<SubjectReference>> parents) {
+    public SubjectStorageModel(LPPermissionService service, Map<ImmutableContextSet, ? extends Map<String, Boolean>> permissions, Map<ImmutableContextSet, ? extends Map<String, String>> options, Map<ImmutableContextSet, ? extends List<LPSubjectReference>> parents) {
         this.service = service;
 
         ImmutableMap.Builder<ImmutableContextSet, Map<String, Boolean>> permissionsBuilder = ImmutableMap.builder();
@@ -69,8 +69,8 @@ public class SubjectStorageModel {
         }
         this.options = optionsBuilder.build();
 
-        ImmutableMap.Builder<ImmutableContextSet, List<SubjectReference>> parentsBuilder = ImmutableMap.builder();
-        for (Map.Entry<ImmutableContextSet, ? extends List<SubjectReference>> e : parents.entrySet()) {
+        ImmutableMap.Builder<ImmutableContextSet, List<LPSubjectReference>> parentsBuilder = ImmutableMap.builder();
+        for (Map.Entry<ImmutableContextSet, ? extends List<LPSubjectReference>> e : parents.entrySet()) {
             parentsBuilder.put(e.getKey(), ImmutableList.copyOf(e.getValue()));
         }
         this.parents = parentsBuilder.build();
@@ -137,7 +137,7 @@ public class SubjectStorageModel {
         }
         this.options = optionsBuilder.build();
 
-        ImmutableMap.Builder<ImmutableContextSet, List<SubjectReference>> parentsBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<ImmutableContextSet, List<LPSubjectReference>> parentsBuilder = ImmutableMap.builder();
         for (JsonElement e : parents) {
             if (!e.isJsonObject()) {
                 continue;
@@ -151,7 +151,7 @@ public class SubjectStorageModel {
             JsonArray data = section.get("data").getAsJsonArray();
 
             ImmutableContextSet contextSet = ContextSetJsonSerializer.deserializeContextSet(context).makeImmutable();
-            ImmutableList.Builder<SubjectReference> pars = ImmutableList.builder();
+            ImmutableList.Builder<LPSubjectReference> pars = ImmutableList.builder();
             for (JsonElement p : data) {
                 if (!p.isJsonObject()) {
                     continue;
@@ -228,7 +228,7 @@ public class SubjectStorageModel {
         root.add("options", options);
 
         JsonArray parents = new JsonArray();
-        for (Map.Entry<ImmutableContextSet, List<SubjectReference>> e : sortContextMap(this.parents)) {
+        for (Map.Entry<ImmutableContextSet, List<LPSubjectReference>> e : sortContextMap(this.parents)) {
             if (e.getValue().isEmpty()) {
                 continue;
             }
@@ -237,7 +237,7 @@ public class SubjectStorageModel {
             section.add("context", ContextSetJsonSerializer.serializeContextSet(e.getKey()));
 
             JsonArray data = new JsonArray();
-            for (SubjectReference ref : e.getValue()) {
+            for (LPSubjectReference ref : e.getValue()) {
                 JsonObject parent = new JsonObject();
                 parent.addProperty("collection", ref.getCollectionIdentifier());
                 parent.addProperty("subject", ref.getCollectionIdentifier());

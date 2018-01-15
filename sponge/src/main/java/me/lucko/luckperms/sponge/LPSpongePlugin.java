@@ -57,7 +57,6 @@ import me.lucko.luckperms.common.logging.SenderLogger;
 import me.lucko.luckperms.common.managers.track.StandardTrackManager;
 import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.SchedulerAdapter;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
@@ -82,6 +81,7 @@ import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.model.LuckPermsSpongePlugin;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.tasks.ServiceCacheHousekeepingTask;
 import me.lucko.luckperms.sponge.utils.VersionData;
@@ -136,7 +136,7 @@ import java.util.stream.Stream;
         description = "A permissions plugin",
         url = "https://github.com/lucko/LuckPerms"
 )
-public class LPSpongePlugin implements LuckPermsPlugin {
+public class LPSpongePlugin implements LuckPermsSpongePlugin {
 
     @Inject
     private Logger logger;

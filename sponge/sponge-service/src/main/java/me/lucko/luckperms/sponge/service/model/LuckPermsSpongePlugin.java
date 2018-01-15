@@ -23,33 +23,16 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.migration;
+package me.lucko.luckperms.sponge.service.model;
 
-import me.lucko.luckperms.common.logging.ProgressLogger;
-import me.lucko.luckperms.common.utils.Uuids;
+import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import org.bukkit.Bukkit;
+import org.spongepowered.api.service.permission.Subject;
 
-import java.util.UUID;
+public interface LuckPermsSpongePlugin extends LuckPermsPlugin {
 
-public final class BukkitMigrationUtils {
-
-    @SuppressWarnings("deprecation")
-    public static UUID lookupUuid(ProgressLogger log, String s) {
-        UUID uuid = Uuids.parseNullable(s);
-        if (uuid == null) {
-            try {
-                uuid = Bukkit.getOfflinePlayer(s).getUniqueId();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-        if (uuid == null) {
-            log.logErr("Unable to get a UUID for user identifier: " + s);
-        }
-        return uuid;
-    }
-
-    private BukkitMigrationUtils() {}
+    @Override
+    ContextManager<Subject> getContextManager();
 
 }

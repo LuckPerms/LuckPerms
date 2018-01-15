@@ -42,9 +42,9 @@ import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
-import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorage;
 
 import org.spongepowered.api.plugin.PluginContainer;
@@ -211,8 +211,8 @@ public class LuckPermsService implements LPPermissionService {
     }
 
     @Override
-    public ImmutableList<SubjectReference> sortSubjects(Collection<SubjectReference> s) {
-        List<SubjectReference> ret = new ArrayList<>(s);
+    public ImmutableList<LPSubjectReference> sortSubjects(Collection<LPSubjectReference> s) {
+        List<LPSubjectReference> ret = new ArrayList<>(s);
         ret.sort(Collections.reverseOrder((o1, o2) -> {
             if (o1.equals(o2)) {
                 return 0;

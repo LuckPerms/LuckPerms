@@ -30,8 +30,8 @@ import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
-import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.SubjectData;
@@ -48,17 +48,19 @@ import javax.annotation.Nullable;
 @SuppressWarnings("unchecked")
 public final class SubjectDataProxy implements SubjectData {
     private final LPPermissionService service;
-    private final SubjectReference ref;
+    private final LPSubjectReference ref;
     private final boolean enduring;
 
-    public SubjectDataProxy(LPPermissionService service, SubjectReference ref, boolean enduring) {
+    public SubjectDataProxy(LPPermissionService service, LPSubjectReference ref, boolean enduring) {
         this.service = service;
         this.ref = ref;
         this.enduring = enduring;
     }
 
     private CompletableFuture<LPSubjectData> handle() {
-        return this.enduring ? this.ref.resolveLp().thenApply(LPSubject::getSubjectData) : this.ref.resolveLp().thenApply(LPSubject::getTransientSubjectData);
+        return this.enduring ?
+                this.ref.resolveLp().thenApply(LPSubject::getSubjectData) :
+                this.ref.resolveLp().thenApply(LPSubject::getTransientSubjectData);
     }
 
     @Nonnull

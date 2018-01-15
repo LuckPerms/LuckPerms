@@ -30,14 +30,15 @@ import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.ProxiedSubject;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
-import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
+import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Tristate;
 
 import java.util.List;
@@ -50,38 +51,33 @@ import javax.annotation.Nonnull;
 @SuppressWarnings("unchecked")
 public final class SubjectProxy implements Subject, ProxiedSubject {
     private final LPPermissionService service;
-    private final SubjectReference ref;
+    private final LPSubjectReference ref;
 
-    public SubjectProxy(LPPermissionService service, SubjectReference ref) {
+    public SubjectProxy(LPPermissionService service, LPSubjectReference ref) {
         this.service = service;
         this.ref = ref;
     }
 
-    private CompletableFuture<LPSubject> getHandle() {
+    private CompletableFuture<LPSubject> handle() {
         return this.ref.resolveLp();
     }
 
+    @Nonnull
     @Override
-    public SubjectReference getReference() {
+    public LPSubjectReference asSubjectReference() {
         return this.ref;
     }
 
     @Nonnull
     @Override
     public Optional<CommandSource> getCommandSource() {
-        return getHandle().thenApply(LPSubject::getCommandSource).join();
+        return handle().thenApply(LPSubject::getCommandSource).join();
     }
 
     @Nonnull
     @Override
     public SubjectCollection getContainingCollection() {
         return this.service.getCollection(this.ref.getCollectionIdentifier()).sponge();
-    }
-
-    @Nonnull
-    @Override
-    public org.spongepowered.api.service.permission.SubjectReference asSubjectReference() {
-        return this.ref;
     }
 
     @Override
@@ -101,52 +97,52 @@ public final class SubjectProxy implements Subject, ProxiedSubject {
 
     @Override
     public boolean hasPermission(@Nonnull Set<Context> contexts, @Nonnull String permission) {
-        return getHandle().thenApply(handle -> handle.getPermissionValue(CompatibilityUtil.convertContexts(contexts), permission).asBoolean()).join();
+        return handle().thenApply(handle -> handle.getPermissionValue(CompatibilityUtil.convertContexts(contexts), permission).asBoolean()).join();
     }
 
     @Override
     public boolean hasPermission(@Nonnull String permission) {
-        return getHandle().thenApply(handle -> handle.getPermissionValue(ImmutableContextSet.empty(), permission).asBoolean()).join();
+        return handle().thenApply(handle -> handle.getPermissionValue(ImmutableContextSet.empty(), permission).asBoolean()).join();
     }
 
     @Nonnull
     @Override
     public Tristate getPermissionValue(@Nonnull Set<Context> contexts, @Nonnull String permission) {
-        return getHandle().thenApply(handle -> CompatibilityUtil.convertTristate(handle.getPermissionValue(CompatibilityUtil.convertContexts(contexts), permission))).join();
+        return handle().thenApply(handle -> CompatibilityUtil.convertTristate(handle.getPermissionValue(CompatibilityUtil.convertContexts(contexts), permission))).join();
     }
 
     @Override
-    public boolean isChildOf(@Nonnull org.spongepowered.api.service.permission.SubjectReference parent) {
-        return getHandle().thenApply(handle -> handle.isChildOf(ImmutableContextSet.empty(), SubjectReferenceFactory.obtain(this.service, parent))).join();
+    public boolean isChildOf(@Nonnull SubjectReference parent) {
+        return handle().thenApply(handle -> handle.isChildOf(ImmutableContextSet.empty(), SubjectReferenceFactory.obtain(this.service, parent))).join();
     }
 
     @Override
-    public boolean isChildOf(@Nonnull Set<Context> contexts, @Nonnull org.spongepowered.api.service.permission.SubjectReference parent) {
-        return getHandle().thenApply(handle -> handle.isChildOf(CompatibilityUtil.convertContexts(contexts), SubjectReferenceFactory.obtain(this.service, parent))).join();
-    }
-
-    @Nonnull
-    @Override
-    public List<org.spongepowered.api.service.permission.SubjectReference> getParents() {
-        return (List) getHandle().thenApply(handle -> handle.getParents(ImmutableContextSet.empty())).join();
+    public boolean isChildOf(@Nonnull Set<Context> contexts, @Nonnull SubjectReference parent) {
+        return handle().thenApply(handle -> handle.isChildOf(CompatibilityUtil.convertContexts(contexts), SubjectReferenceFactory.obtain(this.service, parent))).join();
     }
 
     @Nonnull
     @Override
-    public List<org.spongepowered.api.service.permission.SubjectReference> getParents(@Nonnull Set<Context> contexts) {
-        return (List) getHandle().thenApply(handle -> handle.getParents(CompatibilityUtil.convertContexts(contexts))).join();
+    public List<SubjectReference> getParents() {
+        return (List) handle().thenApply(handle -> handle.getParents(ImmutableContextSet.empty())).join();
+    }
+
+    @Nonnull
+    @Override
+    public List<SubjectReference> getParents(@Nonnull Set<Context> contexts) {
+        return (List) handle().thenApply(handle -> handle.getParents(CompatibilityUtil.convertContexts(contexts))).join();
     }
 
     @Nonnull
     @Override
     public Optional<String> getOption(@Nonnull Set<Context> contexts, @Nonnull String key) {
-        return getHandle().thenApply(handle -> handle.getOption(CompatibilityUtil.convertContexts(contexts), key)).join();
+        return handle().thenApply(handle -> handle.getOption(CompatibilityUtil.convertContexts(contexts), key)).join();
     }
 
     @Nonnull
     @Override
     public Optional<String> getOption(@Nonnull String key) {
-        return getHandle().thenApply(handle -> handle.getOption(ImmutableContextSet.empty(), key)).join();
+        return handle().thenApply(handle -> handle.getOption(ImmutableContextSet.empty(), key)).join();
     }
 
     @Override
@@ -157,13 +153,13 @@ public final class SubjectProxy implements Subject, ProxiedSubject {
     @Nonnull
     @Override
     public Optional<String> getFriendlyIdentifier() {
-        return getHandle().thenApply(LPSubject::getFriendlyIdentifier).join();
+        return handle().thenApply(LPSubject::getFriendlyIdentifier).join();
     }
 
     @Nonnull
     @Override
     public Set<Context> getActiveContexts() {
-        return getHandle().thenApply(handle -> CompatibilityUtil.convertContexts(handle.getActiveContextSet())).join();
+        return CompatibilityUtil.convertContexts(this.service.getPlugin().getContextManager().getApplicableContext(this));
     }
 
     @Override

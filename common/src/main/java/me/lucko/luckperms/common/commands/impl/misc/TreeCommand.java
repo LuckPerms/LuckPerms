@@ -31,7 +31,6 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -40,6 +39,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.treeview.TreeView;
 import me.lucko.luckperms.common.treeview.TreeViewBuilder;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.Uuids;
 
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
@@ -73,7 +73,7 @@ public class TreeCommand extends SingleCommand {
 
         if (player != null) {
             User user;
-            UUID u = CommandUtils.parseUuid(player);
+            UUID u = Uuids.parseNullable(player);
             if (u != null) {
                 user = plugin.getUserManager().getIfLoaded(u);
             } else {

@@ -45,8 +45,8 @@ import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
-import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -129,9 +129,7 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
     @Override
     public CompletableFuture<LPSubject> loadSubject(String identifier) {
         if (!DataConstraints.GROUP_NAME_TEST.test(identifier)) {
-            CompletableFuture<LPSubject> fut = new CompletableFuture<>();
-            fut.completeExceptionally(new IllegalArgumentException("Illegal subject identifier"));
-            return fut;
+            throw new IllegalArgumentException("Illegal subject identifier");
         }
 
         LPSubject present = this.subjectLoadingCache.getIfPresent(identifier.toLowerCase());
@@ -144,16 +142,20 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
 
     @Override
     public Optional<LPSubject> getSubject(String identifier) {
+        if (!DataConstraints.GROUP_NAME_TEST.test(identifier)) {
+            return Optional.empty();
+        }
+
         return Optional.ofNullable(getIfLoaded(identifier.toLowerCase())).map(SpongeGroup::sponge);
     }
 
     @Override
     public CompletableFuture<Boolean> hasRegistered(String identifier) {
-        if (isLoaded(identifier.toLowerCase())) {
-            return CompletableFuture.completedFuture(true);
-        } else {
+        if (!DataConstraints.GROUP_NAME_TEST.test(identifier)) {
             return CompletableFuture.completedFuture(false);
         }
+
+        return CompletableFuture.completedFuture(isLoaded(identifier.toLowerCase()));
     }
 
     @Override
@@ -161,6 +163,9 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
         return CompletableFuture.supplyAsync(() -> {
             ImmutableSet.Builder<LPSubject> ret = ImmutableSet.builder();
             for (String id : identifiers) {
+                if (!DataConstraints.GROUP_NAME_TEST.test(id)) {
+                    continue;
+                }
                 ret.add(loadSubject(id.toLowerCase()).join());
             }
 
@@ -179,9 +184,9 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
     }
 
     @Override
-    public CompletableFuture<ImmutableMap<SubjectReference, Boolean>> getAllWithPermission(String permission) {
+    public CompletableFuture<ImmutableMap<LPSubjectReference, Boolean>> getAllWithPermission(String permission) {
         return CompletableFuture.supplyAsync(() -> {
-            ImmutableMap.Builder<SubjectReference, Boolean> ret = ImmutableMap.builder();
+            ImmutableMap.Builder<LPSubjectReference, Boolean> ret = ImmutableMap.builder();
 
             List<HeldPermission<String>> lookup = this.plugin.getStorage().getGroupsWithPermission(permission).join();
             for (HeldPermission<String> holder : lookup) {
@@ -195,9 +200,9 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
     }
 
     @Override
-    public CompletableFuture<ImmutableMap<SubjectReference, Boolean>> getAllWithPermission(ImmutableContextSet contexts, String permission) {
+    public CompletableFuture<ImmutableMap<LPSubjectReference, Boolean>> getAllWithPermission(ImmutableContextSet contexts, String permission) {
         return CompletableFuture.supplyAsync(() -> {
-            ImmutableMap.Builder<SubjectReference, Boolean> ret = ImmutableMap.builder();
+            ImmutableMap.Builder<LPSubjectReference, Boolean> ret = ImmutableMap.builder();
 
             List<HeldPermission<String>> lookup = this.plugin.getStorage().getGroupsWithPermission(permission).join();
             for (HeldPermission<String> holder : lookup) {

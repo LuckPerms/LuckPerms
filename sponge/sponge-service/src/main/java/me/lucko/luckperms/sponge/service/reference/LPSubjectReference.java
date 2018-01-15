@@ -23,33 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.migration;
+package me.lucko.luckperms.sponge.service.reference;
 
-import me.lucko.luckperms.common.logging.ProgressLogger;
-import me.lucko.luckperms.common.utils.Uuids;
+import me.lucko.luckperms.sponge.service.model.LPSubject;
 
-import org.bukkit.Bukkit;
+import org.spongepowered.api.service.permission.SubjectReference;
 
-import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
-public final class BukkitMigrationUtils {
+import javax.annotation.Nonnull;
 
-    @SuppressWarnings("deprecation")
-    public static UUID lookupUuid(ProgressLogger log, String s) {
-        UUID uuid = Uuids.parseNullable(s);
-        if (uuid == null) {
-            try {
-                uuid = Bukkit.getOfflinePlayer(s).getUniqueId();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-        if (uuid == null) {
-            log.logErr("Unable to get a UUID for user identifier: " + s);
-        }
-        return uuid;
-    }
+/**
+ * LuckPerms model for the Sponge {@link SubjectReference}
+ */
+public interface LPSubjectReference extends SubjectReference {
 
-    private BukkitMigrationUtils() {}
+    @Nonnull
+    CompletableFuture<LPSubject> resolveLp();
 
 }

@@ -45,7 +45,7 @@ import me.lucko.luckperms.sponge.processors.SpongeWildcardProcessor;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
 
 import java.util.HashMap;
 import java.util.List;
@@ -70,7 +70,7 @@ public class CalculatedSubjectData implements LPSubjectData {
     private final String calculatorDisplayName;
 
     private final Map<ImmutableContextSet, Map<String, Boolean>> permissions = new ConcurrentHashMap<>();
-    private final Map<ImmutableContextSet, Set<SubjectReference>> parents = new ConcurrentHashMap<>();
+    private final Map<ImmutableContextSet, Set<LPSubjectReference>> parents = new ConcurrentHashMap<>();
     private final Map<ImmutableContextSet, Map<String, String>> options = new ConcurrentHashMap<>();
 
     private final LoadingCache<ImmutableContextSet, CalculatorHolder> permissionCache = Caffeine.newBuilder()
@@ -121,10 +121,10 @@ public class CalculatedSubjectData implements LPSubjectData {
         this.service.invalidateAllCaches(LPSubject.CacheLevel.PERMISSION);
     }
 
-    public void replaceParents(Map<ImmutableContextSet, List<SubjectReference>> map) {
+    public void replaceParents(Map<ImmutableContextSet, List<LPSubjectReference>> map) {
         this.parents.clear();
-        for (Map.Entry<ImmutableContextSet, List<SubjectReference>> e : map.entrySet()) {
-            Set<SubjectReference> set = ConcurrentHashMap.newKeySet();
+        for (Map.Entry<ImmutableContextSet, List<LPSubjectReference>> e : map.entrySet()) {
+            Set<LPSubjectReference> set = ConcurrentHashMap.newKeySet();
             set.addAll(e.getValue());
             this.parents.put(e.getKey(), set);
         }
@@ -194,17 +194,17 @@ public class CalculatedSubjectData implements LPSubjectData {
     }
 
     @Override
-    public ImmutableMap<ImmutableContextSet, ImmutableList<SubjectReference>> getAllParents() {
-        ImmutableMap.Builder<ImmutableContextSet, ImmutableList<SubjectReference>> map = ImmutableMap.builder();
-        for (Map.Entry<ImmutableContextSet, Set<SubjectReference>> e : this.parents.entrySet()) {
+    public ImmutableMap<ImmutableContextSet, ImmutableList<LPSubjectReference>> getAllParents() {
+        ImmutableMap.Builder<ImmutableContextSet, ImmutableList<LPSubjectReference>> map = ImmutableMap.builder();
+        for (Map.Entry<ImmutableContextSet, Set<LPSubjectReference>> e : this.parents.entrySet()) {
             map.put(e.getKey(), this.service.sortSubjects(e.getValue()));
         }
         return map.build();
     }
 
     @Override
-    public CompletableFuture<Boolean> addParent(ImmutableContextSet contexts, SubjectReference parent) {
-        Set<SubjectReference> set = this.parents.computeIfAbsent(contexts, c -> ConcurrentHashMap.newKeySet());
+    public CompletableFuture<Boolean> addParent(ImmutableContextSet contexts, LPSubjectReference parent) {
+        Set<LPSubjectReference> set = this.parents.computeIfAbsent(contexts, c -> ConcurrentHashMap.newKeySet());
         boolean b = set.add(parent);
         if (b) {
             this.service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
@@ -213,8 +213,8 @@ public class CalculatedSubjectData implements LPSubjectData {
     }
 
     @Override
-    public CompletableFuture<Boolean> removeParent(ImmutableContextSet contexts, SubjectReference parent) {
-        Set<SubjectReference> set = this.parents.get(contexts);
+    public CompletableFuture<Boolean> removeParent(ImmutableContextSet contexts, LPSubjectReference parent) {
+        Set<LPSubjectReference> set = this.parents.get(contexts);
         boolean b = set != null && set.remove(parent);
         if (b) {
             this.service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
@@ -235,7 +235,7 @@ public class CalculatedSubjectData implements LPSubjectData {
 
     @Override
     public CompletableFuture<Boolean> clearParents(ImmutableContextSet contexts) {
-        Set<SubjectReference> set = this.parents.get(contexts);
+        Set<LPSubjectReference> set = this.parents.get(contexts);
         if (set == null) {
             return CompletableFuture.completedFuture(false);
         }

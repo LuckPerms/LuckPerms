@@ -27,7 +27,7 @@ package me.lucko.luckperms.sponge.service.legacy;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
-import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
+import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorageModel;
 
 import java.util.List;

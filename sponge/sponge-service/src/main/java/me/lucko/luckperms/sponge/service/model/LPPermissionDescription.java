@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.sponge.service.model;
 
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.text.Text;
@@ -48,7 +50,7 @@ public interface LPPermissionDescription {
 
     Optional<PluginContainer> getOwner();
 
-    CompletableFuture<Map<SubjectReference, Boolean>> findAssignedSubjects(String collectionIdentifier);
+    CompletableFuture<Map<LPSubjectReference, Boolean>> findAssignedSubjects(String collectionIdentifier);
 
     Map<LPSubject, Boolean> getAssignedSubjects(String collectionIdentifier);
 

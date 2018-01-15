@@ -29,7 +29,7 @@ import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
 
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionDescription;
@@ -89,7 +89,7 @@ public final class LuckPermsPermissionDescription implements LPPermissionDescrip
 
     @SuppressWarnings("unchecked")
     @Override
-    public CompletableFuture<Map<SubjectReference, Boolean>> findAssignedSubjects(String id) {
+    public CompletableFuture<Map<LPSubjectReference, Boolean>> findAssignedSubjects(String id) {
         LPSubjectCollection collection = this.service.getCollection(id);
         return (CompletableFuture) collection.getAllWithPermission(this.id);
     }

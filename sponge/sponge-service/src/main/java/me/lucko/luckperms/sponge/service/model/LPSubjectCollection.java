@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
 
 import org.spongepowered.api.service.permission.SubjectCollection;
 
@@ -63,9 +64,9 @@ public interface LPSubjectCollection {
 
     CompletableFuture<ImmutableSet<String>> getAllIdentifiers();
 
-    CompletableFuture<ImmutableMap<SubjectReference, Boolean>> getAllWithPermission(String permission);
+    CompletableFuture<ImmutableMap<LPSubjectReference, Boolean>> getAllWithPermission(String permission);
 
-    CompletableFuture<ImmutableMap<SubjectReference, Boolean>> getAllWithPermission(ImmutableContextSet contexts, String permission);
+    CompletableFuture<ImmutableMap<LPSubjectReference, Boolean>> getAllWithPermission(ImmutableContextSet contexts, String permission);
 
     ImmutableMap<LPSubject, Boolean> getLoadedWithPermission(String permission);
 

@@ -23,7 +23,10 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.model;
+package me.lucko.luckperms.sponge.service.reference;
+
+import me.lucko.luckperms.sponge.service.model.LPPermissionService;
+import me.lucko.luckperms.sponge.service.model.LPSubject;
 
 import org.spongepowered.api.service.permission.Subject;
 
@@ -40,7 +43,7 @@ import javax.annotation.Nonnull;
  * Use of this class (or interface) should have no negative impact on
  * performance, as {@link #resolve()} calls are cached.
  */
-public final class SubjectReference implements org.spongepowered.api.service.permission.SubjectReference {
+final class LuckPermsSubjectReference implements LPSubjectReference {
 
     /**
      * The time a subject instance should be cached in this reference
@@ -68,7 +71,7 @@ public final class SubjectReference implements org.spongepowered.api.service.per
     private long lastLookup = 0L;
     private WeakReference<LPSubject> cache = null;
 
-    SubjectReference(LPPermissionService service, String collectionIdentifier, String subjectIdentifier) {
+    LuckPermsSubjectReference(LPPermissionService service, String collectionIdentifier, String subjectIdentifier) {
         this.service = Objects.requireNonNull(service);
         this.collectionIdentifier = Objects.requireNonNull(collectionIdentifier);
         this.subjectIdentifier = Objects.requireNonNull(subjectIdentifier);
@@ -130,6 +133,8 @@ public final class SubjectReference implements org.spongepowered.api.service.per
         return s;
     }
 
+    @Nonnull
+    @Override
     public CompletableFuture<LPSubject> resolveLp() {
         // check if there is a cached value before loading
         LPSubject s = tryCache();
@@ -157,9 +162,10 @@ public final class SubjectReference implements org.spongepowered.api.service.per
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
-        if (!(o instanceof SubjectReference)) return false;
-        final SubjectReference other = (SubjectReference) o;
-        return this.collectionIdentifier.equals(other.collectionIdentifier) && this.subjectIdentifier.equals(other.subjectIdentifier);
+        if (!(o instanceof LPSubjectReference)) return false;
+        final LPSubjectReference other = (LPSubjectReference) o;
+        return this.collectionIdentifier.equals(other.getCollectionIdentifier()) &&
+                this.subjectIdentifier.equals(other.getSubjectIdentifier());
     }
 
     @Override

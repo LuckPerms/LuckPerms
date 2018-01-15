@@ -42,15 +42,16 @@ import java.util.Map;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-public final class SimpleDescriptionBuilder implements PermissionDescription.Builder {
+public final class LPDescriptionBuilder implements PermissionDescription.Builder {
     @Nonnull private final LPPermissionService service;
     @Nonnull private final PluginContainer container;
     @Nonnull private final Map<String, Tristate> roles = new HashMap<>();
-    private String id = null;
-    private Text description = null;
+    @Nullable private String id = null;
+    @Nullable private Text description = null;
 
-    public SimpleDescriptionBuilder(LPPermissionService service, PluginContainer container) {
+    public LPDescriptionBuilder(LPPermissionService service, PluginContainer container) {
         this.service = Objects.requireNonNull(service, "service");
         this.container = Objects.requireNonNull(container, "container");
     }
@@ -64,8 +65,8 @@ public final class SimpleDescriptionBuilder implements PermissionDescription.Bui
 
     @Nonnull
     @Override
-    public PermissionDescription.Builder description(Text description) {
-        this.description = Objects.requireNonNull(description, "description");
+    public PermissionDescription.Builder description(@Nullable Text description) {
+        this.description = description;
         return this;
     }
 
@@ -84,7 +85,7 @@ public final class SimpleDescriptionBuilder implements PermissionDescription.Bui
             throw new IllegalStateException("id cannot be null");
         }
 
-        LPPermissionDescription d = this.service.registerPermissionDescription(this.id, this.description, this.container);
+        LPPermissionDescription description = this.service.registerPermissionDescription(this.id, this.description, this.container);
 
         // Set role-templates
         LPSubjectCollection subjects = this.service.getCollection(PermissionService.SUBJECTS_ROLE_TEMPLATE);
@@ -100,14 +101,14 @@ public final class SimpleDescriptionBuilder implements PermissionDescription.Bui
         this.id = null;
         this.description = null;
 
-        return d.sponge();
+        return description.sponge();
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
-        if (!(o instanceof SimpleDescriptionBuilder)) return false;
-        final SimpleDescriptionBuilder other = (SimpleDescriptionBuilder) o;
+        if (!(o instanceof LPDescriptionBuilder)) return false;
+        final LPDescriptionBuilder other = (LPDescriptionBuilder) o;
 
         return this.container.equals(other.container) &&
                 this.roles.equals(other.roles) &&

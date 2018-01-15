@@ -25,11 +25,18 @@
 
 package me.lucko.luckperms.sponge.service.model;
 
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+
+import org.spongepowered.api.service.permission.Subject;
+
+import javax.annotation.Nonnull;
+
 /**
- * Marks that an object is a proxied representation of a {@link org.spongepowered.api.service.permission.Subject}.
+ * Marks that an object is a proxied representation of a {@link Subject}.
  */
 public interface ProxiedSubject {
 
-    SubjectReference getReference();
+    @Nonnull
+    LPSubjectReference asSubjectReference();
 
 }

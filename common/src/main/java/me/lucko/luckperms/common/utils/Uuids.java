@@ -23,33 +23,45 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.migration;
+package me.lucko.luckperms.common.utils;
 
-import me.lucko.luckperms.common.logging.ProgressLogger;
-import me.lucko.luckperms.common.utils.Uuids;
-
-import org.bukkit.Bukkit;
-
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
-public final class BukkitMigrationUtils {
+import javax.annotation.Nullable;
 
-    @SuppressWarnings("deprecation")
-    public static UUID lookupUuid(ProgressLogger log, String s) {
-        UUID uuid = Uuids.parseNullable(s);
-        if (uuid == null) {
-            try {
-                uuid = Bukkit.getOfflinePlayer(s).getUniqueId();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+/**
+ * Utilities for working with {@link UUID}s.
+ */
+public final class Uuids {
+    private static final Pattern UUID_PATTERN = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
+
+    public static final Predicate<String> PREDICATE = s -> parseNullable(s) != null;
+
+    @Nullable
+    private static UUID fromString(String s) {
+        try {
+            return UUID.fromString(s);
+        } catch (IllegalArgumentException e) {
+            return null;
         }
+    }
+
+    @Nullable
+    public static UUID parseNullable(String s) {
+        UUID uuid = fromString(s);
         if (uuid == null) {
-            log.logErr("Unable to get a UUID for user identifier: " + s);
+            uuid = fromString(UUID_PATTERN.matcher(s).replaceAll("$1-$2-$3-$4-$5"));
         }
         return uuid;
     }
 
-    private BukkitMigrationUtils() {}
+    public static Optional<UUID> parse(String s) {
+        return Optional.ofNullable(parseNullable(s));
+    }
+
+    private Uuids() {}
 
 }

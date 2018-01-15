@@ -40,12 +40,13 @@ import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorageModel;
 
 import org.spongepowered.api.service.permission.SubjectCollection;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -73,7 +74,9 @@ public class PersistedCollection implements LPSubjectCollection {
         Map<String, SubjectStorageModel> holders = this.service.getStorage().loadAllFromFile(this.identifier);
         for (Map.Entry<String, SubjectStorageModel> e : holders.entrySet()) {
             PersistedSubject subject = this.subjects.get(e.getKey().toLowerCase());
-            subject.loadData(e.getValue());
+            if (subject != null) {
+                subject.loadData(e.getValue());
+            }
         }
     }
 
@@ -104,7 +107,7 @@ public class PersistedCollection implements LPSubjectCollection {
 
     @Override
     public Optional<LPSubject> getSubject(String identifier) {
-        return Optional.of(this.subjects.get(identifier.toLowerCase()));
+        return Optional.of(Objects.requireNonNull(this.subjects.get(identifier.toLowerCase())));
     }
 
     @Override
@@ -116,7 +119,7 @@ public class PersistedCollection implements LPSubjectCollection {
     public CompletableFuture<ImmutableCollection<LPSubject>> loadSubjects(Set<String> identifiers) {
         ImmutableSet.Builder<LPSubject> ret = ImmutableSet.builder();
         for (String id : identifiers) {
-            ret.add(this.subjects.get(id.toLowerCase()));
+            ret.add(Objects.requireNonNull(this.subjects.get(id.toLowerCase())));
         }
         return CompletableFuture.completedFuture(ret.build());
     }
@@ -132,13 +135,13 @@ public class PersistedCollection implements LPSubjectCollection {
     }
 
     @Override
-    public CompletableFuture<ImmutableMap<SubjectReference, Boolean>> getAllWithPermission(String permission) {
+    public CompletableFuture<ImmutableMap<LPSubjectReference, Boolean>> getAllWithPermission(String permission) {
         return CompletableFuture.completedFuture(getLoadedWithPermission(permission).entrySet().stream()
                 .collect(ImmutableCollectors.toMap(e -> e.getKey().toReference(), Map.Entry::getValue)));
     }
 
     @Override
-    public CompletableFuture<ImmutableMap<SubjectReference, Boolean>> getAllWithPermission(ImmutableContextSet contexts, String permission) {
+    public CompletableFuture<ImmutableMap<LPSubjectReference, Boolean>> getAllWithPermission(ImmutableContextSet contexts, String permission) {
         return CompletableFuture.completedFuture(getLoadedWithPermission(contexts, permission).entrySet().stream()
                 .collect(ImmutableCollectors.toMap(e -> e.getKey().toReference(), Map.Entry::getValue)));
     }

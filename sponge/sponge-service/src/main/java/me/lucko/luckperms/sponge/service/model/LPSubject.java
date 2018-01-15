@@ -29,6 +29,8 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.Subject;
@@ -46,7 +48,7 @@ public interface LPSubject {
 
     String getIdentifier();
 
-    default SubjectReference toReference() {
+    default LPSubjectReference toReference() {
         return SubjectReferenceFactory.obtain(getService(), this);
     }
 
@@ -70,13 +72,11 @@ public interface LPSubject {
 
     Tristate getPermissionValue(ImmutableContextSet contexts, String permission);
 
-    boolean isChildOf(ImmutableContextSet contexts, SubjectReference parent);
+    boolean isChildOf(ImmutableContextSet contexts, LPSubjectReference parent);
 
-    ImmutableList<SubjectReference> getParents(ImmutableContextSet contexts);
+    ImmutableList<LPSubjectReference> getParents(ImmutableContextSet contexts);
 
     Optional<String> getOption(ImmutableContextSet contexts, String key);
-
-    ImmutableContextSet getActiveContextSet();
 
     default void performCleanup() {
 
