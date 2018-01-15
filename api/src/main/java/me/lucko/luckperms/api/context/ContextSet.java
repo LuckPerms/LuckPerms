@@ -51,7 +51,9 @@ import javax.annotation.Nonnull;
  * {@link String#toLowerCase() lowercase} by all implementations.
  * Values however are case-sensitive.</p>
  *
- * <p>Context keys and values may not be null.</p>
+ * <p>Context keys and values may not be null or empty. A key/value will be
+ * deemed empty if it's length is zero, or if it consists of only space
+ * characters.</p>
  *
  * <p>Two default ContextSet implementations are provided.
  * {@link MutableContextSet} allows the addition and removal of context keys

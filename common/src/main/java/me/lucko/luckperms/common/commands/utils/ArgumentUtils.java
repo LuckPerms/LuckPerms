@@ -134,12 +134,12 @@ public class ArgumentUtils {
                 }
 
                 String key = pair.substring(0, index);
-                if (key.equals("")) {
+                if (key.equals("") || key.trim().isEmpty()) {
                     continue;
                 }
 
                 String value = pair.substring(index + 1);
-                if (value.equals("")) {
+                if (value.equals("") || value.trim().isEmpty()) {
                     continue;
                 }
 

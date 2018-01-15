@@ -122,11 +122,33 @@ abstract class AbstractContextSet implements ContextSet {
     }
 
     static String sanitizeKey(String key) {
-        return Objects.requireNonNull(key, "key is null").toLowerCase().intern();
+        Objects.requireNonNull(key, "key is null");
+        if (stringIsEmpty(key)) {
+            throw new IllegalArgumentException("key is (effectively) empty");
+        }
+
+        return key.toLowerCase().intern();
     }
 
     static String sanitizeValue(String value) {
-        return Objects.requireNonNull(value, "value is null").intern();
+        Objects.requireNonNull(value, "value is null");
+        if (stringIsEmpty(value)) {
+            throw new IllegalArgumentException("value is (effectively) empty");
+        }
+
+        return value.intern();
+    }
+
+    private static boolean stringIsEmpty(String s) {
+        if (s.isEmpty()) {
+            return true;
+        }
+        for (char c : s.toCharArray()) {
+            if (c != ' ') {
+                return false;
+            }
+        }
+        return true;
     }
 
 }
