@@ -42,6 +42,8 @@ import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 public abstract class MainCommand<T, I> extends Command<Void, T> {
 
     // equals 1 if the command doesn't take a mid argument, e.g. /lp log sub-command....
@@ -191,6 +193,7 @@ public abstract class MainCommand<T, I> extends Command<Void, T> {
         return getChildren().get().stream().anyMatch(sc -> sc.isAuthorized(sender));
     }
 
+    @Nonnull
     @Override
     public Optional<List<Command<T, ?>>> getChildren() {
         return super.getChildren();

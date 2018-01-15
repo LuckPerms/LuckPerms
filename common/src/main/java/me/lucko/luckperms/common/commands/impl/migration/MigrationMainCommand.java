@@ -45,6 +45,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.annotation.Nonnull;
+
 public class MigrationMainCommand extends MainCommand<Object, Object> {
     private static final Map<String, String> PLUGINS = ImmutableBiMap.<String, String>builder()
             // bukkit
@@ -69,6 +71,7 @@ public class MigrationMainCommand extends MainCommand<Object, Object> {
         super(CommandSpec.MIGRATION.spec(locale), "Migration", 1, null);
     }
 
+    @Nonnull
     @Override
     public synchronized Optional<List<Command<Object, ?>>> getChildren() {
         if (this.commands == null) {

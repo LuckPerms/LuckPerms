@@ -53,6 +53,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 public class SpongeMainCommand extends Command<Void, LPSubjectData> {
     private final LPSpongePlugin plugin;
 
@@ -225,6 +227,7 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
         return this.subCommands.values().stream().flatMap(List::stream).collect(ImmutableCollectors.toList());
     }
 
+    @Nonnull
     @Override
     public Optional<List<Command<LPSubjectData, ?>>> getChildren() {
         return Optional.of(getSubCommands());
