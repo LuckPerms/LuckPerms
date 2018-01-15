@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -68,22 +69,35 @@ public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> 
             return CommandResult.LOADING_ERROR;
         }
 
-        Set<Node> nodes = holder.getEnduringNodes().values().stream()
-                .filter(Node::isGroupNode)
-                .filter(Node::getValuePrimitive)
-                .filter(Node::isPermanent)
-                .collect(Collectors.toSet());
-
         List<Map.Entry<Track, String>> lines = new ArrayList<>();
 
-        for (Node node : nodes) {
-            String name = node.getGroupName();
+        if (holder.getType().isUser()) {
+            // if the holder is a user, we want to query parent groups for tracks
+            Set<Node> nodes = holder.getEnduringNodes().values().stream()
+                    .filter(Node::isGroupNode)
+                    .filter(Node::getValuePrimitive)
+                    .filter(Node::isPermanent)
+                    .collect(Collectors.toSet());
+
+            for (Node node : nodes) {
+                String groupName = node.getGroupName();
+                List<Track> tracks = plugin.getTrackManager().getAll().values().stream()
+                        .filter(t -> t.containsGroup(groupName))
+                        .collect(Collectors.toList());
+
+                for (Track t : tracks) {
+                    lines.add(Maps.immutableEntry(t, CommandUtils.listToArrowSep(t.getGroups(), groupName) + CommandUtils.getAppendableNodeContextString(node)));
+                }
+            }
+        } else {
+            // otherwise, just lookup for the actual group
+            String groupName = ((Group) holder).getName();
             List<Track> tracks = plugin.getTrackManager().getAll().values().stream()
-                    .filter(t -> t.containsGroup(name))
+                    .filter(t -> t.containsGroup(groupName))
                     .collect(Collectors.toList());
 
             for (Track t : tracks) {
-                lines.add(Maps.immutableEntry(t, CommandUtils.listToArrowSep(t.getGroups(), name) + CommandUtils.getAppendableNodeContextString(node)));
+                lines.add(Maps.immutableEntry(t, CommandUtils.listToArrowSep(t.getGroups(), groupName)));
             }
         }
 
