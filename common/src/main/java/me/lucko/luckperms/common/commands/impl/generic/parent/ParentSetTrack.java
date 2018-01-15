@@ -139,7 +139,7 @@ public class ParentSetTrack extends SharedSubCommand {
     }
 
     @Override
-    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         if (args.isEmpty() || args.size() == 1) {
             return getTrackTabComplete(args, plugin);
         }

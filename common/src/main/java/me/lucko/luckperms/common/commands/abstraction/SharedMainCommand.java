@@ -128,7 +128,7 @@ public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T>
                 .limit(1)
                 .findAny();
 
-        return o.map(cmd -> cmd.onTabComplete(plugin, sender, args.subList(1, args.size()))).orElseGet(Collections::emptyList);
+        return o.map(cmd -> cmd.tabComplete(plugin, sender, args.subList(1, args.size()))).orElseGet(Collections::emptyList);
 
     }
 

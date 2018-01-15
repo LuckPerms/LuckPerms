@@ -378,8 +378,10 @@ public class CommandManager {
 
                 // Provide backwards compatibility
                 case "setprimarygroup":
+                case "switchprimarygroup":
                     args.remove(2);
-                    args.add(2, "switchprimarygroup");
+                    args.add(2, "parent");
+                    args.add(3, "switchprimarygroup");
                     break;
                 case "listnodes":
                     args.remove(2);
