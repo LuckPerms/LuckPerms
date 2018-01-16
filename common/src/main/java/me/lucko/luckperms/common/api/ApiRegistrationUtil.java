@@ -34,16 +34,16 @@ public class ApiRegistrationUtil {
     private static final Method REGISTER;
     private static final Method UNREGISTER;
     static {
-        Method register = null;
-        Method unregister = null;
+        Method register;
+        Method unregister;
         try {
             register = LuckPerms.class.getDeclaredMethod("registerProvider", LuckPermsApi.class);
             register.setAccessible(true);
 
             unregister = LuckPerms.class.getDeclaredMethod("unregisterProvider");
             unregister.setAccessible(true);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            throw new ExceptionInInitializerError(e);
         }
 
         REGISTER = register;

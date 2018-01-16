@@ -36,6 +36,7 @@ import me.lucko.luckperms.bukkit.listeners.BukkitPlatformListener;
 import me.lucko.luckperms.bukkit.messaging.BukkitMessagingFactory;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
 import me.lucko.luckperms.bukkit.model.PermissibleInjector;
+import me.lucko.luckperms.bukkit.model.PermissibleMonitoringInjector;
 import me.lucko.luckperms.bukkit.model.SubscriptionMapInjector;
 import me.lucko.luckperms.bukkit.processors.BukkitProcessorsSetupTask;
 import me.lucko.luckperms.bukkit.processors.ChildPermissionProvider;
@@ -255,6 +256,9 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         // schedule another injection after all plugins have loaded - the entire pluginmanager instance
         // is replaced by some plugins :(
         this.scheduler.asyncLater(new SubscriptionMapInjector(this), 2L);
+
+        // inject verbose handlers into internal bukkit objects
+        new PermissibleMonitoringInjector(this).run();
 
         // Provide vault support
         tryVaultHook(false);

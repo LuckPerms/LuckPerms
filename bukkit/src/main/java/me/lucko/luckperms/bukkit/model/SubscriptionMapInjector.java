@@ -44,7 +44,7 @@ public class SubscriptionMapInjector implements Runnable {
             permSubsField = SimplePluginManager.class.getDeclaredField("permSubs");
             permSubsField.setAccessible(true);
         } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
+            throw new ExceptionInInitializerError(e);
         }
         PERM_SUBS_FIELD = permSubsField;
     }

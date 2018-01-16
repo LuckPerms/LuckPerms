@@ -64,7 +64,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
             permissionAttachmentPermissionsField = PermissionAttachment.class.getDeclaredField("permissions");
             permissionAttachmentPermissionsField.setAccessible(true);
         } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
+            throw new ExceptionInInitializerError(e);
         }
         PERMISSION_ATTACHMENT_PERMISSIONS_FIELD = permissionAttachmentPermissionsField;
     }

@@ -45,7 +45,7 @@ public final class ReflectionUtil {
         }
     }
 
-    public static String getServerVersion() {
+    private static String getServerVersion() {
         return SERVER_VERSION;
     }
 
