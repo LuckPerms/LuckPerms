@@ -114,7 +114,7 @@ public final class WebEditorUtils {
             try (OutputStream os = connection.getOutputStream()) {
                 StringWriter sw = new StringWriter();
                 new JsonWriter(sw).beginObject()
-                        .name("description").value("LuckPerms Web Permissions Editor Data")
+                        .name("description").value("LuckPerms Web Editor Data")
                         .name("public").value(false)
                         .name("files")
                         .beginObject().name(FILE_NAME)

@@ -57,36 +57,32 @@ public class VerboseListener {
 
     // how much data should we store before stopping.
     private static final int DATA_TRUNCATION = 10000;
-
     // how many traces should we add
     private static final int TRACE_DATA_TRUNCATION = 250;
+    // how many lines should we include in each stack trace send as a chat message
+    private static final int STACK_TRUNCATION_CHAT = 15;
+    // how many lines should we include in each stack trace in the web output
+    private static final int STACK_TRUNCATION_WEB = 30;
 
     // the time when the listener was first registered
     private final long startTime = System.currentTimeMillis();
-
     // the version of the plugin. (used when we paste data to gist)
     private final String pluginVersion;
-
     // the sender to notify each time the listener processes a check which passes the filter
     private final Sender notifiedSender;
-
-    // the filter string
-    private final String filter;
-
+    // the filter
+    private VerboseFilter filter;
     // if we should notify the sender
     private final boolean notify;
-
     // the number of checks we have processed
     private final AtomicInteger counter = new AtomicInteger(0);
-
     // the number of checks we have processed and accepted, based on the filter rules for this
     // listener
     private final AtomicInteger matchedCounter = new AtomicInteger(0);
-
     // the checks which passed the filter, up to a max size of #DATA_TRUNCATION
     private final List<CheckData> results = new ArrayList<>(DATA_TRUNCATION / 10);
 
-    public VerboseListener(String pluginVersion, Sender notifiedSender, String filter, boolean notify) {
+    public VerboseListener(String pluginVersion, Sender notifiedSender, VerboseFilter filter, boolean notify) {
         this.pluginVersion = pluginVersion;
         this.notifiedSender = notifiedSender;
         this.filter = filter;
@@ -102,8 +98,8 @@ public class VerboseListener {
         // increment handled counter
         this.counter.incrementAndGet();
 
-        // check if the data passes our filters
-        if (!VerboseFilter.passesFilter(data, this.filter)) {
+        // check if the data passes our filter
+        if (!this.filter.evaluate(data)) {
             return;
         }
 
@@ -117,47 +113,36 @@ public class VerboseListener {
 
         // handle notifications
         if (this.notify) {
-            StringBuilder msgContent = new StringBuilder();
-
-            if (this.notifiedSender.isConsole()) {
-                msgContent.append("&8[&2")
-                        .append(data.getCheckOrigin().getCode())
-                        .append("&8] ");
-            }
-
-            msgContent.append("&a")
-                    .append(data.getCheckTarget())
-                    .append("&7 - &a")
-                    .append(data.getPermission())
-                    .append("&7 - ")
-                    .append(getTristateColor(data.getResult()))
-                    .append(data.getResult().name().toLowerCase());
-
-            if (this.notifiedSender.isConsole()) {
-                // just send as a raw message
-                Message.VERBOSE_LOG.send(this.notifiedSender, msgContent.toString());
-            } else {
-
-                // form a hoverevent from the check trace
-                TextComponent textComponent = TextUtils.fromLegacy(Message.VERBOSE_LOG.asString(this.notifiedSender.getPlatform().getLocaleManager(), msgContent.toString()));
-
-                // build the text
-                List<String> hover = new ArrayList<>();
-                hover.add("&bOrigin: &2" + data.getCheckOrigin().name());
-                hover.add("&bContext: &r" + CommandUtils.contextSetToString(data.getCheckContext()));
-                hover.add("&bTrace: &r");
-
-                int overflow = readStack(data, 15, e -> hover.add("&7" + e.getClassName() + "." + e.getMethodName() + (e.getLineNumber() >= 0 ? ":" + e.getLineNumber() : "")));
-                if (overflow != 0) {
-                    hover.add("&f... and " + overflow + " more");
-                }
-
-                // send the message
-                HoverEvent e = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(hover.stream()), CommandManager.AMPERSAND_CHAR));
-                TextComponent msg = textComponent.toBuilder().applyDeep(comp -> comp.hoverEvent(e)).build();
-                this.notifiedSender.sendMessage(msg);
-            }
+            sendNotification(data);
         }
+    }
+
+    private void sendNotification(CheckData data) {
+        String msg = "&a" + data.getCheckTarget() + "&7 - &a" + data.getPermission() + "&7 - " + getTristateColor(data.getResult()) + data.getResult().name().toLowerCase();
+        if (this.notifiedSender.isConsole()) {
+            // just send as a raw message
+            Message.VERBOSE_LOG.send(this.notifiedSender, msg);
+            return;
+        }
+
+        // form a hoverevent from the check trace
+        TextComponent textComponent = TextUtils.fromLegacy(Message.VERBOSE_LOG.asString(this.notifiedSender.getPlatform().getLocaleManager(), msg));
+
+        // build the text
+        List<String> hover = new ArrayList<>();
+        hover.add("&bOrigin: &2" + data.getCheckOrigin().name());
+        hover.add("&bContext: &r" + CommandUtils.contextSetToString(data.getCheckContext()));
+        hover.add("&bTrace: &r");
+
+        int overflow = readStack(data, STACK_TRUNCATION_CHAT, e -> hover.add("&7" + e.getClassName() + "." + e.getMethodName() + (e.getLineNumber() >= 0 ? ":" + e.getLineNumber() : "")));
+        if (overflow != 0) {
+            hover.add("&f... and " + overflow + " more");
+        }
+
+        // send the message
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(hover.stream()), CommandManager.AMPERSAND_CHAR));
+        TextComponent text = textComponent.toBuilder().applyDeep(comp -> comp.hoverEvent(hoverEvent)).build();
+        this.notifiedSender.sendMessage(text);
     }
 
     /**
@@ -177,11 +162,11 @@ public class VerboseListener {
         long secondsTaken = (now - this.startTime) / 1000L;
         String duration = DateUtil.formatTimeShort(secondsTaken);
 
-        String filter = this.filter;
-        if (filter == null || filter.equals("")){
+        String filter;
+        if (this.filter.isBlank()){
             filter = "any";
         } else {
-            filter = "`" + filter + "`";
+            filter = "`" + this.filter.toString() + "`";
         }
 
         // start building the message output
@@ -250,7 +235,7 @@ public class VerboseListener {
                 prettyOutput.add("<br><b>Context:</b> <code>" + CommandUtils.stripColor(CommandUtils.contextSetToString(c.getCheckContext())) + "</code>");
                 prettyOutput.add("<br><b>Trace:</b><pre>");
 
-                int overflow = readStack(c, 30, e -> prettyOutput.add(e.getClassName() + "." + e.getMethodName() + (e.getLineNumber() >= 0 ? ":" + e.getLineNumber() : "")));
+                int overflow = readStack(c, STACK_TRUNCATION_WEB, e -> prettyOutput.add(e.getClassName() + "." + e.getMethodName() + (e.getLineNumber() >= 0 ? ":" + e.getLineNumber() : "")));
                 if (overflow != 0) {
                     prettyOutput.add("... and " + overflow + " more");
                 }

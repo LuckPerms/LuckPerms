@@ -94,7 +94,7 @@ public class VerboseHandler implements Runnable {
      * @param filter the filter string
      * @param notify if the sender should be notified in chat on each check
      */
-    public void registerListener(Sender sender, String filter, boolean notify) {
+    public void registerListener(Sender sender, VerboseFilter filter, boolean notify) {
         this.listeners.put(sender.getUuid(), new VerboseListener(this.pluginVersion, sender, filter, notify));
         this.listening = true;
     }

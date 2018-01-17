@@ -26,28 +26,13 @@
 package me.lucko.luckperms.common.verbose;
 
 /**
- * Represents the origin of a permission check
+ * Exception thrown when attempting to compile a {@link VerboseFilter}
+ * using an invalid filter string.
  */
-public enum CheckOrigin {
+public class InvalidFilterException extends Exception {
 
-    /**
-     * Indicates the check was caused by a 'hasPermission' check on the platform
-     */
-    PLATFORM_PERMISSION_CHECK,
-
-    /**
-     * Indicates the check was caused by a 'hasPermissionSet' type check on the platform
-     */
-    PLATFORM_LOOKUP_CHECK,
-
-    /**
-     * Indicates the check was caused by an API call
-     */
-    API,
-
-    /**
-     * Indicates the check was caused by a LuckPerms internal
-     */
-    INTERNAL
+    public InvalidFilterException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
 }
