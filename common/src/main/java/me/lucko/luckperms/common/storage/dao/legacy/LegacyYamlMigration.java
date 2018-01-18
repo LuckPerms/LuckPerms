@@ -226,7 +226,7 @@ public class LegacyYamlMigration implements Runnable {
             }
 
             // otherwise, this node has some other special context which needs to be saved.
-            // we serialise this way so it gets represented nicely in YAML.
+            // we serialize this way so it gets represented nicely in YAML.
 
             // create a map of node attributes
             Map<String, Object> attributes = new LinkedHashMap<>();

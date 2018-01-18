@@ -48,9 +48,9 @@ public final class SubjectReferenceFactory {
     // static util access
 
     @Deprecated
-    public static LPSubjectReference deserialize(LPPermissionService service, String serialisedReference) {
+    public static LPSubjectReference deserialize(LPPermissionService service, String serializedReference) {
         Objects.requireNonNull(service, "service");
-        return service.getReferenceFactory().deserialize(serialisedReference);
+        return service.getReferenceFactory().deserialize(serializedReference);
     }
 
     public static LPSubjectReference obtain(LPPermissionService service, LPSubject subject) {
@@ -96,9 +96,9 @@ public final class SubjectReferenceFactory {
     }
 
     @Deprecated
-    public LPSubjectReference deserialize(String serialisedReference) {
-        Objects.requireNonNull(serialisedReference, "serialisedReference");
-        List<String> parts = Splitter.on('/').limit(2).splitToList(serialisedReference);
+    public LPSubjectReference deserialize(String serializedReference) {
+        Objects.requireNonNull(serializedReference, "serializedReference");
+        List<String> parts = Splitter.on('/').limit(2).splitToList(serializedReference);
         return obtain(parts.get(0), parts.get(1));
     }
 
