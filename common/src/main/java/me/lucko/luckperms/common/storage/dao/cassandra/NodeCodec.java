@@ -26,39 +26,43 @@ public class NodeCodec extends TypeCodec<NodeModel> {
 
     @Override
     public ByteBuffer serialize(NodeModel value, ProtocolVersion protocolVersion) throws InvalidTypeException {
-        return innerCodec.serialize(toUDTValue(value), protocolVersion);
+        return this.innerCodec.serialize(toUDTValue(value), protocolVersion);
     }
 
     @Override
     public NodeModel deserialize(ByteBuffer bytes, ProtocolVersion protocolVersion) throws InvalidTypeException {
-        return toInstance(innerCodec.deserialize(bytes, protocolVersion));
+        return toInstance(this.innerCodec.deserialize(bytes, protocolVersion));
     }
 
     @Override
     public NodeModel parse(String value) throws InvalidTypeException {
-        return value == null ? null : toInstance(innerCodec.parse(value));
+        return value == null ? null : toInstance(this.innerCodec.parse(value));
     }
 
     @Override
     public String format(NodeModel value) throws InvalidTypeException {
-        return value == null ? null : innerCodec.format(toUDTValue(value));
+        return value == null ? null : this.innerCodec.format(toUDTValue(value));
     }
 
     private NodeModel toInstance(UDTValue value) {
-        if(value == null) return null;
+        if (value == null) {
+            return null;
+        }
         String permission = value.getString("id");
         boolean enabled = value.getBool("value");
         String server = value.getString("server");
         String world = value.getString("world");
         Date expiry = value.getTimestamp("expiry");
-        Map<String, Set<String>> contexts = value.getMap("contexts", TypeToken.of(String.class), new TypeToken<Set<String>>() {});
+        Map<String, Set<String>> contexts = value.getMap("contexts", TypeToken.of(String.class), new TypeToken<Set<String>>(){});
         return NodeModel.of(permission, enabled, server, world, expiry.getTime() / 1000L, fromStringSetMap(contexts));
     }
 
     private UDTValue toUDTValue(NodeModel model) {
-        if(model == null) return null;
+        if (model == null) {
+            return null;
+        }
         ImmutableContextSet contexts = model.getContexts();
-        UDTValue udtValue = userType.newValue();
+        UDTValue udtValue = this.userType.newValue();
         udtValue.setString("id", model.getPermission());
         udtValue.setBool("value", model.getValue());
         udtValue.setString("server", model.getServer());
@@ -83,6 +87,7 @@ public class NodeCodec extends TypeCodec<NodeModel> {
 
     @Nonnull
     public Map<String, Set<String>> toStringSetMap(ImmutableContextSet set) {
+        //noinspection unchecked
         return (Map) set.toMultimap().asMap();
     }
 }

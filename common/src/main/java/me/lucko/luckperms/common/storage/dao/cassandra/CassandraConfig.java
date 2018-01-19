@@ -21,26 +21,26 @@ public class CassandraConfig {
     }
 
     public Set<InetSocketAddress> getNodes() {
-        return nodes;
+        return this.nodes;
     }
 
     public boolean isSsl() {
-        return ssl;
+        return this.ssl;
     }
 
     public String getKeyspace() {
-        return keyspace;
+        return this.keyspace;
     }
 
     public String getUsername() {
-        return username;
+        return this.username;
     }
 
     public String getPassword() {
-        return password;
+        return this.password;
     }
 
     public String getPrefix() {
-        return prefix;
+        return this.prefix;
     }
 }

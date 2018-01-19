@@ -30,7 +30,14 @@ import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.common.assignments.AssignmentRule;
-import me.lucko.luckperms.common.config.keys.*;
+import me.lucko.luckperms.common.config.keys.AbstractKey;
+import me.lucko.luckperms.common.config.keys.BooleanKey;
+import me.lucko.luckperms.common.config.keys.EnduringKey;
+import me.lucko.luckperms.common.config.keys.IntegerKey;
+import me.lucko.luckperms.common.config.keys.LowercaseStringKey;
+import me.lucko.luckperms.common.config.keys.MapKey;
+import me.lucko.luckperms.common.config.keys.StaticKey;
+import me.lucko.luckperms.common.config.keys.StringKey;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
 import me.lucko.luckperms.common.model.TemporaryModifier;
@@ -48,7 +55,13 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -380,6 +393,9 @@ public class ConfigKeys {
         );
     }));
 
+    /**
+     * Cassandra config settings
+     */
     public static final ConfigKey<CassandraConfig> CASSANDRA_CONFIG = EnduringKey.wrap(AbstractKey.of(c -> {
         List<String> socketAddresses = c.getList("cassandra.addresses", Collections.emptyList());
         Set<InetSocketAddress> inetSocketAddresses = socketAddresses.stream()
@@ -403,7 +419,6 @@ public class ConfigKeys {
      * The prefix for any MongoDB collections
      */
     public static final ConfigKey<String> MONGODB_COLLECTION_PREFIX = EnduringKey.wrap(StringKey.of("data.mongodb_collection_prefix", ""));
-
 
     /**
      * The name of the storage method being used

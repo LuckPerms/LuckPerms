@@ -11,24 +11,29 @@ public class CassandraConnectionManager implements AutoCloseable {
 
     public CassandraConnectionManager(CassandraConfig config) {
         Cluster.Builder builder = Cluster.builder().addContactPointsWithPorts(config.getNodes());
-        if(config.isSsl()) builder.withSSL();
+        if (config.isSsl()) {
+            builder.withSSL();
+        }
         String username = config.getUsername();
         String password = config.getPassword();
-        if(!Strings.isNullOrEmpty(username) && !Strings.isNullOrEmpty(password)) builder.withCredentials(username, password);
+        if (!Strings.isNullOrEmpty(username) && !Strings.isNullOrEmpty(password)) {
+            builder.withCredentials(username, password);
+        }
+
         this.cluster = builder.build();
-        this.session = cluster.connect();
+        this.session = this.cluster.connect();
     }
 
     protected Session getSession() {
-        return session;
+        return this.session;
     }
 
     protected Cluster getCluster() {
-        return cluster;
+        return this.cluster;
     }
 
     @Override
     public void close() throws DriverException {
-        cluster.close();
+        this.cluster.close();
     }
 }
