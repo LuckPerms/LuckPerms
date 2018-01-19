@@ -28,8 +28,7 @@ package me.lucko.luckperms.common.dependencies;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteStreams;
 
-import me.lucko.jarrelocator.Relocation;
-import me.lucko.luckperms.common.dependencies.relocation.Relocations;
+import me.lucko.luckperms.common.dependencies.relocation.Relocation;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -53,55 +52,61 @@ public enum Dependency {
             "5.2",
             "zBMYiX4sdxy3l6aNX06mQcI6UfBDfKUXq+z5ZN2yZAs="
     ),
+    JAR_RELOCATOR(
+            "me.lucko",
+            "jar-relocator",
+            "1.2",
+            "ECR0wrAMwmM0dpmuY1ifCG+2rpObOIlSI127jBbSrbI="
+    ),
 
     CAFFEINE(
             "com{}github{}ben-manes{}caffeine",
             "caffeine",
             "2.6.0",
             "JmT16VQnCnVBAjRJCQkkkjmSVx2jajpzeBuKwpbzDA8=",
-            Relocations.of("caffeine", "com{}github{}benmanes{}caffeine")
+            Relocation.of("caffeine", "com{}github{}benmanes{}caffeine")
     ),
     MARIADB_DRIVER(
             "org{}mariadb{}jdbc",
             "mariadb-java-client",
             "2.2.0",
             "/q0LPGHrp3L9rvKr7TuA6urbtXBqvXis92mP4KhxzUw=",
-            Relocations.of("mariadb", "org{}mariadb{}jdbc")
+            Relocation.of("mariadb", "org{}mariadb{}jdbc")
     ),
     MYSQL_DRIVER(
             "mysql",
             "mysql-connector-java",
             "5.1.44",
             "d4RZVzTeWpoHBPB/tQP3mSafNy7L9MDUSOt4Ku9LGCc=",
-            Relocations.of("mysql", "com{}mysql")
+            Relocation.of("mysql", "com{}mysql")
     ),
     POSTGRESQL_DRIVER(
             "org{}postgresql",
             "postgresql",
             "9.4.1212",
             "DLKhWL4xrPIY4KThjI89usaKO8NIBkaHc/xECUsMNl0=",
-            Relocations.of("postgresql", "org{}postgresql")
+            Relocation.of("postgresql", "org{}postgresql")
     ),
     H2_DRIVER(
             "com.h2database",
             "h2",
             "1.4.196",
             "CgX0oNW4WEAUiq3OY6QjtdPDbvRHVjibT6rQjScz+vU=",
-            Relocations.of("h2", "org{}h2")
+            Relocation.of("h2", "org{}h2")
     ),
     SQLITE_DRIVER(
             "org.xerial",
             "sqlite-jdbc",
             "3.21.0",
             "bglRaH4Y+vQFZV7TfOdsVLO3rJpauJ+IwjuRULAb45Y=",
-            Relocations.of("sqlite", "org{}sqlite")
+            Relocation.of("sqlite", "org{}sqlite")
     ),
     HIKARI(
             "com{}zaxxer",
             "HikariCP",
             "2.7.4",
             "y9JE6/VmbydCqlV1z468+oqdkBswBk6aw+ECT178AT4=",
-            Relocations.of("hikari", "com{}zaxxer{}hikari")
+            Relocation.of("hikari", "com{}zaxxer{}hikari")
     ),
     SLF4J_SIMPLE(
             "org.slf4j",
@@ -121,8 +126,8 @@ public enum Dependency {
             "3.5.0",
             "gxrbKVSI/xM6r+6uL7g7I0DzNV+hlNTtfw4UL13XdK8=",
             ImmutableList.<Relocation>builder()
-                    .addAll(Relocations.of("mongodb", "com{}mongodb"))
-                    .addAll(Relocations.of("bson", "org{}bson"))
+                    .addAll(Relocation.of("mongodb", "com{}mongodb"))
+                    .addAll(Relocation.of("bson", "org{}bson"))
                     .build()
     ),
     CASSANDRA_DRIVER(
@@ -150,10 +155,21 @@ public enum Dependency {
             "hNqwMaOGiMsuyAigEboCM8sNEUbTkCDhRHmSrVBfPXg="
     ),
     JEDIS(
-            "https://github.com/lucko/jedis/releases/download/jedis-2.9.1-shaded/jedis-2.9.1-shaded.jar",
-            "2.9.1-shaded",
-            "mM19X6LyD97KP4RSbcCR5BTRAwQ0x9y02voX7ePOSjE=",
-            Relocations.of("jedis", "redis{}clients{}jedis{}shaded")
+            "redis.clients",
+            "jedis",
+            "2.9.0",
+            "HqqWy45QVeTVF0Z/DzsrPLvGKn2dHotqI8YX7GDThvo=",
+            ImmutableList.<Relocation>builder()
+                    .addAll(Relocation.of("jedis", "redis{}clients{}jedis"))
+                    .addAll(Relocation.of("commonspool2", "org{}apache{}commons{}pool2"))
+                    .build()
+    ),
+    COMMONS_POOL_2(
+            "org.apache.commons",
+            "commons-pool2",
+            "2.4.2",
+            "IREqpnNzPfzQRTVN33WzHh1GS5nI5RWXQ0myUyJUzFM=",
+            Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
     ),
     NATS(
             "io.nats",
@@ -166,21 +182,21 @@ public enum Dependency {
             "configurate-core",
             "3.3",
             "4leBJEqj1kVszaifZeKNl4hgHxG5M+Nk5TJKkPW2s4Y=",
-            Relocations.of("configurate", "ninja{}leaping{}configurate")
+            Relocation.of("configurate", "ninja{}leaping{}configurate")
     ),
     CONFIGURATE_GSON(
             "ninja{}leaping{}configurate",
             "configurate-gson",
             "3.3",
             "4HxrW3/ZKdn095x/W4gylQMNskdmteXYVxVv0UKGJA4=",
-            Relocations.of("configurate", "ninja{}leaping{}configurate")
+            Relocation.of("configurate", "ninja{}leaping{}configurate")
     ),
     CONFIGURATE_YAML(
             "ninja{}leaping{}configurate",
             "configurate-yaml",
             "3.3",
             "hgADp3g+xHHPD34bAuxMWtB+OQ718Tlw69jVp2KPJNk=",
-            Relocations.of("configurate", "ninja{}leaping{}configurate")
+            Relocation.of("configurate", "ninja{}leaping{}configurate")
     ),
     CONFIGURATE_HOCON(
             "ninja{}leaping{}configurate",
@@ -188,8 +204,8 @@ public enum Dependency {
             "3.3",
             "UIy5FVmsBUG6+Z1mpIEE2EXgtOI1ZL0p/eEW+BbtGLU=",
             ImmutableList.<Relocation>builder()
-                    .addAll(Relocations.of("configurate", "ninja{}leaping{}configurate"))
-                    .addAll(Relocations.of("hocon", "com{}typesafe{}config"))
+                    .addAll(Relocation.of("configurate", "ninja{}leaping{}configurate"))
+                    .addAll(Relocation.of("hocon", "com{}typesafe{}config"))
                     .build()
     ),
     HOCON_CONFIG(
@@ -197,7 +213,7 @@ public enum Dependency {
             "config",
             "1.3.1",
             "5vrfxhCCINOmuGqn5OFsnnu4V7pYlViGMIuxOXImSvA=",
-            Relocations.of("hocon", "com{}typesafe{}config")
+            Relocation.of("hocon", "com{}typesafe{}config")
     );
 
     private final String url;

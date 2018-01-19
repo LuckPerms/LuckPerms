@@ -25,20 +25,33 @@
 
 package me.lucko.luckperms.common.dependencies.relocation;
 
-import me.lucko.jarrelocator.Relocation;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public final class Relocations {
+public final class Relocation {
 
     public static List<Relocation> of(String name, String... packages) {
-        List<Relocation> relocations = new ArrayList<>();
+        List<Relocation> ret = new ArrayList<>();
         for (String p : packages) {
-            relocations.add(new Relocation(p.replace("{}", "."), "me.lucko.luckperms.lib." + name));
+            ret.add(new Relocation(p.replace("{}", "."), "me.lucko.luckperms.lib." + name));
         }
-        return relocations;
+        return ret;
     }
 
-    private Relocations() {}
+    private final String pattern;
+    private final String relocatedPattern;
+
+    public Relocation(String pattern, String relocatedPattern) {
+        this.pattern = pattern;
+        this.relocatedPattern = relocatedPattern;
+    }
+
+    public String getPattern() {
+        return this.pattern;
+    }
+
+    public String getRelocatedPattern() {
+        return this.relocatedPattern;
+    }
+
 }

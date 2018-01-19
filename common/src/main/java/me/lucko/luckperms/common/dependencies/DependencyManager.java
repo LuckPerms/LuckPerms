@@ -26,8 +26,9 @@
 package me.lucko.luckperms.common.dependencies;
 
 import com.google.common.io.ByteStreams;
-import me.lucko.jarrelocator.JarRelocator;
-import me.lucko.jarrelocator.Relocation;
+
+import me.lucko.luckperms.common.dependencies.relocation.Relocation;
+import me.lucko.luckperms.common.dependencies.relocation.RelocationHandler;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
 
@@ -37,7 +38,12 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Responsible for loading runtime dependencies.
@@ -47,6 +53,7 @@ public class DependencyManager {
     private final MessageDigest digest;
     private final DependencyRegistry registry;
     private final EnumSet<Dependency> alreadyLoaded = EnumSet.noneOf(Dependency.class);
+    private RelocationHandler relocationHandler = null;
 
     public DependencyManager(LuckPermsPlugin plugin) {
         this.plugin = plugin;
@@ -58,23 +65,29 @@ public class DependencyManager {
         this.registry = new DependencyRegistry(plugin);
     }
 
+    private synchronized RelocationHandler getRelocationHandler() {
+        if (this.relocationHandler == null) {
+            this.relocationHandler = new RelocationHandler(this);
+        }
+        return this.relocationHandler;
+    }
+
+    public File getSaveDirectory() {
+        File saveDirectory = new File(this.plugin.getDataDirectory(), "lib");
+        if (!(saveDirectory.exists() || saveDirectory.mkdirs())) {
+            throw new RuntimeException("Unable to create lib dir - " + saveDirectory.getPath());
+        }
+
+        return saveDirectory;
+    }
+
     public void loadStorageDependencies(Set<StorageType> storageTypes) {
         loadDependencies(this.registry.resolveStorageDependencies(storageTypes));
     }
 
     public void loadDependencies(Set<Dependency> dependencies) {
-        loadDependencies(dependencies, true);
-    }
-
-    public void loadDependencies(Set<Dependency> dependencies, boolean applyRemapping) {
-        if (applyRemapping) {
-            this.plugin.getLog().info("Identified the following dependencies: " + dependencies.toString());
-        }
-
-        File saveDirectory = new File(this.plugin.getDataDirectory(), "lib");
-        if (!(saveDirectory.exists() || saveDirectory.mkdirs())) {
-            throw new RuntimeException("Unable to create lib dir - " + saveDirectory.getPath());
-        }
+        this.plugin.getLog().info("Identified the following dependencies: " + dependencies.toString());
+        File saveDirectory = getSaveDirectory();
 
         // create a list of file sources
         List<Source> sources = new ArrayList<>();
@@ -96,53 +109,36 @@ public class DependencyManager {
 
         // apply any remapping rules to the files
         List<File> remappedJars = new ArrayList<>(sources.size());
-        if (applyRemapping) {
-            for (Source source : sources) {
-                try {
-                    // apply remap rules
-                    List<Relocation> relocations = source.dependency.getRelocations();
+        for (Source source : sources) {
+            try {
+                // apply remap rules
+                List<Relocation> relocations = source.dependency.getRelocations();
 
-                    if (relocations.isEmpty()) {
-                        remappedJars.add(source.file);
-                        continue;
-                    }
-
-                    File input = source.file;
-                    File output = new File(input.getParentFile(), "remap-" + input.getName());
-
-                    // if the remapped file exists already, just use that.
-                    if (output.exists()) {
-                        remappedJars.add(output);
-                        continue;
-                    }
-
-                    // make sure ASM is loaded
-                    Set<Dependency> asmDepends = EnumSet.noneOf(Dependency.class);
-                    if (!DependencyRegistry.asmPresent()) {
-                        asmDepends.add(Dependency.ASM);
-                    }
-                    if (!DependencyRegistry.asmCommonsPresent()) {
-                        asmDepends.add(Dependency.ASM_COMMONS);
-                    }
-                    if (!asmDepends.isEmpty()) {
-                        // load asm before calling the jar relocator
-                        loadDependencies(asmDepends, false);
-                    }
-
-                    // attempt to remap the jar.
-                    this.plugin.getLog().info("Attempting to remap " + input.getName() + "...");
-                    JarRelocator relocator = new JarRelocator(input, output, relocations);
-                    relocator.run();
-
-                    remappedJars.add(output);
-                } catch (Throwable e) {
-                    this.plugin.getLog().severe("Unable to remap the source file '" + source.dependency.name() + "'.");
-                    e.printStackTrace();
+                if (relocations.isEmpty()) {
+                    remappedJars.add(source.file);
+                    continue;
                 }
-            }
-        } else {
-            for (Source source : sources) {
-                remappedJars.add(source.file);
+
+                File input = source.file;
+                File output = new File(input.getParentFile(), "remap-" + input.getName());
+
+                // if the remapped file exists already, just use that.
+                if (output.exists()) {
+                    remappedJars.add(output);
+                    continue;
+                }
+
+                // init the relocation handler
+                RelocationHandler relocationHandler = getRelocationHandler();
+
+                // attempt to remap the jar.
+                this.plugin.getLog().info("Attempting to apply relocations to " + input.getName() + "...");
+                relocationHandler.remap(input, output, relocations);
+
+                remappedJars.add(output);
+            } catch (Throwable e) {
+                this.plugin.getLog().severe("Unable to remap the source file '" + source.dependency.name() + "'.");
+                e.printStackTrace();
             }
         }
 
@@ -157,7 +153,7 @@ public class DependencyManager {
         }
     }
 
-    private File downloadDependency(File saveDirectory, Dependency dependency) throws Exception {
+    public File downloadDependency(File saveDirectory, Dependency dependency) throws Exception {
         String fileName = dependency.name().toLowerCase() + "-" + dependency.getVersion() + ".jar";
         File file = new File(saveDirectory, fileName);
 
