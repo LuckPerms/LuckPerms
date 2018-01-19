@@ -81,7 +81,7 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
             if(this.plugin.getConfiguration().get(ConfigKeys.NATS_ENABLED)) {
                 NatsMessagingService nats = new NatsMessagingService(this.plugin);
                 try {
-                    nats.init(this.plugin.getConfiguration().get(ConfigKeys.NATS_PROPERTIES));
+                    nats.init(this.plugin.getConfiguration().get(ConfigKeys.NATS_PROPERTIES), this.plugin.getConfiguration().get(ConfigKeys.NATS_CHANNEL));
                 } catch (IOException e) {
                     this.plugin.getLog().warn("Couldn't load nats...");
                     e.printStackTrace();
