@@ -25,13 +25,8 @@
 
 package me.lucko.luckperms.common.commands.utils;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import java.util.List;
 
-@Getter
-@AllArgsConstructor
 public class SortMode {
 
     public static SortMode determine(List<String> args) {
@@ -62,4 +57,17 @@ public class SortMode {
 
     private final SortType type;
     private final boolean ascending;
+
+    public SortMode(SortType type, boolean ascending) {
+        this.type = type;
+        this.ascending = ascending;
+    }
+
+    public SortType getType() {
+        return this.type;
+    }
+
+    public boolean isAscending() {
+        return this.ascending;
+    }
 }

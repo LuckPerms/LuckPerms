@@ -33,6 +33,8 @@ import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.model.PermissionHolder;
 
+import java.util.Collections;
+
 public class CommandParent<T extends PermissionHolder> extends SharedMainCommand<T> {
     public CommandParent(LocaleManager locale, boolean user) {
         super(CommandSpec.PARENT.spec(locale), "Parent", user, ImmutableList.<SharedSubCommand>builder()
@@ -45,6 +47,7 @@ public class CommandParent<T extends PermissionHolder> extends SharedMainCommand
                 .add(new ParentRemoveTemp(locale))
                 .add(new ParentClear(locale))
                 .add(new ParentClearTrack(locale))
+                .addAll(user ? Collections.singleton(new UserSwitchPrimaryGroup(locale)) : Collections.emptySet())
                 .build());
     }
 }

@@ -25,19 +25,16 @@
 
 package me.lucko.luckperms.common.metastacking;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.ToString;
-
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.api.metastacking.MetaStackElement;
 
 import java.util.List;
+import java.util.Objects;
 
-@Getter
-@ToString
+import javax.annotation.Nonnull;
+
 public final class SimpleMetaStackDefinition implements MetaStackDefinition {
 
     private final List<MetaStackElement> elements;
@@ -48,38 +45,65 @@ public final class SimpleMetaStackDefinition implements MetaStackDefinition {
     // cache hashcode - this class is immutable, and used an index in MetaContexts
     private final int hashCode;
 
-    public SimpleMetaStackDefinition(@NonNull List<MetaStackElement> elements, @NonNull String startSpacer, @NonNull String middleSpacer, @NonNull String endSpacer) {
-        this.elements = ImmutableList.copyOf(elements);
-        this.startSpacer = startSpacer;
-        this.middleSpacer = middleSpacer;
-        this.endSpacer = endSpacer;
+    public SimpleMetaStackDefinition(List<MetaStackElement> elements, String startSpacer, String middleSpacer, String endSpacer) {
+        this.elements = ImmutableList.copyOf(Objects.requireNonNull(elements, "elements"));
+        this.startSpacer = Objects.requireNonNull(startSpacer, "startSpacer");
+        this.middleSpacer = Objects.requireNonNull(middleSpacer, "middleSpacer");
+        this.endSpacer = Objects.requireNonNull(endSpacer, "endSpacer");
         this.hashCode = calculateHashCode();
+    }
+
+    @Nonnull
+    @Override
+    public List<MetaStackElement> getElements() {
+        return this.elements;
+    }
+
+    @Nonnull
+    @Override
+    public String getStartSpacer() {
+        return this.startSpacer;
+    }
+
+    @Nonnull
+    @Override
+    public String getMiddleSpacer() {
+        return this.middleSpacer;
+    }
+
+    @Nonnull
+    @Override
+    public String getEndSpacer() {
+        return this.endSpacer;
+    }
+
+    public int getHashCode() {
+        return this.hashCode;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof SimpleMetaStackDefinition)) return false;
-        final SimpleMetaStackDefinition other = (SimpleMetaStackDefinition) o;
+        final SimpleMetaStackDefinition that = (SimpleMetaStackDefinition) o;
 
-        return this.getElements().equals(other.getElements()) &&
-                this.getStartSpacer().equals(other.getStartSpacer()) &&
-                this.getMiddleSpacer().equals(other.getMiddleSpacer()) &&
-                this.getEndSpacer().equals(other.getEndSpacer());
+        return this.getElements().equals(that.getElements()) &&
+                this.getStartSpacer().equals(that.getStartSpacer()) &&
+                this.getMiddleSpacer().equals(that.getMiddleSpacer()) &&
+                this.getEndSpacer().equals(that.getEndSpacer());
     }
 
     private int calculateHashCode() {
-        final int PRIME = 59;
-        int result = 1;
-        result = result * PRIME + this.getElements().hashCode();
-        result = result * PRIME + this.getStartSpacer().hashCode();
-        result = result * PRIME + this.getMiddleSpacer().hashCode();
-        result = result * PRIME + this.getEndSpacer().hashCode();
-        return result;
+        return Objects.hash(getElements(), getStartSpacer(), getMiddleSpacer(), getEndSpacer());
     }
 
     @Override
     public int hashCode() {
-        return hashCode;
+        return this.hashCode;
+    }
+
+    @Override
+    public String toString() {
+        return "SimpleMetaStackDefinition(elements=" + this.getElements() + ", startSpacer=" + this.getStartSpacer() + ", middleSpacer=" + this.getMiddleSpacer() + ", endSpacer=" + this.getEndSpacer() + ", hashCode=" + this.getHashCode() + ")";
     }
 }

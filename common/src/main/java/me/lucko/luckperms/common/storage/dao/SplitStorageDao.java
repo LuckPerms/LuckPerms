@@ -58,7 +58,7 @@ public class SplitStorageDao extends AbstractDao {
     @Override
     public void init() {
         boolean failed = false;
-        for (AbstractDao ds : backing.values()) {
+        for (AbstractDao ds : this.backing.values()) {
             try {
                 ds.init();
             } catch (Exception ex) {
@@ -73,7 +73,7 @@ public class SplitStorageDao extends AbstractDao {
 
     @Override
     public void shutdown() {
-        for (AbstractDao ds : backing.values()) {
+        for (AbstractDao ds : this.backing.values()) {
             try {
                 ds.shutdown();
             } catch (Exception e) {
@@ -85,8 +85,8 @@ public class SplitStorageDao extends AbstractDao {
     @Override
     public Map<String, String> getMeta() {
         Map<String, String> ret = new LinkedHashMap<>();
-        ret.put("Types", types.toString());
-        for (AbstractDao backing : backing.values()) {
+        ret.put("Types", this.types.toString());
+        for (AbstractDao backing : this.backing.values()) {
             ret.putAll(backing.getMeta());
         }
         return ret;
@@ -94,114 +94,114 @@ public class SplitStorageDao extends AbstractDao {
 
     @Override
     public void logAction(LogEntry entry) throws Exception {
-        backing.get(types.get(SplitStorageType.LOG)).logAction(entry);
+        this.backing.get(this.types.get(SplitStorageType.LOG)).logAction(entry);
     }
 
     @Override
     public Log getLog() throws Exception {
-        return backing.get(types.get(SplitStorageType.LOG)).getLog();
+        return this.backing.get(this.types.get(SplitStorageType.LOG)).getLog();
     }
 
     @Override
     public void applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception {
-        StorageType userType = types.get(SplitStorageType.USER);
-        StorageType groupType = types.get(SplitStorageType.GROUP);
+        StorageType userType = this.types.get(SplitStorageType.USER);
+        StorageType groupType = this.types.get(SplitStorageType.GROUP);
 
-        backing.get(userType).applyBulkUpdate(bulkUpdate);
+        this.backing.get(userType).applyBulkUpdate(bulkUpdate);
 
         // if differs
-        if (!userType.equals(groupType)) {
-            backing.get(groupType).applyBulkUpdate(bulkUpdate);
+        if (userType != groupType) {
+            this.backing.get(groupType).applyBulkUpdate(bulkUpdate);
         }
     }
 
     @Override
     public User loadUser(UUID uuid, String username) throws Exception {
-        return backing.get(types.get(SplitStorageType.USER)).loadUser(uuid, username);
+        return this.backing.get(this.types.get(SplitStorageType.USER)).loadUser(uuid, username);
     }
 
     @Override
     public void saveUser(User user) throws Exception {
-        backing.get(types.get(SplitStorageType.USER)).saveUser(user);
+        this.backing.get(this.types.get(SplitStorageType.USER)).saveUser(user);
     }
 
     @Override
     public Set<UUID> getUniqueUsers() throws Exception {
-        return backing.get(types.get(SplitStorageType.USER)).getUniqueUsers();
+        return this.backing.get(this.types.get(SplitStorageType.USER)).getUniqueUsers();
     }
 
     @Override
     public List<HeldPermission<UUID>> getUsersWithPermission(String permission) throws Exception {
-        return backing.get(types.get(SplitStorageType.USER)).getUsersWithPermission(permission);
+        return this.backing.get(this.types.get(SplitStorageType.USER)).getUsersWithPermission(permission);
     }
 
     @Override
     public Group createAndLoadGroup(String name) throws Exception {
-        return backing.get(types.get(SplitStorageType.GROUP)).createAndLoadGroup(name);
+        return this.backing.get(this.types.get(SplitStorageType.GROUP)).createAndLoadGroup(name);
     }
 
     @Override
     public Optional<Group> loadGroup(String name) throws Exception {
-        return backing.get(types.get(SplitStorageType.GROUP)).loadGroup(name);
+        return this.backing.get(this.types.get(SplitStorageType.GROUP)).loadGroup(name);
     }
 
     @Override
     public void loadAllGroups() throws Exception {
-        backing.get(types.get(SplitStorageType.GROUP)).loadAllGroups();
+        this.backing.get(this.types.get(SplitStorageType.GROUP)).loadAllGroups();
     }
 
     @Override
     public void saveGroup(Group group) throws Exception {
-        backing.get(types.get(SplitStorageType.GROUP)).saveGroup(group);
+        this.backing.get(this.types.get(SplitStorageType.GROUP)).saveGroup(group);
     }
 
     @Override
     public void deleteGroup(Group group) throws Exception {
-        backing.get(types.get(SplitStorageType.GROUP)).deleteGroup(group);
+        this.backing.get(this.types.get(SplitStorageType.GROUP)).deleteGroup(group);
     }
 
     @Override
     public List<HeldPermission<String>> getGroupsWithPermission(String permission) throws Exception {
-        return backing.get(types.get(SplitStorageType.GROUP)).getGroupsWithPermission(permission);
+        return this.backing.get(this.types.get(SplitStorageType.GROUP)).getGroupsWithPermission(permission);
     }
 
     @Override
     public Track createAndLoadTrack(String name) throws Exception {
-        return backing.get(types.get(SplitStorageType.TRACK)).createAndLoadTrack(name);
+        return this.backing.get(this.types.get(SplitStorageType.TRACK)).createAndLoadTrack(name);
     }
 
     @Override
     public Optional<Track> loadTrack(String name) throws Exception {
-        return backing.get(types.get(SplitStorageType.TRACK)).loadTrack(name);
+        return this.backing.get(this.types.get(SplitStorageType.TRACK)).loadTrack(name);
     }
 
     @Override
     public void loadAllTracks() throws Exception {
-        backing.get(types.get(SplitStorageType.TRACK)).loadAllTracks();
+        this.backing.get(this.types.get(SplitStorageType.TRACK)).loadAllTracks();
     }
 
     @Override
     public void saveTrack(Track track) throws Exception {
-        backing.get(types.get(SplitStorageType.TRACK)).saveTrack(track);
+        this.backing.get(this.types.get(SplitStorageType.TRACK)).saveTrack(track);
     }
 
     @Override
     public void deleteTrack(Track track) throws Exception {
-        backing.get(types.get(SplitStorageType.TRACK)).deleteTrack(track);
+        this.backing.get(this.types.get(SplitStorageType.TRACK)).deleteTrack(track);
     }
 
     @Override
     public void saveUUIDData(UUID uuid, String username) throws Exception {
-        backing.get(types.get(SplitStorageType.UUID)).saveUUIDData(uuid, username);
+        this.backing.get(this.types.get(SplitStorageType.UUID)).saveUUIDData(uuid, username);
     }
 
     @Override
     public UUID getUUID(String username) throws Exception {
-        return backing.get(types.get(SplitStorageType.UUID)).getUUID(username);
+        return this.backing.get(this.types.get(SplitStorageType.UUID)).getUUID(username);
     }
 
     @Override
     public String getName(UUID uuid) throws Exception {
-        return backing.get(types.get(SplitStorageType.UUID)).getName(uuid);
+        return this.backing.get(this.types.get(SplitStorageType.UUID)).getName(uuid);
     }
 }

@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.bukkit;
 
-import lombok.AllArgsConstructor;
-
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.compat.BukkitJsonMessageHandler;
 import me.lucko.luckperms.bukkit.compat.ReflectionUtil;
@@ -39,8 +37,9 @@ import me.lucko.luckperms.common.utils.TextUtils;
 import net.kyori.text.Component;
 import net.kyori.text.serializer.ComponentSerializers;
 
-import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.command.RemoteConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
@@ -51,8 +50,8 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
 
     public BukkitSenderFactory(LuckPermsPlugin plugin) {
         super(plugin);
-        bukkitHandler = new BukkitJsonMessageHandler();
-        spigotHandler = isSpigot() ? new SpigotJsonMessageHandler() : null;
+        this.bukkitHandler = new BukkitJsonMessageHandler();
+        this.spigotHandler = isSpigot() ? new SpigotJsonMessageHandler() : null;
     }
 
     @Override
@@ -73,13 +72,14 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
 
     @Override
     protected void sendMessage(CommandSender sender, String s) {
-        // send sync if command block
-        if (sender instanceof BlockCommandSender) {
-            getPlugin().getScheduler().doSync(new BlockMessengerAgent(((BlockCommandSender) sender), s));
+        // we can safely send async for players and the console
+        if (sender instanceof Player || sender instanceof ConsoleCommandSender || sender instanceof RemoteConsoleCommandSender) {
+            sender.sendMessage(s);
             return;
         }
 
-        sender.sendMessage(s);
+        // otherwise, send the message sync
+        getPlugin().getScheduler().doSync(new SyncMessengerAgent(sender, s));
     }
 
     @Override
@@ -89,12 +89,12 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
             String json = ComponentSerializers.JSON.serialize(message);
 
             // Try Bukkit.
-            if (bukkitHandler.sendJsonMessage(player, json)) {
+            if (this.bukkitHandler.sendJsonMessage(player, json)) {
                 return;
             }
 
             // Try Spigot.
-            if (spigotHandler != null && spigotHandler.sendJsonMessage(player, json)) {
+            if (this.spigotHandler != null && this.spigotHandler.sendJsonMessage(player, json)) {
                 return;
             }
         }
@@ -125,14 +125,18 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
         }
     }
 
-    @AllArgsConstructor
-    private static final class BlockMessengerAgent implements Runnable {
-        private final BlockCommandSender block;
+    private static final class SyncMessengerAgent implements Runnable {
+        private final CommandSender sender;
         private final String message;
+
+        private SyncMessengerAgent(CommandSender sender, String message) {
+            this.sender = sender;
+            this.message = message;
+        }
 
         @Override
         public void run() {
-            block.sendMessage(message);
+            this.sender.sendMessage(this.message);
         }
     }
 

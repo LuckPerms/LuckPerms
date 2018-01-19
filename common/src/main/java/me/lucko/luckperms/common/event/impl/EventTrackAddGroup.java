@@ -25,19 +25,14 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.event.track.mutate.TrackAddGroupEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
 import java.util.List;
 
-@Getter
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventTrackAddGroup extends AbstractEvent implements TrackAddGroupEvent {
 
     private final String group;
@@ -45,4 +40,39 @@ public class EventTrackAddGroup extends AbstractEvent implements TrackAddGroupEv
     private final List<String> dataBefore;
     private final List<String> dataAfter;
 
+    public EventTrackAddGroup(String group, Track track, List<String> dataBefore, List<String> dataAfter) {
+        this.group = group;
+        this.track = track;
+        this.dataBefore = dataBefore;
+        this.dataAfter = dataAfter;
+    }
+
+    @Nonnull
+    @Override
+    public String getGroup() {
+        return this.group;
+    }
+
+    @Nonnull
+    @Override
+    public Track getTrack() {
+        return this.track;
+    }
+
+    @Nonnull
+    @Override
+    public List<String> getDataBefore() {
+        return this.dataBefore;
+    }
+
+    @Nonnull
+    @Override
+    public List<String> getDataAfter() {
+        return this.dataAfter;
+    }
+
+    @Override
+    public String toString() {
+        return "EventTrackAddGroup(group=" + this.getGroup() + ", track=" + this.getTrack() + ", dataBefore=" + this.getDataBefore() + ", dataAfter=" + this.getDataAfter() + ")";
+    }
 }

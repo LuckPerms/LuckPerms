@@ -25,36 +25,50 @@
 
 package me.lucko.luckperms.api.context;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
 
 /**
- * A set of context pairs.
+ * A set of contexts.
  *
- * <p>You can think of ContextSets as a wrapped <code>Multimap&lt;String, String&gt;</code>.
- * Each key can be mapped to multiple values.</p>
+ * <p>Context in the most basic sense simply means the circumstances where
+ * something will apply.</p>
  *
- * <p>Keys are automatically converted to lowercase when added, and are therefore
- * case-insensitive. Values however are not.</p>
+ * <p>A single "context" consists of a key and a value, both strings. The key
+ * represents the type of context, and the value represents the setting of the
+ * context key.</p>
  *
- * <p>Implementations may be either mutable or immutable.</p>
+ * <p>Contexts can be combined with each other to form so called
+ * "context sets" - simply a collection of context pairs.</p>
+ *
+ * <p>Context keys are case-insensitive, and will be converted to
+ * {@link String#toLowerCase() lowercase} by all implementations.
+ * Values however are case-sensitive.</p>
+ *
+ * <p>Context keys and values may not be null or empty. A key/value will be
+ * deemed empty if it's length is zero, or if it consists of only space
+ * characters.</p>
+ *
+ * <p>Two default ContextSet implementations are provided.
+ * {@link MutableContextSet} allows the addition and removal of context keys
+ * after construction, and {@link ImmutableContextSet} does not.</p>
  *
  * @since 2.13
  */
 public interface ContextSet {
 
     /**
-     * Creates an ImmutableContextSet from a context pair
+     * Creates an {@link ImmutableContextSet} from a context pair.
      *
      * @param key   the key
      * @param value the value
-     * @return a new ImmutableContextSet containing one KV pair
+     * @return a new ImmutableContextSet containing one context pair
      * @throws NullPointerException if key or value is null
      */
     @Nonnull
@@ -63,7 +77,7 @@ public interface ContextSet {
     }
 
     /**
-     * Creates an ImmutableContextSet from two context pairs
+     * Creates an {@link ImmutableContextSet} from two context pairs.
      *
      * @param key1 the first key
      * @param value1 the first value
@@ -79,7 +93,7 @@ public interface ContextSet {
     }
 
     /**
-     * Creates an ImmutableContextSet from an existing iterable of Map Entries
+     * Creates an {@link ImmutableContextSet} from an existing {@link Iterable} of {@link Map.Entry}s.
      *
      * @param iterable the iterable to copy from
      * @return a new ImmutableContextSet representing the pairs in the iterable
@@ -91,7 +105,7 @@ public interface ContextSet {
     }
 
     /**
-     * Creates an ImmutableContextSet from an existing map
+     * Creates an {@link ImmutableContextSet} from an existing {@link Map}.
      *
      * @param map the map to copy from
      * @return a new ImmutableContextSet representing the pairs from the map
@@ -103,7 +117,7 @@ public interface ContextSet {
     }
 
     /**
-     * Creates an ImmutableContextSet from an existing multimap
+     * Creates an {@link ImmutableContextSet} from an existing {@link Multimap}.
      *
      * @param multimap the multimap to copy from
      * @return a new ImmutableContextSet representing the pairs in the multimap
@@ -116,8 +130,9 @@ public interface ContextSet {
     }
 
     /**
-     * Creates an new ImmutableContextSet from an existing set.
-     * Only really useful for converting between mutable and immutable types.
+     * Creates an new {@link ImmutableContextSet} from an existing {@link Set}.
+     *
+     * <p>Only really useful for converting between mutable and immutable types.</p>
      *
      * @param contextSet the context set to copy from
      * @return a new ImmutableContextSet with the same content and the one provided
@@ -129,9 +144,9 @@ public interface ContextSet {
     }
 
     /**
-     * Creates a new empty ImmutableContextSet.
+     * Returns an empty {@link ImmutableContextSet}.
      *
-     * @return a new ImmutableContextSet
+     * @return an empty ImmutableContextSet
      */
     @Nonnull
     static ImmutableContextSet empty() {
@@ -139,22 +154,30 @@ public interface ContextSet {
     }
 
     /**
-     * Gets if this set is in an immutable form
+     * Gets if this {@link ContextSet} is immutable.
+     *
+     * <p>The state of immutable instances will never change.</p>
      *
      * @return true if the set is immutable
      */
     boolean isImmutable();
 
     /**
-     * If the set is mutable, this method will return an immutable copy. Otherwise just returns itself.
+     * Returns an immutable representation of this {@link ContextSet}.
      *
-     * @return an immutable ContextSet
+     * <p>If the set is already immutable, the same object will be returned.
+     * If the set is mutable, an immutable copy will be made.</p>
+     *
+     * @return an immutable representation of this set
      */
     @Nonnull
     ImmutableContextSet makeImmutable();
 
     /**
-     * Creates a mutable copy of this set.
+     * Creates a mutable copy of this {@link ContextSet}.
+     *
+     * <p>A new copy is returned regardless of the
+     * {@link #isImmutable() mutability} of this set.</p>
      *
      * @return a mutable ContextSet
      * @since 2.16
@@ -163,7 +186,11 @@ public interface ContextSet {
     MutableContextSet mutableCopy();
 
     /**
-     * Converts this ContextSet to an immutable {@link Set} of {@link Map.Entry}s.
+     * Returns a {@link Set} of {@link Map.Entry}s representing the current
+     * state of this {@link ContextSet}.
+     *
+     * <p>The returned set is immutable, and is a copy of the current set.
+     * (will not update live)</p>
      *
      * @return an immutable set
      */
@@ -171,10 +198,18 @@ public interface ContextSet {
     Set<Map.Entry<String, String>> toSet();
 
     /**
-     * Converts this ContextSet to an immutable {@link Map}
+     * Returns a {@link Map} <b>loosely</b> representing the current state of
+     * this {@link ContextSet}.
      *
-     * <b>IMPORTANT: Use of this method may result in data being lost. ContextSets can contain lots of different values for
-     * one key.</b>
+     * <p>The returned map is immutable, and is a copy of the current set.
+     * (will not update live)</p>
+     *
+     * <p>As a single context key can be mapped to multiple values, this method
+     * may not be a true representation of the set.</p>
+     *
+     * <p>If you need a representation of the set in a Java collection instance,
+     * use {@link #toSet()} or {@link #toMultimap()} followed by
+     * {@link Multimap#asMap()}.</p>
      *
      * @return an immutable map
      * @deprecated because the resultant map may not contain all data in the ContextSet
@@ -184,7 +219,11 @@ public interface ContextSet {
     Map<String, String> toMap();
 
     /**
-     * Converts this ContextSet to an immutable {@link Multimap}
+     * Returns a {@link Multimap} representing the current state of this
+     * {@link ContextSet}.
+     *
+     * <p>The returned multimap is immutable, and is a copy of the current set.
+     * (will not update live)</p>
      *
      * @return a multimap
      * @since 2.16
@@ -193,7 +232,8 @@ public interface ContextSet {
     Multimap<String, String> toMultimap();
 
     /**
-     * Check if the set contains at least one value for the given key.
+     * Returns if the {@link ContextSet} contains at least one value for the
+     * given key.
      *
      * @param key the key to check for
      * @return true if the set contains a value for the key
@@ -202,9 +242,12 @@ public interface ContextSet {
     boolean containsKey(@Nonnull String key);
 
     /**
-     * Gets a set of all of the values mapped to the given key
+     * Returns a {@link Set} of the values mapped to the given key.
      *
-     * @param key the key to find values for
+     * <p>The returned set is immutable, and only represents the current state
+     * of the {@link ContextSet}. (will not update live)</p>
+     *
+     * @param key the key to get values for
      * @return a set of values
      * @throws NullPointerException if the key is null
      */
@@ -212,7 +255,10 @@ public interface ContextSet {
     Set<String> getValues(@Nonnull String key);
 
     /**
-     * Returns any value from this set matching the key, if present.
+     * Returns any value from this {@link ContextSet} matching the key, if present.
+     *
+     * <p>Note that context keys can be mapped to multiple values.
+     * Use {@link #getValues(String)} to retrieve all associated values.</p>
      *
      * @param key the key to find values for
      * @return an optional containing any match
@@ -224,67 +270,88 @@ public interface ContextSet {
     }
 
     /**
-     * Check if thr set contains a given key mapped to a given value
+     * Returns if the {@link ContextSet} contains a given context pairing.
+     *
+     * <p>This lookup is case-sensitive on the value.</p>
      *
      * @param key   the key to look for
      * @param value the value to look for (case sensitive)
-     * @return true if the set contains the KV pair
+     * @return true if the set contains the context pair
      * @throws NullPointerException if the key or value is null
      */
     boolean has(@Nonnull String key, @Nonnull String value);
 
     /**
-     * Check if thr set contains a given key mapped to a given value
+     * Returns if the {@link ContextSet} contains a given context pairing,
+     * ignoring the case of values.
      *
-     * @param entry the entry to look for
-     * @return true if the set contains the KV pair
-     * @throws NullPointerException if the key or value is null
-     * @since 3.4
-     */
-    default boolean has(@Nonnull Map.Entry<String, String> entry) {
-        Preconditions.checkNotNull(entry, "entry");
-        return has(entry.getKey(), entry.getValue());
-    }
-
-    /**
-     * Same as {@link #has(String, String)}, except ignores the case of the value.
+     * <p>This lookup is case-insensitive on the value.</p>
      *
      * @param key   the key to look for
      * @param value the value to look for
-     * @return true if the set contains the KV pair
+     * @return true if the set contains the context pair
      * @throws NullPointerException if the key or value is null
      */
     boolean hasIgnoreCase(@Nonnull String key, @Nonnull String value);
 
     /**
-     * Same as {@link #has(Map.Entry)}, except ignores the case of the value.
+     * Returns if the {@link ContextSet} contains a given context pairing.
+     *
+     * <p>This lookup is case-sensitive on the value.</p>
      *
      * @param entry the entry to look for
-     * @return true if the set contains the KV pair
+     * @return true if the set contains the context pair
      * @throws NullPointerException if the key or value is null
-     * @since 3.4
+     */
+    default boolean has(@Nonnull Map.Entry<String, String> entry) {
+        Objects.requireNonNull(entry, "entry");
+        return has(entry.getKey(), entry.getValue());
+    }
+
+    /**
+     * Returns if the {@link ContextSet} contains a given context pairing,
+     * ignoring the case of values.
+     *
+     * <p>This lookup is case-insensitive on the value.</p>
+     *
+     * @param entry the entry to look for
+     * @return true if the set contains the context pair
+     * @throws NullPointerException if the key or value is null
      */
     default boolean hasIgnoreCase(@Nonnull Map.Entry<String, String> entry) {
-        Preconditions.checkNotNull(entry, "entry");
+        Objects.requireNonNull(entry, "entry");
         return hasIgnoreCase(entry.getKey(), entry.getValue());
     }
 
     /**
-     * Checks to see if all entries in this context set are also included in another set.
+     * Returns if this {@link ContextSet} is fully "satisfied" by another set.
+     *
+     * <p>For a context set to "satisfy" another, it must itself contain all of
+     * the context pairings in the other set.</p>
+     *
+     * <p>Mathematically, this method returns true if this set is a <b>subset</b> of the other.</p>
+     *
+     * <p>This check is case-sensitive. For a case-insensitive check,
+     * use {@link #isSatisfiedBy(ContextSet, boolean)}.</p>
      *
      * @param other the other set to check
      * @return true if all entries in this set are also in the other set
      * @since 3.1
      */
     default boolean isSatisfiedBy(@Nonnull ContextSet other) {
-        return this == other || isSatisfiedBy(other, true);
+        return isSatisfiedBy(other, true);
     }
 
     /**
-     * Checks to see if all entries in this context set are also included in another set.
+     * Returns if this {@link ContextSet} is fully "satisfied" by another set.
+     *
+     * <p>For a context set to "satisfy" another, it must itself contain all of
+     * the context pairings in the other set.</p>
+     *
+     * <p>Mathematically, this method returns true if this set is a <b>subset</b> of the other.</p>
      *
      * @param other the other set to check
-     * @param caseSensitive if the lookup should be case sensitive. see {@link #has(Map.Entry)} and {@link #hasIgnoreCase(Map.Entry)}.
+     * @param caseSensitive if the check should be case sensitive
      * @return true if all entries in this set are also in the other set
      * @since 3.4
      */
@@ -293,7 +360,7 @@ public interface ContextSet {
             return true;
         }
 
-        Preconditions.checkNotNull(other, "other");
+        Objects.requireNonNull(other, "other");
         if (this.isEmpty()) {
             // this is empty, so is therefore always satisfied.
             return true;
@@ -305,31 +372,30 @@ public interface ContextSet {
             return false;
         } else {
             // neither are empty, we need to compare the individual entries
-            for (Map.Entry<String, String> pair : toSet()) {
+            for (Map.Entry<String, String> context : toSet()) {
                 if (caseSensitive) {
-                    if (!other.has(pair)) {
+                    if (!other.has(context)) {
                         return false;
                     }
                 } else {
-                    if (!other.hasIgnoreCase(pair)) {
+                    if (!other.hasIgnoreCase(context)) {
                         return false;
                     }
                 }
             }
-
             return true;
         }
     }
 
     /**
-     * Check if the set is empty
+     * Returns if the {@link ContextSet} is empty.
      *
      * @return true if the set is empty
      */
     boolean isEmpty();
 
     /**
-     * Gets the number of key-value context pairs in the set
+     * Gets the number of context pairs in the {@link ContextSet}.
      *
      * @return the size of the set
      */

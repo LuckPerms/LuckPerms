@@ -45,9 +45,64 @@
                             <minimizeJar>false</minimizeJar>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <relocations>
+                                <!-- shaded dependencies -->
                                 <relocation>
                                     <pattern>net.kyori.text</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.text</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>me.lucko.jarrelocator</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.jarrelocator</shadedPattern>
+                                </relocation>
+
+                                <!-- relocated dependencies -->
+                                <relocation>
+                                    <pattern>com.github.benmanes.caffeine</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.caffeine</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.mariadb.jdbc</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.mariadb</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.mysql</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.mysql</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.postgresql</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.postgresql</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.h2</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.h2</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.sqlite</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.sqlite</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.zaxxer.hikari</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.hikari</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.mongodb</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.mongodb</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.bson</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.bson</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>redis.clients.jedis.shaded</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.jedis</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>ninja.leaping.configurate</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.configurate</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.typesafe.config</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.hocon</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -58,13 +113,31 @@
     </build>
 
     <dependencies>
-        <!-- Spigot API -->
+        <!-- common -->
+        <dependency>
+            <groupId>me.lucko.luckperms</groupId>
+            <artifactId>luckperms-common</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- jsr305 -->
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Spigot -->
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
             <version>1.12.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+
+
         <!-- Vault -->
         <dependency>
             <groupId>net.milkbowl.vault</groupId>
@@ -78,27 +151,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- LuckPerms Common -->
-        <dependency>
-            <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-common</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- LuckPerms API -->
-        <dependency>
-            <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-api</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- Lombok -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
-        </dependency>
         <!-- LilyPad -->
         <dependency>
             <groupId>lilypad.client.connect</groupId>
@@ -106,7 +158,6 @@
             <version>0.0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-        <!-- ************** Migration Plugins ************** -->
         <!-- zPermissions -->
         <dependency>
             <groupId>org.tyrannyofheaven.bukkit</groupId>
@@ -141,20 +192,10 @@
         </dependency>
         <!-- PowerfulPerms -->
         <dependency>
-            <groupId>com.github.cheesesoftware</groupId>
+            <groupId>com.github.gustav9797</groupId>
             <artifactId>PowerfulPermsAPI</artifactId>
-            <version>1.4.0</version>
+            <version>4.5.2</version>
             <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>redis.clients</groupId>
-                    <artifactId>jedis</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <!-- GroupManager -->
         <dependency>
@@ -169,6 +210,23 @@
             <artifactId>bpermissions-api</artifactId>
             <version>2.12</version>
             <scope>provided</scope>
+        </dependency>
+        <!-- PermissionsBukkit -->
+        <dependency>
+            <groupId>com.platymuus</groupId>
+            <artifactId>bukkit-permissions</artifactId>
+            <version>2.5</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bukkit</groupId>
+                    <artifactId>bukkit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mcstats.bukkit</groupId>
+                    <artifactId>metrics</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 </project>

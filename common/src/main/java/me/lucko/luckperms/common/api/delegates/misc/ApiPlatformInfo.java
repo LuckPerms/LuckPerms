@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.api.delegates.misc;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.api.platform.PlatformInfo;
 import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -35,13 +33,19 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
-@RequiredArgsConstructor
+import javax.annotation.Nonnull;
+
 public class ApiPlatformInfo implements PlatformInfo {
     private final LuckPermsPlugin plugin;
 
+    public ApiPlatformInfo(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    @Nonnull
     @Override
     public String getVersion() {
-        return plugin.getVersion();
+        return this.plugin.getVersion();
     }
 
     @Override
@@ -49,18 +53,20 @@ public class ApiPlatformInfo implements PlatformInfo {
         return 4.0;
     }
 
+    @Nonnull
     @Override
     public PlatformType getType() {
-        return plugin.getServerType();
+        return this.plugin.getServerType();
     }
 
+    @Nonnull
     @Override
     public Set<UUID> getUniqueConnections() {
-        return Collections.unmodifiableSet(plugin.getUniqueConnections());
+        return Collections.unmodifiableSet(this.plugin.getUniqueConnections());
     }
 
     @Override
     public long getStartTime() {
-        return plugin.getStartTime();
+        return this.plugin.getStartTime();
     }
 }

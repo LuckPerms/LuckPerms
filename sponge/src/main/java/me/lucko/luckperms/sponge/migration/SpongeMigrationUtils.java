@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.sponge.migration;
 
-import lombok.experimental.UtilityClass;
-
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.model.Group;
@@ -44,8 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@UtilityClass
-public class SpongeMigrationUtils {
+public final class SpongeMigrationUtils {
 
     public static void migrateSubject(Subject from, PermissionHolder to, int priority) {
         if (to.getType().isGroup()) {
@@ -120,5 +117,7 @@ public class SpongeMigrationUtils {
             }
         }
     }
+
+    private SpongeMigrationUtils() {}
 
 }

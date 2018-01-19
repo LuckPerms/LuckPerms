@@ -25,12 +25,6 @@
 
 package me.lucko.luckperms.common.metastacking;
 
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.metastacking.MetaStackElement;
@@ -38,30 +32,71 @@ import me.lucko.luckperms.api.metastacking.MetaStackElement;
 import java.util.Map;
 import java.util.Optional;
 
-@Getter
-@ToString
-@EqualsAndHashCode(of = {"element", "type", "current"})
-@RequiredArgsConstructor
 final class SimpleMetaStackEntry implements MetaStackEntry {
 
     private final MetaStack parentStack;
     private final MetaStackElement element;
     private final ChatMetaType type;
 
-    @Getter(AccessLevel.NONE)
     private Map.Entry<Integer, String> current = null;
+
+    public SimpleMetaStackEntry(MetaStack parentStack, MetaStackElement element, ChatMetaType type) {
+        this.parentStack = parentStack;
+        this.element = element;
+        this.type = type;
+    }
 
     @Override
     public Optional<Map.Entry<Integer, String>> getCurrentValue() {
-        return Optional.ofNullable(current);
+        return Optional.ofNullable(this.current);
     }
 
     @Override
     public boolean accumulateNode(LocalizedNode node) {
-        if (element.shouldAccumulate(node, type, current)) {
-            this.current = type.getEntry(node);
+        if (this.element.shouldAccumulate(node, this.type, this.current)) {
+            this.current = this.type.getEntry(node);
             return true;
         }
         return false;
+    }
+
+    @Override
+    public MetaStack getParentStack() {
+        return this.parentStack;
+    }
+
+    @Override
+    public MetaStackElement getElement() {
+        return this.element;
+    }
+
+    public ChatMetaType getType() {
+        return this.type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof SimpleMetaStackEntry)) return false;
+        final SimpleMetaStackEntry that = (SimpleMetaStackEntry) o;
+
+        return this.getElement().equals(that.getElement()) &&
+                this.getType() == that.getType() &&
+                this.current.equals(that.current);
+    }
+
+    @Override
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        result = result * PRIME + this.getElement().hashCode();
+        result = result * PRIME + this.getType().hashCode();
+        result = result * PRIME + this.current.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "SimpleMetaStackEntry(parentStack=" + this.getParentStack() + ", element=" + this.getElement() + ", type=" + this.getType() + ", current=" + this.current + ")";
     }
 }

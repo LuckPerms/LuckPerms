@@ -25,21 +25,23 @@
 
 package me.lucko.luckperms.api.caching;
 
-import com.google.common.base.Preconditions;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 /**
- * Represents the context for a meta lookup.
+ * Encapsulates the options and settings for a meta lookup.
  *
- * <p>Consisting of a standard {@link Contexts} element, plus options to define how
+ * <p>Consists of a standard {@link Contexts} element, plus options to define how
  * the meta stack should be constructed.</p>
  *
  * @since 3.2
  */
+@Immutable
 public final class MetaContexts {
 
     /**
@@ -69,9 +71,9 @@ public final class MetaContexts {
      * @param suffixStackDefinition the suffix stack definition to be used
      */
     public MetaContexts(@Nonnull Contexts contexts, @Nonnull MetaStackDefinition prefixStackDefinition, @Nonnull MetaStackDefinition suffixStackDefinition) {
-        this.contexts = Preconditions.checkNotNull(contexts, "contexts");
-        this.prefixStackDefinition = Preconditions.checkNotNull(prefixStackDefinition, "prefixStackDefinition");
-        this.suffixStackDefinition = Preconditions.checkNotNull(suffixStackDefinition, "suffixStackDefinition");
+        this.contexts = Objects.requireNonNull(contexts, "contexts");
+        this.prefixStackDefinition = Objects.requireNonNull(prefixStackDefinition, "prefixStackDefinition");
+        this.suffixStackDefinition = Objects.requireNonNull(suffixStackDefinition, "suffixStackDefinition");
         this.hashCode = calculateHashCode();
     }
 
@@ -104,23 +106,18 @@ public final class MetaContexts {
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof MetaContexts)) return false;
-        final MetaContexts other = (MetaContexts) o;
-        return this.getContexts().equals(other.getContexts()) &&
-                this.getPrefixStackDefinition().equals(other.getPrefixStackDefinition()) &&
-                this.getSuffixStackDefinition().equals(other.getSuffixStackDefinition());
+        final MetaContexts that = (MetaContexts) o;
+        return this.contexts.equals(that.contexts) &&
+                this.prefixStackDefinition.equals(that.prefixStackDefinition) &&
+                this.suffixStackDefinition.equals(that.suffixStackDefinition);
     }
 
     private int calculateHashCode() {
-        final int PRIME = 59;
-        int result = 1;
-        result = result * PRIME + this.getContexts().hashCode();
-        result = result * PRIME + this.getPrefixStackDefinition().hashCode();
-        result = result * PRIME + this.getSuffixStackDefinition().hashCode();
-        return result;
+        return Objects.hash(this.contexts, this.prefixStackDefinition, this.suffixStackDefinition);
     }
 
     @Override
     public int hashCode() {
-        return hashCode;
+        return this.hashCode;
     }
 }

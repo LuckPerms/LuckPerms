@@ -25,21 +25,15 @@
 
 package me.lucko.luckperms.common.treeview;
 
-import lombok.Setter;
-import lombok.experimental.Accessors;
-
 /**
  * Builds a {@link TreeView}.
  */
-@Accessors(fluent = true)
 public class TreeViewBuilder {
     public static TreeViewBuilder newBuilder() {
         return new TreeViewBuilder();
     }
 
-    @Setter
     private String rootPosition;
-    @Setter
     private int maxLevels;
 
     private TreeViewBuilder() {
@@ -47,17 +41,27 @@ public class TreeViewBuilder {
         this.maxLevels = 5;
     }
 
+    public TreeViewBuilder rootPosition(String rootPosition) {
+        this.rootPosition = rootPosition;
+        return this;
+    }
+
+    public TreeViewBuilder maxLevels(int maxLevels) {
+        this.maxLevels = maxLevels;
+        return this;
+    }
+
     public TreeView build(PermissionVault source) {
-        if (maxLevels < 1) {
-            maxLevels = 1;
+        if (this.maxLevels < 1) {
+            this.maxLevels = 1;
         }
-        if (rootPosition.equals("") || rootPosition.equals("*")) {
-            rootPosition = ".";
-        } else if (!rootPosition.equals(".") && rootPosition.endsWith(".")) {
-            rootPosition = rootPosition.substring(0, rootPosition.length() - 1);
+        if (this.rootPosition.equals("") || this.rootPosition.equals("*")) {
+            this.rootPosition = ".";
+        } else if (!this.rootPosition.equals(".") && this.rootPosition.endsWith(".")) {
+            this.rootPosition = this.rootPosition.substring(0, this.rootPosition.length() - 1);
         }
 
-        return new TreeView(source, rootPosition, maxLevels);
+        return new TreeView(source, this.rootPosition, this.maxLevels);
     }
 
 }

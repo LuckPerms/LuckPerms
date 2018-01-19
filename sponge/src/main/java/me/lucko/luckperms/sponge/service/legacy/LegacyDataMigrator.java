@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.sponge.service.legacy;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorage;
 
@@ -37,22 +35,27 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 @SuppressWarnings("deprecation")
-@RequiredArgsConstructor
 public class LegacyDataMigrator implements Runnable {
     private final LPSpongePlugin plugin;
 
     private final File oldDirectory;
     private final SubjectStorage storage;
 
+    public LegacyDataMigrator(LPSpongePlugin plugin, File oldDirectory, SubjectStorage storage) {
+        this.plugin = plugin;
+        this.oldDirectory = oldDirectory;
+        this.storage = storage;
+    }
+
     @Override
     public void run() {
-        if (!oldDirectory.exists() || !oldDirectory.isDirectory()) {
+        if (!this.oldDirectory.exists() || !this.oldDirectory.isDirectory()) {
             return;
         }
 
-        plugin.getLog().warn("Migrating old sponge data... Please wait.");
+        this.plugin.getLog().warn("Migrating old sponge data... Please wait.");
 
-        File[] collections = oldDirectory.listFiles(File::isDirectory);
+        File[] collections = this.oldDirectory.listFiles(File::isDirectory);
         if (collections == null) {
             return;
         }
@@ -68,8 +71,8 @@ public class LegacyDataMigrator implements Runnable {
                 String subjectName = subjectFile.getName().substring(0, subjectFile.getName().length() - ".json".length());
 
                 try (BufferedReader reader = Files.newBufferedReader(subjectFile.toPath(), StandardCharsets.UTF_8)) {
-                    SubjectDataHolder holder = storage.getGson().fromJson(reader, SubjectDataHolder.class);
-                    storage.saveToFile(holder.asSubjectModel(plugin.getService()), storage.resolveFile(collectionDir.getName(), subjectName));
+                    SubjectDataHolder holder = this.storage.getGson().fromJson(reader, SubjectDataHolder.class);
+                    this.storage.saveToFile(holder.asSubjectModel(this.plugin.getService()), this.storage.resolveFile(collectionDir.getName(), subjectName));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -80,6 +83,6 @@ public class LegacyDataMigrator implements Runnable {
             collectionDir.delete();
         }
 
-        oldDirectory.delete();
+        this.oldDirectory.delete();
     }
 }

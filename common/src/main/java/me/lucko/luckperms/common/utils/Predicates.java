@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.utils;
 
-import lombok.experimental.UtilityClass;
-
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -35,8 +33,7 @@ import java.util.stream.IntStream;
 /**
  * A collection of predicate utilities used mostly in command classes
  */
-@UtilityClass
-public class Predicates {
+public final class Predicates {
     private static final Predicate FALSE = o -> false;
     private static final Predicate TRUE = o -> true;
 
@@ -84,4 +81,6 @@ public class Predicates {
     public static <T> Predicate<T> inverse(Predicate<T> t) {
         return t2 -> !t.test(t2);
     }
+
+    private Predicates() {}
 }

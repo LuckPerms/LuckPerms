@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.impl.track;
 
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -46,7 +45,7 @@ public class TrackInfo extends SubCommand<Track> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) {
         Message.TRACK_INFO.send(sender, track.getName(), CommandUtils.listToArrowSep(track.getGroups()));
         return CommandResult.SUCCESS;
     }

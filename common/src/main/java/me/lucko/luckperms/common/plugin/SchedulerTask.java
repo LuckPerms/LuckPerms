@@ -23,18 +23,16 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.managers;
+package me.lucko.luckperms.common.plugin;
 
-import me.lucko.luckperms.common.model.Group;
-
-public interface GroupManager extends Manager<String, Group> {
+/**
+ * Represents a scheduled task
+ */
+public interface SchedulerTask {
 
     /**
-     * Get a group object by display name
-     *
-     * @param name The name to search by
-     * @return a {@link Group} object if the group is loaded, returns null if the group is not loaded
+     * Cancels the task.
      */
-    Group getByDisplayName(String name);
+    void cancel();
 
 }

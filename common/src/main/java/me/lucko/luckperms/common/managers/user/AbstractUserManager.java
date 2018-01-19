@@ -23,13 +23,12 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.managers;
-
-import lombok.RequiredArgsConstructor;
+package me.lucko.luckperms.common.managers.user;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.managers.AbstractManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -39,14 +38,20 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-@RequiredArgsConstructor
-public class GenericUserManager extends AbstractManager<UserIdentifier, User> implements UserManager {
+public abstract class AbstractUserManager<T extends User> extends AbstractManager<UserIdentifier, User, T> implements UserManager<T> {
 
     private final LuckPermsPlugin plugin;
+    private final UserHousekeeper housekeeper;
+
+    public AbstractUserManager(LuckPermsPlugin plugin, UserHousekeeper.TimeoutSettings timeoutSettings) {
+        this.plugin = plugin;
+        this.housekeeper = new UserHousekeeper(plugin, this, timeoutSettings);
+        this.plugin.getScheduler().asyncRepeating(this.housekeeper, 200L); // every 10 seconds
+    }
 
     @Override
-    public User getOrMake(UserIdentifier id) {
-        User ret = super.getOrMake(id);
+    public T getOrMake(UserIdentifier id) {
+        T ret = super.getOrMake(id);
         if (id.getUsername().isPresent()) {
             ret.setName(id.getUsername().get(), false);
         }
@@ -54,15 +59,8 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
     }
 
     @Override
-    public User apply(UserIdentifier id) {
-        return !id.getUsername().isPresent() ?
-                new User(id.getUuid(), plugin) :
-                new User(id.getUuid(), id.getUsername().get(), plugin);
-    }
-
-    @Override
-    public User getByUsername(String name) {
-        for (User user : getAll().values()) {
+    public T getByUsername(String name) {
+        for (T user : getAll().values()) {
             Optional<String> n = user.getName();
             if (n.isPresent() && n.get().equalsIgnoreCase(name)) {
                 return user;
@@ -72,59 +70,16 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
     }
 
     @Override
-    public User getIfLoaded(UUID uuid) {
+    public T getIfLoaded(UUID uuid) {
         return getIfLoaded(UserIdentifier.of(uuid, null));
     }
 
     @Override
     public boolean giveDefaultIfNeeded(User user, boolean save) {
-        return giveDefaultIfNeeded(user, save, plugin);
-    }
-
-    @Override
-    public boolean cleanup(User user) {
-        if (!plugin.isPlayerOnline(plugin.getUuidCache().getExternalUUID(user.getUuid()))) {
-            unload(user);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public void scheduleUnload(UUID uuid) {
-        plugin.getScheduler().asyncLater(() -> {
-            // check once to see if the user can be unloaded.
-            if (getIfLoaded(plugin.getUuidCache().getUUID(uuid)) != null && !plugin.isPlayerOnline(uuid)) {
-
-                // check again in 40 ticks, we want to be sure the player won't have re-logged before we unload them.
-                plugin.getScheduler().asyncLater(() -> {
-                    User user = getIfLoaded(plugin.getUuidCache().getUUID(uuid));
-                    if (user != null && !plugin.isPlayerOnline(uuid)) {
-                        user.getCachedData().invalidateCaches();
-                        unload(user);
-                        plugin.getUuidCache().clearCache(uuid);
-                    }
-                }, 40L);
-            }
-        }, 40L);
-    }
-
-    @Override
-    public CompletableFuture<Void> updateAllUsers() {
-        return CompletableFuture.runAsync(
-                () -> plugin.getOnlinePlayers()
-                        .map(u -> plugin.getUuidCache().getUUID(u))
-                        .forEach(u -> plugin.getStorage().loadUser(u, null).join()),
-                plugin.getScheduler().async()
-        );
-    }
-
-    public static boolean giveDefaultIfNeeded(User user, boolean save, LuckPermsPlugin plugin) {
         boolean work = false;
 
         // check that they are actually a member of their primary group, otherwise remove it
-        if (plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD).equals("stored")) {
+        if (this.plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD).equals("stored")) {
             String pg = user.getPrimaryGroup().getValue();
             boolean has = false;
 
@@ -173,10 +128,30 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
         }
 
         if (work && save) {
-            plugin.getStorage().saveUser(user);
+            this.plugin.getStorage().saveUser(user);
         }
 
         return work;
+    }
+
+    @Override
+    public UserHousekeeper getHouseKeeper() {
+        return this.housekeeper;
+    }
+
+    @Override
+    public void cleanup(User user) {
+        this.housekeeper.cleanup(user.getId());
+    }
+
+    @Override
+    public CompletableFuture<Void> updateAllUsers() {
+        return CompletableFuture.runAsync(
+                () -> this.plugin.getOnlinePlayers()
+                        .map(u -> this.plugin.getUuidCache().getUUID(u))
+                        .forEach(u -> this.plugin.getStorage().loadUser(u, null).join()),
+                this.plugin.getScheduler().async()
+        );
     }
 
     /**
@@ -185,7 +160,8 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
      * @param user the user to check
      * @return true if the user should be saved
      */
-    public static boolean shouldSave(User user) {
+    @Override
+    public boolean shouldSave(User user) {
         if (user.getEnduringNodes().size() != 1) {
             return true;
         }

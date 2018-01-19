@@ -82,24 +82,24 @@ public class MetaAddChatMeta extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        DataMutateResult result = holder.setPermission(NodeFactory.buildChatMetaNode(type, priority, meta).withExtraContext(context).build());
+        DataMutateResult result = holder.setPermission(NodeFactory.buildChatMetaNode(this.type, priority, meta).withExtraContext(context).build());
         if (result.asBoolean()) {
-            TextComponent.Builder builder = TextUtils.fromLegacy(Message.ADD_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context)), CommandManager.SECTION_CHAR).toBuilder();
+            TextComponent.Builder builder = TextUtils.fromLegacy(Message.ADD_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), this.type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context)), CommandManager.SECTION_CHAR).toBuilder();
             HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
-                    "¥3Raw " + type.name().toLowerCase() + ": ¥r" + meta,
+                    "¥3Raw " + this.type.name().toLowerCase() + ": ¥r" + meta,
                     '¥'
             ));
             builder.applyDeep(c -> c.hoverEvent(event));
             sender.sendMessage(builder.build());
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("meta" , "add" + type.name().toLowerCase(), priority, meta, context)
+                    .action("meta" , "add" + this.type.name().toLowerCase(), priority, meta, context)
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context));
+            Message.ALREADY_HAS_CHAT_META.send(sender, holder.getFriendlyName(), this.type.name().toLowerCase(), meta, priority, CommandUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

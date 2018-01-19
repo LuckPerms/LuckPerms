@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.bulkupdate.comparisons;
 
-import lombok.AllArgsConstructor;
-
 import me.lucko.luckperms.common.bulkupdate.comparisons.impl.ComparisonEqual;
 import me.lucko.luckperms.common.bulkupdate.comparisons.impl.ComparisonNotEqual;
 import me.lucko.luckperms.common.bulkupdate.comparisons.impl.ComparisonNotSimilar;
@@ -35,7 +33,6 @@ import me.lucko.luckperms.common.bulkupdate.comparisons.impl.ComparisonSimilar;
 /**
  * An enumeration of all {@link Comparison}s.
  */
-@AllArgsConstructor
 public enum ComparisonType {
 
     EQUAL("==", new ComparisonEqual()),
@@ -46,12 +43,17 @@ public enum ComparisonType {
     private final String symbol;
     private final Comparison instance;
 
+    ComparisonType(String symbol, Comparison instance) {
+        this.symbol = symbol;
+        this.instance = instance;
+    }
+
     public String getSymbol() {
-        return symbol;
+        return this.symbol;
     }
 
     public Comparison getComparison() {
-        return instance;
+        return this.instance;
     }
 
     public static ComparisonType parseComparison(String s) {

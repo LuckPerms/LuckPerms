@@ -25,48 +25,54 @@
 
 package me.lucko.luckperms.common.api.delegates.manager;
 
-import lombok.AllArgsConstructor;
-import lombok.NonNull;
-
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.manager.UserManager;
 import me.lucko.luckperms.common.api.delegates.model.ApiUser;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class ApiUserManager implements UserManager {
-    private final LuckPermsPlugin plugin;
-    private final me.lucko.luckperms.common.managers.UserManager handle;
+    private final me.lucko.luckperms.common.managers.user.UserManager<?> handle;
+
+    public ApiUserManager(me.lucko.luckperms.common.managers.user.UserManager<?> handle) {
+        this.handle = handle;
+    }
 
     @Override
-    public User getUser(@NonNull UUID uuid) {
-        me.lucko.luckperms.common.model.User user = handle.getIfLoaded(uuid);
+    public User getUser(@Nonnull UUID uuid) {
+        Objects.requireNonNull(uuid, "uuid");
+        me.lucko.luckperms.common.model.User user = this.handle.getIfLoaded(uuid);
         return user == null ? null : user.getDelegate();
     }
 
     @Override
-    public User getUser(@NonNull String name) {
-        me.lucko.luckperms.common.model.User user = handle.getByUsername(name);
+    public User getUser(@Nonnull String name) {
+        Objects.requireNonNull(name, "name");
+        me.lucko.luckperms.common.model.User user = this.handle.getByUsername(name);
         return user == null ? null : user.getDelegate();
     }
 
+    @Nonnull
     @Override
     public Set<User> getLoadedUsers() {
-        return handle.getAll().values().stream().map(me.lucko.luckperms.common.model.User::getDelegate).collect(Collectors.toSet());
+        return this.handle.getAll().values().stream().map(me.lucko.luckperms.common.model.User::getDelegate).collect(Collectors.toSet());
     }
 
     @Override
-    public boolean isLoaded(@NonNull UUID uuid) {
-        return handle.isLoaded(UserIdentifier.of(uuid, null));
+    public boolean isLoaded(@Nonnull UUID uuid) {
+        Objects.requireNonNull(uuid, "uuid");
+        return this.handle.isLoaded(UserIdentifier.of(uuid, null));
     }
 
     @Override
-    public void cleanupUser(@NonNull User user) {
-        handle.scheduleUnload(plugin.getUuidCache().getExternalUUID(ApiUser.cast(user).getUuid()));
+    public void cleanupUser(@Nonnull User user) {
+        Objects.requireNonNull(user, "user");
+        this.handle.getHouseKeeper().clearApiUsage(ApiUser.cast(user).getUuid());
     }
 }

@@ -36,14 +36,14 @@ public class PostgreConnectionFactory extends HikariConnectionFactory {
 
     @Override
     protected void appendConfigurationInfo(HikariConfig config) {
-        String address = configuration.getAddress();
+        String address = this.configuration.getAddress();
         String[] addressSplit = address.split(":");
         address = addressSplit[0];
         String port = addressSplit.length > 1 ? addressSplit[1] : "5432";
 
-        String database = configuration.getDatabase();
-        String username = configuration.getUsername();
-        String password = configuration.getPassword();
+        String database = this.configuration.getDatabase();
+        String username = this.configuration.getUsername();
+        String password = this.configuration.getPassword();
 
         config.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
         config.addDataSourceProperty("serverName", address);

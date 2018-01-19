@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.messaging;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import redis.clients.jedis.shaded.Jedis;
@@ -53,15 +51,15 @@ public class RedisMessagingService extends AbstractMessagingService {
         int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : 6379;
 
         if (password.equals("")) {
-            jedisPool = new JedisPool(new JedisPoolConfig(), host, port);
+            this.jedisPool = new JedisPool(new JedisPoolConfig(), host, port);
         } else {
-            jedisPool = new JedisPool(new JedisPoolConfig(), host, port, 0, password);
+            this.jedisPool = new JedisPool(new JedisPoolConfig(), host, port, 0, password);
         }
 
-        plugin.getScheduler().doAsync(() -> {
-            sub = new LPSub(this);
-            try (Jedis jedis = jedisPool.getResource()) {
-                jedis.subscribe(sub, CHANNEL);
+        this.plugin.getScheduler().doAsync(() -> {
+            this.sub = new LPSub(this);
+            try (Jedis jedis = this.jedisPool.getResource()) {
+                jedis.subscribe(this.sub, CHANNEL);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -70,29 +68,32 @@ public class RedisMessagingService extends AbstractMessagingService {
 
     @Override
     public void close() {
-        sub.unsubscribe();
-        jedisPool.destroy();
+        this.sub.unsubscribe();
+        this.jedisPool.destroy();
     }
 
     @Override
     protected void sendMessage(String message) {
-        try (Jedis jedis = jedisPool.getResource()) {
+        try (Jedis jedis = this.jedisPool.getResource()) {
             jedis.publish(CHANNEL, message);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    @RequiredArgsConstructor
     private static class LPSub extends JedisPubSub {
         private final RedisMessagingService parent;
+
+        public LPSub(RedisMessagingService parent) {
+            this.parent = parent;
+        }
 
         @Override
         public void onMessage(String channel, String msg) {
             if (!channel.equals(CHANNEL)) {
                 return;
             }
-            parent.onMessage(msg, null);
+            this.parent.onMessage(msg, null);
         }
     }
 

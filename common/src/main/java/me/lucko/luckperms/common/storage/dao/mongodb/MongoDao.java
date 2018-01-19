@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.storage.dao.mongodb;
 
-import lombok.Getter;
-
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.mongodb.MongoClient;
@@ -46,9 +44,8 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.managers.GenericUserManager;
-import me.lucko.luckperms.common.managers.GroupManager;
-import me.lucko.luckperms.common.managers.TrackManager;
+import me.lucko.luckperms.common.managers.group.GroupManager;
+import me.lucko.luckperms.common.managers.track.TrackManager;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -80,8 +77,6 @@ public class MongoDao extends AbstractDao {
     private final StorageCredentials configuration;
     private MongoClient mongoClient;
     private MongoDatabase database;
-
-    @Getter
     private final String prefix;
 
     public MongoDao(LuckPermsPlugin plugin, StorageCredentials configuration, String prefix) {
@@ -93,32 +88,32 @@ public class MongoDao extends AbstractDao {
     @Override
     public void init() {
         MongoCredential credential = null;
-        if (!Strings.isNullOrEmpty(configuration.getUsername())) {
+        if (!Strings.isNullOrEmpty(this.configuration.getUsername())) {
             credential = MongoCredential.createCredential(
-                    configuration.getUsername(),
-                    configuration.getDatabase(),
-                    Strings.isNullOrEmpty(configuration.getPassword()) ? null : configuration.getPassword().toCharArray()
+                    this.configuration.getUsername(),
+                    this.configuration.getDatabase(),
+                    Strings.isNullOrEmpty(this.configuration.getPassword()) ? null : this.configuration.getPassword().toCharArray()
             );
         }
 
-        String[] addressSplit = configuration.getAddress().split(":");
+        String[] addressSplit = this.configuration.getAddress().split(":");
         String host = addressSplit[0];
         int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : 27017;
         ServerAddress address = new ServerAddress(host, port);
 
         if (credential == null) {
-            mongoClient = new MongoClient(address, Collections.emptyList());
+            this.mongoClient = new MongoClient(address, Collections.emptyList());
         } else {
-            mongoClient = new MongoClient(address, Collections.singletonList(credential));
+            this.mongoClient = new MongoClient(address, Collections.singletonList(credential));
         }
 
-        database = mongoClient.getDatabase(configuration.getDatabase());
+        this.database = this.mongoClient.getDatabase(this.configuration.getDatabase());
     }
 
     @Override
     public void shutdown() {
-        if (mongoClient != null) {
-            mongoClient.close();
+        if (this.mongoClient != null) {
+            this.mongoClient.close();
         }
     }
 
@@ -129,7 +124,7 @@ public class MongoDao extends AbstractDao {
 
         long start = System.currentTimeMillis();
         try {
-            database.runCommand(new Document("ping", 1));
+            this.database.runCommand(new Document("ping", 1));
         } catch (Exception e) {
             success = false;
         }
@@ -147,7 +142,7 @@ public class MongoDao extends AbstractDao {
 
     @Override
     public void logAction(LogEntry entry) {
-        MongoCollection<Document> c = database.getCollection(prefix + "action");
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "action");
         Document doc = new Document()
                 .append("timestamp", entry.getTimestamp())
                 .append("actor", entry.getActor())
@@ -166,7 +161,7 @@ public class MongoDao extends AbstractDao {
     @Override
     public Log getLog() {
         Log.Builder log = Log.builder();
-        MongoCollection<Document> c = database.getCollection(prefix + "action");
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "action");
         try (MongoCursor<Document> cursor = c.find().iterator()) {
             while (cursor.hasNext()) {
                 Document d = cursor.next();
@@ -195,7 +190,7 @@ public class MongoDao extends AbstractDao {
     @Override
     public void applyBulkUpdate(BulkUpdate bulkUpdate) {
         if (bulkUpdate.getDataType().isIncludingUsers()) {
-            MongoCollection<Document> c = database.getCollection(prefix + "users");
+            MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
             try (MongoCursor<Document> cursor = c.find().iterator()) {
                 while (cursor.hasNext()) {
                     Document d = cursor.next();
@@ -220,7 +215,7 @@ public class MongoDao extends AbstractDao {
         }
 
         if (bulkUpdate.getDataType().isIncludingGroups()) {
-            MongoCollection<Document> c = database.getCollection(prefix + "groups");
+            MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
             try (MongoCursor<Document> cursor = c.find().iterator()) {
                 while (cursor.hasNext()) {
                     Document d = cursor.next();
@@ -247,10 +242,10 @@ public class MongoDao extends AbstractDao {
 
     @Override
     public User loadUser(UUID uuid, String username) {
-        User user = plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
+        User user = this.plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
         user.getIoLock().lock();
         try {
-            MongoCollection<Document> c = database.getCollection(prefix + "users");
+            MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
             try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUuid())).iterator()) {
                 if (cursor.hasNext()) {
                     // User exists, let's load.
@@ -263,7 +258,7 @@ public class MongoDao extends AbstractDao {
                     user.setEnduringNodes(nodes);
                     user.setName(name, true);
 
-                    boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
+                    boolean save = this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
                     if (user.getName().isPresent() && (name == null || !user.getName().get().equalsIgnoreCase(name))) {
                         save = true;
                     }
@@ -272,10 +267,10 @@ public class MongoDao extends AbstractDao {
                         c.replaceOne(new Document("_id", user.getUuid()), userToDoc(user));
                     }
                 } else {
-                    if (GenericUserManager.shouldSave(user)) {
+                    if (this.plugin.getUserManager().shouldSave(user)) {
                         user.clearNodes();
                         user.getPrimaryGroup().setStoredValue(null);
-                        plugin.getUserManager().giveDefaultIfNeeded(user, false);
+                        this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
                     }
                 }
             }
@@ -290,8 +285,8 @@ public class MongoDao extends AbstractDao {
     public void saveUser(User user) {
         user.getIoLock().lock();
         try {
-            MongoCollection<Document> c = database.getCollection(prefix + "users");
-            if (!GenericUserManager.shouldSave(user)) {
+            MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
+            if (!this.plugin.getUserManager().shouldSave(user)) {
                 c.deleteOne(new Document("_id", user.getUuid()));
             } else {
                 c.replaceOne(new Document("_id", user.getUuid()), userToDoc(user), new UpdateOptions().upsert(true));
@@ -304,7 +299,7 @@ public class MongoDao extends AbstractDao {
     @Override
     public Set<UUID> getUniqueUsers() {
         Set<UUID> uuids = new HashSet<>();
-        MongoCollection<Document> c = database.getCollection(prefix + "users");
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
         try (MongoCursor<Document> cursor = c.find().iterator()) {
             while (cursor.hasNext()) {
                 Document d = cursor.next();
@@ -317,7 +312,7 @@ public class MongoDao extends AbstractDao {
     @Override
     public List<HeldPermission<UUID>> getUsersWithPermission(String permission) {
         ImmutableList.Builder<HeldPermission<UUID>> held = ImmutableList.builder();
-        MongoCollection<Document> c = database.getCollection(prefix + "users");
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
         try (MongoCursor<Document> cursor = c.find().iterator()) {
             while (cursor.hasNext()) {
                 Document d = cursor.next();
@@ -337,10 +332,10 @@ public class MongoDao extends AbstractDao {
 
     @Override
     public Group createAndLoadGroup(String name) {
-        Group group = plugin.getGroupManager().getOrMake(name);
+        Group group = this.plugin.getGroupManager().getOrMake(name);
         group.getIoLock().lock();
         try {
-            MongoCollection<Document> c = database.getCollection(prefix + "groups");
+            MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
             try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
                 if (cursor.hasNext()) {
                     Document d = cursor.next();
@@ -359,19 +354,19 @@ public class MongoDao extends AbstractDao {
 
     @Override
     public Optional<Group> loadGroup(String name) {
-        Group group = plugin.getGroupManager().getIfLoaded(name);
+        Group group = this.plugin.getGroupManager().getIfLoaded(name);
         if (group != null) {
             group.getIoLock().lock();
         }
         try {
-            MongoCollection<Document> c = database.getCollection(prefix + "groups");
+            MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
             try (MongoCursor<Document> cursor = c.find(new Document("_id", name)).iterator()) {
                 if (!cursor.hasNext()) {
                     return Optional.empty();
                 }
 
                 if (group == null) {
-                    group = plugin.getGroupManager().getOrMake(name);
+                    group = this.plugin.getGroupManager().getOrMake(name);
                     group.getIoLock().lock();
                 }
 
@@ -391,7 +386,7 @@ public class MongoDao extends AbstractDao {
     @Override
     public void loadAllGroups() {
         List<String> groups = new ArrayList<>();
-        MongoCollection<Document> c = database.getCollection(prefix + "groups");
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
         try (MongoCursor<Document> cursor = c.find().iterator()) {
             while (cursor.hasNext()) {
                 String name = cursor.next().getString("_id");
@@ -413,7 +408,7 @@ public class MongoDao extends AbstractDao {
             throw new RuntimeException("Exception occurred whilst loading a group");
         }
 
-        GroupManager gm = plugin.getGroupManager();
+        GroupManager<?> gm = this.plugin.getGroupManager();
         gm.getAll().values().stream()
                 .filter(g -> !groups.contains(g.getName()))
                 .forEach(gm::unload);
@@ -423,7 +418,7 @@ public class MongoDao extends AbstractDao {
     public void saveGroup(Group group) {
         group.getIoLock().lock();
         try {
-            MongoCollection<Document> c = database.getCollection(prefix + "groups");
+            MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
             c.replaceOne(new Document("_id", group.getName()), groupToDoc(group), new UpdateOptions().upsert(true));
         } finally {
             group.getIoLock().unlock();
@@ -434,7 +429,7 @@ public class MongoDao extends AbstractDao {
     public void deleteGroup(Group group) {
         group.getIoLock().lock();
         try {
-            MongoCollection<Document> c = database.getCollection(prefix + "groups");
+            MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
             c.deleteOne(new Document("_id", group.getName()));
         } finally {
             group.getIoLock().unlock();
@@ -444,7 +439,7 @@ public class MongoDao extends AbstractDao {
     @Override
     public List<HeldPermission<String>> getGroupsWithPermission(String permission) {
         ImmutableList.Builder<HeldPermission<String>> held = ImmutableList.builder();
-        MongoCollection<Document> c = database.getCollection(prefix + "groups");
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
         try (MongoCursor<Document> cursor = c.find().iterator()) {
             while (cursor.hasNext()) {
                 Document d = cursor.next();
@@ -464,10 +459,10 @@ public class MongoDao extends AbstractDao {
 
     @Override
     public Track createAndLoadTrack(String name) {
-        Track track = plugin.getTrackManager().getOrMake(name);
+        Track track = this.plugin.getTrackManager().getOrMake(name);
         track.getIoLock().lock();
         try {
-            MongoCollection<Document> c = database.getCollection(prefix + "tracks");
+            MongoCollection<Document> c = this.database.getCollection(this.prefix + "tracks");
             try (MongoCursor<Document> cursor = c.find(new Document("_id", track.getName())).iterator()) {
                 if (!cursor.hasNext()) {
                     c.insertOne(trackToDoc(track));
@@ -485,20 +480,20 @@ public class MongoDao extends AbstractDao {
 
     @Override
     public Optional<Track> loadTrack(String name) {
-        Track track = plugin.getTrackManager().getIfLoaded(name);
+        Track track = this.plugin.getTrackManager().getIfLoaded(name);
         if (track != null) {
             track.getIoLock().lock();
         }
 
         try {
-            MongoCollection<Document> c = database.getCollection(prefix + "tracks");
+            MongoCollection<Document> c = this.database.getCollection(this.prefix + "tracks");
             try (MongoCursor<Document> cursor = c.find(new Document("_id", name)).iterator()) {
                 if (!cursor.hasNext()) {
                     return Optional.empty();
                 }
 
                 if (track == null) {
-                    track = plugin.getTrackManager().getOrMake(name);
+                    track = this.plugin.getTrackManager().getOrMake(name);
                     track.getIoLock().lock();
                 }
 
@@ -517,7 +512,7 @@ public class MongoDao extends AbstractDao {
     @Override
     public void loadAllTracks() {
         List<String> tracks = new ArrayList<>();
-        MongoCollection<Document> c = database.getCollection(prefix + "tracks");
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "tracks");
         try (MongoCursor<Document> cursor = c.find().iterator()) {
             while (cursor.hasNext()) {
                 String name = cursor.next().getString("_id");
@@ -539,7 +534,7 @@ public class MongoDao extends AbstractDao {
             throw new RuntimeException("Exception occurred whilst loading a track");
         }
 
-        TrackManager tm = plugin.getTrackManager();
+        TrackManager<?> tm = this.plugin.getTrackManager();
         tm.getAll().values().stream()
                 .filter(t -> !tracks.contains(t.getName()))
                 .forEach(tm::unload);
@@ -549,7 +544,7 @@ public class MongoDao extends AbstractDao {
     public void saveTrack(Track track) {
         track.getIoLock().lock();
         try {
-            MongoCollection<Document> c = database.getCollection(prefix + "tracks");
+            MongoCollection<Document> c = this.database.getCollection(this.prefix + "tracks");
             c.replaceOne(new Document("_id", track.getName()), trackToDoc(track));
         } finally {
             track.getIoLock().unlock();
@@ -560,7 +555,7 @@ public class MongoDao extends AbstractDao {
     public void deleteTrack(Track track) {
         track.getIoLock().lock();
         try {
-            MongoCollection<Document> c = database.getCollection(prefix + "tracks");
+            MongoCollection<Document> c = this.database.getCollection(this.prefix + "tracks");
             c.deleteOne(new Document("_id", track.getName()));
         } finally {
             track.getIoLock().unlock();
@@ -569,13 +564,13 @@ public class MongoDao extends AbstractDao {
 
     @Override
     public void saveUUIDData(UUID uuid, String username) {
-        MongoCollection<Document> c = database.getCollection(prefix + "uuid");
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
         c.replaceOne(new Document("_id", uuid), new Document("_id", uuid).append("name", username.toLowerCase()), new UpdateOptions().upsert(true));
     }
 
     @Override
     public UUID getUUID(String username) {
-        MongoCollection<Document> c = database.getCollection(prefix + "uuid");
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
         try (MongoCursor<Document> cursor = c.find(new Document("name", username.toLowerCase())).iterator()) {
             if (cursor.hasNext()) {
                 return cursor.next().get("_id", UUID.class);
@@ -586,7 +581,7 @@ public class MongoDao extends AbstractDao {
 
     @Override
     public String getName(UUID uuid) {
-        MongoCollection<Document> c = database.getCollection(prefix + "uuid");
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
         try (MongoCursor<Document> cursor = c.find(new Document("_id", uuid)).iterator()) {
             if (cursor.hasNext()) {
                 return cursor.next().get("name", String.class);

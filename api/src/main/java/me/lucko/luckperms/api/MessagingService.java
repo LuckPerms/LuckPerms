@@ -35,8 +35,9 @@ public interface MessagingService {
     /**
      * Uses the messaging service to inform other servers about changes.
      *
-     * <p>This will push the update asynchronously, and this method will return immediately. Calling this method is
-     * equivalent to running "/lp networksync", except will not sync this server.</p>
+     * <p>This will push the update asynchronously, and this method will return
+     * immediately. Calling this method is equivalent to running "/lp networksync",
+     * except will not sync this server.</p>
      */
     void pushUpdate();
 

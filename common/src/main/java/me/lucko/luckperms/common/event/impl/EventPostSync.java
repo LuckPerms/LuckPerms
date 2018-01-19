@@ -25,12 +25,13 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.ToString;
-
 import me.lucko.luckperms.api.event.sync.PostSyncEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
-@ToString
 public class EventPostSync extends AbstractEvent implements PostSyncEvent {
 
+    @Override
+    public String toString() {
+        return "EventPostSync()";
+    }
 }

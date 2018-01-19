@@ -53,6 +53,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 public class SpongeMainCommand extends Command<Void, LPSubjectData> {
     private final LPSpongePlugin plugin;
 
@@ -63,7 +65,7 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
 
         LocaleManager locale = plugin.getLocaleManager();
 
-        subCommands = ImmutableMap.<String, List<Command<LPSubjectData, ?>>>builder()
+        this.subCommands = ImmutableMap.<String, List<Command<LPSubjectData, ?>>>builder()
                 .put("permission", ImmutableList.<Command<LPSubjectData, ?>>builder()
                         .add(new PermissionInfo(locale))
                         .add(new PermissionSet(locale))
@@ -90,7 +92,7 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Void v, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Void v, List<String> args, String label) {
         LuckPermsService service = this.plugin.getService();
 
         if (args.size() < 1) {
@@ -152,7 +154,7 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
         }
 
         String cmd = args.get(3);
-        Optional<Command<LPSubjectData, ?>> o = subCommands.get(type).stream()
+        Optional<Command<LPSubjectData, ?>> o = this.subCommands.get(type).stream()
                 .filter(s -> s.getName().equalsIgnoreCase(cmd))
                 .findAny();
 
@@ -203,7 +205,7 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
     public void sendDetailedUsage(Sender sender, String label) {
         CommandUtils.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format("/%s sponge <collection> <subject> [-transient]", label) + " ...)");
         for (String s : Arrays.asList("Permission", "Parent", "Option")) {
-            List<Command> subs = subCommands.get(s.toLowerCase()).stream()
+            List<Command> subs = this.subCommands.get(s.toLowerCase()).stream()
                     .filter(sub -> sub.isAuthorized(sender))
                     .collect(Collectors.toList());
 
@@ -222,9 +224,10 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
     }
 
     public List<Command<LPSubjectData, ?>> getSubCommands() {
-        return subCommands.values().stream().flatMap(List::stream).collect(ImmutableCollectors.toList());
+        return this.subCommands.values().stream().flatMap(List::stream).collect(ImmutableCollectors.toList());
     }
 
+    @Nonnull
     @Override
     public Optional<List<Command<LPSubjectData, ?>>> getChildren() {
         return Optional.of(getSubCommands());

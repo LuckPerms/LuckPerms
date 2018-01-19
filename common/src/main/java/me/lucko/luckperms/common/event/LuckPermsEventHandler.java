@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.event;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.api.event.EventHandler;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 
@@ -35,49 +32,66 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-@RequiredArgsConstructor
+import javax.annotation.Nonnull;
+
 public class LuckPermsEventHandler<T extends LuckPermsEvent> implements EventHandler<T> {
     private final LuckPermsEventBus eventBus;
 
-    @Getter
     private final Class<T> eventClass;
 
-    @Getter
     private final Consumer<T> consumer;
 
     private final AtomicBoolean active = new AtomicBoolean(true);
     private final AtomicInteger callCount = new AtomicInteger(0);
 
+    public LuckPermsEventHandler(LuckPermsEventBus eventBus, Class<T> eventClass, Consumer<T> consumer) {
+        this.eventBus = eventBus;
+        this.eventClass = eventClass;
+        this.consumer = consumer;
+    }
+
     @Override
     public boolean isActive() {
-        return active.get();
+        return this.active.get();
     }
 
     @Override
     public boolean unregister() {
         // already unregistered
-        if (!active.getAndSet(false)) {
+        if (!this.active.getAndSet(false)) {
             return false;
         }
 
-        eventBus.unregisterHandler(this);
+        this.eventBus.unregisterHandler(this);
         return true;
     }
 
     @Override
     public int getCallCount() {
-        return callCount.get();
+        return this.callCount.get();
     }
 
     @SuppressWarnings("unchecked") // we know that this method will never be called if the class doesn't match eventClass
     void handle(LuckPermsEvent event) {
         try {
             T t = (T) event;
-            consumer.accept(t);
-            callCount.incrementAndGet();
+            this.consumer.accept(t);
+            this.callCount.incrementAndGet();
         } catch (Throwable t) {
-            eventBus.getPlugin().getLog().warn("Unable to pass event " + event.getClass().getSimpleName() + " to handler " + consumer.getClass().getName());
+            this.eventBus.getPlugin().getLog().warn("Unable to pass event " + event.getClass().getSimpleName() + " to handler " + this.consumer.getClass().getName());
             t.printStackTrace();
         }
+    }
+
+    @Nonnull
+    @Override
+    public Class<T> getEventClass() {
+        return this.eventClass;
+    }
+
+    @Nonnull
+    @Override
+    public Consumer<T> getConsumer() {
+        return this.consumer;
     }
 }

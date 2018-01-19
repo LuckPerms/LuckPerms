@@ -26,13 +26,11 @@
 package me.lucko.luckperms.sponge.migration;
 
 import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.logging.ProgressLogger;
@@ -41,6 +39,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.SafeIterator;
+import me.lucko.luckperms.common.utils.Uuids;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 
@@ -63,7 +62,7 @@ public class MigrationPermissionManager extends SubCommand<Object> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) {
         ProgressLogger log = new ProgressLogger("PermissionManager");
         log.addListener(plugin.getConsoleSender());
         log.addListener(sender);
@@ -120,7 +119,7 @@ public class MigrationPermissionManager extends SubCommand<Object> {
         log.log("Starting user migration.");
         AtomicInteger userCount = new AtomicInteger(0);
         SafeIterator.iterate(pmService.getUserSubjects().getAllSubjects(), pmUser -> {
-            UUID uuid = CommandUtils.parseUuid(pmUser.getIdentifier());
+            UUID uuid = Uuids.parseNullable(pmUser.getIdentifier());
             if (uuid == null) {
                 log.logErr("Could not parse UUID for user: " + pmUser.getIdentifier());
                 return;

@@ -26,7 +26,6 @@
 package me.lucko.luckperms.bungee.migration;
 
 import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -57,7 +56,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) {
         ProgressLogger log = new ProgressLogger("BungeePerms");
         log.addListener(plugin.getConsoleSender());
         log.addListener(sender);

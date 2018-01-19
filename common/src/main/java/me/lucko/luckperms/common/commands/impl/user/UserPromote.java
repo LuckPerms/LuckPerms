@@ -125,7 +125,7 @@ public class UserPromote extends SubCommand<User> {
                     .build().submit(plugin, sender);
 
             save(user, sender, plugin);
-            plugin.getApiProvider().getEventFactory().handleUserPromote(user, track, null, first);
+            plugin.getEventFactory().handleUserPromote(user, track, null, first);
             return CommandResult.SUCCESS;
         }
 
@@ -182,7 +182,7 @@ public class UserPromote extends SubCommand<User> {
                 .build().submit(plugin, sender);
 
         save(user, sender, plugin);
-        plugin.getApiProvider().getEventFactory().handleUserPromote(user, track, old, nextGroup.getName());
+        plugin.getEventFactory().handleUserPromote(user, track, old, nextGroup.getName());
         return CommandResult.SUCCESS;
     }
 

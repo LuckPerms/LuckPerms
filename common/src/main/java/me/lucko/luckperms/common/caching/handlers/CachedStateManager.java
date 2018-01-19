@@ -54,7 +54,7 @@ public class CachedStateManager {
         Set<HolderReference> set = new HashSet<>();
         set.add(holder);
 
-        lock.lock();
+        this.lock.lock();
         try {
             while (true) {
                 Set<HolderReference> clone = new HashSet<>(set);
@@ -62,7 +62,7 @@ public class CachedStateManager {
                 boolean work = false;
 
                 for (HolderReference s : clone) {
-                    if (set.addAll(map.get(s))) {
+                    if (set.addAll(this.map.get(s))) {
                         work = true;
                     }
                 }
@@ -72,7 +72,7 @@ public class CachedStateManager {
                 }
             }
         } finally {
-            lock.unlock();
+            this.lock.unlock();
         }
 
         set.remove(holder);
@@ -86,15 +86,15 @@ public class CachedStateManager {
      * @param inheritedGroups a list of groups the holder inherits from
      */
     public void putAll(HolderReference holder, Set<HolderReference> inheritedGroups) {
-        lock.lock();
+        this.lock.lock();
         try {
-            map.entries().removeIf(entry -> entry.getValue().equals(holder));
+            this.map.entries().removeIf(entry -> entry.getValue().equals(holder));
 
             for (HolderReference child : inheritedGroups) {
-                map.put(child, holder);
+                this.map.put(child, holder);
             }
         } finally {
-            lock.unlock();
+            this.lock.unlock();
         }
     }
 
@@ -104,11 +104,11 @@ public class CachedStateManager {
      * @param holder the holder name to clear
      */
     public void clear(HolderReference holder) {
-        lock.lock();
+        this.lock.lock();
         try {
-            map.entries().removeIf(entry -> entry.getValue().equals(holder));
+            this.map.entries().removeIf(entry -> entry.getValue().equals(holder));
         } finally {
-            lock.unlock();
+            this.lock.unlock();
         }
     }
 

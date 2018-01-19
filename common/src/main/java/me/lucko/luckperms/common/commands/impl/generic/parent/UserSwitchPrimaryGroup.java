@@ -23,20 +23,20 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.impl.user;
+package me.lucko.luckperms.common.commands.impl.generic.parent;
 
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.abstraction.SubCommand;
+import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -44,14 +44,21 @@ import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
-public class UserSwitchPrimaryGroup extends SubCommand<User> {
+import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getGroupTabComplete;
+
+public class UserSwitchPrimaryGroup extends SharedSubCommand {
     public UserSwitchPrimaryGroup(LocaleManager locale) {
-        super(CommandSpec.USER_SWITCHPRIMARYGROUP.spec(locale), "switchprimarygroup", CommandPermission.USER_SWITCHPRIMARYGROUP, Predicates.not(1));
+        super(CommandSpec.USER_SWITCHPRIMARYGROUP.spec(locale), "switchprimarygroup", CommandPermission.USER_PARENT_SWITCHPRIMARYGROUP, null, Predicates.not(1));
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
-        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), user)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) {
+        // cast to user
+        // although this command is build as a sharedsubcommand,
+        // it is only added to the listings for users.
+        User user = ((User) holder);
+
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, user)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
@@ -81,7 +88,7 @@ public class UserSwitchPrimaryGroup extends SubCommand<User> {
         Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user.getFriendlyName(), group.getFriendlyName());
 
         ExtendedLogEntry.build().actor(sender).acted(user)
-                .action("setprimarygroup", group.getName())
+                .action("parent", "switchprimarygroup", group.getName())
                 .build().submit(plugin, sender);
 
         save(user, sender, plugin);

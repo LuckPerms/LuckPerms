@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.sponge.service.context;
 
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 
 import org.spongepowered.api.service.context.Context;
@@ -36,38 +33,43 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 /**
  * Implements a {@link Set} of {@link Context}s, delegating all calls to a {@link ImmutableContextSet}.
  */
-@ToString
-@RequiredArgsConstructor
 public class DelegatingImmutableContextSet extends AbstractDelegatingContextSet {
     private final ImmutableContextSet delegate;
 
+    public DelegatingImmutableContextSet(ImmutableContextSet delegate) {
+        this.delegate = delegate;
+    }
+
     @Override
     public ImmutableContextSet getDelegate() {
-        return delegate;
+        return this.delegate;
     }
 
     @Override
     public int size() {
-        return delegate.size();
+        return this.delegate.size();
     }
 
     @Override
     public boolean isEmpty() {
-        return delegate.isEmpty();
+        return this.delegate.isEmpty();
     }
 
     @Override
     public boolean contains(Object o) {
         if (o instanceof Context) {
             Context context = (Context) o;
-            return delegate.has(context);
+            return this.delegate.has(context);
         }
         return false;
     }
 
+    @Nonnull
     @Override
     public Iterator<Context> iterator() {
         return new ContextSetIterator();
@@ -88,17 +90,22 @@ public class DelegatingImmutableContextSet extends AbstractDelegatingContextSet 
         throw new UnsupportedOperationException("context set is immutable");
     }
 
+    @Override
+    public String toString() {
+        return "DelegatingImmutableContextSet(delegate=" + this.getDelegate() + ")";
+    }
+
     private final class ContextSetIterator implements Iterator<Context> {
-        private final Iterator<Map.Entry<String, String>> it = delegate.toSet().iterator();
+        private final Iterator<Map.Entry<String, String>> it = DelegatingImmutableContextSet.this.delegate.toSet().iterator();
 
         @Override
         public boolean hasNext() {
-            return it.hasNext();
+            return this.it.hasNext();
         }
 
         @Override
         public Context next() {
-            Map.Entry<String, String> next = it.next();
+            Map.Entry<String, String> next = this.it.next();
             return new Context(next.getKey(), next.getValue());
         }
 

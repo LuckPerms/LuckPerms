@@ -25,14 +25,13 @@
 
 package me.lucko.luckperms.sponge.service.proxy.api7;
 
-import lombok.RequiredArgsConstructor;
-
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -45,53 +44,65 @@ import org.spongepowered.api.service.permission.SubjectReference;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
-@RequiredArgsConstructor
+import javax.annotation.Nonnull;
+
 public final class PermissionServiceProxy implements PermissionService {
     private final LPPermissionService handle;
 
+    public PermissionServiceProxy(LPPermissionService handle) {
+        this.handle = handle;
+    }
+
+    @Nonnull
     @Override
     public SubjectCollection getUserSubjects() {
-        return handle.getUserSubjects().sponge();
+        return this.handle.getUserSubjects().sponge();
     }
 
+    @Nonnull
     @Override
     public SubjectCollection getGroupSubjects() {
-        return handle.getGroupSubjects().sponge();
+        return this.handle.getGroupSubjects().sponge();
     }
 
+    @Nonnull
     @Override
     public Subject getDefaults() {
-        return handle.getDefaults().sponge();
+        return this.handle.getDefaults().sponge();
     }
 
+    @Nonnull
     @Override
     public Predicate<String> getIdentifierValidityPredicate() {
-        return handle.getIdentifierValidityPredicate();
+        return this.handle.getIdentifierValidityPredicate();
     }
 
     @Override
-    public CompletableFuture<SubjectCollection> loadCollection(String s) {
-        return CompletableFuture.completedFuture(handle.getCollection(s).sponge());
+    public CompletableFuture<SubjectCollection> loadCollection(@Nonnull String s) {
+        return CompletableFuture.completedFuture(this.handle.getCollection(s).sponge());
     }
 
+    @Nonnull
     @Override
     public Optional<SubjectCollection> getCollection(String s) {
-        return Optional.ofNullable(handle.getLoadedCollections().get(s.toLowerCase())).map(LPSubjectCollection::sponge);
+        return Optional.ofNullable(this.handle.getLoadedCollections().get(s.toLowerCase())).map(LPSubjectCollection::sponge);
     }
 
     @Override
     public CompletableFuture<Boolean> hasCollection(String s) {
-        return CompletableFuture.completedFuture(handle.getLoadedCollections().containsKey(s.toLowerCase()));
+        return CompletableFuture.completedFuture(this.handle.getLoadedCollections().containsKey(s.toLowerCase()));
     }
 
+    @Nonnull
     @Override
     public Map<String, SubjectCollection> getLoadedCollections() {
-        return handle.getLoadedCollections().entrySet().stream()
+        return this.handle.getLoadedCollections().entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> e.getValue().sponge()
@@ -100,47 +111,62 @@ public final class PermissionServiceProxy implements PermissionService {
 
     @Override
     public CompletableFuture<Set<String>> getAllIdentifiers() {
-        return CompletableFuture.completedFuture(ImmutableSet.copyOf(handle.getLoadedCollections().keySet()));
+        return CompletableFuture.completedFuture(ImmutableSet.copyOf(this.handle.getLoadedCollections().keySet()));
+    }
+
+    @Nonnull
+    @Override
+    public SubjectReference newSubjectReference(@Nonnull String collectionIdentifier, @Nonnull String subjectIdentifier) {
+        Objects.requireNonNull(collectionIdentifier, "collectionIdentifier");
+        Objects.requireNonNull(subjectIdentifier, "subjectIdentifier");
+
+        // test the identifiers
+        String collection = collectionIdentifier.toLowerCase();
+        if (collection.equals("user") && !this.handle.getUserSubjects().getIdentifierValidityPredicate().test(subjectIdentifier)) {
+            throw new IllegalArgumentException("Subject identifier '" + subjectIdentifier + "' does not pass the validity predicate for the user subject collection");
+        } else if (collection.equals("group") && !this.handle.getGroupSubjects().getIdentifierValidityPredicate().test(subjectIdentifier)) {
+            throw new IllegalArgumentException("Subject identifier '" + subjectIdentifier + "' does not pass the validity predicate for the group subject collection");
+        }
+
+        // obtain a reference
+        return SubjectReferenceFactory.obtain(this.handle, collectionIdentifier, subjectIdentifier);
     }
 
     @Override
-    public SubjectReference newSubjectReference(String s, String s1) {
-        return handle.newSubjectReference(s, s1);
-    }
-
-    @Override
-    public PermissionDescription.Builder newDescriptionBuilder(Object o) {
+    public PermissionDescription.Builder newDescriptionBuilder(@Nonnull Object o) {
         Optional<PluginContainer> container = Sponge.getGame().getPluginManager().fromInstance(o);
         if (!container.isPresent()) {
             throw new IllegalArgumentException("Couldn't find a plugin container for " + o.getClass().getSimpleName());
         }
 
-        return new SimpleDescriptionBuilder(handle, container.get());
+        return new LPDescriptionBuilder(this.handle, container.get());
     }
 
+    @Nonnull
     @Override
-    public Optional<PermissionDescription> getDescription(String s) {
-        return handle.getDescription(s).map(LPPermissionDescription::sponge);
+    public Optional<PermissionDescription> getDescription(@Nonnull String s) {
+        return this.handle.getDescription(s).map(LPPermissionDescription::sponge);
     }
 
+    @Nonnull
     @Override
     public Collection<PermissionDescription> getDescriptions() {
-        return handle.getDescriptions().stream().map(LPPermissionDescription::sponge).collect(ImmutableCollectors.toSet());
+        return this.handle.getDescriptions().stream().map(LPPermissionDescription::sponge).collect(ImmutableCollectors.toSet());
     }
 
     @Override
-    public void registerContextCalculator(ContextCalculator<Subject> contextCalculator) {
-        handle.registerContextCalculator(contextCalculator);
+    public void registerContextCalculator(@Nonnull ContextCalculator<Subject> contextCalculator) {
+        this.handle.registerContextCalculator(contextCalculator);
     }
 
     @Override
     public boolean equals(Object o) {
-        return o == this || o instanceof PermissionServiceProxy && handle.equals(((PermissionServiceProxy) o).handle);
+        return o == this || o instanceof PermissionServiceProxy && this.handle.equals(((PermissionServiceProxy) o).handle);
     }
 
     @Override
     public int hashCode() {
-        return handle.hashCode();
+        return this.handle.hashCode();
     }
 
     @Override

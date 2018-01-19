@@ -25,36 +25,29 @@
 
 package me.lucko.luckperms.common.verbose;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 /**
  * Represents the origin of a permission check
  */
-@Getter
-@AllArgsConstructor
 public enum CheckOrigin {
 
     /**
      * Indicates the check was caused by a 'hasPermission' check on the platform
      */
-    PLATFORM_PERMISSION_CHECK('C'),
+    PLATFORM_PERMISSION_CHECK,
 
     /**
      * Indicates the check was caused by a 'hasPermissionSet' type check on the platform
      */
-    PLATFORM_LOOKUP_CHECK('L'),
+    PLATFORM_LOOKUP_CHECK,
 
     /**
      * Indicates the check was caused by an API call
      */
-    API('A'),
+    API,
 
     /**
      * Indicates the check was caused by a LuckPerms internal
      */
-    INTERNAL('I');
-
-    private final char code;
+    INTERNAL
 
 }

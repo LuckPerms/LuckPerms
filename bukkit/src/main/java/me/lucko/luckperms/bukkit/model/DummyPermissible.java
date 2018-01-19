@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.bukkit.model;
 
-import lombok.AllArgsConstructor;
-
 import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
@@ -36,13 +34,16 @@ import org.bukkit.plugin.Plugin;
 import java.util.Collections;
 import java.util.Set;
 
-@AllArgsConstructor
 public class DummyPermissible implements Permissible {
     private final Runnable onRefresh;
 
+    public DummyPermissible(Runnable onRefresh) {
+        this.onRefresh = onRefresh;
+    }
+
     @Override
     public void recalculatePermissions() {
-        onRefresh.run();
+        this.onRefresh.run();
     }
 
     @Override public Set<PermissionAttachmentInfo> getEffectivePermissions() { return Collections.emptySet(); }

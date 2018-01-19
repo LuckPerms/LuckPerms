@@ -29,7 +29,8 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.context.ContextCalculator;
@@ -46,7 +47,9 @@ import java.util.function.Predicate;
  */
 public interface LPPermissionService {
 
-    LuckPermsPlugin getPlugin();
+    LuckPermsSpongePlugin getPlugin();
+
+    SubjectReferenceFactory getReferenceFactory();
 
     PermissionService sponge();
 
@@ -64,8 +67,6 @@ public interface LPPermissionService {
 
     ImmutableMap<String, LPSubjectCollection> getLoadedCollections();
 
-    SubjectReference newSubjectReference(String collectionIdentifier, String subjectIdentifier);
-
     LPPermissionDescription registerPermissionDescription(String id, Text description, PluginContainer owner);
 
     Optional<LPPermissionDescription> getDescription(String permission);
@@ -75,7 +76,7 @@ public interface LPPermissionService {
     void registerContextCalculator(ContextCalculator<Subject> calculator);
 
     // utils
-    ImmutableList<SubjectReference> sortSubjects(Collection<SubjectReference> s);
+    ImmutableList<LPSubjectReference> sortSubjects(Collection<LPSubjectReference> s);
 
     void invalidateAllCaches(LPSubject.CacheLevel cacheLevel);
 }

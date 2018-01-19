@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.utils;
 
-import lombok.experimental.UtilityClass;
-
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.serializer.ComponentSerializers;
@@ -36,30 +34,29 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("deprecation")
-@UtilityClass
-public class TextUtils {
+public final class TextUtils {
 
-    public String joinNewline(String... strings) {
+    public static String joinNewline(String... strings) {
         return joinNewline(Arrays.stream(strings));
     }
 
-    public String joinNewline(Stream<String> strings) {
+    public static String joinNewline(Stream<String> strings) {
         return strings.collect(Collectors.joining("\n"));
     }
 
-    public TextComponent fromLegacy(String input, char character) {
+    public static TextComponent fromLegacy(String input, char character) {
         return ComponentSerializers.LEGACY.deserialize(input, character);
     }
 
-    public TextComponent fromLegacy(String input) {
+    public static TextComponent fromLegacy(String input) {
         return ComponentSerializers.LEGACY.deserialize(input);
     }
 
-    public String toLegacy(Component component, char character) {
+    public static String toLegacy(Component component, char character) {
         return ComponentSerializers.LEGACY.serialize(component, character);
     }
 
-    public String toLegacy(Component component) {
+    public static String toLegacy(Component component) {
         return ComponentSerializers.LEGACY.serialize(component);
     }
 
@@ -70,5 +67,7 @@ public class TextUtils {
         }
         return input;
     }
+
+    private TextUtils() {}
 
 }

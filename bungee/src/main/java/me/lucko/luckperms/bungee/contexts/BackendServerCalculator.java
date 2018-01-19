@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.bungee.contexts;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.MutableContextSet;
@@ -35,7 +33,8 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-@RequiredArgsConstructor
+import javax.annotation.Nonnull;
+
 public class BackendServerCalculator implements ContextCalculator<ProxiedPlayer> {
 
     private static String getServer(ProxiedPlayer player) {
@@ -44,12 +43,17 @@ public class BackendServerCalculator implements ContextCalculator<ProxiedPlayer>
 
     private final LuckPermsPlugin plugin;
 
+    public BackendServerCalculator(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    @Nonnull
     @Override
-    public MutableContextSet giveApplicableContext(ProxiedPlayer subject, MutableContextSet accumulator) {
+    public MutableContextSet giveApplicableContext(@Nonnull ProxiedPlayer subject, @Nonnull MutableContextSet accumulator) {
         String server = getServer(subject);
         while (server != null && !accumulator.has(Contexts.WORLD_KEY, server)) {
             accumulator.add(Contexts.WORLD_KEY, server);
-            server = plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(server, server).toLowerCase();
+            server = this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(server, server).toLowerCase();
         }
 
         return accumulator;

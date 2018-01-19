@@ -30,6 +30,7 @@ import java.util.SortedSet;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 /**
  * Represents the internal LuckPerms log.
@@ -41,6 +42,7 @@ import javax.annotation.Nonnull;
  *
  * <p>All methods are thread safe, and return immutable and thread safe collections.</p>
  */
+@Immutable
 public interface Log {
 
     /**

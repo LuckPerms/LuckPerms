@@ -38,7 +38,7 @@ public class UpdateTaskBuffer extends BufferedRequest<Void> {
 
     @Override
     protected Void perform() {
-        new UpdateTask(plugin, false).run();
+        new UpdateTask(this.plugin, false).run();
         return null;
     }
 }

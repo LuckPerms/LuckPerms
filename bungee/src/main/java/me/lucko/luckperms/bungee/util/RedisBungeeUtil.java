@@ -25,15 +25,12 @@
 
 package me.lucko.luckperms.bungee.util;
 
-import lombok.experimental.UtilityClass;
-
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 
 import java.util.Optional;
 import java.util.UUID;
 
-@UtilityClass
-public class RedisBungeeUtil {
+public final class RedisBungeeUtil {
 
     /**
      * Looks up a UUID from username via RedisBungee's uuid cache.
@@ -44,5 +41,7 @@ public class RedisBungeeUtil {
     public static Optional<UUID> lookupUuid(String username) {
         return Optional.ofNullable(RedisBungee.getApi()).flatMap(a -> Optional.ofNullable(a.getUuidFromName(username, true)));
     }
+
+    private RedisBungeeUtil() {}
 
 }

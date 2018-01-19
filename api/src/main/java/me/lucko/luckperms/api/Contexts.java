@@ -25,20 +25,22 @@
 
 package me.lucko.luckperms.api;
 
-import com.google.common.base.Preconditions;
-
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 /**
- * Encapsulates the options and settings for a permission lookup.
+ * Encapsulates the options and settings for a permission or meta lookup.
  *
  * <p>This class is immutable.</p>
  *
  * @since 2.11
  */
+@Immutable
 public class Contexts {
 
     /**
@@ -87,6 +89,7 @@ public class Contexts {
         return GLOBAL;
     }
 
+    @Nonnull
     public static Contexts of(@Nonnull ContextSet context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
         return new Contexts(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups, op);
     }
@@ -133,7 +136,7 @@ public class Contexts {
     private final int hashCode;
 
     public Contexts(@Nonnull ContextSet context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
-        this.context = Preconditions.checkNotNull(context, "context").makeImmutable();
+        this.context = Objects.requireNonNull(context, "context").makeImmutable();
         this.includeGlobal = includeGlobal;
         this.includeGlobalWorld = includeGlobalWorld;
         this.applyGroups = applyGroups;
@@ -209,18 +212,17 @@ public class Contexts {
         return this.applyGlobalWorldGroups;
     }
 
-    @Override
     @Nonnull
+    @Override
     public String toString() {
         return "Contexts(" +
-                "context=" + this.getContexts() + ", " +
-                "op=" + this.isOp() + ", " +
-                "includeGlobal=" + this.isIncludeGlobal() + ", " +
-                "includeGlobalWorld=" + this.isIncludeGlobalWorld() + ", " +
-                "applyGroups=" + this.isApplyGroups() + ", " +
-                "applyGlobalGroups=" + this.isApplyGlobalGroups() + ", " +
-                "applyGlobalWorldGroups=" + this.isApplyGlobalWorldGroups() +
-                ")";
+                "context=" + this.context + ", " +
+                "op=" + this.op + ", " +
+                "includeGlobal=" + this.includeGlobal + ", " +
+                "includeGlobalWorld=" + this.includeGlobalWorld + ", " +
+                "applyGroups=" + this.applyGroups + ", " +
+                "applyGlobalGroups=" + this.applyGlobalGroups + ", " +
+                "applyGlobalWorldGroups=" + this.applyGlobalWorldGroups + ")";
     }
 
     @Override
@@ -228,33 +230,32 @@ public class Contexts {
         if (o == this) return true;
         if (o == allowAll()) return false;
         if (!(o instanceof Contexts)) return false;
+        final Contexts that = (Contexts) o;
 
-        final Contexts other = (Contexts) o;
-        return this.getContexts().equals(other.getContexts()) &&
-                this.isOp() == other.isOp() &&
-                this.isIncludeGlobal() == other.isIncludeGlobal() &&
-                this.isIncludeGlobalWorld() == other.isIncludeGlobalWorld() &&
-                this.isApplyGroups() == other.isApplyGroups() &&
-                this.isApplyGlobalGroups() == other.isApplyGlobalGroups() &&
-                this.isApplyGlobalWorldGroups() == other.isApplyGlobalWorldGroups();
+        return this.context.equals(that.context) &&
+                this.op == that.op &&
+                this.includeGlobal == that.includeGlobal &&
+                this.includeGlobalWorld == that.includeGlobalWorld &&
+                this.applyGroups == that.applyGroups &&
+                this.applyGlobalGroups == that.applyGlobalGroups &&
+                this.applyGlobalWorldGroups == that.applyGlobalWorldGroups;
     }
 
     private int calculateHashCode() {
         final int PRIME = 59;
         int result = 1;
-        final Object contexts = this.getContexts();
-        result = result * PRIME + contexts.hashCode();
-        result = result * PRIME + (this.isOp() ? 79 : 97);
-        result = result * PRIME + (this.isIncludeGlobal() ? 79 : 97);
-        result = result * PRIME + (this.isIncludeGlobalWorld() ? 79 : 97);
-        result = result * PRIME + (this.isApplyGroups() ? 79 : 97);
-        result = result * PRIME + (this.isApplyGlobalGroups() ? 79 : 97);
-        result = result * PRIME + (this.isApplyGlobalWorldGroups() ? 79 : 97);
+        result = result * PRIME + this.context.hashCode();
+        result = result * PRIME + (this.op ? 79 : 97);
+        result = result * PRIME + (this.includeGlobal ? 79 : 97);
+        result = result * PRIME + (this.includeGlobalWorld ? 79 : 97);
+        result = result * PRIME + (this.applyGroups ? 79 : 97);
+        result = result * PRIME + (this.applyGlobalGroups ? 79 : 97);
+        result = result * PRIME + (this.applyGlobalWorldGroups ? 79 : 97);
         return result;
     }
 
     @Override
     public int hashCode() {
-        return hashCode;
+        return this.hashCode;
     }
 }

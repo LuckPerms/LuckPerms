@@ -25,26 +25,18 @@
 
 package me.lucko.luckperms.common.node;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Tristate;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
  * The result of an inheritance lookup
  */
-@ToString
-@EqualsAndHashCode
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public final class InheritanceInfo {
-    public static InheritanceInfo of(@NonNull LocalizedNode node) {
+    public static InheritanceInfo of(LocalizedNode node) {
+        Objects.requireNonNull(node, "node");
         return new InheritanceInfo(node.getTristate(), node.getLocation());
     }
 
@@ -52,12 +44,41 @@ public final class InheritanceInfo {
         return new InheritanceInfo(Tristate.UNDEFINED, null);
     }
 
-    @Getter
     private final Tristate result;
     private final String location;
 
-    public Optional<String> getLocation() {
-        return Optional.ofNullable(location);
+    private InheritanceInfo(Tristate result, String location) {
+        this.result = result;
+        this.location = location;
     }
 
+    public Optional<String> getLocation() {
+        return Optional.ofNullable(this.location);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof InheritanceInfo)) return false;
+        final InheritanceInfo other = (InheritanceInfo) o;
+        return this.result == other.result && this.getLocation().equals(other.getLocation());
+    }
+
+    @Override
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        result = result * PRIME + this.result.hashCode();
+        result = result * PRIME + this.getLocation().hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "InheritanceInfo(result=" + this.result + ", location=" + this.getLocation() + ")";
+    }
+
+    public Tristate getResult() {
+        return this.result;
+    }
 }

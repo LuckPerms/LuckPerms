@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.sponge.service.storage;
 
-import lombok.Getter;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -55,7 +53,6 @@ public class SubjectStorage {
 
     private final LPPermissionService service;
 
-    @Getter
     private final Gson gson;
 
     private final File container;
@@ -74,7 +71,7 @@ public class SubjectStorage {
     public Set<String> getSavedCollections() {
         checkContainer();
 
-        File[] dirs = container.listFiles(File::isDirectory);
+        File[] dirs = this.container.listFiles(File::isDirectory);
         if (dirs == null) {
             return Collections.emptySet();
         }
@@ -84,7 +81,7 @@ public class SubjectStorage {
 
     public File resolveFile(String collectionName, String subjectName) {
         checkContainer();
-        File collection = new File(container, collectionName);
+        File collection = new File(this.container, collectionName);
         if (!collection.exists()) {
             collection.mkdirs();
         }
@@ -105,14 +102,14 @@ public class SubjectStorage {
         file.createNewFile();
 
         try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
-            gson.toJson(model.toJson(), writer);
+            this.gson.toJson(model.toJson(), writer);
             writer.flush();
         }
     }
 
     public Map<String, SubjectStorageModel> loadAllFromFile(String collectionName) {
         checkContainer();
-        File collection = new File(container, collectionName);
+        File collection = new File(this.container, collectionName);
         if (!collection.exists()) {
             return Collections.emptyMap();
         }
@@ -139,7 +136,7 @@ public class SubjectStorage {
 
     public Map.Entry<String, SubjectStorageModel> loadFromFile(String collectionName, String subjectName) throws IOException {
         checkContainer();
-        File collection = new File(container, collectionName);
+        File collection = new File(this.container, collectionName);
         if (!collection.exists()) {
             return null;
         }
@@ -156,10 +153,13 @@ public class SubjectStorage {
         String subjectName = file.getName().substring(0, file.getName().length() - ".json".length());
 
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
-            JsonObject data = gson.fromJson(reader, JsonObject.class);
-            SubjectStorageModel model = new SubjectStorageModel(service, data);
+            JsonObject data = this.gson.fromJson(reader, JsonObject.class);
+            SubjectStorageModel model = new SubjectStorageModel(this.service, data);
             return Maps.immutableEntry(subjectName, model);
         }
     }
 
+    public Gson getGson() {
+        return this.gson;
+    }
 }

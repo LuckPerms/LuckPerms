@@ -25,16 +25,12 @@
 
 package me.lucko.luckperms.common.commands.sender;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.text.Component;
 
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -42,11 +38,17 @@ import java.util.UUID;
  *
  * @param <T> the command sender type
  */
-@RequiredArgsConstructor
 public abstract class SenderFactory<T> {
 
-    @Getter(AccessLevel.PROTECTED)
     private final LuckPermsPlugin plugin;
+
+    public SenderFactory(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    protected LuckPermsPlugin getPlugin() {
+        return this.plugin;
+    }
 
     protected abstract UUID getUuid(T t);
 
@@ -60,7 +62,8 @@ public abstract class SenderFactory<T> {
 
     protected abstract boolean hasPermission(T t, String node);
 
-    public final Sender wrap(@NonNull T sender) {
-        return new AbstractSender<>(plugin, this, sender);
+    public final Sender wrap(T sender) {
+        Objects.requireNonNull(sender, "sender");
+        return new AbstractSender<>(this.plugin, this, sender);
     }
 }

@@ -37,7 +37,7 @@ public class NoopLocaleManager implements LocaleManager {
     }
 
     @Override
-    public void loadFromFile(File file) throws Exception {
+    public void loadFromFile(File file) {
 
     }
 

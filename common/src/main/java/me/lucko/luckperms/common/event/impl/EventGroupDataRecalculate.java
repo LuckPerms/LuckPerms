@@ -25,21 +25,37 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.caching.GroupData;
 import me.lucko.luckperms.api.event.group.GroupDataRecalculateEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
-@Getter
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventGroupDataRecalculate extends AbstractEvent implements GroupDataRecalculateEvent {
 
     private final Group group;
     private final GroupData data;
 
+    public EventGroupDataRecalculate(Group group, GroupData data) {
+        this.group = group;
+        this.data = data;
+    }
+
+    @Nonnull
+    @Override
+    public Group getGroup() {
+        return this.group;
+    }
+
+    @Nonnull
+    @Override
+    public GroupData getData() {
+        return this.data;
+    }
+
+    @Override
+    public String toString() {
+        return "EventGroupDataRecalculate(group=" + this.getGroup() + ", data=" + this.getData() + ")";
+    }
 }

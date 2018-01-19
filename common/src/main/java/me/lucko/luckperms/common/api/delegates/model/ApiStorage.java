@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.api.delegates.model;
 
-import lombok.AllArgsConstructor;
-import lombok.NonNull;
-
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Log;
@@ -48,17 +45,24 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+import javax.annotation.Nonnull;
+
 import static me.lucko.luckperms.common.api.ApiUtils.checkName;
 import static me.lucko.luckperms.common.api.ApiUtils.checkUsername;
 
-@AllArgsConstructor
 public class ApiStorage implements Storage {
     private final LuckPermsPlugin plugin;
     private final me.lucko.luckperms.common.storage.Storage handle;
+    
+    public ApiStorage(LuckPermsPlugin plugin, me.lucko.luckperms.common.storage.Storage handle) {
+        this.plugin = plugin;
+        this.handle = handle;
+    }
 
+    @Nonnull
     @Override
     public String getName() {
-        return handle.getName();
+        return this.handle.getName();
     }
 
     @Override
@@ -66,116 +70,160 @@ public class ApiStorage implements Storage {
         return true;
     }
 
+    @Nonnull
     @Override
     public Executor getSyncExecutor() {
-        return plugin.getScheduler().sync();
+        return this.plugin.getScheduler().sync();
     }
 
+    @Nonnull
     @Override
     public Executor getAsyncExecutor() {
-        return plugin.getScheduler().async();
+        return this.plugin.getScheduler().async();
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Boolean> logAction(@NonNull LogEntry entry) {
-        return handle.noBuffer().logAction(entry).thenApply(x -> true);
+    public CompletableFuture<Boolean> logAction(@Nonnull LogEntry entry) {
+        Objects.requireNonNull(entry, "entry");
+        return this.handle.noBuffer().logAction(entry).thenApply(x -> true);
     }
 
+    @Nonnull
     @Override
     public CompletableFuture<Log> getLog() {
-        return handle.noBuffer().getLog().thenApply(log -> log == null ? null : new ApiLog(log));
+        return this.handle.noBuffer().getLog().thenApply(log -> log == null ? null : new ApiLog(log));
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Boolean> loadUser(@NonNull UUID uuid, String username) {
-        return handle.noBuffer().loadUser(uuid, username == null ? null : checkUsername(username)).thenApply(Objects::nonNull);
+    public CompletableFuture<Boolean> loadUser(@Nonnull UUID uuid, String username) {
+        Objects.requireNonNull(uuid, "uuid");
+
+        if (this.plugin.getUserManager().getIfLoaded(uuid) == null) {
+            this.plugin.getUserManager().getHouseKeeper().registerApiUsage(uuid);
+        }
+
+        return this.handle.noBuffer().loadUser(uuid, username == null ? null : checkUsername(username)).thenApply(Objects::nonNull);
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Boolean> saveUser(@NonNull User user) {
-        return handle.noBuffer().saveUser(ApiUser.cast(user)).thenApply(x -> true);
+    public CompletableFuture<Boolean> saveUser(@Nonnull User user) {
+        Objects.requireNonNull(user, "user");
+        return this.handle.noBuffer().saveUser(ApiUser.cast(user)).thenApply(x -> true);
     }
 
+    @Nonnull
     @Override
     public CompletableFuture<Set<UUID>> getUniqueUsers() {
-        return handle.noBuffer().getUniqueUsers();
+        return this.handle.noBuffer().getUniqueUsers();
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(@NonNull String permission) {
-        return handle.noBuffer().getUsersWithPermission(permission);
+    public CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(@Nonnull String permission) {
+        Objects.requireNonNull(permission, "permission");
+        return this.handle.noBuffer().getUsersWithPermission(permission);
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Boolean> createAndLoadGroup(@NonNull String name) {
-        return handle.noBuffer().createAndLoadGroup(checkName(name), CreationCause.API).thenApply(Objects::nonNull);
+    public CompletableFuture<Boolean> createAndLoadGroup(@Nonnull String name) {
+        Objects.requireNonNull(name, "name");
+        return this.handle.noBuffer().createAndLoadGroup(checkName(name), CreationCause.API).thenApply(Objects::nonNull);
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Boolean> loadGroup(@NonNull String name) {
-        return handle.noBuffer().loadGroup(checkName(name)).thenApply(Optional::isPresent);
+    public CompletableFuture<Boolean> loadGroup(@Nonnull String name) {
+        Objects.requireNonNull(name, "name");
+        return this.handle.noBuffer().loadGroup(checkName(name)).thenApply(Optional::isPresent);
     }
 
+    @Nonnull
     @Override
     public CompletableFuture<Boolean> loadAllGroups() {
-        return handle.noBuffer().loadAllGroups().thenApply(x -> true);
+        return this.handle.noBuffer().loadAllGroups().thenApply(x -> true);
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Boolean> saveGroup(@NonNull Group group) {
-        return handle.noBuffer().saveGroup(ApiGroup.cast(group)).thenApply(x -> true);
+    public CompletableFuture<Boolean> saveGroup(@Nonnull Group group) {
+        Objects.requireNonNull(group, "group");
+        return this.handle.noBuffer().saveGroup(ApiGroup.cast(group)).thenApply(x -> true);
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Boolean> deleteGroup(@NonNull Group group) {
-        if (group.getName().equalsIgnoreCase(plugin.getConfiguration().get(ConfigKeys.DEFAULT_GROUP_NAME))) {
+    public CompletableFuture<Boolean> deleteGroup(@Nonnull Group group) {
+        Objects.requireNonNull(group, "group");
+        if (group.getName().equalsIgnoreCase(this.plugin.getConfiguration().get(ConfigKeys.DEFAULT_GROUP_NAME))) {
             throw new IllegalArgumentException("Cannot delete the default group.");
         }
-        return handle.noBuffer().deleteGroup(ApiGroup.cast(group), DeletionCause.API).thenApply(x -> true);
+        return this.handle.noBuffer().deleteGroup(ApiGroup.cast(group), DeletionCause.API).thenApply(x -> true);
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(@NonNull String permission) {
-        return handle.noBuffer().getGroupsWithPermission(permission);
+    public CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(@Nonnull String permission) {
+        Objects.requireNonNull(permission, "permission");
+        return this.handle.noBuffer().getGroupsWithPermission(permission);
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Boolean> createAndLoadTrack(@NonNull String name) {
-        return handle.noBuffer().createAndLoadTrack(checkName(name), CreationCause.API).thenApply(Objects::nonNull);
+    public CompletableFuture<Boolean> createAndLoadTrack(@Nonnull String name) {
+        Objects.requireNonNull(name, "name");
+        return this.handle.noBuffer().createAndLoadTrack(checkName(name), CreationCause.API).thenApply(Objects::nonNull);
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Boolean> loadTrack(@NonNull String name) {
-        return handle.noBuffer().loadTrack(checkName(name)).thenApply(Optional::isPresent);
+    public CompletableFuture<Boolean> loadTrack(@Nonnull String name) {
+        Objects.requireNonNull(name, "name");
+        return this.handle.noBuffer().loadTrack(checkName(name)).thenApply(Optional::isPresent);
     }
 
+    @Nonnull
     @Override
     public CompletableFuture<Boolean> loadAllTracks() {
-        return handle.noBuffer().loadAllTracks().thenApply(x -> true);
+        return this.handle.noBuffer().loadAllTracks().thenApply(x -> true);
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Boolean> saveTrack(@NonNull Track track) {
-        return handle.noBuffer().saveTrack(ApiTrack.cast(track)).thenApply(x -> true);
+    public CompletableFuture<Boolean> saveTrack(@Nonnull Track track) {
+        Objects.requireNonNull(track, "track");
+        return this.handle.noBuffer().saveTrack(ApiTrack.cast(track)).thenApply(x -> true);
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Boolean> deleteTrack(@NonNull Track track) {
-        return handle.noBuffer().deleteTrack(ApiTrack.cast(track), DeletionCause.API).thenApply(x -> true);
+    public CompletableFuture<Boolean> deleteTrack(@Nonnull Track track) {
+        Objects.requireNonNull(track, "track");
+        return this.handle.noBuffer().deleteTrack(ApiTrack.cast(track), DeletionCause.API).thenApply(x -> true);
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Boolean> saveUUIDData(@NonNull String username, @NonNull UUID uuid) {
-        return handle.noBuffer().saveUUIDData(uuid, checkUsername(username)).thenApply(x -> true);
+    public CompletableFuture<Boolean> saveUUIDData(@Nonnull String username, @Nonnull UUID uuid) {
+        Objects.requireNonNull(username, "username");
+        Objects.requireNonNull(uuid, "uuid");
+        return this.handle.noBuffer().saveUUIDData(uuid, checkUsername(username)).thenApply(x -> true);
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<UUID> getUUID(@NonNull String username) {
-        return handle.noBuffer().getUUID(checkUsername(username));
+    public CompletableFuture<UUID> getUUID(@Nonnull String username) {
+        Objects.requireNonNull(username, "username");
+        return this.handle.noBuffer().getUUID(checkUsername(username));
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<String> getName(@NonNull UUID uuid) {
-        return handle.noBuffer().getName(uuid);
+    public CompletableFuture<String> getName(@Nonnull UUID uuid) {
+        Objects.requireNonNull(uuid, "uuid");
+        return this.handle.noBuffer().getName(uuid);
     }
 }

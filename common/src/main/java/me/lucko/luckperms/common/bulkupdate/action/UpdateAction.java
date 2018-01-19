@@ -25,20 +25,26 @@
 
 package me.lucko.luckperms.common.bulkupdate.action;
 
-import lombok.AllArgsConstructor;
-
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.constraint.QueryField;
 import me.lucko.luckperms.common.node.NodeModel;
 
-@AllArgsConstructor(staticName = "of")
 public class UpdateAction implements Action {
+
+    public static UpdateAction of(QueryField field, String value) {
+        return new UpdateAction(field, value);
+    }
 
     // the field we're updating
     private final QueryField field;
 
     // the new value of the field
     private final String value;
+
+    private UpdateAction(QueryField field, String value) {
+        this.field = field;
+        this.value = value;
+    }
 
     @Override
     public String getName() {
@@ -47,13 +53,13 @@ public class UpdateAction implements Action {
 
     @Override
     public NodeModel apply(NodeModel from) {
-        switch (field) {
+        switch (this.field) {
             case PERMISSION:
-                return from.setPermission(value);
+                return from.setPermission(this.value);
             case SERVER:
-                return from.setServer(value);
+                return from.setServer(this.value);
             case WORLD:
-                return from.setWorld(value);
+                return from.setWorld(this.value);
             default:
                 throw new RuntimeException();
         }
@@ -61,6 +67,6 @@ public class UpdateAction implements Action {
 
     @Override
     public String getAsSql() {
-        return "UPDATE {table} SET " + field.getSqlName() + "=" + BulkUpdate.escapeStringForSql(value);
+        return "UPDATE {table} SET " + this.field.getSqlName() + "=" + BulkUpdate.escapeStringForSql(this.value);
     }
 }

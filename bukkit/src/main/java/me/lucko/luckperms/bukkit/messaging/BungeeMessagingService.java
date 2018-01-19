@@ -52,14 +52,14 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
     }
 
     public void init() {
-        plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, CHANNEL);
-        plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, CHANNEL, this);
+        this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(this.plugin, CHANNEL);
+        this.plugin.getServer().getMessenger().registerIncomingPluginChannel(this.plugin, CHANNEL, this);
     }
 
     @Override
     public void close() {
-        plugin.getServer().getMessenger().unregisterIncomingPluginChannel(plugin, CHANNEL);
-        plugin.getServer().getMessenger().unregisterOutgoingPluginChannel(plugin, CHANNEL);
+        this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, CHANNEL);
+        this.plugin.getServer().getMessenger().unregisterOutgoingPluginChannel(this.plugin, CHANNEL);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
         new BukkitRunnable() {
             @Override
             public void run() {
-                Collection<? extends Player> players = plugin.getServer().getOnlinePlayers();
+                Collection<? extends Player> players = BungeeMessagingService.this.plugin.getServer().getOnlinePlayers();
                 Player p = Iterables.getFirst(players, null);
                 if (p == null) {
                     return;
@@ -78,10 +78,10 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
 
                 byte[] data = out.toByteArray();
 
-                p.sendPluginMessage(plugin, CHANNEL, data);
+                p.sendPluginMessage(BungeeMessagingService.this.plugin, CHANNEL, data);
                 cancel();
             }
-        }.runTaskTimer(plugin, 1L, 100L);
+        }.runTaskTimer(this.plugin, 1L, 100L);
     }
 
     @Override

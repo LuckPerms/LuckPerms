@@ -59,7 +59,7 @@ public class LogMainCommand extends MainCommand<Log, Object> {
 
     @Override
     protected ReentrantLock getLockForTarget(Object target) {
-        return lock; // all commands target the same log, so we share a lock between all "targets"
+        return this.lock; // all commands target the same log, so we share a lock between all "targets"
     }
 
     @Override

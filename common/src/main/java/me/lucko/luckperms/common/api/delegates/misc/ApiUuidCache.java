@@ -25,24 +25,31 @@
 
 package me.lucko.luckperms.common.api.delegates.misc;
 
-import lombok.AllArgsConstructor;
-import lombok.NonNull;
-
 import me.lucko.luckperms.api.UuidCache;
 
+import java.util.Objects;
 import java.util.UUID;
 
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class ApiUuidCache implements UuidCache {
     private final me.lucko.luckperms.common.utils.UuidCache handle;
 
-    @Override
-    public UUID getUUID(@NonNull UUID external) {
-        return handle.getUUID(external);
+    public ApiUuidCache(me.lucko.luckperms.common.utils.UuidCache handle) {
+        this.handle = handle;
     }
 
+    @Nonnull
     @Override
-    public UUID getExternalUUID(@NonNull UUID internal) {
-        return handle.getExternalUUID(internal);
+    public UUID getUUID(@Nonnull UUID external) {
+        Objects.requireNonNull(external, "external");
+        return this.handle.getUUID(external);
+    }
+
+    @Nonnull
+    @Override
+    public UUID getExternalUUID(@Nonnull UUID internal) {
+        Objects.requireNonNull(internal, "internal");
+        return this.handle.getExternalUUID(internal);
     }
 }

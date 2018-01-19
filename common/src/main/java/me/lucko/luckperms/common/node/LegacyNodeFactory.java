@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.node;
 
-import lombok.experimental.UtilityClass;
-
 import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.api.Node;
@@ -37,8 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-@UtilityClass
-public class LegacyNodeFactory {
+public final class LegacyNodeFactory {
 
     /**
      * The characters which are delimited when serializing a permission string
@@ -213,5 +210,7 @@ public class LegacyNodeFactory {
 
         }
     }
+
+    private LegacyNodeFactory() {}
 
 }

@@ -23,24 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.managers;
+package me.lucko.luckperms.sponge.service.reference;
 
-import lombok.AllArgsConstructor;
+import me.lucko.luckperms.sponge.service.model.LPSubject;
 
-import me.lucko.luckperms.common.model.Track;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import org.spongepowered.api.service.permission.SubjectReference;
 
-@AllArgsConstructor
-public class GenericTrackManager extends AbstractManager<String, Track> implements TrackManager {
-    private final LuckPermsPlugin plugin;
+import java.util.concurrent.CompletableFuture;
 
-    @Override
-    public Track apply(String name) {
-        return new Track(name, plugin);
-    }
+import javax.annotation.Nonnull;
 
-    @Override
-    protected String sanitizeIdentifier(String s) {
-        return s.toLowerCase();
-    }
+/**
+ * LuckPerms model for the Sponge {@link SubjectReference}
+ */
+public interface LPSubjectReference extends SubjectReference {
+
+    @Nonnull
+    CompletableFuture<LPSubject> resolveLp();
+
 }

@@ -25,21 +25,18 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
-import lombok.experimental.UtilityClass;
-
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.logging.ProgressLogger;
+import me.lucko.luckperms.common.utils.Uuids;
 
 import org.bukkit.Bukkit;
 
 import java.util.UUID;
 
-@UtilityClass
-public class BukkitMigrationUtils {
+public final class BukkitMigrationUtils {
 
     @SuppressWarnings("deprecation")
     public static UUID lookupUuid(ProgressLogger log, String s) {
-        UUID uuid = CommandUtils.parseUuid(s);
+        UUID uuid = Uuids.parseNullable(s);
         if (uuid == null) {
             try {
                 uuid = Bukkit.getOfflinePlayer(s).getUniqueId();
@@ -52,5 +49,7 @@ public class BukkitMigrationUtils {
         }
         return uuid;
     }
+
+    private BukkitMigrationUtils() {}
 
 }

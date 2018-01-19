@@ -25,11 +25,8 @@
 
 package me.lucko.luckperms.sponge.managers;
 
-import lombok.Getter;
-
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -38,24 +35,26 @@ import com.google.common.collect.Maps;
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.managers.GenericUserManager;
-import me.lucko.luckperms.common.managers.UserManager;
-import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.managers.user.AbstractUserManager;
+import me.lucko.luckperms.common.managers.user.UserHousekeeper;
 import me.lucko.luckperms.common.references.UserIdentifier;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
+import me.lucko.luckperms.common.utils.Uuids;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.model.SpongeUser;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -63,19 +62,16 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
-public class SpongeUserManager implements UserManager, LPSubjectCollection {
-
-    @Getter
+public class SpongeUserManager extends AbstractUserManager<SpongeUser> implements LPSubjectCollection {
     private final LPSpongePlugin plugin;
-
     private SubjectCollection spongeProxy = null;
-
-    private final LoadingCache<UserIdentifier, SpongeUser> objects = Caffeine.newBuilder()
-            .build(this::apply);
 
     private final LoadingCache<UUID, LPSubject> subjectLoadingCache = Caffeine.<UUID, LPSubject>newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)
             .build(u -> {
+                // clock in with the housekeeper
+                getHouseKeeper().registerUsage(u);
+
                 // check if the user instance is already loaded.
                 SpongeUser user = getIfLoaded(u);
                 if (user != null) {
@@ -102,125 +98,33 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             });
 
     public SpongeUserManager(LPSpongePlugin plugin) {
+        super(plugin, UserHousekeeper.timeoutSettings(10, TimeUnit.MINUTES));
         this.plugin = plugin;
     }
 
     @Override
     public SpongeUser apply(UserIdentifier id) {
         return !id.getUsername().isPresent() ?
-                new SpongeUser(id.getUuid(), plugin) :
-                new SpongeUser(id.getUuid(), id.getUsername().get(), plugin);
+                new SpongeUser(id.getUuid(), this.plugin) :
+                new SpongeUser(id.getUuid(), id.getUsername().get(), this.plugin);
     }
-
-    /* ------------------------------------------
-     * Manager methods
-     * ------------------------------------------ */
-
-    @Override
-    public Map<UserIdentifier, SpongeUser> getAll() {
-        return ImmutableMap.copyOf(objects.asMap());
-    }
-
-    @Override
-    public SpongeUser getOrMake(UserIdentifier id) {
-        SpongeUser ret = objects.get(id);
-        if (id.getUsername().isPresent()) {
-            ret.setName(id.getUsername().get(), false);
-        }
-        return ret;
-    }
-
-    @Override
-    public SpongeUser getIfLoaded(UserIdentifier id) {
-        return objects.getIfPresent(id);
-    }
-
-    @Override
-    public boolean isLoaded(UserIdentifier id) {
-        return objects.asMap().containsKey(id);
-    }
-
-    @Override
-    public void unload(UserIdentifier id) {
-        if (id != null) {
-            objects.invalidate(id);
-        }
-    }
-
-    @Override
-    public void unload(User t) {
-        if (t != null) {
-            unload(t.getId());
-        }
-    }
-
-    @Override
-    public void unloadAll() {
-        objects.invalidateAll();
-    }
-
-    /* ------------------------------------------
-     * UserManager methods
-     * ------------------------------------------ */
-
-    @Override
-    public SpongeUser getByUsername(String name) {
-        for (SpongeUser user : getAll().values()) {
-            Optional<String> n = user.getName();
-            if (n.isPresent() && n.get().equalsIgnoreCase(name)) {
-                return user;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public SpongeUser getIfLoaded(UUID uuid) {
-        return getIfLoaded(UserIdentifier.of(uuid, null));
-    }
-
-    @Override
-    public boolean giveDefaultIfNeeded(User user, boolean save) {
-        return GenericUserManager.giveDefaultIfNeeded(user, save, plugin);
-    }
-
-    @Override
-    public boolean cleanup(User user) {
-        // Do nothing - this instance uses other means in order to cleanup
-        return false;
-    }
-
-    @Override
-    public void scheduleUnload(UUID uuid) {
-        // Do nothing - this instance uses other means in order to cleanup
-    }
-
-    @Override
-    public CompletableFuture<Void> updateAllUsers() {
-        return CompletableFuture.runAsync(
-                () -> plugin.getOnlinePlayers()
-                        .map(u -> plugin.getUuidCache().getUUID(u))
-                        .forEach(u -> plugin.getStorage().loadUser(u, null).join()),
-                plugin.getScheduler().async()
-        );
-    }
-
-    /* ------------------------------------------
-     * SubjectCollection methods
-     * ------------------------------------------ */
 
     @Override
     public synchronized SubjectCollection sponge() {
-        if (spongeProxy == null) {
-            Preconditions.checkNotNull(plugin.getService(), "service");
-            spongeProxy = ProxyFactory.toSponge(this);
+        if (this.spongeProxy == null) {
+            Objects.requireNonNull(this.plugin.getService(), "service");
+            this.spongeProxy = ProxyFactory.toSponge(this);
         }
-        return spongeProxy;
+        return this.spongeProxy;
+    }
+
+    public LPSpongePlugin getPlugin() {
+        return this.plugin;
     }
 
     @Override
     public LuckPermsService getService() {
-        return plugin.getService();
+        return this.plugin.getService();
     }
 
     @Override
@@ -230,64 +134,45 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
 
     @Override
     public Predicate<String> getIdentifierValidityPredicate() {
-        return s -> {
-            try {
-                //noinspection ResultOfMethodCallIgnored
-                UUID.fromString(s);
-                return true;
-            } catch (IllegalArgumentException e) {
-                return false;
-            }
-        };
+        return Uuids.PREDICATE;
     }
 
     @Override
     public CompletableFuture<LPSubject> loadSubject(String identifier) {
-        UUID uuid;
-        try {
-            uuid = UUID.fromString(identifier);
-        } catch (IllegalArgumentException e) {
-            CompletableFuture<LPSubject> fut = new CompletableFuture<>();
-            fut.completeExceptionally(e);
-            return fut;
+        UUID uuid = Uuids.parseNullable(identifier);
+        if (uuid == null) {
+            throw new IllegalArgumentException("Identifier is not a UUID: " + identifier);
         }
 
-        LPSubject present = subjectLoadingCache.getIfPresent(uuid);
+        LPSubject present = this.subjectLoadingCache.getIfPresent(uuid);
         if (present != null) {
             return CompletableFuture.completedFuture(present);
         }
 
-        return CompletableFuture.supplyAsync(() -> subjectLoadingCache.get(uuid), plugin.getScheduler().async());
+        return CompletableFuture.supplyAsync(() -> this.subjectLoadingCache.get(uuid), this.plugin.getScheduler().async());
     }
 
     @Override
     public Optional<LPSubject> getSubject(String identifier) {
-        UUID uuid = UUID.fromString(identifier);
+        UUID uuid = Uuids.parseNullable(identifier);
+        if (uuid == null) {
+            return Optional.empty();
+        }
         return Optional.ofNullable(getIfLoaded(uuid)).map(SpongeUser::sponge);
     }
 
     @Override
     public CompletableFuture<Boolean> hasRegistered(String identifier) {
-        UUID uuid = null;
-        IllegalArgumentException ex = null;
-        try {
-            uuid = UUID.fromString(identifier);
-        } catch (IllegalArgumentException e) {
-            ex = e;
+        UUID uuid = Uuids.parseNullable(identifier);
+        if (uuid == null) {
+            return CompletableFuture.completedFuture(false);
         }
 
-        if (uuid != null && isLoaded(UserIdentifier.of(uuid, null))) {
+        if (isLoaded(UserIdentifier.of(uuid, null))) {
             return CompletableFuture.completedFuture(true);
         }
 
-        if (uuid == null) {
-            CompletableFuture<Boolean> fut = new CompletableFuture<>();
-            fut.completeExceptionally(ex);
-            return fut;
-        }
-
-        UUID finalUuid = uuid;
-        return plugin.getStorage().getUniqueUsers().thenApply(set -> set.contains(finalUuid));
+        return this.plugin.getStorage().getUniqueUsers().thenApply(set -> set.contains(uuid));
     }
 
     @Override
@@ -295,18 +180,15 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
         return CompletableFuture.supplyAsync(() -> {
             ImmutableSet.Builder<LPSubject> ret = ImmutableSet.builder();
             for (String id : identifiers) {
-                UUID uuid;
-                try {
-                    uuid = UUID.fromString(id);
-                } catch (IllegalArgumentException e) {
+                UUID uuid = Uuids.parseNullable(id);
+                if (uuid == null) {
                     continue;
                 }
-
                 ret.add(loadSubject(uuid.toString()).join());
             }
 
             return ret.build();
-        }, plugin.getScheduler().async());
+        }, this.plugin.getScheduler().async());
     }
 
     @Override
@@ -320,47 +202,47 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             ImmutableSet.Builder<String> ids = ImmutableSet.builder();
 
             getAll().keySet().forEach(uuid -> ids.add(uuid.getUuid().toString()));
-            plugin.getStorage().getUniqueUsers().join().forEach(uuid -> ids.add(uuid.toString()));
+            this.plugin.getStorage().getUniqueUsers().join().forEach(uuid -> ids.add(uuid.toString()));
 
             return ids.build();
-        }, plugin.getScheduler().async());
+        }, this.plugin.getScheduler().async());
     }
 
     @Override
-    public CompletableFuture<ImmutableMap<SubjectReference, Boolean>> getAllWithPermission(String permission) {
+    public CompletableFuture<ImmutableMap<LPSubjectReference, Boolean>> getAllWithPermission(String permission) {
         return CompletableFuture.supplyAsync(() -> {
-            ImmutableMap.Builder<SubjectReference, Boolean> ret = ImmutableMap.builder();
+            ImmutableMap.Builder<LPSubjectReference, Boolean> ret = ImmutableMap.builder();
 
-            List<HeldPermission<UUID>> lookup = plugin.getStorage().getUsersWithPermission(permission).join();
+            List<HeldPermission<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(permission).join();
             for (HeldPermission<UUID> holder : lookup) {
                 if (holder.asNode().getFullContexts().equals(ImmutableContextSet.empty())) {
-                    ret.put(getService().newSubjectReference(getIdentifier(), holder.getHolder().toString()), holder.getValue());
+                    ret.put(SubjectReferenceFactory.obtain(getService(), getIdentifier(), holder.getHolder().toString()), holder.getValue());
                 }
             }
 
             return ret.build();
-        }, plugin.getScheduler().async());
+        }, this.plugin.getScheduler().async());
     }
 
     @Override
-    public CompletableFuture<ImmutableMap<SubjectReference, Boolean>> getAllWithPermission(ImmutableContextSet contexts, String permission) {
+    public CompletableFuture<ImmutableMap<LPSubjectReference, Boolean>> getAllWithPermission(ImmutableContextSet contexts, String permission) {
         return CompletableFuture.supplyAsync(() -> {
-            ImmutableMap.Builder<SubjectReference, Boolean> ret = ImmutableMap.builder();
+            ImmutableMap.Builder<LPSubjectReference, Boolean> ret = ImmutableMap.builder();
 
-            List<HeldPermission<UUID>> lookup = plugin.getStorage().getUsersWithPermission(permission).join();
+            List<HeldPermission<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(permission).join();
             for (HeldPermission<UUID> holder : lookup) {
                 if (holder.asNode().getFullContexts().equals(contexts)) {
-                    ret.put(getService().newSubjectReference(getIdentifier(), holder.getHolder().toString()), holder.getValue());
+                    ret.put(SubjectReferenceFactory.obtain(getService(), getIdentifier(), holder.getHolder().toString()), holder.getValue());
                 }
             }
 
             return ret.build();
-        }, plugin.getScheduler().async());
+        }, this.plugin.getScheduler().async());
     }
 
     @Override
     public ImmutableMap<LPSubject, Boolean> getLoadedWithPermission(String permission) {
-        return objects.asMap().values().stream()
+        return getAll().values().stream()
                 .map(SpongeUser::sponge)
                 .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(ImmutableContextSet.empty(), permission)))
                 .filter(pair -> pair.getValue() != Tristate.UNDEFINED)
@@ -369,7 +251,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
 
     @Override
     public ImmutableMap<LPSubject, Boolean> getLoadedWithPermission(ImmutableContextSet contexts, String permission) {
-        return objects.asMap().values().stream()
+        return getAll().values().stream()
                 .map(SpongeUser::sponge)
                 .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(contexts, permission)))
                 .filter(pair -> pair.getValue() != Tristate.UNDEFINED)

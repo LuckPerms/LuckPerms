@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.verbose;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
@@ -55,41 +52,42 @@ import java.util.stream.Collectors;
 /**
  * Accepts and processes {@link CheckData}, passed from the {@link VerboseHandler}.
  */
-@RequiredArgsConstructor
 public class VerboseListener {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 
     // how much data should we store before stopping.
     private static final int DATA_TRUNCATION = 10000;
-
     // how many traces should we add
     private static final int TRACE_DATA_TRUNCATION = 250;
+    // how many lines should we include in each stack trace send as a chat message
+    private static final int STACK_TRUNCATION_CHAT = 15;
+    // how many lines should we include in each stack trace in the web output
+    private static final int STACK_TRUNCATION_WEB = 30;
 
     // the time when the listener was first registered
     private final long startTime = System.currentTimeMillis();
-
     // the version of the plugin. (used when we paste data to gist)
     private final String pluginVersion;
-
     // the sender to notify each time the listener processes a check which passes the filter
-    @Getter
     private final Sender notifiedSender;
-
-    // the filter string
-    private final String filter;
-
+    // the filter
+    private VerboseFilter filter;
     // if we should notify the sender
     private final boolean notify;
-
     // the number of checks we have processed
     private final AtomicInteger counter = new AtomicInteger(0);
-
     // the number of checks we have processed and accepted, based on the filter rules for this
     // listener
     private final AtomicInteger matchedCounter = new AtomicInteger(0);
-
     // the checks which passed the filter, up to a max size of #DATA_TRUNCATION
     private final List<CheckData> results = new ArrayList<>(DATA_TRUNCATION / 10);
+
+    public VerboseListener(String pluginVersion, Sender notifiedSender, VerboseFilter filter, boolean notify) {
+        this.pluginVersion = pluginVersion;
+        this.notifiedSender = notifiedSender;
+        this.filter = filter;
+        this.notify = notify;
+    }
 
     /**
      * Accepts and processes check data.
@@ -98,64 +96,53 @@ public class VerboseListener {
      */
     public void acceptData(CheckData data) {
         // increment handled counter
-        counter.incrementAndGet();
+        this.counter.incrementAndGet();
 
-        // check if the data passes our filters
-        if (!VerboseFilter.passesFilter(data, filter)) {
+        // check if the data passes our filter
+        if (!this.filter.evaluate(data)) {
             return;
         }
 
         // increment the matched filter
-        matchedCounter.incrementAndGet();
+        this.matchedCounter.incrementAndGet();
 
         // record the check, if we have space for it
-        if (results.size() < DATA_TRUNCATION) {
-            results.add(data);
+        if (this.results.size() < DATA_TRUNCATION) {
+            this.results.add(data);
         }
 
         // handle notifications
-        if (notify) {
-            StringBuilder msgContent = new StringBuilder();
-
-            if (notifiedSender.isConsole()) {
-                msgContent.append("&8[&2")
-                        .append(data.getCheckOrigin().getCode())
-                        .append("&8] ");
-            }
-
-            msgContent.append("&a")
-                    .append(data.getCheckTarget())
-                    .append("&7 - &a")
-                    .append(data.getPermission())
-                    .append("&7 - ")
-                    .append(getTristateColor(data.getResult()))
-                    .append(data.getResult().name().toLowerCase());
-
-            if (notifiedSender.isConsole()) {
-                // just send as a raw message
-                Message.VERBOSE_LOG.send(notifiedSender, msgContent.toString());
-            } else {
-
-                // form a hoverevent from the check trace
-                TextComponent textComponent = TextUtils.fromLegacy(Message.VERBOSE_LOG.asString(notifiedSender.getPlatform().getLocaleManager(), msgContent.toString()));
-
-                // build the text
-                List<String> hover = new ArrayList<>();
-                hover.add("&bOrigin: &2" + data.getCheckOrigin().name());
-                hover.add("&bContext: &r" + CommandUtils.contextSetToString(data.getCheckContext()));
-                hover.add("&bTrace: &r");
-
-                int overflow = readStack(data, 15, e -> hover.add("&7" + e.getClassName() + "." + e.getMethodName() + (e.getLineNumber() >= 0 ? ":" + e.getLineNumber() : "")));
-                if (overflow != 0) {
-                    hover.add("&f... and " + overflow + " more");
-                }
-
-                // send the message
-                HoverEvent e = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(hover.stream()), CommandManager.AMPERSAND_CHAR));
-                TextComponent msg = textComponent.toBuilder().applyDeep(comp -> comp.hoverEvent(e)).build();
-                notifiedSender.sendMessage(msg);
-            }
+        if (this.notify) {
+            sendNotification(data);
         }
+    }
+
+    private void sendNotification(CheckData data) {
+        String msg = "&a" + data.getCheckTarget() + "&7 - &a" + data.getPermission() + "&7 - " + getTristateColor(data.getResult()) + data.getResult().name().toLowerCase();
+        if (this.notifiedSender.isConsole()) {
+            // just send as a raw message
+            Message.VERBOSE_LOG.send(this.notifiedSender, msg);
+            return;
+        }
+
+        // form a hoverevent from the check trace
+        TextComponent textComponent = TextUtils.fromLegacy(Message.VERBOSE_LOG.asString(this.notifiedSender.getPlatform().getLocaleManager(), msg));
+
+        // build the text
+        List<String> hover = new ArrayList<>();
+        hover.add("&bOrigin: &2" + data.getCheckOrigin().name());
+        hover.add("&bContext: &r" + CommandUtils.contextSetToString(data.getCheckContext()));
+        hover.add("&bTrace: &r");
+
+        int overflow = readStack(data, STACK_TRUNCATION_CHAT, e -> hover.add("&7" + e.getClassName() + "." + e.getMethodName() + (e.getLineNumber() >= 0 ? ":" + e.getLineNumber() : "")));
+        if (overflow != 0) {
+            hover.add("&f... and " + overflow + " more");
+        }
+
+        // send the message
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(hover.stream()), CommandManager.AMPERSAND_CHAR));
+        TextComponent text = textComponent.toBuilder().applyDeep(comp -> comp.hoverEvent(hoverEvent)).build();
+        this.notifiedSender.sendMessage(text);
     }
 
     /**
@@ -170,22 +157,22 @@ public class VerboseListener {
 
         // retrieve variables
         long now = System.currentTimeMillis();
-        String startDate = DATE_FORMAT.format(new Date(startTime));
+        String startDate = DATE_FORMAT.format(new Date(this.startTime));
         String endDate = DATE_FORMAT.format(new Date(now));
-        long secondsTaken = (now - startTime) / 1000L;
+        long secondsTaken = (now - this.startTime) / 1000L;
         String duration = DateUtil.formatTimeShort(secondsTaken);
 
-        String filter = this.filter;
-        if (filter == null || filter.equals("")){
+        String filter;
+        if (this.filter.isBlank()){
             filter = "any";
         } else {
-            filter = "`" + filter + "`";
+            filter = "`" + this.filter.toString() + "`";
         }
 
         // start building the message output
         ImmutableList.Builder<String> prettyOutput = ImmutableList.<String>builder()
                 .add("## Verbose Checking Output")
-                .add("#### This file was automatically generated by [LuckPerms](https://github.com/lucko/LuckPerms) " + pluginVersion)
+                .add("#### This file was automatically generated by [LuckPerms](https://github.com/lucko/LuckPerms) " + this.pluginVersion)
                 .add("")
                 .add("### Metadata")
                 .add("| Key | Value |")
@@ -193,20 +180,20 @@ public class VerboseListener {
                 .add("| Start Time | " + startDate + " |")
                 .add("| End Time | " + endDate + " |")
                 .add("| Duration | " + duration +" |")
-                .add("| Count | **" + matchedCounter.get() + "** / " + counter.get() + " |")
-                .add("| User | " + notifiedSender.getNameWithLocation() + " |")
+                .add("| Count | **" + this.matchedCounter.get() + "** / " + this.counter.get() + " |")
+                .add("| User | " + this.notifiedSender.getNameWithLocation() + " |")
                 .add("| Filter | " + filter + " |")
                 .add("| Include traces | " + showTraces + " |")
                 .add("");
 
         // warn if data was truncated
-        if (matchedCounter.get() > results.size()) {
+        if (this.matchedCounter.get() > this.results.size()) {
             prettyOutput.add("**WARN:** Result set exceeded max size of " + DATA_TRUNCATION + ". The output below was truncated to " + DATA_TRUNCATION + " entries.");
             prettyOutput.add("");
         }
 
         // explain why some traces may be missing
-        if (showTraces && results.size() > TRACE_DATA_TRUNCATION) {
+        if (showTraces && this.results.size() > TRACE_DATA_TRUNCATION) {
             prettyOutput.add("**WARN:** Result set exceeded size of " + TRACE_DATA_TRUNCATION + ". The traced output below was truncated to " + TRACE_DATA_TRUNCATION + " entries.   ");
             prettyOutput.add("Either refine the query using a more specific filter, or disable tracing by adding '--slim' to the end of the paste command.");
             prettyOutput.add("");
@@ -226,7 +213,7 @@ public class VerboseListener {
         // how many instances have been printed so far
         AtomicInteger printedCount = new AtomicInteger(0);
 
-        for (CheckData c : results) {
+        for (CheckData c : this.results) {
             if (!showTraces) {
 
                 // if traces aren't being shown, just append using raw markdown
@@ -248,7 +235,7 @@ public class VerboseListener {
                 prettyOutput.add("<br><b>Context:</b> <code>" + CommandUtils.stripColor(CommandUtils.contextSetToString(c.getCheckContext())) + "</code>");
                 prettyOutput.add("<br><b>Trace:</b><pre>");
 
-                int overflow = readStack(c, 30, e -> prettyOutput.add(e.getClassName() + "." + e.getMethodName() + (e.getLineNumber() >= 0 ? ":" + e.getLineNumber() : "")));
+                int overflow = readStack(c, STACK_TRUNCATION_WEB, e -> prettyOutput.add(e.getClassName() + "." + e.getMethodName() + (e.getLineNumber() >= 0 ? ":" + e.getLineNumber() : "")));
                 if (overflow != 0) {
                     prettyOutput.add("... and " + overflow + " more");
                 }
@@ -261,7 +248,7 @@ public class VerboseListener {
                 csvOutput.add(escapeCommas(c.getCheckTarget()) + "," + escapeCommas(c.getPermission()) + "," + c.getResult().name().toLowerCase());
             }
         }
-        results.clear();
+        this.results.clear();
 
         ImmutableList.Builder<Map.Entry<String, String>> content = ImmutableList.builder();
         content.add(Maps.immutableEntry("luckperms-verbose.md", prettyOutput.build().stream().collect(Collectors.joining("\n"))));
@@ -344,4 +331,7 @@ public class VerboseListener {
         }
     }
 
+    public Sender getNotifiedSender() {
+        return this.notifiedSender;
+    }
 }

@@ -101,7 +101,7 @@ public class PermissionSetTemp extends SharedSubCommand {
     }
 
     @Override
-    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         List<String> ret = getBoolTabComplete(args);
         if (!ret.isEmpty()) {
             return ret;

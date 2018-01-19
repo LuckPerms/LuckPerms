@@ -39,6 +39,6 @@ public class UserCachedData extends HolderCachedData<User> implements UserData {
 
     @Override
     protected String getHolderName() {
-        return holder.getFriendlyName();
+        return this.holder.getFriendlyName();
     }
 }

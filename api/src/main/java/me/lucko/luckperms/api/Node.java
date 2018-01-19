@@ -35,6 +35,7 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 
 /**
  * Represents a permission node.
@@ -45,6 +46,7 @@ import javax.annotation.Nullable;
  *
  * @since 2.6
  */
+@Immutable
 public interface Node extends Map.Entry<String, Boolean> {
 
     /**
@@ -356,7 +358,7 @@ public interface Node extends Map.Entry<String, Boolean> {
     interface Builder {
 
         /**
-         * Sets the value of negated for the node
+         * Sets the value of negated for the node.
          *
          * @param negated the value
          * @return the builder
@@ -366,7 +368,7 @@ public interface Node extends Map.Entry<String, Boolean> {
         Builder setNegated(boolean negated);
 
         /**
-         * Sets the value of the node
+         * Sets the value of the node.
          *
          * @param value the value
          * @return the builder
@@ -376,7 +378,7 @@ public interface Node extends Map.Entry<String, Boolean> {
         Builder setValue(boolean value);
 
         /**
-         * Sets the override property for the node
+         * Sets the override property for the node.
          *
          * <p>Warning: this value does not persist, and disappears when the holder is re-loaded.
          * It is therefore only useful for transient nodes.</p>
@@ -389,7 +391,7 @@ public interface Node extends Map.Entry<String, Boolean> {
         Builder setOverride(boolean override);
 
         /**
-         * Sets the nodes expiry as a unix timestamp in seconds
+         * Sets the nodes expiry as a unix timestamp in seconds.
          *
          * @param expireAt the expiry time
          * @return the builder
@@ -399,7 +401,7 @@ public interface Node extends Map.Entry<String, Boolean> {
         Builder setExpiry(long expireAt);
 
         /**
-         * Sets the world value for the node
+         * Sets the world value for the node.
          *
          * @param world the world value
          * @return the builder
@@ -409,7 +411,7 @@ public interface Node extends Map.Entry<String, Boolean> {
         Builder setWorld(@Nullable String world);
 
         /**
-         * Sets the server value for the node
+         * Sets the server value for the node.
          *
          * @param server the world value
          * @return the builder
@@ -419,7 +421,7 @@ public interface Node extends Map.Entry<String, Boolean> {
         Builder setServer(@Nullable String server);
 
         /**
-         * Appends an extra context onto the node
+         * Appends an extra context onto the node.
          *
          * @param key the context key
          * @param value the context value
@@ -431,9 +433,10 @@ public interface Node extends Map.Entry<String, Boolean> {
         Builder withExtraContext(@Nonnull String key, @Nonnull String value);
 
         /**
-         * Appends extra contexts onto the node
+         * Appends extra contexts onto the node.
          *
          * @param map a map of contexts
+         * @return the builder
          * @see ContextSet
          * @see Node#getContexts()
          */
@@ -441,9 +444,10 @@ public interface Node extends Map.Entry<String, Boolean> {
         Builder withExtraContext(@Nonnull Map<String, String> map);
 
         /**
-         * Appends extra contexts onto the node
+         * Appends extra contexts onto the node.
          *
          * @param context a set of contexts
+         * @return the builder
          * @see ContextSet
          * @see Node#getContexts()
          */
@@ -451,7 +455,7 @@ public interface Node extends Map.Entry<String, Boolean> {
         Builder withExtraContext(@Nonnull Set<Map.Entry<String, String>> context);
 
         /**
-         * Appends an extra context onto the node
+         * Appends an extra context onto the node.
          *
          * @param entry the context
          * @return the builder
@@ -462,9 +466,10 @@ public interface Node extends Map.Entry<String, Boolean> {
         Builder withExtraContext(@Nonnull Map.Entry<String, String> entry);
 
         /**
-         * Appends extra contexts onto the node
+         * Appends extra contexts onto the node.
          *
          * @param set a contextset
+         * @return the builder
          * @see ContextSet
          * @see Node#getContexts()
          */
@@ -472,7 +477,7 @@ public interface Node extends Map.Entry<String, Boolean> {
         Builder withExtraContext(@Nonnull ContextSet set);
 
         /**
-         * Creates a node instance from the builder
+         * Creates a {@link Node} instance from the builder.
          *
          * @return a new node instance
          */

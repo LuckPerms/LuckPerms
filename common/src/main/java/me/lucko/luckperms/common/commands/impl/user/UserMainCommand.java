@@ -36,9 +36,9 @@ import me.lucko.luckperms.common.commands.impl.generic.other.HolderClear;
 import me.lucko.luckperms.common.commands.impl.generic.other.HolderEditor;
 import me.lucko.luckperms.common.commands.impl.generic.other.HolderShowTracks;
 import me.lucko.luckperms.common.commands.impl.generic.parent.CommandParent;
+import me.lucko.luckperms.common.commands.impl.generic.parent.UserSwitchPrimaryGroup;
 import me.lucko.luckperms.common.commands.impl.generic.permission.CommandPermission;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -47,6 +47,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
 import me.lucko.luckperms.common.storage.DataConstraints;
+import me.lucko.luckperms.common.utils.Uuids;
 
 import java.util.List;
 import java.util.UUID;
@@ -71,7 +72,6 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
                 .add(new CommandParent<>(locale, true))
                 .add(new CommandMeta<>(locale, true))
                 .add(new HolderEditor<>(locale, true))
-                .add(new UserSwitchPrimaryGroup(locale))
                 .add(new UserPromote(locale))
                 .add(new UserDemote(locale))
                 .add(new HolderShowTracks<>(locale, true))
@@ -83,7 +83,7 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
 
     @Override
     protected UserIdentifier parseTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        UUID uuid = CommandUtils.parseUuid(target.toLowerCase());
+        UUID uuid = Uuids.parseNullable(target);
         if (uuid == null) {
             if (!plugin.getConfiguration().get(ConfigKeys.ALLOW_INVALID_USERNAMES)) {
                 if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {
@@ -139,7 +139,7 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
 
     @Override
     protected ReentrantLock getLockForTarget(UserIdentifier target) {
-        return locks.get(target.getUuid());
+        return this.locks.get(target.getUuid());
     }
 
     @Override

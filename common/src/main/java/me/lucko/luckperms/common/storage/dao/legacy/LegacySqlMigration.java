@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.storage.dao.legacy;
 
-import lombok.RequiredArgsConstructor;
-
 import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
 
@@ -51,17 +49,20 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 public class LegacySqlMigration implements Runnable {
     private static final Type NODE_MAP_TYPE = new TypeToken<Map<String, Boolean>>() {}.getType();
     private final SqlDao backing;
 
+    public LegacySqlMigration(SqlDao backing) {
+        this.backing = backing;
+    }
+
     @Override
     public void run() {
-        backing.getPlugin().getLog().warn("Collecting UUID data from the old tables.");
+        this.backing.getPlugin().getLog().warn("Collecting UUID data from the old tables.");
 
         Map<UUID, String> uuidData = new HashMap<>();
-        try (Connection c = backing.getProvider().getConnection()) {
+        try (Connection c = this.backing.getProvider().getConnection()) {
             try (PreparedStatement ps = c.prepareStatement("SELECT uuid, name FROM lp_uuid")) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -77,14 +78,14 @@ public class LegacySqlMigration implements Runnable {
             e.printStackTrace();
         }
 
-        backing.getPlugin().getLog().warn("Found " + uuidData.size() + " uuid data entries. Copying to new tables...");
+        this.backing.getPlugin().getLog().warn("Found " + uuidData.size() + " uuid data entries. Copying to new tables...");
 
         List<Map.Entry<UUID, String>> uuidEntries = new ArrayList<>(uuidData.entrySet());
         List<List<Map.Entry<UUID, String>>> partitionedUuidEntries = Lists.partition(uuidEntries, 100);
 
         for (List<Map.Entry<UUID, String>> l : partitionedUuidEntries) {
-            try (Connection c = backing.getProvider().getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(backing.getPrefix().apply("INSERT INTO {prefix}players VALUES(?, ?, ?)"))) {
+            try (Connection c = this.backing.getProvider().getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(this.backing.getPrefix().apply("INSERT INTO {prefix}players VALUES(?, ?, ?)"))) {
                     for (Map.Entry<UUID, String> e : l) {
                         ps.setString(1, e.getKey().toString());
                         ps.setString(2, e.getValue().toLowerCase());
@@ -102,11 +103,11 @@ public class LegacySqlMigration implements Runnable {
         uuidEntries.clear();
         partitionedUuidEntries.clear();
 
-        backing.getPlugin().getLog().warn("Migrated all uuid data.");
-        backing.getPlugin().getLog().warn("Starting user data migration.");
+        this.backing.getPlugin().getLog().warn("Migrated all uuid data.");
+        this.backing.getPlugin().getLog().warn("Starting user data migration.");
 
         Set<UUID> users = new HashSet<>();
-        try (Connection c = backing.getProvider().getConnection()) {
+        try (Connection c = this.backing.getProvider().getConnection()) {
             try (PreparedStatement ps = c.prepareStatement("SELECT uuid FROM lp_users")) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -122,14 +123,14 @@ public class LegacySqlMigration implements Runnable {
             e.printStackTrace();
         }
 
-        backing.getPlugin().getLog().warn("Found " + users.size() + " user data entries. Copying to new tables...");
+        this.backing.getPlugin().getLog().warn("Found " + users.size() + " user data entries. Copying to new tables...");
 
         AtomicInteger userCounter = new AtomicInteger(0);
         for (UUID uuid : users) {
             String permsJson = null;
             String primaryGroup = null;
 
-            try (Connection c = backing.getProvider().getConnection()) {
+            try (Connection c = this.backing.getProvider().getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement("SELECT primary_group, perms FROM lp_users WHERE uuid=?")) {
                     ps.setString(1, uuid.toString());
                     try (ResultSet rs = ps.executeQuery()) {
@@ -148,7 +149,7 @@ public class LegacySqlMigration implements Runnable {
                 continue;
             }
 
-            Map<String, Boolean> convertedPerms = backing.getGson().fromJson(permsJson, NODE_MAP_TYPE);
+            Map<String, Boolean> convertedPerms = this.backing.getGson().fromJson(permsJson, NODE_MAP_TYPE);
             if (convertedPerms == null) {
                 new Throwable().printStackTrace();
                 continue;
@@ -159,8 +160,8 @@ public class LegacySqlMigration implements Runnable {
                     .map(NodeModel::fromNode)
                     .collect(Collectors.toSet());
 
-            try (Connection c = backing.getProvider().getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(backing.getPrefix().apply("INSERT INTO {prefix}user_permissions(uuid, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)"))) {
+            try (Connection c = this.backing.getProvider().getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(this.backing.getPrefix().apply("INSERT INTO {prefix}user_permissions(uuid, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)"))) {
                     for (NodeModel nd : nodes) {
                         ps.setString(1, uuid.toString());
                         ps.setString(2, nd.getPermission());
@@ -168,7 +169,7 @@ public class LegacySqlMigration implements Runnable {
                         ps.setString(4, nd.getServer());
                         ps.setString(5, nd.getWorld());
                         ps.setLong(6, nd.getExpiry());
-                        ps.setString(7, backing.getGson().toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
+                        ps.setString(7, this.backing.getGson().toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
                         ps.addBatch();
                     }
                     ps.executeBatch();
@@ -178,8 +179,8 @@ public class LegacySqlMigration implements Runnable {
             }
 
             if (!primaryGroup.equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
-                try (Connection c = backing.getProvider().getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(backing.getPrefix().apply("UPDATE {prefix}players SET primary_group=? WHERE uuid=?"))) {
+                try (Connection c = this.backing.getProvider().getConnection()) {
+                    try (PreparedStatement ps = c.prepareStatement(this.backing.getPrefix().apply("UPDATE {prefix}players SET primary_group=? WHERE uuid=?"))) {
                         ps.setString(1, primaryGroup);
                         ps.setString(2, uuid.toString());
                         ps.execute();
@@ -191,17 +192,17 @@ public class LegacySqlMigration implements Runnable {
 
             int i = userCounter.incrementAndGet();
             if (i % 100 == 0) {
-                backing.getPlugin().getLog().warn("Migrated " + i + " users so far...");
+                this.backing.getPlugin().getLog().warn("Migrated " + i + " users so far...");
             }
         }
 
         users.clear();
 
-        backing.getPlugin().getLog().warn("Migrated all user data.");
-        backing.getPlugin().getLog().warn("Starting group data migration.");
+        this.backing.getPlugin().getLog().warn("Migrated all user data.");
+        this.backing.getPlugin().getLog().warn("Starting group data migration.");
 
         Map<String, String> groupData = new HashMap<>();
-        try (Connection c = backing.getProvider().getConnection()) {
+        try (Connection c = this.backing.getProvider().getConnection()) {
             try (PreparedStatement ps = c.prepareStatement("SELECT name, perms FROM lp_groups")) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -213,13 +214,13 @@ public class LegacySqlMigration implements Runnable {
             e.printStackTrace();
         }
 
-        backing.getPlugin().getLog().warn("Found " + groupData.size() + " group data entries. Copying to new tables...");
+        this.backing.getPlugin().getLog().warn("Found " + groupData.size() + " group data entries. Copying to new tables...");
         for (Map.Entry<String, String> e : groupData.entrySet()) {
             String name = e.getKey();
             String permsJson = e.getValue();
 
-            try (Connection c = backing.getProvider().getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(backing.getPrefix().apply("INSERT INTO {prefix}groups VALUES(?)"))) {
+            try (Connection c = this.backing.getProvider().getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(this.backing.getPrefix().apply("INSERT INTO {prefix}groups VALUES(?)"))) {
                     ps.setString(1, name);
                     ps.execute();
                 }
@@ -227,7 +228,7 @@ public class LegacySqlMigration implements Runnable {
                 ex.printStackTrace();
             }
 
-            Map<String, Boolean> convertedPerms = backing.getGson().fromJson(permsJson, NODE_MAP_TYPE);
+            Map<String, Boolean> convertedPerms = this.backing.getGson().fromJson(permsJson, NODE_MAP_TYPE);
             if (convertedPerms == null) {
                 new Throwable().printStackTrace();
                 continue;
@@ -238,8 +239,8 @@ public class LegacySqlMigration implements Runnable {
                     .map(NodeModel::fromNode)
                     .collect(Collectors.toSet());
 
-            try (Connection c = backing.getProvider().getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(backing.getPrefix().apply("INSERT INTO {prefix}group_permissions(name, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)"))) {
+            try (Connection c = this.backing.getProvider().getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(this.backing.getPrefix().apply("INSERT INTO {prefix}group_permissions(name, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)"))) {
                     for (NodeModel nd : nodes) {
                         ps.setString(1, name);
                         ps.setString(2, nd.getPermission());
@@ -247,7 +248,7 @@ public class LegacySqlMigration implements Runnable {
                         ps.setString(4, nd.getServer());
                         ps.setString(5, nd.getWorld());
                         ps.setLong(6, nd.getExpiry());
-                        ps.setString(7, backing.getGson().toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
+                        ps.setString(7, this.backing.getGson().toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
                         ps.addBatch();
                     }
                     ps.executeBatch();
@@ -258,27 +259,27 @@ public class LegacySqlMigration implements Runnable {
         }
 
         groupData.clear();
-        backing.getPlugin().getLog().warn("Migrated all group data.");
+        this.backing.getPlugin().getLog().warn("Migrated all group data.");
 
-        backing.getPlugin().getLog().warn("Renaming action and track tables.");
-        try (Connection c = backing.getProvider().getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(backing.getPrefix().apply("DROP TABLE {prefix}actions"))) {
+        this.backing.getPlugin().getLog().warn("Renaming action and track tables.");
+        try (Connection c = this.backing.getProvider().getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(this.backing.getPrefix().apply("DROP TABLE {prefix}actions"))) {
                 ps.execute();
             }
-            try (PreparedStatement ps = c.prepareStatement(backing.getPrefix().apply("ALTER TABLE lp_actions RENAME TO {prefix}actions"))) {
+            try (PreparedStatement ps = c.prepareStatement(this.backing.getPrefix().apply("ALTER TABLE lp_actions RENAME TO {prefix}actions"))) {
                 ps.execute();
             }
 
-            try (PreparedStatement ps = c.prepareStatement(backing.getPrefix().apply("DROP TABLE {prefix}tracks"))) {
+            try (PreparedStatement ps = c.prepareStatement(this.backing.getPrefix().apply("DROP TABLE {prefix}tracks"))) {
                 ps.execute();
             }
-            try (PreparedStatement ps = c.prepareStatement(backing.getPrefix().apply("ALTER TABLE lp_tracks RENAME TO {prefix}tracks"))) {
+            try (PreparedStatement ps = c.prepareStatement(this.backing.getPrefix().apply("ALTER TABLE lp_tracks RENAME TO {prefix}tracks"))) {
                 ps.execute();
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
 
-        backing.getPlugin().getLog().warn("Legacy schema migration complete.");
+        this.backing.getPlugin().getLog().warn("Legacy schema migration complete.");
     }
 }

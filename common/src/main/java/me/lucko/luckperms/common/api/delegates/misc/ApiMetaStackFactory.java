@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.api.delegates.misc;
 
-import lombok.AllArgsConstructor;
-import lombok.NonNull;
-
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
@@ -38,27 +35,38 @@ import me.lucko.luckperms.common.metastacking.StandardStackElements;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class ApiMetaStackFactory implements MetaStackFactory {
     public final LuckPermsPlugin plugin;
 
-    @Override
-    public Optional<MetaStackElement> fromString(@NonNull String definition) {
-        return StandardStackElements.parseFromString(plugin, definition);
+    public ApiMetaStackFactory(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
     }
 
+    @Nonnull
     @Override
-    public List<MetaStackElement> fromStrings(@NonNull List<String> definitions) {
+    public Optional<MetaStackElement> fromString(@Nonnull String definition) {
+        Objects.requireNonNull(definition, "definition");
+        return StandardStackElements.parseFromString(this.plugin, definition);
+    }
+
+    @Nonnull
+    @Override
+    public List<MetaStackElement> fromStrings(@Nonnull List<String> definitions) {
+        Objects.requireNonNull(definitions, "definitions");
         if (definitions.isEmpty()) {
             return ImmutableList.of();
         }
-        return StandardStackElements.parseList(plugin, definitions);
+        return StandardStackElements.parseList(this.plugin, definitions);
     }
 
+    @Nonnull
     @Override
-    public MetaStackDefinition createDefinition(List<MetaStackElement> elements, String startSpacer, String middleSpacer, String endSpacer) {
+    public MetaStackDefinition createDefinition(@Nonnull List<MetaStackElement> elements, @Nonnull String startSpacer, @Nonnull String middleSpacer, @Nonnull String endSpacer) {
         return new SimpleMetaStackDefinition(elements, startSpacer, middleSpacer, endSpacer);
     }
 }

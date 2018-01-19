@@ -42,4 +42,35 @@ public interface Cancellable {
     @Nonnull
     AtomicBoolean getCancellationState();
 
+    /**
+     * Returns true if the event is currently cancelled.
+     *
+     * @return if the event is cancelled
+     * @since 4.1
+     */
+    default boolean isCancelled() {
+        return getCancellationState().get();
+    }
+
+    /**
+     * Returns true if the event is not currently cancelled.
+     *
+     * @return if the event is not cancelled
+     * @since 4.1
+     */
+    default boolean isNotCancelled() {
+        return !isCancelled();
+    }
+
+    /**
+     * Sets the cancellation state of the event.
+     *
+     * @param cancelled the new state
+     * @return the previous state
+     * @since 4.1
+     */
+    default boolean setCancelled(boolean cancelled) {
+        return getCancellationState().getAndSet(cancelled);
+    }
+
 }

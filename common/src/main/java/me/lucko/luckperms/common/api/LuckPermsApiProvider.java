@@ -25,11 +25,8 @@
 
 package me.lucko.luckperms.common.api;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-
+import me.lucko.luckperms.api.ActionLogger;
 import me.lucko.luckperms.api.LPConfiguration;
-import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.MessagingService;
 import me.lucko.luckperms.api.NodeFactory;
@@ -42,123 +39,129 @@ import me.lucko.luckperms.api.manager.TrackManager;
 import me.lucko.luckperms.api.manager.UserManager;
 import me.lucko.luckperms.api.metastacking.MetaStackFactory;
 import me.lucko.luckperms.api.platform.PlatformInfo;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.api.delegates.manager.ApiContextManager;
 import me.lucko.luckperms.common.api.delegates.manager.ApiGroupManager;
 import me.lucko.luckperms.common.api.delegates.manager.ApiTrackManager;
 import me.lucko.luckperms.common.api.delegates.manager.ApiUserManager;
+import me.lucko.luckperms.common.api.delegates.misc.ApiActionLogger;
 import me.lucko.luckperms.common.api.delegates.misc.ApiMetaStackFactory;
 import me.lucko.luckperms.common.api.delegates.misc.ApiNodeFactory;
 import me.lucko.luckperms.common.api.delegates.misc.ApiPlatformInfo;
-import me.lucko.luckperms.common.event.EventFactory;
-import me.lucko.luckperms.common.event.LuckPermsEventBus;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
+import javax.annotation.Nonnull;
+
 /**
  * Implements the LuckPerms API using the plugin instance
  */
-public class ApiProvider implements LuckPermsApi {
+public class LuckPermsApiProvider implements LuckPermsApi {
 
-    @Getter(AccessLevel.NONE)
     private final LuckPermsPlugin plugin;
 
     private final PlatformInfo platformInfo;
     private final UserManager userManager;
     private final GroupManager groupManager;
     private final TrackManager trackManager;
-    private final LuckPermsEventBus eventBus;
+    private final ActionLogger actionLogger;
     private final ContextManager contextManager;
     private final MetaStackFactory metaStackFactory;
-    private final EventFactory eventFactory;
 
-    public ApiProvider(LuckPermsPlugin plugin) {
+    public LuckPermsApiProvider(LuckPermsPlugin plugin) {
         this.plugin = plugin;
 
         this.platformInfo = new ApiPlatformInfo(plugin);
-        this.userManager = new ApiUserManager(plugin, plugin.getUserManager());
+        this.userManager = new ApiUserManager(plugin.getUserManager());
         this.groupManager = new ApiGroupManager(plugin.getGroupManager());
         this.trackManager = new ApiTrackManager(plugin.getTrackManager());
-        this.eventBus = new LuckPermsEventBus(plugin);
+        this.actionLogger = new ApiActionLogger(plugin);
         this.contextManager = new ApiContextManager(plugin, plugin.getContextManager());
         this.metaStackFactory = new ApiMetaStackFactory(plugin);
-        this.eventFactory = new EventFactory(eventBus);
     }
 
-    public EventFactory getEventFactory() {
-        return eventFactory;
-    }
-
+    @Nonnull
     @Override
     public PlatformInfo getPlatformInfo() {
-        return platformInfo;
+        return this.platformInfo;
     }
 
+    @Nonnull
     @Override
     public UserManager getUserManager() {
-        return userManager;
+        return this.userManager;
     }
 
+    @Nonnull
     @Override
     public GroupManager getGroupManager() {
-        return groupManager;
+        return this.groupManager;
     }
 
+    @Nonnull
     @Override
     public TrackManager getTrackManager() {
-        return trackManager;
+        return this.trackManager;
     }
 
+    @Nonnull
     @Override
     public CompletableFuture<Void> runUpdateTask() {
-        return plugin.getUpdateTaskBuffer().request();
+        return this.plugin.getUpdateTaskBuffer().request();
     }
 
+    @Nonnull
     @Override
     public EventBus getEventBus() {
-        return eventBus;
+        return this.plugin.getEventFactory().getEventBus();
     }
 
+    @Nonnull
     @Override
     public LPConfiguration getConfiguration() {
-        return plugin.getConfiguration().getDelegate();
+        return this.plugin.getConfiguration().getDelegate();
     }
 
+    @Nonnull
     @Override
     public Storage getStorage() {
-        return plugin.getStorage().getDelegate();
+        return this.plugin.getStorage().getDelegate();
     }
 
+    @Nonnull
     @Override
     public Optional<MessagingService> getMessagingService() {
-        return plugin.getMessagingService().map(Function.identity());
+        return this.plugin.getMessagingService().map(Function.identity());
     }
 
     @Override
+    public ActionLogger getActionLogger() {
+        return this.actionLogger;
+    }
+
+    @Nonnull
+    @Override
     public UuidCache getUuidCache() {
-        return plugin.getUuidCache().getDelegate();
+        return this.plugin.getUuidCache().getDelegate();
     }
 
     @Override
     public ContextManager getContextManager() {
-        return contextManager;
+        return this.contextManager;
     }
 
+    @Nonnull
     @Override
     public NodeFactory getNodeFactory() {
         return ApiNodeFactory.INSTANCE;
     }
 
+    @Nonnull
     @Override
     public MetaStackFactory getMetaStackFactory() {
-        return metaStackFactory;
+        return this.metaStackFactory;
     }
 
-    @Override
-    public LogEntry.Builder newLogEntryBuilder() {
-        return ExtendedLogEntry.build();
-    }
 }

@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.sponge.listeners;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 
@@ -34,9 +32,12 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.command.SendCommandEvent;
 
-@RequiredArgsConstructor
 public class SpongePlatformListener {
     private final LPSpongePlugin plugin;
+
+    public SpongePlatformListener(LPSpongePlugin plugin) {
+        this.plugin = plugin;
+    }
 
     @Listener
     public void onSendCommand(SendCommandEvent e) {
@@ -45,7 +46,7 @@ public class SpongePlatformListener {
 
         final String name = e.getCommand().toLowerCase();
         if (((name.equals("op") || name.equals("minecraft:op")) && source.hasPermission("minecraft.command.op")) || ((name.equals("deop") || name.equals("minecraft:deop")) && source.hasPermission("minecraft.command.deop"))) {
-            Message.OP_DISABLED_SPONGE.send(plugin.getSenderFactory().wrap(source));
+            Message.OP_DISABLED_SPONGE.send(this.plugin.getSenderFactory().wrap(source));
         }
     }
 }

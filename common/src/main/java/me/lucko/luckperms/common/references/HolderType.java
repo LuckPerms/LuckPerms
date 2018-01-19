@@ -25,13 +25,8 @@
 
 package me.lucko.luckperms.common.references;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import me.lucko.luckperms.common.model.PermissionHolder;
 
-@Getter
-@AllArgsConstructor
 public enum HolderType {
 
     USER(true, false),
@@ -40,6 +35,11 @@ public enum HolderType {
     private final boolean user;
     private final boolean group;
 
+    HolderType(boolean user, boolean group) {
+        this.user = user;
+        this.group = group;
+    }
+
     public boolean matches(PermissionHolder holder) {
         return holder.getType() == this;
     }
@@ -47,5 +47,13 @@ public enum HolderType {
     @Override
     public String toString() {
         return name().toLowerCase();
+    }
+
+    public boolean isUser() {
+        return this.user;
+    }
+
+    public boolean isGroup() {
+        return this.group;
     }
 }

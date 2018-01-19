@@ -25,21 +25,37 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.event.user.UserFirstLoginEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
 import java.util.UUID;
 
-@Getter
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventUserFirstLogin extends AbstractEvent implements UserFirstLoginEvent {
 
     private final UUID uuid;
     private final String username;
 
+    public EventUserFirstLogin(UUID uuid, String username) {
+        this.uuid = uuid;
+        this.username = username;
+    }
+
+    @Nonnull
+    @Override
+    public UUID getUuid() {
+        return this.uuid;
+    }
+
+    @Nonnull
+    @Override
+    public String getUsername() {
+        return this.username;
+    }
+
+    @Override
+    public String toString() {
+        return "EventUserFirstLogin(uuid=" + this.getUuid() + ", username=" + this.getUsername() + ")";
+    }
 }

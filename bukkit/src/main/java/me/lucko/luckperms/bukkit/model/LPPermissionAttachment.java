@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.bukkit.model;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.Node;
@@ -45,6 +42,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -66,7 +64,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
             permissionAttachmentPermissionsField = PermissionAttachment.class.getDeclaredField("permissions");
             permissionAttachmentPermissionsField.setAccessible(true);
         } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
+            throw new ExceptionInInitializerError(e);
         }
         PERMISSION_ATTACHMENT_PERMISSIONS_FIELD = permissionAttachmentPermissionsField;
     }
@@ -74,7 +72,6 @@ public class LPPermissionAttachment extends PermissionAttachment {
     /**
      * The parent LPPermissible
      */
-    @Getter
     private final LPPermissible permissible;
 
     /**
@@ -95,8 +92,6 @@ public class LPPermissionAttachment extends PermissionAttachment {
     /**
      * Callback to run when the attachment is removed
      */
-    @Getter
-    @Setter
     private PermissionRemovedExecutor removalCallback = null;
 
     public LPPermissionAttachment(LPPermissible permissible, Plugin owner) {
@@ -113,7 +108,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
         this.owner = null;
 
         // copy
-        perms.putAll(bukkit.getPermissions());
+        this.perms.putAll(bukkit.getPermissions());
 
         injectFakeMap();
     }
@@ -138,13 +133,28 @@ public class LPPermissionAttachment extends PermissionAttachment {
         }
     }
 
+    @Override
+    public LPPermissible getPermissible() {
+        return this.permissible;
+    }
+
+    @Override
+    public PermissionRemovedExecutor getRemovalCallback() {
+        return this.removalCallback;
+    }
+
+    @Override
+    public void setRemovalCallback(PermissionRemovedExecutor removalCallback) {
+        this.removalCallback = removalCallback;
+    }
+
     /**
      * Hooks this attachment with the parent {@link User} instance.
      */
     public void hook() {
-        hooked = true;
-        permissible.attachments.add(this);
-        for (Map.Entry<String, Boolean> entry : perms.entrySet()) {
+        this.hooked = true;
+        this.permissible.attachments.add(this);
+        for (Map.Entry<String, Boolean> entry : this.perms.entrySet()) {
             if (entry.getKey() == null || entry.getKey().isEmpty()) {
                 continue;
             }
@@ -153,7 +163,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
     }
 
     private void setPermissionInternal(String name, boolean value) {
-        if (!permissible.getPlugin().getConfiguration().get(ConfigKeys.APPLY_BUKKIT_ATTACHMENT_PERMISSIONS)) {
+        if (!this.permissible.getPlugin().getConfiguration().get(ConfigKeys.APPLY_BUKKIT_ATTACHMENT_PERMISSIONS)) {
             return;
         }
 
@@ -161,26 +171,26 @@ public class LPPermissionAttachment extends PermissionAttachment {
         // we use the servers static context to *try* to ensure that the node will apply
         Node node = NodeFactory.builder(name)
                 .setValue(value)
-                .withExtraContext(permissible.getPlugin().getContextManager().getStaticContext())
+                .withExtraContext(this.permissible.getPlugin().getContextManager().getStaticContext())
                 .build();
 
         // convert the constructed node to a transient node instance to refer back to this attachment
         ImmutableTransientNode transientNode = ImmutableTransientNode.of(node, this);
 
         // set the transient node
-        User user = permissible.getUser();
+        User user = this.permissible.getUser();
         if (user.setTransientPermission(transientNode).asBoolean()) {
             user.reloadCachedData();
         }
     }
 
     private void unsetPermissionInternal(String name) {
-        if (!permissible.getPlugin().getConfiguration().get(ConfigKeys.APPLY_BUKKIT_ATTACHMENT_PERMISSIONS)) {
+        if (!this.permissible.getPlugin().getConfiguration().get(ConfigKeys.APPLY_BUKKIT_ATTACHMENT_PERMISSIONS)) {
             return;
         }
 
         // remove transient permissions from the holder which were added by this attachment & equal the permission
-        User user = permissible.getUser();
+        User user = this.permissible.getUser();
         if (user.removeIfTransient(n -> n instanceof ImmutableTransientNode && ((ImmutableTransientNode) n).getOwner() == this && n.getPermission().equals(name))) {
             user.reloadCachedData();
         }
@@ -188,7 +198,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
     private void clearInternal() {
         // remove all transient permissions added by this attachment
-        User user = permissible.getUser();
+        User user = this.permissible.getUser();
         if (user.removeIfTransient(n -> n instanceof ImmutableTransientNode && ((ImmutableTransientNode) n).getOwner() == this)) {
             user.reloadCachedData();
         }
@@ -196,7 +206,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
     @Override
     public boolean remove() {
-        if (!hooked) {
+        if (!this.hooked) {
             return false;
         }
 
@@ -204,31 +214,31 @@ public class LPPermissionAttachment extends PermissionAttachment {
         clearInternal();
 
         // run the callback
-        if (removalCallback != null) {
-            removalCallback.attachmentRemoved(this);
+        if (this.removalCallback != null) {
+            this.removalCallback.attachmentRemoved(this);
         }
 
         // unhook from the permissible
-        hooked = false;
-        permissible.attachments.remove(this);
+        this.hooked = false;
+        this.permissible.attachments.remove(this);
         return true;
     }
 
     @Override
     public void setPermission(String name, boolean value) {
-        Preconditions.checkNotNull(name, "name is null");
+        Objects.requireNonNull(name, "name is null");
         Preconditions.checkArgument(!name.isEmpty(), "name is empty");
 
         String permission = name.toLowerCase();
 
-        Boolean previous = perms.put(permission, value);
+        Boolean previous = this.perms.put(permission, value);
         if (previous != null && previous == value) {
             return;
         }
 
         // if we're not hooked, then don't actually apply the change
         // it will get applied on hook - if that ever happens
-        if (!hooked) {
+        if (!this.hooked) {
             return;
         }
 
@@ -241,19 +251,19 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
     @Override
     public void unsetPermission(String name) {
-        Preconditions.checkNotNull(name, "name is null");
+        Objects.requireNonNull(name, "name is null");
         Preconditions.checkArgument(!name.isEmpty(), "name is empty");
 
         String permission = name.toLowerCase();
 
-        Boolean previous = perms.remove(permission);
+        Boolean previous = this.perms.remove(permission);
         if (previous == null) {
             return;
         }
 
         // if we're not hooked, then don't actually apply the change
         // it will get applied on hook - if that ever happens
-        if (!hooked) {
+        if (!this.hooked) {
             return;
         }
 
@@ -262,12 +272,12 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
     @Override
     public Map<String, Boolean> getPermissions() {
-        return perms;
+        return this.perms;
     }
 
     @Override
     public Plugin getPlugin() {
-        return owner != null ? owner : permissible.getPlugin();
+        return this.owner != null ? this.owner : this.permissible.getPlugin();
     }
 
     @Override
@@ -295,7 +305,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
         @Override
         public Boolean put(String key, Boolean value) {
             // grab the previous result, so we can still satisfy the method signature of Map
-            Boolean previous = perms.get(key);
+            Boolean previous = LPPermissionAttachment.this.perms.get(key);
 
             // proxy the call back through the PermissionAttachment instance
             setPermission(key, value);
@@ -314,7 +324,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
             String permission = ((String) key);
 
             // grab the previous result, so we can still satisfy the method signature of Map
-            Boolean previous = perms.get(permission);
+            Boolean previous = LPPermissionAttachment.this.perms.get(permission);
 
             // proxy the call back through the PermissionAttachment instance
             unsetPermission(permission);
@@ -333,61 +343,61 @@ public class LPPermissionAttachment extends PermissionAttachment {
         @Override
         public void clear() {
             // remove the permissions which have already been applied
-            if (hooked) {
+            if (LPPermissionAttachment.this.hooked) {
                 clearInternal();
             }
 
             // clear the backing map
-            perms.clear();
+            LPPermissionAttachment.this.perms.clear();
         }
 
         @Override
         public int size() {
             // return the size of the permissions map - probably the most accurate value we have
-            return perms.size();
+            return LPPermissionAttachment.this.perms.size();
         }
 
         @Override
         public boolean isEmpty() {
             // return if the permissions map is empty - again probably the most accurate thing
             // we can return
-            return perms.isEmpty();
+            return LPPermissionAttachment.this.perms.isEmpty();
         }
 
         @Override
         public boolean containsKey(Object key) {
             // just proxy
-            return perms.containsKey(key);
+            return LPPermissionAttachment.this.perms.containsKey(key);
         }
 
         @Override
         public boolean containsValue(Object value) {
             // just proxy
-            return perms.containsValue(value);
+            return LPPermissionAttachment.this.perms.containsValue(value);
         }
 
         @Override
         public Boolean get(Object key) {
             // just proxy
-            return perms.get(key);
+            return LPPermissionAttachment.this.perms.get(key);
         }
 
         @Override
         public Set<String> keySet() {
             // just proxy
-            return perms.keySet();
+            return LPPermissionAttachment.this.perms.keySet();
         }
 
         @Override
         public Collection<Boolean> values() {
             // just proxy
-            return perms.values();
+            return LPPermissionAttachment.this.perms.values();
         }
 
         @Override
         public Set<Entry<String, Boolean>> entrySet() {
             // just proxy
-            return perms.entrySet();
+            return LPPermissionAttachment.this.perms.entrySet();
         }
     }
 }

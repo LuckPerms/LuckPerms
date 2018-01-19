@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.bukkit.vault;
 
-import lombok.Getter;
-
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 
 import net.milkbowl.vault.chat.Chat;
@@ -38,7 +36,6 @@ import org.bukkit.plugin.ServicesManager;
 /**
  * Handles hooking with the Vault API
  */
-@Getter
 public class VaultHookManager {
     private VaultChatHook chatHook = null;
     private VaultPermissionHook permissionHook = null;
@@ -51,17 +48,17 @@ public class VaultHookManager {
      */
     public void hook(LPBukkitPlugin plugin) {
         try {
-            if (permissionHook == null) {
-                permissionHook = new VaultPermissionHook(plugin);
+            if (this.permissionHook == null) {
+                this.permissionHook = new VaultPermissionHook(plugin);
             }
 
-            if (chatHook == null) {
-                chatHook = new VaultChatHook(plugin, permissionHook);
+            if (this.chatHook == null) {
+                this.chatHook = new VaultChatHook(plugin, this.permissionHook);
             }
 
             final ServicesManager sm = plugin.getServer().getServicesManager();
-            sm.register(Permission.class, permissionHook, plugin, ServicePriority.High);
-            sm.register(Chat.class, chatHook, plugin, ServicePriority.High);
+            sm.register(Permission.class, this.permissionHook, plugin, ServicePriority.High);
+            sm.register(Chat.class, this.chatHook, plugin, ServicePriority.High);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -76,25 +73,16 @@ public class VaultHookManager {
     public void unhook(LPBukkitPlugin plugin) {
         final ServicesManager sm = plugin.getServer().getServicesManager();
 
-        if (permissionHook != null) {
-            sm.unregister(Permission.class, permissionHook);
-            permissionHook.getExecutor().shutdown();
-            permissionHook = null;
+        if (this.permissionHook != null) {
+            sm.unregister(Permission.class, this.permissionHook);
+            this.permissionHook.getExecutor().shutdown();
+            this.permissionHook = null;
         }
 
-        if (chatHook != null) {
-            sm.unregister(Chat.class, chatHook);
-            chatHook = null;
+        if (this.chatHook != null) {
+            sm.unregister(Chat.class, this.chatHook);
+            this.chatHook = null;
         }
-    }
-
-    /**
-     * Gets if the Vault classes are registered.
-     *
-     * @return true if hooked
-     */
-    public boolean isHooked() {
-        return permissionHook != null && chatHook != null;
     }
 
 }

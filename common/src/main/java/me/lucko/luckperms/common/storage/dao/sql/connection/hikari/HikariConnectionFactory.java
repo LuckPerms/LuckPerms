@@ -59,7 +59,7 @@ public abstract class HikariConnectionFactory extends AbstractConnectionFactory 
     }
 
     protected void appendConfigurationInfo(HikariConfig config) {
-        String address = configuration.getAddress();
+        String address = this.configuration.getAddress();
         String[] addressSplit = address.split(":");
         address = addressSplit[0];
         String port = addressSplit.length > 1 ? addressSplit[1] : "3306";
@@ -67,9 +67,9 @@ public abstract class HikariConnectionFactory extends AbstractConnectionFactory 
         config.setDataSourceClassName(getDriverClass());
         config.addDataSourceProperty("serverName", address);
         config.addDataSourceProperty("port", port);
-        config.addDataSourceProperty("databaseName", configuration.getDatabase());
-        config.setUsername(configuration.getUsername());
-        config.setPassword(configuration.getPassword());
+        config.addDataSourceProperty("databaseName", this.configuration.getDatabase());
+        config.setUsername(this.configuration.getUsername());
+        config.setPassword(this.configuration.getPassword());
     }
 
     @Override
@@ -78,12 +78,12 @@ public abstract class HikariConnectionFactory extends AbstractConnectionFactory 
         config.setPoolName("luckperms");
 
         appendConfigurationInfo(config);
-        appendProperties(config, configuration);
+        appendProperties(config, this.configuration);
 
-        config.setMaximumPoolSize(configuration.getMaxPoolSize());
-        config.setMinimumIdle(configuration.getMinIdleConnections());
-        config.setMaxLifetime(configuration.getMaxLifetime());
-        config.setConnectionTimeout(configuration.getConnectionTimeout());
+        config.setMaximumPoolSize(this.configuration.getMaxPoolSize());
+        config.setMinimumIdle(this.configuration.getMinIdleConnections());
+        config.setMaxLifetime(this.configuration.getMaxLifetime());
+        config.setConnectionTimeout(this.configuration.getConnectionTimeout());
 
         // If a connection is not returned within 10 seconds, it's probably safe to assume it's been leaked.
         config.setLeakDetectionThreshold(TimeUnit.SECONDS.toMillis(10)); // 10000
@@ -101,13 +101,13 @@ public abstract class HikariConnectionFactory extends AbstractConnectionFactory 
         }
 
 
-        hikari = new HikariDataSource(config);
+        this.hikari = new HikariDataSource(config);
     }
 
     @Override
-    public void shutdown() throws Exception {
-        if (hikari != null) {
-            hikari.close();
+    public void shutdown() {
+        if (this.hikari != null) {
+            this.hikari.close();
         }
     }
 
@@ -117,7 +117,7 @@ public abstract class HikariConnectionFactory extends AbstractConnectionFactory 
         boolean success = true;
 
         long start = System.currentTimeMillis();
-        try (Connection c = hikari.getConnection()) {
+        try (Connection c = this.hikari.getConnection()) {
             try (Statement s = c.createStatement()) {
                 s.execute("/* ping */ SELECT 1");
             }
@@ -138,7 +138,7 @@ public abstract class HikariConnectionFactory extends AbstractConnectionFactory 
 
     @Override
     public Connection getConnection() throws SQLException {
-        Connection connection = hikari.getConnection();
+        Connection connection = this.hikari.getConnection();
         if (connection == null) {
             throw new SQLException("Unable to get a connection from the pool.");
         }

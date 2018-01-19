@@ -25,19 +25,31 @@
 
 package me.lucko.luckperms.api.context;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 abstract class AbstractContextSet implements ContextSet {
 
     protected abstract Multimap<String, String> backing();
+
+    @Nonnull
+    @Override
+    @Deprecated
+    public Map<String, String> toMap() {
+        ImmutableMap.Builder<String, String> m = ImmutableMap.builder();
+        for (Map.Entry<String, String> e : backing().entries()) {
+            m.put(e.getKey(), e.getValue());
+        }
+        return m.build();
+    }
 
     @Override
     public boolean containsKey(@Nonnull String key) {
@@ -91,14 +103,14 @@ abstract class AbstractContextSet implements ContextSet {
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof ContextSet)) return false;
-        final ContextSet other = (ContextSet) o;
+        final ContextSet that = (ContextSet) o;
 
         final Multimap<String, String> otherContexts;
 
-        if (other instanceof AbstractContextSet) {
-            otherContexts = ((AbstractContextSet) other).backing();
+        if (that instanceof AbstractContextSet) {
+            otherContexts = ((AbstractContextSet) that).backing();
         } else {
-            otherContexts = other.toMultimap();
+            otherContexts = that.toMultimap();
         }
 
         return backing().equals(otherContexts);
@@ -110,11 +122,33 @@ abstract class AbstractContextSet implements ContextSet {
     }
 
     static String sanitizeKey(String key) {
-        return checkNotNull(key, "key is null").toLowerCase().intern();
+        Objects.requireNonNull(key, "key is null");
+        if (stringIsEmpty(key)) {
+            throw new IllegalArgumentException("key is (effectively) empty");
+        }
+
+        return key.toLowerCase().intern();
     }
 
     static String sanitizeValue(String value) {
-        return checkNotNull(value, "value is null").intern();
+        Objects.requireNonNull(value, "value is null");
+        if (stringIsEmpty(value)) {
+            throw new IllegalArgumentException("value is (effectively) empty");
+        }
+
+        return value.intern();
+    }
+
+    private static boolean stringIsEmpty(String s) {
+        if (s.isEmpty()) {
+            return true;
+        }
+        for (char c : s.toCharArray()) {
+            if (c != ' ') {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

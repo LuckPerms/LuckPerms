@@ -42,18 +42,18 @@ public class AllParentsByWeightHolder extends CachedPrimaryGroupHolder {
 
     @Override
     protected String calculateValue() {
-        Contexts contexts = user.getPlugin().getContextForUser(user);
+        Contexts contexts = this.user.getPlugin().getContextForUser(this.user);
         if (contexts == null) {
-            contexts = user.getPlugin().getContextManager().getStaticContexts();
+            contexts = this.user.getPlugin().getContextManager().getStaticContexts();
         }
 
         // hack to get a list of groups the holder is inheriting from
         Set<String> groupNames = new LinkedHashSet<>();
-        user.resolveInheritances(new NoopList<>(), groupNames, contexts);
+        this.user.resolveInheritances(new NoopList<>(), groupNames, contexts);
 
         List<Group> groups = new ArrayList<>();
         for (String groupName : groupNames) {
-            Group group = user.getPlugin().getGroupManager().getIfLoaded(groupName);
+            Group group = this.user.getPlugin().getGroupManager().getIfLoaded(groupName);
             if (group != null) {
                 groups.add(group);
             }

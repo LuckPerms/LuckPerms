@@ -31,7 +31,6 @@ import com.google.gson.JsonObject;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
@@ -60,7 +59,7 @@ public class ApplyEditsCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         String code = args.get(0);
         String who = args.size() == 2 ? args.get(1) : null;
 

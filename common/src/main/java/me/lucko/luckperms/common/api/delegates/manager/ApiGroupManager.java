@@ -25,32 +25,38 @@
 
 package me.lucko.luckperms.common.api.delegates.manager;
 
-import lombok.AllArgsConstructor;
-import lombok.NonNull;
-
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.manager.GroupManager;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class ApiGroupManager implements GroupManager {
-    private final me.lucko.luckperms.common.managers.GroupManager handle;
+    private final me.lucko.luckperms.common.managers.group.GroupManager<?> handle;
+
+    public ApiGroupManager(me.lucko.luckperms.common.managers.group.GroupManager<?> handle) {
+        this.handle = handle;
+    }
 
     @Override
-    public Group getGroup(@NonNull String name) {
-        me.lucko.luckperms.common.model.Group group = handle.getIfLoaded(name);
+    public Group getGroup(@Nonnull String name) {
+        Objects.requireNonNull(name, "name");
+        me.lucko.luckperms.common.model.Group group = this.handle.getIfLoaded(name);
         return group == null ? null : group.getDelegate();
     }
 
+    @Nonnull
     @Override
     public Set<Group> getLoadedGroups() {
-        return handle.getAll().values().stream().map(me.lucko.luckperms.common.model.Group::getDelegate).collect(Collectors.toSet());
+        return this.handle.getAll().values().stream().map(me.lucko.luckperms.common.model.Group::getDelegate).collect(Collectors.toSet());
     }
 
     @Override
-    public boolean isLoaded(@NonNull String name) {
-        return handle.isLoaded(name);
+    public boolean isLoaded(@Nonnull String name) {
+        Objects.requireNonNull(name, "name");
+        return this.handle.isLoaded(name);
     }
 }

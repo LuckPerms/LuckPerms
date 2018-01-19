@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.node;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.utils.CollationKeyCache;
@@ -37,7 +34,6 @@ import java.util.Comparator;
 /**
  * Compares permission nodes based upon their supposed "priority".
  */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class NodeWithContextComparator implements Comparator<LocalizedNode> {
 
     private static final Comparator<LocalizedNode> INSTANCE = new NodeWithContextComparator();
@@ -50,6 +46,8 @@ public class NodeWithContextComparator implements Comparator<LocalizedNode> {
     public static Comparator<LocalizedNode> reverse() {
         return REVERSE;
     }
+
+    private NodeWithContextComparator() {}
 
     @Override
     public int compare(LocalizedNode one, LocalizedNode two) {

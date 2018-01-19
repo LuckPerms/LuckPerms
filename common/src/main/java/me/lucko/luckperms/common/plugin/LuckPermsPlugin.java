@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.plugin;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
-import me.lucko.luckperms.common.api.ApiProvider;
+import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
@@ -39,12 +39,13 @@ import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
+import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
+import me.lucko.luckperms.common.event.EventFactory;
 import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.logging.Logger;
-import me.lucko.luckperms.common.managers.GroupManager;
-import me.lucko.luckperms.common.managers.TrackManager;
-import me.lucko.luckperms.common.managers.UserManager;
+import me.lucko.luckperms.common.managers.group.GroupManager;
+import me.lucko.luckperms.common.managers.track.TrackManager;
+import me.lucko.luckperms.common.managers.user.UserManager;
 import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.storage.Storage;
@@ -75,21 +76,21 @@ public interface LuckPermsPlugin {
      *
      * @return the user manager
      */
-    UserManager getUserManager();
+    UserManager<?> getUserManager();
 
     /**
      * Gets the group manager instance for the platform
      *
      * @return the group manager
      */
-    GroupManager getGroupManager();
+    GroupManager<?> getGroupManager();
 
     /**
      * Gets the track manager instance for the platform
      *
      * @return the track manager
      */
-    TrackManager getTrackManager();
+    TrackManager<?> getTrackManager();
 
     /**
      * Gets the plugin's configuration
@@ -127,11 +128,18 @@ public interface LuckPermsPlugin {
     UuidCache getUuidCache();
 
     /**
+     * Gets the event factory
+     *
+     * @return the event factory
+     */
+    EventFactory getEventFactory();
+
+    /**
      * Returns the class implementing the LuckPermsAPI on this platform.
      *
      * @return the api
      */
-    ApiProvider getApiProvider();
+    LuckPermsApiProvider getApiProvider();
 
     /**
      * Gets the command manager
@@ -146,6 +154,13 @@ public interface LuckPermsPlugin {
      * @return the locale manager
      */
     LocaleManager getLocaleManager();
+
+    /**
+     * Gets the classloader wrapper for adding dependencies to the classpath
+     *
+     * @return the plugin classloader
+     */
+    PluginClassLoader getPluginClassLoader();
 
     /**
      * Gets the dependency manager for the plugin
@@ -286,17 +301,6 @@ public interface LuckPermsPlugin {
     InputStream getResourceStream(String path);
 
     /**
-     * Returns a colored string indicating the status of a player
-     *
-     * @param uuid The player's uuid
-     * @return a formatted status string
-     */
-    default Message getPlayerStatus(UUID uuid) {
-        UUID external = getUuidCache().getExternalUUID(uuid);
-        return isPlayerOnline(external) ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
-    }
-
-    /**
      * Gets a player object linked to this User. The returned object must be the same type
      * as the instance used in the platforms {@link ContextManager}
      *
@@ -398,13 +402,13 @@ public interface LuckPermsPlugin {
 
     }
 
-    static void sendStartupBanner(Sender sender, LuckPermsPlugin plugin) {
+    default void sendStartupBanner(Sender sender) {
         sender.sendMessage(CommandUtils.color("&b               __       &3 __   ___  __         __  "));
         sender.sendMessage(CommandUtils.color("&b    |    |  | /  ` |__/ &3|__) |__  |__)  |\\/| /__` "));
         sender.sendMessage(CommandUtils.color("&b    |___ \\__/ \\__, |  \\ &3|    |___ |  \\  |  | .__/ "));
         sender.sendMessage(CommandUtils.color(" "));
-        sender.sendMessage(CommandUtils.color("&2  Loading version &bv" + plugin.getVersion() + "&2 on " + plugin.getServerType().getFriendlyName() + " - " + plugin.getServerBrand()));
-        sender.sendMessage(CommandUtils.color("&8  Running on server version " + plugin.getServerVersion()));
+        sender.sendMessage(CommandUtils.color("&2  Loading version &bv" + getVersion() + "&2 on " + getServerType().getFriendlyName() + " - " + getServerBrand()));
+        sender.sendMessage(CommandUtils.color("&8  Running on server version " + getServerVersion()));
         sender.sendMessage(CommandUtils.color(" "));
     }
 

@@ -39,6 +39,6 @@ public class GroupCachedData extends HolderCachedData<Group> implements GroupDat
 
     @Override
     protected String getHolderName() {
-        return holder.getName();
+        return this.holder.getName();
     }
 }

@@ -29,28 +29,20 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteStreams;
 
-import me.lucko.luckperms.api.platform.PlatformType;
-import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.jarrelocator.JarRelocator;
+import me.lucko.jarrelocator.Relocation;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
 
 import java.io.File;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Responsible for loading runtime dependencies.
@@ -84,6 +76,8 @@ public class DependencyManager {
 
     private final LuckPermsPlugin plugin;
     private final MessageDigest digest;
+    private final DependencyRegistry registry;
+    private final EnumSet<Dependency> alreadyLoaded = EnumSet.noneOf(Dependency.class);
 
     public DependencyManager(LuckPermsPlugin plugin) {
         this.plugin = plugin;
@@ -92,94 +86,142 @@ public class DependencyManager {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
+        this.registry = new DependencyRegistry(plugin);
     }
 
     public void loadStorageDependencies(Set<StorageType> storageTypes) {
-        Set<Dependency> dependencies = new LinkedHashSet<>();
-        for (StorageType storageType : storageTypes) {
-            dependencies.addAll(STORAGE_DEPENDENCIES.get(storageType));
-        }
-
-        if (plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
-            dependencies.add(Dependency.JEDIS);
-        }
-
-        // don't load slf4j if it's already present
-        if (classExists("org.slf4j.Logger") && classExists("org.slf4j.LoggerFactory")) {
-            dependencies.remove(Dependency.SLF4J_API);
-            dependencies.remove(Dependency.SLF4J_SIMPLE);
-        }
-
-        // don't load configurate dependencies on sponge
-        if (plugin.getServerType() == PlatformType.SPONGE) {
-            dependencies.remove(Dependency.CONFIGURATE_CORE);
-            dependencies.remove(Dependency.CONFIGURATE_GSON);
-            dependencies.remove(Dependency.CONFIGURATE_YAML);
-            dependencies.remove(Dependency.CONFIGURATE_HOCON);
-            dependencies.remove(Dependency.HOCON_CONFIG);
-        }
-
-        loadDependencies(dependencies);
+        loadDependencies(this.registry.resolveStorageDependencies(storageTypes));
     }
 
     public void loadDependencies(Set<Dependency> dependencies) {
-        plugin.getLog().info("Identified the following dependencies: " + dependencies.toString());
+        loadDependencies(dependencies, true);
+    }
 
-        File libDir = new File(plugin.getDataDirectory(), "lib");
-        if (!(libDir.exists() || libDir.mkdirs())) {
-            throw new RuntimeException("Unable to create lib dir - " + libDir.getPath());
+    public void loadDependencies(Set<Dependency> dependencies, boolean applyRemapping) {
+        if (applyRemapping) {
+            this.plugin.getLog().info("Identified the following dependencies: " + dependencies.toString());
         }
 
-        // Download files.
-        List<File> filesToLoad = new ArrayList<>();
+        File saveDirectory = new File(this.plugin.getDataDirectory(), "lib");
+        if (!(saveDirectory.exists() || saveDirectory.mkdirs())) {
+            throw new RuntimeException("Unable to create lib dir - " + saveDirectory.getPath());
+        }
+
+        // create a list of file sources
+        List<Source> sources = new ArrayList<>();
+
+        // obtain a file for each of the dependencies
         for (Dependency dependency : dependencies) {
+            if (!this.alreadyLoaded.add(dependency)) {
+                continue;
+            }
+
             try {
-                filesToLoad.add(downloadDependency(libDir, dependency));
+                File file = downloadDependency(saveDirectory, dependency);
+                sources.add(new Source(dependency, file));
             } catch (Throwable e) {
-                plugin.getLog().severe("Exception whilst downloading dependency " + dependency.name());
+                this.plugin.getLog().severe("Exception whilst downloading dependency " + dependency.name());
                 e.printStackTrace();
             }
         }
 
-        // Load classes.
-        for (File file : filesToLoad) {
+        // apply any remapping rules to the files
+        List<File> remappedJars = new ArrayList<>(sources.size());
+        if (applyRemapping) {
+            for (Source source : sources) {
+                try {
+                    // apply remap rules
+                    List<Relocation> relocations = source.dependency.getRelocations();
+
+                    if (relocations.isEmpty()) {
+                        remappedJars.add(source.file);
+                        continue;
+                    }
+
+                    File input = source.file;
+                    File output = new File(input.getParentFile(), "remap-" + input.getName());
+
+                    // if the remapped file exists already, just use that.
+                    if (output.exists()) {
+                        remappedJars.add(output);
+                        continue;
+                    }
+
+                    // make sure ASM is loaded
+                    Set<Dependency> asmDepends = EnumSet.noneOf(Dependency.class);
+                    if (!DependencyRegistry.asmPresent()) {
+                        asmDepends.add(Dependency.ASM);
+                    }
+                    if (!DependencyRegistry.asmCommonsPresent()) {
+                        asmDepends.add(Dependency.ASM_COMMONS);
+                    }
+                    if (!asmDepends.isEmpty()) {
+                        // load asm before calling the jar relocator
+                        loadDependencies(asmDepends, false);
+                    }
+
+                    // attempt to remap the jar.
+                    this.plugin.getLog().info("Attempting to remap " + input.getName() + "...");
+                    JarRelocator relocator = new JarRelocator(input, output, relocations);
+                    relocator.run();
+
+                    remappedJars.add(output);
+                } catch (Throwable e) {
+                    this.plugin.getLog().severe("Unable to remap the source file '" + source.dependency.name() + "'.");
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            for (Source source : sources) {
+                remappedJars.add(source.file);
+            }
+        }
+
+        // load each of the jars
+        for (File file : remappedJars) {
             try {
-                loadJar(file);
-            } catch (Throwable t) {
-                plugin.getLog().severe("Failed to load dependency jar " + file.getName());
-                t.printStackTrace();
+                this.plugin.getPluginClassLoader().loadJar(file);
+            } catch (Throwable e) {
+                this.plugin.getLog().severe("Failed to load dependency jar '" + file.getName() + "'.");
+                e.printStackTrace();
             }
         }
     }
 
-    private File downloadDependency(File libDir, Dependency dependency) throws Exception {
+    private File downloadDependency(File saveDirectory, Dependency dependency) throws Exception {
         String fileName = dependency.name().toLowerCase() + "-" + dependency.getVersion() + ".jar";
+        File file = new File(saveDirectory, fileName);
 
-        File file = new File(libDir, fileName);
+        // if the file already exists, don't attempt to re-download it.
         if (file.exists()) {
             return file;
         }
 
         URL url = new URL(dependency.getUrl());
-
-        plugin.getLog().info("Dependency '" + fileName + "' could not be found. Attempting to download.");
         try (InputStream in = url.openStream()) {
+
+            // download the jar content
             byte[] bytes = ByteStreams.toByteArray(in);
             if (bytes.length == 0) {
                 throw new RuntimeException("Empty stream");
             }
 
+
+            // compute a hash for the downloaded file
             byte[] hash = this.digest.digest(bytes);
 
-            plugin.getLog().info("Successfully downloaded '" + fileName + "' with checksum: " + Base64.getEncoder().encodeToString(hash));
+            this.plugin.getLog().info("Successfully downloaded '" + fileName + "' with checksum: " + Base64.getEncoder().encodeToString(hash));
 
+            // ensure the hash matches the expected checksum
             if (!Arrays.equals(hash, dependency.getChecksum())) {
                 throw new RuntimeException("Downloaded file had an invalid hash. Expected: " + Base64.getEncoder().encodeToString(dependency.getChecksum()));
             }
 
+            // if the checksum matches, save the content to disk
             Files.write(file.toPath(), bytes);
         }
 
+        // ensure the file saved correctly
         if (!file.exists()) {
             throw new IllegalStateException("File not present. - " + file.toString());
         } else {
@@ -187,27 +229,13 @@ public class DependencyManager {
         }
     }
 
-    private  void loadJar(File file) {
-        // get the classloader to load into
-        ClassLoader classLoader = plugin.getClass().getClassLoader();
+    private static final class Source {
+        private final Dependency dependency;
+        private final File file;
 
-        if (classLoader instanceof URLClassLoader) {
-            try {
-                ADD_URL_METHOD.invoke(classLoader, file.toURI().toURL());
-            } catch (IllegalAccessException | InvocationTargetException | MalformedURLException e) {
-                throw new RuntimeException("Unable to invoke URLClassLoader#addURL", e);
-            }
-        } else {
-            throw new RuntimeException("Unknown classloader type: " + classLoader.getClass());
-        }
-    }
-
-    private static boolean classExists(String className) {
-        try {
-            Class.forName(className);
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
+        private Source(Dependency dependency, File file) {
+            this.dependency = dependency;
+            this.file = file;
         }
     }
 

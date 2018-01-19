@@ -29,7 +29,6 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -54,16 +53,18 @@ public class UserInfo extends SubCommand<User> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), user)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
+        Message status = plugin.isPlayerOnline(plugin.getUuidCache().getExternalUUID(user.getUuid())) ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
+
         Message.USER_INFO_GENERAL.send(sender,
                 user.getName().orElse("Unknown"),
                 user.getUuid(),
-                plugin.getPlayerStatus(user.getUuid()).asString(plugin.getLocaleManager()),
+                status.asString(plugin.getLocaleManager()),
                 user.getPrimaryGroup().getValue(),
                 user.getOwnNodes().size(),
                 user.getOwnNodes().stream().filter(n -> !(n.isGroupNode() || n.isPrefix() || n.isSuffix() || n.isMeta())).mapToInt(n -> 1).sum(),

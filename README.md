@@ -32,8 +32,6 @@ mvn clean package
 You can find the output jars in the `target` directories.
 
 ## Contributing
-In order to contribute to and make changes to the plugin, you will need the dependencies listed above, plus the [Lombok plugin](https://projectlombok.org/download.html) for your IDE. 
-
 #### Pull Requests
 If you make any changes or improvements to the plugin which you think would be beneficial to others, please consider making a pull request to merge your changes back into the upstream project. (especially if your changes are bug fixes!)
 

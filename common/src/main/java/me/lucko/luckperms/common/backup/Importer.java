@@ -25,14 +25,12 @@
 
 package me.lucko.luckperms.common.backup;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.sender.DummySender;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.locale.Message;
@@ -81,13 +79,13 @@ public class Importer implements Runnable {
     @Override
     public void run() {
         long startTime = System.currentTimeMillis();
-        notify.forEach(s -> Message.IMPORT_START.send(s));
+        this.notify.forEach(s -> Message.IMPORT_START.send(s));
 
         // form instances for all commands, and register them
         int index = 1;
-        for (String command : commands) {
-            ImportCommand cmd = new ImportCommand(commandManager, index, command);
-            toExecute.add(cmd);
+        for (String command : this.commands) {
+            ImportCommand cmd = new ImportCommand(this.commandManager, index, command);
+            this.toExecute.add(cmd);
 
             if (cmd.getCommand().startsWith("creategroup ") || cmd.getCommand().startsWith("createtrack ")) {
                 cmd.process(); // process immediately
@@ -100,7 +98,7 @@ public class Importer implements Runnable {
         Cycle<List<ImportCommand>> commandPools = new Cycle<>(CommandUtils.nInstances(128, ArrayList::new));
 
         String lastTarget = null;
-        for (ImportCommand cmd : toExecute) {
+        for (ImportCommand cmd : this.toExecute) {
             // if the last target isn't the same, skip to a new pool
             if (lastTarget == null || !lastTarget.equals(cmd.getTarget())) {
                 commandPools.next();
@@ -126,7 +124,7 @@ public class Importer implements Runnable {
                     cmd.process();
                     processedCount.incrementAndGet();
                 }
-            }, commandManager.getPlugin().getScheduler().async()));
+            }, this.commandManager.getPlugin().getScheduler().async()));
         }
 
         // all of the threads have been scheduled now and are running. we just need to wait for them all to complete
@@ -153,24 +151,24 @@ public class Importer implements Runnable {
         long endTime = System.currentTimeMillis();
         double seconds = (endTime - startTime) / 1000;
 
-        int errors = (int) toExecute.stream().filter(v -> !v.getResult().asBoolean()).count();
+        int errors = (int) this.toExecute.stream().filter(v -> !v.getResult().asBoolean()).count();
 
         switch (errors) {
             case 0:
-                notify.forEach(s -> Message.IMPORT_END_COMPLETE.send(s, seconds));
+                this.notify.forEach(s -> Message.IMPORT_END_COMPLETE.send(s, seconds));
                 break;
             case 1:
-                notify.forEach(s -> Message.IMPORT_END_COMPLETE_ERR_SIN.send(s, seconds, errors));
+                this.notify.forEach(s -> Message.IMPORT_END_COMPLETE_ERR_SIN.send(s, seconds, errors));
                 break;
             default:
-                notify.forEach(s -> Message.IMPORT_END_COMPLETE_ERR.send(s, seconds, errors));
+                this.notify.forEach(s -> Message.IMPORT_END_COMPLETE_ERR.send(s, seconds, errors));
                 break;
         }
 
         AtomicInteger errIndex = new AtomicInteger(1);
-        for (ImportCommand e : toExecute) {
+        for (ImportCommand e : this.toExecute) {
             if (e.getResult() != null && !e.getResult().asBoolean()) {
-                notify.forEach(s -> {
+                this.notify.forEach(s -> {
                     Message.IMPORT_END_ERROR_HEADER.send(s, errIndex.get(), e.getId(), e.getCommand(), e.getResult().toString());
                     for (String out : e.getOutput()) {
                         Message.IMPORT_END_ERROR_CONTENT.send(s, out);
@@ -184,19 +182,19 @@ public class Importer implements Runnable {
     }
 
     private void sendProgress(int processedCount) {
-        int percent = (processedCount * 100) / commands.size();
-        int errors = (int) toExecute.stream().filter(v -> v.isCompleted() && !v.getResult().asBoolean()).count();
+        int percent = (processedCount * 100) / this.commands.size();
+        int errors = (int) this.toExecute.stream().filter(v -> v.isCompleted() && !v.getResult().asBoolean()).count();
 
         if (errors == 1) {
-            notify.forEach(s -> Message.IMPORT_PROGRESS_SIN.send(s, percent, processedCount, commands.size(), errors));
+            this.notify.forEach(s -> Message.IMPORT_PROGRESS_SIN.send(s, percent, processedCount, this.commands.size(), errors));
         } else {
-            notify.forEach(s -> Message.IMPORT_PROGRESS.send(s, percent, processedCount, commands.size(), errors));
+            this.notify.forEach(s -> Message.IMPORT_PROGRESS.send(s, percent, processedCount, this.commands.size(), errors));
         }
     }
 
-    @Getter
     private static class ImportCommand extends DummySender {
-        private static final Splitter SPACE_SPLIT = Splitter.on(" ");
+        private static final Splitter ARGUMENT_SPLITTER = Splitter.on(CommandManager.COMMAND_SEPARATOR_PATTERN).omitEmptyStrings();
+        private static final Splitter SPACE_SPLITTER = Splitter.on(" ");
 
         private final CommandManager commandManager;
         private final int id;
@@ -204,12 +202,10 @@ public class Importer implements Runnable {
 
         private final String target;
 
-        @Setter
         private boolean completed = false;
 
         private final List<String> output = new ArrayList<>();
 
-        @Setter
         private CommandResult result = CommandResult.FAILURE;
 
         ImportCommand(CommandManager commandManager, int id, String command) {
@@ -222,7 +218,7 @@ public class Importer implements Runnable {
 
         @Override
         protected void consumeMessage(String s) {
-            output.add(s);
+            this.output.add(s);
         }
 
         public void process() {
@@ -231,13 +227,9 @@ public class Importer implements Runnable {
             }
 
             try {
-                CommandResult result = commandManager.onCommand(
-                        this,
-                        "lp",
-                        CommandManager.stripQuotes(Splitter.on(CommandManager.COMMAND_SEPARATOR_PATTERN).omitEmptyStrings().splitToList(getCommand()))
-                ).get();
+                List<String> args = CommandManager.stripQuotes(ARGUMENT_SPLITTER.splitToList(getCommand()));
+                CommandResult result = this.commandManager.onCommand(this, "lp", args, Runnable::run).get();
                 setResult(result);
-
             } catch (Exception e) {
                 setResult(CommandResult.FAILURE);
                 e.printStackTrace();
@@ -253,7 +245,7 @@ public class Importer implements Runnable {
                     return null;
                 }
 
-                String targetUser = SPACE_SPLIT.split(subCmd).iterator().next();
+                String targetUser = SPACE_SPLITTER.split(subCmd).iterator().next();
                 return "u:" + targetUser;
             }
 
@@ -263,7 +255,7 @@ public class Importer implements Runnable {
                     return null;
                 }
 
-                String targetGroup = SPACE_SPLIT.split(subCmd).iterator().next();
+                String targetGroup = SPACE_SPLITTER.split(subCmd).iterator().next();
                 return "g:" + targetGroup;
             }
 
@@ -273,7 +265,7 @@ public class Importer implements Runnable {
                     return null;
                 }
 
-                String targetTrack = SPACE_SPLIT.split(subCmd).iterator().next();
+                String targetTrack = SPACE_SPLITTER.split(subCmd).iterator().next();
                 return "t:" + targetTrack;
             }
 
@@ -290,6 +282,37 @@ public class Importer implements Runnable {
             return null;
         }
 
+        public int getId() {
+            return this.id;
+        }
+
+        public String getCommand() {
+            return this.command;
+        }
+
+        public String getTarget() {
+            return this.target;
+        }
+
+        public boolean isCompleted() {
+            return this.completed;
+        }
+
+        public List<String> getOutput() {
+            return this.output;
+        }
+
+        public CommandResult getResult() {
+            return this.result;
+        }
+
+        public void setCompleted(boolean completed) {
+            this.completed = completed;
+        }
+
+        public void setResult(CommandResult result) {
+            this.result = result;
+        }
     }
 
 }

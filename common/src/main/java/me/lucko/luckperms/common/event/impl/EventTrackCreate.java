@@ -25,21 +25,37 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.track.TrackCreateEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
-@Getter
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventTrackCreate extends AbstractEvent implements TrackCreateEvent {
 
     private final Track track;
     private final CreationCause cause;
 
+    public EventTrackCreate(Track track, CreationCause cause) {
+        this.track = track;
+        this.cause = cause;
+    }
+
+    @Nonnull
+    @Override
+    public Track getTrack() {
+        return this.track;
+    }
+
+    @Nonnull
+    @Override
+    public CreationCause getCause() {
+        return this.cause;
+    }
+
+    @Override
+    public String toString() {
+        return "EventTrackCreate(track=" + this.getTrack() + ", cause=" + this.getCause() + ")";
+    }
 }

@@ -26,7 +26,6 @@
 package me.lucko.luckperms.sponge.commands;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -52,7 +51,7 @@ public class ParentRemove extends SubCommand<LPSubjectData> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) {
         String collection = args.get(0);
         String name = args.get(1);
         ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(2, args);

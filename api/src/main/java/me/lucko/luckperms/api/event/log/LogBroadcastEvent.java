@@ -61,12 +61,17 @@ public interface LogBroadcastEvent extends LuckPermsEvent, Cancellable {
     enum Origin {
 
         /**
-         * Represents a log entry which originated from the current server instance
+         * Marks a log entry which originated from the current server instance
          */
         LOCAL,
 
         /**
-         * Represents a log entry which was sent to this server via the messaging service
+         * Marks a log entry which originated from an API call on the current server instance
+         */
+        LOCAL_API,
+
+        /**
+         * Marks a log entry which was sent to this server via the messaging service
          */
         REMOTE
     }

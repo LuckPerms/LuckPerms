@@ -12,7 +12,6 @@
         <module>api</module>
         <module>common</module>
         <module>bukkit</module>
-        <module>bukkit-legacy</module>
         <module>bungee</module>
         <module>sponge/sponge-service</module>
         <module>sponge/sponge-service-api6</module>
@@ -65,7 +64,6 @@
         <!-- Standard versions used by the whole project -->
         <compiler.version>3.7.0</compiler.version>
         <shade.version>3.1.0</shade.version>
-        <lombok.version>1.16.18</lombok.version>
     </properties>
 
     <distributionManagement>

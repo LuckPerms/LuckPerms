@@ -25,23 +25,46 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.api.event.track.TrackDeleteEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
 import java.util.List;
 
-@Getter
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventTrackDelete extends AbstractEvent implements TrackDeleteEvent {
 
     private final String trackName;
     private final List<String> existingData;
     private final DeletionCause cause;
 
+    public EventTrackDelete(String trackName, List<String> existingData, DeletionCause cause) {
+        this.trackName = trackName;
+        this.existingData = existingData;
+        this.cause = cause;
+    }
+
+    @Nonnull
+    @Override
+    public String getTrackName() {
+        return this.trackName;
+    }
+
+    @Nonnull
+    @Override
+    public List<String> getExistingData() {
+        return this.existingData;
+    }
+
+    @Nonnull
+    @Override
+    public DeletionCause getCause() {
+        return this.cause;
+    }
+
+    @Override
+    public String toString() {
+        return "EventTrackDelete(trackName=" + this.getTrackName() + ", existingData=" + this.getExistingData() + ", cause=" + this.getCause() + ")";
+    }
 }

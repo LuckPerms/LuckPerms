@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.caching.type;
 
-import lombok.NonNull;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.PermissionData;
@@ -39,10 +37,17 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.Nonnull;
+
 /**
  * Holds cached permissions data for a given context
  */
 public class PermissionCache implements PermissionData {
+
+    /**
+     * The contexts this container is holding data for
+     */
+    private final Contexts contexts;
 
     /**
      * The raw set of permission strings.
@@ -62,42 +67,57 @@ public class PermissionCache implements PermissionData {
     private final PermissionCalculator calculator;
 
     public PermissionCache(Contexts contexts, PermissionCalculatorMetadata metadata, CalculatorFactory calculatorFactory) {
-        permissions = new ConcurrentHashMap<>();
-        permissionsUnmodifiable = Collections.unmodifiableMap(permissions);
+        this.contexts = contexts;
+        this.permissions = new ConcurrentHashMap<>();
+        this.permissionsUnmodifiable = Collections.unmodifiableMap(this.permissions);
 
-        calculator = calculatorFactory.build(contexts, metadata);
-        calculator.updateBacking(permissions); // Initial setup.
+        this.calculator = calculatorFactory.build(contexts, metadata);
+        this.calculator.updateBacking(this.permissions); // Initial setup.
     }
 
     @Override
     public void invalidateCache() {
-        calculator.invalidateCache();
+        this.calculator.invalidateCache();
     }
 
     private void setPermissionsInternal(Map<String, Boolean> permissions) {
         this.permissions.clear();
         this.permissions.putAll(permissions);
-        calculator.updateBacking(this.permissions);
+        this.calculator.updateBacking(this.permissions);
         invalidateCache();
     }
 
     public void setPermissions(Map<String, Boolean> toApply) {
-        if (!permissions.equals(toApply)) {
+        if (!this.permissions.equals(toApply)) {
             setPermissionsInternal(toApply);
         }
     }
 
+    @Nonnull
     @Override
     public Map<String, Boolean> getImmutableBacking() {
-        return permissionsUnmodifiable;
+        return this.permissionsUnmodifiable;
     }
 
+    @Nonnull
     @Override
-    public Tristate getPermissionValue(@NonNull String permission) {
-        return calculator.getPermissionValue(permission, CheckOrigin.API);
+    public Tristate getPermissionValue(@Nonnull String permission) {
+        if (permission == null) {
+            throw new NullPointerException("permission");
+        }
+        return this.calculator.getPermissionValue(permission, CheckOrigin.API);
     }
 
-    public Tristate getPermissionValue(@NonNull String permission, CheckOrigin origin) {
-        return calculator.getPermissionValue(permission, origin);
+    public Tristate getPermissionValue(String permission, CheckOrigin origin) {
+        if (permission == null) {
+            throw new NullPointerException("permission");
+        }
+        return this.calculator.getPermissionValue(permission, origin);
+    }
+
+    @Nonnull
+    @Override
+    public Contexts getContexts() {
+        return this.contexts;
     }
 }

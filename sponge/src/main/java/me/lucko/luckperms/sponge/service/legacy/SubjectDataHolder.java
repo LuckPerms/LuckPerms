@@ -25,11 +25,9 @@
 
 package me.lucko.luckperms.sponge.service.legacy;
 
-import lombok.ToString;
-
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
-import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
+import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorageModel;
 
 import java.util.List;
@@ -41,7 +39,6 @@ import java.util.stream.Collectors;
  * @see SubjectStorageModel
  */
 @SuppressWarnings("DeprecatedIsStillUsed")
-@ToString
 @Deprecated
 public class SubjectDataHolder {
     private Map<Map<String, String>, Map<String, Boolean>> permissions;
@@ -54,17 +51,17 @@ public class SubjectDataHolder {
 
     public SubjectStorageModel asSubjectModel(LPPermissionService service) {
         return new SubjectStorageModel(service,
-                permissions.entrySet().stream()
+                this.permissions.entrySet().stream()
                         .collect(Collectors.toMap(
                                 k -> ImmutableContextSet.fromMap(k.getKey()),
                                 Map.Entry::getValue
                         )),
-                options.entrySet().stream()
+                this.options.entrySet().stream()
                         .collect(Collectors.toMap(
                                 k -> ImmutableContextSet.fromMap(k.getKey()),
                                 Map.Entry::getValue
                         )),
-                parents.entrySet().stream()
+                this.parents.entrySet().stream()
                         .collect(Collectors.toMap(
                                 k -> ImmutableContextSet.fromMap(k.getKey()),
                                 v -> v.getValue().stream().map(s -> SubjectReferenceFactory.deserialize(service, s)).collect(Collectors.toList())

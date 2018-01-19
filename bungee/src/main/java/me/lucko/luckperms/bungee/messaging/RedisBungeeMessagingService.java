@@ -50,22 +50,22 @@ public class RedisBungeeMessagingService extends AbstractMessagingService implem
 
     public void init() {
         this.redisBungee = RedisBungee.getApi();
-        redisBungee.registerPubSubChannels(CHANNEL);
+        this.redisBungee.registerPubSubChannels(CHANNEL);
 
-        plugin.getProxy().getPluginManager().registerListener(plugin, this);
+        this.plugin.getProxy().getPluginManager().registerListener(this.plugin, this);
     }
 
     @Override
     public void close() {
-        redisBungee.unregisterPubSubChannels(CHANNEL);
-        redisBungee = null;
+        this.redisBungee.unregisterPubSubChannels(CHANNEL);
+        this.redisBungee = null;
 
-        plugin.getProxy().getPluginManager().unregisterListener(this);
+        this.plugin.getProxy().getPluginManager().unregisterListener(this);
     }
 
     @Override
     protected void sendMessage(String message) {
-        redisBungee.sendChannelMessage(CHANNEL, message);
+        this.redisBungee.sendChannelMessage(CHANNEL, message);
     }
 
     @EventHandler

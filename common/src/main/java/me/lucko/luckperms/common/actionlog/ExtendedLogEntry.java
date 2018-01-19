@@ -25,11 +25,6 @@
 
 package me.lucko.luckperms.common.actionlog;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.ToString;
-
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
@@ -50,16 +45,18 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
 
 /**
  * An implementation of {@link LogEntry} and {@link LogEntry.Builder},
  * with helper methods for populating and using the entry using internal
  * LuckPerms classes.
  */
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ExtendedLogEntry implements LogEntry {
 
     private static final Comparator<LogEntry> COMPARATOR = Comparator
@@ -88,68 +85,84 @@ public class ExtendedLogEntry implements LogEntry {
     private final String actedName;
     private final String action;
 
+    private ExtendedLogEntry(long timestamp, UUID actor, String actorName, Type type, UUID acted, String actedName, String action) {
+        this.timestamp = timestamp;
+        this.actor = actor;
+        this.actorName = actorName;
+        this.type = type;
+        this.acted = acted;
+        this.actedName = actedName;
+        this.action = action;
+    }
+
     @Override
     public long getTimestamp() {
-        return timestamp;
+        return this.timestamp;
     }
 
+    @Nonnull
     @Override
     public UUID getActor() {
-        return actor;
+        return this.actor;
     }
 
+    @Nonnull
     @Override
     public String getActorName() {
-        return actorName;
+        return this.actorName;
     }
 
     public String getActorFriendlyString() {
-        if (Strings.isNullOrEmpty(actorName) || actorName.equals("null")) {
-            return actor.toString();
+        if (Strings.isNullOrEmpty(this.actorName) || this.actorName.equals("null")) {
+            return this.actor.toString();
         }
-        return actorName;
+        return this.actorName;
     }
 
+    @Nonnull
     @Override
     public Type getType() {
-        return type;
+        return this.type;
     }
 
+    @Nonnull
     @Override
     public Optional<UUID> getActed() {
-        return Optional.ofNullable(acted);
+        return Optional.ofNullable(this.acted);
     }
 
+    @Nonnull
     @Override
     public String getActedName() {
-        return actedName;
+        return this.actedName;
     }
 
     public String getActedFriendlyString() {
-        if (Strings.isNullOrEmpty(actedName) || actedName.equals("null")) {
-            if (acted != null) {
-                return acted.toString();
+        if (Strings.isNullOrEmpty(this.actedName) || this.actedName.equals("null")) {
+            if (this.acted != null) {
+                return this.acted.toString();
             }
         }
-        return String.valueOf(actedName);
+        return String.valueOf(this.actedName);
     }
 
+    @Nonnull
     @Override
     public String getAction() {
-        return action;
+        return this.action;
     }
 
     @Override
-    public int compareTo(LogEntry other) {
-        Preconditions.checkNotNull(other, "other");
+    public int compareTo(@Nonnull LogEntry other) {
+        Objects.requireNonNull(other, "other");
         return COMPARATOR.compare(this, other);
     }
 
     public boolean matchesSearch(String query) {
-        query = Preconditions.checkNotNull(query, "query").toLowerCase();
-        return actorName.toLowerCase().contains(query) ||
-                actedName.toLowerCase().contains(query) ||
-                action.toLowerCase().contains(query);
+        query = Objects.requireNonNull(query, "query").toLowerCase();
+        return this.actorName.toLowerCase().contains(query) ||
+                this.actedName.toLowerCase().contains(query) ||
+                this.action.toLowerCase().contains(query);
     }
 
     public void submit(LuckPermsPlugin plugin, Sender sender) {
@@ -172,15 +185,15 @@ public class ExtendedLogEntry implements LogEntry {
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof LogEntry)) return false;
-        final LogEntry other = (LogEntry) o;
+        final LogEntry that = (LogEntry) o;
 
-        return this.getTimestamp() == other.getTimestamp() &&
-                this.getActor().equals(other.getActor()) &&
-                this.getActorName().equals(other.getActorName()) &&
-                this.getType() == other.getType() &&
-                this.getActed().equals(other.getActed()) &&
-                this.getActedName().equals(other.getActedName()) &&
-                this.getAction().equals(other.getAction());
+        return this.getTimestamp() == that.getTimestamp() &&
+                this.getActor().equals(that.getActor()) &&
+                this.getActorName().equals(that.getActorName()) &&
+                this.getType() == that.getType() &&
+                this.getActed().equals(that.getActed()) &&
+                this.getActedName().equals(that.getActedName()) &&
+                this.getAction().equals(that.getAction());
     }
 
     @Override
@@ -197,7 +210,6 @@ public class ExtendedLogEntry implements LogEntry {
         return result;
     }
 
-    @ToString
     public static class ExtendedLogEntryBuilder implements LogEntry.Builder {
 
         private long timestamp = 0L;
@@ -208,45 +220,52 @@ public class ExtendedLogEntry implements LogEntry {
         private String actedName = null;
         private String action = null;
 
+        @Nonnull
         @Override
         public ExtendedLogEntryBuilder setTimestamp(long timestamp) {
             this.timestamp = timestamp;
             return this;
         }
 
+        @Nonnull
         @Override
-        public ExtendedLogEntryBuilder setActor(UUID actor) {
-            this.actor = Preconditions.checkNotNull(actor, "actor");
+        public ExtendedLogEntryBuilder setActor(@Nonnull UUID actor) {
+            this.actor = Objects.requireNonNull(actor, "actor");
             return this;
         }
 
+        @Nonnull
         @Override
-        public ExtendedLogEntryBuilder setActorName(String actorName) {
-            this.actorName = Preconditions.checkNotNull(actorName, "actorName");
+        public ExtendedLogEntryBuilder setActorName(@Nonnull String actorName) {
+            this.actorName = Objects.requireNonNull(actorName, "actorName");
             return this;
         }
 
+        @Nonnull
         @Override
-        public ExtendedLogEntryBuilder setType(Type type) {
-            this.type = Preconditions.checkNotNull(type, "type");
+        public ExtendedLogEntryBuilder setType(@Nonnull Type type) {
+            this.type = Objects.requireNonNull(type, "type");
             return this;
         }
 
+        @Nonnull
         @Override
         public ExtendedLogEntryBuilder setActed(UUID acted) {
             this.acted = acted; // nullable
             return this;
         }
 
+        @Nonnull
         @Override
-        public ExtendedLogEntryBuilder setActedName(String actedName) {
-            this.actedName = Preconditions.checkNotNull(actedName, "actedName");
+        public ExtendedLogEntryBuilder setActedName(@Nonnull String actedName) {
+            this.actedName = Objects.requireNonNull(actedName, "actedName");
             return this;
         }
 
+        @Nonnull
         @Override
-        public ExtendedLogEntryBuilder setAction(String action) {
-            this.action = Preconditions.checkNotNull(action, "action");
+        public ExtendedLogEntryBuilder setAction(@Nonnull String action) {
+            this.action = Objects.requireNonNull(action, "action");
             return this;
         }
 
@@ -333,26 +352,39 @@ public class ExtendedLogEntry implements LogEntry {
             return this;
         }
 
+        @Nonnull
         @Override
         public ExtendedLogEntry build() {
-            if (timestamp == 0L) {
+            if (this.timestamp == 0L) {
                 timestamp(DateUtil.unixSecondsNow());
             }
 
-            Preconditions.checkNotNull(actor, "actor");
-            Preconditions.checkNotNull(actorName, "actorName");
-            Preconditions.checkNotNull(type, "type");
-            Preconditions.checkNotNull(actedName, "actedName");
-            Preconditions.checkNotNull(action, "action");
+            Objects.requireNonNull(this.actor, "actor");
+            Objects.requireNonNull(this.actorName, "actorName");
+            Objects.requireNonNull(this.type, "type");
+            Objects.requireNonNull(this.actedName, "actedName");
+            Objects.requireNonNull(this.action, "action");
 
-            return new ExtendedLogEntry(timestamp, actor, actorName, type, acted, actedName, action);
+            return new ExtendedLogEntry(this.timestamp, this.actor, this.actorName, this.type, this.acted, this.actedName, this.action);
+        }
+
+        @Override
+        public String toString() {
+            return "ExtendedLogEntry.ExtendedLogEntryBuilder(" +
+                    "timestamp=" + this.timestamp + ", " +
+                    "actor=" + this.actor + ", " +
+                    "actorName=" + this.actorName + ", " +
+                    "type=" + this.type + ", " +
+                    "acted=" + this.acted + ", " +
+                    "actedName=" + this.actedName + ", " +
+                    "action=" + this.action + ")";
         }
     }
 
-    public static JsonObject serializeWithId(UUID id, LogEntry entry) {
+    public static JsonObject serializeWithId(String id, LogEntry entry) {
         JsonObject data = new JsonObject();
 
-        data.add("id", new JsonPrimitive(id.toString()));
+        data.add("id", new JsonPrimitive(id));
         data.add("actor", new JsonPrimitive(entry.getActor().toString()));
         data.add("actorName", new JsonPrimitive(entry.getActorName()));
         data.add("type", new JsonPrimitive(entry.getType().name()));
@@ -365,10 +397,10 @@ public class ExtendedLogEntry implements LogEntry {
         return data;
     }
 
-    public static Map.Entry<UUID, ExtendedLogEntry> deserialize(JsonObject object) {
+    public static Map.Entry<String, ExtendedLogEntry> deserialize(JsonObject object) {
         ExtendedLogEntryBuilder builder = build();
 
-        UUID id = UUID.fromString(object.get("id").getAsString());
+        String id = object.get("id").getAsString();
 
         builder.actor(UUID.fromString(object.get("actor").getAsString()));
         builder.actorName(object.get("actorName").getAsString());

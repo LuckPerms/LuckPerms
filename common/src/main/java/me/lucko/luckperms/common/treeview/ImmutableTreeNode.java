@@ -37,6 +37,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
 /**
  * An immutable and sorted version of TreeNode
  *
@@ -66,7 +68,7 @@ public class ImmutableTreeNode implements Comparable<ImmutableTreeNode> {
     }
 
     public Optional<Map<String, ImmutableTreeNode>> getChildren() {
-        return Optional.ofNullable(children);
+        return Optional.ofNullable(this.children);
     }
 
     /**
@@ -77,12 +79,12 @@ public class ImmutableTreeNode implements Comparable<ImmutableTreeNode> {
      * @return the node endings
      */
     public List<Map.Entry<Integer, String>> getNodeEndings() {
-        if (children == null) {
+        if (this.children == null) {
             return Collections.emptyList();
         }
 
         List<Map.Entry<Integer, String>> results = new ArrayList<>();
-        for (Map.Entry<String, ImmutableTreeNode> node : children.entrySet()) {
+        for (Map.Entry<String, ImmutableTreeNode> node : this.children.entrySet()) {
 
             // add self
             results.add(Maps.immutableEntry(0, node.getKey()));
@@ -100,7 +102,7 @@ public class ImmutableTreeNode implements Comparable<ImmutableTreeNode> {
     }
 
     @Override
-    public int compareTo(ImmutableTreeNode o) {
-        return (children != null) == o.getChildren().isPresent() ? 0 : (children != null ? 1 : -1);
+    public int compareTo(@Nonnull ImmutableTreeNode o) {
+        return (this.children != null) == o.getChildren().isPresent() ? 0 : (this.children != null ? 1 : -1);
     }
 }

@@ -25,22 +25,21 @@
 
 package me.lucko.luckperms.common.references;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.function.Consumer;
 
-@Getter
-@ToString
-@EqualsAndHashCode
-@AllArgsConstructor(staticName = "of")
 public final class UserReference implements HolderReference<User, UserIdentifier> {
+    public static UserReference of(UserIdentifier id) {
+        return new UserReference(id);
+    }
+
     private final UserIdentifier id;
+
+    private UserReference(UserIdentifier id) {
+        this.id = id;
+    }
 
     @Override
     public HolderType getType() {
@@ -49,10 +48,32 @@ public final class UserReference implements HolderReference<User, UserIdentifier
 
     @Override
     public void apply(LuckPermsPlugin plugin, Consumer<User> consumer) {
-        User user = plugin.getUserManager().getIfLoaded(id);
+        User user = plugin.getUserManager().getIfLoaded(this.id);
         if (user == null) return;
 
         consumer.accept(user);
     }
 
+    @Override
+    public UserIdentifier getId() {
+        return this.id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof UserReference)) return false;
+        final UserReference other = (UserReference) o;
+        return this.id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "UserReference(id=" + this.getId() + ")";
+    }
 }

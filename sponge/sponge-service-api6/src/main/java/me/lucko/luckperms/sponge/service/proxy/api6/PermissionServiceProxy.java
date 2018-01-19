@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.sponge.service.proxy.api6;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
@@ -43,33 +41,43 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-@RequiredArgsConstructor
+import javax.annotation.Nonnull;
+
 public final class PermissionServiceProxy implements PermissionService {
     private final LPPermissionService handle;
 
+    public PermissionServiceProxy(LPPermissionService handle) {
+        this.handle = handle;
+    }
+
+    @Nonnull
     @Override
     public SubjectCollection getUserSubjects() {
-        return handle.getUserSubjects().sponge();
+        return this.handle.getUserSubjects().sponge();
     }
 
+    @Nonnull
     @Override
     public SubjectCollection getGroupSubjects() {
-        return handle.getGroupSubjects().sponge();
+        return this.handle.getGroupSubjects().sponge();
     }
 
+    @Nonnull
     @Override
     public Subject getDefaults() {
-        return handle.getDefaults().sponge();
+        return this.handle.getDefaults().sponge();
     }
 
+    @Nonnull
     @Override
-    public SubjectCollection getSubjects(String s) {
-        return handle.getCollection(s).sponge();
+    public SubjectCollection getSubjects(@Nonnull String s) {
+        return this.handle.getCollection(s).sponge();
     }
 
+    @Nonnull
     @Override
     public Map<String, SubjectCollection> getKnownSubjects() {
-        return handle.getLoadedCollections().entrySet().stream()
+        return this.handle.getLoadedCollections().entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> e.getValue().sponge()
@@ -77,38 +85,40 @@ public final class PermissionServiceProxy implements PermissionService {
     }
 
     @Override
-    public Optional<PermissionDescription.Builder> newDescriptionBuilder(Object o) {
+    public Optional<PermissionDescription.Builder> newDescriptionBuilder(@Nonnull Object o) {
         Optional<PluginContainer> container = Sponge.getGame().getPluginManager().fromInstance(o);
         if (!container.isPresent()) {
             throw new IllegalArgumentException("Couldn't find a plugin container for " + o.getClass().getSimpleName());
         }
 
-        return Optional.of(new SimpleDescriptionBuilder(handle, container.get()));
+        return Optional.of(new LPDescriptionBuilder(this.handle, container.get()));
     }
 
+    @Nonnull
     @Override
-    public Optional<PermissionDescription> getDescription(String s) {
-        return handle.getDescription(s).map(LPPermissionDescription::sponge);
+    public Optional<PermissionDescription> getDescription(@Nonnull String s) {
+        return this.handle.getDescription(s).map(LPPermissionDescription::sponge);
     }
 
+    @Nonnull
     @Override
     public Collection<PermissionDescription> getDescriptions() {
-        return handle.getDescriptions().stream().map(LPPermissionDescription::sponge).collect(ImmutableCollectors.toSet());
+        return this.handle.getDescriptions().stream().map(LPPermissionDescription::sponge).collect(ImmutableCollectors.toSet());
     }
 
     @Override
-    public void registerContextCalculator(ContextCalculator<Subject> contextCalculator) {
-        handle.registerContextCalculator(contextCalculator);
+    public void registerContextCalculator(@Nonnull ContextCalculator<Subject> contextCalculator) {
+        this.handle.registerContextCalculator(contextCalculator);
     }
 
     @Override
     public boolean equals(Object o) {
-        return o == this || o instanceof PermissionServiceProxy && handle.equals(((PermissionServiceProxy) o).handle);
+        return o == this || o instanceof PermissionServiceProxy && this.handle.equals(((PermissionServiceProxy) o).handle);
     }
 
     @Override
     public int hashCode() {
-        return handle.hashCode();
+        return this.handle.hashCode();
     }
 
     @Override

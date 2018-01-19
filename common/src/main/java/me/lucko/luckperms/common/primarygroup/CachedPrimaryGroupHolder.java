@@ -52,13 +52,13 @@ public abstract class CachedPrimaryGroupHolder extends StoredHolder implements S
 
     @Override
     public String getValue() {
-        String s = cache.get();
+        String s = this.cache.get();
         return s != null ? s : getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME);
     }
 
     @Override
     public void onStateChange() {
-        cache.invalidate();
+        this.cache.invalidate();
     }
 
 }

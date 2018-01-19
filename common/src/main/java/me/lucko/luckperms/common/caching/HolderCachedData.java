@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.caching;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -46,14 +43,16 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nonnull;
+
 /**
  * Holds an easily accessible cache of a holders data in a number of contexts
  */
-@RequiredArgsConstructor
 public abstract class HolderCachedData<T extends PermissionHolder> implements CachedData {
 
     /**
@@ -75,6 +74,10 @@ public abstract class HolderCachedData<T extends PermissionHolder> implements Ca
             .expireAfterAccess(2, TimeUnit.MINUTES)
             .build(new MetaCacheLoader());
 
+    public HolderCachedData(T holder) {
+        this.holder = holder;
+    }
+
     protected abstract String getHolderName();
 
     /**
@@ -84,16 +87,18 @@ public abstract class HolderCachedData<T extends PermissionHolder> implements Ca
      * @param data an old data instance to try to reuse - ignored if null
      * @return the calculated instance
      */
-    private PermissionCache calculatePermissions(@NonNull Contexts contexts, PermissionCache data) {
+    private PermissionCache calculatePermissions(Contexts contexts, PermissionCache data) {
+        Objects.requireNonNull(contexts, "contexts");
+
         if (data == null) {
-            PermissionCalculatorMetadata metadata = PermissionCalculatorMetadata.of(holder.getType(), getHolderName(), contexts.getContexts());
-            data = new PermissionCache(contexts, metadata, holder.getPlugin().getCalculatorFactory());
+            PermissionCalculatorMetadata metadata = PermissionCalculatorMetadata.of(this.holder.getType(), getHolderName(), contexts.getContexts());
+            data = new PermissionCache(contexts, metadata, this.holder.getPlugin().getCalculatorFactory());
         }
 
         if (contexts == Contexts.allowAll()) {
-            data.setPermissions(holder.exportNodesAndShorthand(true));
+            data.setPermissions(this.holder.exportNodesAndShorthand(true));
         } else {
-            data.setPermissions(holder.exportNodesAndShorthand(contexts, true));
+            data.setPermissions(this.holder.exportNodesAndShorthand(contexts, true));
         }
 
         return data;
@@ -106,122 +111,153 @@ public abstract class HolderCachedData<T extends PermissionHolder> implements Ca
      * @param data an old data instance to try to reuse - ignored if null
      * @return the calculated instance
      */
-    private MetaCache calculateMeta(@NonNull MetaContexts contexts, MetaCache data) {
+    private MetaCache calculateMeta(MetaContexts contexts, MetaCache data) {
+        Objects.requireNonNull(contexts, "contexts");
+
         if (data == null) {
-            data = new MetaCache();
+            data = new MetaCache(contexts);
         }
 
         if (contexts.getContexts() == Contexts.allowAll()) {
-            data.loadMeta(holder.accumulateMeta(newAccumulator(contexts), null));
+            data.loadMeta(this.holder.accumulateMeta(newAccumulator(contexts), null));
         } else {
-            data.loadMeta(holder.accumulateMeta(newAccumulator(contexts), null, contexts.getContexts()));
+            data.loadMeta(this.holder.accumulateMeta(newAccumulator(contexts), null, contexts.getContexts()));
         }
 
         return data;
     }
 
+    @Nonnull
     @Override
-    public PermissionCache getPermissionData(@NonNull Contexts contexts) {
+    public PermissionCache getPermissionData(@Nonnull Contexts contexts) {
+        Objects.requireNonNull(contexts, "contexts");
+
         //noinspection ConstantConditions
-        return permission.get(contexts);
+        return this.permission.get(contexts);
     }
 
+    @Nonnull
     @Override
-    public MetaCache getMetaData(@NonNull MetaContexts contexts) {
+    public MetaCache getMetaData(@Nonnull MetaContexts contexts) {
+        Objects.requireNonNull(contexts, "contexts");
+
         //noinspection ConstantConditions
-        return meta.get(contexts);
+        return this.meta.get(contexts);
     }
 
+    @Nonnull
     @Override
-    public MetaCache getMetaData(@NonNull Contexts contexts) {
-        return getMetaData(makeFromMetaContextsConfig(contexts, holder.getPlugin()));
+    public MetaCache getMetaData(@Nonnull Contexts contexts) {
+        Objects.requireNonNull(contexts, "contexts");
+        return getMetaData(makeFromMetaContextsConfig(contexts, this.holder.getPlugin()));
     }
 
+    @Nonnull
     @Override
-    public PermissionCache calculatePermissions(@NonNull Contexts contexts) {
+    public PermissionCache calculatePermissions(@Nonnull Contexts contexts) {
+        Objects.requireNonNull(contexts, "contexts");
         return calculatePermissions(contexts, null);
     }
 
+    @Nonnull
     @Override
-    public MetaCache calculateMeta(@NonNull MetaContexts contexts) {
+    public MetaCache calculateMeta(@Nonnull MetaContexts contexts) {
+        Objects.requireNonNull(contexts, "contexts");
         return calculateMeta(contexts, null);
     }
 
+    @Nonnull
     @Override
-    public MetaCache calculateMeta(@NonNull Contexts contexts) {
-        return calculateMeta(makeFromMetaContextsConfig(contexts, holder.getPlugin()));
+    public MetaCache calculateMeta(@Nonnull Contexts contexts) {
+        Objects.requireNonNull(contexts, "contexts");
+        return calculateMeta(makeFromMetaContextsConfig(contexts, this.holder.getPlugin()));
     }
 
     @Override
-    public void recalculatePermissions(@NonNull Contexts contexts) {
-        permission.refresh(contexts);
+    public void recalculatePermissions(@Nonnull Contexts contexts) {
+        Objects.requireNonNull(contexts, "contexts");
+        this.permission.refresh(contexts);
     }
 
     @Override
-    public void recalculateMeta(@NonNull MetaContexts contexts) {
-        meta.refresh(contexts);
+    public void recalculateMeta(@Nonnull MetaContexts contexts) {
+        Objects.requireNonNull(contexts, "contexts");
+        this.meta.refresh(contexts);
     }
 
     @Override
-    public void recalculateMeta(@NonNull Contexts contexts) {
-        recalculateMeta(makeFromMetaContextsConfig(contexts, holder.getPlugin()));
+    public void recalculateMeta(@Nonnull Contexts contexts) {
+        Objects.requireNonNull(contexts, "contexts");
+        recalculateMeta(makeFromMetaContextsConfig(contexts, this.holder.getPlugin()));
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<PermissionCache> reloadPermissions(@NonNull Contexts contexts) {
+    public CompletableFuture<PermissionCache> reloadPermissions(@Nonnull Contexts contexts) {
+        Objects.requireNonNull(contexts, "contexts");
+
         // get the previous value - to use when recalculating
-        PermissionCache previous = permission.getIfPresent(contexts);
+        PermissionCache previous = this.permission.getIfPresent(contexts);
 
         // invalidate the entry
-        permission.invalidate(contexts);
+        this.permission.invalidate(contexts);
 
         // repopulate the cache
-        return CompletableFuture.supplyAsync(() -> permission.get(contexts, c -> calculatePermissions(c, previous)));
+        return CompletableFuture.supplyAsync(() -> this.permission.get(contexts, c -> calculatePermissions(c, previous)));
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<MetaCache> reloadMeta(@NonNull MetaContexts contexts) {
+    public CompletableFuture<MetaCache> reloadMeta(@Nonnull MetaContexts contexts) {
+        Objects.requireNonNull(contexts, "contexts");
+
         // get the previous value - to use when recalculating
-        MetaCache previous = meta.getIfPresent(contexts);
+        MetaCache previous = this.meta.getIfPresent(contexts);
 
         // invalidate the entry
-        meta.invalidate(contexts);
+        this.meta.invalidate(contexts);
 
         // repopulate the cache
-        return CompletableFuture.supplyAsync(() -> meta.get(contexts, c -> calculateMeta(c, previous)));
+        return CompletableFuture.supplyAsync(() -> this.meta.get(contexts, c -> calculateMeta(c, previous)));
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<MetaCache> reloadMeta(@NonNull Contexts contexts) {
-        return reloadMeta(makeFromMetaContextsConfig(contexts, holder.getPlugin()));
+    public CompletableFuture<MetaCache> reloadMeta(@Nonnull Contexts contexts) {
+        Objects.requireNonNull(contexts, "contexts");
+        return reloadMeta(makeFromMetaContextsConfig(contexts, this.holder.getPlugin()));
     }
 
     @Override
     public void recalculatePermissions() {
-        Set<Contexts> keys = permission.asMap().keySet();
+        Set<Contexts> keys = this.permission.asMap().keySet();
         keys.forEach(this::recalculatePermissions);
     }
 
     @Override
     public void recalculateMeta() {
-        Set<MetaContexts> keys = meta.asMap().keySet();
+        Set<MetaContexts> keys = this.meta.asMap().keySet();
         keys.forEach(this::recalculateMeta);
     }
 
+    @Nonnull
     @Override
     public CompletableFuture<Void> reloadPermissions() {
-        Set<Contexts> keys = new HashSet<>(permission.asMap().keySet());
+        Set<Contexts> keys = new HashSet<>(this.permission.asMap().keySet());
         return CompletableFuture.allOf(keys.stream().map(this::reloadPermissions).toArray(CompletableFuture[]::new));
     }
 
+    @Nonnull
     @Override
     public CompletableFuture<Void> reloadMeta() {
-        Set<MetaContexts> keys = new HashSet<>(meta.asMap().keySet());
+        Set<MetaContexts> keys = new HashSet<>(this.meta.asMap().keySet());
         return CompletableFuture.allOf(keys.stream().map(this::reloadMeta).toArray(CompletableFuture[]::new));
     }
 
     @Override
-    public void preCalculate(@NonNull Contexts contexts) {
+    public void preCalculate(@Nonnull Contexts contexts) {
+        Objects.requireNonNull(contexts, "contexts");
+
         // pre-calculate just by requesting the data from this cache.
         // if the data isn't already loaded, it will be calculated.
         getPermissionData(contexts);
@@ -229,55 +265,58 @@ public abstract class HolderCachedData<T extends PermissionHolder> implements Ca
     }
 
     @Override
-    public void invalidatePermissions(Contexts contexts) {
-        permission.invalidate(contexts);
+    public void invalidatePermissions(@Nonnull Contexts contexts) {
+        Objects.requireNonNull(contexts, "contexts");
+        this.permission.invalidate(contexts);
     }
 
     @Override
-    public void invalidateMeta(MetaContexts contexts) {
-        meta.invalidate(contexts);
+    public void invalidateMeta(@Nonnull MetaContexts contexts) {
+        Objects.requireNonNull(contexts, "contexts");
+        this.meta.invalidate(contexts);
     }
 
     @Override
-    public void invalidateMeta(Contexts contexts) {
-        meta.invalidate(makeFromMetaContextsConfig(contexts, holder.getPlugin()));
+    public void invalidateMeta(@Nonnull Contexts contexts) {
+        Objects.requireNonNull(contexts, "contexts");
+        this.meta.invalidate(makeFromMetaContextsConfig(contexts, this.holder.getPlugin()));
     }
 
     @Override
     public void invalidatePermissionCalculators() {
-        permission.asMap().values().forEach(PermissionCache::invalidateCache);
+        this.permission.asMap().values().forEach(PermissionCache::invalidateCache);
     }
 
     public void invalidateCaches() {
-        permission.invalidateAll();
-        meta.invalidateAll();
+        this.permission.invalidateAll();
+        this.meta.invalidateAll();
     }
 
     public void doCacheCleanup() {
-        permission.cleanUp();
-        meta.cleanUp();
+        this.permission.cleanUp();
+        this.meta.cleanUp();
     }
 
     private final class PermissionCacheLoader implements CacheLoader<Contexts, PermissionCache> {
         @Override
-        public PermissionCache load(Contexts contexts) {
+        public PermissionCache load(@Nonnull Contexts contexts) {
             return calculatePermissions(contexts);
         }
 
         @Override
-        public PermissionCache reload(Contexts contexts, PermissionCache oldData) {
+        public PermissionCache reload(@Nonnull Contexts contexts, @Nonnull PermissionCache oldData) {
             return calculatePermissions(contexts, oldData);
         }
     }
 
     private final class MetaCacheLoader implements CacheLoader<MetaContexts, MetaCache> {
         @Override
-        public MetaCache load(MetaContexts contexts) {
+        public MetaCache load(@Nonnull MetaContexts contexts) {
             return calculateMeta(contexts);
         }
 
         @Override
-        public MetaCache reload(MetaContexts contexts, MetaCache oldData) {
+        public MetaCache reload(@Nonnull MetaContexts contexts, @Nonnull MetaCache oldData) {
             return calculateMeta(contexts, oldData);
         }
     }

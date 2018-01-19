@@ -25,10 +25,6 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.log.LogNetworkPublishEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
@@ -36,13 +32,40 @@ import me.lucko.luckperms.common.event.AbstractEvent;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@Getter
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventLogNetworkPublish extends AbstractEvent implements LogNetworkPublishEvent {
 
     private final AtomicBoolean cancellationState;
     private final UUID logId;
     private final LogEntry entry;
 
+    public EventLogNetworkPublish(AtomicBoolean cancellationState, UUID logId, LogEntry entry) {
+        this.cancellationState = cancellationState;
+        this.logId = logId;
+        this.entry = entry;
+    }
+
+    @Nonnull
+    @Override
+    public AtomicBoolean getCancellationState() {
+        return this.cancellationState;
+    }
+
+    @Nonnull
+    @Override
+    public UUID getLogId() {
+        return this.logId;
+    }
+
+    @Nonnull
+    @Override
+    public LogEntry getEntry() {
+        return this.entry;
+    }
+
+    @Override
+    public String toString() {
+        return "EventLogNetworkPublish(cancellationState=" + this.getCancellationState() + ", logId=" + this.getLogId() + ", entry=" + this.getEntry() + ")";
+    }
 }

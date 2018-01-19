@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.commands.impl.track;
 
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -49,7 +48,7 @@ public class TrackRemove extends SubCommand<Track> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) {
         String groupName = args.get(0).toLowerCase();
         if (!DataConstraints.GROUP_NAME_TEST.test(groupName)) {
             sendDetailedUsage(sender, label);

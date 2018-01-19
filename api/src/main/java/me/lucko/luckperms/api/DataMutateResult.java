@@ -36,12 +36,12 @@ public enum DataMutateResult {
     SUCCESS(true),
 
     /**
-     * Indicates the mutation failed because the subject already has something
+     * Indicates the mutation failed because the subject of the action already has something
      */
     ALREADY_HAS(false),
 
     /**
-     * Indicates the mutation failed because the subject lacks something
+     * Indicates the mutation failed because the subject of the action lacks something
      */
     LACKS(false),
 
@@ -62,7 +62,7 @@ public enum DataMutateResult {
      * @return a boolean representation
      */
     public boolean asBoolean() {
-        return value;
+        return this.value;
     }
 
     /**
@@ -72,7 +72,7 @@ public enum DataMutateResult {
      * @since 3.4
      */
     public boolean wasSuccess() {
-        return value;
+        return this.value;
     }
 
     /**
@@ -82,7 +82,7 @@ public enum DataMutateResult {
      * @since 3.4
      */
     public boolean wasFailure() {
-        return !value;
+        return !this.value;
     }
 
 }

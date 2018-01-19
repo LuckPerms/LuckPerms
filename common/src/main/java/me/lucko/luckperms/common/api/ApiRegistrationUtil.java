@@ -23,49 +23,47 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.managers;
+package me.lucko.luckperms.common.api;
 
-import lombok.RequiredArgsConstructor;
+import me.lucko.luckperms.LuckPerms;
+import me.lucko.luckperms.api.LuckPermsApi;
 
-import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import java.lang.reflect.Method;
 
-@RequiredArgsConstructor
-public class GenericGroupManager extends AbstractManager<String, Group> implements GroupManager {
-    private final LuckPermsPlugin plugin;
+public class ApiRegistrationUtil {
+    private static final Method REGISTER;
+    private static final Method UNREGISTER;
+    static {
+        Method register;
+        Method unregister;
+        try {
+            register = LuckPerms.class.getDeclaredMethod("registerProvider", LuckPermsApi.class);
+            register.setAccessible(true);
 
-    @Override
-    public Group apply(String name) {
-        return new Group(name, plugin);
-    }
-
-    @Override
-    public Group getByDisplayName(String name) {
-        // try to get an exact match first
-        Group g = getIfLoaded(name);
-        if (g != null) {
-            return g;
+            unregister = LuckPerms.class.getDeclaredMethod("unregisterProvider");
+            unregister.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            throw new ExceptionInInitializerError(e);
         }
 
-        // then try exact display name matches
-        for (Group group : getAll().values()) {
-            if (group.getDisplayName().isPresent() && group.getDisplayName().get().equals(name)) {
-                return group;
-            }
-        }
-
-        // then try case insensitive name matches
-        for (Group group : getAll().values()) {
-            if (group.getDisplayName().isPresent() && group.getDisplayName().get().equalsIgnoreCase(name)) {
-                return group;
-            }
-        }
-
-        return null;
+        REGISTER = register;
+        UNREGISTER = unregister;
     }
 
-    @Override
-    protected String sanitizeIdentifier(String s) {
-        return s.toLowerCase();
+    public static void registerProvider(LuckPermsApi luckPermsApi) {
+        try {
+            REGISTER.invoke(null, luckPermsApi);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
+    public static void unregisterProvider() {
+        try {
+            UNREGISTER.invoke(null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

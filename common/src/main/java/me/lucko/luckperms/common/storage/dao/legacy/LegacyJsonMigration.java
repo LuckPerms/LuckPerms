@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.storage.dao.legacy;
 
-import lombok.RequiredArgsConstructor;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -53,7 +51,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
-@RequiredArgsConstructor
 public class LegacyJsonMigration implements Runnable {
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
@@ -62,21 +59,28 @@ public class LegacyJsonMigration implements Runnable {
     private final File oldDataFolder;
     private final File newDataFolder;
 
+    public LegacyJsonMigration(LuckPermsPlugin plugin, JsonDao backing, File oldDataFolder, File newDataFolder) {
+        this.plugin = plugin;
+        this.backing = backing;
+        this.oldDataFolder = oldDataFolder;
+        this.newDataFolder = newDataFolder;
+    }
+
     private void writeElementToFile(File file, JsonElement element) {
         try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
-            gson.toJson(element, writer);
+            this.gson.toJson(element, writer);
             writer.flush();
         } catch (Throwable t) {
-            plugin.getLog().warn("Exception whilst writing to file: " + file.getAbsolutePath());
+            this.plugin.getLog().warn("Exception whilst writing to file: " + file.getAbsolutePath());
             t.printStackTrace();
         }
     }
 
     private JsonObject readObjectFromFile(File file) {
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
-            return gson.fromJson(reader, JsonObject.class);
+            return this.gson.fromJson(reader, JsonObject.class);
         } catch (Throwable t) {
-            plugin.getLog().warn("Exception whilst reading from file: " + file.getAbsolutePath());
+            this.plugin.getLog().warn("Exception whilst reading from file: " + file.getAbsolutePath());
             t.printStackTrace();
             return null;
         }
@@ -84,18 +88,18 @@ public class LegacyJsonMigration implements Runnable {
 
     @Override
     public void run() {
-        plugin.getLog().warn("Moving existing files to their new location.");
-        relocateFile(oldDataFolder, newDataFolder, "actions.log");
-        relocateFile(oldDataFolder, newDataFolder, "uuidcache.txt");
-        relocateFile(oldDataFolder, newDataFolder, "tracks");
+        this.plugin.getLog().warn("Moving existing files to their new location.");
+        relocateFile(this.oldDataFolder, this.newDataFolder, "actions.log");
+        relocateFile(this.oldDataFolder, this.newDataFolder, "uuidcache.txt");
+        relocateFile(this.oldDataFolder, this.newDataFolder, "tracks");
 
-        plugin.getLog().warn("Migrating group files");
-        File oldGroupsDir = new File(oldDataFolder, "groups");
+        this.plugin.getLog().warn("Migrating group files");
+        File oldGroupsDir = new File(this.oldDataFolder, "groups");
         if (oldGroupsDir.exists() && oldGroupsDir.isDirectory()) {
-            File newGroupsDir = new File(newDataFolder, "groups");
+            File newGroupsDir = new File(this.newDataFolder, "groups");
             newGroupsDir.mkdir();
 
-            File[] toMigrate = oldGroupsDir.listFiles((dir, name) -> name.endsWith(backing.getFileExtension()));
+            File[] toMigrate = oldGroupsDir.listFiles((dir, name) -> name.endsWith(this.backing.getFileExtension()));
             if (toMigrate != null) {
                 for (File oldFile : toMigrate) {
                     try {
@@ -137,14 +141,14 @@ public class LegacyJsonMigration implements Runnable {
             }
         }
 
-        plugin.getLog().warn("Migrated group files, now migrating user files.");
+        this.plugin.getLog().warn("Migrated group files, now migrating user files.");
 
-        File oldUsersDir = new File(oldDataFolder, "users");
+        File oldUsersDir = new File(this.oldDataFolder, "users");
         if (oldUsersDir.exists() && oldUsersDir.isDirectory()) {
-            File newUsersDir = new File(newDataFolder, "users");
+            File newUsersDir = new File(this.newDataFolder, "users");
             newUsersDir.mkdir();
 
-            File[] toMigrate = oldUsersDir.listFiles((dir, name) -> name.endsWith(backing.getFileExtension()));
+            File[] toMigrate = oldUsersDir.listFiles((dir, name) -> name.endsWith(this.backing.getFileExtension()));
             if (toMigrate != null) {
                 for (File oldFile : toMigrate) {
                     try {
@@ -188,12 +192,12 @@ public class LegacyJsonMigration implements Runnable {
                 }
             }
         }
-        plugin.getLog().warn("Migrated user files.");
+        this.plugin.getLog().warn("Migrated user files.");
 
         // rename the old data file
-        oldDataFolder.renameTo(new File(oldDataFolder.getParent(), "old-data-backup"));
+        this.oldDataFolder.renameTo(new File(this.oldDataFolder.getParent(), "old-data-backup"));
 
-        plugin.getLog().warn("Legacy schema migration complete.");
+        this.plugin.getLog().warn("Legacy schema migration complete.");
     }
 
     private static void relocateFile(File dirFrom, File dirTo, String fileName) {

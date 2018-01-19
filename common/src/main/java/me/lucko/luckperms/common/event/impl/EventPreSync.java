@@ -25,20 +25,29 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.event.sync.PreSyncEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@Getter
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventPreSync extends AbstractEvent implements PreSyncEvent {
 
     private final AtomicBoolean cancellationState;
 
+    public EventPreSync(AtomicBoolean cancellationState) {
+        this.cancellationState = cancellationState;
+    }
+
+    @Nonnull
+    @Override
+    public AtomicBoolean getCancellationState() {
+        return this.cancellationState;
+    }
+
+    @Override
+    public String toString() {
+        return "EventPreSync(cancellationState=" + this.getCancellationState() + ")";
+    }
 }

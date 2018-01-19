@@ -29,7 +29,6 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -38,6 +37,7 @@ import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -55,7 +55,7 @@ public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> 
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T holder, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T holder, List<String> args, String label) {
         if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), holder)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
@@ -69,22 +69,35 @@ public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> 
             return CommandResult.LOADING_ERROR;
         }
 
-        Set<Node> nodes = holder.getEnduringNodes().values().stream()
-                .filter(Node::isGroupNode)
-                .filter(Node::getValuePrimitive)
-                .filter(Node::isPermanent)
-                .collect(Collectors.toSet());
-
         List<Map.Entry<Track, String>> lines = new ArrayList<>();
 
-        for (Node node : nodes) {
-            String name = node.getGroupName();
+        if (holder.getType().isUser()) {
+            // if the holder is a user, we want to query parent groups for tracks
+            Set<Node> nodes = holder.getEnduringNodes().values().stream()
+                    .filter(Node::isGroupNode)
+                    .filter(Node::getValuePrimitive)
+                    .filter(Node::isPermanent)
+                    .collect(Collectors.toSet());
+
+            for (Node node : nodes) {
+                String groupName = node.getGroupName();
+                List<Track> tracks = plugin.getTrackManager().getAll().values().stream()
+                        .filter(t -> t.containsGroup(groupName))
+                        .collect(Collectors.toList());
+
+                for (Track t : tracks) {
+                    lines.add(Maps.immutableEntry(t, CommandUtils.listToArrowSep(t.getGroups(), groupName) + CommandUtils.getAppendableNodeContextString(node)));
+                }
+            }
+        } else {
+            // otherwise, just lookup for the actual group
+            String groupName = ((Group) holder).getName();
             List<Track> tracks = plugin.getTrackManager().getAll().values().stream()
-                    .filter(t -> t.containsGroup(name))
+                    .filter(t -> t.containsGroup(groupName))
                     .collect(Collectors.toList());
 
             for (Track t : tracks) {
-                lines.add(Maps.immutableEntry(t, CommandUtils.listToArrowSep(t.getGroups(), name) + CommandUtils.getAppendableNodeContextString(node)));
+                lines.add(Maps.immutableEntry(t, CommandUtils.listToArrowSep(t.getGroups(), groupName)));
             }
         }
 

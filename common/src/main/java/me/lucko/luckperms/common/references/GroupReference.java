@@ -25,23 +25,21 @@
 
 package me.lucko.luckperms.common.references;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.function.Consumer;
 
-@Getter
-@ToString
-@EqualsAndHashCode
-@AllArgsConstructor(staticName = "of")
-public class GroupReference implements HolderReference<Group, String> {
+public final class GroupReference implements HolderReference<Group, String> {
+    public static GroupReference of(String id) {
+        return new GroupReference(id);
+    }
 
     private final String id;
+
+    private GroupReference(String id) {
+        this.id = id;
+    }
 
     @Override
     public HolderType getType() {
@@ -50,10 +48,32 @@ public class GroupReference implements HolderReference<Group, String> {
 
     @Override
     public void apply(LuckPermsPlugin plugin, Consumer<Group> consumer) {
-        Group group = plugin.getGroupManager().getIfLoaded(id);
+        Group group = plugin.getGroupManager().getIfLoaded(this.id);
         if (group == null) return;
 
         consumer.accept(group);
     }
 
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof GroupReference)) return false;
+        final GroupReference other = (GroupReference) o;
+        return this.getId().equals(other.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "GroupReference(id=" + this.getId() + ")";
+    }
 }

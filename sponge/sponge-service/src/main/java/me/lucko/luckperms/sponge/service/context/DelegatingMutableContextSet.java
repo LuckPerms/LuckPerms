@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.sponge.service.context;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.api.context.MutableContextSet;
 
 import org.spongepowered.api.service.context.Context;
@@ -35,37 +33,43 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 /**
  * Implements a {@link Set} of {@link Context}s, delegating all calls to a {@link MutableContextSet}.
  */
-@RequiredArgsConstructor
 public class DelegatingMutableContextSet extends AbstractDelegatingContextSet {
     private final MutableContextSet delegate;
 
+    public DelegatingMutableContextSet(MutableContextSet delegate) {
+        this.delegate = delegate;
+    }
+
     @Override
     public MutableContextSet getDelegate() {
-        return delegate;
+        return this.delegate;
     }
 
     @Override
     public int size() {
-        return delegate.size();
+        return this.delegate.size();
     }
 
     @Override
     public boolean isEmpty() {
-        return delegate.isEmpty();
+        return this.delegate.isEmpty();
     }
 
     @Override
     public boolean contains(Object o) {
         if (o instanceof Context) {
             Context context = (Context) o;
-            return delegate.has(context);
+            return this.delegate.has(context);
         }
         return false;
     }
 
+    @Nonnull
     @Override
     public Iterator<Context> iterator() {
         return new ContextSetIterator();
@@ -77,8 +81,8 @@ public class DelegatingMutableContextSet extends AbstractDelegatingContextSet {
             throw new NullPointerException("context");
         }
 
-        boolean has = delegate.has(context);
-        delegate.add(context);
+        boolean has = this.delegate.has(context);
+        this.delegate.add(context);
         return !has;
     }
 
@@ -86,8 +90,8 @@ public class DelegatingMutableContextSet extends AbstractDelegatingContextSet {
     public boolean remove(Object o) {
         if (o instanceof Context) {
             Context context = (Context) o;
-            boolean had = delegate.has(context);
-            delegate.remove(context.getKey(), context.getValue());
+            boolean had = this.delegate.has(context);
+            this.delegate.remove(context.getKey(), context.getValue());
             return had;
         }
 
@@ -96,38 +100,43 @@ public class DelegatingMutableContextSet extends AbstractDelegatingContextSet {
 
     @Override
     public void clear() {
-        delegate.clear();
+        this.delegate.clear();
+    }
+
+    @Override
+    public String toString() {
+        return "DelegatingMutableContextSet(delegate=" + this.getDelegate() + ")";
     }
 
     private final class ContextSetIterator implements Iterator<Context> {
-        private final Iterator<Map.Entry<String, String>> it = delegate.toSet().iterator();
+        private final Iterator<Map.Entry<String, String>> it = DelegatingMutableContextSet.this.delegate.toSet().iterator();
         private Context current;
 
         @Override
         public boolean hasNext() {
-            return it.hasNext();
+            return this.it.hasNext();
         }
 
         @Override
         public Context next() {
-            Map.Entry<String, String> next = it.next();
+            Map.Entry<String, String> next = this.it.next();
 
             // track the iterators cursor to handle #remove calls
-            current = new Context(next.getKey(), next.getValue());
-            return current;
+            this.current = new Context(next.getKey(), next.getValue());
+            return this.current;
         }
 
         @Override
         public void remove() {
-            Context c = current;
+            Context c = this.current;
             if (c == null) {
                 throw new IllegalStateException();
             }
-            current = null;
+            this.current = null;
 
             // delegate the removal call to the MutableContextSet, as the iterator returned by
             // toSet().iterator() is immutable
-            delegate.remove(c.getKey(), c.getValue());
+            DelegatingMutableContextSet.this.delegate.remove(c.getKey(), c.getValue());
         }
     }
 }

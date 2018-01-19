@@ -25,10 +25,6 @@
 
 package me.lucko.luckperms.common.node;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
@@ -36,49 +32,88 @@ import me.lucko.luckperms.api.context.ContextSet;
 import java.util.Optional;
 import java.util.OptionalLong;
 
-@Getter
-@EqualsAndHashCode
-@AllArgsConstructor(staticName = "of")
+import javax.annotation.Nonnull;
+
 public final class NodeHeldPermission<T> implements HeldPermission<T> {
     public static <T> NodeHeldPermission<T> of(T holder, NodeModel nodeModel) {
         return of(holder, nodeModel.toNode());
     }
 
+    public static <T> NodeHeldPermission<T> of(T holder, Node node) {
+        return new NodeHeldPermission<>(holder, node);
+    }
+
     private final T holder;
     private final Node node;
 
+    private NodeHeldPermission(T holder, Node node) {
+        this.holder = holder;
+        this.node = node;
+    }
+
+    @Nonnull
     @Override
     public String getPermission() {
-        return node.getPermission();
+        return this.node.getPermission();
     }
 
     @Override
     public boolean getValue() {
-        return node.getValuePrimitive();
+        return this.node.getValuePrimitive();
     }
 
+    @Nonnull
     @Override
     public Optional<String> getServer() {
-        return node.getServer();
+        return this.node.getServer();
     }
 
+    @Nonnull
     @Override
     public Optional<String> getWorld() {
-        return node.getWorld();
+        return this.node.getWorld();
     }
 
     @Override
     public OptionalLong getExpiry() {
-        return node.isTemporary() ? OptionalLong.of(node.getExpiryUnixTime()) : OptionalLong.empty();
+        return this.node.isTemporary() ? OptionalLong.of(this.node.getExpiryUnixTime()) : OptionalLong.empty();
     }
 
     @Override
     public ContextSet getContexts() {
-        return node.getContexts();
+        return this.node.getContexts();
+    }
+
+    @Nonnull
+    @Override
+    public Node asNode() {
+        return this.node;
+    }
+
+    @Nonnull
+    @Override
+    public T getHolder() {
+        return this.holder;
+    }
+
+    public Node getNode() {
+        return this.node;
     }
 
     @Override
-    public Node asNode() {
-        return node;
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof NodeHeldPermission)) return false;
+        final NodeHeldPermission other = (NodeHeldPermission) o;
+        return this.getHolder().equals(other.getHolder()) && this.getNode().equals(other.getNode());
+    }
+
+    @Override
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        result = result * PRIME + this.getHolder().hashCode();
+        result = result * PRIME + this.getNode().hashCode();
+        return result;
     }
 }

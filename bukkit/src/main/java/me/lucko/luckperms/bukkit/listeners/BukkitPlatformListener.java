@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.bukkit.listeners;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
@@ -42,9 +40,12 @@ import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.server.RemoteServerCommandEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 
-@RequiredArgsConstructor
 public class BukkitPlatformListener implements Listener {
     private final LPBukkitPlugin plugin;
+
+    public BukkitPlatformListener(LPBukkitPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     @EventHandler
     public void onPlayerCommand(PlayerCommandPreprocessEvent e) {
@@ -66,7 +67,7 @@ public class BukkitPlatformListener implements Listener {
             return;
         }
 
-        if (plugin.getConfiguration().get(ConfigKeys.OPS_ENABLED)) {
+        if (this.plugin.getConfiguration().get(ConfigKeys.OPS_ENABLED)) {
             return;
         }
 
@@ -80,21 +81,21 @@ public class BukkitPlatformListener implements Listener {
 
         if (s.equals("op") || s.startsWith("op ") || s.equals("deop") || s.startsWith("deop ")) {
             event.setCancelled(true);
-            sender.sendMessage(Message.OP_DISABLED.asString(plugin.getLocaleManager()));
+            sender.sendMessage(Message.OP_DISABLED.asString(this.plugin.getLocaleManager()));
         }
     }
 
     @EventHandler
     public void onPluginEnable(PluginEnableEvent e) {
         if (e.getPlugin().getName().equalsIgnoreCase("Vault")) {
-            plugin.tryVaultHook(true);
+            this.plugin.tryVaultHook(true);
         }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onWorldChange(PlayerChangedWorldEvent e) {
-        plugin.getContextManager().invalidateCache(e.getPlayer());
-        plugin.refreshAutoOp(plugin.getUserManager().getIfLoaded(e.getPlayer().getUniqueId()), e.getPlayer());
+        this.plugin.getContextManager().invalidateCache(e.getPlayer());
+        this.plugin.refreshAutoOp(this.plugin.getUserManager().getIfLoaded(e.getPlayer().getUniqueId()), e.getPlayer());
     }
 
 }

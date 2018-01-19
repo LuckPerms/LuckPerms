@@ -63,13 +63,13 @@ public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T>
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T t, List<String> args, String label) throws CommandException {
-        if (args.size() == 0) {
-            sendUsageDetailed(sender, user, label);
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T t, List<String> args, String label) {
+        if (args.isEmpty()) {
+            sendUsageDetailed(sender, this.user, label);
             return CommandResult.INVALID_ARGS;
         }
 
-        Optional<SharedSubCommand> o = secondaryCommands.stream()
+        Optional<SharedSubCommand> o = this.secondaryCommands.stream()
                 .filter(s -> s.getName().equalsIgnoreCase(args.get(0)))
                 .limit(1)
                 .findAny();
@@ -80,7 +80,7 @@ public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T>
         }
 
         final SharedSubCommand sub = o.get();
-        if (!sub.isAuthorized(sender, user)) {
+        if (!sub.isAuthorized(sender, this.user)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
@@ -97,7 +97,7 @@ public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T>
 
         CommandResult result;
         try {
-            result = sub.execute(plugin, sender, t, strippedArgs, label, user ? sub.getUserPermission() : sub.getGroupPermission());
+            result = sub.execute(plugin, sender, t, strippedArgs, label, this.user ? sub.getUserPermission() : sub.getGroupPermission());
         } catch (CommandException e) {
             result = handleException(e, sender, sub);
         }
@@ -106,8 +106,8 @@ public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T>
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        final List<SharedSubCommand> subs = secondaryCommands.stream()
-                .filter(s -> s.isAuthorized(sender, user))
+        final List<SharedSubCommand> subs = this.secondaryCommands.stream()
+                .filter(s -> s.isAuthorized(sender, this.user))
                 .collect(Collectors.toList());
 
         if (args.size() <= 1) {
@@ -128,21 +128,21 @@ public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T>
                 .limit(1)
                 .findAny();
 
-        return o.map(cmd -> cmd.onTabComplete(plugin, sender, args.subList(1, args.size()))).orElseGet(Collections::emptyList);
+        return o.map(cmd -> cmd.tabComplete(plugin, sender, args.subList(1, args.size()))).orElseGet(Collections::emptyList);
 
     }
 
     @Override
     public boolean isAuthorized(Sender sender) {
-        return secondaryCommands.stream().anyMatch(sc -> sc.isAuthorized(sender, user));
+        return this.secondaryCommands.stream().anyMatch(sc -> sc.isAuthorized(sender, this.user));
     }
 
     private void sendUsageDetailed(Sender sender, boolean user, String label) {
-        List<SharedSubCommand> subs = secondaryCommands.stream()
+        List<SharedSubCommand> subs = this.secondaryCommands.stream()
                 .filter(s -> s.isAuthorized(sender, user))
                 .collect(Collectors.toList());
 
-        if (subs.size() > 0) {
+        if (!subs.isEmpty()) {
             if (user) {
                 CommandUtils.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format("/%s user <user> " + getName().toLowerCase() + " ...)", label));
             } else {

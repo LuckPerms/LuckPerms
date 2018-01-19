@@ -52,7 +52,7 @@ public class BukkitCommandExecutor extends CommandManager implements CommandExec
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        Sender lpSender = plugin.getSenderFactory().wrap(sender);
+        Sender lpSender = this.plugin.getSenderFactory().wrap(sender);
         List<String> arguments = stripQuotes(ARGUMENT_SPLITTER.splitToList(ARGUMENT_JOINER.join(args)));
 
         onCommand(lpSender, label, arguments);
@@ -61,7 +61,7 @@ public class BukkitCommandExecutor extends CommandManager implements CommandExec
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
-        Sender lpSender = plugin.getSenderFactory().wrap(sender);
+        Sender lpSender = this.plugin.getSenderFactory().wrap(sender);
         List<String> arguments = stripQuotes(TAB_COMPLETE_ARGUMENT_SPLITTER.splitToList(ARGUMENT_JOINER.join(args)));
 
         return onTabComplete(lpSender, arguments);

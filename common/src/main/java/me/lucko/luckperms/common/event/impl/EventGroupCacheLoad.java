@@ -25,21 +25,37 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.caching.GroupData;
 import me.lucko.luckperms.api.event.group.GroupCacheLoadEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
-@Getter
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventGroupCacheLoad extends AbstractEvent implements GroupCacheLoadEvent {
 
     private final Group group;
     private final GroupData loadedData;
 
+    public EventGroupCacheLoad(Group group, GroupData loadedData) {
+        this.group = group;
+        this.loadedData = loadedData;
+    }
+
+    @Nonnull
+    @Override
+    public Group getGroup() {
+        return this.group;
+    }
+
+    @Nonnull
+    @Override
+    public GroupData getLoadedData() {
+        return this.loadedData;
+    }
+
+    @Override
+    public String toString() {
+        return "EventGroupCacheLoad(group=" + this.getGroup() + ", loadedData=" + this.getLoadedData() + ")";
+    }
 }

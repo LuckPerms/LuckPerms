@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.commands.utils;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
@@ -84,7 +81,7 @@ public class ArgumentUtils {
         return groupName;
     }
 
-    public static boolean handleBoolean(int index, List<String> args) throws ArgumentException {
+    public static boolean handleBoolean(int index, List<String> args) {
         if (index < args.size()) {
             String bool = args.get(index);
             if (bool.equalsIgnoreCase("true") || bool.equalsIgnoreCase("false")) {
@@ -137,12 +134,12 @@ public class ArgumentUtils {
                 }
 
                 String key = pair.substring(0, index);
-                if (key.equals("")) {
+                if (key.equals("") || key.trim().isEmpty()) {
                     continue;
                 }
 
                 String value = pair.substring(index + 1);
-                if (value.equals("")) {
+                if (value.equals("") || value.trim().isEmpty()) {
                     continue;
                 }
 
@@ -239,16 +236,28 @@ public class ArgumentUtils {
     public static class InvalidServerWorldException extends ArgumentException {}
     public static class PastDateException extends ArgumentException {}
 
-    @Getter
-    @AllArgsConstructor
     public static class InvalidDateException extends ArgumentException {
         private final String invalidDate;
+
+        public InvalidDateException(String invalidDate) {
+            this.invalidDate = invalidDate;
+        }
+
+        public String getInvalidDate() {
+            return this.invalidDate;
+        }
     }
 
-    @Getter
-    @AllArgsConstructor
     public static class InvalidPriorityException extends ArgumentException {
         private final String invalidPriority;
+
+        public InvalidPriorityException(String invalidPriority) {
+            this.invalidPriority = invalidPriority;
+        }
+
+        public String getInvalidPriority() {
+            return this.invalidPriority;
+        }
     }
 
 }

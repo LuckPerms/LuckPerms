@@ -25,10 +25,6 @@
 
 package me.lucko.luckperms.common.commands.sender;
 
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-
 import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.api.Tristate;
@@ -46,17 +42,11 @@ import java.util.UUID;
  *
  * @param <T> the command sender type
  */
-@Getter
-@EqualsAndHashCode(of = "uuid")
 public final class AbstractSender<T> implements Sender {
     private static final Splitter NEW_LINE_SPLITTER = Splitter.on("\n");
 
     private final LuckPermsPlugin platform;
-
-    @Getter(AccessLevel.NONE)
     private final SenderFactory<T> factory;
-
-    @Getter(AccessLevel.NONE)
     private final WeakReference<T> reference;
 
     private final UUID uuid;
@@ -71,18 +61,33 @@ public final class AbstractSender<T> implements Sender {
     }
 
     @Override
+    public LuckPermsPlugin getPlatform() {
+        return this.platform;
+    }
+
+    @Override
+    public UUID getUuid() {
+        return this.uuid;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
     public void sendMessage(String message) {
-        final T t = reference.get();
+        final T t = this.reference.get();
         if (t != null) {
 
             if (!isConsole()) {
-                factory.sendMessage(t, message);
+                this.factory.sendMessage(t, message);
                 return;
             }
 
             // if it is console, split up the lines and send individually.
             for (String line : NEW_LINE_SPLITTER.split(message)) {
-                factory.sendMessage(t, line);
+                this.factory.sendMessage(t, line);
             }
         }
     }
@@ -95,17 +100,17 @@ public final class AbstractSender<T> implements Sender {
             return;
         }
 
-        final T t = reference.get();
+        final T t = this.reference.get();
         if (t != null) {
-            factory.sendMessage(t, message);
+            this.factory.sendMessage(t, message);
         }
     }
 
     @Override
     public Tristate getPermissionValue(String permission) {
-        T t = reference.get();
+        T t = this.reference.get();
         if (t != null) {
-            return factory.getPermissionValue(t, permission);
+            return this.factory.getPermissionValue(t, permission);
         }
 
         return isConsole() ? Tristate.TRUE : Tristate.UNDEFINED;
@@ -113,9 +118,9 @@ public final class AbstractSender<T> implements Sender {
 
     @Override
     public boolean hasPermission(String permission) {
-        T t = reference.get();
+        T t = this.reference.get();
         if (t != null) {
-            if (factory.hasPermission(t, permission)) {
+            if (this.factory.hasPermission(t, permission)) {
                 return true;
             }
         }
@@ -125,11 +130,24 @@ public final class AbstractSender<T> implements Sender {
 
     @Override
     public boolean isValid() {
-        return reference.get() != null;
+        return this.reference.get() != null;
     }
 
     @Override
     public Optional<Object> getHandle() {
-        return Optional.ofNullable(reference.get());
+        return Optional.ofNullable(this.reference.get());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof AbstractSender)) return false;
+        final AbstractSender that = (AbstractSender) o;
+        return this.getUuid().equals(that.getUuid());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.uuid.hashCode();
     }
 }

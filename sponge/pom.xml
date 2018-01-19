@@ -45,9 +45,52 @@
                             <minimizeJar>false</minimizeJar>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <relocations>
+                                <!-- shaded dependencies -->
                                 <relocation>
                                     <pattern>net.kyori.text</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.text</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>me.lucko.jarrelocator</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.jarrelocator</shadedPattern>
+                                </relocation>
+
+                                <!-- relocated dependencies -->
+                                <relocation>
+                                    <pattern>org.mariadb.jdbc</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.mariadb</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.mysql</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.mysql</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.postgresql</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.postgresql</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.h2</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.h2</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.sqlite</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.sqlite</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.zaxxer.hikari</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.hikari</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.mongodb</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.mongodb</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.bson</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.bson</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>redis.clients.jedis.shaded</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.jedis</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -71,53 +114,41 @@
     </build>
 
     <dependencies>
-        <!-- LP Sponge Model -->
-        <dependency>
-            <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-sponge-service</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- LP Sponge Proxy for API6 -->
-        <dependency>
-            <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-sponge-service-api6</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- LP Sponge Proxy for API7 -->
-        <dependency>
-            <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-sponge-service-api7</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- Sponge API -->
-        <dependency>
-            <groupId>org.spongepowered</groupId>
-            <artifactId>spongeapi</artifactId>
-            <version>6.0.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- LuckPerms Common -->
+        <!-- common -->
         <dependency>
             <groupId>me.lucko.luckperms</groupId>
             <artifactId>luckperms-common</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
-        <!-- LuckPerms API -->
+
+        <!-- sponge service model -->
         <dependency>
             <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-api</artifactId>
+            <artifactId>luckperms-sponge-service</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
-        <!-- Lombok -->
+        <!-- api6 proxy -->
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
+            <groupId>me.lucko.luckperms</groupId>
+            <artifactId>luckperms-sponge-service-api6</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- api7 proxy -->
+        <dependency>
+            <groupId>me.lucko.luckperms</groupId>
+            <artifactId>luckperms-sponge-service-api7</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Sponge -->
+        <dependency>
+            <groupId>org.spongepowered</groupId>
+            <artifactId>spongeapi</artifactId>
+            <version>6.0.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

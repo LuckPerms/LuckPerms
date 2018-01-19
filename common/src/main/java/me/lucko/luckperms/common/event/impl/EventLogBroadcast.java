@@ -25,23 +25,46 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.log.LogBroadcastEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@Getter
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventLogBroadcast extends AbstractEvent implements LogBroadcastEvent {
 
     private final AtomicBoolean cancellationState;
     private final LogEntry entry;
     private final Origin origin;
 
+    public EventLogBroadcast(AtomicBoolean cancellationState, LogEntry entry, Origin origin) {
+        this.cancellationState = cancellationState;
+        this.entry = entry;
+        this.origin = origin;
+    }
+
+    @Nonnull
+    @Override
+    public AtomicBoolean getCancellationState() {
+        return this.cancellationState;
+    }
+
+    @Nonnull
+    @Override
+    public LogEntry getEntry() {
+        return this.entry;
+    }
+
+    @Nonnull
+    @Override
+    public Origin getOrigin() {
+        return this.origin;
+    }
+
+    @Override
+    public String toString() {
+        return "EventLogBroadcast(cancellationState=" + this.getCancellationState() + ", entry=" + this.getEntry() + ", origin=" + this.getOrigin() + ")";
+    }
 }

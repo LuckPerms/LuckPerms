@@ -25,12 +25,16 @@
 
 package me.lucko.luckperms.common.bulkupdate.action;
 
-import lombok.AllArgsConstructor;
-
 import me.lucko.luckperms.common.node.NodeModel;
 
-@AllArgsConstructor(staticName = "create")
 public class DeleteAction implements Action {
+
+    public static DeleteAction create() {
+        return new DeleteAction();
+    }
+
+    private DeleteAction() {
+    }
 
     @Override
     public String getName() {

@@ -25,12 +25,11 @@
 
 package me.lucko.luckperms.sponge.service.proxy.api7;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
@@ -39,107 +38,132 @@ import org.spongepowered.api.service.permission.SubjectReference;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
+import javax.annotation.Nonnull;
+
 @SuppressWarnings("unchecked")
-@RequiredArgsConstructor
 public final class SubjectCollectionProxy implements SubjectCollection {
     private final LPSubjectCollection handle;
 
+    public SubjectCollectionProxy(LPSubjectCollection handle) {
+        this.handle = handle;
+    }
+
+    @Nonnull
     @Override
     public String getIdentifier() {
-        return handle.getIdentifier();
+        return this.handle.getIdentifier();
     }
 
+    @Nonnull
     @Override
     public Predicate<String> getIdentifierValidityPredicate() {
-        return handle.getIdentifierValidityPredicate();
+        return this.handle.getIdentifierValidityPredicate();
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Subject> loadSubject(String s) {
-        return handle.loadSubject(s).thenApply(LPSubject::sponge);
+    public CompletableFuture<Subject> loadSubject(@Nonnull String s) {
+        return this.handle.loadSubject(s).thenApply(LPSubject::sponge);
     }
 
+    @Nonnull
     @Override
-    public Optional<Subject> getSubject(String s) {
-        return handle.getSubject(s).map(LPSubject::sponge);
+    public Optional<Subject> getSubject(@Nonnull String s) {
+        return this.handle.getSubject(s).map(LPSubject::sponge);
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Boolean> hasSubject(String s) {
-        return handle.hasRegistered(s);
+    public CompletableFuture<Boolean> hasSubject(@Nonnull String s) {
+        return this.handle.hasRegistered(s);
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Map<String, Subject>> loadSubjects(Set<String> set) {
-        return handle.loadSubjects(set).thenApply(subs -> subs.stream().collect(ImmutableCollectors.toMap(LPSubject::getIdentifier, LPSubject::sponge)));
+    public CompletableFuture<Map<String, Subject>> loadSubjects(@Nonnull Set<String> set) {
+        return this.handle.loadSubjects(set).thenApply(subs -> subs.stream().collect(ImmutableCollectors.toMap(LPSubject::getIdentifier, LPSubject::sponge)));
     }
 
+    @Nonnull
     @Override
     public Collection<Subject> getLoadedSubjects() {
-        return handle.getLoadedSubjects().stream().map(LPSubject::sponge).collect(ImmutableCollectors.toSet());
+        return this.handle.getLoadedSubjects().stream().map(LPSubject::sponge).collect(ImmutableCollectors.toSet());
     }
 
+    @Nonnull
     @Override
     public CompletableFuture<Set<String>> getAllIdentifiers() {
-        return (CompletableFuture) handle.getAllIdentifiers();
+        return (CompletableFuture) this.handle.getAllIdentifiers();
     }
 
+    @Nonnull
     @Override
-    public SubjectReference newSubjectReference(String s) {
-        return handle.newSubjectReference(s);
+    public SubjectReference newSubjectReference(@Nonnull String subjectIdentifier) {
+        Objects.requireNonNull(subjectIdentifier, "identifier");
+        if (!this.handle.getIdentifierValidityPredicate().test(subjectIdentifier)) {
+            throw new IllegalArgumentException("Subject identifier '" + subjectIdentifier + "' does not pass the validity predicate");
+        }
+
+        return SubjectReferenceFactory.obtain(this.handle.getService(), getIdentifier(), subjectIdentifier);
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Map<SubjectReference, Boolean>> getAllWithPermission(String s) {
-        return (CompletableFuture) handle.getAllWithPermission(s);
+    public CompletableFuture<Map<SubjectReference, Boolean>> getAllWithPermission(@Nonnull String s) {
+        return (CompletableFuture) this.handle.getAllWithPermission(s);
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<Map<SubjectReference, Boolean>> getAllWithPermission(Set<Context> set, String s) {
-        return (CompletableFuture) handle.getAllWithPermission(CompatibilityUtil.convertContexts(set), s);
+    public CompletableFuture<Map<SubjectReference, Boolean>> getAllWithPermission(@Nonnull Set<Context> set, @Nonnull String s) {
+        return (CompletableFuture) this.handle.getAllWithPermission(CompatibilityUtil.convertContexts(set), s);
     }
 
+    @Nonnull
     @Override
-    public Map<Subject, Boolean> getLoadedWithPermission(String s) {
-        return handle.getLoadedWithPermission(s).entrySet().stream()
+    public Map<Subject, Boolean> getLoadedWithPermission(@Nonnull String s) {
+        return this.handle.getLoadedWithPermission(s).entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         sub -> sub.getKey().sponge(),
                         Map.Entry::getValue
                 ));
     }
 
+    @Nonnull
     @Override
-    public Map<Subject, Boolean> getLoadedWithPermission(Set<Context> set, String s) {
-        return handle.getLoadedWithPermission(CompatibilityUtil.convertContexts(set), s).entrySet().stream()
+    public Map<Subject, Boolean> getLoadedWithPermission(@Nonnull Set<Context> set, @Nonnull String s) {
+        return this.handle.getLoadedWithPermission(CompatibilityUtil.convertContexts(set), s).entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         sub -> sub.getKey().sponge(),
                         Map.Entry::getValue
                 ));
     }
 
+    @Nonnull
     @Override
     public Subject getDefaults() {
-        return handle.getDefaults().sponge();
+        return this.handle.getDefaults().sponge();
     }
 
     @Override
-    public void suggestUnload(String s) {
+    public void suggestUnload(@Nonnull String s) {
         // unused by lp
     }
 
     @Override
     public boolean equals(Object o) {
-        return o == this || o instanceof SubjectCollectionProxy && handle.equals(((SubjectCollectionProxy) o).handle);
+        return o == this || o instanceof SubjectCollectionProxy && this.handle.equals(((SubjectCollectionProxy) o).handle);
     }
 
     @Override
     public int hashCode() {
-        return handle.hashCode();
+        return this.handle.hashCode();
     }
 
     @Override

@@ -25,16 +25,15 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
-import com.github.cheesesoftware.PowerfulPermsAPI.CachedGroup;
-import com.github.cheesesoftware.PowerfulPermsAPI.Group;
-import com.github.cheesesoftware.PowerfulPermsAPI.Permission;
-import com.github.cheesesoftware.PowerfulPermsAPI.PermissionManager;
-import com.github.cheesesoftware.PowerfulPermsAPI.PowerfulPermsPlugin;
+import com.github.gustav9797.PowerfulPermsAPI.CachedGroup;
+import com.github.gustav9797.PowerfulPermsAPI.Group;
+import com.github.gustav9797.PowerfulPermsAPI.Permission;
+import com.github.gustav9797.PowerfulPermsAPI.PermissionManager;
+import com.github.gustav9797.PowerfulPermsAPI.PowerfulPermsPlugin;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
@@ -77,7 +76,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) {
         ProgressLogger log = new ProgressLogger("PowerfulPerms");
         log.addListener(plugin.getConsoleSender());
         log.addListener(sender);

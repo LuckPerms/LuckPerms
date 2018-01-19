@@ -84,6 +84,7 @@
             <version>19.0</version>
             <scope>provided</scope>
         </dependency>
+        <!-- jsr305 -->
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>

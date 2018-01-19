@@ -25,9 +25,8 @@
 
 package me.lucko.luckperms.api;
 
-import com.google.common.base.Preconditions;
-
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
@@ -45,13 +44,13 @@ public enum ChatMetaType {
     PREFIX("prefix") {
         @Override
         public boolean matches(@Nonnull Node node) {
-            return Preconditions.checkNotNull(node, "node").isPrefix();
+            return Objects.requireNonNull(node, "node").isPrefix();
         }
 
         @Nonnull
         @Override
         public Map.Entry<Integer, String> getEntry(@Nonnull Node node) {
-            return Preconditions.checkNotNull(node, "node").getPrefix();
+            return Objects.requireNonNull(node, "node").getPrefix();
         }
     },
 
@@ -61,13 +60,13 @@ public enum ChatMetaType {
     SUFFIX("suffix") {
         @Override
         public boolean matches(@Nonnull Node node) {
-            return Preconditions.checkNotNull(node, "node").isSuffix();
+            return Objects.requireNonNull(node, "node").isSuffix();
         }
 
         @Nonnull
         @Override
         public Map.Entry<Integer, String> getEntry(@Nonnull Node node) {
-            return Preconditions.checkNotNull(node, "node").getSuffix();
+            return Objects.requireNonNull(node, "node").getSuffix();
         }
     };
 
@@ -107,7 +106,7 @@ public enum ChatMetaType {
 
     @Override
     public String toString() {
-        return str;
+        return this.str;
     }
 
     /**

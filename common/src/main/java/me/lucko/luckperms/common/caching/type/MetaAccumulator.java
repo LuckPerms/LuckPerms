@@ -25,11 +25,6 @@
 
 package me.lucko.luckperms.common.caching.type;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.ToString;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
@@ -43,6 +38,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -50,8 +46,6 @@ import java.util.TreeMap;
  * Holds temporary mutable meta whilst this object is passed up the
  * inheritance tree to accumulate meta from parents
  */
-@Getter
-@ToString
 public class MetaAccumulator {
     public static MetaAccumulator makeFromConfig(LuckPermsPlugin plugin) {
         return new MetaAccumulator(
@@ -60,7 +54,6 @@ public class MetaAccumulator {
         );
     }
 
-    @Getter(AccessLevel.NONE)
     private final ListMultimap<String, String> meta;
     private final SortedMap<Integer, String> prefixes;
     private final SortedMap<Integer, String> suffixes;
@@ -69,7 +62,9 @@ public class MetaAccumulator {
     private final MetaStack prefixStack;
     private final MetaStack suffixStack;
 
-    public MetaAccumulator(@NonNull MetaStack prefixStack, @NonNull MetaStack suffixStack) {
+    public MetaAccumulator(MetaStack prefixStack, MetaStack suffixStack) {
+        Objects.requireNonNull(prefixStack, "prefixStack");
+        Objects.requireNonNull(suffixStack, "suffixStack");
         this.meta = ArrayListMultimap.create();
         this.prefixes = new TreeMap<>(Comparator.reverseOrder());
         this.suffixes = new TreeMap<>(Comparator.reverseOrder());
@@ -80,19 +75,19 @@ public class MetaAccumulator {
     public void accumulateNode(LocalizedNode n) {
         if (n.isMeta()) {
             Map.Entry<String, String> entry = n.getMeta();
-            meta.put(entry.getKey(), entry.getValue());
+            this.meta.put(entry.getKey(), entry.getValue());
         }
 
         if (n.isPrefix()) {
             Map.Entry<Integer, String> value = n.getPrefix();
-            prefixes.putIfAbsent(value.getKey(), value.getValue());
-            prefixStack.accumulateToAll(n);
+            this.prefixes.putIfAbsent(value.getKey(), value.getValue());
+            this.prefixStack.accumulateToAll(n);
         }
 
         if (n.isSuffix()) {
             Map.Entry<Integer, String> value = n.getSuffix();
-            suffixes.putIfAbsent(value.getKey(), value.getValue());
-            suffixStack.accumulateToAll(n);
+            this.suffixes.putIfAbsent(value.getKey(), value.getValue());
+            this.suffixStack.accumulateToAll(n);
         }
     }
 
@@ -112,11 +107,41 @@ public class MetaAccumulator {
     }
 
     public Map<Integer, String> getChatMeta(ChatMetaType type) {
-        return type == ChatMetaType.PREFIX ? prefixes : suffixes;
+        return type == ChatMetaType.PREFIX ? this.prefixes : this.suffixes;
     }
 
     public MetaStack getStack(ChatMetaType type) {
-        return type == ChatMetaType.PREFIX ? prefixStack : suffixStack;
+        return type == ChatMetaType.PREFIX ? this.prefixStack : this.suffixStack;
     }
 
+    public SortedMap<Integer, String> getPrefixes() {
+        return this.prefixes;
+    }
+
+    public SortedMap<Integer, String> getSuffixes() {
+        return this.suffixes;
+    }
+
+    public int getWeight() {
+        return this.weight;
+    }
+
+    public MetaStack getPrefixStack() {
+        return this.prefixStack;
+    }
+
+    public MetaStack getSuffixStack() {
+        return this.suffixStack;
+    }
+
+    @Override
+    public String toString() {
+        return "MetaAccumulator(" +
+                "meta=" + this.getMeta() + ", " +
+                "prefixes=" + this.getPrefixes() + ", " +
+                "suffixes=" + this.getSuffixes() + ", " +
+                "weight=" + this.getWeight() + ", " +
+                "prefixStack=" + this.getPrefixStack() + ", " +
+                "suffixStack=" + this.getSuffixStack() + ")";
+    }
 }

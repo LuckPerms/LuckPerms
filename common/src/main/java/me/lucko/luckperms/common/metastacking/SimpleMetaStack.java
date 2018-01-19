@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.metastacking;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
@@ -36,13 +33,11 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
 public final class SimpleMetaStack implements MetaStack {
 
     private final MetaStackDefinition definition;
     private final ChatMetaType targetType;
 
-    @Getter(AccessLevel.NONE)
     private final List<MetaStackEntry> entries;
 
     public SimpleMetaStack(MetaStackDefinition definition, ChatMetaType targetType) {
@@ -55,7 +50,7 @@ public final class SimpleMetaStack implements MetaStack {
 
     @Override
     public String toFormattedString() {
-        List<MetaStackEntry> ret = new ArrayList<>(entries);
+        List<MetaStackEntry> ret = new ArrayList<>(this.entries);
         ret.removeIf(m -> !m.getCurrentValue().isPresent());
 
         if (ret.isEmpty()) {
@@ -63,22 +58,32 @@ public final class SimpleMetaStack implements MetaStack {
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append(definition.getStartSpacer());
+        sb.append(this.definition.getStartSpacer());
         for (int i = 0; i < ret.size(); i++) {
             if (i != 0) {
-                sb.append(definition.getMiddleSpacer());
+                sb.append(this.definition.getMiddleSpacer());
             }
 
             MetaStackEntry e = ret.get(i);
             sb.append(e.getCurrentValue().get().getValue());
         }
-        sb.append(definition.getEndSpacer());
+        sb.append(this.definition.getEndSpacer());
 
         return sb.toString();
     }
 
     @Override
     public void accumulateToAll(LocalizedNode node) {
-        entries.forEach(e -> e.accumulateNode(node));
+        this.entries.forEach(e -> e.accumulateNode(node));
+    }
+
+    @Override
+    public MetaStackDefinition getDefinition() {
+        return this.definition;
+    }
+
+    @Override
+    public ChatMetaType getTargetType() {
+        return this.targetType;
     }
 }

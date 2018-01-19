@@ -31,14 +31,52 @@ import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
 
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Set;
 
 public class DummyPermissibleBase extends PermissibleBase {
+    private static final Field ATTACHMENTS_FIELD;
+    private static final Field PERMISSIONS_FIELD;
+
+    static {
+        Field attachmentsField;
+        try {
+            attachmentsField = PermissibleBase.class.getDeclaredField("attachments");
+            attachmentsField.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+        ATTACHMENTS_FIELD = attachmentsField;
+
+        Field permissionsField;
+        try {
+            permissionsField = PermissibleBase.class.getDeclaredField("permissions");
+            permissionsField.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+        PERMISSIONS_FIELD = permissionsField;
+    }
+
+    public static void nullFields(PermissibleBase permissibleBase) {
+        try {
+            ATTACHMENTS_FIELD.set(permissibleBase, null);
+        } catch (Exception e) {
+            // ignore
+        }
+        try {
+            PERMISSIONS_FIELD.set(permissibleBase, null);
+        } catch (Exception e) {
+            // ignore
+        }
+    }
+
     public static final DummyPermissibleBase INSTANCE = new DummyPermissibleBase();
 
     private DummyPermissibleBase() {
         super(null);
+        nullFields(this);
     }
 
     @Override public boolean isOp() { return false; }

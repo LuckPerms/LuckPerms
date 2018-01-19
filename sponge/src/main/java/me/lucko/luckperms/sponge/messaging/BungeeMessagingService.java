@@ -41,6 +41,8 @@ import org.spongepowered.api.network.RemoteConnection;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nonnull;
+
 /**
  * An implementation of {@link ExtendedMessagingService} using the plugin messaging channels.
  */
@@ -54,25 +56,25 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
     }
 
     public void init() {
-        channel = plugin.getGame().getChannelRegistrar().createRawChannel(plugin, CHANNEL);
-        channel.addListener(Platform.Type.SERVER, this);
+        this.channel = this.plugin.getGame().getChannelRegistrar().createRawChannel(this.plugin, CHANNEL);
+        this.channel.addListener(Platform.Type.SERVER, this);
     }
 
     @Override
     public void close() {
-        if (channel != null) {
-            plugin.getGame().getChannelRegistrar().unbindChannel(channel);
+        if (this.channel != null) {
+            this.plugin.getGame().getChannelRegistrar().unbindChannel(this.channel);
         }
     }
 
     @Override
     protected void sendMessage(String message) {
-        plugin.getSpongeScheduler().createTaskBuilder().interval(10, TimeUnit.SECONDS).execute(task -> {
-            if (!plugin.getGame().isServerAvailable()) {
+        this.plugin.getSpongeScheduler().createTaskBuilder().interval(10, TimeUnit.SECONDS).execute(task -> {
+            if (!this.plugin.getGame().isServerAvailable()) {
                 return;
             }
 
-            Collection<Player> players = plugin.getGame().getServer().getOnlinePlayers();
+            Collection<Player> players = this.plugin.getGame().getServer().getOnlinePlayers();
             Player p = Iterables.getFirst(players, null);
             if (p == null) {
                 return;
@@ -81,11 +83,11 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
             this.channel.sendTo(p, buf -> buf.writeUTF(message));
 
             task.cancel();
-        }).submit(plugin);
+        }).submit(this.plugin);
     }
 
     @Override
-    public void handlePayload(ChannelBuf buf, RemoteConnection connection, Platform.Type type) {
+    public void handlePayload(@Nonnull ChannelBuf buf, @Nonnull RemoteConnection connection, @Nonnull Platform.Type type) {
         String msg = buf.readUTF();
         onMessage(msg, null);
     }

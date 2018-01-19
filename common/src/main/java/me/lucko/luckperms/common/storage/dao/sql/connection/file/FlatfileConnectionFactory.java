@@ -56,28 +56,28 @@ abstract class FlatfileConnectionFactory extends AbstractConnectionFactory {
 
     @Override
     public void shutdown() throws Exception {
-        if (connection != null) {
-            connection.shutdown();
+        if (this.connection != null) {
+            this.connection.shutdown();
         }
     }
 
     @Override
     public Connection getConnection() throws SQLException {
-        lock.lock();
+        this.lock.lock();
         try {
             if (this.connection == null || this.connection.isClosed()) {
                 try {
                     Class.forName(getDriverClass());
                 } catch (ClassNotFoundException ignored) {}
 
-                Connection connection = DriverManager.getConnection(getDriverId() + ":" + file.getAbsolutePath());
+                Connection connection = DriverManager.getConnection(getDriverId() + ":" + this.file.getAbsolutePath());
                 if (connection != null) {
                     this.connection = new NonClosableConnection(connection);
                 }
             }
 
         } finally {
-            lock.unlock();
+            this.lock.unlock();
         }
 
         if (this.connection == null) {

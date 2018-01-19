@@ -23,47 +23,26 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api;
+package me.lucko.luckperms.common.managers.user;
 
-import me.lucko.luckperms.LuckPerms;
-import me.lucko.luckperms.api.LuckPermsApi;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.references.UserIdentifier;
 
-import java.lang.reflect.Method;
+import java.util.concurrent.TimeUnit;
 
-public class ApiSingletonUtils {
-    private static final Method REGISTER;
-    private static final Method UNREGISTER;
-    static {
-        Method register = null;
-        Method unregister = null;
-        try {
-            register = LuckPerms.class.getDeclaredMethod("registerProvider", LuckPermsApi.class);
-            register.setAccessible(true);
+public class StandardUserManager extends AbstractUserManager<User> {
+    private final LuckPermsPlugin plugin;
 
-            unregister = LuckPerms.class.getDeclaredMethod("unregisterProvider");
-            unregister.setAccessible(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        REGISTER = register;
-        UNREGISTER = unregister;
+    public StandardUserManager(LuckPermsPlugin plugin) {
+        super(plugin, UserHousekeeper.timeoutSettings(1, TimeUnit.MINUTES));
+        this.plugin = plugin;
     }
 
-    public static void registerProvider(LuckPermsApi luckPermsApi) {
-        try {
-            REGISTER.invoke(null, luckPermsApi);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    @Override
+    public User apply(UserIdentifier id) {
+        return !id.getUsername().isPresent() ?
+                new User(id.getUuid(), this.plugin) :
+                new User(id.getUuid(), id.getUsername().get(), this.plugin);
     }
-
-    public static void unregisterProvider() {
-        try {
-            UNREGISTER.invoke(null);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
 }

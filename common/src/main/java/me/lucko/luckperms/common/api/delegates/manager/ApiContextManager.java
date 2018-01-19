@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.api.delegates.manager;
 
-import lombok.AllArgsConstructor;
-import lombok.NonNull;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.context.ContextCalculator;
@@ -37,73 +34,98 @@ import me.lucko.luckperms.api.context.StaticContextCalculator;
 import me.lucko.luckperms.common.api.delegates.model.ApiUser;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import java.util.Objects;
 import java.util.Optional;
 
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 @SuppressWarnings("unchecked")
 public class ApiContextManager implements ContextManager {
     private final LuckPermsPlugin plugin;
     private final me.lucko.luckperms.common.contexts.ContextManager handle;
 
+    public ApiContextManager(LuckPermsPlugin plugin, me.lucko.luckperms.common.contexts.ContextManager handle) {
+        this.plugin = plugin;
+        this.handle = handle;
+    }
+
     private Object checkType(Object subject) {
-        if (!handle.getSubjectClass().isAssignableFrom(subject.getClass())) {
-            throw new IllegalStateException("Subject class " + subject.getClass() + " is not assignable from " + handle.getSubjectClass());
+        if (!this.handle.getSubjectClass().isAssignableFrom(subject.getClass())) {
+            throw new IllegalStateException("Subject class " + subject.getClass() + " is not assignable from " + this.handle.getSubjectClass());
         }
         return subject;
     }
 
+    @Nonnull
     @Override
-    public ImmutableContextSet getApplicableContext(@NonNull Object subject) {
-        return handle.getApplicableContext(checkType(subject));
+    public ImmutableContextSet getApplicableContext(@Nonnull Object subject) {
+        Objects.requireNonNull(subject, "subject");
+        return this.handle.getApplicableContext(checkType(subject));
     }
 
+    @Nonnull
     @Override
-    public Contexts getApplicableContexts(@NonNull Object subject) {
-        return handle.getApplicableContexts(checkType(subject));
+    public Contexts getApplicableContexts(@Nonnull Object subject) {
+        Objects.requireNonNull(subject, "subject");
+        return this.handle.getApplicableContexts(checkType(subject));
     }
 
+    @Nonnull
     @Override
-    public Optional<ImmutableContextSet> lookupApplicableContext(@NonNull User user) {
-        return Optional.ofNullable(plugin.getContextForUser(ApiUser.cast(user))).map(c -> c.getContexts().makeImmutable());
+    public Optional<ImmutableContextSet> lookupApplicableContext(@Nonnull User user) {
+        Objects.requireNonNull(user, "user");
+        return Optional.ofNullable(this.plugin.getContextForUser(ApiUser.cast(user))).map(c -> c.getContexts().makeImmutable());
     }
 
+    @Nonnull
     @Override
-    public Optional<Contexts> lookupApplicableContexts(@NonNull User user) {
-        return Optional.ofNullable(plugin.getContextForUser(ApiUser.cast(user)));
+    public Optional<Contexts> lookupApplicableContexts(@Nonnull User user) {
+        Objects.requireNonNull(user, "user");
+        return Optional.ofNullable(this.plugin.getContextForUser(ApiUser.cast(user)));
     }
 
+    @Nonnull
     @Override
     public ImmutableContextSet getStaticContext() {
-        return handle.getStaticContext();
+        return this.handle.getStaticContext();
     }
 
+    @Nonnull
     @Override
     public Contexts getStaticContexts() {
-        return handle.getStaticContexts();
+        return this.handle.getStaticContexts();
+    }
+
+    @Nonnull
+    @Override
+    public Contexts formContexts(@Nonnull Object subject, @Nonnull ImmutableContextSet contextSet) {
+        Objects.requireNonNull(subject, "subject");
+        Objects.requireNonNull(contextSet, "contextSet");
+        return this.handle.formContexts(checkType(subject), contextSet);
+    }
+
+    @Nonnull
+    @Override
+    public Contexts formContexts(@Nonnull ImmutableContextSet contextSet) {
+        Objects.requireNonNull(contextSet, "contextSet");
+        return this.handle.formContexts(contextSet);
     }
 
     @Override
-    public Contexts formContexts(@NonNull Object subject, @NonNull ImmutableContextSet contextSet) {
-        return handle.formContexts(checkType(subject), contextSet);
+    public void registerCalculator(@Nonnull ContextCalculator<?> calculator) {
+        Objects.requireNonNull(calculator, "calculator");
+        this.handle.registerCalculator(calculator);
     }
 
     @Override
-    public Contexts formContexts(@NonNull ImmutableContextSet contextSet) {
-        return handle.formContexts(contextSet);
+    public void registerStaticCalculator(@Nonnull StaticContextCalculator calculator) {
+        Objects.requireNonNull(calculator, "calculator");
+        this.handle.registerStaticCalculator(calculator);
     }
 
     @Override
-    public void registerCalculator(@NonNull ContextCalculator<?> calculator) {
-        handle.registerCalculator(calculator);
-    }
-
-    @Override
-    public void registerStaticCalculator(@NonNull StaticContextCalculator calculator) {
-        handle.registerStaticCalculator(calculator);
-    }
-
-    @Override
-    public void invalidateCache(@NonNull Object subject) {
-        handle.invalidateCache(checkType(subject));
+    public void invalidateCache(@Nonnull Object subject) {
+        Objects.requireNonNull(subject, "subject");
+        this.handle.invalidateCache(checkType(subject));
     }
 }

@@ -25,19 +25,28 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.event.track.TrackLoadEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
-@Getter
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventTrackLoad extends AbstractEvent implements TrackLoadEvent {
 
     private final Track track;
 
+    public EventTrackLoad(Track track) {
+        this.track = track;
+    }
+
+    @Nonnull
+    @Override
+    public Track getTrack() {
+        return this.track;
+    }
+
+    @Override
+    public String toString() {
+        return "EventTrackLoad(track=" + this.getTrack() + ")";
+    }
 }

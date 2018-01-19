@@ -55,7 +55,7 @@ public class FileUuidCache {
      * @param username the username of the player
      */
     public void addMapping(UUID uuid, String username) {
-        lookupMap.put(username.toLowerCase(), Maps.immutableEntry(uuid, DateUtil.unixSecondsNow()));
+        this.lookupMap.put(username.toLowerCase(), Maps.immutableEntry(uuid, DateUtil.unixSecondsNow()));
     }
 
     /**
@@ -65,7 +65,7 @@ public class FileUuidCache {
      * @return a uuid, or null
      */
     public UUID lookupUUID(String username) {
-        Map.Entry<UUID, Long> ret = lookupMap.get(username.toLowerCase());
+        Map.Entry<UUID, Long> ret = this.lookupMap.get(username.toLowerCase());
         return ret == null ? null : ret.getKey();
     }
 
@@ -79,7 +79,7 @@ public class FileUuidCache {
         String username = null;
         Long time = Long.MIN_VALUE;
 
-        for (Map.Entry<String, Map.Entry<UUID, Long>> ent : lookupMap.entrySet()) {
+        for (Map.Entry<String, Map.Entry<UUID, Long>> ent : this.lookupMap.entrySet()) {
             if (!ent.getValue().getKey().equals(uuid)) {
                 continue;
             }
@@ -153,7 +153,7 @@ public class FileUuidCache {
                     t = 0L;
                 }
 
-                lookupMap.put(key, Maps.immutableEntry(uid, t));
+                this.lookupMap.put(key, Maps.immutableEntry(uid, t));
             }
 
         } catch (IOException e) {
@@ -166,7 +166,7 @@ public class FileUuidCache {
             writer.write("# LuckPerms UUID lookup cache");
             writer.newLine();
 
-            for (Map.Entry<String, Map.Entry<UUID, Long>> ent : lookupMap.entrySet()) {
+            for (Map.Entry<String, Map.Entry<UUID, Long>> ent : this.lookupMap.entrySet()) {
                 String out = ent.getKey() + "=" + ent.getValue().getKey().toString() + "|" + ent.getValue().getValue().toString();
                 writer.write(out);
                 writer.newLine();

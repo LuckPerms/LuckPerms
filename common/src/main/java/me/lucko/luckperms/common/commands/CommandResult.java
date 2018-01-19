@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.commands;
 
-import lombok.AllArgsConstructor;
-
-@AllArgsConstructor
 public enum CommandResult {
     SUCCESS(true),
     FAILURE(false),
@@ -41,10 +38,14 @@ public enum CommandResult {
         return b ? SUCCESS : FAILURE;
     }
 
-    private boolean value;
+    private final boolean value;
+
+    CommandResult(boolean value) {
+        this.value = value;
+    }
 
     public boolean asBoolean() {
-        return value;
+        return this.value;
     }
 
 }

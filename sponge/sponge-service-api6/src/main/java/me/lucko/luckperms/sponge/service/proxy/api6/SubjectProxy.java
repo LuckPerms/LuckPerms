@@ -25,14 +25,14 @@
 
 package me.lucko.luckperms.sponge.service.proxy.api6;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.ProxiedSubject;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
@@ -46,115 +46,129 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-@SuppressWarnings("unchecked")
-@RequiredArgsConstructor
-public final class SubjectProxy implements Subject {
-    private final LPPermissionService service;
-    private final SubjectReference ref;
+import javax.annotation.Nonnull;
 
-    private CompletableFuture<LPSubject> handle() {
-        return ref.resolveLp();
+@SuppressWarnings("unchecked")
+public final class SubjectProxy implements Subject, ProxiedSubject {
+    private final LPPermissionService service;
+    private final LPSubjectReference ref;
+
+    public SubjectProxy(LPPermissionService service, LPSubjectReference ref) {
+        this.service = service;
+        this.ref = ref;
     }
 
+    private CompletableFuture<LPSubject> handle() {
+        return this.ref.resolveLp();
+    }
+
+    @Nonnull
+    @Override
+    public LPSubjectReference asSubjectReference() {
+        return this.ref;
+    }
+
+    @Nonnull
     @Override
     public Optional<CommandSource> getCommandSource() {
         return handle().thenApply(LPSubject::getCommandSource).join();
     }
 
+    @Nonnull
     @Override
     public SubjectCollection getContainingCollection() {
-        return service.getCollection(ref.getCollectionIdentifier()).sponge();
+        return this.service.getCollection(this.ref.getCollectionIdentifier()).sponge();
     }
 
     @Override
     public SubjectData getSubjectData() {
-        return new SubjectDataProxy(service, ref, true);
+        return new SubjectDataProxy(this.service, this.ref, true);
     }
 
     @Override
     public SubjectData getTransientSubjectData() {
-        return new SubjectDataProxy(service, ref, false);
+        return new SubjectDataProxy(this.service, this.ref, false);
     }
 
     @Override
-    public boolean hasPermission(Set<Context> contexts, String permission) {
+    public boolean hasPermission(@Nonnull Set<Context> contexts, @Nonnull String permission) {
         return handle().thenApply(handle -> handle.getPermissionValue(CompatibilityUtil.convertContexts(contexts), permission).asBoolean()).join();
     }
 
     @Override
-    public boolean hasPermission(String permission) {
+    public boolean hasPermission(@Nonnull String permission) {
         return handle().thenApply(handle -> handle.getPermissionValue(ImmutableContextSet.empty(), permission).asBoolean()).join();
     }
 
+    @Nonnull
     @Override
-    public Tristate getPermissionValue(Set<Context> contexts, String permission) {
+    public Tristate getPermissionValue(@Nonnull Set<Context> contexts, @Nonnull String permission) {
         return handle().thenApply(handle -> CompatibilityUtil.convertTristate(handle.getPermissionValue(CompatibilityUtil.convertContexts(contexts), permission))).join();
     }
 
     @Override
-    public boolean isChildOf(Subject parent) {
+    public boolean isChildOf(@Nonnull Subject parent) {
         return handle().thenApply(handle -> handle.isChildOf(
                 ImmutableContextSet.empty(),
-                service.newSubjectReference(
-                        parent.getContainingCollection().getIdentifier(),
-                        parent.getIdentifier()
-                )
+                SubjectReferenceFactory.obtain(this.service, parent)
         )).join();
     }
 
     @Override
-    public boolean isChildOf(Set<Context> contexts, Subject parent) {
+    public boolean isChildOf(@Nonnull Set<Context> contexts, @Nonnull Subject parent) {
         return handle().thenApply(handle -> handle.isChildOf(
                 CompatibilityUtil.convertContexts(contexts),
-                service.newSubjectReference(
-                        parent.getContainingCollection().getIdentifier(),
-                        parent.getIdentifier()
-                )
+                SubjectReferenceFactory.obtain(this.service, parent)
         )).join();
     }
 
+    @Nonnull
     @Override
     public List<Subject> getParents() {
         return (List) handle().thenApply(handle -> handle.getParents(ImmutableContextSet.empty()).stream()
-                .map(s -> new SubjectProxy(service, s))
+                .map(s -> new SubjectProxy(this.service, s))
                 .collect(ImmutableCollectors.toList())).join();
     }
 
+    @Nonnull
     @Override
-    public List<Subject> getParents(Set<Context> contexts) {
+    public List<Subject> getParents(@Nonnull Set<Context> contexts) {
         return (List) handle().thenApply(handle -> handle.getParents(CompatibilityUtil.convertContexts(contexts)).stream()
-                .map(s -> new SubjectProxy(service, s))
+                .map(s -> new SubjectProxy(this.service, s))
                 .collect(ImmutableCollectors.toList())).join();
     }
 
+    @Nonnull
     @Override
-    public Optional<String> getOption(Set<Context> contexts, String key) {
+    public Optional<String> getOption(@Nonnull Set<Context> contexts, @Nonnull String key) {
         return handle().thenApply(handle -> handle.getOption(CompatibilityUtil.convertContexts(contexts), key)).join();
     }
 
+    @Nonnull
     @Override
-    public Optional<String> getOption(String key) {
+    public Optional<String> getOption(@Nonnull String key) {
         return handle().thenApply(handle -> handle.getOption(ImmutableContextSet.empty(), key)).join();
     }
 
     @Override
     public String getIdentifier() {
-        return ref.getSubjectIdentifier();
+        return this.ref.getSubjectIdentifier();
     }
 
+    @Nonnull
     @Override
     public Set<Context> getActiveContexts() {
-        return handle().thenApply(handle -> CompatibilityUtil.convertContexts(handle.getActiveContextSet())).join();
+        return CompatibilityUtil.convertContexts(this.service.getPlugin().getContextManager().getApplicableContext(this));
     }
 
     @Override
     public boolean equals(Object o) {
-        return o == this || o instanceof SubjectProxy && ref.equals(((SubjectProxy) o).ref);
+        return o == this || o instanceof SubjectProxy && this.ref.equals(((SubjectProxy) o).ref);
     }
 
     @Override
     public int hashCode() {
-        return ref.hashCode();
+        return this.ref.hashCode();
     }
 
     @Override

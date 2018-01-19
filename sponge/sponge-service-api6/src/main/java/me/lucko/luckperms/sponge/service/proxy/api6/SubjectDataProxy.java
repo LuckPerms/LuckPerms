@@ -25,14 +25,13 @@
 
 package me.lucko.luckperms.sponge.service.proxy.api6;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
@@ -44,17 +43,27 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import javax.annotation.Nonnull;
+
 @SuppressWarnings("unchecked")
-@RequiredArgsConstructor
 public final class SubjectDataProxy implements SubjectData {
     private final LPPermissionService service;
-    private final SubjectReference ref;
+    private final LPSubjectReference ref;
     private final boolean enduring;
 
-    private CompletableFuture<LPSubjectData> handle() {
-        return enduring ? ref.resolveLp().thenApply(LPSubject::getSubjectData) : ref.resolveLp().thenApply(LPSubject::getTransientSubjectData);
+    public SubjectDataProxy(LPPermissionService service, LPSubjectReference ref, boolean enduring) {
+        this.service = service;
+        this.ref = ref;
+        this.enduring = enduring;
     }
 
+    private CompletableFuture<LPSubjectData> handle() {
+        return this.enduring ?
+                this.ref.resolveLp().thenApply(LPSubject::getSubjectData) :
+                this.ref.resolveLp().thenApply(LPSubject::getTransientSubjectData);
+    }
+
+    @Nonnull
     @Override
     public Map<Set<Context>, Map<String, Boolean>> getAllPermissions() {
         return (Map) handle().thenApply(handle -> handle.getAllPermissions().entrySet().stream()
@@ -64,13 +73,14 @@ public final class SubjectDataProxy implements SubjectData {
                 ))).join();
     }
 
+    @Nonnull
     @Override
-    public Map<String, Boolean> getPermissions(Set<Context> contexts) {
+    public Map<String, Boolean> getPermissions(@Nonnull Set<Context> contexts) {
         return handle().thenApply(handle -> handle.getPermissions(CompatibilityUtil.convertContexts(contexts))).join();
     }
 
     @Override
-    public boolean setPermission(Set<Context> contexts, String permission, Tristate value) {
+    public boolean setPermission(@Nonnull Set<Context> contexts, @Nonnull String permission, @Nonnull Tristate value) {
         handle().thenCompose(handle -> handle.setPermission(
                 CompatibilityUtil.convertContexts(contexts),
                 permission,
@@ -86,50 +96,46 @@ public final class SubjectDataProxy implements SubjectData {
     }
 
     @Override
-    public boolean clearPermissions(Set<Context> contexts) {
+    public boolean clearPermissions(@Nonnull Set<Context> contexts) {
         handle().thenCompose(handle -> handle.clearPermissions(CompatibilityUtil.convertContexts(contexts)));
         return true;
     }
 
+    @Nonnull
     @Override
     public Map<Set<Context>, List<Subject>> getAllParents() {
         return (Map) handle().thenApply(handle -> handle.getAllParents().entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         e -> CompatibilityUtil.convertContexts(e.getKey()),
                         e -> e.getValue().stream()
-                                .map(s -> new SubjectProxy(service, s))
+                                .map(s -> new SubjectProxy(this.service, s))
                                 .collect(ImmutableCollectors.toList())
                         )
                 )).join();
     }
 
+    @Nonnull
     @Override
-    public List<Subject> getParents(Set<Context> contexts) {
+    public List<Subject> getParents(@Nonnull Set<Context> contexts) {
         return (List) handle().thenApply(handle -> handle.getParents(CompatibilityUtil.convertContexts(contexts)).stream()
-                .map(s -> new SubjectProxy(service, s))
+                .map(s -> new SubjectProxy(this.service, s))
                 .collect(ImmutableCollectors.toList())).join();
     }
 
     @Override
-    public boolean addParent(Set<Context> contexts, Subject parent) {
+    public boolean addParent(@Nonnull Set<Context> contexts, @Nonnull Subject parent) {
         handle().thenCompose(handle -> handle.addParent(
                 CompatibilityUtil.convertContexts(contexts),
-                service.newSubjectReference(
-                        parent.getContainingCollection().getIdentifier(),
-                        parent.getIdentifier()
-                )
+                SubjectReferenceFactory.obtain(this.service, parent)
         ));
         return true;
     }
 
     @Override
-    public boolean removeParent(Set<Context> contexts, Subject parent) {
+    public boolean removeParent(@Nonnull Set<Context> contexts, @Nonnull Subject parent) {
         handle().thenCompose(handle -> handle.removeParent(
                 CompatibilityUtil.convertContexts(contexts),
-                service.newSubjectReference(
-                        parent.getContainingCollection().getIdentifier(),
-                        parent.getIdentifier()
-                )
+                SubjectReferenceFactory.obtain(this.service, parent)
         ));
         return true;
     }
@@ -141,11 +147,12 @@ public final class SubjectDataProxy implements SubjectData {
     }
 
     @Override
-    public boolean clearParents(Set<Context> contexts) {
+    public boolean clearParents(@Nonnull Set<Context> contexts) {
         handle().thenCompose(handle -> handle.clearParents(CompatibilityUtil.convertContexts(contexts)));
         return true;
     }
 
+    @Nonnull
     @Override
     public Map<Set<Context>, Map<String, String>> getAllOptions() {
         return (Map) handle().thenApply(handle -> handle.getAllOptions().entrySet().stream()
@@ -155,13 +162,14 @@ public final class SubjectDataProxy implements SubjectData {
                 ))).join();
     }
 
+    @Nonnull
     @Override
-    public Map<String, String> getOptions(Set<Context> contexts) {
+    public Map<String, String> getOptions(@Nonnull Set<Context> contexts) {
         return handle().thenApply(handle -> handle.getOptions(CompatibilityUtil.convertContexts(contexts))).join();
     }
 
     @Override
-    public boolean setOption(Set<Context> contexts, String key, String value) {
+    public boolean setOption(@Nonnull Set<Context> contexts, @Nonnull String key, String value) {
         if (value == null) {
             handle().thenCompose(handle -> handle.unsetOption(CompatibilityUtil.convertContexts(contexts), key));
             return true;
@@ -172,7 +180,7 @@ public final class SubjectDataProxy implements SubjectData {
     }
 
     @Override
-    public boolean clearOptions(Set<Context> contexts) {
+    public boolean clearOptions(@Nonnull Set<Context> contexts) {
         handle().thenCompose(handle -> handle.clearOptions(CompatibilityUtil.convertContexts(contexts)));
         return true;
     }

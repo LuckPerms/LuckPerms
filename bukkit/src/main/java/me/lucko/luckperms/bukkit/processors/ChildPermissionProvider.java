@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.bukkit.processors;
 
-import lombok.Getter;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
@@ -51,7 +49,6 @@ import java.util.Map;
 public class ChildPermissionProvider {
 
     // in the format:  permission+value  ===>  children (a map of child permissions)
-    @Getter
     private ImmutableMap<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> permissions = ImmutableMap.of();
 
     public void setup() {
@@ -102,4 +99,9 @@ public class ChildPermissionProvider {
             }
         }
     }
+
+    public ImmutableMap<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> getPermissions() {
+        return this.permissions;
+    }
+
 }

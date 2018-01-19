@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.commands.impl.group;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -49,7 +48,7 @@ public class GroupRename extends SubCommand<Group> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
         String newGroupName = args.get(0).toLowerCase();
         if (!DataConstraints.GROUP_NAME_TEST.test(newGroupName)) {
             Message.GROUP_INVALID_ENTRY.send(sender, newGroupName);

@@ -49,19 +49,19 @@ public class WildcardProcessor implements PermissionProcessor {
 
             node = node.substring(0, endIndex);
             if (!node.isEmpty()) {
-                Tristate t = Tristate.fromNullableBoolean(map.get(node + WILDCARD_SUFFIX));
+                Tristate t = Tristate.fromNullableBoolean(this.map.get(node + WILDCARD_SUFFIX));
                 if (t != Tristate.UNDEFINED) {
                     return t;
                 }
             }
         }
 
-        Tristate t = Tristate.fromNullableBoolean(map.get(GLOBAL_WILDCARD_1));
+        Tristate t = Tristate.fromNullableBoolean(this.map.get(GLOBAL_WILDCARD_1));
         if (t != Tristate.UNDEFINED) {
             return t;
         }
 
-        return Tristate.fromNullableBoolean(map.get(GLOBAL_WILDCARD_2));
+        return Tristate.fromNullableBoolean(this.map.get(GLOBAL_WILDCARD_2));
     }
 
     @Override

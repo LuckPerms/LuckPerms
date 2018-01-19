@@ -30,12 +30,14 @@ import java.util.UUID;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 
 /**
  * Represents a logged action.
  *
- * @see LuckPermsApi#newLogEntryBuilder() for creating an instance
+ * @see ActionLogger#newEntryBuilder() for creating an instance
  */
+@Immutable
 public interface LogEntry extends Comparable<LogEntry> {
 
     /**
@@ -143,27 +145,81 @@ public interface LogEntry extends Comparable<LogEntry> {
      */
     interface Builder {
 
+        /**
+         * Sets the timestamp of the entry.
+         *
+         * @param timestamp the timestamp
+         * @return the builder
+         * @see LogEntry#getTimestamp()
+         */
         @Nonnull
         Builder setTimestamp(long timestamp);
 
+        /**
+         * Sets the actor of the entry.
+         *
+         * @param actor the actor
+         * @return the builder
+         * @see LogEntry#getActor()
+         */
         @Nonnull
         Builder setActor(@Nonnull UUID actor);
 
+        /**
+         * Sets the actor name of the entry.
+         *
+         * @param actorName the actor name
+         * @return the builder
+         * @see LogEntry#getActorName()
+         */
         @Nonnull
         Builder setActorName(@Nonnull String actorName);
 
+        /**
+         * Sets the type of the entry.
+         *
+         * @param type the type
+         * @return the builder
+         * @see LogEntry#getType()
+         */
         @Nonnull
         Builder setType(@Nonnull Type type);
 
+        /**
+         * Sets the acted object for the entry.
+         *
+         * @param acted the acted object
+         * @return the builder
+         * @see LogEntry#getActed()
+         */
         @Nonnull
         Builder setActed(@Nullable UUID acted);
 
+        /**
+         * Sets the acted name for the entry.
+         *
+         * @param actedName the acted name
+         * @return the builder
+         * @see LogEntry#getActedName()
+         */
         @Nonnull
         Builder setActedName(@Nonnull String actedName);
 
+        /**
+         * Sets the action of the entry.
+         *
+         * @param action the action
+         * @return the builder
+         * @see LogEntry#getAction()
+         */
         @Nonnull
         Builder setAction(@Nonnull String action);
 
+        /**
+         * Creates a {@link LogEntry} instance from the builder.
+         *
+         * @return a new log entry instance
+         */
         @Nonnull
         LogEntry build();
 

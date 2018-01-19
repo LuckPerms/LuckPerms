@@ -25,19 +25,22 @@
 
 package me.lucko.luckperms.common.storage.dao.sql.connection;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Map;
 
-@RequiredArgsConstructor
 public abstract class AbstractConnectionFactory {
 
-    @Getter
     private final String name;
+
+    public AbstractConnectionFactory(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return this.name;
+    }
 
     public abstract void init();
 

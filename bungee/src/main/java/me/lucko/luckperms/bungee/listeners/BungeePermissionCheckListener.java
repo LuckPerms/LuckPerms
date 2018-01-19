@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.bungee.listeners;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bungee.LPBungeePlugin;
@@ -41,9 +39,12 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 
-@RequiredArgsConstructor
 public class BungeePermissionCheckListener implements Listener {
     private final LPBungeePlugin plugin;
+
+    public BungeePermissionCheckListener(LPBungeePlugin plugin) {
+        this.plugin = plugin;
+    }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerPermissionCheck(PermissionCheckEvent e) {
@@ -53,15 +54,15 @@ public class BungeePermissionCheckListener implements Listener {
 
         ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
 
-        User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
+        User user = this.plugin.getUserManager().getIfLoaded(this.plugin.getUuidCache().getUUID(player.getUniqueId()));
         if (user == null) {
             e.setHasPermission(false);
             return;
         }
 
-        Contexts contexts = plugin.getContextManager().getApplicableContexts(player);
+        Contexts contexts = this.plugin.getContextManager().getApplicableContexts(player);
         Tristate result = user.getCachedData().getPermissionData(contexts).getPermissionValue(e.getPermission(), CheckOrigin.PLATFORM_PERMISSION_CHECK);
-        if (result == Tristate.UNDEFINED && plugin.getConfiguration().get(ConfigKeys.APPLY_BUNGEE_CONFIG_PERMISSIONS)) {
+        if (result == Tristate.UNDEFINED && this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUNGEE_CONFIG_PERMISSIONS)) {
             return; // just use the result provided by the proxy when the event was created
         }
 
@@ -76,15 +77,15 @@ public class BungeePermissionCheckListener implements Listener {
 
         ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
 
-        User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
+        User user = this.plugin.getUserManager().getIfLoaded(this.plugin.getUuidCache().getUUID(player.getUniqueId()));
         if (user == null) {
             e.setResult(Tristate.UNDEFINED);
             return;
         }
 
-        Contexts contexts = plugin.getContextManager().getApplicableContexts(player);
+        Contexts contexts = this.plugin.getContextManager().getApplicableContexts(player);
         Tristate result = user.getCachedData().getPermissionData(contexts).getPermissionValue(e.getPermission(), CheckOrigin.PLATFORM_LOOKUP_CHECK);
-        if (result == Tristate.UNDEFINED && plugin.getConfiguration().get(ConfigKeys.APPLY_BUNGEE_CONFIG_PERMISSIONS)) {
+        if (result == Tristate.UNDEFINED && this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUNGEE_CONFIG_PERMISSIONS)) {
             return; // just use the result provided by the proxy when the event was created
         }
 

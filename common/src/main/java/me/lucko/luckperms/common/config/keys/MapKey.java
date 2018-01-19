@@ -25,21 +25,26 @@
 
 package me.lucko.luckperms.common.config.keys;
 
-import lombok.AllArgsConstructor;
-
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.config.ConfigKey;
-import me.lucko.luckperms.common.config.ConfigurationAdapter;
+import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 
 import java.util.Map;
 
-@AllArgsConstructor(staticName = "of")
 public class MapKey implements ConfigKey<Map<String, String>> {
+    public static MapKey of(String path) {
+        return new MapKey(path);
+    }
+
     private final String path;
+
+    private MapKey(String path) {
+        this.path = path;
+    }
 
     @Override
     public Map<String, String> get(ConfigurationAdapter adapter) {
-        return ImmutableMap.copyOf(adapter.getMap(path, ImmutableMap.of()));
+        return ImmutableMap.copyOf(adapter.getMap(this.path, ImmutableMap.of()));
     }
 }

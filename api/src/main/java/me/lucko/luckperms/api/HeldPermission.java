@@ -31,13 +31,15 @@ import java.util.Optional;
 import java.util.OptionalLong;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 /**
- * A relationship between a PermissionHolder and a permission
+ * A relationship between a {@link PermissionHolder} and a permission.
  *
  * @param <T> the identifier type of the holder
  * @since 2.17
  */
+@Immutable
 public interface HeldPermission<T> {
 
     /**

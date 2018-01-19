@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.bukkit.calculators;
 
-import lombok.AllArgsConstructor;
-
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Contexts;
@@ -45,9 +43,12 @@ import me.lucko.luckperms.common.references.HolderType;
 
 import java.util.List;
 
-@AllArgsConstructor
 public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
     private final LPBukkitPlugin plugin;
+
+    public BukkitCalculatorFactory(LPBukkitPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public PermissionCalculator build(Contexts contexts, PermissionCalculatorMetadata metadata) {
@@ -55,34 +56,34 @@ public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
 
         processors.add(new MapProcessor());
 
-        if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_CHILD_PERMISSIONS)) {
-            processors.add(new ChildProcessor(plugin.getChildPermissionProvider()));
+        if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_CHILD_PERMISSIONS)) {
+            processors.add(new ChildProcessor(this.plugin.getChildPermissionProvider()));
         }
 
-        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) {
+        if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) {
             processors.add(new RegexProcessor());
         }
 
-        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) {
+        if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) {
             processors.add(new WildcardProcessor());
         }
 
-        if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS) && metadata.getHolderType() == HolderType.USER) {
-            processors.add(new DefaultsProcessor(contexts.isOp(), plugin.getDefaultsProvider()));
+        if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS) && metadata.getHolderType() == HolderType.USER) {
+            processors.add(new DefaultsProcessor(contexts.isOp(), this.plugin.getDefaultsProvider()));
         }
 
-        return registerCalculator(new PermissionCalculator(plugin, metadata, processors.build()));
+        return registerCalculator(new PermissionCalculator(this.plugin, metadata, processors.build()));
     }
 
     @Override
     public List<String> getActiveProcessors() {
         ImmutableList.Builder<String> ret = ImmutableList.builder();
         ret.add("Map");
-        if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_CHILD_PERMISSIONS)) ret.add("Child");
-        if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_ATTACHMENT_PERMISSIONS)) ret.add("Attachment");
-        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ret.add("Regex");
-        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) ret.add("Wildcard");
-        if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) ret.add("Defaults");
+        if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_CHILD_PERMISSIONS)) ret.add("Child");
+        if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_ATTACHMENT_PERMISSIONS)) ret.add("Attachment");
+        if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ret.add("Regex");
+        if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) ret.add("Wildcard");
+        if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) ret.add("Defaults");
         return ret.build();
     }
 }

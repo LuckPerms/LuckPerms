@@ -25,10 +25,6 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.PermissionHolder;
@@ -38,9 +34,8 @@ import me.lucko.luckperms.common.event.AbstractEvent;
 
 import java.util.Set;
 
-@Getter
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventNodeAdd extends AbstractEvent implements NodeAddEvent {
 
     private final Node node;
@@ -48,13 +43,49 @@ public class EventNodeAdd extends AbstractEvent implements NodeAddEvent {
     private final Set<Node> dataBefore;
     private final Set<Node> dataAfter;
 
+    public EventNodeAdd(Node node, PermissionHolder target, Set<Node> dataBefore, Set<Node> dataAfter) {
+        this.node = node;
+        this.target = target;
+        this.dataBefore = dataBefore;
+        this.dataAfter = dataAfter;
+    }
+
     @Override
     public boolean isUser() {
-        return target instanceof User;
+        return this.target instanceof User;
     }
 
     @Override
     public boolean isGroup() {
-        return target instanceof Group;
+        return this.target instanceof Group;
+    }
+
+    @Nonnull
+    @Override
+    public Node getNode() {
+        return this.node;
+    }
+
+    @Nonnull
+    @Override
+    public PermissionHolder getTarget() {
+        return this.target;
+    }
+
+    @Nonnull
+    @Override
+    public Set<Node> getDataBefore() {
+        return this.dataBefore;
+    }
+
+    @Nonnull
+    @Override
+    public Set<Node> getDataAfter() {
+        return this.dataAfter;
+    }
+
+    @Override
+    public String toString() {
+        return "EventNodeAdd(node=" + this.getNode() + ", target=" + this.getTarget() + ", dataBefore=" + this.getDataBefore() + ", dataAfter=" + this.getDataAfter() + ")";
     }
 }

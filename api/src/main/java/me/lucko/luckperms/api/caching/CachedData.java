@@ -210,6 +210,7 @@ public interface CachedData {
      *
      * @param contexts the contexts to reload in.
      * @throws NullPointerException if contexts is null
+     * @return a future
      * @since 4.0
      */
     @Nonnull
@@ -237,6 +238,7 @@ public interface CachedData {
      *
      * @param contexts the contexts to reload in.
      * @throws NullPointerException if contexts is null
+     * @return a future
      * @since 4.0
      */
     @Nonnull
@@ -264,6 +266,7 @@ public interface CachedData {
      *
      * @param contexts the contexts to reload in.
      * @throws NullPointerException if contexts is null
+     * @return a future
      * @since 4.0
      */
     @Nonnull
@@ -309,6 +312,7 @@ public interface CachedData {
      * <p>This method returns a Future so users can optionally choose to wait
      * until the recalculation has been performed.</p>
      *
+     * @return a future
      * @since 4.0
      */
     @Nonnull
@@ -332,6 +336,7 @@ public interface CachedData {
      * <p>This method returns a Future so users can optionally choose to wait
      * until the recalculation has been performed.</p>
      *
+     * @return a future
      * @since 4.0
      */
     @Nonnull

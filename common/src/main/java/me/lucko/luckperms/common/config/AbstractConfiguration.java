@@ -25,15 +25,12 @@
 
 package me.lucko.luckperms.common.config;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import me.lucko.luckperms.common.api.delegates.misc.ApiConfiguration;
+import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.config.keys.EnduringKey;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -41,16 +38,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 /**
  * An abstract implementation of {@link LuckPermsConfiguration}, backed by a cache.
  */
-@Getter
-@RequiredArgsConstructor
 public class AbstractConfiguration implements LuckPermsConfiguration, CacheLoader<ConfigKey<?>, Optional<Object>> {
 
     // the loading cache for config keys --> their value
     // the value is wrapped in an optional as null values don't get cached.
-    @Getter(AccessLevel.NONE)
     private final LoadingCache<ConfigKey<?>, Optional<Object>> cache = Caffeine.newBuilder().build(this);
 
     // the plugin instance
@@ -62,10 +58,34 @@ public class AbstractConfiguration implements LuckPermsConfiguration, CacheLoade
     // the contextsfile handler
     private final ContextsFile contextsFile = new ContextsFile(this);
 
+    public AbstractConfiguration(LuckPermsPlugin plugin, ConfigurationAdapter adapter) {
+        this.plugin = plugin;
+        this.adapter = adapter;
+    }
+
+    public ConfigurationAdapter getAdapter() {
+        return this.adapter;
+    }
+
+    @Override
+    public LuckPermsPlugin getPlugin() {
+        return this.plugin;
+    }
+
+    @Override
+    public ApiConfiguration getDelegate() {
+        return this.delegate;
+    }
+
+    @Override
+    public ContextsFile getContextsFile() {
+        return this.contextsFile;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public <T> T get(ConfigKey<T> key) {
-        Optional<Object> ret = cache.get(key);
+        Optional<Object> ret = this.cache.get(key);
         if (ret == null) {
             return null;
         }
@@ -74,29 +94,23 @@ public class AbstractConfiguration implements LuckPermsConfiguration, CacheLoade
 
     @Override
     public void loadAll() {
-        ConfigKeys.getAllKeys().values().forEach(cache::get);
-        contextsFile.load();
-    }
-
-    @Override
-    public void init() {
-        adapter.init();
-        loadAll();
+        ConfigKeys.getAllKeys().values().forEach(this.cache::get);
+        this.contextsFile.load();
     }
 
     @Override
     public void reload() {
-        init();
+        this.adapter.reload();
 
-        Set<ConfigKey<?>> toInvalidate = cache.asMap().keySet().stream().filter(k -> !(k instanceof EnduringKey)).collect(Collectors.toSet());
-        cache.invalidateAll(toInvalidate);
+        Set<ConfigKey<?>> toInvalidate = this.cache.asMap().keySet().stream().filter(k -> !(k instanceof EnduringKey)).collect(Collectors.toSet());
+        this.cache.invalidateAll(toInvalidate);
 
         loadAll();
-        getPlugin().getApiProvider().getEventFactory().handleConfigReload();
+        getPlugin().getEventFactory().handleConfigReload();
     }
 
     @Override
-    public Optional<Object> load(ConfigKey<?> key) {
-        return Optional.ofNullable(key.get(adapter));
+    public Optional<Object> load(@Nonnull ConfigKey<?> key) {
+        return Optional.ofNullable(key.get(this.adapter));
     }
 }

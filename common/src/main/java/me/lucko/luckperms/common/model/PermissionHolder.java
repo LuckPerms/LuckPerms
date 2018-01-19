@@ -25,10 +25,6 @@
 
 package me.lucko.luckperms.common.model;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -104,7 +100,6 @@ import java.util.stream.Collectors;
  * contexts they apply in, so doing context specific querying should be fast. Caching would be ineffective here, due to
  * the potentially vast amount of contexts being used by nodes, and the potential for very large inheritance trees.</p>
  */
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class PermissionHolder {
 
     /**
@@ -115,13 +110,11 @@ public abstract class PermissionHolder {
      * <p>For users, this value is a String representation of their {@link User#getUuid()}. For groups, it's just the
      * {@link Group#getName()}.</p>
      */
-    @Getter
     private final String objectName;
 
     /**
      * Reference to the main plugin instance
      */
-    @Getter
     private final LuckPermsPlugin plugin;
 
     /**
@@ -137,17 +130,22 @@ public abstract class PermissionHolder {
             .treeSetValues(NodeComparator.reverse())
             .build();
 
+    protected PermissionHolder(String objectName, LuckPermsPlugin plugin) {
+        this.objectName = objectName;
+        this.plugin = plugin;
+    }
+
     /**
      * Caches an immutable copy of the above nodes multimap
      */
     private final class NodesCache extends Cache<ImmutableSetMultimap<ImmutableContextSet, Node>> {
         @Override
         protected ImmutableSetMultimap<ImmutableContextSet, Node> supply() {
-            nodesLock.lock();
+            PermissionHolder.this.nodesLock.lock();
             try {
-                return ImmutableSetMultimap.copyOf(nodes);
+                return ImmutableSetMultimap.copyOf(PermissionHolder.this.nodes);
             } finally {
-                nodesLock.unlock();
+                PermissionHolder.this.nodesLock.unlock();
             }
         }
     }
@@ -179,11 +177,11 @@ public abstract class PermissionHolder {
     private final class TransientNodesCache extends Cache<ImmutableSetMultimap<ImmutableContextSet, Node>> {
         @Override
         protected ImmutableSetMultimap<ImmutableContextSet, Node> supply() {
-            transientNodesLock.lock();
+            PermissionHolder.this.transientNodesLock.lock();
             try {
-                return ImmutableSetMultimap.copyOf(transientNodes);
+                return ImmutableSetMultimap.copyOf(PermissionHolder.this.transientNodes);
             } finally {
-                transientNodesLock.unlock();
+                PermissionHolder.this.transientNodesLock.unlock();
             }
         }
     }
@@ -206,7 +204,6 @@ public abstract class PermissionHolder {
     /**
      * Lock used by Storage implementations to prevent concurrent read/writes
      */
-    @Getter
     private final Lock ioLock = new ReentrantLock();
 
     /**
@@ -217,16 +214,31 @@ public abstract class PermissionHolder {
     /**
      * A set of runnables which are called when this objects state changes.
      */
-    @Getter
     private final Set<StateListener> stateListeners = ConcurrentHashMap.newKeySet();
 
+    public String getObjectName() {
+        return this.objectName;
+    }
+
+    public LuckPermsPlugin getPlugin() {
+        return this.plugin;
+    }
+
+    public Lock getIoLock() {
+        return this.ioLock;
+    }
+
+    public Set<StateListener> getStateListeners() {
+        return this.stateListeners;
+    }
+
     private void invalidateCache() {
-        nodesCopy.invalidate();
-        transientNodesCopy.invalidate();
-        weightCache.invalidate();
+        this.nodesCopy.invalidate();
+        this.transientNodesCopy.invalidate();
+        this.weightCache.invalidate();
 
         // Invalidate listeners
-        for (StateListener listener : stateListeners) {
+        for (StateListener listener : this.stateListeners) {
             try {
                 listener.onStateChange();
             } catch (Exception e) {
@@ -242,7 +254,7 @@ public abstract class PermissionHolder {
         /* only declare state of groups. the state manager isn't really being used now the caches in this class
            are gone, but it's useful for command output. */
         if (this.getType().isGroup()) {
-            plugin.getCachedStateManager().putAll(toReference(), getGroupReferences());
+            this.plugin.getCachedStateManager().putAll(toReference(), getGroupReferences());
         }
     }
 
@@ -289,7 +301,7 @@ public abstract class PermissionHolder {
      * @return an immutable copy of the multimap storing this objects nodes
      */
     public ImmutableSetMultimap<ImmutableContextSet, Node> getEnduringNodes() {
-        return nodesCopy.get();
+        return this.nodesCopy.get();
     }
 
     /**
@@ -298,7 +310,7 @@ public abstract class PermissionHolder {
      * @return an immutable copy of the multimap storing this objects transient nodes
      */
     public ImmutableSetMultimap<ImmutableContextSet, Node> getTransientNodes() {
-        return transientNodesCopy.get();
+        return this.transientNodesCopy.get();
     }
 
     /**
@@ -307,14 +319,14 @@ public abstract class PermissionHolder {
      * @param set the set of nodes to apply to the object
      */
     public void setEnduringNodes(Set<Node> set) {
-        nodesLock.lock();
+        this.nodesLock.lock();
         try {
-            nodes.clear();
+            this.nodes.clear();
             for (Node n : set) {
-                nodes.put(n.getFullContexts().makeImmutable(), n);
+                this.nodes.put(n.getFullContexts().makeImmutable(), n);
             }
         } finally {
-            nodesLock.unlock();
+            this.nodesLock.unlock();
         }
         invalidateCache();
     }
@@ -325,36 +337,36 @@ public abstract class PermissionHolder {
      * @param multimap the replacement multimap
      */
     public void replaceEnduringNodes(Multimap<ImmutableContextSet, Node> multimap) {
-        nodesLock.lock();
+        this.nodesLock.lock();
         try {
-            nodes.clear();
-            nodes.putAll(multimap);
+            this.nodes.clear();
+            this.nodes.putAll(multimap);
         } finally {
-            nodesLock.unlock();
+            this.nodesLock.unlock();
         }
         invalidateCache();
     }
 
     public void setTransientNodes(Set<Node> set) {
-        transientNodesLock.lock();
+        this.transientNodesLock.lock();
         try {
-            transientNodes.clear();
+            this.transientNodes.clear();
             for (Node n : set) {
-                transientNodes.put(n.getFullContexts().makeImmutable(), n);
+                this.transientNodes.put(n.getFullContexts().makeImmutable(), n);
             }
         } finally {
-            transientNodesLock.unlock();
+            this.transientNodesLock.unlock();
         }
         invalidateCache();
     }
 
     public void replaceTransientNodes(Multimap<ImmutableContextSet, Node> multimap) {
-        transientNodesLock.lock();
+        this.transientNodesLock.lock();
         try {
-            transientNodes.clear();
-            transientNodes.putAll(multimap);
+            this.transientNodes.clear();
+            this.transientNodes.putAll(multimap);
         } finally {
-            transientNodesLock.unlock();
+            this.transientNodesLock.unlock();
         }
         invalidateCache();
     }
@@ -367,18 +379,18 @@ public abstract class PermissionHolder {
     public LinkedHashSet<Node> getOwnNodesSet() {
         LinkedHashSet<Node> ret = new LinkedHashSet<>();
 
-        transientNodesLock.lock();
+        this.transientNodesLock.lock();
         try {
-            ret.addAll(transientNodes.values());
+            ret.addAll(this.transientNodes.values());
         } finally {
-            transientNodesLock.unlock();
+            this.transientNodesLock.unlock();
         }
 
-        nodesLock.lock();
+        this.nodesLock.lock();
         try {
-            ret.addAll(nodes.values());
+            ret.addAll(this.nodes.values());
         } finally {
-            nodesLock.unlock();
+            this.nodesLock.unlock();
         }
 
         return ret;
@@ -387,18 +399,18 @@ public abstract class PermissionHolder {
     public List<Node> getOwnNodes() {
         List<Node> ret = new ArrayList<>();
 
-        transientNodesLock.lock();
+        this.transientNodesLock.lock();
         try {
-            ret.addAll(transientNodes.values());
+            ret.addAll(this.transientNodes.values());
         } finally {
-            transientNodesLock.unlock();
+            this.transientNodesLock.unlock();
         }
 
-        nodesLock.lock();
+        this.nodesLock.lock();
         try {
-            ret.addAll(nodes.values());
+            ret.addAll(this.nodes.values());
         } finally {
-            nodesLock.unlock();
+            this.nodesLock.unlock();
         }
 
         return ret;
@@ -407,22 +419,22 @@ public abstract class PermissionHolder {
     public SortedSet<LocalizedNode> getOwnNodesSorted() {
         SortedSet<LocalizedNode> ret = new TreeSet<>(NodeWithContextComparator.reverse());
 
-        transientNodesLock.lock();
+        this.transientNodesLock.lock();
         try {
-            for (Node node : transientNodes.values()) {
+            for (Node node : this.transientNodes.values()) {
                 ret.add(ImmutableLocalizedNode.of(node, getObjectName()));
             }
         } finally {
-            transientNodesLock.unlock();
+            this.transientNodesLock.unlock();
         }
 
-        nodesLock.lock();
+        this.nodesLock.lock();
         try {
-            for (Node node : nodes.values()) {
+            for (Node node : this.nodes.values()) {
                 ret.add(ImmutableLocalizedNode.of(node, getObjectName()));
             }
         } finally {
-            nodesLock.unlock();
+            this.nodesLock.unlock();
         }
 
         return ret;
@@ -433,15 +445,15 @@ public abstract class PermissionHolder {
     }
 
     public <C extends Collection<Node>> C filterEnduringNodes(C ret, ContextSet filter) {
-        nodesLock.lock();
+        this.nodesLock.lock();
         try {
-            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : nodes.asMap().entrySet()) {
+            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : this.nodes.asMap().entrySet()) {
                 if (e.getKey().isSatisfiedBy(filter)) {
                     ret.addAll(e.getValue());
                 }
             }
         } finally {
-            nodesLock.unlock();
+            this.nodesLock.unlock();
         }
 
         return ret;
@@ -452,15 +464,15 @@ public abstract class PermissionHolder {
     }
 
     public <C extends Collection<Node>> C filterTransientNodes(C ret, ContextSet filter) {
-        transientNodesLock.lock();
+        this.transientNodesLock.lock();
         try {
-            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : transientNodes.asMap().entrySet()) {
+            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : this.transientNodes.asMap().entrySet()) {
                 if (e.getKey().isSatisfiedBy(filter)) {
                     ret.addAll(e.getValue());
                 }
             }
         } finally {
-            transientNodesLock.unlock();
+            this.transientNodesLock.unlock();
         }
 
         return ret;
@@ -471,26 +483,26 @@ public abstract class PermissionHolder {
     }
 
     public <C extends Collection<Node>> C filterNodes(C ret, ContextSet filter) {
-        transientNodesLock.lock();
+        this.transientNodesLock.lock();
         try {
-            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : transientNodes.asMap().entrySet()) {
+            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : this.transientNodes.asMap().entrySet()) {
                 if (e.getKey().isSatisfiedBy(filter)) {
                     ret.addAll(e.getValue());
                 }
             }
         } finally {
-            transientNodesLock.unlock();
+            this.transientNodesLock.unlock();
         }
 
-        nodesLock.lock();
+        this.nodesLock.lock();
         try {
-            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : nodes.asMap().entrySet()) {
+            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : this.nodes.asMap().entrySet()) {
                 if (e.getKey().isSatisfiedBy(filter)) {
                     ret.addAll(e.getValue());
                 }
             }
         } finally {
-            nodesLock.unlock();
+            this.nodesLock.unlock();
         }
 
         return ret;
@@ -500,11 +512,11 @@ public abstract class PermissionHolder {
         boolean result;
         ImmutableCollection<Node> before = getEnduringNodes().values();
 
-        nodesLock.lock();
+        this.nodesLock.lock();
         try {
-            result = nodes.values().removeIf(predicate);
+            result = this.nodes.values().removeIf(predicate);
         } finally {
-            nodesLock.unlock();
+            this.nodesLock.unlock();
         }
 
         if (!result) {
@@ -514,18 +526,18 @@ public abstract class PermissionHolder {
         invalidateCache();
 
         ImmutableCollection<Node> after = getEnduringNodes().values();
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        this.plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
     public boolean removeIfTransient(Predicate<Node> predicate) {
         boolean result;
 
-        transientNodesLock.lock();
+        this.transientNodesLock.lock();
         try {
-            result = transientNodes.values().removeIf(predicate);
+            result = this.transientNodes.values().removeIf(predicate);
         } finally {
-            transientNodesLock.unlock();
+            this.transientNodesLock.unlock();
         }
 
         if (result) {
@@ -576,14 +588,14 @@ public abstract class PermissionHolder {
                 continue;
             }
 
-            Group g = plugin.getGroupManager().getIfLoaded(groupName);
+            Group g = this.plugin.getGroupManager().getIfLoaded(groupName);
             if (g != null) {
                 resolvedGroups.add(g);
             }
         }
 
         // sort the groups according to weight + other factors.
-        resolvedGroups.sort(inheritanceComparator);
+        resolvedGroups.sort(this.inheritanceComparator);
 
         for (Group g : resolvedGroups) {
             g.resolveInheritances(accumulator, excludedGroups, context);
@@ -648,14 +660,14 @@ public abstract class PermissionHolder {
 
             if (!processedGroups.add(groupName) || excludedGroups.contains(groupName) || !n.getValuePrimitive()) continue;
 
-            Group g = plugin.getGroupManager().getIfLoaded(groupName);
+            Group g = this.plugin.getGroupManager().getIfLoaded(groupName);
             if (g != null) {
                 resolvedGroups.add(g);
             }
         }
 
         // sort the groups according to weight + other factors.
-        resolvedGroups.sort(inheritanceComparator);
+        resolvedGroups.sort(this.inheritanceComparator);
 
         for (Group g : resolvedGroups) {
             g.resolveInheritances(accumulator, excludedGroups);
@@ -729,15 +741,17 @@ public abstract class PermissionHolder {
         }
 
         Map<String, Boolean> perms = new HashMap<>();
-        boolean applyShorthand = plugin.getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND);
+        boolean applyShorthand = this.plugin.getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND);
         for (Node node : entries) {
             String perm = lowerCase ? node.getPermission().toLowerCase() : node.getPermission();
 
             if (perms.putIfAbsent(perm, node.getValuePrimitive()) == null) {
                 if (applyShorthand) {
-                    List<String> sh = node.resolveShorthand();
-                    if (!sh.isEmpty()) {
-                        sh.stream().map(s -> lowerCase ? s.toLowerCase() : s).forEach(s -> perms.putIfAbsent(s, node.getValuePrimitive()));
+                    List<String> shorthand = node.resolveShorthand();
+                    if (!shorthand.isEmpty()) {
+                        for (String s : shorthand) {
+                            perms.putIfAbsent(lowerCase ? s.toLowerCase() : s, node.getValuePrimitive());
+                        }
                     }
                 }
             }
@@ -750,7 +764,7 @@ public abstract class PermissionHolder {
         List<LocalizedNode> entries = resolveInheritances();
 
         Map<String, Boolean> perms = new HashMap<>();
-        boolean applyShorthand = plugin.getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND);
+        boolean applyShorthand = this.plugin.getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND);
         for (Node node : entries) {
             String perm = lowerCase ? node.getPermission().toLowerCase().intern() : node.getPermission();
 
@@ -769,7 +783,7 @@ public abstract class PermissionHolder {
 
     public MetaAccumulator accumulateMeta(MetaAccumulator accumulator, Set<String> excludedGroups, Contexts context) {
         if (accumulator == null) {
-            accumulator = MetaAccumulator.makeFromConfig(plugin);
+            accumulator = MetaAccumulator.makeFromConfig(this.plugin);
         }
 
         if (excludedGroups == null) {
@@ -813,14 +827,14 @@ public abstract class PermissionHolder {
                 continue;
             }
 
-            Group g = plugin.getGroupManager().getIfLoaded(groupName);
+            Group g = this.plugin.getGroupManager().getIfLoaded(groupName);
             if (g != null) {
                 resolvedGroups.add(g);
             }
         }
 
         // sort the groups according to weight + other factors.
-        resolvedGroups.sort(inheritanceComparator);
+        resolvedGroups.sort(this.inheritanceComparator);
 
         for (Group g : resolvedGroups) {
             g.accumulateMeta(accumulator, excludedGroups, context);
@@ -831,7 +845,7 @@ public abstract class PermissionHolder {
 
     public MetaAccumulator accumulateMeta(MetaAccumulator accumulator, Set<String> excludedGroups) {
         if (accumulator == null) {
-            accumulator = MetaAccumulator.makeFromConfig(plugin);
+            accumulator = MetaAccumulator.makeFromConfig(this.plugin);
         }
 
         if (excludedGroups == null) {
@@ -867,14 +881,14 @@ public abstract class PermissionHolder {
 
             if (!processedGroups.add(groupName) || excludedGroups.contains(groupName) || !n.getValuePrimitive()) continue;
 
-            Group g = plugin.getGroupManager().getIfLoaded(groupName);
+            Group g = this.plugin.getGroupManager().getIfLoaded(groupName);
             if (g != null) {
                 resolvedGroups.add(g);
             }
         }
 
         // sort the groups according to weight + other factors.
-        resolvedGroups.sort(inheritanceComparator);
+        resolvedGroups.sort(this.inheritanceComparator);
 
         for (Group g : resolvedGroups) {
             g.accumulateMeta(accumulator, excludedGroups);
@@ -894,9 +908,9 @@ public abstract class PermissionHolder {
 
         ImmutableSet<Node> before = ImmutableSet.copyOf(getOwnNodesSet());
 
-        nodesLock.lock();
+        this.nodesLock.lock();
         try {
-            Iterator<Node> it = nodes.values().iterator();
+            Iterator<Node> it = this.nodes.values().iterator();
             while (it.hasNext()) {
                 Node entry = it.next();
                 if (entry.hasExpired()) {
@@ -906,7 +920,7 @@ public abstract class PermissionHolder {
                 }
             }
         } finally {
-            nodesLock.unlock();
+            this.nodesLock.unlock();
         }
 
         if (work) {
@@ -914,9 +928,9 @@ public abstract class PermissionHolder {
             work = false;
         }
 
-        transientNodesLock.lock();
+        this.transientNodesLock.lock();
         try {
-            Iterator<Node> it = transientNodes.values().iterator();
+            Iterator<Node> it = this.transientNodes.values().iterator();
             while (it.hasNext()) {
                 Node entry = it.next();
                 if (entry.hasExpired()) {
@@ -926,7 +940,7 @@ public abstract class PermissionHolder {
                 }
             }
         } finally {
-            transientNodesLock.unlock();
+            this.transientNodesLock.unlock();
         }
 
         if (work) {
@@ -940,7 +954,7 @@ public abstract class PermissionHolder {
         ImmutableSet<Node> after = ImmutableSet.copyOf(getOwnNodesSet());
 
         for (Node r : removed) {
-            plugin.getApiProvider().getEventFactory().handleNodeRemove(r, this, before, after);
+            this.plugin.getEventFactory().handleNodeRemove(r, this, before, after);
         }
 
         return true;
@@ -1013,17 +1027,17 @@ public abstract class PermissionHolder {
 
         ImmutableCollection<Node> before = getEnduringNodes().values();
 
-        nodesLock.lock();
+        this.nodesLock.lock();
         try {
-            nodes.put(node.getFullContexts().makeImmutable(), node);
+            this.nodes.put(node.getFullContexts().makeImmutable(), node);
         } finally {
-            nodesLock.unlock();
+            this.nodesLock.unlock();
         }
         invalidateCache();
 
         ImmutableCollection<Node> after = getEnduringNodes().values();
 
-        plugin.getApiProvider().getEventFactory().handleNodeAdd(node, this, before, after);
+        this.plugin.getEventFactory().handleNodeAdd(node, this, before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -1050,17 +1064,17 @@ public abstract class PermissionHolder {
                     ImmutableCollection<Node> before = getEnduringNodes().values();
 
                     // Remove the old node & add the new one.
-                    nodesLock.lock();
+                    this.nodesLock.lock();
                     try {
-                        nodes.remove(previous.getFullContexts().makeImmutable(), previous);
-                        nodes.put(newNode.getFullContexts().makeImmutable(), newNode);
+                        this.nodes.remove(previous.getFullContexts().makeImmutable(), previous);
+                        this.nodes.put(newNode.getFullContexts().makeImmutable(), newNode);
                     } finally {
-                        nodesLock.unlock();
+                        this.nodesLock.unlock();
                     }
 
                     invalidateCache();
                     ImmutableCollection<Node> after = getEnduringNodes().values();
-                    plugin.getApiProvider().getEventFactory().handleNodeAdd(newNode, this, before, after);
+                    this.plugin.getEventFactory().handleNodeAdd(newNode, this, before, after);
                     return Maps.immutableEntry(DataMutateResult.SUCCESS, newNode);
                 }
 
@@ -1077,17 +1091,17 @@ public abstract class PermissionHolder {
 
                         ImmutableCollection<Node> before = getEnduringNodes().values();
 
-                        nodesLock.lock();
+                        this.nodesLock.lock();
                         try {
-                            nodes.remove(previous.getFullContexts().makeImmutable(), previous);
-                            nodes.put(node.getFullContexts().makeImmutable(), node);
+                            this.nodes.remove(previous.getFullContexts().makeImmutable(), previous);
+                            this.nodes.put(node.getFullContexts().makeImmutable(), node);
                         } finally {
-                            nodesLock.unlock();
+                            this.nodesLock.unlock();
                         }
 
                         invalidateCache();
                         ImmutableCollection<Node> after = getEnduringNodes().values();
-                        plugin.getApiProvider().getEventFactory().handleNodeAdd(node, this, before, after);
+                        this.plugin.getEventFactory().handleNodeAdd(node, this, before, after);
                         return Maps.immutableEntry(DataMutateResult.SUCCESS, node);
                     }
                 }
@@ -1112,18 +1126,18 @@ public abstract class PermissionHolder {
 
         ImmutableCollection<Node> before = getTransientNodes().values();
 
-        transientNodesLock.lock();
+        this.transientNodesLock.lock();
         try {
-            transientNodes.put(node.getFullContexts().makeImmutable(), node);
+            this.transientNodes.put(node.getFullContexts().makeImmutable(), node);
         } finally {
-            transientNodesLock.unlock();
+            this.transientNodesLock.unlock();
         }
 
         invalidateCache();
 
         ImmutableCollection<Node> after = getTransientNodes().values();
 
-        plugin.getApiProvider().getEventFactory().handleNodeAdd(node, this, before, after);
+        this.plugin.getEventFactory().handleNodeAdd(node, this, before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -1139,17 +1153,17 @@ public abstract class PermissionHolder {
 
         ImmutableCollection<Node> before = getEnduringNodes().values();
 
-        nodesLock.lock();
+        this.nodesLock.lock();
         try {
-            nodes.get(node.getFullContexts().makeImmutable()).removeIf(e -> e.almostEquals(node));
+            this.nodes.get(node.getFullContexts().makeImmutable()).removeIf(e -> e.almostEquals(node));
         } finally {
-            nodesLock.unlock();
+            this.nodesLock.unlock();
         }
 
         invalidateCache();
 
         ImmutableCollection<Node> after = getEnduringNodes().values();
-        plugin.getApiProvider().getEventFactory().handleNodeRemove(node, this, before, after);
+        this.plugin.getEventFactory().handleNodeRemove(node, this, before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -1165,17 +1179,17 @@ public abstract class PermissionHolder {
 
         ImmutableCollection<Node> before = getTransientNodes().values();
 
-        transientNodesLock.lock();
+        this.transientNodesLock.lock();
         try {
-            transientNodes.get(node.getFullContexts().makeImmutable()).removeIf(e -> e.almostEquals(node));
+            this.transientNodes.get(node.getFullContexts().makeImmutable()).removeIf(e -> e.almostEquals(node));
         } finally {
-            transientNodesLock.unlock();
+            this.transientNodesLock.unlock();
         }
 
         invalidateCache();
 
         ImmutableCollection<Node> after = getTransientNodes().values();
-        plugin.getApiProvider().getEventFactory().handleNodeRemove(node, this, before, after);
+        this.plugin.getEventFactory().handleNodeRemove(node, this, before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -1193,11 +1207,11 @@ public abstract class PermissionHolder {
     public boolean clearNodes() {
         ImmutableCollection<Node> before = getEnduringNodes().values();
 
-        nodesLock.lock();
+        this.nodesLock.lock();
         try {
-            nodes.clear();
+            this.nodes.clear();
         } finally {
-            nodesLock.unlock();
+            this.nodesLock.unlock();
         }
 
         invalidateCache();
@@ -1207,17 +1221,17 @@ public abstract class PermissionHolder {
             return false;
         }
 
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        this.plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
     public boolean clearNodes(ContextSet contextSet) {
         ImmutableCollection<Node> before = getEnduringNodes().values();
-        nodesLock.lock();
+        this.nodesLock.lock();
         try {
-            nodes.removeAll(contextSet.makeImmutable());
+            this.nodes.removeAll(contextSet.makeImmutable());
         } finally {
-            nodesLock.unlock();
+            this.nodesLock.unlock();
         }
 
         invalidateCache();
@@ -1227,37 +1241,37 @@ public abstract class PermissionHolder {
             return false;
         }
 
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        this.plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
     public boolean clearParents(boolean giveDefault) {
         ImmutableCollection<Node> before = getEnduringNodes().values();
 
-        nodesLock.lock();
+        this.nodesLock.lock();
         try {
-            boolean b = nodes.values().removeIf(Node::isGroupNode);
+            boolean b = this.nodes.values().removeIf(Node::isGroupNode);
             if (!b) {
                 return false;
             }
         } finally {
-            nodesLock.unlock();
+            this.nodesLock.unlock();
         }
 
         if (this.getType().isUser() && giveDefault) {
-            plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
+            this.plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
         }
 
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        this.plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
     public boolean clearParents(ContextSet contextSet, boolean giveDefault) {
         ImmutableCollection<Node> before = getEnduringNodes().values();
 
-        nodesLock.lock();
+        this.nodesLock.lock();
         try {
             SortedSet<Node> nodes = this.nodes.get(contextSet.makeImmutable());
             if (nodes == null) {
@@ -1269,40 +1283,40 @@ public abstract class PermissionHolder {
                 return false;
             }
         } finally {
-            nodesLock.unlock();
+            this.nodesLock.unlock();
         }
 
         if (this.getType().isUser() && giveDefault) {
-            plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
+            this.plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
         }
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        this.plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
     public boolean clearMeta(MetaType type) {
         ImmutableCollection<Node> before = getEnduringNodes().values();
 
-        nodesLock.lock();
+        this.nodesLock.lock();
         try {
-            if (!nodes.values().removeIf(type::matches)) {
+            if (!this.nodes.values().removeIf(type::matches)) {
                 return false;
             }
         } finally {
-            nodesLock.unlock();
+            this.nodesLock.unlock();
         }
 
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        this.plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
     public boolean clearMeta(MetaType type, ContextSet contextSet) {
         ImmutableCollection<Node> before = getEnduringNodes().values();
 
-        nodesLock.lock();
+        this.nodesLock.lock();
         try {
             SortedSet<Node> nodes = this.nodes.get(contextSet.makeImmutable());
             if (nodes == null) {
@@ -1314,38 +1328,38 @@ public abstract class PermissionHolder {
                 return false;
             }
         } finally {
-            nodesLock.unlock();
+            this.nodesLock.unlock();
         }
 
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        this.plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
     public boolean clearMetaKeys(String key, boolean temp) {
         ImmutableCollection<Node> before = getEnduringNodes().values();
 
-        nodesLock.lock();
+        this.nodesLock.lock();
         try {
             boolean b = this.nodes.values().removeIf(n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key));
             if (!b) {
                 return false;
             }
         } finally {
-            nodesLock.unlock();
+            this.nodesLock.unlock();
         }
 
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        this.plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
     public boolean clearMetaKeys(String key, ContextSet contextSet, boolean temp) {
         ImmutableCollection<Node> before = getEnduringNodes().values();
 
-        nodesLock.lock();
+        this.nodesLock.lock();
         try {
             SortedSet<Node> nodes = this.nodes.get(contextSet.makeImmutable());
             if (nodes == null) {
@@ -1357,23 +1371,23 @@ public abstract class PermissionHolder {
                 return false;
             }
         } finally {
-            nodesLock.unlock();
+            this.nodesLock.unlock();
         }
 
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        this.plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
     public boolean clearTransientNodes() {
         ImmutableCollection<Node> before = getTransientNodes().values();
 
-        transientNodesLock.lock();
+        this.transientNodesLock.lock();
         try {
-            transientNodes.clear();
+            this.transientNodes.clear();
         } finally {
-            transientNodesLock.unlock();
+            this.transientNodesLock.unlock();
         }
 
         invalidateCache();
@@ -1383,12 +1397,12 @@ public abstract class PermissionHolder {
             return false;
         }
 
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        this.plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
     public OptionalInt getWeight() {
-        return weightCache.get();
+        return this.weightCache.get();
     }
 
     private OptionalInt calculateWeight() {
@@ -1410,7 +1424,7 @@ public abstract class PermissionHolder {
         OptionalInt weight = seen ? OptionalInt.of(best) : OptionalInt.empty();
 
         if (!weight.isPresent()) {
-            Integer w = plugin.getConfiguration().get(ConfigKeys.GROUP_WEIGHTS).get(getObjectName().toLowerCase());
+            Integer w = this.plugin.getConfiguration().get(ConfigKeys.GROUP_WEIGHTS).get(getObjectName().toLowerCase());
             if (w != null) {
                 weight = OptionalInt.of(w);
             }

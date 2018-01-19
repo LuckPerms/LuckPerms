@@ -25,10 +25,9 @@
 
 package me.lucko.luckperms.bungee;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
-import me.lucko.luckperms.common.config.ConfigurationAdapter;
+import me.lucko.luckperms.common.config.adapter.AbstractConfigurationAdapter;
+import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -36,73 +35,60 @@ import net.md_5.bungee.config.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@RequiredArgsConstructor
-public class BungeeConfigAdapter implements ConfigurationAdapter {
+public class BungeeConfigAdapter extends AbstractConfigurationAdapter implements ConfigurationAdapter {
 
-    @Getter
-    private final LPBungeePlugin plugin;
-
+    private final File file;
     private Configuration configuration;
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private File makeFile(String file) throws IOException {
-        File configFile = new File(plugin.getDataFolder(), file);
-
-        if (!configFile.exists()) {
-            plugin.getDataFolder().mkdir();
-            try (InputStream is = plugin.getResourceAsStream(file)) {
-                Files.copy(is, configFile.toPath());
-            }
-        }
-
-        return configFile;
+    public BungeeConfigAdapter(LuckPermsPlugin plugin, File file) {
+        super(plugin);
+        this.file = file;
+        reload();
     }
 
     @Override
-    public void init() {
+    public void reload() {
         try {
-            configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(makeFile("config.yml"));
+            this.configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(this.file);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
     @Override
     public boolean contains(String path) {
-        return configuration.contains(path);
+        return this.configuration.contains(path);
     }
 
     @Override
     public String getString(String path, String def) {
-        return configuration.getString(path, def);
+        return this.configuration.getString(path, def);
     }
 
     @Override
     public int getInt(String path, int def) {
-        return configuration.getInt(path, def);
+        return this.configuration.getInt(path, def);
     }
 
     @Override
     public boolean getBoolean(String path, boolean def) {
-        return configuration.getBoolean(path, def);
+        return this.configuration.getBoolean(path, def);
     }
 
     @Override
     public List<String> getList(String path, List<String> def) {
-        return Optional.ofNullable(configuration.getStringList(path)).orElse(def);
+        return Optional.ofNullable(this.configuration.getStringList(path)).orElse(def);
     }
 
     @Override
     public List<String> getObjectList(String path, List<String> def) {
-        Configuration section = configuration.getSection(path);
+        Configuration section = this.configuration.getSection(path);
         if (section == null) {
             return def;
         }
@@ -113,7 +99,7 @@ public class BungeeConfigAdapter implements ConfigurationAdapter {
     @Override
     public Map<String, String> getMap(String path, Map<String, String> def) {
         Map<String, String> map = new HashMap<>();
-        Configuration section = configuration.getSection(path);
+        Configuration section = this.configuration.getSection(path);
         if (section == null) {
             return def;
         }

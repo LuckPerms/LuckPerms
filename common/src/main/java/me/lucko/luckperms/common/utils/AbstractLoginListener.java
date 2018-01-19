@@ -25,8 +25,7 @@
 
 package me.lucko.luckperms.common.utils;
 
-import lombok.experimental.UtilityClass;
-
+import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.assignments.AssignmentRule;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
@@ -36,48 +35,61 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Utilities for use in platform listeners
+ * Abstract listener utility for handling new player connections
  */
-@UtilityClass
-public class LoginHelper {
+public abstract class AbstractLoginListener {
+    private final LuckPermsPlugin plugin;
 
-    public static User loadUser(LuckPermsPlugin plugin, UUID u, String username, boolean joinUuidSave) throws Exception {
+    // if we should #join the uuid save future.
+    // this is only really necessary on BungeeCord, as the data may be needed
+    // on the backend, depending on uuid config options
+    private final boolean joinUuidSave;
+
+    protected AbstractLoginListener(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+        this.joinUuidSave = plugin.getServerType() == PlatformType.BUNGEE;
+    }
+
+    public User loadUser(UUID u, String username) {
         final long startTime = System.currentTimeMillis();
 
-        final UuidCache cache = plugin.getUuidCache();
-        if (!plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUIDS)) {
-            UUID uuid = plugin.getStorage().noBuffer().getUUID(username).join();
+        // register with the housekeeper to avoid accidental unloads
+        this.plugin.getUserManager().getHouseKeeper().registerUsage(u);
+
+        final UuidCache cache = this.plugin.getUuidCache();
+        if (!this.plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUIDS)) {
+            UUID uuid = this.plugin.getStorage().noBuffer().getUUID(username).join();
             if (uuid != null) {
                 cache.addToCache(u, uuid);
             } else {
                 // No previous data for this player
-                plugin.getApiProvider().getEventFactory().handleUserFirstLogin(u, username);
+                this.plugin.getEventFactory().handleUserFirstLogin(u, username);
                 cache.addToCache(u, u);
-                CompletableFuture<Void> future = plugin.getStorage().noBuffer().saveUUIDData(u, username);
-                if (joinUuidSave) {
+                CompletableFuture<Void> future = this.plugin.getStorage().noBuffer().saveUUIDData(u, username);
+                if (this.joinUuidSave) {
                     future.join();
                 }
             }
         } else {
-            String name = plugin.getStorage().noBuffer().getName(u).join();
+            String name = this.plugin.getStorage().noBuffer().getName(u).join();
             if (name == null) {
-                plugin.getApiProvider().getEventFactory().handleUserFirstLogin(u, username);
+                this.plugin.getEventFactory().handleUserFirstLogin(u, username);
             }
 
             // Online mode, no cache needed. This is just for name -> uuid lookup.
-            CompletableFuture<Void> future = plugin.getStorage().noBuffer().saveUUIDData(u, username);
-            if (joinUuidSave) {
+            CompletableFuture<Void> future = this.plugin.getStorage().noBuffer().saveUUIDData(u, username);
+            if (this.joinUuidSave) {
                 future.join();
             }
         }
 
-        User user = plugin.getStorage().noBuffer().loadUser(cache.getUUID(u), username).join();
+        User user = this.plugin.getStorage().noBuffer().loadUser(cache.getUUID(u), username).join();
         if (user == null) {
             throw new NullPointerException("User is null");
         } else {
             // Setup defaults for the user
             boolean save = false;
-            for (AssignmentRule rule : plugin.getConfiguration().get(ConfigKeys.DEFAULT_ASSIGNMENTS)) {
+            for (AssignmentRule rule : this.plugin.getConfiguration().get(ConfigKeys.DEFAULT_ASSIGNMENTS)) {
                 if (rule.apply(user)) {
                     save = true;
                 }
@@ -85,7 +97,7 @@ public class LoginHelper {
 
             // If they were given a default, persist the new assignments back to the storage.
             if (save) {
-                plugin.getStorage().noBuffer().saveUser(user).join();
+                this.plugin.getStorage().noBuffer().saveUser(user).join();
             }
 
             // Does some minimum pre-calculations to (maybe) speed things up later.
@@ -94,7 +106,7 @@ public class LoginHelper {
 
         final long time = System.currentTimeMillis() - startTime;
         if (time >= 1000) {
-            plugin.getLog().warn("Processing login for " + username + " took " + time + "ms.");
+            this.plugin.getLog().warn("Processing login for " + username + " took " + time + "ms.");
         }
 
         return user;

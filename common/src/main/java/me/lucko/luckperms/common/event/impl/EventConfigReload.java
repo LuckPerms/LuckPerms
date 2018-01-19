@@ -25,12 +25,13 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.ToString;
-
 import me.lucko.luckperms.api.event.sync.ConfigReloadEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
-@ToString
 public class EventConfigReload extends AbstractEvent implements ConfigReloadEvent {
 
+    @Override
+    public String toString() {
+        return "EventConfigReload()";
+    }
 }

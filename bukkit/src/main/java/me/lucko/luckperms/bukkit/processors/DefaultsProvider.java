@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.bukkit.processors;
 
-import lombok.Getter;
-
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.api.Tristate;
@@ -54,12 +52,10 @@ import java.util.Set;
 public class DefaultsProvider {
 
     // defaults for opped players
-    @Getter
     private Map<String, Boolean> opDefaults = ImmutableMap.of();
     private final DummyPermissible opDummy = new DummyPermissible(this::refreshOp);
 
     // defaults for non-opped players
-    @Getter
     private Map<String, Boolean> nonOpDefaults = ImmutableMap.of();
     private final DummyPermissible nonOpDummy = new DummyPermissible(this::refreshNonOp);
 
@@ -79,7 +75,7 @@ public class DefaultsProvider {
      * @return a tristate result
      */
     public Tristate lookup(String permission, boolean isOp) {
-        Map<String, Boolean> map = isOp ? opDefaults : nonOpDefaults;
+        Map<String, Boolean> map = isOp ? this.opDefaults : this.nonOpDefaults;
         return Tristate.fromNullableBoolean(map.get(permission));
     }
 
@@ -89,39 +85,39 @@ public class DefaultsProvider {
      * @return the number of permissions held
      */
     public int size() {
-        return opDefaults.size() + nonOpDefaults.size();
+        return this.opDefaults.size() + this.nonOpDefaults.size();
     }
 
     /**
      * Refreshes the op data in this provider.
      */
     private void refreshOp() {
-        unregisterDefaults(opDefaults, opDummy, true);
+        unregisterDefaults(this.opDefaults, this.opDummy, true);
 
         Map<String, Boolean> builder = new HashMap<>();
-        calculateDefaults(builder, opDummy, true);
+        calculateDefaults(builder, this.opDummy, true);
 
-        opDefaults = ImmutableMap.copyOf(builder);
+        this.opDefaults = ImmutableMap.copyOf(builder);
     }
 
     /**
      * Refreshes the non op data in this provider.
      */
     private void refreshNonOp() {
-        unregisterDefaults(nonOpDefaults, nonOpDummy, false);
+        unregisterDefaults(this.nonOpDefaults, this.nonOpDummy, false);
 
         Map<String, Boolean> builder = new HashMap<>();
-        calculateDefaults(builder, nonOpDummy, false);
+        calculateDefaults(builder, this.nonOpDummy, false);
 
-        nonOpDefaults = ImmutableMap.copyOf(builder);
+        this.nonOpDefaults = ImmutableMap.copyOf(builder);
     }
 
     /**
      * Unregisters the dummy permissibles with Bukkit.
      */
     public void close() {
-        unregisterDefaults(opDefaults, opDummy, true);
-        unregisterDefaults(nonOpDefaults, nonOpDummy, false);
+        unregisterDefaults(this.opDefaults, this.opDummy, true);
+        unregisterDefaults(this.nonOpDefaults, this.nonOpDummy, false);
     }
 
     private static PluginManager pm() {

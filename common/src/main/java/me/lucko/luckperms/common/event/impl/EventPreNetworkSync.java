@@ -25,22 +25,38 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.event.sync.PreNetworkSyncEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@Getter
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventPreNetworkSync extends AbstractEvent implements PreNetworkSyncEvent {
 
     private final AtomicBoolean cancellationState;
     private final UUID syncId;
 
+    public EventPreNetworkSync(AtomicBoolean cancellationState, UUID syncId) {
+        this.cancellationState = cancellationState;
+        this.syncId = syncId;
+    }
+
+    @Nonnull
+    @Override
+    public AtomicBoolean getCancellationState() {
+        return this.cancellationState;
+    }
+
+    @Nonnull
+    @Override
+    public UUID getSyncId() {
+        return this.syncId;
+    }
+
+    @Override
+    public String toString() {
+        return "EventPreNetworkSync(cancellationState=" + this.getCancellationState() + ", syncId=" + this.getSyncId() + ")";
+    }
 }

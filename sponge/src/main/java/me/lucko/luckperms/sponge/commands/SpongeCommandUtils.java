@@ -25,19 +25,16 @@
 
 package me.lucko.luckperms.sponge.commands;
 
-import lombok.experimental.UtilityClass;
-
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
 
 import java.util.List;
 import java.util.Map;
 
-@UtilityClass
-public class SpongeCommandUtils {
+public final class SpongeCommandUtils {
 
     public static Tristate parseTristate(int index, List<String> args) throws ArgumentUtils.ArgumentException {
         String s = args.get(index).toLowerCase();
@@ -76,9 +73,9 @@ public class SpongeCommandUtils {
         return sb.toString();
     }
 
-    public static String parentsToString(Iterable<SubjectReference> parents) {
+    public static String parentsToString(Iterable<LPSubjectReference> parents) {
         StringBuilder sb = new StringBuilder();
-        for (SubjectReference s : parents) {
+        for (LPSubjectReference s : parents) {
             sb.append("&3> &a")
                     .append(s.getSubjectIdentifier())
                     .append(" &bfrom collection &a")
@@ -91,5 +88,7 @@ public class SpongeCommandUtils {
     public static String contextToString(ContextSet set) {
         return CommandUtils.contextSetToString(set);
     }
+
+    private SpongeCommandUtils() {}
 
 }

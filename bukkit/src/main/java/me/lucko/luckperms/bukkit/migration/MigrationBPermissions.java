@@ -34,7 +34,6 @@ import de.bananaco.bpermissions.api.WorldManager;
 
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
@@ -77,7 +76,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) {
         ProgressLogger log = new ProgressLogger("bPermissions");
         log.addListener(plugin.getConsoleSender());
         log.addListener(sender);

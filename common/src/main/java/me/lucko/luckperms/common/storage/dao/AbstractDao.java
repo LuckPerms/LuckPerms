@@ -25,10 +25,6 @@
 
 package me.lucko.luckperms.common.storage.dao;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
@@ -45,14 +41,23 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class AbstractDao {
 
-    @Getter
     protected final LuckPermsPlugin plugin;
-
-    @Getter
     public final String name;
+
+    protected AbstractDao(LuckPermsPlugin plugin, String name) {
+        this.plugin = plugin;
+        this.name = name;
+    }
+
+    public LuckPermsPlugin getPlugin() {
+        return this.plugin;
+    }
+
+    public String getName() {
+        return this.name;
+    }
 
     public abstract void init();
 

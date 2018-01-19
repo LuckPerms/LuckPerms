@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.impl.misc;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
@@ -39,6 +38,7 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.Uuids;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
 
 import java.util.List;
@@ -51,12 +51,12 @@ public class CheckCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         String target = args.get(0);
         String permission = args.get(1);
 
         User user;
-        UUID u = CommandUtils.parseUuid(target);
+        UUID u = Uuids.parseNullable(target);
         if (u != null) {
             user = plugin.getUserManager().getIfLoaded(u);
         } else {

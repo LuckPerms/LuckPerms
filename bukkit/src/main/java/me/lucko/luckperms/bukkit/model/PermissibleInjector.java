@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.bukkit.model;
 
-import lombok.experimental.UtilityClass;
-
 import me.lucko.luckperms.bukkit.compat.ReflectionUtil;
 
 import org.bukkit.entity.Player;
@@ -42,8 +40,7 @@ import java.util.List;
  * This allows LuckPerms to directly intercept permission checks and take over all handling of
  * checks made by plugins.
  */
-@UtilityClass
-public class PermissibleInjector {
+public final class PermissibleInjector {
 
     /**
      * All permission checks made on standard Bukkit objects are effectively proxied to a
@@ -161,5 +158,7 @@ public class PermissibleInjector {
             }
         }
     }
+
+    private PermissibleInjector() {}
 
 }

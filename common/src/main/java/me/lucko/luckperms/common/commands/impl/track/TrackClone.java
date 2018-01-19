@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.commands.impl.track;
 
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -48,7 +47,7 @@ public class TrackClone extends SubCommand<Track> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) {
         String newTrackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(newTrackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender, newTrackName);

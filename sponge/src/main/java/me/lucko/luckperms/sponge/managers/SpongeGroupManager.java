@@ -25,11 +25,8 @@
 
 package me.lucko.luckperms.sponge.managers;
 
-import lombok.Getter;
-
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -39,8 +36,7 @@ import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.common.managers.GroupManager;
-import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.managers.group.AbstractGroupManager;
 import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
@@ -49,28 +45,24 @@ import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
-public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
-
-    @Getter
+public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implements LPSubjectCollection {
     private final LPSpongePlugin plugin;
-
     private SubjectCollection spongeProxy = null;
-
-    private final LoadingCache<String, SpongeGroup> objects = Caffeine.newBuilder()
-            .build(this::apply);
 
     private final LoadingCache<String, LPSubject> subjectLoadingCache = Caffeine.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)
@@ -103,68 +95,25 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
 
     @Override
     public SpongeGroup apply(String name) {
-        return new SpongeGroup(name, plugin);
+        return new SpongeGroup(name, this.plugin);
     }
-
-    /* ------------------------------------------
-     * Manager methods
-     * ------------------------------------------ */
-
-    @Override
-    public Map<String, SpongeGroup> getAll() {
-        return ImmutableMap.copyOf(objects.asMap());
-    }
-
-    @Override
-    public SpongeGroup getOrMake(String id) {
-        return objects.get(id.toLowerCase());
-    }
-
-    @Override
-    public SpongeGroup getIfLoaded(String id) {
-        return objects.getIfPresent(id.toLowerCase());
-    }
-
-    @Override
-    public boolean isLoaded(String id) {
-        return objects.asMap().containsKey(id.toLowerCase());
-    }
-
-    @Override
-    public void unload(String id) {
-        if (id != null) {
-            objects.invalidate(id.toLowerCase());
-        }
-    }
-
-    @Override
-    public void unload(Group t) {
-        if (t != null) {
-            unload(t.getId());
-        }
-    }
-
-    @Override
-    public void unloadAll() {
-        objects.invalidateAll();
-    }
-
-    /* ------------------------------------------
-     * SubjectCollection methods
-     * ------------------------------------------ */
 
     @Override
     public synchronized SubjectCollection sponge() {
-        if (spongeProxy == null) {
-            Preconditions.checkNotNull(plugin.getService(), "service");
-            spongeProxy = ProxyFactory.toSponge(this);
+        if (this.spongeProxy == null) {
+            Objects.requireNonNull(this.plugin.getService(), "service");
+            this.spongeProxy = ProxyFactory.toSponge(this);
         }
-        return spongeProxy;
+        return this.spongeProxy;
+    }
+
+    public LPSpongePlugin getPlugin() {
+        return this.plugin;
     }
 
     @Override
     public LuckPermsService getService() {
-        return plugin.getService();
+        return this.plugin.getService();
     }
 
     @Override
@@ -180,31 +129,33 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
     @Override
     public CompletableFuture<LPSubject> loadSubject(String identifier) {
         if (!DataConstraints.GROUP_NAME_TEST.test(identifier)) {
-            CompletableFuture<LPSubject> fut = new CompletableFuture<>();
-            fut.completeExceptionally(new IllegalArgumentException("Illegal subject identifier"));
-            return fut;
+            throw new IllegalArgumentException("Illegal subject identifier");
         }
 
-        LPSubject present = subjectLoadingCache.getIfPresent(identifier.toLowerCase());
+        LPSubject present = this.subjectLoadingCache.getIfPresent(identifier.toLowerCase());
         if (present != null) {
             return CompletableFuture.completedFuture(present);
         }
 
-        return CompletableFuture.supplyAsync(() -> subjectLoadingCache.get(identifier.toLowerCase()), plugin.getScheduler().async());
+        return CompletableFuture.supplyAsync(() -> this.subjectLoadingCache.get(identifier.toLowerCase()), this.plugin.getScheduler().async());
     }
 
     @Override
     public Optional<LPSubject> getSubject(String identifier) {
+        if (!DataConstraints.GROUP_NAME_TEST.test(identifier)) {
+            return Optional.empty();
+        }
+
         return Optional.ofNullable(getIfLoaded(identifier.toLowerCase())).map(SpongeGroup::sponge);
     }
 
     @Override
     public CompletableFuture<Boolean> hasRegistered(String identifier) {
-        if (isLoaded(identifier.toLowerCase())) {
-            return CompletableFuture.completedFuture(true);
-        } else {
+        if (!DataConstraints.GROUP_NAME_TEST.test(identifier)) {
             return CompletableFuture.completedFuture(false);
         }
+
+        return CompletableFuture.completedFuture(isLoaded(identifier.toLowerCase()));
     }
 
     @Override
@@ -212,11 +163,14 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
         return CompletableFuture.supplyAsync(() -> {
             ImmutableSet.Builder<LPSubject> ret = ImmutableSet.builder();
             for (String id : identifiers) {
+                if (!DataConstraints.GROUP_NAME_TEST.test(id)) {
+                    continue;
+                }
                 ret.add(loadSubject(id.toLowerCase()).join());
             }
 
             return ret.build();
-        }, plugin.getScheduler().async());
+        }, this.plugin.getScheduler().async());
     }
 
     @Override
@@ -230,40 +184,40 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
     }
 
     @Override
-    public CompletableFuture<ImmutableMap<SubjectReference, Boolean>> getAllWithPermission(String permission) {
+    public CompletableFuture<ImmutableMap<LPSubjectReference, Boolean>> getAllWithPermission(String permission) {
         return CompletableFuture.supplyAsync(() -> {
-            ImmutableMap.Builder<SubjectReference, Boolean> ret = ImmutableMap.builder();
+            ImmutableMap.Builder<LPSubjectReference, Boolean> ret = ImmutableMap.builder();
 
-            List<HeldPermission<String>> lookup = plugin.getStorage().getGroupsWithPermission(permission).join();
+            List<HeldPermission<String>> lookup = this.plugin.getStorage().getGroupsWithPermission(permission).join();
             for (HeldPermission<String> holder : lookup) {
                 if (holder.asNode().getFullContexts().equals(ImmutableContextSet.empty())) {
-                    ret.put(getService().newSubjectReference(getIdentifier(), holder.getHolder()), holder.getValue());
+                    ret.put(SubjectReferenceFactory.obtain(getService(), getIdentifier(), holder.getHolder()), holder.getValue());
                 }
             }
 
             return ret.build();
-        }, plugin.getScheduler().async());
+        }, this.plugin.getScheduler().async());
     }
 
     @Override
-    public CompletableFuture<ImmutableMap<SubjectReference, Boolean>> getAllWithPermission(ImmutableContextSet contexts, String permission) {
+    public CompletableFuture<ImmutableMap<LPSubjectReference, Boolean>> getAllWithPermission(ImmutableContextSet contexts, String permission) {
         return CompletableFuture.supplyAsync(() -> {
-            ImmutableMap.Builder<SubjectReference, Boolean> ret = ImmutableMap.builder();
+            ImmutableMap.Builder<LPSubjectReference, Boolean> ret = ImmutableMap.builder();
 
-            List<HeldPermission<String>> lookup = plugin.getStorage().getGroupsWithPermission(permission).join();
+            List<HeldPermission<String>> lookup = this.plugin.getStorage().getGroupsWithPermission(permission).join();
             for (HeldPermission<String> holder : lookup) {
                 if (holder.asNode().getFullContexts().equals(contexts)) {
-                    ret.put(getService().newSubjectReference(getIdentifier(), holder.getHolder()), holder.getValue());
+                    ret.put(SubjectReferenceFactory.obtain(getService(), getIdentifier(), holder.getHolder()), holder.getValue());
                 }
             }
 
             return ret.build();
-        }, plugin.getScheduler().async());
+        }, this.plugin.getScheduler().async());
     }
 
     @Override
     public ImmutableMap<LPSubject, Boolean> getLoadedWithPermission(String permission) {
-        return objects.asMap().values().stream()
+        return getAll().values().stream()
                 .map(SpongeGroup::sponge)
                 .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(ImmutableContextSet.empty(), permission)))
                 .filter(pair -> pair.getValue() != Tristate.UNDEFINED)
@@ -272,7 +226,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
 
     @Override
     public ImmutableMap<LPSubject, Boolean> getLoadedWithPermission(ImmutableContextSet contexts, String permission) {
-        return objects.asMap().values().stream()
+        return getAll().values().stream()
                 .map(SpongeGroup::sponge)
                 .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(contexts, permission)))
                 .filter(pair -> pair.getValue() != Tristate.UNDEFINED)
@@ -284,28 +238,4 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
         return getService().getDefaultSubjects().loadSubject(getIdentifier()).join();
     }
 
-    @Override
-    public Group getByDisplayName(String name) {
-        // try to get an exact match first
-        Group g = getIfLoaded(name);
-        if (g != null) {
-            return g;
-        }
-
-        // then try exact display name matches
-        for (Group group : getAll().values()) {
-            if (group.getDisplayName().isPresent() && group.getDisplayName().get().equals(name)) {
-                return group;
-            }
-        }
-
-        // then try case insensitive name matches
-        for (Group group : getAll().values()) {
-            if (group.getDisplayName().isPresent() && group.getDisplayName().get().equalsIgnoreCase(name)) {
-                return group;
-            }
-        }
-
-        return null;
-    }
 }

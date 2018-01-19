@@ -56,8 +56,8 @@ public class VerboseHandler implements Runnable {
 
     public VerboseHandler(Executor executor, String pluginVersion) {
         this.pluginVersion = "v" + pluginVersion;
-        listeners = new ConcurrentHashMap<>();
-        queue = new ConcurrentLinkedQueue<>();
+        this.listeners = new ConcurrentHashMap<>();
+        this.queue = new ConcurrentLinkedQueue<>();
 
         executor.execute(this);
     }
@@ -76,7 +76,7 @@ public class VerboseHandler implements Runnable {
      */
     public void offerCheckData(CheckOrigin checkOrigin, String checkTarget, ContextSet checkContext, String permission, Tristate result) {
         // don't bother even processing the check if there are no listeners registered
-        if (!listening) {
+        if (!this.listening) {
             return;
         }
 
@@ -84,7 +84,7 @@ public class VerboseHandler implements Runnable {
         StackTraceElement[] trace = new Exception().getStackTrace();
 
         // add the check data to a queue to be processed later.
-        queue.offer(new CheckData(checkOrigin, checkTarget, checkContext.makeImmutable(), trace, permission, result));
+        this.queue.offer(new CheckData(checkOrigin, checkTarget, checkContext.makeImmutable(), trace, permission, result));
     }
 
     /**
@@ -94,9 +94,9 @@ public class VerboseHandler implements Runnable {
      * @param filter the filter string
      * @param notify if the sender should be notified in chat on each check
      */
-    public void registerListener(Sender sender, String filter, boolean notify) {
-        listeners.put(sender.getUuid(), new VerboseListener(pluginVersion, sender, filter, notify));
-        listening = true;
+    public void registerListener(Sender sender, VerboseFilter filter, boolean notify) {
+        this.listeners.put(sender.getUuid(), new VerboseListener(this.pluginVersion, sender, filter, notify));
+        this.listening = true;
     }
 
     /**
@@ -109,7 +109,7 @@ public class VerboseHandler implements Runnable {
         // immediately flush, so the listener gets all current data
         flush();
 
-        return listeners.remove(uuid);
+        return this.listeners.remove(uuid);
     }
 
     @Override
@@ -117,18 +117,18 @@ public class VerboseHandler implements Runnable {
         while (true) {
 
             // remove listeners where the sender is no longer valid
-            listeners.values().removeIf(l -> !l.getNotifiedSender().isValid());
+            this.listeners.values().removeIf(l -> !l.getNotifiedSender().isValid());
 
             // handle all checks in the queue
             flush();
 
             // break the loop if the handler has been shutdown
-            if (shutdown) {
+            if (this.shutdown) {
                 return;
             }
 
             // update listening state
-            listening = !listeners.isEmpty();
+            this.listening = !this.listeners.isEmpty();
 
             try {
                 Thread.sleep(100);
@@ -140,14 +140,14 @@ public class VerboseHandler implements Runnable {
      * Flushes the current check data to the listeners.
      */
     public synchronized void flush() {
-        for (CheckData e; (e = queue.poll()) != null; ) {
-            for (VerboseListener listener : listeners.values()) {
+        for (CheckData e; (e = this.queue.poll()) != null; ) {
+            for (VerboseListener listener : this.listeners.values()) {
                 listener.acceptData(e);
             }
         }
     }
 
     public void shutdown() {
-        shutdown = true;
+        this.shutdown = true;
     }
 }

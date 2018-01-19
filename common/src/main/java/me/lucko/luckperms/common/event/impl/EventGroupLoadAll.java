@@ -25,12 +25,13 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.ToString;
-
 import me.lucko.luckperms.api.event.group.GroupLoadAllEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
-@ToString
 public class EventGroupLoadAll extends AbstractEvent implements GroupLoadAllEvent {
 
+    @Override
+    public String toString() {
+        return "EventGroupLoadAll()";
+    }
 }

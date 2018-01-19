@@ -25,23 +25,65 @@
 
 package me.lucko.luckperms.common.storage;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import java.util.Map;
 
-@Getter
-@AllArgsConstructor
 public class StorageCredentials {
 
     private final String address;
     private final String database;
     private final String username;
     private final String password;
-    private int maxPoolSize;
-    private int minIdleConnections;
-    private int maxLifetime;
-    private int connectionTimeout;
-    private Map<String, String> properties;
+    private final int maxPoolSize;
+    private final int minIdleConnections;
+    private final int maxLifetime;
+    private final int connectionTimeout;
+    private final Map<String, String> properties;
 
+    public StorageCredentials(String address, String database, String username, String password, int maxPoolSize, int minIdleConnections, int maxLifetime, int connectionTimeout, Map<String, String> properties) {
+        this.address = address;
+        this.database = database;
+        this.username = username;
+        this.password = password;
+        this.maxPoolSize = maxPoolSize;
+        this.minIdleConnections = minIdleConnections;
+        this.maxLifetime = maxLifetime;
+        this.connectionTimeout = connectionTimeout;
+        this.properties = properties;
+    }
+
+    public String getAddress() {
+        return this.address;
+    }
+
+    public String getDatabase() {
+        return this.database;
+    }
+
+    public String getUsername() {
+        return this.username;
+    }
+
+    public String getPassword() {
+        return this.password;
+    }
+
+    public int getMaxPoolSize() {
+        return this.maxPoolSize;
+    }
+
+    public int getMinIdleConnections() {
+        return this.minIdleConnections;
+    }
+
+    public int getMaxLifetime() {
+        return this.maxLifetime;
+    }
+
+    public int getConnectionTimeout() {
+        return this.connectionTimeout;
+    }
+
+    public Map<String, String> getProperties() {
+        return this.properties;
+    }
 }

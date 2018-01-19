@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.commands.utils;
 
-import lombok.experimental.UtilityClass;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
@@ -39,12 +37,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
-@UtilityClass
-public class CommandUtils {
+public final class CommandUtils {
     private static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + String.valueOf('§') + "[0-9A-FK-OR]");
 
     /**
@@ -109,18 +105,6 @@ public class CommandUtils {
             lists.add(subList);
         }
         return lists;
-    }
-
-    public static UUID parseUuid(String s) {
-        try {
-            return UUID.fromString(s);
-        } catch (IllegalArgumentException e) {
-            try {
-                return UUID.fromString(s.replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5"));
-            } catch (IllegalArgumentException e1) {
-                return null;
-            }
-        }
     }
 
     public static String toCommaSep(Collection<String> strings) {
@@ -246,4 +230,7 @@ public class CommandUtils {
 
         return sb.delete(sb.length() - Message.CONTEXT_PAIR_SEP.asString(null).length(), sb.length()).toString();
     }
+
+    private CommandUtils() {}
+
 }

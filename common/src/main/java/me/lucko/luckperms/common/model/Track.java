@@ -25,11 +25,6 @@
 
 package me.lucko.luckperms.common.model;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
-
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.DataMutateResult;
@@ -43,20 +38,15 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-@ToString
-@EqualsAndHashCode(of = {"name"})
-@RequiredArgsConstructor
-public class Track implements Identifiable<String> {
+public final class Track implements Identifiable<String> {
 
     /**
      * The name of the track
      */
-    @Getter
     private final String name;
 
     private final LuckPermsPlugin plugin;
 
-    @Getter
     private final Lock ioLock = new ReentrantLock();
 
     /**
@@ -64,12 +54,28 @@ public class Track implements Identifiable<String> {
      */
     private final List<String> groups = Collections.synchronizedList(new ArrayList<>());
 
-    @Getter
     private final ApiTrack delegate = new ApiTrack(this);
+
+    public Track(String name, LuckPermsPlugin plugin) {
+        this.name = name;
+        this.plugin = plugin;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public Lock getIoLock() {
+        return this.ioLock;
+    }
+
+    public ApiTrack getDelegate() {
+        return this.delegate;
+    }
 
     @Override
     public String getId() {
-        return name.toLowerCase();
+        return this.name.toLowerCase();
     }
 
     /**
@@ -78,7 +84,7 @@ public class Track implements Identifiable<String> {
      * @return am ordered {@link List} of the groups on this track
      */
     public List<String> getGroups() {
-        return ImmutableList.copyOf(groups);
+        return ImmutableList.copyOf(this.groups);
     }
 
     public void setGroups(List<String> groups) {
@@ -92,7 +98,7 @@ public class Track implements Identifiable<String> {
      * @return the number of groups on this track
      */
     public int getSize() {
-        return groups.size();
+        return this.groups.size();
     }
 
     /**
@@ -129,11 +135,11 @@ public class Track implements Identifiable<String> {
             throw new IllegalArgumentException();
         }
 
-        if (groups.indexOf(current) == groups.size() - 1) {
+        if (this.groups.indexOf(current) == this.groups.size() - 1) {
             return null;
         }
 
-        return groups.get(groups.indexOf(current) + 1);
+        return this.groups.get(this.groups.indexOf(current) + 1);
     }
 
     /**
@@ -148,11 +154,11 @@ public class Track implements Identifiable<String> {
             throw new IllegalArgumentException();
         }
 
-        if (groups.indexOf(current) == 0) {
+        if (this.groups.indexOf(current) == 0) {
             return null;
         }
 
-        return groups.get(groups.indexOf(current) - 1);
+        return this.groups.get(this.groups.indexOf(current) - 1);
     }
 
     /**
@@ -166,11 +172,11 @@ public class Track implements Identifiable<String> {
             return DataMutateResult.ALREADY_HAS;
         }
 
-        List<String> before = ImmutableList.copyOf(groups);
-        groups.add(group.getName());
-        List<String> after = ImmutableList.copyOf(groups);
+        List<String> before = ImmutableList.copyOf(this.groups);
+        this.groups.add(group.getName());
+        List<String> after = ImmutableList.copyOf(this.groups);
 
-        plugin.getApiProvider().getEventFactory().handleTrackAddGroup(this, group.getName(), before, after);
+        this.plugin.getEventFactory().handleTrackAddGroup(this, group.getName(), before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -187,11 +193,11 @@ public class Track implements Identifiable<String> {
             return DataMutateResult.ALREADY_HAS;
         }
 
-        List<String> before = ImmutableList.copyOf(groups);
-        groups.add(position, group.getName());
-        List<String> after = ImmutableList.copyOf(groups);
+        List<String> before = ImmutableList.copyOf(this.groups);
+        this.groups.add(position, group.getName());
+        List<String> after = ImmutableList.copyOf(this.groups);
 
-        plugin.getApiProvider().getEventFactory().handleTrackAddGroup(this, group.getName(), before, after);
+        this.plugin.getEventFactory().handleTrackAddGroup(this, group.getName(), before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -216,11 +222,11 @@ public class Track implements Identifiable<String> {
             return DataMutateResult.LACKS;
         }
 
-        List<String> before = ImmutableList.copyOf(groups);
-        groups.remove(group);
-        List<String> after = ImmutableList.copyOf(groups);
+        List<String> before = ImmutableList.copyOf(this.groups);
+        this.groups.remove(group);
+        List<String> after = ImmutableList.copyOf(this.groups);
 
-        plugin.getApiProvider().getEventFactory().handleTrackRemoveGroup(this, group, before, after);
+        this.plugin.getEventFactory().handleTrackRemoveGroup(this, group, before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -241,15 +247,34 @@ public class Track implements Identifiable<String> {
      * @return true if the group is on this track
      */
     public boolean containsGroup(String group) {
-        return groups.contains(group);
+        return this.groups.contains(group);
     }
 
     /**
      * Clear all of the groups within this track
      */
     public void clearGroups() {
-        List<String> before = ImmutableList.copyOf(groups);
-        groups.clear();
-        plugin.getApiProvider().getEventFactory().handleTrackClear(this, before);
+        List<String> before = ImmutableList.copyOf(this.groups);
+        this.groups.clear();
+        this.plugin.getEventFactory().handleTrackClear(this, before);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof Track)) return false;
+        final Track other = (Track) o;
+        return this.name.equals(other.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.name.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Track(name=" + this.name + ", groups=" + this.getGroups() + ")";
+    }
+
 }

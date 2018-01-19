@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.sponge.service;
 
-import lombok.experimental.UtilityClass;
-
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
@@ -40,8 +38,7 @@ import org.spongepowered.api.service.permission.SubjectCollection;
 /**
  * Provides proxy instances which implement the SpongeAPI using the LuckPerms model.
  */
-@UtilityClass
-public class ProxyFactory {
+public final class ProxyFactory {
     private static final boolean IS_API_7 = isApi7();
     private static boolean isApi7() {
         try {
@@ -76,5 +73,7 @@ public class ProxyFactory {
                 new me.lucko.luckperms.sponge.service.proxy.api7.PermissionDescriptionProxy(luckPerms.getService(), luckPerms) :
                 new me.lucko.luckperms.sponge.service.proxy.api6.PermissionDescriptionProxy(luckPerms.getService(), luckPerms);
     }
+
+    private ProxyFactory() {}
 
 }

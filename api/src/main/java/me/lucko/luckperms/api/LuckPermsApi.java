@@ -65,7 +65,14 @@ public interface LuckPermsApi {
     PlatformInfo getPlatformInfo();
 
     /**
-     * Gets the user manager
+     * Gets the {@link UserManager}, responsible for managing
+     * {@link User} instances.
+     *
+     * <p>This manager can be used to retrieve instances of {@link User} by uuid
+     * or name, or query all loaded users.</p>
+     *
+     * <p>The {@link #getStorage() storage} instance should be used to
+     * load/create/save users.</p>
      *
      * @return the user manager
      * @since 4.0
@@ -74,7 +81,14 @@ public interface LuckPermsApi {
     UserManager getUserManager();
 
     /**
-     * Gets the group manager
+     * Gets the {@link GroupManager}, responsible for managing
+     * {@link Group} instances.
+     *
+     * <p>This manager can be used to retrieve instances of {@link Group} by
+     * name, or query all loaded groups.</p>
+     *
+     * <p>The {@link #getStorage() storage} instance should be used to
+     * load/create/save/delete groups.</p>
      *
      * @return the group manager
      * @since 4.0
@@ -83,7 +97,14 @@ public interface LuckPermsApi {
     GroupManager getGroupManager();
 
     /**
-     * Gets the track manager
+     * Gets the {@link TrackManager}, responsible for managing
+     * {@link Track} instances.
+     *
+     * <p>This manager can be used to retrieve instances of {@link Track} by
+     * name, or query all loaded tracks.</p>
+     *
+     * <p>The {@link #getStorage() storage} instance should be used to
+     * load/create/save/delete tracks.</p>
      *
      * @return the track manager
      * @since 4.0
@@ -92,15 +113,23 @@ public interface LuckPermsApi {
     TrackManager getTrackManager();
 
     /**
-     * Schedules an update task to run
+     * Schedules the execution of an update task, and returns an encapsulation
+     * of the task as a {@link CompletableFuture}.
      *
+     * <p>The exact actions performed in an update task remains an
+     * implementation detail of the plugin, however, as a minimum, it is
+     * expected to perform a full reload of user, group and track data, and
+     * ensure that any changes are fully applied and propagated.</p>
+     *
+     * @return a future
      * @since 4.0
      */
     @Nonnull
     CompletableFuture<Void> runUpdateTask();
 
     /**
-     * Gets the event bus, used for subscribing to events
+     * Gets the {@link EventBus}, used for subscribing to internal LuckPerms
+     * events.
      *
      * @return the event bus
      * @since 3.0
@@ -109,15 +138,18 @@ public interface LuckPermsApi {
     EventBus getEventBus();
 
     /**
-     * Gets the configuration
+     * Gets a representation of the plugins configuration
      *
-     * @return a configuration instance
+     * @return the configuration
      */
     @Nonnull
     LPConfiguration getConfiguration();
 
     /**
-     * Gets the backend storage dao
+     * Gets an object representing the plugins primary {@link Storage} backend.
+     *
+     * <p>The instance propagates calls to the internal DAO (Data Access Object),
+     * and applies any changes to the storage provider.</p>
      *
      * @return a storage instance
      * @since 2.14
@@ -126,24 +158,47 @@ public interface LuckPermsApi {
     Storage getStorage();
 
     /**
-     * Gets the messaging service
+     * Gets the {@link MessagingService}, if present.
      *
-     * @return an optional that may contain a messaging service instance.
+     * <p>The MessagingService is used to dispatch updates throughout a network
+     * of servers running the plugin.</p>
+     *
+     * <p>Not all instances of LuckPerms will have a messaging service setup and
+     * configured, but it is recommended that all users of the API account for
+     * and make use of this.</p>
+     *
+     * @return the messaging service instance, if present.
      */
     @Nonnull
     Optional<MessagingService> getMessagingService();
 
     /**
-     * Gets a {@link UuidCache} instance, providing read access to the LuckPerms
-     * internal uuid caching system
+     * Gets the {@link ActionLogger}.
      *
-     * @return a uuid cache instance
+     * <p>The action logger is responsible for saving and broadcasting defined
+     * actions occurring on the platform.</p>
+     *
+     * @return the action logger
+     * @since 4.1
+     */
+    ActionLogger getActionLogger();
+
+    /**
+     * Gets a {@link UuidCache}.
+     *
+     * <p>The uuid cache provides read access to the internal LuckPerms uuid
+     * mapping system.</p>
+     *
+     * @return the uuid cache
      */
     @Nonnull
     UuidCache getUuidCache();
 
     /**
-     * Gets the context manager
+     * Gets the {@link ContextManager}.
+     *
+     * <p>The context manager manages {@link ContextCalculator}s, and calculates
+     * applicable contexts for a given type.</p>
      *
      * @return the context manager
      * @since 4.0
@@ -151,7 +206,9 @@ public interface LuckPermsApi {
     ContextManager getContextManager();
 
     /**
-     * Gets the node factory
+     * Gets the {@link NodeFactory}.
+     *
+     * <p>The node factory provides methods for building {@link Node} instances.</p>
      *
      * @return the node factory
      */
@@ -159,7 +216,11 @@ public interface LuckPermsApi {
     NodeFactory getNodeFactory();
 
     /**
-     * Gets the MetaStackFactory
+     * Gets the {@link MetaStackFactory}.
+     *
+     * <p>The metastack factory provides methods for retrieving
+     * {@link me.lucko.luckperms.api.metastacking.MetaStackElement}s and constructing
+     * {@link me.lucko.luckperms.api.metastacking.MetaStackDefinition}s.</p>
      *
      * @return the meta stack factory
      * @since 3.2
@@ -167,7 +228,18 @@ public interface LuckPermsApi {
     @Nonnull
     MetaStackFactory getMetaStackFactory();
 
-    // convenience methods
+
+
+
+    /*
+     * The following methods are provided only for convenience, and offer no
+     * additional functionality.
+     *
+     * They are implemented as "default" methods, using the manager and factory
+     * instances provided by the methods above.
+     */
+
+
 
     /**
      * Gets a wrapped user object from the user storage
@@ -350,7 +422,9 @@ public interface LuckPermsApi {
      * @since 4.0
      */
     @Nonnull
-    LogEntry.Builder newLogEntryBuilder();
+    default LogEntry.Builder newLogEntryBuilder() {
+        return getActionLogger().newEntryBuilder();
+    }
 
     /**
      * Returns a permission builder instance

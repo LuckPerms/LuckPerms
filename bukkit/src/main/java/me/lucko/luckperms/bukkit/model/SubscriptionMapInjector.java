@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.bukkit.model;
 
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 
 import org.bukkit.Bukkit;
@@ -37,7 +35,6 @@ import org.bukkit.plugin.SimplePluginManager;
 import java.lang.reflect.Field;
 import java.util.Map;
 
-@RequiredArgsConstructor
 public class SubscriptionMapInjector implements Runnable {
     private static final Field PERM_SUBS_FIELD;
 
@@ -47,29 +44,33 @@ public class SubscriptionMapInjector implements Runnable {
             permSubsField = SimplePluginManager.class.getDeclaredField("permSubs");
             permSubsField.setAccessible(true);
         } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
+            throw new ExceptionInInitializerError(e);
         }
         PERM_SUBS_FIELD = permSubsField;
     }
 
     private final LPBukkitPlugin plugin;
 
+    public SubscriptionMapInjector(LPBukkitPlugin plugin) {
+        this.plugin = plugin;
+    }
+
     @Override
     public void run() {
         try {
             inject();
         } catch (Exception e) {
-            plugin.getLog().severe("Exception occurred whilst injecting LuckPerms Permission Subscription map.");
+            this.plugin.getLog().severe("Exception occurred whilst injecting LuckPerms Permission Subscription map.");
             e.printStackTrace();
         }
     }
 
     private void inject() throws Exception {
-        PluginManager pluginManager = plugin.getServer().getPluginManager();
+        PluginManager pluginManager = this.plugin.getServer().getPluginManager();
 
         if (!(pluginManager instanceof SimplePluginManager)) {
-            plugin.getLog().severe("PluginManager instance is not a 'SimplePluginManager', instead: " + pluginManager.getClass());
-            plugin.getLog().severe("Unable to inject LuckPerms Permission Subscription map.");
+            this.plugin.getLog().severe("PluginManager instance is not a 'SimplePluginManager', instead: " + pluginManager.getClass());
+            this.plugin.getLog().severe("Unable to inject LuckPerms Permission Subscription map.");
             return;
         }
 
@@ -82,7 +83,7 @@ public class SubscriptionMapInjector implements Runnable {
         Map<String, Map<Permissible, Boolean>> castedMap = (Map<String, Map<Permissible, Boolean>>) map;
 
         // make a new subscription map
-        LPSubscriptionMap newMap = new LPSubscriptionMap(plugin, castedMap);
+        LPSubscriptionMap newMap = new LPSubscriptionMap(this.plugin, castedMap);
 
         // inject it
         PERM_SUBS_FIELD.set(pluginManager, newMap);

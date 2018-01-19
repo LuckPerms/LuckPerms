@@ -30,7 +30,7 @@ import me.lucko.luckperms.api.LuckPermsApi;
 import javax.annotation.Nonnull;
 
 /**
- * The base event interface
+ * A superinterface for all LuckPerms events.
  *
  * @since 3.0
  */

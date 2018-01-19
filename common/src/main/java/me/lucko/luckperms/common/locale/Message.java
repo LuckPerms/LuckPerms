@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.locale;
 
-import lombok.Getter;
-
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.utils.TextUtils;
@@ -456,7 +454,6 @@ public enum Message {
         return s;
     }
 
-    @Getter
     private final String message;
     private final boolean showPrefix;
 
@@ -464,6 +461,10 @@ public enum Message {
         // rewrite hardcoded placeholders according to their position
         this.message = TextUtils.rewritePlaceholders(message);
         this.showPrefix = showPrefix;
+    }
+
+    public String getMessage() {
+        return this.message;
     }
 
     public String asString(LocaleManager localeManager, Object... objects) {
@@ -480,11 +481,11 @@ public enum Message {
             s = localeManager.getTranslation(this);
         }
         if (s == null) {
-            s = message;
+            s = this.message;
         }
 
         s = format(s.replace("{PREFIX}", prefix).replace("\\n", "\n"), objects);
-        return CommandUtils.color(showPrefix ? prefix + s : s);
+        return CommandUtils.color(this.showPrefix ? prefix + s : s);
     }
 
     public void send(Sender sender, Object... objects) {

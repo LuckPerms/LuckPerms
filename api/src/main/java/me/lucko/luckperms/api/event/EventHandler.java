@@ -34,7 +34,7 @@ import javax.annotation.Nonnull;
  *
  * @param <T> the event class
  */
-public interface EventHandler<T extends LuckPermsEvent> {
+public interface EventHandler<T extends LuckPermsEvent> extends AutoCloseable {
 
     /**
      * Gets the class this handler is listening to
@@ -73,4 +73,8 @@ public interface EventHandler<T extends LuckPermsEvent> {
      */
     int getCallCount();
 
+    @Override
+    default void close() {
+        unregister();
+    }
 }

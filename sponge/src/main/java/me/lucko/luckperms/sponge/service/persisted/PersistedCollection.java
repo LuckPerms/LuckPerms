@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.sponge.service.persisted;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableCollection;
@@ -43,12 +40,13 @@ import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorageModel;
 
 import org.spongepowered.api.service.permission.SubjectCollection;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -57,15 +55,12 @@ import java.util.function.Predicate;
 /**
  * A simple persistable subject collection
  */
-@Getter
 public class PersistedCollection implements LPSubjectCollection {
     private final LuckPermsService service;
     private final String identifier;
 
-    @Getter(AccessLevel.NONE)
     private final SubjectCollection spongeProxy;
 
-    @Getter(AccessLevel.NONE)
     private final LoadingCache<String, PersistedSubject> subjects = Caffeine.newBuilder()
             .build(s -> new PersistedSubject(s, getService(), PersistedCollection.this));
 
@@ -76,16 +71,28 @@ public class PersistedCollection implements LPSubjectCollection {
     }
 
     public void loadAll() {
-        Map<String, SubjectStorageModel> holders = service.getStorage().loadAllFromFile(identifier);
+        Map<String, SubjectStorageModel> holders = this.service.getStorage().loadAllFromFile(this.identifier);
         for (Map.Entry<String, SubjectStorageModel> e : holders.entrySet()) {
-            PersistedSubject subject = subjects.get(e.getKey().toLowerCase());
-            subject.loadData(e.getValue());
+            PersistedSubject subject = this.subjects.get(e.getKey().toLowerCase());
+            if (subject != null) {
+                subject.loadData(e.getValue());
+            }
         }
     }
 
     @Override
     public SubjectCollection sponge() {
-        return spongeProxy;
+        return this.spongeProxy;
+    }
+
+    @Override
+    public LuckPermsService getService() {
+        return this.service;
+    }
+
+    @Override
+    public String getIdentifier() {
+        return this.identifier;
     }
 
     @Override
@@ -95,46 +102,46 @@ public class PersistedCollection implements LPSubjectCollection {
 
     @Override
     public CompletableFuture<LPSubject> loadSubject(String identifier) {
-        return CompletableFuture.completedFuture(subjects.get(identifier.toLowerCase()));
+        return CompletableFuture.completedFuture(this.subjects.get(identifier.toLowerCase()));
     }
 
     @Override
     public Optional<LPSubject> getSubject(String identifier) {
-        return Optional.of(subjects.get(identifier.toLowerCase()));
+        return Optional.of(Objects.requireNonNull(this.subjects.get(identifier.toLowerCase())));
     }
 
     @Override
     public CompletableFuture<Boolean> hasRegistered(String identifier) {
-        return CompletableFuture.completedFuture(subjects.asMap().containsKey(identifier.toLowerCase()));
+        return CompletableFuture.completedFuture(this.subjects.asMap().containsKey(identifier.toLowerCase()));
     }
 
     @Override
     public CompletableFuture<ImmutableCollection<LPSubject>> loadSubjects(Set<String> identifiers) {
         ImmutableSet.Builder<LPSubject> ret = ImmutableSet.builder();
         for (String id : identifiers) {
-            ret.add(subjects.get(id.toLowerCase()));
+            ret.add(Objects.requireNonNull(this.subjects.get(id.toLowerCase())));
         }
         return CompletableFuture.completedFuture(ret.build());
     }
 
     @Override
     public ImmutableCollection<LPSubject> getLoadedSubjects() {
-        return ImmutableList.copyOf(subjects.asMap().values());
+        return ImmutableList.copyOf(this.subjects.asMap().values());
     }
 
     @Override
     public CompletableFuture<ImmutableSet<String>> getAllIdentifiers() {
-        return CompletableFuture.completedFuture(ImmutableSet.copyOf(subjects.asMap().keySet()));
+        return CompletableFuture.completedFuture(ImmutableSet.copyOf(this.subjects.asMap().keySet()));
     }
 
     @Override
-    public CompletableFuture<ImmutableMap<SubjectReference, Boolean>> getAllWithPermission(String permission) {
+    public CompletableFuture<ImmutableMap<LPSubjectReference, Boolean>> getAllWithPermission(String permission) {
         return CompletableFuture.completedFuture(getLoadedWithPermission(permission).entrySet().stream()
                 .collect(ImmutableCollectors.toMap(e -> e.getKey().toReference(), Map.Entry::getValue)));
     }
 
     @Override
-    public CompletableFuture<ImmutableMap<SubjectReference, Boolean>> getAllWithPermission(ImmutableContextSet contexts, String permission) {
+    public CompletableFuture<ImmutableMap<LPSubjectReference, Boolean>> getAllWithPermission(ImmutableContextSet contexts, String permission) {
         return CompletableFuture.completedFuture(getLoadedWithPermission(contexts, permission).entrySet().stream()
                 .collect(ImmutableCollectors.toMap(e -> e.getKey().toReference(), Map.Entry::getValue)));
     }
@@ -142,7 +149,7 @@ public class PersistedCollection implements LPSubjectCollection {
     @Override
     public ImmutableMap<LPSubject, Boolean> getLoadedWithPermission(String permission) {
         ImmutableMap.Builder<LPSubject, Boolean> m = ImmutableMap.builder();
-        for (LPSubject subject : subjects.asMap().values()) {
+        for (LPSubject subject : this.subjects.asMap().values()) {
             Tristate ts = subject.getPermissionValue(ImmutableContextSet.empty(), permission);
             if (ts != Tristate.UNDEFINED) {
                 m.put(subject, ts.asBoolean());
@@ -155,7 +162,7 @@ public class PersistedCollection implements LPSubjectCollection {
     @Override
     public ImmutableMap<LPSubject, Boolean> getLoadedWithPermission(ImmutableContextSet contexts, String permission) {
         ImmutableMap.Builder<LPSubject, Boolean> m = ImmutableMap.builder();
-        for (LPSubject subject : subjects.asMap().values()) {
+        for (LPSubject subject : this.subjects.asMap().values()) {
             Tristate ts = subject.getPermissionValue(contexts, permission);
             if (ts != Tristate.UNDEFINED) {
                 m.put(subject, ts.asBoolean());
@@ -167,7 +174,7 @@ public class PersistedCollection implements LPSubjectCollection {
 
     @Override
     public LPSubject getDefaults() {
-        return service.getDefaultSubjects().loadSubject(getIdentifier()).join();
+        return this.service.getDefaultSubjects().loadSubject(getIdentifier()).join();
     }
 
 }

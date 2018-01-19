@@ -25,14 +25,9 @@
 
 package me.lucko.luckperms.common.bulkupdate.constraint;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 /**
  * Represents a field being used in an update
  */
-@Getter
-@AllArgsConstructor
 public enum QueryField {
 
     PERMISSION("permission"),
@@ -47,5 +42,13 @@ public enum QueryField {
         } catch (IllegalArgumentException e) {
             return null;
         }
+    }
+
+    QueryField(String sqlName) {
+        this.sqlName = sqlName;
+    }
+
+    public String getSqlName() {
+        return this.sqlName;
     }
 }

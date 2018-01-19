@@ -36,11 +36,19 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Holds cached Meta lookup data for a specific set of contexts
+ * Holds cached meta lookup data for a specific set of contexts.
  *
  * @since 2.13
  */
-public interface MetaData {
+public interface MetaData extends CachedDataContainer {
+
+    /**
+     * Gets the contexts this container is holding data for.
+     *
+     * @return the contexts this container is caching
+     */
+    @Nonnull
+    MetaContexts getMetaContexts();
 
     /**
      * Gets an immutable copy of the meta this user has.

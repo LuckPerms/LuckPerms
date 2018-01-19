@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.commands.abstraction;
 
-import lombok.Getter;
-
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
@@ -47,7 +45,6 @@ import java.util.function.Predicate;
  * A sub command which can be be applied to both groups and users.
  * This doesn't extend the other Command or SubCommand classes to avoid generics hell.
  */
-@Getter
 public abstract class SharedSubCommand {
 
     private final LocalizedSpec spec;
@@ -78,8 +75,28 @@ public abstract class SharedSubCommand {
 
     public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) throws CommandException;
 
-    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return Collections.emptyList();
+    }
+
+    public LocalizedSpec getSpec() {
+        return this.spec;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public CommandPermission getUserPermission() {
+        return this.userPermission;
+    }
+
+    public CommandPermission getGroupPermission() {
+        return this.groupPermission;
+    }
+
+    public Predicate<? super Integer> getArgumentCheck() {
+        return this.argumentCheck;
     }
 
     public void sendUsage(Sender sender) {
@@ -106,15 +123,15 @@ public abstract class SharedSubCommand {
     }
 
     public boolean isAuthorized(Sender sender, boolean user) {
-        return user ? userPermission.isAuthorized(sender) : groupPermission.isAuthorized(sender);
+        return user ? this.userPermission.isAuthorized(sender) : this.groupPermission.isAuthorized(sender);
     }
 
     public String getDescription() {
-        return spec.description();
+        return this.spec.description();
     }
 
     public List<Arg> getArgs() {
-        return spec.args();
+        return this.spec.args();
     }
 
     public static void save(PermissionHolder holder, Sender sender, LuckPermsPlugin plugin) {

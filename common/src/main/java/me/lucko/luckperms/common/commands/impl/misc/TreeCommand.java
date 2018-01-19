@@ -26,13 +26,11 @@
 package me.lucko.luckperms.common.commands.impl.misc;
 
 import me.lucko.luckperms.common.caching.type.PermissionCache;
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -41,6 +39,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.treeview.TreeView;
 import me.lucko.luckperms.common.treeview.TreeViewBuilder;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.Uuids;
 
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
@@ -57,12 +56,12 @@ public class TreeCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         String selection = ".";
         int maxLevel = 5;
         String player = null;
 
-        if (args.size() > 0) {
+        if (!args.isEmpty()) {
             selection = args.get(0);
         }
         if (args.size() > 1) {
@@ -74,7 +73,7 @@ public class TreeCommand extends SingleCommand {
 
         if (player != null) {
             User user;
-            UUID u = CommandUtils.parseUuid(player);
+            UUID u = Uuids.parseNullable(player);
             if (u != null) {
                 user = plugin.getUserManager().getIfLoaded(u);
             } else {

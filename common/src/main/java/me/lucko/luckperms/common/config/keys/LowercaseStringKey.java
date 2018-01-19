@@ -25,18 +25,24 @@
 
 package me.lucko.luckperms.common.config.keys;
 
-import lombok.AllArgsConstructor;
-
 import me.lucko.luckperms.common.config.ConfigKey;
-import me.lucko.luckperms.common.config.ConfigurationAdapter;
+import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 
-@AllArgsConstructor(staticName = "of")
 public class LowercaseStringKey implements ConfigKey<String> {
+    public static LowercaseStringKey of(String path, String def) {
+        return new LowercaseStringKey(path, def);
+    }
+
     private final String path;
     private final String def;
 
+    private LowercaseStringKey(String path, String def) {
+        this.path = path;
+        this.def = def;
+    }
+
     @Override
     public String get(ConfigurationAdapter adapter) {
-        return adapter.getString(path, def).toLowerCase();
+        return adapter.getString(this.path, this.def).toLowerCase();
     }
 }

@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.sponge.model;
 
-import lombok.Getter;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
@@ -42,7 +40,7 @@ import me.lucko.luckperms.sponge.service.LuckPermsSubjectData;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
@@ -76,10 +74,8 @@ public class SpongeUser extends User {
         private final SpongeUser parent;
         private final LPSpongePlugin plugin;
 
-        @Getter
         private final LuckPermsSubjectData subjectData;
 
-        @Getter
         private final LuckPermsSubjectData transientSubjectData;
 
         private UserSubject(LPSpongePlugin plugin, SpongeUser parent) {
@@ -91,23 +87,23 @@ public class SpongeUser extends User {
 
         @Override
         public String getIdentifier() {
-            return plugin.getUuidCache().getExternalUUID(parent.getUuid()).toString();
+            return this.plugin.getUuidCache().getExternalUUID(this.parent.getUuid()).toString();
         }
 
         @Override
         public Optional<String> getFriendlyIdentifier() {
-            return parent.getName();
+            return this.parent.getName();
         }
 
         @Override
         public Optional<CommandSource> getCommandSource() {
-            final UUID uuid = plugin.getUuidCache().getExternalUUID(parent.getUuid());
+            final UUID uuid = this.plugin.getUuidCache().getExternalUUID(this.parent.getUuid());
             return Sponge.getServer().getPlayer(uuid).map(Function.identity());
         }
 
         @Override
         public LPSubjectCollection getParentCollection() {
-            return plugin.getService().getUserSubjects();
+            return this.plugin.getService().getUserSubjects();
         }
 
         @Override
@@ -117,24 +113,34 @@ public class SpongeUser extends User {
 
         @Override
         public LuckPermsService getService() {
-            return plugin.getService();
+            return this.plugin.getService();
+        }
+
+        @Override
+        public LuckPermsSubjectData getSubjectData() {
+            return this.subjectData;
+        }
+
+        @Override
+        public LuckPermsSubjectData getTransientSubjectData() {
+            return this.transientSubjectData;
         }
 
         @Override
         public Tristate getPermissionValue(ImmutableContextSet contexts, String permission) {
-            return parent.getCachedData().getPermissionData(plugin.getContextManager().formContexts(contexts)).getPermissionValue(permission, CheckOrigin.PLATFORM_LOOKUP_CHECK);
+            return this.parent.getCachedData().getPermissionData(this.plugin.getContextManager().formContexts(contexts)).getPermissionValue(permission, CheckOrigin.PLATFORM_LOOKUP_CHECK);
         }
 
         @Override
-        public boolean isChildOf(ImmutableContextSet contexts, SubjectReference parent) {
+        public boolean isChildOf(ImmutableContextSet contexts, LPSubjectReference parent) {
             return parent.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP) && getPermissionValue(contexts, NodeFactory.groupNode(parent.getSubjectIdentifier())).asBoolean();
         }
 
         @Override
-        public ImmutableList<SubjectReference> getParents(ImmutableContextSet contexts) {
-            ImmutableSet.Builder<SubjectReference> subjects = ImmutableSet.builder();
+        public ImmutableList<LPSubjectReference> getParents(ImmutableContextSet contexts) {
+            ImmutableSet.Builder<LPSubjectReference> subjects = ImmutableSet.builder();
 
-            for (Map.Entry<String, Boolean> entry : parent.getCachedData().getPermissionData(plugin.getContextManager().formContexts(contexts)).getImmutableBacking().entrySet()) {
+            for (Map.Entry<String, Boolean> entry : this.parent.getCachedData().getPermissionData(this.plugin.getContextManager().formContexts(contexts)).getImmutableBacking().entrySet()) {
                 if (!entry.getValue()) {
                     continue;
                 }
@@ -144,20 +150,20 @@ public class SpongeUser extends User {
                     continue;
                 }
 
-                if (plugin.getGroupManager().isLoaded(groupName)) {
-                    subjects.add(plugin.getService().getGroupSubjects().loadSubject(groupName).join().toReference());
+                if (this.plugin.getGroupManager().isLoaded(groupName)) {
+                    subjects.add(this.plugin.getService().getGroupSubjects().loadSubject(groupName).join().toReference());
                 }
             }
 
-            subjects.addAll(plugin.getService().getUserSubjects().getDefaults().getParents(contexts));
-            subjects.addAll(plugin.getService().getDefaults().getParents(contexts));
+            subjects.addAll(this.plugin.getService().getUserSubjects().getDefaults().getParents(contexts));
+            subjects.addAll(this.plugin.getService().getDefaults().getParents(contexts));
 
             return getService().sortSubjects(subjects.build());
         }
 
         @Override
         public Optional<String> getOption(ImmutableContextSet contexts, String s) {
-            MetaData data = parent.getCachedData().getMetaData(plugin.getContextManager().formContexts(contexts));
+            MetaData data = this.parent.getCachedData().getMetaData(this.plugin.getContextManager().formContexts(contexts));
             if (s.equalsIgnoreCase(NodeFactory.PREFIX_KEY)) {
                 if (data.getPrefix() != null) {
                     return Optional.of(data.getPrefix());
@@ -175,23 +181,18 @@ public class SpongeUser extends User {
                 return Optional.of(val);
             }
 
-            Optional<String> v = plugin.getService().getUserSubjects().getDefaults().getOption(contexts, s);
+            Optional<String> v = this.plugin.getService().getUserSubjects().getDefaults().getOption(contexts, s);
             if (v.isPresent()) {
                 return v;
             }
 
-            return plugin.getService().getDefaults().getOption(contexts, s);
-        }
-
-        @Override
-        public ImmutableContextSet getActiveContextSet() {
-            return plugin.getContextManager().getApplicableContext(this.sponge());
+            return this.plugin.getService().getDefaults().getOption(contexts, s);
         }
 
         @Override
         public void invalidateCaches(CacheLevel cacheLevel) {
             // invalidate for all changes
-            parent.getCachedData().invalidateCaches();
+            this.parent.getCachedData().invalidateCaches();
         }
     }
 

@@ -25,11 +25,6 @@
 
 package me.lucko.luckperms.common.api.delegates.model;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NonNull;
-
 import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.DataMutateResult;
@@ -37,94 +32,115 @@ import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Track;
 
 import java.util.List;
+import java.util.Objects;
 
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public final class ApiTrack implements Track {
-    public static me.lucko.luckperms.common.model.Track cast(Track g) {
-        Preconditions.checkState(g instanceof ApiTrack, "Illegal instance " + g.getClass() + " cannot be handled by this implementation.");
-        return ((ApiTrack) g).getHandle();
+    public static me.lucko.luckperms.common.model.Track cast(Track track) {
+        Objects.requireNonNull(track, "track");
+        Preconditions.checkState(track instanceof ApiTrack, "Illegal instance " + track.getClass() + " cannot be handled by this implementation.");
+        return ((ApiTrack) track).getHandle();
     }
 
-    @Getter(AccessLevel.PACKAGE)
     private final me.lucko.luckperms.common.model.Track handle;
+    
+    public ApiTrack(me.lucko.luckperms.common.model.Track handle) {
+        this.handle = handle;
+    }
 
+    me.lucko.luckperms.common.model.Track getHandle() {
+        return this.handle;
+    }
+
+    @Nonnull
     @Override
     public String getName() {
-        return handle.getName();
+        return this.handle.getName();
     }
 
+    @Nonnull
     @Override
     public List<String> getGroups() {
-        return handle.getGroups();
+        return this.handle.getGroups();
     }
 
     @Override
     public int getSize() {
-        return handle.getSize();
+        return this.handle.getSize();
     }
 
     @Override
-    public String getNext(@NonNull Group current) {
+    public String getNext(@Nonnull Group current) {
+        Objects.requireNonNull(current, "current");
         try {
-            return handle.getNext(ApiGroup.cast(current));
+            return this.handle.getNext(ApiGroup.cast(current));
         } catch (IllegalArgumentException e) {
             return null;
         }
     }
 
     @Override
-    public String getPrevious(@NonNull Group current) {
+    public String getPrevious(@Nonnull Group current) {
+        Objects.requireNonNull(current, "current");
         try {
-            return handle.getPrevious(ApiGroup.cast(current));
+            return this.handle.getPrevious(ApiGroup.cast(current));
         } catch (IllegalArgumentException e) {
             return null;
         }
     }
 
     @Override
-    public DataMutateResult appendGroup(@NonNull Group group) {
-        return handle.appendGroup(ApiGroup.cast(group));
+    public DataMutateResult appendGroup(@Nonnull Group group) {
+        Objects.requireNonNull(group, "group");
+        return this.handle.appendGroup(ApiGroup.cast(group));
     }
 
     @Override
-    public DataMutateResult insertGroup(@NonNull Group group, @NonNull int position) throws IndexOutOfBoundsException {
-        return handle.insertGroup(ApiGroup.cast(group), position);
+    public DataMutateResult insertGroup(@Nonnull Group group, int position) throws IndexOutOfBoundsException {
+        Objects.requireNonNull(group, "group");
+        return this.handle.insertGroup(ApiGroup.cast(group), position);
     }
 
     @Override
-    public DataMutateResult removeGroup(@NonNull Group group) {
-        return handle.removeGroup(ApiGroup.cast(group));
+    public DataMutateResult removeGroup(@Nonnull Group group) {
+        Objects.requireNonNull(group, "group");
+        return this.handle.removeGroup(ApiGroup.cast(group));
     }
 
     @Override
-    public DataMutateResult removeGroup(@NonNull String group) {
-        return handle.removeGroup(group);
+    public DataMutateResult removeGroup(@Nonnull String group) {
+        Objects.requireNonNull(group, "group");
+        return this.handle.removeGroup(group);
     }
 
     @Override
-    public boolean containsGroup(@NonNull Group group) {
-        return handle.containsGroup(ApiGroup.cast(group));
+    public boolean containsGroup(@Nonnull Group group) {
+        Objects.requireNonNull(group, "group");
+        return this.handle.containsGroup(ApiGroup.cast(group));
     }
 
     @Override
-    public boolean containsGroup(@NonNull String group) {
-        return handle.containsGroup(group);
+    public boolean containsGroup(@Nonnull String group) {
+        Objects.requireNonNull(group, "group");
+        return this.handle.containsGroup(group);
     }
 
     @Override
     public void clearGroups() {
-        handle.clearGroups();
+        this.handle.clearGroups();
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof ApiTrack)) return false;
-
-        ApiTrack other = (ApiTrack) o;
-        return handle.equals(other.handle);
+        ApiTrack that = (ApiTrack) o;
+        return this.handle.equals(that.handle);
     }
 
+    @Override
     public int hashCode() {
-        return handle.hashCode();
+        return this.handle.hashCode();
     }
 }

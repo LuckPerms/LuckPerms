@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.common.node;
 
-import lombok.NonNull;
-
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+
+import java.util.Objects;
 
 /**
  * An stripped down version of {@link Node}, without methods and cached values
@@ -63,27 +63,27 @@ public final class NodeModel {
     private final ImmutableContextSet contexts;
     private Node node = null;
 
-    private NodeModel(@NonNull String permission, boolean value, @NonNull String server, @NonNull String world, long expiry, @NonNull ImmutableContextSet contexts) {
-        this.permission = permission;
+    private NodeModel(String permission, boolean value, String server, String world, long expiry, ImmutableContextSet contexts) {
+        this.permission = Objects.requireNonNull(permission, "permission");
         this.value = value;
-        this.server = server;
-        this.world = world;
+        this.server = Objects.requireNonNull(server, "server");
+        this.world = Objects.requireNonNull(world, "world");
         this.expiry = expiry;
-        this.contexts = contexts;
+        this.contexts = Objects.requireNonNull(contexts, "contexts");
     }
 
     public synchronized Node toNode() {
-        if (node == null) {
-            node = NodeFactory.builder(permission)
-                    .setValue(value)
-                    .setServer(server)
-                    .setWorld(world)
-                    .setExpiry(expiry)
-                    .withExtraContext(contexts)
+        if (this.node == null) {
+            this.node = NodeFactory.builder(this.permission)
+                    .setValue(this.value)
+                    .setServer(this.server)
+                    .setWorld(this.world)
+                    .setExpiry(this.expiry)
+                    .withExtraContext(this.contexts)
                     .build();
         }
 
-        return node;
+        return this.node;
     }
 
     public String getPermission() {
@@ -111,27 +111,27 @@ public final class NodeModel {
     }
 
     public NodeModel setPermission(String permission) {
-        return of(permission, value, server, world, expiry, contexts);
+        return of(permission, this.value, this.server, this.world, this.expiry, this.contexts);
     }
 
     public NodeModel setValue(boolean value) {
-        return of(permission, value, server, world, expiry, contexts);
+        return of(this.permission, value, this.server, this.world, this.expiry, this.contexts);
     }
 
     public NodeModel setServer(String server) {
-        return of(permission, value, server, world, expiry, contexts);
+        return of(this.permission, this.value, server, this.world, this.expiry, this.contexts);
     }
 
     public NodeModel setWorld(String world) {
-        return of(permission, value, server, world, expiry, contexts);
+        return of(this.permission, this.value, this.server, world, this.expiry, this.contexts);
     }
 
     public NodeModel setExpiry(long expiry) {
-        return of(permission, value, server, world, expiry, contexts);
+        return of(this.permission, this.value, this.server, this.world, expiry, this.contexts);
     }
 
     public NodeModel setContexts(ImmutableContextSet contexts) {
-        return of(permission, value, server, world, expiry, contexts);
+        return of(this.permission, this.value, this.server, this.world, this.expiry, contexts);
     }
 
     @Override

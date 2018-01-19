@@ -27,12 +27,10 @@ package me.lucko.luckperms.common.commands.impl.log;
 
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -41,6 +39,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.Uuids;
 
 import java.util.List;
 import java.util.Map;
@@ -55,8 +54,8 @@ public class LogRecent extends SubCommand<Log> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) throws CommandException {
-        if (args.size() == 0) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
+        if (args.isEmpty()) {
             // No page or user
             return showLog(log.getRecentMaxPages(ENTRIES_PER_PAGE), null, sender, log);
         }
@@ -73,7 +72,7 @@ public class LogRecent extends SubCommand<Log> {
 
         // User and possibly page
         final String target = args.get(0);
-        UUID uuid = CommandUtils.parseUuid(target.toLowerCase());
+        UUID uuid = Uuids.parseNullable(target);
         if (uuid == null) {
             if (!plugin.getConfiguration().get(ConfigKeys.ALLOW_INVALID_USERNAMES)) {
                 if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {

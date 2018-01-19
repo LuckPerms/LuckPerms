@@ -25,21 +25,37 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.event.user.UserCacheLoadEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
 
-@Getter
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventUserCacheLoad extends AbstractEvent implements UserCacheLoadEvent {
 
     private final User user;
     private final UserData loadedData;
 
+    public EventUserCacheLoad(User user, UserData loadedData) {
+        this.user = user;
+        this.loadedData = loadedData;
+    }
+
+    @Nonnull
+    @Override
+    public User getUser() {
+        return this.user;
+    }
+
+    @Nonnull
+    @Override
+    public UserData getLoadedData() {
+        return this.loadedData;
+    }
+
+    @Override
+    public String toString() {
+        return "EventUserCacheLoad(user=" + this.getUser() + ", loadedData=" + this.getLoadedData() + ")";
+    }
 }

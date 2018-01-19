@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.config;
+package me.lucko.luckperms.common.config.adapter;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -34,7 +34,7 @@ public interface ConfigurationAdapter {
 
     LuckPermsPlugin getPlugin();
 
-    void init();
+    void reload();
 
     boolean contains(String path);
 

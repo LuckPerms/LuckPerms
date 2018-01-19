@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.event;
 
-import lombok.RequiredArgsConstructor;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
@@ -38,6 +36,8 @@ import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.api.event.log.LogBroadcastEvent;
+import me.lucko.luckperms.common.api.LuckPermsApiProvider;
+import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.event.impl.EventConfigReload;
 import me.lucko.luckperms.common.event.impl.EventGroupCacheLoad;
 import me.lucko.luckperms.common.event.impl.EventGroupCreate;
@@ -47,6 +47,7 @@ import me.lucko.luckperms.common.event.impl.EventGroupLoad;
 import me.lucko.luckperms.common.event.impl.EventGroupLoadAll;
 import me.lucko.luckperms.common.event.impl.EventLogBroadcast;
 import me.lucko.luckperms.common.event.impl.EventLogNetworkPublish;
+import me.lucko.luckperms.common.event.impl.EventLogNotify;
 import me.lucko.luckperms.common.event.impl.EventLogPublish;
 import me.lucko.luckperms.common.event.impl.EventLogReceive;
 import me.lucko.luckperms.common.event.impl.EventNodeAdd;
@@ -73,22 +74,30 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@RequiredArgsConstructor
 public final class EventFactory {
     private final LuckPermsEventBus eventBus;
 
+    public EventFactory(LuckPermsPlugin plugin, LuckPermsApiProvider apiProvider) {
+        this.eventBus = new LuckPermsEventBus(plugin, apiProvider);
+    }
+
+    public LuckPermsEventBus getEventBus() {
+        return this.eventBus;
+    }
+
     private void fireEventAsync(LuckPermsEvent event) {
-        eventBus.fireEventAsync(event);
+        this.eventBus.fireEventAsync(event);
     }
 
     private void fireEvent(LuckPermsEvent event) {
-        eventBus.fireEvent(event);
+        this.eventBus.fireEvent(event);
     }
 
     public void handleGroupCacheLoad(Group group, GroupData data) {
@@ -138,6 +147,13 @@ public final class EventFactory {
     public boolean handleLogNetworkPublish(boolean initialState, UUID id, LogEntry entry) {
         AtomicBoolean cancel = new AtomicBoolean(initialState);
         EventLogNetworkPublish event = new EventLogNetworkPublish(cancel, id, entry);
+        fireEvent(event);
+        return cancel.get();
+    }
+
+    public boolean handleLogNotify(boolean initialState, LogEntry entry, LogBroadcastEvent.Origin origin, Sender sender) {
+        AtomicBoolean cancel = new AtomicBoolean(initialState);
+        EventLogNotify event = new EventLogNotify(cancel, entry, origin, sender);
         fireEvent(event);
         return cancel.get();
     }

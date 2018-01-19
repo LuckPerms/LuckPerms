@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.webeditor;
 
-import lombok.experimental.UtilityClass;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -35,7 +33,6 @@ import com.google.gson.stream.JsonWriter;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
@@ -43,6 +40,7 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.Uuids;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -60,8 +58,7 @@ import java.util.stream.Stream;
 /**
  * Utility methods for interacting with the LuckPerms web permission editor.
  */
-@UtilityClass
-public class WebEditorUtils {
+public final class WebEditorUtils {
 
     private static final String FILE_NAME = "luckperms-data.json";
     private static final String GIST_API_URL = "https://api.github.com/gists";
@@ -89,7 +86,7 @@ public class WebEditorUtils {
             return holder;
         } else if (who.startsWith(USER_ID_PATTERN)) {
             String user = who.substring(USER_ID_PATTERN.length());
-            UUID uuid = CommandUtils.parseUuid(user);
+            UUID uuid = Uuids.parseNullable(user);
             if (uuid == null) {
                 Message.APPLY_EDITS_TARGET_USER_NOT_UUID.send(sender, user);
                 return null;
@@ -117,7 +114,7 @@ public class WebEditorUtils {
             try (OutputStream os = connection.getOutputStream()) {
                 StringWriter sw = new StringWriter();
                 new JsonWriter(sw).beginObject()
-                        .name("description").value("LuckPerms Web Permissions Editor Data")
+                        .name("description").value("LuckPerms Web Editor Data")
                         .name("public").value(false)
                         .name("files")
                         .beginObject().name(FILE_NAME)
@@ -273,5 +270,7 @@ public class WebEditorUtils {
 
         return nodes;
     }
+
+    private WebEditorUtils() {}
 
 }

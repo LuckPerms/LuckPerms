@@ -88,8 +88,10 @@ public interface Storage {
      * @param entry the log entry to be saved
      * @return true if the operation completed successfully.
      * @throws NullPointerException if entry is null
+     * @deprecated in favour of {@link ActionLogger#submit(LogEntry)}.
      */
     @Nonnull
+    @Deprecated
     CompletableFuture<Boolean> logAction(@Nonnull LogEntry entry);
 
     /**

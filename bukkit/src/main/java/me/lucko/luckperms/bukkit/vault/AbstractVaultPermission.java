@@ -110,7 +110,7 @@ public abstract class AbstractVaultPermission extends Permission {
     }
     
     private String world(String world) {
-        return worldMappingFunction.apply(world);
+        return this.worldMappingFunction.apply(world);
     }
 
     private String world(Player player) {

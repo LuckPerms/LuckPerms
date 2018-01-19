@@ -65,28 +65,28 @@ public interface SchedulerAdapter {
      *  @param runnable the runnable
      * @param intervalTicks the interval in ticks.
      */
-    void asyncRepeating(Runnable runnable, long intervalTicks);
+    SchedulerTask asyncRepeating(Runnable runnable, long intervalTicks);
 
     /**
      * Runs a runnable repeatedly until the plugin disables. Will wait for the interval before the first iteration of the task is ran.
      *  @param runnable the runnable
      * @param intervalTicks the interval in ticks.
      */
-    void syncRepeating(Runnable runnable, long intervalTicks);
+    SchedulerTask syncRepeating(Runnable runnable, long intervalTicks);
 
     /**
      * Runs a runnable with a delay
      *  @param runnable the runnable
      * @param delayTicks the delay in ticks
      */
-    void asyncLater(Runnable runnable, long delayTicks);
+    SchedulerTask asyncLater(Runnable runnable, long delayTicks);
 
     /**
      * Runs a runnable with a delay
      *  @param runnable the runnable
      * @param delayTicks the delay in ticks
      */
-    void syncLater(Runnable runnable, long delayTicks);
+    SchedulerTask syncLater(Runnable runnable, long delayTicks);
 
     /**
      * Shuts down this executor instance

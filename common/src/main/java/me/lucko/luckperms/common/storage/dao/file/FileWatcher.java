@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.storage.dao.file;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.io.IOException;
@@ -63,20 +60,20 @@ public class FileWatcher implements Runnable {
     }
 
     public void subscribe(String id, Path path, Consumer<String> consumer) {
-        if (watchService == null) {
+        if (this.watchService == null) {
             return;
         }
 
         // Register with a delay to ignore changes made at startup
-        plugin.getScheduler().asyncLater(() -> {
+        this.plugin.getScheduler().asyncLater(() -> {
             try {
                 // doesn't need to be atomic
-                if (keyMap.containsKey(id)) {
+                if (this.keyMap.containsKey(id)) {
                     throw new IllegalArgumentException("id already registered");
                 }
 
-                WatchKey key = path.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
-                keyMap.put(id, new WatchedLocation(path, key, consumer));
+                WatchKey key = path.register(this.watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
+                this.keyMap.put(id, new WatchedLocation(path, key, consumer));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -84,16 +81,16 @@ public class FileWatcher implements Runnable {
     }
 
     public void registerChange(StorageLocation location, String fileName) {
-        internalChanges.put(location.name().toLowerCase() + "/" + fileName, System.currentTimeMillis());
+        this.internalChanges.put(location.name().toLowerCase() + "/" + fileName, System.currentTimeMillis());
     }
 
     public void close() {
-        if (watchService == null) {
+        if (this.watchService == null) {
             return;
         }
 
         try {
-            watchService.close();
+            this.watchService.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -103,11 +100,11 @@ public class FileWatcher implements Runnable {
     public void run() {
         long expireTime = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(4);
         // was either processed last time, or recently modified by the system.
-        internalChanges.values().removeIf(lastChange -> lastChange < expireTime);
+        this.internalChanges.values().removeIf(lastChange -> lastChange < expireTime);
 
         List<String> expired = new ArrayList<>();
 
-        for (Map.Entry<String, WatchedLocation> ent : keyMap.entrySet()) {
+        for (Map.Entry<String, WatchedLocation> ent : this.keyMap.entrySet()) {
             String id = ent.getKey();
             Path path = ent.getValue().getPath();
             WatchKey key = ent.getValue().getKey();
@@ -129,14 +126,14 @@ public class FileWatcher implements Runnable {
                     continue;
                 }
 
-                if (internalChanges.containsKey(id + "/" + fileName)) {
+                if (this.internalChanges.containsKey(id + "/" + fileName)) {
                     // This file was modified by the system.
                     continue;
                 }
 
-                internalChanges.put(id + "/" + fileName, System.currentTimeMillis());
+                this.internalChanges.put(id + "/" + fileName, System.currentTimeMillis());
 
-                plugin.getLog().info("[FileWatcher] Detected change in file: " + file.toString());
+                this.plugin.getLog().info("[FileWatcher] Detected change in file: " + file.toString());
 
                 // Process the change
                 ent.getValue().getFileConsumer().accept(fileName);
@@ -149,15 +146,31 @@ public class FileWatcher implements Runnable {
             }
         }
 
-        expired.forEach(keyMap::remove);
+        expired.forEach(this.keyMap::remove);
     }
 
-    @Getter
-    @RequiredArgsConstructor
     private static class WatchedLocation {
         private final Path path;
         private final WatchKey key;
         private final Consumer<String> fileConsumer;
+
+        public WatchedLocation(Path path, WatchKey key, Consumer<String> fileConsumer) {
+            this.path = path;
+            this.key = key;
+            this.fileConsumer = fileConsumer;
+        }
+
+        public Path getPath() {
+            return this.path;
+        }
+
+        public WatchKey getKey() {
+            return this.key;
+        }
+
+        public Consumer<String> getFileConsumer() {
+            return this.fileConsumer;
+        }
     }
 
 }

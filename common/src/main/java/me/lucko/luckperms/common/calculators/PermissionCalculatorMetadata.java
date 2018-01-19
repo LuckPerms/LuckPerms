@@ -25,15 +25,14 @@
 
 package me.lucko.luckperms.common.calculators;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.references.HolderType;
 
-@Getter
-@AllArgsConstructor(staticName = "of")
 public class PermissionCalculatorMetadata {
+
+    public static PermissionCalculatorMetadata of(HolderType holderType, String objectName, ContextSet context) {
+        return new PermissionCalculatorMetadata(holderType, objectName, context);
+    }
 
     /**
      * The type of the object which owns the permission calculator
@@ -50,4 +49,21 @@ public class PermissionCalculatorMetadata {
      */
     private final ContextSet context;
 
+    private PermissionCalculatorMetadata(HolderType holderType, String objectName, ContextSet context) {
+        this.holderType = holderType;
+        this.objectName = objectName;
+        this.context = context;
+    }
+
+    public HolderType getHolderType() {
+        return this.holderType;
+    }
+
+    public String getObjectName() {
+        return this.objectName;
+    }
+
+    public ContextSet getContext() {
+        return this.context;
+    }
 }

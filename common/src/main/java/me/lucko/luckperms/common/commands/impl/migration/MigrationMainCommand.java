@@ -25,9 +25,8 @@
 
 package me.lucko.luckperms.common.commands.impl.migration;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableBiMap;
 
-import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.Command;
@@ -46,17 +45,23 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.annotation.Nonnull;
+
 public class MigrationMainCommand extends MainCommand<Object, Object> {
-    private static final Map<String, String> PLUGINS = ImmutableMap.<String, String>builder()
-            .put("org.anjocaido.groupmanager.GroupManager", "me.lucko.luckperms.bukkit.migration.MigrationGroupManager")
-            .put("ru.tehkode.permissions.bukkit.PermissionsEx", "me.lucko.luckperms.bukkit.migration.MigrationPermissionsEx")
-            .put("com.github.cheesesoftware.PowerfulPermsAPI.PowerfulPermsPlugin", "me.lucko.luckperms.bukkit.migration.MigrationPowerfulPerms")
-            .put("org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService", "me.lucko.luckperms.bukkit.migration.MigrationZPermissions")
-            .put("net.alpenblock.bungeeperms.BungeePerms", "me.lucko.luckperms.bungee.migration.MigrationBungeePerms")
-            .put("de.bananaco.bpermissions.api.WorldManager", "me.lucko.luckperms.bukkit.migration.MigrationBPermissions")
-            .put("ninja.leaping.permissionsex.sponge.PermissionsExPlugin", "me.lucko.luckperms.sponge.migration.MigrationPermissionsEx")
-            .put("io.github.djxy.permissionmanager.sponge.SpongePlugin", "me.lucko.luckperms.sponge.migration.MigrationPermissionManager")
-            .build();
+    private static final Map<String, String> PLUGINS = ImmutableBiMap.<String, String>builder()
+            // bukkit
+            .put("me.lucko.luckperms.bukkit.migration.MigrationGroupManager",       "org.anjocaido.groupmanager.GroupManager")
+            .put("me.lucko.luckperms.bukkit.migration.MigrationPermissionsEx",      "ru.tehkode.permissions.bukkit.PermissionsEx")
+            .put("me.lucko.luckperms.bukkit.migration.MigrationPowerfulPerms",      "com.github.gustav9797.PowerfulPermsAPI.PowerfulPermsPlugin")
+            .put("me.lucko.luckperms.bukkit.migration.MigrationZPermissions",       "org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService")
+            .put("me.lucko.luckperms.bukkit.migration.MigrationBPermissions",       "de.bananaco.bpermissions.api.WorldManager")
+            .put("me.lucko.luckperms.bukkit.migration.MigrationPermissionsBukkit",  "com.platymuus.bukkit.permissions.PermissionsPlugin")
+            // bungee
+            .put("me.lucko.luckperms.bungee.migration.MigrationBungeePerms",        "net.alpenblock.bungeeperms.BungeePerms")
+            // sponge
+            .put("me.lucko.luckperms.sponge.migration.MigrationPermissionsEx",      "ninja.leaping.permissionsex.sponge.PermissionsExPlugin")
+            .put("me.lucko.luckperms.sponge.migration.MigrationPermissionManager",  "io.github.djxy.permissionmanager.sponge.SpongePlugin")
+            .build().inverse();
 
     private final ReentrantLock lock = new ReentrantLock();
     private List<Command<Object, ?>> commands = null;
@@ -66,24 +71,25 @@ public class MigrationMainCommand extends MainCommand<Object, Object> {
         super(CommandSpec.MIGRATION.spec(locale), "Migration", 1, null);
     }
 
+    @Nonnull
     @Override
     public synchronized Optional<List<Command<Object, ?>>> getChildren() {
-        if (commands == null) {
-            commands = getAvailableCommands(getSpec().getLocaleManager());
+        if (this.commands == null) {
+            this.commands = getAvailableCommands(getSpec().getLocaleManager());
 
             // Add dummy command to show in the list.
-            if (commands.isEmpty()) {
-                display = false;
-                commands.add(new SubCommand<Object>(CommandSpec.MIGRATION_COMMAND.spec(getSpec().getLocaleManager()), "No available plugins to migrate from", CommandPermission.MIGRATION, Predicates.alwaysFalse()) {
+            if (this.commands.isEmpty()) {
+                this.display = false;
+                this.commands.add(new SubCommand<Object>(CommandSpec.MIGRATION_COMMAND.spec(getSpec().getLocaleManager()), "No available plugins to migrate from", CommandPermission.MIGRATION, Predicates.alwaysFalse()) {
                     @Override
-                    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
+                    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) {
                         return CommandResult.SUCCESS;
                     }
                 });
             }
         }
 
-        return Optional.of(commands);
+        return Optional.of(this.commands);
     }
 
     @Override
@@ -94,7 +100,7 @@ public class MigrationMainCommand extends MainCommand<Object, Object> {
     @Override
     public boolean shouldDisplay() {
         getChildren();
-        return display;
+        return this.display;
     }
 
     @SuppressWarnings("unchecked")
@@ -113,7 +119,7 @@ public class MigrationMainCommand extends MainCommand<Object, Object> {
 
     @Override
     protected ReentrantLock getLockForTarget(Object target) {
-        return lock; // share a lock between all migration commands
+        return this.lock; // share a lock between all migration commands
     }
 
     /* Dummy */

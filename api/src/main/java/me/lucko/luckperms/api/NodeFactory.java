@@ -92,6 +92,7 @@ public interface NodeFactory {
     /**
      * Creates a node builder for the given chat meta type
      *
+     * @param type the type
      * @param priority the priority
      * @param value the value for the prefix/suffix
      * @return a node builder instance

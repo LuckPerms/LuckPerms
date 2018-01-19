@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.contexts;
 
-import lombok.experimental.UtilityClass;
-
 import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.context.ContextSet;
@@ -40,8 +38,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-@UtilityClass
-public class ContextSetConfigurateSerializer {
+public final class ContextSetConfigurateSerializer {
 
     public static ConfigurationNode serializeContextSet(ContextSet contextSet) {
         ConfigurationNode data = SimpleConfigurationNode.root();
@@ -86,5 +83,7 @@ public class ContextSetConfigurateSerializer {
 
         return map;
     }
+
+    private ContextSetConfigurateSerializer() {}
 
 }

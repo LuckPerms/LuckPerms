@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.utils;
 
-import lombok.AllArgsConstructor;
-import lombok.experimental.UtilityClass;
-
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.Maps;
@@ -36,8 +33,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-@UtilityClass
-public class PatternCache {
+public final class PatternCache {
 
     private static final NullablePattern NULL_PATTERN = new NullablePattern(null);
 
@@ -67,9 +63,14 @@ public class PatternCache {
         return compile(buildDelimitedMatcher(delim, esc));
     }
 
-    @AllArgsConstructor
     private static final class NullablePattern {
         private final Pattern pattern;
+
+        public NullablePattern(Pattern pattern) {
+            this.pattern = pattern;
+        }
     }
+
+    private PatternCache() {}
 
 }

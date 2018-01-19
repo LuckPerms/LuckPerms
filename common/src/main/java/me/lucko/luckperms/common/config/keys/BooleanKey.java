@@ -25,18 +25,24 @@
 
 package me.lucko.luckperms.common.config.keys;
 
-import lombok.AllArgsConstructor;
-
 import me.lucko.luckperms.common.config.ConfigKey;
-import me.lucko.luckperms.common.config.ConfigurationAdapter;
+import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 
-@AllArgsConstructor(staticName = "of")
 public class BooleanKey implements ConfigKey<Boolean> {
+    public static BooleanKey of(String path, boolean def) {
+        return new BooleanKey(path, def);
+    }
+
     private final String path;
     private final boolean def;
 
+    private BooleanKey(String path, boolean def) {
+        this.path = path;
+        this.def = def;
+    }
+
     @Override
     public Boolean get(ConfigurationAdapter adapter) {
-        return adapter.getBoolean(path, def);
+        return adapter.getBoolean(this.path, this.def);
     }
 }

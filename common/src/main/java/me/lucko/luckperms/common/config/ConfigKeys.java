@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.config;
 
-import lombok.experimental.UtilityClass;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
@@ -64,7 +62,6 @@ import java.util.stream.Collectors;
 /**
  * All of the {@link ConfigKey}s used by LuckPerms.
  */
-@UtilityClass
 public class ConfigKeys {
 
     /**
@@ -515,5 +512,7 @@ public class ConfigKeys {
 
         return KEYS;
     }
+
+    private ConfigKeys() {}
 
 }

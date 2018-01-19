@@ -25,14 +25,11 @@
 
 package me.lucko.luckperms.common.api;
 
-import lombok.experimental.UtilityClass;
-
 import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.common.storage.DataConstraints;
 
-@UtilityClass
-public class ApiUtils {
+public final class ApiUtils {
 
     public static String checkUsername(String s) {
         Preconditions.checkArgument(
@@ -49,5 +46,7 @@ public class ApiUtils {
         );
         return s.toLowerCase();
     }
+
+    private ApiUtils() {}
 
 }

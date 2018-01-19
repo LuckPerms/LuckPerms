@@ -42,6 +42,8 @@ import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 public abstract class MainCommand<T, I> extends Command<Void, T> {
 
     // equals 1 if the command doesn't take a mid argument, e.g. /lp log sub-command....
@@ -54,14 +56,14 @@ public abstract class MainCommand<T, I> extends Command<Void, T> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Void v, List<String> args, String label) throws CommandException {
-        if (args.size() < minArgs) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Void v, List<String> args, String label) {
+        if (args.size() < this.minArgs) {
             sendUsage(sender, label);
             return CommandResult.INVALID_ARGS;
         }
 
         Optional<Command<T, ?>> o = getChildren().get().stream()
-                .filter(s -> s.getName().equalsIgnoreCase(args.get(minArgs - 1)))
+                .filter(s -> s.getName().equalsIgnoreCase(args.get(this.minArgs - 1)))
                 .limit(1)
                 .findAny();
 
@@ -77,8 +79,8 @@ public abstract class MainCommand<T, I> extends Command<Void, T> {
         }
 
         List<String> strippedArgs = new ArrayList<>();
-        if (args.size() > minArgs) {
-            strippedArgs.addAll(args.subList(minArgs, args.size()));
+        if (args.size() > this.minArgs) {
+            strippedArgs.addAll(args.subList(this.minArgs, args.size()));
         }
 
         if (sub.getArgumentCheck().test(strippedArgs.size())) {
@@ -169,7 +171,7 @@ public abstract class MainCommand<T, I> extends Command<Void, T> {
                 .filter(s -> s.isAuthorized(sender))
                 .collect(Collectors.toList());
 
-        if (subs.size() > 0) {
+        if (!subs.isEmpty()) {
             CommandUtils.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format(getUsage(), label) + " ...)");
 
             for (Command s : subs) {
@@ -191,6 +193,7 @@ public abstract class MainCommand<T, I> extends Command<Void, T> {
         return getChildren().get().stream().anyMatch(sc -> sc.isAuthorized(sender));
     }
 
+    @Nonnull
     @Override
     public Optional<List<Command<T, ?>>> getChildren() {
         return super.getChildren();

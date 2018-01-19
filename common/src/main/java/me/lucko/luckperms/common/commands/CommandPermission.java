@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.commands;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import me.lucko.luckperms.common.commands.sender.Sender;
 
 import static me.lucko.luckperms.common.commands.CommandPermission.Type.GROUP;
@@ -80,6 +77,7 @@ public enum CommandPermission {
     USER_PARENT_REMOVE_TEMP("parent.removetemp", USER),
     USER_PARENT_CLEAR("parent.clear", USER),
     USER_PARENT_CLEAR_TRACK("parent.cleartrack", USER),
+    USER_PARENT_SWITCHPRIMARYGROUP("parent.switchprimarygroup", USER),
     USER_META_INFO("meta.info", USER),
     USER_META_SET("meta.set", USER),
     USER_META_UNSET("meta.unset", USER),
@@ -95,7 +93,6 @@ public enum CommandPermission {
     USER_META_REMOVE_TEMP_SUFFIX("meta.removetempsuffix", USER),
     USER_META_CLEAR("meta.clear", USER),
     USER_EDITOR("editor", USER),
-    USER_SWITCHPRIMARYGROUP("switchprimarygroup", USER),
     USER_SHOW_TRACKS("showtracks", USER),
     USER_PROMOTE("promote", USER),
     USER_DEMOTE("demote", USER),
@@ -173,7 +170,6 @@ public enum CommandPermission {
 
     private final String node;
 
-    @Getter
     private final Type type;
 
     CommandPermission(String node, Type type) {
@@ -187,15 +183,17 @@ public enum CommandPermission {
     }
 
     public String getPermission() {
-        return node;
+        return this.node;
     }
 
     public boolean isAuthorized(Sender sender) {
         return sender.hasPermission(this);
     }
 
-    @Getter
-    @AllArgsConstructor
+    public Type getType() {
+        return this.type;
+    }
+
     public enum Type {
 
         NONE(null),
@@ -207,6 +205,13 @@ public enum CommandPermission {
 
         private final String tag;
 
+        Type(String tag) {
+            this.tag = tag;
+        }
+
+        public String getTag() {
+            return this.tag;
+        }
     }
 
 }

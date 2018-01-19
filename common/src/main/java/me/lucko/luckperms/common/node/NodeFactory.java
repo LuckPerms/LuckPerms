@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.node;
 
-import lombok.experimental.UtilityClass;
-
 import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
 
@@ -43,8 +41,7 @@ import java.util.Map;
 /**
  * Utility class to make Node(Builder) instances from strings or existing Nodes
  */
-@UtilityClass
-public class NodeFactory {
+public final class NodeFactory {
     public static final String DEFAULT_GROUP_NAME = "default";
 
     public static final String PREFIX_KEY = "prefix";
@@ -210,12 +207,23 @@ public class NodeFactory {
     }
 
     public static String nodeAsCommand(Node node, String id, HolderType type, boolean set) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(32);
         sb.append(type.toString()).append(" ").append(id).append(" ");
 
         if (node.isGroupNode()) {
-            sb.append(node.isTemporary() ? (set ? "parent addtemp " : "parent removetemp ") : (set ? "parent add " : "parent remove "));
-            sb.append(node.getGroupName());
+            sb.append("parent ");
+
+            if (set) {
+                sb.append("add");
+            } else {
+                sb.append("remove");
+            }
+
+            if (node.isTemporary()) {
+                sb.append("temp");
+            }
+
+            sb.append(" ").append(node.getGroupName());
 
             if (node.isTemporary() && set) {
                 sb.append(" ").append(node.getExpiryUnixTime());
@@ -225,17 +233,33 @@ public class NodeFactory {
         }
 
         if (node.getValuePrimitive() && (node.isPrefix() || node.isSuffix())) {
-            ChatMetaType nodeType = node.isPrefix() ? ChatMetaType.PREFIX : ChatMetaType.SUFFIX;
-            String typeName = type.name().toLowerCase();
+            ChatMetaType chatMetaType = node.isPrefix() ? ChatMetaType.PREFIX : ChatMetaType.SUFFIX;
 
-            sb.append(node.isTemporary() ? (set ? "meta addtemp" + typeName + " " : "meta removetemp" + typeName + " ") : (set ? "meta add" + typeName + " " : "meta remove" + typeName + " "));
-            sb.append(nodeType.getEntry(node).getKey()).append(" ");
+            sb.append("meta ");
 
-            if (nodeType.getEntry(node).getValue().contains(" ")) {
-                sb.append("\"").append(nodeType.getEntry(node).getValue()).append("\"");
+            if (set) {
+                sb.append("add");
             } else {
-                sb.append(nodeType.getEntry(node).getValue());
+                sb.append("remove");
             }
+
+            if (node.isTemporary()) {
+                sb.append("temp");
+            }
+
+            sb.append(chatMetaType)
+                    .append(" ")
+                    .append(chatMetaType.getEntry(node).getKey()) // weight
+                    .append(" ");
+
+            String value = chatMetaType.getEntry(node).getValue();
+            if (value.contains(" ")) {
+                // wrap value in quotes
+                sb.append("\"").append(value).append("\"");
+            } else {
+                sb.append(value);
+            }
+
             if (set && node.isTemporary()) {
                 sb.append(" ").append(node.getExpiryUnixTime());
             }
@@ -244,21 +268,36 @@ public class NodeFactory {
         }
 
         if (node.getValuePrimitive() && node.isMeta()) {
-            sb.append(node.isTemporary() ? (set ? "meta settemp " : "meta unsettemp ") : (set ? "meta set " : "meta unset "));
+            sb.append("meta ");
 
-            if (node.getMeta().getKey().contains(" ")) {
-                sb.append("\"").append(node.getMeta().getKey()).append("\"");
+            if (set) {
+                sb.append("set");
             } else {
-                sb.append(node.getMeta().getKey());
+                sb.append("unset");
+            }
+
+            if (node.isTemporary()) {
+                sb.append("temp");
+            }
+
+            sb.append(" ");
+
+
+            String key = node.getMeta().getKey();
+            if (key.contains(" ")) {
+                sb.append("\"").append(key).append("\"");
+            } else {
+                sb.append(key);
             }
 
             if (set) {
                 sb.append(" ");
 
-                if (node.getMeta().getValue().contains(" ")) {
-                    sb.append("\"").append(node.getMeta().getValue()).append("\"");
+                String value = node.getMeta().getValue();
+                if (value.contains(" ")) {
+                    sb.append("\"").append(value).append("\"");
                 } else {
-                    sb.append(node.getMeta().getValue());
+                    sb.append(value);
                 }
 
                 if (node.isTemporary()) {
@@ -269,11 +308,25 @@ public class NodeFactory {
             return appendContextToCommand(sb, node).toString();
         }
 
-        sb.append(node.isTemporary() ? (set ? "permission settemp " : "permission unsettemp ") : (set ? "permission set " : "permission unset "));
-        if (node.getPermission().contains(" ")) {
-            sb.append("\"").append(node.getPermission()).append("\"");
+        sb.append("permission ");
+
+        if (set) {
+            sb.append("set");
         } else {
-            sb.append(node.getPermission());
+            sb.append("unset");
+        }
+
+        if (node.isTemporary()) {
+            sb.append("temp");
+        }
+
+        sb.append(" ");
+
+        String perm = node.getPermission();
+        if (perm.contains(" ")) {
+            sb.append("\"").append(perm).append("\"");
+        } else {
+            sb.append(perm);
         }
         if (set) {
             sb.append(" ").append(node.getValuePrimitive());
@@ -287,10 +340,10 @@ public class NodeFactory {
     }
 
     private static StringBuilder appendContextToCommand(StringBuilder sb, Node node) {
-        if (node.isServerSpecific()) {
+        if (node.getServer().isPresent()) {
             sb.append(" server=").append(node.getServer().get());
         }
-        if (node.isWorldSpecific()) {
+        if (node.getWorld().isPresent()) {
             sb.append(" world=").append(node.getWorld().get());
         }
 
@@ -311,7 +364,7 @@ public class NodeFactory {
     }
 
     public static Map.Entry<String, String> parseMetaNode(String s) {
-        if (!s.startsWith(META_NODE_MARKER)) {
+        if (!s.toLowerCase().startsWith(META_NODE_MARKER)) {
             return null;
         }
 
@@ -327,7 +380,7 @@ public class NodeFactory {
     }
 
     private static Map.Entry<Integer, String> parseChatMetaNode(String marker, String s) {
-        if (!s.startsWith(marker)) {
+        if (!s.toLowerCase().startsWith(marker)) {
             return null;
         }
 
@@ -368,5 +421,7 @@ public class NodeFactory {
             return null;
         }
     }
+
+    private NodeFactory() {}
 
 }

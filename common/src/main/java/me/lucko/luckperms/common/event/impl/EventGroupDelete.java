@@ -25,10 +25,6 @@
 
 package me.lucko.luckperms.common.event.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.api.event.group.GroupDeleteEvent;
@@ -36,13 +32,40 @@ import me.lucko.luckperms.common.event.AbstractEvent;
 
 import java.util.Set;
 
-@Getter
-@ToString
-@AllArgsConstructor
+import javax.annotation.Nonnull;
+
 public class EventGroupDelete extends AbstractEvent implements GroupDeleteEvent {
 
     private final String groupName;
     private final Set<Node> existingData;
     private final DeletionCause cause;
 
+    public EventGroupDelete(String groupName, Set<Node> existingData, DeletionCause cause) {
+        this.groupName = groupName;
+        this.existingData = existingData;
+        this.cause = cause;
+    }
+
+    @Nonnull
+    @Override
+    public String getGroupName() {
+        return this.groupName;
+    }
+
+    @Nonnull
+    @Override
+    public Set<Node> getExistingData() {
+        return this.existingData;
+    }
+
+    @Nonnull
+    @Override
+    public DeletionCause getCause() {
+        return this.cause;
+    }
+
+    @Override
+    public String toString() {
+        return "EventGroupDelete(groupName=" + this.getGroupName() + ", existingData=" + this.getExistingData() + ", cause=" + this.getCause() + ")";
+    }
 }

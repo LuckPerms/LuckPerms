@@ -29,39 +29,27 @@
     </build>
 
     <dependencies>
-        <!-- Sponge Model -->
-        <dependency>
-            <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-sponge-service</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- LuckPerms Common -->
+        <!-- common -->
         <dependency>
             <groupId>me.lucko.luckperms</groupId>
             <artifactId>luckperms-common</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- LuckPerms API -->
+
+        <!-- sponge service model -->
         <dependency>
             <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-api</artifactId>
+            <artifactId>luckperms-sponge-service</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Sponge API -->
+
+        <!-- Sponge -->
         <dependency>
             <groupId>org.spongepowered</groupId>
             <artifactId>spongeapi</artifactId>
             <version>6.0.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- Lombok -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
