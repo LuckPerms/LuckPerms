@@ -469,21 +469,6 @@ public class ConfigKeys {
     public static final ConfigKey<String> REDIS_PASSWORD = EnduringKey.wrap(StringKey.of("redis.password", ""));
 
     /**
-     * If nats messaging is enabled
-     */
-    public static final ConfigKey<Boolean> NATS_ENABLED = EnduringKey.wrap(BooleanKey.of("nats.enabled", false));
-
-    /**
-     * Nats channel
-     */
-    public static final ConfigKey<String> NATS_CHANNEL = EnduringKey.wrap(StringKey.of("nats.channel", "lpuc"));
-
-    /**
-     * Nats properties
-     */
-    public static final ConfigKey<Properties> NATS_PROPERTIES = EnduringKey.wrap(PropertiesKey.of("nats.props", new Properties()));
-
-    /**
      * The URL of the web editor
      */
     public static final ConfigKey<String> WEB_EDITOR_URL_PATTERN = StringKey.of("web-editor-url", "https://lpedit.lucko.me/");

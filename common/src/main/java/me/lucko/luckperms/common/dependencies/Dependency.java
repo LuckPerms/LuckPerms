@@ -196,12 +196,6 @@ public enum Dependency {
             "IREqpnNzPfzQRTVN33WzHh1GS5nI5RWXQ0myUyJUzFM=",
             Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
     ),
-    NATS(
-            "io.nats",
-            "jnats",
-            "1.0",
-            "0VTd86WjPdzwXZxmmWPLwb1Fx+XNrZtgjncP44o0wMo="
-    ),
     CONFIGURATE_CORE(
             "ninja{}leaping{}configurate",
             "configurate-core",

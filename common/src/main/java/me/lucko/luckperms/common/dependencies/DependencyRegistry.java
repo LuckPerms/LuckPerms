@@ -70,10 +70,6 @@ public class DependencyRegistry {
             dependencies.add(Dependency.JEDIS);
         }
 
-        if(this.plugin.getConfiguration().get(ConfigKeys.NATS_ENABLED)) {
-            dependencies.add(Dependency.NATS);
-        }
-
         // don't load slf4j if it's already present
         if (slf4jPresent()) {
             dependencies.remove(Dependency.SLF4J_API);

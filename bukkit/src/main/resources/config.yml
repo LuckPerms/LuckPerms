@@ -402,11 +402,6 @@ redis:
   address: localhost
   password: ''
 
-nats:
-  enabled: false
-  channel: 'lpuc'
-  props:
-
 
 # +----------------------------------------------------------------------------------------------+ #
 # |                                      Default Assignments                                     | #
