@@ -302,6 +302,7 @@ cassandra:
   addresses:
   - 'localhost:9042'
   ssl: false
+  keyspace: 'luckperms'
   username: ''
   password: ''
   prefix: ''
@@ -346,6 +347,7 @@ redis:
 
 nats:
   enabled: false
+  channel: 'lpuc'
   props:
 
 

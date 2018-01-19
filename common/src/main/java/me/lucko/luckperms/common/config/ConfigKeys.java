@@ -388,8 +388,8 @@ public class ConfigKeys {
                 .collect(Collectors.toSet());
         boolean ssl = c.getBoolean("cassandra.ssl", false);
         String keyspace = c.getString("cassandra.keyspace", "luckperms");
-        String username = c.getString("cassandra.username", null);
-        String password = c.getString("cassandra.password", null);
+        String username = c.getString("cassandra.username", "");
+        String password = c.getString("cassandra.password", "");
         String prefix = c.getString("cassandra.prefix", "");
         return new CassandraConfig(inetSocketAddresses, ssl, keyspace, username, password, prefix);
     }));
@@ -472,6 +472,11 @@ public class ConfigKeys {
      * If nats messaging is enabled
      */
     public static final ConfigKey<Boolean> NATS_ENABLED = EnduringKey.wrap(BooleanKey.of("nats.enabled", false));
+
+    /**
+     * Nats channel
+     */
+    public static final ConfigKey<String> NATS_CHANNEL = EnduringKey.wrap(StringKey.of("nats.channel", "lpuc"));
 
     /**
      * Nats properties
