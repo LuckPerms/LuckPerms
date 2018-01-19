@@ -25,10 +25,7 @@
 
 package me.lucko.luckperms.common.dependencies;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteStreams;
-
 import me.lucko.jarrelocator.JarRelocator;
 import me.lucko.jarrelocator.Relocation;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -36,9 +33,7 @@ import me.lucko.luckperms.common.storage.StorageType;
 
 import java.io.File;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
