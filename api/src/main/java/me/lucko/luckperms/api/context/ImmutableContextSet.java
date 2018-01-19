@@ -106,19 +106,6 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
         return builder.build();
     }
 
-    @Nonnull
-    public static ImmutableContextSet fromStringSetMap(@Nonnull Map<String, Set<String>> map) {
-        Objects.requireNonNull(map, "map");
-        ImmutableContextSet.Builder builder = builder();
-        for (Map.Entry<String, Set<String>> entry : map.entrySet()) {
-            String key = entry.getKey();
-            for (String value : entry.getValue()) {
-                builder.add(key, value);
-            }
-        }
-        return builder.build();
-    }
-
     /**
      * Creates an {@link ImmutableContextSet} from an existing {@link Map}.
      *
@@ -209,11 +196,6 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
     @Override
     public Multimap<String, String> toMultimap() {
         return this.map;
-    }
-
-    @Nonnull
-    public Map<String, Set<String>> toStringSetMap() {
-        return (Map) this.map.asMap();
     }
 
     @Override

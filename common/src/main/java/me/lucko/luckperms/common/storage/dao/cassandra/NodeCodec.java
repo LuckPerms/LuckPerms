@@ -10,6 +10,7 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.config.keys.StringKey;
 import me.lucko.luckperms.common.node.NodeModel;
 
+import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -51,7 +52,7 @@ public class NodeCodec extends TypeCodec<NodeModel> {
         String world = value.getString("world");
         Date expiry = value.getTimestamp("expiry");
         Map<String, Set<String>> contexts = value.getMap("contexts", TypeToken.of(String.class), new TypeToken<Set<String>>() {});
-        return NodeModel.of(permission, enabled, server, world, expiry.getTime() / 1000L, ImmutableContextSet.fromStringSetMap(contexts));
+        return NodeModel.of(permission, enabled, server, world, expiry.getTime() / 1000L, fromStringSetMap(contexts));
     }
 
     private UDTValue toUDTValue(NodeModel model) {
@@ -62,8 +63,26 @@ public class NodeCodec extends TypeCodec<NodeModel> {
         udtValue.setBool("value", model.getValue());
         udtValue.setString("server", model.getServer());
         udtValue.setString("world", model.getWorld());
-        udtValue.setMap("contexts", contexts.toStringSetMap());
+        udtValue.setMap("contexts", toStringSetMap(contexts));
         udtValue.setTimestamp("expiry", new Date(model.getExpiry() * 1000L));
         return udtValue;
+    }
+
+    @Nonnull
+    private static ImmutableContextSet fromStringSetMap(@Nonnull Map<String, Set<String>> map) {
+        Objects.requireNonNull(map, "map");
+        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        for (Map.Entry<String, Set<String>> entry : map.entrySet()) {
+            String key = entry.getKey();
+            for (String value : entry.getValue()) {
+                builder.add(key, value);
+            }
+        }
+        return builder.build();
+    }
+
+    @Nonnull
+    public Map<String, Set<String>> toStringSetMap(ImmutableContextSet set) {
+        return (Map) set.toMultimap();
     }
 }
