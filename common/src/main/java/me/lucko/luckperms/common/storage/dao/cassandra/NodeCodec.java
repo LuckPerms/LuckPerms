@@ -2,12 +2,16 @@ package me.lucko.luckperms.common.storage.dao.cassandra;
 
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.exceptions.InvalidTypeException;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.SetMultimap;
+import com.google.common.reflect.TypeToken;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.config.keys.StringKey;
 import me.lucko.luckperms.common.node.NodeModel;
 
 import java.nio.ByteBuffer;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 public class NodeCodec extends TypeCodec<NodeModel> {
     private final TypeCodec<UDTValue> innerCodec;
@@ -46,19 +50,19 @@ public class NodeCodec extends TypeCodec<NodeModel> {
         String server = value.getString("server");
         String world = value.getString("world");
         Date expiry = value.getTimestamp("expiry");
-        Map<String, String> contexts = value.getMap("contexts", String.class, String.class);
-        // Lucko, i don't like this shit.
-        return NodeModel.of(permission, enabled, server, world, expiry.getTime() / 1000L, ImmutableContextSet.fromMap(contexts));
+        Map<String, Set<String>> contexts = value.getMap("contexts", TypeToken.of(String.class), new TypeToken<Set<String>>() {});
+        return NodeModel.of(permission, enabled, server, world, expiry.getTime() / 1000L, ImmutableContextSet.fromStringSetMap(contexts));
     }
 
     private UDTValue toUDTValue(NodeModel model) {
         if(model == null) return null;
+        ImmutableContextSet contexts = model.getContexts();
         UDTValue udtValue = userType.newValue();
         udtValue.setString("id", model.getPermission());
         udtValue.setBool("value", model.getValue());
         udtValue.setString("server", model.getServer());
         udtValue.setString("world", model.getWorld());
-        // Lucko, i don't like this shit again.
+        udtValue.setMap("contexts", contexts.toStringSetMap());
         udtValue.setTimestamp("expiry", new Date(model.getExpiry() * 1000L));
         return udtValue;
     }

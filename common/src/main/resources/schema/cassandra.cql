@@ -4,7 +4,7 @@ CREATE TYPE permission (
   server text,
   world text,
   expiry timestamp,
-  contexts map<text,text>,
+  contexts map<text,set<text>>,
 );
 
 CREATE TABLE {prefix}actions (

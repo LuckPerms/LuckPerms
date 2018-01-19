@@ -155,6 +155,12 @@ public enum Dependency {
             "mM19X6LyD97KP4RSbcCR5BTRAwQ0x9y02voX7ePOSjE=",
             Relocations.of("jedis", "redis{}clients{}jedis{}shaded")
     ),
+    NATS(
+            "io.nats",
+            "jnats",
+            "1.0",
+            "0VTd86WjPdzwXZxmmWPLwb1Fx+XNrZtgjncP44o0wMo="
+    ),
     CONFIGURATE_CORE(
             "ninja{}leaping{}configurate",
             "configurate-core",

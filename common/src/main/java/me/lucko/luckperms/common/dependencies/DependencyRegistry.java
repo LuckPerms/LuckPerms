@@ -50,6 +50,7 @@ public class DependencyRegistry {
             .put(StorageType.POSTGRESQL, ImmutableList.of(Dependency.POSTGRESQL_DRIVER, Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI))
             .put(StorageType.SQLITE, ImmutableList.of(Dependency.SQLITE_DRIVER))
             .put(StorageType.H2, ImmutableList.of(Dependency.H2_DRIVER))
+            .put(StorageType.CASSANDRA, ImmutableList.of(Dependency.CASSANDRA_DRIVER, Dependency.DROPWIZARD_METRICS, Dependency.JNR_FFI, Dependency.JNR_POSIX, Dependency.SLF4J_API))
             .build();
 
     private final LuckPermsPlugin plugin;
@@ -66,6 +67,10 @@ public class DependencyRegistry {
 
         if (this.plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
             dependencies.add(Dependency.JEDIS);
+        }
+
+        if(this.plugin.getConfiguration().get(ConfigKeys.NATS_ENABLED)) {
+            dependencies.add(Dependency.NATS);
         }
 
         // don't load slf4j if it's already present
