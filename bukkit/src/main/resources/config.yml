@@ -356,6 +356,14 @@ data:
   # Set to -1 to disable the task completely.
   sync-minutes: -1
 
+cassandra:
+  addresses:
+  - 'localhost:9042'
+  ssl: false
+  username: ''
+  password: ''
+  prefix: ''
+
 # Settings for the messaging service
 #
 # If enabled and configured, LuckPerms will use the messaging system to inform other
@@ -393,7 +401,9 @@ redis:
   address: localhost
   password: ''
 
-
+nats:
+  enabled: false
+  props:
 
 
 # +----------------------------------------------------------------------------------------------+ #

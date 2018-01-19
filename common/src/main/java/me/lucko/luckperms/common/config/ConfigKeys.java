@@ -30,14 +30,7 @@ import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.common.assignments.AssignmentRule;
-import me.lucko.luckperms.common.config.keys.AbstractKey;
-import me.lucko.luckperms.common.config.keys.BooleanKey;
-import me.lucko.luckperms.common.config.keys.EnduringKey;
-import me.lucko.luckperms.common.config.keys.IntegerKey;
-import me.lucko.luckperms.common.config.keys.LowercaseStringKey;
-import me.lucko.luckperms.common.config.keys.MapKey;
-import me.lucko.luckperms.common.config.keys.StaticKey;
-import me.lucko.luckperms.common.config.keys.StringKey;
+import me.lucko.luckperms.common.config.keys.*;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
 import me.lucko.luckperms.common.model.TemporaryModifier;
@@ -474,6 +467,16 @@ public class ConfigKeys {
      * The password in use by the redis server, or an empty string if there is no passworld
      */
     public static final ConfigKey<String> REDIS_PASSWORD = EnduringKey.wrap(StringKey.of("redis.password", ""));
+
+    /**
+     * If nats messaging is enabled
+     */
+    public static final ConfigKey<Boolean> NATS_ENABLED = EnduringKey.wrap(BooleanKey.of("nats.enabled", false));
+
+    /**
+     * Nats properties
+     */
+    public static final ConfigKey<Properties> NATS_PROPERTIES = EnduringKey.wrap(PropertiesKey.of("nats.props", new Properties()));
 
     /**
      * The URL of the web editor
