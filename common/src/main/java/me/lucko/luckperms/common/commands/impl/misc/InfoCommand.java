@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
+import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -68,7 +68,7 @@ public class InfoCommand extends SingleCommand {
         }
 
         Message.INFO_MIDDLE.send(sender,
-                plugin.getMessagingService().map(ExtendedMessagingService::getName).orElse("None"),
+                plugin.getMessagingService().map(InternalMessagingService::getName).orElse("None"),
                 plugin.getContextManager().getStaticContextString().orElse("None"),
                 plugin.getPlayerCount(),
                 plugin.getUniqueConnections().size(),

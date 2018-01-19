@@ -33,6 +33,7 @@ import me.lucko.luckperms.api.event.EventBus;
 import me.lucko.luckperms.api.manager.GroupManager;
 import me.lucko.luckperms.api.manager.TrackManager;
 import me.lucko.luckperms.api.manager.UserManager;
+import me.lucko.luckperms.api.messenger.MessengerProvider;
 import me.lucko.luckperms.api.metastacking.MetaStackFactory;
 import me.lucko.luckperms.api.platform.PlatformInfo;
 
@@ -171,6 +172,17 @@ public interface LuckPermsApi {
      */
     @Nonnull
     Optional<MessagingService> getMessagingService();
+
+    /**
+     * Registers a {@link MessengerProvider} for use by the platform.
+     *
+     * <p>Note that the mere action of registering a provider doesn't
+     * necessarily mean that it will be used.</p>
+     *
+     * @param messengerProvider the messenger provider.
+     * @since 4.1
+     */
+    void registerMessengerProvider(@Nonnull MessengerProvider messengerProvider);
 
     /**
      * Gets the {@link ActionLogger}.

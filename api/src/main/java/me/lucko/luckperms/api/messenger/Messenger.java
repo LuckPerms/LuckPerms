@@ -23,46 +23,36 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.messaging;
+package me.lucko.luckperms.api.messenger;
 
-import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.api.MessagingService;
-import me.lucko.luckperms.common.buffers.BufferedRequest;
-import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.api.messenger.message.Message;
+import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
 
-public interface ExtendedMessagingService extends MessagingService {
+import javax.annotation.Nonnull;
+
+/**
+ * Represents an object which dispatches {@link OutgoingMessage}s.
+ *
+ * @since 4.1
+ */
+public interface Messenger extends AutoCloseable {
 
     /**
-     * Gets the name of this messaging service
+     * Performs the necessary action to dispatch the message using the means
+     * of the messenger.
      *
-     * @return the name of this messaging service
-     */
-    String getName();
-
-    /**
-     * Closes the messaging service
-     */
-    void close();
-
-    /**
-     * Gets the buffer for sending updates to other servers
+     * <p>The outgoing message instance is guaranteed to be an instance of one
+     * of the interfaces extending {@link Message} in the
+     * 'api.messenger.message.type' package.</p>
      *
-     * @return the update buffer
-     */
-    BufferedRequest<Void> getUpdateBuffer();
-
-    /**
-     * Pushes an update for a specific user.
+     * <p>This call is always made async.</p>
      *
-     * @param user the user
+     * @param outgoingMessage the outgoing message
      */
-    void pushUserUpdate(User user);
+    void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage);
 
-    /**
-     * Pushes a log entry to connected servers.
-     *
-     * @param logEntry the log entry
-     */
-    void pushLog(LogEntry logEntry);
+    @Override
+    default void close() {
 
+    }
 }

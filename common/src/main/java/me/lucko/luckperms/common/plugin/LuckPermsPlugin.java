@@ -46,7 +46,7 @@ import me.lucko.luckperms.common.logging.Logger;
 import me.lucko.luckperms.common.managers.group.GroupManager;
 import me.lucko.luckperms.common.managers.track.TrackManager;
 import me.lucko.luckperms.common.managers.user.UserManager;
-import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
+import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.dao.file.FileWatcher;
@@ -65,7 +65,8 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
- * Main internal interface for LuckPerms plugins, providing the base for abstraction throughout the project.
+ * Main internal interface for LuckPerms plugins, providing the base for
+ * abstraction throughout the project.
  *
  * All plugin platforms implement this interface.
  */
@@ -107,11 +108,18 @@ public interface LuckPermsPlugin {
     Storage getStorage();
 
     /**
-     * Gets the redis messaging instance.
+     * Gets the messaging service.
      *
-     * @return the redis messaging service
+     * @return the messaging service
      */
-    Optional<ExtendedMessagingService> getMessagingService();
+    Optional<InternalMessagingService> getMessagingService();
+
+    /**
+     * Sets the messaging service.
+     *
+     * @param service the service
+     */
+    void setMessagingService(InternalMessagingService service);
 
     /**
      * Gets a wrapped logger instance for the platform.

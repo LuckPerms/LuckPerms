@@ -23,8 +23,11 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.messaging;
+package me.lucko.luckperms.common.messaging.redis;
 
+import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
+import me.lucko.luckperms.api.messenger.Messenger;
+import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import redis.clients.jedis.Jedis;
@@ -32,17 +35,23 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPubSub;
 
+import javax.annotation.Nonnull;
+
 /**
- * An implementation of {@link me.lucko.luckperms.api.MessagingService} using Redis.
+ * An implementation of {@link Messenger} using Redis.
  */
-public class RedisMessagingService extends AbstractMessagingService {
+public class RedisMessenger implements Messenger {
+    private static final String CHANNEL = "lpuc";
+
     private final LuckPermsPlugin plugin;
+    private final IncomingMessageConsumer consumer;
+
     private JedisPool jedisPool;
     private LPSub sub;
 
-    public RedisMessagingService(LuckPermsPlugin plugin) {
-        super(plugin, "Redis");
+    public RedisMessenger(LuckPermsPlugin plugin, IncomingMessageConsumer consumer) {
         this.plugin = plugin;
+        this.consumer = consumer;
     }
 
     public void init(String address, String password) {
@@ -67,24 +76,24 @@ public class RedisMessagingService extends AbstractMessagingService {
     }
 
     @Override
-    public void close() {
-        this.sub.unsubscribe();
-        this.jedisPool.destroy();
-    }
-
-    @Override
-    protected void sendMessage(String message) {
+    public void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage) {
         try (Jedis jedis = this.jedisPool.getResource()) {
-            jedis.publish(CHANNEL, message);
+            jedis.publish(CHANNEL, outgoingMessage.asEncodedString());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static class LPSub extends JedisPubSub {
-        private final RedisMessagingService parent;
+    @Override
+    public void close() {
+        this.sub.unsubscribe();
+        this.jedisPool.destroy();
+    }
 
-        public LPSub(RedisMessagingService parent) {
+    private static class LPSub extends JedisPubSub {
+        private final RedisMessenger parent;
+
+        public LPSub(RedisMessenger parent) {
             this.parent = parent;
         }
 
@@ -93,7 +102,7 @@ public class RedisMessagingService extends AbstractMessagingService {
             if (!channel.equals(CHANNEL)) {
                 return;
             }
-            this.parent.onMessage(msg, null);
+            this.parent.consumer.consumeIncomingMessageAsString(msg);
         }
     }
 

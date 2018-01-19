@@ -25,9 +25,15 @@
 
 package me.lucko.luckperms.sponge.messaging;
 
-import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
+import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
+import me.lucko.luckperms.api.messenger.Messenger;
+import me.lucko.luckperms.api.messenger.MessengerProvider;
+import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
+
+import javax.annotation.Nonnull;
 
 public class SpongeMessagingFactory extends MessagingFactory<LPSpongePlugin> {
     public SpongeMessagingFactory(LPSpongePlugin plugin) {
@@ -35,13 +41,33 @@ public class SpongeMessagingFactory extends MessagingFactory<LPSpongePlugin> {
     }
 
     @Override
-    protected ExtendedMessagingService getServiceFor(String messagingType) {
+    protected InternalMessagingService getServiceFor(String messagingType) {
         if (messagingType.equals("bungee")) {
-            BungeeMessagingService bungeeMessaging = new BungeeMessagingService(getPlugin());
-            bungeeMessaging.init();
-            return bungeeMessaging;
+            try {
+                return new LuckPermsMessagingService(getPlugin(), new BungeeMessengerProvider());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         return super.getServiceFor(messagingType);
     }
+
+    private class BungeeMessengerProvider implements MessengerProvider {
+
+        @Nonnull
+        @Override
+        public String getName() {
+            return "Bungee";
+        }
+
+        @Nonnull
+        @Override
+        public Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer) {
+            BungeeMessenger bungeeMessaging = new BungeeMessenger(getPlugin(), incomingMessageConsumer);
+            bungeeMessaging.init();
+            return bungeeMessaging;
+        }
+    }
+
 }

@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.commands.impl.log.LogNotify;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
+import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Optional;
@@ -69,7 +69,7 @@ public class LogDispatcher {
             return;
         }
 
-        Optional<ExtendedMessagingService> messagingService = this.plugin.getMessagingService();
+        Optional<InternalMessagingService> messagingService = this.plugin.getMessagingService();
         if (!sender.isImport() && messagingService.isPresent()) {
             messagingService.get().pushLog(entry);
         }

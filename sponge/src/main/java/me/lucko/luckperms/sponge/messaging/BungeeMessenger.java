@@ -27,8 +27,9 @@ package me.lucko.luckperms.sponge.messaging;
 
 import com.google.common.collect.Iterables;
 
-import me.lucko.luckperms.common.messaging.AbstractMessagingService;
-import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
+import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
+import me.lucko.luckperms.api.messenger.Messenger;
+import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 
 import org.spongepowered.api.Platform;
@@ -44,15 +45,19 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 
 /**
- * An implementation of {@link ExtendedMessagingService} using the plugin messaging channels.
+ * An implementation of {@link Messenger} using the plugin messaging channels.
  */
-public class BungeeMessagingService extends AbstractMessagingService implements RawDataListener {
+public class BungeeMessenger implements Messenger, RawDataListener {
+    private static final String CHANNEL = "lpuc";
+
     private final LPSpongePlugin plugin;
+    private final IncomingMessageConsumer consumer;
+
     private ChannelBinding.RawDataChannel channel = null;
 
-    public BungeeMessagingService(LPSpongePlugin plugin) {
-        super(plugin, "Bungee");
+    public BungeeMessenger(LPSpongePlugin plugin, IncomingMessageConsumer consumer) {
         this.plugin = plugin;
+        this.consumer = consumer;
     }
 
     public void init() {
@@ -68,7 +73,7 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
     }
 
     @Override
-    protected void sendMessage(String message) {
+    public void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage) {
         this.plugin.getSpongeScheduler().createTaskBuilder().interval(10, TimeUnit.SECONDS).execute(task -> {
             if (!this.plugin.getGame().isServerAvailable()) {
                 return;
@@ -80,8 +85,7 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
                 return;
             }
 
-            this.channel.sendTo(p, buf -> buf.writeUTF(message));
-
+            this.channel.sendTo(p, buf -> buf.writeUTF(outgoingMessage.asEncodedString()));
             task.cancel();
         }).submit(this.plugin);
     }
@@ -89,6 +93,6 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
     @Override
     public void handlePayload(@Nonnull ChannelBuf buf, @Nonnull RemoteConnection connection, @Nonnull Platform.Type type) {
         String msg = buf.readUTF();
-        onMessage(msg, null);
+        this.consumer.consumeIncomingMessageAsString(msg);
     }
 }

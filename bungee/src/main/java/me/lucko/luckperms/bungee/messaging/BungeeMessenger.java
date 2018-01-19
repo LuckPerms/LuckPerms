@@ -29,9 +29,10 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
+import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
+import me.lucko.luckperms.api.messenger.Messenger;
+import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
 import me.lucko.luckperms.bungee.LPBungeePlugin;
-import me.lucko.luckperms.common.messaging.AbstractMessagingService;
-import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -39,15 +40,20 @@ import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
-/**
- * An implementation of {@link ExtendedMessagingService} using the plugin messaging channels.
- */
-public class BungeeMessagingService extends AbstractMessagingService implements Listener {
-    private final LPBungeePlugin plugin;
+import javax.annotation.Nonnull;
 
-    public BungeeMessagingService(LPBungeePlugin plugin) {
-        super(plugin, "Bungee");
+/**
+ * An implementation of {@link Messenger} using the plugin messaging channels.
+ */
+public class BungeeMessenger implements Messenger, Listener {
+    private static final String CHANNEL = "lpuc";
+
+    private final LPBungeePlugin plugin;
+    private final IncomingMessageConsumer consumer;
+
+    public BungeeMessenger(LPBungeePlugin plugin, IncomingMessageConsumer consumer) {
         this.plugin = plugin;
+        this.consumer = consumer;
     }
 
     public void init() {
@@ -61,10 +67,9 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
     }
 
     @Override
-    protected void sendMessage(String message) {
-
+    public void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage) {
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        out.writeUTF(message);
+        out.writeUTF(outgoingMessage.asEncodedString());
 
         byte[] data = out.toByteArray();
 
@@ -85,12 +90,18 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
             return;
         }
 
-        ByteArrayDataInput in = ByteStreams.newDataInput(e.getData());
+        byte[] data = e.getData();
+
+        ByteArrayDataInput in = ByteStreams.newDataInput(data);
         String msg = in.readUTF();
 
-        onMessage(msg, u -> {
+        if (this.consumer.consumeIncomingMessageAsString(msg)) {
             // Forward to other servers
-            this.plugin.getScheduler().doAsync(() -> sendMessage(u));
-        });
+            this.plugin.getScheduler().doAsync(() -> {
+                for (ServerInfo server : this.plugin.getProxy().getServers().values()) {
+                    server.sendData(CHANNEL, data, true);
+                }
+            });
+        }
     }
 }

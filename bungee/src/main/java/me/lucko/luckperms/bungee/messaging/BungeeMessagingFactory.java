@@ -25,9 +25,15 @@
 
 package me.lucko.luckperms.bungee.messaging;
 
+import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
+import me.lucko.luckperms.api.messenger.Messenger;
+import me.lucko.luckperms.api.messenger.MessengerProvider;
 import me.lucko.luckperms.bungee.LPBungeePlugin;
-import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
+import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
+
+import javax.annotation.Nonnull;
 
 public class BungeeMessagingFactory extends MessagingFactory<LPBungeePlugin> {
     public BungeeMessagingFactory(LPBungeePlugin plugin) {
@@ -35,21 +41,59 @@ public class BungeeMessagingFactory extends MessagingFactory<LPBungeePlugin> {
     }
 
     @Override
-    protected ExtendedMessagingService getServiceFor(String messagingType) {
+    protected InternalMessagingService getServiceFor(String messagingType) {
         if (messagingType.equals("bungee")) {
-            BungeeMessagingService bungeeMessaging = new BungeeMessagingService(getPlugin());
-            bungeeMessaging.init();
-            return bungeeMessaging;
+            try {
+                return new LuckPermsMessagingService(getPlugin(), new BungeeMessengerProvider());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } else if (messagingType.equals("redisbungee")) {
             if (getPlugin().getProxy().getPluginManager().getPlugin("RedisBungee") == null) {
                 getPlugin().getLog().warn("RedisBungee plugin not present.");
             } else {
-                RedisBungeeMessagingService redisBungeeMessaging = new RedisBungeeMessagingService(getPlugin());
-                redisBungeeMessaging.init();
-                return redisBungeeMessaging;
+                try {
+                    return new LuckPermsMessagingService(getPlugin(), new RedisBungeeMessengerProvider());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
 
         return super.getServiceFor(messagingType);
+    }
+
+    private class BungeeMessengerProvider implements MessengerProvider {
+
+        @Nonnull
+        @Override
+        public String getName() {
+            return "Bungee";
+        }
+
+        @Nonnull
+        @Override
+        public Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer) {
+            BungeeMessenger bungeeMessaging = new BungeeMessenger(getPlugin(), incomingMessageConsumer);
+            bungeeMessaging.init();
+            return bungeeMessaging;
+        }
+    }
+
+    private class RedisBungeeMessengerProvider implements MessengerProvider {
+
+        @Nonnull
+        @Override
+        public String getName() {
+            return "RedisBungee";
+        }
+
+        @Nonnull
+        @Override
+        public Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer) {
+            RedisBungeeMessenger redisBungeeMessaging = new RedisBungeeMessenger(getPlugin(), incomingMessageConsumer);
+            redisBungeeMessaging.init();
+            return redisBungeeMessaging;
+        }
     }
 }

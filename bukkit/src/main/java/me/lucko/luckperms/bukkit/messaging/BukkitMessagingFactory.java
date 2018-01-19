@@ -25,9 +25,15 @@
 
 package me.lucko.luckperms.bukkit.messaging;
 
+import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
+import me.lucko.luckperms.api.messenger.Messenger;
+import me.lucko.luckperms.api.messenger.MessengerProvider;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
+import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
+
+import javax.annotation.Nonnull;
 
 public class BukkitMessagingFactory extends MessagingFactory<LPBukkitPlugin> {
     public BukkitMessagingFactory(LPBukkitPlugin plugin) {
@@ -35,21 +41,59 @@ public class BukkitMessagingFactory extends MessagingFactory<LPBukkitPlugin> {
     }
 
     @Override
-    protected ExtendedMessagingService getServiceFor(String messagingType) {
+    protected InternalMessagingService getServiceFor(String messagingType) {
         if (messagingType.equals("bungee")) {
-            BungeeMessagingService bungeeMessaging = new BungeeMessagingService(getPlugin());
-            bungeeMessaging.init();
-            return bungeeMessaging;
+            try {
+                return new LuckPermsMessagingService(getPlugin(), new BungeeMessengerProvider());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } else if (messagingType.equals("lilypad")) {
             if (getPlugin().getServer().getPluginManager().getPlugin("LilyPad-Connect") == null) {
                 getPlugin().getLog().warn("LilyPad-Connect plugin not present.");
             } else {
-                LilyPadMessagingService lilyPadMessaging = new LilyPadMessagingService(getPlugin());
-                lilyPadMessaging.init();
-                return lilyPadMessaging;
+                try {
+                    return new LuckPermsMessagingService(getPlugin(), new LilyPadMessengerProvider());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
 
         return super.getServiceFor(messagingType);
+    }
+
+    private class BungeeMessengerProvider implements MessengerProvider {
+
+        @Nonnull
+        @Override
+        public String getName() {
+            return "Bungee";
+        }
+
+        @Nonnull
+        @Override
+        public Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer) {
+            BungeeMessenger bungeeMessaging = new BungeeMessenger(getPlugin(), incomingMessageConsumer);
+            bungeeMessaging.init();
+            return bungeeMessaging;
+        }
+    }
+
+    private class LilyPadMessengerProvider implements MessengerProvider {
+
+        @Nonnull
+        @Override
+        public String getName() {
+            return "LilyPad";
+        }
+
+        @Nonnull
+        @Override
+        public Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer) {
+            LilyPadMessenger lilyPadMessaging = new LilyPadMessenger(getPlugin(), incomingMessageConsumer);
+            lilyPadMessaging.init();
+            return lilyPadMessaging;
+        }
     }
 }

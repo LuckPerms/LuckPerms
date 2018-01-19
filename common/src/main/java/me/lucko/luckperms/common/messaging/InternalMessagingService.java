@@ -23,54 +23,51 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api;
+package me.lucko.luckperms.common.messaging;
 
-import javax.annotation.Nonnull;
+import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.common.buffers.BufferedRequest;
+import me.lucko.luckperms.common.model.User;
 
-/**
- * A means to push changes to other servers using the platforms networking
- *
- * @since 2.14
- */
-public interface MessagingService {
+public interface InternalMessagingService {
 
     /**
      * Gets the name of this messaging service
      *
      * @return the name of this messaging service
-     * @since 4.1
      */
     String getName();
 
     /**
+     * Closes the messaging service
+     */
+    void close();
+
+    /**
+     * Gets the buffer for sending updates to other servers
+     *
+     * @return the update buffer
+     */
+    BufferedRequest<Void> getUpdateBuffer();
+
+    /**
      * Uses the messaging service to inform other servers about a general
      * change.
-     *
-     * <p>The standard response by other servers will be to execute a overall
-     * sync of all live data, equivalent to calling
-     * {@link LuckPermsApi#runUpdateTask()}.</p>
-     *
-     * <p>This will push the update asynchronously, and this method will return
-     * immediately. Note that this method will not cause an update to be
-     * processed on the local server.</p>
      */
     void pushUpdate();
 
     /**
-     * Uses the messaging service to inform other servers about a change to a
-     * specific user.
+     * Pushes an update for a specific user.
      *
-     * <p>The standard response by other servers is undefined, however the
-     * current implementation will reload the corresponding users data if they
-     * are online.</p>
-     *
-     * <p>This will push the update asynchronously, and this method will return
-     * immediately. Note that this method will not cause an update to be
-     * processed on the local server.</p>
-     *
-     * @param user the user to push the update for
-     * @since 4.1
+     * @param user the user
      */
-    void pushUserUpdate(@Nonnull User user);
+    void pushUserUpdate(User user);
+
+    /**
+     * Pushes a log entry to connected servers.
+     *
+     * @param logEntry the log entry
+     */
+    void pushLog(LogEntry logEntry);
 
 }
