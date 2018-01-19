@@ -83,6 +83,6 @@ public class NodeCodec extends TypeCodec<NodeModel> {
 
     @Nonnull
     public Map<String, Set<String>> toStringSetMap(ImmutableContextSet set) {
-        return (Map) set.toMultimap();
+        return (Map) set.toMultimap().asMap();
     }
 }
