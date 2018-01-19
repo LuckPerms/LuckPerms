@@ -37,6 +37,7 @@ import me.lucko.luckperms.api.event.EventBus;
 import me.lucko.luckperms.api.manager.GroupManager;
 import me.lucko.luckperms.api.manager.TrackManager;
 import me.lucko.luckperms.api.manager.UserManager;
+import me.lucko.luckperms.api.messenger.MessengerProvider;
 import me.lucko.luckperms.api.metastacking.MetaStackFactory;
 import me.lucko.luckperms.api.platform.PlatformInfo;
 import me.lucko.luckperms.common.api.delegates.manager.ApiContextManager;
@@ -44,14 +45,16 @@ import me.lucko.luckperms.common.api.delegates.manager.ApiGroupManager;
 import me.lucko.luckperms.common.api.delegates.manager.ApiTrackManager;
 import me.lucko.luckperms.common.api.delegates.manager.ApiUserManager;
 import me.lucko.luckperms.common.api.delegates.misc.ApiActionLogger;
+import me.lucko.luckperms.common.api.delegates.misc.ApiMessagingService;
 import me.lucko.luckperms.common.api.delegates.misc.ApiMetaStackFactory;
 import me.lucko.luckperms.common.api.delegates.misc.ApiNodeFactory;
 import me.lucko.luckperms.common.api.delegates.misc.ApiPlatformInfo;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 import javax.annotation.Nonnull;
 
@@ -133,7 +136,14 @@ public class LuckPermsApiProvider implements LuckPermsApi {
     @Nonnull
     @Override
     public Optional<MessagingService> getMessagingService() {
-        return this.plugin.getMessagingService().map(Function.identity());
+        return this.plugin.getMessagingService().map(ApiMessagingService::new);
+    }
+
+    @Override
+    public void registerMessengerProvider(@Nonnull MessengerProvider messengerProvider) {
+        if (this.plugin.getConfiguration().get(ConfigKeys.MESSAGING_SERVICE).equals("custom")) {
+            this.plugin.setMessagingService(new LuckPermsMessagingService(this.plugin, messengerProvider));
+        }
     }
 
     @Override

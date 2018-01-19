@@ -55,7 +55,7 @@ import me.lucko.luckperms.common.locale.NoopLocaleManager;
 import me.lucko.luckperms.common.locale.SimpleLocaleManager;
 import me.lucko.luckperms.common.logging.SenderLogger;
 import me.lucko.luckperms.common.managers.track.StandardTrackManager;
-import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
+import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.SchedulerAdapter;
 import me.lucko.luckperms.common.storage.Storage;
@@ -172,7 +172,7 @@ public class LPSpongePlugin implements LuckPermsSpongePlugin {
     private StandardTrackManager trackManager;
     private Storage storage;
     private FileWatcher fileWatcher = null;
-    private ExtendedMessagingService messagingService = null;
+    private InternalMessagingService messagingService = null;
     private UuidCache uuidCache;
     private LuckPermsApiProvider apiProvider;
     private EventFactory eventFactory;
@@ -370,8 +370,15 @@ public class LPSpongePlugin implements LuckPermsSpongePlugin {
     }
 
     @Override
-    public Optional<ExtendedMessagingService> getMessagingService() {
+    public Optional<InternalMessagingService> getMessagingService() {
         return Optional.ofNullable(this.messagingService);
+    }
+
+    @Override
+    public void setMessagingService(InternalMessagingService messagingService) {
+        if (this.messagingService == null) {
+            this.messagingService = messagingService;
+        }
     }
 
     @Override

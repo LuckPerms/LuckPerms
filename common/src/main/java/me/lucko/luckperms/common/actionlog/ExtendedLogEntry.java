@@ -26,9 +26,6 @@
 package me.lucko.luckperms.common.actionlog;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LogEntry;
@@ -379,38 +376,5 @@ public class ExtendedLogEntry implements LogEntry {
                     "actedName=" + this.actedName + ", " +
                     "action=" + this.action + ")";
         }
-    }
-
-    public static JsonObject serializeWithId(String id, LogEntry entry) {
-        JsonObject data = new JsonObject();
-
-        data.add("id", new JsonPrimitive(id));
-        data.add("actor", new JsonPrimitive(entry.getActor().toString()));
-        data.add("actorName", new JsonPrimitive(entry.getActorName()));
-        data.add("type", new JsonPrimitive(entry.getType().name()));
-        if (entry.getActed().isPresent()) {
-            data.add("acted", new JsonPrimitive(entry.getActed().get().toString()));
-        }
-        data.add("actedName", new JsonPrimitive(entry.getActedName()));
-        data.add("action", new JsonPrimitive(entry.getAction()));
-
-        return data;
-    }
-
-    public static Map.Entry<String, ExtendedLogEntry> deserialize(JsonObject object) {
-        ExtendedLogEntryBuilder builder = build();
-
-        String id = object.get("id").getAsString();
-
-        builder.actor(UUID.fromString(object.get("actor").getAsString()));
-        builder.actorName(object.get("actorName").getAsString());
-        builder.type(Type.valueOf(object.get("type").getAsString()));
-        if (object.has("acted")) {
-            builder.actor(UUID.fromString(object.get("acted").getAsString()));
-        }
-        builder.actedName(object.get("actedName").getAsString());
-        builder.action(object.get("action").getAsString());
-
-        return Maps.immutableEntry(id, builder.build());
     }
 }

@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
+import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -50,7 +50,7 @@ public class NetworkSyncCommand extends SingleCommand {
         plugin.getUpdateTaskBuffer().request().join();
         Message.UPDATE_TASK_COMPLETE_NETWORK.send(sender);
 
-        Optional<ExtendedMessagingService> messagingService = plugin.getMessagingService();
+        Optional<InternalMessagingService> messagingService = plugin.getMessagingService();
         if (!messagingService.isPresent()) {
             Message.UPDATE_TASK_PUSH_FAILURE_NOT_SETUP.send(sender);
             return CommandResult.FAILURE;

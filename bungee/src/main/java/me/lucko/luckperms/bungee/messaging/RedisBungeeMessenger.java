@@ -29,23 +29,29 @@ import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 
+import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
+import me.lucko.luckperms.api.messenger.Messenger;
+import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
 import me.lucko.luckperms.bungee.LPBungeePlugin;
-import me.lucko.luckperms.common.messaging.AbstractMessagingService;
-import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
+import javax.annotation.Nonnull;
+
 /**
- * An implementation of {@link ExtendedMessagingService} using Redis, via RedisBungee's API.
+ * An implementation of {@link Messenger} using Redis, via RedisBungee's API.
  */
-public class RedisBungeeMessagingService extends AbstractMessagingService implements Listener {
+public class RedisBungeeMessenger implements Messenger, Listener {
+    private static final String CHANNEL = "lpuc";
+
     private final LPBungeePlugin plugin;
+    private final IncomingMessageConsumer consumer;
     private RedisBungeeAPI redisBungee;
 
-    public RedisBungeeMessagingService(LPBungeePlugin plugin) {
-        super(plugin, "RedisBungee");
+    public RedisBungeeMessenger(LPBungeePlugin plugin, IncomingMessageConsumer consumer) {
         this.plugin = plugin;
+        this.consumer = consumer;
     }
 
     public void init() {
@@ -64,8 +70,8 @@ public class RedisBungeeMessagingService extends AbstractMessagingService implem
     }
 
     @Override
-    protected void sendMessage(String message) {
-        this.redisBungee.sendChannelMessage(CHANNEL, message);
+    public void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage) {
+        this.redisBungee.sendChannelMessage(CHANNEL, outgoingMessage.asEncodedString());
     }
 
     @EventHandler
@@ -74,6 +80,6 @@ public class RedisBungeeMessagingService extends AbstractMessagingService implem
             return;
         }
 
-        onMessage(e.getMessage(), null);
+        this.consumer.consumeIncomingMessageAsString(e.getMessage());
     }
 }

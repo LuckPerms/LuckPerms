@@ -25,11 +25,14 @@
 
 package me.lucko.luckperms.common.messaging;
 
-import me.lucko.luckperms.common.config.ConfigKey;
+import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
+import me.lucko.luckperms.api.messenger.Messenger;
+import me.lucko.luckperms.api.messenger.MessengerProvider;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.messaging.redis.RedisMessenger;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import java.io.IOException;
+import javax.annotation.Nonnull;
 
 public class MessagingFactory<P extends LuckPermsPlugin> {
     private final P plugin;
@@ -42,7 +45,7 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
         return this.plugin;
     }
 
-    public final ExtendedMessagingService getInstance() {
+    public final InternalMessagingService getInstance() {
         String messagingType = this.plugin.getConfiguration().get(ConfigKeys.MESSAGING_SERVICE).toLowerCase();
         if (messagingType.equals("none") && this.plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
             messagingType = "redis";
@@ -54,7 +57,7 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
 
         this.plugin.getLog().info("Loading messaging service... [" + messagingType.toUpperCase() + "]");
 
-        ExtendedMessagingService service = getServiceFor(messagingType);
+        InternalMessagingService service = getServiceFor(messagingType);
         if (service != null) {
             return service;
         }
@@ -63,15 +66,12 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
         return null;
     }
 
-    protected ExtendedMessagingService getServiceFor(String messagingType) {
+    protected InternalMessagingService getServiceFor(String messagingType) {
         if (messagingType.equals("redis")) {
             if (this.plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
-                RedisMessagingService redis = new RedisMessagingService(this.plugin);
                 try {
-                    redis.init(this.plugin.getConfiguration().get(ConfigKeys.REDIS_ADDRESS), this.plugin.getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
-                    return redis;
+                    return new LuckPermsMessagingService(this.plugin, new RedisMessengerProvider());
                 } catch (Exception e) {
-                    this.plugin.getLog().warn("Couldn't load redis...");
                     e.printStackTrace();
                 }
             } else {
@@ -80,6 +80,23 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
         }
 
         return null;
+    }
+
+    private class RedisMessengerProvider implements MessengerProvider {
+
+        @Nonnull
+        @Override
+        public String getName() {
+            return "Redis";
+        }
+
+        @Nonnull
+        @Override
+        public Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer) {
+            RedisMessenger redis = new RedisMessenger(getPlugin(), incomingMessageConsumer);
+            redis.init(getPlugin().getConfiguration().get(ConfigKeys.REDIS_ADDRESS), getPlugin().getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
+            return redis;
+        }
     }
 
 }

@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.LocalizedSpec;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
+import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -185,7 +185,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
         }
 
         if (!sender.isImport()) {
-            Optional<ExtendedMessagingService> messagingService = plugin.getMessagingService();
+            Optional<InternalMessagingService> messagingService = plugin.getMessagingService();
             if (messagingService.isPresent() && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
                 messagingService.get().pushUserUpdate(user);
             }
@@ -208,7 +208,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
         }
 
         if (!sender.isImport()) {
-            Optional<ExtendedMessagingService> messagingService = plugin.getMessagingService();
+            Optional<InternalMessagingService> messagingService = plugin.getMessagingService();
             if (messagingService.isPresent() && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
                 messagingService.get().getUpdateBuffer().request();
             }
@@ -231,7 +231,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
         }
 
         if (!sender.isImport()) {
-            Optional<ExtendedMessagingService> messagingService = plugin.getMessagingService();
+            Optional<InternalMessagingService> messagingService = plugin.getMessagingService();
             if (messagingService.isPresent() && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
                 messagingService.get().getUpdateBuffer().request();
             }

@@ -30,9 +30,10 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
+import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
+import me.lucko.luckperms.api.messenger.Messenger;
+import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.common.messaging.AbstractMessagingService;
-import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
@@ -40,15 +41,20 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Collection;
 
-/**
- * An implementation of {@link ExtendedMessagingService} using the plugin messaging channels.
- */
-public class BungeeMessagingService extends AbstractMessagingService implements PluginMessageListener {
-    private final LPBukkitPlugin plugin;
+import javax.annotation.Nonnull;
 
-    public BungeeMessagingService(LPBukkitPlugin plugin) {
-        super(plugin, "Bungee");
+/**
+ * An implementation of {@link Messenger} using the plugin messaging channels.
+ */
+public class BungeeMessenger implements Messenger, PluginMessageListener {
+    private static final String CHANNEL = "lpuc";
+
+    private final LPBukkitPlugin plugin;
+    private final IncomingMessageConsumer consumer;
+
+    public BungeeMessenger(LPBukkitPlugin plugin, IncomingMessageConsumer consumer) {
         this.plugin = plugin;
+        this.consumer = consumer;
     }
 
     public void init() {
@@ -63,22 +69,22 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
     }
 
     @Override
-    protected void sendMessage(String message) {
+    public void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage) {
         new BukkitRunnable() {
             @Override
             public void run() {
-                Collection<? extends Player> players = BungeeMessagingService.this.plugin.getServer().getOnlinePlayers();
+                Collection<? extends Player> players = BungeeMessenger.this.plugin.getServer().getOnlinePlayers();
                 Player p = Iterables.getFirst(players, null);
                 if (p == null) {
                     return;
                 }
 
                 ByteArrayDataOutput out = ByteStreams.newDataOutput();
-                out.writeUTF(message);
+                out.writeUTF(outgoingMessage.asEncodedString());
 
                 byte[] data = out.toByteArray();
 
-                p.sendPluginMessage(BungeeMessagingService.this.plugin, CHANNEL, data);
+                p.sendPluginMessage(BungeeMessenger.this.plugin, CHANNEL, data);
                 cancel();
             }
         }.runTaskTimer(this.plugin, 1L, 100L);
@@ -93,6 +99,6 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
         ByteArrayDataInput in = ByteStreams.newDataInput(bytes);
         String msg = in.readUTF();
 
-        onMessage(msg, null);
+        this.consumer.consumeIncomingMessageAsString(msg);
     }
 }

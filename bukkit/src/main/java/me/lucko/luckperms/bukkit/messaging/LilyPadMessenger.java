@@ -25,9 +25,10 @@
 
 package me.lucko.luckperms.bukkit.messaging;
 
+import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
+import me.lucko.luckperms.api.messenger.Messenger;
+import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.common.messaging.AbstractMessagingService;
-import me.lucko.luckperms.common.messaging.ExtendedMessagingService;
 
 import lilypad.client.connect.api.Connect;
 import lilypad.client.connect.api.event.EventListener;
@@ -38,16 +39,22 @@ import lilypad.client.connect.api.request.impl.MessageRequest;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 
+import javax.annotation.Nonnull;
+
 /**
- * An implementation of {@link ExtendedMessagingService} using LilyPad.
+ * An implementation of {@link Messenger} using LilyPad.
  */
-public class LilyPadMessagingService extends AbstractMessagingService {
+public class LilyPadMessenger implements Messenger {
+    private static final String CHANNEL = "lpuc";
+
     private final LPBukkitPlugin plugin;
+    private final IncomingMessageConsumer consumer;
+
     private Connect connect;
 
-    public LilyPadMessagingService(LPBukkitPlugin plugin) {
-        super(plugin, "LilyPad");
+    public LilyPadMessenger(LPBukkitPlugin plugin, IncomingMessageConsumer consumer) {
         this.plugin = plugin;
+        this.consumer = consumer;
     }
 
     public void init() {
@@ -61,11 +68,11 @@ public class LilyPadMessagingService extends AbstractMessagingService {
     }
 
     @Override
-    protected void sendMessage(String message) {
+    public void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage) {
         MessageRequest request;
 
         try {
-            request = new MessageRequest(Collections.emptyList(), CHANNEL, message);
+            request = new MessageRequest(Collections.emptyList(), CHANNEL, outgoingMessage.asEncodedString());
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             return;
@@ -89,8 +96,7 @@ public class LilyPadMessagingService extends AbstractMessagingService {
                 }
 
                 String message = event.getMessageAsString();
-
-                onMessage(message, null);
+                this.consumer.consumeIncomingMessageAsString(message);
             } catch (Exception e) {
                 e.printStackTrace();
             }
