@@ -50,10 +50,6 @@
                                     <pattern>net.kyori.text</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.text</shadedPattern>
                                 </relocation>
-                                <relocation>
-                                    <pattern>me.lucko.jarrelocator</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.jarrelocator</shadedPattern>
-                                </relocation>
 
                                 <!-- relocated dependencies -->
                                 <relocation>
@@ -89,8 +85,12 @@
                                     <shadedPattern>me.lucko.luckperms.lib.bson</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>redis.clients.jedis.shaded</pattern>
+                                    <pattern>redis.clients.jedis</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.jedis</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.commons.pool2</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.commonspool2</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

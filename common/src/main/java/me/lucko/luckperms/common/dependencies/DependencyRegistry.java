@@ -65,6 +65,7 @@ public class DependencyRegistry {
         }
 
         if (this.plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
+            dependencies.add(Dependency.COMMONS_POOL_2);
             dependencies.add(Dependency.JEDIS);
         }
 

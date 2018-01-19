@@ -27,10 +27,10 @@ package me.lucko.luckperms.common.messaging;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import redis.clients.jedis.shaded.Jedis;
-import redis.clients.jedis.shaded.JedisPool;
-import redis.clients.jedis.shaded.JedisPoolConfig;
-import redis.clients.jedis.shaded.JedisPubSub;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisPubSub;
 
 /**
  * An implementation of {@link me.lucko.luckperms.api.MessagingService} using Redis.
