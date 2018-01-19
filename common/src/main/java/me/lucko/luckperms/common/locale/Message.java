@@ -134,7 +134,7 @@ public enum Message {
     APPLY_EDITS_DIFF_ADDED("&a+  &f{}", false),
     APPLY_EDITS_DIFF_REMOVED("&c-  &f{}", false),
 
-    EDITOR_START("&7Preparing a new editor sesssion. Please wait...", true),
+    EDITOR_START("&7Preparing a new editor session. Please wait...", true),
     EDITOR_UPLOAD_FAILURE("&cUnable to upload permission data to the editor.", true),
     EDITOR_URL("&aClick the link below to open the editor:", true),
 
