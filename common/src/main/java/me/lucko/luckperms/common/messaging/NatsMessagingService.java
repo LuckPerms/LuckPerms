@@ -12,7 +12,7 @@ public class NatsMessagingService extends AbstractMessagingService {
     private Connection connection;
     private String channel;
 
-    public NatsMessagingService(LuckPermsPlugin plugin) {
+    NatsMessagingService(LuckPermsPlugin plugin) {
         super(plugin, "Nats");
     }
     public void init(Properties natsProps, String channel) throws IOException {

@@ -8,7 +8,6 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.managers.GenericUserManager;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -232,7 +231,7 @@ public class CassandraDao extends AbstractDao {
                     connectionManager.getSession().execute(bind);
                 }
             } else {
-                if (GenericUserManager.shouldSave(user)) {
+                if (this.plugin.getUserManager().shouldSave(user)) {
                     user.clearNodes();
                     user.getPrimaryGroup().setStoredValue(null);
                     plugin.getUserManager().giveDefaultIfNeeded(user, false);
@@ -249,7 +248,7 @@ public class CassandraDao extends AbstractDao {
     public void saveUser(User user) {
         user.getIoLock().lock();
         try {
-            if (!GenericUserManager.shouldSave(user)) {
+            if (!this.plugin.getUserManager().shouldSave(user)) {
                 BoundStatement bind = USER_DELETE.bind(user.getUuid());
                 connectionManager.getSession().execute(bind);
             } else {
