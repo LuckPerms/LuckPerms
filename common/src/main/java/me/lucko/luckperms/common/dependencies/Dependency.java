@@ -134,50 +134,114 @@ public enum Dependency {
             "com.datastax.cassandra",
             "cassandra-driver-core",
             "3.3.2",
-            "BauFwmXj/syIoOkmhlyKYVwv8+QiEVHvSoOHhz9OIXs="
+            "BauFwmXj/syIoOkmhlyKYVwv8+QiEVHvSoOHhz9OIXs=",
+            ImmutableList.<Relocation>builder()
+                    .addAll(Relocation.of("cassandra", "com{}datastax{}driver{}core"))
+                    .addAll(Relocation.of("dropwizard", "com{}codahale{}metrics"))
+                    .addAll(Relocation.of("jffi", "com{}kenai{}jffi"))
+                    .addAll(Relocation.of("jni", "jni"))
+                    .addAll(Relocation.of("jnr", "jnr"))
+                    .addAll(Relocation.of("ckjnr", "com{}kenai{}jnr"))
+                    .build()
     ),
     DROPWIZARD_METRICS(
             "io.dropwizard.metrics",
             "metrics-core",
             "3.2.2",
-            "XG9oXkFmTRDHDGWDfLqeWNOf84loEeO1cHqTSxHIWtA="
+            "XG9oXkFmTRDHDGWDfLqeWNOf84loEeO1cHqTSxHIWtA=",
+            ImmutableList.<Relocation>builder()
+                    .addAll(Relocation.of("cassandra", "com{}datastax{}driver{}core"))
+                    .addAll(Relocation.of("dropwizard", "com{}codahale{}metrics"))
+                    .addAll(Relocation.of("jffi", "com{}kenai{}jffi"))
+                    .addAll(Relocation.of("jni", "jni"))
+                    .addAll(Relocation.of("jnr", "jnr"))
+                    .addAll(Relocation.of("ckjnr", "com{}kenai{}jnr"))
+                    .build()
     ),
     JNR_JFFI(
             "com.github.jnr",
             "jffi",
             "1.2.10",
-            "rPZ8I/MyC2nIyq44n2Tk2Y6tFLWRushLPyWSy882oz4="
+            "rPZ8I/MyC2nIyq44n2Tk2Y6tFLWRushLPyWSy882oz4=",
+            ImmutableList.<Relocation>builder()
+                    .addAll(Relocation.of("cassandra", "com{}datastax{}driver{}core"))
+                    .addAll(Relocation.of("dropwizard", "com{}codahale{}metrics"))
+                    .addAll(Relocation.of("jffi", "com{}kenai{}jffi"))
+                    .addAll(Relocation.of("jni", "jni"))
+                    .addAll(Relocation.of("jnr", "jnr"))
+                    .addAll(Relocation.of("ckjnr", "com{}kenai{}jnr"))
+                    .build()
     ),
     JNR_JFFI_NATIVE(
             "com.github.jnr",
             "jffi",
             "1.2.10",
             "native",
-            "yLxbzkWivLVSCQK2GVuDlenKuhUYxrcs5p3muYROcq4="
+            "yLxbzkWivLVSCQK2GVuDlenKuhUYxrcs5p3muYROcq4=",
+            ImmutableList.<Relocation>builder()
+                    .addAll(Relocation.of("cassandra", "com{}datastax{}driver{}core"))
+                    .addAll(Relocation.of("dropwizard", "com{}codahale{}metrics"))
+                    .addAll(Relocation.of("jffi", "com{}kenai{}jffi"))
+                    .addAll(Relocation.of("jni", "jni"))
+                    .addAll(Relocation.of("jnr", "jnr"))
+                    .addAll(Relocation.of("ckjnr", "com{}kenai{}jnr"))
+                    .build()
     ),
     JNR_CONSTANTS(
             "com.github.jnr",
             "jnr-constants",
             "0.9.0",
-            "/vQ7o2Omxcxdq2cbLqBtBlEc9z7TKsHuguiTqEDtJzM="
+            "/vQ7o2Omxcxdq2cbLqBtBlEc9z7TKsHuguiTqEDtJzM=",
+            ImmutableList.<Relocation>builder()
+                    .addAll(Relocation.of("cassandra", "com{}datastax{}driver{}core"))
+                    .addAll(Relocation.of("dropwizard", "com{}codahale{}metrics"))
+                    .addAll(Relocation.of("jffi", "com{}kenai{}jffi"))
+                    .addAll(Relocation.of("jni", "jni"))
+                    .addAll(Relocation.of("jnr", "jnr"))
+                    .addAll(Relocation.of("ckjnr", "com{}kenai{}jnr"))
+                    .build()
     ),
     JNR_FFI(
             "com.github.jnr",
             "jnr-ffi",
             "2.0.7",
-            "lAbfqtWbw/wN6Xq/ikVecNRgwpTW9EVAfVCA25MjlkM="
+            "lAbfqtWbw/wN6Xq/ikVecNRgwpTW9EVAfVCA25MjlkM=",
+            ImmutableList.<Relocation>builder()
+                    .addAll(Relocation.of("cassandra", "com{}datastax{}driver{}core"))
+                    .addAll(Relocation.of("dropwizard", "com{}codahale{}metrics"))
+                    .addAll(Relocation.of("jffi", "com{}kenai{}jffi"))
+                    .addAll(Relocation.of("jni", "jni"))
+                    .addAll(Relocation.of("jnr", "jnr"))
+                    .addAll(Relocation.of("ckjnr", "com{}kenai{}jnr"))
+                    .build()
     ),
     JNR_POSIX(
             "com.github.jnr",
             "jnr-posix",
             "3.0.27",
-            "hNqwMaOGiMsuyAigEboCM8sNEUbTkCDhRHmSrVBfPXg="
+            "hNqwMaOGiMsuyAigEboCM8sNEUbTkCDhRHmSrVBfPXg=",
+            ImmutableList.<Relocation>builder()
+                    .addAll(Relocation.of("cassandra", "com{}datastax{}driver{}core"))
+                    .addAll(Relocation.of("dropwizard", "com{}codahale{}metrics"))
+                    .addAll(Relocation.of("jffi", "com{}kenai{}jffi"))
+                    .addAll(Relocation.of("jni", "jni"))
+                    .addAll(Relocation.of("jnr", "jnr"))
+                    .addAll(Relocation.of("ckjnr", "com{}kenai{}jnr"))
+                    .build()
     ),
     JNR_X86ASM(
             "com.github.jnr",
             "jnr-x86asm",
             "1.0.2",
-            "OfNnW5EObpuTgl+ChL7J9K0wRM0gpvfI/54vhpXr8h4="
+            "OfNnW5EObpuTgl+ChL7J9K0wRM0gpvfI/54vhpXr8h4=",
+            ImmutableList.<Relocation>builder()
+                    .addAll(Relocation.of("cassandra", "com{}datastax{}driver{}core"))
+                    .addAll(Relocation.of("dropwizard", "com{}codahale{}metrics"))
+                    .addAll(Relocation.of("jffi", "com{}kenai{}jffi"))
+                    .addAll(Relocation.of("jni", "jni"))
+                    .addAll(Relocation.of("jnr", "jnr"))
+                    .addAll(Relocation.of("ckjnr", "com{}kenai{}jnr"))
+                    .build()
     ),
     JEDIS(
             "redis.clients",
@@ -243,7 +307,7 @@ public enum Dependency {
     private static final String MAVEN_CENTRAL_FORMAT = "https://repo1.maven.org/maven2/%s/%s/%s/%s-%s.jar";
     private static final String MAVEN_CENTRAL_FORMAT_WITH_CLASSIFIER = "https://repo1.maven.org/maven2/%s/%s/%s/%s-%s-%s.jar";
 
-    Dependency(String groupId, String artifactId, String version, String classifier, String checksum) {
+    Dependency(String groupId, String artifactId, String version, String classifier, String checksum, List<Relocation> relocations) {
         this(
                 String.format(MAVEN_CENTRAL_FORMAT_WITH_CLASSIFIER,
                         rewriteEscaping(groupId).replace(".", "/"),
@@ -253,7 +317,7 @@ public enum Dependency {
                         version,
                         classifier
                 ),
-                version, checksum, Collections.emptyList()
+                version, checksum, relocations
         );
     }
 
