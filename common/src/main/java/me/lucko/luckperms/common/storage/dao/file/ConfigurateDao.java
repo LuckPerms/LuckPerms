@@ -763,7 +763,7 @@ public abstract class ConfigurateDao extends AbstractDao {
 
     @Override
     public UUID getUUID(String username) {
-        return this.uuidCache.lookupUUID(username);
+        return this.uuidCache.lookup(username);
     }
 
     @Override
