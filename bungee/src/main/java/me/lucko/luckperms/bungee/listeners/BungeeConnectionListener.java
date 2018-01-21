@@ -132,9 +132,19 @@ public class BungeeConnectionListener extends AbstractLoginListener implements L
     // Wait until the last priority to unload, so plugins can still perform permission checks on this event
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerQuit(PlayerDisconnectEvent e) {
+        ProxiedPlayer player = e.getPlayer();
+
         // Register with the housekeeper, so the User's instance will stick
         // around for a bit after they disconnect
-        this.plugin.getUserManager().getHouseKeeper().registerUsage(e.getPlayer().getUniqueId());
+        this.plugin.getUserManager().getHouseKeeper().registerUsage(player.getUniqueId());
+
+        // force a clear of transient nodes
+        this.plugin.getScheduler().doAsync(() -> {
+            User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
+            if (user != null) {
+                user.clearTransientNodes();
+            }
+        });
     }
 
 }

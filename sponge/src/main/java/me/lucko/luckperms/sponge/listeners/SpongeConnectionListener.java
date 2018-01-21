@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.utils.AbstractLoginListener;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.IsCancelled;
@@ -157,9 +158,19 @@ public class SpongeConnectionListener extends AbstractLoginListener {
 
     @Listener(order = Order.POST)
     public void onClientLeave(ClientConnectionEvent.Disconnect e) {
+        Player player = e.getTargetEntity();
+
         // Register with the housekeeper, so the User's instance will stick
         // around for a bit after they disconnect
-        this.plugin.getUserManager().getHouseKeeper().registerUsage(e.getTargetEntity().getUniqueId());
+        this.plugin.getUserManager().getHouseKeeper().registerUsage(player.getUniqueId());
+
+        // force a clear of transient nodes
+        this.plugin.getScheduler().doAsync(() -> {
+            User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
+            if (user != null) {
+                user.clearTransientNodes();
+            }
+        });
     }
 
 }
