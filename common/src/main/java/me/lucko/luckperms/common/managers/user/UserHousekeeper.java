@@ -76,7 +76,7 @@ public class UserHousekeeper implements Runnable {
         UUID uuid = identifier.getUuid();
 
         // unload users which aren't online and who haven't been online (or tried to login) recently
-        if (this.recentlyUsed.contains(uuid) || this.recentlyUsedApi.contains(uuid) || this.plugin.isPlayerOnline(this.plugin.getUuidCache().getExternalUUID(uuid))) {
+        if (this.recentlyUsed.contains(uuid) || this.recentlyUsedApi.contains(uuid) || this.plugin.isPlayerOnline(uuid)) {
             return;
         }
 

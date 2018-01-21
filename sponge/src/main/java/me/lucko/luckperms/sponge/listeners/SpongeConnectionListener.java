@@ -29,7 +29,6 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.utils.AbstractLoginListener;
-import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 
 import org.spongepowered.api.event.Listener;
@@ -126,7 +125,7 @@ public class SpongeConnectionListener extends AbstractLoginListener {
             this.plugin.getLog().info("Processing login event for " + player.getUniqueId() + " - " + player.getName());
         }
 
-        final User user = this.plugin.getUserManager().getIfLoaded(this.plugin.getUuidCache().getUUID(player.getUniqueId()));
+        final User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
 
         /* User instance is null for whatever reason. Could be that it was unloaded between asyncpre and now. */
         if (user == null) {
@@ -158,15 +157,6 @@ public class SpongeConnectionListener extends AbstractLoginListener {
 
     @Listener(order = Order.POST)
     public void onClientLeave(ClientConnectionEvent.Disconnect e) {
-        /* We don't actually remove the user instance here, as Sponge likes to keep performing checks
-           on players when they disconnect. The instance gets cleared up on a housekeeping task
-           after a period of inactivity. */
-
-        final UuidCache cache = this.plugin.getUuidCache();
-
-        // Unload the user from memory when they disconnect
-        cache.clearCache(e.getTargetEntity().getUniqueId());
-
         // Register with the housekeeper, so the User's instance will stick
         // around for a bit after they disconnect
         this.plugin.getUserManager().getHouseKeeper().registerUsage(e.getTargetEntity().getUniqueId());

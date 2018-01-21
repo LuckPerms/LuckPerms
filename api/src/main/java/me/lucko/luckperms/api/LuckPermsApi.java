@@ -202,8 +202,11 @@ public interface LuckPermsApi {
      * mapping system.</p>
      *
      * @return the uuid cache
+     * @deprecated this feature is now handled internally - and the API returns a
+     *             No-op implementation of this class.
      */
     @Nonnull
+    @Deprecated
     UuidCache getUuidCache();
 
     /**

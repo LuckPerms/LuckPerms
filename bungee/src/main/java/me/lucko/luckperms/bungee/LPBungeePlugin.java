@@ -74,7 +74,6 @@ import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
-import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -106,7 +105,6 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private Storage storage;
     private FileWatcher fileWatcher = null;
     private InternalMessagingService messagingService = null;
-    private UuidCache uuidCache;
     private LuckPermsApiProvider apiProvider;
     private EventFactory eventFactory;
     private Logger log;
@@ -183,7 +181,6 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         // load internal managers
         getLog().info("Loading internal permission managers...");
-        this.uuidCache = new UuidCache(this);
         this.userManager = new StandardUserManager(this);
         this.groupManager = new StandardGroupManager(this);
         this.trackManager = new StandardTrackManager(this);
@@ -322,7 +319,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
     @Override
     public ProxiedPlayer getPlayer(User user) {
-        return getProxy().getPlayer(this.uuidCache.getExternalUUID(user.getUuid()));
+        return getProxy().getPlayer(user.getUuid());
     }
 
     @Override
@@ -419,11 +416,6 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     @Override
     public Storage getStorage() {
         return this.storage;
-    }
-
-    @Override
-    public UuidCache getUuidCache() {
-        return this.uuidCache;
     }
 
     @Override

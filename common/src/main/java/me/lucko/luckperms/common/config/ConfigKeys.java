@@ -119,14 +119,6 @@ public class ConfigKeys {
     public static final ConfigKey<Boolean> APPLYING_GLOBAL_WORLD_GROUPS = BooleanKey.of("apply-global-world-groups", true);
 
     /**
-     * If the server provided uuids should be used. False if we should use the LP cache for existing users.
-     */
-    public static final ConfigKey<Boolean> USE_SERVER_UUIDS = AbstractKey.of(c -> {
-        // backwards compatible with the old online-mode option
-        return c.contains("use-server-uuids") ? c.getBoolean("use-server-uuids", true) : c.getBoolean("online-mode", true);
-    });
-
-    /**
      * # If the servers own UUID cache/lookup facility should be used when there is no record for a player in the LuckPerms cache.
      */
     public static final ConfigKey<Boolean> USE_SERVER_UUID_CACHE = BooleanKey.of("use-server-uuid-cache", false);

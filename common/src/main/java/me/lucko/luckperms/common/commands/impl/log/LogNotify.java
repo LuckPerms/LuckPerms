@@ -49,7 +49,7 @@ public class LogNotify extends SubCommand<Log> {
     }
 
     public static boolean isIgnoring(LuckPermsPlugin plugin, UUID uuid) {
-        User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(uuid));
+        User user = plugin.getUserManager().getIfLoaded(uuid);
         if (user == null) {
             return false;
         }
@@ -64,7 +64,7 @@ public class LogNotify extends SubCommand<Log> {
     }
 
     private static void setIgnoring(LuckPermsPlugin plugin, UUID uuid, boolean state) {
-        User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(uuid));
+        User user = plugin.getUserManager().getIfLoaded(uuid);
         if (user == null) {
             return;
         }

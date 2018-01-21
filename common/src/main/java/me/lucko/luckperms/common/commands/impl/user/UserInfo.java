@@ -59,7 +59,7 @@ public class UserInfo extends SubCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
-        Message status = plugin.isPlayerOnline(plugin.getUuidCache().getExternalUUID(user.getUuid())) ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
+        Message status = plugin.isPlayerOnline(user.getUuid()) ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
 
         Message.USER_INFO_GENERAL.send(sender,
                 user.getName().orElse("Unknown"),

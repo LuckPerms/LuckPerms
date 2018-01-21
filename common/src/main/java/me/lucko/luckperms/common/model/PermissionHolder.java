@@ -191,7 +191,7 @@ public abstract class PermissionHolder {
         declareState();
     }
 
-    protected void declareState() {
+    private void declareState() {
         /* only declare state of groups. the state manager isn't really being used now the caches in this class
            are gone, but it's useful for command output. */
         if (this.getType().isGroup()) {
@@ -255,20 +255,10 @@ public abstract class PermissionHolder {
         return this.transientNodes;
     }
 
-    /**
-     * Returns an immutable copy of this objects nodes
-     *
-     * @return an immutable copy of the multimap storing this objects nodes
-     */
     public ImmutableSetMultimap<ImmutableContextSet, Node> getEnduringNodes() {
         return this.enduringNodes.immutable();
     }
 
-    /**
-     * Returns an immutable copy of this objects transient nodes
-     *
-     * @return an immutable copy of the multimap storing this objects transient nodes
-     */
     public ImmutableSetMultimap<ImmutableContextSet, Node> getTransientNodes() {
         return this.transientNodes.immutable();
     }
@@ -298,8 +288,8 @@ public abstract class PermissionHolder {
      *
      * @return a set containing the holders enduring and transient permissions
      */
-    public LinkedHashSet<Node> getOwnNodesSet() {
-        LinkedHashSet<Node> ret = new LinkedHashSet<>();
+    public Set<Node> getOwnNodesSet() {
+        Set<Node> ret = new LinkedHashSet<>();
         this.transientNodes.copyTo(ret);
         this.enduringNodes.copyTo(ret);
         return ret;

@@ -51,7 +51,6 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.dao.file.FileWatcher;
 import me.lucko.luckperms.common.treeview.PermissionVault;
-import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 
 import java.io.File;
@@ -127,13 +126,6 @@ public interface LuckPermsPlugin {
      * @return the plugin's logger
      */
     Logger getLog();
-
-    /**
-     * Gets the UUID caching store for the platform
-     *
-     * @return the uuid cache
-     */
-    UuidCache getUuidCache();
 
     /**
      * Gets the event factory

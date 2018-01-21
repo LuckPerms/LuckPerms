@@ -33,15 +33,10 @@ import javax.annotation.Nonnull;
  * A UUID cache for online users, between external Mojang UUIDs, and internal
  * LuckPerms UUIDs.
  *
- * <p>A user's internal LuckPerms UUID is always the same as their Mojang one,
- * unless <code>use-server-uuids</code> is disabled.</p>
- *
- * <p>When this setting is disabled, this cache becomes active, and allows you
- * to convert between 'internal' and 'server provided' uuids.</p>
- *
- * <p><strong>This is only effective for online players.
- * Use {@link Storage#getUUID(String)} for offline players.</strong></p>
+ * @deprecated this feature is now handled internally - and the API returns a
+ *             No-op implementation of this class.
  */
+@Deprecated
 public interface UuidCache {
 
     /**
@@ -56,6 +51,7 @@ public interface UuidCache {
      * @return the corresponding internal UUID
      */
     @Nonnull
+    @Deprecated
     UUID getUUID(@Nonnull UUID mojangUuid);
 
     /**
@@ -67,6 +63,7 @@ public interface UuidCache {
      * @return the corresponding external UUID
      */
     @Nonnull
+    @Deprecated
     UUID getExternalUUID(@Nonnull UUID internalUuid);
 
 }

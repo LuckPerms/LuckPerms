@@ -27,29 +27,30 @@ package me.lucko.luckperms.common.api.delegates.misc;
 
 import me.lucko.luckperms.api.UuidCache;
 
-import java.util.Objects;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
-public class ApiUuidCache implements UuidCache {
-    private final me.lucko.luckperms.common.utils.UuidCache handle;
+@Deprecated
+@SuppressWarnings({"DeprecatedIsStillUsed", "deprecation"})
+public class NoopUuidCache implements UuidCache {
+    public static final NoopUuidCache INSTANCE = new NoopUuidCache();
 
-    public ApiUuidCache(me.lucko.luckperms.common.utils.UuidCache handle) {
-        this.handle = handle;
+    private NoopUuidCache() {
+
     }
 
     @Nonnull
     @Override
+    @Deprecated
     public UUID getUUID(@Nonnull UUID external) {
-        Objects.requireNonNull(external, "external");
-        return this.handle.getUUID(external);
+        return external;
     }
 
     @Nonnull
     @Override
+    @Deprecated
     public UUID getExternalUUID(@Nonnull UUID internal) {
-        Objects.requireNonNull(internal, "internal");
-        return this.handle.getExternalUUID(internal);
+        return internal;
     }
 }

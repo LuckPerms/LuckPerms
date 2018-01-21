@@ -287,7 +287,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
     // utility methods for getting user and group instances
 
     private User getUser(UUID uuid) {
-        return this.plugin.getUserManager().getIfLoaded(this.plugin.getUuidCache().getUUID(uuid));
+        return this.plugin.getUserManager().getIfLoaded(uuid);
     }
 
     private Group getGroup(String name) {

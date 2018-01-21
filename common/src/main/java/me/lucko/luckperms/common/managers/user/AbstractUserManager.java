@@ -147,9 +147,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
     @Override
     public CompletableFuture<Void> updateAllUsers() {
         return CompletableFuture.runAsync(
-                () -> this.plugin.getOnlinePlayers()
-                        .map(u -> this.plugin.getUuidCache().getUUID(u))
-                        .forEach(u -> this.plugin.getStorage().loadUser(u, null).join()),
+                () -> this.plugin.getOnlinePlayers().forEach(u -> this.plugin.getStorage().loadUser(u, null).join()),
                 this.plugin.getScheduler().async()
         );
     }

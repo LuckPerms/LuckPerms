@@ -63,7 +63,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
         this.cachedData = new GroupCachedData(this);
         getPlugin().getEventFactory().handleGroupCacheLoad(this, this.cachedData);
 
-        // invalidate out caches when data is updated
+        // invalidate our caches when data is updated
         getStateListeners().add(this.refreshBuffer::request);
     }
 

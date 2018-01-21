@@ -25,14 +25,12 @@
 
 package me.lucko.luckperms.common.utils;
 
-import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.assignments.AssignmentRule;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Abstract listener utility for handling new player connections
@@ -40,14 +38,8 @@ import java.util.concurrent.CompletableFuture;
 public abstract class AbstractLoginListener {
     private final LuckPermsPlugin plugin;
 
-    // if we should #join the uuid save future.
-    // this is only really necessary on BungeeCord, as the data may be needed
-    // on the backend, depending on uuid config options
-    private final boolean joinUuidSave;
-
     protected AbstractLoginListener(LuckPermsPlugin plugin) {
         this.plugin = plugin;
-        this.joinUuidSave = plugin.getServerType() == PlatformType.BUNGEE;
     }
 
     public User loadUser(UUID u, String username) {
@@ -56,34 +48,14 @@ public abstract class AbstractLoginListener {
         // register with the housekeeper to avoid accidental unloads
         this.plugin.getUserManager().getHouseKeeper().registerUsage(u);
 
-        final UuidCache cache = this.plugin.getUuidCache();
-        if (!this.plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUIDS)) {
-            UUID uuid = this.plugin.getStorage().noBuffer().getUUID(username).join();
-            if (uuid != null) {
-                cache.addToCache(u, uuid);
-            } else {
-                // No previous data for this player
-                this.plugin.getEventFactory().handleUserFirstLogin(u, username);
-                cache.addToCache(u, u);
-                CompletableFuture<Void> future = this.plugin.getStorage().noBuffer().saveUUIDData(u, username);
-                if (this.joinUuidSave) {
-                    future.join();
-                }
-            }
-        } else {
-            String name = this.plugin.getStorage().noBuffer().getName(u).join();
-            if (name == null) {
-                this.plugin.getEventFactory().handleUserFirstLogin(u, username);
-            }
-
-            // Online mode, no cache needed. This is just for name -> uuid lookup.
-            CompletableFuture<Void> future = this.plugin.getStorage().noBuffer().saveUUIDData(u, username);
-            if (this.joinUuidSave) {
-                future.join();
-            }
+        // save uuid data.
+        String name = this.plugin.getStorage().noBuffer().getName(u).join();
+        if (name == null) {
+            this.plugin.getEventFactory().handleUserFirstLogin(u, username);
         }
+        this.plugin.getStorage().noBuffer().saveUUIDData(u, username);
 
-        User user = this.plugin.getStorage().noBuffer().loadUser(cache.getUUID(u), username).join();
+        User user = this.plugin.getStorage().noBuffer().loadUser(u, username).join();
         if (user == null) {
             throw new NullPointerException("User is null");
         } else {

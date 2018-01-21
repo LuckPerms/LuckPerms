@@ -105,7 +105,7 @@ public class BungeeConnectionListener extends AbstractLoginListener implements L
     @EventHandler
     public void onPlayerPostLogin(PostLoginEvent e) {
         final ProxiedPlayer player = e.getPlayer();
-        final User user = this.plugin.getUserManager().getIfLoaded(this.plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
+        final User user = this.plugin.getUserManager().getIfLoaded(e.getPlayer().getUniqueId());
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
             this.plugin.getLog().info("Processing post-login for " + player.getUniqueId() + " - " + player.getName());
