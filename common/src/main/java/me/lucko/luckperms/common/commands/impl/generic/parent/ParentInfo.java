@@ -76,7 +76,7 @@ public class ParentInfo extends SharedSubCommand {
         SortMode sortMode = SortMode.determine(args);
 
         // get the holders nodes
-        List<LocalizedNode> nodes = new ArrayList<>(holder.getOwnNodesSorted());
+        List<LocalizedNode> nodes = new ArrayList<>(holder.getEnduringData().asSortedSet());
 
         // remove irrelevant types (these are displayed in the other info commands)
         nodes.removeIf(node -> !node.isGroupNode() || !node.getValuePrimitive());

@@ -175,7 +175,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
                 .build();
 
         // convert the constructed node to a transient node instance to refer back to this attachment
-        ImmutableTransientNode transientNode = ImmutableTransientNode.of(node, this);
+        ImmutableTransientNode<LPPermissionAttachment> transientNode = ImmutableTransientNode.of(node, this);
 
         // set the transient node
         User user = this.permissible.getUser();

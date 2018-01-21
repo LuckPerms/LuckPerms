@@ -41,6 +41,7 @@ import me.lucko.luckperms.api.caching.CachedData;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.MetaType;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
@@ -161,14 +162,14 @@ public class ApiPermissionHolder implements PermissionHolder {
     @Override
     public Tristate hasPermission(@Nonnull Node node) {
         Objects.requireNonNull(node, "node");
-        return this.handle.hasPermission(node, false);
+        return this.handle.hasPermission(node, NodeMapType.ENDURING);
     }
 
     @Nonnull
     @Override
     public Tristate hasTransientPermission(@Nonnull Node node) {
         Objects.requireNonNull(node, "node");
-        return this.handle.hasPermission(node, true);
+        return this.handle.hasPermission(node, NodeMapType.TRANSIENT);
     }
 
     @Nonnull

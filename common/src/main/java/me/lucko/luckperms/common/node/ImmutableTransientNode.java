@@ -40,17 +40,17 @@ import javax.annotation.Nonnull;
 /**
  * Holds a Node and plus an owning object. All calls are passed onto the contained Node instance.
  */
-public final class ImmutableTransientNode implements Node {
-    public static ImmutableTransientNode of(Node node, Object owner) {
+public final class ImmutableTransientNode<O> implements Node {
+    public static <O> ImmutableTransientNode<O> of(Node node, O owner) {
         Objects.requireNonNull(node, "node");
         Objects.requireNonNull(owner, "owner");
-        return new ImmutableTransientNode(node, owner);
+        return new ImmutableTransientNode<>(node, owner);
     }
 
     private final Node node;
-    private final Object owner;
+    private final O owner;
 
-    private ImmutableTransientNode(Node node, Object owner) {
+    private ImmutableTransientNode(Node node, O owner) {
         this.node = node;
         this.owner = owner;
     }
@@ -69,7 +69,7 @@ public final class ImmutableTransientNode implements Node {
         return this.node;
     }
 
-    public Object getOwner() {
+    public O getOwner() {
         return this.owner;
     }
 
