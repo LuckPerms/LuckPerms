@@ -40,7 +40,7 @@ public class MariaDbConnectionFactory extends HikariConnectionFactory {
 
     @Override
     protected String getDriverClass() {
-        return classExists("org.mariadb.jdbc.MariaDbDataSource") ? "org.mariadb.jdbc.MariaDbDataSource" : "org.mariadb.jdbc.MySQLDataSource";
+        return "org.mariadb.jdbc.MariaDbDataSource";
     }
 
     @Override
@@ -55,15 +55,6 @@ public class MariaDbConnectionFactory extends HikariConnectionFactory {
         // kinda hacky. this will call #setProperties on the datasource, which will append these options
         // onto the connections.
         config.addDataSourceProperty("properties", propertiesString);
-    }
-
-    private static boolean classExists(String clazz) {
-        try {
-            Class.forName(clazz);
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
     }
 
 }

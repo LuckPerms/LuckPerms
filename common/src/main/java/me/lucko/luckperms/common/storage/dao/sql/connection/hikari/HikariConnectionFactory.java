@@ -100,7 +100,6 @@ public abstract class HikariConnectionFactory extends AbstractConnectionFactory 
             config.setInitializationFailFast(false);
         }
 
-
         this.hikari = new HikariDataSource(config);
     }
 

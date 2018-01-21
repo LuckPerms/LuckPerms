@@ -25,43 +25,59 @@
 
 package me.lucko.luckperms.common.storage.dao.sql.connection.file;
 
+import org.h2.Driver;
+
 import java.io.File;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Properties;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class H2ConnectionFactory extends FlatfileConnectionFactory {
+    private final ReentrantLock lock = new ReentrantLock();
+    private NonClosableConnection connection;
+
     public H2ConnectionFactory(File file) {
         super("H2", file);
 
         // backwards compat
         File data = new File(file.getParent(), "luckperms.db.mv.db");
         if (data.exists()) {
-            data.renameTo(new File(file.getParent(), "luckperms-h2.mv.db"));
+            data.renameTo(new File(file.getParent(), file.getName() + ".mv.db"));
         }
     }
 
     @Override
-    public Map<String, String> getMeta() {
-        Map<String, String> ret = new LinkedHashMap<>();
-
-        File databaseFile = new File(super.file.getParent(), "luckperms-h2.mv.db");
-        if (databaseFile.exists()) {
-            double size = databaseFile.length() / 1048576D;
-            ret.put("File Size", DF.format(size) + "MB");
-        } else {
-            ret.put("File Size", "0MB");
+    public Connection getConnection() throws SQLException {
+        this.lock.lock();
+        try {
+            if (this.connection == null || this.connection.isClosed()) {
+                Connection connection = Driver.load().connect("jdbc:h2:" + this.file.getAbsolutePath(), new Properties());
+                if (connection != null) {
+                    this.connection = new NonClosableConnection(connection);
+                }
+            }
+        } finally {
+            this.lock.unlock();
         }
 
-        return ret;
+        if (this.connection == null) {
+            throw new SQLException("Unable to get a connection.");
+        }
+
+        return this.connection;
     }
 
     @Override
-    protected String getDriverClass() {
-        return "org.h2.Driver";
+    public void shutdown() throws Exception {
+        if (this.connection != null) {
+            this.connection.shutdown();
+        }
     }
 
     @Override
-    protected String getDriverId() {
-        return "jdbc:h2";
+    protected File getWriteFile() {
+        // h2 appends this to the end of the database file
+        return new File(super.file.getParent(), super.file.getName() + ".mv.db");
     }
 }
