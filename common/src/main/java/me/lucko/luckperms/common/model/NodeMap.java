@@ -52,6 +52,8 @@ import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
+
 /**
  * A map of nodes held by a {@link PermissionHolder}.
  *
@@ -251,7 +253,7 @@ public final class NodeMap {
         }
     }
 
-    boolean auditTemporaryNodes(Set<Node> removed) {
+    boolean auditTemporaryNodes(@Nullable Set<Node> removed) {
         boolean work = false;
 
         this.lock.lock();
@@ -260,7 +262,9 @@ public final class NodeMap {
             while (it.hasNext()) {
                 Node entry = it.next();
                 if (entry.hasExpired()) {
-                    removed.add(entry);
+                    if (removed != null) {
+                        removed.add(entry);
+                    }
                     work = true;
                     it.remove();
                 }

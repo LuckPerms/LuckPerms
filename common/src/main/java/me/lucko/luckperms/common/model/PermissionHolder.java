@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.model;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -64,7 +63,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -281,18 +279,6 @@ public abstract class PermissionHolder {
     public void replaceEnduringNodes(Multimap<ImmutableContextSet, Node> multimap) {
         this.enduringNodes.setContent(multimap);
         invalidateCache();
-    }
-
-    /**
-     * Merges enduring and transient permissions into one set
-     *
-     * @return a set containing the holders enduring and transient permissions
-     */
-    public Set<Node> getOwnNodesSet() {
-        Set<Node> ret = new LinkedHashSet<>();
-        this.transientNodes.copyTo(ret);
-        this.enduringNodes.copyTo(ret);
-        return ret;
     }
 
     public List<Node> getOwnNodes() {
@@ -694,25 +680,25 @@ public abstract class PermissionHolder {
     public boolean auditTemporaryPermissions() {
         Set<Node> removed = new HashSet<>();
 
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getOwnNodesSet());
+        // audit temporary nodes first, but don't track ones which are removed
+        // we don't call events for transient nodes
+        this.transientNodes.auditTemporaryNodes(null);
 
-        if (this.enduringNodes.auditTemporaryNodes(removed) | this.transientNodes.auditTemporaryNodes(removed)) {
-            invalidateCache();
-        }
+        ImmutableCollection<Node> before = getEnduringNodes().values();
 
-        if (removed.isEmpty()) {
+        if (!this.enduringNodes.auditTemporaryNodes(removed)) {
             return false;
         }
 
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getOwnNodesSet());
+        invalidateCache();
+        ImmutableCollection<Node> after = getEnduringNodes().values();
         for (Node r : removed) {
             this.plugin.getEventFactory().handleNodeRemove(r, this, before, after);
         }
-
         return true;
     }
 
-    public Optional<Node> getAlmostEquals(Node node, NodeMapType type) {
+    private Optional<Node> getAlmostEquals(Node node, NodeMapType type) {
         for (Node n : getData(type).immutable().values()) {
             if (n.almostEquals(node)) {
                 return Optional.of(n);
@@ -855,12 +841,8 @@ public abstract class PermissionHolder {
             return DataMutateResult.ALREADY_HAS;
         }
 
-        ImmutableCollection<Node> before = getTransientNodes().values();
         this.transientNodes.add(node);
         invalidateCache();
-        ImmutableCollection<Node> after = getTransientNodes().values();
-
-        this.plugin.getEventFactory().handleNodeAdd(node, this, before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -893,12 +875,8 @@ public abstract class PermissionHolder {
             return DataMutateResult.LACKS;
         }
 
-        ImmutableCollection<Node> before = getTransientNodes().values();
         this.transientNodes.remove(node);
         invalidateCache();
-        ImmutableCollection<Node> after = getTransientNodes().values();
-
-        this.plugin.getEventFactory().handleNodeRemove(node, this, before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -1024,16 +1002,8 @@ public abstract class PermissionHolder {
     }
 
     public boolean clearTransientNodes() {
-        ImmutableCollection<Node> before = getTransientNodes().values();
         this.transientNodes.clear();
         invalidateCache();
-        ImmutableCollection<Node> after = getTransientNodes().values();
-
-        if (before.size() == after.size()) {
-            return false;
-        }
-
-        this.plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
@@ -1046,7 +1016,7 @@ public abstract class PermissionHolder {
 
         boolean seen = false;
         int best = 0;
-        for (Node n : getEnduringNodes().get(ImmutableContextSet.empty())) {
+        for (Node n : getOwnNodes(ImmutableContextSet.empty())) {
             Integer weight = NodeFactory.parseWeightNode(n.getPermission());
             if (weight == null) {
                 continue;
