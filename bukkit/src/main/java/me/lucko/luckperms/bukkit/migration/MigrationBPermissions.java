@@ -27,7 +27,6 @@ package me.lucko.luckperms.bukkit.migration;
 
 import de.bananaco.bpermissions.api.Calculable;
 import de.bananaco.bpermissions.api.CalculableType;
-import de.bananaco.bpermissions.api.Group;
 import de.bananaco.bpermissions.api.Permission;
 import de.bananaco.bpermissions.api.World;
 import de.bananaco.bpermissions.api.WorldManager;
@@ -41,6 +40,7 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.logging.ProgressLogger;
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
@@ -61,13 +61,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static me.lucko.luckperms.common.commands.CommandPermission.MIGRATION;
 
 public class MigrationBPermissions extends SubCommand<Object> {
-    private static Field uConfigField;
+    private static final Field UCONFIG_FIELD;
     static {
         try {
-            uConfigField = Class.forName("de.bananaco.bpermissions.imp.YamlWorld").getDeclaredField("uconfig");
-            uConfigField.setAccessible(true);
-        } catch (Throwable t) {
-            t.printStackTrace();
+            UCONFIG_FIELD = Class.forName("de.bananaco.bpermissions.imp.YamlWorld").getDeclaredField("uconfig");
+            UCONFIG_FIELD.setAccessible(true);
+        } catch (ClassNotFoundException | NoSuchFieldException e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 
@@ -95,7 +95,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
 
             YamlConfiguration yamlWorldUsers = null;
             try {
-                yamlWorldUsers = (YamlConfiguration) uConfigField.get(world);
+                yamlWorldUsers = (YamlConfiguration) UCONFIG_FIELD.get(world);
             } catch (Throwable t) {
                 t.printStackTrace();
             }
@@ -138,8 +138,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 }
 
                 // Make a LuckPerms group for the one being migrated.
-                plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
-                me.lucko.luckperms.common.model.Group lpGroup = plugin.getGroupManager().getIfLoaded(groupName);
+                Group lpGroup = plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
 
                 MigrationUtils.setGroupWeight(lpGroup, group.getPriority());
                 migrateHolder(world, group, lpGroup);
@@ -162,8 +161,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 }
 
                 // Make a LuckPerms user for the one being migrated.
-                plugin.getStorage().loadUser(uuid, null).join();
-                User lpUser = plugin.getUserManager().getIfLoaded(uuid);
+                User lpUser = plugin.getStorage().loadUser(uuid, null).join();
 
                 migrateHolder(world, user, lpUser);
 
@@ -199,14 +197,14 @@ public class MigrationBPermissions extends SubCommand<Object> {
         }
 
         // Migrate any inherited groups
-        for (Group parent : c.getGroups()) {
+        c.getGroups().forEach(parent -> {
             String parentName = MigrationUtils.standardizeName(parent.getName());
             if (parent.getName().equalsIgnoreCase(world.getDefaultGroup())) {
                 parentName = NodeFactory.DEFAULT_GROUP_NAME;
             }
 
             holder.setPermission(NodeFactory.make(NodeFactory.groupNode(parentName), true, "global", world.getName()));
-        }
+        });
 
         // Migrate existing meta
         for (Map.Entry<String, String> meta : c.getMeta().entrySet()) {

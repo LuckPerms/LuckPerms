@@ -60,9 +60,7 @@ public class GroupClone extends SubCommand<Group> {
             return CommandResult.INVALID_ARGS;
         }
 
-        plugin.getStorage().createAndLoadGroup(newGroupName, CreationCause.COMMAND).join();
-
-        Group newGroup = plugin.getGroupManager().getIfLoaded(newGroupName);
+        Group newGroup = plugin.getStorage().createAndLoadGroup(newGroupName, CreationCause.COMMAND).join();
         if (newGroup == null) {
             Message.GROUP_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;

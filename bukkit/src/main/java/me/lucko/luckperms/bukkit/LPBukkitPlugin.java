@@ -314,8 +314,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         for (Player player : getServer().getOnlinePlayers()) {
             this.scheduler.doAsync(() -> {
                 try {
-                    connectionListener.loadUser(player.getUniqueId(), player.getName());
-                    User user = getUserManager().getIfLoaded(player.getUniqueId());
+                    User user = connectionListener.loadUser(player.getUniqueId(), player.getName());
                     if (user != null) {
                         this.scheduler.doSync(() -> {
                             try {

@@ -60,18 +60,13 @@ public class TrackRename extends SubCommand<Track> {
             return CommandResult.INVALID_ARGS;
         }
 
+        Track newTrack;
         try {
-            plugin.getStorage().createAndLoadTrack(newTrackName, CreationCause.COMMAND).get();
+            newTrack = plugin.getStorage().createAndLoadTrack(newTrackName, CreationCause.COMMAND).get();
         } catch (Exception e) {
             e.printStackTrace();
             Message.CREATE_ERROR.send(sender, newTrackName);
             return CommandResult.FAILURE;
-        }
-
-        Track newTrack = plugin.getTrackManager().getIfLoaded(newTrackName);
-        if (newTrack == null) {
-            Message.TRACK_LOAD_ERROR.send(sender);
-            return CommandResult.LOADING_ERROR;
         }
 
         try {

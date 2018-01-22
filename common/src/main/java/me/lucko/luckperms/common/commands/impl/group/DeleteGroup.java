@@ -62,12 +62,7 @@ public class DeleteGroup extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().loadGroup(groupName).join().isPresent()) {
-            Message.DOES_NOT_EXIST.send(sender, groupName);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        Group group = plugin.getGroupManager().getIfLoaded(groupName);
+        Group group = plugin.getStorage().loadGroup(groupName).join().orElse(null);
         if (group == null) {
             Message.GROUP_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;

@@ -96,8 +96,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             int groupWeight = maxWeight - group.getRank();
 
             final String groupName = MigrationUtils.standardizeName(group.getName());
-            plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
-            Group lpGroup = plugin.getGroupManager().getIfLoaded(groupName);
+            Group lpGroup = plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
 
             MigrationUtils.setGroupWeight(lpGroup, groupWeight);
 
@@ -117,8 +116,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         // Migrate all ladders/tracks.
         log.log("Starting tracks migration.");
         for (String rankLadder : ladders) {
-            plugin.getStorage().createAndLoadTrack(rankLadder, CreationCause.INTERNAL).join();
-            Track track = plugin.getTrackManager().getIfLoaded(rankLadder);
+            Track track = plugin.getStorage().createAndLoadTrack(rankLadder, CreationCause.INTERNAL).join();
 
             // Get a list of all groups in a ladder
             List<String> ladder = manager.getRankLadder(rankLadder).entrySet().stream()
@@ -145,8 +143,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             // load in a user instance
-            plugin.getStorage().loadUser(u, user.getName()).join();
-            User lpUser = plugin.getUserManager().getIfLoaded(u);
+            User lpUser = plugin.getStorage().loadUser(u, user.getName()).join();
 
             // migrate data
             migrateEntity(user, lpUser, userWeight);

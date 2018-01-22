@@ -106,8 +106,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         AtomicInteger maxWeight = new AtomicInteger(0);
         SafeIterator.iterate(internalService.getEntities(true), entity -> {
             String groupName = MigrationUtils.standardizeName(entity.getDisplayName());
-            plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
-            Group group = plugin.getGroupManager().getIfLoaded(groupName);
+            Group group = plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
 
             int weight = entity.getPriority();
             maxWeight.set(Math.max(maxWeight.get(), weight));
@@ -141,9 +140,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         AtomicInteger trackCount = new AtomicInteger(0);
         SafeIterator.iterate(service.getAllTracks(), t -> {
             String trackName = MigrationUtils.standardizeName(t);
-
-            plugin.getStorage().createAndLoadTrack(trackName, CreationCause.INTERNAL).join();
-            Track track = plugin.getTrackManager().getIfLoaded(trackName);
+            Track track = plugin.getStorage().createAndLoadTrack(trackName, CreationCause.INTERNAL).join();
             track.setGroups(service.getTrackGroups(t));
             plugin.getStorage().saveTrack(track);
 
@@ -167,8 +164,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
                 username = entity.getDisplayName();
             }
 
-            plugin.getStorage().loadUser(u, username).join();
-            User user = plugin.getUserManager().getIfLoaded(u);
+            User user = plugin.getStorage().loadUser(u, username).join();
 
             // migrate permissions & meta
             if (entity != null) {
