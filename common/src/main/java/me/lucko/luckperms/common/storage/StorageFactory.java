@@ -42,6 +42,7 @@ import me.lucko.luckperms.common.storage.dao.sql.connection.file.SQLiteConnectio
 import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.MariaDbConnectionFactory;
 import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.MySqlConnectionFactory;
 import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.PostgreConnectionFactory;
+import me.lucko.luckperms.common.storage.provider.StorageProviders;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.io.File;
@@ -121,6 +122,8 @@ public class StorageFactory {
 
     private AbstractDao makeDao(StorageType method) {
         switch (method) {
+            case CUSTOM:
+                return StorageProviders.getProvider().provide(this.plugin);
             case MARIADB:
                 return new SqlDao(
                         this.plugin,

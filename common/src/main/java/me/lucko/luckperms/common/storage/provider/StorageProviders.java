@@ -23,50 +23,23 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage;
+package me.lucko.luckperms.common.storage.provider;
 
-import com.google.common.collect.ImmutableList;
+public final class StorageProviders {
+    private static StorageProvider provider = null;
 
-import java.util.List;
-
-public enum StorageType {
-
-    JSON("JSON", "json", "flatfile"),
-    YAML("YAML", "yaml", "yml"),
-    HOCON("HOCON", "hocon"),
-    MONGODB("MongoDB", "mongodb"),
-    MARIADB("MariaDB", "mariadb"),
-    MYSQL("MySQL", "mysql"),
-    POSTGRESQL("PostgreSQL", "postgresql"),
-    SQLITE("SQLite", "sqlite"),
-    H2("H2", "h2"),
-    CUSTOM("Custom", "custom");
-
-    private final String name;
-
-    private final List<String> identifiers;
-
-    StorageType(String name, String... identifiers) {
-        this.name = name;
-        this.identifiers = ImmutableList.copyOf(identifiers);
+    public static void register(StorageProvider provider) {
+        StorageProviders.provider = provider;
     }
 
-    public static StorageType parse(String name) {
-        for (StorageType t : values()) {
-            for (String id : t.getIdentifiers()) {
-                if (id.equalsIgnoreCase(name)) {
-                    return t;
-                }
-            }
+    public static StorageProvider getProvider() {
+        if (provider == null) {
+            throw new IllegalStateException("Provider not present.");
         }
-        return null;
+
+        return provider;
     }
 
-    public String getName() {
-        return this.name;
-    }
+    private StorageProviders() {}
 
-    public List<String> getIdentifiers() {
-        return this.identifiers;
-    }
 }

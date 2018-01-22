@@ -23,50 +23,17 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage;
+package me.lucko.luckperms.common.storage.provider;
 
-import com.google.common.collect.ImmutableList;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.dao.AbstractDao;
 
-import java.util.List;
+/**
+ * A storage provider
+ */
+@FunctionalInterface
+public interface StorageProvider {
 
-public enum StorageType {
+    AbstractDao provide(LuckPermsPlugin plugin);
 
-    JSON("JSON", "json", "flatfile"),
-    YAML("YAML", "yaml", "yml"),
-    HOCON("HOCON", "hocon"),
-    MONGODB("MongoDB", "mongodb"),
-    MARIADB("MariaDB", "mariadb"),
-    MYSQL("MySQL", "mysql"),
-    POSTGRESQL("PostgreSQL", "postgresql"),
-    SQLITE("SQLite", "sqlite"),
-    H2("H2", "h2"),
-    CUSTOM("Custom", "custom");
-
-    private final String name;
-
-    private final List<String> identifiers;
-
-    StorageType(String name, String... identifiers) {
-        this.name = name;
-        this.identifiers = ImmutableList.copyOf(identifiers);
-    }
-
-    public static StorageType parse(String name) {
-        for (StorageType t : values()) {
-            for (String id : t.getIdentifiers()) {
-                if (id.equalsIgnoreCase(name)) {
-                    return t;
-                }
-            }
-        }
-        return null;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public List<String> getIdentifiers() {
-        return this.identifiers;
-    }
 }
