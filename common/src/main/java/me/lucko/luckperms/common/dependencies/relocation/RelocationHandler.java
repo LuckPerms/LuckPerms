@@ -27,86 +27,55 @@ package me.lucko.luckperms.common.dependencies.relocation;
 
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
+import me.lucko.luckperms.common.dependencies.classloader.IsolatedClassLoader;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Handles class runtime relocation of packages in downloaded dependencies
  */
-public class RelocationHandler implements AutoCloseable {
-    private final DependencyManager dependencyManager;
+public class RelocationHandler {
+    private static final Set<Dependency> DEPENDENCIES = EnumSet.of(Dependency.ASM, Dependency.ASM_COMMONS, Dependency.JAR_RELOCATOR);
 
-    private URLClassLoader classLoader;
-    private Constructor<?> relocatorConstructor;
-    private Method relocatorRunMethod;
+    private final Constructor<?> jarRelocatorConstructor;
+    private final Method jarRelocatorRunMethod;
 
     public RelocationHandler(DependencyManager dependencyManager) {
-        this.dependencyManager = dependencyManager;
         try {
-            setup();
+            // download the required dependencies for remapping
+            dependencyManager.loadDependencies(DEPENDENCIES);
+            // get a classloader containing the required dependencies as sources
+            IsolatedClassLoader classLoader = dependencyManager.obtainClassLoaderWith(DEPENDENCIES);
+
+            // load the relocator class
+            Class<?> jarRelocatorClass = classLoader.loadClass("me.lucko.jarrelocator.JarRelocator");
+
+            // prepare the the reflected constructor & method instances
+            this.jarRelocatorConstructor = jarRelocatorClass.getDeclaredConstructor(File.class, File.class, Map.class);
+            this.jarRelocatorConstructor.setAccessible(true);
+
+            this.jarRelocatorRunMethod = jarRelocatorClass.getDeclaredMethod("run");
+            this.jarRelocatorRunMethod.setAccessible(true);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void setup() throws Exception {
-        File saveDirectory = this.dependencyManager.getSaveDirectory();
-
-        // download the required dependencies for the remapping.
-        File asm = this.dependencyManager.downloadDependency(saveDirectory, Dependency.ASM);
-        File asmCommons = this.dependencyManager.downloadDependency(saveDirectory, Dependency.ASM_COMMONS);
-        File jarRelocator = this.dependencyManager.downloadDependency(saveDirectory, Dependency.JAR_RELOCATOR);
-
-        URL[] urls = new URL[]{
-                asm.toURI().toURL(),
-                asmCommons.toURI().toURL(),
-                jarRelocator.toURI().toURL()
-        };
-
-        // construct an isolated classloader instance containing the dependencies needed
-        this.classLoader = new URLClassLoader(urls, null);
-
-        // load the relocator class
-        Class<?> relocatorClass = this.classLoader.loadClass("me.lucko.jarrelocator.JarRelocator");
-
-        // prepare the the reflected constructor & method instances
-        this.relocatorConstructor = relocatorClass.getDeclaredConstructor(File.class, File.class, Map.class);
-        this.relocatorConstructor.setAccessible(true);
-
-        this.relocatorRunMethod = relocatorClass.getDeclaredMethod("run");
-        this.relocatorRunMethod.setAccessible(true);
-    }
-
     public void remap(File input, File output, List<Relocation> relocations) throws Exception {
-        if (this.classLoader == null) {
-            throw new IllegalStateException("ClassLoader is closed");
-        }
-
         Map<String, String> mappings = new HashMap<>();
         for (Relocation relocation : relocations) {
             mappings.put(relocation.getPattern(), relocation.getRelocatedPattern());
         }
 
         // create and invoke a new relocator
-        Object relocator = this.relocatorConstructor.newInstance(input, output, mappings);
-        this.relocatorRunMethod.invoke(relocator);
-    }
-
-    @Override
-    public void close() throws IOException {
-        if (this.classLoader == null) {
-            return;
-        }
-
-        this.classLoader.close();
-        this.classLoader = null;
+        Object relocator = this.jarRelocatorConstructor.newInstance(input, output, mappings);
+        this.jarRelocatorRunMethod.invoke(relocator);
     }
 }

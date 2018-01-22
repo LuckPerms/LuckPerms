@@ -25,19 +25,27 @@
 
 package me.lucko.luckperms.common.storage.dao.sql.connection.file;
 
-import org.h2.Driver;
+import me.lucko.luckperms.common.dependencies.Dependency;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URLClassLoader;
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.SQLException;
+import java.util.EnumSet;
 import java.util.Properties;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class H2ConnectionFactory extends FlatfileConnectionFactory {
-    private final ReentrantLock lock = new ReentrantLock();
+
+    // the driver used to obtain connections
+    private final Driver driver;
+    // the active connection
     private NonClosableConnection connection;
 
-    public H2ConnectionFactory(File file) {
+    public H2ConnectionFactory(LuckPermsPlugin plugin, File file) {
         super("H2", file);
 
         // backwards compat
@@ -45,20 +53,25 @@ public class H2ConnectionFactory extends FlatfileConnectionFactory {
         if (data.exists()) {
             data.renameTo(new File(file.getParent(), file.getName() + ".mv.db"));
         }
+
+        // setup the classloader
+        URLClassLoader classLoader = plugin.getDependencyManager().obtainClassLoaderWith(EnumSet.of(Dependency.H2_DRIVER));
+        try {
+            Class<?> driverClass = classLoader.loadClass("org.h2.Driver");
+            Method loadMethod = driverClass.getMethod("load");
+            this.driver = (Driver) loadMethod.invoke(null);
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public Connection getConnection() throws SQLException {
-        this.lock.lock();
-        try {
-            if (this.connection == null || this.connection.isClosed()) {
-                Connection connection = Driver.load().connect("jdbc:h2:" + this.file.getAbsolutePath(), new Properties());
-                if (connection != null) {
-                    this.connection = new NonClosableConnection(connection);
-                }
+    public synchronized Connection getConnection() throws SQLException {
+        if (this.connection == null || this.connection.isClosed()) {
+            Connection connection = this.driver.connect("jdbc:h2:" + this.file.getAbsolutePath(), new Properties());
+            if (connection != null) {
+                this.connection = new NonClosableConnection(connection);
             }
-        } finally {
-            this.lock.unlock();
         }
 
         if (this.connection == null) {

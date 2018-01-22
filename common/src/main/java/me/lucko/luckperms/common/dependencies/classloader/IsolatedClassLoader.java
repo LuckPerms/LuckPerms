@@ -23,35 +23,21 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.dependencies.relocation;
+package me.lucko.luckperms.common.dependencies.classloader;
 
-import java.util.Arrays;
-import java.util.List;
+import java.net.URL;
+import java.net.URLClassLoader;
 
-public final class Relocation {
+/**
+ * A classloader "isolated" from the rest of the Minecraft server.
+ *
+ * <p>Used to load specific LuckPerms dependencies without causing conflicts
+ * with other plugins, or libraries provided by the server implementation.</p>
+ */
+public class IsolatedClassLoader extends URLClassLoader {
 
-    public static Relocation of(String id, String pattern) {
-        return new Relocation(pattern.replace("{}", "."), "me.lucko.luckperms.lib." + id);
-    }
-
-    public static List<Relocation> allOf(Relocation... relocations) {
-        return Arrays.asList(relocations);
-    }
-
-    private final String pattern;
-    private final String relocatedPattern;
-
-    private Relocation(String pattern, String relocatedPattern) {
-        this.pattern = pattern;
-        this.relocatedPattern = relocatedPattern;
-    }
-
-    public String getPattern() {
-        return this.pattern;
-    }
-
-    public String getRelocatedPattern() {
-        return this.relocatedPattern;
+    public IsolatedClassLoader(URL[] urls) {
+        super(urls, null);
     }
 
 }

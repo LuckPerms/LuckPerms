@@ -122,28 +122,33 @@ public class StorageFactory {
     private AbstractDao makeDao(StorageType method) {
         switch (method) {
             case MARIADB:
-                return new SqlDao(this.plugin, new MariaDbConnectionFactory(
-                        this.plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
+                return new SqlDao(
+                        this.plugin,
+                        new MariaDbConnectionFactory(this.plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
                         this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case MYSQL:
-                return new SqlDao(this.plugin, new MySqlConnectionFactory(
-                        this.plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
+                return new SqlDao(
+                        this.plugin,
+                        new MySqlConnectionFactory(this.plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
                         this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case SQLITE:
-                return new SqlDao(this.plugin, new SQLiteConnectionFactory(
-                        new File(this.plugin.getDataDirectory(), "luckperms-sqlite.db")),
+                return new SqlDao(
+                        this.plugin,
+                        new SQLiteConnectionFactory(this.plugin, new File(this.plugin.getDataDirectory(), "luckperms-sqlite.db")),
                         this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case H2:
-                return new SqlDao(this.plugin, new H2ConnectionFactory(
-                        new File(this.plugin.getDataDirectory(), "luckperms-h2")),
+                return new SqlDao(
+                        this.plugin,
+                        new H2ConnectionFactory(this.plugin, new File(this.plugin.getDataDirectory(), "luckperms-h2")),
                         this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case POSTGRESQL:
-                return new SqlDao(this.plugin, new PostgreConnectionFactory(
-                        this.plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
+                return new SqlDao(
+                        this.plugin,
+                        new PostgreConnectionFactory(this.plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
                         this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case MONGODB:

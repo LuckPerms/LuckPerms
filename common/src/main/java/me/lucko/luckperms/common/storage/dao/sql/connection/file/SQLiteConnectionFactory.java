@@ -25,19 +25,26 @@
 
 package me.lucko.luckperms.common.storage.dao.sql.connection.file;
 
-import org.sqlite.JDBC;
+import me.lucko.luckperms.common.dependencies.Dependency;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.EnumSet;
 import java.util.Properties;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class SQLiteConnectionFactory extends FlatfileConnectionFactory {
-    private final ReentrantLock lock = new ReentrantLock();
+
+    // the method invoked to obtain new connection instances
+    private final Method createConnectionMethod;
+    // the active connection
     private NonClosableConnection connection;
 
-    public SQLiteConnectionFactory(File file) {
+    public SQLiteConnectionFactory(LuckPermsPlugin plugin, File file) {
         super("SQLite", file);
 
         // backwards compat
@@ -45,21 +52,37 @@ public class SQLiteConnectionFactory extends FlatfileConnectionFactory {
         if (data.exists()) {
             data.renameTo(file);
         }
+
+        // setup the classloader
+        URLClassLoader classLoader = plugin.getDependencyManager().obtainClassLoaderWith(EnumSet.of(Dependency.SQLITE_DRIVER));
+        try {
+            Class<?> jdcbClass = classLoader.loadClass("org.sqlite.JDBC");
+            this.createConnectionMethod = jdcbClass.getMethod("createConnection", String.class, Properties.class);
+        } catch (ClassNotFoundException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Connection createConnection(String url) throws SQLException {
+        try {
+            return (Connection) this.createConnectionMethod.invoke(null, url, new Properties());
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof SQLException) {
+                throw ((SQLException) e.getCause());
+            }
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public Connection getConnection() throws SQLException {
-        this.lock.lock();
-        try {
-            if (this.connection == null || this.connection.isClosed()) {
-                Connection connection = JDBC.createConnection("jdbc:sqlite:" + this.file.getAbsolutePath(), new Properties());
-                if (connection != null) {
-                    this.connection = new NonClosableConnection(connection);
-                }
+    public synchronized Connection getConnection() throws SQLException {
+        if (this.connection == null || this.connection.isClosed()) {
+            Connection connection = createConnection("jdbc:sqlite:" + this.file.getAbsolutePath());
+            if (connection != null) {
+                this.connection = new NonClosableConnection(connection);
             }
-
-        } finally {
-            this.lock.unlock();
         }
 
         if (this.connection == null) {
