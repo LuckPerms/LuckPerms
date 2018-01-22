@@ -54,9 +54,7 @@ public class TrackClone extends SubCommand<Track> {
             return CommandResult.INVALID_ARGS;
         }
 
-        plugin.getStorage().createAndLoadTrack(newTrackName, CreationCause.INTERNAL).join();
-
-        Track newTrack = plugin.getTrackManager().getIfLoaded(newTrackName);
+        Track newTrack = plugin.getStorage().createAndLoadTrack(newTrackName, CreationCause.INTERNAL).join();
         if (newTrack == null) {
             Message.TRACK_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;

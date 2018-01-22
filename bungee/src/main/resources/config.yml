@@ -38,34 +38,6 @@ apply-global-groups: true
 # If users on this server should have global (non-world specific) groups applied
 apply-global-world-groups: true
 
-# If UUIDs should be pulled from the server, or looked up by username based upon previous
-# connections.
-#
-# This option should be set to true in most cases. When set to false, in order to get a player's
-# UUID, LuckPerms will:
-#
-# 1. Check if a player with the given username has joined before, if they have, use the UUID they
-#    used on their previous login.
-# 2. Save and return the players "current" uuid.
-#
-# For offline mode (cracked) servers, a players UUID is generated based upon their username.
-#
-# IMPORTANT:
-# If you are using BungeeCord proxy running in online mode, it is important that "online-mode=false"
-# is set in server.properties, but "bungeecord: true" is set in the spigot.yml. You also need to set
-# "ip_forward: true" in BungeeCord's config.yml.
-#
-# If for whatever reason you are not able to do this, and do not have ip-forward enabled, then you
-# may need to set "use-server-uuids" to false.
-#
-# If your proxy is running in offline mode, you should still be setting up ip-forwarding as
-# described above, but may also find that you need to set "bungee-online-mode" to false in
-# paper.yml, if you are using Paper. (https://ci.destroystokyo.com/job/PaperSpigot/)
-#
-# This option only really exists for networks who for whatever reason cannot setup proper ip
-# forwarding.
-use-server-uuids: true
-
 # If the servers own UUID cache/lookup facility should be used when there is no record for a player
 # in the LuckPerms cache.
 #

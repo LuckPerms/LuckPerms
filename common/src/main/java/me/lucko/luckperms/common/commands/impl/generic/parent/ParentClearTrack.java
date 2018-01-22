@@ -67,12 +67,7 @@ public class ParentClearTrack extends SharedSubCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().loadTrack(trackName).join().isPresent()) {
-            Message.DOES_NOT_EXIST.send(sender, trackName);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        Track track = plugin.getTrackManager().getIfLoaded(trackName);
+        Track track = plugin.getStorage().loadTrack(trackName).join().orElse(null);
         if (track == null) {
             Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.LOADING_ERROR;

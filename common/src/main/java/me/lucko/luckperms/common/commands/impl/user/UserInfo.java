@@ -59,26 +59,26 @@ public class UserInfo extends SubCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
-        Message status = plugin.isPlayerOnline(plugin.getUuidCache().getExternalUUID(user.getUuid())) ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
+        Message status = plugin.isPlayerOnline(user.getUuid()) ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
 
         Message.USER_INFO_GENERAL.send(sender,
                 user.getName().orElse("Unknown"),
                 user.getUuid(),
                 status.asString(plugin.getLocaleManager()),
                 user.getPrimaryGroup().getValue(),
-                user.getOwnNodes().size(),
-                user.getOwnNodes().stream().filter(n -> !(n.isGroupNode() || n.isPrefix() || n.isSuffix() || n.isMeta())).mapToInt(n -> 1).sum(),
-                user.getOwnNodes().stream().filter(Node::isPrefix).mapToInt(n -> 1).sum(),
-                user.getOwnNodes().stream().filter(Node::isSuffix).mapToInt(n -> 1).sum(),
-                user.getOwnNodes().stream().filter(Node::isMeta).mapToInt(n -> 1).sum()
+                user.getEnduringData().asList().size(),
+                user.getEnduringData().asList().stream().filter(n -> !(n.isGroupNode() || n.isPrefix() || n.isSuffix() || n.isMeta())).mapToInt(n -> 1).sum(),
+                user.getEnduringData().asList().stream().filter(Node::isPrefix).mapToInt(n -> 1).sum(),
+                user.getEnduringData().asList().stream().filter(Node::isSuffix).mapToInt(n -> 1).sum(),
+                user.getEnduringData().asList().stream().filter(Node::isMeta).mapToInt(n -> 1).sum()
         );
 
-        Set<Node> parents = user.getOwnNodesSet().stream()
+        Set<Node> parents = user.getEnduringData().asSet().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::isPermanent)
                 .collect(Collectors.toSet());
 
-        Set<Node> tempParents = user.getOwnNodesSet().stream()
+        Set<Node> tempParents = user.getEnduringData().asSet().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::isTemporary)
                 .collect(Collectors.toSet());

@@ -36,13 +36,11 @@ import me.lucko.luckperms.common.config.keys.EnduringKey;
 import me.lucko.luckperms.common.config.keys.IntegerKey;
 import me.lucko.luckperms.common.config.keys.LowercaseStringKey;
 import me.lucko.luckperms.common.config.keys.MapKey;
-import me.lucko.luckperms.common.config.keys.StaticKey;
 import me.lucko.luckperms.common.config.keys.StringKey;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
 import me.lucko.luckperms.common.model.TemporaryModifier;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.primarygroup.AllParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.ParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
@@ -90,20 +88,6 @@ public class ConfigKeys {
     public static final ConfigKey<Integer> SYNC_TIME = EnduringKey.wrap(IntegerKey.of("data.sync-minutes", -1));
 
     /**
-     * The permission node associated with the default group
-     *
-     * Constant since 2.6
-     */
-    public static final ConfigKey<String> DEFAULT_GROUP_NODE = StaticKey.of(NodeFactory.groupNode(NodeFactory.DEFAULT_GROUP_NAME));
-
-    /**
-     * The name of the default group
-     *
-     * Constant since 2.6
-     */
-    public static final ConfigKey<String> DEFAULT_GROUP_NAME = StaticKey.of(NodeFactory.DEFAULT_GROUP_NAME);
-
-    /**
      * If permissions without a server context should be included.
      */
     public static final ConfigKey<Boolean> INCLUDING_GLOBAL_PERMS = BooleanKey.of("include-global", true);
@@ -122,14 +106,6 @@ public class ConfigKeys {
      * If groups without a world context should be included.
      */
     public static final ConfigKey<Boolean> APPLYING_GLOBAL_WORLD_GROUPS = BooleanKey.of("apply-global-world-groups", true);
-
-    /**
-     * If the server provided uuids should be used. False if we should use the LP cache for existing users.
-     */
-    public static final ConfigKey<Boolean> USE_SERVER_UUIDS = AbstractKey.of(c -> {
-        // backwards compatible with the old online-mode option
-        return c.contains("use-server-uuids") ? c.getBoolean("use-server-uuids", true) : c.getBoolean("online-mode", true);
-    });
 
     /**
      * # If the servers own UUID cache/lookup facility should be used when there is no record for a player in the LuckPerms cache.

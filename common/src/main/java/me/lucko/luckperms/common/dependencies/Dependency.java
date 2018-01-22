@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.dependencies;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteStreams;
 
 import me.lucko.luckperms.common.dependencies.relocation.Relocation;
@@ -91,15 +90,17 @@ public enum Dependency {
             "com.h2database",
             "h2",
             "1.4.196",
-            "CgX0oNW4WEAUiq3OY6QjtdPDbvRHVjibT6rQjScz+vU=",
-            Relocation.of("h2", "org{}h2")
+            "CgX0oNW4WEAUiq3OY6QjtdPDbvRHVjibT6rQjScz+vU="
+            // we don't apply relocations to h2 - it gets loaded via
+            // an isolated classloader
     ),
     SQLITE_DRIVER(
             "org.xerial",
             "sqlite-jdbc",
             "3.21.0",
-            "bglRaH4Y+vQFZV7TfOdsVLO3rJpauJ+IwjuRULAb45Y=",
-            Relocation.of("sqlite", "org{}sqlite")
+            "bglRaH4Y+vQFZV7TfOdsVLO3rJpauJ+IwjuRULAb45Y="
+            // we don't apply relocations to sqlite - it gets loaded via
+            // an isolated classloader
     ),
     HIKARI(
             "com{}zaxxer",
@@ -125,10 +126,10 @@ public enum Dependency {
             "mongo-java-driver",
             "3.5.0",
             "gxrbKVSI/xM6r+6uL7g7I0DzNV+hlNTtfw4UL13XdK8=",
-            ImmutableList.<Relocation>builder()
-                    .addAll(Relocation.of("mongodb", "com{}mongodb"))
-                    .addAll(Relocation.of("bson", "org{}bson"))
-                    .build()
+            Relocation.allOf(
+                    Relocation.of("mongodb", "com{}mongodb"),
+                    Relocation.of("bson", "org{}bson")
+            )
     ),
     CASSANDRA_DRIVER(
             "com.datastax.cassandra",
@@ -248,10 +249,10 @@ public enum Dependency {
             "jedis",
             "2.9.0",
             "HqqWy45QVeTVF0Z/DzsrPLvGKn2dHotqI8YX7GDThvo=",
-            ImmutableList.<Relocation>builder()
-                    .addAll(Relocation.of("jedis", "redis{}clients{}jedis"))
-                    .addAll(Relocation.of("commonspool2", "org{}apache{}commons{}pool2"))
-                    .build()
+            Relocation.allOf(
+                    Relocation.of("jedis", "redis{}clients{}jedis"),
+                    Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
+            )
     ),
     COMMONS_POOL_2(
             "org.apache.commons",
@@ -286,10 +287,10 @@ public enum Dependency {
             "configurate-hocon",
             "3.3",
             "UIy5FVmsBUG6+Z1mpIEE2EXgtOI1ZL0p/eEW+BbtGLU=",
-            ImmutableList.<Relocation>builder()
-                    .addAll(Relocation.of("configurate", "ninja{}leaping{}configurate"))
-                    .addAll(Relocation.of("hocon", "com{}typesafe{}config"))
-                    .build()
+            Relocation.allOf(
+                    Relocation.of("configurate", "ninja{}leaping{}configurate"),
+                    Relocation.of("hocon", "com{}typesafe{}config")
+            )
     ),
     HOCON_CONFIG(
             "com{}typesafe",
@@ -325,6 +326,10 @@ public enum Dependency {
         this(groupId, artifactId, version, checksum, Collections.emptyList());
     }
 
+    Dependency(String groupId, String artifactId, String version, String checksum, Relocation relocation) {
+        this(groupId, artifactId, version, checksum, Collections.singletonList(relocation));
+    }
+
     Dependency(String groupId, String artifactId, String version, String checksum, List<Relocation> relocations) {
         this(
                 String.format(MAVEN_CENTRAL_FORMAT,
@@ -336,6 +341,14 @@ public enum Dependency {
                 ),
                 version, checksum, relocations
         );
+    }
+
+    Dependency(String url, String version, String checksum) {
+        this(url, version, checksum, Collections.emptyList());
+    }
+
+    Dependency(String url, String version, String checksum, Relocation relocation) {
+        this(url, version, checksum, Collections.singletonList(relocation));
     }
 
     Dependency(String url, String version, String checksum, List<Relocation> relocations) {

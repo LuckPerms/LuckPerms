@@ -81,8 +81,7 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
 
         SafeIterator.iterate(groupsSection.getKeys(false), key -> {
             final String groupName = MigrationUtils.standardizeName(key);
-            plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
-            Group lpGroup = plugin.getGroupManager().getIfLoaded(groupName);
+            Group lpGroup = plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
 
             // migrate data
             if (groupsSection.isConfigurationSection(key)) {
@@ -106,8 +105,7 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
                 return;
             }
 
-            plugin.getStorage().loadUser(uuid, null).join();
-            User lpUser = plugin.getUserManager().getIfLoaded(uuid);
+            User lpUser = plugin.getStorage().loadUser(uuid, null).join();
 
             // migrate data
             if (usersSection.isConfigurationSection(key)) {

@@ -23,33 +23,21 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.delegates.misc;
+package me.lucko.luckperms.common.dependencies.classloader;
 
-import me.lucko.luckperms.api.UuidCache;
+import java.net.URL;
+import java.net.URLClassLoader;
 
-import java.util.Objects;
-import java.util.UUID;
+/**
+ * A classloader "isolated" from the rest of the Minecraft server.
+ *
+ * <p>Used to load specific LuckPerms dependencies without causing conflicts
+ * with other plugins, or libraries provided by the server implementation.</p>
+ */
+public class IsolatedClassLoader extends URLClassLoader {
 
-import javax.annotation.Nonnull;
-
-public class ApiUuidCache implements UuidCache {
-    private final me.lucko.luckperms.common.utils.UuidCache handle;
-
-    public ApiUuidCache(me.lucko.luckperms.common.utils.UuidCache handle) {
-        this.handle = handle;
+    public IsolatedClassLoader(URL[] urls) {
+        super(urls, null);
     }
 
-    @Nonnull
-    @Override
-    public UUID getUUID(@Nonnull UUID external) {
-        Objects.requireNonNull(external, "external");
-        return this.handle.getUUID(external);
-    }
-
-    @Nonnull
-    @Override
-    public UUID getExternalUUID(@Nonnull UUID internal) {
-        Objects.requireNonNull(internal, "internal");
-        return this.handle.getExternalUUID(internal);
-    }
 }

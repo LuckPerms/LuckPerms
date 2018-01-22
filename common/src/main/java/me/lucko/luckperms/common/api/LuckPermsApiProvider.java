@@ -49,6 +49,7 @@ import me.lucko.luckperms.common.api.delegates.misc.ApiMessagingService;
 import me.lucko.luckperms.common.api.delegates.misc.ApiMetaStackFactory;
 import me.lucko.luckperms.common.api.delegates.misc.ApiNodeFactory;
 import me.lucko.luckperms.common.api.delegates.misc.ApiPlatformInfo;
+import me.lucko.luckperms.common.api.delegates.misc.NoopUuidCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -153,8 +154,9 @@ public class LuckPermsApiProvider implements LuckPermsApi {
 
     @Nonnull
     @Override
+    @Deprecated
     public UuidCache getUuidCache() {
-        return this.plugin.getUuidCache().getDelegate();
+        return NoopUuidCache.INSTANCE;
     }
 
     @Override

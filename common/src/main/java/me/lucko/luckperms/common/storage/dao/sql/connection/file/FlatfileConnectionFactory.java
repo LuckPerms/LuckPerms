@@ -28,62 +28,41 @@ package me.lucko.luckperms.common.storage.dao.sql.connection.file;
 import me.lucko.luckperms.common.storage.dao.sql.connection.AbstractConnectionFactory;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.text.DecimalFormat;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 abstract class FlatfileConnectionFactory extends AbstractConnectionFactory {
     protected static final DecimalFormat DF = new DecimalFormat("#.##");
 
     protected final File file;
-    private final ReentrantLock lock = new ReentrantLock();
-    private NonClosableConnection connection;
 
     FlatfileConnectionFactory(String name, File file) {
         super(name);
         this.file = file;
     }
 
-    protected abstract String getDriverClass();
-    protected abstract String getDriverId();
-
     @Override
     public void init() {
 
     }
 
-    @Override
-    public void shutdown() throws Exception {
-        if (this.connection != null) {
-            this.connection.shutdown();
-        }
+    protected File getWriteFile() {
+        return this.file;
     }
 
     @Override
-    public Connection getConnection() throws SQLException {
-        this.lock.lock();
-        try {
-            if (this.connection == null || this.connection.isClosed()) {
-                try {
-                    Class.forName(getDriverClass());
-                } catch (ClassNotFoundException ignored) {}
+    public Map<String, String> getMeta() {
+        Map<String, String> ret = new LinkedHashMap<>();
 
-                Connection connection = DriverManager.getConnection(getDriverId() + ":" + this.file.getAbsolutePath());
-                if (connection != null) {
-                    this.connection = new NonClosableConnection(connection);
-                }
-            }
-
-        } finally {
-            this.lock.unlock();
+        File databaseFile = getWriteFile();
+        if (databaseFile.exists()) {
+            double size = databaseFile.length() / 1048576D;
+            ret.put("File Size", DF.format(size) + "MB");
+        } else {
+            ret.put("File Size", "0MB");
         }
 
-        if (this.connection == null) {
-            throw new SQLException("Unable to get a connection.");
-        }
-
-        return this.connection;
+        return ret;
     }
 }

@@ -77,7 +77,7 @@ public final class ArgumentPermissions {
         if (target instanceof User) {
             User targetUser = ((User) target);
             
-            if (plugin.getUuidCache().getExternalUUID(targetUser.getUuid()).equals(sender.getUuid())) {
+            if (targetUser.getUuid().equals(sender.getUuid())) {
                 // the sender is trying to edit themselves
                 Tristate ret = sender.getPermissionValue(base.getPermission() + ".modify.self");
                 if (ret != Tristate.UNDEFINED) {
@@ -133,7 +133,7 @@ public final class ArgumentPermissions {
         if (target instanceof User) {
             User targetUser = ((User) target);
 
-            if (plugin.getUuidCache().getExternalUUID(targetUser.getUuid()).equals(sender.getUuid())) {
+            if (targetUser.getUuid().equals(sender.getUuid())) {
                 // the sender is trying to view themselves
                 Tristate ret = sender.getPermissionValue(base.getPermission() + ".view.self");
                 if (ret != Tristate.UNDEFINED) {

@@ -25,23 +25,23 @@
 
 package me.lucko.luckperms.common.dependencies.relocation;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public final class Relocation {
 
-    public static List<Relocation> of(String name, String... packages) {
-        List<Relocation> ret = new ArrayList<>();
-        for (String p : packages) {
-            ret.add(new Relocation(p.replace("{}", "."), "me.lucko.luckperms.lib." + name));
-        }
-        return ret;
+    public static Relocation of(String id, String pattern) {
+        return new Relocation(pattern.replace("{}", "."), "me.lucko.luckperms.lib." + id);
+    }
+
+    public static List<Relocation> allOf(Relocation... relocations) {
+        return Arrays.asList(relocations);
     }
 
     private final String pattern;
     private final String relocatedPattern;
 
-    public Relocation(String pattern, String relocatedPattern) {
+    private Relocation(String pattern, String relocatedPattern) {
         this.pattern = pattern;
         this.relocatedPattern = relocatedPattern;
     }

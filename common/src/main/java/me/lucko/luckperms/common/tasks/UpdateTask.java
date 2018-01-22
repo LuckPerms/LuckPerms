@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.tasks;
 
 import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.concurrent.CompletableFuture;
@@ -62,9 +62,8 @@ public class UpdateTask implements Runnable {
 
         // Reload all groups
         this.plugin.getStorage().loadAllGroups().join();
-        String defaultGroup = this.plugin.getConfiguration().get(ConfigKeys.DEFAULT_GROUP_NAME);
-        if (!this.plugin.getGroupManager().isLoaded(defaultGroup)) {
-            this.plugin.getStorage().createAndLoadGroup(defaultGroup, CreationCause.INTERNAL).join();
+        if (!this.plugin.getGroupManager().isLoaded(NodeFactory.DEFAULT_GROUP_NAME)) {
+            this.plugin.getStorage().createAndLoadGroup(NodeFactory.DEFAULT_GROUP_NAME, CreationCause.INTERNAL).join();
         }
 
         // Reload all tracks

@@ -69,14 +69,6 @@
                                     <shadedPattern>me.lucko.luckperms.lib.postgresql</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>org.h2</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.h2</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.sqlite</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.sqlite</shadedPattern>
-                                </relocation>
-                                <relocation>
                                     <pattern>com.zaxxer.hikari</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.hikari</shadedPattern>
                                 </relocation>

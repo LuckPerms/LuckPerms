@@ -25,43 +25,78 @@
 
 package me.lucko.luckperms.common.storage.dao.sql.connection.file;
 
+import me.lucko.luckperms.common.dependencies.Dependency;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+
 import java.io.File;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URLClassLoader;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.EnumSet;
+import java.util.Properties;
 
 public class SQLiteConnectionFactory extends FlatfileConnectionFactory {
-    public SQLiteConnectionFactory(File file) {
+
+    // the method invoked to obtain new connection instances
+    private final Method createConnectionMethod;
+    // the active connection
+    private NonClosableConnection connection;
+
+    public SQLiteConnectionFactory(LuckPermsPlugin plugin, File file) {
         super("SQLite", file);
 
         // backwards compat
         File data = new File(file.getParent(), "luckperms.sqlite");
         if (data.exists()) {
-            data.renameTo(new File(file.getParent(), "luckperms-sqlite.db"));
+            data.renameTo(file);
+        }
+
+        // setup the classloader
+        URLClassLoader classLoader = plugin.getDependencyManager().obtainClassLoaderWith(EnumSet.of(Dependency.SQLITE_DRIVER));
+        try {
+            Class<?> jdcbClass = classLoader.loadClass("org.sqlite.JDBC");
+            this.createConnectionMethod = jdcbClass.getMethod("createConnection", String.class, Properties.class);
+        } catch (ClassNotFoundException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Connection createConnection(String url) throws SQLException {
+        try {
+            return (Connection) this.createConnectionMethod.invoke(null, url, new Properties());
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof SQLException) {
+                throw ((SQLException) e.getCause());
+            }
+            throw new RuntimeException(e);
         }
     }
 
     @Override
-    public Map<String, String> getMeta() {
-        Map<String, String> ret = new LinkedHashMap<>();
-
-        File databaseFile = new File(super.file.getParent(), "luckperms-sqlite.db");
-        if (databaseFile.exists()) {
-            double size = databaseFile.length() / 1048576D;
-            ret.put("File Size", DF.format(size) + "MB");
-        } else {
-            ret.put("File Size", "0MB");
+    public synchronized Connection getConnection() throws SQLException {
+        if (this.connection == null || this.connection.isClosed()) {
+            Connection connection = createConnection("jdbc:sqlite:" + this.file.getAbsolutePath());
+            if (connection != null) {
+                this.connection = new NonClosableConnection(connection);
+            }
         }
 
-        return ret;
+        if (this.connection == null) {
+            throw new SQLException("Unable to get a connection.");
+        }
+
+        return this.connection;
     }
 
     @Override
-    protected String getDriverClass() {
-        return "org.sqlite.JDBC";
+    public void shutdown() throws Exception {
+        if (this.connection != null) {
+            this.connection.shutdown();
+        }
     }
 
-    @Override
-    protected String getDriverId() {
-        return "jdbc:sqlite";
-    }
 }

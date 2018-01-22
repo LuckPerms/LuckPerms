@@ -87,7 +87,7 @@ public class SpongeUser extends User {
 
         @Override
         public String getIdentifier() {
-            return this.plugin.getUuidCache().getExternalUUID(this.parent.getUuid()).toString();
+            return this.parent.getUuid().toString();
         }
 
         @Override
@@ -97,7 +97,7 @@ public class SpongeUser extends User {
 
         @Override
         public Optional<CommandSource> getCommandSource() {
-            final UUID uuid = this.plugin.getUuidCache().getExternalUUID(this.parent.getUuid());
+            final UUID uuid = this.parent.getUuid();
             return Sponge.getServer().getPlayer(uuid).map(Function.identity());
         }
 

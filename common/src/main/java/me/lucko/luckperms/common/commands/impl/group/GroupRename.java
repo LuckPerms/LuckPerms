@@ -60,18 +60,13 @@ public class GroupRename extends SubCommand<Group> {
             return CommandResult.INVALID_ARGS;
         }
 
+        Group newGroup;
         try {
-            plugin.getStorage().createAndLoadGroup(newGroupName, CreationCause.COMMAND).get();
+            newGroup = plugin.getStorage().createAndLoadGroup(newGroupName, CreationCause.COMMAND).get();
         } catch (Exception e) {
             e.printStackTrace();
             Message.CREATE_ERROR.send(sender, newGroupName);
             return CommandResult.FAILURE;
-        }
-
-        Group newGroup = plugin.getGroupManager().getIfLoaded(newGroupName);
-        if (newGroup == null) {
-            Message.GROUP_LOAD_ERROR.send(sender);
-            return CommandResult.LOADING_ERROR;
         }
 
         try {

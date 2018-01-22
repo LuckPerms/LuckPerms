@@ -80,7 +80,6 @@ import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
-import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 
 import org.bukkit.command.PluginCommand;
@@ -120,7 +119,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private Storage storage;
     private FileWatcher fileWatcher = null;
     private InternalMessagingService messagingService = null;
-    private UuidCache uuidCache;
     private LuckPermsApiProvider apiProvider;
     private EventFactory eventFactory;
     private Logger log;
@@ -238,7 +236,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         // load internal managers
         getLog().info("Loading internal permission managers...");
-        this.uuidCache = new UuidCache(this);
         this.userManager = new StandardUserManager(this);
         this.groupManager = new StandardGroupManager(this);
         this.trackManager = new StandardTrackManager(this);
@@ -317,8 +314,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         for (Player player : getServer().getOnlinePlayers()) {
             this.scheduler.doAsync(() -> {
                 try {
-                    connectionListener.loadUser(player.getUniqueId(), player.getName());
-                    User user = getUserManager().getIfLoaded(getUuidCache().getUUID(player.getUniqueId()));
+                    User user = connectionListener.loadUser(player.getUniqueId(), player.getName());
                     if (user != null) {
                         this.scheduler.doSync(() -> {
                             try {
@@ -363,7 +359,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
                 player.setOp(false);
             }
 
-            final User user = getUserManager().getIfLoaded(getUuidCache().getUUID(player.getUniqueId()));
+            final User user = getUserManager().getIfLoaded(player.getUniqueId());
             if (user != null) {
                 user.getCachedData().invalidateCaches();
                 getUserManager().unload(user);
@@ -496,7 +492,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public Player getPlayer(User user) {
-        return getServer().getPlayer(this.uuidCache.getExternalUUID(user.getUuid()));
+        return getServer().getPlayer(user.getUuid());
     }
 
     @Override
@@ -613,11 +609,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public Storage getStorage() {
         return this.storage;
-    }
-
-    @Override
-    public UuidCache getUuidCache() {
-        return this.uuidCache;
     }
 
     @Override

@@ -41,6 +41,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.Nullable;
+
 public class FileUuidCache {
     private static final Splitter KV_SPLIT = Splitter.on('=').omitEmptyStrings();
     private static final Splitter TIME_SPLIT = Splitter.on('|').omitEmptyStrings();
@@ -64,7 +66,8 @@ public class FileUuidCache {
      * @param username the username to lookup with
      * @return a uuid, or null
      */
-    public UUID lookupUUID(String username) {
+    @Nullable
+    public UUID lookup(String username) {
         Map.Entry<UUID, Long> ret = this.lookupMap.get(username.toLowerCase());
         return ret == null ? null : ret.getKey();
     }

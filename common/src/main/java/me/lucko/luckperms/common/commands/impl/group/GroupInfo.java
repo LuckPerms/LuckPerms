@@ -60,19 +60,19 @@ public class GroupInfo extends SubCommand<Group> {
                 group.getName(),
                 group.getDisplayName().orElse(group.getName()),
                 group.getWeight().isPresent() ? group.getWeight().getAsInt() : "None",
-                group.getOwnNodes().size(),
-                group.getOwnNodes().stream().filter(n -> !(n.isGroupNode() || n.isPrefix() || n.isSuffix() || n.isMeta())).mapToInt(n -> 1).sum(),
-                group.getOwnNodes().stream().filter(Node::isPrefix).mapToInt(n -> 1).sum(),
-                group.getOwnNodes().stream().filter(Node::isSuffix).mapToInt(n -> 1).sum(),
-                group.getOwnNodes().stream().filter(Node::isMeta).mapToInt(n -> 1).sum()
+                group.getEnduringData().asList().size(),
+                group.getEnduringData().asList().stream().filter(n -> !(n.isGroupNode() || n.isPrefix() || n.isSuffix() || n.isMeta())).mapToInt(n -> 1).sum(),
+                group.getEnduringData().asList().stream().filter(Node::isPrefix).mapToInt(n -> 1).sum(),
+                group.getEnduringData().asList().stream().filter(Node::isSuffix).mapToInt(n -> 1).sum(),
+                group.getEnduringData().asList().stream().filter(Node::isMeta).mapToInt(n -> 1).sum()
         );
 
-        Set<Node> parents = group.getOwnNodesSet().stream()
+        Set<Node> parents = group.getEnduringData().asSet().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::isPermanent)
                 .collect(Collectors.toSet());
 
-        Set<Node> tempParents = group.getOwnNodesSet().stream()
+        Set<Node> tempParents = group.getEnduringData().asSet().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::isTemporary)
                 .collect(Collectors.toSet());

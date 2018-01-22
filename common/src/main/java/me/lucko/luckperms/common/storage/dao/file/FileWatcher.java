@@ -42,6 +42,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class FileWatcher implements Runnable {
+    private static final WatchEvent.Kind[] KINDS = new WatchEvent.Kind[]{
+            StandardWatchEventKinds.ENTRY_CREATE,
+            StandardWatchEventKinds.ENTRY_DELETE,
+            StandardWatchEventKinds.ENTRY_MODIFY
+    };
+
     private final LuckPermsPlugin plugin;
 
     private final Map<String, WatchedLocation> keyMap;
@@ -66,17 +72,15 @@ public class FileWatcher implements Runnable {
 
         // Register with a delay to ignore changes made at startup
         this.plugin.getScheduler().asyncLater(() -> {
-            try {
-                // doesn't need to be atomic
-                if (this.keyMap.containsKey(id)) {
-                    throw new IllegalArgumentException("id already registered");
+            this.keyMap.computeIfAbsent(id, s -> {
+                WatchKey key;
+                try {
+                    key = path.register(this.watchService, KINDS);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-
-                WatchKey key = path.register(this.watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
-                this.keyMap.put(id, new WatchedLocation(path, key, consumer));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                return new WatchedLocation(path, key, consumer);
+            });
         }, 40L);
     }
 

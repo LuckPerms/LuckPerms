@@ -41,6 +41,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 public abstract class AbstractDao {
 
     protected final LuckPermsPlugin plugin;
@@ -105,8 +107,10 @@ public abstract class AbstractDao {
 
     public abstract void saveUUIDData(UUID uuid, String username) throws Exception;
 
+    @Nullable
     public abstract UUID getUUID(String username) throws Exception;
 
+    @Nullable
     public abstract String getName(UUID uuid) throws Exception;
 
 }

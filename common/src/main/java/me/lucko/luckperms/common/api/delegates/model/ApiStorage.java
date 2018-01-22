@@ -34,7 +34,7 @@ import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
-import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.List;
@@ -158,7 +158,7 @@ public class ApiStorage implements Storage {
     @Override
     public CompletableFuture<Boolean> deleteGroup(@Nonnull Group group) {
         Objects.requireNonNull(group, "group");
-        if (group.getName().equalsIgnoreCase(this.plugin.getConfiguration().get(ConfigKeys.DEFAULT_GROUP_NAME))) {
+        if (group.getName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
             throw new IllegalArgumentException("Cannot delete the default group.");
         }
         return this.handle.noBuffer().deleteGroup(ApiGroup.cast(group), DeletionCause.API).thenApply(x -> true);

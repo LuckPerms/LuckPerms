@@ -220,8 +220,7 @@ public class Exporter implements Runnable {
                             // actually export the user. this output will be fed to the writing function when we have all of the user's data.
                             List<String> output = new ArrayList<>();
 
-                            this.plugin.getStorage().loadUser(uuid, null).join();
-                            User user = this.plugin.getUserManager().getIfLoaded(uuid);
+                            User user = this.plugin.getStorage().loadUser(uuid, null).join();
                             output.add("# Export user: " + user.getUuid().toString() + " - " + user.getName().orElse("unknown username"));
 
                             boolean inDefault = false;

@@ -64,15 +64,10 @@ public class ParentAdd extends SharedSubCommand {
         String groupName = ArgumentUtils.handleName(0, args);
         MutableContextSet context = ArgumentUtils.handleContext(1, args, plugin);
 
-        if (!plugin.getStorage().loadGroup(groupName).join().isPresent()) {
-            Message.DOES_NOT_EXIST.send(sender, groupName);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        Group group = plugin.getGroupManager().getIfLoaded(groupName);
+        Group group = plugin.getStorage().loadGroup(groupName).join().orElse(null);
         if (group == null) {
             Message.DOES_NOT_EXIST.send(sender, groupName);
-            return CommandResult.LOADING_ERROR;
+            return CommandResult.INVALID_ARGS;
         }
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {

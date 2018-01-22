@@ -66,7 +66,6 @@ import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
-import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.sponge.calculators.SpongeCalculatorFactory;
 import me.lucko.luckperms.sponge.commands.SpongeMainCommand;
@@ -173,7 +172,6 @@ public class LPSpongePlugin implements LuckPermsSpongePlugin {
     private Storage storage;
     private FileWatcher fileWatcher = null;
     private InternalMessagingService messagingService = null;
-    private UuidCache uuidCache;
     private LuckPermsApiProvider apiProvider;
     private EventFactory eventFactory;
     private me.lucko.luckperms.common.logging.Logger log;
@@ -243,7 +241,6 @@ public class LPSpongePlugin implements LuckPermsSpongePlugin {
 
         // load internal managers
         getLog().info("Loading internal permission managers...");
-        this.uuidCache = new UuidCache(this);
         this.userManager = new SpongeUserManager(this);
         this.groupManager = new SpongeGroupManager(this);
         this.trackManager = new StandardTrackManager(this);
@@ -410,7 +407,7 @@ public class LPSpongePlugin implements LuckPermsSpongePlugin {
             return null;
         }
 
-        return this.game.getServer().getPlayer(this.uuidCache.getExternalUUID(user.getUuid())).orElse(null);
+        return this.game.getServer().getPlayer(user.getUuid()).orElse(null);
     }
 
     @Override
@@ -578,11 +575,6 @@ public class LPSpongePlugin implements LuckPermsSpongePlugin {
     @Override
     public Storage getStorage() {
         return this.storage;
-    }
-
-    @Override
-    public UuidCache getUuidCache() {
-        return this.uuidCache;
     }
 
     @Override

@@ -131,8 +131,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             // Make a LuckPerms group for the one being migrated
-            plugin.getStorage().createAndLoadGroup(pexName, CreationCause.INTERNAL).join();
-            Group group = plugin.getGroupManager().getIfLoaded(pexName);
+            Group group = plugin.getStorage().createAndLoadGroup(pexName, CreationCause.INTERNAL).join();
             migrateSubject(pexGroup, group, weight);
             plugin.getStorage().saveGroup(group);
 
@@ -153,8 +152,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         // Migrate tracks
         log.log("Starting track migration.");
         SafeIterator.iterate(tracks.entrySet(), e -> {
-            plugin.getStorage().createAndLoadTrack(e.getKey(), CreationCause.INTERNAL).join();
-            Track track = plugin.getTrackManager().getIfLoaded(e.getKey());
+            Track track = plugin.getStorage().createAndLoadTrack(e.getKey(), CreationCause.INTERNAL).join();
             for (String groupName : e.getValue().values()) {
                 Group group = plugin.getGroupManager().getIfLoaded(groupName);
                 if (group != null) {
@@ -179,8 +177,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             // Make a LuckPerms user for the one being migrated
-            plugin.getStorage().loadUser(uuid, null).join();
-            User user = plugin.getUserManager().getIfLoaded(uuid);
+            User user = plugin.getStorage().loadUser(uuid, null).join();
             if (user.getEnduringNodes().size() <= 1) {
                 user.clearNodes(false);
             }

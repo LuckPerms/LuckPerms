@@ -87,9 +87,7 @@ public class UserClone extends SubCommand<User> {
             }
         }
 
-        plugin.getStorage().loadUser(uuid, null).join();
-        User otherUser = plugin.getUserManager().getIfLoaded(uuid);
-
+        User otherUser = plugin.getStorage().loadUser(uuid, null).join();
         if (otherUser == null) {
             Message.USER_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;

@@ -162,8 +162,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             maxWeight.set(Math.max(maxWeight.get(), g.getRank()));
 
             String groupName = MigrationUtils.standardizeName(g.getName());
-            plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
-            me.lucko.luckperms.common.model.Group group = plugin.getGroupManager().getIfLoaded(groupName);
+            me.lucko.luckperms.common.model.Group group = plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
 
             MigrationUtils.setGroupWeight(group, g.getRank());
 
@@ -222,8 +221,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         SafeIterator.iterate(uuids, uuid -> {
 
             // Create a LuckPerms user for the UUID
-            plugin.getStorage().loadUser(uuid, null).join();
-            User user = plugin.getUserManager().getIfLoaded(uuid);
+            User user = plugin.getStorage().loadUser(uuid, null).join();
 
             List<Permission> permissions = joinFuture(pm.getPlayerOwnPermissions(uuid));
 

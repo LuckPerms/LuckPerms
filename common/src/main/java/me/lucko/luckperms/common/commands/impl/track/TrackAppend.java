@@ -56,12 +56,7 @@ public class TrackAppend extends SubCommand<Track> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().loadGroup(groupName).join().isPresent()) {
-            Message.DOES_NOT_EXIST.send(sender, groupName);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        Group group = plugin.getGroupManager().getIfLoaded(groupName);
+        Group group = plugin.getStorage().loadGroup(groupName).join().orElse(null);
         if (group == null) {
             Message.DOES_NOT_EXIST.send(sender, groupName);
             return CommandResult.LOADING_ERROR;

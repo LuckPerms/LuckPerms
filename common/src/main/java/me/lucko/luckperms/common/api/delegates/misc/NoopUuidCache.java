@@ -23,38 +23,34 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.dao.sql.connection.hikari;
+package me.lucko.luckperms.common.api.delegates.misc;
 
-import com.zaxxer.hikari.HikariConfig;
+import me.lucko.luckperms.api.UuidCache;
 
-import me.lucko.luckperms.common.storage.StorageCredentials;
+import java.util.UUID;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
-public class MariaDbConnectionFactory extends HikariConnectionFactory {
-    public MariaDbConnectionFactory(StorageCredentials configuration) {
-        super("MariaDB", configuration);
+@Deprecated
+@SuppressWarnings({"DeprecatedIsStillUsed", "deprecation"})
+public class NoopUuidCache implements UuidCache {
+    public static final NoopUuidCache INSTANCE = new NoopUuidCache();
+
+    private NoopUuidCache() {
+
     }
 
+    @Nonnull
     @Override
-    protected String getDriverClass() {
-        return "org.mariadb.jdbc.MariaDbDataSource";
+    @Deprecated
+    public UUID getUUID(@Nonnull UUID external) {
+        return external;
     }
 
+    @Nonnull
     @Override
-    protected void appendProperties(HikariConfig config, StorageCredentials credentials) {
-        Set<Map.Entry<String, String>> properties = credentials.getProperties().entrySet();
-        if (properties.isEmpty()) {
-            return;
-        }
-
-        String propertiesString = properties.stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining(";"));
-
-        // kinda hacky. this will call #setProperties on the datasource, which will append these options
-        // onto the connections.
-        config.addDataSourceProperty("properties", propertiesString);
+    @Deprecated
+    public UUID getExternalUUID(@Nonnull UUID internal) {
+        return internal;
     }
-
 }

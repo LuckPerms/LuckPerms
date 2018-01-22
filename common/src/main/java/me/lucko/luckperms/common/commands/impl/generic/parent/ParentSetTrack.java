@@ -69,12 +69,7 @@ public class ParentSetTrack extends SharedSubCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().loadTrack(trackName).join().isPresent()) {
-            Message.DOES_NOT_EXIST.send(sender, trackName);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        Track track = plugin.getTrackManager().getIfLoaded(trackName);
+        Track track = plugin.getStorage().loadTrack(trackName).join().orElse(null);
         if (track == null) {
             Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.LOADING_ERROR;
@@ -104,12 +99,7 @@ public class ParentSetTrack extends SharedSubCommand {
 
         MutableContextSet context = ArgumentUtils.handleContext(2, args, plugin);
 
-        if (!plugin.getStorage().loadGroup(groupName).join().isPresent()) {
-            Message.DOES_NOT_EXIST.send(sender, groupName);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        Group group = plugin.getGroupManager().getIfLoaded(groupName);
+        Group group = plugin.getStorage().loadGroup(groupName).join().orElse(null);
         if (group == null) {
             Message.DOES_NOT_EXIST.send(sender, groupName);
             return CommandResult.LOADING_ERROR;

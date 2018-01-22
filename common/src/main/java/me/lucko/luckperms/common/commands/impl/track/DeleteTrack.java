@@ -55,12 +55,7 @@ public class DeleteTrack extends SingleCommand {
         }
 
         String trackName = args.get(0).toLowerCase();
-        if (!plugin.getStorage().loadTrack(trackName).join().isPresent()) {
-            Message.DOES_NOT_EXIST.send(sender, trackName);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        Track track = plugin.getTrackManager().getIfLoaded(trackName);
+        Track track = plugin.getStorage().loadTrack(trackName).join().orElse(null);
         if (track == null) {
             Message.TRACK_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;

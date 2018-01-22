@@ -36,6 +36,8 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.logging.ProgressLogger;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -93,9 +95,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         AtomicInteger globalGroupCount = new AtomicInteger(0);
         SafeIterator.iterate(gg.getGroupList(), g -> {
             String groupName = MigrationUtils.standardizeName(g.getName());
-
-            plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
-            me.lucko.luckperms.common.model.Group group = plugin.getGroupManager().getIfLoaded(groupName);
+            Group group = plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
 
             for (String node : g.getPermissionList()) {
                 if (node.isEmpty()) continue;
@@ -211,8 +211,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
         SafeIterator.iterate(groups.entrySet(), e -> {
-            plugin.getStorage().createAndLoadGroup(e.getKey(), CreationCause.INTERNAL).join();
-            me.lucko.luckperms.common.model.Group group = plugin.getGroupManager().getIfLoaded(e.getKey());
+            Group group = plugin.getStorage().createAndLoadGroup(e.getKey(), CreationCause.INTERNAL).join();
 
             for (Node node : e.getValue()) {
                 group.setPermission(node);
@@ -226,8 +225,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         log.log("Starting user migration.");
         AtomicInteger userCount = new AtomicInteger(0);
         SafeIterator.iterate(users.entrySet(), e -> {
-            plugin.getStorage().loadUser(e.getKey(), null).join();
-            me.lucko.luckperms.common.model.User user = plugin.getUserManager().getIfLoaded(e.getKey());
+            User user = plugin.getStorage().loadUser(e.getKey(), null).join();
 
             for (Node node : e.getValue()) {
                 user.setPermission(node);

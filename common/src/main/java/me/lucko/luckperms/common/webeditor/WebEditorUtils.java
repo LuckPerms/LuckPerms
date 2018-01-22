@@ -91,8 +91,7 @@ public final class WebEditorUtils {
                 Message.APPLY_EDITS_TARGET_USER_NOT_UUID.send(sender, user);
                 return null;
             }
-            plugin.getStorage().loadUser(uuid, null).join();
-            User holder = plugin.getUserManager().getIfLoaded(uuid);
+            User holder = plugin.getStorage().loadUser(uuid, null).join();
             if (holder == null) {
                 Message.APPLY_EDITS_TARGET_USER_UNABLE_TO_LOAD.send(sender, uuid.toString());
             }

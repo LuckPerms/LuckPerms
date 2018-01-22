@@ -23,24 +23,10 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.config.keys;
+package me.lucko.luckperms.common.model;
 
-import me.lucko.luckperms.common.config.ConfigKey;
-import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
+public enum NodeMapType {
 
-public class StaticKey<T> implements ConfigKey<T> {
-    public static <T> StaticKey<T> of(T val) {
-        return new StaticKey<>(val);
-    }
+    ENDURING, TRANSIENT
 
-    private final T val;
-
-    private StaticKey(T val) {
-        this.val = val;
-    }
-
-    @Override
-    public T get(ConfigurationAdapter adapter) {
-        return this.val;
-    }
 }

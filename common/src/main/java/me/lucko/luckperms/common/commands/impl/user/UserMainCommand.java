@@ -36,7 +36,6 @@ import me.lucko.luckperms.common.commands.impl.generic.other.HolderClear;
 import me.lucko.luckperms.common.commands.impl.generic.other.HolderEditor;
 import me.lucko.luckperms.common.commands.impl.generic.other.HolderShowTracks;
 import me.lucko.luckperms.common.commands.impl.generic.parent.CommandParent;
-import me.lucko.luckperms.common.commands.impl.generic.parent.UserSwitchPrimaryGroup;
 import me.lucko.luckperms.common.commands.impl.generic.permission.CommandPermission;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -118,21 +117,7 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
 
     @Override
     protected User getTarget(UserIdentifier target, LuckPermsPlugin plugin, Sender sender) {
-
-        try {
-            plugin.getStorage().loadUser(target.getUuid(), target.getUsername().orElse(null)).get();
-        } catch (Exception e) {
-            e.printStackTrace();
-            Message.LOADING_ERROR.send(sender);
-            return null;
-        }
-
-        User user = plugin.getUserManager().getIfLoaded(target.getUuid());
-        if (user == null) {
-            Message.LOADING_ERROR.send(sender);
-            return null;
-        }
-
+        User user = plugin.getStorage().loadUser(target.getUuid(), target.getUsername().orElse(null)).join();
         user.auditTemporaryPermissions();
         return user;
     }

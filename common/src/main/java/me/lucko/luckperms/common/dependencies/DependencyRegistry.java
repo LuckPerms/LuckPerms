@@ -88,7 +88,7 @@ public class DependencyRegistry {
         return dependencies;
     }
 
-    public static boolean classExists(String className) {
+    private static boolean classExists(String className) {
         try {
             Class.forName(className);
             return true;
@@ -101,17 +101,19 @@ public class DependencyRegistry {
         return classExists("org.slf4j.Logger") && classExists("org.slf4j.LoggerFactory");
     }
 
-    // used to remap dependencies - we check to see if they're present to avoid loading unnecessarily.
-
-    public static boolean asmPresent() {
-        return classExists("org.objectweb.asm.ClassReader") &&
-                classExists("org.objectweb.asm.ClassVisitor") &&
-                classExists("org.objectweb.asm.ClassWriter");
-    }
-
-    public static boolean asmCommonsPresent() {
-        return classExists("org.objectweb.asm.commons.ClassRemapper") &&
-                classExists("org.objectweb.asm.commons.Remapper");
+    public static boolean shouldAutoLoad(Dependency dependency) {
+        switch (dependency) {
+            // all used within 'isolated' classloaders, and are therefore not
+            // relocated.
+            case ASM:
+            case ASM_COMMONS:
+            case JAR_RELOCATOR:
+            case H2_DRIVER:
+            case SQLITE_DRIVER:
+                return false;
+            default:
+                return true;
+        }
     }
 
 }

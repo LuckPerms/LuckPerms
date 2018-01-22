@@ -106,8 +106,7 @@ public class MigrationPermissionManager extends SubCommand<Object> {
             String pmName = MigrationUtils.standardizeName(pmGroup.getIdentifier());
 
             // Make a LuckPerms group for the one being migrated
-            plugin.getStorage().createAndLoadGroup(pmName, CreationCause.INTERNAL).join();
-            Group group = plugin.getGroupManager().getIfLoaded(pmName);
+            Group group = plugin.getStorage().createAndLoadGroup(pmName, CreationCause.INTERNAL).join();
             migrateSubject(pmGroup, group, 100);
             plugin.getStorage().saveGroup(group);
 
@@ -126,8 +125,7 @@ public class MigrationPermissionManager extends SubCommand<Object> {
             }
 
             // Make a LuckPerms user for the one being migrated
-            plugin.getStorage().loadUser(uuid, "null").join();
-            User user = plugin.getUserManager().getIfLoaded(uuid);
+            User user = plugin.getStorage().loadUser(uuid, "null").join();
             if (user.getEnduringNodes().size() <= 1) {
                 user.clearNodes(false);
             }

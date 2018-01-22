@@ -84,20 +84,16 @@ public class GroupMainCommand extends MainCommand<Group, String> {
 
     @Override
     protected Group getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        if (!plugin.getStorage().loadGroup(target).join().isPresent()) {
+        Group group = plugin.getStorage().loadGroup(target).join().orElse(null);
+        if (group == null) {
             // failed to load, but it might be a display name.
+            group = plugin.getGroupManager().getByDisplayName(target);
 
             // nope, not a display name
-            if (plugin.getGroupManager().getByDisplayName(target) == null) {
+            if (group == null) {
                 Message.GROUP_NOT_FOUND.send(sender, target);
                 return null;
             }
-        }
-
-        Group group = plugin.getGroupManager().getByDisplayName(target);
-        if (group == null) {
-            Message.GROUP_NOT_FOUND.send(sender, target);
-            return null;
         }
 
         group.auditTemporaryPermissions();

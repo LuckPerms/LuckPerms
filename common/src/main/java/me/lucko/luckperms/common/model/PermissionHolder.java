@@ -27,12 +27,9 @@ package me.lucko.luckperms.common.model;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
-import com.google.common.collect.SortedSetMultimap;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.DataMutateResult;
@@ -63,12 +60,9 @@ import me.lucko.luckperms.common.references.HolderReference;
 import me.lucko.luckperms.common.references.HolderType;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -119,40 +113,8 @@ public abstract class PermissionHolder {
 
     /**
      * The holders persistent nodes.
-     *
-     * <p>Nodes are mapped by the result of {@link Node#getFullContexts()}, and keys are sorted by the weight of the
-     * ContextSet. ContextSets are ordered first by the presence of a server key, then by the presence of a world
-     * key, and finally by the overall size of the set. Nodes are ordered according to the priority rules
-     * defined in {@link NodeComparator}.</p>
      */
-    private final SortedSetMultimap<ImmutableContextSet, Node> nodes = MultimapBuilder
-            .treeKeys(ContextSetComparator.reverse())
-            .treeSetValues(NodeComparator.reverse())
-            .build();
-
-    protected PermissionHolder(String objectName, LuckPermsPlugin plugin) {
-        this.objectName = objectName;
-        this.plugin = plugin;
-    }
-
-    /**
-     * Caches an immutable copy of the above nodes multimap
-     */
-    private final class NodesCache extends Cache<ImmutableSetMultimap<ImmutableContextSet, Node>> {
-        @Override
-        protected ImmutableSetMultimap<ImmutableContextSet, Node> supply() {
-            PermissionHolder.this.nodesLock.lock();
-            try {
-                return ImmutableSetMultimap.copyOf(PermissionHolder.this.nodes);
-            } finally {
-                PermissionHolder.this.nodesLock.unlock();
-            }
-        }
-    }
-    private final NodesCache nodesCopy = new NodesCache();
-
-    // used to ensure thread safe access to the backing nodes map
-    private final ReentrantLock nodesLock = new ReentrantLock();
+    private final NodeMap enduringNodes = new NodeMap(this);
 
     /**
      * The holders transient nodes.
@@ -160,46 +122,18 @@ public abstract class PermissionHolder {
      * <p>These are nodes which are never stored or persisted to a file, and only
      * last until the end of the objects lifetime. (for a group, that's when the server stops, and for a user, it's when
      * they log out, or get unloaded.)</p>
-     *
-     * <p>Nodes are mapped by the result of {@link Node#getFullContexts()}, and keys are sorted by the weight of the
-     * ContextSet. ContextSets are ordered first by the presence of a server key, then by the presence of a world
-     * key, and finally by the overall size of the set. Nodes are ordered according to the priority rules
-     * defined in {@link NodeComparator}.</p>
      */
-    private final SortedSetMultimap<ImmutableContextSet, Node> transientNodes = MultimapBuilder
-            .treeKeys(ContextSetComparator.reverse())
-            .treeSetValues(NodeComparator.reverse())
-            .build();
-
-    /**
-     * Caches an immutable copy of the above transientNodes multimap
-     */
-    private final class TransientNodesCache extends Cache<ImmutableSetMultimap<ImmutableContextSet, Node>> {
-        @Override
-        protected ImmutableSetMultimap<ImmutableContextSet, Node> supply() {
-            PermissionHolder.this.transientNodesLock.lock();
-            try {
-                return ImmutableSetMultimap.copyOf(PermissionHolder.this.transientNodes);
-            } finally {
-                PermissionHolder.this.transientNodesLock.unlock();
-            }
-        }
-    }
-    private final TransientNodesCache transientNodesCopy = new TransientNodesCache();
+    private final NodeMap transientNodes = new NodeMap(this);
 
     /**
      * Caches the holders weight lookup
      */
-    private final class WeightCache extends Cache<OptionalInt> {
+    private final Cache<OptionalInt> weightCache = new Cache<OptionalInt>() {
         @Override
         protected OptionalInt supply() {
             return calculateWeight();
         }
-    }
-    private final WeightCache weightCache = new WeightCache();
-
-    // used to ensure thread safe access to the backing transientNodes map
-    private final ReentrantLock transientNodesLock = new ReentrantLock();
+    };
 
     /**
      * Lock used by Storage implementations to prevent concurrent read/writes
@@ -215,6 +149,11 @@ public abstract class PermissionHolder {
      * A set of runnables which are called when this objects state changes.
      */
     private final Set<StateListener> stateListeners = ConcurrentHashMap.newKeySet();
+
+    protected PermissionHolder(String objectName, LuckPermsPlugin plugin) {
+        this.objectName = objectName;
+        this.plugin = plugin;
+    }
 
     public String getObjectName() {
         return this.objectName;
@@ -233,8 +172,8 @@ public abstract class PermissionHolder {
     }
 
     private void invalidateCache() {
-        this.nodesCopy.invalidate();
-        this.transientNodesCopy.invalidate();
+        this.enduringNodes.invalidate();
+        this.transientNodes.invalidate();
         this.weightCache.invalidate();
 
         // Invalidate listeners
@@ -250,7 +189,7 @@ public abstract class PermissionHolder {
         declareState();
     }
 
-    protected void declareState() {
+    private void declareState() {
         /* only declare state of groups. the state manager isn't really being used now the caches in this class
            are gone, but it's useful for command output. */
         if (this.getType().isGroup()) {
@@ -295,22 +234,31 @@ public abstract class PermissionHolder {
      */
     public abstract ApiPermissionHolder getDelegate();
 
-    /**
-     * Returns an immutable copy of this objects nodes
-     *
-     * @return an immutable copy of the multimap storing this objects nodes
-     */
-    public ImmutableSetMultimap<ImmutableContextSet, Node> getEnduringNodes() {
-        return this.nodesCopy.get();
+    public NodeMap getData(NodeMapType type) {
+        switch (type) {
+            case ENDURING:
+                return this.enduringNodes;
+            case TRANSIENT:
+                return this.transientNodes;
+            default:
+                throw new AssertionError();
+        }
     }
 
-    /**
-     * Returns an immutable copy of this objects transient nodes
-     *
-     * @return an immutable copy of the multimap storing this objects transient nodes
-     */
+    public NodeMap getEnduringData() {
+        return this.enduringNodes;
+    }
+
+    public NodeMap getTransientData() {
+        return this.transientNodes;
+    }
+
+    public ImmutableSetMultimap<ImmutableContextSet, Node> getEnduringNodes() {
+        return this.enduringNodes.immutable();
+    }
+
     public ImmutableSetMultimap<ImmutableContextSet, Node> getTransientNodes() {
-        return this.transientNodesCopy.get();
+        return this.transientNodes.immutable();
     }
 
     /**
@@ -319,15 +267,7 @@ public abstract class PermissionHolder {
      * @param set the set of nodes to apply to the object
      */
     public void setEnduringNodes(Set<Node> set) {
-        this.nodesLock.lock();
-        try {
-            this.nodes.clear();
-            for (Node n : set) {
-                this.nodes.put(n.getFullContexts().makeImmutable(), n);
-            }
-        } finally {
-            this.nodesLock.unlock();
-        }
+        this.enduringNodes.setContent(set);
         invalidateCache();
     }
 
@@ -337,213 +277,48 @@ public abstract class PermissionHolder {
      * @param multimap the replacement multimap
      */
     public void replaceEnduringNodes(Multimap<ImmutableContextSet, Node> multimap) {
-        this.nodesLock.lock();
-        try {
-            this.nodes.clear();
-            this.nodes.putAll(multimap);
-        } finally {
-            this.nodesLock.unlock();
-        }
+        this.enduringNodes.setContent(multimap);
         invalidateCache();
-    }
-
-    public void setTransientNodes(Set<Node> set) {
-        this.transientNodesLock.lock();
-        try {
-            this.transientNodes.clear();
-            for (Node n : set) {
-                this.transientNodes.put(n.getFullContexts().makeImmutable(), n);
-            }
-        } finally {
-            this.transientNodesLock.unlock();
-        }
-        invalidateCache();
-    }
-
-    public void replaceTransientNodes(Multimap<ImmutableContextSet, Node> multimap) {
-        this.transientNodesLock.lock();
-        try {
-            this.transientNodes.clear();
-            this.transientNodes.putAll(multimap);
-        } finally {
-            this.transientNodesLock.unlock();
-        }
-        invalidateCache();
-    }
-
-    /**
-     * Merges enduring and transient permissions into one set
-     *
-     * @return a set containing the holders enduring and transient permissions
-     */
-    public LinkedHashSet<Node> getOwnNodesSet() {
-        LinkedHashSet<Node> ret = new LinkedHashSet<>();
-
-        this.transientNodesLock.lock();
-        try {
-            ret.addAll(this.transientNodes.values());
-        } finally {
-            this.transientNodesLock.unlock();
-        }
-
-        this.nodesLock.lock();
-        try {
-            ret.addAll(this.nodes.values());
-        } finally {
-            this.nodesLock.unlock();
-        }
-
-        return ret;
     }
 
     public List<Node> getOwnNodes() {
         List<Node> ret = new ArrayList<>();
+        this.transientNodes.copyTo(ret);
+        this.enduringNodes.copyTo(ret);
+        return ret;
+    }
 
-        this.transientNodesLock.lock();
-        try {
-            ret.addAll(this.transientNodes.values());
-        } finally {
-            this.transientNodesLock.unlock();
-        }
-
-        this.nodesLock.lock();
-        try {
-            ret.addAll(this.nodes.values());
-        } finally {
-            this.nodesLock.unlock();
-        }
-
+    public List<Node> getOwnNodes(ContextSet filter) {
+        List<Node> ret = new ArrayList<>();
+        this.transientNodes.copyTo(ret, filter);
+        this.enduringNodes.copyTo(ret, filter);
         return ret;
     }
 
     public SortedSet<LocalizedNode> getOwnNodesSorted() {
         SortedSet<LocalizedNode> ret = new TreeSet<>(NodeWithContextComparator.reverse());
-
-        this.transientNodesLock.lock();
-        try {
-            for (Node node : this.transientNodes.values()) {
-                ret.add(ImmutableLocalizedNode.of(node, getObjectName()));
-            }
-        } finally {
-            this.transientNodesLock.unlock();
-        }
-
-        this.nodesLock.lock();
-        try {
-            for (Node node : this.nodes.values()) {
-                ret.add(ImmutableLocalizedNode.of(node, getObjectName()));
-            }
-        } finally {
-            this.nodesLock.unlock();
-        }
-
-        return ret;
-    }
-
-    public List<Node> filterEnduringNodes(ContextSet filter) {
-        return filterEnduringNodes(new ArrayList<>(), filter);
-    }
-
-    public <C extends Collection<Node>> C filterEnduringNodes(C ret, ContextSet filter) {
-        this.nodesLock.lock();
-        try {
-            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : this.nodes.asMap().entrySet()) {
-                if (e.getKey().isSatisfiedBy(filter)) {
-                    ret.addAll(e.getValue());
-                }
-            }
-        } finally {
-            this.nodesLock.unlock();
-        }
-
-        return ret;
-    }
-
-    public List<Node> filterTransientNodes(ContextSet filter) {
-        return filterTransientNodes(new ArrayList<>(), filter);
-    }
-
-    public <C extends Collection<Node>> C filterTransientNodes(C ret, ContextSet filter) {
-        this.transientNodesLock.lock();
-        try {
-            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : this.transientNodes.asMap().entrySet()) {
-                if (e.getKey().isSatisfiedBy(filter)) {
-                    ret.addAll(e.getValue());
-                }
-            }
-        } finally {
-            this.transientNodesLock.unlock();
-        }
-
-        return ret;
-    }
-
-    public List<Node> filterNodes(ContextSet filter) {
-        return filterNodes(new ArrayList<>(), filter);
-    }
-
-    public <C extends Collection<Node>> C filterNodes(C ret, ContextSet filter) {
-        this.transientNodesLock.lock();
-        try {
-            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : this.transientNodes.asMap().entrySet()) {
-                if (e.getKey().isSatisfiedBy(filter)) {
-                    ret.addAll(e.getValue());
-                }
-            }
-        } finally {
-            this.transientNodesLock.unlock();
-        }
-
-        this.nodesLock.lock();
-        try {
-            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : this.nodes.asMap().entrySet()) {
-                if (e.getKey().isSatisfiedBy(filter)) {
-                    ret.addAll(e.getValue());
-                }
-            }
-        } finally {
-            this.nodesLock.unlock();
-        }
-
+        this.transientNodes.copyToLocalized(ret);
+        this.enduringNodes.copyToLocalized(ret);
         return ret;
     }
 
     public boolean removeIf(Predicate<Node> predicate) {
-        boolean result;
         ImmutableCollection<Node> before = getEnduringNodes().values();
-
-        this.nodesLock.lock();
-        try {
-            result = this.nodes.values().removeIf(predicate);
-        } finally {
-            this.nodesLock.unlock();
-        }
-
-        if (!result) {
+        if (!this.enduringNodes.removeIf(predicate)) {
             return false;
         }
-
         invalidateCache();
-
         ImmutableCollection<Node> after = getEnduringNodes().values();
+
         this.plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
     public boolean removeIfTransient(Predicate<Node> predicate) {
-        boolean result;
-
-        this.transientNodesLock.lock();
-        try {
-            result = this.transientNodes.values().removeIf(predicate);
-        } finally {
-            this.transientNodesLock.unlock();
-        }
-
+        boolean result = this.transientNodes.removeIf(predicate);
         if (result) {
             invalidateCache();
         }
-
         return result;
     }
 
@@ -568,7 +343,7 @@ public abstract class PermissionHolder {
         }
 
         // get and add the objects own nodes
-        List<Node> nodes = filterNodes(context.getContexts());
+        List<Node> nodes = getOwnNodes(context.getContexts());
         for (Node node : nodes) {
             ImmutableLocalizedNode localizedNode = ImmutableLocalizedNode.of(node, getObjectName());
             accumulator.add(localizedNode);
@@ -702,7 +477,7 @@ public abstract class PermissionHolder {
             entries = resolveInheritances(new LinkedList<>(), null, context);
         } else {
             entries = new LinkedList<>();
-            for (Node n : filterNodes(context.getContexts())) {
+            for (Node n : getOwnNodes(context.getContexts())) {
                 ImmutableLocalizedNode localizedNode = ImmutableLocalizedNode.of(n, getObjectName());
                 entries.add(localizedNode);
             }
@@ -727,7 +502,7 @@ public abstract class PermissionHolder {
             entries = resolveInheritances(new LinkedList<>(), null, context);
         } else {
             entries = new LinkedList<>();
-            for (Node n : filterNodes(context.getContexts())) {
+            for (Node n : getOwnNodes(context.getContexts())) {
                 ImmutableLocalizedNode localizedNode = ImmutableLocalizedNode.of(n, getObjectName());
                 entries.add(localizedNode);
             }
@@ -795,7 +570,7 @@ public abstract class PermissionHolder {
         }
 
         // get and add the objects own nodes
-        List<Node> nodes = filterNodes(context.getContexts());
+        List<Node> nodes = getOwnNodes(context.getContexts());
 
         for (Node node : nodes) {
             if (!node.getValuePrimitive()) continue;
@@ -903,65 +678,28 @@ public abstract class PermissionHolder {
      * @return true if permissions had expired and were removed
      */
     public boolean auditTemporaryPermissions() {
-        boolean work = false;
         Set<Node> removed = new HashSet<>();
 
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getOwnNodesSet());
+        // audit temporary nodes first, but don't track ones which are removed
+        // we don't call events for transient nodes
+        this.transientNodes.auditTemporaryNodes(null);
 
-        this.nodesLock.lock();
-        try {
-            Iterator<Node> it = this.nodes.values().iterator();
-            while (it.hasNext()) {
-                Node entry = it.next();
-                if (entry.hasExpired()) {
-                    removed.add(entry);
-                    work = true;
-                    it.remove();
-                }
-            }
-        } finally {
-            this.nodesLock.unlock();
-        }
+        ImmutableCollection<Node> before = getEnduringNodes().values();
 
-        if (work) {
-            invalidateCache();
-            work = false;
-        }
-
-        this.transientNodesLock.lock();
-        try {
-            Iterator<Node> it = this.transientNodes.values().iterator();
-            while (it.hasNext()) {
-                Node entry = it.next();
-                if (entry.hasExpired()) {
-                    removed.add(entry);
-                    work = true;
-                    it.remove();
-                }
-            }
-        } finally {
-            this.transientNodesLock.unlock();
-        }
-
-        if (work) {
-            invalidateCache();
-        }
-
-        if (removed.isEmpty()) {
+        if (!this.enduringNodes.auditTemporaryNodes(removed)) {
             return false;
         }
 
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getOwnNodesSet());
-
+        invalidateCache();
+        ImmutableCollection<Node> after = getEnduringNodes().values();
         for (Node r : removed) {
             this.plugin.getEventFactory().handleNodeRemove(r, this, before, after);
         }
-
         return true;
     }
 
-    public Optional<Node> getAlmostEquals(Node node, boolean t) {
-        for (Node n : t ? getTransientNodes().values() : getEnduringNodes().values()) {
+    private Optional<Node> getAlmostEquals(Node node, NodeMapType type) {
+        for (Node n : getData(type).immutable().values()) {
             if (n.almostEquals(node)) {
                 return Optional.of(n);
             }
@@ -974,19 +712,19 @@ public abstract class PermissionHolder {
      * Check if the holder has a permission node
      *
      * @param node the node to check
-     * @param checkTransient    whether to check transient nodes
+     * @param type which backing map to check
      * @return a tristate
      */
-    public Tristate hasPermission(Node node, boolean checkTransient) {
+    public Tristate hasPermission(Node node, NodeMapType type) {
         if (this.getType().isGroup() && node.isGroupNode() && node.getGroupName().equalsIgnoreCase(getObjectName())) {
             return Tristate.TRUE;
         }
 
-        return getAlmostEquals(node, checkTransient).map(Node::getTristate).orElse(Tristate.UNDEFINED);
+        return getAlmostEquals(node, type).map(Node::getTristate).orElse(Tristate.UNDEFINED);
     }
 
     public Tristate hasPermission(Node node) {
-        return hasPermission(node, false);
+        return hasPermission(node, NodeMapType.ENDURING);
     }
 
     /**
@@ -1021,20 +759,13 @@ public abstract class PermissionHolder {
      * @param node the node to set
      */
     public DataMutateResult setPermission(Node node) {
-        if (hasPermission(node, false) != Tristate.UNDEFINED) {
+        if (hasPermission(node, NodeMapType.ENDURING) != Tristate.UNDEFINED) {
             return DataMutateResult.ALREADY_HAS;
         }
 
         ImmutableCollection<Node> before = getEnduringNodes().values();
-
-        this.nodesLock.lock();
-        try {
-            this.nodes.put(node.getFullContexts().makeImmutable(), node);
-        } finally {
-            this.nodesLock.unlock();
-        }
+        this.enduringNodes.add(node);
         invalidateCache();
-
         ImmutableCollection<Node> after = getEnduringNodes().values();
 
         this.plugin.getEventFactory().handleNodeAdd(node, this, before, after);
@@ -1052,7 +783,7 @@ public abstract class PermissionHolder {
         if (node.isTemporary()) {
             if (modifier == TemporaryModifier.ACCUMULATE) {
                 // Try to accumulate with an existing node
-                Optional<Node> existing = getAlmostEquals(node, false);
+                Optional<Node> existing = getAlmostEquals(node, NodeMapType.ENDURING);
 
                 // An existing node was found
                 if (existing.isPresent()) {
@@ -1061,26 +792,19 @@ public abstract class PermissionHolder {
                     // Create a new node with the same properties, but add the expiry dates together
                     Node newNode = NodeFactory.builder(node).setExpiry(previous.getExpiryUnixTime() + node.getSecondsTilExpiry()).build();
 
-                    ImmutableCollection<Node> before = getEnduringNodes().values();
-
                     // Remove the old node & add the new one.
-                    this.nodesLock.lock();
-                    try {
-                        this.nodes.remove(previous.getFullContexts().makeImmutable(), previous);
-                        this.nodes.put(newNode.getFullContexts().makeImmutable(), newNode);
-                    } finally {
-                        this.nodesLock.unlock();
-                    }
-
+                    ImmutableCollection<Node> before = getEnduringNodes().values();
+                    this.enduringNodes.replace(newNode, previous);
                     invalidateCache();
                     ImmutableCollection<Node> after = getEnduringNodes().values();
+
                     this.plugin.getEventFactory().handleNodeAdd(newNode, this, before, after);
                     return Maps.immutableEntry(DataMutateResult.SUCCESS, newNode);
                 }
 
             } else if (modifier == TemporaryModifier.REPLACE) {
                 // Try to replace an existing node
-                Optional<Node> existing = getAlmostEquals(node, false);
+                Optional<Node> existing = getAlmostEquals(node, NodeMapType.ENDURING);
 
                 // An existing node was found
                 if (existing.isPresent()) {
@@ -1090,17 +814,10 @@ public abstract class PermissionHolder {
                     if (node.getExpiryUnixTime() > previous.getExpiryUnixTime()) {
 
                         ImmutableCollection<Node> before = getEnduringNodes().values();
-
-                        this.nodesLock.lock();
-                        try {
-                            this.nodes.remove(previous.getFullContexts().makeImmutable(), previous);
-                            this.nodes.put(node.getFullContexts().makeImmutable(), node);
-                        } finally {
-                            this.nodesLock.unlock();
-                        }
-
+                        this.enduringNodes.replace(node, previous);
                         invalidateCache();
                         ImmutableCollection<Node> after = getEnduringNodes().values();
+
                         this.plugin.getEventFactory().handleNodeAdd(node, this, before, after);
                         return Maps.immutableEntry(DataMutateResult.SUCCESS, node);
                     }
@@ -1120,24 +837,12 @@ public abstract class PermissionHolder {
      * @param node the node to set
      */
     public DataMutateResult setTransientPermission(Node node) {
-        if (hasPermission(node, true) != Tristate.UNDEFINED) {
+        if (hasPermission(node, NodeMapType.TRANSIENT) != Tristate.UNDEFINED) {
             return DataMutateResult.ALREADY_HAS;
         }
 
-        ImmutableCollection<Node> before = getTransientNodes().values();
-
-        this.transientNodesLock.lock();
-        try {
-            this.transientNodes.put(node.getFullContexts().makeImmutable(), node);
-        } finally {
-            this.transientNodesLock.unlock();
-        }
-
+        this.transientNodes.add(node);
         invalidateCache();
-
-        ImmutableCollection<Node> after = getTransientNodes().values();
-
-        this.plugin.getEventFactory().handleNodeAdd(node, this, before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -1147,22 +852,15 @@ public abstract class PermissionHolder {
      * @param node the node to unset
      */
     public DataMutateResult unsetPermission(Node node) {
-        if (hasPermission(node, false) == Tristate.UNDEFINED) {
+        if (hasPermission(node, NodeMapType.ENDURING) == Tristate.UNDEFINED) {
             return DataMutateResult.LACKS;
         }
 
         ImmutableCollection<Node> before = getEnduringNodes().values();
-
-        this.nodesLock.lock();
-        try {
-            this.nodes.get(node.getFullContexts().makeImmutable()).removeIf(e -> e.almostEquals(node));
-        } finally {
-            this.nodesLock.unlock();
-        }
-
+        this.enduringNodes.remove(node);
         invalidateCache();
-
         ImmutableCollection<Node> after = getEnduringNodes().values();
+
         this.plugin.getEventFactory().handleNodeRemove(node, this, before, after);
         return DataMutateResult.SUCCESS;
     }
@@ -1173,23 +871,12 @@ public abstract class PermissionHolder {
      * @param node the node to unset
      */
     public DataMutateResult unsetTransientPermission(Node node) {
-        if (hasPermission(node, true) == Tristate.UNDEFINED) {
+        if (hasPermission(node, NodeMapType.TRANSIENT) == Tristate.UNDEFINED) {
             return DataMutateResult.LACKS;
         }
 
-        ImmutableCollection<Node> before = getTransientNodes().values();
-
-        this.transientNodesLock.lock();
-        try {
-            this.transientNodes.get(node.getFullContexts().makeImmutable()).removeIf(e -> e.almostEquals(node));
-        } finally {
-            this.transientNodesLock.unlock();
-        }
-
+        this.transientNodes.remove(node);
         invalidateCache();
-
-        ImmutableCollection<Node> after = getTransientNodes().values();
-        this.plugin.getEventFactory().handleNodeRemove(node, this, before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -1206,14 +893,7 @@ public abstract class PermissionHolder {
      */
     public boolean clearNodes() {
         ImmutableCollection<Node> before = getEnduringNodes().values();
-
-        this.nodesLock.lock();
-        try {
-            this.nodes.clear();
-        } finally {
-            this.nodesLock.unlock();
-        }
-
+        this.enduringNodes.clear();
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
 
@@ -1227,13 +907,7 @@ public abstract class PermissionHolder {
 
     public boolean clearNodes(ContextSet contextSet) {
         ImmutableCollection<Node> before = getEnduringNodes().values();
-        this.nodesLock.lock();
-        try {
-            this.nodes.removeAll(contextSet.makeImmutable());
-        } finally {
-            this.nodesLock.unlock();
-        }
-
+        this.enduringNodes.clear(contextSet);
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
 
@@ -1248,22 +922,16 @@ public abstract class PermissionHolder {
     public boolean clearParents(boolean giveDefault) {
         ImmutableCollection<Node> before = getEnduringNodes().values();
 
-        this.nodesLock.lock();
-        try {
-            boolean b = this.nodes.values().removeIf(Node::isGroupNode);
-            if (!b) {
-                return false;
-            }
-        } finally {
-            this.nodesLock.unlock();
+        if (!this.enduringNodes.removeIf(Node::isGroupNode)) {
+            return false;
         }
-
         if (this.getType().isUser() && giveDefault) {
             this.plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
         }
 
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
+
         this.plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
@@ -1271,133 +939,71 @@ public abstract class PermissionHolder {
     public boolean clearParents(ContextSet contextSet, boolean giveDefault) {
         ImmutableCollection<Node> before = getEnduringNodes().values();
 
-        this.nodesLock.lock();
-        try {
-            SortedSet<Node> nodes = this.nodes.get(contextSet.makeImmutable());
-            if (nodes == null) {
-                return false;
-            }
-
-            boolean b = nodes.removeIf(Node::isGroupNode);
-            if (!b) {
-                return false;
-            }
-        } finally {
-            this.nodesLock.unlock();
+        if (!this.enduringNodes.removeIf(contextSet, Node::isGroupNode)) {
+            return false;
         }
-
         if (this.getType().isUser() && giveDefault) {
             this.plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
         }
+
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
+
         this.plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
     public boolean clearMeta(MetaType type) {
         ImmutableCollection<Node> before = getEnduringNodes().values();
-
-        this.nodesLock.lock();
-        try {
-            if (!this.nodes.values().removeIf(type::matches)) {
-                return false;
-            }
-        } finally {
-            this.nodesLock.unlock();
+        if (!this.enduringNodes.removeIf(type::matches)) {
+            return false;
         }
-
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
+
         this.plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
     public boolean clearMeta(MetaType type, ContextSet contextSet) {
         ImmutableCollection<Node> before = getEnduringNodes().values();
-
-        this.nodesLock.lock();
-        try {
-            SortedSet<Node> nodes = this.nodes.get(contextSet.makeImmutable());
-            if (nodes == null) {
-                return false;
-            }
-
-            boolean b = nodes.removeIf(type::matches);
-            if (!b) {
-                return false;
-            }
-        } finally {
-            this.nodesLock.unlock();
+        if (!this.enduringNodes.removeIf(contextSet, type::matches)) {
+            return false;
         }
-
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
+
         this.plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
     public boolean clearMetaKeys(String key, boolean temp) {
         ImmutableCollection<Node> before = getEnduringNodes().values();
-
-        this.nodesLock.lock();
-        try {
-            boolean b = this.nodes.values().removeIf(n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key));
-            if (!b) {
-                return false;
-            }
-        } finally {
-            this.nodesLock.unlock();
+        if (!this.enduringNodes.removeIf(n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key))) {
+            return false;
         }
-
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
+
         this.plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
     public boolean clearMetaKeys(String key, ContextSet contextSet, boolean temp) {
         ImmutableCollection<Node> before = getEnduringNodes().values();
-
-        this.nodesLock.lock();
-        try {
-            SortedSet<Node> nodes = this.nodes.get(contextSet.makeImmutable());
-            if (nodes == null) {
-                return false;
-            }
-
-            boolean b = nodes.removeIf(n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key));
-            if (!b) {
-                return false;
-            }
-        } finally {
-            this.nodesLock.unlock();
+        if (!this.enduringNodes.removeIf(contextSet, n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key))) {
+            return false;
         }
-
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
+
         this.plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
     public boolean clearTransientNodes() {
-        ImmutableCollection<Node> before = getTransientNodes().values();
-
-        this.transientNodesLock.lock();
-        try {
-            this.transientNodes.clear();
-        } finally {
-            this.transientNodesLock.unlock();
-        }
-
+        this.transientNodes.clear();
         invalidateCache();
-        ImmutableCollection<Node> after = getTransientNodes().values();
-
-        if (before.size() == after.size()) {
-            return false;
-        }
-
-        this.plugin.getEventFactory().handleNodeClear(this, before, after);
         return true;
     }
 
@@ -1410,7 +1016,7 @@ public abstract class PermissionHolder {
 
         boolean seen = false;
         int best = 0;
-        for (Node n : getEnduringNodes().get(ImmutableContextSet.empty())) {
+        for (Node n : getOwnNodes(ImmutableContextSet.empty())) {
             Integer weight = NodeFactory.parseWeightNode(n.getPermission());
             if (weight == null) {
                 continue;

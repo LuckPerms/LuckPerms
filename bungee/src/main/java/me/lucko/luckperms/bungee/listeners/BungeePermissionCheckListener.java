@@ -54,7 +54,7 @@ public class BungeePermissionCheckListener implements Listener {
 
         ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
 
-        User user = this.plugin.getUserManager().getIfLoaded(this.plugin.getUuidCache().getUUID(player.getUniqueId()));
+        User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
         if (user == null) {
             e.setHasPermission(false);
             return;
@@ -77,7 +77,7 @@ public class BungeePermissionCheckListener implements Listener {
 
         ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
 
-        User user = this.plugin.getUserManager().getIfLoaded(this.plugin.getUuidCache().getUUID(player.getUniqueId()));
+        User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
         if (user == null) {
             e.setResult(Tristate.UNDEFINED);
             return;
