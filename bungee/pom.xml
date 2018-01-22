@@ -81,10 +81,6 @@
                                     <shadedPattern>me.lucko.luckperms.lib.bson</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>com.datastax.driver.core</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.cassandra</shadedPattern>
-                                </relocation>
-                                <relocation>
                                     <pattern>redis.clients.jedis</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.jedis</shadedPattern>
                                 </relocation>

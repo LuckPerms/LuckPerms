@@ -34,6 +34,7 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -135,114 +136,50 @@ public enum Dependency {
             "com.datastax.cassandra",
             "cassandra-driver-core",
             "3.3.2",
-            "BauFwmXj/syIoOkmhlyKYVwv8+QiEVHvSoOHhz9OIXs=",
-            ImmutableList.<Relocation>builder()
-                    .addAll(Relocation.of("cassandra", "com{}datastax{}driver{}core"))
-                    .addAll(Relocation.of("dropwizard", "com{}codahale{}metrics"))
-                    .addAll(Relocation.of("jffi", "com{}kenai{}jffi"))
-                    .addAll(Relocation.of("jni", "jni"))
-                    .addAll(Relocation.of("jnr", "jnr"))
-                    .addAll(Relocation.of("ckjnr", "com{}kenai{}jnr"))
-                    .build()
+            "BauFwmXj/syIoOkmhlyKYVwv8+QiEVHvSoOHhz9OIXs="
     ),
     DROPWIZARD_METRICS(
             "io.dropwizard.metrics",
             "metrics-core",
             "3.2.2",
-            "XG9oXkFmTRDHDGWDfLqeWNOf84loEeO1cHqTSxHIWtA=",
-            ImmutableList.<Relocation>builder()
-                    .addAll(Relocation.of("cassandra", "com{}datastax{}driver{}core"))
-                    .addAll(Relocation.of("dropwizard", "com{}codahale{}metrics"))
-                    .addAll(Relocation.of("jffi", "com{}kenai{}jffi"))
-                    .addAll(Relocation.of("jni", "jni"))
-                    .addAll(Relocation.of("jnr", "jnr"))
-                    .addAll(Relocation.of("ckjnr", "com{}kenai{}jnr"))
-                    .build()
+            "XG9oXkFmTRDHDGWDfLqeWNOf84loEeO1cHqTSxHIWtA="
     ),
     JNR_JFFI(
             "com.github.jnr",
             "jffi",
             "1.2.10",
-            "rPZ8I/MyC2nIyq44n2Tk2Y6tFLWRushLPyWSy882oz4=",
-            ImmutableList.<Relocation>builder()
-                    .addAll(Relocation.of("cassandra", "com{}datastax{}driver{}core"))
-                    .addAll(Relocation.of("dropwizard", "com{}codahale{}metrics"))
-                    .addAll(Relocation.of("jffi", "com{}kenai{}jffi"))
-                    .addAll(Relocation.of("jni", "jni"))
-                    .addAll(Relocation.of("jnr", "jnr"))
-                    .addAll(Relocation.of("ckjnr", "com{}kenai{}jnr"))
-                    .build()
+            "rPZ8I/MyC2nIyq44n2Tk2Y6tFLWRushLPyWSy882oz4="
     ),
     JNR_JFFI_NATIVE(
             "com.github.jnr",
             "jffi",
             "1.2.10",
             "native",
-            "yLxbzkWivLVSCQK2GVuDlenKuhUYxrcs5p3muYROcq4=",
-            ImmutableList.<Relocation>builder()
-                    .addAll(Relocation.of("cassandra", "com{}datastax{}driver{}core"))
-                    .addAll(Relocation.of("dropwizard", "com{}codahale{}metrics"))
-                    .addAll(Relocation.of("jffi", "com{}kenai{}jffi"))
-                    .addAll(Relocation.of("jni", "jni"))
-                    .addAll(Relocation.of("jnr", "jnr"))
-                    .addAll(Relocation.of("ckjnr", "com{}kenai{}jnr"))
-                    .build()
+            "yLxbzkWivLVSCQK2GVuDlenKuhUYxrcs5p3muYROcq4="
     ),
     JNR_CONSTANTS(
             "com.github.jnr",
             "jnr-constants",
             "0.9.0",
-            "/vQ7o2Omxcxdq2cbLqBtBlEc9z7TKsHuguiTqEDtJzM=",
-            ImmutableList.<Relocation>builder()
-                    .addAll(Relocation.of("cassandra", "com{}datastax{}driver{}core"))
-                    .addAll(Relocation.of("dropwizard", "com{}codahale{}metrics"))
-                    .addAll(Relocation.of("jffi", "com{}kenai{}jffi"))
-                    .addAll(Relocation.of("jni", "jni"))
-                    .addAll(Relocation.of("jnr", "jnr"))
-                    .addAll(Relocation.of("ckjnr", "com{}kenai{}jnr"))
-                    .build()
+            "/vQ7o2Omxcxdq2cbLqBtBlEc9z7TKsHuguiTqEDtJzM="
     ),
     JNR_FFI(
             "com.github.jnr",
             "jnr-ffi",
             "2.0.7",
-            "lAbfqtWbw/wN6Xq/ikVecNRgwpTW9EVAfVCA25MjlkM=",
-            ImmutableList.<Relocation>builder()
-                    .addAll(Relocation.of("cassandra", "com{}datastax{}driver{}core"))
-                    .addAll(Relocation.of("dropwizard", "com{}codahale{}metrics"))
-                    .addAll(Relocation.of("jffi", "com{}kenai{}jffi"))
-                    .addAll(Relocation.of("jni", "jni"))
-                    .addAll(Relocation.of("jnr", "jnr"))
-                    .addAll(Relocation.of("ckjnr", "com{}kenai{}jnr"))
-                    .build()
+            "lAbfqtWbw/wN6Xq/ikVecNRgwpTW9EVAfVCA25MjlkM="
     ),
     JNR_POSIX(
             "com.github.jnr",
             "jnr-posix",
             "3.0.27",
-            "hNqwMaOGiMsuyAigEboCM8sNEUbTkCDhRHmSrVBfPXg=",
-            ImmutableList.<Relocation>builder()
-                    .addAll(Relocation.of("cassandra", "com{}datastax{}driver{}core"))
-                    .addAll(Relocation.of("dropwizard", "com{}codahale{}metrics"))
-                    .addAll(Relocation.of("jffi", "com{}kenai{}jffi"))
-                    .addAll(Relocation.of("jni", "jni"))
-                    .addAll(Relocation.of("jnr", "jnr"))
-                    .addAll(Relocation.of("ckjnr", "com{}kenai{}jnr"))
-                    .build()
+            "hNqwMaOGiMsuyAigEboCM8sNEUbTkCDhRHmSrVBfPXg="
     ),
     JNR_X86ASM(
             "com.github.jnr",
             "jnr-x86asm",
             "1.0.2",
-            "OfNnW5EObpuTgl+ChL7J9K0wRM0gpvfI/54vhpXr8h4=",
-            ImmutableList.<Relocation>builder()
-                    .addAll(Relocation.of("cassandra", "com{}datastax{}driver{}core"))
-                    .addAll(Relocation.of("dropwizard", "com{}codahale{}metrics"))
-                    .addAll(Relocation.of("jffi", "com{}kenai{}jffi"))
-                    .addAll(Relocation.of("jni", "jni"))
-                    .addAll(Relocation.of("jnr", "jnr"))
-                    .addAll(Relocation.of("ckjnr", "com{}kenai{}jnr"))
-                    .build()
+            "OfNnW5EObpuTgl+ChL7J9K0wRM0gpvfI/54vhpXr8h4="
     ),
     JEDIS(
             "redis.clients",
@@ -308,7 +245,7 @@ public enum Dependency {
     private static final String MAVEN_CENTRAL_FORMAT = "https://repo1.maven.org/maven2/%s/%s/%s/%s-%s.jar";
     private static final String MAVEN_CENTRAL_FORMAT_WITH_CLASSIFIER = "https://repo1.maven.org/maven2/%s/%s/%s/%s-%s-%s.jar";
 
-    Dependency(String groupId, String artifactId, String version, String classifier, String checksum, List<Relocation> relocations) {
+    Dependency(String groupId, String artifactId, String version, String classifier, String checksum) {
         this(
                 String.format(MAVEN_CENTRAL_FORMAT_WITH_CLASSIFIER,
                         rewriteEscaping(groupId).replace(".", "/"),
@@ -318,7 +255,7 @@ public enum Dependency {
                         version,
                         classifier
                 ),
-                version, checksum, relocations
+                version, checksum, Collections.emptyList()
         );
     }
 
@@ -341,14 +278,6 @@ public enum Dependency {
                 ),
                 version, checksum, relocations
         );
-    }
-
-    Dependency(String url, String version, String checksum) {
-        this(url, version, checksum, Collections.emptyList());
-    }
-
-    Dependency(String url, String version, String checksum, Relocation relocation) {
-        this(url, version, checksum, Collections.singletonList(relocation));
     }
 
     Dependency(String url, String version, String checksum, List<Relocation> relocations) {

@@ -162,8 +162,8 @@ public class StorageFactory {
                 );
             case CASSANDRA:
                 return new CassandraDao(
-                        plugin,
-                        plugin.getConfiguration().get(ConfigKeys.CASSANDRA_CONFIG)
+                        this.plugin,
+                        this.plugin.getConfiguration().get(ConfigKeys.CASSANDRA_CONFIG)
                 );
             case YAML:
                 return new YamlDao(this.plugin, "yaml-storage");
