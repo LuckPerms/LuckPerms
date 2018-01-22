@@ -39,7 +39,8 @@ public enum StorageType {
     MYSQL("MySQL", "mysql"),
     POSTGRESQL("PostgreSQL", "postgresql"),
     SQLITE("SQLite", "sqlite"),
-    H2("H2", "h2");
+    H2("H2", "h2"),
+    CASSANDRA("Cassandra", "cassandra");
 
     private final String name;
 

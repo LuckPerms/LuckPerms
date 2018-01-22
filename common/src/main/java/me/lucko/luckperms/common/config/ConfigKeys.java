@@ -47,16 +47,21 @@ import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
 import me.lucko.luckperms.common.primarygroup.StoredHolder;
 import me.lucko.luckperms.common.storage.SplitStorageType;
 import me.lucko.luckperms.common.storage.StorageCredentials;
+import me.lucko.luckperms.common.storage.dao.cassandra.CassandraConfig;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * All of the {@link ConfigKey}s used by LuckPerms.
@@ -362,6 +367,23 @@ public class ConfigKeys {
                 c.getString("data.password", null),
                 maxPoolSize, minIdle, maxLifetime, connectionTimeout, props
         );
+    }));
+
+    /**
+     * Cassandra config settings
+     */
+    public static final ConfigKey<CassandraConfig> CASSANDRA_CONFIG = EnduringKey.wrap(AbstractKey.of(c -> {
+        List<String> socketAddresses = c.getList("cassandra.addresses", Collections.emptyList());
+        Set<InetSocketAddress> inetSocketAddresses = socketAddresses.stream()
+                .map(s -> s.split(":"))
+                .map(s -> new InetSocketAddress(s[0], Integer.valueOf(s[1])))
+                .collect(Collectors.toSet());
+        boolean ssl = c.getBoolean("cassandra.ssl", false);
+        String keyspace = c.getString("cassandra.keyspace", "luckperms");
+        String username = c.getString("cassandra.username", "");
+        String password = c.getString("cassandra.password", "");
+        String prefix = c.getString("cassandra.prefix", "");
+        return new CassandraConfig(inetSocketAddresses, ssl, keyspace, username, password, prefix);
     }));
 
     /**

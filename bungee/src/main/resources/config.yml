@@ -183,6 +183,7 @@ meta-formatting:
 #
 # See: https://github.com/lucko/LuckPerms/wiki/Choosing-a-Storage-type
 # Currently supported: mysql, mariadb, postgresql, sqlite, h2, json, yaml, hocon, mongodb
+#                      cassandra
 #
 # Fill out connection info below if you're using MySQL, MariaDB, PostgreSQL or MongoDB
 # If your MySQL server supports it, the "mariadb" option is preferred over "mysql".
@@ -269,6 +270,16 @@ data:
   #
   # Set to -1 to disable the task completely.
   sync-minutes: -1
+
+# Settings for Cassandra
+cassandra:
+  addresses:
+  - 'localhost:9042'
+  ssl: false
+  keyspace: 'luckperms'
+  username: ''
+  password: ''
+  prefix: ''
 
 # Settings for the messaging service
 #

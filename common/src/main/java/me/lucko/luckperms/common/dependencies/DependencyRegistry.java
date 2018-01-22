@@ -50,6 +50,7 @@ public class DependencyRegistry {
             .put(StorageType.POSTGRESQL, ImmutableList.of(Dependency.POSTGRESQL_DRIVER, Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI))
             .put(StorageType.SQLITE, ImmutableList.of(Dependency.SQLITE_DRIVER))
             .put(StorageType.H2, ImmutableList.of(Dependency.H2_DRIVER))
+            .put(StorageType.CASSANDRA, ImmutableList.of(Dependency.CASSANDRA_DRIVER, Dependency.DROPWIZARD_METRICS, Dependency.JNR_JFFI, Dependency.JNR_JFFI_NATIVE, Dependency.JNR_CONSTANTS, Dependency.JNR_FFI, Dependency.JNR_POSIX, Dependency.JNR_X86ASM, Dependency.SLF4J_API))
             .build();
 
     private final LuckPermsPlugin plugin;

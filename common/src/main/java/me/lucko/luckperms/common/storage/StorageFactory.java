@@ -28,10 +28,13 @@ package me.lucko.luckperms.common.storage;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
+import me.lucko.luckperms.common.config.ConfigKey;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.dao.AbstractDao;
 import me.lucko.luckperms.common.storage.dao.SplitStorageDao;
+import me.lucko.luckperms.common.storage.dao.cassandra.CassandraConnectionManager;
+import me.lucko.luckperms.common.storage.dao.cassandra.CassandraDao;
 import me.lucko.luckperms.common.storage.dao.file.HoconDao;
 import me.lucko.luckperms.common.storage.dao.file.JsonDao;
 import me.lucko.luckperms.common.storage.dao.file.YamlDao;
@@ -156,6 +159,11 @@ public class StorageFactory {
                         this.plugin,
                         this.plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES),
                         this.plugin.getConfiguration().get(ConfigKeys.MONGODB_COLLECTION_PREFIX)
+                );
+            case CASSANDRA:
+                return new CassandraDao(
+                        this.plugin,
+                        this.plugin.getConfiguration().get(ConfigKeys.CASSANDRA_CONFIG)
                 );
             case YAML:
                 return new YamlDao(this.plugin, "yaml-storage");
