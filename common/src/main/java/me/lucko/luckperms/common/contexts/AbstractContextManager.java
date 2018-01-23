@@ -186,7 +186,7 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
                     }
                     accumulator = ret;
                 } catch (Exception e) {
-                    AbstractContextManager.this.plugin.getLog().warn("An exception was thrown whilst calculating the context of subject " + subject);
+                    AbstractContextManager.this.plugin.getLog().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating the context of subject " + subject);
                     e.printStackTrace();
                 }
             }
@@ -209,13 +209,23 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
                     }
                     accumulator = ret;
                 } catch (Exception e) {
-                    AbstractContextManager.this.plugin.getLog().warn("An exception was thrown whilst calculating static contexts");
+                    AbstractContextManager.this.plugin.getLog().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating static contexts");
                     e.printStackTrace();
                 }
             }
 
             return formContexts(accumulator.makeImmutable());
         }
+    }
+
+    private static String getCalculatorClass(ContextCalculator<?> calculator) {
+        Class<?> calculatorClass;
+        if (calculator instanceof ProxiedContextCalculator) {
+            calculatorClass = ((ProxiedContextCalculator) calculator).getDelegate().getClass();
+        } else {
+            calculatorClass = calculator.getClass();
+        }
+        return calculatorClass.getName();
     }
 
 }
