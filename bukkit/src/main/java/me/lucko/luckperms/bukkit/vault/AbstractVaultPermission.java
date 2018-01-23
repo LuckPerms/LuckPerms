@@ -99,7 +99,7 @@ public abstract class AbstractVaultPermission extends Permission {
         if (player == null) {
             return null;
         }
-        return player(Bukkit.getOfflinePlayer(player));
+        return player(Bukkit.getPlayerExact(player));
     }
 
     private static UUID player(OfflinePlayer player) {
