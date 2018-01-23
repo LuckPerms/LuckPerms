@@ -59,12 +59,7 @@ public class GroupInfo extends SubCommand<Group> {
         Message.GROUP_INFO_GENERAL.send(sender,
                 group.getName(),
                 group.getDisplayName().orElse(group.getName()),
-                group.getWeight().isPresent() ? group.getWeight().getAsInt() : "None",
-                group.getEnduringData().asList().size(),
-                group.getEnduringData().asList().stream().filter(n -> !(n.isGroupNode() || n.isPrefix() || n.isSuffix() || n.isMeta())).mapToInt(n -> 1).sum(),
-                group.getEnduringData().asList().stream().filter(Node::isPrefix).mapToInt(n -> 1).sum(),
-                group.getEnduringData().asList().stream().filter(Node::isSuffix).mapToInt(n -> 1).sum(),
-                group.getEnduringData().asList().stream().filter(Node::isMeta).mapToInt(n -> 1).sum()
+                group.getWeight().isPresent() ? group.getWeight().getAsInt() : "None"
         );
 
         Set<Node> parents = group.getEnduringData().asSet().stream()

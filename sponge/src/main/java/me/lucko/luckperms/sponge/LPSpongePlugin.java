@@ -111,11 +111,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.AbstractCollection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -505,20 +502,6 @@ public class LPSpongePlugin implements LuckPermsSpongePlugin {
     @Override
     public List<Command> getExtraCommands() {
         return Collections.singletonList(new SpongeMainCommand(this));
-    }
-
-    @Override
-    public Map<String, Object> getExtraInfo() {
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("SubjectCollection count", this.service.getLoadedCollections().size());
-        map.put("Subject count",
-                this.service.getLoadedCollections().values().stream()
-                        .map(LPSubjectCollection::getLoadedSubjects)
-                        .mapToInt(AbstractCollection::size)
-                        .sum()
-        );
-        map.put("PermissionDescription count", this.service.getDescriptions().size());
-        return map;
     }
 
     public Game getGame() {

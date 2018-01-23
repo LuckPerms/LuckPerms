@@ -57,7 +57,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -377,15 +376,6 @@ public interface LuckPermsPlugin {
 
     default List<Command> getExtraCommands() {
         return Collections.emptyList();
-    }
-
-    /**
-     * Gets a map of extra information to be shown in the info command
-     *
-     * @return a map of options
-     */
-    default Map<String, Object> getExtraInfo() {
-        return Collections.emptyMap();
     }
 
     /**

@@ -25,9 +25,12 @@
 
 package me.lucko.luckperms.common.commands.impl.user;
 
+import com.google.common.collect.ListMultimap;
+
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.caching.MetaData;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -65,12 +68,7 @@ public class UserInfo extends SubCommand<User> {
                 user.getName().orElse("Unknown"),
                 user.getUuid(),
                 status.asString(plugin.getLocaleManager()),
-                user.getPrimaryGroup().getValue(),
-                user.getEnduringData().asList().size(),
-                user.getEnduringData().asList().stream().filter(n -> !(n.isGroupNode() || n.isPrefix() || n.isSuffix() || n.isMeta())).mapToInt(n -> 1).sum(),
-                user.getEnduringData().asList().stream().filter(Node::isPrefix).mapToInt(n -> 1).sum(),
-                user.getEnduringData().asList().stream().filter(Node::isSuffix).mapToInt(n -> 1).sum(),
-                user.getEnduringData().asList().stream().filter(Node::isMeta).mapToInt(n -> 1).sum()
+                user.getPrimaryGroup().getValue()
         );
 
         Set<Node> parents = user.getEnduringData().asSet().stream()
@@ -101,22 +99,33 @@ public class UserInfo extends SubCommand<User> {
         String context = "&bNone";
         String prefix = "&bNone";
         String suffix = "&bNone";
+        String meta = "&bNone";
         Contexts contexts = plugin.getContextForUser(user);
         if (contexts != null) {
-            context = contexts.getContexts().toSet().stream()
-                    .map(e -> CommandUtils.contextToString(e.getKey(), e.getValue()))
-                    .collect(Collectors.joining(" "));
-
-            MetaData meta = user.getCachedData().getMetaData(contexts);
-            if (meta.getPrefix() != null) {
-                prefix = "&f\"" + meta.getPrefix() + "&f\"";
+            ContextSet contextSet = contexts.getContexts();
+            if (!contextSet.isEmpty()) {
+                context = contextSet.toSet().stream()
+                        .map(e -> CommandUtils.contextToString(e.getKey(), e.getValue()))
+                        .collect(Collectors.joining(" "));
             }
-            if (meta.getSuffix() != null) {
-                suffix = "&f\"" + meta.getSuffix() + "&f\"";
+
+            MetaData data = user.getCachedData().getMetaData(contexts);
+            if (data.getPrefix() != null) {
+                prefix = "&f\"" + data.getPrefix() + "&f\"";
+            }
+            if (data.getSuffix() != null) {
+                suffix = "&f\"" + data.getSuffix() + "&f\"";
+            }
+
+            ListMultimap<String, String> metaMap = data.getMetaMultimap();
+            if (!metaMap.isEmpty()) {
+                meta = metaMap.entries().stream()
+                        .map(e -> CommandUtils.contextToString(e.getKey(), e.getValue()))
+                        .collect(Collectors.joining(" "));
             }
         }
 
-        Message.USER_INFO_DATA.send(sender, CommandUtils.formatBoolean(contexts != null), context, prefix, suffix);
+        Message.USER_INFO_DATA.send(sender, CommandUtils.formatBoolean(contexts != null), context, prefix, suffix, meta);
         return CommandResult.SUCCESS;
     }
 }

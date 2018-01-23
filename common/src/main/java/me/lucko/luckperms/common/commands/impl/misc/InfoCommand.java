@@ -30,7 +30,6 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -41,7 +40,6 @@ import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class InfoCommand extends SingleCommand {
     public InfoCommand(LocaleManager locale) {
@@ -50,8 +48,6 @@ public class InfoCommand extends SingleCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        final LuckPermsConfiguration c = plugin.getConfiguration();
-
         Message.INFO_TOP.send(sender,
                 plugin.getVersion(),
                 plugin.getServerType().getFriendlyName(),
@@ -59,11 +55,9 @@ public class InfoCommand extends SingleCommand {
                 plugin.getServerVersion()
         );
 
-        Map<String, String> storageInfo = plugin.getStorage().getMeta();
-
         Message.EMPTY.send(sender, "&f-  &bStorage:");
         Message.EMPTY.send(sender, "&f-     &3Type: &f" + plugin.getStorage().getName());
-        for (Map.Entry<String, String> e : storageInfo.entrySet()) {
+        for (Map.Entry<String, String> e : plugin.getStorage().getMeta().entrySet()) {
             Message.EMPTY.send(sender, "&f-     &3" + e.getKey() + ": " + formatValue(e.getValue()));
         }
 
@@ -75,19 +69,8 @@ public class InfoCommand extends SingleCommand {
                 DateUtil.formatTimeBrief((System.currentTimeMillis() - plugin.getStartTime()) / 1000L),
                 plugin.getUserManager().getAll().size(),
                 plugin.getGroupManager().getAll().size(),
-                plugin.getTrackManager().getAll().size(),
-                plugin.getContextManager().getCalculatorsSize(),
-                plugin.getPermissionVault().getSize(),
-                plugin.getCalculatorFactory().getActiveProcessors().stream().collect(Collectors.joining(", "))
+                plugin.getTrackManager().getAll().size()
         );
-
-        Map<String, Object> platformInfo = plugin.getExtraInfo();
-        if (!platformInfo.isEmpty()) {
-            Message.EMPTY.send(sender, "&f-  &bPlatform Info:");
-            for (Map.Entry<String, Object> e : platformInfo.entrySet()) {
-                Message.EMPTY.send(sender, "&f-     &3" + e.getKey() + ": " + formatValue(e.getValue().toString()));
-            }
-        }
 
         return CommandResult.SUCCESS;
     }

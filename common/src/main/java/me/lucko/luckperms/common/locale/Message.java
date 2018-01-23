@@ -176,20 +176,17 @@ public enum Message {
             "{PREFIX}&2Running &bLuckPerms v{}&2 by &bLuck&2." + "\n" +
             "{PREFIX}&f-  &3Platform: &f{}" + "\n" +
             "{PREFIX}&f-  &3Server Brand: &f{}" + "\n" +
-            "{PREFIX}&f-  &3Server Version: &f{}",
+            "{PREFIX}&f-  &3Server Version:" + "\n" +
+            "{PREFIX}&f-  {}",
             false
     ),
     INFO_MIDDLE(
-            "{PREFIX}&f-  &bMessaging Type: &f{}" + "\n" +
+            "{PREFIX}&f-  &bMessaging: &f{}" + "\n" +
             "{PREFIX}&f-  &bInstance:" + "\n" +
-            "{PREFIX}&f-     &3Server Name: &f{}" + "\n" +
-            "{PREFIX}&f-     &3Online Players: &a{}" + "\n" +
-            "{PREFIX}&f-     &3Unique Connections: &a{}" + "\n" +
+            "{PREFIX}&f-     &3Static contexts: &f{}" + "\n" +
+            "{PREFIX}&f-     &3Online Players: &a{} &7(&a{}&7 unique)" + "\n" +
             "{PREFIX}&f-     &3Uptime: &7{}" + "\n" +
-            "{PREFIX}&f-     &3Local Data: &a{} &7users, &a{} &7groups, &a{} &7tracks" + "\n" +
-            "{PREFIX}&f-     &3Context Calculators: &a{}" + "\n" +
-            "{PREFIX}&f-     &3Known permissions: &a{}" + "\n" +
-            "{PREFIX}&f-     &3Active processors: &7{10}",
+            "{PREFIX}&f-     &3Local Data: &a{} &7users, &a{} &7groups, &a{} &7tracks",
             false
     ),
 
@@ -308,22 +305,17 @@ public enum Message {
             "{PREFIX}&b&l> &bUser Info: &f{}" + "\n" +
             "{PREFIX}&f- &3UUID: &f{}" + "\n" +
             "{PREFIX}&f- &3Status: {}" + "\n" +
-            "{PREFIX}&f- &3Primary Group: &f{}" + "\n" +
-            "{PREFIX}&f- &aCounts:" + "\n" +
-            "{PREFIX}&f-    &3Nodes: &a{}" + "\n" +
-            "{PREFIX}&f-    &3Permissions: &a{}" + "\n" +
-            "{PREFIX}&f-    &3Prefixes: &a{}" + "\n" +
-            "{PREFIX}&f-    &3Suffixes: &a{}" + "\n" +
-            "{PREFIX}&f-    &3Meta: &a{}",
+            "{PREFIX}&f- &3Primary Group: &f{}",
             false
     ),
 
     USER_INFO_DATA(
-            "{PREFIX}&f- &aCached Data:" + "\n" +
+            "{PREFIX}&f- &aContextual Data:" + "\n" +
             "{PREFIX}&f-    &3Has contextual data: {}" + "\n" +
-            "{PREFIX}&f-    &3Current Contexts: {}" + "\n" +
-            "{PREFIX}&f-    &3Current Prefix: {}" + "\n" +
-            "{PREFIX}&f-    &3Current Suffix: {}",
+            "{PREFIX}&f-    &3Applicable contexts: {}" + "\n" +
+            "{PREFIX}&f-    &3Prefix: {}" + "\n" +
+            "{PREFIX}&f-    &3Suffix: {}" + "\n" +
+            "{PREFIX}&f-    &3Meta: {}",
             false
     ),
 
@@ -356,13 +348,7 @@ public enum Message {
     GROUP_INFO_GENERAL(
             "{PREFIX}&b&l> &bGroup Info: &f{}" + "\n" +
             "{PREFIX}&f- &3Display Name: &f{}" + "\n" +
-            "{PREFIX}&f- &3Weight: &f{}" + "\n" +
-            "{PREFIX}&f- &aCounts:" + "\n" +
-            "{PREFIX}&f-    &3Nodes: &a{}" + "\n" +
-            "{PREFIX}&f-    &3Permissions: &a{}" + "\n" +
-            "{PREFIX}&f-    &3Prefixes: &a{}" + "\n" +
-            "{PREFIX}&f-    &3Suffixes: &a{}" + "\n" +
-            "{PREFIX}&f-    &3Meta: &a{}",
+            "{PREFIX}&f- &3Weight: &f{}",
             false
     ),
     GROUP_SET_WEIGHT("&aSet weight to &b{}&a for group &b{}&a.", true),

@@ -94,7 +94,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -547,15 +546,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public Sender getConsoleSender() {
         return getSenderFactory().wrap(getServer().getConsoleSender());
-    }
-
-    @Override
-    public Map<String, Object> getExtraInfo() {
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("Vault Enabled", this.vaultHookManager != null);
-        map.put("Bukkit Defaults count", this.defaultsProvider.size());
-        map.put("Bukkit Child Permissions count", this.childPermissionProvider.getPermissions().size());
-        return map;
     }
 
     private static boolean checkInvalidVersion() {
