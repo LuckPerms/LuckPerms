@@ -41,6 +41,7 @@ public enum CommandPermission {
 
     SYNC("sync", NONE),
     INFO("info", NONE),
+    DEBUG("debug", NONE),
     VERBOSE("verbose", NONE),
     TREE("tree", NONE),
     SEARCH("search", NONE),

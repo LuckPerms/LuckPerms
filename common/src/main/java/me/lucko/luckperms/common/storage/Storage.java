@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.storage.dao.AbstractDao;
 
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,8 @@ import java.util.concurrent.CompletableFuture;
 public interface Storage {
 
     ApiStorage getDelegate();
+
+    AbstractDao getDao();
 
     String getName();
 

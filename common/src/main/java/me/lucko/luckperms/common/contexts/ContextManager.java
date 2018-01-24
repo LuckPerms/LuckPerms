@@ -26,10 +26,12 @@
 package me.lucko.luckperms.common.contexts;
 
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.caching.MetaContexts;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.StaticContextCalculator;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -104,6 +106,14 @@ public interface ContextManager<T> {
     Contexts formContexts(ImmutableContextSet contextSet);
 
     /**
+     * Forms a "default" {@link MetaContexts} instance from {@link Contexts}.
+     *
+     * @param contexts the contexts
+     * @return a contexts instance
+     */
+    MetaContexts formMetaContexts(Contexts contexts);
+
+    /**
      * Registers a context calculator with the manager.
      *
      * @param calculator the calculator
@@ -125,10 +135,17 @@ public interface ContextManager<T> {
     void invalidateCache(T subject);
 
     /**
-     * Gets the number of calculators registered with the manager.
+     * Gets the calculators registered on the platform
      *
-     * @return the number of calculators registered
+     * @return the registered calculators
      */
-    int getCalculatorsSize();
+    List<ContextCalculator<? super T>> getCalculators();
+
+    /**
+     * Gets the static calculators registered on the platform
+     *
+     * @return the registered static calculators
+     */
+    List<StaticContextCalculator> getStaticCalculators();
 
 }

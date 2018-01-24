@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.calculators;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -45,15 +46,19 @@ import javax.annotation.Nonnull;
 public class PermissionCalculator implements CacheLoader<String, Tristate> {
     private final LuckPermsPlugin plugin;
     private final PermissionCalculatorMetadata metadata;
-    private final List<PermissionProcessor> processors;
+    private final ImmutableList<PermissionProcessor> processors;
 
     // caches lookup calls.
     private final LoadingCache<String, Tristate> lookupCache = Caffeine.newBuilder().build(this);
 
-    public PermissionCalculator(LuckPermsPlugin plugin, PermissionCalculatorMetadata metadata, List<PermissionProcessor> processors) {
+    public PermissionCalculator(LuckPermsPlugin plugin, PermissionCalculatorMetadata metadata, ImmutableList<PermissionProcessor> processors) {
         this.plugin = plugin;
         this.metadata = metadata;
         this.processors = processors;
+    }
+
+    public List<PermissionProcessor> getProcessors() {
+        return this.processors;
     }
 
     public void invalidateCache() {

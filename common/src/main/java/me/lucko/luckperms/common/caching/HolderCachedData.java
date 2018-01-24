@@ -37,10 +37,8 @@ import me.lucko.luckperms.common.caching.type.MetaAccumulator;
 import me.lucko.luckperms.common.caching.type.MetaCache;
 import me.lucko.luckperms.common.caching.type.PermissionCache;
 import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
-import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStack;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -149,7 +147,7 @@ public abstract class HolderCachedData<T extends PermissionHolder> implements Ca
     @Override
     public MetaCache getMetaData(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
-        return getMetaData(makeFromMetaContextsConfig(contexts, this.holder.getPlugin()));
+        return getMetaData(this.holder.getPlugin().getContextManager().formMetaContexts(contexts));
     }
 
     @Nonnull
@@ -170,7 +168,7 @@ public abstract class HolderCachedData<T extends PermissionHolder> implements Ca
     @Override
     public MetaCache calculateMeta(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
-        return calculateMeta(makeFromMetaContextsConfig(contexts, this.holder.getPlugin()));
+        return calculateMeta(this.holder.getPlugin().getContextManager().formMetaContexts(contexts));
     }
 
     @Override
@@ -188,7 +186,7 @@ public abstract class HolderCachedData<T extends PermissionHolder> implements Ca
     @Override
     public void recalculateMeta(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
-        recalculateMeta(makeFromMetaContextsConfig(contexts, this.holder.getPlugin()));
+        recalculateMeta(this.holder.getPlugin().getContextManager().formMetaContexts(contexts));
     }
 
     @Nonnull
@@ -225,7 +223,7 @@ public abstract class HolderCachedData<T extends PermissionHolder> implements Ca
     @Override
     public CompletableFuture<MetaCache> reloadMeta(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
-        return reloadMeta(makeFromMetaContextsConfig(contexts, this.holder.getPlugin()));
+        return reloadMeta(this.holder.getPlugin().getContextManager().formMetaContexts(contexts));
     }
 
     @Override
@@ -279,7 +277,7 @@ public abstract class HolderCachedData<T extends PermissionHolder> implements Ca
     @Override
     public void invalidateMeta(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
-        this.meta.invalidate(makeFromMetaContextsConfig(contexts, this.holder.getPlugin()));
+        this.meta.invalidate(this.holder.getPlugin().getContextManager().formMetaContexts(contexts));
     }
 
     @Override
@@ -319,14 +317,6 @@ public abstract class HolderCachedData<T extends PermissionHolder> implements Ca
         public MetaCache reload(@Nonnull MetaContexts contexts, @Nonnull MetaCache oldData) {
             return calculateMeta(contexts, oldData);
         }
-    }
-
-    private static MetaContexts makeFromMetaContextsConfig(Contexts contexts, LuckPermsPlugin plugin) {
-        return new MetaContexts(
-                contexts,
-                plugin.getConfiguration().get(ConfigKeys.PREFIX_FORMATTING_OPTIONS),
-                plugin.getConfiguration().get(ConfigKeys.SUFFIX_FORMATTING_OPTIONS)
-        );
     }
 
     private static MetaAccumulator newAccumulator(MetaContexts contexts) {

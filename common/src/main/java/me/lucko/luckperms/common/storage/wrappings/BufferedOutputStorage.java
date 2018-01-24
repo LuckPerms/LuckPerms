@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.storage.Storage;
+import me.lucko.luckperms.common.storage.dao.AbstractDao;
 
 import java.util.List;
 import java.util.Map;
@@ -105,6 +106,11 @@ public class BufferedOutputStorage implements Storage, Runnable {
     }
 
     // delegate
+
+    @Override
+    public AbstractDao getDao() {
+        return this.delegate.getDao();
+    }
 
     @Override
     public CompletableFuture<Set<UUID>> getUniqueUsers() {

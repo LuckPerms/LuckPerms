@@ -49,6 +49,7 @@ public enum CommandSpec {
 
     SYNC("Sync changes with the storage", "/%s sync"),
     INFO("Print general plugin info", "/%s info"),
+    DEBUG("Produce debugging output", "/%s debug"),
     VERBOSE("Manage verbose permission checking", "/%s verbose <true|false> [filter]",
             Arg.list(
                     Arg.create("on|record|off|paste", true, "whether to enable/disable logging, or to paste the logged output"),

@@ -42,8 +42,6 @@ import me.lucko.luckperms.sponge.processors.GroupDefaultsProcessor;
 import me.lucko.luckperms.sponge.processors.SpongeWildcardProcessor;
 import me.lucko.luckperms.sponge.processors.UserDefaultsProcessor;
 
-import java.util.List;
-
 public class SpongeCalculatorFactory extends AbstractCalculatorFactory {
     private final LPSpongePlugin plugin;
 
@@ -78,16 +76,5 @@ public class SpongeCalculatorFactory extends AbstractCalculatorFactory {
         }
 
         return registerCalculator(new PermissionCalculator(this.plugin, metadata, processors.build()));
-    }
-
-    @Override
-    public List<String> getActiveProcessors() {
-        ImmutableList.Builder<String> ret = ImmutableList.builder();
-        ret.add("Map");
-        if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_SPONGE_IMPLICIT_WILDCARDS)) ret.add("SpongeWildcard");
-        if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ret.add("Regex");
-        if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) ret.add("Wildcard");
-        if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_SPONGE_DEFAULT_SUBJECTS)) ret.add("Defaults");
-        return ret.build();
     }
 }

@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.sponge.service.calculated;
 
-import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
@@ -57,8 +56,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Nonnull;
-
 /**
  * In-memory implementation of {@link LPSubjectData}.
  */
@@ -75,18 +72,15 @@ public class CalculatedSubjectData implements LPSubjectData {
 
     private final LoadingCache<ImmutableContextSet, CalculatorHolder> permissionCache = Caffeine.newBuilder()
             .expireAfterAccess(10, TimeUnit.MINUTES)
-            .build(new CacheLoader<ImmutableContextSet, CalculatorHolder>() {
-                @Override
-                public CalculatorHolder load(@Nonnull ImmutableContextSet contexts) {
-                    ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
-                    processors.add(new MapProcessor());
-                    processors.add(new SpongeWildcardProcessor());
+            .build(contexts -> {
+                ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
+                processors.add(new MapProcessor());
+                processors.add(new SpongeWildcardProcessor());
 
-                    CalculatorHolder holder = new CalculatorHolder(new PermissionCalculator(CalculatedSubjectData.this.service.getPlugin(), PermissionCalculatorMetadata.of(HolderType.GROUP, CalculatedSubjectData.this.calculatorDisplayName, contexts), processors.build()));
-                    holder.setPermissions(flattenMap(getRelevantEntries(contexts, CalculatedSubjectData.this.permissions)));
+                CalculatorHolder holder = new CalculatorHolder(new PermissionCalculator(CalculatedSubjectData.this.service.getPlugin(), PermissionCalculatorMetadata.of(HolderType.GROUP, CalculatedSubjectData.this.calculatorDisplayName, contexts), processors.build()));
+                holder.setPermissions(flattenMap(getRelevantEntries(contexts, CalculatedSubjectData.this.permissions)));
 
-                    return holder;
-                }
+                return holder;
             });
 
     public CalculatedSubjectData(LPSubject parentSubject, LPPermissionService service, String calculatorDisplayName) {

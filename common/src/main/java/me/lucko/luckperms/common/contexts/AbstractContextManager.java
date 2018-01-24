@@ -28,8 +28,10 @@ package me.lucko.luckperms.common.contexts;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.caching.MetaContexts;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
@@ -78,6 +80,16 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
     protected AbstractContextManager(LuckPermsPlugin plugin, Class<T> subjectClass) {
         this.plugin = plugin;
         this.subjectClass = subjectClass;
+    }
+
+    @Override
+    public List<ContextCalculator<? super T>> getCalculators() {
+        return ImmutableList.copyOf(this.calculators);
+    }
+
+    @Override
+    public List<StaticContextCalculator> getStaticCalculators() {
+        return ImmutableList.copyOf(this.staticCalculators);
     }
 
     @Override
@@ -147,6 +159,15 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
     }
 
     @Override
+    public MetaContexts formMetaContexts(Contexts contexts) {
+        return new MetaContexts(
+                contexts,
+                this.plugin.getConfiguration().get(ConfigKeys.PREFIX_FORMATTING_OPTIONS),
+                this.plugin.getConfiguration().get(ConfigKeys.SUFFIX_FORMATTING_OPTIONS)
+        );
+    }
+
+    @Override
     public void registerCalculator(ContextCalculator<? super T> calculator) {
         // calculators registered first should have priority (and be checked last.)
         this.calculators.add(0, calculator);
@@ -165,11 +186,6 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
         }
 
         this.lookupCache.invalidate(subject);
-    }
-
-    @Override
-    public int getCalculatorsSize() {
-        return this.calculators.size();
     }
 
     private final class Loader implements CacheLoader<T, Contexts> {

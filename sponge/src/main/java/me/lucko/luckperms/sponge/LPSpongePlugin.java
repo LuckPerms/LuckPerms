@@ -121,6 +121,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
+import javax.annotation.Nullable;
+
 /**
  * LuckPerms implementation for the Sponge API.
  */
@@ -422,6 +424,7 @@ public class LPSpongePlugin implements LuckPermsSpongePlugin {
         }
     }
 
+    @Nullable
     @Override
     public Contexts getContextForUser(User user) {
         Player player = getPlayer(user);

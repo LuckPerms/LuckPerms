@@ -190,6 +190,9 @@ public enum Message {
             false
     ),
 
+    DEBUG_START("&bGenerating debugging output...", true),
+    DEBUG_URL("&aDebug data URL:", true),
+
     CREATE_ERROR("&cThere was an error whilst creating &4{}&c.", true),
     DELETE_ERROR("&cThere was an error whilst deleting &4{}&c.", true),
 

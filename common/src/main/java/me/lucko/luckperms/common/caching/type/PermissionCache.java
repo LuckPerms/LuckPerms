@@ -93,6 +93,10 @@ public class PermissionCache implements PermissionData {
         }
     }
 
+    public PermissionCalculator getCalculator() {
+        return this.calculator;
+    }
+
     @Nonnull
     @Override
     public Map<String, Boolean> getImmutableBacking() {

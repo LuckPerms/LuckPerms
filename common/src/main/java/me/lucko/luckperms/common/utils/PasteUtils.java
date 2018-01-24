@@ -37,7 +37,6 @@ import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -54,7 +53,7 @@ public class PasteUtils {
      * @param files the files to include in the gist (file name --> content)
      * @return the url, or null
      */
-    public static String paste(String desc, List<Map.Entry<String, String>> files) {
+    public static String paste(String desc, Iterable<Map.Entry<String, String>> files) {
         HttpURLConnection connection = null;
         try {
             connection = (HttpURLConnection) new URL(GIST_API).openConnection();

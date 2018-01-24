@@ -41,8 +41,6 @@ import me.lucko.luckperms.common.processors.RegexProcessor;
 import me.lucko.luckperms.common.processors.WildcardProcessor;
 import me.lucko.luckperms.common.references.HolderType;
 
-import java.util.List;
-
 public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
     private final LPBukkitPlugin plugin;
 
@@ -73,17 +71,5 @@ public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
         }
 
         return registerCalculator(new PermissionCalculator(this.plugin, metadata, processors.build()));
-    }
-
-    @Override
-    public List<String> getActiveProcessors() {
-        ImmutableList.Builder<String> ret = ImmutableList.builder();
-        ret.add("Map");
-        if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_CHILD_PERMISSIONS)) ret.add("Child");
-        if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_ATTACHMENT_PERMISSIONS)) ret.add("Attachment");
-        if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ret.add("Regex");
-        if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) ret.add("Wildcard");
-        if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) ret.add("Defaults");
-        return ret.build();
     }
 }

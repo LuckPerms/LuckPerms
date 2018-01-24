@@ -72,6 +72,11 @@ public class AbstractStorage implements Storage {
         this.delegate = new ApiStorage(plugin, this);
     }
 
+    @Override
+    public AbstractDao getDao() {
+        return this.dao;
+    }
+
     private <T> CompletableFuture<T> makeFuture(Callable<T> supplier) {
         return CompletableFuture.supplyAsync(() -> {
             try {

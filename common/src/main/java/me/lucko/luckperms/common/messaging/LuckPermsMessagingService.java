@@ -75,6 +75,16 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
     }
 
     @Override
+    public Messenger getMessenger() {
+        return this.messenger;
+    }
+
+    @Override
+    public MessengerProvider getMessengerProvider() {
+        return this.messengerProvider;
+    }
+
+    @Override
     public void close() {
         this.messenger.close();
     }

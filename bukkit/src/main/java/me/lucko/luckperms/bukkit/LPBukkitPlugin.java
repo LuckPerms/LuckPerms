@@ -102,6 +102,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
 
+import javax.annotation.Nullable;
+
 /**
  * LuckPerms implementation for the Bukkit API.
  */
@@ -505,6 +507,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }
     }
 
+    @Nullable
     @Override
     public Contexts getContextForUser(User user) {
         Player player = getPlayer(user);

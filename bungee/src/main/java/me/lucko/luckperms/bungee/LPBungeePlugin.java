@@ -90,6 +90,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
+import javax.annotation.Nullable;
+
 /**
  * LuckPerms implementation for the BungeeCord API.
  */
@@ -335,6 +337,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         return Optional.empty();
     }
 
+    @Nullable
     @Override
     public Contexts getContextForUser(User user) {
         ProxiedPlayer player = getPlayer(user);

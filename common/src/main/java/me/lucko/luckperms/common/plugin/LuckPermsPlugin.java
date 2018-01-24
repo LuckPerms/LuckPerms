@@ -62,6 +62,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import javax.annotation.Nullable;
+
 /**
  * Main internal interface for LuckPerms plugins, providing the base for
  * abstraction throughout the project.
@@ -322,6 +324,7 @@ public interface LuckPermsPlugin {
      * @param user the user instance
      * @return a contexts object, or null if one couldn't be generated
      */
+    @Nullable
     Contexts getContextForUser(User user);
 
     /**

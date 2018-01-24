@@ -26,6 +26,8 @@
 package me.lucko.luckperms.common.messaging;
 
 import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.messenger.Messenger;
+import me.lucko.luckperms.api.messenger.MessengerProvider;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.model.User;
 
@@ -37,6 +39,10 @@ public interface InternalMessagingService {
      * @return the name of this messaging service
      */
     String getName();
+
+    Messenger getMessenger();
+
+    MessengerProvider getMessengerProvider();
 
     /**
      * Closes the messaging service
