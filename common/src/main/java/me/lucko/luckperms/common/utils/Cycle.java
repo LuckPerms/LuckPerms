@@ -50,7 +50,7 @@ public class Cycle<E> {
     /**
      * The current position of the cursor
      */
-    private AtomicInteger cursor = new AtomicInteger(0);
+    private final AtomicInteger cursor = new AtomicInteger(0);
 
     public Cycle(List<E> objects) {
         if (objects == null || objects.isEmpty()) {

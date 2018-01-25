@@ -61,22 +61,22 @@ public enum Dependency {
     CAFFEINE(
             "com{}github{}ben-manes{}caffeine",
             "caffeine",
-            "2.6.0",
-            "JmT16VQnCnVBAjRJCQkkkjmSVx2jajpzeBuKwpbzDA8=",
+            "2.6.1",
+            "5F55lb0PmSThBWkRJ9mwkvN+8xT6uDZKIwKk37QW0co=",
             Relocation.of("caffeine", "com{}github{}benmanes{}caffeine")
     ),
     MARIADB_DRIVER(
             "org{}mariadb{}jdbc",
             "mariadb-java-client",
-            "2.2.0",
-            "/q0LPGHrp3L9rvKr7TuA6urbtXBqvXis92mP4KhxzUw=",
+            "2.2.1",
+            "K/WUWx66IX2PpclGA6Eeczs5FyuzqBdcmS/IzNLzKW8=",
             Relocation.of("mariadb", "org{}mariadb{}jdbc")
     ),
     MYSQL_DRIVER(
             "mysql",
             "mysql-connector-java",
-            "5.1.44",
-            "d4RZVzTeWpoHBPB/tQP3mSafNy7L9MDUSOt4Ku9LGCc=",
+            "5.1.45",
+            "WbqXFalbltVXkMdH8kxUmr1kXNHpQdrlSxOMATMwDWQ=",
             Relocation.of("mysql", "com{}mysql")
     ),
     POSTGRESQL_DRIVER(
@@ -105,8 +105,8 @@ public enum Dependency {
     HIKARI(
             "com{}zaxxer",
             "HikariCP",
-            "2.7.4",
-            "y9JE6/VmbydCqlV1z468+oqdkBswBk6aw+ECT178AT4=",
+            "2.7.6",
+            "gEhb0Z6eOIgGT5mG9NhyyEtbBxJx/Rks6aDiWUnmqK4=",
             Relocation.of("hikari", "com{}zaxxer{}hikari")
     ),
     SLF4J_SIMPLE(
@@ -124,8 +124,8 @@ public enum Dependency {
     MONGODB_DRIVER(
             "org.mongodb",
             "mongo-java-driver",
-            "3.5.0",
-            "gxrbKVSI/xM6r+6uL7g7I0DzNV+hlNTtfw4UL13XdK8=",
+            "3.6.1",
+            "Po8eyOBWv8XjREKSFrQh/NKHvLabtOysxbEFiD35cEk=",
             Relocation.allOf(
                     Relocation.of("mongodb", "com{}mongodb"),
                     Relocation.of("bson", "org{}bson")

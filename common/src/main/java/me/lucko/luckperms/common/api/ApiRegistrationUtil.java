@@ -34,20 +34,15 @@ public class ApiRegistrationUtil {
     private static final Method REGISTER;
     private static final Method UNREGISTER;
     static {
-        Method register;
-        Method unregister;
         try {
-            register = LuckPerms.class.getDeclaredMethod("registerProvider", LuckPermsApi.class);
-            register.setAccessible(true);
+            REGISTER = LuckPerms.class.getDeclaredMethod("registerProvider", LuckPermsApi.class);
+            REGISTER.setAccessible(true);
 
-            unregister = LuckPerms.class.getDeclaredMethod("unregisterProvider");
-            unregister.setAccessible(true);
+            UNREGISTER = LuckPerms.class.getDeclaredMethod("unregisterProvider");
+            UNREGISTER.setAccessible(true);
         } catch (NoSuchMethodException e) {
             throw new ExceptionInInitializerError(e);
         }
-
-        REGISTER = register;
-        UNREGISTER = unregister;
     }
 
     public static void registerProvider(LuckPermsApi luckPermsApi) {

@@ -71,7 +71,7 @@ public class VerboseListener {
     // the sender to notify each time the listener processes a check which passes the filter
     private final Sender notifiedSender;
     // the filter
-    private VerboseFilter filter;
+    private final VerboseFilter filter;
     // if we should notify the sender
     private final boolean notify;
     // the number of checks we have processed

@@ -113,8 +113,6 @@ public class BukkitConnectionListener extends AbstractLoginListener implements L
                 this.plugin.getLog().severe("Player connection was re-allowed for " + e.getUniqueId());
                 e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, "");
             }
-
-            return;
         }
     }
 

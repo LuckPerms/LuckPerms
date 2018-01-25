@@ -39,14 +39,12 @@ public class SubscriptionMapInjector implements Runnable {
     private static final Field PERM_SUBS_FIELD;
 
     static {
-        Field permSubsField;
         try {
-            permSubsField = SimplePluginManager.class.getDeclaredField("permSubs");
-            permSubsField.setAccessible(true);
+            PERM_SUBS_FIELD = SimplePluginManager.class.getDeclaredField("permSubs");
+            PERM_SUBS_FIELD.setAccessible(true);
         } catch (NoSuchFieldException e) {
             throw new ExceptionInInitializerError(e);
         }
-        PERM_SUBS_FIELD = permSubsField;
     }
 
     private final LPBukkitPlugin plugin;

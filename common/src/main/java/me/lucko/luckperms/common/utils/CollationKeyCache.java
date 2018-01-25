@@ -37,9 +37,9 @@ import java.util.concurrent.TimeUnit;
 public final class CollationKeyCache implements Comparator<String> {
     private static final CollationKeyCache INSTANCE = new CollationKeyCache();
 
-    private static final Collator COLLATOR = Collator.getInstance(Locale.ENGLISH);
-
+    private static final Collator COLLATOR;
     static {
+        COLLATOR = Collator.getInstance(Locale.ENGLISH);
         COLLATOR.setStrength(Collator.IDENTICAL);
         COLLATOR.setDecomposition(Collator.FULL_DECOMPOSITION);
     }
@@ -78,14 +78,11 @@ public final class CollationKeyCache implements Comparator<String> {
                     return i;
                 }
             }
-
-            // fallback to standard string comparison
-            return o1.compareTo(o2);
         } catch (Exception e) {
             // ignored
         }
 
-        // shrug
-        return 0;
+        // fallback to standard string comparison
+        return o1.compareTo(o2);
     }
 }

@@ -40,23 +40,15 @@ public class DummyPermissibleBase extends PermissibleBase {
     private static final Field PERMISSIONS_FIELD;
 
     static {
-        Field attachmentsField;
         try {
-            attachmentsField = PermissibleBase.class.getDeclaredField("attachments");
-            attachmentsField.setAccessible(true);
-        } catch (NoSuchFieldException e) {
-            throw new ExceptionInInitializerError(e);
-        }
-        ATTACHMENTS_FIELD = attachmentsField;
+            ATTACHMENTS_FIELD = PermissibleBase.class.getDeclaredField("attachments");
+            ATTACHMENTS_FIELD.setAccessible(true);
 
-        Field permissionsField;
-        try {
-            permissionsField = PermissibleBase.class.getDeclaredField("permissions");
-            permissionsField.setAccessible(true);
+            PERMISSIONS_FIELD = PermissibleBase.class.getDeclaredField("permissions");
+            PERMISSIONS_FIELD.setAccessible(true);
         } catch (NoSuchFieldException e) {
             throw new ExceptionInInitializerError(e);
         }
-        PERMISSIONS_FIELD = permissionsField;
     }
 
     public static void nullFields(PermissibleBase permissibleBase) {

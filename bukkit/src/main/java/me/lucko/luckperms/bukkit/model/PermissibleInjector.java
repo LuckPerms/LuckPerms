@@ -56,35 +56,26 @@ public final class PermissibleInjector {
     private static final Field PERMISSIBLE_BASE_ATTACHMENTS_FIELD;
 
     static {
-        Field humanEntityPermissibleField;
-        Field permissibleBaseAttachmentsField;
-
         try {
-            // Catch all. If this setup doesn't fully complete without
-            // exceptions, then the Injector will not work.
-
             // Try to load the permissible field.
+            Field humanEntityPermissibleField;
             try {
                 // craftbukkit
                 humanEntityPermissibleField = ReflectionUtil.obcClass("entity.CraftHumanEntity").getDeclaredField("perm");
                 humanEntityPermissibleField.setAccessible(true);
-
             } catch (Exception e) {
                 // glowstone
                 humanEntityPermissibleField = Class.forName("net.glowstone.entity.GlowHumanEntity").getDeclaredField("permissions");
                 humanEntityPermissibleField.setAccessible(true);
             }
+            HUMAN_ENTITY_PERMISSIBLE_FIELD = humanEntityPermissibleField;
 
             // Try to load the attachments field.
-            permissibleBaseAttachmentsField = PermissibleBase.class.getDeclaredField("attachments");
-            permissibleBaseAttachmentsField.setAccessible(true);
-
-        } catch (Throwable t) {
-            throw new RuntimeException("Injector did not init successfully.", t);
+            PERMISSIBLE_BASE_ATTACHMENTS_FIELD = PermissibleBase.class.getDeclaredField("attachments");
+            PERMISSIBLE_BASE_ATTACHMENTS_FIELD.setAccessible(true);
+        } catch (ClassNotFoundException | NoSuchFieldException e) {
+            throw new ExceptionInInitializerError(e);
         }
-
-        HUMAN_ENTITY_PERMISSIBLE_FIELD = humanEntityPermissibleField;
-        PERMISSIBLE_BASE_ATTACHMENTS_FIELD = permissibleBaseAttachmentsField;
     }
 
     /**

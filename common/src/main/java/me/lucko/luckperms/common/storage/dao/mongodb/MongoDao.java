@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.storage.dao.mongodb;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
@@ -61,7 +62,6 @@ import me.lucko.luckperms.common.storage.dao.AbstractDao;
 import org.bson.Document;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -102,9 +102,9 @@ public class MongoDao extends AbstractDao {
         ServerAddress address = new ServerAddress(host, port);
 
         if (credential == null) {
-            this.mongoClient = new MongoClient(address, Collections.emptyList());
+            this.mongoClient = new MongoClient(address);
         } else {
-            this.mongoClient = new MongoClient(address, Collections.singletonList(credential));
+            this.mongoClient = new MongoClient(address, credential, MongoClientOptions.builder().build());
         }
 
         this.database = this.mongoClient.getDatabase(this.configuration.getDatabase());

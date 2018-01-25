@@ -59,14 +59,12 @@ public class LPPermissionAttachment extends PermissionAttachment {
     private static final Field PERMISSION_ATTACHMENT_PERMISSIONS_FIELD;
 
     static {
-        Field permissionAttachmentPermissionsField;
         try {
-            permissionAttachmentPermissionsField = PermissionAttachment.class.getDeclaredField("permissions");
-            permissionAttachmentPermissionsField.setAccessible(true);
+            PERMISSION_ATTACHMENT_PERMISSIONS_FIELD = PermissionAttachment.class.getDeclaredField("permissions");
+            PERMISSION_ATTACHMENT_PERMISSIONS_FIELD.setAccessible(true);
         } catch (NoSuchFieldException e) {
             throw new ExceptionInInitializerError(e);
         }
-        PERMISSION_ATTACHMENT_PERMISSIONS_FIELD = permissionAttachmentPermissionsField;
     }
 
     /**

@@ -36,14 +36,12 @@ public class ReflectionClassLoader implements PluginClassLoader {
     private static final Method ADD_URL_METHOD;
 
     static {
-        Method addUrlMethod;
         try {
-            addUrlMethod = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-            addUrlMethod.setAccessible(true);
+            ADD_URL_METHOD = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+            ADD_URL_METHOD.setAccessible(true);
         } catch (NoSuchMethodException e) {
             throw new ExceptionInInitializerError(e);
         }
-        ADD_URL_METHOD = addUrlMethod;
     }
 
     private final URLClassLoader classLoader;
