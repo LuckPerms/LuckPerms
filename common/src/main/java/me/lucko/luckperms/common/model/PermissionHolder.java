@@ -38,7 +38,6 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.api.delegates.model.ApiPermissionHolder;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.Cache;
 import me.lucko.luckperms.common.caching.HolderCachedData;
@@ -226,13 +225,6 @@ public abstract class PermissionHolder {
      * @return this holders type
      */
     public abstract HolderType getType();
-
-    /**
-     * Gets the API delegate for this instance
-     *
-     * @return the api delegate
-     */
-    public abstract ApiPermissionHolder getDelegate();
 
     public NodeMap getData(NodeMapType type) {
         switch (type) {

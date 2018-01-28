@@ -178,8 +178,8 @@ public class BufferedOutputStorage implements Storage, Runnable {
     }
 
     @Override
-    public ApiStorage getDelegate() {
-        return this.delegate.getDelegate();
+    public ApiStorage getApiDelegate() {
+        return this.delegate.getApiDelegate();
     }
 
     @Override

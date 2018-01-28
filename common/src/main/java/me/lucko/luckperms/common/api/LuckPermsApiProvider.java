@@ -131,7 +131,7 @@ public class LuckPermsApiProvider implements LuckPermsApi {
     @Nonnull
     @Override
     public Storage getStorage() {
-        return this.plugin.getStorage().getDelegate();
+        return this.plugin.getStorage().getApiDelegate();
     }
 
     @Nonnull

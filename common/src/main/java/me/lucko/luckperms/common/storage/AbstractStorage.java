@@ -64,12 +64,12 @@ public class AbstractStorage implements Storage {
     private final LuckPermsPlugin plugin;
     private final AbstractDao dao;
 
-    private final ApiStorage delegate;
+    private final ApiStorage apiDelegate;
 
     private AbstractStorage(LuckPermsPlugin plugin, AbstractDao dao) {
         this.plugin = plugin;
         this.dao = dao;
-        this.delegate = new ApiStorage(plugin, this);
+        this.apiDelegate = new ApiStorage(plugin, this);
     }
 
     @Override
@@ -100,8 +100,8 @@ public class AbstractStorage implements Storage {
     }
 
     @Override
-    public ApiStorage getDelegate() {
-        return this.delegate;
+    public ApiStorage getApiDelegate() {
+        return this.apiDelegate;
     }
 
     private interface ThrowingRunnable {

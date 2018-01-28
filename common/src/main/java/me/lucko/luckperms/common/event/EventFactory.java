@@ -101,17 +101,17 @@ public final class EventFactory {
     }
 
     public void handleGroupCacheLoad(Group group, GroupData data) {
-        EventGroupCacheLoad event = new EventGroupCacheLoad(group.getDelegate(), data);
+        EventGroupCacheLoad event = new EventGroupCacheLoad(group.getApiDelegate(), data);
         fireEventAsync(event);
     }
 
     public void handleGroupCreate(Group group, CreationCause cause) {
-        EventGroupCreate event = new EventGroupCreate(group.getDelegate(), cause);
+        EventGroupCreate event = new EventGroupCreate(group.getApiDelegate(), cause);
         fireEventAsync(event);
     }
 
     public void handleGroupDataRecalculate(Group group, GroupData data) {
-        EventGroupDataRecalculate event = new EventGroupDataRecalculate(group.getDelegate(), data);
+        EventGroupDataRecalculate event = new EventGroupDataRecalculate(group.getApiDelegate(), data);
         fireEventAsync(event);
     }
 
@@ -126,7 +126,7 @@ public final class EventFactory {
     }
 
     public void handleGroupLoad(Group group) {
-        EventGroupLoad event = new EventGroupLoad(group.getDelegate());
+        EventGroupLoad event = new EventGroupLoad(group.getApiDelegate());
         fireEventAsync(event);
     }
 
@@ -203,7 +203,7 @@ public final class EventFactory {
     }
 
     public void handleTrackCreate(Track track, CreationCause cause) {
-        EventTrackCreate event = new EventTrackCreate(track.getDelegate(), cause);
+        EventTrackCreate event = new EventTrackCreate(track.getApiDelegate(), cause);
         fireEventAsync(event);
     }
 
@@ -218,22 +218,22 @@ public final class EventFactory {
     }
 
     public void handleTrackLoad(Track track) {
-        EventTrackLoad event = new EventTrackLoad(track.getDelegate());
+        EventTrackLoad event = new EventTrackLoad(track.getApiDelegate());
         fireEventAsync(event);
     }
 
     public void handleTrackAddGroup(Track track, String group, List<String> before, List<String> after) {
-        EventTrackAddGroup event = new EventTrackAddGroup(group, track.getDelegate(), ImmutableList.copyOf(before), ImmutableList.copyOf(after));
+        EventTrackAddGroup event = new EventTrackAddGroup(group, track.getApiDelegate(), ImmutableList.copyOf(before), ImmutableList.copyOf(after));
         fireEventAsync(event);
     }
 
     public void handleTrackClear(Track track, List<String> before) {
-        EventTrackClear event = new EventTrackClear(track.getDelegate(), ImmutableList.copyOf(before), ImmutableList.of());
+        EventTrackClear event = new EventTrackClear(track.getApiDelegate(), ImmutableList.copyOf(before), ImmutableList.of());
         fireEventAsync(event);
     }
 
     public void handleTrackRemoveGroup(Track track, String group, List<String> before, List<String> after) {
-        EventTrackRemoveGroup event = new EventTrackRemoveGroup(group, track.getDelegate(), ImmutableList.copyOf(before), ImmutableList.copyOf(after));
+        EventTrackRemoveGroup event = new EventTrackRemoveGroup(group, track.getApiDelegate(), ImmutableList.copyOf(before), ImmutableList.copyOf(after));
         fireEventAsync(event);
     }
 
@@ -263,12 +263,12 @@ public final class EventFactory {
     }
 
     public void handleUserDemote(User user, Track track, String from, String to) {
-        EventUserDemote event = new EventUserDemote(track.getDelegate(), user.getDelegate(), from, to);
+        EventUserDemote event = new EventUserDemote(track.getApiDelegate(), user.getDelegate(), from, to);
         fireEventAsync(event);
     }
 
     public void handleUserPromote(User user, Track track, String from, String to) {
-        EventUserPromote event = new EventUserPromote(track.getDelegate(), user.getDelegate(), from, to);
+        EventUserPromote event = new EventUserPromote(track.getApiDelegate(), user.getDelegate(), from, to);
         fireEventAsync(event);
     }
 

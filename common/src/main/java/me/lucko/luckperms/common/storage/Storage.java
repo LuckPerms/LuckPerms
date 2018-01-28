@@ -49,7 +49,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface Storage {
 
-    ApiStorage getDelegate();
+    ApiStorage getApiDelegate();
 
     AbstractDao getDao();
 

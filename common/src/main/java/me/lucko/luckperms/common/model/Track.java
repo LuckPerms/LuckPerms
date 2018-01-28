@@ -54,7 +54,7 @@ public final class Track implements Identifiable<String> {
      */
     private final List<String> groups = Collections.synchronizedList(new ArrayList<>());
 
-    private final ApiTrack delegate = new ApiTrack(this);
+    private final ApiTrack apiDelegate = new ApiTrack(this);
 
     public Track(String name, LuckPermsPlugin plugin) {
         this.name = name;
@@ -69,8 +69,8 @@ public final class Track implements Identifiable<String> {
         return this.ioLock;
     }
 
-    public ApiTrack getDelegate() {
-        return this.delegate;
+    public ApiTrack getApiDelegate() {
+        return this.apiDelegate;
     }
 
     @Override

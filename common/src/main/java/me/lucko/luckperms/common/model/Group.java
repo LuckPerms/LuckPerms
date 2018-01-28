@@ -46,7 +46,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
      */
     private final String name;
 
-    private final ApiGroup delegate = new ApiGroup(this);
+    private final ApiGroup apiDelegate = new ApiGroup(this);
 
     /**
      * The groups data cache instance
@@ -71,9 +71,8 @@ public class Group extends PermissionHolder implements Identifiable<String> {
         return this.name;
     }
 
-    @Override
-    public ApiGroup getDelegate() {
-        return this.delegate;
+    public ApiGroup getApiDelegate() {
+        return this.apiDelegate;
     }
 
     @Override

@@ -45,13 +45,13 @@ public class ApiTrackManager implements TrackManager {
     public Track getTrack(@Nonnull String name) {
         Objects.requireNonNull(name, "name");
         me.lucko.luckperms.common.model.Track track = this.handle.getIfLoaded(name);
-        return track == null ? null : track.getDelegate();
+        return track == null ? null : track.getApiDelegate();
     }
 
     @Nonnull
     @Override
     public Set<Track> getLoadedTracks() {
-        return this.handle.getAll().values().stream().map(me.lucko.luckperms.common.model.Track::getDelegate).collect(Collectors.toSet());
+        return this.handle.getAll().values().stream().map(me.lucko.luckperms.common.model.Track::getApiDelegate).collect(Collectors.toSet());
     }
 
     @Override

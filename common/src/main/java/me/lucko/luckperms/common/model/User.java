@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.model;
 
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.common.api.delegates.model.ApiUser;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.caching.UserCachedData;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -64,8 +63,6 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     private final UserCachedData cachedData;
 
     private final BufferedRequest<Void> refreshBuffer;
-
-    private final ApiUser delegate = new ApiUser(this);
 
     public User(UUID uuid, LuckPermsPlugin plugin) {
         super(uuid.toString(), plugin);
@@ -106,11 +103,6 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     @Override
     public BufferedRequest<Void> getRefreshBuffer() {
         return this.refreshBuffer;
-    }
-
-    @Override
-    public ApiUser getDelegate() {
-        return this.delegate;
     }
 
     @Override

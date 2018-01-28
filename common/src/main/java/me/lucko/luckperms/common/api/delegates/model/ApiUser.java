@@ -45,14 +45,14 @@ public final class ApiUser extends ApiPermissionHolder implements User {
 
     private final me.lucko.luckperms.common.model.User handle;
 
-    @Override
-    me.lucko.luckperms.common.model.User getHandle() {
-        return this.handle;
-    }
-
     public ApiUser(me.lucko.luckperms.common.model.User handle) {
         super(handle);
         this.handle = handle;
+    }
+
+    @Override
+    me.lucko.luckperms.common.model.User getHandle() {
+        return this.handle;
     }
 
     @Nonnull

@@ -59,7 +59,7 @@ import javax.annotation.Nonnull;
 public class ApiPermissionHolder implements PermissionHolder {
     private final me.lucko.luckperms.common.model.PermissionHolder handle;
 
-    public ApiPermissionHolder(me.lucko.luckperms.common.model.PermissionHolder handle) {
+    ApiPermissionHolder(me.lucko.luckperms.common.model.PermissionHolder handle) {
         this.handle = Objects.requireNonNull(handle, "handle");
     }
 

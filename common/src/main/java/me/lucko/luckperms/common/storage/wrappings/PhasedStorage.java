@@ -69,8 +69,8 @@ public class PhasedStorage implements Storage {
     }
 
     @Override
-    public ApiStorage getDelegate() {
-        return this.delegate.getDelegate();
+    public ApiStorage getApiDelegate() {
+        return this.delegate.getApiDelegate();
     }
 
     @Override

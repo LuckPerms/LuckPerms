@@ -45,13 +45,13 @@ public class ApiGroupManager implements GroupManager {
     public Group getGroup(@Nonnull String name) {
         Objects.requireNonNull(name, "name");
         me.lucko.luckperms.common.model.Group group = this.handle.getIfLoaded(name);
-        return group == null ? null : group.getDelegate();
+        return group == null ? null : group.getApiDelegate();
     }
 
     @Nonnull
     @Override
     public Set<Group> getLoadedGroups() {
-        return this.handle.getAll().values().stream().map(me.lucko.luckperms.common.model.Group::getDelegate).collect(Collectors.toSet());
+        return this.handle.getAll().values().stream().map(me.lucko.luckperms.common.model.Group::getApiDelegate).collect(Collectors.toSet());
     }
 
     @Override

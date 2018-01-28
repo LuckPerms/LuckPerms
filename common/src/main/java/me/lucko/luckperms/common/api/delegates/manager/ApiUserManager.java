@@ -48,20 +48,20 @@ public class ApiUserManager implements UserManager {
     public User getUser(@Nonnull UUID uuid) {
         Objects.requireNonNull(uuid, "uuid");
         me.lucko.luckperms.common.model.User user = this.handle.getIfLoaded(uuid);
-        return user == null ? null : user.getDelegate();
+        return user == null ? null : new ApiUser(user);
     }
 
     @Override
     public User getUser(@Nonnull String name) {
         Objects.requireNonNull(name, "name");
         me.lucko.luckperms.common.model.User user = this.handle.getByUsername(name);
-        return user == null ? null : user.getDelegate();
+        return user == null ? null : new ApiUser(user);
     }
 
     @Nonnull
     @Override
     public Set<User> getLoadedUsers() {
-        return this.handle.getAll().values().stream().map(me.lucko.luckperms.common.model.User::getDelegate).collect(Collectors.toSet());
+        return this.handle.getAll().values().stream().map(ApiUser::new).collect(Collectors.toSet());
     }
 
     @Override
