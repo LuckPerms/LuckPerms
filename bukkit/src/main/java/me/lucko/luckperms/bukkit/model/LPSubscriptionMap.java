@@ -65,11 +65,13 @@ import javax.annotation.Nonnull;
  * 2) inject it's own map instance to proxy calls to {@link PluginManager#getPermissionSubscriptions(String)} back to LuckPerms.
  *
  * This class implements option 2 above. It is preferred because it is faster & uses less memory
+ *
+ * Injected by {@link SubscriptionMapInjector}.
  */
 public class LPSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>> {
 
     // the plugin instance
-    private final LPBukkitPlugin plugin;
+    final LPBukkitPlugin plugin;
 
     public LPSubscriptionMap(LPBukkitPlugin plugin, Map<String, Map<Permissible, Boolean>> existingData) {
         super(existingData);

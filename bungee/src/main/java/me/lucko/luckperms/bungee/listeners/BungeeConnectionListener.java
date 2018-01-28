@@ -86,7 +86,7 @@ public class BungeeConnectionListener extends AbstractLoginListener implements L
                 User user = loadUser(c.getUniqueId(), c.getName());
                 this.plugin.getEventFactory().handleUserLoginProcess(c.getUniqueId(), c.getName(), user);
             } catch (Exception ex) {
-                this.plugin.getLog().severe("Exception occured whilst loading data for " + c.getUniqueId() + " - " + c.getName());
+                this.plugin.getLog().severe("Exception occurred whilst loading data for " + c.getUniqueId() + " - " + c.getName());
                 ex.printStackTrace();
 
                 // there was some error loading

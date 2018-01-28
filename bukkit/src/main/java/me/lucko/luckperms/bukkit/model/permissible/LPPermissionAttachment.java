@@ -23,11 +23,12 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.model;
+package me.lucko.luckperms.bukkit.model.permissible;
 
 import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.bukkit.model.dummy.DummyPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.ImmutableTransientNode;

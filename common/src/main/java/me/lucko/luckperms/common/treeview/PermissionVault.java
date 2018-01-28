@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.treeview;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -97,6 +98,10 @@ public class PermissionVault implements Runnable {
             throw new NullPointerException("permission");
         }
         this.queue.offer(permission);
+    }
+
+    public void offerAll(Collection<? extends String> permissions) {
+        this.queue.addAll(permissions);
     }
 
     public Set<String> getKnownPermissions() {

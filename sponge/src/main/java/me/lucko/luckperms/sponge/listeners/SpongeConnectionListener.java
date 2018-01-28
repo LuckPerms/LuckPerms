@@ -84,7 +84,7 @@ public class SpongeConnectionListener extends AbstractLoginListener {
             User user = loadUser(p.getUniqueId(), username);
             this.plugin.getEventFactory().handleUserLoginProcess(p.getUniqueId(), username, user);
         } catch (Exception ex) {
-            this.plugin.getLog().severe("Exception occured whilst loading data for " + p.getUniqueId() + " - " + p.getName());
+            this.plugin.getLog().severe("Exception occurred whilst loading data for " + p.getUniqueId() + " - " + p.getName());
             ex.printStackTrace();
 
             this.deniedAsyncLogin.add(p.getUniqueId());

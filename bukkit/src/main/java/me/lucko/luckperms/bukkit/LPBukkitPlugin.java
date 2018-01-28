@@ -34,10 +34,11 @@ import me.lucko.luckperms.bukkit.contexts.WorldCalculator;
 import me.lucko.luckperms.bukkit.listeners.BukkitConnectionListener;
 import me.lucko.luckperms.bukkit.listeners.BukkitPlatformListener;
 import me.lucko.luckperms.bukkit.messaging.BukkitMessagingFactory;
-import me.lucko.luckperms.bukkit.model.LPPermissible;
-import me.lucko.luckperms.bukkit.model.PermissibleInjector;
-import me.lucko.luckperms.bukkit.model.PermissibleMonitoringInjector;
+import me.lucko.luckperms.bukkit.model.PermissionMapInjector;
 import me.lucko.luckperms.bukkit.model.SubscriptionMapInjector;
+import me.lucko.luckperms.bukkit.model.permissible.LPPermissible;
+import me.lucko.luckperms.bukkit.model.permissible.PermissibleInjector;
+import me.lucko.luckperms.bukkit.model.permissible.PermissibleMonitoringInjector;
 import me.lucko.luckperms.bukkit.processors.BukkitProcessorsSetupTask;
 import me.lucko.luckperms.bukkit.processors.ChildPermissionProvider;
 import me.lucko.luckperms.bukkit.processors.DefaultsProvider;
@@ -197,12 +198,9 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         Set<StorageType> storageTypes = storageFactory.getRequiredTypes(StorageType.H2);
         this.dependencyManager.loadStorageDependencies(storageTypes);
 
-        // setup the Bukkit defaults hook
+        // init the Bukkit model providers
         this.defaultsProvider = new DefaultsProvider();
         this.childPermissionProvider = new ChildPermissionProvider();
-
-        // give all plugins a chance to load their permissions, then refresh.
-        this.scheduler.syncLater(new BukkitProcessorsSetupTask(this), 1L);
 
         // register events
         BukkitConnectionListener connectionListener = new BukkitConnectionListener(this);
@@ -248,12 +246,22 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         this.contextManager.registerCalculator(new WorldCalculator(this));
         this.contextManager.registerStaticCalculator(new LuckPermsCalculator(getConfiguration()));
 
-        // inject our own subscription map
-        new SubscriptionMapInjector(this).run();
+        // inject our own custom permission maps
+        SubscriptionMapInjector subscriptionMapInjector = new SubscriptionMapInjector(this);
+        subscriptionMapInjector.run();
+
+        PermissionMapInjector permissionMapInjector = new PermissionMapInjector(this);
+        permissionMapInjector.run();
+
+        // setup the bukkit processors
+        BukkitProcessorsSetupTask bukkitProcessorsSetupTask = new BukkitProcessorsSetupTask(this);
+        bukkitProcessorsSetupTask.run();
 
         // schedule another injection after all plugins have loaded - the entire pluginmanager instance
         // is replaced by some plugins :(
-        this.scheduler.asyncLater(new SubscriptionMapInjector(this), 2L);
+        this.scheduler.asyncLater(subscriptionMapInjector, 1L);
+        this.scheduler.asyncLater(permissionMapInjector, 1L);
+        this.scheduler.syncLater(bukkitProcessorsSetupTask, 1L);
 
         // inject verbose handlers into internal bukkit objects
         new PermissibleMonitoringInjector(this).run();
@@ -367,8 +375,9 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             }
         }
 
-        // uninject subscription map
+        // uninject custom maps
         SubscriptionMapInjector.uninject();
+        PermissionMapInjector.uninject();
 
         getLog().info("Closing storage...");
         this.storage.shutdown();

@@ -27,9 +27,6 @@ package me.lucko.luckperms.bukkit.processors;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * Performs the initial setup for Bukkit permission processors
  */
@@ -44,13 +41,5 @@ public class BukkitProcessorsSetupTask implements Runnable {
     public void run() {
         this.plugin.getDefaultsProvider().refresh();
         this.plugin.getChildPermissionProvider().setup();
-
-        Set<String> perms = new HashSet<>();
-        this.plugin.getServer().getPluginManager().getPermissions().forEach(p -> {
-            perms.add(p.getName());
-            perms.addAll(p.getChildren().keySet());
-        });
-
-        perms.forEach(p -> this.plugin.getPermissionVault().offer(p));
     }
 }

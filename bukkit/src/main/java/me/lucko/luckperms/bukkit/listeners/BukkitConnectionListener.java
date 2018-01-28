@@ -26,8 +26,8 @@
 package me.lucko.luckperms.bukkit.listeners;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.bukkit.model.LPPermissible;
-import me.lucko.luckperms.bukkit.model.PermissibleInjector;
+import me.lucko.luckperms.bukkit.model.permissible.LPPermissible;
+import me.lucko.luckperms.bukkit.model.permissible.PermissibleInjector;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
@@ -90,7 +90,7 @@ public class BukkitConnectionListener extends AbstractLoginListener implements L
             User user = loadUser(e.getUniqueId(), e.getName());
             this.plugin.getEventFactory().handleUserLoginProcess(e.getUniqueId(), e.getName(), user);
         } catch (Exception ex) {
-            this.plugin.getLog().severe("Exception occured whilst loading data for " + e.getUniqueId() + " - " + e.getName());
+            this.plugin.getLog().severe("Exception occurred whilst loading data for " + e.getUniqueId() + " - " + e.getName());
             ex.printStackTrace();
 
             // deny the connection

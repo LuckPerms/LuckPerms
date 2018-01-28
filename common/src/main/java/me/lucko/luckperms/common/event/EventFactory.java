@@ -37,6 +37,8 @@ import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.api.event.log.LogBroadcastEvent;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
+import me.lucko.luckperms.common.api.delegates.model.ApiPermissionHolder;
+import me.lucko.luckperms.common.api.delegates.model.ApiUser;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.event.impl.EventConfigReload;
 import me.lucko.luckperms.common.event.impl.EventGroupCacheLoad;
@@ -164,17 +166,17 @@ public final class EventFactory {
     }
 
     public void handleNodeAdd(Node node, PermissionHolder target, Collection<Node> before, Collection<Node> after) {
-        EventNodeAdd event = new EventNodeAdd(node, target.getDelegate(), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
+        EventNodeAdd event = new EventNodeAdd(node, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
         fireEventAsync(event);
     }
 
     public void handleNodeClear(PermissionHolder target, Collection<Node> before, Collection<Node> after) {
-        EventNodeClear event = new EventNodeClear(target.getDelegate(), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
+        EventNodeClear event = new EventNodeClear(getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
         fireEventAsync(event);
     }
 
     public void handleNodeRemove(Node node, PermissionHolder target, Collection<Node> before, Collection<Node> after) {
-        EventNodeRemove event = new EventNodeRemove(node, target.getDelegate(), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
+        EventNodeRemove event = new EventNodeRemove(node, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
         fireEventAsync(event);
     }
 
@@ -238,12 +240,12 @@ public final class EventFactory {
     }
 
     public void handleUserCacheLoad(User user, UserData data) {
-        EventUserCacheLoad event = new EventUserCacheLoad(user.getDelegate(), data);
+        EventUserCacheLoad event = new EventUserCacheLoad(new ApiUser(user), data);
         fireEventAsync(event);
     }
 
     public void handleUserDataRecalculate(User user, UserData data) {
-        EventUserDataRecalculate event = new EventUserDataRecalculate(user.getDelegate(), data);
+        EventUserDataRecalculate event = new EventUserDataRecalculate(new ApiUser(user), data);
         fireEventAsync(event);
     }
 
@@ -253,23 +255,33 @@ public final class EventFactory {
     }
 
     public void handleUserLoad(User user) {
-        EventUserLoad event = new EventUserLoad(user.getDelegate());
+        EventUserLoad event = new EventUserLoad(new ApiUser(user));
         fireEventAsync(event);
     }
 
     public void handleUserLoginProcess(UUID uuid, String username, User user) {
-        EventUserLoginProcess event = new EventUserLoginProcess(uuid, username, user.getDelegate());
+        EventUserLoginProcess event = new EventUserLoginProcess(uuid, username, new ApiUser(user));
         fireEvent(event);
     }
 
     public void handleUserDemote(User user, Track track, String from, String to) {
-        EventUserDemote event = new EventUserDemote(track.getApiDelegate(), user.getDelegate(), from, to);
+        EventUserDemote event = new EventUserDemote(track.getApiDelegate(), new ApiUser(user), from, to);
         fireEventAsync(event);
     }
 
     public void handleUserPromote(User user, Track track, String from, String to) {
-        EventUserPromote event = new EventUserPromote(track.getApiDelegate(), user.getDelegate(), from, to);
+        EventUserPromote event = new EventUserPromote(track.getApiDelegate(), new ApiUser(user), from, to);
         fireEventAsync(event);
+    }
+
+    private static ApiPermissionHolder getDelegate(PermissionHolder holder) {
+        if (holder instanceof Group) {
+            return ((Group) holder).getApiDelegate();
+        } else if (holder instanceof User) {
+            return new ApiUser(((User) holder));
+        } else {
+            throw new AssertionError();
+        }
     }
 
 }

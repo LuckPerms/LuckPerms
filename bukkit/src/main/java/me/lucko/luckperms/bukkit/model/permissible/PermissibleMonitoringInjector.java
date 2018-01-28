@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.model;
+package me.lucko.luckperms.bukkit.model.permissible;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.bukkit.compat.ReflectionUtil;
@@ -77,7 +77,7 @@ public class PermissibleMonitoringInjector implements Runnable {
         }
 
         // create a monitored instance which delegates to the previous PermissibleBase
-        return new MonitoredPermissibleBase(this.plugin.getVerboseHandler(), permBase, name);
+        return new MonitoredPermissibleBase(this.plugin, permBase, name);
     }
 
     private void injectConsole() throws Exception {

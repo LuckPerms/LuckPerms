@@ -23,10 +23,12 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.model;
+package me.lucko.luckperms.bukkit.model.permissible;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.bukkit.model.dummy.DummyPermissibleBase;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 
@@ -45,7 +47,7 @@ import java.util.Set;
  * Method calls are forwarded to the delegate permissible.
  */
 public class MonitoredPermissibleBase extends PermissibleBase {
-    private final VerboseHandler verboseHandler;
+    private final LuckPermsPlugin plugin;
     private final PermissibleBase delegate;
     private final String name;
 
@@ -54,11 +56,11 @@ public class MonitoredPermissibleBase extends PermissibleBase {
     @SuppressWarnings("UnusedAssignment")
     private boolean initialised = false;
 
-    public MonitoredPermissibleBase(VerboseHandler verboseHandler, PermissibleBase delegate, String name) {
+    public MonitoredPermissibleBase(LuckPermsPlugin plugin, PermissibleBase delegate, String name) {
         super(null);
         DummyPermissibleBase.nullFields(this);
 
-        this.verboseHandler = verboseHandler;
+        this.plugin = plugin;
         this.delegate = delegate;
         this.name = name;
         this.initialised = true;
@@ -69,7 +71,8 @@ public class MonitoredPermissibleBase extends PermissibleBase {
     }
 
     private void logCheck(CheckOrigin origin, String permission, boolean result) {
-        this.verboseHandler.offerCheckData(origin, this.name, ContextSet.empty(), permission, Tristate.fromBoolean(result));
+        this.plugin.getVerboseHandler().offerCheckData(origin, this.name, ContextSet.empty(), permission, Tristate.fromBoolean(result));
+        this.plugin.getPermissionVault().offer(permission);
     }
 
     PermissibleBase getDelegate() {

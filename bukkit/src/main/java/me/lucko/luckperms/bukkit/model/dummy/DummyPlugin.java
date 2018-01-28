@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.model;
+package me.lucko.luckperms.bukkit.model.dummy;
 
 import org.bukkit.Server;
 import org.bukkit.command.Command;

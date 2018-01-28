@@ -23,40 +23,67 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.model;
+package me.lucko.luckperms.bukkit.model.dummy;
 
-import org.bukkit.permissions.Permissible;
+import org.bukkit.permissions.PermissibleBase;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
 
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Set;
 
-public class DummyPermissible implements Permissible {
-    private final Runnable onRefresh;
+public class DummyPermissibleBase extends PermissibleBase {
+    private static final Field ATTACHMENTS_FIELD;
+    private static final Field PERMISSIONS_FIELD;
 
-    public DummyPermissible(Runnable onRefresh) {
-        this.onRefresh = onRefresh;
+    static {
+        try {
+            ATTACHMENTS_FIELD = PermissibleBase.class.getDeclaredField("attachments");
+            ATTACHMENTS_FIELD.setAccessible(true);
+
+            PERMISSIONS_FIELD = PermissibleBase.class.getDeclaredField("permissions");
+            PERMISSIONS_FIELD.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new ExceptionInInitializerError(e);
+        }
     }
 
-    @Override
-    public void recalculatePermissions() {
-        this.onRefresh.run();
+    public static void nullFields(PermissibleBase permissibleBase) {
+        try {
+            ATTACHMENTS_FIELD.set(permissibleBase, null);
+        } catch (Exception e) {
+            // ignore
+        }
+        try {
+            PERMISSIONS_FIELD.set(permissibleBase, null);
+        } catch (Exception e) {
+            // ignore
+        }
     }
 
-    @Override public Set<PermissionAttachmentInfo> getEffectivePermissions() { return Collections.emptySet(); }
+    public static final DummyPermissibleBase INSTANCE = new DummyPermissibleBase();
+
+    private DummyPermissibleBase() {
+        super(null);
+        nullFields(this);
+    }
+
+    @Override public boolean isOp() { return false; }
+    @Override public void setOp(boolean value) {}
     @Override public boolean isPermissionSet(String name) { return false; }
     @Override public boolean isPermissionSet(Permission perm) { return false; }
-    @Override public boolean hasPermission(String name) { return false; }
+    @Override public boolean hasPermission(String inName) { return false; }
     @Override public boolean hasPermission(Permission perm) { return false; }
     @Override public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value) { return null; }
     @Override public PermissionAttachment addAttachment(Plugin plugin) { return null; }
+    @Override public void removeAttachment(PermissionAttachment attachment) {}
+    @Override public void recalculatePermissions() {}
+    @Override public void clearPermissions() {}
     @Override public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value, int ticks) { return null; }
     @Override public PermissionAttachment addAttachment(Plugin plugin, int ticks) { return null; }
-    @Override public void removeAttachment(PermissionAttachment attachment) {}
-    @Override public boolean isOp() { return false; }
-    @Override public void setOp(boolean value) {}
+    @Override public Set<PermissionAttachmentInfo> getEffectivePermissions() { return Collections.emptySet(); }
 
 }

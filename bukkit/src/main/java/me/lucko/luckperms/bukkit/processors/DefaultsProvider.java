@@ -28,7 +28,7 @@ package me.lucko.luckperms.bukkit.processors;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.bukkit.model.DummyPermissible;
+import me.lucko.luckperms.bukkit.model.dummy.DummyPermissible;
 
 import org.bukkit.Bukkit;
 import org.bukkit.permissions.Permission;
@@ -77,15 +77,6 @@ public class DefaultsProvider {
     public Tristate lookup(String permission, boolean isOp) {
         Map<String, Boolean> map = isOp ? this.opDefaults : this.nonOpDefaults;
         return Tristate.fromNullableBoolean(map.get(permission));
-    }
-
-    /**
-     * Gets the number of default permissions held by the provider.
-     *
-     * @return the number of permissions held
-     */
-    public int size() {
-        return this.opDefaults.size() + this.nonOpDefaults.size();
     }
 
     /**
