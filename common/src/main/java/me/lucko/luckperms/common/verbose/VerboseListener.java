@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.verbose;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.commands.CommandManager;
@@ -34,7 +33,7 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.utils.DateUtil;
-import me.lucko.luckperms.common.utils.PasteUtils;
+import me.lucko.luckperms.common.utils.Gist;
 import me.lucko.luckperms.common.utils.TextUtils;
 
 import net.kyori.text.TextComponent;
@@ -44,7 +43,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -151,7 +149,6 @@ public class VerboseListener {
      * @param showTraces if stack traces should be included in the output
      * @param attachRaw if the rawdata should be attached to the gist
      * @return the url
-     * @see PasteUtils#paste(String, List)
      */
     public String uploadPasteData(boolean showTraces, boolean attachRaw) {
 
@@ -250,14 +247,15 @@ public class VerboseListener {
         }
         this.results.clear();
 
-        ImmutableList.Builder<Map.Entry<String, String>> content = ImmutableList.builder();
-        content.add(Maps.immutableEntry("luckperms-verbose.md", prettyOutput.build().stream().collect(Collectors.joining("\n"))));
+        Gist.Builder gist = Gist.builder()
+                .description("LuckPerms Verbose Checking Output")
+                .file("luckperms-verbose.md", prettyOutput.build().stream().collect(Collectors.joining("\n")));
 
         if (attachRaw) {
-            content.add(Maps.immutableEntry("raw-data.csv", csvOutput.build().stream().collect(Collectors.joining("\n"))));
+            gist.file("raw-data.csv", csvOutput.build().stream().collect(Collectors.joining("\n")));
         }
 
-        return PasteUtils.paste("LuckPerms Verbose Checking Output", content.build());
+        return gist.upload().getUrl();
     }
 
     /**

@@ -49,8 +49,8 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.LuckPermsCalculator;
-import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
+import me.lucko.luckperms.common.dependencies.DependencyRegistry;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.event.EventFactory;
@@ -83,7 +83,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -133,7 +132,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         this.pluginClassLoader = new ReflectionClassLoader(this);
         this.dependencyManager = new DependencyManager(this);
-        this.dependencyManager.loadDependencies(Collections.singleton(Dependency.CAFFEINE));
+        this.dependencyManager.loadDependencies(DependencyRegistry.GLOBAL_DEPENDENCIES);
     }
 
     @Override

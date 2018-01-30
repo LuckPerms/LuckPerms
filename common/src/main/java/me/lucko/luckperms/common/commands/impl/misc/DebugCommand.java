@@ -51,7 +51,7 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
-import me.lucko.luckperms.common.utils.PasteUtils;
+import me.lucko.luckperms.common.utils.Gist;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.TextUtils;
 
@@ -62,7 +62,6 @@ import net.kyori.text.event.HoverEvent;
 import net.kyori.text.format.TextColor;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -81,20 +80,19 @@ public class DebugCommand extends SingleCommand {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         Message.DEBUG_START.send(sender);
 
-        Map<String, String> pages = new LinkedHashMap<>();
+        Gist gist = Gist.builder()
+                .description("LuckPerms Debug Output")
+                .file("__DEBUG__.md", TextUtils.joinNewline("# Debug Output", "The debugging data can be found in the files below."))
+                .file("platform.json", GSON.toJson(getPlatformData(plugin).toJson()))
+                .file("storage.json", GSON.toJson(getStorageData(plugin).toJson()))
+                .file("context.json", GSON.toJson(getContextData(plugin).toJson()))
+                .file("players.json", GSON.toJson(getPlayersData(plugin).toJson()))
+                .upload();
 
-        pages.put("__DEBUG__.md", TextUtils.joinNewline("# Debug Output", "The debugging data can be found in the files below."));
-
-        pages.put("platform.json", GSON.toJson(getPlatformData(plugin).toJson()));
-        pages.put("storage.json", GSON.toJson(getStorageData(plugin).toJson()));
-        pages.put("context.json", GSON.toJson(getContextData(plugin).toJson()));
-        pages.put("players.json", GSON.toJson(getPlayersData(plugin).toJson()));
-
-        String url = PasteUtils.paste("LuckPerms Debug Output", pages.entrySet());
         Message.DEBUG_URL.send(sender);
 
-        Component message = TextComponent.builder(url).color(TextColor.AQUA)
-                .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, String.valueOf(url)))
+        Component message = TextComponent.builder(gist.getUrl()).color(TextColor.AQUA)
+                .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, String.valueOf(gist.getUrl())))
                 .hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to open the debugging data.").color(TextColor.GRAY)))
                 .build();
 

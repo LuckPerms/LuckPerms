@@ -29,7 +29,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonWriter;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -40,15 +39,18 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.Gist;
+import me.lucko.luckperms.common.utils.HttpClient;
 import me.lucko.luckperms.common.utils.Uuids;
 
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.StringWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
@@ -59,6 +61,7 @@ import java.util.stream.Stream;
  * Utility methods for interacting with the LuckPerms web permission editor.
  */
 public final class WebEditorUtils {
+    private static final Gson GSON = new Gson();
 
     private static final String FILE_NAME = "luckperms-data.json";
     private static final String GIST_API_URL = "https://api.github.com/gists";
@@ -103,101 +106,56 @@ public final class WebEditorUtils {
     }
 
     public static String postToGist(String content) {
-        HttpURLConnection connection = null;
-        try {
-            connection = (HttpURLConnection) new URL(GIST_API_URL).openConnection();
-            connection.addRequestProperty("User-Agent", "luckperms");
-            connection.setRequestMethod("POST");
-            connection.setDoOutput(true);
+        Gist gist = Gist.builder()
+                .description("LuckPerms Web Editor Data")
+                .shorten(false)
+                .file(FILE_NAME, content)
+                .upload();
 
-            try (OutputStream os = connection.getOutputStream()) {
-                StringWriter sw = new StringWriter();
-                new JsonWriter(sw).beginObject()
-                        .name("description").value("LuckPerms Web Editor Data")
-                        .name("public").value(false)
-                        .name("files")
-                        .beginObject().name(FILE_NAME)
-                        .beginObject().name("content").value(content)
-                        .endObject()
-                        .endObject()
-                        .endObject();
-
-                os.write(sw.toString().getBytes(StandardCharsets.UTF_8));
-            }
-
-            if (connection.getResponseCode() >= 400) {
-                throw new RuntimeException("Connection returned response code: " + connection.getResponseCode() + " - " + connection.getResponseMessage());
-            }
-
-            try (InputStream inputStream = connection.getInputStream()) {
-                try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-                    try (BufferedReader reader = new BufferedReader(inputStreamReader)) {
-                        JsonObject response = new Gson().fromJson(reader, JsonObject.class);
-                        return response.get("id").getAsString();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.disconnect();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        return gist.getId();
     }
 
     public static JsonObject getDataFromGist(String id) {
-        HttpURLConnection connection = null;
-        try {
-            connection = (HttpURLConnection) new URL(GIST_API_URL + "/" + id).openConnection();
-            connection.addRequestProperty("User-Agent", "luckperms");
-            connection.setRequestMethod("GET");
+        Request request = new Request.Builder()
+                .url(GIST_API_URL + "/" + id)
+                .build();
 
-            if (connection.getResponseCode() >= 400) {
-                throw new RuntimeException("Connection returned response code: " + connection.getResponseCode() + " - " + connection.getResponseMessage());
-            }
+        try (Response response = HttpClient.makeCall(request)) {
+            try (ResponseBody responseBody = response.body()) {
+                if (responseBody == null) {
+                    throw new RuntimeException("No response");
+                }
 
-            try (InputStream inputStream = connection.getInputStream()) {
-                try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-                    try (BufferedReader reader = new BufferedReader(inputStreamReader)) {
-                        JsonObject response = new Gson().fromJson(reader, JsonObject.class);
-                        JsonObject files = response.get("files").getAsJsonObject();
+                try (InputStream inputStream = responseBody.byteStream()) {
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                        JsonObject object = new Gson().fromJson(reader, JsonObject.class);
+                        JsonObject files = object.get("files").getAsJsonObject();
                         JsonObject permsFile = files.get(FILE_NAME).getAsJsonObject();
 
                         // uh..
                         if (permsFile.get("truncated").getAsBoolean()) {
-                            String rawUrlStr = permsFile.get("raw_url").getAsString();
-                            URL rawUrl = new URL(rawUrlStr);
-                            try (InputStream rawInputStream = rawUrl.openStream()) {
-                                try (InputStreamReader rawInputStreamReader = new InputStreamReader(rawInputStream, StandardCharsets.UTF_8)) {
-                                    try (BufferedReader rawReader = new BufferedReader(rawInputStreamReader)) {
-                                        return new Gson().fromJson(rawReader, JsonObject.class);
+                            try (Response rawResponse = HttpClient.makeCall(new Request.Builder().url(permsFile.get("raw_url").getAsString()).build())) {
+                                try (ResponseBody rawResponseBody = rawResponse.body()) {
+                                    if (rawResponseBody == null) {
+                                        throw new RuntimeException("No response");
+                                    }
+
+                                    try (InputStream rawInputStream = rawResponseBody.byteStream()) {
+                                        try (BufferedReader rawReader = new BufferedReader(new InputStreamReader(rawInputStream, StandardCharsets.UTF_8))) {
+                                            return GSON.fromJson(rawReader, JsonObject.class);
+                                        }
                                     }
                                 }
                             }
                         } else {
                             String content = permsFile.get("content").getAsString();
-                            return new Gson().fromJson(content, JsonObject.class);
+                            return GSON.fromJson(content, JsonObject.class);
                         }
                     }
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.disconnect();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -53,6 +53,18 @@
 
                                 <!-- relocated dependencies -->
                                 <relocation>
+                                    <pattern>com.github.benmanes.caffeine</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.caffeine</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>okio</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.okio</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>okhttp3</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.okhttp3</shadedPattern>
+                                </relocation>
+                                <relocation>
                                     <pattern>org.mariadb.jdbc</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.mariadb</shadedPattern>
                                 </relocation>

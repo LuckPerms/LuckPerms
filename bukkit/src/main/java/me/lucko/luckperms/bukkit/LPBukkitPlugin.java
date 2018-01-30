@@ -57,8 +57,8 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.LuckPermsCalculator;
-import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
+import me.lucko.luckperms.common.dependencies.DependencyRegistry;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.event.EventFactory;
@@ -94,7 +94,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -157,7 +156,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         this.pluginClassLoader = new ReflectionClassLoader(this);
         this.dependencyManager = new DependencyManager(this);
-        this.dependencyManager.loadDependencies(Collections.singleton(Dependency.CAFFEINE));
+        this.dependencyManager.loadDependencies(DependencyRegistry.GLOBAL_DEPENDENCIES);
     }
 
     @Override

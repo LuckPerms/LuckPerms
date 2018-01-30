@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.dependencies;
 import com.google.common.io.ByteStreams;
 
 import me.lucko.luckperms.common.dependencies.relocation.Relocation;
+import me.lucko.luckperms.common.dependencies.relocation.RelocationHelper;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -64,6 +65,23 @@ public enum Dependency {
             "2.6.1",
             "5F55lb0PmSThBWkRJ9mwkvN+8xT6uDZKIwKk37QW0co=",
             Relocation.of("caffeine", "com{}github{}benmanes{}caffeine")
+    ),
+    OKIO(
+            "com{}squareup{}" + RelocationHelper.OKIO_STRING,
+            RelocationHelper.OKIO_STRING,
+            "1.13.0",
+            "c0Jpw+vFCQ47I1ZttVj0IfC0AnJ3x5rV0Xa47BaLuFA=",
+            Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
+    ),
+    OKHTTP(
+            "com{}squareup{}" + RelocationHelper.OKHTTP3_STRING,
+            "okhttp",
+            "3.9.1",
+            "oNAQF6QruiblB/xtRIuzblNvS25hL3xC3jC72sK3eF4=",
+            Relocation.allOf(
+                    Relocation.of(RelocationHelper.OKHTTP3_STRING, RelocationHelper.OKHTTP3_STRING),
+                    Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
+            )
     ),
     MARIADB_DRIVER(
             "org{}mariadb{}jdbc",

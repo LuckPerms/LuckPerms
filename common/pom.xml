@@ -92,7 +92,20 @@
             <version>2.6.1</version>
             <scope>provided</scope>
         </dependency>
-
+        <!-- okhttp -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>3.9.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- okio -->
+        <dependency>
+            <groupId>com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
+            <version>1.13.0</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- configurate -->
         <dependency>

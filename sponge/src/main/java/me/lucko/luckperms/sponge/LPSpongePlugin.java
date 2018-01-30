@@ -47,6 +47,7 @@ import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.LuckPermsCalculator;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
+import me.lucko.luckperms.common.dependencies.DependencyRegistry;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.event.EventFactory;
@@ -197,6 +198,7 @@ public class LPSpongePlugin implements LuckPermsSpongePlugin {
         this.log = new SenderLogger(this, getConsoleSender());
         this.pluginClassLoader = new ReflectionClassLoader(this);
         this.dependencyManager = new DependencyManager(this);
+        this.dependencyManager.loadDependencies(DependencyRegistry.GLOBAL_DEPENDENCIES);
 
         sendStartupBanner(getConsoleSender());
         this.verboseHandler = new VerboseHandler(this.scheduler.async(), getVersion());

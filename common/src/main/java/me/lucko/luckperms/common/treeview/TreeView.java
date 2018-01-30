@@ -32,7 +32,7 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.caching.type.PermissionCache;
-import me.lucko.luckperms.common.utils.PasteUtils;
+import me.lucko.luckperms.common.utils.Gist;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
 
 import java.text.SimpleDateFormat;
@@ -153,7 +153,6 @@ public class TreeView {
      *
      * @param version the plugin version string
      * @return the url, or null
-     * @see PasteUtils#paste(String, List)
      */
     public String uploadPasteData(String version) {
         // only paste if there is actually data here
@@ -180,7 +179,12 @@ public class TreeView {
         ret.clear();
 
         // upload the return the data
-        return PasteUtils.paste("LuckPerms Permission Tree", ImmutableList.of(Maps.immutableEntry("luckperms-tree.md", builder.build().stream().collect(Collectors.joining("\n")))));
+        Gist gist = Gist.builder()
+                .description("LuckPerms Permission Tree")
+                .file("luckperms-tree.md", builder.build().stream().collect(Collectors.joining("\n")))
+                .upload();
+
+        return gist.getUrl();
     }
 
     /**
@@ -193,7 +197,6 @@ public class TreeView {
      * @param username the username of the reference user
      * @param checker the permission data instance to check against
      * @return the url, or null
-     * @see PasteUtils#paste(String, List)
      */
     public String uploadPasteData(String version, String username, PermissionCache checker) {
         // only paste if there is actually data here
@@ -225,7 +228,12 @@ public class TreeView {
         ret.clear();
 
         // upload the return the data
-        return PasteUtils.paste("LuckPerms Permission Tree", ImmutableList.of(Maps.immutableEntry("luckperms-tree.md", builder.build().stream().collect(Collectors.joining("\n")))));
+        Gist gist = Gist.builder()
+                .description("LuckPerms Permission Tree")
+                .file("luckperms-tree.md", builder.build().stream().collect(Collectors.joining("\n")))
+                .upload();
+
+        return gist.getUrl();
     }
 
     private static String getTristateDiffPrefix(Tristate t) {

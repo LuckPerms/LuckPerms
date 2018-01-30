@@ -27,18 +27,24 @@ package me.lucko.luckperms.common.dependencies;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
 
+import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class DependencyRegistry {
+
+    public static final Set<Dependency> GLOBAL_DEPENDENCIES = ImmutableSet.copyOf(EnumSet.of(
+            Dependency.CAFFEINE, Dependency.OKIO, Dependency.OKHTTP
+    ));
 
     private static final Map<StorageType, List<Dependency>> STORAGE_DEPENDENCIES = ImmutableMap.<StorageType, List<Dependency>>builder()
             .put(StorageType.JSON, ImmutableList.of(Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_GSON))
