@@ -27,30 +27,30 @@ package me.lucko.luckperms.common.api.delegates.model;
 
 import com.google.common.base.Preconditions;
 
-import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.caching.GroupData;
+import me.lucko.luckperms.common.model.Group;
 
 import java.util.Objects;
 import java.util.OptionalInt;
 
 import javax.annotation.Nonnull;
 
-public final class ApiGroup extends ApiPermissionHolder implements Group {
-    public static me.lucko.luckperms.common.model.Group cast(Group group) {
+public final class ApiGroup extends ApiPermissionHolder implements me.lucko.luckperms.api.Group {
+    public static Group cast(me.lucko.luckperms.api.Group group) {
         Objects.requireNonNull(group, "group");
         Preconditions.checkState(group instanceof ApiGroup, "Illegal instance " + group.getClass() + " cannot be handled by this implementation.");
         return ((ApiGroup) group).getHandle();
     }
 
-    private final me.lucko.luckperms.common.model.Group handle;
+    private final Group handle;
 
-    public ApiGroup(me.lucko.luckperms.common.model.Group handle) {
+    public ApiGroup(Group handle) {
         super(handle);
         this.handle = handle;
     }
 
     @Override
-    me.lucko.luckperms.common.model.Group getHandle() {
+    Group getHandle() {
         return this.handle;
     }
 

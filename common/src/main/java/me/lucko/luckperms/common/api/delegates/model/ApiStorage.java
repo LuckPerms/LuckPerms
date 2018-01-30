@@ -29,13 +29,13 @@ import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Log;
 import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.api.Storage;
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.Storage;
 
 import java.util.List;
 import java.util.Objects;
@@ -44,17 +44,34 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Function;
 
 import javax.annotation.Nonnull;
 
 import static me.lucko.luckperms.common.api.ApiUtils.checkName;
 import static me.lucko.luckperms.common.api.ApiUtils.checkUsername;
 
-public class ApiStorage implements Storage {
-    private final LuckPermsPlugin plugin;
-    private final me.lucko.luckperms.common.storage.Storage handle;
+public class ApiStorage implements me.lucko.luckperms.api.Storage {
+    private static final Function<Throwable, Boolean> CONSUME_EXCEPTION = throwable -> {
+        throwable.printStackTrace();
+        return false;
+    };
+
+    private static Function<Throwable, Boolean> consumeExceptionToFalse() {
+        return CONSUME_EXCEPTION;
+    }
+
+    private static <T> Function<Throwable, T> consumeExceptionToNull() {
+        return throwable -> {
+            throwable.printStackTrace();
+            return null;
+        };
+    }
     
-    public ApiStorage(LuckPermsPlugin plugin, me.lucko.luckperms.common.storage.Storage handle) {
+    private final LuckPermsPlugin plugin;
+    private final Storage handle;
+    
+    public ApiStorage(LuckPermsPlugin plugin, Storage handle) {
         this.plugin = plugin;
         this.handle = handle;
     }
@@ -86,72 +103,87 @@ public class ApiStorage implements Storage {
     @Override
     public CompletableFuture<Boolean> logAction(@Nonnull LogEntry entry) {
         Objects.requireNonNull(entry, "entry");
-        return this.handle.noBuffer().logAction(entry).thenApply(x -> true);
+        return this.handle.noBuffer().logAction(entry)
+                .thenApply(r -> true)
+                .exceptionally(consumeExceptionToFalse());
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Log> getLog() {
-        return this.handle.noBuffer().getLog().thenApply(log -> log == null ? null : new ApiLog(log));
+        return this.handle.noBuffer().getLog().<Log>thenApply(ApiLog::new).exceptionally(consumeExceptionToNull());
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Boolean> loadUser(@Nonnull UUID uuid, String username) {
         Objects.requireNonNull(uuid, "uuid");
+        username = checkUsername(username);
 
         if (this.plugin.getUserManager().getIfLoaded(uuid) == null) {
             this.plugin.getUserManager().getHouseKeeper().registerApiUsage(uuid);
         }
 
-        return this.handle.noBuffer().loadUser(uuid, username == null ? null : checkUsername(username)).thenApply(Objects::nonNull);
+        return this.handle.noBuffer().loadUser(uuid, username)
+                .thenApply(r -> true)
+                .exceptionally(consumeExceptionToFalse());
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Boolean> saveUser(@Nonnull User user) {
         Objects.requireNonNull(user, "user");
-        return this.handle.noBuffer().saveUser(ApiUser.cast(user)).thenApply(x -> true);
+        return this.handle.noBuffer().saveUser(ApiUser.cast(user))
+                .thenApply(r -> true)
+                .exceptionally(consumeExceptionToFalse());
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Set<UUID>> getUniqueUsers() {
-        return this.handle.noBuffer().getUniqueUsers();
+        return this.handle.noBuffer().getUniqueUsers().exceptionally(consumeExceptionToNull());
     }
 
     @Nonnull
     @Override
     public CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(@Nonnull String permission) {
         Objects.requireNonNull(permission, "permission");
-        return this.handle.noBuffer().getUsersWithPermission(permission);
+        return this.handle.noBuffer().getUsersWithPermission(permission).exceptionally(consumeExceptionToNull());
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Boolean> createAndLoadGroup(@Nonnull String name) {
         Objects.requireNonNull(name, "name");
-        return this.handle.noBuffer().createAndLoadGroup(checkName(name), CreationCause.API).thenApply(Objects::nonNull);
+        return this.handle.noBuffer().createAndLoadGroup(checkName(name), CreationCause.API)
+                .thenApply(r -> true)
+                .exceptionally(consumeExceptionToFalse());
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Boolean> loadGroup(@Nonnull String name) {
         Objects.requireNonNull(name, "name");
-        return this.handle.noBuffer().loadGroup(checkName(name)).thenApply(Optional::isPresent);
+        return this.handle.noBuffer().loadGroup(checkName(name))
+                .thenApply(Optional::isPresent)
+                .exceptionally(consumeExceptionToFalse());
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Boolean> loadAllGroups() {
-        return this.handle.noBuffer().loadAllGroups().thenApply(x -> true);
+        return this.handle.noBuffer().loadAllGroups()
+                .thenApply(r -> true)
+                .exceptionally(consumeExceptionToFalse());
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Boolean> saveGroup(@Nonnull Group group) {
         Objects.requireNonNull(group, "group");
-        return this.handle.noBuffer().saveGroup(ApiGroup.cast(group)).thenApply(x -> true);
+        return this.handle.noBuffer().saveGroup(ApiGroup.cast(group))
+                .thenApply(r -> true)
+                .exceptionally(consumeExceptionToFalse());
     }
 
     @Nonnull
@@ -161,48 +193,60 @@ public class ApiStorage implements Storage {
         if (group.getName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
             throw new IllegalArgumentException("Cannot delete the default group.");
         }
-        return this.handle.noBuffer().deleteGroup(ApiGroup.cast(group), DeletionCause.API).thenApply(x -> true);
+        return this.handle.noBuffer().deleteGroup(ApiGroup.cast(group), DeletionCause.API)
+                .thenApply(r -> true)
+                .exceptionally(consumeExceptionToFalse());
     }
 
     @Nonnull
     @Override
     public CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(@Nonnull String permission) {
         Objects.requireNonNull(permission, "permission");
-        return this.handle.noBuffer().getGroupsWithPermission(permission);
+        return this.handle.noBuffer().getGroupsWithPermission(permission).exceptionally(consumeExceptionToNull());
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Boolean> createAndLoadTrack(@Nonnull String name) {
         Objects.requireNonNull(name, "name");
-        return this.handle.noBuffer().createAndLoadTrack(checkName(name), CreationCause.API).thenApply(Objects::nonNull);
+        return this.handle.noBuffer().createAndLoadTrack(checkName(name), CreationCause.API)
+                .thenApply(r -> true)
+                .exceptionally(consumeExceptionToFalse());
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Boolean> loadTrack(@Nonnull String name) {
         Objects.requireNonNull(name, "name");
-        return this.handle.noBuffer().loadTrack(checkName(name)).thenApply(Optional::isPresent);
+        return this.handle.noBuffer().loadTrack(checkName(name))
+                .thenApply(Optional::isPresent)
+                .exceptionally(consumeExceptionToFalse());
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Boolean> loadAllTracks() {
-        return this.handle.noBuffer().loadAllTracks().thenApply(x -> true);
+        return this.handle.noBuffer().loadAllTracks()
+                .thenApply(r -> true)
+                .exceptionally(consumeExceptionToFalse());
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Boolean> saveTrack(@Nonnull Track track) {
         Objects.requireNonNull(track, "track");
-        return this.handle.noBuffer().saveTrack(ApiTrack.cast(track)).thenApply(x -> true);
+        return this.handle.noBuffer().saveTrack(ApiTrack.cast(track))
+                .thenApply(r -> true)
+                .exceptionally(consumeExceptionToFalse());
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Boolean> deleteTrack(@Nonnull Track track) {
         Objects.requireNonNull(track, "track");
-        return this.handle.noBuffer().deleteTrack(ApiTrack.cast(track), DeletionCause.API).thenApply(x -> true);
+        return this.handle.noBuffer().deleteTrack(ApiTrack.cast(track), DeletionCause.API)
+                .thenApply(r -> true)
+                .exceptionally(consumeExceptionToFalse());
     }
 
     @Nonnull
@@ -210,7 +254,9 @@ public class ApiStorage implements Storage {
     public CompletableFuture<Boolean> saveUUIDData(@Nonnull String username, @Nonnull UUID uuid) {
         Objects.requireNonNull(username, "username");
         Objects.requireNonNull(uuid, "uuid");
-        return this.handle.noBuffer().saveUUIDData(uuid, checkUsername(username)).thenApply(x -> true);
+        return this.handle.noBuffer().saveUUIDData(uuid, checkUsername(username))
+                .thenApply(r -> true)
+                .exceptionally(consumeExceptionToFalse());
     }
 
     @Nonnull

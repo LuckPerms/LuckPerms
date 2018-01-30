@@ -23,38 +23,19 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api;
+package me.lucko.luckperms.common.api.delegates.manager;
 
-import com.google.common.base.Preconditions;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import me.lucko.luckperms.common.storage.DataConstraints;
+public abstract class ApiAbstractManager<I, E, H> {
+    protected final LuckPermsPlugin plugin;
+    protected final H handle;
 
-public final class ApiUtils {
-
-    public static String checkUsername(String s) {
-        if (s == null) {
-            return null;
-        }
-
-        Preconditions.checkArgument(
-                DataConstraints.PLAYER_USERNAME_TEST.test(s),
-                "Invalid username entry '" + s + "'. Usernames must be less than 16 chars and only contain 'a-z A-Z 1-9 _'."
-        );
-        return s;
+    protected ApiAbstractManager(LuckPermsPlugin plugin, H handle) {
+        this.plugin = plugin;
+        this.handle = handle;
     }
 
-    public static String checkName(String s) {
-        if (s == null) {
-            return null;
-        }
-
-        Preconditions.checkArgument(
-                DataConstraints.GROUP_NAME_TEST.test(s),
-                "Invalid name entry '" + s + "'. Names must be less than 37 chars and only contain 'a-z A-Z 1-9'."
-        );
-        return s.toLowerCase();
-    }
-
-    private ApiUtils() {}
+    protected abstract E getDelegateFor(I internal);
 
 }

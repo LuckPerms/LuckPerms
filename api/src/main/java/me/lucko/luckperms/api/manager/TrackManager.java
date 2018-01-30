@@ -25,10 +25,12 @@
 
 package me.lucko.luckperms.api.manager;
 
+import me.lucko.luckperms.api.Storage;
 import me.lucko.luckperms.api.Track;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -41,7 +43,103 @@ import javax.annotation.Nullable;
 public interface TrackManager {
 
     /**
-     * Gets a wrapped track object from the track storage
+     * Creates a new track in the plugin's storage provider and then loads it
+     * into memory.
+     *
+     * <p>If a track by the same name already exists, it will be loaded.</p>
+     *
+     * <p>This method is effectively the same as
+     * {@link Storage#createAndLoadTrack(String)}, however, the Future returns
+     * the resultant track instance instead of a boolean flag.</p>
+     *
+     * <p>Unlike the method in {@link Storage}, when a track cannot be loaded,
+     * the future will be {@link CompletableFuture completed exceptionally}.</p>
+     *
+     * @param name the name of the track
+     * @return the resultant track
+     * @throws NullPointerException if the name is null
+     * @since 4.1
+     */
+    @Nonnull
+    CompletableFuture<Track> createAndLoadTrack(@Nonnull String name);
+
+    /**
+     * Loads a track from the plugin's storage provider into memory.
+     *
+     * <p>Returns an {@link Optional#empty() empty optional} if the track does
+     * not exist.</p>
+     *
+     * <p>This method is effectively the same as
+     * {@link Storage#loadTrack(String)}, however, the Future returns
+     * the resultant track instance instead of a boolean flag.</p>
+     *
+     * <p>Unlike the method in {@link Storage}, when a track cannot be loaded,
+     * the future will be {@link CompletableFuture completed exceptionally}.</p>
+     *
+     * @param name the name of the track
+     * @return the resultant track
+     * @throws NullPointerException if the name is null
+     * @since 4.1
+     */
+    @Nonnull
+    CompletableFuture<Optional<Track>> loadTrack(@Nonnull String name);
+
+    /**
+     * Saves a track's data back to the plugin's storage provider.
+     *
+     * <p>You should call this after you make any changes to a track.</p>
+     *
+     * <p>This method is effectively the same as {@link Storage#saveTrack(Track)},
+     * however, the Future returns void instead of a boolean flag.</p>
+     *
+     * <p>Unlike the method in {@link Storage}, when a track cannot be saved,
+     * the future will be {@link CompletableFuture completed exceptionally}.</p>
+     *
+     * @param track the track to save
+     * @return a future to encapsulate the operation.
+     * @throws NullPointerException  if track is null
+     * @throws IllegalStateException if the track instance was not obtained from LuckPerms.
+     * @since 4.1
+     */
+    @Nonnull
+    CompletableFuture<Void> saveTrack(@Nonnull Track track);
+
+    /**
+     * Permanently deletes a track from the plugin's storage provider.
+     *
+     * <p>This method is effectively the same as {@link Storage#deleteTrack(Track)},
+     * however, the Future returns void instead of a boolean flag.</p>
+     *
+     * <p>Unlike the method in {@link Storage}, when a track cannot be deleted,
+     * the future will be {@link CompletableFuture completed exceptionally}.</p>
+     *
+     *
+     * @param track the track to delete
+     * @return a future to encapsulate the operation.
+     * @throws NullPointerException  if track is null
+     * @throws IllegalStateException if the track instance was not obtained from LuckPerms.
+     * @since 4.1
+     */
+    @Nonnull
+    CompletableFuture<Void> deleteTrack(@Nonnull Track track);
+
+    /**
+     * Loads all tracks into memory.
+     *
+     * <p>This method is effectively the same as {@link Storage#loadAllTracks()},
+     * however, the Future returns void instead of a boolean flag.</p>
+     *
+     * <p>Unlike the method in {@link Storage}, when a track cannot be loaded,
+     * the future will be {@link CompletableFuture completed exceptionally}.</p>
+     *
+     * @return a future to encapsulate the operation.
+     * @since 4.1
+     */
+    @Nonnull
+    CompletableFuture<Void> loadAllTracks();
+
+    /**
+     * Gets a loaded track.
      *
      * @param name the name of the track to get
      * @return a {@link Track} object, if one matching the name exists, or null if not
@@ -51,7 +149,7 @@ public interface TrackManager {
     Track getTrack(@Nonnull String name);
 
     /**
-     * Gets a wrapped track object from the track storage.
+     * Gets a loaded track.
      *
      * <p>This method does not return null, unlike {@link #getTrack}</p>
      *

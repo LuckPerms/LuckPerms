@@ -26,9 +26,11 @@
 package me.lucko.luckperms.api.manager;
 
 import me.lucko.luckperms.api.Group;
+import me.lucko.luckperms.api.Storage;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -41,7 +43,103 @@ import javax.annotation.Nullable;
 public interface GroupManager {
 
     /**
-     * Gets a wrapped group object from the group storage
+     * Creates a new group in the plugin's storage provider and then loads it
+     * into memory.
+     *
+     * <p>If a group by the same name already exists, it will be loaded.</p>
+     *
+     * <p>This method is effectively the same as
+     * {@link Storage#createAndLoadGroup(String)}, however, the Future returns
+     * the resultant group instance instead of a boolean flag.</p>
+     *
+     * <p>Unlike the method in {@link Storage}, when a group cannot be loaded,
+     * the future will be {@link CompletableFuture completed exceptionally}.</p>
+     *
+     * @param name the name of the group
+     * @return the resultant group
+     * @throws NullPointerException if the name is null
+     * @since 4.1
+     */
+    @Nonnull
+    CompletableFuture<Group> createAndLoadGroup(@Nonnull String name);
+
+    /**
+     * Loads a group from the plugin's storage provider into memory.
+     *
+     * <p>Returns an {@link Optional#empty() empty optional} if the group does
+     * not exist.</p>
+     *
+     * <p>This method is effectively the same as
+     * {@link Storage#loadGroup(String)}, however, the Future returns
+     * the resultant group instance instead of a boolean flag.</p>
+     *
+     * <p>Unlike the method in {@link Storage}, when a group cannot be loaded,
+     * the future will be {@link CompletableFuture completed exceptionally}.</p>
+     *
+     * @param name the name of the group
+     * @return the resultant group
+     * @throws NullPointerException if the name is null
+     * @since 4.1
+     */
+    @Nonnull
+    CompletableFuture<Optional<Group>> loadGroup(@Nonnull String name);
+
+    /**
+     * Saves a group's data back to the plugin's storage provider.
+     *
+     * <p>You should call this after you make any changes to a group.</p>
+     *
+     * <p>This method is effectively the same as {@link Storage#saveGroup(Group)},
+     * however, the Future returns void instead of a boolean flag.</p>
+     *
+     * <p>Unlike the method in {@link Storage}, when a group cannot be saved,
+     * the future will be {@link CompletableFuture completed exceptionally}.</p>
+     *
+     * @param group the group to save
+     * @return a future to encapsulate the operation.
+     * @throws NullPointerException  if group is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @since 4.1
+     */
+    @Nonnull
+    CompletableFuture<Void> saveGroup(@Nonnull Group group);
+
+    /**
+     * Permanently deletes a group from the plugin's storage provider.
+     *
+     * <p>This method is effectively the same as {@link Storage#deleteGroup(Group)},
+     * however, the Future returns void instead of a boolean flag.</p>
+     *
+     * <p>Unlike the method in {@link Storage}, when a group cannot be deleted,
+     * the future will be {@link CompletableFuture completed exceptionally}.</p>
+     *
+     *
+     * @param group the group to delete
+     * @return a future to encapsulate the operation.
+     * @throws NullPointerException  if group is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @since 4.1
+     */
+    @Nonnull
+    CompletableFuture<Void> deleteGroup(@Nonnull Group group);
+
+    /**
+     * Loads all groups into memory.
+     *
+     * <p>This method is effectively the same as {@link Storage#loadAllTracks()},
+     * however, the Future returns void instead of a boolean flag.</p>
+     *
+     * <p>Unlike the method in {@link Storage}, when a group cannot be loaded,
+     * the future will be {@link CompletableFuture completed exceptionally}.</p>
+     *
+     * @return a future to encapsulate the operation.
+     * @since 4.1
+     */
+    @Nonnull
+    CompletableFuture<Void> loadAllGroups();
+
+    /**
+     * Gets a loaded group.
      *
      * @param name the name of the group to get
      * @return a {@link Group} object, if one matching the name exists, or null if not
@@ -51,7 +149,7 @@ public interface GroupManager {
     Group getGroup(@Nonnull String name);
 
     /**
-     * Gets a wrapped group object from the group storage.
+     * Gets a loaded group.
      *
      * <p>This method does not return null, unlike {@link #getGroup}</p>
      *

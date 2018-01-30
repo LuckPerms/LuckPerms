@@ -29,27 +29,27 @@ import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.Group;
-import me.lucko.luckperms.api.Track;
+import me.lucko.luckperms.common.model.Track;
 
 import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
-public final class ApiTrack implements Track {
-    public static me.lucko.luckperms.common.model.Track cast(Track track) {
+public final class ApiTrack implements me.lucko.luckperms.api.Track {
+    public static Track cast(me.lucko.luckperms.api.Track track) {
         Objects.requireNonNull(track, "track");
         Preconditions.checkState(track instanceof ApiTrack, "Illegal instance " + track.getClass() + " cannot be handled by this implementation.");
         return ((ApiTrack) track).getHandle();
     }
 
-    private final me.lucko.luckperms.common.model.Track handle;
+    private final Track handle;
     
-    public ApiTrack(me.lucko.luckperms.common.model.Track handle) {
+    public ApiTrack(Track handle) {
         this.handle = handle;
     }
 
-    me.lucko.luckperms.common.model.Track getHandle() {
+    Track getHandle() {
         return this.handle;
     }
 

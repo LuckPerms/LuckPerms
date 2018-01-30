@@ -25,8 +25,9 @@
 
 package me.lucko.luckperms.common.api.delegates.model;
 
-import me.lucko.luckperms.api.Log;
+
 import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.common.actionlog.Log;
 
 import java.util.Objects;
 import java.util.SortedMap;
@@ -38,11 +39,11 @@ import javax.annotation.Nonnull;
 import static me.lucko.luckperms.common.api.ApiUtils.checkName;
 
 @SuppressWarnings("unchecked")
-public class ApiLog implements Log {
+public class ApiLog implements me.lucko.luckperms.api.Log {
     private static final int ENTRIES_PER_PAGE = 5;
-    private final me.lucko.luckperms.common.actionlog.Log handle;
+    private final Log handle;
 
-    public ApiLog(me.lucko.luckperms.common.actionlog.Log handle) {
+    public ApiLog(Log handle) {
         this.handle = handle;
     }
 

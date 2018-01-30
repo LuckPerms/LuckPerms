@@ -25,33 +25,83 @@
 
 package me.lucko.luckperms.common.api.delegates.manager;
 
-import me.lucko.luckperms.api.Track;
-import me.lucko.luckperms.api.manager.TrackManager;
+import me.lucko.luckperms.api.event.cause.CreationCause;
+import me.lucko.luckperms.api.event.cause.DeletionCause;
+import me.lucko.luckperms.common.api.ApiUtils;
+import me.lucko.luckperms.common.api.delegates.model.ApiTrack;
+import me.lucko.luckperms.common.managers.track.TrackManager;
+import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nonnull;
 
-public class ApiTrackManager implements TrackManager {
-    private final me.lucko.luckperms.common.managers.track.TrackManager<?> handle;
-
-    public ApiTrackManager(me.lucko.luckperms.common.managers.track.TrackManager<?> handle) {
-        this.handle = handle;
+public class ApiTrackManager extends ApiAbstractManager<Track, me.lucko.luckperms.api.Track, TrackManager<?>> implements me.lucko.luckperms.api.manager.TrackManager {
+    public ApiTrackManager(LuckPermsPlugin plugin, TrackManager<?> handle) {
+        super(plugin, handle);
     }
 
     @Override
-    public Track getTrack(@Nonnull String name) {
-        Objects.requireNonNull(name, "name");
-        me.lucko.luckperms.common.model.Track track = this.handle.getIfLoaded(name);
-        return track == null ? null : track.getApiDelegate();
+    protected me.lucko.luckperms.api.Track getDelegateFor(Track internal) {
+        if (internal == null) {
+            return null;
+        }
+
+        return internal.getApiDelegate();
     }
 
     @Nonnull
     @Override
-    public Set<Track> getLoadedTracks() {
-        return this.handle.getAll().values().stream().map(me.lucko.luckperms.common.model.Track::getApiDelegate).collect(Collectors.toSet());
+    public CompletableFuture<me.lucko.luckperms.api.Track> createAndLoadTrack(@Nonnull String name) {
+        name = ApiUtils.checkName(Objects.requireNonNull(name, "name"));
+        return this.plugin.getStorage().noBuffer().createAndLoadTrack(name, CreationCause.API)
+                .thenApply(this::getDelegateFor);
+    }
+
+    @Nonnull
+    @Override
+    public CompletableFuture<Optional<me.lucko.luckperms.api.Track>> loadTrack(@Nonnull String name) {
+        name = ApiUtils.checkName(Objects.requireNonNull(name, "name"));
+        return this.plugin.getStorage().noBuffer().loadTrack(name).thenApply(opt -> opt.map(this::getDelegateFor));
+    }
+
+    @Nonnull
+    @Override
+    public CompletableFuture<Void> saveTrack(@Nonnull me.lucko.luckperms.api.Track track) {
+        Objects.requireNonNull(track, "track");
+        return this.plugin.getStorage().noBuffer().saveTrack(ApiTrack.cast(track));
+    }
+
+    @Nonnull
+    @Override
+    public CompletableFuture<Void> deleteTrack(@Nonnull me.lucko.luckperms.api.Track track) {
+        Objects.requireNonNull(track, "track");
+        return this.plugin.getStorage().noBuffer().deleteTrack(ApiTrack.cast(track), DeletionCause.API);
+    }
+
+    @Nonnull
+    @Override
+    public CompletableFuture<Void> loadAllTracks() {
+        return this.plugin.getStorage().noBuffer().loadAllTracks();
+    }
+
+    @Override
+    public me.lucko.luckperms.api.Track getTrack(@Nonnull String name) {
+        Objects.requireNonNull(name, "name");
+        return getDelegateFor(this.handle.getIfLoaded(name));
+    }
+
+    @Nonnull
+    @Override
+    public Set<me.lucko.luckperms.api.Track> getLoadedTracks() {
+        return this.handle.getAll().values().stream()
+                .map(this::getDelegateFor)
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override

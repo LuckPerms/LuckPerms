@@ -35,13 +35,13 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.PermissionHolder;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.CachedData;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.NodeMapType;
+import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.MetaType;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
@@ -56,14 +56,14 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
 
-public class ApiPermissionHolder implements PermissionHolder {
-    private final me.lucko.luckperms.common.model.PermissionHolder handle;
+public class ApiPermissionHolder implements me.lucko.luckperms.api.PermissionHolder {
+    private final PermissionHolder handle;
 
-    ApiPermissionHolder(me.lucko.luckperms.common.model.PermissionHolder handle) {
+    ApiPermissionHolder(PermissionHolder handle) {
         this.handle = Objects.requireNonNull(handle, "handle");
     }
 
-    me.lucko.luckperms.common.model.PermissionHolder getHandle() {
+    PermissionHolder getHandle() {
         return this.handle;
     }
 

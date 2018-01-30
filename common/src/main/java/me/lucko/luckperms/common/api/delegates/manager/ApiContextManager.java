@@ -28,10 +28,10 @@ package me.lucko.luckperms.common.api.delegates.manager;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.context.ContextCalculator;
-import me.lucko.luckperms.api.context.ContextManager;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.StaticContextCalculator;
 import me.lucko.luckperms.common.api.delegates.model.ApiUser;
+import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Objects;
@@ -40,11 +40,11 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 
 @SuppressWarnings("unchecked")
-public class ApiContextManager implements ContextManager {
+public class ApiContextManager implements me.lucko.luckperms.api.context.ContextManager {
     private final LuckPermsPlugin plugin;
-    private final me.lucko.luckperms.common.contexts.ContextManager handle;
+    private final ContextManager handle;
 
-    public ApiContextManager(LuckPermsPlugin plugin, me.lucko.luckperms.common.contexts.ContextManager handle) {
+    public ApiContextManager(LuckPermsPlugin plugin, ContextManager handle) {
         this.plugin = plugin;
         this.handle = handle;
     }

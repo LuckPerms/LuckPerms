@@ -28,8 +28,8 @@ package me.lucko.luckperms.common.api.delegates.model;
 import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.DataMutateResult;
-import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.caching.UserData;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 
 import java.util.Objects;
@@ -37,21 +37,21 @@ import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
-public final class ApiUser extends ApiPermissionHolder implements User {
-    public static me.lucko.luckperms.common.model.User cast(User u) {
+public final class ApiUser extends ApiPermissionHolder implements me.lucko.luckperms.api.User {
+    public static User cast(me.lucko.luckperms.api.User u) {
         Preconditions.checkState(u instanceof ApiUser, "Illegal instance " + u.getClass() + " cannot be handled by this implementation.");
         return ((ApiUser) u).getHandle();
     }
 
-    private final me.lucko.luckperms.common.model.User handle;
+    private final User handle;
 
-    public ApiUser(me.lucko.luckperms.common.model.User handle) {
+    public ApiUser(User handle) {
         super(handle);
         this.handle = handle;
     }
 
     @Override
-    me.lucko.luckperms.common.model.User getHandle() {
+    User getHandle() {
         return this.handle;
     }
 

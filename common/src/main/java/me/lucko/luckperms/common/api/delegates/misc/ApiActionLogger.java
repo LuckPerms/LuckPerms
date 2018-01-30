@@ -52,7 +52,7 @@ public class ApiActionLogger implements ActionLogger {
     @Nonnull
     @Override
     public CompletableFuture<Log> getLog() {
-        return this.plugin.getStorage().noBuffer().getLog().thenApply(log -> log == null ? null : new ApiLog(log));
+        return this.plugin.getStorage().noBuffer().getLog().thenApply(ApiLog::new);
     }
 
     @Nonnull

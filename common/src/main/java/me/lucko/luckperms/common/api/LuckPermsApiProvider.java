@@ -78,9 +78,9 @@ public class LuckPermsApiProvider implements LuckPermsApi {
         this.plugin = plugin;
 
         this.platformInfo = new ApiPlatformInfo(plugin);
-        this.userManager = new ApiUserManager(plugin.getUserManager());
-        this.groupManager = new ApiGroupManager(plugin.getGroupManager());
-        this.trackManager = new ApiTrackManager(plugin.getTrackManager());
+        this.userManager = new ApiUserManager(plugin, plugin.getUserManager());
+        this.groupManager = new ApiGroupManager(plugin, plugin.getGroupManager());
+        this.trackManager = new ApiTrackManager(plugin, plugin.getTrackManager());
         this.actionLogger = new ApiActionLogger(plugin);
         this.contextManager = new ApiContextManager(plugin, plugin.getContextManager());
         this.metaStackFactory = new ApiMetaStackFactory(plugin);

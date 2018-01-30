@@ -77,8 +77,8 @@ public class LuckPermsEventBus implements EventBus {
     }
 
     @Nonnull
-    @SuppressWarnings("unchecked")
     @Override
+    @SuppressWarnings("unchecked")
     public <T extends LuckPermsEvent> Set<EventHandler<T>> getHandlers(@Nonnull Class<T> eventClass) {
         Set<LuckPermsEventHandler<?>> handlers = this.handlerMap.get(eventClass);
         if (handlers == null) {
