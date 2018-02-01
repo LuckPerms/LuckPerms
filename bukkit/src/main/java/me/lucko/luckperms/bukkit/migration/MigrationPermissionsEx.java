@@ -173,22 +173,6 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             // migrate data
             migrateEntity(user, lpUser, userWeight);
 
-            // Lowest rank is the highest group #logic
-            String primary = null;
-            int weight = Integer.MAX_VALUE;
-            for (PermissionGroup group : user.getOwnParents()) {
-                if (group.getRank() < weight) {
-                    primary = group.getName();
-                    weight = group.getRank();
-                }
-            }
-
-            if (primary != null && !primary.isEmpty() && !primary.equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
-                lpUser.setPermission(NodeFactory.buildGroupNode(primary.toLowerCase()).build());
-                lpUser.getPrimaryGroup().setStoredValue(primary);
-                lpUser.unsetPermission(NodeFactory.buildGroupNode(NodeFactory.DEFAULT_GROUP_NAME).build());
-            }
-
             plugin.getUserManager().cleanup(lpUser);
             plugin.getStorage().saveUser(lpUser);
             log.logProgress("Migrated {} users so far.", userCount.incrementAndGet());
@@ -242,9 +226,13 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         }
 
         // migrate parents
-        Map<String, List<PermissionGroup>> parents = entity.getAllParents();
-        for (Map.Entry<String, List<PermissionGroup>> worldData : parents.entrySet()) {
+        for (Map.Entry<String, List<PermissionGroup>> worldData : entity.getAllParents().entrySet()) {
             String world = standardizeWorld(worldData.getKey());
+
+            // keep track of primary group
+            String primary = null;
+            int primaryWeight = Integer.MAX_VALUE;
+
             for (PermissionGroup parent : worldData.getValue()) {
                 String parentName = parent.getName();
                 long expiry = 0L;
@@ -262,6 +250,20 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 }
 
                 holder.setPermission(NodeFactory.buildGroupNode(MigrationUtils.standardizeName(parentName)).setWorld(world).setExpiry(expiry).build());
+
+                // migrate primary groups
+                if (world == null && holder instanceof User && expiry == 0) {
+                    if (parent.getRank() < primaryWeight) {
+                        primary = parent.getName();
+                        primaryWeight = parent.getRank();
+                    }
+                }
+            }
+
+            if (primary != null && !primary.isEmpty() && !primary.equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
+                User user = ((User) holder);
+                user.getPrimaryGroup().setStoredValue(primary);
+                user.unsetPermission(NodeFactory.buildGroupNode(NodeFactory.DEFAULT_GROUP_NAME).build());
             }
         }
 
@@ -278,8 +280,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         }
 
         // migrate options
-        Map<String, Map<String, String>> options = entity.getAllOptions();
-        for (Map.Entry<String, Map<String, String>> worldData : options.entrySet()) {
+        for (Map.Entry<String, Map<String, String>> worldData : entity.getAllOptions().entrySet()) {
             String world = standardizeWorld(worldData.getKey());
             for (Map.Entry<String, String> opt : worldData.getValue().entrySet()) {
                 if (opt.getKey() == null || opt.getKey().isEmpty() || opt.getValue() == null || opt.getValue().isEmpty()) {
