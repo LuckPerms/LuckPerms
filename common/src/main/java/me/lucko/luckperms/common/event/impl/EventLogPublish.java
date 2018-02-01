@@ -57,6 +57,6 @@ public class EventLogPublish extends AbstractEvent implements LogPublishEvent {
 
     @Override
     public String toString() {
-        return "EventLogPublish(cancellationState=" + this.getCancellationState() + ", entry=" + this.getEntry() + ")";
+        return "LogPublishEvent(cancellationState=" + this.getCancellationState() + ", entry=" + this.getEntry() + ")";
     }
 }

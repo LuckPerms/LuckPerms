@@ -47,6 +47,6 @@ public class EventUserLoad extends AbstractEvent implements UserLoadEvent {
 
     @Override
     public String toString() {
-        return "EventUserLoad(user=" + this.getUser() + ")";
+        return "UserLoadEvent(user=" + this.getUser() + ")";
     }
 }

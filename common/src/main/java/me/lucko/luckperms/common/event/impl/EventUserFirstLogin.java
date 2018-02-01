@@ -56,6 +56,6 @@ public class EventUserFirstLogin extends AbstractEvent implements UserFirstLogin
 
     @Override
     public String toString() {
-        return "EventUserFirstLogin(uuid=" + this.getUuid() + ", username=" + this.getUsername() + ")";
+        return "UserFirstLoginEvent(uuid=" + this.getUuid() + ", username=" + this.getUsername() + ")";
     }
 }

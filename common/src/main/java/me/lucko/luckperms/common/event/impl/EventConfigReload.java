@@ -32,6 +32,6 @@ public class EventConfigReload extends AbstractEvent implements ConfigReloadEven
 
     @Override
     public String toString() {
-        return "EventConfigReload()";
+        return "ConfigReloadEvent()";
     }
 }

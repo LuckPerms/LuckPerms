@@ -23,47 +23,50 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.event.impl;
+package me.lucko.luckperms.common.event.model;
 
-import me.lucko.luckperms.api.User;
-import me.lucko.luckperms.api.event.user.UserLoginProcessEvent;
-import me.lucko.luckperms.common.event.AbstractEvent;
+import me.lucko.luckperms.api.Entity;
+import me.lucko.luckperms.common.commands.sender.Sender;
 
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-public class EventUserLoginProcess extends AbstractEvent implements UserLoginProcessEvent {
+public class EntitySender implements Entity {
+    private final Sender sender;
 
-    private final UUID uuid;
-    private final String username;
-    private final User user;
+    public EntitySender(Sender sender) {
+        this.sender = sender;
+    }
 
-    public EventUserLoginProcess(UUID uuid, String username, User user) {
-        this.uuid = uuid;
-        this.username = username;
-        this.user = user;
+    @Nullable
+    @Override
+    public UUID getUniqueId() {
+        if (this.sender.isConsole()) {
+            return null;
+        }
+        return this.sender.getUuid();
     }
 
     @Nonnull
     @Override
-    public UUID getUuid() {
-        return this.uuid;
+    public String getName() {
+        return this.sender.getName();
     }
 
     @Nonnull
     @Override
-    public String getUsername() {
-        return this.username;
-    }
-
-    @Override
-    public User getUser() {
-        return this.user;
+    public Type getType() {
+        if (this.sender.isConsole()) {
+            return Type.CONSOLE;
+        } else {
+            return Type.PLAYER;
+        }
     }
 
     @Override
     public String toString() {
-        return "UserLoginProcessEvent(uuid=" + this.getUuid() + ", username=" + this.getUsername() + ", user=" + this.getUser() + ")";
+        return "Sender(type=" + getType() + ", sender=" + this.sender + ")";
     }
 }

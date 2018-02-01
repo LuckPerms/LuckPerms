@@ -78,6 +78,9 @@ public class EventNodeClear extends AbstractEvent implements NodeClearEvent {
 
     @Override
     public String toString() {
-        return "EventNodeClear(target=" + this.getTarget() + ", dataBefore=" + this.getDataBefore() + ", dataAfter=" + this.getDataAfter() + ")";
+        return "NodeClearEvent(" +
+                "target=" + this.getTarget() + ", " +
+                "dataBefore=" + this.getDataBefore() + ", " +
+                "dataAfter=" + this.getDataAfter() + ")";
     }
 }

@@ -48,6 +48,6 @@ public class EventPreSync extends AbstractEvent implements PreSyncEvent {
 
     @Override
     public String toString() {
-        return "EventPreSync(cancellationState=" + this.getCancellationState() + ")";
+        return "PreSyncEvent(cancellationState=" + this.getCancellationState() + ")";
     }
 }

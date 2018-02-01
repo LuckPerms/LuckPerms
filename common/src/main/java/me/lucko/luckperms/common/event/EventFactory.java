@@ -36,6 +36,7 @@ import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.api.event.log.LogBroadcastEvent;
+import me.lucko.luckperms.api.event.log.LogNotifyEvent;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.api.delegates.model.ApiPermissionHolder;
 import me.lucko.luckperms.common.api.delegates.model.ApiUser;
@@ -72,6 +73,8 @@ import me.lucko.luckperms.common.event.impl.EventUserFirstLogin;
 import me.lucko.luckperms.common.event.impl.EventUserLoad;
 import me.lucko.luckperms.common.event.impl.EventUserLoginProcess;
 import me.lucko.luckperms.common.event.impl.EventUserPromote;
+import me.lucko.luckperms.common.event.model.EntitySender;
+import me.lucko.luckperms.common.event.model.SourceEntity;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
@@ -153,7 +156,7 @@ public final class EventFactory {
         return cancel.get();
     }
 
-    public boolean handleLogNotify(boolean initialState, LogEntry entry, LogBroadcastEvent.Origin origin, Sender sender) {
+    public boolean handleLogNotify(boolean initialState, LogEntry entry, LogNotifyEvent.Origin origin, Sender sender) {
         AtomicBoolean cancel = new AtomicBoolean(initialState);
         EventLogNotify event = new EventLogNotify(cancel, entry, origin, sender);
         fireEvent(event);
@@ -264,13 +267,13 @@ public final class EventFactory {
         fireEvent(event);
     }
 
-    public void handleUserDemote(User user, Track track, String from, String to) {
-        EventUserDemote event = new EventUserDemote(track.getApiDelegate(), new ApiUser(user), from, to);
+    public void handleUserDemote(User user, Track track, String from, String to, Sender source) {
+        EventUserDemote event = new EventUserDemote(track.getApiDelegate(), new ApiUser(user), from, to, new SourceEntity(new EntitySender(source)));
         fireEventAsync(event);
     }
 
-    public void handleUserPromote(User user, Track track, String from, String to) {
-        EventUserPromote event = new EventUserPromote(track.getApiDelegate(), new ApiUser(user), from, to);
+    public void handleUserPromote(User user, Track track, String from, String to, Sender source) {
+        EventUserPromote event = new EventUserPromote(track.getApiDelegate(), new ApiUser(user), from, to, new SourceEntity(new EntitySender(source)));
         fireEventAsync(event);
     }
 

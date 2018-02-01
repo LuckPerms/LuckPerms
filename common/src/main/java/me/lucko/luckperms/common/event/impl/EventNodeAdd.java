@@ -86,6 +86,10 @@ public class EventNodeAdd extends AbstractEvent implements NodeAddEvent {
 
     @Override
     public String toString() {
-        return "EventNodeAdd(node=" + this.getNode() + ", target=" + this.getTarget() + ", dataBefore=" + this.getDataBefore() + ", dataAfter=" + this.getDataAfter() + ")";
+        return "NodeAddEvent(" +
+                "node=" + this.getNode() + ", " +
+                "target=" + this.getTarget() + ", " +
+                "dataBefore=" + this.getDataBefore() + ", " +
+                "dataAfter=" + this.getDataAfter() + ")";
     }
 }

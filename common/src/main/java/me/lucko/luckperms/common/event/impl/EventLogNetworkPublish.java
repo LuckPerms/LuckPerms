@@ -66,6 +66,9 @@ public class EventLogNetworkPublish extends AbstractEvent implements LogNetworkP
 
     @Override
     public String toString() {
-        return "EventLogNetworkPublish(cancellationState=" + this.getCancellationState() + ", logId=" + this.getLogId() + ", entry=" + this.getEntry() + ")";
+        return "LogNetworkPublishEvent(" +
+                "cancellationState=" + this.getCancellationState() + ", " +
+                "logId=" + this.getLogId() + ", " +
+                "entry=" + this.getEntry() + ")";
     }
 }

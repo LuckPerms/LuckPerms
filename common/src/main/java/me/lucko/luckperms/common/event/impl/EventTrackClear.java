@@ -65,6 +65,9 @@ public class EventTrackClear extends AbstractEvent implements TrackClearEvent {
 
     @Override
     public String toString() {
-        return "EventTrackClear(track=" + this.getTrack() + ", dataBefore=" + this.getDataBefore() + ", dataAfter=" + this.getDataAfter() + ")";
+        return "TrackClearEvent(" +
+                "track=" + this.getTrack() + ", " +
+                "dataBefore=" + this.getDataBefore() + ", " +
+                "dataAfter=" + this.getDataAfter() + ")";
     }
 }

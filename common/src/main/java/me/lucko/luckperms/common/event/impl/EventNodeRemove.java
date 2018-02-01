@@ -86,6 +86,10 @@ public class EventNodeRemove extends AbstractEvent implements NodeRemoveEvent {
 
     @Override
     public String toString() {
-        return "EventNodeRemove(node=" + this.getNode() + ", target=" + this.getTarget() + ", dataBefore=" + this.getDataBefore() + ", dataAfter=" + this.getDataAfter() + ")";
+        return "NodeRemoveEvent(" +
+                "node=" + this.getNode() + ", " +
+                "target=" + this.getTarget() + ", " +
+                "dataBefore=" + this.getDataBefore() + ", " +
+                "dataAfter=" + this.getDataAfter() + ")";
     }
 }

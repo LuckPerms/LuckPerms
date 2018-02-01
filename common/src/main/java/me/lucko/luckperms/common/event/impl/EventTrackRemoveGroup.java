@@ -73,6 +73,10 @@ public class EventTrackRemoveGroup extends AbstractEvent implements TrackRemoveG
 
     @Override
     public String toString() {
-        return "EventTrackRemoveGroup(group=" + this.getGroup() + ", track=" + this.getTrack() + ", dataBefore=" + this.getDataBefore() + ", dataAfter=" + this.getDataAfter() + ")";
+        return "TrackRemoveGroupEvent(" +
+                "group=" + this.getGroup() + ", " +
+                "track=" + this.getTrack() + ", " +
+                "dataBefore=" + this.getDataBefore() + ", " +
+                "dataAfter=" + this.getDataAfter() + ")";
     }
 }

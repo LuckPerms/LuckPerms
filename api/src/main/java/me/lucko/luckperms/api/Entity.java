@@ -23,47 +23,65 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.event.impl;
-
-import me.lucko.luckperms.api.User;
-import me.lucko.luckperms.api.event.user.UserLoginProcessEvent;
-import me.lucko.luckperms.common.event.AbstractEvent;
+package me.lucko.luckperms.api;
 
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-public class EventUserLoginProcess extends AbstractEvent implements UserLoginProcessEvent {
+/**
+ * Represents an entity on the server.
+ *
+ * <p>This does not relate directly to a "Minecraft Entity". The closest
+ * comparison is to a "CommandSender" or "CommandSource" in Bukkit/Sponge.</p>
+ *
+ * <p>The various types of {@link Entity} are detailed in {@link Type}.</p>
+ *
+ * @since 4.1
+ */
+public interface Entity {
 
-    private final UUID uuid;
-    private final String username;
-    private final User user;
+    /**
+     * Gets the unique id of the entity, if it has one.
+     *
+     * <p>For players, this returns their uuid assigned by the server.</p>
+     *
+     * @return the uuid of the object, if available
+     */
+    @Nullable
+    UUID getUniqueId();
 
-    public EventUserLoginProcess(UUID uuid, String username, User user) {
-        this.uuid = uuid;
-        this.username = username;
-        this.user = user;
-    }
-
+    /**
+     * Gets the name of the object
+     *
+     * @return the object name
+     */
     @Nonnull
-    @Override
-    public UUID getUuid() {
-        return this.uuid;
-    }
+    String getName();
 
+    /**
+     * Gets the entities type.
+     *
+     * @return the type
+     */
     @Nonnull
-    @Override
-    public String getUsername() {
-        return this.username;
+    Type getType();
+
+    /**
+     * The different types of {@link Entity}
+     */
+    enum Type {
+
+        /**
+         * Represents a player connected to the server
+         */
+        PLAYER,
+
+        /**
+         * Represents the server console
+         */
+        CONSOLE
     }
 
-    @Override
-    public User getUser() {
-        return this.user;
-    }
-
-    @Override
-    public String toString() {
-        return "UserLoginProcessEvent(uuid=" + this.getUuid() + ", username=" + this.getUsername() + ", user=" + this.getUser() + ")";
-    }
 }

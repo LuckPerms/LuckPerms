@@ -23,47 +23,28 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.event.impl;
+package me.lucko.luckperms.api.event;
 
-import me.lucko.luckperms.api.User;
-import me.lucko.luckperms.api.event.user.UserLoginProcessEvent;
-import me.lucko.luckperms.common.event.AbstractEvent;
-
-import java.util.UUID;
+import me.lucko.luckperms.api.event.source.Source;
 
 import javax.annotation.Nonnull;
 
-public class EventUserLoginProcess extends AbstractEvent implements UserLoginProcessEvent {
+/**
+ * Represents an event with a {@link Source}.
+ *
+ * @since 4.1
+ */
+public interface Sourced {
 
-    private final UUID uuid;
-    private final String username;
-    private final User user;
-
-    public EventUserLoginProcess(UUID uuid, String username, User user) {
-        this.uuid = uuid;
-        this.username = username;
-        this.user = user;
-    }
-
+    /**
+     * Gets the events source.
+     *
+     * <p>Never returns null. In situations where the source is unknown, a
+     * {@link Source} with type {@link Source.Type#UNKNOWN} is returned.</p>
+     *
+     * @return the source
+     */
     @Nonnull
-    @Override
-    public UUID getUuid() {
-        return this.uuid;
-    }
+    Source getSource();
 
-    @Nonnull
-    @Override
-    public String getUsername() {
-        return this.username;
-    }
-
-    @Override
-    public User getUser() {
-        return this.user;
-    }
-
-    @Override
-    public String toString() {
-        return "UserLoginProcessEvent(uuid=" + this.getUuid() + ", username=" + this.getUsername() + ", user=" + this.getUser() + ")";
-    }
 }

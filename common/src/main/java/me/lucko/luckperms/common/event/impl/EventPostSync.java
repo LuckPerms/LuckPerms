@@ -32,6 +32,6 @@ public class EventPostSync extends AbstractEvent implements PostSyncEvent {
 
     @Override
     public String toString() {
-        return "EventPostSync()";
+        return "PostSyncEvent()";
     }
 }

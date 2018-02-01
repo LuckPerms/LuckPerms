@@ -73,6 +73,10 @@ public class EventTrackAddGroup extends AbstractEvent implements TrackAddGroupEv
 
     @Override
     public String toString() {
-        return "EventTrackAddGroup(group=" + this.getGroup() + ", track=" + this.getTrack() + ", dataBefore=" + this.getDataBefore() + ", dataAfter=" + this.getDataAfter() + ")";
+        return "TrackAddGroupEvent(" +
+                "group=" + this.getGroup() + ", " +
+                "track=" + this.getTrack() + ", " +
+                "dataBefore=" + this.getDataBefore() + ", " +
+                "dataAfter=" + this.getDataAfter() + ")";
     }
 }

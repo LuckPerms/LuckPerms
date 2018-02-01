@@ -56,6 +56,6 @@ public class EventGroupCacheLoad extends AbstractEvent implements GroupCacheLoad
 
     @Override
     public String toString() {
-        return "EventGroupCacheLoad(group=" + this.getGroup() + ", loadedData=" + this.getLoadedData() + ")";
+        return "GroupCacheLoadEvent(group=" + this.getGroup() + ", loadedData=" + this.getLoadedData() + ")";
     }
 }

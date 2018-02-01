@@ -47,6 +47,6 @@ public class EventTrackLoad extends AbstractEvent implements TrackLoadEvent {
 
     @Override
     public String toString() {
-        return "EventTrackLoad(track=" + this.getTrack() + ")";
+        return "TrackLoadEvent(track=" + this.getTrack() + ")";
     }
 }

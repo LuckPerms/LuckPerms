@@ -65,6 +65,9 @@ public class EventLogBroadcast extends AbstractEvent implements LogBroadcastEven
 
     @Override
     public String toString() {
-        return "EventLogBroadcast(cancellationState=" + this.getCancellationState() + ", entry=" + this.getEntry() + ", origin=" + this.getOrigin() + ")";
+        return "LogBroadcastEvent(" +
+                "cancellationState=" + this.getCancellationState() + ", " +
+                "entry=" + this.getEntry() + ", " +
+                "origin=" + this.getOrigin() + ")";
     }
 }

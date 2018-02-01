@@ -57,6 +57,8 @@ public class EventPreNetworkSync extends AbstractEvent implements PreNetworkSync
 
     @Override
     public String toString() {
-        return "EventPreNetworkSync(cancellationState=" + this.getCancellationState() + ", syncId=" + this.getSyncId() + ")";
+        return "PreNetworkSyncEvent(" +
+                "cancellationState=" + this.getCancellationState() + ", " +
+                "syncId=" + this.getSyncId() + ")";
     }
 }

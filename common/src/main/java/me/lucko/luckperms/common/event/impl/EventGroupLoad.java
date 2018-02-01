@@ -47,6 +47,6 @@ public class EventGroupLoad extends AbstractEvent implements GroupLoadEvent {
 
     @Override
     public String toString() {
-        return "EventGroupLoad(group=" + this.getGroup() + ")";
+        return "GroupLoadEvent(group=" + this.getGroup() + ")";
     }
 }

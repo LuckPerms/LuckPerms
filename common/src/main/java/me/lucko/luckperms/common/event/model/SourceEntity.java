@@ -23,47 +23,34 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.event.impl;
+package me.lucko.luckperms.common.event.model;
 
-import me.lucko.luckperms.api.User;
-import me.lucko.luckperms.api.event.user.UserLoginProcessEvent;
-import me.lucko.luckperms.common.event.AbstractEvent;
-
-import java.util.UUID;
+import me.lucko.luckperms.api.Entity;
+import me.lucko.luckperms.api.event.source.EntitySource;
 
 import javax.annotation.Nonnull;
 
-public class EventUserLoginProcess extends AbstractEvent implements UserLoginProcessEvent {
+public class SourceEntity implements EntitySource {
+    private final Entity entity;
 
-    private final UUID uuid;
-    private final String username;
-    private final User user;
-
-    public EventUserLoginProcess(UUID uuid, String username, User user) {
-        this.uuid = uuid;
-        this.username = username;
-        this.user = user;
+    public SourceEntity(Entity entity) {
+        this.entity = entity;
     }
 
     @Nonnull
     @Override
-    public UUID getUuid() {
-        return this.uuid;
+    public Entity getEntity() {
+        return this.entity;
     }
 
     @Nonnull
     @Override
-    public String getUsername() {
-        return this.username;
-    }
-
-    @Override
-    public User getUser() {
-        return this.user;
+    public Type getType() {
+        return Type.ENTITY;
     }
 
     @Override
     public String toString() {
-        return "UserLoginProcessEvent(uuid=" + this.getUuid() + ", username=" + this.getUsername() + ", user=" + this.getUser() + ")";
+        return "Sender(type=ENTITY, entity=" + this.entity + ")";
     }
 }

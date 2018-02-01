@@ -57,6 +57,6 @@ public class EventLogReceive extends AbstractEvent implements LogReceiveEvent {
 
     @Override
     public String toString() {
-        return "EventLogReceive(logId=" + this.getLogId() + ", entry=" + this.getEntry() + ")";
+        return "LogReceiveEvent(logId=" + this.getLogId() + ", entry=" + this.getEntry() + ")";
     }
 }

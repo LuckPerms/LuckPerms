@@ -25,12 +25,10 @@
 
 package me.lucko.luckperms.api.event.log;
 
+import me.lucko.luckperms.api.Entity;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.Cancellable;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
-
-import java.util.Optional;
-import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
@@ -60,7 +58,7 @@ public interface LogNotifyEvent extends LuckPermsEvent, Cancellable {
      * @return the origin of the log
      */
     @Nonnull
-    LogBroadcastEvent.Origin getOrigin();
+    Origin getOrigin();
 
     /**
      * Gets the object to be notified.
@@ -68,46 +66,27 @@ public interface LogNotifyEvent extends LuckPermsEvent, Cancellable {
      * @return the object to notify
      */
     @Nonnull
-    Notifiable getNotifiable();
+    Entity getNotifiable();
 
     /**
-     * Represents an object which could be notified as a result of a
-     * {@link LogNotifyEvent}.
+     * Represents where a log entry is from
      */
-    interface Notifiable {
+    enum Origin {
 
         /**
-         * Gets a {@link UUID} for the object, if it has one.
-         *
-         * <p>For Players, this method returns their unique id.</p>
-         *
-         * @return the uuid of the object, if available
+         * Marks a log entry which originated from the current server instance
          */
-        @Nonnull
-        Optional<UUID> getUuid();
+        LOCAL,
 
         /**
-         * Gets the name of the object
-         *
-         * @return the name
+         * Marks a log entry which originated from an API call on the current server instance
          */
-        @Nonnull
-        String getName();
+        LOCAL_API,
 
         /**
-         * Gets if the object is a console
-         *
-         * @return if the object is a console
+         * Marks a log entry which was sent to this server via the messaging service
          */
-        boolean isConsole();
-
-        /**
-         * Gets if the object is a player
-         *
-         * @return if the object is a player
-         */
-        boolean isPlayer();
-
+        REMOTE
     }
 
 }

@@ -56,6 +56,6 @@ public class EventUserDataRecalculate extends AbstractEvent implements UserDataR
 
     @Override
     public String toString() {
-        return "EventUserDataRecalculate(user=" + this.getUser() + ", data=" + this.getData() + ")";
+        return "UserDataRecalculateEvent(user=" + this.getUser() + ", data=" + this.getData() + ")";
     }
 }

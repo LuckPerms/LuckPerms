@@ -32,6 +32,6 @@ public class EventGroupLoadAll extends AbstractEvent implements GroupLoadAllEven
 
     @Override
     public String toString() {
-        return "EventGroupLoadAll()";
+        return "GroupLoadAllEvent()";
     }
 }

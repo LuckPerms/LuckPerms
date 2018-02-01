@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.actionlog;
 
 import me.lucko.luckperms.api.event.log.LogBroadcastEvent;
+import me.lucko.luckperms.api.event.log.LogNotifyEvent;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.impl.log.LogNotify;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -43,7 +44,7 @@ public class LogDispatcher {
         this.plugin = plugin;
     }
 
-    private void broadcast(ExtendedLogEntry entry, LogBroadcastEvent.Origin origin, Sender sender) {
+    private void broadcast(ExtendedLogEntry entry, LogNotifyEvent.Origin origin, Sender sender) {
         this.plugin.getOnlineSenders()
                 .filter(CommandPermission.LOG_NOTIFY::isAuthorized)
                 .filter(s -> {
@@ -76,7 +77,7 @@ public class LogDispatcher {
 
         boolean shouldCancel = !this.plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
         if (!this.plugin.getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.LOCAL)) {
-            broadcast(entry, LogBroadcastEvent.Origin.LOCAL, sender);
+            broadcast(entry, LogNotifyEvent.Origin.LOCAL, sender);
         }
     }
 
@@ -97,14 +98,14 @@ public class LogDispatcher {
 
         boolean shouldCancel = !this.plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
         if (!this.plugin.getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.LOCAL_API)) {
-            broadcast(entry, LogBroadcastEvent.Origin.LOCAL_API, null);
+            broadcast(entry, LogNotifyEvent.Origin.LOCAL_API, null);
         }
     }
 
     public void dispatchFromRemote(ExtendedLogEntry entry) {
         boolean shouldCancel = !this.plugin.getConfiguration().get(ConfigKeys.BROADCAST_RECEIVED_LOG_ENTRIES) || !this.plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
         if (!this.plugin.getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.REMOTE)) {
-            broadcast(entry, LogBroadcastEvent.Origin.LOCAL_API, null);
+            broadcast(entry, LogNotifyEvent.Origin.LOCAL_API, null);
         }
     }
 }

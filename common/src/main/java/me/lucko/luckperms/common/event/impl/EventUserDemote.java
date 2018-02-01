@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.event.impl;
 
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
+import me.lucko.luckperms.api.event.source.Source;
 import me.lucko.luckperms.api.event.user.track.TrackAction;
 import me.lucko.luckperms.api.event.user.track.UserDemoteEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
@@ -43,11 +44,14 @@ public class EventUserDemote extends AbstractEvent implements UserDemoteEvent {
     private final String groupFrom;
     private final String groupTo;
 
-    public EventUserDemote(Track track, User user, String groupFrom, String groupTo) {
+    private final Source source;
+
+    public EventUserDemote(Track track, User user, String groupFrom, String groupTo, Source source) {
         this.track = track;
         this.user = user;
         this.groupFrom = groupFrom;
         this.groupTo = groupTo;
+        this.source = source;
     }
 
     @Nonnull
@@ -80,9 +84,20 @@ public class EventUserDemote extends AbstractEvent implements UserDemoteEvent {
         return Optional.ofNullable(this.groupTo);
     }
 
+    @Nonnull
+    @Override
+    public Source getSource() {
+        return this.source;
+    }
+
     @Override
     public String toString() {
-        return "EventUserDemote(track=" + this.track + ", user=" + this.user + ", groupFrom=" + this.getGroupFrom() + ", groupTo=" + this.getGroupTo() + ")";
+        return "UserDemoteEvent(" +
+                "track=" + this.track + ", " +
+                "user=" + this.user + ", " +
+                "groupFrom=" + this.getGroupFrom() + ", " +
+                "groupTo=" + this.getGroupTo() + ", " +
+                "source=" + this.getSource() + ")";
     }
 
 }

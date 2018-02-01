@@ -28,6 +28,7 @@ package me.lucko.luckperms.api.event.user.track;
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
+import me.lucko.luckperms.api.event.Sourced;
 
 import java.util.Optional;
 
@@ -36,7 +37,7 @@ import javax.annotation.Nonnull;
 /**
  * Called when a user interacts with a track through a promotion or demotion
  */
-public interface UserTrackEvent extends LuckPermsEvent {
+public interface UserTrackEvent extends LuckPermsEvent, Sourced {
 
     /**
      * Gets the track involved in the event

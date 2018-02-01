@@ -56,6 +56,6 @@ public class EventGroupDataRecalculate extends AbstractEvent implements GroupDat
 
     @Override
     public String toString() {
-        return "EventGroupDataRecalculate(group=" + this.getGroup() + ", data=" + this.getData() + ")";
+        return "GroupDataRecalculateEvent(group=" + this.getGroup() + ", data=" + this.getData() + ")";
     }
 }

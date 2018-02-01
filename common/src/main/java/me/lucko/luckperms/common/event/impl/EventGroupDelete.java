@@ -66,6 +66,9 @@ public class EventGroupDelete extends AbstractEvent implements GroupDeleteEvent 
 
     @Override
     public String toString() {
-        return "EventGroupDelete(groupName=" + this.getGroupName() + ", existingData=" + this.getExistingData() + ", cause=" + this.getCause() + ")";
+        return "GroupDeleteEvent(" +
+                "groupName=" + this.getGroupName() + ", " +
+                "existingData=" + this.getExistingData() + ", " +
+                "cause=" + this.getCause() + ")";
     }
 }

@@ -56,6 +56,6 @@ public class EventTrackCreate extends AbstractEvent implements TrackCreateEvent 
 
     @Override
     public String toString() {
-        return "EventTrackCreate(track=" + this.getTrack() + ", cause=" + this.getCause() + ")";
+        return "TrackCreateEvent(track=" + this.getTrack() + ", cause=" + this.getCause() + ")";
     }
 }

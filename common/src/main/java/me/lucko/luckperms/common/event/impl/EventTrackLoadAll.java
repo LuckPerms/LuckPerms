@@ -32,6 +32,6 @@ public class EventTrackLoadAll extends AbstractEvent implements TrackLoadAllEven
 
     @Override
     public String toString() {
-        return "EventTrackLoadAll()";
+        return "TrackLoadAllEvent()";
     }
 }

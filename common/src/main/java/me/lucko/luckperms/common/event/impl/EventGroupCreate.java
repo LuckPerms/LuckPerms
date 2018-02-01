@@ -56,6 +56,6 @@ public class EventGroupCreate extends AbstractEvent implements GroupCreateEvent 
 
     @Override
     public String toString() {
-        return "EventGroupCreate(group=" + this.getGroup() + ", cause=" + this.getCause() + ")";
+        return "GroupCreateEvent(group=" + this.getGroup() + ", cause=" + this.getCause() + ")";
     }
 }

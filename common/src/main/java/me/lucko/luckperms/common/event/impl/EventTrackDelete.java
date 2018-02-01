@@ -65,6 +65,9 @@ public class EventTrackDelete extends AbstractEvent implements TrackDeleteEvent 
 
     @Override
     public String toString() {
-        return "EventTrackDelete(trackName=" + this.getTrackName() + ", existingData=" + this.getExistingData() + ", cause=" + this.getCause() + ")";
+        return "TrackDeleteEvent(" +
+                "trackName=" + this.getTrackName() + ", " +
+                "existingData=" + this.getExistingData() + ", " +
+                "cause=" + this.getCause() + ")";
     }
 }

@@ -56,6 +56,6 @@ public class EventUserCacheLoad extends AbstractEvent implements UserCacheLoadEv
 
     @Override
     public String toString() {
-        return "EventUserCacheLoad(user=" + this.getUser() + ", loadedData=" + this.getLoadedData() + ")";
+        return "UserCacheLoadEvent(user=" + this.getUser() + ", loadedData=" + this.getLoadedData() + ")";
     }
 }
