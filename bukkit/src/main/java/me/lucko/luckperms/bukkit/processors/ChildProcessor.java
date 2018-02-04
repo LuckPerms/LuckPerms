@@ -25,9 +25,8 @@
 
 package me.lucko.luckperms.bukkit.processors;
 
-import com.google.common.collect.Maps;
-
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.processors.AbstractPermissionProcessor;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
 
@@ -39,11 +38,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * Permission Processor for Bukkits "child" permission system.
  */
 public class ChildProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
-    private final ChildPermissionProvider provider;
+    private final LPBukkitPlugin plugin;
     private Map<String, Boolean> childPermissions = Collections.emptyMap();
 
-    public ChildProcessor(ChildPermissionProvider provider) {
-        this.provider = provider;
+    public ChildProcessor(LPBukkitPlugin plugin) {
+        this.plugin = plugin;
     }
 
     @Override
@@ -55,7 +54,7 @@ public class ChildProcessor extends AbstractPermissionProcessor implements Permi
     public void refresh() {
         Map<String, Boolean> builder = new ConcurrentHashMap<>();
         for (Map.Entry<String, Boolean> e : this.sourceMap.entrySet()) {
-            Map<String, Boolean> children = this.provider.getPermissions().get(Maps.immutableEntry(e.getKey(), e.getValue()));
+            Map<String, Boolean> children = this.plugin.getPermissionMap().getChildPermissions(e.getKey(), e.getValue());
             if (children != null) {
                 builder.putAll(children);
             }

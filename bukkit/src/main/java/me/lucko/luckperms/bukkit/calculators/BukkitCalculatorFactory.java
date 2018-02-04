@@ -55,7 +55,7 @@ public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
         processors.add(new MapProcessor());
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_CHILD_PERMISSIONS)) {
-            processors.add(new ChildProcessor(this.plugin.getChildPermissionProvider()));
+            processors.add(new ChildProcessor(this.plugin));
         }
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) {
@@ -67,7 +67,7 @@ public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
         }
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS) && metadata.getHolderType() == HolderType.USER) {
-            processors.add(new DefaultsProcessor(contexts.isOp(), this.plugin.getDefaultsProvider()));
+            processors.add(new DefaultsProcessor(this.plugin, contexts.isOp()));
         }
 
         return registerCalculator(new PermissionCalculator(this.plugin, metadata, processors.build()));

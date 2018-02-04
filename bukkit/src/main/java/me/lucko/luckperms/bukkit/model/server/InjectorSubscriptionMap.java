@@ -23,91 +23,96 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.model;
+package me.lucko.luckperms.bukkit.model.server;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 
 import org.bukkit.Bukkit;
-import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.Permissible;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.SimplePluginManager;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 /**
- * Injects a {@link LPPermissionMap} into the {@link PluginManager}.
+ * Injects a {@link LPSubscriptionMap} into the {@link PluginManager}.
  */
-public class PermissionMapInjector implements Runnable {
-    private static final Field PERMISSIONS_FIELD;
+public class InjectorSubscriptionMap implements Runnable {
+    private static final Field PERM_SUBS_FIELD;
 
     static {
-        Field permissionsField = null;
+        Field permSubsField = null;
         try {
-            permissionsField = SimplePluginManager.class.getDeclaredField("permissions");
-            permissionsField.setAccessible(true);
+            permSubsField = SimplePluginManager.class.getDeclaredField("permSubs");
+            permSubsField.setAccessible(true);
         } catch (Exception e) {
             // ignore
         }
-        PERMISSIONS_FIELD = permissionsField;
+        PERM_SUBS_FIELD = permSubsField;
     }
 
     private final LPBukkitPlugin plugin;
 
-    public PermissionMapInjector(LPBukkitPlugin plugin) {
+    public InjectorSubscriptionMap(LPBukkitPlugin plugin) {
         this.plugin = plugin;
     }
 
     @Override
     public void run() {
         try {
-            inject();
+            LPSubscriptionMap ret = inject();
+            if (ret != null) {
+                this.plugin.setSubscriptionMap(ret);
+            }
         } catch (Exception e) {
-            this.plugin.getLog().severe("Exception occurred whilst injecting LuckPerms Permission map.");
+            this.plugin.getLog().severe("Exception occurred whilst injecting LuckPerms Permission Subscription map.");
             e.printStackTrace();
         }
     }
 
-    private void inject() throws Exception {
-        Objects.requireNonNull(PERMISSIONS_FIELD, "PERMISSIONS_FIELD");
+    private LPSubscriptionMap inject() throws Exception {
+        Objects.requireNonNull(PERM_SUBS_FIELD, "PERM_SUBS_FIELD");
         PluginManager pluginManager = this.plugin.getServer().getPluginManager();
 
         if (!(pluginManager instanceof SimplePluginManager)) {
             this.plugin.getLog().severe("PluginManager instance is not a 'SimplePluginManager', instead: " + pluginManager.getClass());
-            this.plugin.getLog().severe("Unable to inject LuckPerms Permission map.");
-            return;
+            this.plugin.getLog().severe("Unable to inject LuckPerms Permission Subscription map.");
+            return null;
         }
 
-        Object map = PERMISSIONS_FIELD.get(pluginManager);
-        if (map instanceof LPPermissionMap && ((LPPermissionMap) map).plugin == this.plugin) {
-            return;
+        Object map = PERM_SUBS_FIELD.get(pluginManager);
+        if (map instanceof LPSubscriptionMap) {
+            if (((LPSubscriptionMap) map).plugin == this.plugin) {
+                return null;
+            }
+
+            map = ((LPSubscriptionMap) map).detach();
         }
 
         //noinspection unchecked
-        Map<String, Permission> castedMap = (Map<String, Permission>) map;
+        Map<String, Map<Permissible, Boolean>> castedMap = (Map<String, Map<Permissible, Boolean>>) map;
 
-        // make a new map
-        LPPermissionMap newMap = new LPPermissionMap(this.plugin, castedMap);
-
-        // inject it
-        PERMISSIONS_FIELD.set(pluginManager, newMap);
+        // make a new subscription map & inject it
+        LPSubscriptionMap newMap = new LPSubscriptionMap(this.plugin, castedMap);
+        PERM_SUBS_FIELD.set(pluginManager, newMap);
+        return newMap;
     }
 
     public static void uninject() {
         try {
-            Objects.requireNonNull(PERMISSIONS_FIELD, "PERMISSIONS_FIELD");
+            Objects.requireNonNull(PERM_SUBS_FIELD, "PERM_SUBS_FIELD");
 
             PluginManager pluginManager = Bukkit.getServer().getPluginManager();
             if (!(pluginManager instanceof SimplePluginManager)) {
                 return;
             }
 
-            Object map = PERMISSIONS_FIELD.get(pluginManager);
-            if (map instanceof LPPermissionMap) {
-                LPPermissionMap lpMap = (LPPermissionMap) map;
-                PERMISSIONS_FIELD.set(pluginManager, new HashMap<>(lpMap));
+            Object map = PERM_SUBS_FIELD.get(pluginManager);
+            if (map instanceof LPSubscriptionMap) {
+                LPSubscriptionMap lpMap = (LPSubscriptionMap) map;
+                PERM_SUBS_FIELD.set(pluginManager, lpMap.detach());
             }
         } catch (Exception e) {
             e.printStackTrace();

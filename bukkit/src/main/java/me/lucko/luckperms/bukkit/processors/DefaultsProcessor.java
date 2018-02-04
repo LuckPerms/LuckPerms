@@ -26,31 +26,31 @@
 package me.lucko.luckperms.bukkit.processors;
 
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
 
-import org.bukkit.Bukkit;
 import org.bukkit.permissions.Permission;
 
 /**
  * Permission Processor for Bukkits "default" permission system.
  */
 public class DefaultsProcessor implements PermissionProcessor {
+    private final LPBukkitPlugin plugin;
     private final boolean isOp;
-    private final DefaultsProvider defaultsProvider;
 
-    public DefaultsProcessor(boolean isOp, DefaultsProvider defaultsProvider) {
+    public DefaultsProcessor(LPBukkitPlugin plugin, boolean isOp) {
+        this.plugin = plugin;
         this.isOp = isOp;
-        this.defaultsProvider = defaultsProvider;
     }
 
     @Override
     public Tristate hasPermission(String permission) {
-        Tristate t = this.defaultsProvider.lookup(permission, this.isOp);
+        Tristate t = this.plugin.getDefaultPermissionMap().lookupDefaultPermission(permission, this.isOp);
         if (t != Tristate.UNDEFINED) {
             return t;
         }
 
-        Permission defPerm = Bukkit.getServer().getPluginManager().getPermission(permission);
+        Permission defPerm = this.plugin.getPermissionMap().get(permission);
         return defPerm == null ? Tristate.UNDEFINED : Tristate.fromBoolean(defPerm.getDefault().getValue(this.isOp));
     }
 }

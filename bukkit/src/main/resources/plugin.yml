@@ -8,16 +8,15 @@ main: me.lucko.luckperms.bukkit.LPBukkitPlugin
 load: STARTUP
 
 # This means that all plugins that (soft-)depend on Vault, depend on LuckPerms too.
-# It in turn fixes issues where plugins using Vault cache the provided instance when their plugin enables, or
-# when they check for the presence of a service provider, before LuckPerms has enabled.
+# It in turn fixes issues where plugins using Vault cache the provided instance
+# when their plugin enables, or when they check for the presence of a service
+# provider, before LuckPerms has enabled.
 loadbefore: [Vault]
+
+# Soft depend on LilyPad for messaging service impl
 softdepend: [LilyPad-Connect]
 
 commands:
   luckperms:
     description: Manage permissions
     aliases: [lp, perm, perms, permission, permissions]
-
-
-# Permissions are registered programmatically instead of here.
-# See the last method in me.lucko.luckperms.bukkit.LPBukkitPlugin

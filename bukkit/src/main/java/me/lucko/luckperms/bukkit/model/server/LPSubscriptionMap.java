@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.model;
+package me.lucko.luckperms.bukkit.model.server;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -66,7 +66,7 @@ import javax.annotation.Nonnull;
  *
  * This class implements option 2 above. It is preferred because it is faster & uses less memory
  *
- * Injected by {@link SubscriptionMapInjector}.
+ * Injected by {@link InjectorSubscriptionMap}.
  */
 public class LPSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>> {
 
