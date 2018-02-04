@@ -28,6 +28,9 @@ package me.lucko.luckperms.common.calculators;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.references.HolderType;
 
+/**
+ * Metadata about a given {@link PermissionCalculator}.
+ */
 public class PermissionCalculatorMetadata {
 
     public static PermissionCalculatorMetadata of(HolderType holderType, String objectName, ContextSet context) {

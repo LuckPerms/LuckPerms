@@ -31,8 +31,6 @@ import me.lucko.luckperms.common.processors.PermissionProcessor;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 
-import java.util.Map;
-
 public abstract class DefaultsProcessor implements PermissionProcessor {
     private final LuckPermsService service;
     private final ImmutableContextSet contexts;
@@ -57,10 +55,5 @@ public abstract class DefaultsProcessor implements PermissionProcessor {
         }
 
         return Tristate.UNDEFINED;
-    }
-
-    @Override
-    public void updateBacking(Map<String, Boolean> map) {
-        // Do nothing, this doesn't use the backing
     }
 }

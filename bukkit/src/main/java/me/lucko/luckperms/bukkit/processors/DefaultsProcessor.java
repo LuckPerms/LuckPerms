@@ -31,8 +31,6 @@ import me.lucko.luckperms.common.processors.PermissionProcessor;
 import org.bukkit.Bukkit;
 import org.bukkit.permissions.Permission;
 
-import java.util.Map;
-
 /**
  * Permission Processor for Bukkits "default" permission system.
  */
@@ -54,10 +52,5 @@ public class DefaultsProcessor implements PermissionProcessor {
 
         Permission defPerm = Bukkit.getServer().getPluginManager().getPermission(permission);
         return defPerm == null ? Tristate.UNDEFINED : Tristate.fromBoolean(defPerm.getDefault().getValue(this.isOp));
-    }
-
-    @Override
-    public void updateBacking(Map<String, Boolean> map) {
-        // Do nothing, this doesn't use the backing
     }
 }

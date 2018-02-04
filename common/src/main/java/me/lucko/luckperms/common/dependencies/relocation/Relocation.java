@@ -29,9 +29,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class Relocation {
+    private static final String RELOCATION_PREFIX = "me.lucko.luckperms.lib.";
 
     public static Relocation of(String id, String pattern) {
-        return new Relocation(pattern.replace("{}", "."), "me.lucko.luckperms.lib." + id);
+        return new Relocation(pattern.replace("{}", "."), RELOCATION_PREFIX + id);
     }
 
     public static List<Relocation> allOf(Relocation... relocations) {

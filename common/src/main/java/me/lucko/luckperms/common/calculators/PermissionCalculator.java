@@ -44,11 +44,25 @@ import javax.annotation.Nonnull;
  * Calculates and caches permissions
  */
 public class PermissionCalculator implements CacheLoader<String, Tristate> {
+
+    /**
+     * The plugin instance
+     */
     private final LuckPermsPlugin plugin;
+
+    /**
+     * Info about the nature of this calculator.
+     */
     private final PermissionCalculatorMetadata metadata;
+
+    /**
+     * The processors which back this calculator
+     */
     private final ImmutableList<PermissionProcessor> processors;
 
-    // caches lookup calls.
+    /**
+     * Loading cache for permission checks
+     */
     private final LoadingCache<String, Tristate> lookupCache = Caffeine.newBuilder().build(this);
 
     public PermissionCalculator(LuckPermsPlugin plugin, PermissionCalculatorMetadata metadata, ImmutableList<PermissionProcessor> processors) {
@@ -57,16 +71,16 @@ public class PermissionCalculator implements CacheLoader<String, Tristate> {
         this.processors = processors;
     }
 
-    public List<PermissionProcessor> getProcessors() {
-        return this.processors;
-    }
-
-    public void invalidateCache() {
-        this.lookupCache.invalidateAll();
-    }
-
+    /**
+     * Performs a permission check against this calculator.
+     *
+     * <p>The result is calculated using the calculators backing 'processors'.</p>
+     *
+     * @param permission the permission to check
+     * @param origin marks where this check originated from
+     * @return the result
+     */
     public Tristate getPermissionValue(String permission, CheckOrigin origin) {
-
         // convert the permission to lowercase, as all values in the backing map are also lowercase.
         // this allows fast case insensitive lookups
         permission = permission.toLowerCase().intern();
@@ -83,7 +97,6 @@ public class PermissionCalculator implements CacheLoader<String, Tristate> {
 
     @Override
     public Tristate load(@Nonnull String permission) {
-
         // offer the permission to the permission vault
         // we only need to do this once per permission, so it doesn't matter
         // that this call is behind the cache.
@@ -91,19 +104,32 @@ public class PermissionCalculator implements CacheLoader<String, Tristate> {
 
         for (PermissionProcessor processor : this.processors) {
             Tristate result = processor.hasPermission(permission);
-            if (result == Tristate.UNDEFINED) {
-                continue;
+            if (result != Tristate.UNDEFINED) {
+                return result;
             }
-
-            return result;
         }
 
         return Tristate.UNDEFINED;
     }
 
-    public synchronized void updateBacking(Map<String, Boolean> map) {
+    /**
+     * Defines the source permissions map which should be used when calculating
+     * a result.
+     *
+     * @param sourceMap the source map
+     */
+    public synchronized void setSourcePermissions(Map<String, Boolean> sourceMap) {
         for (PermissionProcessor processor : this.processors) {
-            processor.updateBacking(map);
+            processor.setSource(sourceMap);
+            processor.refresh();
         }
+    }
+
+    public List<PermissionProcessor> getProcessors() {
+        return this.processors;
+    }
+
+    public void invalidateCache() {
+        this.lookupCache.invalidateAll();
     }
 }

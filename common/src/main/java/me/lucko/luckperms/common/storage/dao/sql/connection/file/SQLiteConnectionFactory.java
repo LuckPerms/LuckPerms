@@ -26,12 +26,12 @@
 package me.lucko.luckperms.common.storage.dao.sql.connection.file;
 
 import me.lucko.luckperms.common.dependencies.Dependency;
+import me.lucko.luckperms.common.dependencies.classloader.IsolatedClassLoader;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.EnumSet;
@@ -54,7 +54,7 @@ public class SQLiteConnectionFactory extends FlatfileConnectionFactory {
         }
 
         // setup the classloader
-        URLClassLoader classLoader = plugin.getDependencyManager().obtainClassLoaderWith(EnumSet.of(Dependency.SQLITE_DRIVER));
+        IsolatedClassLoader classLoader = plugin.getDependencyManager().obtainClassLoaderWith(EnumSet.of(Dependency.SQLITE_DRIVER));
         try {
             Class<?> jdcbClass = classLoader.loadClass("org.sqlite.JDBC");
             this.createConnectionMethod = jdcbClass.getMethod("createConnection", String.class, Properties.class);

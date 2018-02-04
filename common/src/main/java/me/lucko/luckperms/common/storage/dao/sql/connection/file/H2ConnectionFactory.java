@@ -26,12 +26,12 @@
 package me.lucko.luckperms.common.storage.dao.sql.connection.file;
 
 import me.lucko.luckperms.common.dependencies.Dependency;
+import me.lucko.luckperms.common.dependencies.classloader.IsolatedClassLoader;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
@@ -55,7 +55,7 @@ public class H2ConnectionFactory extends FlatfileConnectionFactory {
         }
 
         // setup the classloader
-        URLClassLoader classLoader = plugin.getDependencyManager().obtainClassLoaderWith(EnumSet.of(Dependency.H2_DRIVER));
+        IsolatedClassLoader classLoader = plugin.getDependencyManager().obtainClassLoaderWith(EnumSet.of(Dependency.H2_DRIVER));
         try {
             Class<?> driverClass = classLoader.loadClass("org.h2.Driver");
             Method loadMethod = driverClass.getMethod("load");

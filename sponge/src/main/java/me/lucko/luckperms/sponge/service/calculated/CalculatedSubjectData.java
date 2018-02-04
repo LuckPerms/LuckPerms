@@ -330,13 +330,13 @@ public class CalculatedSubjectData implements LPSubjectData {
         public CalculatorHolder(PermissionCalculator calculator) {
             this.calculator = calculator;
             this.permissions = new ConcurrentHashMap<>();
-            this.calculator.updateBacking(this.permissions);
+            this.calculator.setSourcePermissions(this.permissions);
         }
 
         public void setPermissions(Map<String, Boolean> permissions) {
             this.permissions.clear();
             this.permissions.putAll(permissions);
-            this.calculator.updateBacking(this.permissions);
+            this.calculator.setSourcePermissions(this.permissions);
             this.calculator.invalidateCache();
         }
 

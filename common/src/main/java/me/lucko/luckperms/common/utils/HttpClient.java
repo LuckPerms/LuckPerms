@@ -50,7 +50,7 @@ public class HttpClient {
         return response;
     }
 
-    public static RuntimeException exceptionForUnsuccessfulResponse(Response response) {
+    private static RuntimeException exceptionForUnsuccessfulResponse(Response response) {
         String msg = "";
         try (ResponseBody responseBody = response.body()) {
             if (responseBody != null) {

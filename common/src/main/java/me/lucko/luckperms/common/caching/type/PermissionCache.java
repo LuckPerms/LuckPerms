@@ -72,7 +72,7 @@ public class PermissionCache implements PermissionData {
         this.permissionsUnmodifiable = Collections.unmodifiableMap(this.permissions);
 
         this.calculator = calculatorFactory.build(contexts, metadata);
-        this.calculator.updateBacking(this.permissions); // Initial setup.
+        this.calculator.setSourcePermissions(this.permissions); // Initial setup.
     }
 
     @Override
@@ -83,7 +83,7 @@ public class PermissionCache implements PermissionData {
     private void setPermissionsInternal(Map<String, Boolean> permissions) {
         this.permissions.clear();
         this.permissions.putAll(permissions);
-        this.calculator.updateBacking(this.permissions);
+        this.calculator.setSourcePermissions(this.permissions);
         invalidateCache();
     }
 

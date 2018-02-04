@@ -43,20 +43,20 @@ public enum Dependency {
     ASM(
             "org.ow2.asm",
             "asm",
-            "5.2",
-            "Pl6g19osUVXvT0cNkJLULeNOP1PbZYnHwH1nIa30uj4="
+            "6.0",
+            "3Ylxx0pOaXiZqOlcquTqh2DqbEhtxrl7F5XnV2BCBGE="
     ),
     ASM_COMMONS(
             "org.ow2.asm",
             "asm-commons",
-            "5.2",
-            "zBMYiX4sdxy3l6aNX06mQcI6UfBDfKUXq+z5ZN2yZAs="
+            "6.0",
+            "8bzlxkipagF73NAf5dWa+YRSl/17ebgcAVpvu9lxmr8="
     ),
     JAR_RELOCATOR(
             "me.lucko",
             "jar-relocator",
-            "1.2",
-            "ECR0wrAMwmM0dpmuY1ifCG+2rpObOIlSI127jBbSrbI="
+            "1.3",
+            "mmz3ltQbS8xXGA2scM0ZH6raISlt4nukjCiU2l9Jxfs="
     ),
 
     CAFFEINE(

@@ -25,46 +25,14 @@
 
 package me.lucko.luckperms.common.processors;
 
-import com.google.common.collect.ImmutableMap;
-
-import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.utils.PatternCache;
-
 import java.util.Collections;
 import java.util.Map;
-import java.util.regex.Pattern;
 
-public class RegexProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
-    private Map<Pattern, Boolean> regexPermissions = Collections.emptyMap();
-
-    @Override
-    public Tristate hasPermission(String permission) {
-        for (Map.Entry<Pattern, Boolean> e : this.regexPermissions.entrySet()) {
-            if (e.getKey().matcher(permission).matches()) {
-                return Tristate.fromBoolean(e.getValue());
-            }
-        }
-
-        return Tristate.UNDEFINED;
-    }
+public abstract class AbstractPermissionProcessor implements PermissionProcessor {
+    protected Map<String, Boolean> sourceMap = Collections.emptyMap();
 
     @Override
-    public void refresh() {
-        ImmutableMap.Builder<Pattern, Boolean> builder = ImmutableMap.builder();
-        for (Map.Entry<String, Boolean> e : this.sourceMap.entrySet()) {
-            if (!e.getKey().startsWith("r=") && !e.getKey().startsWith("R=")) {
-                continue;
-            }
-
-            String pattern = e.getKey().substring(2);
-            Pattern p = PatternCache.compile(pattern);
-
-            if (p == null) {
-                continue;
-            }
-
-            builder.put(p, e.getValue());
-        }
-        this.regexPermissions = builder.build();
+    public void setSource(Map<String, Boolean> sourceMap) {
+        this.sourceMap = sourceMap;
     }
 }

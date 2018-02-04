@@ -27,20 +27,11 @@ package me.lucko.luckperms.common.processors;
 
 import me.lucko.luckperms.api.Tristate;
 
-import java.util.Map;
-
-public class MapProcessor implements PermissionProcessor {
-    private Map<String, Boolean> map = null;
+public class MapProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
 
     @Override
     public Tristate hasPermission(String permission) {
-        return Tristate.fromNullableBoolean(this.map.get(permission));
+        return Tristate.fromNullableBoolean(this.sourceMap.get(permission));
     }
 
-    @Override
-    public void updateBacking(Map<String, Boolean> map) {
-        if (this.map == null) {
-            this.map = map;
-        }
-    }
 }

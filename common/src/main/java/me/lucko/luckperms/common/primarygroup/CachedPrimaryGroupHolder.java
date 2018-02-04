@@ -51,7 +51,7 @@ public abstract class CachedPrimaryGroupHolder extends StoredHolder implements S
     protected abstract String calculateValue();
 
     @Override
-    public String getValue() {
+    public final String getValue() {
         String s = this.cache.get();
         return s != null ? s : getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME);
     }

@@ -26,11 +26,15 @@
 package me.lucko.luckperms.common.processors;
 
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.common.calculators.PermissionCalculator;
 
 import java.util.Map;
 
 /**
- * A processor within a {@link me.lucko.luckperms.common.calculators.PermissionCalculator}.
+ * A processor within a {@link PermissionCalculator}.
+ *
+ * <p>Processors should not implement any sort of caching. This is handled in
+ * the parent calculator.</p>
  */
 public interface PermissionProcessor {
 
@@ -43,14 +47,19 @@ public interface PermissionProcessor {
     Tristate hasPermission(String permission);
 
     /**
-     * Called each time the permission calculators backing is updated.
+     * Sets the source permissions which should be used by this processor
      *
-     * <p>Note that the same map instance is passed to this method on each update,
-     * so, if no processing is needed on the backing map, this can be cached on
-     * the first invocation.</p>
-     *
-     * @param map the map
+     * @param sourceMap the source map
      */
-    void updateBacking(Map<String, Boolean> map);
+    default void setSource(Map<String, Boolean> sourceMap) {
+
+    }
+
+    /**
+     * Called after a change has been made to the source map
+     */
+    default void refresh() {
+
+    }
 
 }
