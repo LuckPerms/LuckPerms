@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.storage.dao.sql;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -510,7 +509,7 @@ public class SqlDao extends AbstractDao {
 
     @Override
     public List<HeldPermission<UUID>> getUsersWithPermission(String permission) throws SQLException {
-        ImmutableList.Builder<HeldPermission<UUID>> held = ImmutableList.builder();
+        List<HeldPermission<UUID>> held = new ArrayList<>();
         try (Connection c = this.provider.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_SELECT_PERMISSION))) {
                 ps.setString(1, permission);
@@ -529,7 +528,7 @@ public class SqlDao extends AbstractDao {
                 }
             }
         }
-        return held.build();
+        return held;
     }
 
     @Override
@@ -754,7 +753,7 @@ public class SqlDao extends AbstractDao {
 
     @Override
     public List<HeldPermission<String>> getGroupsWithPermission(String permission) throws SQLException {
-        ImmutableList.Builder<HeldPermission<String>> held = ImmutableList.builder();
+        List<HeldPermission<String>> held = new ArrayList<>();
         try (Connection c = this.provider.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_SELECT_PERMISSION))) {
                 ps.setString(1, permission);
@@ -773,7 +772,7 @@ public class SqlDao extends AbstractDao {
                 }
             }
         }
-        return held.build();
+        return held;
     }
 
     @Override

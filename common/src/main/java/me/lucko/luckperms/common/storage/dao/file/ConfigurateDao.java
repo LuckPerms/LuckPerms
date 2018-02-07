@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.storage.dao.file;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
 import me.lucko.luckperms.api.HeldPermission;
@@ -450,7 +449,7 @@ public abstract class ConfigurateDao extends AbstractDao {
 
     @Override
     public List<HeldPermission<UUID>> getUsersWithPermission(String permission) throws Exception {
-        ImmutableList.Builder<HeldPermission<UUID>> held = ImmutableList.builder();
+        List<HeldPermission<UUID>> held = new ArrayList<>();
         File[] files = getDirectory(StorageLocation.USER).listFiles(getFileTypeFilter());
         if (files == null) {
             throw new IllegalStateException("Users directory matched no files.");
@@ -472,7 +471,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                 throw reportException(file.getName(), e);
             }
         }
-        return held.build();
+        return held;
     }
 
     @Override
@@ -605,7 +604,7 @@ public abstract class ConfigurateDao extends AbstractDao {
 
     @Override
     public List<HeldPermission<String>> getGroupsWithPermission(String permission) throws Exception {
-        ImmutableList.Builder<HeldPermission<String>> held = ImmutableList.builder();
+        List<HeldPermission<String>> held = new ArrayList<>();
         File[] files = getDirectory(StorageLocation.GROUP).listFiles(getFileTypeFilter());
         if (files == null) {
             throw new IllegalStateException("Groups directory matched no files.");
@@ -627,7 +626,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                 throw reportException(file.getName(), e);
             }
         }
-        return held.build();
+        return held;
     }
 
     @Override

@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.storage.dao.mongodb;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
@@ -311,7 +310,7 @@ public class MongoDao extends AbstractDao {
 
     @Override
     public List<HeldPermission<UUID>> getUsersWithPermission(String permission) {
-        ImmutableList.Builder<HeldPermission<UUID>> held = ImmutableList.builder();
+        List<HeldPermission<UUID>> held = new ArrayList<>();
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
         try (MongoCursor<Document> cursor = c.find().iterator()) {
             while (cursor.hasNext()) {
@@ -327,7 +326,7 @@ public class MongoDao extends AbstractDao {
                 }
             }
         }
-        return held.build();
+        return held;
     }
 
     @Override
@@ -438,7 +437,7 @@ public class MongoDao extends AbstractDao {
 
     @Override
     public List<HeldPermission<String>> getGroupsWithPermission(String permission) {
-        ImmutableList.Builder<HeldPermission<String>> held = ImmutableList.builder();
+        List<HeldPermission<String>> held = new ArrayList<>();
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
         try (MongoCursor<Document> cursor = c.find().iterator()) {
             while (cursor.hasNext()) {
@@ -454,7 +453,7 @@ public class MongoDao extends AbstractDao {
                 }
             }
         }
-        return held.build();
+        return held;
     }
 
     @Override

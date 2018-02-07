@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.storage;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
@@ -181,7 +182,11 @@ public class AbstractStorage implements Storage {
 
     @Override
     public CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(String permission) {
-        return makeFuture(() -> this.dao.getUsersWithPermission(permission));
+        return makeFuture(() -> {
+            List<HeldPermission<UUID>> result = this.dao.getUsersWithPermission(permission);
+            result.removeIf(entry -> entry.asNode().hasExpired());
+            return ImmutableList.copyOf(result);
+        });
     }
 
     @Override
@@ -229,7 +234,11 @@ public class AbstractStorage implements Storage {
 
     @Override
     public CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(String permission) {
-        return makeFuture(() -> this.dao.getGroupsWithPermission(permission));
+        return makeFuture(() -> {
+            List<HeldPermission<String>> result = this.dao.getGroupsWithPermission(permission);
+            result.removeIf(entry -> entry.asNode().hasExpired());
+            return ImmutableList.copyOf(result);
+        });
     }
 
     @Override
