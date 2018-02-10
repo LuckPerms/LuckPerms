@@ -84,7 +84,7 @@ public class BulkUpdateCommand extends SingleCommand {
             return CommandResult.SUCCESS;
         }
 
-        if (args.size() < 3) {
+        if (args.size() < 2) {
             throw new ArgumentUtils.DetailedUsageException();
         }
 
