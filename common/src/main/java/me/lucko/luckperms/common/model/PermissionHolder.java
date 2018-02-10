@@ -44,11 +44,9 @@ import me.lucko.luckperms.common.caching.HolderCachedData;
 import me.lucko.luckperms.common.caching.handlers.StateListener;
 import me.lucko.luckperms.common.caching.type.MetaAccumulator;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.contexts.ContextSetComparator;
 import me.lucko.luckperms.common.node.ImmutableLocalizedNode;
 import me.lucko.luckperms.common.node.InheritanceInfo;
 import me.lucko.luckperms.common.node.MetaType;
-import me.lucko.luckperms.common.node.NodeComparator;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.node.NodeTools;
 import me.lucko.luckperms.common.node.NodeWithContextComparator;
@@ -79,63 +77,74 @@ import java.util.stream.Collectors;
 /**
  * Represents an object that can hold permissions, (a user or group)
  *
- * <p>Permissions are stored in Multimaps, with the context of the node being the key, and the actual Node object being
- * the value. The keys (context sets) are ordered according to their weight {@link ContextSetComparator}, and the values
- * are ordered according to the priority of the node, according to {@link NodeComparator}.</p>
+ * <p>Data is stored in {@link NodeMap}s. A holder has two of these, one for
+ * enduring nodes and one for transient nodes.</p>
  *
- * <p>This class also provides a number of methods to perform inheritance lookups. These lookup methods initially use
- * Lists of nodes populated with the inheritance tree. Nodes at the start of this list have priority over nodes at the
- * end. Nodes higher up the tree appear at the end of these lists. In order to remove duplicate elements, the lists are
- * flattened using the methods in {@link NodeTools}. This is significantly faster than trying to prevent duplicates
- * throughout the process of accumulation, and reduces the need for too much caching.</p>
+ * <p>This class provides a number of methods to perform inheritance lookups.
+ * These lookup methods initially use Lists of nodes populated with the
+ * inheritance tree. Nodes at the start of this list have priority over nodes at
+ * the end. Nodes higher up the tree appear at the end of these lists. In order
+ * to remove duplicate elements, the lists are flattened using the methods in
+ * {@link NodeTools}. This is significantly faster than trying to prevent
+ * duplicates throughout the process of accumulation, and reduces the need for
+ * too much caching.</p>
  *
- * <p>Cached state is avoided in these instances to cut down on memory footprint. The nodes are stored indexed to the
- * contexts they apply in, so doing context specific querying should be fast. Caching would be ineffective here, due to
- * the potentially vast amount of contexts being used by nodes, and the potential for very large inheritance trees.</p>
+ * <p>Cached state is avoided in these instances to cut down on memory
+ * footprint. The nodes are stored indexed to the contexts they apply in, so
+ * doing context specific querying should be fast. Caching would be ineffective
+ * here, due to the potentially vast amount of contexts being used by nodes,
+ * and the potential for very large inheritance trees.</p>
  */
 public abstract class PermissionHolder {
 
     /**
-     * The name of this PermissionHolder object.
+     * The name of this object.
      *
-     * <p>Used to prevent circular inheritance issues.</p>
+     * <p>Used as a base for identifying permission holding objects. Also acts
+     * as a method for preventing circular inheritance issues.</p>
      *
-     * <p>For users, this value is a String representation of their {@link User#getUuid()}. For groups, it's just the
-     * {@link Group#getName()}.</p>
+     * @see User#getUuid()
+     * @see Group#getName()
+     * @see #getObjectName()
      */
     private final String objectName;
 
     /**
      * Reference to the main plugin instance
+     * @see #getPlugin()
      */
     private final LuckPermsPlugin plugin;
 
     /**
      * The holders persistent nodes.
+     *
+     * <p>These (unlike transient nodes) are saved to the storage backing.</p>
+     *
+     * @see #getEnduringData()
      */
     private final NodeMap enduringNodes = new NodeMap(this);
 
     /**
      * The holders transient nodes.
      *
-     * <p>These are nodes which are never stored or persisted to a file, and only
-     * last until the end of the objects lifetime. (for a group, that's when the server stops, and for a user, it's when
-     * they log out, or get unloaded.)</p>
+     * <p>These are nodes which are never stored or persisted to a file, and
+     * only last until the end of the objects lifetime. (for a group, that's
+     * when the server stops, and for a user, it's when they log out, or get
+     * unloaded.)</p>
+     *
+     * @see #getTransientData()
      */
     private final NodeMap transientNodes = new NodeMap(this);
 
     /**
-     * Caches the holders weight lookup
+     * Caches the holders weight
+     * @see #getWeight()
      */
-    private final Cache<OptionalInt> weightCache = new Cache<OptionalInt>() {
-        @Override
-        protected OptionalInt supply() {
-            return calculateWeight();
-        }
-    };
+    private final Cache<OptionalInt> weightCache = WeightCache.getFor(this);
 
     /**
      * Lock used by Storage implementations to prevent concurrent read/writes
+     * @see #getIoLock()
      */
     private final Lock ioLock = new ReentrantLock();
 
@@ -1001,34 +1010,6 @@ public abstract class PermissionHolder {
 
     public OptionalInt getWeight() {
         return this.weightCache.get();
-    }
-
-    private OptionalInt calculateWeight() {
-        if (this.getType().isUser()) return OptionalInt.empty();
-
-        boolean seen = false;
-        int best = 0;
-        for (Node n : getOwnNodes(ImmutableContextSet.empty())) {
-            Integer weight = NodeFactory.parseWeightNode(n.getPermission());
-            if (weight == null) {
-                continue;
-            }
-
-            if (!seen || weight > best) {
-                seen = true;
-                best = weight;
-            }
-        }
-        OptionalInt weight = seen ? OptionalInt.of(best) : OptionalInt.empty();
-
-        if (!weight.isPresent()) {
-            Integer w = this.plugin.getConfiguration().get(ConfigKeys.GROUP_WEIGHTS).get(getObjectName().toLowerCase());
-            if (w != null) {
-                weight = OptionalInt.of(w);
-            }
-        }
-
-        return weight;
     }
 
     public Set<HolderReference> getGroupReferences() {

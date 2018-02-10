@@ -57,7 +57,11 @@ import javax.annotation.Nullable;
 /**
  * A map of nodes held by a {@link PermissionHolder}.
  *
- * Each holder has two of these maps, one for enduring and transient nodes.
+ * <p>Permissions are stored in Multimaps, with the context of the node being the key, and the actual Node object being
+ * the value. The keys (context sets) are ordered according to their weight {@link ContextSetComparator}, and the values
+ * are ordered according to the priority of the node, according to {@link NodeComparator}.</p>
+ *
+ * <p>Each holder has two of these maps, one for enduring and transient nodes.</p>
  */
 public final class NodeMap {
 
