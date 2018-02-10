@@ -29,12 +29,14 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.model.TemporaryModifier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.DateUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Utility class to help process arguments, and throw checked exceptions if the arguments are invalid.
@@ -110,6 +112,21 @@ public class ArgumentUtils {
         }
 
         return duration;
+    }
+
+    public static Optional<TemporaryModifier> handleTemporaryModifier(int index, List<String> args) {
+        if (index < 0 || index >= args.size()) {
+            return Optional.empty();
+        }
+
+        String s = args.get(index);
+        try {
+            Optional<TemporaryModifier> ret = Optional.of(TemporaryModifier.valueOf(s.toUpperCase()));
+            args.remove(index);
+            return ret;
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
     }
 
     public static MutableContextSet handleContext(int fromIndex, List<String> args, LuckPermsPlugin plugin) throws CommandException {

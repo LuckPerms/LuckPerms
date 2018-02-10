@@ -69,8 +69,8 @@ public class MetaSetTemp extends SharedSubCommand {
         String key = args.get(0);
         String value = args.get(1);
         long duration = ArgumentUtils.handleDuration(2, args);
+        TemporaryModifier modifier = ArgumentUtils.handleTemporaryModifier(3, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
         MutableContextSet context = ArgumentUtils.handleContext(3, args, plugin);
-        TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
             Message.COMMAND_NO_PERMISSION.send(sender);

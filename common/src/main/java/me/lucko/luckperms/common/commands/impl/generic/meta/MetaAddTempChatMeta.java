@@ -81,8 +81,8 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
         int priority = ArgumentUtils.handlePriority(0, args);
         String meta = ArgumentUtils.handleString(1, args);
         long duration = ArgumentUtils.handleDuration(2, args);
+        TemporaryModifier modifier = ArgumentUtils.handleTemporaryModifier(3, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
         MutableContextSet context = ArgumentUtils.handleContext(3, args, plugin);
-        TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
             Message.COMMAND_NO_PERMISSION.send(sender);

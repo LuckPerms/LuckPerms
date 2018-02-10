@@ -68,8 +68,8 @@ public class ParentAddTemp extends SharedSubCommand {
 
         String groupName = ArgumentUtils.handleName(0, args);
         long duration = ArgumentUtils.handleDuration(1, args);
+        TemporaryModifier modifier = ArgumentUtils.handleTemporaryModifier(2, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
         MutableContextSet context = ArgumentUtils.handleContext(2, args, plugin);
-        TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
 
         Group group = plugin.getStorage().loadGroup(groupName).join().orElse(null);
         if (group == null) {
