@@ -38,6 +38,7 @@ import me.lucko.luckperms.common.commands.impl.misc.ApplyEditsCommand;
 import me.lucko.luckperms.common.commands.impl.misc.BulkUpdateCommand;
 import me.lucko.luckperms.common.commands.impl.misc.CheckCommand;
 import me.lucko.luckperms.common.commands.impl.misc.DebugCommand;
+import me.lucko.luckperms.common.commands.impl.misc.EditorCommand;
 import me.lucko.luckperms.common.commands.impl.misc.ExportCommand;
 import me.lucko.luckperms.common.commands.impl.misc.ImportCommand;
 import me.lucko.luckperms.common.commands.impl.misc.InfoCommand;
@@ -109,6 +110,7 @@ public class CommandManager {
                 .add(new LogMainCommand(locale))
                 .add(new SyncCommand(locale))
                 .add(new InfoCommand(locale))
+                .add(new EditorCommand(locale))
                 .add(new DebugCommand(locale))
                 .add(new VerboseCommand(locale))
                 .add(new TreeCommand(locale))

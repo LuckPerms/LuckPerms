@@ -26,6 +26,8 @@
 package me.lucko.luckperms.common.commands.impl.misc;
 
 import com.google.common.collect.Maps;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.api.Node;
@@ -61,7 +63,6 @@ public class ApplyEditsCommand extends SingleCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         String code = args.get(0);
-        String who = args.size() == 2 ? args.get(1) : null;
 
         if (code.isEmpty()) {
             Message.APPLY_EDITS_INVALID_CODE.send(sender, code);
@@ -74,39 +75,55 @@ public class ApplyEditsCommand extends SingleCommand {
             return CommandResult.FAILURE;
         }
 
-        if (who == null) {
-            if (!data.has("who") || data.get("who").getAsString().isEmpty()) {
-                Message.APPLY_EDITS_NO_TARGET.send(sender);
-                return CommandResult.STATE_ERROR;
+        if (data.has("tabs") && data.get("tabs").isJsonArray()) {
+            JsonArray rows = data.get("tabs").getAsJsonArray();
+            for (JsonElement row : rows) {
+                read(row.getAsJsonObject(), code, sender, plugin);
             }
-
-            who = data.get("who").getAsString();
+        } else {
+            read(data, code, sender, plugin);
         }
 
+        return CommandResult.SUCCESS;
+    }
+
+    private boolean read(JsonObject data, String code, Sender sender, LuckPermsPlugin plugin) {
+        if (!data.has("who") || data.get("who").getAsString().isEmpty()) {
+            Message.APPLY_EDITS_NO_TARGET.send(sender);
+            return false;
+        }
+
+        String who = data.get("who").getAsString();
         PermissionHolder holder = WebEditorUtils.getHolderFromIdentifier(plugin, sender, who);
         if (holder == null) {
             // the #getHolderFromIdentifier method will send the error message onto the sender
-            return CommandResult.STATE_ERROR;
+            return false;
         }
 
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), holder)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return false;
+        }
+
+        Set<NodeModel> nodes = WebEditorUtils.deserializePermissions(data.getAsJsonArray("nodes"));
+
+        Set<Node> before = new HashSet<>(holder.getEnduringNodes().values());
+        Set<Node> after = nodes.stream().map(NodeModel::toNode).collect(Collectors.toSet());
+
+        Map.Entry<Set<Node>, Set<Node>> diff = diff(before, after);
+        int additions = diff.getKey().size();
+        int deletions = diff.getValue().size();
+
+        if (additions == 0 && deletions == 0) {
+            return false;
         }
 
         ExtendedLogEntry.build().actor(sender).acted(holder)
                 .action("applyedits", code)
                 .build().submit(plugin, sender);
 
-        Set<NodeModel> rawNodes = WebEditorUtils.deserializePermissions(data.getAsJsonArray("nodes"));
+        holder.setEnduringNodes(after);
 
-        Set<Node> before = new HashSet<>(holder.getEnduringNodes().values());
-        Set<Node> nodes = rawNodes.stream().map(NodeModel::toNode).collect(Collectors.toSet());
-        holder.setEnduringNodes(nodes);
-
-        Map.Entry<Set<Node>, Set<Node>> diff = diff(before, nodes);
-        int additions = diff.getKey().size();
-        int deletions = diff.getValue().size();
         String additionsSummary = "addition" + (additions == 1 ? "" : "s");
         String deletionsSummary = "deletion" + (deletions == 1 ? "" : "s");
 
@@ -118,9 +135,8 @@ public class ApplyEditsCommand extends SingleCommand {
         for (Node n : diff.getValue()) {
             Message.APPLY_EDITS_DIFF_REMOVED.send(sender, formatNode(n));
         }
-
         SharedSubCommand.save(holder, sender, plugin);
-        return CommandResult.SUCCESS;
+        return true;
     }
 
     private static String formatNode(Node n) {

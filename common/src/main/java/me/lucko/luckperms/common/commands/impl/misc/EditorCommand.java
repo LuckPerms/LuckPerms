@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.impl.generic.other;
+package me.lucko.luckperms.common.commands.impl.misc;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -31,8 +31,9 @@ import com.google.gson.JsonObject;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.abstraction.SubCommand;
+import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -48,17 +49,42 @@ import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
 import net.kyori.text.format.TextColor;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
-public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
-    public HolderEditor(LocaleManager locale, boolean user) {
-        super(CommandSpec.HOLDER_EDITOR.spec(locale), "editor", user ? CommandPermission.USER_EDITOR : CommandPermission.GROUP_EDITOR, Predicates.alwaysFalse());
+public class EditorCommand extends SingleCommand {
+    public EditorCommand(LocaleManager locale) {
+        super(CommandSpec.EDITOR.spec(locale), "Editor", CommandPermission.EDITOR, Predicates.notInRange(0, 1));
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T holder, List<String> args, String label) {
-        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), holder)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+        Type type = Type.ALL;
+
+        // parse type
+        String typeString = ArgumentUtils.handleStringOrElse(0, args, null);
+        if (typeString != null) {
+            try {
+                type = Type.valueOf(typeString.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // ignored
+            }
+        }
+
+        // collect holders
+        List<PermissionHolder> holders = new ArrayList<>();
+        if (type.includingGroups) {
+            holders.addAll(plugin.getGroupManager().getAll().values());
+        }
+        if (type.includingUsers) {
+            holders.addAll(plugin.getUserManager().getAll().values());
+        }
+
+        // remove holders which the sender doesn't have perms to view
+        holders.removeIf(holder -> ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), holder));
+
+        // they don't have perms to view any of them
+        if (holders.isEmpty()) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
@@ -66,7 +92,7 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
         Message.EDITOR_START.send(sender);
 
         // form the payload data
-        JsonObject payload = WebEditorUtils.formPayload(Collections.singletonList(holder), sender, label, plugin);
+        JsonObject payload = WebEditorUtils.formPayload(holders, sender, label, plugin);
 
         // upload the payload data to gist
         String gistId = WebEditorUtils.postToGist(new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(payload));
@@ -89,4 +115,17 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
         return CommandResult.SUCCESS;
     }
 
+    private enum Type {
+        ALL(true, true),
+        USERS(true, false),
+        GROUPS(false, true);
+
+        private final boolean includingUsers;
+        private final boolean includingGroups;
+
+        Type(boolean includingUsers, boolean includingGroups) {
+            this.includingUsers = includingUsers;
+            this.includingGroups = includingGroups;
+        }
+    }
 }

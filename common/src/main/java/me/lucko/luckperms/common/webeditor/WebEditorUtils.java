@@ -25,10 +25,12 @@
 
 package me.lucko.luckperms.common.webeditor;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -53,6 +55,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -69,7 +72,51 @@ public final class WebEditorUtils {
     private static final String USER_ID_PATTERN = "user/";
     private static final String GROUP_ID_PATTERN = "group/";
 
-    public static String getHolderIdentifier(PermissionHolder holder) {
+    private static void writeData(PermissionHolder holder, JsonObject payload) {
+        payload.addProperty("who", getHolderIdentifier(holder));
+        payload.addProperty("whoFriendly", holder.getFriendlyName());
+        if (holder.getType().isUser()) {
+            payload.addProperty("whoUuid", ((User) holder).getUuid().toString());
+        }
+
+        // attach the holders permissions
+        payload.add("nodes", WebEditorUtils.serializePermissions(holder.getEnduringNodes().values().stream().map(NodeModel::fromNode)));
+    }
+
+    public static JsonObject formPayload(List<PermissionHolder> holders, Sender sender, String cmdLabel, LuckPermsPlugin plugin) {
+        Preconditions.checkArgument(!holders.isEmpty(), "holders is empty");
+
+        // form the payload data
+        JsonObject payload = new JsonObject();
+
+        payload.addProperty("cmdAlias", cmdLabel);
+        payload.addProperty("uploadedBy", sender.getNameWithLocation());
+        payload.addProperty("uploadedByUuid", sender.getUuid().toString());
+        payload.addProperty("time", System.currentTimeMillis());
+
+        if (holders.size() == 1) {
+            writeData(holders.get(0), payload);
+        } else {
+            JsonArray tabs = new JsonArray();
+            for (PermissionHolder holder : holders) {
+                JsonObject o = new JsonObject();
+                writeData(holder, o);
+                tabs.add(o);
+            }
+            payload.add("tabs", tabs);
+        }
+
+        // attach an array of all permissions known to the server, to use for tab completion in the editor
+        JsonArray knownPermsArray = new JsonArray();
+        for (String perm : plugin.getPermissionVault().rootAsList()) {
+            knownPermsArray.add(new JsonPrimitive(perm));
+        }
+        payload.add("knownPermissions", knownPermsArray);
+
+        return payload;
+    }
+
+    private static String getHolderIdentifier(PermissionHolder holder) {
         if (holder.getType().isUser()) {
             User user = ((User) holder);
             return USER_ID_PATTERN + user.getUuid().toString();

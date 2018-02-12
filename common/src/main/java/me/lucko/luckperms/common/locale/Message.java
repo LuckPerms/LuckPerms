@@ -124,7 +124,7 @@ public enum Message {
 
     APPLY_EDITS_INVALID_CODE("&cInvalid code. &7({})", true),
     APPLY_EDITS_UNABLE_TO_READ("&cUnable to read data using the given code. &7({})", true),
-    APPLY_EDITS_NO_TARGET("&cUnable to parse the target of the edit. Please supply it as an extra argument.", true),
+    APPLY_EDITS_NO_TARGET("&cUnable to parse the target of the edit.", true),
     APPLY_EDITS_TARGET_GROUP_NOT_EXISTS("&cTarget group &4{}&c does not exist.", true),
     APPLY_EDITS_TARGET_USER_NOT_UUID("&cTarget user &4{}&c is not a valid uuid.", true),
     APPLY_EDITS_TARGET_USER_UNABLE_TO_LOAD("&cUnable to load target user &4{}&c.", true),

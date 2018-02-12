@@ -49,6 +49,11 @@ public enum CommandSpec {
 
     SYNC("Sync changes with the storage", "/%s sync"),
     INFO("Print general plugin info", "/%s info"),
+    EDITOR("Creates a new editor session", "/%s editor [type]",
+            Arg.list(
+                    Arg.create("type", false, "the types to load into the editor. ('all', 'users' or 'groups')")
+            )
+    ),
     DEBUG("Produce debugging output", "/%s debug"),
     VERBOSE("Manage verbose permission checking", "/%s verbose <true|false> [filter]",
             Arg.list(
