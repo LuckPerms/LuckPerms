@@ -32,6 +32,12 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 import java.io.IOException;
+import java.net.Proxy;
+import java.net.ProxySelector;
+import java.net.SocketAddress;
+import java.net.URI;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Utilities for the OkHttp client
@@ -43,6 +49,7 @@ public class HttpClient {
     private synchronized static OkHttpClient getClient() {
         if (client == null) {
             client = new OkHttpClient.Builder()
+                    .proxySelector(new NullSafeProxySelector())
                     .addInterceptor(new LuckPermsUserAgentInterceptor())
                     .build();
         }
@@ -78,6 +85,28 @@ public class HttpClient {
                     .build();
 
             return chain.proceed(modified);
+        }
+    }
+
+    // sometimes ProxySelector#getDefault returns null, and okhttp doesn't like that
+    private static final class NullSafeProxySelector extends ProxySelector {
+        private static final List<Proxy> DIRECT = Collections.singletonList(Proxy.NO_PROXY);
+
+        @Override
+        public List<Proxy> select(URI uri) {
+            ProxySelector def = ProxySelector.getDefault();
+            if (def == null) {
+                return DIRECT;
+            }
+            return def.select(uri);
+        }
+
+        @Override
+        public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {
+            ProxySelector def = ProxySelector.getDefault();
+            if (def != null) {
+                def.connectFailed(uri, sa, ioe);
+            }
         }
     }
 
