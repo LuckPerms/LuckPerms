@@ -38,12 +38,21 @@ import java.io.IOException;
  */
 public class HttpClient {
 
-    private static final OkHttpClient CLIENT = new OkHttpClient.Builder()
+    private static OkHttpClient client = new OkHttpClient.Builder()
             .addInterceptor(new LuckPermsUserAgentInterceptor())
             .build();
 
+    private synchronized static OkHttpClient getClient() {
+        if (client == null) {
+            client = new OkHttpClient.Builder()
+                    .addInterceptor(new LuckPermsUserAgentInterceptor())
+                    .build();
+        }
+        return client;
+    }
+
     public static Response makeCall(Request request) throws IOException {
-        Response response = CLIENT.newCall(request).execute();
+        Response response = getClient().newCall(request).execute();
         if (!response.isSuccessful()) {
             throw exceptionForUnsuccessfulResponse(response);
         }
