@@ -38,9 +38,7 @@ import java.io.IOException;
  */
 public class HttpClient {
 
-    private static OkHttpClient client = new OkHttpClient.Builder()
-            .addInterceptor(new LuckPermsUserAgentInterceptor())
-            .build();
+    private static OkHttpClient client = null;
 
     private synchronized static OkHttpClient getClient() {
         if (client == null) {
