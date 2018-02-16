@@ -262,7 +262,7 @@ public class MongoDao extends AbstractDao {
                         save = true;
                     }
 
-                    if (save) {
+                    if (save | user.auditTemporaryPermissions()) {
                         c.replaceOne(new Document("_id", user.getUuid()), userToDoc(user));
                     }
                 } else {

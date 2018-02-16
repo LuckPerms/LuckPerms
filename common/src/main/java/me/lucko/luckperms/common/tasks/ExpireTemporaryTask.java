@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.tasks;
 
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -40,6 +41,9 @@ public class ExpireTemporaryTask implements Runnable {
     public void run() {
         boolean groupChanges = false;
         for (Group group : this.plugin.getGroupManager().getAll().values()) {
+            if (shouldSkip(group)) {
+                continue;
+            }
             if (group.auditTemporaryPermissions()) {
                 this.plugin.getStorage().saveGroup(group);
                 groupChanges = true;
@@ -47,6 +51,9 @@ public class ExpireTemporaryTask implements Runnable {
         }
 
         for (User user : this.plugin.getUserManager().getAll().values()) {
+            if (shouldSkip(user)) {
+                continue;
+            }
             if (user.auditTemporaryPermissions()) {
                 this.plugin.getStorage().saveUser(user);
                 if (!groupChanges) {
@@ -58,5 +65,19 @@ public class ExpireTemporaryTask implements Runnable {
         if (groupChanges) {
             this.plugin.getUpdateTaskBuffer().request();
         }
+    }
+
+    // return true if the holder's io lock is currently held, false otherwise
+    private static boolean shouldSkip(PermissionHolder holder) {
+        // if the holder is currently being manipulated by the storage dao,
+        // don't attempt to audit temporary permissions
+        if (!holder.getIoLock().tryLock()) {
+            // if #tryLock returns false, it means it's held by something else
+            return true;
+        }
+
+        // immediately release the lock & return false
+        holder.getIoLock().unlock();
+        return false;
     }
 }

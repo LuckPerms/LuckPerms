@@ -679,24 +679,30 @@ public abstract class PermissionHolder {
      * @return true if permissions had expired and were removed
      */
     public boolean auditTemporaryPermissions() {
-        Set<Node> removed = new HashSet<>();
-
         // audit temporary nodes first, but don't track ones which are removed
         // we don't call events for transient nodes
-        this.transientNodes.auditTemporaryNodes(null);
+        boolean transientWork = this.transientNodes.auditTemporaryNodes(null);
 
         ImmutableCollection<Node> before = getEnduringNodes().values();
+        Set<Node> removed = new HashSet<>();
 
-        if (!this.enduringNodes.auditTemporaryNodes(removed)) {
-            return false;
+        boolean enduringWork = this.enduringNodes.auditTemporaryNodes(removed);
+        if (enduringWork) {
+            // invalidate
+            invalidateCache();
+
+            // call event
+            ImmutableCollection<Node> after = getEnduringNodes().values();
+            for (Node r : removed) {
+                this.plugin.getEventFactory().handleNodeRemove(r, this, before, after);
+            }
         }
 
-        invalidateCache();
-        ImmutableCollection<Node> after = getEnduringNodes().values();
-        for (Node r : removed) {
-            this.plugin.getEventFactory().handleNodeRemove(r, this, before, after);
+        if (transientWork && !enduringWork) {
+            invalidateCache();
         }
-        return true;
+
+        return transientWork || enduringWork;
     }
 
     private Optional<Node> getAlmostEquals(Node node, NodeMapType type) {

@@ -359,8 +359,8 @@ public class SqlDao extends AbstractDao {
                 Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
                 user.setEnduringNodes(nodes);
 
-                // Save back to the store if data was changed
-                if (this.plugin.getUserManager().giveDefaultIfNeeded(user, false)) {
+                // Save back to the store if data they were given any defaults or had permissions expire
+                if (this.plugin.getUserManager().giveDefaultIfNeeded(user, false) | user.auditTemporaryPermissions()) {
                     // This should be fine, as the lock will be acquired by the same thread.
                     saveUser(user);
                 }

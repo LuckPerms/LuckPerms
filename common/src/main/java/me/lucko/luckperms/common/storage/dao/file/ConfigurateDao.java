@@ -394,7 +394,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                     save = true;
                 }
 
-                if (save) {
+                if (save | user.auditTemporaryPermissions()) {
                     saveUser(user);
                 }
             } else {
