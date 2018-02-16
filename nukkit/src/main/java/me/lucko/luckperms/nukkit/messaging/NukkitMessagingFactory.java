@@ -23,35 +23,19 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.platform;
+package me.lucko.luckperms.nukkit.messaging;
 
-import javax.annotation.Nonnull;
+import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.messaging.MessagingFactory;
+import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
-/**
- * Represents a type of platform which LuckPerms can run on.
- *
- * @since 2.7
- */
-public enum PlatformType {
-
-    BUKKIT("Bukkit"),
-    BUNGEE("Bungee"),
-    SPONGE("Sponge"),
-    NUKKIT("Nukkit");
-
-    private final String friendlyName;
-
-    PlatformType(String friendlyName) {
-        this.friendlyName = friendlyName;
+public class NukkitMessagingFactory extends MessagingFactory<LPNukkitPlugin> {
+    public NukkitMessagingFactory(LPNukkitPlugin plugin) {
+        super(plugin);
     }
 
-    /**
-     * Gets a readable name for the platform type.
-     *
-     * @return a readable name
-     */
-    @Nonnull
-    public String getFriendlyName() {
-        return this.friendlyName;
+    @Override
+    protected InternalMessagingService getServiceFor(String messagingType) {
+        return super.getServiceFor(messagingType);
     }
 }

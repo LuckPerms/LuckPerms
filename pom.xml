@@ -17,6 +17,7 @@
         <module>sponge/sponge-service-api6</module>
         <module>sponge/sponge-service-api7</module>
         <module>sponge</module>
+        <module>nukkit</module>
     </modules>
 
     <name>LuckPerms</name>
@@ -151,14 +152,6 @@
         <repository>
             <id>luck-repo</id>
             <url>https://repo.lucko.me/</url>
-        </repository>
-        <repository>
-            <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-        </repository>
-        <repository>
-            <id>sponge-repo</id>
-            <url>https://repo.spongepowered.org/maven</url>
         </repository>
     </repositories>
 

@@ -23,35 +23,31 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.platform;
+package me.lucko.luckperms.nukkit.contexts;
 
-import javax.annotation.Nonnull;
+import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.contexts.AbstractContextManager;
+import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
-/**
- * Represents a type of platform which LuckPerms can run on.
- *
- * @since 2.7
- */
-public enum PlatformType {
+import cn.nukkit.Player;
 
-    BUKKIT("Bukkit"),
-    BUNGEE("Bungee"),
-    SPONGE("Sponge"),
-    NUKKIT("Nukkit");
-
-    private final String friendlyName;
-
-    PlatformType(String friendlyName) {
-        this.friendlyName = friendlyName;
+public class NukkitContextManager extends AbstractContextManager<Player> {
+    public NukkitContextManager(LPNukkitPlugin plugin) {
+        super(plugin, Player.class);
     }
 
-    /**
-     * Gets a readable name for the platform type.
-     *
-     * @return a readable name
-     */
-    @Nonnull
-    public String getFriendlyName() {
-        return this.friendlyName;
+    @Override
+    public Contexts formContexts(Player subject, ImmutableContextSet contextSet) {
+        return new Contexts(
+                contextSet,
+                this.plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                this.plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
+                true,
+                this.plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                this.plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
+                subject.isOp()
+        );
     }
 }

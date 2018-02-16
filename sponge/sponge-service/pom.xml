@@ -55,4 +55,11 @@
         </dependency>
     </dependencies>
 
+    <repositories>
+        <repository>
+            <id>sponge-repo</id>
+            <url>https://repo.spongepowered.org/maven</url>
+        </repository>
+    </repositories>
+
 </project>

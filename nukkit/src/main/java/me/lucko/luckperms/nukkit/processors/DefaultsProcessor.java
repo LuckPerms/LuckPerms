@@ -23,35 +23,37 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.platform;
+package me.lucko.luckperms.nukkit.processors;
 
-import javax.annotation.Nonnull;
+import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.common.processors.PermissionProcessor;
+import me.lucko.luckperms.nukkit.LPNukkitPlugin;
+
+import cn.nukkit.permission.Permission;
 
 /**
- * Represents a type of platform which LuckPerms can run on.
- *
- * @since 2.7
+ * Permission Processor for Nukkits "default" permission system.
  */
-public enum PlatformType {
+public class DefaultsProcessor implements PermissionProcessor {
+    private final LPNukkitPlugin plugin;
+    private final boolean isOp;
 
-    BUKKIT("Bukkit"),
-    BUNGEE("Bungee"),
-    SPONGE("Sponge"),
-    NUKKIT("Nukkit");
-
-    private final String friendlyName;
-
-    PlatformType(String friendlyName) {
-        this.friendlyName = friendlyName;
+    public DefaultsProcessor(LPNukkitPlugin plugin, boolean isOp) {
+        this.plugin = plugin;
+        this.isOp = isOp;
     }
 
-    /**
-     * Gets a readable name for the platform type.
-     *
-     * @return a readable name
-     */
-    @Nonnull
-    public String getFriendlyName() {
-        return this.friendlyName;
+    @Override
+    public Tristate hasPermission(String permission) {
+        Tristate t = this.plugin.getDefaultPermissionMap().lookupDefaultPermission(permission, this.isOp);
+        if (t != Tristate.UNDEFINED) {
+            return t;
+        }
+
+        Permission defPerm = this.plugin.getPermissionMap().get(permission);
+        return defPerm == null ? Tristate.UNDEFINED : Tristate.fromBoolean(
+                Permission.getByName(defPerm.getDefault()).equals(Permission.DEFAULT_TRUE) ||
+                (Permission.getByName(defPerm.getDefault()).equals(Permission.DEFAULT_OP) && this.isOp)
+        );
     }
 }
