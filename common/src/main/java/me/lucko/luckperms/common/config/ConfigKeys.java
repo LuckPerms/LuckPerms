@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.config.keys.IntegerKey;
 import me.lucko.luckperms.common.config.keys.LowercaseStringKey;
 import me.lucko.luckperms.common.config.keys.MapKey;
 import me.lucko.luckperms.common.config.keys.StringKey;
+import me.lucko.luckperms.common.inheritance.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
 import me.lucko.luckperms.common.model.TemporaryModifier;
@@ -221,6 +222,21 @@ public class ConfigKeys {
      * If Sponge default subjects should be applied
      */
     public static final ConfigKey<Boolean> APPLY_SPONGE_DEFAULT_SUBJECTS = EnduringKey.wrap(BooleanKey.of("apply-sponge-default-subjects", true));
+
+    /**
+     * The algorithm LuckPerms should use when traversing the "inheritance tree"
+     */
+    public static final ConfigKey<TraversalAlgorithm> INHERITANCE_TRAVERSAL_ALGORITHM = AbstractKey.of(c -> {
+        String value = c.getString("inheritance-traversal-algorithm", "depth-first-pre-order");
+        switch (value.toLowerCase()) {
+            case "breadth-first":
+                return TraversalAlgorithm.BREADTH_FIRST;
+            case "depth-first-post-order":
+                return TraversalAlgorithm.DEPTH_FIRST_POST_ORDER;
+            default:
+                return TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER;
+        }
+    });
 
     /**
      * The configured group weightings

@@ -77,10 +77,14 @@ public class BungeePermissionCheckListener implements Listener {
 
     @EventHandler
     public void onPlayerTristateCheck(TristateCheckEvent e) {
-        ProxiedPlayer player = e.getPlayer();
+        if (!(e.getSender() instanceof ProxiedPlayer)) {
+            return;
+        }
 
         Objects.requireNonNull(e.getPermission(), "permission");
-        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(e.getSender(), "sender");
+
+        ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
 
         User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
         if (user == null) {

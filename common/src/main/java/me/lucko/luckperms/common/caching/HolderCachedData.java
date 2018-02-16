@@ -117,9 +117,9 @@ public abstract class HolderCachedData<T extends PermissionHolder> implements Ca
         }
 
         if (contexts.getContexts() == Contexts.allowAll()) {
-            data.loadMeta(this.holder.accumulateMeta(newAccumulator(contexts), null));
+            data.loadMeta(this.holder.accumulateMeta(newAccumulator(contexts)));
         } else {
-            data.loadMeta(this.holder.accumulateMeta(newAccumulator(contexts), null, contexts.getContexts()));
+            data.loadMeta(this.holder.accumulateMeta(newAccumulator(contexts), contexts.getContexts()));
         }
 
         return data;

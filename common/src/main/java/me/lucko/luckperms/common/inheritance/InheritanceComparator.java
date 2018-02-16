@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.primarygroup;
+package me.lucko.luckperms.common.inheritance;
 
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -35,19 +35,19 @@ import java.util.Comparator;
 /**
  * Determines the order of group inheritance in {@link PermissionHolder}.
  */
-public class GroupInheritanceComparator implements Comparator<Group> {
-    private static final Comparator<Group> NULL_ORIGIN = new GroupInheritanceComparator(null);
+public class InheritanceComparator implements Comparator<Group> {
+    private static final Comparator<Group> NULL_ORIGIN = new InheritanceComparator(null);
 
     public static Comparator<Group> getFor(PermissionHolder origin) {
         if (origin.getType().isUser()) {
-            return new GroupInheritanceComparator(((User) origin));
+            return new InheritanceComparator(((User) origin));
         }
         return NULL_ORIGIN;
     }
 
     private final User origin;
 
-    private GroupInheritanceComparator(User origin) {
+    private InheritanceComparator(User origin) {
         this.origin = origin;
     }
 

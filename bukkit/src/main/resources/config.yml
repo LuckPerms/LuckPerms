@@ -134,6 +134,18 @@ apply-bukkit-default-permissions: true
 # permissions when considering if a player should have access to a certain permission.
 apply-bukkit-attachment-permissions: true
 
+# The algorithm LuckPerms should use when traversing the "inheritance tree".
+#
+# The valid options are:
+# - breadth-first
+# - depth-first-pre-order
+# - depth-first-post-order
+#
+# See here for information about the differences between each algorithm.
+# - https://en.wikipedia.org/wiki/Breadth-first_search
+# - https://en.wikipedia.org/wiki/Depth-first_search
+inheritance-traversal-algorithm: depth-first-pre-order
+
 # Define special group weights for this server.
 # Default is just 0.
 group-weight:

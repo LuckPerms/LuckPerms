@@ -25,15 +25,16 @@
 
 package me.lucko.luckperms.common.primarygroup;
 
+import com.google.common.collect.ImmutableList;
+
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.inheritance.InheritanceGraph;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 public class AllParentsByWeightHolder extends CachedPrimaryGroupHolder {
     public AllParentsByWeightHolder(User user) {
@@ -47,23 +48,21 @@ public class AllParentsByWeightHolder extends CachedPrimaryGroupHolder {
             contexts = this.user.getPlugin().getContextManager().getStaticContexts();
         }
 
-        // hack to get a list of groups the holder is inheriting from
-        Set<String> groupNames = new LinkedHashSet<>();
-        this.user.resolveInheritances(new NoopList<>(), groupNames, contexts);
+        InheritanceGraph graph = this.user.getPlugin().getInheritanceHandler().getGraph(contexts);
 
-        List<Group> groups = new ArrayList<>();
-        for (String groupName : groupNames) {
-            Group group = this.user.getPlugin().getGroupManager().getIfLoaded(groupName);
-            if (group != null) {
-                groups.add(group);
-            }
-        }
+        // fully traverse the graph, obtain a list of permission holders the user inherits from
+        List<PermissionHolder> traversal = ImmutableList.copyOf(graph.traverse(this.user.getPlugin().getConfiguration().get(ConfigKeys.INHERITANCE_TRAVERSAL_ALGORITHM), this.user));
 
         Group bestGroup = null;
 
-        if (!groups.isEmpty()) {
+        if (!traversal.isEmpty()) {
             int best = 0;
-            for (Group g : groups) {
+            for (PermissionHolder holder : traversal) {
+                if (!(holder instanceof Group)) {
+                    continue;
+                }
+                Group g = ((Group) holder);
+
                 int weight = g.getWeight().orElse(0);
                 if (bestGroup == null || g.getWeight().orElse(0) > best) {
                     bestGroup = g;
@@ -73,23 +72,5 @@ public class AllParentsByWeightHolder extends CachedPrimaryGroupHolder {
         }
 
         return bestGroup == null ? null : bestGroup.getName();
-    }
-
-    private static final class NoopList<E> extends AbstractList<E> implements List<E> {
-
-        @Override
-        public boolean add(E e) {
-            return true;
-        }
-
-        @Override
-        public E get(int index) {
-            return null;
-        }
-
-        @Override
-        public int size() {
-            return 0;
-        }
     }
 }

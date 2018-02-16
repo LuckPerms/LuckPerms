@@ -51,6 +51,7 @@ import me.lucko.luckperms.common.dependencies.DependencyRegistry;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.event.EventFactory;
+import me.lucko.luckperms.common.inheritance.InheritanceHandler;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.NoopLocaleManager;
 import me.lucko.luckperms.common.locale.SimpleLocaleManager;
@@ -179,6 +180,7 @@ public class LPSpongePlugin implements LuckPermsSpongePlugin {
     private LocaleManager localeManager;
     private PluginClassLoader pluginClassLoader;
     private DependencyManager dependencyManager;
+    private InheritanceHandler inheritanceHandler;
     private CachedStateManager cachedStateManager;
     private ContextManager<Subject> contextManager;
     private CalculatorFactory calculatorFactory;
@@ -242,6 +244,7 @@ public class LPSpongePlugin implements LuckPermsSpongePlugin {
 
         // load internal managers
         getLog().info("Loading internal permission managers...");
+        this.inheritanceHandler = new InheritanceHandler(this);
         this.userManager = new SpongeUserManager(this);
         this.groupManager = new SpongeGroupManager(this);
         this.trackManager = new StandardTrackManager(this);
@@ -607,6 +610,11 @@ public class LPSpongePlugin implements LuckPermsSpongePlugin {
     @Override
     public ContextManager<Subject> getContextManager() {
         return this.contextManager;
+    }
+
+    @Override
+    public InheritanceHandler getInheritanceHandler() {
+        return this.inheritanceHandler;
     }
 
     @Override

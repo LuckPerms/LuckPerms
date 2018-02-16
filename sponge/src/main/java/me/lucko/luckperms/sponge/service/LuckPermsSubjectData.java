@@ -376,7 +376,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
 
             toRemove.forEach(makeUnsetConsumer(this.enduring));
 
-            MetaAccumulator metaAccumulator = this.holder.accumulateMeta(null, null, this.service.getPlugin().getContextManager().formContexts(contexts));
+            MetaAccumulator metaAccumulator = this.holder.accumulateMeta(null, this.service.getPlugin().getContextManager().formContexts(contexts));
             int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0);
             priority += 10;
 

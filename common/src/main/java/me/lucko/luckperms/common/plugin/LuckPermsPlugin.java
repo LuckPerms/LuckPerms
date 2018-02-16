@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.event.EventFactory;
+import me.lucko.luckperms.common.inheritance.InheritanceHandler;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.logging.Logger;
 import me.lucko.luckperms.common.managers.group.GroupManager;
@@ -177,6 +178,13 @@ public interface LuckPermsPlugin {
      * @return the context manager
      */
     ContextManager<?> getContextManager();
+
+    /**
+     * Gets the inheritance handler
+     *
+     * @return the inheritance handler
+     */
+    InheritanceHandler getInheritanceHandler();
 
     /**
      * Gets the cached state manager for the platform.
