@@ -27,35 +27,35 @@ package me.lucko.luckperms.bungee.event;
 
 import me.lucko.luckperms.api.Tristate;
 
-import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Event;
 
 /**
- * Copy of the internal BungeeCord "PermissionCheckEvent", returning a tristate instead of a boolean.
+ * Copy of the internal BungeeCord PermissionCheckEvent, returning a tristate instead of a boolean.
  */
 public class TristateCheckEvent extends Event {
-    public static Tristate call(CommandSender sender, String permission) {
-        return ProxyServer.getInstance().getPluginManager().callEvent(new TristateCheckEvent(sender, permission)).getResult();
+    public static Tristate call(ProxiedPlayer player, String permission) {
+        return ProxyServer.getInstance().getPluginManager().callEvent(new TristateCheckEvent(player, permission)).getResult();
     }
 
-    private final CommandSender sender;
+    private final ProxiedPlayer player;
     private final String permission;
 
     private Tristate result;
 
-    public TristateCheckEvent(CommandSender sender, String permission) {
-        this(sender, permission, sender.getPermissions().contains(permission) ? Tristate.TRUE : Tristate.UNDEFINED);
+    public TristateCheckEvent(ProxiedPlayer player, String permission) {
+        this(player, permission, player.getPermissions().contains(permission) ? Tristate.TRUE : Tristate.UNDEFINED);
     }
 
-    public TristateCheckEvent(CommandSender sender, String permission, Tristate result) {
-        this.sender = sender;
+    public TristateCheckEvent(ProxiedPlayer player, String permission, Tristate result) {
+        this.player = player;
         this.permission = permission;
         this.result = result;
     }
 
-    public CommandSender getSender() {
-        return this.sender;
+    public ProxiedPlayer getPlayer() {
+        return this.player;
     }
 
     public String getPermission() {
@@ -73,7 +73,7 @@ public class TristateCheckEvent extends Event {
     @Override
     public String toString() {
         return "TristateCheckEvent(" +
-                "sender=" + this.sender + ", " +
+                "player=" + this.player + ", " +
                 "permission=" + this.permission + ", " +
                 "result=" + this.result + ")";
     }
