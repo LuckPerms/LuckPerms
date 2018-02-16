@@ -38,9 +38,17 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class Log {
+    private static Log empty = null;
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public synchronized static Log empty() {
+        if (empty == null) {
+            empty = builder().build();
+        }
+        return empty;
     }
 
     private static SortedMap<Integer, ExtendedLogEntry> getPage(Set<ExtendedLogEntry> set, int pageNo, int entries) {

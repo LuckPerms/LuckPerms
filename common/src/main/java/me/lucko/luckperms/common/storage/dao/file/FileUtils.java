@@ -23,52 +23,43 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node;
+package me.lucko.luckperms.common.storage.dao.file;
 
-import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.api.Node;
+import java.io.File;
+import java.io.IOException;
 
-import java.util.Objects;
+public final class FileUtils {
 
-import javax.annotation.Nonnull;
-
-/**
- * Holds a Node and where it was inherited from. All calls are passed onto the contained Node instance.
- */
-public final class ImmutableLocalizedNode extends ForwardingNode implements LocalizedNode {
-    public static ImmutableLocalizedNode of(Node node, String location) {
-        Objects.requireNonNull(node, "node");
-        Objects.requireNonNull(location, "location");
-        return new ImmutableLocalizedNode(node, location);
+    public static File mkdir(File file) throws IOException {
+        if (file.exists()) {
+            return file;
+        }
+        if (!file.mkdir()) {
+            throw new IOException("Unable to create directory - " + file.getPath());
+        }
+        return file;
     }
 
-    private final Node node;
-    private final String location;
-
-    private ImmutableLocalizedNode(Node node, String location) {
-        this.node = node;
-        this.location = location;
+    public static File mkdirs(File file) throws IOException {
+        if (file.exists()) {
+            return file;
+        }
+        if (!file.mkdirs()) {
+            throw new IOException("Unable to create directory - " + file.getPath());
+        }
+        return file;
     }
 
-    @Override
-    protected Node delegate() {
-        return this.node;
+    public static File createNewFile(File file) throws IOException {
+        if (file.exists()) {
+            return file;
+        }
+        if (!file.createNewFile()) {
+            throw new IOException("Unable to create file - " + file.getPath());
+        }
+        return file;
     }
 
-    @Nonnull
-    @Override
-    public Node getNode() {
-        return this.node;
-    }
+    private FileUtils() {}
 
-    @Nonnull
-    @Override
-    public String getLocation() {
-        return this.location;
-    }
-
-    @Override
-    public String toString() {
-        return "ImmutableLocalizedNode(node=" + this.getNode() + ", location=" + this.getLocation() + ")";
-    }
 }

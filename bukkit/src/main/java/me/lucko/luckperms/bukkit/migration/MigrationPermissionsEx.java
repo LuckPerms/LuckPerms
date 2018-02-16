@@ -43,7 +43,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.SafeIterator;
+import me.lucko.luckperms.common.utils.SafeIteration;
 
 import org.bukkit.Bukkit;
 
@@ -117,7 +117,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
         Set<String> ladders = new HashSet<>();
-        SafeIterator.iterate(manager.getGroupList(), group -> {
+        SafeIteration.iterate(manager.getGroupList(), group -> {
             int groupWeight = maxWeight - group.getRank();
 
             final String groupName = MigrationUtils.standardizeName(group.getName());
@@ -161,7 +161,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         // Increment the max weight from the group migrations. All user meta should override.
         int userWeight = maxWeight + 5;
 
-        SafeIterator.iterate(manager.getUsers(), user -> {
+        SafeIteration.iterate(manager.getUsers(), user -> {
             UUID u = BukkitMigrationUtils.lookupUuid(log, user.getIdentifier());
             if (u == null) {
                 return;

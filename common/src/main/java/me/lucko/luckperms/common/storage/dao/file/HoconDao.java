@@ -36,7 +36,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class HoconDao extends ConfigurateDao {
-
     public HoconDao(LuckPermsPlugin plugin, String dataFolderName) {
         super(plugin, "HOCON", ".conf", dataFolderName);
     }

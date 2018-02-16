@@ -40,7 +40,7 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.webeditor.WebEditorUtils;
+import me.lucko.luckperms.common.webeditor.WebEditor;
 
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
@@ -66,10 +66,10 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
         Message.EDITOR_START.send(sender);
 
         // form the payload data
-        JsonObject payload = WebEditorUtils.formPayload(Collections.singletonList(holder), sender, label, plugin);
+        JsonObject payload = WebEditor.formPayload(Collections.singletonList(holder), sender, label, plugin);
 
         // upload the payload data to gist
-        String gistId = WebEditorUtils.postToGist(new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(payload));
+        String gistId = WebEditor.postToGist(new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(payload));
         if (gistId == null) {
             Message.EDITOR_UPLOAD_FAILURE.send(sender);
             return CommandResult.STATE_ERROR;

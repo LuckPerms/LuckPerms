@@ -42,7 +42,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.SafeIterator;
+import me.lucko.luckperms.common.utils.SafeIteration;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -79,7 +79,7 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
 
         ConfigurationSection groupsSection = config.getConfigurationSection("groups");
 
-        SafeIterator.iterate(groupsSection.getKeys(false), key -> {
+        SafeIteration.iterate(groupsSection.getKeys(false), key -> {
             final String groupName = MigrationUtils.standardizeName(key);
             Group lpGroup = plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
 
@@ -99,7 +99,7 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
 
         ConfigurationSection usersSection = config.getConfigurationSection("users");
 
-        SafeIterator.iterate(usersSection.getKeys(false), key -> {
+        SafeIteration.iterate(usersSection.getKeys(false), key -> {
             UUID uuid = BukkitMigrationUtils.lookupUuid(log, key);
             if (uuid == null) {
                 return;

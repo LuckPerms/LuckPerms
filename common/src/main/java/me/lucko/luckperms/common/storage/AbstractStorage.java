@@ -53,13 +53,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 /**
- * Converts a {@link AbstractDao} to use {@link CompletableFuture}s
+ * Implements {@link Storage} using an {@link AbstractDao}.
  */
 public class AbstractStorage implements Storage {
     public static Storage create(LuckPermsPlugin plugin, AbstractDao backing) {
-        BufferedOutputStorage bufferedDs = BufferedOutputStorage.wrap(PhasedStorage.wrap(new AbstractStorage(plugin, backing)), 250L);
-        plugin.getScheduler().asyncRepeating(bufferedDs, 2L);
-        return bufferedDs;
+        Storage base = new AbstractStorage(plugin, backing);
+        Storage phased = PhasedStorage.wrap(base);
+        BufferedOutputStorage buffered = BufferedOutputStorage.wrap(phased, 250L);
+        plugin.getScheduler().asyncRepeating(buffered, 2L);
+        return buffered;
     }
 
     private final LuckPermsPlugin plugin;

@@ -29,17 +29,17 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 /**
- * Nashorn provider utility
+ * Provides a nashorn script engine (lazily)
  */
 public final class Scripting {
-    private static ScriptEngine SCRIPT_ENGINE = null;
+    private static ScriptEngine engine = null;
 
     // Lazily load
     public static synchronized ScriptEngine getScriptEngine() {
-        if (SCRIPT_ENGINE == null) {
-            SCRIPT_ENGINE = new ScriptEngineManager(null).getEngineByName("nashorn");
+        if (engine == null) {
+            engine = new ScriptEngineManager(null).getEngineByName("nashorn");
         }
-        return SCRIPT_ENGINE;
+        return engine;
     }
 
     private Scripting() {}

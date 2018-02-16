@@ -38,7 +38,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class YamlDao extends ConfigurateDao {
-
     public YamlDao(LuckPermsPlugin plugin, String dataFolderName) {
         super(plugin, "YAML", ".yml", dataFolderName);
     }

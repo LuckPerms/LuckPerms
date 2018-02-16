@@ -29,7 +29,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import me.lucko.luckperms.common.plugin.SchedulerAdapter;
 import me.lucko.luckperms.common.plugin.SchedulerTask;
-import me.lucko.luckperms.common.utils.SafeIterator;
+import me.lucko.luckperms.common.utils.SafeIteration;
 
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
@@ -105,7 +105,7 @@ public class BukkitSchedulerAdapter implements SchedulerAdapter {
 
     @Override
     public void shutdown() {
-        SafeIterator.iterate(this.tasks, SchedulerTask::cancel);
+        SafeIteration.iterate(this.tasks, SchedulerTask::cancel);
 
         // wait for executor
         this.asyncFallback.shutdown();

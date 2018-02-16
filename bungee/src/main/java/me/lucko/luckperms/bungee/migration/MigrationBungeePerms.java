@@ -38,7 +38,7 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.SafeIterator;
+import me.lucko.luckperms.common.utils.SafeIteration;
 
 import net.alpenblock.bungeeperms.BungeePerms;
 import net.alpenblock.bungeeperms.Group;
@@ -82,7 +82,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         // Migrate all groups.
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
-        SafeIterator.iterate(groups, g -> {
+        SafeIteration.iterate(groups, g -> {
             int groupWeight = maxWeight - g.getRank();
 
             // Make a LuckPerms group for the one being migrated
@@ -104,7 +104,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         // Increment the max weight from the group migrations. All user meta should override.
         int userWeight = maxWeight + 5;
 
-        SafeIterator.iterate(bp.getPermissionsManager().getBackEnd().loadUsers(), u -> {
+        SafeIteration.iterate(bp.getPermissionsManager().getBackEnd().loadUsers(), u -> {
             if (u.getUUID() == null) {
                 log.logErr("Could not parse UUID for user: " + u.getName());
                 return;

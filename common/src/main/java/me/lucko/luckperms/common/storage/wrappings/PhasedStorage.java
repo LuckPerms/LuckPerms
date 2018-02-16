@@ -49,7 +49,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * A Datastore wrapping that ensures all tasks are completed before {@link Storage#shutdown()} is called.
+ * A storage wrapping that ensures all tasks are completed before
+ * {@link Storage#shutdown()} is called.
  */
 public class PhasedStorage implements Storage {
     public static PhasedStorage wrap(Storage storage) {

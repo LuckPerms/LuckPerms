@@ -31,6 +31,7 @@ import com.github.gustav9797.PowerfulPermsAPI.Permission;
 import com.github.gustav9797.PowerfulPermsAPI.PermissionManager;
 import com.github.gustav9797.PowerfulPermsAPI.PowerfulPermsPlugin;
 import com.google.common.collect.ImmutableSet;
+import com.zaxxer.hikari.HikariDataSource;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.cause.CreationCause;
@@ -47,9 +48,8 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
-import me.lucko.luckperms.common.utils.HikariSupplier;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.SafeIterator;
+import me.lucko.luckperms.common.utils.SafeIteration;
 
 import org.bukkit.Bukkit;
 
@@ -57,6 +57,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -158,7 +159,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         // Groups first.
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
-        SafeIterator.iterate(groups, g -> {
+        SafeIteration.iterate(groups, g -> {
             maxWeight.set(Math.max(maxWeight.get(), g.getRank()));
 
             String groupName = MigrationUtils.standardizeName(g.getName());
@@ -218,7 +219,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         maxWeight.addAndGet(5);
 
         // Migrate all users and their groups
-        SafeIterator.iterate(uuids, uuid -> {
+        SafeIteration.iterate(uuids, uuid -> {
 
             // Create a LuckPerms user for the UUID
             User user = plugin.getStorage().loadUser(uuid, null).join();
@@ -340,4 +341,47 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * A simple hikari wrapper
+     */
+    public static final class HikariSupplier implements AutoCloseable {
+
+        private final String address;
+        private final String database;
+        private final String username;
+        private final String password;
+
+        private HikariDataSource hikari;
+
+        public HikariSupplier(String address, String database, String username, String password) {
+            this.address = address;
+            this.database = database;
+            this.username = username;
+            this.password = password;
+        }
+
+        public void setup(String poolName) {
+            this.hikari = new HikariDataSource();
+            this.hikari.setPoolName(poolName);
+            this.hikari.setMaximumPoolSize(2);
+            this.hikari.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
+            this.hikari.addDataSourceProperty("serverName", this.address.split(":")[0]);
+            this.hikari.addDataSourceProperty("port", this.address.split(":")[1]);
+            this.hikari.addDataSourceProperty("databaseName", this.database);
+            this.hikari.addDataSourceProperty("user", this.username);
+            this.hikari.addDataSourceProperty("password", this.password);
+        }
+
+        @Override
+        public void close() {
+            this.hikari.close();
+        }
+
+        public Connection getConnection() throws SQLException {
+            return this.hikari.getConnection();
+        }
+    }
+
+
 }

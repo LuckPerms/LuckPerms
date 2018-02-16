@@ -27,7 +27,7 @@ package me.lucko.luckperms.bungee;
 
 import me.lucko.luckperms.common.plugin.SchedulerAdapter;
 import me.lucko.luckperms.common.plugin.SchedulerTask;
-import me.lucko.luckperms.common.utils.SafeIterator;
+import me.lucko.luckperms.common.utils.SafeIteration;
 
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.api.scheduler.TaskScheduler;
@@ -109,7 +109,7 @@ public class BungeeSchedulerAdapter implements SchedulerAdapter {
 
     @Override
     public void shutdown() {
-        SafeIterator.iterate(this.tasks, SchedulerTask::cancel);
+        SafeIteration.iterate(this.tasks, SchedulerTask::cancel);
     }
 
     private static final class BungeeSchedulerTask implements SchedulerTask {

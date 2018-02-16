@@ -39,7 +39,7 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.SafeIterator;
+import me.lucko.luckperms.common.utils.SafeIteration;
 import me.lucko.luckperms.common.utils.Uuids;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -88,7 +88,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
         // Migrate defaults
         log.log("Migrating default subjects.");
-        SafeIterator.iterate(pexService.getKnownSubjects().values(), collection -> {
+        SafeIteration.iterate(pexService.getKnownSubjects().values(), collection -> {
             migrateSubjectData(
                     collection.getDefaults().getSubjectData(),
                     lpService.getCollection("defaults").loadSubject(collection.getIdentifier()).join().sponge().getSubjectData()
@@ -113,7 +113,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         // Migrate groups
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
-        SafeIterator.iterate(pexService.getGroupSubjects().getAllSubjects(), pexGroup -> {
+        SafeIteration.iterate(pexService.getGroupSubjects().getAllSubjects(), pexGroup -> {
             String pexName = MigrationUtils.standardizeName(pexGroup.getIdentifier());
 
             Optional<String> rankString = pexGroup.getOption("rank");
@@ -151,7 +151,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
         // Migrate tracks
         log.log("Starting track migration.");
-        SafeIterator.iterate(tracks.entrySet(), e -> {
+        SafeIteration.iterate(tracks.entrySet(), e -> {
             Track track = plugin.getStorage().createAndLoadTrack(e.getKey(), CreationCause.INTERNAL).join();
             for (String groupName : e.getValue().values()) {
                 Group group = plugin.getGroupManager().getIfLoaded(groupName);
@@ -169,7 +169,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         // Increment the max weight from the group migrations. All user meta should override.
         int userWeight = maxWeight + 5;
 
-        SafeIterator.iterate(pexService.getUserSubjects().getAllSubjects(), pexUser -> {
+        SafeIteration.iterate(pexService.getUserSubjects().getAllSubjects(), pexUser -> {
             UUID uuid = Uuids.parseNullable(pexUser.getIdentifier());
             if (uuid == null) {
                 log.logErr("Could not parse UUID for user: " + pexUser.getIdentifier());

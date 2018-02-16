@@ -43,7 +43,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.SafeIterator;
+import me.lucko.luckperms.common.utils.SafeIteration;
 
 import org.bukkit.Bukkit;
 import org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService;
@@ -104,7 +104,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
         AtomicInteger groupCount = new AtomicInteger(0);
         AtomicInteger maxWeight = new AtomicInteger(0);
-        SafeIterator.iterate(internalService.getEntities(true), entity -> {
+        SafeIteration.iterate(internalService.getEntities(true), entity -> {
             String groupName = MigrationUtils.standardizeName(entity.getDisplayName());
             Group group = plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
 
@@ -138,7 +138,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         // Migrate all tracks
         log.log("Starting track migration.");
         AtomicInteger trackCount = new AtomicInteger(0);
-        SafeIterator.iterate(service.getAllTracks(), t -> {
+        SafeIteration.iterate(service.getAllTracks(), t -> {
             String trackName = MigrationUtils.standardizeName(t);
             Track track = plugin.getStorage().createAndLoadTrack(trackName, CreationCause.INTERNAL).join();
             track.setGroups(service.getTrackGroups(t));
@@ -156,7 +156,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         Set<UUID> usersToMigrate = new HashSet<>(userParents.keySet());
         usersToMigrate.addAll(service.getAllPlayersUUID());
 
-        SafeIterator.iterate(usersToMigrate, u -> {
+        SafeIteration.iterate(usersToMigrate, u -> {
             PermissionEntity entity = internalService.getEntity(null, u, false);
 
             String username = null;

@@ -27,7 +27,7 @@ package me.lucko.luckperms.sponge;
 
 import me.lucko.luckperms.common.plugin.SchedulerAdapter;
 import me.lucko.luckperms.common.plugin.SchedulerTask;
-import me.lucko.luckperms.common.utils.SafeIterator;
+import me.lucko.luckperms.common.utils.SafeIteration;
 
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
@@ -122,7 +122,7 @@ public class SpongeSchedulerAdapter implements SchedulerAdapter {
 
     @Override
     public void shutdown() {
-        SafeIterator.iterate(this.tasks, SchedulerTask::cancel);
+        SafeIteration.iterate(this.tasks, SchedulerTask::cancel);
     }
 
     private static final class SpongeSchedulerTask implements SchedulerTask {

@@ -25,6 +25,9 @@
 
 package me.lucko.luckperms.common.storage.provider;
 
+/**
+ * Hook to allow external code to provide a storage dao
+ */
 public final class StorageProviders {
     private static StorageProvider provider = null;
 

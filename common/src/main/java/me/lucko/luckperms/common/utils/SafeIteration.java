@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.utils;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public final class SafeIterator {
+public final class SafeIteration {
 
     public static <I> void iterate(Iterable<I> iterable, Consumer<I> action) {
         for (I i : iterable) {
@@ -70,6 +70,6 @@ public final class SafeIterator {
         }
     }
 
-    private SafeIterator() {}
+    private SafeIteration() {}
 
 }

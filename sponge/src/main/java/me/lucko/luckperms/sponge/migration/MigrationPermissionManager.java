@@ -38,7 +38,7 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.SafeIterator;
+import me.lucko.luckperms.common.utils.SafeIteration;
 import me.lucko.luckperms.common.utils.Uuids;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -91,7 +91,7 @@ public class MigrationPermissionManager extends SubCommand<Object> {
 
         // Migrate defaults
         log.log("Migrating default subjects.");
-        SafeIterator.iterate(pmService.getKnownSubjects().values(), collection -> {
+        SafeIteration.iterate(pmService.getKnownSubjects().values(), collection -> {
             migrateSubjectData(
                     collection.getDefaults().getSubjectData(),
                     lpService.getCollection("defaults").loadSubject(collection.getIdentifier()).join().sponge().getSubjectData()
@@ -102,7 +102,7 @@ public class MigrationPermissionManager extends SubCommand<Object> {
         // Migrate groups
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
-        SafeIterator.iterate(pmService.getGroupSubjects().getAllSubjects(), pmGroup -> {
+        SafeIteration.iterate(pmService.getGroupSubjects().getAllSubjects(), pmGroup -> {
             String pmName = MigrationUtils.standardizeName(pmGroup.getIdentifier());
 
             // Make a LuckPerms group for the one being migrated
@@ -117,7 +117,7 @@ public class MigrationPermissionManager extends SubCommand<Object> {
         // Migrate users
         log.log("Starting user migration.");
         AtomicInteger userCount = new AtomicInteger(0);
-        SafeIterator.iterate(pmService.getUserSubjects().getAllSubjects(), pmUser -> {
+        SafeIteration.iterate(pmService.getUserSubjects().getAllSubjects(), pmUser -> {
             UUID uuid = Uuids.parseNullable(pmUser.getIdentifier());
             if (uuid == null) {
                 log.logErr("Could not parse UUID for user: " + pmUser.getIdentifier());

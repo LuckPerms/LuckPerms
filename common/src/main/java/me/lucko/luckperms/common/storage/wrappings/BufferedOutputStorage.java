@@ -46,6 +46,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * A storage wrapping that passes save tasks through a buffer
+ */
 public class BufferedOutputStorage implements Storage, Runnable {
     public static BufferedOutputStorage wrap(Storage storage, long flushTime) {
         return new BufferedOutputStorage(storage, flushTime);

@@ -47,7 +47,6 @@ import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
 import me.lucko.luckperms.common.storage.dao.AbstractDao;
-import me.lucko.luckperms.common.storage.dao.legacy.LegacySqlMigration;
 import me.lucko.luckperms.common.storage.dao.sql.connection.AbstractConnectionFactory;
 import me.lucko.luckperms.common.storage.dao.sql.connection.file.SQLiteConnectionFactory;
 import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.PostgreConnectionFactory;
@@ -115,11 +114,8 @@ public class SqlDao extends AbstractDao {
     private static final String ACTION_INSERT = "INSERT INTO {prefix}actions(time, actor_uuid, actor_name, type, acted_uuid, acted_name, action) VALUES(?, ?, ?, ?, ?, ?, ?)";
     private static final String ACTION_SELECT_ALL = "SELECT * FROM {prefix}actions";
 
-
     private final Gson gson;
-
     private final AbstractConnectionFactory provider;
-
     private final Function<String, String> prefix;
 
     public SqlDao(LuckPermsPlugin plugin, AbstractConnectionFactory provider, String prefix) {
@@ -131,10 +127,6 @@ public class SqlDao extends AbstractDao {
 
     public Gson getGson() {
         return this.gson;
-    }
-
-    public AbstractConnectionFactory getProvider() {
-        return this.provider;
     }
 
     public Function<String, String> getPrefix() {
@@ -192,15 +184,6 @@ public class SqlDao extends AbstractDao {
                             }
                         }
                     }
-                }
-
-                // Try migration from legacy backing
-                if (tableExists("lp_users")) {
-                    this.plugin.getLog().severe("===== Legacy Schema Migration =====");
-                    this.plugin.getLog().severe("Starting migration from legacy schema. This could take a while....");
-                    this.plugin.getLog().severe("Please do not stop your server while the migration takes place.");
-
-                    new LegacySqlMigration(this).run();
                 }
             }
 

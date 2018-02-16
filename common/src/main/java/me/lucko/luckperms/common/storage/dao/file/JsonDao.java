@@ -36,7 +36,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class JsonDao extends ConfigurateDao {
-
     public JsonDao(LuckPermsPlugin plugin, String dataFolderName) {
         super(plugin, "JSON", ".json", dataFolderName);
     }

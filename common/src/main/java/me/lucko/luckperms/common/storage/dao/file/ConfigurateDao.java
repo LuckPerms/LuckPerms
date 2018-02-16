@@ -33,7 +33,6 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.contexts.ContextSetConfigurateSerializer;
 import me.lucko.luckperms.common.managers.group.GroupManager;
 import me.lucko.luckperms.common.managers.track.TrackManager;
@@ -46,8 +45,6 @@ import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
 import me.lucko.luckperms.common.storage.dao.AbstractDao;
-import me.lucko.luckperms.common.storage.dao.legacy.LegacyJsonMigration;
-import me.lucko.luckperms.common.storage.dao.legacy.LegacyYamlMigration;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.common.utils.Uuids;
 
@@ -64,7 +61,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -73,18 +69,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.FileHandler;
-import java.util.logging.Formatter;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public abstract class ConfigurateDao extends AbstractDao {
-    private static final String LOG_FORMAT = "%s(%s): [%s] %s(%s) --> %s";
-
-    private final Logger actionLogger = Logger.getLogger("luckperms_actions");
     private final FileUuidCache uuidCache = new FileUuidCache();
+    private final FileActionLogger actionLogger = new FileActionLogger();
 
     private final String fileExtension;
     private final String dataFolderName;
@@ -169,132 +158,59 @@ public abstract class ConfigurateDao extends AbstractDao {
     @Override
     public void init() {
         try {
-            setupFiles();
+            File data = FileUtils.mkdirs(new File(this.plugin.getDataDirectory(), this.dataFolderName));
+
+            this.usersDirectory = FileUtils.mkdir(new File(data, "users"));
+            this.groupsDirectory = FileUtils.mkdir(new File(data, "groups"));
+            this.tracksDirectory = FileUtils.mkdir(new File(data, "tracks"));
+            this.uuidDataFile = FileUtils.createNewFile(new File(data, "uuidcache.txt"));
+            this.actionLogFile = FileUtils.createNewFile(new File(data, "actions.log"));
+
+            // Listen for file changes.
+            this.plugin.getFileWatcher().ifPresent(watcher -> {
+                watcher.subscribe("user", this.usersDirectory.toPath(), s -> {
+                    if (!s.endsWith(this.fileExtension)) {
+                        return;
+                    }
+
+                    String user = s.substring(0, s.length() - this.fileExtension.length());
+                    UUID uuid = Uuids.parseNullable(user);
+                    if (uuid == null) {
+                        return;
+                    }
+
+                    User u = this.plugin.getUserManager().getIfLoaded(uuid);
+                    if (u != null) {
+                        this.plugin.getLog().info("[FileWatcher] Refreshing user " + u.getFriendlyName());
+                        this.plugin.getStorage().loadUser(uuid, null);
+                    }
+                });
+                watcher.subscribe("group", this.groupsDirectory.toPath(), s -> {
+                    if (!s.endsWith(this.fileExtension)) {
+                        return;
+                    }
+
+                    String groupName = s.substring(0, s.length() - this.fileExtension.length());
+                    this.plugin.getLog().info("[FileWatcher] Refreshing group " + groupName);
+                    this.plugin.getUpdateTaskBuffer().request();
+                });
+                watcher.subscribe("track", this.tracksDirectory.toPath(), s -> {
+                    if (!s.endsWith(this.fileExtension)) {
+                        return;
+                    }
+
+                    String trackName = s.substring(0, s.length() - this.fileExtension.length());
+                    this.plugin.getLog().info("[FileWatcher] Refreshing track " + trackName);
+                    this.plugin.getStorage().loadAllTracks();
+                });
+            });
         } catch (IOException e) {
             e.printStackTrace();
             return;
         }
 
         this.uuidCache.load(this.uuidDataFile);
-
-        try {
-            FileHandler fh = new FileHandler(this.actionLogFile.getAbsolutePath(), 0, 1, true);
-            fh.setFormatter(new Formatter() {
-                @Override
-                public String format(LogRecord record) {
-                    return new Date(record.getMillis()).toString() + ": " + record.getMessage() + "\n";
-                }
-            });
-            this.actionLogger.addHandler(fh);
-            this.actionLogger.setUseParentHandlers(false);
-            this.actionLogger.setLevel(Level.ALL);
-            this.actionLogger.setFilter(record -> true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void mkdir(File file) throws IOException {
-        if (file.exists()) {
-            return;
-        }
-        if (!file.mkdir()) {
-            throw new IOException("Unable to create directory - " + file.getPath());
-        }
-    }
-
-    private static void mkdirs(File file) throws IOException {
-        if (file.exists()) {
-            return;
-        }
-        if (!file.mkdirs()) {
-            throw new IOException("Unable to create directory - " + file.getPath());
-        }
-    }
-
-    private void setupFiles() throws IOException {
-        File data = new File(this.plugin.getDataDirectory(), this.dataFolderName);
-
-        // Try to perform schema migration
-        File oldData = new File(this.plugin.getDataDirectory(), "data");
-
-        if (!data.exists() && oldData.exists()) {
-            mkdirs(data);
-
-            this.plugin.getLog().severe("===== Legacy Schema Migration =====");
-            this.plugin.getLog().severe("Starting migration from legacy schema. This could take a while....");
-            this.plugin.getLog().severe("Please do not stop your server while the migration takes place.");
-
-            if (this instanceof YamlDao) {
-                try {
-                    new LegacyYamlMigration(this.plugin, (YamlDao) this, oldData, data).run();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else if (this instanceof JsonDao) {
-                try {
-                    new LegacyJsonMigration(this.plugin, (JsonDao) this, oldData, data).run();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        } else {
-            mkdirs(data);
-        }
-
-        this.usersDirectory = new File(data, "users");
-        mkdir(this.usersDirectory);
-
-        this.groupsDirectory = new File(data, "groups");
-        mkdir(this.groupsDirectory);
-
-        this.tracksDirectory = new File(data, "tracks");
-        mkdir(this.tracksDirectory);
-
-        this.uuidDataFile = new File(data, "uuidcache.txt");
-        this.uuidDataFile.createNewFile();
-
-        this.actionLogFile = new File(data, "actions.log");
-        this.actionLogFile.createNewFile();
-
-        // Listen for file changes.
-        this.plugin.getFileWatcher().ifPresent(watcher -> {
-            watcher.subscribe("user", this.usersDirectory.toPath(), s -> {
-                if (!s.endsWith(this.fileExtension)) {
-                    return;
-                }
-
-                String user = s.substring(0, s.length() - this.fileExtension.length());
-                UUID uuid = Uuids.parseNullable(user);
-                if (uuid == null) {
-                    return;
-                }
-
-                User u = this.plugin.getUserManager().getIfLoaded(uuid);
-                if (u != null) {
-                    this.plugin.getLog().info("[FileWatcher] Refreshing user " + u.getFriendlyName());
-                    this.plugin.getStorage().loadUser(uuid, null);
-                }
-            });
-            watcher.subscribe("group", this.groupsDirectory.toPath(), s -> {
-                if (!s.endsWith(this.fileExtension)) {
-                    return;
-                }
-
-                String groupName = s.substring(0, s.length() - this.fileExtension.length());
-                this.plugin.getLog().info("[FileWatcher] Refreshing group " + groupName);
-                this.plugin.getUpdateTaskBuffer().request();
-            });
-            watcher.subscribe("track", this.tracksDirectory.toPath(), s -> {
-                if (!s.endsWith(this.fileExtension)) {
-                    return;
-                }
-
-                String trackName = s.substring(0, s.length() - this.fileExtension.length());
-                this.plugin.getLog().info("[FileWatcher] Refreshing track " + trackName);
-                this.plugin.getStorage().loadAllTracks();
-            });
-        });
+        this.actionLogger.init(this.actionLogFile);
     }
 
     @Override
@@ -304,20 +220,14 @@ public abstract class ConfigurateDao extends AbstractDao {
 
     @Override
     public void logAction(LogEntry entry) {
-        this.actionLogger.info(String.format(LOG_FORMAT,
-                (entry.getActor().equals(CommandManager.CONSOLE_UUID) ? "" : entry.getActor() + " "),
-                entry.getActorName(),
-                Character.toString(entry.getType().getCode()),
-                entry.getActed().map(e -> e.toString() + " ").orElse(""),
-                entry.getActedName(),
-                entry.getAction())
-        );
+        this.actionLogger.logAction(entry);
     }
 
     @Override
     public Log getLog() {
-        // Flatfile doesn't support viewing log data from in-game. You can just read the file in a text editor.
-        return Log.builder().build();
+        // File based daos don't support viewing log data from in-game.
+        // You can just read the file in a text editor.
+        return Log.empty();
     }
 
     @Override

@@ -47,7 +47,7 @@ import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.webeditor.WebEditorUtils;
+import me.lucko.luckperms.common.webeditor.WebEditor;
 
 import java.util.HashSet;
 import java.util.List;
@@ -69,7 +69,7 @@ public class ApplyEditsCommand extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        JsonObject data = WebEditorUtils.getDataFromGist(code);
+        JsonObject data = WebEditor.getDataFromGist(code);
         if (data == null) {
             Message.APPLY_EDITS_UNABLE_TO_READ.send(sender, code);
             return CommandResult.FAILURE;
@@ -94,7 +94,7 @@ public class ApplyEditsCommand extends SingleCommand {
         }
 
         String who = data.get("who").getAsString();
-        PermissionHolder holder = WebEditorUtils.getHolderFromIdentifier(plugin, sender, who);
+        PermissionHolder holder = WebEditor.getHolderFromIdentifier(plugin, sender, who);
         if (holder == null) {
             // the #getHolderFromIdentifier method will send the error message onto the sender
             return false;
@@ -105,7 +105,7 @@ public class ApplyEditsCommand extends SingleCommand {
             return false;
         }
 
-        Set<NodeModel> nodes = WebEditorUtils.deserializePermissions(data.getAsJsonArray("nodes"));
+        Set<NodeModel> nodes = WebEditor.deserializePermissions(data.getAsJsonArray("nodes"));
 
         Set<Node> before = new HashSet<>(holder.getEnduringNodes().values());
         Set<Node> after = nodes.stream().map(NodeModel::toNode).collect(Collectors.toSet());

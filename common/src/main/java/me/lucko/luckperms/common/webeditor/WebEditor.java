@@ -63,7 +63,7 @@ import java.util.stream.Stream;
 /**
  * Utility methods for interacting with the LuckPerms web permission editor.
  */
-public final class WebEditorUtils {
+public final class WebEditor {
     private static final Gson GSON = new Gson();
 
     private static final String FILE_NAME = "luckperms-data.json";
@@ -80,7 +80,7 @@ public final class WebEditorUtils {
         }
 
         // attach the holders permissions
-        payload.add("nodes", WebEditorUtils.serializePermissions(holder.getEnduringNodes().values().stream().map(NodeModel::fromNode)));
+        payload.add("nodes", serializePermissions(holder.getEnduringNodes().values().stream().map(NodeModel::fromNode)));
     }
 
     public static JsonObject formPayload(List<PermissionHolder> holders, Sender sender, String cmdLabel, LuckPermsPlugin plugin) {
@@ -206,7 +206,7 @@ public final class WebEditorUtils {
         }
     }
 
-    public static JsonArray serializePermissions(Stream<NodeModel> nodes) {
+    private static JsonArray serializePermissions(Stream<NodeModel> nodes) {
         JsonArray arr = new JsonArray();
         nodes.forEach(node -> {
             JsonObject attributes = new JsonObject();
@@ -275,6 +275,6 @@ public final class WebEditorUtils {
         return nodes;
     }
 
-    private WebEditorUtils() {}
+    private WebEditor() {}
 
 }
