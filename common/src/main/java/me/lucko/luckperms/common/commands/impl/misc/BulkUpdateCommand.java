@@ -33,7 +33,8 @@ import me.lucko.luckperms.common.bulkupdate.BulkUpdateBuilder;
 import me.lucko.luckperms.common.bulkupdate.DataType;
 import me.lucko.luckperms.common.bulkupdate.action.DeleteAction;
 import me.lucko.luckperms.common.bulkupdate.action.UpdateAction;
-import me.lucko.luckperms.common.bulkupdate.comparisons.ComparisonType;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Comparison;
+import me.lucko.luckperms.common.bulkupdate.comparisons.StandardComparison;
 import me.lucko.luckperms.common.bulkupdate.constraint.Constraint;
 import me.lucko.luckperms.common.bulkupdate.constraint.QueryField;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -133,7 +134,7 @@ public class BulkUpdateCommand extends SingleCommand {
                 return CommandResult.INVALID_ARGS;
             }
 
-            ComparisonType comparison = ComparisonType.parseComparison(parts[1]);
+            Comparison comparison = StandardComparison.parseComparison(parts[1]);
             if (comparison == null) {
                 Message.BULK_UPDATE_INVALID_COMPARISON.send(sender, parts[1]);
                 return CommandResult.INVALID_ARGS;

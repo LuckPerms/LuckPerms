@@ -64,17 +64,6 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
 
     private final BufferedRequest<Void> refreshBuffer;
 
-    public User(UUID uuid, LuckPermsPlugin plugin) {
-        super(uuid.toString(), plugin);
-        this.uuid = uuid;
-
-        this.refreshBuffer = new UserRefreshBuffer(plugin, this);
-        this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
-
-        this.cachedData = new UserCachedData(this);
-        getPlugin().getEventFactory().handleUserCacheLoad(this, this.cachedData);
-    }
-
     public User(UUID uuid, String name, LuckPermsPlugin plugin) {
         super(uuid.toString(), plugin);
         this.uuid = uuid;
@@ -85,6 +74,10 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
 
         this.cachedData = new UserCachedData(this);
         getPlugin().getEventFactory().handleUserCacheLoad(this, this.cachedData);
+    }
+
+    public User(UUID uuid, LuckPermsPlugin plugin) {
+        this(uuid, null, plugin);
     }
 
     public UUID getUuid() {

@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.bulkupdate.constraint;
 
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.bulkupdate.comparisons.ComparisonType;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Comparison;
 import me.lucko.luckperms.common.node.NodeModel;
 
 /**
@@ -34,22 +34,22 @@ import me.lucko.luckperms.common.node.NodeModel;
  */
 public class Constraint {
 
-    public static Constraint of(QueryField field, ComparisonType comparisonType, String value) {
-        return new Constraint(field, comparisonType, value);
+    public static Constraint of(QueryField field, Comparison comparison, String value) {
+        return new Constraint(field, comparison, value);
     }
 
     // the field this constraint is comparing against
     private final QueryField field;
 
     // the comparison type being used in this constraint
-    private final ComparisonType comparisonType;
+    private final Comparison comparison;
 
     // the expression being compared against
     private final String value;
 
-    private Constraint(QueryField field, ComparisonType comparisonType, String value) {
+    private Constraint(QueryField field, Comparison comparison, String value) {
         this.field = field;
-        this.comparisonType = comparisonType;
+        this.comparison = comparison;
         this.value = value;
     }
 
@@ -62,37 +62,26 @@ public class Constraint {
     public boolean isSatisfiedBy(NodeModel node) {
         switch (this.field) {
             case PERMISSION:
-                return this.comparisonType.getComparison().matches(node.getPermission(), this.value);
+                return this.comparison.matches(node.getPermission(), this.value);
             case SERVER:
-                return this.comparisonType.getComparison().matches(node.getServer(), this.value);
+                return this.comparison.matches(node.getServer(), this.value);
             case WORLD:
-                return this.comparisonType.getComparison().matches(node.getWorld(), this.value);
+                return this.comparison.matches(node.getWorld(), this.value);
             default:
                 throw new RuntimeException();
         }
     }
 
     public String getAsSql() {
-        switch (this.comparisonType) {
-            case EQUAL:
-                return this.field.getSqlName() + " = " + BulkUpdate.escapeStringForSql(this.value);
-            case NOT_EQUAL:
-                return this.field.getSqlName() + " != " + BulkUpdate.escapeStringForSql(this.value);
-            case SIMILAR:
-                return this.field.getSqlName() + " LIKE " + BulkUpdate.escapeStringForSql(this.value);
-            case NOT_SIMILAR:
-                return this.field.getSqlName() + " NOT LIKE " + BulkUpdate.escapeStringForSql(this.value);
-            default:
-                throw new RuntimeException();
-        }
+        return this.field.getSqlName() + " " + this.comparison.getAsSql() + " " + BulkUpdate.escapeStringForSql(this.value);
     }
 
     public QueryField getField() {
         return this.field;
     }
 
-    public ComparisonType getComparisonType() {
-        return this.comparisonType;
+    public Comparison getComparison() {
+        return this.comparison;
     }
 
     public String getValue() {

@@ -47,4 +47,11 @@ public interface Comparison {
      */
     boolean matches(String str, String expr);
 
+    /**
+     * Returns the comparison operator in SQL form
+     *
+     * @return a sql form of this comparison
+     */
+    String getAsSql();
+
 }
