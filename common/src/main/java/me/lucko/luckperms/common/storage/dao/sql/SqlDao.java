@@ -205,14 +205,19 @@ public class SqlDao extends AbstractDao {
             }
 
             // migrations
-            if (!(this.provider instanceof SQLiteConnectionFactory) && !(this.provider instanceof PostgreConnectionFactory)) {
-                try (Connection connection = this.provider.getConnection()) {
-                    try (Statement s = connection.createStatement()) {
-                        s.execute(this.prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN actor_name VARCHAR(100)"));
-                        s.execute(this.prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN action VARCHAR(300)"));
+            try {
+                if (!(this.provider instanceof SQLiteConnectionFactory) && !(this.provider instanceof PostgreConnectionFactory)) {
+                    try (Connection connection = this.provider.getConnection()) {
+                        try (Statement s = connection.createStatement()) {
+                            s.execute(this.prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN actor_name VARCHAR(100)"));
+                            s.execute(this.prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN action VARCHAR(300)"));
+                        }
                     }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+
 
         } catch (Exception e) {
             this.plugin.getLog().severe("Error occurred whilst initialising the database.");
