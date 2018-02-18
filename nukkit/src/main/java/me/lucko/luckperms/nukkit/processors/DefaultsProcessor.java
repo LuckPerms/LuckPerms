@@ -28,8 +28,7 @@ package me.lucko.luckperms.nukkit.processors;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
-
-import cn.nukkit.permission.Permission;
+import me.lucko.luckperms.nukkit.model.PermissionDefault;
 
 /**
  * Permission Processor for Nukkits "default" permission system.
@@ -50,10 +49,7 @@ public class DefaultsProcessor implements PermissionProcessor {
             return t;
         }
 
-        Permission defPerm = this.plugin.getPermissionMap().get(permission);
-        return defPerm == null ? Tristate.UNDEFINED : Tristate.fromBoolean(
-                Permission.getByName(defPerm.getDefault()).equals(Permission.DEFAULT_TRUE) ||
-                (Permission.getByName(defPerm.getDefault()).equals(Permission.DEFAULT_OP) && this.isOp)
-        );
+        PermissionDefault def = PermissionDefault.fromPermission(this.plugin.getPermissionMap().get(permission));
+        return def == null ? Tristate.UNDEFINED : Tristate.fromBoolean(def.getValue(this.isOp));
     }
 }

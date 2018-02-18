@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
+import me.lucko.luckperms.nukkit.model.PermissionDefault;
 
 import cn.nukkit.Player;
 import cn.nukkit.permission.PermissibleBase;
@@ -96,7 +97,7 @@ public class LPPermissible extends PermissibleBase {
         }
 
         Tristate ts = this.user.getCachedData().getPermissionData(calculateContexts()).getPermissionValue(permission, CheckOrigin.PLATFORM_LOOKUP_CHECK);
-        return ts != Tristate.UNDEFINED || isOp();
+        return ts != Tristate.UNDEFINED || PermissionDefault.OP.getValue(isOp());
     }
 
     @Override
@@ -111,10 +112,10 @@ public class LPPermissible extends PermissibleBase {
         }
 
         if (!this.plugin.getConfiguration().get(ConfigKeys.APPLY_NUKKIT_DEFAULT_PERMISSIONS)) {
-            return isOp();
+            return PermissionDefault.OP.getValue(isOp());
         } else {
-            return Permission.getByName(permission.getDefault()).equals(Permission.DEFAULT_TRUE) ||
-                    (Permission.getByName(permission.getDefault()).equals(Permission.DEFAULT_OP) && isOp());
+            PermissionDefault def = PermissionDefault.fromPermission(permission);
+            return def != null && def.getValue(isOp());
         }
     }
 
@@ -125,7 +126,7 @@ public class LPPermissible extends PermissibleBase {
         }
 
         Tristate ts = this.user.getCachedData().getPermissionData(calculateContexts()).getPermissionValue(permission, CheckOrigin.PLATFORM_PERMISSION_CHECK);
-        return ts != Tristate.UNDEFINED ? ts.asBoolean() : isOp();
+        return ts != Tristate.UNDEFINED ? ts.asBoolean() : PermissionDefault.OP.getValue(isOp());
     }
 
     @Override
@@ -140,10 +141,10 @@ public class LPPermissible extends PermissibleBase {
         }
 
         if (!this.plugin.getConfiguration().get(ConfigKeys.APPLY_NUKKIT_DEFAULT_PERMISSIONS)) {
-            return isOp();
+            return PermissionDefault.OP.getValue(isOp());
         } else {
-            return Permission.getByName(permission.getDefault()).equals(Permission.DEFAULT_TRUE) ||
-                    (Permission.getByName(permission.getDefault()).equals(Permission.DEFAULT_OP) && isOp());
+            PermissionDefault def = PermissionDefault.fromPermission(permission);
+            return def != null && def.getValue(isOp());
         }
     }
 

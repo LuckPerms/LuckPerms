@@ -34,6 +34,7 @@ import cn.nukkit.plugin.PluginManager;
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Injects a {@link LPSubscriptionMap} into the {@link PluginManager}.
@@ -85,7 +86,7 @@ public class InjectorSubscriptionMap implements Runnable {
         }
 
         //noinspection unchecked
-        Map<String, Map<Permissible, Permissible>> castedMap = (Map<String, Map<Permissible, Permissible>>) map;
+        Map<String, Set<Permissible>> castedMap = (Map<String, Set<Permissible>>) map;
 
         // make a new subscription map & inject it
         LPSubscriptionMap newMap = new LPSubscriptionMap(this.plugin, castedMap);

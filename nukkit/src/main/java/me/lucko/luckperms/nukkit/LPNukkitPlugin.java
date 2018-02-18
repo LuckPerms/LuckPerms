@@ -74,6 +74,7 @@ import me.lucko.luckperms.nukkit.contexts.WorldCalculator;
 import me.lucko.luckperms.nukkit.listeners.NukkitConnectionListener;
 import me.lucko.luckperms.nukkit.listeners.NukkitPlatformListener;
 import me.lucko.luckperms.nukkit.messaging.NukkitMessagingFactory;
+import me.lucko.luckperms.nukkit.model.PermissionDefault;
 import me.lucko.luckperms.nukkit.model.permissible.LPPermissible;
 import me.lucko.luckperms.nukkit.model.permissible.PermissibleInjector;
 import me.lucko.luckperms.nukkit.model.permissible.PermissibleMonitoringInjector;
@@ -223,7 +224,7 @@ public class LPNukkitPlugin extends PluginBase implements LuckPermsPlugin {
 
         // inject our own custom permission maps
         Runnable[] injectors = new Runnable[]{
-                // TODO new InjectorSubscriptionMap(this),
+                new InjectorSubscriptionMap(this),
                 new InjectorPermissionMap(this),
                 new InjectorDefaultsMap(this)
         };
@@ -273,10 +274,10 @@ public class LPNukkitPlugin extends PluginBase implements LuckPermsPlugin {
         // register permissions
         try {
             PluginManager pm = getServer().getPluginManager();
-            String permDefault = getConfiguration().get(ConfigKeys.COMMANDS_ALLOW_OP) ? Permission.DEFAULT_OP : Permission.DEFAULT_FALSE;
+            PermissionDefault permDefault = getConfiguration().get(ConfigKeys.COMMANDS_ALLOW_OP) ? PermissionDefault.OP : PermissionDefault.FALSE;
 
             for (CommandPermission p : CommandPermission.values()) {
-                pm.addPermission(new Permission(p.getPermission(), null, permDefault));
+                pm.addPermission(new Permission(p.getPermission(), null, permDefault.toString()));
             }
         } catch (Exception e) {
             // this throws an exception if the plugin is /reloaded, grr

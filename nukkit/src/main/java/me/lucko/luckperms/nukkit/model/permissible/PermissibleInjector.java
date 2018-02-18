@@ -32,7 +32,7 @@ import cn.nukkit.permission.PermissibleBase;
 import cn.nukkit.permission.PermissionAttachment;
 
 import java.lang.reflect.Field;
-import java.util.List;
+import java.util.Set;
 
 /**
  * Injects a {@link LPPermissible} into a {@link Player}.
@@ -89,7 +89,7 @@ public final class PermissibleInjector {
         // Move attachments over from the old permissible
 
         //noinspection unchecked
-        List<PermissionAttachment> attachments = (List<PermissionAttachment>) PERMISSIBLE_BASE_ATTACHMENTS_FIELD.get(oldPermissible);
+        Set<PermissionAttachment> attachments = (Set<PermissionAttachment>) PERMISSIBLE_BASE_ATTACHMENTS_FIELD.get(oldPermissible);
 
         newPermissible.convertAndAddAttachments(attachments);
         attachments.clear();

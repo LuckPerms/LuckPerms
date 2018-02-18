@@ -37,8 +37,8 @@ import cn.nukkit.Player;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
+import cn.nukkit.event.player.PlayerAsyncPreLoginEvent;
 import cn.nukkit.event.player.PlayerLoginEvent;
-import cn.nukkit.event.player.PlayerPreLoginEvent;
 import cn.nukkit.event.player.PlayerQuitEvent;
 
 import java.util.Collections;
@@ -59,7 +59,7 @@ public class NukkitConnectionListener extends AbstractLoginListener implements L
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    public void onPlayerPreLogin(PlayerPreLoginEvent e) {
+    public void onPlayerPreLogin(PlayerAsyncPreLoginEvent e) {
         /* Called when the player first attempts a connection with the server.
            Listening on LOW priority to allow plugins to modify username / UUID data here. (auth plugins) */
 
@@ -71,14 +71,11 @@ public class NukkitConnectionListener extends AbstractLoginListener implements L
             ex.printStackTrace();
         }
 
-        UUID uniqueId = e.getPlayer().getUniqueId();
-        String name = e.getPlayer().getName();
-
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
-            this.plugin.getLog().info("Processing pre-login for " + uniqueId + " - " + name);
+            this.plugin.getLog().info("Processing pre-login for " + e.getUuid() + " - " + e.getName());
         }
 
-        this.plugin.getUniqueConnections().add(uniqueId);
+        this.plugin.getUniqueConnections().add(e.getUuid());
 
         /* Actually process the login for the connection.
            We do this here to delay the login until the data is ready.
@@ -90,32 +87,31 @@ public class NukkitConnectionListener extends AbstractLoginListener implements L
            - creating a user instance in the UserManager for this connection.
            - setting up cached data. */
         try {
-            User user = loadUser(uniqueId, name);
-            this.plugin.getEventFactory().handleUserLoginProcess(uniqueId, name, user);
+            User user = loadUser(e.getUuid(), e.getName());
+            this.plugin.getEventFactory().handleUserLoginProcess(e.getUuid(), e.getName(), user);
         } catch (Exception ex) {
-            this.plugin.getLog().severe("Exception occurred whilst loading data for " + uniqueId + " - " + name);
+            this.plugin.getLog().severe("Exception occurred whilst loading data for " + e.getUuid() + " - " + e.getName());
             ex.printStackTrace();
 
             // deny the connection
-            this.deniedAsyncLogin.add(uniqueId);
-            e.setCancelled();
-            e.setKickMessage(Message.LOADING_ERROR.asString(this.plugin.getLocaleManager()));
+            this.deniedAsyncLogin.add(e.getUuid());
+            e.disAllow(Message.LOADING_ERROR.asString(this.plugin.getLocaleManager()));
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerPreLoginMonitor(PlayerPreLoginEvent e) {
+    public void onPlayerPreLoginMonitor(PlayerAsyncPreLoginEvent e) {
         /* Listen to see if the event was cancelled after we initially handled the connection
            If the connection was cancelled here, we need to do something to clean up the data that was loaded. */
 
         // Check to see if this connection was denied at LOW.
-        if (this.deniedAsyncLogin.remove(e.getPlayer().getUniqueId())) {
+        if (this.deniedAsyncLogin.remove(e.getUuid())) {
             // their data was never loaded at LOW priority, now check to see if they have been magically allowed since then.
 
             // This is a problem, as they were denied at low priority, but are now being allowed.
-            if (!e.isCancelled()) {
-                this.plugin.getLog().severe("Player connection was re-allowed for " + e.getPlayer().getUniqueId());
-                e.setCancelled();
+            if (e.getLoginResult() == PlayerAsyncPreLoginEvent.LoginResult.SUCCESS) {
+                this.plugin.getLog().severe("Player connection was re-allowed for " + e.getUuid());
+                e.disAllow("");
             }
         }
     }
