@@ -121,7 +121,8 @@ public class LPPermissible extends PermissibleBase {
     @Override
     public boolean hasPermission(String permission) {
         if (permission == null) {
-            throw new NullPointerException("permission");
+            //Nukkit checks for a null permission on player login for some reason
+            //throw new NullPointerException("permission");
         }
 
         Tristate ts = this.user.getCachedData().getPermissionData(calculateContexts()).getPermissionValue(permission, CheckOrigin.PLATFORM_PERMISSION_CHECK);

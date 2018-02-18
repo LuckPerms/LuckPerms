@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.nukkit.listeners;
 
+import cn.nukkit.scheduler.AsyncTask;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
@@ -60,47 +61,53 @@ public class NukkitConnectionListener extends AbstractLoginListener implements L
 
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerPreLogin(PlayerPreLoginEvent e) {
-        /* Called when the player first attempts a connection with the server.
-           Listening on LOW priority to allow plugins to modify username / UUID data here. (auth plugins) */
+        //This must be ran Async
+        plugin.getServer().getScheduler().scheduleAsyncTask(plugin, new AsyncTask() {
+            @Override
+            public void onRun() {
+                /* Called when the player first attempts a connection with the server.
+                   Listening on LOW priority to allow plugins to modify username / UUID data here. (auth plugins) */
 
-        /* wait for the plugin to enable. because these events are fired async, they can be called before
-           the plugin has enabled.  */
-        try {
-            this.plugin.getEnableLatch().await(60, TimeUnit.SECONDS);
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        }
+                /* wait for the plugin to enable. because these events are fired async, they can be called before
+                   the plugin has enabled.  */
+                try {
+                    plugin.getEnableLatch().await(60, TimeUnit.SECONDS);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
 
-        UUID uniqueId = e.getPlayer().getUniqueId();
-        String name = e.getPlayer().getName();
+                UUID uniqueId = e.getPlayer().getUniqueId();
+                String name = e.getPlayer().getName();
 
-        if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
-            this.plugin.getLog().info("Processing pre-login for " + uniqueId + " - " + name);
-        }
+                if (plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
+                    plugin.getLog().info("Processing pre-login for " + uniqueId + " - " + name);
+                }
 
-        this.plugin.getUniqueConnections().add(uniqueId);
+                plugin.getUniqueConnections().add(uniqueId);
 
-        /* Actually process the login for the connection.
-           We do this here to delay the login until the data is ready.
-           If the login gets cancelled later on, then this will be cleaned up.
+                /* Actually process the login for the connection.
+                   We do this here to delay the login until the data is ready.
+                   If the login gets cancelled later on, then this will be cleaned up.
 
-           This includes:
-           - loading uuid data
-           - loading permissions
-           - creating a user instance in the UserManager for this connection.
-           - setting up cached data. */
-        try {
-            User user = loadUser(uniqueId, name);
-            this.plugin.getEventFactory().handleUserLoginProcess(uniqueId, name, user);
-        } catch (Exception ex) {
-            this.plugin.getLog().severe("Exception occurred whilst loading data for " + uniqueId + " - " + name);
-            ex.printStackTrace();
+                   This includes:
+                   - loading uuid data
+                   - loading permissions
+                   - creating a user instance in the UserManager for this connection.
+                   - setting up cached data. */
+                try {
+                    User user = loadUser(uniqueId, name);
+                    plugin.getEventFactory().handleUserLoginProcess(uniqueId, name, user);
+                } catch (Exception ex) {
+                    plugin.getLog().severe("Exception occurred whilst loading data for " + uniqueId + " - " + name);
+                    ex.printStackTrace();
 
-            // deny the connection
-            this.deniedAsyncLogin.add(uniqueId);
-            e.setCancelled();
-            e.setKickMessage(Message.LOADING_ERROR.asString(this.plugin.getLocaleManager()));
-        }
+                    // deny the connection
+                    deniedAsyncLogin.add(uniqueId);
+                    e.setCancelled();
+                    e.setKickMessage(Message.LOADING_ERROR.asString(plugin.getLocaleManager()));
+                }
+            }
+        });
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
