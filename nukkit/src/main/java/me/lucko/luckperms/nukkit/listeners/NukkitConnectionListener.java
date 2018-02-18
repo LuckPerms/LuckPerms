@@ -45,7 +45,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 public class NukkitConnectionListener extends AbstractLoginListener implements Listener {
     private final LPNukkitPlugin plugin;
@@ -62,14 +61,6 @@ public class NukkitConnectionListener extends AbstractLoginListener implements L
     public void onPlayerPreLogin(PlayerAsyncPreLoginEvent e) {
         /* Called when the player first attempts a connection with the server.
            Listening on LOW priority to allow plugins to modify username / UUID data here. (auth plugins) */
-
-        /* wait for the plugin to enable. because these events are fired async, they can be called before
-           the plugin has enabled.  */
-        try {
-            this.plugin.getEnableLatch().await(60, TimeUnit.SECONDS);
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        }
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
             this.plugin.getLog().info("Processing pre-login for " + e.getUuid() + " - " + e.getName());

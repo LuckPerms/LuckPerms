@@ -33,7 +33,6 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
-import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginManager;
 
 import java.util.Collection;
@@ -56,7 +55,7 @@ import javax.annotation.Nonnull;
  *
  * Bukkit for some reason sometimes uses subscription status to determine whether
  * a permissible has a given node, instead of checking directly with
- * {@link Permissible#hasPermission(Permission)}.
+ * {@link Permissible#hasPermission(String)}.
  *
  * {@link org.bukkit.Server#broadcast(String, String)} is a good example of this.
  *
@@ -68,7 +67,7 @@ import javax.annotation.Nonnull;
  *
  * Injected by {@link InjectorSubscriptionMap}.
  */
-public class LPSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>> {
+public final class LPSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>> {
 
     // the plugin instance
     final LPBukkitPlugin plugin;
@@ -151,7 +150,7 @@ public class LPSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>
     /**
      * Value map extension which includes LP objects in Permissible related queries.
      */
-    public class LPSubscriptionValueMap implements Map<Permissible, Boolean> {
+    public final class LPSubscriptionValueMap implements Map<Permissible, Boolean> {
 
         // the permission being mapped to this value map
         private final String permission;
@@ -159,7 +158,7 @@ public class LPSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>
         // the backing map
         private final Map<Permissible, Boolean> backing;
 
-        public LPSubscriptionValueMap(String permission, Map<Permissible, Boolean> backing) {
+        private LPSubscriptionValueMap(String permission, Map<Permissible, Boolean> backing) {
             this.permission = permission;
             this.backing = backing;
         }
@@ -235,6 +234,11 @@ public class LPSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>
             return false;
         }
 
+        @Override
+        public int size() {
+            return Math.max(1, this.backing.size());
+        }
+
         // just delegate to the backing map
 
         @Override
@@ -245,13 +249,6 @@ public class LPSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>
         @Override
         public Boolean remove(Object key) {
             return this.backing.remove(key);
-        }
-
-        // the following methods are not used in the current impls of PluginManager, but just delegate them for now
-
-        @Override
-        public int size() {
-            return this.backing.size();
         }
 
         @Override

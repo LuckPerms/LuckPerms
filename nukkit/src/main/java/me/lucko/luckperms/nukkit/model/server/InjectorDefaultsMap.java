@@ -107,8 +107,8 @@ public class InjectorDefaultsMap implements Runnable {
 
         // make a new map & inject it
         LPDefaultsMap newMap = new LPDefaultsMap(this.plugin, ImmutableMap.of(true, castedOpMap, false, castedNonOpMap));
-        OP_DEFAULT_PERMISSIONS_FIELD.set(pluginManager, newMap.get(true));
-        NON_OP_DEFAULT_PERMISSIONS_FIELD.set(pluginManager, newMap.get(false));
+        OP_DEFAULT_PERMISSIONS_FIELD.set(pluginManager, newMap.getOpPermissions());
+        NON_OP_DEFAULT_PERMISSIONS_FIELD.set(pluginManager, newMap.getNonOpPermissions());
         return newMap;
     }
 

@@ -55,7 +55,7 @@ import javax.annotation.Nonnull;
  *
  * Injected by {@link InjectorDefaultsMap}.
  */
-public class LPDefaultsMap implements Map<Boolean, Set<Permission>> {
+public final class LPDefaultsMap implements Map<Boolean, Set<Permission>> {
     // keyset for all instances
     private static final Set<Boolean> KEY_SET = ImmutableSet.of(Boolean.TRUE, Boolean.FALSE);
 

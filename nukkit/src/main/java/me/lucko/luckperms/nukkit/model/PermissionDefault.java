@@ -36,10 +36,30 @@ import javax.annotation.Nullable;
  * Represents the possible default values for permissions
  */
 public enum PermissionDefault {
-    TRUE("true"),
-    FALSE("false"),
-    OP("op", "isop", "operator", "isoperator", "admin", "isadmin"),
-    NOT_OP("!op", "notop", "!operator", "notoperator", "!admin", "notadmin");
+    TRUE("true") {
+        @Override
+        public boolean getValue(boolean op) {
+            return true;
+        }
+    },
+    FALSE("false") {
+        @Override
+        public boolean getValue(boolean op) {
+            return false;
+        }
+    },
+    OP("op", "isop", "operator", "isoperator", "admin", "isadmin") {
+        @Override
+        public boolean getValue(boolean op) {
+            return op;
+        }
+    },
+    NOT_OP("!op", "notop", "!operator", "notoperator", "!admin", "notadmin") {
+        @Override
+        public boolean getValue(boolean op) {
+            return !op;
+        }
+    };
 
     private final String[] names;
     private static final Map<String, PermissionDefault> LOOKUP = new HashMap<>();
@@ -55,20 +75,7 @@ public enum PermissionDefault {
      * @param op If the target is op
      * @return True if the default should be true, or false
      */
-    public boolean getValue(boolean op) {
-        switch (this) {
-            case TRUE:
-                return true;
-            case FALSE:
-                return false;
-            case OP:
-                return op;
-            case NOT_OP:
-                return !op;
-            default:
-                return false;
-        }
-    }
+    public abstract boolean getValue(boolean op);
 
     /**
      * Looks up a PermissionDefault by name
@@ -78,7 +85,7 @@ public enum PermissionDefault {
      */
     @Nullable
     public static PermissionDefault getByName(String name) {
-        return LOOKUP.get(name.toLowerCase(java.util.Locale.ENGLISH).replaceAll("[^a-z!]", ""));
+        return LOOKUP.get(name.toLowerCase().replaceAll("[^a-z!]", ""));
     }
 
     @Nullable

@@ -46,9 +46,9 @@ public final class PermissibleInjector {
      * All permission checks made on standard Nukkit objects are effectively proxied to a
      * {@link PermissibleBase} object, held as a variable on the object.
      *
-     * This field is where the permissible is stored on a HumanEntity.
+     * This field is where the permissible is stored on a Player.
      */
-    private static final Field HUMAN_ENTITY_PERMISSIBLE_FIELD;
+    private static final Field PLAYER_PERMISSIBLE_FIELD;
 
     /**
      * The field where attachments are stored on a permissible base.
@@ -58,8 +58,8 @@ public final class PermissibleInjector {
     static {
         try {
             // Try to load the permissible field.
-            HUMAN_ENTITY_PERMISSIBLE_FIELD = Player.class.getDeclaredField("perm");
-            HUMAN_ENTITY_PERMISSIBLE_FIELD.setAccessible(true);
+            PLAYER_PERMISSIBLE_FIELD = Player.class.getDeclaredField("perm");
+            PLAYER_PERMISSIBLE_FIELD.setAccessible(true);
 
             // Try to load the attachments field.
             PERMISSIBLE_BASE_ATTACHMENTS_FIELD = PermissibleBase.class.getDeclaredField("attachments");
@@ -79,7 +79,7 @@ public final class PermissibleInjector {
     public static void inject(Player player, LPPermissible newPermissible) throws Exception {
 
         // get the existing PermissibleBase held by the player
-        PermissibleBase oldPermissible = (PermissibleBase) HUMAN_ENTITY_PERMISSIBLE_FIELD.get(player);
+        PermissibleBase oldPermissible = (PermissibleBase) PLAYER_PERMISSIBLE_FIELD.get(player);
 
         // seems we have already injected into this player.
         if (oldPermissible instanceof LPPermissible) {
@@ -100,7 +100,7 @@ public final class PermissibleInjector {
         newPermissible.setOldPermissible(oldPermissible);
 
         // inject the new instance
-        HUMAN_ENTITY_PERMISSIBLE_FIELD.set(player, newPermissible);
+        PLAYER_PERMISSIBLE_FIELD.set(player, newPermissible);
     }
 
     /**
@@ -113,7 +113,7 @@ public final class PermissibleInjector {
     public static void unInject(Player player, boolean dummy) throws Exception {
 
         // gets the players current permissible.
-        PermissibleBase permissible = (PermissibleBase) HUMAN_ENTITY_PERMISSIBLE_FIELD.get(player);
+        PermissibleBase permissible = (PermissibleBase) PLAYER_PERMISSIBLE_FIELD.get(player);
 
         // only uninject if the permissible was a luckperms one.
         if (permissible instanceof LPPermissible) {
@@ -128,7 +128,7 @@ public final class PermissibleInjector {
             // handle the replacement permissible.
             if (dummy) {
                 // just inject a dummy class. this is used when we know the player is about to quit the server.
-                HUMAN_ENTITY_PERMISSIBLE_FIELD.set(player, DummyPermissibleBase.INSTANCE);
+                PLAYER_PERMISSIBLE_FIELD.set(player, DummyPermissibleBase.INSTANCE);
 
             } else {
                 PermissibleBase newPb = lpPermissible.getOldPermissible();
@@ -136,7 +136,7 @@ public final class PermissibleInjector {
                     newPb = new PermissibleBase(player);
                 }
 
-                HUMAN_ENTITY_PERMISSIBLE_FIELD.set(player, newPb);
+                PLAYER_PERMISSIBLE_FIELD.set(player, newPb);
             }
         }
     }

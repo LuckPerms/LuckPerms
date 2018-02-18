@@ -57,6 +57,7 @@ import me.lucko.luckperms.common.managers.group.StandardGroupManager;
 import me.lucko.luckperms.common.managers.track.StandardTrackManager;
 import me.lucko.luckperms.common.managers.user.StandardUserManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.messaging.MessagingFactory;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.Storage;
@@ -73,7 +74,6 @@ import me.lucko.luckperms.nukkit.contexts.NukkitContextManager;
 import me.lucko.luckperms.nukkit.contexts.WorldCalculator;
 import me.lucko.luckperms.nukkit.listeners.NukkitConnectionListener;
 import me.lucko.luckperms.nukkit.listeners.NukkitPlatformListener;
-import me.lucko.luckperms.nukkit.messaging.NukkitMessagingFactory;
 import me.lucko.luckperms.nukkit.model.PermissionDefault;
 import me.lucko.luckperms.nukkit.model.permissible.LPPermissible;
 import me.lucko.luckperms.nukkit.model.permissible.PermissibleInjector;
@@ -92,6 +92,7 @@ import cn.nukkit.permission.Permission;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.plugin.service.ServicePriority;
+import cn.nukkit.utils.Config;
 
 import java.io.File;
 import java.io.InputStream;
@@ -100,7 +101,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
@@ -134,7 +134,6 @@ public class LPNukkitPlugin extends PluginBase implements LuckPermsPlugin {
     private ContextManager<Player> contextManager;
     private CalculatorFactory calculatorFactory;
     private BufferedRequest<Void> updateTaskBuffer;
-    private CountDownLatch enableLatch = new CountDownLatch(1);
     private VerboseHandler verboseHandler;
     private NukkitSenderFactory senderFactory;
     private PermissionVault permissionVault;
@@ -156,16 +155,6 @@ public class LPNukkitPlugin extends PluginBase implements LuckPermsPlugin {
 
     @Override
     public void onEnable() {
-        try {
-            enable();
-        } finally {
-            // count down the latch when onEnable has been called
-            // we don't care about the result here
-            this.enableLatch.countDown();
-        }
-    }
-
-    private void enable() {
         this.startTime = System.currentTimeMillis();
         sendStartupBanner(getConsoleSender());
         this.verboseHandler = new VerboseHandler(this.scheduler.asyncNukkit(), getVersion());
@@ -194,7 +183,7 @@ public class LPNukkitPlugin extends PluginBase implements LuckPermsPlugin {
         this.storage = storageFactory.getInstance(StorageType.H2);
 
         // initialise messaging
-        this.messagingService = new NukkitMessagingFactory(this).getInstance();
+        this.messagingService = new MessagingFactory<>(this).getInstance();
 
         // setup the update task buffer
         this.updateTaskBuffer = new UpdateTaskBuffer(this);
@@ -283,9 +272,10 @@ public class LPNukkitPlugin extends PluginBase implements LuckPermsPlugin {
             // this throws an exception if the plugin is /reloaded, grr
         }
 
-        // if (!getConfiguration().get(ConfigKeys.OPS_ENABLED)) {
-        //     this.scheduler.doSync(() -> getServer().getOperators().forEach(o -> o.setOp(false)));
-        // }
+        if (!getConfiguration().get(ConfigKeys.OPS_ENABLED)) {
+            Config ops = getServer().getOps();
+            ops.getKeys(false).forEach(ops::remove);
+        }
 
         // replace the temporary executor when the Nukkit one starts
         getServer().getScheduler().scheduleTask(this, () -> this.scheduler.setUseFallback(false), true);
@@ -616,10 +606,6 @@ public class LPNukkitPlugin extends PluginBase implements LuckPermsPlugin {
     @Override
     public BufferedRequest<Void> getUpdateTaskBuffer() {
         return this.updateTaskBuffer;
-    }
-
-    public CountDownLatch getEnableLatch() {
-        return this.enableLatch;
     }
 
     @Override

@@ -61,7 +61,7 @@ import java.util.stream.Collectors;
  *
  * Injected by {@link InjectorSubscriptionMap}.
  */
-public class LPSubscriptionMap extends HashMap<String, Set<Permissible>> {
+public final class LPSubscriptionMap extends HashMap<String, Set<Permissible>> {
 
     // the plugin instance
     final LPNukkitPlugin plugin;
@@ -154,7 +154,7 @@ public class LPSubscriptionMap extends HashMap<String, Set<Permissible>> {
         // the backing map
         private final Set<Permissible> backing;
 
-        public LPSubscriptionValueSet(String permission, Set<Permissible> content) {
+        private LPSubscriptionValueSet(String permission, Set<Permissible> content) {
             this.permission = permission;
             this.backing = Collections.newSetFromMap(new WeakHashMap<>());
             
@@ -163,7 +163,7 @@ public class LPSubscriptionMap extends HashMap<String, Set<Permissible>> {
             }
         }
 
-        public LPSubscriptionValueSet(String permission) {
+        private LPSubscriptionValueSet(String permission) {
             this(permission, null);
         }
 

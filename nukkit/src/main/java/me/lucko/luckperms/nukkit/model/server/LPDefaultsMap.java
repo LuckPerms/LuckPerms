@@ -26,10 +26,7 @@
 package me.lucko.luckperms.nukkit.model.server;
 
 import com.google.common.collect.ForwardingMap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
@@ -37,14 +34,10 @@ import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import cn.nukkit.permission.Permission;
 import cn.nukkit.plugin.PluginManager;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.Nonnull;
 
 /**
  * A replacement map for the 'defaultPerms' instance in Nukkit's SimplePluginManager.
@@ -55,9 +48,7 @@ import javax.annotation.Nonnull;
  *
  * Injected by {@link InjectorDefaultsMap}.
  */
-public class LPDefaultsMap implements Map<Boolean, Map<String, Permission>> {
-    // keyset for all instances
-    private static final Set<Boolean> KEY_SET = ImmutableSet.of(Boolean.TRUE, Boolean.FALSE);
+public final class LPDefaultsMap {
 
     // the plugin
     final LPNukkitPlugin plugin;
@@ -69,13 +60,6 @@ public class LPDefaultsMap implements Map<Boolean, Map<String, Permission>> {
     // fully resolved defaults (accounts for child permissions too)
     private Map<String, Boolean> resolvedOpDefaults = ImmutableMap.of();
     private Map<String, Boolean> resolvedNonOpDefaults = ImmutableMap.of();
-
-    // #values and #entrySet results - both immutable
-    private final Collection<Map<String, Permission>> values = ImmutableList.of(this.opSet, this.nonOpSet);
-    private final Set<Entry<Boolean, Map<String, Permission>>> entrySet = ImmutableSet.of(
-            Maps.immutableEntry(Boolean.TRUE, this.opSet),
-            Maps.immutableEntry(Boolean.FALSE, this.nonOpSet)
-    );
 
     public LPDefaultsMap(LPNukkitPlugin plugin, Map<Boolean, Map<String, Permission>> existingData) {
         this.plugin = plugin;
@@ -142,29 +126,6 @@ public class LPDefaultsMap implements Map<Boolean, Map<String, Permission>> {
         }
         this.resolvedNonOpDefaults = ImmutableMap.copyOf(builder);
     }
-
-    @Override
-    public Map<String, Permission> get(Object key) {
-        boolean b = (boolean) key;
-        return b ? this.opSet : this.nonOpSet;
-    }
-
-    // return wrappers around this map impl
-    @Nonnull @Override public Collection<Map<String, Permission>> values() { return this.values; }
-    @Nonnull @Override public Set<Entry<Boolean, Map<String, Permission>>> entrySet() { return this.entrySet; }
-    @Nonnull @Override public Set<Boolean> keySet() { return KEY_SET; }
-
-    // return accurate results for the Map spec
-    @Override public int size() { return 2; }
-    @Override public boolean isEmpty() { return false; }
-    @Override public boolean containsKey(Object key) { return key instanceof Boolean; }
-    @Override public boolean containsValue(Object value) { return value == this.opSet || value == this.nonOpSet; }
-
-    // throw unsupported operation exceptions
-    @Override public Map<String, Permission> put(Boolean key, Map<String, Permission> value) { throw new UnsupportedOperationException(); }
-    @Override public Map<String, Permission> remove(Object key) { throw new UnsupportedOperationException(); }
-    @Override public void putAll(@Nonnull Map<? extends Boolean, ? extends Map<String, Permission>> m) { throw new UnsupportedOperationException(); }
-    @Override public void clear() { throw new UnsupportedOperationException(); }
 
     final class DefaultPermissionSet extends ForwardingMap<String, Permission> {
         final LPDefaultsMap parent = LPDefaultsMap.this;

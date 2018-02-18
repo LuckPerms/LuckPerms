@@ -56,7 +56,7 @@ import javax.annotation.Nonnull;
  *
  * Injected by {@link InjectorPermissionMap}.
  */
-public class LPPermissionMap extends ForwardingMap<String, Permission> {
+public final class LPPermissionMap extends ForwardingMap<String, Permission> {
 
     // Uses perm.getName().toLowerCase(java.util.Locale.ENGLISH); to determine the key
     private final Map<String, Permission> delegate = new ConcurrentHashMap<>();
