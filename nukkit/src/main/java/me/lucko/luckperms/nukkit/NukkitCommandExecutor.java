@@ -23,35 +23,37 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.platform;
+package me.lucko.luckperms.nukkit;
 
-import javax.annotation.Nonnull;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 
-/**
- * Represents a type of platform which LuckPerms can run on.
- *
- * @since 2.7
- */
-public enum PlatformType {
+import me.lucko.luckperms.common.commands.CommandManager;
+import me.lucko.luckperms.common.commands.sender.Sender;
 
-    BUKKIT("Bukkit"),
-    BUNGEE("Bungee"),
-    SPONGE("Sponge"),
-    NUKKIT("Nukkit");
+import cn.nukkit.command.Command;
+import cn.nukkit.command.CommandExecutor;
+import cn.nukkit.command.CommandSender;
 
-    private final String friendlyName;
+import java.util.List;
 
-    PlatformType(String friendlyName) {
-        this.friendlyName = friendlyName;
+public class NukkitCommandExecutor extends CommandManager implements CommandExecutor {
+    private static final Splitter ARGUMENT_SPLITTER = Splitter.on(COMMAND_SEPARATOR_PATTERN).omitEmptyStrings();
+    private static final Joiner ARGUMENT_JOINER = Joiner.on(' ');
+
+    private final LPNukkitPlugin plugin;
+
+    NukkitCommandExecutor(LPNukkitPlugin plugin) {
+        super(plugin);
+        this.plugin = plugin;
     }
 
-    /**
-     * Gets a readable name for the platform type.
-     *
-     * @return a readable name
-     */
-    @Nonnull
-    public String getFriendlyName() {
-        return this.friendlyName;
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        Sender lpSender = this.plugin.getSenderFactory().wrap(sender);
+        List<String> arguments = stripQuotes(ARGUMENT_SPLITTER.splitToList(ARGUMENT_JOINER.join(args)));
+
+        onCommand(lpSender, label, arguments);
+        return true;
     }
 }

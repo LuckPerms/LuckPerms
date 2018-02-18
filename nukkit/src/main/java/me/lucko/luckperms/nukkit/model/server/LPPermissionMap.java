@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.model.server;
+package me.lucko.luckperms.nukkit.model.server;
 
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -34,8 +34,8 @@ import com.google.common.collect.ImmutableMap;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 
-import org.bukkit.permissions.Permission;
-import org.bukkit.plugin.PluginManager;
+import cn.nukkit.permission.Permission;
+import cn.nukkit.plugin.PluginManager;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -46,7 +46,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 /**
- * A replacement map for the 'permissions' instance in Bukkit's SimplePluginManager.
+ * A replacement map for the 'permissions' instance in Nukkit's SimplePluginManager.
  *
  * This instance allows LuckPerms to intercept calls to
  * {@link PluginManager#addPermission(Permission)} and record permissions in the
@@ -140,7 +140,7 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
                 continue; // Prevent infinite loops
             }
 
-            // xor the value using the parent (bukkit logic, not mine)
+            // xor the value using the parent (nukkit logic, not mine)
             boolean value = e.getValue() ^ invert;
             accumulator.put(e.getKey().toLowerCase(), value);
 

@@ -9,12 +9,12 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>luckperms-sponge</artifactId>
+    <artifactId>luckperms-nukkit</artifactId>
     <packaging>jar</packaging>
 
     <build>
         <defaultGoal>clean package</defaultGoal>
-        <finalName>LuckPerms-Sponge-${full.version}</finalName>
+        <finalName>LuckPerms-Nukkit-${full.version}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -96,21 +96,16 @@
                                     <pattern>org.apache.commons.pool2</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.commonspool2</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>ninja.leaping.configurate</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.configurate</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.typesafe.config</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.hocon</shadedPattern>
+                                </relocation>
                             </relocations>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>templating-maven-plugin</artifactId>
-                <version>1.0.0</version>
-                <executions>
-                    <execution>
-                        <id>filter-src</id>
-                        <goals>
-                            <goal>filter-sources</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -126,41 +121,35 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- sponge service model -->
+        <!-- jsr305 -->
         <dependency>
-            <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-sponge-service</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- api6 proxy -->
-        <dependency>
-            <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-sponge-service-api6</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- api7 proxy -->
-        <dependency>
-            <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-sponge-service-api7</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+            <scope>provided</scope>
         </dependency>
 
-        <!-- Sponge -->
+        <!-- caffeine -->
         <dependency>
-            <groupId>org.spongepowered</groupId>
-            <artifactId>spongeapi</artifactId>
-            <version>6.0.0</version>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>2.6.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Nukkit -->
+        <dependency>
+            <groupId>cn.nukkit</groupId>
+            <artifactId>nukkit</artifactId>
+            <version>1.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
 
     <repositories>
         <repository>
-            <id>sponge-repo</id>
-            <url>https://repo.spongepowered.org/maven</url>
+            <id>nukkit-repo</id>
+            <url>https://repo.potestas.xyz/main/</url>
         </repository>
     </repositories>
 

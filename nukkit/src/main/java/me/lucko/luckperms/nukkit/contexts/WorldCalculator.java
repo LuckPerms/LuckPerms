@@ -23,35 +23,34 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.platform;
+package me.lucko.luckperms.nukkit.contexts;
+
+import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.context.ContextCalculator;
+import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+
+import cn.nukkit.Player;
 
 import javax.annotation.Nonnull;
 
-/**
- * Represents a type of platform which LuckPerms can run on.
- *
- * @since 2.7
- */
-public enum PlatformType {
+public class WorldCalculator implements ContextCalculator<Player> {
+    private final LuckPermsPlugin plugin;
 
-    BUKKIT("Bukkit"),
-    BUNGEE("Bungee"),
-    SPONGE("Sponge"),
-    NUKKIT("Nukkit");
-
-    private final String friendlyName;
-
-    PlatformType(String friendlyName) {
-        this.friendlyName = friendlyName;
+    public WorldCalculator(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
     }
 
-    /**
-     * Gets a readable name for the platform type.
-     *
-     * @return a readable name
-     */
     @Nonnull
-    public String getFriendlyName() {
-        return this.friendlyName;
+    @Override
+    public MutableContextSet giveApplicableContext(@Nonnull Player subject, @Nonnull MutableContextSet accumulator) {
+        String world = subject.getLevel().getName().toLowerCase();
+        while (!accumulator.has(Contexts.WORLD_KEY, world)) {
+            accumulator.add(Contexts.WORLD_KEY, world);
+            world = this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(world, world).toLowerCase();
+        }
+
+        return accumulator;
     }
 }
