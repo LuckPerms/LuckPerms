@@ -78,19 +78,19 @@ public class MongoDao extends AbstractDao {
     private MongoClient mongoClient;
     private MongoDatabase database;
     private final String prefix;
-    private final String connectionURI;
+    private final String connectionUri;
 
-    public MongoDao(LuckPermsPlugin plugin, StorageCredentials configuration, String prefix, String connectionURI) {
+    public MongoDao(LuckPermsPlugin plugin, StorageCredentials configuration, String prefix, String connectionUri) {
         super(plugin, "MongoDB");
         this.configuration = configuration;
         this.prefix = prefix;
-        this.connectionURI = connectionURI;
+        this.connectionUri = connectionUri;
     }
 
     @Override
     public void init() {
-        if (!Strings.isNullOrempty(this.connectionURI)) {
-            this.mongoClient = new MongoClient(new MongoClientURI(this.connectionURI));
+        if (!Strings.isNullOrEmpty(this.connectionUri)) {
+            this.mongoClient = new MongoClient(new MongoClientURI(this.connectionUri));
         } else {
             MongoCredential credential = null;
             if (!Strings.isNullOrEmpty(this.configuration.getUsername())) {

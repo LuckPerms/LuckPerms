@@ -404,12 +404,12 @@ public class ConfigKeys {
      * The prefix for any MongoDB collections
      */
     public static final ConfigKey<String> MONGODB_COLLECTION_PREFIX = EnduringKey.wrap(StringKey.of("data.mongodb_collection_prefix", ""));
-       
+
     /**
      * MongoDB ClientConnectionURI to override default connection options
      */
     public static final ConfigKey<String> MONGODB_CONNECTION_URI = EnduringKey.wrap(StringKey.of("data.mongodb_connection_URI", ""));
-    
+
     /**
      * The name of the storage method being used
      */
