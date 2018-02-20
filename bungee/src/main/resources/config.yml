@@ -271,8 +271,8 @@ data:
   # collections for different servers. The default is no prefix.
   mongodb_collection_prefix: ''
   
-  #MongoDB ClientConnectionURI for use with replicasets and custom connection options
-  #See https://docs.mongodb.com/manual/reference/connection-string/
+  # MongoDB ClientConnectionURI for use with replicasets and custom connection options
+  # See https://docs.mongodb.com/manual/reference/connection-string/
   mongodb_connection_URI: ''
 
   # This option controls how frequently LuckPerms will perform a sync task.
