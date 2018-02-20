@@ -328,6 +328,10 @@ data:
   # The prefix to use for all LuckPerms collections. Change this if you want to use different
   # collections for different servers. The default is no prefix.
   mongodb_collection_prefix: ''
+  
+  #MongoDB ClientConnectionURI for use with replicasets and custom connection options
+  #See https://docs.mongodb.com/manual/reference/connection-string/
+  mongodb_connection_URI: ''
 
   # This option controls how frequently LuckPerms will perform a sync task.
   # A sync task will refresh all data from the storage, and ensure that the most up-to-date data is
