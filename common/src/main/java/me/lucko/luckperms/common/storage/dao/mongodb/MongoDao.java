@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.storage.dao.mongodb;
 import com.google.common.base.Strings;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoClientURI;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
@@ -77,35 +78,41 @@ public class MongoDao extends AbstractDao {
     private MongoClient mongoClient;
     private MongoDatabase database;
     private final String prefix;
+    private final String connectionURI;
 
-    public MongoDao(LuckPermsPlugin plugin, StorageCredentials configuration, String prefix) {
+    public MongoDao(LuckPermsPlugin plugin, StorageCredentials configuration, String prefix, String connectionURI) {
         super(plugin, "MongoDB");
         this.configuration = configuration;
         this.prefix = prefix;
+        this.connectionURI = connectionURI;
     }
 
     @Override
     public void init() {
-        MongoCredential credential = null;
-        if (!Strings.isNullOrEmpty(this.configuration.getUsername())) {
-            credential = MongoCredential.createCredential(
-                    this.configuration.getUsername(),
-                    this.configuration.getDatabase(),
-                    Strings.isNullOrEmpty(this.configuration.getPassword()) ? null : this.configuration.getPassword().toCharArray()
-            );
-        }
-
-        String[] addressSplit = this.configuration.getAddress().split(":");
-        String host = addressSplit[0];
-        int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : 27017;
-        ServerAddress address = new ServerAddress(host, port);
-
-        if (credential == null) {
-            this.mongoClient = new MongoClient(address);
+        if (!Strings.isNullOrempty(this.connectionURI)) {
+            this.mongoClient = new MongoClient(new MongoClientURI(this.connectionURI));
         } else {
-            this.mongoClient = new MongoClient(address, credential, MongoClientOptions.builder().build());
-        }
+            MongoCredential credential = null;
+            if (!Strings.isNullOrEmpty(this.configuration.getUsername())) {
+                credential = MongoCredential.createCredential(
+                        this.configuration.getUsername(),
+                        this.configuration.getDatabase(),
+                        Strings.isNullOrEmpty(this.configuration.getPassword()) ? null : this.configuration.getPassword().toCharArray()
+                );
+            }
 
+            String[] addressSplit = this.configuration.getAddress().split(":");
+            String host = addressSplit[0];
+            int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : 27017;
+            ServerAddress address = new ServerAddress(host, port);
+
+            if (credential == null) {
+                this.mongoClient = new MongoClient(address);
+            } else {
+                this.mongoClient = new MongoClient(address, credential, MongoClientOptions.builder().build());
+            }
+        }
+        
         this.database = this.mongoClient.getDatabase(this.configuration.getDatabase());
     }
 
