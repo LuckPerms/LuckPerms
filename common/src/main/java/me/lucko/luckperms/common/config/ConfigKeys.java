@@ -406,9 +406,8 @@ public class ConfigKeys {
     public static final ConfigKey<String> MONGODB_COLLECTION_PREFIX = EnduringKey.wrap(StringKey.of("data.mongodb_collection_prefix", ""));
        
     /**
-     * MongoDB ClientConnectionURI
+     * MongoDB ClientConnectionURI to override default connection options
      */
-    
     public static final ConfigKey<String> MONGODB_CONNECTION_URI = EnduringKey.wrap(StringKey.of("data.mongodb_connection_URI", ""));
     
     /**
