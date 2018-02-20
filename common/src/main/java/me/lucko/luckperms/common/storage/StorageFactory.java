@@ -158,7 +158,8 @@ public class StorageFactory {
                 return new MongoDao(
                         this.plugin,
                         this.plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES),
-                        this.plugin.getConfiguration().get(ConfigKeys.MONGODB_COLLECTION_PREFIX)
+                        this.plugin.getConfiguration().get(ConfigKeys.MONGODB_COLLECTION_PREFIX),
+                        this.plugin.getConfiguration().get(ConfigKeys.MONGODB_CONNECTION_URI)
                 );
             case YAML:
                 return new YamlDao(this.plugin, "yaml-storage");
