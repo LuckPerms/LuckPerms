@@ -190,7 +190,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private void enable() {
         this.startTime = System.currentTimeMillis();
         sendStartupBanner(getConsoleSender());
-        this.verboseHandler = new VerboseHandler(this.scheduler.asyncBukkit(), getVersion());
+        this.verboseHandler = new VerboseHandler(this.scheduler.asyncBukkit());
         this.permissionVault = new PermissionVault(this.scheduler.asyncBukkit());
         this.logDispatcher = new LogDispatcher(this);
 

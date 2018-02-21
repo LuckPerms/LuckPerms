@@ -203,7 +203,7 @@ public class LPSpongePlugin implements LuckPermsSpongePlugin {
         this.dependencyManager.loadDependencies(DependencyRegistry.GLOBAL_DEPENDENCIES);
 
         sendStartupBanner(getConsoleSender());
-        this.verboseHandler = new VerboseHandler(this.scheduler.async(), getVersion());
+        this.verboseHandler = new VerboseHandler(this.scheduler.async());
         this.permissionVault = new PermissionVault(this.scheduler.async());
         this.logDispatcher = new LogDispatcher(this);
 

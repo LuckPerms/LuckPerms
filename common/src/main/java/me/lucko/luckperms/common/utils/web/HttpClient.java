@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.utils;
+package me.lucko.luckperms.common.utils.web;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;

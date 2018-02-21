@@ -157,7 +157,7 @@ public class LPNukkitPlugin extends PluginBase implements LuckPermsPlugin {
     public void onEnable() {
         this.startTime = System.currentTimeMillis();
         sendStartupBanner(getConsoleSender());
-        this.verboseHandler = new VerboseHandler(this.scheduler.asyncNukkit(), getVersion());
+        this.verboseHandler = new VerboseHandler(this.scheduler.asyncNukkit());
         this.permissionVault = new PermissionVault(this.scheduler.asyncNukkit());
         this.logDispatcher = new LogDispatcher(this);
 

@@ -476,7 +476,12 @@ public class ConfigKeys {
     /**
      * The URL of the web editor
      */
-    public static final ConfigKey<String> WEB_EDITOR_URL_PATTERN = StringKey.of("web-editor-url", "https://lpedit.lucko.me/");
+    public static final ConfigKey<String> WEB_EDITOR_URL_PATTERN = StringKey.of("web-editor-url", "https://luckperms.github.io/editor/");
+
+    /**
+     * The URL of the verbose viewer
+     */
+    public static final ConfigKey<String> VERBOSE_VIEWER_URL_PATTERN = StringKey.of("verbose-viewer-url", "https://luckperms.github.io/verbose/");
 
     private static Map<String, ConfigKey<?>> KEYS = null;
 

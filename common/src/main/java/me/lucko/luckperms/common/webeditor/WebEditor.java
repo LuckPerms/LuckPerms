@@ -30,7 +30,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -41,9 +40,11 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.Gist;
-import me.lucko.luckperms.common.utils.HttpClient;
 import me.lucko.luckperms.common.utils.Uuids;
+import me.lucko.luckperms.common.utils.gson.JArray;
+import me.lucko.luckperms.common.utils.gson.JObject;
+import me.lucko.luckperms.common.utils.web.HttpClient;
+import me.lucko.luckperms.common.utils.web.StandardPastebin;
 
 import okhttp3.Request;
 import okhttp3.Response;
@@ -66,54 +67,49 @@ import java.util.stream.Stream;
 public final class WebEditor {
     private static final Gson GSON = new Gson();
 
-    private static final String FILE_NAME = "luckperms-data.json";
-    private static final String GIST_API_URL = "https://api.github.com/gists";
-
     private static final String USER_ID_PATTERN = "user/";
     private static final String GROUP_ID_PATTERN = "group/";
 
-    private static void writeData(PermissionHolder holder, JsonObject payload) {
-        payload.addProperty("who", getHolderIdentifier(holder));
-        payload.addProperty("whoFriendly", holder.getFriendlyName());
-        if (holder.getType().isUser()) {
-            payload.addProperty("whoUuid", ((User) holder).getUuid().toString());
-        }
-
-        // attach the holders permissions
-        payload.add("nodes", serializePermissions(holder.getEnduringNodes().values().stream().map(NodeModel::fromNode)));
+    private static JObject writeData(PermissionHolder holder) {
+        return new JObject()
+                .add("who", new JObject()
+                        .add("id", getHolderIdentifier(holder))
+                        .add("friendly", holder.getFriendlyName())
+                        .consume(obj -> {
+                            if (holder.getType().isUser()) {
+                                obj.add("uuid", ((User) holder).getUuid().toString());
+                            }
+                        }))
+                .add("nodes", serializePermissions(holder.getEnduringNodes().values().stream().map(NodeModel::fromNode)));
     }
 
     public static JsonObject formPayload(List<PermissionHolder> holders, Sender sender, String cmdLabel, LuckPermsPlugin plugin) {
         Preconditions.checkArgument(!holders.isEmpty(), "holders is empty");
 
         // form the payload data
-        JsonObject payload = new JsonObject();
-
-        payload.addProperty("cmdAlias", cmdLabel);
-        payload.addProperty("uploadedBy", sender.getNameWithLocation());
-        payload.addProperty("uploadedByUuid", sender.getUuid().toString());
-        payload.addProperty("time", System.currentTimeMillis());
-
-        if (holders.size() == 1) {
-            writeData(holders.get(0), payload);
-        } else {
-            JsonArray tabs = new JsonArray();
-            for (PermissionHolder holder : holders) {
-                JsonObject o = new JsonObject();
-                writeData(holder, o);
-                tabs.add(o);
-            }
-            payload.add("tabs", tabs);
-        }
-
-        // attach an array of all permissions known to the server, to use for tab completion in the editor
-        JsonArray knownPermsArray = new JsonArray();
-        for (String perm : plugin.getPermissionVault().rootAsList()) {
-            knownPermsArray.add(new JsonPrimitive(perm));
-        }
-        payload.add("knownPermissions", knownPermsArray);
-
-        return payload;
+        return new JObject()
+                .add("metadata", new JObject()
+                        .add("cmdAlias", cmdLabel)
+                        .add("uploader", new JObject()
+                                .add("name", sender.getNameWithLocation())
+                                .add("uuid", sender.getUuid().toString())
+                        )
+                        .add("time", System.currentTimeMillis())
+                )
+                .add("sessions", new JArray()
+                        .consume(arr -> {
+                            for (PermissionHolder holder : holders) {
+                                arr.add(writeData(holder));
+                            }
+                        })
+                )
+                .add("knownPermissions", new JArray()
+                        .consume(arr -> {
+                            for (String perm : plugin.getPermissionVault().rootAsList()) {
+                                arr.add(perm);
+                            }
+                        })
+                ).toJson();
     }
 
     private static String getHolderIdentifier(PermissionHolder holder) {
@@ -152,19 +148,9 @@ public final class WebEditor {
         }
     }
 
-    public static String postToGist(String content) {
-        Gist gist = Gist.builder()
-                .description("LuckPerms Web Editor Data")
-                .shorten(false)
-                .file(FILE_NAME, content)
-                .upload();
-
-        return gist.getId();
-    }
-
     public static JsonObject getDataFromGist(String id) {
         Request request = new Request.Builder()
-                .url(GIST_API_URL + "/" + id)
+                .url(StandardPastebin.BYTEBIN.getRawUrl(id))
                 .build();
 
         try (Response response = HttpClient.makeCall(request)) {
@@ -175,29 +161,7 @@ public final class WebEditor {
 
                 try (InputStream inputStream = responseBody.byteStream()) {
                     try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-                        JsonObject object = new Gson().fromJson(reader, JsonObject.class);
-                        JsonObject files = object.get("files").getAsJsonObject();
-                        JsonObject permsFile = files.get(FILE_NAME).getAsJsonObject();
-
-                        // uh..
-                        if (permsFile.get("truncated").getAsBoolean()) {
-                            try (Response rawResponse = HttpClient.makeCall(new Request.Builder().url(permsFile.get("raw_url").getAsString()).build())) {
-                                try (ResponseBody rawResponseBody = rawResponse.body()) {
-                                    if (rawResponseBody == null) {
-                                        throw new RuntimeException("No response");
-                                    }
-
-                                    try (InputStream rawInputStream = rawResponseBody.byteStream()) {
-                                        try (BufferedReader rawReader = new BufferedReader(new InputStreamReader(rawInputStream, StandardCharsets.UTF_8))) {
-                                            return GSON.fromJson(rawReader, JsonObject.class);
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            String content = permsFile.get("content").getAsString();
-                            return GSON.fromJson(content, JsonObject.class);
-                        }
+                        return GSON.fromJson(reader, JsonObject.class);
                     }
                 }
             }

@@ -25,8 +25,15 @@
 
 package me.lucko.luckperms.common.verbose;
 
+import com.google.gson.JsonObject;
+
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.utils.StackTracePrinter;
+import me.lucko.luckperms.common.utils.gson.JArray;
+import me.lucko.luckperms.common.utils.gson.JObject;
+
+import java.util.Map;
 
 /**
  * Holds the data from a permission check
@@ -94,5 +101,34 @@ public class CheckData {
 
     public Tristate getResult() {
         return this.result;
+    }
+
+    private JObject formBaseJson() {
+        return new JObject()
+                .add("who", new JObject()
+                        .add("identifier", this.checkTarget)
+                )
+                .add("permission", this.permission)
+                .add("result", this.result.name().toLowerCase())
+                .add("origin", this.checkOrigin.name().toLowerCase())
+                .add("context", new JArray()
+                        .consume(arr -> {
+                            for (Map.Entry<String, String> contextPair : this.checkContext.toSet()) {
+                                arr.add(new JObject().add("key", contextPair.getKey()).add("value", contextPair.getValue()));
+                            }
+                        })
+                );
+    }
+
+    public JsonObject toJson() {
+        return formBaseJson().toJson();
+    }
+
+    public JsonObject toJson(StackTracePrinter tracePrinter) {
+        return formBaseJson()
+                .add("trace", new JArray()
+                        .consume(arr -> tracePrinter.process(this.checkTrace, StackTracePrinter.elementToString(arr::add)))
+                )
+                .toJson();
     }
 }

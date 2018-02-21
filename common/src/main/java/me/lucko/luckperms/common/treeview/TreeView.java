@@ -32,7 +32,6 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.caching.type.PermissionCache;
-import me.lucko.luckperms.common.utils.Gist;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
 
 import java.text.SimpleDateFormat;
@@ -41,7 +40,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * A readable view of a branch of {@link TreeNode}s.
@@ -179,12 +177,13 @@ public class TreeView {
         ret.clear();
 
         // upload the return the data
-        Gist gist = Gist.builder()
+        /*Gist gist = Gist.builder()
                 .description("LuckPerms Permission Tree")
                 .file("luckperms-tree.md", builder.build().stream().collect(Collectors.joining("\n")))
                 .upload();
 
-        return gist.getUrl();
+        return gist.getUrl();*/
+        return null;
     }
 
     /**
@@ -228,12 +227,13 @@ public class TreeView {
         ret.clear();
 
         // upload the return the data
-        Gist gist = Gist.builder()
+        /*Gist gist = Gist.builder()
                 .description("LuckPerms Permission Tree")
                 .file("luckperms-tree.md", builder.build().stream().collect(Collectors.joining("\n")))
                 .upload();
 
-        return gist.getUrl();
+        return gist.getUrl();*/
+        return null; // TODO
     }
 
     private static String getTristateDiffPrefix(Tristate t) {
