@@ -50,25 +50,6 @@ public class DelegatingMutableContextSet extends AbstractDelegatingContextSet {
         return this.delegate;
     }
 
-    @Override
-    public int size() {
-        return this.delegate.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return this.delegate.isEmpty();
-    }
-
-    @Override
-    public boolean contains(Object o) {
-        if (o instanceof Context) {
-            Context context = (Context) o;
-            return this.delegate.has(context);
-        }
-        return false;
-    }
-
     @Nonnull
     @Override
     public Iterator<Context> iterator() {
@@ -80,6 +61,9 @@ public class DelegatingMutableContextSet extends AbstractDelegatingContextSet {
         if (context == null) {
             throw new NullPointerException("context");
         }
+        if (context.getKey().isEmpty() || context.getValue().isEmpty()) {
+            return false;
+        }
 
         boolean has = this.delegate.has(context);
         this.delegate.add(context);
@@ -90,6 +74,9 @@ public class DelegatingMutableContextSet extends AbstractDelegatingContextSet {
     public boolean remove(Object o) {
         if (o instanceof Context) {
             Context context = (Context) o;
+            if (context.getKey().isEmpty() || context.getValue().isEmpty()) {
+                return false;
+            }
             boolean had = this.delegate.has(context);
             this.delegate.remove(context.getKey(), context.getValue());
             return had;

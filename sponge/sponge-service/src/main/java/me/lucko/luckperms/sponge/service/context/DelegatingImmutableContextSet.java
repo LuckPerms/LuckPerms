@@ -50,25 +50,6 @@ public class DelegatingImmutableContextSet extends AbstractDelegatingContextSet 
         return this.delegate;
     }
 
-    @Override
-    public int size() {
-        return this.delegate.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return this.delegate.isEmpty();
-    }
-
-    @Override
-    public boolean contains(Object o) {
-        if (o instanceof Context) {
-            Context context = (Context) o;
-            return this.delegate.has(context);
-        }
-        return false;
-    }
-
     @Nonnull
     @Override
     public Iterator<Context> iterator() {

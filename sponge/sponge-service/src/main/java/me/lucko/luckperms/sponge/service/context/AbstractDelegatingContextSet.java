@@ -33,6 +33,25 @@ import java.util.Set;
 abstract class AbstractDelegatingContextSet extends AbstractSet<Context> implements DelegatingContextSet {
 
     @Override
+    public int size() {
+        return getDelegate().size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return getDelegate().isEmpty();
+    }
+
+    @Override
+    public boolean contains(Object o) {
+        if (o instanceof Context) {
+            Context context = (Context) o;
+            return !context.getKey().isEmpty() && !context.getValue().isEmpty() && getDelegate().has(context);
+        }
+        return false;
+    }
+
+    @Override
     public int hashCode() {
         return getDelegate().hashCode();
     }
