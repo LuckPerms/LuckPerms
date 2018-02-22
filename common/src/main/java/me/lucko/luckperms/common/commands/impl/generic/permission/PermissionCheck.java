@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.commands.impl.generic.permission;
 
+import me.lucko.luckperms.api.StandardNodeEquality;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
@@ -62,7 +63,7 @@ public class PermissionCheck extends SharedSubCommand {
         String node = ArgumentUtils.handleString(0, args);
         MutableContextSet context = ArgumentUtils.handleContext(1, args, plugin);
 
-        Tristate result = holder.hasPermission(NodeFactory.builder(node).withExtraContext(context).build());
+        Tristate result = holder.hasPermission(NodeFactory.builder(node).withExtraContext(context).build(), StandardNodeEquality.IGNORE_VALUE_OR_IF_TEMPORARY);
         String s = CommandUtils.formatTristate(result);
 
         Message.CHECK_PERMISSION.send(sender, holder.getFriendlyName(), node, s, CommandUtils.contextSetToString(context));

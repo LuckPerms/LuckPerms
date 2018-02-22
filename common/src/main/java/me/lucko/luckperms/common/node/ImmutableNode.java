@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.StandardNodeEquality;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
@@ -320,27 +321,41 @@ public final class ImmutableNode implements Node {
         return this.resolvedShorthand;
     }
 
-    @SuppressWarnings("StringEquality")
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof Node)) return false;
-        final Node other = (Node) o;
 
-        if (this.permission != other.getPermission()) return false;
-        if (this.value != other.getValuePrimitive()) return false;
-        if (this.override != other.isOverride()) return false;
+        Node other = (Node) o;
+        while (other instanceof ForwardingNode) {
+            other = ((ForwardingNode) other).delegate();
+        }
+        return other instanceof ImmutableNode && Equality.EXACT.areEqual(this, (ImmutableNode) other);
+    }
 
-        final String thisServer = this.server;
-        final String otherServer = other.getServer().orElse(null);
-        if (thisServer == null ? otherServer != null : !thisServer.equals(otherServer)) return false;
-
-        final String thisWorld = this.world;
-        final String otherWorld = other.getWorld().orElse(null);
-        if (thisWorld == null ? otherWorld != null : !thisWorld.equals(otherWorld)) return false;
-
-        final long otherExpireAt = other.isTemporary() ? other.getExpiryUnixTime() : 0L;
-        return this.expireAt == otherExpireAt && this.getContexts().equals(other.getContexts());
+    @Override
+    public boolean standardEquals(Node o, StandardNodeEquality equalityPredicate) {
+        while (o instanceof ForwardingNode) {
+            o = ((ForwardingNode) o).delegate();
+        }
+        if (!(o instanceof ImmutableNode)) {
+            return false;
+        }
+        ImmutableNode other = (ImmutableNode) o;
+        switch (equalityPredicate) {
+            case EXACT:
+                return Equality.EXACT.areEqual(this, other);
+            case IGNORE_VALUE:
+                return Equality.IGNORE_VALUE.areEqual(this, other);
+            case IGNORE_EXPIRY_TIME:
+                return Equality.IGNORE_EXPIRY_TIME.areEqual(this, other);
+            case IGNORE_EXPIRY_TIME_AND_VALUE:
+                return Equality.IGNORE_EXPIRY_TIME_AND_VALUE.areEqual(this, other);
+            case IGNORE_VALUE_OR_IF_TEMPORARY:
+                return Equality.IGNORE_VALUE_OR_IF_TEMPORARY.areEqual(this, other);
+            default:
+                throw new AssertionError();
+        }
     }
 
     @Override
@@ -362,57 +377,70 @@ public final class ImmutableNode implements Node {
     }
 
     @SuppressWarnings("StringEquality")
-    @Override
-    public boolean equalsIgnoringValue(@Nonnull Node other) {
-        if (this.permission != other.getPermission()) return false;
-        if (this.override != other.isOverride()) return false;
+    private enum Equality {
+        EXACT {
+            @Override
+            public boolean areEqual(@Nonnull ImmutableNode o1, @Nonnull ImmutableNode o2) {
+                return o1 == o2 ||
+                        o1.permission == o2.permission &&
+                        o1.value == o2.value &&
+                        o1.override == o2.override &&
+                        (o1.server == null ? o2.server == null : o1.server.equals(o2.server)) &&
+                        (o1.world == null ? o2.world == null : o1.world.equals(o2.world)) &&
+                        o1.expireAt == o2.expireAt &&
+                        o1.getContexts().equals(o2.getContexts());
+            }
+        },
+        IGNORE_VALUE {
+            @Override
+            public boolean areEqual(@Nonnull ImmutableNode o1, @Nonnull ImmutableNode o2) {
+                return o1 == o2 ||
+                        o1.permission == o2.permission &&
+                        o1.override == o2.override &&
+                        (o1.server == null ? o2.server == null : o1.server.equals(o2.server)) &&
+                        (o1.world == null ? o2.world == null : o1.world.equals(o2.world)) &&
+                        o1.expireAt == o2.expireAt &&
+                        o1.getContexts().equals(o2.getContexts());
+            }
+        },
+        IGNORE_EXPIRY_TIME {
+            @Override
+            public boolean areEqual(@Nonnull ImmutableNode o1, @Nonnull ImmutableNode o2) {
+                return o1 == o2 ||
+                        o1.permission == o2.permission &&
+                        o1.value == o2.value &&
+                        o1.override == o2.override &&
+                        (o1.server == null ? o2.server == null : o1.server.equals(o2.server)) &&
+                        (o1.world == null ? o2.world == null : o1.world.equals(o2.world)) &&
+                        o1.isTemporary() == o2.isTemporary() &&
+                        o1.getContexts().equals(o2.getContexts());
+            }
+        },
+        IGNORE_EXPIRY_TIME_AND_VALUE {
+            @Override
+            public boolean areEqual(@Nonnull ImmutableNode o1, @Nonnull ImmutableNode o2) {
+                return o1 == o2 ||
+                        o1.permission == o2.permission &&
+                        o1.override == o2.override &&
+                        (o1.server == null ? o2.server == null : o1.server.equals(o2.server)) &&
+                        (o1.world == null ? o2.world == null : o1.world.equals(o2.world)) &&
+                        o1.isTemporary() == o2.isTemporary() &&
+                        o1.getContexts().equals(o2.getContexts());
+            }
+        },
+        IGNORE_VALUE_OR_IF_TEMPORARY {
+            @Override
+            public boolean areEqual(@Nonnull ImmutableNode o1, @Nonnull ImmutableNode o2) {
+                return o1 == o2 ||
+                        o1.permission == o2.permission &&
+                        o1.override == o2.override &&
+                        (o1.server == null ? o2.server == null : o1.server.equals(o2.server)) &&
+                        (o1.world == null ? o2.world == null : o1.world.equals(o2.world)) &&
+                        o1.getContexts().equals(o2.getContexts());
+            }
+        };
 
-        final String thisServer = this.server;
-        final String otherServer = other.getServer().orElse(null);
-        if (thisServer == null ? otherServer != null : !thisServer.equals(otherServer)) return false;
-
-        final String thisWorld = this.world;
-        final String otherWorld = other.getWorld().orElse(null);
-        if (thisWorld == null ? otherWorld != null : !thisWorld.equals(otherWorld)) return false;
-
-        final long otherExpireAt = other.isTemporary() ? other.getExpiryUnixTime() : 0L;
-        return this.expireAt == otherExpireAt && this.getContexts().equals(other.getContexts());
-    }
-
-    @SuppressWarnings("StringEquality")
-    @Override
-    public boolean almostEquals(@Nonnull Node other) {
-        if (this.permission != other.getPermission()) return false;
-        if (this.override != other.isOverride()) return false;
-
-        final String thisServer = this.server;
-        final String otherServer = other.getServer().orElse(null);
-        if (thisServer == null ? otherServer != null : !thisServer.equals(otherServer))
-            return false;
-
-        final String thisWorld = this.world;
-        final String otherWorld = other.getWorld().orElse(null);
-        return (thisWorld == null ? otherWorld == null : thisWorld.equals(otherWorld)) &&
-                this.isTemporary() == other.isTemporary() &&
-                this.getContexts().equals(other.getContexts());
-
-    }
-
-    @SuppressWarnings("StringEquality")
-    @Override
-    public boolean equalsIgnoringValueOrTemp(@Nonnull Node other) {
-        if (this.permission != other.getPermission()) return false;
-        if (this.override != other.isOverride()) return false;
-
-        final String thisServer = this.server;
-        final String otherServer = other.getServer().orElse(null);
-        if (thisServer == null ? otherServer != null : !thisServer.equals(otherServer))
-            return false;
-
-        final String thisWorld = this.world;
-        final String otherWorld = other.getWorld().orElse(null);
-        return (thisWorld == null ? otherWorld == null : thisWorld.equals(otherWorld)) &&
-                this.getContexts().equals(other.getContexts());
+        public abstract boolean areEqual(@Nonnull ImmutableNode o1, @Nonnull ImmutableNode o2);
     }
 
     @Override
@@ -443,6 +471,13 @@ public final class ImmutableNode implements Node {
 
     @Override
     public String toString() {
-        return "ImmutableNode(permission=" + this.permission + ", value=" + this.value + ", override=" + this.override + ", server=" + this.getServer() + ", world=" + this.getWorld() + ", expireAt=" + this.expireAt + ", contexts=" + this.contexts + ")";
+        return "ImmutableNode(" +
+                "permission=" + this.permission + ", " +
+                "value=" + this.value + ", " +
+                "override=" + this.override + ", " +
+                "server=" + this.getServer() + ", " +
+                "world=" + this.getWorld() + ", " +
+                "expireAt=" + this.expireAt + ", " +
+                "contexts=" + this.contexts + ")";
     }
 }

@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.node;
 
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.StandardNodeEquality;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 
@@ -224,18 +225,8 @@ public abstract class ForwardingNode implements Node {
     }
 
     @Override
-    public boolean equalsIgnoringValue(@Nonnull Node other) {
-        return delegate().equalsIgnoringValue(other);
-    }
-
-    @Override
-    public boolean almostEquals(@Nonnull Node other) {
-        return delegate().almostEquals(other);
-    }
-
-    @Override
-    public boolean equalsIgnoringValueOrTemp(@Nonnull Node other) {
-        return delegate().equalsIgnoringValueOrTemp(other);
+    public boolean standardEquals(Node other, StandardNodeEquality equalityPredicate) {
+        return delegate().standardEquals(other, equalityPredicate);
     }
 
     @Override

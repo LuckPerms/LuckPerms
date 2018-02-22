@@ -318,39 +318,81 @@ public interface Node extends Map.Entry<String, Boolean> {
     Map.Entry<Integer, String> getSuffix() throws IllegalStateException;
 
     /**
-     * Checks if this Node is equal to another node
+     * Returns if this Node is equal to another node
      *
      * @param obj the other node
      * @return true if this node is equal to the other provided
-     * @see #equalsIgnoringValue(Node) for a less strict implementation of this method
+     * @see StandardNodeEquality#EXACT
      */
     @Override
     boolean equals(Object obj);
 
     /**
-     * Similar to {@link Node#equals(Object)}, except doesn't take note of the value
+     * Returns if this Node is equal to another node as defined by the given
+     * {@link StandardNodeEquality} predicate.
+     *
+     * @param other the other node
+     * @param equalityPredicate the predicate
+     * @return true if this node is considered equal
+     * @since 4.1
+     */
+    boolean standardEquals(Node other, StandardNodeEquality equalityPredicate);
+
+    /**
+     * Returns if this Node is equal to another node as defined by the given
+     * {@link NodeEqualityPredicate}.
+     *
+     * @param other the other node
+     * @param equalityPredicate the predicate
+     * @return true if this node is considered equal
+     * @since 4.1
+     */
+    default boolean equals(Node other, NodeEqualityPredicate equalityPredicate) {
+        return equalityPredicate.areEqual(this, other);
+    }
+
+    /**
+     * Similar to {@link Node#equals(Object)}, except doesn't take note of the
+     * value.
      *
      * @param other the other node
      * @return true if the two nodes are almost equal
+     * @deprecated in favour of {@link #equals(Node, NodeEqualityPredicate)}
+     * @see StandardNodeEquality#IGNORE_VALUE
      */
-    boolean equalsIgnoringValue(@Nonnull Node other);
+    @Deprecated
+    default boolean equalsIgnoringValue(@Nonnull Node other) {
+        return equals(other, StandardNodeEquality.IGNORE_VALUE);
+    }
 
     /**
-     * Similar to {@link Node#equals(Object)}, except doesn't take note of the expiry time or value
+     * Similar to {@link Node#equals(Object)}, except doesn't take note of the
+     * expiry time or value.
      *
      * @param other the other node
      * @return true if the two nodes are almost equal
+     * @deprecated in favour of {@link #equals(Node, NodeEqualityPredicate)}
+     * @see StandardNodeEquality#IGNORE_EXPIRY_TIME_AND_VALUE
      */
-    boolean almostEquals(@Nonnull Node other);
+    @Deprecated
+    default boolean almostEquals(@Nonnull Node other) {
+        return equals(other, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
+    }
 
     /**
-     * Similar to {@link Node#equals(Object)}, except doesn't take note of the value or if the node is temporary
+     * Similar to {@link Node#equals(Object)}, except doesn't take note of the
+     * value or if the node is temporary.
      *
      * @param other the other node
      * @return true if the two nodes are almost equal
      * @since 2.8
+     * @deprecated in favour of {@link #equals(Node, NodeEqualityPredicate)}
+     * @see StandardNodeEquality#IGNORE_VALUE_OR_IF_TEMPORARY
      */
-    boolean equalsIgnoringValueOrTemp(@Nonnull Node other);
+    @Deprecated
+    default boolean equalsIgnoringValueOrTemp(@Nonnull Node other) {
+        return equals(other, StandardNodeEquality.IGNORE_VALUE_OR_IF_TEMPORARY);
+    }
 
     /**
      * Builds a Node instance

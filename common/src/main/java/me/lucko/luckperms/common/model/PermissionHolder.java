@@ -35,6 +35,8 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.NodeEqualityPredicate;
+import me.lucko.luckperms.api.StandardNodeEquality;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
@@ -578,44 +580,53 @@ public abstract class PermissionHolder {
         return transientWork || enduringWork;
     }
 
-    private Optional<Node> getAlmostEquals(Node node, NodeMapType type) {
+    private Optional<Node> searchForMatch(NodeMapType type, Node node, NodeEqualityPredicate equalityPredicate) {
         for (Node n : getData(type).immutable().values()) {
-            if (n.almostEquals(node)) {
+            if (n.equals(node, equalityPredicate)) {
                 return Optional.of(n);
             }
         }
-
         return Optional.empty();
     }
 
     /**
      * Check if the holder has a permission node
      *
-     * @param node the node to check
      * @param type which backing map to check
-     * @return a tristate
+     * @param node the node to check
+     * @param equalityPredicate how to match
+     * @return a tristate, returns undefined if no match
      */
-    public Tristate hasPermission(Node node, NodeMapType type) {
+    public Tristate hasPermission(NodeMapType type, Node node, NodeEqualityPredicate equalityPredicate) {
         if (this.getType().isGroup() && node.isGroupNode() && node.getGroupName().equalsIgnoreCase(getObjectName())) {
             return Tristate.TRUE;
         }
 
-        return getAlmostEquals(node, type).map(Node::getTristate).orElse(Tristate.UNDEFINED);
+        return searchForMatch(type, node, equalityPredicate).map(Node::getTristate).orElse(Tristate.UNDEFINED);
+    }
+
+    public Tristate hasPermission(NodeMapType type, Node node) {
+        return hasPermission(type, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
+    }
+
+    public Tristate hasPermission(Node node, NodeEqualityPredicate equalityPredicate) {
+        return hasPermission(NodeMapType.ENDURING, node, equalityPredicate);
     }
 
     public Tristate hasPermission(Node node) {
-        return hasPermission(node, NodeMapType.ENDURING);
+        return hasPermission(NodeMapType.ENDURING, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
     }
 
     /**
      * Check if the holder inherits a node
      *
      * @param node the node to check
+     * @param equalityPredicate how to match
      * @return the result of the lookup
      */
-    public InheritanceInfo inheritsPermissionInfo(Node node) {
+    public InheritanceInfo searchForInheritedMatch(Node node, NodeEqualityPredicate equalityPredicate) {
         for (LocalizedNode n : resolveInheritances()) {
-            if (n.getNode().almostEquals(node)) {
+            if (n.getNode().equals(node, equalityPredicate)) {
                 return InheritanceInfo.of(n);
             }
         }
@@ -627,10 +638,15 @@ public abstract class PermissionHolder {
      * Check if the holder inherits a node
      *
      * @param node the node to check
+     * @param equalityPredicate how to match
      * @return the Tristate result
      */
+    public Tristate inheritsPermission(Node node, NodeEqualityPredicate equalityPredicate) {
+        return searchForInheritedMatch(node, equalityPredicate).getResult();
+    }
+
     public Tristate inheritsPermission(Node node) {
-        return inheritsPermissionInfo(node).getResult();
+        return inheritsPermission(node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
     }
 
     /**
@@ -639,7 +655,7 @@ public abstract class PermissionHolder {
      * @param node the node to set
      */
     public DataMutateResult setPermission(Node node) {
-        if (hasPermission(node, NodeMapType.ENDURING) != Tristate.UNDEFINED) {
+        if (hasPermission(NodeMapType.ENDURING, node) != Tristate.UNDEFINED) {
             return DataMutateResult.ALREADY_HAS;
         }
 
@@ -663,7 +679,7 @@ public abstract class PermissionHolder {
         if (node.isTemporary()) {
             if (modifier == TemporaryModifier.ACCUMULATE) {
                 // Try to accumulate with an existing node
-                Optional<Node> existing = getAlmostEquals(node, NodeMapType.ENDURING);
+                Optional<Node> existing = searchForMatch(NodeMapType.ENDURING, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
 
                 // An existing node was found
                 if (existing.isPresent()) {
@@ -684,7 +700,7 @@ public abstract class PermissionHolder {
 
             } else if (modifier == TemporaryModifier.REPLACE) {
                 // Try to replace an existing node
-                Optional<Node> existing = getAlmostEquals(node, NodeMapType.ENDURING);
+                Optional<Node> existing = searchForMatch(NodeMapType.ENDURING, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
 
                 // An existing node was found
                 if (existing.isPresent()) {
@@ -717,7 +733,7 @@ public abstract class PermissionHolder {
      * @param node the node to set
      */
     public DataMutateResult setTransientPermission(Node node) {
-        if (hasPermission(node, NodeMapType.TRANSIENT) != Tristate.UNDEFINED) {
+        if (hasPermission(NodeMapType.TRANSIENT, node) != Tristate.UNDEFINED) {
             return DataMutateResult.ALREADY_HAS;
         }
 
@@ -732,7 +748,7 @@ public abstract class PermissionHolder {
      * @param node the node to unset
      */
     public DataMutateResult unsetPermission(Node node) {
-        if (hasPermission(node, NodeMapType.ENDURING) == Tristate.UNDEFINED) {
+        if (hasPermission(NodeMapType.ENDURING, node) == Tristate.UNDEFINED) {
             return DataMutateResult.LACKS;
         }
 
@@ -751,7 +767,7 @@ public abstract class PermissionHolder {
      * @param node the node to unset
      */
     public DataMutateResult unsetTransientPermission(Node node) {
-        if (hasPermission(node, NodeMapType.TRANSIENT) == Tristate.UNDEFINED) {
+        if (hasPermission(NodeMapType.TRANSIENT, node) == Tristate.UNDEFINED) {
             return DataMutateResult.LACKS;
         }
 

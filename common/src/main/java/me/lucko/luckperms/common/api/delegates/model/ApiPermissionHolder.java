@@ -35,6 +35,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.NodeEqualityPredicate;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.CachedData;
 import me.lucko.luckperms.api.context.ContextSet;
@@ -160,16 +161,40 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.PermissionHol
 
     @Nonnull
     @Override
+    public Tristate hasPermission(@Nonnull Node node, @Nonnull NodeEqualityPredicate equalityPredicate) {
+        Objects.requireNonNull(node, "node");
+        Objects.requireNonNull(equalityPredicate, "equalityPredicate");
+        return this.handle.hasPermission(NodeMapType.ENDURING, node, equalityPredicate);
+    }
+
+    @Nonnull
+    @Override
+    public Tristate hasTransientPermission(@Nonnull Node node, @Nonnull NodeEqualityPredicate equalityPredicate) {
+        Objects.requireNonNull(node, "node");
+        Objects.requireNonNull(equalityPredicate, "equalityPredicate");
+        return this.handle.hasPermission(NodeMapType.TRANSIENT, node, equalityPredicate);
+    }
+
+    @Nonnull
+    @Override
+    public Tristate inheritsPermission(@Nonnull Node node, @Nonnull NodeEqualityPredicate equalityPredicate) {
+        Objects.requireNonNull(node, "node");
+        Objects.requireNonNull(equalityPredicate, "equalityPredicate");
+        return this.handle.inheritsPermission(node, equalityPredicate);
+    }
+
+    @Nonnull
+    @Override
     public Tristate hasPermission(@Nonnull Node node) {
         Objects.requireNonNull(node, "node");
-        return this.handle.hasPermission(node, NodeMapType.ENDURING);
+        return this.handle.hasPermission(NodeMapType.ENDURING, node);
     }
 
     @Nonnull
     @Override
     public Tristate hasTransientPermission(@Nonnull Node node) {
         Objects.requireNonNull(node, "node");
-        return this.handle.hasPermission(node, NodeMapType.TRANSIENT);
+        return this.handle.hasPermission(NodeMapType.TRANSIENT, node);
     }
 
     @Nonnull

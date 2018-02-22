@@ -275,6 +275,42 @@ public interface PermissionHolder {
      * Checks to see if the object has a certain permission
      *
      * @param node the node to check for
+     * @param equalityPredicate how to determine if a node matches
+     * @return a Tristate for the holders permission status for the node
+     * @throws NullPointerException if the node is null
+     * @since 4.1
+     */
+    @Nonnull
+    Tristate hasPermission(@Nonnull Node node, @Nonnull NodeEqualityPredicate equalityPredicate);
+
+    /**
+     * Checks to see if the object has a certain permission
+     *
+     * @param node the node to check for
+     * @param equalityPredicate how to determine if a node matches
+     * @return a Tristate for the holders permission status for the node
+     * @throws NullPointerException if the node is null
+     * @since 4.1
+     */
+    @Nonnull
+    Tristate hasTransientPermission(@Nonnull Node node, @Nonnull NodeEqualityPredicate equalityPredicate);
+
+    /**
+     * Checks to see if the object inherits a certain permission
+     *
+     * @param node the node to check for
+     * @param equalityPredicate how to determine if a node matches
+     * @return a Tristate for the holders inheritance status for the node
+     * @throws NullPointerException if the node is null
+     * @since 4.1
+     */
+    @Nonnull
+    Tristate inheritsPermission(@Nonnull Node node, @Nonnull NodeEqualityPredicate equalityPredicate);
+
+    /**
+     * Checks to see if the object has a certain permission
+     *
+     * @param node the node to check for
      * @return a Tristate for the holders permission status for the node
      * @throws NullPointerException if the node is null
      * @since 2.6
