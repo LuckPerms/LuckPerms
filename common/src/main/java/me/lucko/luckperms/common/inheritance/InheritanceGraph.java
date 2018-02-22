@@ -27,9 +27,9 @@ package me.lucko.luckperms.common.inheritance;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.inheritance.graph.Graph;
-import me.lucko.luckperms.common.inheritance.graph.GraphTraversers;
-import me.lucko.luckperms.common.inheritance.graph.TraversalAlgorithm;
+import me.lucko.luckperms.common.graph.Graph;
+import me.lucko.luckperms.common.graph.GraphTraversers;
+import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;

@@ -40,7 +40,7 @@ public class ParentsByWeightHolder extends CachedPrimaryGroupHolder {
 
     @Override
     protected String calculateValue() {
-        Contexts contexts = this.user.getPlugin().getContextForUser(this.user);
+        Contexts contexts = this.user.getPlugin().getContextForUser(this.user).orElse(null);
         if (contexts == null) {
             contexts = this.user.getPlugin().getContextManager().getStaticContexts();
         }

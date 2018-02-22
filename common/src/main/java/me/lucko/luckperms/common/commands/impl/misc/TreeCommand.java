@@ -30,14 +30,13 @@ import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.treeview.TreeView;
-import me.lucko.luckperms.common.treeview.TreeViewBuilder;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.Uuids;
 
@@ -58,21 +57,17 @@ public class TreeCommand extends SingleCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         String selection = ".";
-        int maxLevel = 5;
         String player = null;
 
         if (!args.isEmpty()) {
             selection = args.get(0);
         }
         if (args.size() > 1) {
-            maxLevel = ArgumentUtils.handleIntOrElse(1, args, 5);
-        }
-        if (args.size() > 2) {
-            player = args.get(2);
+            player = args.get(1);
         }
 
+        User user;
         if (player != null) {
-            User user;
             UUID u = Uuids.parseNullable(player);
             if (u != null) {
                 user = plugin.getUserManager().getIfLoaded(u);
@@ -84,38 +79,20 @@ public class TreeCommand extends SingleCommand {
                 Message.USER_NOT_ONLINE.send(sender, player);
                 return CommandResult.STATE_ERROR;
             }
-
-            PermissionCache permissionData = user.getCachedData().getPermissionData(plugin.getContextForUser(user));
-            TreeView view = TreeViewBuilder.newBuilder().rootPosition(selection).maxLevels(maxLevel).build(plugin.getPermissionVault());
-
-            if (!view.hasData()) {
-                Message.TREE_EMPTY.send(sender);
-                return CommandResult.FAILURE;
-            }
-
-            Message.TREE_UPLOAD_START.send(sender);
-            String url = view.uploadPasteData(plugin.getVersion(), user.getFriendlyName(), permissionData);
-
-            Message.TREE_URL.send(sender);
-
-            Component message = TextComponent.builder(url).color(TextColor.AQUA)
-                    .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, String.valueOf(url)))
-                    .hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to open the tree view.").color(TextColor.GRAY)))
-                    .build();
-
-            sender.sendMessage(message);
-            return CommandResult.SUCCESS;
+        } else {
+            user = null;
         }
 
-        TreeView view = TreeViewBuilder.newBuilder().rootPosition(selection).maxLevels(maxLevel).build(plugin.getPermissionVault());
-
+        TreeView view = new TreeView(plugin.getPermissionVault(), selection);
         if (!view.hasData()) {
             Message.TREE_EMPTY.send(sender);
             return CommandResult.FAILURE;
         }
 
         Message.TREE_UPLOAD_START.send(sender);
-        String url = view.uploadPasteData(plugin.getVersion());
+        PermissionCache permissionData = user == null ? null : user.getCachedData().getPermissionData(plugin.getContextForUser(user).orElse(plugin.getContextManager().getStaticContexts()));
+        String id = view.uploadPasteData(sender, user, permissionData);
+        String url = plugin.getConfiguration().get(ConfigKeys.TREE_VIEWER_URL_PATTERN) + "?" + id;
 
         Message.TREE_URL.send(sender);
 

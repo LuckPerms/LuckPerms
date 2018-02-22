@@ -196,7 +196,7 @@ public class DebugCommand extends SingleCommand {
                     )
                     .add("activeContext", () -> {
                         JObject obj = new JObject();
-                        Contexts contexts = plugin.getContextForUser(user);
+                        Contexts contexts = plugin.getContextForUser(user).orElse(null);
                         if (contexts != null) {
                             MetaContexts metaContexts = plugin.getContextManager().formMetaContexts(contexts);
                             obj.add("data", new JObject()

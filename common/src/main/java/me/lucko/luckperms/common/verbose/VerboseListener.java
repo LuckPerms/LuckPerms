@@ -172,10 +172,9 @@ public class VerboseListener {
     /**
      * Uploads the captured data in this listener to a paste and returns the url
      *
-     * @param includeTraces if stack traces should be included in the output
      * @return the url
      */
-    public String uploadPasteData(boolean includeTraces) {
+    public String uploadPasteData() {
 
         // retrieve variables
         long now = System.currentTimeMillis();
@@ -196,7 +195,7 @@ public class VerboseListener {
         JObject metadata = new JObject()
                 .add("startTime", startDate)
                 .add("endTime", endDate)
-                .add("diration", duration)
+                .add("duration", duration)
                 .add("count", new JObject()
                         .add("matched", this.matchedCounter.get())
                         .add("total", this.counter.get())
@@ -206,19 +205,14 @@ public class VerboseListener {
                         .add("uuid", this.notifiedSender.getUuid().toString())
                 )
                 .add("filter", filter)
-                .add("includeTraces", includeTraces)
                 .add("truncated", truncated);
 
         JArray data = new JArray();
         for (CheckData c : this.results) {
-            if (includeTraces) {
-                if (c.getCheckOrigin() == CheckOrigin.API || c.getCheckOrigin() == CheckOrigin.INTERNAL) {
-                    data.add(c.toJson(WEB_UNFILTERED_PRINTER));
-                } else {
-                    data.add(c.toJson(WEB_FILTERED_PRINTER));
-                }
+            if (c.getCheckOrigin() == CheckOrigin.API || c.getCheckOrigin() == CheckOrigin.INTERNAL) {
+                data.add(c.toJson(WEB_UNFILTERED_PRINTER));
             } else {
-                data.add(c.toJson());
+                data.add(c.toJson(WEB_FILTERED_PRINTER));
             }
         }
         this.results.clear();

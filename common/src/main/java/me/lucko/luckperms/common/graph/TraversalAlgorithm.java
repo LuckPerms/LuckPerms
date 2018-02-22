@@ -23,22 +23,37 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.inheritance.graph;
+package me.lucko.luckperms.common.graph;
 
-/**
- * A minimal functional interface for graph-structured data.
- *
- * @param <N> the node parameter type
- */
-@FunctionalInterface
-public interface Graph<N> {
+public enum TraversalAlgorithm {
 
     /**
-     * Returns all nodes in this graph directly adjacent to {@code node} which
-     * can be reached by traversing {@code node}'s outgoing edges.
+     * Traverses in breadth-first order.
      *
-     * @throws IllegalArgumentException if {@code node} is not an element of this graph
+     * <p>That is, all the nodes of depth 0 are returned, then depth 1, then 2, and so on.</p>
+     *
+     * <p>See <a href="https://en.wikipedia.org/wiki/Breadth-first_search">Wikipedia</a> for more info.</p>
      */
-    Iterable<? extends N> successors(N node);
+    BREADTH_FIRST,
+
+    /**
+     * Traverses in depth-first pre-order.
+     *
+     * <p>"Pre-order" implies that nodes appear in the order in which they are
+     * first visited.</p>
+     *
+     * <p>See <a href="https://en.wikipedia.org/wiki/Depth-first_search">Wikipedia</a> for more info.</p>
+     */
+    DEPTH_FIRST_PRE_ORDER,
+
+    /**
+     * Traverses in depth-first post-order.
+     *
+     * <p>"Post-order" implies that nodes appear in the order in which they are
+     * visited for the last time.</p>
+     *
+     * <p>See <a href="https://en.wikipedia.org/wiki/Depth-first_search">Wikipedia</a> for more info.</p>
+     */
+    DEPTH_FIRST_POST_ORDER
 
 }

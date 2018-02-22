@@ -68,7 +68,7 @@ public class CheckCommand extends SingleCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        Tristate tristate = user.getCachedData().getPermissionData(plugin.getContextForUser(user)).getPermissionValue(permission, CheckOrigin.INTERNAL);
+        Tristate tristate = user.getCachedData().getPermissionData(plugin.getContextForUser(user).orElse(plugin.getContextManager().getStaticContexts())).getPermissionValue(permission, CheckOrigin.INTERNAL);
         Message.CHECK_RESULT.send(sender, user.getFriendlyName(), permission, CommandUtils.formatTristate(tristate));
         return CommandResult.SUCCESS;
     }

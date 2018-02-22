@@ -74,14 +74,14 @@ public class ApiContextManager implements me.lucko.luckperms.api.context.Context
     @Override
     public Optional<ImmutableContextSet> lookupApplicableContext(@Nonnull User user) {
         Objects.requireNonNull(user, "user");
-        return Optional.ofNullable(this.plugin.getContextForUser(ApiUser.cast(user))).map(c -> c.getContexts().makeImmutable());
+        return this.plugin.getContextForUser(ApiUser.cast(user)).map(c -> c.getContexts().makeImmutable());
     }
 
     @Nonnull
     @Override
     public Optional<Contexts> lookupApplicableContexts(@Nonnull User user) {
         Objects.requireNonNull(user, "user");
-        return Optional.ofNullable(this.plugin.getContextForUser(ApiUser.cast(user)));
+        return this.plugin.getContextForUser(ApiUser.cast(user));
     }
 
     @Nonnull
