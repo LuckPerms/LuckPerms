@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.treeview;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -99,6 +100,19 @@ public class ImmutableTreeNode implements Comparable<ImmutableTreeNode> {
                     .collect(Collectors.toList()));
         }
         return results;
+    }
+
+    public JsonObject toJson(String prefix) {
+        if (this.children == null) {
+            return new JsonObject();
+        }
+
+        JsonObject object = new JsonObject();
+        for (Map.Entry<String, ImmutableTreeNode> entry : this.children.entrySet()) {
+            String name = prefix + entry.getKey();
+            object.add(name, entry.getValue().toJson(name + "."));
+        }
+        return object;
     }
 
     @Override

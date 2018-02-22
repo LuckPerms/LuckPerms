@@ -123,8 +123,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
-import javax.annotation.Nullable;
-
 /**
  * LuckPerms implementation for the Sponge API.
  */
@@ -203,7 +201,7 @@ public class LPSpongePlugin implements LuckPermsSpongePlugin {
         this.dependencyManager.loadDependencies(DependencyRegistry.GLOBAL_DEPENDENCIES);
 
         sendStartupBanner(getConsoleSender());
-        this.verboseHandler = new VerboseHandler(this.scheduler.async(), getVersion());
+        this.verboseHandler = new VerboseHandler(this.scheduler.async());
         this.permissionVault = new PermissionVault(this.scheduler.async());
         this.logDispatcher = new LogDispatcher(this);
 
@@ -429,14 +427,13 @@ public class LPSpongePlugin implements LuckPermsSpongePlugin {
         }
     }
 
-    @Nullable
     @Override
-    public Contexts getContextForUser(User user) {
+    public Optional<Contexts> getContextForUser(User user) {
         Player player = getPlayer(user);
         if (player == null) {
-            return null;
+            return Optional.empty();
         }
-        return this.contextManager.getApplicableContexts(player);
+        return Optional.of(this.contextManager.getApplicableContexts(player));
     }
 
     @Override

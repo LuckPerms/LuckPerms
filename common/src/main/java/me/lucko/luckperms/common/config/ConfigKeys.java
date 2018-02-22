@@ -37,7 +37,7 @@ import me.lucko.luckperms.common.config.keys.IntegerKey;
 import me.lucko.luckperms.common.config.keys.LowercaseStringKey;
 import me.lucko.luckperms.common.config.keys.MapKey;
 import me.lucko.luckperms.common.config.keys.StringKey;
-import me.lucko.luckperms.common.inheritance.graph.TraversalAlgorithm;
+import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
 import me.lucko.luckperms.common.model.TemporaryModifier;
@@ -476,7 +476,17 @@ public class ConfigKeys {
     /**
      * The URL of the web editor
      */
-    public static final ConfigKey<String> WEB_EDITOR_URL_PATTERN = StringKey.of("web-editor-url", "https://lpedit.lucko.me/");
+    public static final ConfigKey<String> WEB_EDITOR_URL_PATTERN = StringKey.of("web-editor-url", "https://luckperms.github.io/editor/");
+
+    /**
+     * The URL of the verbose viewer
+     */
+    public static final ConfigKey<String> VERBOSE_VIEWER_URL_PATTERN = StringKey.of("verbose-viewer-url", "https://luckperms.github.io/verbose/");
+
+    /**
+     * The URL of the tree viewer
+     */
+    public static final ConfigKey<String> TREE_VIEWER_URL_PATTERN = StringKey.of("tree-viewer-url", "https://luckperms.github.io/treeview/");
 
     private static Map<String, ConfigKey<?>> KEYS = null;
 

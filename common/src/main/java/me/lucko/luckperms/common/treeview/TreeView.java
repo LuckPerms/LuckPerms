@@ -26,22 +26,19 @@
 package me.lucko.luckperms.common.treeview;
 
 import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
+import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.caching.type.PermissionCache;
-import me.lucko.luckperms.common.utils.Gist;
-import me.lucko.luckperms.common.verbose.CheckOrigin;
+import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.utils.gson.JObject;
+import me.lucko.luckperms.common.utils.web.StandardPastebin;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * A readable view of a branch of {@link TreeNode}s.
@@ -52,15 +49,16 @@ public class TreeView {
     // the root of the tree
     private final String rootPosition;
 
-    // how many levels / branches to display
-    private final int maxLevel;
-
     // the actual tree object
     private final ImmutableTreeNode view;
 
-    public TreeView(PermissionVault source, String rootPosition, int maxLevel) {
+    public TreeView(PermissionVault source, String rootPosition) {
+        if (rootPosition.equals("") || rootPosition.equals("*")) {
+            rootPosition = ".";
+        } else if (!rootPosition.equals(".") && rootPosition.endsWith(".")) {
+            rootPosition = rootPosition.substring(0, rootPosition.length() - 1);
+        }
         this.rootPosition = rootPosition;
-        this.maxLevel = maxLevel;
 
         Optional<TreeNode> root = findRoot(rootPosition, source);
         this.view = root.map(TreeNode::makeImmutableCopy).orElse(null);
@@ -115,152 +113,61 @@ public class TreeView {
     }
 
     /**
-     * Converts the view to a readable list
+     * Uploads the data contained in this TreeView and returns the id.
      *
-     * <p>The list contains KV pairs, where the key is the tree padding/structure,
-     * and the value is the actual permission.</p>
-     *
-     * @return a list of the nodes in this view
+     * @param sender the sender
+     * @param user the reference user, or null
+     * @param checker the permission data instance to check against, or null
+     * @return the id, or null
      */
-    private List<Map.Entry<String, String>> asTreeList() {
+    public String uploadPasteData(Sender sender, User user, PermissionCache checker) {
+        // only paste if there is actually data here
+        if (!hasData()) {
+            throw new IllegalStateException();
+        }
+
         // work out the prefix to apply
         // since the view is relative, we need to prepend this to all permissions
         String prefix = this.rootPosition.equals(".") ? "" : (this.rootPosition + ".");
+        JsonObject jsonTree = this.view.toJson(prefix);
 
+        JObject metadata = new JObject()
+                .add("time", DATE_FORMAT.format(new Date(System.currentTimeMillis())))
+                .add("root", this.rootPosition)
+                .add("uploader", new JObject()
+                        .add("name", sender.getNameWithLocation())
+                        .add("uuid", sender.getUuid().toString())
+                );
 
-        List<Map.Entry<String, String>> ret = new ArrayList<>();
+        JObject checks;
+        if (user != null && checker != null) {
+            metadata.add("referenceUser", new JObject()
+                    .add("name", user.getFriendlyName())
+                    .add("uuid", user.getUuid().toString())
+            );
 
-        // iterate the node endings in the view
-        for (Map.Entry<Integer, String> s : this.view.getNodeEndings()) {
-            // don't include the node if it exceeds the max level
-            if (s.getKey() >= this.maxLevel) {
-                continue;
+            checks = new JObject();
+            for (Map.Entry<Integer, String> node : this.view.getNodeEndings()) {
+                String permission = prefix + node.getValue();
+                checks.add(permission, checker.getPermissionValue(permission).name().toLowerCase());
             }
-
-            // generate the tree padding characters from the node level
-            String treeStructure = Strings.repeat("│  ", s.getKey()) + "├── ";
-            // generate the permission, using the prefix and the node
-            String permission = prefix + s.getValue();
-
-            ret.add(Maps.immutableEntry(treeStructure, permission));
+        } else {
+            checks = null;
         }
 
-        return ret;
-    }
+        JsonObject payload = new JObject()
+                .add("metadata", metadata)
+                .add("data", new JObject()
+                        .add("tree", jsonTree)
+                        .consume(obj -> {
+                            if (checks != null) {
+                                obj.add("checkResults", checks);
+                            }
+                        })
+                )
+                .toJson();
 
-    /**
-     * Uploads the data contained in this TreeView to a paste, and returns the URL.
-     *
-     * @param version the plugin version string
-     * @return the url, or null
-     */
-    public String uploadPasteData(String version) {
-        // only paste if there is actually data here
-        if (!hasData()) {
-            throw new IllegalStateException();
-        }
-
-        // get the data contained in the view in a list form
-        // for each entry, the key is the padding tree characters
-        // and the value is the actual permission string
-        List<Map.Entry<String, String>> ret = asTreeList();
-
-        // build the header of the paste
-        ImmutableList.Builder<String> builder = getPasteHeader(version, "none", ret.size());
-
-        // add the tree data
-        builder.add("```");
-        for (Map.Entry<String, String> e : ret) {
-            builder.add(e.getKey() + e.getValue());
-        }
-        builder.add("```");
-
-        // clear the initial data map
-        ret.clear();
-
-        // upload the return the data
-        Gist gist = Gist.builder()
-                .description("LuckPerms Permission Tree")
-                .file("luckperms-tree.md", builder.build().stream().collect(Collectors.joining("\n")))
-                .upload();
-
-        return gist.getUrl();
-    }
-
-    /**
-     * Uploads the data contained in this TreeView to a paste, and returns the URL.
-     *
-     * <p>Unlike {@link #uploadPasteData(String)}, this method will check each permission
-     * against a corresponding user, and colorize the output depending on the check results.</p>
-     *
-     * @param version the plugin version string
-     * @param username the username of the reference user
-     * @param checker the permission data instance to check against
-     * @return the url, or null
-     */
-    public String uploadPasteData(String version, String username, PermissionCache checker) {
-        // only paste if there is actually data here
-        if (!hasData()) {
-            throw new IllegalStateException();
-        }
-
-        // get the data contained in the view in a list form
-        // for each entry, the key is the padding tree characters
-        // and the value is the actual permission string
-        List<Map.Entry<String, String>> ret = asTreeList();
-
-        // build the header of the paste
-        ImmutableList.Builder<String> builder = getPasteHeader(version, username, ret.size());
-
-        // add the tree data
-        builder.add("```diff");
-        for (Map.Entry<String, String> e : ret) {
-
-            // lookup a permission value for the node
-            Tristate tristate = checker.getPermissionValue(e.getValue(), CheckOrigin.INTERNAL);
-
-            // append the data to the paste
-            builder.add(getTristateDiffPrefix(tristate) + e.getKey() + e.getValue());
-        }
-        builder.add("```");
-
-        // clear the initial data map
-        ret.clear();
-
-        // upload the return the data
-        Gist gist = Gist.builder()
-                .description("LuckPerms Permission Tree")
-                .file("luckperms-tree.md", builder.build().stream().collect(Collectors.joining("\n")))
-                .upload();
-
-        return gist.getUrl();
-    }
-
-    private static String getTristateDiffPrefix(Tristate t) {
-        switch (t) {
-            case TRUE:
-                return "+ ";
-            case FALSE:
-                return "- ";
-            default:
-                return "# ";
-        }
-    }
-
-    private ImmutableList.Builder<String> getPasteHeader(String version, String referenceUser, int size) {
-        String date = DATE_FORMAT.format(new Date(System.currentTimeMillis()));
-        String selection = this.rootPosition.equals(".") ? "any" : "`" + this.rootPosition + "`";
-
-        return ImmutableList.<String>builder()
-                .add("## Permission Tree")
-                .add("#### This file was automatically generated by [LuckPerms](https://github.com/lucko/LuckPerms) v" + version)
-                .add("")
-                .add("### Metadata")
-                .add("| Selection | Max Recursion | Reference User | Size | Produced at |")
-                .add("|-----------|---------------|----------------|------|-------------|")
-                .add("| " + selection + " | " + this.maxLevel + " | " + referenceUser + " | **" + size + "** | " + date + " |")
-                .add("")
-                .add("### Output");
+        return StandardPastebin.BYTEBIN.postJson(payload).id();
     }
 
 }

@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.impl.misc;
 
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
@@ -41,6 +40,7 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.web.StandardPastebin;
 import me.lucko.luckperms.common.webeditor.WebEditor;
 
 import net.kyori.text.Component;
@@ -95,14 +95,14 @@ public class EditorCommand extends SingleCommand {
         JsonObject payload = WebEditor.formPayload(holders, sender, label, plugin);
 
         // upload the payload data to gist
-        String gistId = WebEditor.postToGist(new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(payload));
-        if (gistId == null) {
+        String pasteId = StandardPastebin.BYTEBIN.postJson(payload).id();
+        if (pasteId == null) {
             Message.EDITOR_UPLOAD_FAILURE.send(sender);
             return CommandResult.STATE_ERROR;
         }
 
         // form a url for the editor
-        String url = plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + "?" + gistId;
+        String url = plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + "?" + pasteId;
 
         Message.EDITOR_URL.send(sender);
 

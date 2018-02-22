@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -64,8 +65,6 @@ public class VerboseCommand extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        boolean noTraces = args.remove("--notrace") || args.remove("--notraces") || args.remove("--slim") || args.remove("-s");
-        boolean attachRaw = args.remove("--raw");
         String mode = args.get(0).toLowerCase();
 
         if (mode.equals("on") || mode.equals("true") || mode.equals("record")) {
@@ -114,7 +113,8 @@ public class VerboseCommand extends SingleCommand {
                     Message.VERBOSE_OFF.send(sender);
                 } else {
                     Message.VERBOSE_UPLOAD_START.send(sender);
-                    String url = listener.uploadPasteData(!noTraces, attachRaw);
+                    String id = listener.uploadPasteData();
+                    String url = plugin.getConfiguration().get(ConfigKeys.VERBOSE_VIEWER_URL_PATTERN) + "?" + id;
 
                     Message.VERBOSE_RESULTS_URL.send(sender);
 

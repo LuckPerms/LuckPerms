@@ -23,22 +23,52 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.inheritance.graph;
+package me.lucko.luckperms.common.utils.gson;
 
-/**
- * A minimal functional interface for graph-structured data.
- *
- * @param <N> the node parameter type
- */
-@FunctionalInterface
-public interface Graph<N> {
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
-    /**
-     * Returns all nodes in this graph directly adjacent to {@code node} which
-     * can be reached by traversing {@code node}'s outgoing edges.
-     *
-     * @throws IllegalArgumentException if {@code node} is not an element of this graph
-     */
-    Iterable<? extends N> successors(N node);
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+public class JObject implements JElement {
+    private final JsonObject object = new JsonObject();
+
+    @Override
+    public JsonObject toJson() {
+        return this.object;
+    }
+
+    public JObject add(String key, String value) {
+        this.object.addProperty(key, value);
+        return this;
+    }
+
+    public JObject add(String key, Number value) {
+        this.object.addProperty(key, value);
+        return this;
+    }
+
+    public JObject add(String key, Boolean value) {
+        this.object.addProperty(key, value);
+        return this;
+    }
+
+    public JObject add(String key, JsonElement value) {
+        this.object.add(key, value);
+        return this;
+    }
+
+    public JObject add(String key, JElement value) {
+        return add(key, value.toJson());
+    }
+
+    public JObject add(String key, Supplier<? extends JElement> value) {
+        return add(key, value.get().toJson());
+    }
+
+    public JObject consume(Consumer<? super JObject> consumer) {
+        consumer.accept(this);
+        return this;
+    }
 }

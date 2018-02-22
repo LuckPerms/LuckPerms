@@ -27,9 +27,6 @@ package me.lucko.luckperms.common.commands.impl.misc;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.caching.MetaContexts;
@@ -51,9 +48,11 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
-import me.lucko.luckperms.common.utils.Gist;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.TextUtils;
+import me.lucko.luckperms.common.utils.gson.JArray;
+import me.lucko.luckperms.common.utils.gson.JObject;
+import me.lucko.luckperms.common.utils.web.Pastebin;
+import me.lucko.luckperms.common.utils.web.StandardPastebin;
 
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
@@ -66,7 +65,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Supplier;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class DebugCommand extends SingleCommand {
@@ -80,19 +79,26 @@ public class DebugCommand extends SingleCommand {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         Message.DEBUG_START.send(sender);
 
-        Gist gist = Gist.builder()
-                .description("LuckPerms Debug Output")
-                .file("__DEBUG__.md", TextUtils.joinNewline("# Debug Output", "The debugging data can be found in the files below."))
-                .file("platform.json", GSON.toJson(getPlatformData(plugin).toJson()))
-                .file("storage.json", GSON.toJson(getStorageData(plugin).toJson()))
-                .file("context.json", GSON.toJson(getContextData(plugin).toJson()))
-                .file("players.json", GSON.toJson(getPlayersData(plugin).toJson()))
-                .upload();
+        StringBuilder sb = new StringBuilder();
+        sb.append("LuckPerms Debug Output\n\n\n");
+
+        BiConsumer<String, JObject> builder = (name, content) -> {
+            sb.append("-- ").append(name).append(" --\n");
+            sb.append(GSON.toJson(content.toJson()));
+            sb.append("\n\n");
+        };
+
+        builder.accept("platform.json", getPlatformData(plugin));
+        builder.accept("storage.json", getStorageData(plugin));
+        builder.accept("context.json", getContextData(plugin));
+        builder.accept("players.json", getPlayersData(plugin));
+
+        Pastebin.Paste paste = StandardPastebin.HASTEBIN.postPlain(sb.toString());
 
         Message.DEBUG_URL.send(sender);
 
-        Component message = TextComponent.builder(gist.getUrl()).color(TextColor.AQUA)
-                .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, String.valueOf(gist.getUrl())))
+        Component message = TextComponent.builder(paste.url()).color(TextColor.AQUA)
+                .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, String.valueOf(paste.url())))
                 .hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to open the debugging data.").color(TextColor.GRAY)))
                 .build();
 
@@ -190,7 +196,7 @@ public class DebugCommand extends SingleCommand {
                     )
                     .add("activeContext", () -> {
                         JObject obj = new JObject();
-                        Contexts contexts = plugin.getContextForUser(user);
+                        Contexts contexts = plugin.getContextForUser(user).orElse(null);
                         if (contexts != null) {
                             MetaContexts metaContexts = plugin.getContextManager().formMetaContexts(contexts);
                             obj.add("data", new JObject()
@@ -296,76 +302,6 @@ public class DebugCommand extends SingleCommand {
                     }
                     return elements;
                 });
-    }
-
-    // stupidly simply fluent gson wrappers
-
-    private interface JElement {
-        JsonElement toJson();
-    }
-
-    private static final class JObject implements JElement {
-        private final JsonObject o = new JsonObject();
-
-        @Override
-        public JsonElement toJson() {
-            return this.o;
-        }
-
-        public JObject add(String key, String value) {
-            this.o.addProperty(key, value);
-            return this;
-        }
-
-        public JObject add(String key, Number value) {
-            this.o.addProperty(key, value);
-            return this;
-        }
-
-        public JObject add(String key, Boolean value) {
-            this.o.addProperty(key, value);
-            return this;
-        }
-
-        public JObject add(String key, JsonElement value) {
-            this.o.add(key, value);
-            return this;
-        }
-
-        public JObject add(String key, JElement value) {
-            return add(key, value.toJson());
-        }
-
-        public JObject add(String key, Supplier<? extends JElement> value) {
-            return add(key, value.get().toJson());
-        }
-    }
-
-    private static final class JArray implements JElement {
-        private final JsonArray o = new JsonArray();
-
-        @Override
-        public JsonElement toJson() {
-            return this.o;
-        }
-
-        public JArray add(String value) {
-            this.o.add(value);
-            return this;
-        }
-
-        public JArray add(JsonElement value) {
-            this.o.add(value);
-            return this;
-        }
-
-        public JArray add(JElement value) {
-            return add(value.toJson());
-        }
-
-        public JArray add(Supplier<? extends JElement> value) {
-            return add(value.get().toJson());
-        }
     }
 
 }

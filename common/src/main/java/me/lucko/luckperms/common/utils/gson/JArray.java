@@ -23,37 +23,42 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.inheritance.graph;
+package me.lucko.luckperms.common.utils.gson;
 
-public enum TraversalAlgorithm {
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 
-    /**
-     * Traverses in breadth-first order.
-     *
-     * <p>That is, all the nodes of depth 0 are returned, then depth 1, then 2, and so on.</p>
-     *
-     * <p>See <a href="https://en.wikipedia.org/wiki/Breadth-first_search">Wikipedia</a> for more info.</p>
-     */
-    BREADTH_FIRST,
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-    /**
-     * Traverses in depth-first pre-order.
-     *
-     * <p>"Pre-order" implies that nodes appear in the order in which they are
-     * first visited.</p>
-     *
-     * <p>See <a href="https://en.wikipedia.org/wiki/Depth-first_search">Wikipedia</a> for more info.</p>
-     */
-    DEPTH_FIRST_PRE_ORDER,
+public class JArray implements JElement {
+    private final JsonArray array = new JsonArray();
 
-    /**
-     * Traverses in depth-first post-order.
-     *
-     * <p>"Post-order" implies that nodes appear in the order in which they are
-     * visited for the last time.</p>
-     *
-     * <p>See <a href="https://en.wikipedia.org/wiki/Depth-first_search">Wikipedia</a> for more info.</p>
-     */
-    DEPTH_FIRST_POST_ORDER
+    @Override
+    public JsonArray toJson() {
+        return this.array;
+    }
 
+    public JArray add(String value) {
+        this.array.add(value);
+        return this;
+    }
+
+    public JArray add(JsonElement value) {
+        this.array.add(value);
+        return this;
+    }
+
+    public JArray add(JElement value) {
+        return add(value.toJson());
+    }
+
+    public JArray add(Supplier<? extends JElement> value) {
+        return add(value.get().toJson());
+    }
+
+    public JArray consume(Consumer<? super JArray> consumer) {
+        consumer.accept(this);
+        return this;
+    }
 }

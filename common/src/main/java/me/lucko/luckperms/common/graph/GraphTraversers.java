@@ -39,7 +39,7 @@
  * limitations under the License.
  */
 
-package me.lucko.luckperms.common.inheritance.graph;
+package me.lucko.luckperms.common.graph;
 
 import com.google.common.collect.AbstractIterator;
 

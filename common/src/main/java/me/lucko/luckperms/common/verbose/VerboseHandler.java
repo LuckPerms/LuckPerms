@@ -40,7 +40,6 @@ import java.util.concurrent.Executor;
  * Accepts {@link CheckData} and passes it onto registered {@link VerboseListener}s.
  */
 public class VerboseHandler implements Runnable {
-    private final String pluginVersion;
 
     // the listeners currently registered
     private final Map<UUID, VerboseListener> listeners;
@@ -54,8 +53,7 @@ public class VerboseHandler implements Runnable {
     // if the handler should shutdown
     private boolean shutdown = false;
 
-    public VerboseHandler(Executor executor, String pluginVersion) {
-        this.pluginVersion = "v" + pluginVersion;
+    public VerboseHandler(Executor executor) {
         this.listeners = new ConcurrentHashMap<>();
         this.queue = new ConcurrentLinkedQueue<>();
 
@@ -95,7 +93,7 @@ public class VerboseHandler implements Runnable {
      * @param notify if the sender should be notified in chat on each check
      */
     public void registerListener(Sender sender, VerboseFilter filter, boolean notify) {
-        this.listeners.put(sender.getUuid(), new VerboseListener(this.pluginVersion, sender, filter, notify));
+        this.listeners.put(sender.getUuid(), new VerboseListener(sender, filter, notify));
         this.listening = true;
     }
 

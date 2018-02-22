@@ -100,7 +100,7 @@ public class UserInfo extends SubCommand<User> {
         String prefix = "&bNone";
         String suffix = "&bNone";
         String meta = "&bNone";
-        Contexts contexts = plugin.getContextForUser(user);
+        Contexts contexts = plugin.getContextForUser(user).orElse(null);
         if (contexts != null) {
             ContextSet contextSet = contexts.getContexts();
             if (!contextSet.isEmpty()) {

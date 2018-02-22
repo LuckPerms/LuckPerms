@@ -23,45 +23,15 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.treeview;
+package me.lucko.luckperms.common.utils.gson;
+
+import com.google.gson.JsonElement;
 
 /**
- * Builds a {@link TreeView}.
+ * Stupidly simple fluent gson wrappers
  */
-public class TreeViewBuilder {
-    public static TreeViewBuilder newBuilder() {
-        return new TreeViewBuilder();
-    }
+public interface JElement {
 
-    private String rootPosition;
-    private int maxLevels;
-
-    private TreeViewBuilder() {
-        this.rootPosition = ".";
-        this.maxLevels = 5;
-    }
-
-    public TreeViewBuilder rootPosition(String rootPosition) {
-        this.rootPosition = rootPosition;
-        return this;
-    }
-
-    public TreeViewBuilder maxLevels(int maxLevels) {
-        this.maxLevels = maxLevels;
-        return this;
-    }
-
-    public TreeView build(PermissionVault source) {
-        if (this.maxLevels < 1) {
-            this.maxLevels = 1;
-        }
-        if (this.rootPosition.equals("") || this.rootPosition.equals("*")) {
-            this.rootPosition = ".";
-        } else if (!this.rootPosition.equals(".") && this.rootPosition.endsWith(".")) {
-            this.rootPosition = this.rootPosition.substring(0, this.rootPosition.length() - 1);
-        }
-
-        return new TreeView(source, this.rootPosition, this.maxLevels);
-    }
+    JsonElement toJson();
 
 }
