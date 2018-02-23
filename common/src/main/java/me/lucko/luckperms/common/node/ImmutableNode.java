@@ -162,6 +162,11 @@ public final class ImmutableNode implements Node {
         this.hashCode = calculateHashCode();
     }
 
+    @Override
+    public Builder toBuilder() {
+        return new NodeBuilder(this);
+    }
+
     @Nonnull
     @Override
     public String getPermission() {
@@ -441,16 +446,6 @@ public final class ImmutableNode implements Node {
         };
 
         public abstract boolean areEqual(@Nonnull ImmutableNode o1, @Nonnull ImmutableNode o2);
-    }
-
-    @Override
-    public Boolean setValue(Boolean value) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getKey() {
-        return getPermission();
     }
 
     private static String internString(String s) {

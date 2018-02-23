@@ -686,7 +686,7 @@ public abstract class PermissionHolder {
                     Node previous = existing.get();
 
                     // Create a new node with the same properties, but add the expiry dates together
-                    Node newNode = NodeFactory.builder(node).setExpiry(previous.getExpiryUnixTime() + node.getSecondsTilExpiry()).build();
+                    Node newNode = node.toBuilder().setExpiry(previous.getExpiryUnixTime() + node.getSecondsTilExpiry()).build();
 
                     // Remove the old node & add the new one.
                     ImmutableCollection<Node> before = getEnduringNodes().values();

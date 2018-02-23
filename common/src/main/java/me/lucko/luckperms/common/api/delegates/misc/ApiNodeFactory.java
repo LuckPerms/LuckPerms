@@ -52,8 +52,7 @@ public final class ApiNodeFactory implements me.lucko.luckperms.api.NodeFactory 
     @Nonnull
     @Override
     public Node.Builder newBuilderFromExisting(@Nonnull Node other) {
-        Objects.requireNonNull(other, "other");
-        return NodeFactory.builder(other);
+        return Objects.requireNonNull(other, "other").toBuilder();
     }
 
     @Nonnull

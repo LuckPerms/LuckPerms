@@ -62,10 +62,6 @@ public final class NodeFactory {
         return new NodeBuilder(s);
     }
 
-    public static Node.Builder builder(Node other) {
-        return new NodeBuilder(other);
-    }
-
     public static Node.Builder buildGroupNode(String groupName) {
         return new NodeBuilder(groupNode(groupName));
     }

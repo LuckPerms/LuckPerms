@@ -55,7 +55,7 @@ public enum CommandSpec {
             )
     ),
     DEBUG("Produce debugging output", "/%s debug"),
-    VERBOSE("Manage verbose permission checking", "/%s verbose <true|false> [filter]",
+    VERBOSE("Manage verbose permission checking", "/%s verbose <on|record|off|paste> [filter]",
             Arg.list(
                     Arg.create("on|record|off|paste", true, "whether to enable/disable logging, or to paste the logged output"),
                     Arg.create("filter", false, "the filter to match entries against")

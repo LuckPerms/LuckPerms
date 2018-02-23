@@ -230,12 +230,7 @@ public abstract class ForwardingNode implements Node {
     }
 
     @Override
-    public String getKey() {
-        return delegate().getKey();
-    }
-
-    @Override
-    public Boolean setValue(Boolean value) {
-        return delegate().setValue(value);
+    public Builder toBuilder() {
+        return delegate().toBuilder();
     }
 }
