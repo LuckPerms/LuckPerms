@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.node;
 
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.NodeEqualityPredicate;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -35,50 +36,17 @@ import java.util.Set;
 
 public final class NodeTools {
 
-    public static <T extends Node> void removeAlmostEqual(Iterator<T> it) {
+    public static <T extends Node> void removeEqual(Iterator<T> it, NodeEqualityPredicate equalityPredicate) {
         List<T> alreadyIn = new ArrayList<>();
 
-        iter:
+        iterate:
         while (it.hasNext()) {
             T next = it.next();
-            for (T n : alreadyIn) {
-                if (next.almostEquals(n)) {
+
+            for (T other : alreadyIn) {
+                if (next.equals(other, equalityPredicate)) {
                     it.remove();
-                    continue iter;
-                }
-            }
-
-            alreadyIn.add(next);
-        }
-    }
-
-    public static <T extends Node> void removeIgnoreValue(Iterator<T> it) {
-        List<T> alreadyIn = new ArrayList<>();
-
-        iter:
-        while (it.hasNext()) {
-            T next = it.next();
-            for (T n : alreadyIn) {
-                if (next.equalsIgnoringValue(n)) {
-                    it.remove();
-                    continue iter;
-                }
-            }
-
-            alreadyIn.add(next);
-        }
-    }
-
-    public static <T extends Node> void removeIgnoreValueOrTemp(Iterator<T> it) {
-        List<T> alreadyIn = new ArrayList<>();
-
-        iter:
-        while (it.hasNext()) {
-            T next = it.next();
-            for (T n : alreadyIn) {
-                if (next.equalsIgnoringValueOrTemp(n)) {
-                    it.remove();
-                    continue iter;
+                    continue iterate;
                 }
             }
 
@@ -88,10 +56,8 @@ public final class NodeTools {
 
     public static <T extends Node> void removeSamePermission(Iterator<T> it) {
         Set<String> alreadyIn = new HashSet<>();
-
         while (it.hasNext()) {
             T next = it.next();
-
             if (!alreadyIn.add(next.getPermission())) {
                 it.remove();
             }

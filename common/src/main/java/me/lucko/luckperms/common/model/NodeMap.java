@@ -32,6 +32,7 @@ import com.google.common.collect.SortedSetMultimap;
 
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.StandardNodeEquality;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.buffers.Cache;
@@ -218,9 +219,9 @@ public final class NodeMap {
         this.lock.lock();
         try {
             ImmutableContextSet context = node.getFullContexts().makeImmutable();
-            this.map.get(context).removeIf(e -> e.almostEquals(node));
+            this.map.get(context).removeIf(e -> e.equals(node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE));
             if (node.isGroupNode()) {
-                this.inheritanceMap.get(context).removeIf(e -> e.almostEquals(node));
+                this.inheritanceMap.get(context).removeIf(e -> e.equals(node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE));
             }
         } finally {
             this.lock.unlock();

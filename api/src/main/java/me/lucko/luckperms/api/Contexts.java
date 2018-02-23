@@ -58,15 +58,7 @@ public class Contexts {
      *
      * Simply passes an empty context set, with all accumulation settings set to true.
      */
-    private static final Contexts GLOBAL = new Contexts(
-            ContextSet.empty(),
-            true,
-            true,
-            true,
-            true,
-            true,
-            false
-    );
+    private static final Contexts GLOBAL = new Contexts(ContextSet.empty(), true, true, true, true, true, false);
 
     /**
      * Gets the {@link FullySatisfiedContexts} instance.

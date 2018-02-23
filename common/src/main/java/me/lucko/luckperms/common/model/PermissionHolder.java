@@ -366,7 +366,7 @@ public abstract class PermissionHolder {
         List<LocalizedNode> nodes = new LinkedList<>();
         accumulateInheritancesTo(nodes, contexts);
 
-        NodeTools.removeAlmostEqual(nodes.iterator());
+        NodeTools.removeEqual(nodes.iterator(), StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
         SortedSet<LocalizedNode> ret = new TreeSet<>(NodeWithContextComparator.reverse());
         ret.addAll(nodes);
         return ret;
@@ -376,7 +376,7 @@ public abstract class PermissionHolder {
         List<LocalizedNode> nodes = new LinkedList<>();
         accumulateInheritancesTo(nodes, contexts);
 
-        NodeTools.removeIgnoreValueOrTemp(nodes.iterator());
+        NodeTools.removeEqual(nodes.iterator(), StandardNodeEquality.IGNORE_VALUE_OR_IF_TEMPORARY);
         SortedSet<LocalizedNode> ret = new TreeSet<>(NodeWithContextComparator.reverse());
         ret.addAll(nodes);
         return ret;
@@ -404,7 +404,7 @@ public abstract class PermissionHolder {
         List<LocalizedNode> nodes = new LinkedList<>();
         accumulateInheritancesTo(nodes);
 
-        NodeTools.removeAlmostEqual(nodes.iterator());
+        NodeTools.removeEqual(nodes.iterator(), StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
         SortedSet<LocalizedNode> ret = new TreeSet<>(NodeWithContextComparator.reverse());
         ret.addAll(nodes);
         return ret;
@@ -414,7 +414,7 @@ public abstract class PermissionHolder {
         List<LocalizedNode> nodes = new LinkedList<>();
         accumulateInheritancesTo(nodes);
 
-        NodeTools.removeIgnoreValueOrTemp(nodes.iterator());
+        NodeTools.removeEqual(nodes.iterator(), StandardNodeEquality.IGNORE_VALUE_OR_IF_TEMPORARY);
         SortedSet<LocalizedNode> ret = new TreeSet<>(NodeWithContextComparator.reverse());
         ret.addAll(nodes);
         return ret;
