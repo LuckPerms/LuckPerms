@@ -98,6 +98,10 @@ public final class NodeFactory {
         return GROUP_NODE_MARKER + groupName;
     }
 
+    public static String chatMetaNode(ChatMetaType type, int priority, String value) {
+        return type == ChatMetaType.PREFIX ? prefixNode(priority, value) : suffixNode(priority, value);
+    }
+
     public static String prefixNode(int priority, String prefix) {
         return PREFIX_NODE_MARKER + priority + "." + LegacyNodeFactory.escapeCharacters(prefix);
     }

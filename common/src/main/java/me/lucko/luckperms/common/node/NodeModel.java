@@ -55,6 +55,10 @@ public final class NodeModel {
         return new NodeModel(permission, value, server, world, expiry, contexts);
     }
 
+    public static NodeModel of(String permission) {
+        return of(permission, true, "global", "global", 0L, ImmutableContextSet.empty());
+    }
+
     private final String permission;
     private final boolean value;
     private final String server;
