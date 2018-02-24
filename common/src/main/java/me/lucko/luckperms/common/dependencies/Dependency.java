@@ -156,6 +156,7 @@ public enum Dependency {
             "HqqWy45QVeTVF0Z/DzsrPLvGKn2dHotqI8YX7GDThvo=",
             Relocation.allOf(
                     Relocation.of("jedis", "redis{}clients{}jedis"),
+                    Relocation.of("jedisutil", "redis{}clients{}util"),
                     Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
             )
     ),
