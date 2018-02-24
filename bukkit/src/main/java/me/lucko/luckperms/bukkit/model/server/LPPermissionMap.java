@@ -40,10 +40,12 @@ import org.bukkit.plugin.PluginManager;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * A replacement map for the 'permissions' instance in Bukkit's SimplePluginManager.
@@ -94,6 +96,9 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
 
     @Override
     public Permission put(@Nonnull String key, @Nonnull Permission value) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(value, "value");
+
         this.plugin.getPermissionVault().offer(key);
         Permission ret = super.put(key, value);
         update();
@@ -109,10 +114,46 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
 
     @Override
     public Permission putIfAbsent(String key, Permission value) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(value, "value");
+
         this.plugin.getPermissionVault().offer(key);
         Permission ret = super.putIfAbsent(key, value);
         update();
         return ret;
+    }
+
+    // null-safe - the plugin manager uses hashmap
+
+    @Override
+    public Permission remove(@Nullable Object object) {
+        if (object == null) {
+            return null;
+        }
+        return super.remove(object);
+    }
+
+    @Override
+    public boolean remove(Object key, Object value) {
+        return key != null && value != null && super.remove(key, value);
+    }
+
+    @Override
+    public boolean containsKey(@Nullable Object key) {
+        return key != null && super.containsKey(key);
+    }
+
+    @Override
+    public boolean containsValue(@Nullable Object value) {
+        return value != null && super.containsValue(value);
+    }
+
+    @Override
+    public Permission get(@Nullable Object key) {
+        if (key == null) {
+            return null;
+        }
+        return super.get(key);
     }
 
     private final class ChildPermissionResolver implements CacheLoader<String, Map<String, Boolean>> {
