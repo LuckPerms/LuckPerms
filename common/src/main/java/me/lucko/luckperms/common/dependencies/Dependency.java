@@ -62,8 +62,8 @@ public enum Dependency {
     CAFFEINE(
             "com{}github{}ben-manes{}caffeine",
             "caffeine",
-            "2.6.1",
-            "5F55lb0PmSThBWkRJ9mwkvN+8xT6uDZKIwKk37QW0co=",
+            "2.6.2",
+            "53pEV3NfB1FY29Ahx2YXl91IVpX8Ttkt/d401HFNl1A=",
             Relocation.of("caffeine", "com{}github{}benmanes{}caffeine")
     ),
     OKIO(
@@ -123,8 +123,8 @@ public enum Dependency {
     HIKARI(
             "com{}zaxxer",
             "HikariCP",
-            "2.7.6",
-            "gEhb0Z6eOIgGT5mG9NhyyEtbBxJx/Rks6aDiWUnmqK4=",
+            "2.7.8",
+            "nmp5eJvNRsz/4fxakr4re5Tdx/U4wy8BlSU2si0j/ZY=",
             Relocation.of("hikari", "com{}zaxxer{}hikari")
     ),
     SLF4J_SIMPLE(
