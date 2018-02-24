@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.utils.gson;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -39,24 +40,21 @@ public class JObject implements JElement {
         return this.object;
     }
 
-    public JObject add(String key, String value) {
-        this.object.addProperty(key, value);
-        return this;
-    }
-
-    public JObject add(String key, Number value) {
-        this.object.addProperty(key, value);
-        return this;
-    }
-
-    public JObject add(String key, Boolean value) {
-        this.object.addProperty(key, value);
-        return this;
-    }
-
     public JObject add(String key, JsonElement value) {
         this.object.add(key, value);
         return this;
+    }
+
+    public JObject add(String key, String value) {
+        return add(key, new JsonPrimitive(value));
+    }
+
+    public JObject add(String key, Number value) {
+        return add(key, new JsonPrimitive(value));
+    }
+
+    public JObject add(String key, Boolean value) {
+        return add(key, new JsonPrimitive(value));
     }
 
     public JObject add(String key, JElement value) {

@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.utils.gson;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -40,7 +41,7 @@ public class JArray implements JElement {
     }
 
     public JArray add(String value) {
-        this.array.add(value);
+        this.array.add(new JsonPrimitive(value));
         return this;
     }
 
