@@ -29,6 +29,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.bukkit.calculators.BukkitCalculatorFactory;
+import me.lucko.luckperms.bukkit.compat.NullSafeConsoleCommandSender;
 import me.lucko.luckperms.bukkit.contexts.BukkitContextManager;
 import me.lucko.luckperms.bukkit.contexts.WorldCalculator;
 import me.lucko.luckperms.bukkit.listeners.BukkitConnectionListener;
@@ -85,6 +86,7 @@ import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -124,6 +126,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private LuckPermsApiProvider apiProvider;
     private EventFactory eventFactory;
     private Logger log;
+    private ConsoleCommandSender console;
     private LPSubscriptionMap subscriptionMap;
     private LPPermissionMap permissionMap;
     private LPDefaultsMap defaultPermissionMap;
@@ -152,6 +155,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }
 
         // setup minimal functionality in order to load initial dependencies
+        this.console = new NullSafeConsoleCommandSender(getServer());
         this.scheduler = new BukkitSchedulerAdapter(this);
         this.localeManager = new NoopLocaleManager();
         this.senderFactory = new BukkitSenderFactory(this);
@@ -577,7 +581,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public Sender getConsoleSender() {
-        return getSenderFactory().wrap(getServer().getConsoleSender());
+        return getSenderFactory().wrap(this.console);
     }
 
     private static boolean checkInvalidVersion() {
