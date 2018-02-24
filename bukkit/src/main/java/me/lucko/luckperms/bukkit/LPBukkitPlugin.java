@@ -253,7 +253,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         Runnable[] injectors = new Runnable[]{
                 new InjectorSubscriptionMap(this),
                 new InjectorPermissionMap(this),
-                new InjectorDefaultsMap(this)
+                new InjectorDefaultsMap(this),
+                new PermissibleMonitoringInjector(this)
         };
 
         for (Runnable injector : injectors) {
@@ -263,9 +264,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             // the entire pluginmanager instance is replaced by some plugins :(
             this.scheduler.asyncLater(injector, 1L);
         }
-
-        // inject verbose handlers into internal bukkit objects
-        new PermissibleMonitoringInjector(this).run();
 
         // Provide vault support
         tryVaultHook(false);
