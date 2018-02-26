@@ -38,7 +38,7 @@ public final class DataConstraints {
     public static final int MAX_GROUP_NAME_LENGTH = 36;
 
     public static final int MAX_PLAYER_USERNAME_LENGTH = 16;
-    public static final Pattern PLAYER_USERNAME_INVALID_CHAR_MATCHER = Pattern.compile("[^A-Za-z0-9_ ]");
+    public static final Pattern PLAYER_USERNAME_INVALID_CHAR_MATCHER = Pattern.compile("[^A-Za-z0-9_]");
 
     public static final int MAX_SERVER_LENGTH = 36;
     public static final int MAX_WORLD_LENGTH = 36;
