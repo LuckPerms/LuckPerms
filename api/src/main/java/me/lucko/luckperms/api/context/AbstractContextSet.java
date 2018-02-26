@@ -126,8 +126,7 @@ abstract class AbstractContextSet implements ContextSet {
         if (stringIsEmpty(key)) {
             throw new IllegalArgumentException("key is (effectively) empty");
         }
-
-        return key.toLowerCase().intern();
+        return key.toLowerCase();
     }
 
     static String sanitizeValue(String value) {
@@ -135,8 +134,7 @@ abstract class AbstractContextSet implements ContextSet {
         if (stringIsEmpty(value)) {
             throw new IllegalArgumentException("value is (effectively) empty");
         }
-
-        return value.intern();
+        return value;
     }
 
     private static boolean stringIsEmpty(String s) {
