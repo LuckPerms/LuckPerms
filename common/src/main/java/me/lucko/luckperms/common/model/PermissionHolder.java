@@ -34,6 +34,7 @@ import com.google.common.collect.Multimap;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.LocalizedNode;
+import me.lucko.luckperms.api.LookupSetting;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.NodeEqualityPredicate;
 import me.lucko.luckperms.api.StandardNodeEquality;
@@ -422,7 +423,7 @@ public abstract class PermissionHolder {
 
     private List<LocalizedNode> getAllEntries(Contexts context) {
         List<LocalizedNode> entries = new LinkedList<>();
-        if (context.isApplyGroups()) {
+        if (context.hasSetting(LookupSetting.RESOLVE_INHERITANCE)) {
             accumulateInheritancesTo(entries, context);
         } else {
             for (Node n : getOwnNodes(context.getContexts())) {
@@ -431,10 +432,10 @@ public abstract class PermissionHolder {
             }
         }
 
-        if (!context.isIncludeGlobal()) {
+        if (!context.hasSetting(LookupSetting.INCLUDE_NODES_SET_WITHOUT_SERVER)) {
             entries.removeIf(n -> !n.isGroupNode() && !n.isServerSpecific());
         }
-        if (!context.isApplyGlobalWorldGroups()) {
+        if (!context.hasSetting(LookupSetting.INCLUDE_NODES_SET_WITHOUT_WORLD)) {
             entries.removeIf(n -> !n.isGroupNode() && !n.isWorldSpecific());
         }
 
@@ -507,7 +508,7 @@ public abstract class PermissionHolder {
                 if (!node.getValuePrimitive()) continue;
                 if (!node.isMeta() && !node.isPrefix() && !node.isSuffix()) continue;
 
-                if (!((context.isIncludeGlobal() || node.isServerSpecific()) && (context.isIncludeGlobalWorld() || node.isWorldSpecific()))) {
+                if (!((context.hasSetting(LookupSetting.INCLUDE_NODES_SET_WITHOUT_SERVER) || node.isServerSpecific()) && (context.hasSetting(LookupSetting.INCLUDE_NODES_SET_WITHOUT_WORLD) || node.isWorldSpecific()))) {
                     continue;
                 }
 

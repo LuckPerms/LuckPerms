@@ -28,6 +28,7 @@ package me.lucko.luckperms.bukkit.calculators;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.LookupSetting;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.bukkit.processors.ChildProcessor;
 import me.lucko.luckperms.bukkit.processors.DefaultsProcessor;
@@ -67,7 +68,7 @@ public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
         }
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS) && metadata.getHolderType() == HolderType.USER) {
-            processors.add(new DefaultsProcessor(this.plugin, contexts.isOp()));
+            processors.add(new DefaultsProcessor(this.plugin, contexts.hasSetting(LookupSetting.IS_OP)));
         }
 
         return registerCalculator(new PermissionCalculator(this.plugin, metadata, processors.build()));

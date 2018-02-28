@@ -23,31 +23,42 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bungee.contexts;
+package me.lucko.luckperms.api;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.bungee.LPBungeePlugin;
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.contexts.AbstractContextManager;
+/**
+ * The various lookup setting flags for {@link Contexts}.
+ *
+ * @since 4.2
+ */
+public enum LookupSetting {
 
-import net.md_5.bungee.api.connection.ProxiedPlayer;
+    /**
+     * If the target subject is OP
+     */
+    IS_OP,
 
-public class BungeeContextManager extends AbstractContextManager<ProxiedPlayer> {
-    public BungeeContextManager(LPBungeePlugin plugin) {
-        super(plugin, ProxiedPlayer.class);
-    }
+    /**
+     * If global or non-server-specific nodes should be applied
+     */
+    INCLUDE_NODES_SET_WITHOUT_SERVER,
 
-    @Override
-    public Contexts formContexts(ProxiedPlayer subject, ImmutableContextSet contextSet) {
-        return Contexts.of(
-                contextSet,
-                this.plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                this.plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                true,
-                this.plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                this.plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                false
-        );
-    }
+    /**
+     * If global or non-world-specific nodes should be applied
+     */
+    INCLUDE_NODES_SET_WITHOUT_WORLD,
+
+    /**
+     * If parent groups should be resolved
+     */
+    RESOLVE_INHERITANCE,
+
+    /**
+     * If global or non-server-specific group memberships should be applied
+     */
+    APPLY_PARENTS_SET_WITHOUT_SERVER,
+
+    /**
+     * If global or non-world-specific group memberships should be applied
+     */
+    APPLY_PARENTS_SET_WITHOUT_WORLD
 }

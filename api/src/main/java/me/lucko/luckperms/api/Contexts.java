@@ -25,16 +25,21 @@
 
 package me.lucko.luckperms.api;
 
+import com.google.common.collect.ImmutableSet;
+
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 
+import java.util.EnumSet;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 /**
- * Encapsulates the options and settings for a permission or meta lookup.
+ * Encapsulates the {@link ContextSet contexts} and {@link LookupSetting settings} for
+ * a permission or meta lookup.
  *
  * <p>This class is immutable.</p>
  *
@@ -54,11 +59,23 @@ public class Contexts {
     public static final String WORLD_KEY = "world";
 
     /**
+     * The default {@link LookupSetting}s.
+     */
+    private static final EnumSet<LookupSetting> DEFAULT_SETTINGS = EnumSet.of(
+            LookupSetting.INCLUDE_NODES_SET_WITHOUT_SERVER,
+            LookupSetting.INCLUDE_NODES_SET_WITHOUT_WORLD,
+            LookupSetting.RESOLVE_INHERITANCE,
+            LookupSetting.APPLY_PARENTS_SET_WITHOUT_SERVER,
+            LookupSetting.APPLY_PARENTS_SET_WITHOUT_WORLD
+    );
+
+    /**
      * A 'global' or default contexts instance.
      *
-     * Simply passes an empty context set, with all accumulation settings set to true.
+     * <p>Formed of an empty {@link ContextSet} and all inclusion and
+     * inheritance {@link LookupSetting}s applied.</p>
      */
-    private static final Contexts GLOBAL = new Contexts(ContextSet.empty(), true, true, true, true, true, false);
+    private static final Contexts GLOBAL = new Contexts(ImmutableContextSet.empty(), ImmutableSet.copyOf(DEFAULT_SETTINGS));
 
     /**
      * Gets the {@link FullySatisfiedContexts} instance.
@@ -71,7 +88,10 @@ public class Contexts {
     }
 
     /**
-     * A contexts instance with no defined context.
+     * Returns a 'global' or default contexts instance.
+     *
+     * <p>Formed of an empty {@link ContextSet} and all inclusion and
+     * inheritance {@link LookupSetting}s applied.</p>
      *
      * @return the global contexts
      * @since 3.3
@@ -81,140 +101,208 @@ public class Contexts {
         return GLOBAL;
     }
 
+    /**
+     * Creates a new {@link Contexts} instance.
+     *
+     * @param contextSet the context set
+     * @param includeNodesSetWithoutServer the value of {@link LookupSetting#INCLUDE_NODES_SET_WITHOUT_SERVER}
+     * @param includeNodesSetWithoutWorld the value of {@link LookupSetting#INCLUDE_NODES_SET_WITHOUT_WORLD}
+     * @param resolveInheritance the value of {@link LookupSetting#RESOLVE_INHERITANCE}
+     * @param applyParentsWithoutServer the value of {@link LookupSetting#APPLY_PARENTS_SET_WITHOUT_SERVER}
+     * @param applyParentsWithoutWorld the value of {@link LookupSetting#APPLY_PARENTS_SET_WITHOUT_WORLD}
+     * @param isOp the value of {@link LookupSetting#IS_OP}
+     * @return a new instance
+     */
     @Nonnull
-    public static Contexts of(@Nonnull ContextSet context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
-        return new Contexts(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups, op);
+    public static Contexts of(@Nonnull ContextSet contextSet, boolean includeNodesSetWithoutServer, boolean includeNodesSetWithoutWorld, boolean resolveInheritance, boolean applyParentsWithoutServer, boolean applyParentsWithoutWorld, boolean isOp) {
+        Objects.requireNonNull(contextSet, "contextSet");
+        EnumSet<LookupSetting> settings = formSettings(
+                includeNodesSetWithoutServer,
+                includeNodesSetWithoutWorld,
+                resolveInheritance,
+                applyParentsWithoutServer,
+                applyParentsWithoutWorld,
+                isOp
+        );
+        if (contextSet.isEmpty() && DEFAULT_SETTINGS.equals(settings)) {
+            return GLOBAL;
+        }
+        return new Contexts(contextSet.makeImmutable(), ImmutableSet.copyOf(settings));
+    }
+
+    /**
+     * Creates a new {@link Contexts} instance.
+     *
+     * @param contextSet the context set
+     * @param settings the settings
+     * @return a new instance
+     */
+    public static Contexts of(@Nonnull ContextSet contextSet, @Nonnull Set<LookupSetting> settings) {
+        Objects.requireNonNull(contextSet, "contextSet");
+        Objects.requireNonNull(settings, "settings");
+
+        EnumSet<LookupSetting> settingsCopy = EnumSet.copyOf(settings);
+        if (contextSet.isEmpty() && DEFAULT_SETTINGS.equals(settingsCopy)) {
+            return GLOBAL;
+        }
+
+        return new Contexts(contextSet.makeImmutable(), ImmutableSet.copyOf(settingsCopy));
     }
 
     /**
      * The contexts that apply for this lookup
      */
-    private final ImmutableContextSet context;
+    private final ImmutableContextSet contextSet;
 
     /**
-     * If the target subject is OP. This is used to parse defaults on Bukkit,
-     * and is ignored on all other platforms.
-     *
-     * @since 2.12
+     * The settings for this lookup
      */
-    private final boolean op;
-
-    /**
-     * If global or non server specific nodes should be applied
-     */
-    private final boolean includeGlobal;
-
-    /**
-     * If global or non world specific nodes should be applied
-     */
-    private final boolean includeGlobalWorld;
-
-    /**
-     * If parent groups should be applied
-     */
-    private final boolean applyGroups;
-
-    /**
-     * If global or non server specific group memberships should be applied
-     */
-    private final boolean applyGlobalGroups;
-
-    /**
-     * If global or non world specific group memberships should be applied
-     */
-    private final boolean applyGlobalWorldGroups;
+    private final ImmutableSet<LookupSetting> settings;
 
     // cache hashcode - this class is immutable, and is used as an index in the permission cache.
     private final int hashCode;
 
-    public Contexts(@Nonnull ContextSet context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
-        this.context = Objects.requireNonNull(context, "context").makeImmutable();
-        this.includeGlobal = includeGlobal;
-        this.includeGlobalWorld = includeGlobalWorld;
-        this.applyGroups = applyGroups;
-        this.applyGlobalGroups = applyGlobalGroups;
-        this.applyGlobalWorldGroups = applyGlobalWorldGroups;
-        this.op = op;
+    /**
+     * Creates a new {@link Contexts} instance.
+     *
+     * @param contextSet the context set
+     * @param includeNodesSetWithoutServer the value of {@link LookupSetting#INCLUDE_NODES_SET_WITHOUT_SERVER}
+     * @param includeNodesSetWithoutWorld the value of {@link LookupSetting#INCLUDE_NODES_SET_WITHOUT_WORLD}
+     * @param resolveInheritance the value of {@link LookupSetting#RESOLVE_INHERITANCE}
+     * @param applyParentsWithoutServer the value of {@link LookupSetting#APPLY_PARENTS_SET_WITHOUT_SERVER}
+     * @param applyParentsWithoutWorld the value of {@link LookupSetting#APPLY_PARENTS_SET_WITHOUT_WORLD}
+     * @param isOp the value of {@link LookupSetting#IS_OP}
+     * @deprecated in favour of {@link #of(ContextSet, boolean, boolean, boolean, boolean, boolean, boolean)}
+     */
+    @Deprecated
+    public Contexts(@Nonnull ContextSet contextSet, boolean includeNodesSetWithoutServer, boolean includeNodesSetWithoutWorld, boolean resolveInheritance, boolean applyParentsWithoutServer, boolean applyParentsWithoutWorld, boolean isOp) {
+        this.contextSet = Objects.requireNonNull(contextSet, "contextSet").makeImmutable();
+        this.settings = ImmutableSet.copyOf(formSettings(
+                includeNodesSetWithoutServer,
+                includeNodesSetWithoutWorld,
+                resolveInheritance,
+                applyParentsWithoutServer,
+                applyParentsWithoutWorld,
+                isOp
+        ));
+        this.hashCode = calculateHashCode();
+    }
+
+    protected Contexts(@Nonnull ImmutableContextSet contextSet, @Nonnull ImmutableSet<LookupSetting> settings) {
+        this.contextSet = contextSet;
+        this.settings = settings;
         this.hashCode = calculateHashCode();
     }
 
     /**
-     * Gets the contexts that apply for this lookup
+     * Gets the {@link ContextSet} which represent these {@link Contexts}.
      *
-     * @return an immutable set of context key value pairs
+     * @return an immutable context from this instance
      * @since 2.13
      */
     @Nonnull
     public ContextSet getContexts() {
-        return this.context;
+        return this.contextSet;
     }
 
     /**
-     * Gets if the target subject is OP. This is used to parse defaults on Bukkit,
-     * and is ignored on all other platforms.
+     * Gets the set of {@link LookupSetting}s which represent these {@link Contexts}.
      *
-     * @return true if op defaults should be included
+     * @return the settings
+     * @since 4.2
      */
+    @Nonnull
+    public Set<LookupSetting> getSettings() {
+        return this.settings;
+    }
+
+    /**
+     * Gets if the given {@link LookupSetting} is set.
+     *
+     * @param setting the setting
+     * @return the value
+     * @since 4.2
+     */
+    public boolean hasSetting(@Nonnull LookupSetting setting) {
+        return this.settings.contains(setting);
+    }
+
+    /**
+     * Gets the value of {@link LookupSetting#IS_OP}.
+     *
+     * @return the value
+     * @see LookupSetting#IS_OP
+     * @deprecated in favour of {@link #hasSetting(LookupSetting)}
+     */
+    @Deprecated
     public boolean isOp() {
-        return this.op;
+        return hasSetting(LookupSetting.IS_OP);
     }
 
     /**
-     * Gets if global or non server specific nodes should be applied
+     * Gets the value of {@link LookupSetting#INCLUDE_NODES_SET_WITHOUT_SERVER}.
      *
-     * @return true if global or non server specific nodes should be applied
+     * @return the value
+     * @see LookupSetting#INCLUDE_NODES_SET_WITHOUT_SERVER
+     * @deprecated in favour of {@link #hasSetting(LookupSetting)}
      */
+    @Deprecated
     public boolean isIncludeGlobal() {
-        return this.includeGlobal;
+        return hasSetting(LookupSetting.INCLUDE_NODES_SET_WITHOUT_SERVER);
     }
 
     /**
-     * Gets if global or non world specific nodes should be applied
+     * Gets the value of {@link LookupSetting#INCLUDE_NODES_SET_WITHOUT_WORLD}.
      *
-     * @return true if global or non world specific nodes should be applied
+     * @return the value
+     * @see LookupSetting#INCLUDE_NODES_SET_WITHOUT_WORLD
+     * @deprecated in favour of {@link #hasSetting(LookupSetting)}
      */
+    @Deprecated
     public boolean isIncludeGlobalWorld() {
-        return this.includeGlobalWorld;
+        return hasSetting(LookupSetting.INCLUDE_NODES_SET_WITHOUT_WORLD);
     }
 
     /**
-     * Gets if parent groups should be applied
+     * Gets the value of {@link LookupSetting#RESOLVE_INHERITANCE}.
      *
-     * @return true if parent groups should be applied
+     * @return the value
+     * @see LookupSetting#RESOLVE_INHERITANCE
+     * @deprecated in favour of {@link #hasSetting(LookupSetting)}
      */
+    @Deprecated
     public boolean isApplyGroups() {
-        return this.applyGroups;
+        return hasSetting(LookupSetting.RESOLVE_INHERITANCE);
     }
 
     /**
-     * Gets if global or non server specific group memberships should be applied
+     * Gets the value of {@link LookupSetting#APPLY_PARENTS_SET_WITHOUT_SERVER}.
      *
-     * @return true if global or non server specific group memberships should be applied
+     * @return the value
+     * @see LookupSetting#APPLY_PARENTS_SET_WITHOUT_SERVER
+     * @deprecated in favour of {@link #hasSetting(LookupSetting)}
      */
+    @Deprecated
     public boolean isApplyGlobalGroups() {
-        return this.applyGlobalGroups;
+        return hasSetting(LookupSetting.APPLY_PARENTS_SET_WITHOUT_SERVER);
     }
 
     /**
-     * Gets if global or non world specific group memberships should be applied
+     * Gets the value of {@link LookupSetting#APPLY_PARENTS_SET_WITHOUT_WORLD}.
      *
-     * @return true if global or non world specific group memberships should be applied
+     * @return the value
+     * @see LookupSetting#APPLY_PARENTS_SET_WITHOUT_WORLD
+     * @deprecated in favour of {@link #hasSetting(LookupSetting)}
      */
+    @Deprecated
     public boolean isApplyGlobalWorldGroups() {
-        return this.applyGlobalWorldGroups;
+        return hasSetting(LookupSetting.APPLY_PARENTS_SET_WITHOUT_WORLD);
     }
 
     @Nonnull
     @Override
     public String toString() {
-        return "Contexts(" +
-                "context=" + this.context + ", " +
-                "op=" + this.op + ", " +
-                "includeGlobal=" + this.includeGlobal + ", " +
-                "includeGlobalWorld=" + this.includeGlobalWorld + ", " +
-                "applyGroups=" + this.applyGroups + ", " +
-                "applyGlobalGroups=" + this.applyGlobalGroups + ", " +
-                "applyGlobalWorldGroups=" + this.applyGlobalWorldGroups + ")";
+        return "Contexts(contextSet=" + this.contextSet + ", settings=" + this.settings + ")";
     }
 
     @Override
@@ -223,26 +311,14 @@ public class Contexts {
         if (o == allowAll()) return false;
         if (!(o instanceof Contexts)) return false;
         final Contexts that = (Contexts) o;
-
-        return this.context.equals(that.context) &&
-                this.op == that.op &&
-                this.includeGlobal == that.includeGlobal &&
-                this.includeGlobalWorld == that.includeGlobalWorld &&
-                this.applyGroups == that.applyGroups &&
-                this.applyGlobalGroups == that.applyGlobalGroups &&
-                this.applyGlobalWorldGroups == that.applyGlobalWorldGroups;
+        return this.contextSet.equals(that.contextSet) && this.settings.equals(that.settings);
     }
 
     private int calculateHashCode() {
         final int PRIME = 59;
         int result = 1;
-        result = result * PRIME + this.context.hashCode();
-        result = result * PRIME + (this.op ? 79 : 97);
-        result = result * PRIME + (this.includeGlobal ? 79 : 97);
-        result = result * PRIME + (this.includeGlobalWorld ? 79 : 97);
-        result = result * PRIME + (this.applyGroups ? 79 : 97);
-        result = result * PRIME + (this.applyGlobalGroups ? 79 : 97);
-        result = result * PRIME + (this.applyGlobalWorldGroups ? 79 : 97);
+        result = result * PRIME + this.contextSet.hashCode();
+        result = result * PRIME + this.settings.hashCode();
         return result;
     }
 
@@ -250,4 +326,28 @@ public class Contexts {
     public int hashCode() {
         return this.hashCode;
     }
+
+    private static EnumSet<LookupSetting> formSettings(boolean includeNodesSetWithoutServer, boolean includeNodesSetWithoutWorld, boolean resolveInheritance, boolean applyParentsWithoutServer, boolean applyParentsWithoutWorld, boolean isOp) {
+        EnumSet<LookupSetting> settings = EnumSet.noneOf(LookupSetting.class);
+        if (includeNodesSetWithoutServer) {
+            settings.add(LookupSetting.INCLUDE_NODES_SET_WITHOUT_SERVER);
+        }
+        if (includeNodesSetWithoutWorld) {
+            settings.add(LookupSetting.INCLUDE_NODES_SET_WITHOUT_WORLD);
+        }
+        if (resolveInheritance) {
+            settings.add(LookupSetting.RESOLVE_INHERITANCE);
+        }
+        if (applyParentsWithoutServer) {
+            settings.add(LookupSetting.APPLY_PARENTS_SET_WITHOUT_SERVER);
+        }
+        if (applyParentsWithoutWorld) {
+            settings.add(LookupSetting.APPLY_PARENTS_SET_WITHOUT_WORLD);
+        }
+        if (isOp) {
+            settings.add(LookupSetting.IS_OP);
+        }
+        return settings;
+    }
+
 }

@@ -348,7 +348,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
             }
         }
 
-        return new Contexts(context, isIncludeGlobal(), true, true, true, true, false);
+        return Contexts.of(context, isIncludeGlobal(), true, true, true, true, false);
     }
 
     // utility methods for modifying the state of PermissionHolders

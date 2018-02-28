@@ -326,6 +326,6 @@ public class VaultChatHook extends AbstractVaultChat {
             context.add(Contexts.WORLD_KEY, world.toLowerCase());
         }
         context.add(Contexts.SERVER_KEY, this.permissionHook.getVaultServer());
-        return new Contexts(context.build(), this.permissionHook.isIncludeGlobal(), true, true, true, true, false);
+        return Contexts.of(context.build(), this.permissionHook.isIncludeGlobal(), true, true, true, true, false);
     }
 }

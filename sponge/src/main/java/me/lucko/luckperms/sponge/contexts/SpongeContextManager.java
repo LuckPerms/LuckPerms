@@ -40,7 +40,7 @@ public class SpongeContextManager extends AbstractContextManager<Subject> {
 
     @Override
     public Contexts formContexts(Subject subject, ImmutableContextSet contextSet) {
-        return new Contexts(
+        return Contexts.of(
                 contextSet,
                 this.plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
                 this.plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),

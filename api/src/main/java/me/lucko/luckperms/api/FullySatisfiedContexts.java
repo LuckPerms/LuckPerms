@@ -25,9 +25,11 @@
 
 package me.lucko.luckperms.api;
 
+import com.google.common.collect.ImmutableSet;
+
 import me.lucko.luckperms.api.caching.CachedData;
 import me.lucko.luckperms.api.caching.MetaContexts;
-import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 
 import javax.annotation.Nonnull;
 
@@ -58,7 +60,7 @@ public final class FullySatisfiedContexts extends Contexts {
     }
 
     private FullySatisfiedContexts() {
-        super(ContextSet.empty(), true, true, true, true, true, false);
+        super(ImmutableContextSet.empty(), ImmutableSet.copyOf(Contexts.global().getSettings()));
     }
 
     @Nonnull

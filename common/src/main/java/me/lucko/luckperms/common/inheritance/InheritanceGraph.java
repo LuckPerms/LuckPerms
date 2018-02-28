@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.inheritance;
 
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.LookupSetting;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.graph.Graph;
 import me.lucko.luckperms.common.graph.GraphTraversers;
@@ -95,7 +96,7 @@ public interface InheritanceGraph extends Graph<PermissionHolder> {
             List<Node> nodes = holder.getOwnGroupNodes(this.context.getContexts());
             for (Node n : nodes) {
                 // effectively: if not (we're applying global groups or it's specific anyways)
-                if (!((this.context.isApplyGlobalGroups() || n.isServerSpecific()) && (this.context.isApplyGlobalWorldGroups() || n.isWorldSpecific()))) {
+                if (!((this.context.hasSetting(LookupSetting.APPLY_PARENTS_SET_WITHOUT_SERVER) || n.isServerSpecific()) && (this.context.hasSetting(LookupSetting.APPLY_PARENTS_SET_WITHOUT_WORLD) || n.isWorldSpecific()))) {
                     continue;
                 }
 

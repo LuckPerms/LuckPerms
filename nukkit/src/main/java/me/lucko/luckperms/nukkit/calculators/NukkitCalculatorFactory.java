@@ -28,6 +28,7 @@ package me.lucko.luckperms.nukkit.calculators;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.LookupSetting;
 import me.lucko.luckperms.common.calculators.AbstractCalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
 import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
@@ -67,7 +68,7 @@ public class NukkitCalculatorFactory extends AbstractCalculatorFactory {
         }
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_NUKKIT_DEFAULT_PERMISSIONS) && metadata.getHolderType() == HolderType.USER) {
-            processors.add(new DefaultsProcessor(this.plugin, contexts.isOp()));
+            processors.add(new DefaultsProcessor(this.plugin, contexts.hasSetting(LookupSetting.IS_OP)));
         }
 
         return registerCalculator(new PermissionCalculator(this.plugin, metadata, processors.build()));

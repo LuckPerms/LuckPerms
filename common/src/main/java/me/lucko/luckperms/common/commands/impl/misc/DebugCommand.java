@@ -29,6 +29,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.LookupSetting;
 import me.lucko.luckperms.api.caching.MetaContexts;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.StaticContextCalculator;
@@ -215,14 +216,12 @@ public class DebugCommand extends SingleCommand {
         return ret;
     }
 
-    private static JObject serializeContextsSettings(Contexts contexts) {
-        return new JObject()
-                .add("op", contexts.isOp())
-                .add("includeGlobal", contexts.isIncludeGlobal())
-                .add("includeGlobalWorld", contexts.isIncludeGlobalWorld())
-                .add("applyGroups", contexts.isApplyGroups())
-                .add("applyGlobalGroups", contexts.isApplyGlobalGroups())
-                .add("applyGlobalWorldGroups", contexts.isApplyGlobalWorldGroups());
+    private static JArray serializeContextsSettings(Contexts contexts) {
+        JArray array = new JArray();
+        for (LookupSetting setting : contexts.getSettings()) {
+            array.add(setting.name());
+        }
+        return array;
     }
 
     private static JObject serializeMetaContextsSettings(MetaContexts metaContexts) {

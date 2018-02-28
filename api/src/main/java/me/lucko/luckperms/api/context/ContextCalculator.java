@@ -28,7 +28,7 @@ package me.lucko.luckperms.api.context;
 import javax.annotation.Nonnull;
 
 /**
- * Calculates whether contexts are applicable to {@link T}
+ * Calculates whether contexts are applicable to a {@link T subject}.
  *
  * @param <T> the subject type. Is ALWAYS the player class of the platform.
  * @since 2.13

@@ -147,7 +147,7 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
 
     @Override
     public Contexts formContexts(ImmutableContextSet contextSet) {
-        return new Contexts(
+        return Contexts.of(
                 contextSet,
                 this.plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
                 this.plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
