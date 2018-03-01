@@ -58,9 +58,6 @@ public class MigrationMainCommand extends MainCommand<Object, Object> {
             .put("me.lucko.luckperms.bukkit.migration.MigrationPermissionsBukkit",  "com.platymuus.bukkit.permissions.PermissionsPlugin")
             // bungee
             .put("me.lucko.luckperms.bungee.migration.MigrationBungeePerms",        "net.alpenblock.bungeeperms.BungeePerms")
-            // sponge
-            .put("me.lucko.luckperms.sponge.migration.MigrationPermissionsEx",      "ninja.leaping.permissionsex.sponge.PermissionsExPlugin")
-            .put("me.lucko.luckperms.sponge.migration.MigrationPermissionManager",  "io.github.djxy.permissionmanager.sponge.SpongePlugin")
             .build().inverse();
 
     private final ReentrantLock lock = new ReentrantLock();
