@@ -445,6 +445,16 @@ public interface Node {
     interface Builder {
 
         /**
+         * Copies the attributes from the given node and applies them to this
+         * builder.
+         *
+         * @param node the node to copy from
+         * @return the builder
+         * @since 4.2
+         */
+        Builder copyFrom(@Nonnull Node node);
+
+        /**
          * Sets the value of negated for the node.
          *
          * @param negated the value

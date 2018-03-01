@@ -58,12 +58,19 @@ class NodeBuilder implements Node.Builder {
 
     NodeBuilder(Node other) {
         this.permission = other.getPermission();
-        this.value = other.getValuePrimitive();
-        this.override = other.isOverride();
-        this.server = other.getServer().orElse(null);
-        this.world = other.getWorld().orElse(null);
-        this.expireAt = other.isPermanent() ? 0L : other.getExpiryUnixTime();
-        this.extraContexts.addAll(other.getContexts());
+        copyFrom(other);
+    }
+
+    @Override
+    public Node.Builder copyFrom(@Nonnull Node node) {
+        Objects.requireNonNull(node, "node");
+        this.value = node.getValuePrimitive();
+        this.override = node.isOverride();
+        this.server = node.getServer().orElse(null);
+        this.world = node.getWorld().orElse(null);
+        this.expireAt = node.isPermanent() ? 0L : node.getExpiryUnixTime();
+        this.extraContexts.addAll(node.getContexts());
+        return this;
     }
 
     @Nonnull
