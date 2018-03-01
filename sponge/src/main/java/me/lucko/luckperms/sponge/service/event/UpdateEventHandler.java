@@ -23,34 +23,28 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.persisted;
+package me.lucko.luckperms.sponge.service.event;
 
-import me.lucko.luckperms.common.model.NodeMapType;
-import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.calculated.MonitoredSubjectData;
+import me.lucko.luckperms.sponge.LPSpongePlugin;
+import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 
-/**
- * Extension of CalculatedSubjectData which persists data when modified
- */
-public class PersistedSubjectData extends MonitoredSubjectData {
-    private final PersistedSubject subject;
-    private boolean save = true;
+public interface UpdateEventHandler {
 
-    public PersistedSubjectData(PersistedSubject subject, NodeMapType type, LuckPermsService service, String calculatorDisplayName) {
-        super(subject, type, service, calculatorDisplayName);
-        this.subject = subject;
-    }
-
-    @Override
-    protected void onUpdate(boolean success) {
-        if (!this.save) {
-            return;
+    static UpdateEventHandler obtain(LPSpongePlugin plugin) {
+        try {
+            Class.forName("org.spongepowered.api.event.permission.SubjectDataUpdateEvent");
+            return new UpdateEventHandlerImpl(plugin);
+        } catch (ClassNotFoundException e) {
+            return new Noop();
         }
-
-        this.subject.save();
     }
 
-    public void setSave(boolean save) {
-        this.save = save;
+    void fireUpdateEvent(LPSubjectData subjectData);
+
+    class Noop implements UpdateEventHandler {
+        @Override
+        public void fireUpdateEvent(LPSubjectData subjectData) {
+
+        }
     }
 }

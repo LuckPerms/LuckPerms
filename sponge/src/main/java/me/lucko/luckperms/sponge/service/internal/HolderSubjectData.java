@@ -40,11 +40,13 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
 
 import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.service.permission.SubjectData;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -74,8 +76,18 @@ public class HolderSubjectData implements LPSubjectData {
     }
 
     @Override
+    public SubjectData sponge() {
+        return ProxyFactory.toSponge(this);
+    }
+
+    @Override
     public LPSubject getParentSubject() {
         return this.parentSubject;
+    }
+
+    @Override
+    public NodeMapType getType() {
+        return this.type;
     }
 
     @Override

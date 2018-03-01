@@ -35,14 +35,18 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
 import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.contexts.ContextSetComparator;
+import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.processors.MapProcessor;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
 import me.lucko.luckperms.sponge.processors.SpongeWildcardProcessor;
+import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+
+import org.spongepowered.api.service.permission.SubjectData;
 
 import java.util.HashMap;
 import java.util.List;
@@ -60,6 +64,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class CalculatedSubjectData implements LPSubjectData {
     private final LPSubject parentSubject;
+    private final NodeMapType type;
     private final LPPermissionService service;
 
     private final Map<ImmutableContextSet, Map<String, Boolean>> permissions = new ConcurrentHashMap<>();
@@ -68,8 +73,9 @@ public class CalculatedSubjectData implements LPSubjectData {
 
     private final LoadingCache<ImmutableContextSet, CalculatorHolder> permissionCache;
 
-    public CalculatedSubjectData(LPSubject parentSubject, LPPermissionService service, String calculatorDisplayName) {
+    public CalculatedSubjectData(LPSubject parentSubject, NodeMapType type, LPPermissionService service, String calculatorDisplayName) {
         this.parentSubject = parentSubject;
+        this.type = type;
         this.service = service;
         this.permissionCache = Caffeine.newBuilder()
                 .expireAfterAccess(10, TimeUnit.MINUTES)
@@ -84,8 +90,18 @@ public class CalculatedSubjectData implements LPSubjectData {
     }
 
     @Override
+    public SubjectData sponge() {
+        return ProxyFactory.toSponge(this);
+    }
+
+    @Override
     public LPSubject getParentSubject() {
         return this.parentSubject;
+    }
+
+    @Override
+    public NodeMapType getType() {
+        return this.type;
     }
 
     public void cleanup() {

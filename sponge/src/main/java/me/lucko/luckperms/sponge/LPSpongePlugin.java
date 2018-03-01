@@ -79,6 +79,7 @@ import me.lucko.luckperms.sponge.managers.SpongeGroupManager;
 import me.lucko.luckperms.sponge.managers.SpongeUserManager;
 import me.lucko.luckperms.sponge.messaging.SpongeMessagingFactory;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.event.UpdateEventHandler;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
@@ -173,6 +174,7 @@ public class LPSpongePlugin implements LuckPermsSpongePlugin {
     private InternalMessagingService messagingService = null;
     private LuckPermsApiProvider apiProvider;
     private EventFactory eventFactory;
+    private UpdateEventHandler updateEventHandler;
     private me.lucko.luckperms.common.logging.Logger log;
     private LuckPermsService service;
     private LocaleManager localeManager;
@@ -256,6 +258,7 @@ public class LPSpongePlugin implements LuckPermsSpongePlugin {
 
         // register the PermissionService with Sponge
         getLog().info("Registering PermissionService...");
+        this.updateEventHandler = UpdateEventHandler.obtain(this);
         this.service = new LuckPermsService(this);
 
         if (this.game.getPluginManager().getPlugin("permissionsex").isPresent()) {
@@ -513,8 +516,16 @@ public class LPSpongePlugin implements LuckPermsSpongePlugin {
         return this.game;
     }
 
+    public PluginContainer getPluginContainer() {
+        return this.pluginContainer;
+    }
+
     public Scheduler getSpongeScheduler() {
         return this.spongeScheduler;
+    }
+
+    public UpdateEventHandler getUpdateEventHandler() {
+        return this.updateEventHandler;
     }
 
     public SpongeExecutorService getSyncExecutorService() {

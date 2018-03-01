@@ -32,11 +32,14 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
+import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
+import me.lucko.luckperms.sponge.service.calculated.MonitoredSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
+import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorageModel;
 
@@ -92,8 +95,27 @@ public class PersistedSubject implements LPSubject {
         this.parentCollection = parentCollection;
 
         String displayName = parentCollection.getIdentifier() + "/" + identifier;
-        this.subjectData = new PersistedSubjectData(service, displayName + "/p", this);
-        this.transientSubjectData = new CalculatedSubjectData(this, service, displayName + "/t");
+        this.subjectData = new PersistedSubjectData(this, NodeMapType.ENDURING, service, displayName + "/p") {
+            @Override
+            protected void onUpdate(boolean success) {
+                super.onUpdate(success);
+                if (success) {
+                    fireUpdateEvent(this);
+                }
+            }
+        };
+        this.transientSubjectData = new MonitoredSubjectData(this, NodeMapType.TRANSIENT, service, displayName + "/t") {
+            @Override
+            protected void onUpdate(boolean success) {
+                if (success) {
+                    fireUpdateEvent(this);
+                }
+            }
+        };
+    }
+
+    private void fireUpdateEvent(LPSubjectData subjectData) {
+        this.service.getPlugin().getUpdateEventHandler().fireUpdateEvent(subjectData);
     }
 
     @Override
