@@ -50,11 +50,8 @@ import java.util.stream.Collectors;
  * Handles persisted Subject I/O and (de)serialization
  */
 public class SubjectStorage {
-
     private final LPPermissionService service;
-
     private final Gson gson;
-
     private final File container;
 
     public SubjectStorage(LPPermissionService service, File container) {
@@ -157,9 +154,5 @@ public class SubjectStorage {
             SubjectStorageModel model = new SubjectStorageModel(this.service, data);
             return Maps.immutableEntry(subjectName, model);
         }
-    }
-
-    public Gson getGson() {
-        return this.gson;
     }
 }

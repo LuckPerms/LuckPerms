@@ -76,12 +76,12 @@ public class MigrationZPermissions extends SubCommand<Object> {
         log.log("Starting.");
         
         if (!Bukkit.getPluginManager().isPluginEnabled("zPermissions")) {
-            log.logErr("Plugin not loaded.");
+            log.logError("Plugin not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
         if (!Bukkit.getServicesManager().isProvidedFor(ZPermissionsService.class)) {
-            log.logErr("Plugin not loaded.");
+            log.logError("Plugin not loaded.");
             return CommandResult.STATE_ERROR;
         }
 

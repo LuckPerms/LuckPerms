@@ -29,7 +29,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSortedMap;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
@@ -38,7 +37,6 @@ import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.contexts.ContextSetComparator;
 import me.lucko.luckperms.common.processors.MapProcessor;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
-import me.lucko.luckperms.common.references.HolderType;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
 import me.lucko.luckperms.sponge.processors.SpongeWildcardProcessor;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
@@ -52,6 +50,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -60,33 +59,28 @@ import java.util.concurrent.TimeUnit;
  * In-memory implementation of {@link LPSubjectData}.
  */
 public class CalculatedSubjectData implements LPSubjectData {
-
     private final LPSubject parentSubject;
-
     private final LPPermissionService service;
-    private final String calculatorDisplayName;
 
     private final Map<ImmutableContextSet, Map<String, Boolean>> permissions = new ConcurrentHashMap<>();
     private final Map<ImmutableContextSet, Set<LPSubjectReference>> parents = new ConcurrentHashMap<>();
     private final Map<ImmutableContextSet, Map<String, String>> options = new ConcurrentHashMap<>();
 
-    private final LoadingCache<ImmutableContextSet, CalculatorHolder> permissionCache = Caffeine.newBuilder()
-            .expireAfterAccess(10, TimeUnit.MINUTES)
-            .build(contexts -> {
-                ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
-                processors.add(new MapProcessor());
-                processors.add(new SpongeWildcardProcessor());
-
-                CalculatorHolder holder = new CalculatorHolder(new PermissionCalculator(CalculatedSubjectData.this.service.getPlugin(), PermissionCalculatorMetadata.of(HolderType.GROUP, CalculatedSubjectData.this.calculatorDisplayName, contexts), processors.build()));
-                holder.setPermissions(flattenMap(getRelevantEntries(contexts, CalculatedSubjectData.this.permissions)));
-
-                return holder;
-            });
+    private final LoadingCache<ImmutableContextSet, CalculatorHolder> permissionCache;
 
     public CalculatedSubjectData(LPSubject parentSubject, LPPermissionService service, String calculatorDisplayName) {
         this.parentSubject = parentSubject;
         this.service = service;
-        this.calculatorDisplayName = calculatorDisplayName;
+        this.permissionCache = Caffeine.newBuilder()
+                .expireAfterAccess(10, TimeUnit.MINUTES)
+                .build(contexts -> {
+                    ImmutableList<PermissionProcessor> processors = ImmutableList.of(new MapProcessor(), new SpongeWildcardProcessor());
+                    PermissionCalculatorMetadata calcMetadata = PermissionCalculatorMetadata.of(null, calculatorDisplayName, contexts);
+
+                    CalculatorHolder holder = new CalculatorHolder(new PermissionCalculator(this.service.getPlugin(), calcMetadata, processors));
+                    holder.setPermissions(processPermissionsMap(contexts, this.permissions));
+                    return holder;
+                });
     }
 
     @Override
@@ -103,7 +97,8 @@ public class CalculatedSubjectData implements LPSubjectData {
     }
 
     public Tristate getPermissionValue(ImmutableContextSet contexts, String permission) {
-        return this.permissionCache.get(contexts).getCalculator().getPermissionValue(permission, CheckOrigin.INTERNAL);
+        CalculatorHolder calculatorHolder = Objects.requireNonNull(this.permissionCache.get(contexts));
+        return calculatorHolder.getCalculator().getPermissionValue(permission, CheckOrigin.INTERNAL);
     }
 
     public void replacePermissions(Map<ImmutableContextSet, Map<String, Boolean>> map) {
@@ -291,30 +286,25 @@ public class CalculatedSubjectData implements LPSubjectData {
         return CompletableFuture.completedFuture(!map.isEmpty());
     }
 
-    private static <V> Map<String, V> flattenMap(SortedMap<ImmutableContextSet, Map<String, V>> data) {
-        Map<String, V> map = new HashMap<>();
-
-        for (Map<String, V> m : data.values()) {
-            for (Map.Entry<String, V> e : m.entrySet()) {
-                map.putIfAbsent(e.getKey(), e.getValue());
-            }
-        }
-
-        return ImmutableMap.copyOf(map);
-    }
-
-    private static <K, V> SortedMap<ImmutableContextSet, Map<K, V>> getRelevantEntries(ImmutableContextSet set, Map<ImmutableContextSet, Map<K, V>> map) {
-        ImmutableSortedMap.Builder<ImmutableContextSet, Map<K, V>> perms = ImmutableSortedMap.orderedBy(ContextSetComparator.reverse());
-
-        for (Map.Entry<ImmutableContextSet, Map<K, V>> e : map.entrySet()) {
-            if (!e.getKey().isSatisfiedBy(set)) {
+    private static Map<String, Boolean> processPermissionsMap(ImmutableContextSet filter, Map<ImmutableContextSet, Map<String, Boolean>> input) {
+        // get relevant entries
+        SortedMap<ImmutableContextSet, Map<String, Boolean>> sorted = new TreeMap<>(ContextSetComparator.reverse());
+        for (Map.Entry<ImmutableContextSet, Map<String, Boolean>> entry : input.entrySet()) {
+            if (!entry.getKey().isSatisfiedBy(filter)) {
                 continue;
             }
 
-            perms.put(e.getKey(), ImmutableMap.copyOf(e.getValue()));
+            sorted.put(entry.getKey(), entry.getValue());
         }
 
-        return perms.build();
+        // flatten
+        Map<String, Boolean> result = new HashMap<>();
+        for (Map<String, Boolean> map : sorted.values()) {
+            for (Map.Entry<String, Boolean> e : map.entrySet()) {
+                result.putIfAbsent(e.getKey(), e.getValue());
+            }
+        }
+        return ImmutableMap.copyOf(result);
     }
 
     private static boolean stringEquals(String a, String b) {
@@ -322,9 +312,7 @@ public class CalculatedSubjectData implements LPSubjectData {
     }
 
     private static class CalculatorHolder {
-
         private final PermissionCalculator calculator;
-
         private final Map<String, Boolean> permissions;
 
         public CalculatorHolder(PermissionCalculator calculator) {

@@ -23,23 +23,46 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.model;
+package me.lucko.luckperms.sponge.service.internal;
 
-import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
-import me.lucko.luckperms.sponge.service.internal.GroupSubject;
+import me.lucko.luckperms.sponge.model.SpongeUser;
+import me.lucko.luckperms.sponge.service.model.LPSubject;
+import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 
-public class SpongeGroup extends Group implements SpongePermissionHolder {
-    private final GroupSubject spongeData;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 
-    public SpongeGroup(String name, LPSpongePlugin plugin) {
-        super(name, plugin);
-        this.spongeData = new GroupSubject(plugin, this);
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Function;
+
+/**
+ * Implements {@link LPSubject} for a {@link SpongeUser}.
+ */
+public final class UserSubject extends HolderSubject<SpongeUser> implements LPSubject {
+    public UserSubject(LPSpongePlugin plugin, SpongeUser parent) {
+        super(plugin, parent);
     }
 
     @Override
-    public GroupSubject sponge() {
-        return this.spongeData;
+    public String getIdentifier() {
+        return this.parent.getUuid().toString();
     }
 
+    @Override
+    public Optional<String> getFriendlyIdentifier() {
+        return this.parent.getName();
+    }
+
+    @Override
+    public Optional<CommandSource> getCommandSource() {
+        final UUID uuid = this.parent.getUuid();
+        return Sponge.getServer().getPlayer(uuid).map(Function.identity());
+    }
+
+    @Override
+    public LPSubjectCollection getParentCollection() {
+        return this.plugin.getService().getUserSubjects();
+    }
 }

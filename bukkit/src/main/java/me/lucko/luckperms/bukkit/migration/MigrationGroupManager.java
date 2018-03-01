@@ -74,14 +74,14 @@ public class MigrationGroupManager extends SubCommand<Object> {
         log.log("Starting.");
 
         if (!args.get(0).equalsIgnoreCase("true") && !args.get(0).equalsIgnoreCase("false")) {
-            log.logErr("Was expecting true/false, but got " + args.get(0) + " instead.");
+            log.logError("Was expecting true/false, but got " + args.get(0) + " instead.");
             return CommandResult.STATE_ERROR;
         }
         final boolean migrateAsGlobal = Boolean.parseBoolean(args.get(0));
         final Function<String, String> worldMappingFunc = s -> migrateAsGlobal ? null : s;
         
         if (!Bukkit.getPluginManager().isPluginEnabled("GroupManager")) {
-            log.logErr("Plugin not loaded.");
+            log.logError("Plugin not loaded.");
             return CommandResult.STATE_ERROR;
         }
 

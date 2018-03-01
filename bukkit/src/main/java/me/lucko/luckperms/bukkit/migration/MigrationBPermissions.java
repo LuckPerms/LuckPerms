@@ -85,7 +85,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
 
         WorldManager worldManager = WorldManager.getInstance();
         if (worldManager == null) {
-            log.logErr("Plugin not loaded.");
+            log.logError("Plugin not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
@@ -111,7 +111,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
 
             Set<String> users = configSection.getKeys(false);
             if (users == null) {
-                log.logErr("Couldn't get a list of users.");
+                log.logError("Couldn't get a list of users.");
                 return CommandResult.FAILURE;
             }
             AtomicInteger userLoadCount = new AtomicInteger(0);

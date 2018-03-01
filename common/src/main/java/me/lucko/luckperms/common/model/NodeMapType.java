@@ -25,8 +25,30 @@
 
 package me.lucko.luckperms.common.model;
 
+import java.util.function.Supplier;
+
 public enum NodeMapType {
 
-    ENDURING, TRANSIENT
+    ENDURING,
+    TRANSIENT;
+
+    // useful methods for fluent/conditional execution
+
+    public void run(Runnable ifEnduring, Runnable ifTransient) {
+        if (this == ENDURING) {
+            ifEnduring.run();
+        } else {
+            ifTransient.run();
+        }
+    }
+
+    public <T> T supply(Supplier<T> ifEnduring, Supplier<T> ifTransient) {
+        if (this == ENDURING) {
+            return ifEnduring.get();
+        } else {
+            return ifTransient.get();
+        }
+    }
+
 
 }

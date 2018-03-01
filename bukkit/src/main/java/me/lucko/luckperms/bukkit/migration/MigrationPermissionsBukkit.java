@@ -66,7 +66,7 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
         log.log("Starting.");
         
         if (!Bukkit.getPluginManager().isPluginEnabled("PermissionsBukkit")) {
-            log.logErr("Plugin not loaded.");
+            log.logError("Plugin not loaded.");
             return CommandResult.STATE_ERROR;
         }
 

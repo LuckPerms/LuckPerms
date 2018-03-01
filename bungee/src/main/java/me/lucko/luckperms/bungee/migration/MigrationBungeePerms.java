@@ -66,7 +66,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         // Get BungeePerms instance
         BungeePerms bp = BungeePerms.getInstance();
         if (bp == null) {
-            log.logErr("Plugin not loaded.");
+            log.logError("Plugin not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
@@ -106,7 +106,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
 
         SafeIteration.iterate(bp.getPermissionsManager().getBackEnd().loadUsers(), u -> {
             if (u.getUUID() == null) {
-                log.logErr("Could not parse UUID for user: " + u.getName());
+                log.logError("Could not parse UUID for user: " + u.getName());
                 return;
             }
 

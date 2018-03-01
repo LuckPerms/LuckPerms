@@ -64,7 +64,7 @@ public class PersistedSubject implements LPSubject {
 
     private final LoadingCache<PermissionLookupKey, Tristate> permissionLookupCache = Caffeine.newBuilder()
             .expireAfterAccess(20, TimeUnit.MINUTES)
-            .build(lookup -> lookupPermissionValue(lookup.getContexts(), lookup.getNode()));
+            .build(lookup -> lookupPermissionValue(lookup.contexts, lookup.node));
 
     private final LoadingCache<ImmutableContextSet, ImmutableList<LPSubjectReference>> parentLookupCache = Caffeine.newBuilder()
             .expireAfterAccess(20, TimeUnit.MINUTES)
@@ -72,7 +72,7 @@ public class PersistedSubject implements LPSubject {
 
     private final LoadingCache<OptionLookupKey, Optional<String>> optionLookupCache = Caffeine.newBuilder()
             .expireAfterAccess(20, TimeUnit.MINUTES)
-            .build(lookup -> lookupOptionValue(lookup.getContexts(), lookup.getKey()));
+            .build(lookup -> lookupOptionValue(lookup.contexts, lookup.key));
 
     private final BufferedRequest<Void> saveBuffer = new BufferedRequest<Void>(1000L, 500L, r -> PersistedSubject.this.service.getPlugin().getScheduler().doAsync(r)) {
         @Override
@@ -91,8 +91,9 @@ public class PersistedSubject implements LPSubject {
         this.service = service;
         this.parentCollection = parentCollection;
 
-        this.subjectData = new PersistedSubjectData(service, parentCollection.getIdentifier() + "/" + identifier + "/p", this);
-        this.transientSubjectData = new CalculatedSubjectData(this, service, parentCollection.getIdentifier() + "/" + identifier + "/t");
+        String displayName = parentCollection.getIdentifier() + "/" + identifier;
+        this.subjectData = new PersistedSubjectData(service, displayName + "/p", this);
+        this.transientSubjectData = new CalculatedSubjectData(this, service, displayName + "/t");
     }
 
     @Override
@@ -277,7 +278,7 @@ public class PersistedSubject implements LPSubject {
         Objects.requireNonNull(contexts, "contexts");
         Objects.requireNonNull(node, "node");
 
-        Tristate t = this.permissionLookupCache.get(PermissionLookupKey.of(node, contexts));
+        Tristate t = this.permissionLookupCache.get(new PermissionLookupKey(node, contexts));
         this.service.getPlugin().getVerboseHandler().offerCheckData(CheckOrigin.INTERNAL, getParentCollection().getIdentifier() + "/" + this.identifier, contexts, node, t);
         return t;
     }
@@ -306,6 +307,54 @@ public class PersistedSubject implements LPSubject {
 
     @Override
     public Optional<String> getOption(ImmutableContextSet contexts, String key) {
-        return this.optionLookupCache.get(OptionLookupKey.of(key, contexts));
+        return this.optionLookupCache.get(new OptionLookupKey(key, contexts));
+    }
+
+    private static final class PermissionLookupKey {
+        private final String node;
+        private final ImmutableContextSet contexts;
+
+        public PermissionLookupKey(String node, ImmutableContextSet contexts) {
+            this.node = node;
+            this.contexts = contexts;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) return true;
+            if (!(o instanceof PermissionLookupKey)) return false;
+            final PermissionLookupKey other = (PermissionLookupKey) o;
+
+            return this.node.equals(other.node) && this.contexts.equals(other.contexts);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.node, this.contexts);
+        }
+    }
+
+    public static final class OptionLookupKey {
+        private final String key;
+        private final ImmutableContextSet contexts;
+
+        public OptionLookupKey(String key, ImmutableContextSet contexts) {
+            this.key = key;
+            this.contexts = contexts;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) return true;
+            if (!(o instanceof OptionLookupKey)) return false;
+            final OptionLookupKey other = (OptionLookupKey) o;
+
+            return this.key.equals(other.key) && this.contexts.equals(other.contexts);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.key, this.contexts);
+        }
     }
 }

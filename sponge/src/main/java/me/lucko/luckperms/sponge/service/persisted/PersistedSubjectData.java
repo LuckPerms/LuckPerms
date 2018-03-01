@@ -37,10 +37,15 @@ import java.util.function.Function;
 /**
  * Extension of MemorySubjectData which persists data when modified
  */
-public class PersistedSubjectData extends CalculatedSubjectData implements Function<Boolean, Boolean> {
+public class PersistedSubjectData extends CalculatedSubjectData {
     private final PersistedSubject subject;
 
     private boolean save = true;
+
+    private final Function<Boolean, Boolean> saveFunction = b -> {
+        save();
+        return b;
+    };
 
     public PersistedSubjectData(LuckPermsService service, String calculatorDisplayName, PersistedSubject subject) {
         super(subject, service, calculatorDisplayName);
@@ -57,72 +62,62 @@ public class PersistedSubjectData extends CalculatedSubjectData implements Funct
         }
     }
 
-    @Override
-    public Boolean apply(Boolean b) {
-        save();
-        return b;
+    public void setSave(boolean save) {
+        this.save = save;
     }
 
     @Override
     public CompletableFuture<Boolean> setPermission(ImmutableContextSet contexts, String permission, Tristate value) {
-        return super.setPermission(contexts, permission, value).thenApply(this);
+        return super.setPermission(contexts, permission, value).thenApply(this.saveFunction);
     }
 
     @Override
     public CompletableFuture<Boolean> clearPermissions() {
-        return super.clearPermissions().thenApply(this);
+        return super.clearPermissions().thenApply(this.saveFunction);
     }
 
     @Override
     public CompletableFuture<Boolean> clearPermissions(ImmutableContextSet contexts) {
-        return super.clearPermissions(contexts).thenApply(this);
+        return super.clearPermissions(contexts).thenApply(this.saveFunction);
     }
 
     @Override
     public CompletableFuture<Boolean> addParent(ImmutableContextSet contexts, LPSubjectReference parent) {
-        return super.addParent(contexts, parent).thenApply(this);
+        return super.addParent(contexts, parent).thenApply(this.saveFunction);
     }
 
     @Override
     public CompletableFuture<Boolean> removeParent(ImmutableContextSet contexts, LPSubjectReference parent) {
-        return super.removeParent(contexts, parent).thenApply(this);
+        return super.removeParent(contexts, parent).thenApply(this.saveFunction);
     }
 
     @Override
     public CompletableFuture<Boolean> clearParents() {
-        return super.clearParents().thenApply(this);
+        return super.clearParents().thenApply(this.saveFunction);
     }
 
     @Override
     public CompletableFuture<Boolean> clearParents(ImmutableContextSet contexts) {
-        return super.clearParents(contexts).thenApply(this);
+        return super.clearParents(contexts).thenApply(this.saveFunction);
     }
 
     @Override
     public CompletableFuture<Boolean> setOption(ImmutableContextSet contexts, String key, String value) {
-        return super.setOption(contexts, key, value).thenApply(this);
+        return super.setOption(contexts, key, value).thenApply(this.saveFunction);
     }
 
     @Override
     public CompletableFuture<Boolean> unsetOption(ImmutableContextSet contexts, String key) {
-        return super.unsetOption(contexts, key).thenApply(this);
+        return super.unsetOption(contexts, key).thenApply(this.saveFunction);
     }
 
     @Override
     public CompletableFuture<Boolean> clearOptions() {
-        return super.clearOptions().thenApply(this);
+        return super.clearOptions().thenApply(this.saveFunction);
     }
 
     @Override
     public CompletableFuture<Boolean> clearOptions(ImmutableContextSet contexts) {
-        return super.clearOptions(contexts).thenApply(this);
-    }
-
-    public boolean isSave() {
-        return this.save;
-    }
-
-    public void setSave(boolean save) {
-        this.save = save;
+        return super.clearOptions(contexts).thenApply(this.saveFunction);
     }
 }

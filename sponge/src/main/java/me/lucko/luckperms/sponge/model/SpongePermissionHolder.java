@@ -25,21 +25,19 @@
 
 package me.lucko.luckperms.sponge.model;
 
-import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.sponge.LPSpongePlugin;
-import me.lucko.luckperms.sponge.service.internal.GroupSubject;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.sponge.service.model.LPSubject;
 
-public class SpongeGroup extends Group implements SpongePermissionHolder {
-    private final GroupSubject spongeData;
+/**
+ * A sponge specific extension of {@link PermissionHolder}.
+ */
+public interface SpongePermissionHolder {
 
-    public SpongeGroup(String name, LPSpongePlugin plugin) {
-        super(name, plugin);
-        this.spongeData = new GroupSubject(plugin, this);
-    }
-
-    @Override
-    public GroupSubject sponge() {
-        return this.spongeData;
-    }
+    /**
+     * Gets a {@link LPSubject} representation of this holder.
+     *
+     * @return a subject
+     */
+    LPSubject sponge();
 
 }

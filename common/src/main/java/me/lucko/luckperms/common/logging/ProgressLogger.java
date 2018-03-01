@@ -62,7 +62,7 @@ public class ProgressLogger {
         }
     }
 
-    public void logErr(String msg) {
+    public void logError(String msg) {
         if (this.pluginName == null) {
             this.listeners.forEach(s -> this.logMessage.send(s, "Error -> " + msg));
         } else {
@@ -80,7 +80,6 @@ public class ProgressLogger {
 
     public void logProgress(String msg, int amount) {
         if (amount % NOTIFY_FREQUENCY == 0) {
-            // migrated {} groups so far.
             logAllProgress(msg, amount);
         }
     }

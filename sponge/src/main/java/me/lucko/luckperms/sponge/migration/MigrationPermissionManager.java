@@ -73,7 +73,7 @@ public class MigrationPermissionManager extends SubCommand<Object> {
 
         Optional<PluginContainer> pm = Sponge.getPluginManager().getPlugin("permissionmanager");
         if (!pm.isPresent()) {
-            log.logErr("Plugin not loaded.");
+            log.logError("Plugin not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
@@ -120,7 +120,7 @@ public class MigrationPermissionManager extends SubCommand<Object> {
         SafeIteration.iterate(pmService.getUserSubjects().getAllSubjects(), pmUser -> {
             UUID uuid = Uuids.parseNullable(pmUser.getIdentifier());
             if (uuid == null) {
-                log.logErr("Could not parse UUID for user: " + pmUser.getIdentifier());
+                log.logError("Could not parse UUID for user: " + pmUser.getIdentifier());
                 return;
             }
 

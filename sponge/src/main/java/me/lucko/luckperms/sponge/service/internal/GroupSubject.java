@@ -23,52 +23,42 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.persisted;
+package me.lucko.luckperms.sponge.service.internal;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.sponge.LPSpongePlugin;
+import me.lucko.luckperms.sponge.model.SpongeGroup;
+import me.lucko.luckperms.sponge.service.model.LPSubject;
+import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 
-public final class OptionLookupKey {
+import org.spongepowered.api.command.CommandSource;
 
-    public static OptionLookupKey of(String key, ImmutableContextSet contexts) {
-        return new OptionLookupKey(key, contexts);
-    }
+import java.util.Optional;
 
-    private final String key;
-    private final ImmutableContextSet contexts;
-
-    private OptionLookupKey(String key, ImmutableContextSet contexts) {
-        this.key = key;
-        this.contexts = contexts;
-    }
-
-    public String getKey() {
-        return this.key;
-    }
-
-    public ImmutableContextSet getContexts() {
-        return this.contexts;
+/**
+ * Implements {@link LPSubject} for a {@link SpongeGroup}.
+ */
+public class GroupSubject extends HolderSubject<SpongeGroup> implements LPSubject {
+    public GroupSubject(LPSpongePlugin plugin, SpongeGroup parent) {
+        super(plugin, parent);
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (o == this) return true;
-        if (!(o instanceof OptionLookupKey)) return false;
-        final OptionLookupKey other = (OptionLookupKey) o;
-
-        return this.getKey().equals(other.getKey()) && this.getContexts().equals(other.getContexts());
+    public String getIdentifier() {
+        return this.parent.getObjectName();
     }
 
     @Override
-    public int hashCode() {
-        final int PRIME = 59;
-        int result = 1;
-        result = result * PRIME + this.getKey().hashCode();
-        result = result * PRIME + this.getContexts().hashCode();
-        return result;
+    public Optional<String> getFriendlyIdentifier() {
+        return this.parent.getDisplayName();
     }
 
     @Override
-    public String toString() {
-        return "OptionLookupKey(key=" + this.getKey() + ", contexts=" + this.getContexts() + ")";
+    public Optional<CommandSource> getCommandSource() {
+        return Optional.empty();
+    }
+
+    @Override
+    public LPSubjectCollection getParentCollection() {
+        return this.plugin.getService().getGroupSubjects();
     }
 }

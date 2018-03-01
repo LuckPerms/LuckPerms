@@ -262,6 +262,10 @@ public abstract class PermissionHolder {
         return this.transientNodes;
     }
 
+    public ImmutableSetMultimap<ImmutableContextSet, Node> getNodes(NodeMapType type) {
+        return getData(type).immutable();
+    }
+
     public ImmutableSetMultimap<ImmutableContextSet, Node> getEnduringNodes() {
         return this.enduringNodes.immutable();
     }

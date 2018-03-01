@@ -79,7 +79,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
         Optional<PluginContainer> pex = Sponge.getPluginManager().getPlugin("permissionsex");
         if (!pex.isPresent()) {
-            log.logErr("Plugin not loaded.");
+            log.logError("Plugin not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
@@ -172,7 +172,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         SafeIteration.iterate(pexService.getUserSubjects().getAllSubjects(), pexUser -> {
             UUID uuid = Uuids.parseNullable(pexUser.getIdentifier());
             if (uuid == null) {
-                log.logErr("Could not parse UUID for user: " + pexUser.getIdentifier());
+                log.logError("Could not parse UUID for user: " + pexUser.getIdentifier());
                 return;
             }
 

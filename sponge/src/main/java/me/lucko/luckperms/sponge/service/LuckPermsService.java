@@ -37,7 +37,6 @@ import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.contexts.SpongeProxiedContextCalculator;
 import me.lucko.luckperms.sponge.managers.SpongeGroupManager;
 import me.lucko.luckperms.sponge.managers.SpongeUserManager;
-import me.lucko.luckperms.sponge.service.legacy.LegacyDataMigrator;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
@@ -90,7 +89,6 @@ public class LuckPermsService implements LPPermissionService {
         this.spongeProxy = ProxyFactory.toSponge(this);
 
         this.storage = new SubjectStorage(this, new File(plugin.getDataDirectory(), "sponge-data"));
-        new LegacyDataMigrator(plugin, new File(plugin.getDataDirectory(), "local"), this.storage).run();
 
         this.userSubjects = plugin.getUserManager();
         this.groupSubjects = plugin.getGroupManager();

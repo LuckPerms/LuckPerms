@@ -62,7 +62,7 @@ public class PersistedCollection implements LPSubjectCollection {
     private final SubjectCollection spongeProxy;
 
     private final LoadingCache<String, PersistedSubject> subjects = Caffeine.newBuilder()
-            .build(s -> new PersistedSubject(s, getService(), PersistedCollection.this));
+            .build(s -> new PersistedSubject(s, getService(), this));
 
     public PersistedCollection(LuckPermsService service, String identifier) {
         this.service = service;

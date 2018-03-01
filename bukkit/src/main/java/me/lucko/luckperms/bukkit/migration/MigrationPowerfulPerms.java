@@ -85,7 +85,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         log.log("Starting.");
 
         if (!Bukkit.getPluginManager().isPluginEnabled("PowerfulPerms")) {
-            log.logErr("Plugin not loaded.");
+            log.logError("Plugin not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
@@ -143,7 +143,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         }
 
         if (uuids.isEmpty()) {
-            log.logErr("Unable to find any UUIDs to migrate.");
+            log.logError("Unable to find any UUIDs to migrate.");
             return CommandResult.FAILURE;
         }
 

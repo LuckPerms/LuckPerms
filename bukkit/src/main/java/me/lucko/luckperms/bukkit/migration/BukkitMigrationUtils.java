@@ -45,7 +45,7 @@ public final class BukkitMigrationUtils {
             }
         }
         if (uuid == null) {
-            log.logErr("Unable to get a UUID for user identifier: " + s);
+            log.logError("Unable to get a UUID for user identifier: " + s);
         }
         return uuid;
     }

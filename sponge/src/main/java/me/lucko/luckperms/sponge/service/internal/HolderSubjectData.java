@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service;
+package me.lucko.luckperms.sponge.service.internal;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -35,9 +35,11 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.caching.type.MetaAccumulator;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
@@ -50,23 +52,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class LuckPermsSubjectData implements LPSubjectData {
-    private final boolean enduring;
+public class HolderSubjectData implements LPSubjectData {
     private final LuckPermsService service;
 
+    private final NodeMapType type;
     private final PermissionHolder holder;
-
     private final LPSubject parentSubject;
 
-    public LuckPermsSubjectData(boolean enduring, LuckPermsService service, PermissionHolder holder, LPSubject parentSubject) {
-        this.enduring = enduring;
+    public HolderSubjectData(LuckPermsService service, NodeMapType type, PermissionHolder holder, LPSubject parentSubject) {
+        this.type = type;
         this.service = service;
         this.holder = holder;
         this.parentSubject = parentSubject;
+    }
+
+    private Stream<Node> streamNodes() {
+        return this.holder.getNodes(this.type).values().stream();
     }
 
     @Override
@@ -76,21 +80,15 @@ public class LuckPermsSubjectData implements LPSubjectData {
 
     @Override
     public ImmutableMap<ImmutableContextSet, ImmutableMap<String, Boolean>> getAllPermissions() {
-        Map<ImmutableContextSet, ImmutableMap.Builder<String, Boolean>> perms = new HashMap<>();
-
-        for (Map.Entry<ImmutableContextSet, Collection<Node>> e : (this.enduring ? this.holder.getEnduringNodes() : this.holder.getTransientNodes()).asMap().entrySet()) {
-            ImmutableMap.Builder<String, Boolean> results = ImmutableMap.builder();
-            for (Node n : e.getValue()) {
-                results.put(n.getPermission(), n.getValuePrimitive());
+        ImmutableMap.Builder<ImmutableContextSet, ImmutableMap<String, Boolean>> ret = ImmutableMap.builder();
+        for (Map.Entry<ImmutableContextSet, Collection<Node>> entry : this.holder.getNodes(this.type).asMap().entrySet()) {
+            ImmutableMap.Builder<String, Boolean> builder = ImmutableMap.builder();
+            for (Node n : entry.getValue()) {
+                builder.put(n.getPermission(), n.getValuePrimitive());
             }
-            perms.put(e.getKey(), results);
+            ret.put(entry.getKey(), builder.build());
         }
-
-        ImmutableMap.Builder<ImmutableContextSet, ImmutableMap<String, Boolean>> map = ImmutableMap.builder();
-        for (Map.Entry<ImmutableContextSet, ImmutableMap.Builder<String, Boolean>> e : perms.entrySet()) {
-            map.put(e.getKey(), e.getValue().build());
-        }
-        return map.build();
+        return ret.build();
     }
 
     @Override
@@ -102,42 +100,35 @@ public class LuckPermsSubjectData implements LPSubjectData {
         if (tristate == Tristate.UNDEFINED) {
             // Unset
             Node node = NodeFactory.builder(permission).withExtraContext(contexts).build();
-
-            if (this.enduring) {
-                this.holder.unsetPermission(node);
-            } else {
-                this.holder.unsetTransientPermission(node);
-            }
-
+            this.type.run(
+                    () -> this.holder.unsetPermission(node),
+                    () -> this.holder.unsetTransientPermission(node)
+            );
             return objectSave(this.holder).thenApply(v -> true);
         }
 
         Node node = NodeFactory.builder(permission).setValue(tristate.asBoolean()).withExtraContext(contexts).build();
-
-        // Workaround: unset the inverse, to allow false -> true, true -> false overrides.
-        if (this.enduring) {
-            this.holder.unsetPermission(node);
-        } else {
-            this.holder.unsetTransientPermission(node);
-        }
-
-        if (this.enduring) {
-            this.holder.setPermission(node);
-        } else {
-            this.holder.setTransientPermission(node);
-        }
-
+        this.type.run(
+                () -> {
+                    // unset the inverse, to allow false -> true, true -> false overrides.
+                    this.holder.unsetPermission(node);
+                    this.holder.setPermission(node);
+                },
+                () -> {
+                    // unset the inverse, to allow false -> true, true -> false overrides.
+                    this.holder.unsetTransientPermission(node);
+                    this.holder.setTransientPermission(node);
+                }
+        );
         return objectSave(this.holder).thenApply(v -> true);
     }
 
     @Override
     public CompletableFuture<Boolean> clearPermissions() {
-        boolean ret;
-        if (this.enduring) {
-            ret = this.holder.clearNodes();
-        } else {
-            ret = this.holder.clearTransientNodes();
-        }
+        boolean ret = this.type.supply(
+                this.holder::clearNodes,
+                this.holder::clearTransientNodes
+        );
 
         if (!ret) {
             return CompletableFuture.completedFuture(false);
@@ -153,18 +144,17 @@ public class LuckPermsSubjectData implements LPSubjectData {
     @Override
     public CompletableFuture<Boolean> clearPermissions(ImmutableContextSet contexts) {
         Objects.requireNonNull(contexts, "contexts");
+        boolean ret = this.type.supply(
+                () -> this.holder.clearNodes(contexts),
+                () -> {
+                    List<Node> toRemove = streamNodes()
+                            .filter(n -> n.getFullContexts().equals(contexts))
+                            .collect(Collectors.toList());
 
-        boolean ret;
-        if (this.enduring) {
-            ret = this.holder.clearNodes(contexts);
-        } else {
-            List<Node> toRemove = streamNodes(false)
-                    .filter(n -> n.getFullContexts().equals(contexts))
-                    .collect(Collectors.toList());
-
-            toRemove.forEach(makeUnsetConsumer(false));
-            ret = !toRemove.isEmpty();
-        }
+                    toRemove.forEach(this.holder::unsetTransientPermission);
+                    return !toRemove.isEmpty();
+                }
+        );
 
         if (!ret) {
             return CompletableFuture.completedFuture(false);
@@ -179,23 +169,17 @@ public class LuckPermsSubjectData implements LPSubjectData {
 
     @Override
     public ImmutableMap<ImmutableContextSet, ImmutableList<LPSubjectReference>> getAllParents() {
-        Map<ImmutableContextSet, ImmutableList.Builder<LPSubjectReference>> parents = new HashMap<>();
-
-        for (Map.Entry<ImmutableContextSet, Collection<Node>> e : (this.enduring ? this.holder.getEnduringNodes() : this.holder.getTransientNodes()).asMap().entrySet()) {
-            ImmutableList.Builder<LPSubjectReference> results = ImmutableList.builder();
-            for (Node n : e.getValue()) {
+        ImmutableMap.Builder<ImmutableContextSet, ImmutableList<LPSubjectReference>> ret = ImmutableMap.builder();
+        for (Map.Entry<ImmutableContextSet, Collection<Node>> entry : this.holder.getNodes(this.type).asMap().entrySet()) {
+            ImmutableList.Builder<LPSubjectReference> builder = ImmutableList.builder();
+            for (Node n : entry.getValue()) {
                 if (n.isGroupNode()) {
-                    results.add(this.service.getGroupSubjects().loadSubject(n.getGroupName()).join().toReference());
+                    builder.add(this.service.getGroupSubjects().loadSubject(n.getGroupName()).join().toReference());
                 }
             }
-            parents.put(e.getKey(), results);
+            ret.put(entry.getKey(), builder.build());
         }
-
-        ImmutableMap.Builder<ImmutableContextSet, ImmutableList<LPSubjectReference>> map = ImmutableMap.builder();
-        for (Map.Entry<ImmutableContextSet, ImmutableList.Builder<LPSubjectReference>> e : parents.entrySet()) {
-            map.put(e.getKey(), e.getValue().build());
-        }
-        return map.build();
+        return ret.build();
     }
 
     @Override
@@ -203,28 +187,24 @@ public class LuckPermsSubjectData implements LPSubjectData {
         Objects.requireNonNull(contexts, "contexts");
         Objects.requireNonNull(subject, "subject");
 
-        if (subject.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP)) {
-            return subject.resolveLp().thenCompose(sub -> {
-                DataMutateResult result;
-
-                if (this.enduring) {
-                    result = this.holder.setPermission(NodeFactory.buildGroupNode(sub.getIdentifier())
-                            .withExtraContext(contexts)
-                            .build());
-                } else {
-                    result = this.holder.setTransientPermission(NodeFactory.buildGroupNode(sub.getIdentifier())
-                            .withExtraContext(contexts)
-                            .build());
-                }
-
-                if (!result.asBoolean()) {
-                    return CompletableFuture.completedFuture(false);
-                }
-
-                return objectSave(this.holder).thenApply(v -> true);
-            });
+        if (!subject.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP)) {
+            return CompletableFuture.completedFuture(false);
         }
-        return CompletableFuture.completedFuture(false);
+
+        Node node = NodeFactory.buildGroupNode(subject.getSubjectIdentifier())
+                .withExtraContext(contexts)
+                .build();
+
+        DataMutateResult result = this.type.supply(
+                () -> this.holder.setPermission(node),
+                () -> this.holder.setTransientPermission(node)
+        );
+
+        if (!result.asBoolean()) {
+            return CompletableFuture.completedFuture(false);
+        }
+
+        return objectSave(this.holder).thenApply(v -> true);
     }
 
     @Override
@@ -232,47 +212,39 @@ public class LuckPermsSubjectData implements LPSubjectData {
         Objects.requireNonNull(contexts, "contexts");
         Objects.requireNonNull(subject, "subject");
 
-        if (subject.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP)) {
-            subject.resolveLp().thenCompose(sub -> {
-                DataMutateResult result;
-
-                if (this.enduring) {
-                    result = this.holder.unsetPermission(NodeFactory.buildGroupNode(sub.getIdentifier())
-                            .withExtraContext(contexts)
-                            .build());
-                } else {
-                    result = this.holder.unsetTransientPermission(NodeFactory.buildGroupNode(sub.getIdentifier())
-                            .withExtraContext(contexts)
-                            .build());
-                }
-
-                if (!result.asBoolean()) {
-                    return CompletableFuture.completedFuture(false);
-                }
-
-                return objectSave(this.holder).thenApply(v -> true);
-            });
+        if (!subject.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP)) {
+            return CompletableFuture.completedFuture(false);
         }
-        return CompletableFuture.completedFuture(false);
+
+        Node node = NodeFactory.buildGroupNode(subject.getSubjectIdentifier())
+                .withExtraContext(contexts)
+                .build();
+
+        DataMutateResult result = this.type.supply(
+                () -> this.holder.unsetPermission(node),
+                () -> this.holder.unsetTransientPermission(node)
+        );
+
+        if (!result.asBoolean()) {
+            return CompletableFuture.completedFuture(false);
+        }
+
+        return objectSave(this.holder).thenApply(v -> true);
     }
 
     @Override
     public CompletableFuture<Boolean> clearParents() {
-        boolean ret;
-        if (this.enduring) {
-            ret = this.holder.clearParents(true);
-        } else {
-            List<Node> toRemove = streamNodes(false)
-                    .filter(Node::isGroupNode)
-                    .collect(Collectors.toList());
+        boolean ret = this.type.supply(
+                () -> this.holder.clearParents(true),
+                () -> {
+                    List<Node> toRemove = streamNodes()
+                            .filter(Node::isGroupNode)
+                            .collect(Collectors.toList());
 
-            toRemove.forEach(makeUnsetConsumer(false));
-            ret = !toRemove.isEmpty();
-
-            if (ret && this.holder.getType().isUser()) {
-                this.service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) this.holder), false);
-            }
-        }
+                    toRemove.forEach(this.holder::unsetTransientPermission);
+                    return !toRemove.isEmpty();
+                }
+        );
 
         if (!ret) {
             return CompletableFuture.completedFuture(false);
@@ -284,23 +256,18 @@ public class LuckPermsSubjectData implements LPSubjectData {
     @Override
     public CompletableFuture<Boolean> clearParents(ImmutableContextSet contexts) {
         Objects.requireNonNull(contexts, "contexts");
+        boolean ret = this.type.supply(
+                () -> this.holder.clearParents(contexts, true),
+                () -> {
+                    List<Node> toRemove = streamNodes()
+                            .filter(Node::isGroupNode)
+                            .filter(n -> n.getFullContexts().equals(contexts))
+                            .collect(Collectors.toList());
 
-        boolean ret;
-        if (this.enduring) {
-            ret = this.holder.clearParents(contexts, true);
-        } else {
-            List<Node> toRemove = streamNodes(false)
-                    .filter(Node::isGroupNode)
-                    .filter(n -> n.getFullContexts().equals(contexts))
-                    .collect(Collectors.toList());
-
-            toRemove.forEach(makeUnsetConsumer(false));
-            ret = !toRemove.isEmpty();
-
-            if (ret && this.holder.getType().isUser()) {
-                this.service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) this.holder), false);
-            }
-        }
+                    toRemove.forEach(this.holder::unsetTransientPermission);
+                    return !toRemove.isEmpty();
+                }
+        );
 
         if (!ret) {
             return CompletableFuture.completedFuture(false);
@@ -315,7 +282,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
         Map<ImmutableContextSet, Integer> minPrefixPriority = new HashMap<>();
         Map<ImmutableContextSet, Integer> minSuffixPriority = new HashMap<>();
 
-        for (Node n : this.enduring ? this.holder.getEnduringNodes().values() : this.holder.getTransientNodes().values()) {
+        for (Node n : this.holder.getNodes(this.type).values()) {
             if (!n.getValuePrimitive()) continue;
             if (!n.isMeta() && !n.isPrefix() && !n.isSuffix()) continue;
 
@@ -364,44 +331,46 @@ public class LuckPermsSubjectData implements LPSubjectData {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(value, "value");
 
+        Node node;
         if (key.equalsIgnoreCase(NodeFactory.PREFIX_KEY) || key.equalsIgnoreCase(NodeFactory.SUFFIX_KEY)) {
             // special handling.
             ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
 
             // remove all prefixes/suffixes from the user
-            List<Node> toRemove = streamNodes(this.enduring)
+            List<Node> toRemove = streamNodes()
                     .filter(type::matches)
                     .filter(n -> n.getFullContexts().equals(contexts))
                     .collect(Collectors.toList());
 
-            toRemove.forEach(makeUnsetConsumer(this.enduring));
+            toRemove.forEach(n -> this.type.run(
+                    () -> this.holder.unsetPermission(n),
+                    () -> this.holder.unsetTransientPermission(n)
+            ));
 
             MetaAccumulator metaAccumulator = this.holder.accumulateMeta(null, this.service.getPlugin().getContextManager().formContexts(contexts));
             int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0);
             priority += 10;
 
-            if (this.enduring) {
-                this.holder.setPermission(NodeFactory.buildChatMetaNode(type, priority, value).withExtraContext(contexts).build());
-            } else {
-                this.holder.setTransientPermission(NodeFactory.buildChatMetaNode(type, priority, value).withExtraContext(contexts).build());
-            }
-
+            node = NodeFactory.buildChatMetaNode(type, priority, value).withExtraContext(contexts).build();
         } else {
             // standard remove
-            List<Node> toRemove = streamNodes(this.enduring)
+            List<Node> toRemove = streamNodes()
                     .filter(n -> n.isMeta() && n.getMeta().getKey().equals(key))
                     .filter(n -> n.getFullContexts().equals(contexts))
                     .collect(Collectors.toList());
 
-            toRemove.forEach(makeUnsetConsumer(this.enduring));
+            toRemove.forEach(n -> this.type.run(
+                    () -> this.holder.unsetPermission(n),
+                    () -> this.holder.unsetTransientPermission(n)
+            ));
 
-            if (this.enduring) {
-                this.holder.setPermission(NodeFactory.buildMetaNode(key, value).withExtraContext(contexts).build());
-            } else {
-                this.holder.setTransientPermission(NodeFactory.buildMetaNode(key, value).withExtraContext(contexts).build());
-            }
+            node = NodeFactory.buildMetaNode(key, value).withExtraContext(contexts).build();
         }
 
+        this.type.run(
+                () -> this.holder.setPermission(node),
+                () -> this.holder.setTransientPermission(node)
+        );
         return objectSave(this.holder).thenApply(v -> true);
     }
 
@@ -410,7 +379,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
         Objects.requireNonNull(contexts, "contexts");
         Objects.requireNonNull(key, "key");
 
-        List<Node> toRemove = streamNodes(this.enduring)
+        List<Node> toRemove = streamNodes()
                 .filter(n -> {
                     if (key.equalsIgnoreCase(NodeFactory.PREFIX_KEY)) {
                         return n.isPrefix();
@@ -423,7 +392,10 @@ public class LuckPermsSubjectData implements LPSubjectData {
                 .filter(n -> n.getFullContexts().equals(contexts))
                 .collect(Collectors.toList());
 
-        toRemove.forEach(makeUnsetConsumer(this.enduring));
+        toRemove.forEach(node -> this.type.run(
+                () -> this.holder.unsetPermission(node),
+                () -> this.holder.unsetTransientPermission(node)
+        ));
 
         return objectSave(this.holder).thenApply(v -> true);
     }
@@ -432,43 +404,36 @@ public class LuckPermsSubjectData implements LPSubjectData {
     public CompletableFuture<Boolean> clearOptions(ImmutableContextSet contexts) {
         Objects.requireNonNull(contexts, "contexts");
 
-        List<Node> toRemove = streamNodes(this.enduring)
+        List<Node> toRemove = streamNodes()
                 .filter(n -> n.isMeta() || n.isPrefix() || n.isSuffix())
                 .filter(n -> n.getFullContexts().equals(contexts))
                 .collect(Collectors.toList());
 
-        toRemove.forEach(makeUnsetConsumer(this.enduring));
+        toRemove.forEach(node -> this.type.run(
+                () -> this.holder.unsetPermission(node),
+                () -> this.holder.unsetTransientPermission(node)
+        ));
 
         return objectSave(this.holder).thenApply(v -> !toRemove.isEmpty());
     }
 
     @Override
     public CompletableFuture<Boolean> clearOptions() {
-        List<Node> toRemove = streamNodes(this.enduring)
+        List<Node> toRemove = streamNodes()
                 .filter(n -> n.isMeta() || n.isPrefix() || n.isSuffix())
                 .collect(Collectors.toList());
 
-        toRemove.forEach(makeUnsetConsumer(this.enduring));
+        toRemove.forEach(node -> this.type.run(
+                () -> this.holder.unsetPermission(node),
+                () -> this.holder.unsetTransientPermission(node)
+        ));
 
         return objectSave(this.holder).thenApply(v -> !toRemove.isEmpty());
     }
 
-    private Stream<Node> streamNodes(boolean enduring) {
-        return (enduring ? this.holder.getEnduringNodes() : this.holder.getTransientNodes()).values().stream();
-    }
-
-    private Consumer<Node> makeUnsetConsumer(boolean enduring) {
-        return n -> {
-            if (enduring) {
-                this.holder.unsetPermission(n);
-            } else {
-                this.holder.unsetTransientPermission(n);
-            }
-        };
-    }
-
     private CompletableFuture<Void> objectSave(PermissionHolder t) {
-        if (!this.enduring) {
+        // handle transient first
+        if (this.type == NodeMapType.TRANSIENT) {
             // don't bother saving to primary storage. just refresh
             if (t.getType().isUser()) {
                 User user = ((User) t);
@@ -476,30 +441,31 @@ public class LuckPermsSubjectData implements LPSubjectData {
             } else {
                 return this.service.getPlugin().getUpdateTaskBuffer().request();
             }
+        }
+
+        // handle enduring
+        if (t.getType().isUser()) {
+            User user = ((User) t);
+            CompletableFuture<Void> fut = new CompletableFuture<>();
+            this.service.getPlugin().getStorage().saveUser(user).whenCompleteAsync((v, ex) -> {
+                if (ex != null) {
+                    fut.complete(null);
+                }
+
+                user.getRefreshBuffer().request().thenAccept(fut::complete);
+            }, this.service.getPlugin().getScheduler().async());
+            return fut;
         } else {
-            if (t.getType().isUser()) {
-                User user = ((User) t);
-                CompletableFuture<Void> fut = new CompletableFuture<>();
-                this.service.getPlugin().getStorage().saveUser(user).whenCompleteAsync((v, ex) -> {
-                    if (ex != null) {
-                        fut.complete(null);
-                    }
+            Group group = ((Group) t);
+            CompletableFuture<Void> fut = new CompletableFuture<>();
+            this.service.getPlugin().getStorage().saveGroup(group).whenCompleteAsync((v, ex) -> {
+                if (ex != null) {
+                    fut.complete(null);
+                }
 
-                    user.getRefreshBuffer().request().thenAccept(fut::complete);
-                }, this.service.getPlugin().getScheduler().async());
-                return fut;
-            } else {
-                Group group = ((Group) t);
-                CompletableFuture<Void> fut = new CompletableFuture<>();
-                this.service.getPlugin().getStorage().saveGroup(group).whenCompleteAsync((v, ex) -> {
-                    if (ex != null) {
-                        fut.complete(null);
-                    }
-
-                    this.service.getPlugin().getUpdateTaskBuffer().request().thenAccept(fut::complete);
-                }, this.service.getPlugin().getScheduler().async());
-                return fut;
-            }
+                this.service.getPlugin().getUpdateTaskBuffer().request().thenAccept(fut::complete);
+            }, this.service.getPlugin().getScheduler().async());
+            return fut;
         }
     }
 }

@@ -43,7 +43,6 @@ import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nullable;
 
 public final class LuckPermsPermissionDescription implements LPPermissionDescription {
-
     private final LPPermissionService service;
 
     private final String id;
