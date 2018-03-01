@@ -116,8 +116,10 @@ public class VaultPermissionHook extends AbstractVaultPermission {
     }
 
     @Override
-    public boolean hasPermission(String world, UUID uuid, String permission) {
-        Objects.requireNonNull(uuid, "uuid");
+    public boolean userHasPermission(String world, UUID uuid, String permission) {
+        if (uuid == null) {
+            return false;
+        }
         Objects.requireNonNull(permission, "permission");
 
         User user = getUser(uuid);
@@ -130,14 +132,16 @@ public class VaultPermissionHook extends AbstractVaultPermission {
 
         Tristate result = permissionData.getPermissionValue(permission, CheckOrigin.INTERNAL);
         if (log()) {
-            logMsg("#hasPermission: %s - %s - %s - %s", user.getFriendlyName(), contexts.getContexts().toMultimap(), permission, result);
+            logMsg("#userHasPermission: %s - %s - %s - %s", user.getFriendlyName(), contexts.getContexts().toMultimap(), permission, result);
         }
         return result.asBoolean();
     }
 
     @Override
-    public boolean playerAddPermission(String world, UUID uuid, String permission) {
-        Objects.requireNonNull(uuid, "uuid");
+    public boolean userAddPermission(String world, UUID uuid, String permission) {
+        if (uuid == null) {
+            return false;
+        }
         Objects.requireNonNull(permission, "permission");
 
         User user = getUser(uuid);
@@ -150,8 +154,10 @@ public class VaultPermissionHook extends AbstractVaultPermission {
     }
 
     @Override
-    public boolean playerRemovePermission(String world, UUID uuid, String permission) {
-        Objects.requireNonNull(uuid, "uuid");
+    public boolean userRemovePermission(String world, UUID uuid, String permission) {
+        if (uuid == null) {
+            return false;
+        }
         Objects.requireNonNull(permission, "permission");
 
         User user = getUser(uuid);
@@ -164,29 +170,37 @@ public class VaultPermissionHook extends AbstractVaultPermission {
     }
 
     @Override
-    public boolean playerInGroup(String world, UUID uuid, String group) {
-        Objects.requireNonNull(uuid, "uuid");
+    public boolean userInGroup(String world, UUID uuid, String group) {
+        if (uuid == null) {
+            return false;
+        }
         Objects.requireNonNull(group, "group");
-        return hasPermission(world, uuid, NodeFactory.groupNode(rewriteGroupName(group)));
+        return userHasPermission(world, uuid, NodeFactory.groupNode(rewriteGroupName(group)));
     }
 
     @Override
-    public boolean playerAddGroup(String world, UUID uuid, String group) {
-        Objects.requireNonNull(uuid, "uuid");
+    public boolean userAddGroup(String world, UUID uuid, String group) {
+        if (uuid == null) {
+            return false;
+        }
         Objects.requireNonNull(group, "group");
-        return checkGroupExists(group) && playerAddPermission(world, uuid, NodeFactory.groupNode(rewriteGroupName(group)));
+        return checkGroupExists(group) && userAddPermission(world, uuid, NodeFactory.groupNode(rewriteGroupName(group)));
     }
 
     @Override
-    public boolean playerRemoveGroup(String world, UUID uuid, String group) {
-        Objects.requireNonNull(uuid, "uuid");
+    public boolean userRemoveGroup(String world, UUID uuid, String group) {
+        if (uuid == null) {
+            return false;
+        }
         Objects.requireNonNull(group, "group");
-        return checkGroupExists(group) && playerRemovePermission(world, uuid, NodeFactory.groupNode(rewriteGroupName(group)));
+        return checkGroupExists(group) && userRemovePermission(world, uuid, NodeFactory.groupNode(rewriteGroupName(group)));
     }
 
     @Override
-    public String[] playerGetGroups(String world, UUID uuid) {
-        Objects.requireNonNull(uuid, "uuid");
+    public String[] userGetGroups(String world, UUID uuid) {
+        if (uuid == null) {
+            return new String[0];
+        }
 
         User user = getUser(uuid);
         if (user == null) {
@@ -208,15 +222,17 @@ public class VaultPermissionHook extends AbstractVaultPermission {
                 .toArray(String[]::new);
 
         if (log()) {
-            logMsg("#playerGetGroups: %s - %s - %s", user.getFriendlyName(), contexts, Arrays.toString(ret));
+            logMsg("#userGetGroups: %s - %s - %s", user.getFriendlyName(), contexts, Arrays.toString(ret));
         }
 
         return ret;
     }
 
     @Override
-    public String playerPrimaryGroup(String world, UUID uuid) {
-        Objects.requireNonNull(uuid, "uuid");
+    public String userGetPrimaryGroup(String world, UUID uuid) {
+        if (uuid == null) {
+            return null;
+        }
 
         User user = getUser(uuid);
         if (user == null) {
@@ -230,7 +246,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
         }
 
         if (log()) {
-            logMsg("#playerPrimaryGroup: %s - %s - %s", user.getFriendlyName(), world, value);
+            logMsg("#userGetPrimaryGroup: %s - %s - %s", user.getFriendlyName(), world, value);
         }
 
         return value;

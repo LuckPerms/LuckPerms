@@ -33,6 +33,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -73,18 +74,18 @@ public abstract class AbstractVaultChat extends Chat {
     }
 
     // methods subclasses are expected to implement
-    public abstract String getPlayerPrefix(String world, UUID uuid);
-    public abstract String getPlayerSuffix(String world, UUID uuid);
-    public abstract void setPlayerPrefix(String world, UUID uuid, String prefix);
-    public abstract void setPlayerSuffix(String world, UUID uuid, String suffix);
-    public abstract String getPlayerInfo(String world, UUID uuid, String key);
-    public abstract void setPlayerInfo(String world, UUID uuid, String key, Object value);
-    public abstract String getGroupsPrefix(String world, String name); // note "groups" not "group"
-    public abstract String getGroupsSuffix(String world, String name); // note "groups" not "group"
-    public abstract void setGroupsPrefix(String world, String name, String prefix); // note "groups" not "group"
-    public abstract void setGroupsSuffix(String world, String name, String suffix); // note "groups" not "group"
-    public abstract String getGroupInfo(String world, String name, String key);
-    public abstract void setGroupInfo(String world, String name, String key, Object value);
+    public abstract String getUserChatPrefix(String world, UUID uuid);
+    public abstract String getUserChatSuffix(String world, UUID uuid);
+    public abstract void setUserChatPrefix(String world, UUID uuid, String prefix);
+    public abstract void setUserChatSuffix(String world, UUID uuid, String suffix);
+    public abstract String getUserMeta(String world, UUID uuid, String key);
+    public abstract void setUserMeta(String world, UUID uuid, String key, Object value);
+    public abstract String getGroupChatPrefix(String world, String name);
+    public abstract String getGroupChatSuffix(String world, String name);
+    public abstract void setGroupChatPrefix(String world, String name, String prefix);
+    public abstract void setGroupChatSuffix(String world, String name, String suffix);
+    public abstract String getGroupMeta(String world, String name, String key);
+    public abstract void setGroupMeta(String world, String name, String key, Object value);
 
     // utility methods for parsing metadata values from strings
 
@@ -165,362 +166,482 @@ public abstract class AbstractVaultChat extends Chat {
 
     @Override
     public String getPlayerPrefix(String world, String player) {
-        return getPlayerPrefix(world(world), player(player));
+        Objects.requireNonNull(player, "player");
+        return getUserChatPrefix(world(world), player(player));
     }
 
     @Override
     public String getPlayerPrefix(String world, OfflinePlayer player) {
-        return getPlayerPrefix(world(world), player(player));
+        Objects.requireNonNull(player, "player");
+        return getUserChatPrefix(world(world), player(player));
     }
 
     @Override
     public String getPlayerPrefix(World world, String player) {
-        return getPlayerPrefix(world(world), player(player));
+        Objects.requireNonNull(player, "player");
+        return getUserChatPrefix(world(world), player(player));
     }
 
     @Override
     public String getPlayerPrefix(Player player) {
-        return getPlayerPrefix(world(player), player(player));
+        Objects.requireNonNull(player, "player");
+        return getUserChatPrefix(world(player), player(player));
     }
 
     @Override
     public void setPlayerPrefix(String world, String player, String prefix) {
-        setPlayerPrefix(world(world), player(player), prefix);
+        Objects.requireNonNull(player, "player");
+        setUserChatPrefix(world(world), player(player), prefix);
     }
 
     @Override
     public void setPlayerPrefix(String world, OfflinePlayer player, String prefix) {
-        setPlayerPrefix(world(world), player(player), prefix);
+        Objects.requireNonNull(player, "player");
+        setUserChatPrefix(world(world), player(player), prefix);
     }
 
     @Override
     public void setPlayerPrefix(World world, String player, String prefix) {
-        setPlayerPrefix(world(world), player(player), prefix);
+        Objects.requireNonNull(player, "player");
+        setUserChatPrefix(world(world), player(player), prefix);
     }
 
     @Override
     public void setPlayerPrefix(Player player, String prefix) {
-        setPlayerPrefix(world(player), player(player), prefix);
+        Objects.requireNonNull(player, "player");
+        setUserChatPrefix(world(player), player(player), prefix);
     }
 
     @Override
     public String getPlayerSuffix(String world, String player) {
-        return getPlayerSuffix(world(world), player(player));
+        Objects.requireNonNull(player, "player");
+        return getUserChatSuffix(world(world), player(player));
     }
 
     @Override
     public String getPlayerSuffix(String world, OfflinePlayer player) {
-        return getPlayerSuffix(world(world), player(player));
+        Objects.requireNonNull(player, "player");
+        return getUserChatSuffix(world(world), player(player));
     }
 
     @Override
     public String getPlayerSuffix(World world, String player) {
-        return getPlayerSuffix(world(world), player(player));
+        Objects.requireNonNull(player, "player");
+        return getUserChatSuffix(world(world), player(player));
     }
 
     @Override
     public String getPlayerSuffix(Player player) {
-        return getPlayerSuffix(world(player), player(player));
+        Objects.requireNonNull(player, "player");
+        return getUserChatSuffix(world(player), player(player));
     }
 
     @Override
     public void setPlayerSuffix(String world, String player, String suffix) {
-        setPlayerSuffix(world(world), player(player), suffix);
+        Objects.requireNonNull(player, "player");
+        setUserChatSuffix(world(world), player(player), suffix);
     }
 
     @Override
     public void setPlayerSuffix(String world, OfflinePlayer player, String suffix) {
-        setPlayerSuffix(world(world), player(player), suffix);
+        Objects.requireNonNull(player, "player");
+        setUserChatSuffix(world(world), player(player), suffix);
     }
 
     @Override
     public void setPlayerSuffix(World world, String player, String suffix) {
-        setPlayerSuffix(world(world), player(player), suffix);
+        Objects.requireNonNull(player, "player");
+        setUserChatSuffix(world(world), player(player), suffix);
     }
 
     @Override
     public void setPlayerSuffix(Player player, String suffix) {
-        setPlayerSuffix(world(player), player(player), suffix);
+        Objects.requireNonNull(player, "player");
+        setUserChatSuffix(world(player), player(player), suffix);
     }
 
     @Override
     public String getGroupPrefix(String world, String group) {
-        return getGroupsPrefix(world(world), group);
+        Objects.requireNonNull(group, "group");
+        return getGroupChatPrefix(world(world), group);
     }
 
     @Override
     public String getGroupPrefix(World world, String group) {
-        return getGroupsPrefix(world(world), group);
+        Objects.requireNonNull(group, "group");
+        return getGroupChatPrefix(world(world), group);
     }
 
     @Override
     public void setGroupPrefix(String world, String group, String prefix) {
-        setGroupsPrefix(world(world), group, prefix);
+        Objects.requireNonNull(group, "group");
+        setGroupChatPrefix(world(world), group, prefix);
     }
 
     @Override
     public void setGroupPrefix(World world, String group, String prefix) {
-        setGroupsPrefix(world(world), group, prefix);
+        Objects.requireNonNull(group, "group");
+        setGroupChatPrefix(world(world), group, prefix);
     }
 
     @Override
     public String getGroupSuffix(String world, String group) {
-        return getGroupsSuffix(world(world), group);
+        Objects.requireNonNull(group, "group");
+        return getGroupChatSuffix(world(world), group);
     }
 
     @Override
     public String getGroupSuffix(World world, String group) {
-        return getGroupsSuffix(world(world), group);
+        Objects.requireNonNull(group, "group");
+        return getGroupChatSuffix(world(world), group);
     }
 
     @Override
     public void setGroupSuffix(String world, String group, String suffix) {
-        setGroupsSuffix(world(world), group, suffix);
+        Objects.requireNonNull(group, "group");
+        setGroupChatSuffix(world(world), group, suffix);
     }
 
     @Override
     public void setGroupSuffix(World world, String group, String suffix) {
-        setGroupsSuffix(world(world), group, suffix);
+        Objects.requireNonNull(group, "group");
+        setGroupChatSuffix(world(world), group, suffix);
     }
 
     @Override
     public int getPlayerInfoInteger(String world, OfflinePlayer player, String node, int defaultValue) {
-        return intConvert(getPlayerInfo(world(world), player(player), node), defaultValue);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        return intConvert(getUserMeta(world(world), player(player), node), defaultValue);
     }
 
     @Override
     public int getPlayerInfoInteger(String world, String player, String node, int defaultValue) {
-        return intConvert(getPlayerInfo(world(world), player(player), node), defaultValue);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        return intConvert(getUserMeta(world(world), player(player), node), defaultValue);
     }
 
     @Override
     public int getPlayerInfoInteger(World world, String player, String node, int defaultValue) {
-        return intConvert(getPlayerInfo(world(world), player(player), node), defaultValue);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        return intConvert(getUserMeta(world(world), player(player), node), defaultValue);
     }
 
     @Override
     public int getPlayerInfoInteger(Player player, String node, int defaultValue) {
-        return intConvert(getPlayerInfo(world(player), player(player), node), defaultValue);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        return intConvert(getUserMeta(world(player), player(player), node), defaultValue);
     }
 
     @Override
     public void setPlayerInfoInteger(String world, OfflinePlayer player, String node, int value) {
-        setPlayerInfo(world(world), player(player), node, value);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        setUserMeta(world(world), player(player), node, value);
     }
 
     @Override
     public void setPlayerInfoInteger(String world, String player, String node, int value) {
-        setPlayerInfo(world(world), player(player), node, value);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        setUserMeta(world(world), player(player), node, value);
     }
 
     @Override
     public void setPlayerInfoInteger(World world, String player, String node, int value) {
-        setPlayerInfo(world(world), player(player), node, value);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        setUserMeta(world(world), player(player), node, value);
     }
 
     @Override
     public void setPlayerInfoInteger(Player player, String node, int value) {
-        setPlayerInfo(world(player), player(player), node, value);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        setUserMeta(world(player), player(player), node, value);
     }
 
     @Override
     public int getGroupInfoInteger(String world, String group, String node, int defaultValue) {
-        return intConvert(getGroupInfo(world(world), group, node), defaultValue);
+        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(node, "node");
+        return intConvert(getGroupMeta(world(world), group, node), defaultValue);
     }
 
     @Override
     public int getGroupInfoInteger(World world, String group, String node, int defaultValue) {
-        return intConvert(getGroupInfo(world(world), group, node), defaultValue);
+        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(node, "node");
+        return intConvert(getGroupMeta(world(world), group, node), defaultValue);
     }
 
     @Override
     public void setGroupInfoInteger(String world, String group, String node, int value) {
-        setGroupInfo(world(world), group, node, value);
+        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(node, "node");
+        setGroupMeta(world(world), group, node, value);
     }
 
     @Override
     public void setGroupInfoInteger(World world, String group, String node, int value) {
-        setGroupInfo(world(world), group, node, value);
+        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(node, "node");
+        setGroupMeta(world(world), group, node, value);
     }
 
     @Override
     public double getPlayerInfoDouble(String world, OfflinePlayer player, String node, double defaultValue) {
-        return doubleConvert(getPlayerInfo(world(world), player(player), node), defaultValue);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        return doubleConvert(getUserMeta(world(world), player(player), node), defaultValue);
     }
 
     @Override
     public double getPlayerInfoDouble(String world, String player, String node, double defaultValue) {
-        return doubleConvert(getPlayerInfo(world(world), player(player), node), defaultValue);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        return doubleConvert(getUserMeta(world(world), player(player), node), defaultValue);
     }
 
     @Override
     public double getPlayerInfoDouble(World world, String player, String node, double defaultValue) {
-        return doubleConvert(getPlayerInfo(world(world), player(player), node), defaultValue);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        return doubleConvert(getUserMeta(world(world), player(player), node), defaultValue);
     }
 
     @Override
     public double getPlayerInfoDouble(Player player, String node, double defaultValue) {
-        return doubleConvert(getPlayerInfo(world(player), player(player), node), defaultValue);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        return doubleConvert(getUserMeta(world(player), player(player), node), defaultValue);
     }
 
     @Override
     public void setPlayerInfoDouble(String world, OfflinePlayer player, String node, double value) {
-        setPlayerInfo(world(world), player(player), node, value);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        setUserMeta(world(world), player(player), node, value);
     }
 
     @Override
     public void setPlayerInfoDouble(String world, String player, String node, double value) {
-        setPlayerInfo(world(world), player(player), node, value);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        setUserMeta(world(world), player(player), node, value);
     }
 
     @Override
     public void setPlayerInfoDouble(World world, String player, String node, double value) {
-        setPlayerInfo(world(world), player(player), node, value);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        setUserMeta(world(world), player(player), node, value);
     }
 
     @Override
     public void setPlayerInfoDouble(Player player, String node, double value) {
-        setPlayerInfo(world(player), player(player), node, value);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        setUserMeta(world(player), player(player), node, value);
     }
 
     @Override
     public double getGroupInfoDouble(String world, String group, String node, double defaultValue) {
-        return doubleConvert(getGroupInfo(world(world), group, node), defaultValue);
+        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(node, "node");
+        return doubleConvert(getGroupMeta(world(world), group, node), defaultValue);
     }
 
     @Override
     public double getGroupInfoDouble(World world, String group, String node, double defaultValue) {
-        return doubleConvert(getGroupInfo(world(world), group, node), defaultValue);
+        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(node, "node");
+        return doubleConvert(getGroupMeta(world(world), group, node), defaultValue);
     }
 
     @Override
     public void setGroupInfoDouble(String world, String group, String node, double value) {
-        setGroupInfo(world(world), group, node, value);
+        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(node, "node");
+        setGroupMeta(world(world), group, node, value);
     }
 
     @Override
     public void setGroupInfoDouble(World world, String group, String node, double value) {
-        setGroupInfo(world(world), group, node, value);
+        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(node, "node");
+        setGroupMeta(world(world), group, node, value);
     }
 
     @Override
     public boolean getPlayerInfoBoolean(String world, OfflinePlayer player, String node, boolean defaultValue) {
-        return booleanConvert(getPlayerInfo(world(world), player(player), node), defaultValue);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        return booleanConvert(getUserMeta(world(world), player(player), node), defaultValue);
     }
 
     @Override
     public boolean getPlayerInfoBoolean(String world, String player, String node, boolean defaultValue) {
-        return booleanConvert(getPlayerInfo(world(world), player(player), node), defaultValue);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        return booleanConvert(getUserMeta(world(world), player(player), node), defaultValue);
     }
 
     @Override
     public boolean getPlayerInfoBoolean(World world, String player, String node, boolean defaultValue) {
-        return booleanConvert(getPlayerInfo(world(world), player(player), node), defaultValue);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        return booleanConvert(getUserMeta(world(world), player(player), node), defaultValue);
     }
 
     @Override
     public boolean getPlayerInfoBoolean(Player player, String node, boolean defaultValue) {
-        return booleanConvert(getPlayerInfo(world(player), player(player), node), defaultValue);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        return booleanConvert(getUserMeta(world(player), player(player), node), defaultValue);
     }
 
     @Override
     public void setPlayerInfoBoolean(String world, OfflinePlayer player, String node, boolean value) {
-        setPlayerInfo(world(world), player(player), node, value);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        setUserMeta(world(world), player(player), node, value);
     }
 
     @Override
     public void setPlayerInfoBoolean(String world, String player, String node, boolean value) {
-        setPlayerInfo(world(world), player(player), node, value);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        setUserMeta(world(world), player(player), node, value);
     }
 
     @Override
     public void setPlayerInfoBoolean(World world, String player, String node, boolean value) {
-        setPlayerInfo(world(world), player(player), node, value);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        setUserMeta(world(world), player(player), node, value);
     }
 
     @Override
     public void setPlayerInfoBoolean(Player player, String node, boolean value) {
-        setPlayerInfo(world(player), player(player), node, value);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        setUserMeta(world(player), player(player), node, value);
     }
 
     @Override
     public boolean getGroupInfoBoolean(String world, String group, String node, boolean defaultValue) {
-        return booleanConvert(getGroupInfo(world(world), group, node), defaultValue);
+        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(node, "node");
+        return booleanConvert(getGroupMeta(world(world), group, node), defaultValue);
     }
 
     @Override
     public boolean getGroupInfoBoolean(World world, String group, String node, boolean defaultValue) {
-        return booleanConvert(getGroupInfo(world(world), group, node), defaultValue);
+        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(node, "node");
+        return booleanConvert(getGroupMeta(world(world), group, node), defaultValue);
     }
 
     @Override
     public void setGroupInfoBoolean(String world, String group, String node, boolean value) {
-        setGroupInfo(world(world), group, node, value);
+        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(node, "node");
+        setGroupMeta(world(world), group, node, value);
     }
 
     @Override
     public void setGroupInfoBoolean(World world, String group, String node, boolean value) {
-        setGroupInfo(world(world), group, node, value);
+        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(node, "node");
+        setGroupMeta(world(world), group, node, value);
     }
 
     @Override
     public String getPlayerInfoString(String world, OfflinePlayer player, String node, String defaultValue) {
-        return strConvert(getPlayerInfo(world(world), player(player), node), defaultValue);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        return strConvert(getUserMeta(world(world), player(player), node), defaultValue);
     }
 
     @Override
     public String getPlayerInfoString(String world, String player, String node, String defaultValue) {
-        return strConvert(getPlayerInfo(world(world), player(player), node), defaultValue);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        return strConvert(getUserMeta(world(world), player(player), node), defaultValue);
     }
 
     @Override
     public String getPlayerInfoString(World world, String player, String node, String defaultValue) {
-        return strConvert(getPlayerInfo(world(world), player(player), node), defaultValue);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        return strConvert(getUserMeta(world(world), player(player), node), defaultValue);
     }
 
     @Override
     public String getPlayerInfoString(Player player, String node, String defaultValue) {
-        return strConvert(getPlayerInfo(world(player), player(player), node), defaultValue);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        return strConvert(getUserMeta(world(player), player(player), node), defaultValue);
     }
 
     @Override
     public void setPlayerInfoString(String world, OfflinePlayer player, String node, String value) {
-        setPlayerInfo(world(world), player(player), node, value);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        setUserMeta(world(world), player(player), node, value);
     }
 
     @Override
     public void setPlayerInfoString(String world, String player, String node, String value) {
-        setPlayerInfo(world(world), player(player), node, value);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        setUserMeta(world(world), player(player), node, value);
     }
 
     @Override
     public void setPlayerInfoString(World world, String player, String node, String value) {
-        setPlayerInfo(world(world), player(player), node, value);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        setUserMeta(world(world), player(player), node, value);
     }
 
     @Override
     public void setPlayerInfoString(Player player, String node, String value) {
-        setPlayerInfo(world(player), player(player), node, value);
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(node, "node");
+        setUserMeta(world(player), player(player), node, value);
     }
 
     @Override
     public String getGroupInfoString(String world, String group, String node, String defaultValue) {
-        return strConvert(getGroupInfo(world(world), group, node), defaultValue);
+        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(node, "node");
+        return strConvert(getGroupMeta(world(world), group, node), defaultValue);
     }
 
     @Override
     public String getGroupInfoString(World world, String group, String node, String defaultValue) {
-        return strConvert(getGroupInfo(world(world), group, node), defaultValue);
+        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(node, "node");
+        return strConvert(getGroupMeta(world(world), group, node), defaultValue);
     }
 
     @Override
     public void setGroupInfoString(String world, String group, String node, String value) {
-        setGroupInfo(world(world), group, node, value);
+        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(node, "node");
+        setGroupMeta(world(world), group, node, value);
     }
 
     @Override
     public void setGroupInfoString(World world, String group, String node, String value) {
-        setGroupInfo(world(world), group, node, value);
+        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(node, "node");
+        setGroupMeta(world(world), group, node, value);
     }
 
     @Override
