@@ -74,10 +74,17 @@ public class EditorCommand extends SingleCommand {
         // collect holders
         List<PermissionHolder> holders = new ArrayList<>();
         if (type.includingGroups) {
-            holders.addAll(plugin.getGroupManager().getAll().values());
+            plugin.getGroupManager().getAll().values().stream()
+                    .sorted((o1, o2) -> {
+                        int i = Integer.compare(o2.getWeight().orElse(0), o1.getWeight().orElse(0));
+                        return i != 0 ? i : o1.getName().compareToIgnoreCase(o2.getName());
+                    })
+                    .forEach(holders::add);
         }
         if (type.includingUsers) {
-            holders.addAll(plugin.getUserManager().getAll().values());
+            plugin.getUserManager().getAll().values().stream()
+                    .sorted((o1, o2) -> o1.getFriendlyName().compareToIgnoreCase(o2.getFriendlyName()))
+                    .forEach(holders::add);
         }
 
         // remove holders which the sender doesn't have perms to view
