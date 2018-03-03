@@ -88,17 +88,9 @@ public abstract class HikariConnectionFactory extends AbstractConnectionFactory 
         // If a connection is not returned within 10 seconds, it's probably safe to assume it's been leaked.
         config.setLeakDetectionThreshold(TimeUnit.SECONDS.toMillis(10)); // 10000
 
-        // The drivers are really old in some of the older Spigot binaries, so Connection#isValid doesn't work.
-        config.setConnectionTestQuery("/* LuckPerms ping */ SELECT 1");
-
-        try {
-            // don't perform any initial connection validation - we subsequently call #getConnection
-            // to setup the schema anyways
-            config.setInitializationFailTimeout(-1);
-        } catch (NoSuchMethodError e) {
-            //noinspection deprecation
-            config.setInitializationFailFast(false);
-        }
+        // don't perform any initial connection validation - we subsequently call #getConnection
+        // to setup the schema anyways
+        config.setInitializationFailTimeout(-1);
 
         this.hikari = new HikariDataSource(config);
     }

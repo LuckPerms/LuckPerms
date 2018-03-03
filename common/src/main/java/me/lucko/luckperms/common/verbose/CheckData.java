@@ -127,7 +127,12 @@ public class CheckData {
     public JsonObject toJson(StackTracePrinter tracePrinter) {
         return formBaseJson()
                 .add("trace", new JArray()
-                        .consume(arr -> tracePrinter.process(this.checkTrace, StackTracePrinter.elementToString(arr::add)))
+                        .consume(arr -> {
+                            int overflow = tracePrinter.process(this.checkTrace, StackTracePrinter.elementToString(arr::add));
+                            if (overflow != 0) {
+                                arr.add("... and " + overflow + " more");
+                            }
+                        })
                 )
                 .toJson();
     }
