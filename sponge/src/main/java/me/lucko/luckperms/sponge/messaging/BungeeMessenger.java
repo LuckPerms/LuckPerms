@@ -61,7 +61,7 @@ public class BungeeMessenger implements Messenger, RawDataListener {
     }
 
     public void init() {
-        this.channel = this.plugin.getBootstrap().getGame().getChannelRegistrar().createRawChannel(this.plugin, CHANNEL);
+        this.channel = this.plugin.getBootstrap().getGame().getChannelRegistrar().createRawChannel(this.plugin.getBootstrap(), CHANNEL);
         this.channel.addListener(Platform.Type.SERVER, this);
     }
 
@@ -87,7 +87,7 @@ public class BungeeMessenger implements Messenger, RawDataListener {
 
             this.channel.sendTo(p, buf -> buf.writeUTF(outgoingMessage.asEncodedString()));
             task.cancel();
-        }).submit(this.plugin);
+        }).submit(this.plugin.getBootstrap());
     }
 
     @Override

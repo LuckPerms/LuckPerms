@@ -111,8 +111,8 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void registerPlatformListeners() {
         this.connectionListener = new SpongeConnectionListener(this);
-        this.bootstrap.getGame().getEventManager().registerListeners(this, this.connectionListener);
-        this.bootstrap.getGame().getEventManager().registerListeners(this, new SpongePlatformListener(this));
+        this.bootstrap.getGame().getEventManager().registerListeners(this.bootstrap, this.connectionListener);
+        this.bootstrap.getGame().getEventManager().registerListeners(this.bootstrap, new SpongePlatformListener(this));
     }
 
     @Override
@@ -123,7 +123,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void registerCommands() {
         this.commandManager = new SpongeCommandExecutor(this);
-        this.bootstrap.getGame().getCommandManager().register(this, this.commandManager, "luckperms", "lp", "perm", "perms", "permission", "permissions");
+        this.bootstrap.getGame().getCommandManager().register(this.bootstrap, this.commandManager, "luckperms", "lp", "perm", "perms", "permission", "permissions");
     }
 
     @Override
@@ -155,15 +155,15 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
             getLogger().warn("Delaying LuckPerms PermissionService registration.");
             this.lateLoad = true;
         } else {
-            this.bootstrap.getGame().getServiceManager().setProvider(this, LPPermissionService.class, this.service);
-            this.bootstrap.getGame().getServiceManager().setProvider(this, PermissionService.class, this.service.sponge());
-            this.bootstrap.getGame().getServiceManager().setProvider(this, LuckPermsService.class, this.service);
+            this.bootstrap.getGame().getServiceManager().setProvider(this.bootstrap, LPPermissionService.class, this.service);
+            this.bootstrap.getGame().getServiceManager().setProvider(this.bootstrap, PermissionService.class, this.service.sponge());
+            this.bootstrap.getGame().getServiceManager().setProvider(this.bootstrap, LuckPermsService.class, this.service);
         }
     }
 
     @Override
     protected void registerApiOnPlatform(LuckPermsApi api) {
-        this.bootstrap.getGame().getServiceManager().setProvider(this, LuckPermsApi.class, api);
+        this.bootstrap.getGame().getServiceManager().setProvider(this.bootstrap, LuckPermsApi.class, api);
     }
 
     @Override
@@ -184,9 +184,9 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     public void lateEnable() {
         if (this.lateLoad) {
             getLogger().info("Providing late registration of PermissionService...");
-            this.bootstrap.getGame().getServiceManager().setProvider(this, LPPermissionService.class, this.service);
-            this.bootstrap.getGame().getServiceManager().setProvider(this, PermissionService.class, this.service.sponge());
-            this.bootstrap.getGame().getServiceManager().setProvider(this, LuckPermsService.class, this.service);
+            this.bootstrap.getGame().getServiceManager().setProvider(this.bootstrap, LPPermissionService.class, this.service);
+            this.bootstrap.getGame().getServiceManager().setProvider(this.bootstrap, PermissionService.class, this.service.sponge());
+            this.bootstrap.getGame().getServiceManager().setProvider(this.bootstrap, LuckPermsService.class, this.service);
         }
     }
 

@@ -62,6 +62,10 @@ public class LPSubjectDataUpdateEvent extends AbstractEvent implements SubjectDa
                 .add(EventContextKeys.PLUGIN, this.plugin.getBootstrap().getPluginContainer())
                 .build();
 
-        return Cause.builder().build(eventContext);
+        return Cause.builder()
+                .append(this.plugin.getService())
+                .append(this.plugin.getService().sponge())
+                .append(this.plugin.getBootstrap().getPluginContainer())
+                .build(eventContext);
     }
 }

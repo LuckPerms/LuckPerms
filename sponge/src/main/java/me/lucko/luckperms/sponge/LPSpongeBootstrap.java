@@ -52,7 +52,9 @@ import org.spongepowered.api.scheduler.SpongeExecutorService;
 import org.spongepowered.api.scheduler.SynchronousExecutor;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.UUID;
@@ -242,10 +244,19 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     
     @Override
     public File getDataDirectory() {
-        File serverRoot = getConfigPath().toFile().getParentFile().getParentFile();
-        File dataDirectory = new File(serverRoot, "luckperms");
-        dataDirectory.mkdirs();
-        return dataDirectory;
+        Path serverRoot = getConfigPath().getParent().getParent();
+        Path dataDirectory = serverRoot.resolve("luckperms");
+        try {
+            Files.createDirectories(dataDirectory);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return dataDirectory.toFile();
+    }
+
+    @Override
+    public File getConfigDirectory() {
+        return this.configDirectory.toFile();
     }
 
     @Override
