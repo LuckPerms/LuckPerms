@@ -45,7 +45,7 @@ public class ApiPlatformInfo implements PlatformInfo {
     @Nonnull
     @Override
     public String getVersion() {
-        return this.plugin.getVersion();
+        return this.plugin.getBootstrap().getVersion();
     }
 
     @Override
@@ -56,17 +56,17 @@ public class ApiPlatformInfo implements PlatformInfo {
     @Nonnull
     @Override
     public PlatformType getType() {
-        return this.plugin.getServerType();
+        return this.plugin.getBootstrap().getType();
     }
 
     @Nonnull
     @Override
     public Set<UUID> getUniqueConnections() {
-        return Collections.unmodifiableSet(this.plugin.getUniqueConnections());
+        return Collections.unmodifiableSet(this.plugin.getConnectionListener().getUniqueConnections());
     }
 
     @Override
     public long getStartTime() {
-        return this.plugin.getStartTime();
+        return this.plugin.getBootstrap().getStartupTime();
     }
 }

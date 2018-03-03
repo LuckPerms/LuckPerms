@@ -83,7 +83,7 @@ public class DependencyRegistry {
         }
 
         // don't load configurate dependencies on sponge
-        if (this.plugin.getServerType() == PlatformType.SPONGE) {
+        if (this.plugin.getBootstrap().getType() == PlatformType.SPONGE) {
             dependencies.remove(Dependency.CONFIGURATE_CORE);
             dependencies.remove(Dependency.CONFIGURATE_GSON);
             dependencies.remove(Dependency.CONFIGURATE_YAML);

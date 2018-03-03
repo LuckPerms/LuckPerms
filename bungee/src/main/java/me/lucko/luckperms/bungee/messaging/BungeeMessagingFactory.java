@@ -49,8 +49,8 @@ public class BungeeMessagingFactory extends MessagingFactory<LPBungeePlugin> {
                 e.printStackTrace();
             }
         } else if (messagingType.equals("redisbungee")) {
-            if (getPlugin().getProxy().getPluginManager().getPlugin("RedisBungee") == null) {
-                getPlugin().getLog().warn("RedisBungee plugin not present.");
+            if (getPlugin().getBootstrap().getProxy().getPluginManager().getPlugin("RedisBungee") == null) {
+                getPlugin().getLogger().warn("RedisBungee plugin not present.");
             } else {
                 try {
                     return new LuckPermsMessagingService(getPlugin(), new RedisBungeeMessengerProvider());

@@ -79,7 +79,7 @@ public class UserClone extends SubCommand<User> {
                     return CommandResult.INVALID_ARGS;
                 }
 
-                uuid = plugin.lookupUuid(target).orElse(null);
+                uuid = plugin.getBootstrap().lookupUuid(target).orElse(null);
                 if (uuid == null) {
                     Message.USER_NOT_FOUND.send(sender, target);
                     return CommandResult.INVALID_ARGS;

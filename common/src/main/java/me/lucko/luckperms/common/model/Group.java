@@ -154,7 +154,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
         private final Group group;
 
         private GroupRefreshBuffer(LuckPermsPlugin plugin, Group group) {
-            super(50L, 5L, plugin.getScheduler().async());
+            super(50L, 5L, plugin.getBootstrap().getScheduler().async());
             this.group = group;
         }
 

@@ -79,7 +79,7 @@ public class DependencyManager {
     }
 
     private File getSaveDirectory() {
-        File saveDirectory = new File(this.plugin.getDataDirectory(), "lib");
+        File saveDirectory = new File(this.plugin.getBootstrap().getDataDirectory(), "lib");
         if (!(saveDirectory.exists() || saveDirectory.mkdirs())) {
             throw new RuntimeException("Unable to create lib dir - " + saveDirectory.getPath());
         }
@@ -139,7 +139,7 @@ public class DependencyManager {
                 File file = downloadDependency(saveDirectory, dependency);
                 sources.add(new Source(dependency, file));
             } catch (Throwable e) {
-                this.plugin.getLog().severe("Exception whilst downloading dependency " + dependency.name());
+                this.plugin.getLogger().severe("Exception whilst downloading dependency " + dependency.name());
                 e.printStackTrace();
             }
         }
@@ -169,12 +169,12 @@ public class DependencyManager {
                 RelocationHandler relocationHandler = getRelocationHandler();
 
                 // attempt to remap the jar.
-                this.plugin.getLog().info("Attempting to apply relocations to " + input.getName() + "...");
+                this.plugin.getLogger().info("Attempting to apply relocations to " + input.getName() + "...");
                 relocationHandler.remap(input, output, relocations);
 
                 remappedJars.add(new Source(source.dependency, output));
             } catch (Throwable e) {
-                this.plugin.getLog().severe("Unable to remap the source file '" + source.dependency.name() + "'.");
+                this.plugin.getLogger().severe("Unable to remap the source file '" + source.dependency.name() + "'.");
                 e.printStackTrace();
             }
         }
@@ -187,10 +187,10 @@ public class DependencyManager {
             }
 
             try {
-                this.plugin.getPluginClassLoader().loadJar(source.file);
+                this.plugin.getBootstrap().getPluginClassLoader().loadJar(source.file);
                 this.loaded.put(source.dependency, source.file);
             } catch (Throwable e) {
-                this.plugin.getLog().severe("Failed to load dependency jar '" + source.file.getName() + "'.");
+                this.plugin.getLogger().severe("Failed to load dependency jar '" + source.file.getName() + "'.");
                 e.printStackTrace();
             }
         }
@@ -218,7 +218,7 @@ public class DependencyManager {
             // compute a hash for the downloaded file
             byte[] hash = this.digest.digest(bytes);
 
-            this.plugin.getLog().info("Successfully downloaded '" + fileName + "' with checksum: " + Base64.getEncoder().encodeToString(hash));
+            this.plugin.getLogger().info("Successfully downloaded '" + fileName + "' with checksum: " + Base64.getEncoder().encodeToString(hash));
 
             // ensure the hash matches the expected checksum
             if (!Arrays.equals(hash, dependency.getChecksum())) {

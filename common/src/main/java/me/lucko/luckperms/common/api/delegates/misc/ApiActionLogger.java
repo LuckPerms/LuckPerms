@@ -58,7 +58,7 @@ public class ApiActionLogger implements ActionLogger {
     @Nonnull
     @Override
     public CompletableFuture<Void> submit(@Nonnull LogEntry entry) {
-        return CompletableFuture.runAsync(() -> this.plugin.getLogDispatcher().dispatchFromApi((ExtendedLogEntry) entry), this.plugin.getScheduler().async());
+        return CompletableFuture.runAsync(() -> this.plugin.getLogDispatcher().dispatchFromApi((ExtendedLogEntry) entry), this.plugin.getBootstrap().getScheduler().async());
     }
 
     @Nonnull
@@ -70,6 +70,6 @@ public class ApiActionLogger implements ActionLogger {
     @Nonnull
     @Override
     public CompletableFuture<Void> broadcastAction(@Nonnull LogEntry entry) {
-        return CompletableFuture.runAsync(() -> this.plugin.getLogDispatcher().broadcastFromApi((ExtendedLogEntry) entry), this.plugin.getScheduler().async());
+        return CompletableFuture.runAsync(() -> this.plugin.getLogDispatcher().broadcastFromApi((ExtendedLogEntry) entry), this.plugin.getBootstrap().getScheduler().async());
     }
 }

@@ -23,37 +23,21 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.locale;
+package me.lucko.luckperms.common.listener;
 
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import java.util.Set;
+import java.util.UUID;
 
-import java.io.File;
+/**
+ * Handles incoming connections on the platform
+ */
+public interface ConnectionListener {
 
-public class NoopLocaleManager implements LocaleManager {
-
-    @Override
-    public void tryLoad(LuckPermsPlugin plugin, File file) {
-
-    }
-
-    @Override
-    public void loadFromFile(File file) {
-
-    }
-
-    @Override
-    public int getSize() {
-        return 0;
-    }
-
-    @Override
-    public String getTranslation(Message key) {
-        return null;
-    }
-
-    @Override
-    public CommandSpecData getTranslation(CommandSpec key) {
-        return null;
-    }
+    /**
+     * Gets the unique players which have connected to the server since it started.
+     *
+     * @return the unique connections
+     */
+    Set<UUID> getUniqueConnections();
 
 }

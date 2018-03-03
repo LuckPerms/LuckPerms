@@ -124,7 +124,7 @@ public class Importer implements Runnable {
                     cmd.process();
                     processedCount.incrementAndGet();
                 }
-            }, this.commandManager.getPlugin().getScheduler().async()));
+            }, this.commandManager.getPlugin().getBootstrap().getScheduler().async()));
         }
 
         // all of the threads have been scheduled now and are running. we just need to wait for them all to complete

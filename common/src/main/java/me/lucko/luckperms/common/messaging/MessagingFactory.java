@@ -55,14 +55,14 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
             return null;
         }
 
-        this.plugin.getLog().info("Loading messaging service... [" + messagingType.toUpperCase() + "]");
+        this.plugin.getLogger().info("Loading messaging service... [" + messagingType.toUpperCase() + "]");
 
         InternalMessagingService service = getServiceFor(messagingType);
         if (service != null) {
             return service;
         }
 
-        this.plugin.getLog().warn("Messaging service '" + messagingType + "' not recognised.");
+        this.plugin.getLogger().warn("Messaging service '" + messagingType + "' not recognised.");
         return null;
     }
 
@@ -75,7 +75,7 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
                     e.printStackTrace();
                 }
             } else {
-                this.plugin.getLog().warn("Messaging Service was set to redis, but redis is not enabled!");
+                this.plugin.getLogger().warn("Messaging Service was set to redis, but redis is not enabled!");
             }
         }
 

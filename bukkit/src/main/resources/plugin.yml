@@ -4,7 +4,7 @@ description: A permissions plugin
 author: Luck
 website: https://github.com/lucko/LuckPerms
 
-main: me.lucko.luckperms.bukkit.LPBukkitPlugin
+main: me.lucko.luckperms.bukkit.LPBukkitBootstrap
 load: STARTUP
 
 # This means that all plugins that (soft-)depend on Vault, depend on LuckPerms too.

@@ -77,7 +77,7 @@ public class PersistedSubject implements LPSubject {
             .expireAfterAccess(20, TimeUnit.MINUTES)
             .build(lookup -> lookupOptionValue(lookup.contexts, lookup.key));
 
-    private final BufferedRequest<Void> saveBuffer = new BufferedRequest<Void>(1000L, 500L, r -> PersistedSubject.this.service.getPlugin().getScheduler().doAsync(r)) {
+    private final BufferedRequest<Void> saveBuffer = new BufferedRequest<Void>(1000L, 500L, r -> PersistedSubject.this.service.getPlugin().getBootstrap().getScheduler().doAsync(r)) {
         @Override
         protected Void perform() {
             try {

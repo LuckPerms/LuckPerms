@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.plugin;
 
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
@@ -35,13 +34,12 @@ import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.abstraction.Command;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
-import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.event.EventFactory;
 import me.lucko.luckperms.common.inheritance.InheritanceHandler;
+import me.lucko.luckperms.common.listener.ConnectionListener;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.logging.Logger;
 import me.lucko.luckperms.common.managers.group.GroupManager;
@@ -49,18 +47,15 @@ import me.lucko.luckperms.common.managers.track.TrackManager;
 import me.lucko.luckperms.common.managers.user.UserManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.dao.file.FileWatcher;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 
-import java.io.File;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
@@ -70,6 +65,13 @@ import java.util.stream.Stream;
  * All plugin platforms implement this interface.
  */
 public interface LuckPermsPlugin {
+
+    /**
+     * Gets the bootstrap plugin instance
+     *
+     * @return the bootstrap plugin
+     */
+    LuckPermsBootstrap getBootstrap();
 
     /**
      * Gets the user manager instance for the platform
@@ -125,7 +127,7 @@ public interface LuckPermsPlugin {
      *
      * @return the plugin's logger
      */
-    Logger getLog();
+    Logger getLogger();
 
     /**
      * Gets the event factory
@@ -149,18 +151,18 @@ public interface LuckPermsPlugin {
     CommandManager getCommandManager();
 
     /**
+     * Gets the connection listener.
+     *
+     * @return the connection listener
+     */
+    ConnectionListener getConnectionListener();
+
+    /**
      * Gets the instance providing locale translations for the plugin
      *
      * @return the locale manager
      */
     LocaleManager getLocaleManager();
-
-    /**
-     * Gets the classloader wrapper for adding dependencies to the classpath
-     *
-     * @return the plugin classloader
-     */
-    PluginClassLoader getPluginClassLoader();
 
     /**
      * Gets the dependency manager for the plugin
@@ -220,109 +222,11 @@ public interface LuckPermsPlugin {
     LogDispatcher getLogDispatcher();
 
     /**
-     * Gets the LuckPerms Scheduler instance
-     *
-     * @return the scheduler
-     */
-    SchedulerAdapter getScheduler();
-
-    /**
      * Gets the file watcher running on the platform
      *
      * @return the file watcher
      */
     Optional<FileWatcher> getFileWatcher();
-
-    /**
-     * Gets a string of the plugin's version
-     *
-     * @return the version of the plugin
-     */
-    String getVersion();
-
-    /**
-     * Gets the platform type this instance of LuckPerms is running on.
-     *
-     * @return the platform type
-     */
-    PlatformType getServerType();
-
-    /**
-     * Gets the name or "brand" of the running platform
-     *
-     * @return the server brand
-     */
-    String getServerBrand();
-
-    /**
-     * Gets the version of the running platform
-     *
-     * @return the server version
-     */
-    String getServerVersion();
-
-    /**
-     * Gets the name associated with this server
-     *
-     * @return the server name
-     */
-    default String getServerName() {
-        return null;
-    }
-
-    /**
-     * Gets the time when the plugin first started in millis.
-     *
-     * @return the enable time
-     */
-    long getStartTime();
-
-    /**
-     * Gets the plugins main data storage directory
-     *
-     * <p>Bukkit: /root/plugins/LuckPerms</p>
-     * <p>Bungee: /root/plugins/LuckPerms</p>
-     * <p>Sponge: /root/luckperms/</p>
-     *
-     * @return the platforms data folder
-     */
-    File getDataDirectory();
-
-    /**
-     * Gets the plugins config directory.
-     *
-     * <p>This is the same as {@link #getDataDirectory()} on Bukkit/Bungee, but different on Sponge.</p>
-     *
-     * @return the platforms config folder
-     */
-    default File getConfigDirectory() {
-        return getDataDirectory();
-    }
-
-    /**
-     * Gets a bundled resource file from the jar
-     *
-     * @param path the path of the file
-     * @return the file as an input stream
-     */
-    InputStream getResourceStream(String path);
-
-    /**
-     * Gets a player object linked to this User. The returned object must be the same type
-     * as the instance used in the platforms {@link ContextManager}
-     *
-     * @param user the user instance
-     * @return a player object, or null, if one couldn't be found.
-     */
-    Object getPlayer(User user);
-
-    /**
-     * Lookup a uuid from a username, using the servers internal uuid cache.
-     *
-     * @param username the username to lookup
-     * @return an optional uuid, if found
-     */
-    Optional<UUID> lookupUuid(String username);
 
     /**
      * Gets a calculated context instance for the user using the rules of the platform.
@@ -331,35 +235,6 @@ public interface LuckPermsPlugin {
      * @return a contexts object, or null if one couldn't be generated
      */
     Optional<Contexts> getContextForUser(User user);
-
-    /**
-     * Gets the number of users online on the platform
-     *
-     * @return the number of users
-     */
-    int getPlayerCount();
-
-    /**
-     * Gets the usernames of the users online on the platform
-     *
-     * @return a {@link List} of usernames
-     */
-    Stream<String> getPlayerList();
-
-    /**
-     * Gets the UUIDs of the users online on the platform
-     *
-     * @return a {@link Set} of UUIDs
-     */
-    Stream<UUID> getOnlinePlayers();
-
-    /**
-     * Checks if a user is online
-     *
-     * @param external the users external uuid
-     * @return true if the user is online
-     */
-    boolean isPlayerOnline(UUID external);
 
     /**
      * Gets a list of online Senders on the platform
@@ -374,13 +249,6 @@ public interface LuckPermsPlugin {
      * @return the console sender of the instance
      */
     Sender getConsoleSender();
-
-    /**
-     * Gets the unique players which have connected to the server since it started.
-     *
-     * @return the unique connections
-     */
-    Set<UUID> getUniqueConnections();
 
     default List<Command> getExtraCommands() {
         return Collections.emptyList();
@@ -398,16 +266,6 @@ public interface LuckPermsPlugin {
      */
     default void onPostUpdate() {
 
-    }
-
-    default void sendStartupBanner(Sender sender) {
-        sender.sendMessage(CommandUtils.color("&b               __       &3 __   ___  __         __  "));
-        sender.sendMessage(CommandUtils.color("&b    |    |  | /  ` |__/ &3|__) |__  |__)  |\\/| /__` "));
-        sender.sendMessage(CommandUtils.color("&b    |___ \\__/ \\__, |  \\ &3|    |___ |  \\  |  | .__/ "));
-        sender.sendMessage(CommandUtils.color(" "));
-        sender.sendMessage(CommandUtils.color("&2  Loading version &bv" + getVersion() + "&2 on " + getServerType().getFriendlyName() + " - " + getServerBrand()));
-        sender.sendMessage(CommandUtils.color("&8  Running on server version " + getServerVersion()));
-        sender.sendMessage(CommandUtils.color(" "));
     }
 
 }

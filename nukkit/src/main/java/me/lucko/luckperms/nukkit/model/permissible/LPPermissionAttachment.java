@@ -306,7 +306,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
     @Override
     public Plugin getPlugin() {
-        return this.owner != null ? this.owner : this.permissible.getPlugin();
+        return this.owner != null ? this.owner : this.permissible.getPlugin().getBootstrap();
     }
 
     @Override

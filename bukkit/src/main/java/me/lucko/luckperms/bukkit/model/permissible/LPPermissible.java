@@ -219,7 +219,7 @@ public class LPPermissible extends PermissibleBase {
         }
 
         LPPermissionAttachment ret = addAttachment(plugin);
-        if (getPlugin().getServer().getScheduler().scheduleSyncDelayedTask(plugin, ret::remove, ticks) == -1) {
+        if (getPlugin().getBootstrap().getServer().getScheduler().scheduleSyncDelayedTask(plugin, ret::remove, ticks) == -1) {
             ret.remove();
             throw new RuntimeException("Could not add PermissionAttachment to " + this.player + " for plugin " + plugin.getDescription().getFullName() + ": Scheduler returned -1");
         }

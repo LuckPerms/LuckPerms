@@ -145,7 +145,7 @@ public class CommandManager {
             try {
                 return execute(sender, label, args);
             } catch (Throwable e) {
-                this.plugin.getLog().severe("Exception whilst executing command: " + args.toString());
+                this.plugin.getLogger().severe("Exception whilst executing command: " + args.toString());
                 e.printStackTrace();
                 return null;
             }
@@ -159,7 +159,7 @@ public class CommandManager {
 
         // Handle no arguments
         if (arguments.isEmpty() || (arguments.size() == 1 && arguments.get(0).trim().isEmpty())) {
-            CommandUtils.sendPluginMessage(sender, "&2Running &bLuckPerms v" + this.plugin.getVersion() + "&2.");
+            CommandUtils.sendPluginMessage(sender, "&2Running &bLuckPerms v" + this.plugin.getBootstrap().getVersion() + "&2.");
             if (this.mainCommands.stream().anyMatch(c -> c.shouldDisplay() && c.isAuthorized(sender))) {
                 Message.VIEW_AVAILABLE_COMMANDS_PROMPT.send(sender, label);
             } else {
@@ -257,7 +257,7 @@ public class CommandManager {
     }
 
     private void sendCommandUsage(Sender sender, String label) {
-        CommandUtils.sendPluginMessage(sender, "&2Running &bLuckPerms v" + this.plugin.getVersion() + "&2.");
+        CommandUtils.sendPluginMessage(sender, "&2Running &bLuckPerms v" + this.plugin.getBootstrap().getVersion() + "&2.");
         this.mainCommands.stream()
                 .filter(Command::shouldDisplay)
                 .filter(c -> c.isAuthorized(sender))

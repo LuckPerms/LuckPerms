@@ -29,6 +29,8 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
 import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
@@ -47,7 +49,9 @@ import java.util.function.Predicate;
  */
 public interface LPPermissionService {
 
-    LuckPermsSpongePlugin getPlugin();
+    LuckPermsPlugin getPlugin();
+
+    ContextManager<Subject> getContextManager();
 
     SubjectReferenceFactory getReferenceFactory();
 

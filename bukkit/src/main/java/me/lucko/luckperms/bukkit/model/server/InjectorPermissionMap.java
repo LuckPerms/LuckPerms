@@ -68,18 +68,18 @@ public class InjectorPermissionMap implements Runnable {
                 this.plugin.setPermissionMap(ret);
             }
         } catch (Exception e) {
-            this.plugin.getLog().severe("Exception occurred whilst injecting LuckPerms Permission map.");
+            this.plugin.getLogger().severe("Exception occurred whilst injecting LuckPerms Permission map.");
             e.printStackTrace();
         }
     }
 
     private LPPermissionMap inject() throws Exception {
         Objects.requireNonNull(PERMISSIONS_FIELD, "PERMISSIONS_FIELD");
-        PluginManager pluginManager = this.plugin.getServer().getPluginManager();
+        PluginManager pluginManager = this.plugin.getBootstrap().getServer().getPluginManager();
 
         if (!(pluginManager instanceof SimplePluginManager)) {
-            this.plugin.getLog().severe("PluginManager instance is not a 'SimplePluginManager', instead: " + pluginManager.getClass());
-            this.plugin.getLog().severe("Unable to inject LuckPerms Permission map.");
+            this.plugin.getLogger().severe("PluginManager instance is not a 'SimplePluginManager', instead: " + pluginManager.getClass());
+            this.plugin.getLogger().severe("Unable to inject LuckPerms Permission map.");
             return null;
         }
 

@@ -69,7 +69,7 @@ public class NukkitSenderFactory extends SenderFactory<CommandSender> {
         }
 
         // otherwise, send the message sync
-        getPlugin().getScheduler().doSync(new SyncMessengerAgent(sender, s));
+        getPlugin().getBootstrap().getScheduler().doSync(new SyncMessengerAgent(sender, s));
     }
 
     @Override

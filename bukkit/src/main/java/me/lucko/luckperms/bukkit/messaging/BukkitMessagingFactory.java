@@ -49,8 +49,8 @@ public class BukkitMessagingFactory extends MessagingFactory<LPBukkitPlugin> {
                 e.printStackTrace();
             }
         } else if (messagingType.equals("lilypad")) {
-            if (getPlugin().getServer().getPluginManager().getPlugin("LilyPad-Connect") == null) {
-                getPlugin().getLog().warn("LilyPad-Connect plugin not present.");
+            if (getPlugin().getBootstrap().getServer().getPluginManager().getPlugin("LilyPad-Connect") == null) {
+                getPlugin().getLogger().warn("LilyPad-Connect plugin not present.");
             } else {
                 try {
                     return new LuckPermsMessagingService(getPlugin(), new LilyPadMessengerProvider());

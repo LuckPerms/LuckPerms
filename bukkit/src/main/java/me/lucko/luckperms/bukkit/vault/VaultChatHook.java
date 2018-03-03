@@ -270,7 +270,7 @@ public class VaultChatHook extends AbstractVaultChat {
         return this.plugin.getConfiguration().get(ConfigKeys.VAULT_DEBUG);
     }
     private void logMsg(String format, Object... args) {
-        this.plugin.getLog().info("[VAULT-CHAT] " + String.format(format, args)
+        this.plugin.getLogger().info("[VAULT-CHAT] " + String.format(format, args)
                 .replace(CommandManager.SECTION_CHAR, '$')
                 .replace(CommandManager.AMPERSAND_CHAR, '$')
         );

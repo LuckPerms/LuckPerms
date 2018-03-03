@@ -82,7 +82,7 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
 
                 group = getIfLoaded(s);
                 if (group == null) {
-                    getPlugin().getLog().severe("Error whilst loading group '" + s + "'.");
+                    getPlugin().getLogger().severe("Error whilst loading group '" + s + "'.");
                     throw new RuntimeException();
                 }
 
@@ -137,7 +137,7 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
             return CompletableFuture.completedFuture(present);
         }
 
-        return CompletableFuture.supplyAsync(() -> this.subjectLoadingCache.get(identifier.toLowerCase()), this.plugin.getScheduler().async());
+        return CompletableFuture.supplyAsync(() -> this.subjectLoadingCache.get(identifier.toLowerCase()), this.plugin.getBootstrap().getScheduler().async());
     }
 
     @Override
@@ -170,7 +170,7 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
             }
 
             return ret.build();
-        }, this.plugin.getScheduler().async());
+        }, this.plugin.getBootstrap().getScheduler().async());
     }
 
     @Override
@@ -196,7 +196,7 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
             }
 
             return ret.build();
-        }, this.plugin.getScheduler().async());
+        }, this.plugin.getBootstrap().getScheduler().async());
     }
 
     @Override
@@ -212,7 +212,7 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
             }
 
             return ret.build();
-        }, this.plugin.getScheduler().async());
+        }, this.plugin.getBootstrap().getScheduler().async());
     }
 
     @Override

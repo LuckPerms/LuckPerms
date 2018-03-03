@@ -90,13 +90,13 @@ public class ApiStorage implements me.lucko.luckperms.api.Storage {
     @Nonnull
     @Override
     public Executor getSyncExecutor() {
-        return this.plugin.getScheduler().sync();
+        return this.plugin.getBootstrap().getScheduler().sync();
     }
 
     @Nonnull
     @Override
     public Executor getAsyncExecutor() {
-        return this.plugin.getScheduler().async();
+        return this.plugin.getBootstrap().getScheduler().async();
     }
 
     @Nonnull

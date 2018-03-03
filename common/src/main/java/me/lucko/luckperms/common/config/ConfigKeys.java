@@ -69,7 +69,7 @@ public class ConfigKeys {
      */
     public static final ConfigKey<String> SERVER = AbstractKey.of(c -> {
         if (c.getBoolean("use-server-properties-name", false)) {
-            String serverName = c.getPlugin().getServerName();
+            String serverName = c.getPlugin().getBootstrap().getServerName();
             if (serverName != null && !serverName.equals("Unknown Server")) {
                 return serverName.toLowerCase();
             }

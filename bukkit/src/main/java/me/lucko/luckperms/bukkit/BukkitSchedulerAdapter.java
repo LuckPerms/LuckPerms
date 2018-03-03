@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 
 public class BukkitSchedulerAdapter implements SchedulerAdapter {
-    private final LPBukkitPlugin plugin;
+    private final LPBukkitBootstrap bootstrap;
 
     private final ExecutorService asyncFallback;
     private final Executor asyncBukkit;
@@ -56,8 +56,8 @@ public class BukkitSchedulerAdapter implements SchedulerAdapter {
 
     private final Set<SchedulerTask> tasks = ConcurrentHashMap.newKeySet();
 
-    public BukkitSchedulerAdapter(LPBukkitPlugin plugin) {
-        this.plugin = plugin;
+    public BukkitSchedulerAdapter(LPBukkitBootstrap bootstrap) {
+        this.bootstrap = bootstrap;
 
         this.sync = new SyncExecutor();
         this.asyncFallback = new FallbackAsyncExecutor();
@@ -66,7 +66,7 @@ public class BukkitSchedulerAdapter implements SchedulerAdapter {
     }
 
     private BukkitScheduler scheduler() {
-        return this.plugin.getServer().getScheduler();
+        return this.bootstrap.getServer().getScheduler();
     }
 
     @Override
@@ -81,26 +81,26 @@ public class BukkitSchedulerAdapter implements SchedulerAdapter {
 
     @Override
     public SchedulerTask asyncRepeating(Runnable runnable, long intervalTicks) {
-        SchedulerTask task = new BukkitSchedulerTask(scheduler().runTaskTimerAsynchronously(this.plugin, runnable, intervalTicks, intervalTicks));
+        SchedulerTask task = new BukkitSchedulerTask(scheduler().runTaskTimerAsynchronously(this.bootstrap, runnable, intervalTicks, intervalTicks));
         this.tasks.add(task);
         return task;
     }
 
     @Override
     public SchedulerTask syncRepeating(Runnable runnable, long intervalTicks) {
-        SchedulerTask task = new BukkitSchedulerTask(scheduler().runTaskTimer(this.plugin, runnable, intervalTicks, intervalTicks));
+        SchedulerTask task = new BukkitSchedulerTask(scheduler().runTaskTimer(this.bootstrap, runnable, intervalTicks, intervalTicks));
         this.tasks.add(task);
         return task;
     }
 
     @Override
     public SchedulerTask asyncLater(Runnable runnable, long delayTicks) {
-        return new BukkitSchedulerTask(scheduler().runTaskLaterAsynchronously(this.plugin, runnable, delayTicks));
+        return new BukkitSchedulerTask(scheduler().runTaskLaterAsynchronously(this.bootstrap, runnable, delayTicks));
     }
 
     @Override
     public SchedulerTask syncLater(Runnable runnable, long delayTicks) {
-        return new BukkitSchedulerTask(scheduler().runTaskLater(this.plugin, runnable, delayTicks));
+        return new BukkitSchedulerTask(scheduler().runTaskLater(this.bootstrap, runnable, delayTicks));
     }
 
     @Override
@@ -142,14 +142,14 @@ public class BukkitSchedulerAdapter implements SchedulerAdapter {
     private final class SyncExecutor implements Executor {
         @Override
         public void execute(@Nonnull Runnable runnable) {
-            BukkitSchedulerAdapter.this.plugin.getServer().getScheduler().scheduleSyncDelayedTask(BukkitSchedulerAdapter.this.plugin, runnable);
+            BukkitSchedulerAdapter.this.bootstrap.getServer().getScheduler().scheduleSyncDelayedTask(BukkitSchedulerAdapter.this.bootstrap, runnable);
         }
     }
 
     private final class AsyncExecutor implements Executor {
         @Override
         public void execute(@Nonnull Runnable runnable) {
-            if (BukkitSchedulerAdapter.this.useFallback || !BukkitSchedulerAdapter.this.plugin.isEnabled()) {
+            if (BukkitSchedulerAdapter.this.useFallback || !BukkitSchedulerAdapter.this.bootstrap.isEnabled()) {
                 BukkitSchedulerAdapter.this.asyncFallback.execute(runnable);
             } else {
                 BukkitSchedulerAdapter.this.asyncBukkit.execute(runnable);
@@ -160,7 +160,7 @@ public class BukkitSchedulerAdapter implements SchedulerAdapter {
     private final class BukkitAsyncExecutor implements Executor {
         @Override
         public void execute(@Nonnull Runnable runnable) {
-            BukkitSchedulerAdapter.this.plugin.getServer().getScheduler().runTaskAsynchronously(BukkitSchedulerAdapter.this.plugin, runnable);
+            BukkitSchedulerAdapter.this.bootstrap.getServer().getScheduler().runTaskAsynchronously(BukkitSchedulerAdapter.this.bootstrap, runnable);
         }
     }
 

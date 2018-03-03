@@ -56,9 +56,9 @@ public class VaultHookManager {
                 this.chatHook = new VaultChatHook(plugin, this.permissionHook);
             }
 
-            final ServicesManager sm = plugin.getServer().getServicesManager();
-            sm.register(Permission.class, this.permissionHook, plugin, ServicePriority.High);
-            sm.register(Chat.class, this.chatHook, plugin, ServicePriority.High);
+            final ServicesManager sm = plugin.getBootstrap().getServer().getServicesManager();
+            sm.register(Permission.class, this.permissionHook, plugin.getBootstrap(), ServicePriority.High);
+            sm.register(Chat.class, this.chatHook, plugin.getBootstrap(), ServicePriority.High);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -71,7 +71,7 @@ public class VaultHookManager {
      * @param plugin the plugin
      */
     public void unhook(LPBukkitPlugin plugin) {
-        final ServicesManager sm = plugin.getServer().getServicesManager();
+        final ServicesManager sm = plugin.getBootstrap().getServer().getServicesManager();
 
         if (this.permissionHook != null) {
             sm.unregister(Permission.class, this.permissionHook);

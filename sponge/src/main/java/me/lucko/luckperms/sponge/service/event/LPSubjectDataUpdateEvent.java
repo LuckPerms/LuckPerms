@@ -59,7 +59,7 @@ public class LPSubjectDataUpdateEvent extends AbstractEvent implements SubjectDa
     @Override
     public Cause getCause() {
         EventContext eventContext = EventContext.builder()
-                .add(EventContextKeys.PLUGIN, this.plugin.getPluginContainer())
+                .add(EventContextKeys.PLUGIN, this.plugin.getBootstrap().getPluginContainer())
                 .build();
 
         return Cause.builder().build(eventContext);

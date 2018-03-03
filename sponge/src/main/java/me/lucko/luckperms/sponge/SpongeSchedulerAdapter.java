@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.plugin.SchedulerTask;
 import me.lucko.luckperms.common.utils.SafeIteration;
 
 import org.spongepowered.api.scheduler.Scheduler;
+import org.spongepowered.api.scheduler.SpongeExecutorService;
 import org.spongepowered.api.scheduler.Task;
 
 import java.util.Set;
@@ -37,45 +38,49 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
 public class SpongeSchedulerAdapter implements SchedulerAdapter {
-    private final LPSpongePlugin plugin;
+    private final LPSpongeBootstrap bootstrap;
+    
+    private final Scheduler scheduler;
+    private final SpongeExecutorService sync;
+    private final SpongeExecutorService async;
+    
     private final Set<SchedulerTask> tasks = ConcurrentHashMap.newKeySet();
 
-    public SpongeSchedulerAdapter(LPSpongePlugin plugin) {
-        this.plugin = plugin;
-    }
-
-    private Scheduler scheduler() {
-        return this.plugin.getSpongeScheduler();
+    public SpongeSchedulerAdapter(LPSpongeBootstrap bootstrap, Scheduler scheduler, SpongeExecutorService sync, SpongeExecutorService async) {
+        this.bootstrap = bootstrap;
+        this.scheduler = scheduler;
+        this.sync = sync;
+        this.async = async;
     }
 
     @Override
     public Executor async() {
-        return this.plugin.getAsyncExecutorService();
+        return this.async;
     }
 
     @Override
     public Executor sync() {
-        return this.plugin.getSyncExecutorService();
+        return this.sync;
     }
 
     @Override
     public void doAsync(Runnable runnable) {
-        this.plugin.getSpongeScheduler().createTaskBuilder().async().execute(runnable).submit(this.plugin);
+        this.scheduler.createTaskBuilder().async().execute(runnable).submit(this.bootstrap);
     }
 
     @Override
     public void doSync(Runnable runnable) {
-        this.plugin.getSpongeScheduler().createTaskBuilder().execute(runnable).submit(this.plugin);
+        this.scheduler.createTaskBuilder().execute(runnable).submit(this.bootstrap);
     }
 
     @Override
     public SchedulerTask asyncRepeating(Runnable runnable, long intervalTicks) {
-        Task task = scheduler().createTaskBuilder()
+        Task task = this.scheduler.createTaskBuilder()
                 .async()
                 .intervalTicks(intervalTicks)
                 .delayTicks(intervalTicks)
                 .execute(runnable)
-                .submit(this.plugin);
+                .submit(this.bootstrap);
 
         SchedulerTask wrapped = new SpongeSchedulerTask(task);
         this.tasks.add(wrapped);
@@ -84,11 +89,11 @@ public class SpongeSchedulerAdapter implements SchedulerAdapter {
 
     @Override
     public SchedulerTask syncRepeating(Runnable runnable, long intervalTicks) {
-        Task task = scheduler().createTaskBuilder()
+        Task task = this.scheduler.createTaskBuilder()
                 .intervalTicks(intervalTicks)
                 .delayTicks(intervalTicks)
                 .execute(runnable)
-                .submit(this.plugin);
+                .submit(this.bootstrap);
 
         SchedulerTask wrapped = new SpongeSchedulerTask(task);
         this.tasks.add(wrapped);
@@ -97,11 +102,11 @@ public class SpongeSchedulerAdapter implements SchedulerAdapter {
 
     @Override
     public SchedulerTask asyncLater(Runnable runnable, long delayTicks) {
-        Task task = scheduler().createTaskBuilder()
+        Task task = this.scheduler.createTaskBuilder()
                 .async()
                 .delayTicks(delayTicks)
                 .execute(runnable)
-                .submit(this.plugin);
+                .submit(this.bootstrap);
 
         SchedulerTask wrapped = new SpongeSchedulerTask(task);
         this.tasks.add(wrapped);
@@ -110,10 +115,10 @@ public class SpongeSchedulerAdapter implements SchedulerAdapter {
 
     @Override
     public SchedulerTask syncLater(Runnable runnable, long delayTicks) {
-        Task task = scheduler().createTaskBuilder()
+        Task task = this.scheduler.createTaskBuilder()
                 .delayTicks(delayTicks)
                 .execute(runnable)
-                .submit(this.plugin);
+                .submit(this.bootstrap);
 
         SchedulerTask wrapped = new SpongeSchedulerTask(task);
         this.tasks.add(wrapped);

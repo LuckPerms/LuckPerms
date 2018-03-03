@@ -79,7 +79,7 @@ public class InjectorDefaultsMap implements Runnable {
                 this.plugin.setDefaultPermissionMap(ret);
             }
         } catch (Exception e) {
-            this.plugin.getLog().severe("Exception occurred whilst injecting LuckPerms Default Permission map.");
+            this.plugin.getLogger().severe("Exception occurred whilst injecting LuckPerms Default Permission map.");
             e.printStackTrace();
         }
     }
@@ -88,7 +88,7 @@ public class InjectorDefaultsMap implements Runnable {
         Objects.requireNonNull(OP_DEFAULT_PERMISSIONS_FIELD, "OP_DEFAULT_PERMISSIONS_FIELD");
         Objects.requireNonNull(NON_OP_DEFAULT_PERMISSIONS_FIELD, "NON_OP_DEFAULT_PERMISSIONS_FIELD");
 
-        PluginManager pluginManager = this.plugin.getServer().getPluginManager();
+        PluginManager pluginManager = this.plugin.getBootstrap().getServer().getPluginManager();
 
         Object opMap = OP_DEFAULT_PERMISSIONS_FIELD.get(pluginManager);
         Object nonOpMap = NON_OP_DEFAULT_PERMISSIONS_FIELD.get(pluginManager);

@@ -39,6 +39,10 @@ public interface SchedulerAdapter {
      */
     Executor async();
 
+    default Executor platformAsync() {
+        return async();
+    }
+
     /**
      * Gets a sync executor instance
      *

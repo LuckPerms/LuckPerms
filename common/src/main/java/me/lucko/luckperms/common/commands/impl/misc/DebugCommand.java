@@ -109,14 +109,14 @@ public class DebugCommand extends SingleCommand {
 
     private static JObject getPlatformData(LuckPermsPlugin plugin) {
         return new JObject()
-                .add("type", plugin.getServerType().name())
+                .add("type", plugin.getBootstrap().getType().name())
                 .add("version", new JObject()
                         .add("api", String.valueOf(plugin.getApiProvider().getPlatformInfo().getApiVersion()))
-                        .add("plugin", plugin.getVersion())
+                        .add("plugin", plugin.getBootstrap().getVersion())
                 )
                 .add("server", new JObject()
-                        .add("brand", plugin.getServerBrand())
-                        .add("version", plugin.getServerVersion())
+                        .add("brand", plugin.getBootstrap().getServerBrand())
+                        .add("version", plugin.getBootstrap().getServerVersion())
                 );
     }
 
@@ -172,7 +172,7 @@ public class DebugCommand extends SingleCommand {
     private static JObject getPlayersData(LuckPermsPlugin plugin) {
         JObject ret = new JObject();
 
-        Set<UUID> onlinePlayers = plugin.getOnlinePlayers().collect(Collectors.toSet());
+        Set<UUID> onlinePlayers = plugin.getBootstrap().getOnlinePlayers().collect(Collectors.toSet());
         ret.add("count", onlinePlayers.size());
 
         JArray playerArray = new JArray();

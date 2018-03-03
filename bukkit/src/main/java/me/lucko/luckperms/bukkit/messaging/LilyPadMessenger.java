@@ -58,7 +58,7 @@ public class LilyPadMessenger implements Messenger {
     }
 
     public void init() {
-        this.connect = this.plugin.getServer().getServicesManager().getRegistration(Connect.class).getProvider();
+        this.connect = this.plugin.getBootstrap().getServer().getServicesManager().getRegistration(Connect.class).getProvider();
         this.connect.registerEvents(this);
     }
 
@@ -87,7 +87,7 @@ public class LilyPadMessenger implements Messenger {
 
     @EventListener
     public void onMessage(MessageEvent event) {
-        this.plugin.getScheduler().doAsync(() -> {
+        this.plugin.getBootstrap().getScheduler().doAsync(() -> {
             try {
                 String channel = event.getChannel();
 

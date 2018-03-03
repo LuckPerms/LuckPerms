@@ -235,7 +235,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         private final User user;
 
         private UserRefreshBuffer(LuckPermsPlugin plugin, User user) {
-            super(50L, 5L, plugin.getScheduler().async());
+            super(50L, 5L, plugin.getBootstrap().getScheduler().async());
             this.user = user;
         }
 

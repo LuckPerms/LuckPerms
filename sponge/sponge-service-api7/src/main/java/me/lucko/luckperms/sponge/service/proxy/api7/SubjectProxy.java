@@ -159,7 +159,7 @@ public final class SubjectProxy implements Subject, ProxiedSubject {
     @Nonnull
     @Override
     public Set<Context> getActiveContexts() {
-        return CompatibilityUtil.convertContexts(this.service.getPlugin().getContextManager().getApplicableContext(this));
+        return CompatibilityUtil.convertContexts(this.service.getContextManager().getApplicableContext(this));
     }
 
     @Override

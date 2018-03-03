@@ -103,7 +103,7 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
                     return null;
                 }
 
-                uuid = plugin.lookupUuid(target).orElse(null);
+                uuid = plugin.getBootstrap().lookupUuid(target).orElse(null);
                 if (uuid == null) {
                     Message.USER_NOT_FOUND.send(sender, target);
                     return null;
@@ -134,6 +134,6 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
 
     @Override
     protected List<String> getTargets(LuckPermsPlugin plugin) {
-        return plugin.getPlayerList().collect(Collectors.toList());
+        return plugin.getBootstrap().getPlayerList().collect(Collectors.toList());
     }
 }

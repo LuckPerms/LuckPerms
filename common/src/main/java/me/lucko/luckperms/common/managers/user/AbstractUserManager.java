@@ -46,7 +46,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
     public AbstractUserManager(LuckPermsPlugin plugin, UserHousekeeper.TimeoutSettings timeoutSettings) {
         this.plugin = plugin;
         this.housekeeper = new UserHousekeeper(plugin, this, timeoutSettings);
-        this.plugin.getScheduler().asyncRepeating(this.housekeeper, 200L); // every 10 seconds
+        this.plugin.getBootstrap().getScheduler().asyncRepeating(this.housekeeper, 200L); // every 10 seconds
     }
 
     @Override
@@ -147,8 +147,8 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
     @Override
     public CompletableFuture<Void> updateAllUsers() {
         return CompletableFuture.runAsync(
-                () -> this.plugin.getOnlinePlayers().forEach(u -> this.plugin.getStorage().loadUser(u, null).join()),
-                this.plugin.getScheduler().async()
+                () -> this.plugin.getBootstrap().getOnlinePlayers().forEach(u -> this.plugin.getStorage().loadUser(u, null).join()),
+                this.plugin.getBootstrap().getScheduler().async()
         );
     }
 

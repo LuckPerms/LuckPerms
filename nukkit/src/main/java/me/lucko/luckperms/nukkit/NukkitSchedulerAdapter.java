@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 
 public class NukkitSchedulerAdapter implements SchedulerAdapter {
-    private final LPNukkitPlugin plugin;
+    private final LPNukkitBootstrap bootstrap;
 
     private final ExecutorService asyncFallback;
     private final Executor asyncNukkit;
@@ -56,8 +56,8 @@ public class NukkitSchedulerAdapter implements SchedulerAdapter {
 
     private final Set<SchedulerTask> tasks = ConcurrentHashMap.newKeySet();
 
-    public NukkitSchedulerAdapter(LPNukkitPlugin plugin) {
-        this.plugin = plugin;
+    public NukkitSchedulerAdapter(LPNukkitBootstrap bootstrap) {
+        this.bootstrap = bootstrap;
 
         this.sync = new SyncExecutor();
         this.asyncFallback = new FallbackAsyncExecutor();
@@ -66,7 +66,7 @@ public class NukkitSchedulerAdapter implements SchedulerAdapter {
     }
 
     private ServerScheduler scheduler() {
-        return this.plugin.getServer().getScheduler();
+        return this.bootstrap.getServer().getScheduler();
     }
 
     @Override
@@ -81,26 +81,26 @@ public class NukkitSchedulerAdapter implements SchedulerAdapter {
 
     @Override
     public SchedulerTask asyncRepeating(Runnable runnable, long intervalTicks) {
-        SchedulerTask task = new NukkitSchedulerTask(scheduler().scheduleDelayedRepeatingTask(this.plugin, runnable, (int) intervalTicks, (int) intervalTicks, true));
+        SchedulerTask task = new NukkitSchedulerTask(scheduler().scheduleDelayedRepeatingTask(this.bootstrap, runnable, (int) intervalTicks, (int) intervalTicks, true));
         this.tasks.add(task);
         return task;
     }
 
     @Override
     public SchedulerTask syncRepeating(Runnable runnable, long intervalTicks) {
-        SchedulerTask task = new NukkitSchedulerTask(scheduler().scheduleDelayedRepeatingTask(this.plugin, runnable, (int) intervalTicks, (int) intervalTicks, false));
+        SchedulerTask task = new NukkitSchedulerTask(scheduler().scheduleDelayedRepeatingTask(this.bootstrap, runnable, (int) intervalTicks, (int) intervalTicks, false));
         this.tasks.add(task);
         return task;
     }
 
     @Override
     public SchedulerTask asyncLater(Runnable runnable, long delayTicks) {
-        return new NukkitSchedulerTask(scheduler().scheduleDelayedTask(this.plugin, runnable, (int) delayTicks, true));
+        return new NukkitSchedulerTask(scheduler().scheduleDelayedTask(this.bootstrap, runnable, (int) delayTicks, true));
     }
 
     @Override
     public SchedulerTask syncLater(Runnable runnable, long delayTicks) {
-        return new NukkitSchedulerTask(scheduler().scheduleDelayedTask(this.plugin, runnable, (int) delayTicks, false));
+        return new NukkitSchedulerTask(scheduler().scheduleDelayedTask(this.bootstrap, runnable, (int) delayTicks, false));
     }
 
     @Override
@@ -142,14 +142,14 @@ public class NukkitSchedulerAdapter implements SchedulerAdapter {
     private final class SyncExecutor implements Executor {
         @Override
         public void execute(@Nonnull Runnable runnable) {
-            NukkitSchedulerAdapter.this.plugin.getServer().getScheduler().scheduleTask(NukkitSchedulerAdapter.this.plugin, runnable, false);
+            NukkitSchedulerAdapter.this.bootstrap.getServer().getScheduler().scheduleTask(NukkitSchedulerAdapter.this.bootstrap, runnable, false);
         }
     }
 
     private final class AsyncExecutor implements Executor {
         @Override
         public void execute(@Nonnull Runnable runnable) {
-            if (NukkitSchedulerAdapter.this.useFallback || !NukkitSchedulerAdapter.this.plugin.isEnabled()) {
+            if (NukkitSchedulerAdapter.this.useFallback || !NukkitSchedulerAdapter.this.bootstrap.isEnabled()) {
                 NukkitSchedulerAdapter.this.asyncFallback.execute(runnable);
             } else {
                 NukkitSchedulerAdapter.this.asyncNukkit.execute(runnable);
@@ -160,7 +160,7 @@ public class NukkitSchedulerAdapter implements SchedulerAdapter {
     private final class NukkitAsyncExecutor implements Executor {
         @Override
         public void execute(@Nonnull Runnable runnable) {
-            NukkitSchedulerAdapter.this.plugin.getServer().getScheduler().scheduleTask(NukkitSchedulerAdapter.this.plugin, runnable, true);
+            NukkitSchedulerAdapter.this.bootstrap.getServer().getScheduler().scheduleTask(NukkitSchedulerAdapter.this.bootstrap, runnable, true);
         }
     }
 

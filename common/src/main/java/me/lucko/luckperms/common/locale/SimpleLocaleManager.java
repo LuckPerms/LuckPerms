@@ -45,7 +45,7 @@ public class SimpleLocaleManager implements LocaleManager {
     @Override
     public void tryLoad(LuckPermsPlugin plugin, File file) {
         if (file.exists()) {
-            plugin.getLog().info("Found lang.yml - loading messages...");
+            plugin.getLogger().info("Found lang.yml - loading messages...");
             try {
                 loadFromFile(file);
             } catch (Exception e) {

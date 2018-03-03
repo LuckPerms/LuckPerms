@@ -154,7 +154,7 @@ public class SqlDao extends AbstractDao {
             // Init tables
             if (!tableExists(this.prefix.apply("{prefix}user_permissions"))) {
                 String schemaFileName = "schema/" + this.provider.getName().toLowerCase() + ".sql";
-                try (InputStream is = this.plugin.getResourceStream(schemaFileName)) {
+                try (InputStream is = this.plugin.getBootstrap().getResourceStream(schemaFileName)) {
                     if (is == null) {
                         throw new Exception("Couldn't locate schema file for " + this.provider.getName());
                     }
@@ -203,7 +203,7 @@ public class SqlDao extends AbstractDao {
 
 
         } catch (Exception e) {
-            this.plugin.getLog().severe("Error occurred whilst initialising the database.");
+            this.plugin.getLogger().severe("Error occurred whilst initialising the database.");
             e.printStackTrace();
         }
     }

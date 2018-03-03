@@ -81,7 +81,7 @@ public class BulkUpdateCommand extends SingleCommand {
                     ex.printStackTrace();
                     Message.BULK_UPDATE_FAILURE.send(sender);
                 }
-            }, plugin.getScheduler().async());
+            }, plugin.getBootstrap().getScheduler().async());
             return CommandResult.SUCCESS;
         }
 

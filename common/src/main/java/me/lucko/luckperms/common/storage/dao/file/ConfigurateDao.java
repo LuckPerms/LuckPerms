@@ -150,7 +150,7 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     private Exception reportException(String file, Exception ex) throws Exception {
-        this.plugin.getLog().warn("Exception thrown whilst performing i/o: " + file);
+        this.plugin.getLogger().warn("Exception thrown whilst performing i/o: " + file);
         ex.printStackTrace();
         throw ex;
     }
@@ -162,7 +162,7 @@ public abstract class ConfigurateDao extends AbstractDao {
     @Override
     public void init() {
         try {
-            File data = FileUtils.mkdirs(new File(this.plugin.getDataDirectory(), this.dataFolderName));
+            File data = FileUtils.mkdirs(new File(this.plugin.getBootstrap().getDataDirectory(), this.dataFolderName));
 
             this.usersDirectory = FileUtils.mkdir(new File(data, "users"));
             this.groupsDirectory = FileUtils.mkdir(new File(data, "groups"));
@@ -185,7 +185,7 @@ public abstract class ConfigurateDao extends AbstractDao {
 
                     User u = this.plugin.getUserManager().getIfLoaded(uuid);
                     if (u != null) {
-                        this.plugin.getLog().info("[FileWatcher] Refreshing user " + u.getFriendlyName());
+                        this.plugin.getLogger().info("[FileWatcher] Refreshing user " + u.getFriendlyName());
                         this.plugin.getStorage().loadUser(uuid, null);
                     }
                 });
@@ -195,7 +195,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                     }
 
                     String groupName = s.substring(0, s.length() - this.fileExtension.length());
-                    this.plugin.getLog().info("[FileWatcher] Refreshing group " + groupName);
+                    this.plugin.getLogger().info("[FileWatcher] Refreshing group " + groupName);
                     this.plugin.getUpdateTaskBuffer().request();
                 });
                 watcher.subscribe("track", this.tracksDirectory.toPath(), s -> {
@@ -204,7 +204,7 @@ public abstract class ConfigurateDao extends AbstractDao {
                     }
 
                     String trackName = s.substring(0, s.length() - this.fileExtension.length());
-                    this.plugin.getLog().info("[FileWatcher] Refreshing track " + trackName);
+                    this.plugin.getLogger().info("[FileWatcher] Refreshing track " + trackName);
                     this.plugin.getStorage().loadAllTracks();
                 });
             });

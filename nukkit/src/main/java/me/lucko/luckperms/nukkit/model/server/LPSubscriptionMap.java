@@ -169,7 +169,7 @@ public final class LPSubscriptionMap extends HashMap<String, Set<Permissible>> {
 
         private Sets.SetView<Permissible> getContentView() {
             // gather players (LPPermissibles)
-            Set<Permissible> players = LPSubscriptionMap.this.plugin.getServer().getOnlinePlayers().values().stream()
+            Set<Permissible> players = LPSubscriptionMap.this.plugin.getBootstrap().getServer().getOnlinePlayers().values().stream()
                     .filter(player -> player.isPermissionSet(this.permission))
                     .collect(Collectors.toSet());
 

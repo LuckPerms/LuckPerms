@@ -58,14 +58,14 @@ public class BungeeMessenger implements Messenger, PluginMessageListener {
     }
 
     public void init() {
-        this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(this.plugin, CHANNEL);
-        this.plugin.getServer().getMessenger().registerIncomingPluginChannel(this.plugin, CHANNEL, this);
+        this.plugin.getBootstrap().getServer().getMessenger().registerOutgoingPluginChannel(this.plugin.getBootstrap(), CHANNEL);
+        this.plugin.getBootstrap().getServer().getMessenger().registerIncomingPluginChannel(this.plugin.getBootstrap(), CHANNEL, this);
     }
 
     @Override
     public void close() {
-        this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, CHANNEL);
-        this.plugin.getServer().getMessenger().unregisterOutgoingPluginChannel(this.plugin, CHANNEL);
+        this.plugin.getBootstrap().getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin.getBootstrap(), CHANNEL);
+        this.plugin.getBootstrap().getServer().getMessenger().unregisterOutgoingPluginChannel(this.plugin.getBootstrap(), CHANNEL);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class BungeeMessenger implements Messenger, PluginMessageListener {
         new BukkitRunnable() {
             @Override
             public void run() {
-                Collection<? extends Player> players = BungeeMessenger.this.plugin.getServer().getOnlinePlayers();
+                Collection<? extends Player> players = BungeeMessenger.this.plugin.getBootstrap().getServer().getOnlinePlayers();
                 Player p = Iterables.getFirst(players, null);
                 if (p == null) {
                     return;
@@ -84,10 +84,10 @@ public class BungeeMessenger implements Messenger, PluginMessageListener {
 
                 byte[] data = out.toByteArray();
 
-                p.sendPluginMessage(BungeeMessenger.this.plugin, CHANNEL, data);
+                p.sendPluginMessage(BungeeMessenger.this.plugin.getBootstrap(), CHANNEL, data);
                 cancel();
             }
-        }.runTaskTimer(this.plugin, 1L, 100L);
+        }.runTaskTimer(this.plugin.getBootstrap(), 1L, 100L);
     }
 
     @Override

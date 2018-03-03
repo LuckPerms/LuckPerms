@@ -57,7 +57,7 @@ public class ExportCommand extends SingleCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        File f = new File(plugin.getDataDirectory(), args.get(0));
+        File f = new File(plugin.getBootstrap().getDataDirectory(), args.get(0));
         if (f.exists()) {
             Message.LOG_EXPORT_ALREADY_EXISTS.send(sender, f.getAbsolutePath());
             return CommandResult.INVALID_ARGS;
@@ -86,7 +86,7 @@ public class ExportCommand extends SingleCommand {
         Exporter exporter = new Exporter(plugin, sender, path);
 
         // Run the exporter in its own thread.
-        plugin.getScheduler().doAsync(() -> {
+        plugin.getBootstrap().getScheduler().doAsync(() -> {
             try {
                 exporter.run();
             } finally {

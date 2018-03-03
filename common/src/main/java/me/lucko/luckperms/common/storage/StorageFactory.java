@@ -62,7 +62,7 @@ public class StorageFactory {
                     .map(e -> {
                         StorageType type = StorageType.parse(e.getValue());
                         if (type == null) {
-                            this.plugin.getLog().severe("Storage method for " + e.getKey() + " - " + e.getValue() + " not recognised. " +
+                            this.plugin.getLogger().severe("Storage method for " + e.getKey() + " - " + e.getValue() + " not recognised. " +
                                     "Using the default instead.");
                             type = defaultMethod;
                         }
@@ -73,7 +73,7 @@ public class StorageFactory {
             String method = this.plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);
             StorageType type = StorageType.parse(method);
             if (type == null) {
-                this.plugin.getLog().severe("Storage method '" + method + "' not recognised. Using the default instead.");
+                this.plugin.getLogger().severe("Storage method '" + method + "' not recognised. Using the default instead.");
                 type = defaultMethod;
             }
             return ImmutableSet.of(type);
@@ -83,7 +83,7 @@ public class StorageFactory {
     public Storage getInstance(StorageType defaultMethod) {
         Storage storage;
         if (this.plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE)) {
-            this.plugin.getLog().info("Loading storage provider... [SPLIT STORAGE]");
+            this.plugin.getLogger().info("Loading storage provider... [SPLIT STORAGE]");
 
             Map<SplitStorageType, StorageType> mappedTypes = this.plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS).entrySet().stream()
                     .map(e -> {
@@ -108,7 +108,7 @@ public class StorageFactory {
                 type = defaultMethod;
             }
 
-            this.plugin.getLog().info("Loading storage provider... [" + type.name() + "]");
+            this.plugin.getLogger().info("Loading storage provider... [" + type.name() + "]");
             storage = makeInstance(type);
         }
 
@@ -139,13 +139,13 @@ public class StorageFactory {
             case SQLITE:
                 return new SqlDao(
                         this.plugin,
-                        new SQLiteConnectionFactory(this.plugin, new File(this.plugin.getDataDirectory(), "luckperms-sqlite.db")),
+                        new SQLiteConnectionFactory(this.plugin, new File(this.plugin.getBootstrap().getDataDirectory(), "luckperms-sqlite.db")),
                         this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case H2:
                 return new SqlDao(
                         this.plugin,
-                        new H2ConnectionFactory(this.plugin, new File(this.plugin.getDataDirectory(), "luckperms-h2")),
+                        new H2ConnectionFactory(this.plugin, new File(this.plugin.getBootstrap().getDataDirectory(), "luckperms-h2")),
                         this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case POSTGRESQL:

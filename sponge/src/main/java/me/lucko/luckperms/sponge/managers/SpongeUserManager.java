@@ -89,7 +89,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
                 getPlugin().getStorage().loadUser(u, null).join();
                 user = getIfLoaded(u);
                 if (user == null) {
-                    getPlugin().getLog().severe("Error whilst loading user '" + u + "'.");
+                    getPlugin().getLogger().severe("Error whilst loading user '" + u + "'.");
                     throw new RuntimeException();
                 }
 
@@ -149,7 +149,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
             return CompletableFuture.completedFuture(present);
         }
 
-        return CompletableFuture.supplyAsync(() -> this.subjectLoadingCache.get(uuid), this.plugin.getScheduler().async());
+        return CompletableFuture.supplyAsync(() -> this.subjectLoadingCache.get(uuid), this.plugin.getBootstrap().getScheduler().async());
     }
 
     @Override
@@ -188,7 +188,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
             }
 
             return ret.build();
-        }, this.plugin.getScheduler().async());
+        }, this.plugin.getBootstrap().getScheduler().async());
     }
 
     @Override
@@ -205,7 +205,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
             this.plugin.getStorage().getUniqueUsers().join().forEach(uuid -> ids.add(uuid.toString()));
 
             return ids.build();
-        }, this.plugin.getScheduler().async());
+        }, this.plugin.getBootstrap().getScheduler().async());
     }
 
     @Override
@@ -221,7 +221,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
             }
 
             return ret.build();
-        }, this.plugin.getScheduler().async());
+        }, this.plugin.getBootstrap().getScheduler().async());
     }
 
     @Override
@@ -237,7 +237,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
             }
 
             return ret.build();
-        }, this.plugin.getScheduler().async());
+        }, this.plugin.getBootstrap().getScheduler().async());
     }
 
     @Override

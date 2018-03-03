@@ -81,7 +81,7 @@ public class PermissibleMonitoringInjector implements Runnable {
     }
 
     private void injectConsole() throws Exception {
-        ConsoleCommandSender consoleSender = this.plugin.getServer().getConsoleSender();
+        ConsoleCommandSender consoleSender = this.plugin.getBootstrap().getServer().getConsoleSender();
 
         // get the ServerCommandSender class
         Class<?> serverCommandSenderClass = ReflectionUtil.obcClass("command.ServerCommandSender");

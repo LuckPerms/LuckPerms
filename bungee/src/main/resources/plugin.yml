@@ -2,5 +2,5 @@ name: LuckPerms
 version: ${full.version}
 description: A permissions plugin
 author: Luck
-main: me.lucko.luckperms.bungee.LPBungeePlugin
+main: me.lucko.luckperms.bungee.LPBungeeBootstrap
 softDepends: ["RedisBungee"]

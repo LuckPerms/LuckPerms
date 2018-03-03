@@ -49,10 +49,10 @@ public class InfoCommand extends SingleCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         Message.INFO_TOP.send(sender,
-                plugin.getVersion(),
-                plugin.getServerType().getFriendlyName(),
-                plugin.getServerBrand(),
-                plugin.getServerVersion()
+                plugin.getBootstrap().getVersion(),
+                plugin.getBootstrap().getType().getFriendlyName(),
+                plugin.getBootstrap().getServerBrand(),
+                plugin.getBootstrap().getServerVersion()
         );
 
         Message.EMPTY.send(sender, "&f-  &bStorage:");
@@ -64,9 +64,9 @@ public class InfoCommand extends SingleCommand {
         Message.INFO_MIDDLE.send(sender,
                 plugin.getMessagingService().map(InternalMessagingService::getName).orElse("None"),
                 plugin.getContextManager().getStaticContextString().orElse("None"),
-                plugin.getPlayerCount(),
-                plugin.getUniqueConnections().size(),
-                DateUtil.formatTimeBrief((System.currentTimeMillis() - plugin.getStartTime()) / 1000L),
+                plugin.getBootstrap().getPlayerCount(),
+                plugin.getConnectionListener().getUniqueConnections().size(),
+                DateUtil.formatTimeBrief((System.currentTimeMillis() - plugin.getBootstrap().getStartupTime()) / 1000L),
                 plugin.getUserManager().getAll().size(),
                 plugin.getGroupManager().getAll().size(),
                 plugin.getTrackManager().getAll().size()

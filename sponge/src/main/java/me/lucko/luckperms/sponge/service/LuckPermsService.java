@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
@@ -88,7 +89,7 @@ public class LuckPermsService implements LPPermissionService {
         this.referenceFactory = new SubjectReferenceFactory(this);
         this.spongeProxy = ProxyFactory.toSponge(this);
 
-        this.storage = new SubjectStorage(this, new File(plugin.getDataDirectory(), "sponge-data"));
+        this.storage = new SubjectStorage(this, new File(plugin.getBootstrap().getDataDirectory(), "sponge-data"));
 
         this.userSubjects = plugin.getUserManager();
         this.groupSubjects = plugin.getGroupManager();
@@ -120,6 +121,11 @@ public class LuckPermsService implements LPPermissionService {
     @Override
     public LPSpongePlugin getPlugin() {
         return this.plugin;
+    }
+
+    @Override
+    public ContextManager<Subject> getContextManager() {
+        return this.plugin.getContextManager();
     }
 
     @Override

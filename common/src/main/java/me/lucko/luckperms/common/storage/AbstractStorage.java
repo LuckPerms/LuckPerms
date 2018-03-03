@@ -60,7 +60,7 @@ public class AbstractStorage implements Storage {
         Storage base = new AbstractStorage(plugin, backing);
         Storage phased = PhasedStorage.wrap(base);
         BufferedOutputStorage buffered = BufferedOutputStorage.wrap(phased, 250L);
-        plugin.getScheduler().asyncRepeating(buffered, 2L);
+        plugin.getBootstrap().getScheduler().asyncRepeating(buffered, 2L);
         return buffered;
     }
 
@@ -88,7 +88,7 @@ public class AbstractStorage implements Storage {
                 Throwables.propagateIfPossible(e);
                 throw new CompletionException(e);
             }
-        }, this.dao.getPlugin().getScheduler().async());
+        }, this.dao.getPlugin().getBootstrap().getScheduler().async());
     }
 
     private CompletableFuture<Void> makeFuture(ThrowingRunnable runnable) {
@@ -99,7 +99,7 @@ public class AbstractStorage implements Storage {
                 Throwables.propagateIfPossible(e);
                 throw new CompletionException(e);
             }
-        }, this.dao.getPlugin().getScheduler().async());
+        }, this.dao.getPlugin().getBootstrap().getScheduler().async());
     }
 
     @Override
@@ -126,7 +126,7 @@ public class AbstractStorage implements Storage {
         try {
             this.dao.init();
         } catch (Exception e) {
-            this.plugin.getLog().severe("Failed to init storage dao");
+            this.plugin.getLogger().severe("Failed to init storage dao");
             e.printStackTrace();
         }
     }
@@ -136,7 +136,7 @@ public class AbstractStorage implements Storage {
         try {
             this.dao.shutdown();
         } catch (Exception e) {
-            this.plugin.getLog().severe("Failed to shutdown storage dao");
+            this.plugin.getLogger().severe("Failed to shutdown storage dao");
             e.printStackTrace();
         }
     }

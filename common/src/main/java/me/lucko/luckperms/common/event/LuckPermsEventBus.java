@@ -118,7 +118,7 @@ public class LuckPermsEventBus implements EventBus {
         if (event instanceof Cancellable) {
             throw new IllegalArgumentException("cannot call Cancellable event async");
         }
-        this.plugin.getScheduler().doAsync(() -> fireEvent(event));
+        this.plugin.getBootstrap().getScheduler().doAsync(() -> fireEvent(event));
     }
 
     public LuckPermsPlugin getPlugin() {

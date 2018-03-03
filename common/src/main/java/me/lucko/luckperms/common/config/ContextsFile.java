@@ -53,8 +53,8 @@ public class ContextsFile {
     }
 
     public void load() {
-        File file = new File(this.configuration.getPlugin().getConfigDirectory(), "contexts.json");
-        File oldFile = new File(this.configuration.getPlugin().getConfigDirectory(), "static-contexts.json");
+        File file = new File(this.configuration.getPlugin().getBootstrap().getDataDirectory(), "contexts.json");
+        File oldFile = new File(this.configuration.getPlugin().getBootstrap().getDataDirectory(), "static-contexts.json");
         if (oldFile.exists()) {
             oldFile.renameTo(file);
         }
@@ -91,7 +91,7 @@ public class ContextsFile {
     }
 
     public void save() {
-        File file = new File(this.configuration.getPlugin().getConfigDirectory(), "contexts.json");
+        File file = new File(this.configuration.getPlugin().getBootstrap().getDataDirectory(), "contexts.json");
 
         try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
 

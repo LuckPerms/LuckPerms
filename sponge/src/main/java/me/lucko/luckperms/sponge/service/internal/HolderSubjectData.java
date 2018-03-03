@@ -465,7 +465,7 @@ public class HolderSubjectData implements LPSubjectData {
                 }
 
                 user.getRefreshBuffer().request().thenAccept(fut::complete);
-            }, this.service.getPlugin().getScheduler().async());
+            }, this.service.getPlugin().getBootstrap().getScheduler().async());
             return fut;
         } else {
             Group group = ((Group) t);
@@ -476,7 +476,7 @@ public class HolderSubjectData implements LPSubjectData {
                 }
 
                 this.service.getPlugin().getUpdateTaskBuffer().request().thenAccept(fut::complete);
-            }, this.service.getPlugin().getScheduler().async());
+            }, this.service.getPlugin().getBootstrap().getScheduler().async());
             return fut;
         }
     }

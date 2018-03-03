@@ -207,7 +207,7 @@ public final class LPSubscriptionMap extends HashMap<String, Map<Permissible, Bo
         @Override
         public Set<Permissible> keySet() {
             // gather players (LPPermissibles)
-            Set<Permissible> players = LPSubscriptionMap.this.plugin.getServer().getOnlinePlayers().stream()
+            Set<Permissible> players = LPSubscriptionMap.this.plugin.getBootstrap().getServer().getOnlinePlayers().stream()
                     .filter(player -> player.isPermissionSet(this.permission))
                     .collect(Collectors.toSet());
 

@@ -50,18 +50,18 @@ public class BungeeSchedulerAdapter implements SchedulerAdapter {
         return ticks * MILLISECONDS_PER_TICK;
     }
 
-    private final LPBungeePlugin plugin;
+    private final LPBungeeBootstrap bootstrap;
 
     private final Executor asyncExecutor;
     private final Set<SchedulerTask> tasks = ConcurrentHashMap.newKeySet();
 
-    public BungeeSchedulerAdapter(LPBungeePlugin plugin) {
-        this.plugin = plugin;
-        this.asyncExecutor = r -> plugin.getProxy().getScheduler().runAsync(plugin, r);
+    public BungeeSchedulerAdapter(LPBungeeBootstrap bootstrap) {
+        this.bootstrap = bootstrap;
+        this.asyncExecutor = r -> bootstrap.getProxy().getScheduler().runAsync(bootstrap, r);
     }
 
     private TaskScheduler scheduler() {
-        return this.plugin.getProxy().getScheduler();
+        return this.bootstrap.getProxy().getScheduler();
     }
 
     @Override
@@ -87,7 +87,7 @@ public class BungeeSchedulerAdapter implements SchedulerAdapter {
     @Override
     public SchedulerTask asyncRepeating(Runnable runnable, long intervalTicks) {
         long millis = ticksToMillis(intervalTicks);
-        SchedulerTask task = new BungeeSchedulerTask(scheduler().schedule(this.plugin, runnable, millis, millis, TimeUnit.MILLISECONDS));
+        SchedulerTask task = new BungeeSchedulerTask(scheduler().schedule(this.bootstrap, runnable, millis, millis, TimeUnit.MILLISECONDS));
         this.tasks.add(task);
         return task;
     }
@@ -99,7 +99,7 @@ public class BungeeSchedulerAdapter implements SchedulerAdapter {
 
     @Override
     public SchedulerTask asyncLater(Runnable runnable, long delayTicks) {
-        return new BungeeSchedulerTask(scheduler().schedule(this.plugin, runnable, ticksToMillis(delayTicks), TimeUnit.MILLISECONDS));
+        return new BungeeSchedulerTask(scheduler().schedule(this.bootstrap, runnable, ticksToMillis(delayTicks), TimeUnit.MILLISECONDS));
     }
 
     @Override

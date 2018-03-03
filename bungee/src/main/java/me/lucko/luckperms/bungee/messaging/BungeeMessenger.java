@@ -57,13 +57,13 @@ public class BungeeMessenger implements Messenger, Listener {
     }
 
     public void init() {
-        this.plugin.getProxy().getPluginManager().registerListener(this.plugin, this);
-        this.plugin.getProxy().registerChannel(CHANNEL);
+        this.plugin.getBootstrap().getProxy().getPluginManager().registerListener(this.plugin.getBootstrap(), this);
+        this.plugin.getBootstrap().getProxy().registerChannel(CHANNEL);
     }
 
     @Override
     public void close() {
-        this.plugin.getProxy().unregisterChannel(CHANNEL);
+        this.plugin.getBootstrap().getProxy().unregisterChannel(CHANNEL);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class BungeeMessenger implements Messenger, Listener {
 
         byte[] data = out.toByteArray();
 
-        for (ServerInfo server : this.plugin.getProxy().getServers().values()) {
+        for (ServerInfo server : this.plugin.getBootstrap().getProxy().getServers().values()) {
             server.sendData(CHANNEL, data, true);
         }
     }
@@ -97,8 +97,8 @@ public class BungeeMessenger implements Messenger, Listener {
 
         if (this.consumer.consumeIncomingMessageAsString(msg)) {
             // Forward to other servers
-            this.plugin.getScheduler().doAsync(() -> {
-                for (ServerInfo server : this.plugin.getProxy().getServers().values()) {
+            this.plugin.getBootstrap().getScheduler().doAsync(() -> {
+                for (ServerInfo server : this.plugin.getBootstrap().getProxy().getServers().values()) {
                     server.sendData(CHANNEL, data, true);
                 }
             });

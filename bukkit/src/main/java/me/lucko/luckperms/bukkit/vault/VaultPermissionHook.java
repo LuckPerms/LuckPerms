@@ -327,7 +327,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
         return this.plugin.getConfiguration().get(ConfigKeys.VAULT_DEBUG);
     }
     private void logMsg(String format, Object... args) {
-        this.plugin.getLog().info("[VAULT-PERMS] " + String.format(format, args)
+        this.plugin.getLogger().info("[VAULT-PERMS] " + String.format(format, args)
                 .replace(CommandManager.SECTION_CHAR, '$')
                 .replace(CommandManager.AMPERSAND_CHAR, '$')
         );
@@ -337,7 +337,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
     Contexts contextForLookup(User user, String world) {
         MutableContextSet context;
 
-        Player player = user == null ? null : this.plugin.getPlayer(user);
+        Player player = user == null ? null : this.plugin.getBootstrap().getPlayer(user.getUuid());
         if (player != null) {
             context = this.plugin.getContextManager().getApplicableContext(player).mutableCopy();
         } else {
@@ -402,11 +402,11 @@ public class VaultPermissionHook extends AbstractVaultPermission {
     void holderSave(PermissionHolder holder) {
         if (holder.getType().isUser()) {
             User u = (User) holder;
-            this.plugin.getStorage().saveUser(u).thenRunAsync(() -> u.getRefreshBuffer().request(), this.plugin.getScheduler().async());
+            this.plugin.getStorage().saveUser(u).thenRunAsync(() -> u.getRefreshBuffer().request(), this.plugin.getBootstrap().getScheduler().async());
         }
         if (holder.getType().isGroup()) {
             Group g = (Group) holder;
-            this.plugin.getStorage().saveGroup(g).thenRunAsync(() -> this.plugin.getUpdateTaskBuffer().request(), this.plugin.getScheduler().async());
+            this.plugin.getStorage().saveGroup(g).thenRunAsync(() -> this.plugin.getUpdateTaskBuffer().request(), this.plugin.getBootstrap().getScheduler().async());
         }
     }
 

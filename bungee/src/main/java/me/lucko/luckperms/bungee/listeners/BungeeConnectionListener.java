@@ -27,9 +27,9 @@ package me.lucko.luckperms.bungee.listeners;
 
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.listener.AbstractConnectionListener;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.utils.AbstractLoginListener;
 
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
@@ -43,7 +43,7 @@ import net.md_5.bungee.event.EventPriority;
 
 import java.util.concurrent.TimeUnit;
 
-public class BungeeConnectionListener extends AbstractLoginListener implements Listener {
+public class BungeeConnectionListener extends AbstractConnectionListener implements Listener {
     private final LPBungeePlugin plugin;
 
     public BungeeConnectionListener(LPBungeePlugin plugin) {
@@ -62,16 +62,16 @@ public class BungeeConnectionListener extends AbstractLoginListener implements L
 
         /* registers the plugins intent to modify this events state going forward.
            this will prevent the event from completing until we're finished handling. */
-        e.registerIntent(this.plugin);
+        e.registerIntent(this.plugin.getBootstrap());
 
         final PendingConnection c = e.getConnection();
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
-            this.plugin.getLog().info("Processing pre-login for " + c.getUniqueId() + " - " + c.getName());
+            this.plugin.getLogger().info("Processing pre-login for " + c.getUniqueId() + " - " + c.getName());
         }
 
-        this.plugin.getScheduler().doAsync(() -> {
-            this.plugin.getUniqueConnections().add(c.getUniqueId());
+        this.plugin.getBootstrap().getScheduler().doAsync(() -> {
+            recordConnection(c.getUniqueId());
 
             /* Actually process the login for the connection.
                We do this here to delay the login until the data is ready.
@@ -86,7 +86,7 @@ public class BungeeConnectionListener extends AbstractLoginListener implements L
                 User user = loadUser(c.getUniqueId(), c.getName());
                 this.plugin.getEventFactory().handleUserLoginProcess(c.getUniqueId(), c.getName(), user);
             } catch (Exception ex) {
-                this.plugin.getLog().severe("Exception occurred whilst loading data for " + c.getUniqueId() + " - " + c.getName());
+                this.plugin.getLogger().severe("Exception occurred whilst loading data for " + c.getUniqueId() + " - " + c.getName());
                 ex.printStackTrace();
 
                 // there was some error loading
@@ -98,7 +98,7 @@ public class BungeeConnectionListener extends AbstractLoginListener implements L
             }
 
             // finally, complete our intent to modify state, so the proxy can continue handling the connection.
-            e.completeIntent(this.plugin);
+            e.completeIntent(this.plugin.getBootstrap());
         });
     }
 
@@ -108,17 +108,17 @@ public class BungeeConnectionListener extends AbstractLoginListener implements L
         final User user = this.plugin.getUserManager().getIfLoaded(e.getPlayer().getUniqueId());
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
-            this.plugin.getLog().info("Processing post-login for " + player.getUniqueId() + " - " + player.getName());
+            this.plugin.getLogger().info("Processing post-login for " + player.getUniqueId() + " - " + player.getName());
         }
 
         if (user == null) {
             if (this.plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {
                 // disconnect the user
-                this.plugin.getLog().warn("User " + player.getUniqueId() + " - " + player.getName() + " doesn't have data pre-loaded - cancelling login.");
+                this.plugin.getLogger().warn("User " + player.getUniqueId() + " - " + player.getName() + " doesn't have data pre-loaded - cancelling login.");
                 e.getPlayer().disconnect(TextComponent.fromLegacyText(Message.LOADING_ERROR.asString(this.plugin.getLocaleManager())));
             } else {
                 // just send a message
-                this.plugin.getProxy().getScheduler().schedule(this.plugin, () -> {
+                this.plugin.getBootstrap().getProxy().getScheduler().schedule(this.plugin.getBootstrap(), () -> {
                     if (!player.isConnected()) {
                         return;
                     }
@@ -139,7 +139,7 @@ public class BungeeConnectionListener extends AbstractLoginListener implements L
         this.plugin.getUserManager().getHouseKeeper().registerUsage(player.getUniqueId());
 
         // force a clear of transient nodes
-        this.plugin.getScheduler().doAsync(() -> {
+        this.plugin.getBootstrap().getScheduler().doAsync(() -> {
             User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
             if (user != null) {
                 user.clearTransientNodes();

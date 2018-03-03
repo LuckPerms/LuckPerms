@@ -61,25 +61,25 @@ public class BungeeMessenger implements Messenger, RawDataListener {
     }
 
     public void init() {
-        this.channel = this.plugin.getGame().getChannelRegistrar().createRawChannel(this.plugin, CHANNEL);
+        this.channel = this.plugin.getBootstrap().getGame().getChannelRegistrar().createRawChannel(this.plugin, CHANNEL);
         this.channel.addListener(Platform.Type.SERVER, this);
     }
 
     @Override
     public void close() {
         if (this.channel != null) {
-            this.plugin.getGame().getChannelRegistrar().unbindChannel(this.channel);
+            this.plugin.getBootstrap().getGame().getChannelRegistrar().unbindChannel(this.channel);
         }
     }
 
     @Override
     public void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage) {
-        this.plugin.getSpongeScheduler().createTaskBuilder().interval(10, TimeUnit.SECONDS).execute(task -> {
-            if (!this.plugin.getGame().isServerAvailable()) {
+        this.plugin.getBootstrap().getSpongeScheduler().createTaskBuilder().interval(10, TimeUnit.SECONDS).execute(task -> {
+            if (!this.plugin.getBootstrap().getGame().isServerAvailable()) {
                 return;
             }
 
-            Collection<Player> players = this.plugin.getGame().getServer().getOnlinePlayers();
+            Collection<Player> players = this.plugin.getBootstrap().getGame().getServer().getOnlinePlayers();
             Player p = Iterables.getFirst(players, null);
             if (p == null) {
                 return;

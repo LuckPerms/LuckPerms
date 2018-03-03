@@ -65,7 +65,7 @@ public class RedisMessenger implements Messenger {
             this.jedisPool = new JedisPool(new JedisPoolConfig(), host, port, 0, password);
         }
 
-        this.plugin.getScheduler().doAsync(() -> {
+        this.plugin.getBootstrap().getScheduler().doAsync(() -> {
             this.sub = new LPSub(this);
             try (Jedis jedis = this.jedisPool.getResource()) {
                 jedis.subscribe(this.sub, CHANNEL);

@@ -59,7 +59,7 @@ public class FileWatcher implements Runnable {
         this.keyMap = Collections.synchronizedMap(new HashMap<>());
         this.internalChanges = Collections.synchronizedMap(new HashMap<>());
         try {
-            this.watchService = plugin.getDataDirectory().toPath().getFileSystem().newWatchService();
+            this.watchService = plugin.getBootstrap().getDataDirectory().toPath().getFileSystem().newWatchService();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -71,7 +71,7 @@ public class FileWatcher implements Runnable {
         }
 
         // Register with a delay to ignore changes made at startup
-        this.plugin.getScheduler().asyncLater(() -> {
+        this.plugin.getBootstrap().getScheduler().asyncLater(() -> {
             this.keyMap.computeIfAbsent(id, s -> {
                 WatchKey key;
                 try {
@@ -137,7 +137,7 @@ public class FileWatcher implements Runnable {
 
                 this.internalChanges.put(id + "/" + fileName, System.currentTimeMillis());
 
-                this.plugin.getLog().info("[FileWatcher] Detected change in file: " + file.toString());
+                this.plugin.getLogger().info("[FileWatcher] Detected change in file: " + file.toString());
 
                 // Process the change
                 ent.getValue().getFileConsumer().accept(fileName);

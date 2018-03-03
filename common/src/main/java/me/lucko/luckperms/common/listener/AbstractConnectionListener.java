@@ -23,23 +23,35 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.utils;
+package me.lucko.luckperms.common.listener;
 
 import me.lucko.luckperms.common.assignments.AssignmentRule;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Abstract listener utility for handling new player connections
  */
-public abstract class AbstractLoginListener {
+public abstract class AbstractConnectionListener implements ConnectionListener {
     private final LuckPermsPlugin plugin;
+    private final Set<UUID> uniqueConnections = ConcurrentHashMap.newKeySet();
 
-    protected AbstractLoginListener(LuckPermsPlugin plugin) {
+    protected AbstractConnectionListener(LuckPermsPlugin plugin) {
         this.plugin = plugin;
+    }
+
+    @Override
+    public Set<UUID> getUniqueConnections() {
+        return this.uniqueConnections;
+    }
+
+    protected void recordConnection(UUID uuid) {
+        this.uniqueConnections.add(uuid);
     }
 
     public User loadUser(UUID u, String username) {
@@ -78,7 +90,7 @@ public abstract class AbstractLoginListener {
 
         final long time = System.currentTimeMillis() - startTime;
         if (time >= 1000) {
-            this.plugin.getLog().warn("Processing login for " + username + " took " + time + "ms.");
+            this.plugin.getLogger().warn("Processing login for " + username + " took " + time + "ms.");
         }
 
         return user;
