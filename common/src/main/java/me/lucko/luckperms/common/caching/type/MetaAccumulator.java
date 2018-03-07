@@ -91,6 +91,10 @@ public class MetaAccumulator {
         }
     }
 
+    public void accumulateMeta(String key, String value) {
+        this.meta.put(key, value);
+    }
+
     public void accumulateWeight(int weight) {
         this.weight = Math.max(this.weight, weight);
     }

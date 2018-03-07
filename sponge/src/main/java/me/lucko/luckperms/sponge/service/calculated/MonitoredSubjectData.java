@@ -44,8 +44,8 @@ public abstract class MonitoredSubjectData extends CalculatedSubjectData {
         return b;
     };
 
-    public MonitoredSubjectData(LPSubject subject, NodeMapType type, LuckPermsService service, String calculatorDisplayName) {
-        super(subject, type, service, calculatorDisplayName);
+    public MonitoredSubjectData(LPSubject subject, NodeMapType type, LuckPermsService service) {
+        super(subject, type, service);
     }
 
     protected abstract void onUpdate(boolean success);

@@ -23,25 +23,11 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.caching;
+package me.lucko.luckperms.sponge.service.model;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.caching.GroupData;
-import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
-import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.references.HolderType;
+public enum ResolutionOrder {
 
-/**
- * Holds an easily accessible cache of a groups's data in a number of contexts
- */
-public class GroupCachedData extends HolderCachedData<Group> implements GroupData {
+    TRANSIENT_FIRST,
+    TRANSIENT_LAST
 
-    public GroupCachedData(Group holder) {
-        super(holder);
-    }
-
-    @Override
-    protected PermissionCalculatorMetadata getMetadataForContexts(Contexts contexts) {
-        return PermissionCalculatorMetadata.of(HolderType.GROUP, this.holder.getFriendlyName(), contexts.getContexts());
-    }
 }

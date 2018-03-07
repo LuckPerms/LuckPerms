@@ -52,6 +52,19 @@ public interface LPSubjectCollection {
 
     Predicate<String> getIdentifierValidityPredicate();
 
+    // transient has priority for all collections except default
+    default ResolutionOrder getResolutionOrder() {
+        if (isDefaultsCollection()) {
+            return ResolutionOrder.TRANSIENT_LAST;
+        } else {
+            return ResolutionOrder.TRANSIENT_FIRST;
+        }
+    }
+
+    default boolean isDefaultsCollection() {
+        return false;
+    }
+
     CompletableFuture<LPSubject> loadSubject(String identifier);
 
     Optional<LPSubject> getSubject(String identifier);

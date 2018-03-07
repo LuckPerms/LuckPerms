@@ -34,7 +34,7 @@ import me.lucko.luckperms.bungee.contexts.RedisBungeeCalculator;
 import me.lucko.luckperms.bungee.listeners.BungeeConnectionListener;
 import me.lucko.luckperms.bungee.listeners.BungeePermissionCheckListener;
 import me.lucko.luckperms.bungee.messaging.BungeeMessagingFactory;
-import me.lucko.luckperms.common.calculators.CalculatorFactory;
+import me.lucko.luckperms.common.calculators.PlatformCalculatorFactory;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
@@ -120,7 +120,7 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected CalculatorFactory provideCalculatorFactory() {
+    protected PlatformCalculatorFactory provideCalculatorFactory() {
         return new BungeeCalculatorFactory(this);
     }
 

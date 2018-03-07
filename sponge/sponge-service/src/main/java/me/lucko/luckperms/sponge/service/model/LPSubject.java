@@ -82,17 +82,6 @@ public interface LPSubject {
 
     }
 
-    void invalidateCaches(CacheLevel cacheLevel);
-
-    /**
-     * The level of cache for invalidation
-     *
-     * Invalidating at {@link #PARENT} will also invalidate at
-     * {@link #PERMISSION} and {@link #OPTION}, and invalidating at
-     * {@link #PERMISSION} will also invalidate at {@link #OPTION}.
-     */
-    enum CacheLevel {
-        PARENT, PERMISSION, OPTION
-    }
+    void invalidateCaches();
 
 }

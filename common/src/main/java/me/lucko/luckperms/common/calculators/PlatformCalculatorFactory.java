@@ -23,25 +23,17 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.caching;
-
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.caching.GroupData;
-import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
-import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.references.HolderType;
+package me.lucko.luckperms.common.calculators;
 
 /**
- * Holds an easily accessible cache of a groups's data in a number of contexts
+ * Extension of {@link CalculatorFactory} which keeps a record of produced
+ * calculators and provides a means to invalidate them all in bulk.
  */
-public class GroupCachedData extends HolderCachedData<Group> implements GroupData {
+public interface PlatformCalculatorFactory extends CalculatorFactory {
 
-    public GroupCachedData(Group holder) {
-        super(holder);
-    }
+    /**
+     * Invalidates all calculators build by this factory
+     */
+    void invalidateAll();
 
-    @Override
-    protected PermissionCalculatorMetadata getMetadataForContexts(Contexts contexts) {
-        return PermissionCalculatorMetadata.of(HolderType.GROUP, this.holder.getFriendlyName(), contexts.getContexts());
-    }
 }

@@ -27,7 +27,7 @@ package me.lucko.luckperms.sponge;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LuckPermsApi;
-import me.lucko.luckperms.common.calculators.CalculatorFactory;
+import me.lucko.luckperms.common.calculators.PlatformCalculatorFactory;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.abstraction.Command;
@@ -53,7 +53,6 @@ import me.lucko.luckperms.sponge.messaging.SpongeMessagingFactory;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.event.UpdateEventHandler;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
-import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.tasks.ServiceCacheHousekeepingTask;
@@ -134,7 +133,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected CalculatorFactory provideCalculatorFactory() {
+    protected PlatformCalculatorFactory provideCalculatorFactory() {
         return new SpongeCalculatorFactory(this);
     }
 
@@ -197,7 +196,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
                 ((PersistedCollection) collection).loadAll();
             }
         }
-        this.service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
+        this.service.invalidateAllCaches();
     }
 
     private Path resolveConfig() {

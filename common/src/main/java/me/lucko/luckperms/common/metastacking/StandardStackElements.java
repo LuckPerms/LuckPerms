@@ -43,12 +43,12 @@ import javax.annotation.Nonnull;
  * Contains the standard {@link MetaStackElement}s provided by LuckPerms.
  */
 public final class StandardStackElements {
-    private static final HighestPriority HIGHEST_PRIORITY = new HighestPriority();
-    private static final LowestPriority LOWEST_PRIORITY = new LowestPriority();
-    private static final HighestPriorityOwn HIGHEST_PRIORITY_OWN = new HighestPriorityOwn();
-    private static final LowestPriorityOwn LOWEST_PRIORITY_OWN = new LowestPriorityOwn();
-    private static final HighestPriorityInherited HIGHEST_PRIORITY_INHERITED = new HighestPriorityInherited();
-    private static final LowestPriorityInherited LOWEST_PRIORITY_INHERITED = new LowestPriorityInherited();
+    public static final HighestPriority HIGHEST_PRIORITY = new HighestPriority();
+    public static final LowestPriority LOWEST_PRIORITY = new LowestPriority();
+    public static final HighestPriorityOwn HIGHEST_PRIORITY_OWN = new HighestPriorityOwn();
+    public static final LowestPriorityOwn LOWEST_PRIORITY_OWN = new LowestPriorityOwn();
+    public static final HighestPriorityInherited HIGHEST_PRIORITY_INHERITED = new HighestPriorityInherited();
+    public static final LowestPriorityInherited LOWEST_PRIORITY_INHERITED = new LowestPriorityInherited();
 
     public static Optional<MetaStackElement> parseFromString(LuckPermsPlugin plugin, String s) {
         s = s.toLowerCase();

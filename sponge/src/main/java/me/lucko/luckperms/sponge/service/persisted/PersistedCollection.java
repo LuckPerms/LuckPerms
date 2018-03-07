@@ -58,6 +58,7 @@ import java.util.function.Predicate;
 public class PersistedCollection implements LPSubjectCollection {
     private final LuckPermsService service;
     private final String identifier;
+    private final boolean defaultsCollection;
 
     private final SubjectCollection spongeProxy;
 
@@ -67,6 +68,7 @@ public class PersistedCollection implements LPSubjectCollection {
     public PersistedCollection(LuckPermsService service, String identifier) {
         this.service = service;
         this.identifier = identifier;
+        this.defaultsCollection = identifier.equals("defaults");
         this.spongeProxy = ProxyFactory.toSponge(this);
     }
 
@@ -98,6 +100,11 @@ public class PersistedCollection implements LPSubjectCollection {
     @Override
     public Predicate<String> getIdentifierValidityPredicate() {
         return Predicates.alwaysTrue();
+    }
+
+    @Override
+    public boolean isDefaultsCollection() {
+        return this.defaultsCollection;
     }
 
     @Override

@@ -26,7 +26,6 @@
 package me.lucko.luckperms.sponge.service.internal;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.MetaData;
@@ -38,12 +37,15 @@ import me.lucko.luckperms.common.verbose.CheckOrigin;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
+import me.lucko.luckperms.sponge.service.SubjectComparator;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
 
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -68,6 +70,10 @@ public abstract class HolderSubject<T extends PermissionHolder> implements LPSub
             plugin.getUpdateEventHandler().fireUpdateEvent(this.subjectData);
             plugin.getUpdateEventHandler().fireUpdateEvent(this.transientSubjectData);
         });
+    }
+
+    public T getParent() {
+        return this.parent;
     }
 
     @Override
@@ -102,7 +108,7 @@ public abstract class HolderSubject<T extends PermissionHolder> implements LPSub
 
     @Override
     public ImmutableList<LPSubjectReference> getParents(ImmutableContextSet contexts) {
-        ImmutableSet.Builder<LPSubjectReference> subjects = ImmutableSet.builder();
+        List<LPSubjectReference> subjects = new ArrayList<>();
 
         for (Map.Entry<String, Boolean> entry : this.parent.getCachedData().getPermissionData(this.plugin.getContextManager().formContexts(contexts)).getImmutableBacking().entrySet()) {
             if (!entry.getValue()) {
@@ -122,7 +128,8 @@ public abstract class HolderSubject<T extends PermissionHolder> implements LPSub
         subjects.addAll(getParentCollection().getDefaults().getParents(contexts));
         subjects.addAll(this.plugin.getService().getDefaults().getParents(contexts));
 
-        return getService().sortSubjects(subjects.build());
+        subjects.sort(SubjectComparator.reverse());
+        return ImmutableList.copyOf(subjects);
     }
 
     @Override
@@ -154,7 +161,7 @@ public abstract class HolderSubject<T extends PermissionHolder> implements LPSub
     }
 
     @Override
-    public void invalidateCaches(CacheLevel cacheLevel) {
+    public void invalidateCaches() {
         // invalidate for all changes
         this.parent.getCachedData().invalidateCaches();
     }

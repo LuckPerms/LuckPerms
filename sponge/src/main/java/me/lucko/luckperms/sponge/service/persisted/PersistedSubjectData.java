@@ -36,8 +36,8 @@ public class PersistedSubjectData extends MonitoredSubjectData {
     private final PersistedSubject subject;
     private boolean save = true;
 
-    public PersistedSubjectData(PersistedSubject subject, NodeMapType type, LuckPermsService service, String calculatorDisplayName) {
-        super(subject, type, service, calculatorDisplayName);
+    public PersistedSubjectData(PersistedSubject subject, NodeMapType type, LuckPermsService service) {
+        super(subject, type, service);
         this.subject = subject;
     }
 

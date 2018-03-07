@@ -23,25 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.caching;
+package me.lucko.luckperms.sponge.processors;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.caching.GroupData;
-import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
-import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.references.HolderType;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.sponge.service.model.LPPermissionService;
+import me.lucko.luckperms.sponge.service.model.LPSubject;
 
-/**
- * Holds an easily accessible cache of a groups's data in a number of contexts
- */
-public class GroupCachedData extends HolderCachedData<Group> implements GroupData {
+public class FixedDefaultsProcessor extends DefaultsProcessor {
+    private final LPSubject defaultsSubject;
 
-    public GroupCachedData(Group holder) {
-        super(holder);
+    public FixedDefaultsProcessor(LPPermissionService service, ImmutableContextSet contexts, LPSubject defaultsSubject) {
+        super(service, contexts);
+        this.defaultsSubject = defaultsSubject;
     }
 
     @Override
-    protected PermissionCalculatorMetadata getMetadataForContexts(Contexts contexts) {
-        return PermissionCalculatorMetadata.of(HolderType.GROUP, this.holder.getFriendlyName(), contexts.getContexts());
+    protected LPSubject getTypeDefaults(LPPermissionService service) {
+        return this.defaultsSubject;
     }
 }

@@ -41,9 +41,4 @@ public interface CalculatorFactory {
      */
     PermissionCalculator build(Contexts contexts, PermissionCalculatorMetadata metadata);
 
-    /**
-     * Invalidates all calculators build by this factory
-     */
-    void invalidateAll();
-
 }

@@ -27,12 +27,10 @@ package me.lucko.luckperms.sponge.service;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.common.contexts.ContextManager;
-import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.contexts.SpongeProxiedContextCalculator;
@@ -43,7 +41,6 @@ import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
-import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
 import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorage;
 
@@ -54,11 +51,7 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.text.Text;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -216,56 +209,14 @@ public class LuckPermsService implements LPPermissionService {
     }
 
     @Override
-    public ImmutableList<LPSubjectReference> sortSubjects(Collection<LPSubjectReference> s) {
-        List<LPSubjectReference> ret = new ArrayList<>(s);
-        ret.sort(Collections.reverseOrder((o1, o2) -> {
-            if (o1.equals(o2)) {
-                return 0;
-            }
-
-            boolean o1isGroup = o1.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP);
-            boolean o2isGroup = o2.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP);
-
-            if (o1isGroup != o2isGroup) {
-                return o1isGroup ? 1 : -1;
-            }
-
-            // Neither are groups
-            if (!o1isGroup) {
-                return 1;
-            }
-
-            Group g1 = this.plugin.getGroupManager().getIfLoaded(o1.getSubjectIdentifier());
-            Group g2 = this.plugin.getGroupManager().getIfLoaded(o2.getSubjectIdentifier());
-
-            boolean g1Null = g1 == null;
-            boolean g2Null = g2 == null;
-
-            if (g1Null != g2Null) {
-                return g1Null ? -1 : 1;
-            }
-
-            // Both are null
-            if (g1Null) {
-                return 1;
-            }
-
-            return Integer.compare(g1.getWeight().orElse(0), g2.getWeight().orElse(0)) == 1 ? 1 : -1;
-        }));
-        return ImmutableList.copyOf(ret);
-    }
-
-    @Override
-    public void invalidateAllCaches(LPSubject.CacheLevel cacheLevel) {
+    public void invalidateAllCaches() {
         for (LPSubjectCollection collection : this.collections.asMap().values()) {
             for (LPSubject subject : collection.getLoadedSubjects()) {
-                subject.invalidateCaches(cacheLevel);
+                subject.invalidateCaches();
             }
         }
 
-        if (cacheLevel != LPSubject.CacheLevel.OPTION) {
-            this.plugin.getCalculatorFactory().invalidateAll();
-        }
+        this.plugin.getCalculatorFactory().invalidateAll();
     }
 
 }

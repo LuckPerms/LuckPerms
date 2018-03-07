@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.UpdateTaskBuffer;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
-import me.lucko.luckperms.common.calculators.CalculatorFactory;
+import me.lucko.luckperms.common.calculators.PlatformCalculatorFactory;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.CommandUtils;
 import me.lucko.luckperms.common.config.AbstractConfiguration;
@@ -80,7 +80,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private BufferedRequest<Void> updateTaskBuffer;
     private InheritanceHandler inheritanceHandler;
     private CachedStateManager cachedStateManager;
-    private CalculatorFactory calculatorFactory;
+    private PlatformCalculatorFactory calculatorFactory;
     private LuckPermsApiProvider apiProvider;
     private EventFactory eventFactory;
 
@@ -231,7 +231,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     protected abstract MessagingFactory<?> provideMessagingFactory();
     protected abstract void registerCommands();
     protected abstract void setupManagers();
-    protected abstract CalculatorFactory provideCalculatorFactory();
+    protected abstract PlatformCalculatorFactory provideCalculatorFactory();
     protected abstract void setupContextManager();
     protected abstract void setupPlatformHooks();
     protected abstract void registerApiOnPlatform(LuckPermsApi api);
@@ -314,7 +314,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public CalculatorFactory getCalculatorFactory() {
+    public PlatformCalculatorFactory getCalculatorFactory() {
         return this.calculatorFactory;
     }
 

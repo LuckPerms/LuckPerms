@@ -25,22 +25,16 @@
 
 package me.lucko.luckperms.sponge.service.calculated;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.calculators.PermissionCalculator;
-import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.contexts.ContextSetComparator;
 import me.lucko.luckperms.common.model.NodeMapType;
-import me.lucko.luckperms.common.processors.MapProcessor;
-import me.lucko.luckperms.common.processors.PermissionProcessor;
-import me.lucko.luckperms.common.verbose.CheckOrigin;
-import me.lucko.luckperms.sponge.processors.SpongeWildcardProcessor;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
+import me.lucko.luckperms.sponge.service.SubjectComparator;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
@@ -49,6 +43,7 @@ import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
 import org.spongepowered.api.service.permission.SubjectData;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -57,7 +52,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * In-memory implementation of {@link LPSubjectData}.
@@ -71,22 +65,10 @@ public class CalculatedSubjectData implements LPSubjectData {
     private final Map<ImmutableContextSet, Set<LPSubjectReference>> parents = new ConcurrentHashMap<>();
     private final Map<ImmutableContextSet, Map<String, String>> options = new ConcurrentHashMap<>();
 
-    private final LoadingCache<ImmutableContextSet, CalculatorHolder> permissionCache;
-
-    public CalculatedSubjectData(LPSubject parentSubject, NodeMapType type, LPPermissionService service, String calculatorDisplayName) {
+    public CalculatedSubjectData(LPSubject parentSubject, NodeMapType type, LPPermissionService service) {
         this.parentSubject = parentSubject;
         this.type = type;
         this.service = service;
-        this.permissionCache = Caffeine.newBuilder()
-                .expireAfterAccess(10, TimeUnit.MINUTES)
-                .build(contexts -> {
-                    ImmutableList<PermissionProcessor> processors = ImmutableList.of(new MapProcessor(), new SpongeWildcardProcessor());
-                    PermissionCalculatorMetadata calcMetadata = PermissionCalculatorMetadata.of(null, calculatorDisplayName, contexts);
-
-                    CalculatorHolder holder = new CalculatorHolder(new PermissionCalculator(this.service.getPlugin(), calcMetadata, processors));
-                    holder.setPermissions(processPermissionsMap(contexts, this.permissions));
-                    return holder;
-                });
     }
 
     @Override
@@ -104,26 +86,12 @@ public class CalculatedSubjectData implements LPSubjectData {
         return this.type;
     }
 
-    public void cleanup() {
-        this.permissionCache.cleanUp();
-    }
-
-    public void invalidateLookupCache() {
-        this.permissionCache.invalidateAll();
-    }
-
-    public Tristate getPermissionValue(ImmutableContextSet contexts, String permission) {
-        CalculatorHolder calculatorHolder = Objects.requireNonNull(this.permissionCache.get(contexts));
-        return calculatorHolder.getCalculator().getPermissionValue(permission, CheckOrigin.INTERNAL);
-    }
-
     public void replacePermissions(Map<ImmutableContextSet, Map<String, Boolean>> map) {
         this.permissions.clear();
         for (Map.Entry<ImmutableContextSet, Map<String, Boolean>> e : map.entrySet()) {
             this.permissions.put(e.getKey(), new ConcurrentHashMap<>(e.getValue()));
         }
-        this.permissionCache.invalidateAll();
-        this.service.invalidateAllCaches(LPSubject.CacheLevel.PERMISSION);
+        this.service.invalidateAllCaches();
     }
 
     public void replaceParents(Map<ImmutableContextSet, List<LPSubjectReference>> map) {
@@ -133,7 +101,7 @@ public class CalculatedSubjectData implements LPSubjectData {
             set.addAll(e.getValue());
             this.parents.put(e.getKey(), set);
         }
-        this.service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
+        this.service.invalidateAllCaches();
     }
 
     public void replaceOptions(Map<ImmutableContextSet, Map<String, String>> map) {
@@ -141,7 +109,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         for (Map.Entry<ImmutableContextSet, Map<String, String>> e : map.entrySet()) {
             this.options.put(e.getKey(), new ConcurrentHashMap<>(e.getValue()));
         }
-        this.service.invalidateAllCaches(LPSubject.CacheLevel.OPTION);
+        this.service.invalidateAllCaches();
     }
 
     @Override
@@ -153,159 +121,10 @@ public class CalculatedSubjectData implements LPSubjectData {
         return map.build();
     }
 
-    @Override
-    public CompletableFuture<Boolean> setPermission(ImmutableContextSet contexts, String permission, Tristate value) {
-        boolean b;
-        if (value == Tristate.UNDEFINED) {
-            Map<String, Boolean> perms = this.permissions.get(contexts);
-            b = perms != null && perms.remove(permission.toLowerCase()) != null;
-        } else {
-            Map<String, Boolean> perms = this.permissions.computeIfAbsent(contexts, c -> new ConcurrentHashMap<>());
-            b = !Objects.equals(perms.put(permission.toLowerCase(), value.asBoolean()), value.asBoolean());
-        }
-        if (b) {
-            this.permissionCache.invalidateAll();
-            this.service.invalidateAllCaches(LPSubject.CacheLevel.PERMISSION);
-        }
-        return CompletableFuture.completedFuture(b);
-    }
-
-    @Override
-    public CompletableFuture<Boolean> clearPermissions() {
-        if (this.permissions.isEmpty()) {
-            return CompletableFuture.completedFuture(false);
-        } else {
-            this.permissions.clear();
-            this.permissionCache.invalidateAll();
-            this.service.invalidateAllCaches(LPSubject.CacheLevel.PERMISSION);
-            return CompletableFuture.completedFuture(true);
-        }
-    }
-
-    @Override
-    public CompletableFuture<Boolean> clearPermissions(ImmutableContextSet contexts) {
-        Map<String, Boolean> perms = this.permissions.get(contexts);
-        if (perms == null) {
-            return CompletableFuture.completedFuture(false);
-        }
-
-        this.permissions.remove(contexts);
-        if (!perms.isEmpty()) {
-            this.permissionCache.invalidateAll();
-            this.service.invalidateAllCaches(LPSubject.CacheLevel.PERMISSION);
-            return CompletableFuture.completedFuture(true);
-        }
-        return CompletableFuture.completedFuture(false);
-    }
-
-    @Override
-    public ImmutableMap<ImmutableContextSet, ImmutableList<LPSubjectReference>> getAllParents() {
-        ImmutableMap.Builder<ImmutableContextSet, ImmutableList<LPSubjectReference>> map = ImmutableMap.builder();
-        for (Map.Entry<ImmutableContextSet, Set<LPSubjectReference>> e : this.parents.entrySet()) {
-            map.put(e.getKey(), this.service.sortSubjects(e.getValue()));
-        }
-        return map.build();
-    }
-
-    @Override
-    public CompletableFuture<Boolean> addParent(ImmutableContextSet contexts, LPSubjectReference parent) {
-        Set<LPSubjectReference> set = this.parents.computeIfAbsent(contexts, c -> ConcurrentHashMap.newKeySet());
-        boolean b = set.add(parent);
-        if (b) {
-            this.service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
-        }
-        return CompletableFuture.completedFuture(b);
-    }
-
-    @Override
-    public CompletableFuture<Boolean> removeParent(ImmutableContextSet contexts, LPSubjectReference parent) {
-        Set<LPSubjectReference> set = this.parents.get(contexts);
-        boolean b = set != null && set.remove(parent);
-        if (b) {
-            this.service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
-        }
-        return CompletableFuture.completedFuture(b);
-    }
-
-    @Override
-    public CompletableFuture<Boolean> clearParents() {
-        if (this.parents.isEmpty()) {
-            return CompletableFuture.completedFuture(false);
-        } else {
-            this.parents.clear();
-            this.service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
-            return CompletableFuture.completedFuture(true);
-        }
-    }
-
-    @Override
-    public CompletableFuture<Boolean> clearParents(ImmutableContextSet contexts) {
-        Set<LPSubjectReference> set = this.parents.get(contexts);
-        if (set == null) {
-            return CompletableFuture.completedFuture(false);
-        }
-
-        this.parents.remove(contexts);
-        this.service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
-        return CompletableFuture.completedFuture(!set.isEmpty());
-    }
-
-    @Override
-    public ImmutableMap<ImmutableContextSet, ImmutableMap<String, String>> getAllOptions() {
-        ImmutableMap.Builder<ImmutableContextSet, ImmutableMap<String, String>> map = ImmutableMap.builder();
-        for (Map.Entry<ImmutableContextSet, Map<String, String>> e : this.options.entrySet()) {
-            map.put(e.getKey(), ImmutableMap.copyOf(e.getValue()));
-        }
-        return map.build();
-    }
-
-    @Override
-    public CompletableFuture<Boolean> setOption(ImmutableContextSet contexts, String key, String value) {
-        Map<String, String> options = this.options.computeIfAbsent(contexts, c -> new ConcurrentHashMap<>());
-        boolean b = !stringEquals(options.put(key.toLowerCase(), value), value);
-        if (b) {
-            this.service.invalidateAllCaches(LPSubject.CacheLevel.OPTION);
-        }
-        return CompletableFuture.completedFuture(b);
-    }
-
-    @Override
-    public CompletableFuture<Boolean> unsetOption(ImmutableContextSet contexts, String key) {
-        Map<String, String> options = this.options.get(contexts);
-        boolean b = options != null && options.remove(key.toLowerCase()) != null;
-        if (b) {
-            this.service.invalidateAllCaches(LPSubject.CacheLevel.OPTION);
-        }
-        return CompletableFuture.completedFuture(b);
-    }
-
-    @Override
-    public CompletableFuture<Boolean> clearOptions() {
-        if (this.options.isEmpty()) {
-            return CompletableFuture.completedFuture(false);
-        } else {
-            this.options.clear();
-            this.service.invalidateAllCaches(LPSubject.CacheLevel.OPTION);
-            return CompletableFuture.completedFuture(true);
-        }
-    }
-
-    @Override
-    public CompletableFuture<Boolean> clearOptions(ImmutableContextSet contexts) {
-        Map<String, String> map = this.options.get(contexts);
-        if (map == null) {
-            return CompletableFuture.completedFuture(false);
-        }
-
-        this.options.remove(contexts);
-        this.service.invalidateAllCaches(LPSubject.CacheLevel.OPTION);
-        return CompletableFuture.completedFuture(!map.isEmpty());
-    }
-
-    private static Map<String, Boolean> processPermissionsMap(ImmutableContextSet filter, Map<ImmutableContextSet, Map<String, Boolean>> input) {
+    public Map<String, Boolean> resolvePermissions(ContextSet filter) {
         // get relevant entries
         SortedMap<ImmutableContextSet, Map<String, Boolean>> sorted = new TreeMap<>(ContextSetComparator.reverse());
-        for (Map.Entry<ImmutableContextSet, Map<String, Boolean>> entry : input.entrySet()) {
+        for (Map.Entry<ImmutableContextSet, Map<String, Boolean>> entry : this.permissions.entrySet()) {
             if (!entry.getKey().isSatisfiedBy(filter)) {
                 continue;
             }
@@ -320,32 +139,257 @@ public class CalculatedSubjectData implements LPSubjectData {
                 result.putIfAbsent(e.getKey(), e.getValue());
             }
         }
-        return ImmutableMap.copyOf(result);
+
+        return result;
+    }
+
+    public Map<String, Boolean> resolvePermissions() {
+        // get relevant entries
+        SortedMap<ImmutableContextSet, Map<String, Boolean>> sorted = new TreeMap<>(ContextSetComparator.reverse());
+        for (Map.Entry<ImmutableContextSet, Map<String, Boolean>> entry : this.permissions.entrySet()) {
+            sorted.put(entry.getKey(), entry.getValue());
+        }
+
+        // flatten
+        Map<String, Boolean> result = new HashMap<>();
+        for (Map<String, Boolean> map : sorted.values()) {
+            for (Map.Entry<String, Boolean> e : map.entrySet()) {
+                result.putIfAbsent(e.getKey(), e.getValue());
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public CompletableFuture<Boolean> setPermission(ImmutableContextSet contexts, String permission, Tristate value) {
+        boolean b;
+        if (value == Tristate.UNDEFINED) {
+            Map<String, Boolean> perms = this.permissions.get(contexts);
+            b = perms != null && perms.remove(permission.toLowerCase()) != null;
+        } else {
+            Map<String, Boolean> perms = this.permissions.computeIfAbsent(contexts, c -> new ConcurrentHashMap<>());
+            b = !Objects.equals(perms.put(permission.toLowerCase(), value.asBoolean()), value.asBoolean());
+        }
+        if (b) {
+            this.service.invalidateAllCaches();
+        }
+        return CompletableFuture.completedFuture(b);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> clearPermissions() {
+        if (this.permissions.isEmpty()) {
+            return CompletableFuture.completedFuture(false);
+        } else {
+            this.permissions.clear();
+            this.service.invalidateAllCaches();
+            return CompletableFuture.completedFuture(true);
+        }
+    }
+
+    @Override
+    public CompletableFuture<Boolean> clearPermissions(ImmutableContextSet contexts) {
+        Map<String, Boolean> perms = this.permissions.get(contexts);
+        if (perms == null) {
+            return CompletableFuture.completedFuture(false);
+        }
+
+        this.permissions.remove(contexts);
+        if (!perms.isEmpty()) {
+            this.service.invalidateAllCaches();
+            return CompletableFuture.completedFuture(true);
+        }
+        return CompletableFuture.completedFuture(false);
+    }
+
+    @Override
+    public ImmutableMap<ImmutableContextSet, ImmutableList<LPSubjectReference>> getAllParents() {
+        ImmutableMap.Builder<ImmutableContextSet, ImmutableList<LPSubjectReference>> map = ImmutableMap.builder();
+        for (Map.Entry<ImmutableContextSet, Set<LPSubjectReference>> e : this.parents.entrySet()) {
+            map.put(e.getKey(), ImmutableList.sortedCopyOf(SubjectComparator.reverse(), e.getValue()));
+        }
+        return map.build();
+    }
+
+    public Set<LPSubjectReference> resolveParents(ContextSet filter) {
+        // get relevant entries
+        SortedMap<ImmutableContextSet, Set<LPSubjectReference>> sorted = new TreeMap<>(ContextSetComparator.reverse());
+        for (Map.Entry<ImmutableContextSet, Set<LPSubjectReference>> entry : this.parents.entrySet()) {
+            if (!entry.getKey().isSatisfiedBy(filter)) {
+                continue;
+            }
+
+            sorted.put(entry.getKey(), entry.getValue());
+        }
+
+        // flatten
+        Set<LPSubjectReference> result = new LinkedHashSet<>();
+        for (Set<LPSubjectReference> set : sorted.values()) {
+            for (LPSubjectReference e : set) {
+                if (!result.contains(e)) {
+                    result.add(e);
+                }
+            }
+        }
+        return result;
+    }
+
+    public Set<LPSubjectReference> resolveParents() {
+        // get relevant entries
+        SortedMap<ImmutableContextSet, Set<LPSubjectReference>> sorted = new TreeMap<>(ContextSetComparator.reverse());
+        for (Map.Entry<ImmutableContextSet, Set<LPSubjectReference>> entry : this.parents.entrySet()) {
+            sorted.put(entry.getKey(), entry.getValue());
+        }
+
+        // flatten
+        Set<LPSubjectReference> result = new LinkedHashSet<>();
+        for (Set<LPSubjectReference> set : sorted.values()) {
+            for (LPSubjectReference e : set) {
+                if (!result.contains(e)) {
+                    result.add(e);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public CompletableFuture<Boolean> addParent(ImmutableContextSet contexts, LPSubjectReference parent) {
+        Set<LPSubjectReference> set = this.parents.computeIfAbsent(contexts, c -> ConcurrentHashMap.newKeySet());
+        boolean b = set.add(parent);
+        if (b) {
+            this.service.invalidateAllCaches();
+        }
+        return CompletableFuture.completedFuture(b);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> removeParent(ImmutableContextSet contexts, LPSubjectReference parent) {
+        Set<LPSubjectReference> set = this.parents.get(contexts);
+        boolean b = set != null && set.remove(parent);
+        if (b) {
+            this.service.invalidateAllCaches();
+        }
+        return CompletableFuture.completedFuture(b);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> clearParents() {
+        if (this.parents.isEmpty()) {
+            return CompletableFuture.completedFuture(false);
+        } else {
+            this.parents.clear();
+            this.service.invalidateAllCaches();
+            return CompletableFuture.completedFuture(true);
+        }
+    }
+
+    @Override
+    public CompletableFuture<Boolean> clearParents(ImmutableContextSet contexts) {
+        Set<LPSubjectReference> set = this.parents.get(contexts);
+        if (set == null) {
+            return CompletableFuture.completedFuture(false);
+        }
+
+        this.parents.remove(contexts);
+        this.service.invalidateAllCaches();
+        return CompletableFuture.completedFuture(!set.isEmpty());
+    }
+
+    @Override
+    public ImmutableMap<ImmutableContextSet, ImmutableMap<String, String>> getAllOptions() {
+        ImmutableMap.Builder<ImmutableContextSet, ImmutableMap<String, String>> map = ImmutableMap.builder();
+        for (Map.Entry<ImmutableContextSet, Map<String, String>> e : this.options.entrySet()) {
+            map.put(e.getKey(), ImmutableMap.copyOf(e.getValue()));
+        }
+        return map.build();
+    }
+
+    public Map<String, String> resolveOptions(ContextSet filter) {
+        // get relevant entries
+        SortedMap<ImmutableContextSet, Map<String, String>> sorted = new TreeMap<>(ContextSetComparator.reverse());
+        for (Map.Entry<ImmutableContextSet, Map<String, String>> entry : this.options.entrySet()) {
+            if (!entry.getKey().isSatisfiedBy(filter)) {
+                continue;
+            }
+
+            sorted.put(entry.getKey(), entry.getValue());
+        }
+
+        // flatten
+        Map<String, String> result = new HashMap<>();
+        for (Map<String, String> map : sorted.values()) {
+            for (Map.Entry<String, String> e : map.entrySet()) {
+                result.putIfAbsent(e.getKey(), e.getValue());
+            }
+        }
+
+        return result;
+    }
+
+    public Map<String, String> resolveOptions() {
+        // get relevant entries
+        SortedMap<ImmutableContextSet, Map<String, String>> sorted = new TreeMap<>(ContextSetComparator.reverse());
+        for (Map.Entry<ImmutableContextSet, Map<String, String>> entry : this.options.entrySet()) {
+            sorted.put(entry.getKey(), entry.getValue());
+        }
+
+        // flatten
+        Map<String, String> result = new HashMap<>();
+        for (Map<String, String> map : sorted.values()) {
+            for (Map.Entry<String, String> e : map.entrySet()) {
+                result.putIfAbsent(e.getKey(), e.getValue());
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public CompletableFuture<Boolean> setOption(ImmutableContextSet contexts, String key, String value) {
+        Map<String, String> options = this.options.computeIfAbsent(contexts, c -> new ConcurrentHashMap<>());
+        boolean b = !stringEquals(options.put(key.toLowerCase(), value), value);
+        if (b) {
+            this.service.invalidateAllCaches();
+        }
+        return CompletableFuture.completedFuture(b);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> unsetOption(ImmutableContextSet contexts, String key) {
+        Map<String, String> options = this.options.get(contexts);
+        boolean b = options != null && options.remove(key.toLowerCase()) != null;
+        if (b) {
+            this.service.invalidateAllCaches();
+        }
+        return CompletableFuture.completedFuture(b);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> clearOptions() {
+        if (this.options.isEmpty()) {
+            return CompletableFuture.completedFuture(false);
+        } else {
+            this.options.clear();
+            this.service.invalidateAllCaches();
+            return CompletableFuture.completedFuture(true);
+        }
+    }
+
+    @Override
+    public CompletableFuture<Boolean> clearOptions(ImmutableContextSet contexts) {
+        Map<String, String> map = this.options.get(contexts);
+        if (map == null) {
+            return CompletableFuture.completedFuture(false);
+        }
+
+        this.options.remove(contexts);
+        this.service.invalidateAllCaches();
+        return CompletableFuture.completedFuture(!map.isEmpty());
     }
 
     private static boolean stringEquals(String a, String b) {
         return a == null && b == null || a != null && b != null && a.equalsIgnoreCase(b);
-    }
-
-    private static class CalculatorHolder {
-        private final PermissionCalculator calculator;
-        private final Map<String, Boolean> permissions;
-
-        public CalculatorHolder(PermissionCalculator calculator) {
-            this.calculator = calculator;
-            this.permissions = new ConcurrentHashMap<>();
-            this.calculator.setSourcePermissions(this.permissions);
-        }
-
-        public void setPermissions(Map<String, Boolean> permissions) {
-            this.permissions.clear();
-            this.permissions.putAll(permissions);
-            this.calculator.setSourcePermissions(this.permissions);
-            this.calculator.invalidateCache();
-        }
-
-        public PermissionCalculator getCalculator() {
-            return this.calculator;
-        }
     }
 }

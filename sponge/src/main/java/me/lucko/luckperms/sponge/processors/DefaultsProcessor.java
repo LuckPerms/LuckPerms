@@ -28,19 +28,19 @@ package me.lucko.luckperms.sponge.processors;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
-import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 
 public abstract class DefaultsProcessor implements PermissionProcessor {
-    private final LuckPermsService service;
+    private final LPPermissionService service;
     private final ImmutableContextSet contexts;
 
-    public DefaultsProcessor(LuckPermsService service, ImmutableContextSet contexts) {
+    public DefaultsProcessor(LPPermissionService service, ImmutableContextSet contexts) {
         this.service = service;
         this.contexts = contexts;
     }
 
-    protected abstract LPSubject getTypeDefaults(LuckPermsService service);
+    protected abstract LPSubject getTypeDefaults(LPPermissionService service);
 
     @Override
     public Tristate hasPermission(String permission) {

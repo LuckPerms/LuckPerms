@@ -27,7 +27,7 @@ package me.lucko.luckperms.nukkit;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LuckPermsApi;
-import me.lucko.luckperms.common.calculators.CalculatorFactory;
+import me.lucko.luckperms.common.calculators.PlatformCalculatorFactory;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -133,7 +133,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected CalculatorFactory provideCalculatorFactory() {
+    protected PlatformCalculatorFactory provideCalculatorFactory() {
         return new NukkitCalculatorFactory(this);
     }
 

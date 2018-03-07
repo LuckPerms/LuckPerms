@@ -43,7 +43,7 @@ import me.lucko.luckperms.bukkit.model.server.LPDefaultsMap;
 import me.lucko.luckperms.bukkit.model.server.LPPermissionMap;
 import me.lucko.luckperms.bukkit.model.server.LPSubscriptionMap;
 import me.lucko.luckperms.bukkit.vault.VaultHookManager;
-import me.lucko.luckperms.common.calculators.CalculatorFactory;
+import me.lucko.luckperms.common.calculators.PlatformCalculatorFactory;
 import me.lucko.luckperms.common.commands.CommandPermission;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -139,7 +139,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected CalculatorFactory provideCalculatorFactory() {
+    protected PlatformCalculatorFactory provideCalculatorFactory() {
         return new BukkitCalculatorFactory(this);
     }
 

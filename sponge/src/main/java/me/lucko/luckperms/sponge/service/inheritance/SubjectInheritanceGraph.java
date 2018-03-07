@@ -23,25 +23,28 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.caching;
+package me.lucko.luckperms.sponge.service.inheritance;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.caching.GroupData;
-import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
-import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.references.HolderType;
+import me.lucko.luckperms.common.graph.Graph;
+import me.lucko.luckperms.common.graph.GraphTraversers;
+import me.lucko.luckperms.common.graph.TraversalAlgorithm;
+import me.lucko.luckperms.sponge.service.calculated.CalculatedSubject;
 
 /**
- * Holds an easily accessible cache of a groups's data in a number of contexts
+ * A {@link Graph} which represents an "inheritance tree" for subjects.
  */
-public class GroupCachedData extends HolderCachedData<Group> implements GroupData {
+public interface SubjectInheritanceGraph extends Graph<CalculatedSubject> {
 
-    public GroupCachedData(Group holder) {
-        super(holder);
+    /**
+     * Returns an iterable which will traverse this inheritance graph using the
+     * specified algorithm starting at the given node.
+     *
+     * @param algorithm the algorithm to use when traversing
+     * @param startNode the start node in the inheritance graph
+     * @return an iterable
+     */
+    default Iterable<CalculatedSubject> traverse(TraversalAlgorithm algorithm, CalculatedSubject startNode) {
+        return GraphTraversers.traverseUsing(algorithm, this, startNode);
     }
 
-    @Override
-    protected PermissionCalculatorMetadata getMetadataForContexts(Contexts contexts) {
-        return PermissionCalculatorMetadata.of(HolderType.GROUP, this.holder.getFriendlyName(), contexts.getContexts());
-    }
 }

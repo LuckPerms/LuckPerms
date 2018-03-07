@@ -30,7 +30,7 @@ import com.google.common.collect.MapMaker;
 import java.util.Collections;
 import java.util.Set;
 
-public abstract class AbstractCalculatorFactory implements CalculatorFactory {
+public abstract class AbstractCalculatorFactory implements PlatformCalculatorFactory {
     private final Set<PermissionCalculator> calculators = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
 
     protected PermissionCalculator registerCalculator(PermissionCalculator calculator) {
