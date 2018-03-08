@@ -35,9 +35,20 @@ import java.net.URLClassLoader;
  * with other plugins, or libraries provided by the server implementation.</p>
  */
 public class IsolatedClassLoader extends URLClassLoader {
+    static {
+        ClassLoader.registerAsParallelCapable();
+    }
 
     public IsolatedClassLoader(URL[] urls) {
-        super(urls, null);
+        /*
+         * ClassLoader#getSystemClassLoader returns the AppClassLoader
+         *
+         * Calling #getParent on this returns the ExtClassLoader (Java 8) or
+         * the PlatformClassLoader (Java 8). Since we want this classloader to
+         * be isolated from the Minecraft server (the app), we set the parent
+         * to be the platform class loader.
+         */
+        super(urls, ClassLoader.getSystemClassLoader().getParent());
     }
 
 }
