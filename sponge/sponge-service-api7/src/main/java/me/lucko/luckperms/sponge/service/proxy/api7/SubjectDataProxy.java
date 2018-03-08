@@ -30,8 +30,7 @@ import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
-import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
-import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
+import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.SubjectData;
@@ -120,13 +119,13 @@ public final class SubjectDataProxy implements SubjectData {
     @Nonnull
     @Override
     public CompletableFuture<Boolean> addParent(@Nonnull Set<Context> contexts, @Nonnull org.spongepowered.api.service.permission.SubjectReference ref) {
-        return handle().thenCompose(handle -> handle.addParent(CompatibilityUtil.convertContexts(contexts), SubjectReferenceFactory.obtain(this.service, ref)));
+        return handle().thenCompose(handle -> handle.addParent(CompatibilityUtil.convertContexts(contexts), this.service.getReferenceFactory().obtain(ref)));
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Boolean> removeParent(@Nonnull Set<Context> contexts, @Nonnull org.spongepowered.api.service.permission.SubjectReference ref) {
-        return handle().thenCompose(handle -> handle.removeParent(CompatibilityUtil.convertContexts(contexts), SubjectReferenceFactory.obtain(this.service, ref)));
+        return handle().thenCompose(handle -> handle.removeParent(CompatibilityUtil.convertContexts(contexts), this.service.getReferenceFactory().obtain(ref)));
     }
 
     @Nonnull

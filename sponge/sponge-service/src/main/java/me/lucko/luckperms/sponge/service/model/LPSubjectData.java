@@ -31,7 +31,6 @@ import com.google.common.collect.ImmutableMap;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.model.NodeMapType;
-import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
 
 import org.spongepowered.api.service.permission.SubjectData;
 

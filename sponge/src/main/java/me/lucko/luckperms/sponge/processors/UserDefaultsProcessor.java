@@ -36,7 +36,7 @@ public class UserDefaultsProcessor extends DefaultsProcessor implements Permissi
     }
 
     @Override
-    protected LPSubject getTypeDefaults(LPPermissionService service) {
-        return service.getUserSubjects().getDefaults();
+    protected LPSubject getTypeDefaults() {
+        return this.service.getUserSubjects().getDefaults();
     }
 }

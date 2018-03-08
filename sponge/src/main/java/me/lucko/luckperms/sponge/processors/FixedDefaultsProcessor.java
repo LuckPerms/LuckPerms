@@ -38,7 +38,7 @@ public class FixedDefaultsProcessor extends DefaultsProcessor {
     }
 
     @Override
-    protected LPSubject getTypeDefaults(LPPermissionService service) {
+    protected LPSubject getTypeDefaults() {
         return this.defaultsSubject;
     }
 }

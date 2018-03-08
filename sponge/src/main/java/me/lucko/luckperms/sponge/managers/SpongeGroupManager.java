@@ -42,11 +42,10 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.model.SpongeGroup;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
-import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
+import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.proxy.ProxyFactory;
 
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -191,7 +190,7 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
             List<HeldPermission<String>> lookup = this.plugin.getStorage().getGroupsWithPermission(permission).join();
             for (HeldPermission<String> holder : lookup) {
                 if (holder.asNode().getFullContexts().equals(ImmutableContextSet.empty())) {
-                    ret.put(SubjectReferenceFactory.obtain(getService(), getIdentifier(), holder.getHolder()), holder.getValue());
+                    ret.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder()), holder.getValue());
                 }
             }
 
@@ -207,7 +206,7 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
             List<HeldPermission<String>> lookup = this.plugin.getStorage().getGroupsWithPermission(permission).join();
             for (HeldPermission<String> holder : lookup) {
                 if (holder.asNode().getFullContexts().equals(contexts)) {
-                    ret.put(SubjectReferenceFactory.obtain(getService(), getIdentifier(), holder.getHolder()), holder.getValue());
+                    ret.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder()), holder.getValue());
                 }
             }
 
@@ -235,7 +234,7 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
 
     @Override
     public LPSubject getDefaults() {
-        return getService().getDefaultSubjects().loadSubject(getIdentifier()).join();
+        return getService().getDefaultSubjects().getTypeDefaults(getIdentifier());
     }
 
 }

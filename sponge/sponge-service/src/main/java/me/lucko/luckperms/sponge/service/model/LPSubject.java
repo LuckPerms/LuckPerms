@@ -29,8 +29,6 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
-import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.Subject;
@@ -49,12 +47,10 @@ public interface LPSubject {
     String getIdentifier();
 
     default LPSubjectReference toReference() {
-        return SubjectReferenceFactory.obtain(getService(), this);
+        return getService().getReferenceFactory().obtain(this);
     }
 
-    default LPSubject getDefaults() {
-        return getService().getDefaultSubjects().loadSubject(getIdentifier()).join();
-    }
+    LPSubject getDefaults();
 
     default Optional<String> getFriendlyIdentifier() {
         return Optional.empty();

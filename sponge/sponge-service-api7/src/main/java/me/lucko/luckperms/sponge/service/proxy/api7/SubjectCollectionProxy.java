@@ -29,7 +29,6 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
@@ -110,7 +109,7 @@ public final class SubjectCollectionProxy implements SubjectCollection {
             throw new IllegalArgumentException("Subject identifier '" + subjectIdentifier + "' does not pass the validity predicate");
         }
 
-        return SubjectReferenceFactory.obtain(this.handle.getService(), getIdentifier(), subjectIdentifier);
+        return this.handle.getService().getReferenceFactory().obtain(getIdentifier(), subjectIdentifier);
     }
 
     @Nonnull

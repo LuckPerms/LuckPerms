@@ -53,7 +53,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
      */
     private final GroupCachedData cachedData;
 
-    private final BufferedRequest<Void> refreshBuffer;
+    private final GroupRefreshBuffer refreshBuffer;
 
     public Group(String name, LuckPermsPlugin plugin) {
         super(name, plugin);

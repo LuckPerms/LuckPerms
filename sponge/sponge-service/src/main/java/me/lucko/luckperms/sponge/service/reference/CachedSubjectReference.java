@@ -27,6 +27,7 @@ package me.lucko.luckperms.sponge.service.reference;
 
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
+import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 
 import org.spongepowered.api.service.permission.Subject;
 
@@ -43,7 +44,7 @@ import javax.annotation.Nonnull;
  * Use of this class (or interface) should have no negative impact on
  * performance, as {@link #resolve()} calls are cached.
  */
-final class LuckPermsSubjectReference implements LPSubjectReference {
+final class CachedSubjectReference implements LPSubjectReference {
 
     /**
      * The time a subject instance should be cached in this reference
@@ -71,7 +72,7 @@ final class LuckPermsSubjectReference implements LPSubjectReference {
     private long lastLookup = 0L;
     private WeakReference<LPSubject> cache = null;
 
-    LuckPermsSubjectReference(LPPermissionService service, String collectionIdentifier, String subjectIdentifier) {
+    CachedSubjectReference(LPPermissionService service, String collectionIdentifier, String subjectIdentifier) {
         this.service = Objects.requireNonNull(service);
         this.collectionIdentifier = Objects.requireNonNull(collectionIdentifier);
         this.subjectIdentifier = Objects.requireNonNull(subjectIdentifier);

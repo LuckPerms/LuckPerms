@@ -43,11 +43,10 @@ import me.lucko.luckperms.common.utils.Uuids;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.model.SpongeUser;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
-import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
+import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.proxy.ProxyFactory;
 
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -216,7 +215,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
             List<HeldPermission<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(permission).join();
             for (HeldPermission<UUID> holder : lookup) {
                 if (holder.asNode().getFullContexts().equals(ImmutableContextSet.empty())) {
-                    ret.put(SubjectReferenceFactory.obtain(getService(), getIdentifier(), holder.getHolder().toString()), holder.getValue());
+                    ret.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder().toString()), holder.getValue());
                 }
             }
 
@@ -232,7 +231,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
             List<HeldPermission<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(permission).join();
             for (HeldPermission<UUID> holder : lookup) {
                 if (holder.asNode().getFullContexts().equals(contexts)) {
-                    ret.put(SubjectReferenceFactory.obtain(getService(), getIdentifier(), holder.getHolder().toString()), holder.getValue());
+                    ret.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder().toString()), holder.getValue());
                 }
             }
 
@@ -260,7 +259,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
 
     @Override
     public LPSubject getDefaults() {
-        return getService().getDefaultSubjects().loadSubject(getIdentifier()).join();
+        return getService().getDefaultSubjects().getTypeDefaults(getIdentifier());
     }
 
 }

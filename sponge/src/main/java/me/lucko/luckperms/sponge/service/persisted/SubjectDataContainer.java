@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.storage;
+package me.lucko.luckperms.sponge.service.persisted;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -38,25 +38,44 @@ import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.utils.CollationKeyCache;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
-import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
-import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
+import me.lucko.luckperms.sponge.service.model.LPSubjectData;
+import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Used for converting a SubjectData instance to and from JSON
+ * Immutable container for a subjects persisted data
  */
-public class SubjectStorageModel {
-    private final LPPermissionService service;
+public class SubjectDataContainer {
+
+    /**
+     * Creates a {@link SubjectDataContainer} container for the given {@link LPSubjectData}.
+     *
+     * @param subjectData the subject data to copy from
+     * @return a new container
+     */
+    public static SubjectDataContainer copyOf(LPSubjectData subjectData) {
+        return new SubjectDataContainer(subjectData.getAllPermissions(), subjectData.getAllOptions(), subjectData.getAllParents());
+    }
+
+    /**
+     * Deserializes a {@link SubjectDataContainer} container from a json object
+     *
+     * @param service the permission service
+     * @param root the root json object
+     * @return a container representing the json data
+     */
+    public static SubjectDataContainer derserialize(LPPermissionService service, JsonObject root) {
+        return new SubjectDataContainer(service, root);
+    }
+
     private final Map<ImmutableContextSet, Map<String, Boolean>> permissions;
     private final Map<ImmutableContextSet, Map<String, String>> options;
     private final Map<ImmutableContextSet, List<LPSubjectReference>> parents;
 
-    public SubjectStorageModel(LPPermissionService service, Map<ImmutableContextSet, ? extends Map<String, Boolean>> permissions, Map<ImmutableContextSet, ? extends Map<String, String>> options, Map<ImmutableContextSet, ? extends List<LPSubjectReference>> parents) {
-        this.service = service;
-
+    private SubjectDataContainer(Map<ImmutableContextSet, ? extends Map<String, Boolean>> permissions, Map<ImmutableContextSet, ? extends Map<String, String>> options, Map<ImmutableContextSet, ? extends List<LPSubjectReference>> parents) {
         ImmutableMap.Builder<ImmutableContextSet, Map<String, Boolean>> permissionsBuilder = ImmutableMap.builder();
         for (Map.Entry<ImmutableContextSet, ? extends Map<String, Boolean>> e : permissions.entrySet()) {
             permissionsBuilder.put(e.getKey(), ImmutableMap.copyOf(e.getValue()));
@@ -75,18 +94,12 @@ public class SubjectStorageModel {
         }
         this.parents = parentsBuilder.build();
     }
-
-    public SubjectStorageModel(CalculatedSubjectData data) {
-        this(data.getParentSubject().getService(), data.getAllPermissions(), data.getAllOptions(), data.getAllParents());
-    }
     
-    public SubjectStorageModel(LPPermissionService service, JsonObject root) {
-        this.service = service;
-
+    private SubjectDataContainer(LPPermissionService service, JsonObject root) {
         Preconditions.checkArgument(root.get("permissions").isJsonArray());
         Preconditions.checkArgument(root.get("options").isJsonArray());
         Preconditions.checkArgument(root.get("parents").isJsonArray());
-        
+
         JsonArray permissions = root.get("permissions").getAsJsonArray();
         JsonArray options = root.get("options").getAsJsonArray();
         JsonArray parents = root.get("parents").getAsJsonArray();
@@ -96,20 +109,20 @@ public class SubjectStorageModel {
             if (!e.isJsonObject()) {
                 continue;
             }
-            
+
             JsonObject section = e.getAsJsonObject();
             if (!section.get("context").isJsonObject()) continue;
             if (!section.get("data").isJsonObject()) continue;
-            
+
             JsonObject context = section.get("context").getAsJsonObject();
             JsonObject data = section.get("data").getAsJsonObject();
-            
+
             ImmutableContextSet contextSet = ContextSetJsonSerializer.deserializeContextSet(context).makeImmutable();
             ImmutableMap.Builder<String, Boolean> perms = ImmutableMap.builder();
             for (Map.Entry<String, JsonElement> perm : data.entrySet()) {
                 perms.put(perm.getKey(), perm.getValue().getAsBoolean());
             }
-            
+
             permissionsBuilder.put(contextSet, perms.build());
         }
         this.permissions = permissionsBuilder.build();
@@ -156,13 +169,13 @@ public class SubjectStorageModel {
                 if (!p.isJsonObject()) {
                     continue;
                 }
-                
+
                 JsonObject parent = p.getAsJsonObject();
-                
+
                 String collection = parent.get("collection").getAsString();
                 String subject = parent.get("subject").getAsString();
-                
-                pars.add(SubjectReferenceFactory.obtain(service, collection, subject));
+
+                pars.add(service.getReferenceFactory().obtain(collection, subject));
             }
 
             parentsBuilder.put(contextSet, pars.build());
@@ -170,13 +183,12 @@ public class SubjectStorageModel {
         this.parents = parentsBuilder.build();
     }
 
-    private static <T> List<Map.Entry<ImmutableContextSet, T>> sortContextMap(Map<ImmutableContextSet, T> map) {
-        List<Map.Entry<ImmutableContextSet, T>> entries = new ArrayList<>(map.entrySet());
-        entries.sort((o1, o2) -> ContextSetComparator.reverse().compare(o1.getKey(), o2.getKey()));
-        return entries;
-    }
-    
-    public JsonObject toJson() {
+    /**
+     * Converts this container to json
+     *
+     * @return a json serialisation of the data in this container
+     */
+    public JsonObject serialize() {
         JsonObject root = new JsonObject();
         
         JsonArray permissions = new JsonArray();
@@ -252,14 +264,22 @@ public class SubjectStorageModel {
         return root;
     }
 
+    /**
+     * Applies the data encapsulated by this container to the given
+     * {@link CalculatedSubjectData}.
+     *
+     * @param subjectData the data to apply to
+     */
     public void applyToData(CalculatedSubjectData subjectData) {
         subjectData.replacePermissions(this.permissions);
         subjectData.replaceOptions(this.options);
         subjectData.replaceParents(this.parents);
     }
 
-    public LPPermissionService getService() {
-        return this.service;
+    private static <T> List<Map.Entry<ImmutableContextSet, T>> sortContextMap(Map<ImmutableContextSet, T> map) {
+        List<Map.Entry<ImmutableContextSet, T>> entries = new ArrayList<>(map.entrySet());
+        entries.sort((o1, o2) -> ContextSetComparator.reverse().compare(o1.getKey(), o2.getKey()));
+        return entries;
     }
 
 }

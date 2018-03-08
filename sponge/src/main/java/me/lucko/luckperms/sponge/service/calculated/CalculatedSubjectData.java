@@ -33,12 +33,11 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.contexts.ContextSetComparator;
 import me.lucko.luckperms.common.model.NodeMapType;
-import me.lucko.luckperms.sponge.service.ProxyFactory;
-import me.lucko.luckperms.sponge.service.SubjectComparator;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
-import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.proxy.ProxyFactory;
 
 import org.spongepowered.api.service.permission.SubjectData;
 
@@ -207,7 +206,7 @@ public class CalculatedSubjectData implements LPSubjectData {
     public ImmutableMap<ImmutableContextSet, ImmutableList<LPSubjectReference>> getAllParents() {
         ImmutableMap.Builder<ImmutableContextSet, ImmutableList<LPSubjectReference>> map = ImmutableMap.builder();
         for (Map.Entry<ImmutableContextSet, Set<LPSubjectReference>> e : this.parents.entrySet()) {
-            map.put(e.getKey(), ImmutableList.sortedCopyOf(SubjectComparator.reverse(), e.getValue()));
+            map.put(e.getKey(), ImmutableList.copyOf(e.getValue()));
         }
         return map.build();
     }

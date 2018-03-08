@@ -65,7 +65,7 @@ public final class PermissionServiceProxy implements PermissionService {
     @Nonnull
     @Override
     public Subject getDefaults() {
-        return this.handle.getDefaults().sponge();
+        return this.handle.getRootDefaults().sponge();
     }
 
     @Nonnull
@@ -91,7 +91,7 @@ public final class PermissionServiceProxy implements PermissionService {
             throw new IllegalArgumentException("Couldn't find a plugin container for " + o.getClass().getSimpleName());
         }
 
-        return Optional.of(new LPDescriptionBuilder(this.handle, container.get()));
+        return Optional.of(new DescriptionBuilder(this.handle, container.get()));
     }
 
     @Nonnull

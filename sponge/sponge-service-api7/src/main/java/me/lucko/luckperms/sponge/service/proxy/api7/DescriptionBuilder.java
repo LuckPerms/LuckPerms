@@ -44,14 +44,14 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public final class LPDescriptionBuilder implements PermissionDescription.Builder {
+public final class DescriptionBuilder implements PermissionDescription.Builder {
     @Nonnull private final LPPermissionService service;
     @Nonnull private final PluginContainer container;
     @Nonnull private final Map<String, Tristate> roles = new HashMap<>();
     @Nullable private String id = null;
     @Nullable private Text description = null;
 
-    public LPDescriptionBuilder(LPPermissionService service, PluginContainer container) {
+    public DescriptionBuilder(LPPermissionService service, PluginContainer container) {
         this.service = Objects.requireNonNull(service, "service");
         this.container = Objects.requireNonNull(container, "container");
     }
@@ -107,8 +107,8 @@ public final class LPDescriptionBuilder implements PermissionDescription.Builder
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
-        if (!(o instanceof LPDescriptionBuilder)) return false;
-        final LPDescriptionBuilder other = (LPDescriptionBuilder) o;
+        if (!(o instanceof DescriptionBuilder)) return false;
+        final DescriptionBuilder other = (DescriptionBuilder) o;
 
         return this.container.equals(other.container) &&
                 this.roles.equals(other.roles) &&

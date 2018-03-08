@@ -27,26 +27,27 @@ package me.lucko.luckperms.sponge.service.internal;
 
 import com.google.common.collect.ImmutableList;
 
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.graph.TraversalAlgorithm;
+import me.lucko.luckperms.common.inheritance.InheritanceGraph;
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
+import me.lucko.luckperms.sponge.model.SpongeGroup;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.ProxyFactory;
-import me.lucko.luckperms.sponge.service.SubjectComparator;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
-import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.proxy.ProxyFactory;
 
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -87,6 +88,11 @@ public abstract class HolderSubject<T extends PermissionHolder> implements LPSub
     }
 
     @Override
+    public LPSubject getDefaults() {
+        return this.plugin.getService().getDefaultSubjects().getTypeDefaults(getParentCollection().getIdentifier());
+    }
+
+    @Override
     public HolderSubjectData getSubjectData() {
         return this.subjectData;
     }
@@ -98,38 +104,30 @@ public abstract class HolderSubject<T extends PermissionHolder> implements LPSub
 
     @Override
     public Tristate getPermissionValue(ImmutableContextSet contexts, String permission) {
-        return this.parent.getCachedData().getPermissionData(this.plugin.getContextManager().formContexts(contexts)).getPermissionValue(permission, CheckOrigin.PLATFORM_LOOKUP_CHECK);
+        Contexts lookupContexts = this.plugin.getContextManager().formContexts(contexts);
+        return this.parent.getCachedData().getPermissionData(lookupContexts).getPermissionValue(permission, CheckOrigin.PLATFORM_LOOKUP_CHECK);
     }
 
     @Override
     public boolean isChildOf(ImmutableContextSet contexts, LPSubjectReference parent) {
-        return parent.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP) && getPermissionValue(contexts, NodeFactory.groupNode(parent.getSubjectIdentifier())).asBoolean();
+        return parent.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP) &&
+                getPermissionValue(contexts, NodeFactory.groupNode(parent.getSubjectIdentifier())).asBoolean();
     }
 
     @Override
     public ImmutableList<LPSubjectReference> getParents(ImmutableContextSet contexts) {
-        List<LPSubjectReference> subjects = new ArrayList<>();
+        InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph(this.plugin.getContextManager().formContexts(contexts));
+        Iterable<PermissionHolder> traversal = graph.traverse(TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER, this.parent);
 
-        for (Map.Entry<String, Boolean> entry : this.parent.getCachedData().getPermissionData(this.plugin.getContextManager().formContexts(contexts)).getImmutableBacking().entrySet()) {
-            if (!entry.getValue()) {
+        ImmutableList.Builder<LPSubjectReference> subjects = ImmutableList.builder();
+        for (PermissionHolder parent : traversal) {
+            if (!(parent instanceof Group)) {
                 continue;
             }
 
-            String groupName = NodeFactory.parseGroupNode(entry.getKey());
-            if (groupName == null) {
-                continue;
-            }
-
-            if (this.plugin.getGroupManager().isLoaded(groupName)) {
-                subjects.add(this.plugin.getService().getGroupSubjects().loadSubject(groupName).join().toReference());
-            }
+            subjects.add(((SpongeGroup) parent).sponge().toReference());
         }
-
-        subjects.addAll(getParentCollection().getDefaults().getParents(contexts));
-        subjects.addAll(this.plugin.getService().getDefaults().getParents(contexts));
-
-        subjects.sort(SubjectComparator.reverse());
-        return ImmutableList.copyOf(subjects);
+        return subjects.build();
     }
 
     @Override
@@ -157,7 +155,7 @@ public abstract class HolderSubject<T extends PermissionHolder> implements LPSub
             return v;
         }
 
-        return this.plugin.getService().getDefaults().getOption(contexts, s);
+        return this.plugin.getService().getRootDefaults().getOption(contexts, s);
     }
 
     @Override

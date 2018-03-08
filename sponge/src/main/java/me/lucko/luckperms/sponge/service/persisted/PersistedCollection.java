@@ -37,11 +37,10 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
-import me.lucko.luckperms.sponge.service.storage.SubjectStorageModel;
+import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.proxy.ProxyFactory;
 
 import org.spongepowered.api.service.permission.SubjectCollection;
 
@@ -57,24 +56,38 @@ import java.util.function.Predicate;
  */
 public class PersistedCollection implements LPSubjectCollection {
     private final LuckPermsService service;
-    private final String identifier;
-    private final boolean defaultsCollection;
 
+    /**
+     * The collection identifier
+     */
+    private final String identifier;
+
+    /**
+     * If the collection is the defaults collection
+     */
+    private final boolean isDefaultsCollection;
+
+    /**
+     * Cached sponge proxy instance
+     */
     private final SubjectCollection spongeProxy;
 
+    /**
+     * The contained subjects
+     */
     private final LoadingCache<String, PersistedSubject> subjects = Caffeine.newBuilder()
-            .build(s -> new PersistedSubject(s, getService(), this));
+            .build(s -> new PersistedSubject(getService(), this, s));
 
     public PersistedCollection(LuckPermsService service, String identifier) {
         this.service = service;
         this.identifier = identifier;
-        this.defaultsCollection = identifier.equals("defaults");
+        this.isDefaultsCollection = identifier.equals("defaults");
         this.spongeProxy = ProxyFactory.toSponge(this);
     }
 
     public void loadAll() {
-        Map<String, SubjectStorageModel> holders = this.service.getStorage().loadAllFromFile(this.identifier);
-        for (Map.Entry<String, SubjectStorageModel> e : holders.entrySet()) {
+        Map<String, SubjectDataContainer> holders = this.service.getStorage().loadAllFromFile(this.identifier);
+        for (Map.Entry<String, SubjectDataContainer> e : holders.entrySet()) {
             PersistedSubject subject = this.subjects.get(e.getKey().toLowerCase());
             if (subject != null) {
                 subject.loadData(e.getValue());
@@ -104,17 +117,23 @@ public class PersistedCollection implements LPSubjectCollection {
 
     @Override
     public boolean isDefaultsCollection() {
-        return this.defaultsCollection;
+        return this.isDefaultsCollection;
+    }
+
+    public LPSubject obtainSubject(String identifier) {
+        return this.subjects.get(identifier.toLowerCase());
     }
 
     @Override
+    @Deprecated // not necessary to wrap with a completablefuture
     public CompletableFuture<LPSubject> loadSubject(String identifier) {
-        return CompletableFuture.completedFuture(this.subjects.get(identifier.toLowerCase()));
+        return CompletableFuture.completedFuture(obtainSubject(identifier));
     }
 
     @Override
+    @Deprecated // not necessary to wrap with an optional
     public Optional<LPSubject> getSubject(String identifier) {
-        return Optional.of(Objects.requireNonNull(this.subjects.get(identifier.toLowerCase())));
+        return Optional.of(Objects.requireNonNull(obtainSubject(identifier)));
     }
 
     @Override
@@ -181,7 +200,7 @@ public class PersistedCollection implements LPSubjectCollection {
 
     @Override
     public LPSubject getDefaults() {
-        return this.service.getDefaultSubjects().loadSubject(getIdentifier()).join();
+        return this.service.getDefaultSubjects().getTypeDefaults(getIdentifier());
     }
 
 }

@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service;
+package me.lucko.luckperms.sponge.service.proxy;
 
 import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;

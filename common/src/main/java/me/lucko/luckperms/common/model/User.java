@@ -62,7 +62,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      */
     private final UserCachedData cachedData;
 
-    private final BufferedRequest<Void> refreshBuffer;
+    private final UserRefreshBuffer refreshBuffer;
 
     public User(UUID uuid, String name, LuckPermsPlugin plugin) {
         super(uuid.toString(), plugin);

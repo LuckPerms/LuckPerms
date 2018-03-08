@@ -30,8 +30,7 @@ import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
-import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
-import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
+import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
@@ -126,7 +125,7 @@ public final class SubjectDataProxy implements SubjectData {
     public boolean addParent(@Nonnull Set<Context> contexts, @Nonnull Subject parent) {
         handle().thenCompose(handle -> handle.addParent(
                 CompatibilityUtil.convertContexts(contexts),
-                SubjectReferenceFactory.obtain(this.service, parent)
+                this.service.getReferenceFactory().obtain(parent)
         ));
         return true;
     }
@@ -135,7 +134,7 @@ public final class SubjectDataProxy implements SubjectData {
     public boolean removeParent(@Nonnull Set<Context> contexts, @Nonnull Subject parent) {
         handle().thenCompose(handle -> handle.removeParent(
                 CompatibilityUtil.convertContexts(contexts),
-                SubjectReferenceFactory.obtain(this.service, parent)
+                this.service.getReferenceFactory().obtain(parent)
         ));
         return true;
     }

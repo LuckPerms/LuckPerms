@@ -32,7 +32,7 @@ import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 
 public abstract class DefaultsProcessor implements PermissionProcessor {
-    private final LPPermissionService service;
+    protected final LPPermissionService service;
     private final ImmutableContextSet contexts;
 
     public DefaultsProcessor(LPPermissionService service, ImmutableContextSet contexts) {
@@ -40,16 +40,16 @@ public abstract class DefaultsProcessor implements PermissionProcessor {
         this.contexts = contexts;
     }
 
-    protected abstract LPSubject getTypeDefaults(LPPermissionService service);
+    protected abstract LPSubject getTypeDefaults();
 
     @Override
     public Tristate hasPermission(String permission) {
-        Tristate t = getTypeDefaults(this.service).getPermissionValue(this.contexts, permission);
+        Tristate t = getTypeDefaults().getPermissionValue(this.contexts, permission);
         if (t != Tristate.UNDEFINED) {
             return t;
         }
 
-        t = this.service.getDefaults().getPermissionValue(this.contexts, permission);
+        t = this.service.getRootDefaults().getPermissionValue(this.contexts, permission);
         if (t != Tristate.UNDEFINED) {
             return t;
         }

@@ -27,14 +27,14 @@ package me.lucko.luckperms.sponge.service.persisted;
 
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.model.NodeMapType;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubject;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.calculated.MonitoredSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
-import me.lucko.luckperms.sponge.service.storage.SubjectStorageModel;
+import me.lucko.luckperms.sponge.service.proxy.ProxyFactory;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.Subject;
@@ -46,31 +46,33 @@ import java.util.Optional;
  * A simple persistable Subject implementation
  */
 public class PersistedSubject extends CalculatedSubject implements LPSubject {
+    private final LuckPermsService service;
+
+    /**
+     * The subjects identifier
+     */
     private final String identifier;
 
-    private final LuckPermsService service;
+    /**
+     * The parent collection
+     */
     private final PersistedCollection parentCollection;
 
+    // subject data instances
     private final PersistedSubjectData subjectData;
     private final CalculatedSubjectData transientSubjectData;
 
-    private final BufferedRequest<Void> saveBuffer = new BufferedRequest<Void>(1000L, 500L, r -> PersistedSubject.this.service.getPlugin().getBootstrap().getScheduler().doAsync(r)) {
-        @Override
-        protected Void perform() {
-            try {
-                PersistedSubject.this.service.getStorage().saveToFile(PersistedSubject.this);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-    };
+    /**
+     * The save buffer instance for saving changes to disk
+     */
+    private final SaveBuffer saveBuffer;
 
-    public PersistedSubject(String identifier, LuckPermsService service, PersistedCollection parentCollection) {
+    public PersistedSubject(LuckPermsService service, PersistedCollection parentCollection, String identifier) {
         super(service.getPlugin());
-        this.identifier = identifier;
         this.service = service;
         this.parentCollection = parentCollection;
+        this.identifier = identifier;
+
         this.subjectData = new PersistedSubjectData(this, NodeMapType.ENDURING, service) {
             @Override
             protected void onUpdate(boolean success) {
@@ -88,18 +90,34 @@ public class PersistedSubject extends CalculatedSubject implements LPSubject {
                 }
             }
         };
+
+        this.saveBuffer = new SaveBuffer(service.getPlugin());
     }
 
+    /**
+     * Calls the subject data update event for the given {@link LPSubjectData} instance.
+     *
+     * @param subjectData the subject data
+     */
     private void fireUpdateEvent(LPSubjectData subjectData) {
         this.service.getPlugin().getUpdateEventHandler().fireUpdateEvent(subjectData);
     }
 
-    public void loadData(SubjectStorageModel dataHolder) {
+    /**
+     * Loads data into this {@link PersistedSubject} from the given
+     * {@link SubjectDataContainer} container
+     *
+     * @param container the container to load from
+     */
+    public void loadData(SubjectDataContainer container) {
         this.subjectData.setSave(false);
-        dataHolder.applyToData(this.subjectData);
+        container.applyToData(this.subjectData);
         this.subjectData.setSave(true);
     }
 
+    /**
+     * Requests that this subjects data is saved to disk
+     */
     public void save() {
         this.saveBuffer.request();
     }
@@ -137,5 +155,21 @@ public class PersistedSubject extends CalculatedSubject implements LPSubject {
     @Override
     public Optional<CommandSource> getCommandSource() {
         return Optional.empty();
+    }
+
+    private final class SaveBuffer extends BufferedRequest<Void> {
+        public SaveBuffer(LuckPermsPlugin plugin) {
+            super(1000L, 500L, plugin.getBootstrap().getScheduler().async());
+        }
+
+        @Override
+        protected Void perform() {
+            try {
+                PersistedSubject.this.service.getStorage().saveToFile(PersistedSubject.this);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
 }

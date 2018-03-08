@@ -36,7 +36,7 @@ public class GroupDefaultsProcessor extends DefaultsProcessor implements Permiss
     }
 
     @Override
-    protected LPSubject getTypeDefaults(LPPermissionService service) {
-        return service.getGroupSubjects().getDefaults();
+    protected LPSubject getTypeDefaults() {
+        return this.service.getGroupSubjects().getDefaults();
     }
 }

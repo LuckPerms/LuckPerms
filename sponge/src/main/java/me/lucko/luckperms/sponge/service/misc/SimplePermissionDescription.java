@@ -23,13 +23,14 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service;
+package me.lucko.luckperms.sponge.service.misc;
 
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.proxy.ProxyFactory;
 
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionDescription;
@@ -42,7 +43,7 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
 
-public final class LuckPermsPermissionDescription implements LPPermissionDescription {
+public final class SimplePermissionDescription implements LPPermissionDescription {
     private final LPPermissionService service;
 
     private final String id;
@@ -51,7 +52,7 @@ public final class LuckPermsPermissionDescription implements LPPermissionDescrip
 
     private PermissionDescription spongeProxy = null;
 
-    public LuckPermsPermissionDescription(LPPermissionService service, String id, @Nullable Text description, @Nullable PluginContainer owner) {
+    public SimplePermissionDescription(LPPermissionService service, String id, @Nullable Text description, @Nullable PluginContainer owner) {
         this.service = service;
         this.id = Objects.requireNonNull(id, "id");
         this.description = description;
@@ -102,8 +103,8 @@ public final class LuckPermsPermissionDescription implements LPPermissionDescrip
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
-        if (!(o instanceof LuckPermsPermissionDescription)) return false;
-        final LuckPermsPermissionDescription other = (LuckPermsPermissionDescription) o;
+        if (!(o instanceof SimplePermissionDescription)) return false;
+        final SimplePermissionDescription other = (SimplePermissionDescription) o;
         return this.id.equals(other.id);
     }
 
@@ -114,7 +115,7 @@ public final class LuckPermsPermissionDescription implements LPPermissionDescrip
 
     @Override
     public String toString() {
-        return "LuckPermsPermissionDescription(" +
+        return "PermissionDescription(" +
                 "id=" + this.id + ", " +
                 "description=" + this.description + ", " +
                 "owner=" + this.owner + ")";

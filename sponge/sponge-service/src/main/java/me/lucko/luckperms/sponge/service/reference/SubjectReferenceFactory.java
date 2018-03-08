@@ -31,6 +31,7 @@ import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
+import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 import me.lucko.luckperms.sponge.service.model.ProxiedSubject;
 
 import org.spongepowered.api.service.permission.Subject;
@@ -44,34 +45,6 @@ import java.util.concurrent.TimeUnit;
  * Caches the creation of {@link LPSubjectReference}s.
  */
 public final class SubjectReferenceFactory {
-
-    // static util access
-
-    @Deprecated
-    public static LPSubjectReference deserialize(LPPermissionService service, String serializedReference) {
-        Objects.requireNonNull(service, "service");
-        return service.getReferenceFactory().deserialize(serializedReference);
-    }
-
-    public static LPSubjectReference obtain(LPPermissionService service, LPSubject subject) {
-        Objects.requireNonNull(service, "service");
-        return service.getReferenceFactory().obtain(subject);
-    }
-
-    public static LPSubjectReference obtain(LPPermissionService service, Subject subject) {
-        Objects.requireNonNull(service, "service");
-        return service.getReferenceFactory().obtain(subject);
-    }
-
-    public static LPSubjectReference obtain(LPPermissionService service, SubjectReference reference) {
-        Objects.requireNonNull(service, "service");
-        return service.getReferenceFactory().obtain(reference);
-    }
-
-    public static LPSubjectReference obtain(LPPermissionService service, String collectionIdentifier, String subjectIdentifier) {
-        Objects.requireNonNull(service, "service");
-        return service.getReferenceFactory().obtain(collectionIdentifier, subjectIdentifier);
-    }
 
     /**
      * The permission service to obtain real subject instances from
@@ -87,9 +60,9 @@ public final class SubjectReferenceFactory {
      *
      * It's perfectly ok if two instances of the same SubjectReference exist. (hence the 1 hour expiry)
      */
-    private final LoadingCache<SubjectReferenceAttributes, LuckPermsSubjectReference> referenceCache = Caffeine.newBuilder()
+    private final LoadingCache<SubjectReferenceAttributes, CachedSubjectReference> referenceCache = Caffeine.newBuilder()
             .expireAfterAccess(1, TimeUnit.HOURS)
-            .build(a -> new LuckPermsSubjectReference(SubjectReferenceFactory.this.service, a.collectionId, a.id));
+            .build(a -> new CachedSubjectReference(SubjectReferenceFactory.this.service, a.collectionId, a.id));
 
     public SubjectReferenceFactory(LPPermissionService service) {
         this.service = service;
@@ -105,7 +78,7 @@ public final class SubjectReferenceFactory {
     public LPSubjectReference obtain(LPSubject subject) {
         Objects.requireNonNull(subject, "subject");
         LPSubjectReference ret = obtain(subject.getParentCollection().getIdentifier(), subject.getIdentifier());
-        ((LuckPermsSubjectReference) ret).fillCache(subject);
+        ((CachedSubjectReference) ret).fillCache(subject);
         return ret;
     }
 

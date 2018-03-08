@@ -23,16 +23,25 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.model;
+package me.lucko.luckperms.sponge.service.persisted;
 
-import me.lucko.luckperms.common.contexts.ContextManager;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.model.LPSubject;
 
-import org.spongepowered.api.service.permission.Subject;
+/**
+ * Subject collection used for storing default subjects
+ */
+public class DefaultsCollection extends PersistedCollection {
+    public DefaultsCollection(LuckPermsService service) {
+        super(service, "defaults");
+    }
 
-public interface LuckPermsSpongePlugin extends LuckPermsPlugin {
+    public LPSubject getRootSubject() {
+        return obtainSubject("default");
+    }
 
-    @Override
-    ContextManager<Subject> getContextManager();
+    public LPSubject getTypeDefaults(String collectionIdentifier) {
+        return obtainSubject(collectionIdentifier);
+    }
 
 }

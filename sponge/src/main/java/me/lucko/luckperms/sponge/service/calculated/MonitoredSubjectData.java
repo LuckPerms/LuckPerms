@@ -30,78 +30,77 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
-import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 /**
  * Extension of CalculatedSubjectData which allows subclasses to respond to updates
  */
 public abstract class MonitoredSubjectData extends CalculatedSubjectData {
-    private final Function<Boolean, Boolean> saveFunction = b -> {
-        onUpdate(b);
-        return b;
-    };
-
     public MonitoredSubjectData(LPSubject subject, NodeMapType type, LuckPermsService service) {
         super(subject, type, service);
+    }
+    
+    private boolean callUpdate(boolean success) {
+        onUpdate(success);
+        return success;
     }
 
     protected abstract void onUpdate(boolean success);
 
     @Override
     public CompletableFuture<Boolean> setPermission(ImmutableContextSet contexts, String permission, Tristate value) {
-        return super.setPermission(contexts, permission, value).thenApply(this.saveFunction);
+        return super.setPermission(contexts, permission, value).thenApply(this::callUpdate);
     }
 
     @Override
     public CompletableFuture<Boolean> clearPermissions() {
-        return super.clearPermissions().thenApply(this.saveFunction);
+        return super.clearPermissions().thenApply(this::callUpdate);
     }
 
     @Override
     public CompletableFuture<Boolean> clearPermissions(ImmutableContextSet contexts) {
-        return super.clearPermissions(contexts).thenApply(this.saveFunction);
+        return super.clearPermissions(contexts).thenApply(this::callUpdate);
     }
 
     @Override
     public CompletableFuture<Boolean> addParent(ImmutableContextSet contexts, LPSubjectReference parent) {
-        return super.addParent(contexts, parent).thenApply(this.saveFunction);
+        return super.addParent(contexts, parent).thenApply(this::callUpdate);
     }
 
     @Override
     public CompletableFuture<Boolean> removeParent(ImmutableContextSet contexts, LPSubjectReference parent) {
-        return super.removeParent(contexts, parent).thenApply(this.saveFunction);
+        return super.removeParent(contexts, parent).thenApply(this::callUpdate);
     }
 
     @Override
     public CompletableFuture<Boolean> clearParents() {
-        return super.clearParents().thenApply(this.saveFunction);
+        return super.clearParents().thenApply(this::callUpdate);
     }
 
     @Override
     public CompletableFuture<Boolean> clearParents(ImmutableContextSet contexts) {
-        return super.clearParents(contexts).thenApply(this.saveFunction);
+        return super.clearParents(contexts).thenApply(this::callUpdate);
     }
 
     @Override
     public CompletableFuture<Boolean> setOption(ImmutableContextSet contexts, String key, String value) {
-        return super.setOption(contexts, key, value).thenApply(this.saveFunction);
+        return super.setOption(contexts, key, value).thenApply(this::callUpdate);
     }
 
     @Override
     public CompletableFuture<Boolean> unsetOption(ImmutableContextSet contexts, String key) {
-        return super.unsetOption(contexts, key).thenApply(this.saveFunction);
+        return super.unsetOption(contexts, key).thenApply(this::callUpdate);
     }
 
     @Override
     public CompletableFuture<Boolean> clearOptions() {
-        return super.clearOptions().thenApply(this.saveFunction);
+        return super.clearOptions().thenApply(this::callUpdate);
     }
 
     @Override
     public CompletableFuture<Boolean> clearOptions(ImmutableContextSet contexts) {
-        return super.clearOptions(contexts).thenApply(this.saveFunction);
+        return super.clearOptions(contexts).thenApply(this::callUpdate);
     }
 }

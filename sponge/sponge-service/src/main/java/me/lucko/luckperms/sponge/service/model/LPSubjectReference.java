@@ -23,9 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.reference;
-
-import me.lucko.luckperms.sponge.service.model.LPSubject;
+package me.lucko.luckperms.sponge.service.model;
 
 import org.spongepowered.api.service.permission.SubjectReference;
 

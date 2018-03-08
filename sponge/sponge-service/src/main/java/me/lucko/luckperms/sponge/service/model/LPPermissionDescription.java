@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.sponge.service.model;
 
-import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
-
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.text.Text;

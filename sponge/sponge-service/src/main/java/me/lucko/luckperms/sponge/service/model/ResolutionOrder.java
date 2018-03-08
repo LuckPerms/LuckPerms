@@ -25,9 +25,19 @@
 
 package me.lucko.luckperms.sponge.service.model;
 
+/**
+ * Defines in what order data should be resolved.
+ */
 public enum ResolutionOrder {
 
+    /**
+     * Marks that transient data should be considered before enduring data
+     */
     TRANSIENT_FIRST,
+
+    /**
+     * Marks that transient data should be considered after enduring data
+     */
     TRANSIENT_LAST
 
 }

@@ -36,13 +36,17 @@ import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.contexts.SpongeProxiedContextCalculator;
 import me.lucko.luckperms.sponge.managers.SpongeGroupManager;
 import me.lucko.luckperms.sponge.managers.SpongeUserManager;
+import me.lucko.luckperms.sponge.service.misc.SimplePermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.persisted.DefaultsCollection;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
+import me.lucko.luckperms.sponge.service.persisted.SubjectStorage;
+import me.lucko.luckperms.sponge.service.proxy.ProxyFactory;
 import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
-import me.lucko.luckperms.sponge.service.storage.SubjectStorage;
 
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.context.ContextCalculator;
@@ -63,17 +67,39 @@ import java.util.function.Predicate;
  */
 public class LuckPermsService implements LPPermissionService {
 
+    /**
+     * The plugin
+     */
     private final LPSpongePlugin plugin;
 
+    /**
+     * A cached proxy of this instance
+     */
     private final PermissionService spongeProxy;
 
+    /**
+     * Reference factory, used to obtain {@link LPSubjectReference}s.
+     */
     private final SubjectReferenceFactory referenceFactory;
-    private final SubjectStorage storage;
-    private final SpongeUserManager userSubjects;
-    private final SpongeGroupManager groupSubjects;
-    private final PersistedCollection defaultSubjects;
-    private final Set<LPPermissionDescription> descriptionSet;
 
+    /**
+     * Subject storage, used to save PersistedSubjects to a file
+     */
+    private final SubjectStorage storage;
+
+    /**
+     * The defaults subject collection
+     */
+    private final DefaultsCollection defaultSubjects;
+
+    /**
+     * A set of registered permission description instances
+     */
+    private final Set<LPPermissionDescription> permissionDescriptions;
+
+    /**
+     * The loaded collections in this service
+     */
     private final LoadingCache<String, LPSubjectCollection> collections = Caffeine.newBuilder()
             .build(s -> new PersistedCollection(this, s));
 
@@ -81,29 +107,33 @@ public class LuckPermsService implements LPPermissionService {
         this.plugin = plugin;
         this.referenceFactory = new SubjectReferenceFactory(this);
         this.spongeProxy = ProxyFactory.toSponge(this);
+        this.permissionDescriptions = ConcurrentHashMap.newKeySet();
 
+        // init subject storage
         this.storage = new SubjectStorage(this, new File(plugin.getBootstrap().getDataDirectory(), "sponge-data"));
 
-        this.userSubjects = plugin.getUserManager();
-        this.groupSubjects = plugin.getGroupManager();
-        this.defaultSubjects = new PersistedCollection(this, "defaults");
+        // load defaults collection
+        this.defaultSubjects = new DefaultsCollection(this);
         this.defaultSubjects.loadAll();
 
-        this.collections.put("user", this.userSubjects);
-        this.collections.put("group", this.groupSubjects);
+        // pre-populate collections map with the default types
+        this.collections.put("user", plugin.getUserManager());
+        this.collections.put("group", plugin.getGroupManager());
         this.collections.put("defaults", this.defaultSubjects);
 
-        for (String collection : this.storage.getSavedCollections()) {
-            if (this.collections.asMap().containsKey(collection.toLowerCase())) {
+        // load known collections
+        for (String identifier : this.storage.getSavedCollections()) {
+            if (this.collections.asMap().containsKey(identifier.toLowerCase())) {
                 continue;
             }
 
-            PersistedCollection c = new PersistedCollection(this, collection.toLowerCase());
-            c.loadAll();
-            this.collections.put(c.getIdentifier(), c);
-        }
+            // load data
+            PersistedCollection collection = new PersistedCollection(this, identifier.toLowerCase());
+            collection.loadAll();
 
-        this.descriptionSet = ConcurrentHashMap.newKeySet();
+            // cache in this instance
+            this.collections.put(collection.getIdentifier(), collection);
+        }
     }
 
     @Override
@@ -132,22 +162,22 @@ public class LuckPermsService implements LPPermissionService {
 
     @Override
     public SpongeUserManager getUserSubjects() {
-        return this.userSubjects;
+        return this.plugin.getUserManager();
     }
 
     @Override
     public SpongeGroupManager getGroupSubjects() {
-        return this.groupSubjects;
+        return this.plugin.getGroupManager();
     }
 
     @Override
-    public PersistedCollection getDefaultSubjects() {
+    public DefaultsCollection getDefaultSubjects() {
         return this.defaultSubjects;
     }
 
     @Override
-    public LPSubject getDefaults() {
-        return getDefaultSubjects().loadSubject("default").join();
+    public LPSubject getRootDefaults() {
+        return this.defaultSubjects.getRootSubject();
     }
 
     @Override
@@ -168,15 +198,15 @@ public class LuckPermsService implements LPPermissionService {
 
     @Override
     public LPPermissionDescription registerPermissionDescription(String id, Text description, PluginContainer owner) {
-        LuckPermsPermissionDescription desc = new LuckPermsPermissionDescription(this, id, description, owner);
-        this.descriptionSet.add(desc);
+        SimplePermissionDescription desc = new SimplePermissionDescription(this, id, description, owner);
+        this.permissionDescriptions.add(desc);
         return desc;
     }
 
     @Override
     public Optional<LPPermissionDescription> getDescription(String s) {
         Objects.requireNonNull(s);
-        for (LPPermissionDescription d : this.descriptionSet) {
+        for (LPPermissionDescription d : this.permissionDescriptions) {
             if (d.getId().equals(s)) {
                 return Optional.of(d);
             }
@@ -187,11 +217,11 @@ public class LuckPermsService implements LPPermissionService {
 
     @Override
     public ImmutableSet<LPPermissionDescription> getDescriptions() {
-        Set<LPPermissionDescription> descriptions = new HashSet<>(this.descriptionSet);
+        Set<LPPermissionDescription> descriptions = new HashSet<>(this.permissionDescriptions);
 
         // collect known values from the permission vault
         for (String knownPermission : this.plugin.getPermissionVault().getKnownPermissions()) {
-            LPPermissionDescription desc = new LuckPermsPermissionDescription(this, knownPermission, null, null);
+            LPPermissionDescription desc = new SimplePermissionDescription(this, knownPermission, null, null);
 
             // don't override plugin defined values
             if (!descriptions.contains(desc)) {

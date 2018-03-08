@@ -31,7 +31,6 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -74,7 +73,7 @@ public final class PermissionServiceProxy implements PermissionService {
     @Nonnull
     @Override
     public Subject getDefaults() {
-        return this.handle.getDefaults().sponge();
+        return this.handle.getRootDefaults().sponge();
     }
 
     @Nonnull
@@ -129,7 +128,7 @@ public final class PermissionServiceProxy implements PermissionService {
         }
 
         // obtain a reference
-        return SubjectReferenceFactory.obtain(this.handle, collectionIdentifier, subjectIdentifier);
+        return this.handle.getReferenceFactory().obtain(collectionIdentifier, subjectIdentifier);
     }
 
     @Override
@@ -139,7 +138,7 @@ public final class PermissionServiceProxy implements PermissionService {
             throw new IllegalArgumentException("Couldn't find a plugin container for " + o.getClass().getSimpleName());
         }
 
-        return new LPDescriptionBuilder(this.handle, container.get());
+        return new DescriptionBuilder(this.handle, container.get());
     }
 
     @Nonnull

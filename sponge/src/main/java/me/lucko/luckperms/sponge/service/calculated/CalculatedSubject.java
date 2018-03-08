@@ -29,29 +29,16 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.caching.MetaContexts;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
-import me.lucko.luckperms.common.caching.AbstractCachedData;
 import me.lucko.luckperms.common.caching.type.MetaAccumulator;
-import me.lucko.luckperms.common.calculators.CalculatorFactory;
-import me.lucko.luckperms.common.calculators.PermissionCalculator;
-import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
-import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
-import me.lucko.luckperms.common.metastacking.StandardStackElements;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.processors.MapProcessor;
-import me.lucko.luckperms.common.processors.PermissionProcessor;
-import me.lucko.luckperms.common.processors.WildcardProcessor;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
-import me.lucko.luckperms.sponge.processors.FixedDefaultsProcessor;
-import me.lucko.luckperms.sponge.processors.SpongeWildcardProcessor;
+import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.inheritance.SubjectInheritanceGraph;
 import me.lucko.luckperms.sponge.service.inheritance.SubjectInheritanceGraphs;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
-import me.lucko.luckperms.sponge.service.reference.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -60,17 +47,17 @@ import java.util.Optional;
 import java.util.Set;
 
 public abstract class CalculatedSubject implements LPSubject {
-    private static final MetaStackDefinition DEFAULT_META_STACK = new SimpleMetaStackDefinition(
-            ImmutableList.of(StandardStackElements.HIGHEST_PRIORITY),
-            "", "", ""
-    );
-
-    private final LuckPermsPlugin plugin;
+    private final LPSpongePlugin plugin;
     private final SubjectCachedData cachedData;
 
-    protected CalculatedSubject(LuckPermsPlugin plugin) {
+    protected CalculatedSubject(LPSpongePlugin plugin) {
         this.plugin = plugin;
-        this.cachedData = new SubjectCachedData(plugin);
+        this.cachedData = new SubjectCachedData(this, plugin);
+    }
+
+    @Override
+    public LPSubject getDefaults() {
+        return this.plugin.getService().getDefaultSubjects().getTypeDefaults(getParentCollection().getIdentifier());
     }
 
     public abstract CalculatedSubjectData getSubjectData();
@@ -353,58 +340,4 @@ public abstract class CalculatedSubject implements LPSubject {
         this.cachedData.invalidateCaches();
     }
 
-    private final class SubjectCachedData extends AbstractCachedData implements CalculatorFactory {
-        private SubjectCachedData(LuckPermsPlugin plugin) {
-            super(plugin);
-        }
-
-        @Override
-        protected PermissionCalculatorMetadata getMetadataForContexts(Contexts contexts) {
-            return PermissionCalculatorMetadata.of(null, getParentCollection().getIdentifier() + "/" + getIdentifier(), contexts.getContexts());
-        }
-
-        @Override
-        protected CalculatorFactory getCalculatorFactory() {
-            return this;
-        }
-
-        @Override
-        protected MetaContexts getDefaultMetaContexts(Contexts contexts) {
-            return MetaContexts.of(contexts, DEFAULT_META_STACK, DEFAULT_META_STACK);
-        }
-
-        @Override
-        protected Map<String, Boolean> resolvePermissions() {
-            return resolveAllPermissions();
-        }
-
-        @Override
-        protected Map<String, Boolean> resolvePermissions(Contexts contexts) {
-            return resolveAllPermissions(contexts.getContexts().makeImmutable());
-        }
-
-        @Override
-        protected void resolveMeta(MetaAccumulator accumulator) {
-            resolveAllOptions(accumulator);
-        }
-
-        @Override
-        protected void resolveMeta(MetaAccumulator accumulator, MetaContexts contexts) {
-            resolveAllOptions(accumulator, contexts.getContexts().getContexts().makeImmutable());
-        }
-
-        @Override
-        public PermissionCalculator build(Contexts contexts, PermissionCalculatorMetadata metadata) {
-            ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
-            processors.add(new MapProcessor());
-            processors.add(new SpongeWildcardProcessor());
-            processors.add(new WildcardProcessor());
-
-            if (!getParentCollection().isDefaultsCollection()) {
-                processors.add(new FixedDefaultsProcessor(getService(), contexts.getContexts().makeImmutable(), getDefaults()));
-            }
-
-            return new PermissionCalculator(this.plugin, metadata, processors.build());
-        }
-    }
 }

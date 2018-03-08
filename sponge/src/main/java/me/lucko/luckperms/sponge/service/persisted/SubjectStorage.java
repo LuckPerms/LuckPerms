@@ -23,16 +23,14 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.storage;
+package me.lucko.luckperms.sponge.service.persisted;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
-import me.lucko.luckperms.sponge.service.persisted.PersistedSubject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -50,8 +48,20 @@ import java.util.stream.Collectors;
  * Handles persisted Subject I/O and (de)serialization
  */
 public class SubjectStorage {
+
+    /**
+     * The permission service
+     */
     private final LPPermissionService service;
+
+    /**
+     * Gson instance
+     */
     private final Gson gson;
+
+    /**
+     * The root directory used to store files
+     */
     private final File container;
 
     public SubjectStorage(LPPermissionService service, File container) {
@@ -65,6 +75,11 @@ public class SubjectStorage {
         this.container.getParentFile().mkdirs();
     }
 
+    /**
+     * Returns a set of all known collections
+     *
+     * @return the identifiers of all known collections
+     */
     public Set<String> getSavedCollections() {
         checkContainer();
 
@@ -76,22 +91,42 @@ public class SubjectStorage {
         return ImmutableSet.copyOf(dirs).stream().map(File::getName).collect(Collectors.toSet());
     }
 
-    public File resolveFile(String collectionName, String subjectName) {
+    /**
+     * Returns the file where a subjects data should be stored
+     *
+     * @param collectionIdentifier the identifier of the subjects collection
+     * @param subjectIdentifier the identifier of the subject
+     * @return a file
+     */
+    private File resolveFile(String collectionIdentifier, String subjectIdentifier) {
         checkContainer();
-        File collection = new File(this.container, collectionName);
+        File collection = new File(this.container, collectionIdentifier);
         if (!collection.exists()) {
             collection.mkdirs();
         }
 
-        return new File(collection, subjectName + ".json");
+        return new File(collection, subjectIdentifier + ".json");
     }
 
+    /**
+     * Saves a subject
+     *
+     * @param subject the subject to save
+     * @throws IOException if the write fails
+     */
     public void saveToFile(PersistedSubject subject) throws IOException {
         File subjectFile = resolveFile(subject.getParentCollection().getIdentifier(), subject.getIdentifier());
-        saveToFile(new SubjectStorageModel(subject.getSubjectData()), subjectFile);
+        saveToFile(SubjectDataContainer.copyOf(subject.getSubjectData()), subjectFile);
     }
 
-    public void saveToFile(SubjectStorageModel model, File file) throws IOException {
+    /**
+     * Saves subject data to a specific file
+     *
+     * @param container the data
+     * @param file the file
+     * @throws IOException if the write fails
+     */
+    public void saveToFile(SubjectDataContainer container, File file) throws IOException {
         file.getParentFile().mkdirs();
         if (file.exists()) {
             file.delete();
@@ -99,14 +134,20 @@ public class SubjectStorage {
         file.createNewFile();
 
         try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
-            this.gson.toJson(model.toJson(), writer);
+            this.gson.toJson(container.serialize(), writer);
             writer.flush();
         }
     }
 
-    public Map<String, SubjectStorageModel> loadAllFromFile(String collectionName) {
+    /**
+     * Loads all known subjects for a given collection
+     *
+     * @param collectionIdentifier the collection identifier
+     * @return a map of found subjects
+     */
+    public Map<String, SubjectDataContainer> loadAllFromFile(String collectionIdentifier) {
         checkContainer();
-        File collection = new File(this.container, collectionName);
+        File collection = new File(this.container, collectionIdentifier);
         if (!collection.exists()) {
             return Collections.emptyMap();
         }
@@ -114,14 +155,14 @@ public class SubjectStorage {
         String[] fileNames = collection.list((dir, name) -> name.endsWith(".json"));
         if (fileNames == null) return Collections.emptyMap();
 
-        Map<String, SubjectStorageModel> holders = new HashMap<>();
+        Map<String, SubjectDataContainer> holders = new HashMap<>();
         for (String name : fileNames) {
-            File subject = new File(collection, name);
+            File subjectFile = new File(collection, name);
 
             try {
-                Map.Entry<String, SubjectStorageModel> s = loadFromFile(subject);
+                LoadedSubject s = loadFromFile(subjectFile);
                 if (s != null) {
-                    holders.put(s.getKey(), s.getValue());
+                    holders.put(s.identifier, s.data);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -131,18 +172,33 @@ public class SubjectStorage {
         return holders;
     }
 
-    public Map.Entry<String, SubjectStorageModel> loadFromFile(String collectionName, String subjectName) throws IOException {
+    /**
+     * Loads a subject
+     *
+     * @param collectionIdentifier the collection id
+     * @param subjectIdentifier the subject id
+     * @return a loaded subject
+     * @throws IOException if the read fails
+     */
+    public LoadedSubject loadFromFile(String collectionIdentifier, String subjectIdentifier) throws IOException {
         checkContainer();
-        File collection = new File(this.container, collectionName);
+        File collection = new File(this.container, collectionIdentifier);
         if (!collection.exists()) {
             return null;
         }
 
-        File subject = new File(collection, subjectName + ".json");
-        return Maps.immutableEntry(subjectName, loadFromFile(subject).getValue());
+        File subject = new File(collection, subjectIdentifier + ".json");
+        return new LoadedSubject(subjectIdentifier, loadFromFile(subject).data);
     }
 
-    public Map.Entry<String, SubjectStorageModel> loadFromFile(File file) throws IOException {
+    /**
+     * Loads a subject from a particular file
+     *
+     * @param file the file to load from
+     * @return a loaded subject
+     * @throws IOException if the read fails
+     */
+    public LoadedSubject loadFromFile(File file) throws IOException {
         if (!file.exists()) {
             return null;
         }
@@ -151,8 +207,18 @@ public class SubjectStorage {
 
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             JsonObject data = this.gson.fromJson(reader, JsonObject.class);
-            SubjectStorageModel model = new SubjectStorageModel(this.service, data);
-            return Maps.immutableEntry(subjectName, model);
+            SubjectDataContainer model = SubjectDataContainer.derserialize(this.service, data);
+            return new LoadedSubject(subjectName, model);
+        }
+    }
+
+    private static final class LoadedSubject {
+        private final String identifier;
+        private final SubjectDataContainer data;
+
+        private LoadedSubject(String identifier, SubjectDataContainer data) {
+            this.identifier = identifier;
+            this.data = data;
         }
     }
 }

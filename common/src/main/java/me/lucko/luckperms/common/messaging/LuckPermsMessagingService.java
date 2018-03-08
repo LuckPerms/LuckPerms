@@ -53,7 +53,7 @@ import javax.annotation.Nonnull;
 public class LuckPermsMessagingService implements InternalMessagingService, IncomingMessageConsumer {
     private final LuckPermsPlugin plugin;
     private final Set<UUID> receivedMessages;
-    private final BufferedRequest<Void> updateBuffer;
+    private final PushUpdateBuffer updateBuffer;
 
     private final MessengerProvider messengerProvider;
     private final Messenger messenger;
