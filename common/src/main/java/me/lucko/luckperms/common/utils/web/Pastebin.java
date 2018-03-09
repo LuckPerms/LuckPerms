@@ -27,16 +27,53 @@ package me.lucko.luckperms.common.utils.web;
 
 import com.google.gson.JsonElement;
 
+/**
+ * Represents a pastebin service
+ */
 public interface Pastebin {
 
-    Paste postJson(JsonElement element);
+    /**
+     * Posts the given json to the pastebin
+     *
+     * @param element the json element to post
+     * @param compress whether to compress and post the data using gzip
+     * @return a paste
+     */
+    Paste postJson(JsonElement element, boolean compress);
 
+    /**
+     * Posts "plain" content to the pastebin
+     *
+     * @param content the content
+     * @return a paste
+     */
     Paste postPlain(String content);
 
+    /**
+     * Gets the raw url of a paste's data from an id
+     *
+     * @param id the id
+     * @return a url
+     */
     String getRawUrl(String id);
 
+    /**
+     * Encapsulates the properties of a specific "paste" entry
+     */
     interface Paste {
+
+        /**
+         * Gets the url of the paste
+         *
+         * @return the url
+         */
         String url();
+
+        /**
+         * Gets the unique id of the paste
+         *
+         * @return the id
+         */
         String id();
     }
 

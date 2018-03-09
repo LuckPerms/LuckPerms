@@ -102,7 +102,7 @@ public class EditorCommand extends SingleCommand {
         JsonObject payload = WebEditor.formPayload(holders, sender, label, plugin);
 
         // upload the payload data to gist
-        String pasteId = StandardPastebin.BYTEBIN.postJson(payload).id();
+        String pasteId = StandardPastebin.BYTEBIN.postJson(payload, true).id();
         if (pasteId == null) {
             Message.EDITOR_UPLOAD_FAILURE.send(sender);
             return CommandResult.STATE_ERROR;

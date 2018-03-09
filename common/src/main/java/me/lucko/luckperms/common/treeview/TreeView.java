@@ -167,7 +167,7 @@ public class TreeView {
                 )
                 .toJson();
 
-        return StandardPastebin.BYTEBIN.postJson(payload).id();
+        return StandardPastebin.BYTEBIN.postJson(payload, true).id();
     }
 
 }

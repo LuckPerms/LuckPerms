@@ -56,11 +56,11 @@ public class VerboseListener {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 
     // how much data should we store before stopping.
-    private static final int DATA_TRUNCATION = 3000;
+    private static final int DATA_TRUNCATION = 10000;
     // how many lines should we include in each stack trace send as a chat message
     private static final int STACK_TRUNCATION_CHAT = 15;
     // how many lines should we include in each stack trace in the web output
-    private static final int STACK_TRUNCATION_WEB = 20;
+    private static final int STACK_TRUNCATION_WEB = 30;
 
     private static final StackTracePrinter FILTERING_PRINTER = StackTracePrinter.builder()
             .ignoreClassStartingWith("me.lucko.luckperms.")
@@ -222,7 +222,7 @@ public class VerboseListener {
                 .add("data", data)
                 .toJson();
 
-        return StandardPastebin.BYTEBIN.postJson(payload).id();
+        return StandardPastebin.BYTEBIN.postJson(payload, true).id();
     }
 
     private static String getTristateColor(Tristate tristate) {

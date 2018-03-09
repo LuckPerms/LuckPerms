@@ -37,13 +37,15 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.zip.GZIPOutputStream;
 
 public enum StandardPastebin implements Pastebin {
 
@@ -98,28 +100,44 @@ public enum StandardPastebin implements Pastebin {
     protected abstract String parseIdFromResult(BufferedReader reader);
 
     @Override
-    public Pastebin.Paste postJson(JsonElement content) {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(bytes))) {
+    public Pastebin.Paste postJson(JsonElement content, boolean compress) {
+        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+
+        OutputStream outputStream;
+        if (compress) {
+            try {
+                outputStream = new GZIPOutputStream(byteOut);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            outputStream = byteOut;
+        }
+
+        try (Writer writer = new OutputStreamWriter(outputStream)) {
             GSON.toJson(content, writer);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        return post(RequestBody.create(JSON_TYPE, bytes.toByteArray()));
+        return post(RequestBody.create(JSON_TYPE, byteOut.toByteArray()), compress);
     }
 
     @Override
     public Pastebin.Paste postPlain(String content) {
-        return post(RequestBody.create(PLAIN_TYPE, content));
+        return post(RequestBody.create(PLAIN_TYPE, content), false);
     }
 
-    private Pastebin.Paste post(RequestBody body) {
-        Request request = new Request.Builder()
+    private Pastebin.Paste post(RequestBody body, boolean compressed) {
+        Request.Builder requestBuilder = new Request.Builder()
                 .url(getPostUrl())
-                .post(body)
-                .build();
+                .post(body);
 
+        if (compressed) {
+            requestBuilder.header("Content-Encoding", "gzip");
+        }
+
+        Request request = requestBuilder.build();
         try (Response response = HttpClient.makeCall(request)) {
             try (ResponseBody responseBody = response.body()) {
                 if (responseBody == null) {
