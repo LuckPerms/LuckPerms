@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.bukkit.compat;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.conversations.Conversation;
@@ -68,7 +69,7 @@ public class NullSafeConsoleCommandSender implements ConsoleCommandSender {
         if (console.isPresent()) {
             console.get().sendMessage(message);
         } else {
-            this.server.getLogger().info(message);
+            this.server.getLogger().info(ChatColor.stripColor(message));
         }
     }
 
