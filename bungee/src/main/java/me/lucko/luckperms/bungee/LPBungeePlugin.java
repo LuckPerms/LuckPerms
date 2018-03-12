@@ -35,8 +35,7 @@ import me.lucko.luckperms.bungee.listeners.BungeeConnectionListener;
 import me.lucko.luckperms.bungee.listeners.BungeePermissionCheckListener;
 import me.lucko.luckperms.bungee.messaging.BungeeMessagingFactory;
 import me.lucko.luckperms.common.calculators.PlatformCalculatorFactory;
-import me.lucko.luckperms.common.commands.CommandManager;
-import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.listener.ConnectionListener;
@@ -46,6 +45,7 @@ import me.lucko.luckperms.common.managers.user.StandardUserManager;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 

@@ -44,7 +44,7 @@ public class Log {
         return new Builder();
     }
 
-    public synchronized static Log empty() {
+    public static synchronized Log empty() {
         if (empty == null) {
             empty = builder().build();
         }

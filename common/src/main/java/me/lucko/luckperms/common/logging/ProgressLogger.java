@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.logging;
 
-import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.sender.Sender;
 
 import java.util.HashSet;
 import java.util.Set;

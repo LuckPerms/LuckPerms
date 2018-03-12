@@ -26,15 +26,15 @@
 package me.lucko.luckperms.sponge.commands;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.commands.CommandPermission;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.abstraction.SubCommand;
-import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 
@@ -42,18 +42,18 @@ import java.util.List;
 
 public class OptionUnset extends SubCommand<LPSubjectData> {
     public OptionUnset(LocaleManager locale) {
-        super(CommandSpec.SPONGE_OPTION_UNSET.spec(locale), "unset", CommandPermission.SPONGE_OPTION_UNSET, Predicates.is(0));
+        super(CommandSpec.SPONGE_OPTION_UNSET.localize(locale), "unset", CommandPermission.SPONGE_OPTION_UNSET, Predicates.is(0));
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) {
         String key = args.get(0);
-        ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(1, args);
+        ImmutableContextSet contextSet = ArgumentParser.parseContextSponge(1, args);
 
         if (subjectData.unsetOption(contextSet, key).join()) {
-            CommandUtils.sendPluginMessage(sender, "&aUnset &f\"" + key + "&f\"&a in context " + SpongeCommandUtils.contextToString(contextSet));
+            MessageUtils.sendPluginMessage(sender, "&aUnset &f\"" + key + "&f\"&a in context " + SpongeCommandUtils.contextToString(contextSet));
         } else {
-            CommandUtils.sendPluginMessage(sender, "Unable to unset option. Are you sure the Subject has it set?");
+            MessageUtils.sendPluginMessage(sender, "Unable to unset option. Are you sure the Subject has it set?");
         }
         return CommandResult.SUCCESS;
     }

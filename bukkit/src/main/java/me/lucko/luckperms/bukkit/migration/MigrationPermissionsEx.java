@@ -28,13 +28,12 @@ package me.lucko.luckperms.bukkit.migration;
 import com.google.common.base.Strings;
 
 import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.common.commands.CommandPermission;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.abstraction.SubCommand;
-import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
-import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.commands.migration.MigrationUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.logging.ProgressLogger;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -42,8 +41,9 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.utils.Iterators;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.SafeIteration;
 
 import org.bukkit.Bukkit;
 
@@ -86,7 +86,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
     }
 
     public MigrationPermissionsEx(LocaleManager locale) {
-        super(CommandSpec.MIGRATION_COMMAND.spec(locale), "permissionsex", CommandPermission.MIGRATION, Predicates.alwaysFalse());
+        super(CommandSpec.MIGRATION_COMMAND.localize(locale), "permissionsex", CommandPermission.MIGRATION, Predicates.alwaysFalse());
     }
 
     @SuppressWarnings("deprecation")
@@ -117,7 +117,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
         Set<String> ladders = new HashSet<>();
-        SafeIteration.iterate(manager.getGroupList(), group -> {
+        Iterators.iterate(manager.getGroupList(), group -> {
             int groupWeight = maxWeight - group.getRank();
 
             final String groupName = MigrationUtils.standardizeName(group.getName());
@@ -161,7 +161,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         // Increment the max weight from the group migrations. All user meta should override.
         int userWeight = maxWeight + 5;
 
-        SafeIteration.iterate(manager.getUsers(), user -> {
+        Iterators.iterate(manager.getUsers(), user -> {
             UUID u = BukkitMigrationUtils.lookupUuid(log, user.getIdentifier());
             if (u == null) {
                 return;

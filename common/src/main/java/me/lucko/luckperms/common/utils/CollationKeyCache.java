@@ -45,7 +45,7 @@ public final class CollationKeyCache implements Comparator<String> {
     }
 
     private static final LoadingCache<String, CollationKey> CACHE = Caffeine.newBuilder()
-            .maximumSize(1000)
+            .maximumSize(5000)
             .expireAfterAccess(5, TimeUnit.MINUTES)
             .build(COLLATOR::getCollationKey);
 

@@ -44,8 +44,7 @@ import me.lucko.luckperms.bukkit.model.server.LPPermissionMap;
 import me.lucko.luckperms.bukkit.model.server.LPSubscriptionMap;
 import me.lucko.luckperms.bukkit.vault.VaultHookManager;
 import me.lucko.luckperms.common.calculators.PlatformCalculatorFactory;
-import me.lucko.luckperms.common.commands.CommandPermission;
-import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.contexts.ContextManager;
@@ -56,6 +55,7 @@ import me.lucko.luckperms.common.managers.user.StandardUserManager;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 

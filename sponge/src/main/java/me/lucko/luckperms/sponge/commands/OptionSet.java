@@ -26,15 +26,15 @@
 package me.lucko.luckperms.sponge.commands;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.commands.CommandPermission;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.abstraction.SubCommand;
-import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 
@@ -42,19 +42,19 @@ import java.util.List;
 
 public class OptionSet extends SubCommand<LPSubjectData> {
     public OptionSet(LocaleManager locale) {
-        super(CommandSpec.SPONGE_OPTION_SET.spec(locale), "set", CommandPermission.SPONGE_OPTION_SET, Predicates.inRange(0, 1));
+        super(CommandSpec.SPONGE_OPTION_SET.localize(locale), "set", CommandPermission.SPONGE_OPTION_SET, Predicates.inRange(0, 1));
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) {
         String key = args.get(0);
         String value = args.get(1);
-        ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(2, args);
+        ImmutableContextSet contextSet = ArgumentParser.parseContextSponge(2, args);
 
         if (subjectData.setOption(contextSet, key, value).join()) {
-            CommandUtils.sendPluginMessage(sender, "&aSet &f\"" + key + "&f\"&a to &f\"" + value + "&f\"&a in context " + SpongeCommandUtils.contextToString(contextSet));
+            MessageUtils.sendPluginMessage(sender, "&aSet &f\"" + key + "&f\"&a to &f\"" + value + "&f\"&a in context " + SpongeCommandUtils.contextToString(contextSet));
         } else {
-            CommandUtils.sendPluginMessage(sender, "Unable to set option. Does the Subject already have it set?");
+            MessageUtils.sendPluginMessage(sender, "Unable to set option. Does the Subject already have it set?");
         }
 
         return CommandResult.SUCCESS;

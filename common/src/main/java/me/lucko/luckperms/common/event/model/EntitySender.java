@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.event.model;
 
 import me.lucko.luckperms.api.Entity;
-import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.sender.Sender;
 
 import java.util.UUID;
 

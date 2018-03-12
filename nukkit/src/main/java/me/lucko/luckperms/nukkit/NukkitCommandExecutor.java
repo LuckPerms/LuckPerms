@@ -28,8 +28,8 @@ package me.lucko.luckperms.nukkit;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
-import me.lucko.luckperms.common.commands.CommandManager;
-import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.command.CommandManager;
+import me.lucko.luckperms.common.sender.Sender;
 
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandExecutor;

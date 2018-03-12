@@ -25,17 +25,26 @@
 
 package me.lucko.luckperms.common.utils;
 
-import java.util.Set;
+import com.google.common.collect.Range;
+
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * A collection of predicate utilities used mostly in command classes
  */
 public final class Predicates {
-    private static final Predicate FALSE = o -> false;
-    private static final Predicate TRUE = o -> true;
+    private static final Predicate FALSE = new Predicate() {
+        @Override public boolean test(Object o) { return false; }
+        @Override public Predicate and(Predicate other) { return this; }
+        @Override public Predicate or(Predicate other) { return other; }
+        @Override public Predicate negate() { return TRUE; }
+    };
+    private static final Predicate TRUE = new Predicate() {
+        @Override public boolean test(Object o) { return true; }
+        @Override public Predicate and(Predicate other) { return other; }
+        @Override public Predicate or(Predicate other) { return this; }
+        @Override public Predicate negate() { return FALSE; }
+    };
 
     public static <T> Predicate<T> alwaysFalse() {
         //noinspection unchecked
@@ -47,39 +56,22 @@ public final class Predicates {
         return TRUE;
     }
 
-    public static Predicate<Integer> notInRange(Integer start, Integer end) {
-        return inverse(inRange(start, end));
+    public static Predicate<Integer> notInRange(int start, int end) {
+        Range<Integer> range = Range.closed(start, end);
+        return value -> !range.contains(value);
     }
 
-    public static Predicate<Integer> inRange(Integer start, Integer end) {
-        return isOneOf(IntStream.rangeClosed(start, end).boxed().collect(Collectors.toSet()));
-    }
-
-    public static <T> Predicate<T> notOneOf(Set<T> ts) {
-        return inverse(isOneOf(ts));
-    }
-
-    public static <T> Predicate<T> isOneOf(Set<T> ta) {
-        return t -> {
-            for (T i : ta) {
-                if (i.equals(t)) {
-                    return true;
-                }
-            }
-            return false;
-        };
+    public static Predicate<Integer> inRange(int start, int end) {
+        Range<Integer> range = Range.closed(start, end);
+        return range::contains;
     }
 
     public static <T> Predicate<T> not(T t) {
-        return inverse(is(t));
+        return obj -> !t.equals(obj);
     }
 
     public static <T> Predicate<T> is(T t) {
         return t::equals;
-    }
-
-    public static <T> Predicate<T> inverse(Predicate<T> t) {
-        return t2 -> !t.test(t2);
     }
 
     private Predicates() {}

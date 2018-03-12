@@ -29,7 +29,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import me.lucko.luckperms.common.plugin.SchedulerAdapter;
 import me.lucko.luckperms.common.plugin.SchedulerTask;
-import me.lucko.luckperms.common.utils.SafeIteration;
+import me.lucko.luckperms.common.utils.Iterators;
 
 import cn.nukkit.scheduler.ServerScheduler;
 import cn.nukkit.scheduler.TaskHandler;
@@ -105,7 +105,7 @@ public class NukkitSchedulerAdapter implements SchedulerAdapter {
 
     @Override
     public void shutdown() {
-        SafeIteration.iterate(this.tasks, SchedulerTask::cancel);
+        Iterators.iterate(this.tasks, SchedulerTask::cancel);
 
         // wait for executor
         this.asyncFallback.shutdown();

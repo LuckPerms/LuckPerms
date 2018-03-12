@@ -26,9 +26,7 @@
 package me.lucko.luckperms.common.backup;
 
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.logging.ProgressLogger;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
@@ -36,6 +34,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.HolderType;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.utils.Cycle;
 
@@ -56,6 +55,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -181,7 +181,7 @@ public class Exporter implements Runnable {
             write(writer, "# Export users");
 
             // divide into 16 pools.
-            Cycle<List<UUID>> userPools = new Cycle<>(CommandUtils.nInstances(32, ArrayList::new));
+            Cycle<List<UUID>> userPools = new Cycle<>(nInstances(32, ArrayList::new));
             for (UUID uuid : users) {
                 userPools.next().add(uuid);
             }
@@ -264,5 +264,13 @@ public class Exporter implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static <T> List<T> nInstances(int count, Supplier<T> supplier) {
+        List<T> ret = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            ret.add(supplier.get());
+        }
+        return ret;
     }
 }

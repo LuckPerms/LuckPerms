@@ -27,7 +27,7 @@ package me.lucko.luckperms.sponge.listeners;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.listener.AbstractConnectionListener;
-import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 

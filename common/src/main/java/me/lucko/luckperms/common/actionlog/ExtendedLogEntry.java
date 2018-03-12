@@ -30,12 +30,12 @@ import com.google.common.base.Strings;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.DateUtil;
 
 import java.util.ArrayList;
@@ -70,8 +70,8 @@ public class ExtendedLogEntry implements LogEntry {
      *
      * @return a new builder
      */
-    public static ExtendedLogEntryBuilder build() {
-        return new ExtendedLogEntryBuilder();
+    public static Builder build() {
+        return new Builder();
     }
 
     private final long timestamp;
@@ -207,7 +207,7 @@ public class ExtendedLogEntry implements LogEntry {
         return result;
     }
 
-    public static class ExtendedLogEntryBuilder implements LogEntry.Builder {
+    public static class Builder implements LogEntry.Builder {
 
         private long timestamp = 0L;
         private UUID actor = null;
@@ -219,88 +219,88 @@ public class ExtendedLogEntry implements LogEntry {
 
         @Nonnull
         @Override
-        public ExtendedLogEntryBuilder setTimestamp(long timestamp) {
+        public Builder setTimestamp(long timestamp) {
             this.timestamp = timestamp;
             return this;
         }
 
         @Nonnull
         @Override
-        public ExtendedLogEntryBuilder setActor(@Nonnull UUID actor) {
+        public Builder setActor(@Nonnull UUID actor) {
             this.actor = Objects.requireNonNull(actor, "actor");
             return this;
         }
 
         @Nonnull
         @Override
-        public ExtendedLogEntryBuilder setActorName(@Nonnull String actorName) {
+        public Builder setActorName(@Nonnull String actorName) {
             this.actorName = Objects.requireNonNull(actorName, "actorName");
             return this;
         }
 
         @Nonnull
         @Override
-        public ExtendedLogEntryBuilder setType(@Nonnull Type type) {
+        public Builder setType(@Nonnull Type type) {
             this.type = Objects.requireNonNull(type, "type");
             return this;
         }
 
         @Nonnull
         @Override
-        public ExtendedLogEntryBuilder setActed(UUID acted) {
+        public Builder setActed(UUID acted) {
             this.acted = acted; // nullable
             return this;
         }
 
         @Nonnull
         @Override
-        public ExtendedLogEntryBuilder setActedName(@Nonnull String actedName) {
+        public Builder setActedName(@Nonnull String actedName) {
             this.actedName = Objects.requireNonNull(actedName, "actedName");
             return this;
         }
 
         @Nonnull
         @Override
-        public ExtendedLogEntryBuilder setAction(@Nonnull String action) {
+        public Builder setAction(@Nonnull String action) {
             this.action = Objects.requireNonNull(action, "action");
             return this;
         }
 
-        public ExtendedLogEntryBuilder timestamp(long timestamp) {
+        public Builder timestamp(long timestamp) {
             return setTimestamp(timestamp);
         }
 
-        public ExtendedLogEntryBuilder actor(UUID actor) {
+        public Builder actor(UUID actor) {
             return setActor(actor);
         }
 
-        public ExtendedLogEntryBuilder actorName(String actorName) {
+        public Builder actorName(String actorName) {
             return setActorName(actorName);
         }
 
-        public ExtendedLogEntryBuilder type(Type type) {
+        public Builder type(Type type) {
             return setType(type);
         }
 
-        public ExtendedLogEntryBuilder acted(UUID acted) {
+        public Builder acted(UUID acted) {
             return setActed(acted);
         }
 
-        public ExtendedLogEntryBuilder actedName(String actedName) {
+        public Builder actedName(String actedName) {
             return setActedName(actedName);
         }
 
-        public ExtendedLogEntryBuilder action(String action) {
+        public Builder action(String action) {
             return setAction(action);
         }
 
-        public ExtendedLogEntryBuilder actor(Sender actor) {
+        public Builder actor(Sender actor) {
             actorName(actor.getNameWithLocation());
             actor(actor.getUuid());
             return this;
         }
 
-        public ExtendedLogEntryBuilder acted(PermissionHolder acted) {
+        public Builder acted(PermissionHolder acted) {
             if (acted.getType().isUser()) {
                 actedName(((User) acted).getName().orElse("null"));
                 acted(((User) acted).getUuid());
@@ -312,13 +312,13 @@ public class ExtendedLogEntry implements LogEntry {
             return this;
         }
 
-        public ExtendedLogEntryBuilder acted(Track track) {
+        public Builder acted(Track track) {
             actedName(track.getName());
             type(Type.TRACK);
             return this;
         }
 
-        public ExtendedLogEntryBuilder action(Object... args) {
+        public Builder action(Object... args) {
             List<String> parts = new ArrayList<>();
 
             for (Object o : args) {
@@ -367,7 +367,7 @@ public class ExtendedLogEntry implements LogEntry {
 
         @Override
         public String toString() {
-            return "ExtendedLogEntry.ExtendedLogEntryBuilder(" +
+            return "ExtendedLogEntry.Builder(" +
                     "timestamp=" + this.timestamp + ", " +
                     "actor=" + this.actor + ", " +
                     "actorName=" + this.actorName + ", " +

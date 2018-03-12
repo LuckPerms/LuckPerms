@@ -29,10 +29,10 @@ import com.google.common.base.Splitter;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.common.caching.type.PermissionCache;
-import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.gson.JObject;
-import me.lucko.luckperms.common.utils.web.StandardPastebin;
+import me.lucko.luckperms.common.web.StandardPastebin;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

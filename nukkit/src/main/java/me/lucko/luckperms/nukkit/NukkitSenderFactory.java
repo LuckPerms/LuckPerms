@@ -26,9 +26,9 @@
 package me.lucko.luckperms.nukkit;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.commands.CommandManager;
-import me.lucko.luckperms.common.commands.sender.SenderFactory;
+import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.common.utils.TextUtils;
 
 import net.kyori.text.Component;

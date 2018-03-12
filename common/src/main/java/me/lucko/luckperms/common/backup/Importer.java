@@ -28,12 +28,11 @@ package me.lucko.luckperms.common.backup;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 
-import me.lucko.luckperms.common.commands.CommandManager;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.sender.DummySender;
-import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.command.CommandManager;
+import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.sender.DummySender;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Cycle;
 
 import java.util.ArrayList;
@@ -45,6 +44,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -95,7 +95,7 @@ public class Importer implements Runnable {
         }
 
         // divide commands up into pools
-        Cycle<List<ImportCommand>> commandPools = new Cycle<>(CommandUtils.nInstances(128, ArrayList::new));
+        Cycle<List<ImportCommand>> commandPools = new Cycle<>(nInstances(128, ArrayList::new));
 
         String lastTarget = null;
         for (ImportCommand cmd : this.toExecute) {
@@ -151,7 +151,7 @@ public class Importer implements Runnable {
         long endTime = System.currentTimeMillis();
         double seconds = (endTime - startTime) / 1000;
 
-        int errors = (int) this.toExecute.stream().filter(v -> !v.getResult().asBoolean()).count();
+        int errors = (int) this.toExecute.stream().filter(v -> v.getResult().wasFailure()).count();
 
         switch (errors) {
             case 0:
@@ -167,7 +167,7 @@ public class Importer implements Runnable {
 
         AtomicInteger errIndex = new AtomicInteger(1);
         for (ImportCommand e : this.toExecute) {
-            if (e.getResult() != null && !e.getResult().asBoolean()) {
+            if (e.getResult() != null && e.getResult().wasFailure()) {
                 this.notify.forEach(s -> {
                     Message.IMPORT_END_ERROR_HEADER.send(s, errIndex.get(), e.getId(), e.getCommand(), e.getResult().toString());
                     for (String out : e.getOutput()) {
@@ -183,7 +183,7 @@ public class Importer implements Runnable {
 
     private void sendProgress(int processedCount) {
         int percent = (processedCount * 100) / this.commands.size();
-        int errors = (int) this.toExecute.stream().filter(v -> v.isCompleted() && !v.getResult().asBoolean()).count();
+        int errors = (int) this.toExecute.stream().filter(v -> v.isCompleted() && v.getResult().wasFailure()).count();
 
         if (errors == 1) {
             this.notify.forEach(s -> Message.IMPORT_PROGRESS_SIN.send(s, percent, processedCount, this.commands.size(), errors));
@@ -313,6 +313,14 @@ public class Importer implements Runnable {
         public void setResult(CommandResult result) {
             this.result = result;
         }
+    }
+
+    private static <T> List<T> nInstances(int count, Supplier<T> supplier) {
+        List<T> ret = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            ret.add(supplier.get());
+        }
+        return ret;
     }
 
 }

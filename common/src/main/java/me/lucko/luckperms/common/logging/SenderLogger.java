@@ -25,11 +25,11 @@
 
 package me.lucko.luckperms.common.logging;
 
-import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
+import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.sender.Sender;
 
 import java.util.Objects;
 
@@ -60,7 +60,7 @@ public class SenderLogger implements Logger {
     private void msg(Message message, String s) {
         String msg = message.asString(this.plugin.getLocaleManager(), s);
         if (this.plugin.getConfiguration() != null && !this.plugin.getConfiguration().get(ConfigKeys.USE_COLORED_LOGGER)) {
-            msg = CommandUtils.stripColor(msg);
+            msg = MessageUtils.stripColor(msg);
         }
         this.console.sendMessage(msg);
     }

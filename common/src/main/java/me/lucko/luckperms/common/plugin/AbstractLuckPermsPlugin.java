@@ -33,8 +33,7 @@ import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.UpdateTaskBuffer;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.PlatformCalculatorFactory;
-import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
+import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.config.AbstractConfiguration;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
@@ -50,6 +49,7 @@ import me.lucko.luckperms.common.logging.Logger;
 import me.lucko.luckperms.common.logging.SenderLogger;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.storage.StorageType;
@@ -329,12 +329,12 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     private void displayBanner(Sender sender) {
-        sender.sendMessage(CommandUtils.color("&b               __       &3 __   ___  __         __  "));
-        sender.sendMessage(CommandUtils.color("&b    |    |  | /  ` |__/ &3|__) |__  |__)  |\\/| /__` "));
-        sender.sendMessage(CommandUtils.color("&b    |___ \\__/ \\__, |  \\ &3|    |___ |  \\  |  | .__/ "));
-        sender.sendMessage(CommandUtils.color(" "));
-        sender.sendMessage(CommandUtils.color("&2  Loading version &bv" + getBootstrap().getVersion() + "&2 on " + getBootstrap().getType().getFriendlyName() + " - " + getBootstrap().getServerBrand()));
-        sender.sendMessage(CommandUtils.color("&8  Running on server version " + getBootstrap().getServerVersion()));
-        sender.sendMessage(CommandUtils.color(" "));
+        sender.sendMessage(MessageUtils.color("&b               __       &3 __   ___  __         __  "));
+        sender.sendMessage(MessageUtils.color("&b    |    |  | /  ` |__/ &3|__) |__  |__)  |\\/| /__` "));
+        sender.sendMessage(MessageUtils.color("&b    |___ \\__/ \\__, |  \\ &3|    |___ |  \\  |  | .__/ "));
+        sender.sendMessage(MessageUtils.color(" "));
+        sender.sendMessage(MessageUtils.color("&2  Loading version &bv" + getBootstrap().getVersion() + "&2 on " + getBootstrap().getType().getFriendlyName() + " - " + getBootstrap().getServerBrand()));
+        sender.sendMessage(MessageUtils.color("&8  Running on server version " + getBootstrap().getServerVersion()));
+        sender.sendMessage(MessageUtils.color(" "));
     }
 }

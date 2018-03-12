@@ -28,20 +28,20 @@ package me.lucko.luckperms.bukkit.migration;
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.common.commands.CommandPermission;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.abstraction.SubCommand;
-import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
-import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.commands.migration.MigrationUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.logging.ProgressLogger;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.utils.Iterators;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.SafeIteration;
 
 import org.anjocaido.groupmanager.GlobalGroups;
 import org.anjocaido.groupmanager.GroupManager;
@@ -62,7 +62,7 @@ import java.util.stream.Collectors;
 
 public class MigrationGroupManager extends SubCommand<Object> {
     public MigrationGroupManager(LocaleManager locale) {
-        super(CommandSpec.MIGRATION_GROUPMANAGER.spec(locale), "groupmanager", CommandPermission.MIGRATION, Predicates.is(0));
+        super(CommandSpec.MIGRATION_GROUPMANAGER.localize(locale), "groupmanager", CommandPermission.MIGRATION, Predicates.is(0));
     }
 
     @Override
@@ -93,7 +93,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         GlobalGroups gg = GroupManager.getGlobalGroups();
 
         AtomicInteger globalGroupCount = new AtomicInteger(0);
-        SafeIteration.iterate(gg.getGroupList(), g -> {
+        Iterators.iterate(gg.getGroupList(), g -> {
             String groupName = MigrationUtils.standardizeName(g.getName());
             Group group = plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
 
@@ -120,13 +120,13 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
         // Collect data for all users and groups.
         log.log("Collecting user and group data.");
-        SafeIteration.iterate(worlds, String::toLowerCase, world -> {
+        Iterators.iterate(worlds, String::toLowerCase, world -> {
             log.log("Querying world " + world);
 
             WorldDataHolder wdh = wh.getWorldData(world);
 
             AtomicInteger groupWorldCount = new AtomicInteger(0);
-            SafeIteration.iterate(wdh.getGroupList(), group -> {
+            Iterators.iterate(wdh.getGroupList(), group -> {
                 String groupName = MigrationUtils.standardizeName(group.getName());
 
                 groups.putIfAbsent(groupName, new HashSet<>());
@@ -160,7 +160,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
             log.log("Migrated " + groupWorldCount.get() + " groups in world " + world);
 
             AtomicInteger userWorldCount = new AtomicInteger(0);
-            SafeIteration.iterate(wdh.getUserList(), user -> {
+            Iterators.iterate(wdh.getUserList(), user -> {
                 UUID uuid = BukkitMigrationUtils.lookupUuid(log, user.getUUID());
                 if (uuid == null) {
                     return;
@@ -210,7 +210,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
-        SafeIteration.iterate(groups.entrySet(), e -> {
+        Iterators.iterate(groups.entrySet(), e -> {
             Group group = plugin.getStorage().createAndLoadGroup(e.getKey(), CreationCause.INTERNAL).join();
 
             for (Node node : e.getValue()) {
@@ -224,7 +224,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
         log.log("Starting user migration.");
         AtomicInteger userCount = new AtomicInteger(0);
-        SafeIteration.iterate(users.entrySet(), e -> {
+        Iterators.iterate(users.entrySet(), e -> {
             User user = plugin.getStorage().loadUser(e.getKey(), null).join();
 
             for (Node node : e.getValue()) {

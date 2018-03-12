@@ -111,7 +111,7 @@ public class LogMessageImpl extends AbstractMessage implements LogMessage {
     }
 
     private static LogMessageImpl decodeContent(JsonObject object) {
-        ExtendedLogEntry.ExtendedLogEntryBuilder builder = ExtendedLogEntry.build();
+        ExtendedLogEntry.Builder builder = ExtendedLogEntry.build();
 
         String id = object.get("id").getAsString();
         if (id == null) {

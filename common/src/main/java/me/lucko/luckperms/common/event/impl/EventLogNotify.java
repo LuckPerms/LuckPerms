@@ -28,9 +28,9 @@ package me.lucko.luckperms.common.event.impl;
 import me.lucko.luckperms.api.Entity;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.log.LogNotifyEvent;
-import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.event.AbstractEvent;
 import me.lucko.luckperms.common.event.model.EntitySender;
+import me.lucko.luckperms.common.sender.Sender;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

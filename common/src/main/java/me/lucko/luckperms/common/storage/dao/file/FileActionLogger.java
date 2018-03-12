@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.storage.dao.file;
 
 import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.common.commands.CommandManager;
+import me.lucko.luckperms.common.command.CommandManager;
 
 import java.io.File;
 import java.util.Date;

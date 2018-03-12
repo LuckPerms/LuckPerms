@@ -26,19 +26,19 @@
 package me.lucko.luckperms.bungee.migration;
 
 import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.common.commands.CommandPermission;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.abstraction.SubCommand;
-import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
-import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.commands.migration.MigrationUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.logging.ProgressLogger;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.utils.Iterators;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.SafeIteration;
 
 import net.alpenblock.bungeeperms.BungeePerms;
 import net.alpenblock.bungeeperms.Group;
@@ -52,7 +52,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class MigrationBungeePerms extends SubCommand<Object> {
     public MigrationBungeePerms(LocaleManager locale) {
-        super(CommandSpec.MIGRATION_COMMAND.spec(locale), "bungeeperms", CommandPermission.MIGRATION, Predicates.alwaysFalse());
+        super(CommandSpec.MIGRATION_COMMAND.localize(locale), "bungeeperms", CommandPermission.MIGRATION, Predicates.alwaysFalse());
     }
 
     @Override
@@ -82,7 +82,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         // Migrate all groups.
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
-        SafeIteration.iterate(groups, g -> {
+        Iterators.iterate(groups, g -> {
             int groupWeight = maxWeight - g.getRank();
 
             // Make a LuckPerms group for the one being migrated
@@ -104,7 +104,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         // Increment the max weight from the group migrations. All user meta should override.
         int userWeight = maxWeight + 5;
 
-        SafeIteration.iterate(bp.getPermissionsManager().getBackEnd().loadUsers(), u -> {
+        Iterators.iterate(bp.getPermissionsManager().getBackEnd().loadUsers(), u -> {
             if (u.getUUID() == null) {
                 log.logError("Could not parse UUID for user: " + u.getName());
                 return;

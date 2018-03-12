@@ -26,15 +26,15 @@
 package me.lucko.luckperms.sponge.commands;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.commands.CommandPermission;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.abstraction.SubCommand;
-import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 
@@ -42,18 +42,18 @@ import java.util.List;
 
 public class ParentClear extends SubCommand<LPSubjectData> {
     public ParentClear(LocaleManager locale) {
-        super(CommandSpec.SPONGE_PARENT_CLEAR.spec(locale), "clear", CommandPermission.SPONGE_PARENT_CLEAR, Predicates.alwaysFalse());
+        super(CommandSpec.SPONGE_PARENT_CLEAR.localize(locale), "clear", CommandPermission.SPONGE_PARENT_CLEAR, Predicates.alwaysFalse());
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) {
-        ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(0, args);
+        ImmutableContextSet contextSet = ArgumentParser.parseContextSponge(0, args);
         if (contextSet.isEmpty()) {
             subjectData.clearParents();
-            CommandUtils.sendPluginMessage(sender, "&aCleared parents matching contexts &bANY&a.");
+            MessageUtils.sendPluginMessage(sender, "&aCleared parents matching contexts &bANY&a.");
         } else {
             subjectData.clearParents(contextSet);
-            CommandUtils.sendPluginMessage(sender, "&aCleared parents matching contexts &b" + SpongeCommandUtils.contextToString(contextSet));
+            MessageUtils.sendPluginMessage(sender, "&aCleared parents matching contexts &b" + SpongeCommandUtils.contextToString(contextSet));
         }
         return CommandResult.SUCCESS;
     }

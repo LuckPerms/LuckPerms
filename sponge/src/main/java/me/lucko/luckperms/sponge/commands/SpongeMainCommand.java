@@ -28,16 +28,16 @@ package me.lucko.luckperms.sponge.commands;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import me.lucko.luckperms.common.commands.CommandException;
-import me.lucko.luckperms.common.commands.CommandManager;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.abstraction.Command;
-import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.command.CommandManager;
+import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.command.abstraction.Command;
+import me.lucko.luckperms.common.command.abstraction.CommandException;
+import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.locale.command.CommandSpec;
+import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
@@ -61,7 +61,7 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
     private final Map<String, List<Command<LPSubjectData, ?>>> subCommands;
 
     public SpongeMainCommand(LPSpongePlugin plugin) {
-        super(CommandSpec.SPONGE.spec(plugin.getLocaleManager()), "Sponge", null, Predicates.alwaysFalse());
+        super(CommandSpec.SPONGE.localize(plugin.getLocaleManager()), "Sponge", null, Predicates.alwaysFalse());
 
         LocaleManager locale = plugin.getLocaleManager();
 
@@ -96,8 +96,8 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
         LuckPermsService service = this.plugin.getService();
 
         if (args.size() < 1) {
-            CommandUtils.sendPluginMessage(sender, "&aCurrent Subject Collections:\n" +
-                    CommandUtils.toCommaSep(service.getLoadedCollections().keySet().stream()
+            MessageUtils.sendPluginMessage(sender, "&aCurrent Subject Collections:\n" +
+                    MessageUtils.toCommaSep(service.getLoadedCollections().keySet().stream()
                             .filter(s -> !s.equalsIgnoreCase("user") && !s.equalsIgnoreCase("group"))
                             .sorted()
                             .collect(Collectors.toList())
@@ -109,12 +109,12 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
         String subjectCollection = args.get(0);
 
         if (subjectCollection.equalsIgnoreCase("user") || subjectCollection.equalsIgnoreCase("group")) {
-            CommandUtils.sendPluginMessage(sender, "Please use the main LuckPerms commands to edit users and groups.");
+            MessageUtils.sendPluginMessage(sender, "Please use the main LuckPerms commands to edit users and groups.");
             return CommandResult.STATE_ERROR;
         }
 
         if (service.getLoadedCollections().keySet().stream().map(String::toLowerCase).noneMatch(s -> s.equalsIgnoreCase(subjectCollection))) {
-            CommandUtils.sendPluginMessage(sender, "Warning: SubjectCollection '&4" + subjectCollection + "&c' doesn't already exist. Creating it now.");
+            MessageUtils.sendPluginMessage(sender, "Warning: SubjectCollection '&4" + subjectCollection + "&c' doesn't already exist. Creating it now.");
         }
 
         LPSubjectCollection collection = service.getCollection(subjectCollection);
@@ -128,9 +128,9 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
                 List<String> extra = subjects.subList(50, subjects.size());
                 int overflow = extra.size();
                 extra.clear();
-                CommandUtils.sendPluginMessage(sender, "&aCurrent Subjects:\n" + CommandUtils.toCommaSep(subjects) + "&b ... and &a" + overflow + " &bmore.");
+                MessageUtils.sendPluginMessage(sender, "&aCurrent Subjects:\n" + MessageUtils.toCommaSep(subjects) + "&b ... and &a" + overflow + " &bmore.");
             } else {
-                CommandUtils.sendPluginMessage(sender, "&aCurrent Subjects:\n" + CommandUtils.toCommaSep(subjects));
+                MessageUtils.sendPluginMessage(sender, "&aCurrent Subjects:\n" + MessageUtils.toCommaSep(subjects));
             }
 
             return CommandResult.SUCCESS;
@@ -181,7 +181,7 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
 
         String subjectId = args.get(1);
         if (!collection.hasRegistered(subjectId).join()) {
-            CommandUtils.sendPluginMessage(sender, "Warning: Subject '&4" + subjectId + "&c' doesn't already exist. Creating it now.");
+            MessageUtils.sendPluginMessage(sender, "Warning: Subject '&4" + subjectId + "&c' doesn't already exist. Creating it now.");
         }
 
         LPSubject subject = collection.loadSubject(subjectId).join();
@@ -198,19 +198,19 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
 
     @Override
     public void sendUsage(Sender sender, String label) {
-        CommandUtils.sendPluginMessage(sender, "&3> &a" + String.format(getUsage(), label));
+        MessageUtils.sendPluginMessage(sender, "&3> &a" + String.format(getUsage(), label));
     }
 
     @Override
     public void sendDetailedUsage(Sender sender, String label) {
-        CommandUtils.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format("/%s sponge <collection> <subject> [-transient]", label) + " ...)");
+        MessageUtils.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format("/%s sponge <collection> <subject> [-transient]", label) + " ...)");
         for (String s : Arrays.asList("Permission", "Parent", "Option")) {
             List<Command> subs = this.subCommands.get(s.toLowerCase()).stream()
                     .filter(sub -> sub.isAuthorized(sender))
                     .collect(Collectors.toList());
 
             if (!subs.isEmpty()) {
-                CommandUtils.sendPluginMessage(sender, "&3>>  &b" + s);
+                MessageUtils.sendPluginMessage(sender, "&3>>  &b" + s);
                 for (Command sub : subs) {
                     sub.sendUsage(sender, label);
                 }

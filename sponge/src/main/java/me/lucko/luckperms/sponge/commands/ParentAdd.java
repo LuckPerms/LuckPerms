@@ -26,15 +26,15 @@
 package me.lucko.luckperms.sponge.commands;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.commands.CommandPermission;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.abstraction.SubCommand;
-import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
-import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
@@ -47,32 +47,32 @@ import java.util.List;
 
 public class ParentAdd extends SubCommand<LPSubjectData> {
     public ParentAdd(LocaleManager locale) {
-        super(CommandSpec.SPONGE_PARENT_ADD.spec(locale), "add", CommandPermission.SPONGE_PARENT_ADD, Predicates.inRange(0, 1));
+        super(CommandSpec.SPONGE_PARENT_ADD.localize(locale), "add", CommandPermission.SPONGE_PARENT_ADD, Predicates.inRange(0, 1));
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) {
         String collection = args.get(0);
         String name = args.get(1);
-        ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(2, args);
+        ImmutableContextSet contextSet = ArgumentParser.parseContextSponge(2, args);
 
         LuckPermsService service = Sponge.getServiceManager().provideUnchecked(LuckPermsService.class);
         if (service.getLoadedCollections().keySet().stream().map(String::toLowerCase).noneMatch(s -> s.equalsIgnoreCase(collection))) {
-            CommandUtils.sendPluginMessage(sender, "Warning: SubjectCollection '&4" + collection + "&c' doesn't already exist.");
+            MessageUtils.sendPluginMessage(sender, "Warning: SubjectCollection '&4" + collection + "&c' doesn't already exist.");
         }
 
         LPSubjectCollection c = service.getCollection(collection);
         if (!c.hasRegistered(name).join()) {
-            CommandUtils.sendPluginMessage(sender, "Warning: Subject '&4" + name + "&c' doesn't already exist.");
+            MessageUtils.sendPluginMessage(sender, "Warning: Subject '&4" + name + "&c' doesn't already exist.");
         }
 
         LPSubject subject = c.loadSubject(name).join();
 
         if (subjectData.addParent(contextSet, subject.toReference()).join()) {
-            CommandUtils.sendPluginMessage(sender, "&aAdded parent &b" + subject.getParentCollection().getIdentifier() +
+            MessageUtils.sendPluginMessage(sender, "&aAdded parent &b" + subject.getParentCollection().getIdentifier() +
                     "&a/&b" + subject.getIdentifier() + "&a in context " + SpongeCommandUtils.contextToString(contextSet));
         } else {
-            CommandUtils.sendPluginMessage(sender, "Unable to add parent. Does the Subject already have it added?");
+            MessageUtils.sendPluginMessage(sender, "Unable to add parent. Does the Subject already have it added?");
         }
         return CommandResult.SUCCESS;
     }

@@ -28,21 +28,21 @@ package me.lucko.luckperms.bukkit.migration;
 import com.platymuus.bukkit.permissions.PermissionsPlugin;
 
 import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.common.commands.CommandPermission;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.abstraction.SubCommand;
-import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
-import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.commands.migration.MigrationUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.logging.ProgressLogger;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.utils.Iterators;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.SafeIteration;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class MigrationPermissionsBukkit extends SubCommand<Object> {
     public MigrationPermissionsBukkit(LocaleManager locale) {
-        super(CommandSpec.MIGRATION_COMMAND.spec(locale), "permissionsbukkit", CommandPermission.MIGRATION, Predicates.alwaysFalse());
+        super(CommandSpec.MIGRATION_COMMAND.localize(locale), "permissionsbukkit", CommandPermission.MIGRATION, Predicates.alwaysFalse());
     }
 
     @Override
@@ -79,7 +79,7 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
 
         ConfigurationSection groupsSection = config.getConfigurationSection("groups");
 
-        SafeIteration.iterate(groupsSection.getKeys(false), key -> {
+        Iterators.iterate(groupsSection.getKeys(false), key -> {
             final String groupName = MigrationUtils.standardizeName(key);
             Group lpGroup = plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
 
@@ -99,7 +99,7 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
 
         ConfigurationSection usersSection = config.getConfigurationSection("users");
 
-        SafeIteration.iterate(usersSection.getKeys(false), key -> {
+        Iterators.iterate(usersSection.getKeys(false), key -> {
             UUID uuid = BukkitMigrationUtils.lookupUuid(log, key);
             if (uuid == null) {
                 return;

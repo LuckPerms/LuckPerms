@@ -27,6 +27,9 @@ package me.lucko.luckperms.common.locale;
 
 import com.google.common.collect.ImmutableMap;
 
+import me.lucko.luckperms.common.locale.command.CommandSpec;
+import me.lucko.luckperms.common.locale.command.CommandSpecData;
+import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import org.yaml.snakeyaml.Yaml;

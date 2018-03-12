@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.verbose;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.sender.Sender;
 
 import java.util.Map;
 import java.util.Queue;

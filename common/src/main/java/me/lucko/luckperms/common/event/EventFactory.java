@@ -40,7 +40,6 @@ import me.lucko.luckperms.api.event.log.LogNotifyEvent;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.api.delegates.model.ApiPermissionHolder;
 import me.lucko.luckperms.common.api.delegates.model.ApiUser;
-import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.event.impl.EventConfigReload;
 import me.lucko.luckperms.common.event.impl.EventGroupCacheLoad;
 import me.lucko.luckperms.common.event.impl.EventGroupCreate;
@@ -80,6 +79,7 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.sender.Sender;
 
 import java.util.Collection;
 import java.util.List;

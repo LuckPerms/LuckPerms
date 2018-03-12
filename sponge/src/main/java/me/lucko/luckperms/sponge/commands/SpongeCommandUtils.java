@@ -27,8 +27,8 @@ package me.lucko.luckperms.sponge.commands;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.CommandUtils;
+import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 
 import java.util.List;
@@ -36,7 +36,7 @@ import java.util.Map;
 
 public final class SpongeCommandUtils {
 
-    public static Tristate parseTristate(int index, List<String> args) throws ArgumentUtils.ArgumentException {
+    public static Tristate parseTristate(int index, List<String> args) throws ArgumentParser.ArgumentException {
         String s = args.get(index).toLowerCase();
         if (s.equals("1") || s.equals("true") || s.equals("t")) {
             return Tristate.TRUE;
@@ -47,7 +47,7 @@ public final class SpongeCommandUtils {
         if (s.equals("-1") || s.equals("false") || s.equals("f")) {
             return Tristate.FALSE;
         }
-        throw new ArgumentUtils.DetailedUsageException();
+        throw new ArgumentParser.DetailedUsageException();
     }
 
     public static String nodesToString(Map<String, Boolean> nodes) {
@@ -86,7 +86,7 @@ public final class SpongeCommandUtils {
     }
 
     public static String contextToString(ContextSet set) {
-        return CommandUtils.contextSetToString(set);
+        return MessageUtils.contextSetToString(set);
     }
 
     private SpongeCommandUtils() {}
