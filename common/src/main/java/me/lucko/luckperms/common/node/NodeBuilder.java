@@ -41,7 +41,7 @@ import javax.annotation.Nonnull;
  */
 class NodeBuilder implements Node.Builder {
     protected String permission;
-    private final ImmutableContextSet.Builder extraContexts = ImmutableContextSet.builder();
+    private ImmutableContextSet.Builder extraContexts = ImmutableContextSet.builder();
     private Boolean value = true;
     private boolean override = false;
     private String server = null;
@@ -69,7 +69,7 @@ class NodeBuilder implements Node.Builder {
         this.server = node.getServer().orElse(null);
         this.world = node.getWorld().orElse(null);
         this.expireAt = node.isPermanent() ? 0L : node.getExpiryUnixTime();
-        this.extraContexts.addAll(node.getContexts());
+        this.extraContexts = ImmutableContextSet.builder().addAll(node.getContexts());
         return this;
     }
 

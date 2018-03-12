@@ -316,8 +316,8 @@ public final class ImmutableNode implements Node {
     }
 
     @Override
-    public boolean shouldApplyWithContext(@Nonnull ContextSet context) {
-        return getFullContexts().isSatisfiedBy(context, false);
+    public boolean shouldApplyWithContext(@Nonnull ContextSet contextSet) {
+        return getFullContexts().isSatisfiedBy(contextSet, false);
     }
 
     @Nonnull

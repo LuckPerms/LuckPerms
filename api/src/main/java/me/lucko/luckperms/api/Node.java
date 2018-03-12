@@ -25,13 +25,17 @@
 
 package me.lucko.luckperms.api;
 
+import com.google.common.base.Preconditions;
+
 import me.lucko.luckperms.api.context.ContextSet;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -87,7 +91,10 @@ import javax.annotation.concurrent.Immutable;
 public interface Node {
 
     /**
-     * Gets the permission string
+     * Gets the permission string this node encapsulates.
+     *
+     * <p>The exact value of this string may vary for nodes which aren't regular
+     * permission settings.</p>
      *
      * @return the actual permission node
      */
@@ -95,11 +102,11 @@ public interface Node {
     String getPermission();
 
     /**
-     * Gets the value.
+     * Gets the value of the node.
      *
-     * <p>A negated node would return a value of <code>false</code>.</p>
+     * <p>A negated setting would result in a value of <code>false</code>.</p>
      *
-     * @return the permission's value
+     * @return the nodes value
      */
     @Nonnull
     default Boolean getValue() {
@@ -107,16 +114,16 @@ public interface Node {
     }
 
     /**
-     * Gets the value.
+     * Gets the value of the node.
      *
-     * <p>A negated node would return a value of <code>false</code>.</p>
+     *  <p>A negated setting would result in a value of <code>false</code>.</p>
      *
-     * @return the permission's value
+     * @return the nodes value
      */
     boolean getValuePrimitive();
 
     /**
-     * Gets the value of this node as a {@link Tristate}
+     * Gets the value of this node as a {@link Tristate}.
      *
      * @return the value of this node as a Tristate
      */
@@ -126,7 +133,9 @@ public interface Node {
     }
 
     /**
-     * Gets if the node is negated
+     * Gets if the node is negated.
+     *
+     * <p>This is the inverse of the {@link #getValuePrimitive() value}.</p>
      *
      * @return true if the node is negated
      */
@@ -137,14 +146,15 @@ public interface Node {
     /**
      * Gets if this node is set to override explicitly.
      *
-     * <p>This value does not persist across saves, and is therefore only useful for transient nodes</p>
+     * <p>This value does not persist across saves, and is therefore only
+     * useful for transient nodes.</p>
      *
      * @return true if this node is set to override explicitly
      */
     boolean isOverride();
 
     /**
-     * Gets the server this node applies on, if the node is server specific
+     * Gets the server this node applies on, if the node is server specific.
      *
      * @return an {@link Optional} containing the server, if one is defined
      */
@@ -152,7 +162,7 @@ public interface Node {
     Optional<String> getServer();
 
     /**
-     * Gets the world this node applies on, if the node is world specific
+     * Gets the world this node applies on, if the node is world specific.
      *
      * @return an {@link Optional} containing the world, if one is defined
      */
@@ -160,21 +170,21 @@ public interface Node {
     Optional<String> getWorld();
 
     /**
-     * Gets if this node is server specific
+     * Gets if this node is server specific.
      *
      * @return true if this node is server specific
      */
     boolean isServerSpecific();
 
     /**
-     * Gets if this node is server specific
+     * Gets if this node is server specific.
      *
      * @return true if this node is server specific
      */
     boolean isWorldSpecific();
 
     /**
-     * Gets if this node applies globally, and therefore has no specific context
+     * Gets if this node applies globally, and therefore has no specific context.
      *
      * @return true if this node applies globally, and has no specific context
      * @since 3.1
@@ -182,7 +192,7 @@ public interface Node {
     boolean appliesGlobally();
 
     /**
-     * Gets if this node has any specific context in order for it to apply
+     * Gets if this node has any specific context in order for it to apply.
      *
      * @return true if this node has specific context
      * @since 3.1
@@ -192,14 +202,16 @@ public interface Node {
     /**
      * Gets if this node should apply in the given context
      *
-     * @param context the context key value pairs
+     * @param contextSet the context set
      * @return true if the node should apply
      * @since 2.13
      */
-    boolean shouldApplyWithContext(@Nonnull ContextSet context);
+    boolean shouldApplyWithContext(@Nonnull ContextSet contextSet);
 
     /**
-     * Resolves any shorthand parts of this node and returns the full list
+     * Resolves any shorthand parts of this node and returns the full list.
+     *
+     * <p>The list will not contain the exact permission itself.</p>
      *
      * @return a list of full nodes
      */
@@ -207,14 +219,14 @@ public interface Node {
     List<String> resolveShorthand();
 
     /**
-     * Gets if this node will expire in the future
+     * Gets if this node is temporary (will automatically expire).
      *
      * @return true if this node will expire in the future
      */
     boolean isTemporary();
 
     /**
-     * Gets if this node will not expire
+     * Gets if this node is permanent (will not expire).
      *
      * @return true if this node will not expire
      */
@@ -223,7 +235,7 @@ public interface Node {
     }
 
     /**
-     * Gets a unix timestamp in seconds when this node will expire
+     * Gets the unix timestamp (in seconds) when this node will expire.
      *
      * @return the time in Unix time when this node will expire
      * @throws IllegalStateException if the node is not temporary
@@ -231,7 +243,7 @@ public interface Node {
     long getExpiryUnixTime() throws IllegalStateException;
 
     /**
-     * Gets the date when this node will expire
+     * Gets the date when this node will expire.
      *
      * @return the {@link Date} when this node will expire
      * @throws IllegalStateException if the node is not temporary
@@ -240,7 +252,9 @@ public interface Node {
     Date getExpiry() throws IllegalStateException;
 
     /**
-     * Gets the number of seconds until this permission will expire
+     * Gets the number of seconds until this permission will expire.
+     *
+     * <p>Will return a negative value if the node has already expired.</p>
      *
      * @return the number of seconds until this permission will expire
      * @throws IllegalStateException if the node is not temporary
@@ -250,14 +264,14 @@ public interface Node {
     /**
      * Gets if the node has expired.
      *
-     * <p>This also returns false if the node is not temporary.</p>
+     * <p>This returns false if the node is not temporary.</p>
      *
      * @return true if this node has expired
      */
     boolean hasExpired();
 
     /**
-     * Gets the extra contexts required for this node to apply
+     * Gets the extra contexts required for this node to apply.
      *
      * @return the extra contexts required for this node to apply
      * @since 2.13
@@ -266,16 +280,19 @@ public interface Node {
     ContextSet getContexts();
 
     /**
-     * The same as {@link #getContexts()}, but also includes values for "server" and "world" keys if present.
+     * The same as {@link #getContexts()}, but also includes context pairs for
+     * "server" and "world" keys if present.
      *
      * @return the full contexts required for this node to apply
      * @since 3.1
+     * @see Contexts#SERVER_KEY
+     * @see Contexts#WORLD_KEY
      */
     @Nonnull
     ContextSet getFullContexts();
 
     /**
-     * Gets if this is a group node
+     * Returns if this is a group node.
      *
      * @return true if this is a group node
      */
@@ -291,14 +308,14 @@ public interface Node {
     String getGroupName() throws IllegalStateException;
 
     /**
-     * Gets if this node is a wildcard node
+     * Gets if this node is a wildcard permission.
      *
-     * @return true if this node is a wildcard node
+     * @return true if this node is a wildcard permission
      */
     boolean isWildcard();
 
     /**
-     * Gets the level of this wildcard, higher is more specific
+     * Gets the level of this wildcard.
      *
      * @return the wildcard level
      * @throws IllegalStateException if this is not a wildcard
@@ -306,14 +323,14 @@ public interface Node {
     int getWildcardLevel() throws IllegalStateException;
 
     /**
-     * Gets if this node is a meta node
+     * Gets if this node is a meta node.
      *
      * @return true if this node is a meta node
      */
     boolean isMeta();
 
     /**
-     * Gets the meta value from this node
+     * Gets the meta value from this node.
      *
      * @return the meta value
      * @throws IllegalStateException if this node is not a meta node
@@ -322,14 +339,14 @@ public interface Node {
     Map.Entry<String, String> getMeta() throws IllegalStateException;
 
     /**
-     * Gets if this node is a prefix node
+     * Gets if this node is a prefix node.
      *
      * @return true if this node is a prefix node
      */
     boolean isPrefix();
 
     /**
-     * Gets the prefix value from this node
+     * Gets the prefix value from this node.
      *
      * @return the prefix value
      * @throws IllegalStateException if this node is a not a prefix node
@@ -338,14 +355,14 @@ public interface Node {
     Map.Entry<Integer, String> getPrefix() throws IllegalStateException;
 
     /**
-     * Gets if this node is a suffix node
+     * Gets if this node is a suffix node.
      *
      * @return true if this node is a suffix node
      */
     boolean isSuffix();
 
     /**
-     * Gets the suffix value from this node
+     * Gets the suffix value from this node.
      *
      * @return the suffix value
      * @throws IllegalStateException if this node is a not a suffix node
@@ -354,7 +371,7 @@ public interface Node {
     Map.Entry<Integer, String> getSuffix() throws IllegalStateException;
 
     /**
-     * Returns if this Node is equal to another node
+     * Gets if this Node is equal to another node.
      *
      * @param obj the other node
      * @return true if this node is equal to the other provided
@@ -364,7 +381,7 @@ public interface Node {
     boolean equals(Object obj);
 
     /**
-     * Returns if this Node is equal to another node as defined by the given
+     * Gets if this Node is equal to another node as defined by the given
      * {@link StandardNodeEquality} predicate.
      *
      * @param other the other node
@@ -375,7 +392,7 @@ public interface Node {
     boolean standardEquals(Node other, StandardNodeEquality equalityPredicate);
 
     /**
-     * Returns if this Node is equal to another node as defined by the given
+     * Gets if this Node is equal to another node as defined by the given
      * {@link NodeEqualityPredicate}.
      *
      * @param other the other node
@@ -448,6 +465,9 @@ public interface Node {
          * Copies the attributes from the given node and applies them to this
          * builder.
          *
+         * <p>Note that this copies all attributes <strong>except</strong> the
+         * permission itself.</p>
+         *
          * @param node the node to copy from
          * @return the builder
          * @since 4.2
@@ -488,14 +508,45 @@ public interface Node {
         Builder setOverride(boolean override);
 
         /**
-         * Sets the nodes expiry as a unix timestamp in seconds.
+         * Sets the time when the node should expire.
          *
-         * @param expireAt the expiry time
+         * <p>The parameter passed to this method must be the unix timestamp
+         * (in seconds) when the node should expire.</p>
+         *
+         * @param expiryUnixTimestamp the expiry timestamp (unix seconds)
          * @return the builder
          * @see Node#getExpiryUnixTime()
          */
         @Nonnull
-        Builder setExpiry(long expireAt);
+        Builder setExpiry(long expiryUnixTimestamp);
+
+        /**
+         * Sets the time when the node should expire.
+         *
+         * <p>The expiry timestamp is calculated relative to the current
+         * system time.</p>
+         *
+         * @param duration how long the node should be added for
+         * @param unit the unit <code>duration</code> is measured in
+         * @return the builder
+         * @since 4.2
+         */
+        @Nonnull
+        default Builder setExpiry(long duration, TimeUnit unit) {
+            Preconditions.checkArgument(duration > 0, "duration must be positive");
+            long seconds = Objects.requireNonNull(unit, "unit").toSeconds(duration);
+            long timeNow = System.currentTimeMillis() / 1000L;
+            return setExpiry(timeNow + seconds);
+        }
+
+        /**
+         * Marks that the node being built should never expire.
+         *
+         * @return the builder
+         * @since 4.2
+         */
+        @Nonnull
+        Builder clearExpiry();
 
         /**
          * Sets the world value for the node.
@@ -565,13 +616,25 @@ public interface Node {
         /**
          * Appends extra contexts onto the node.
          *
-         * @param set a contextset
+         * @param contextSet a context set
          * @return the builder
          * @see ContextSet
          * @see Node#getContexts()
          */
         @Nonnull
-        Builder withExtraContext(@Nonnull ContextSet set);
+        Builder withExtraContext(@Nonnull ContextSet contextSet);
+
+        /**
+         * Sets the extra contexts for the node.
+         *
+         * @param contextSet a context set
+         * @return the builder
+         * @see ContextSet
+         * @see Node#getContexts()
+         * @since 4.2
+         */
+        @Nonnull
+        Builder setExtraContext(@Nonnull ContextSet contextSet);
 
         /**
          * Creates a {@link Node} instance from the builder.
