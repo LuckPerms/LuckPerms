@@ -103,6 +103,13 @@ class NodeBuilder implements Node.Builder {
 
     @Nonnull
     @Override
+    public Node.Builder clearExpiry() {
+        this.expireAt = 0L;
+        return this;
+    }
+
+    @Nonnull
+    @Override
     public Node.Builder setWorld(String world) {
         this.world = world;
         return this;
@@ -164,6 +171,13 @@ class NodeBuilder implements Node.Builder {
     public Node.Builder withExtraContext(@Nonnull ContextSet set) {
         Objects.requireNonNull(set, "set");
         set.toSet().forEach(this::withExtraContext);
+        return this;
+    }
+
+    @Nonnull
+    @Override
+    public Node.Builder setExtraContext(@Nonnull ContextSet contextSet) {
+        this.extraContexts = ImmutableContextSet.builder().addAll(contextSet);
         return this;
     }
 
