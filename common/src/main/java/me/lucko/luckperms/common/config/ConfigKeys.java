@@ -114,6 +114,11 @@ public class ConfigKeys {
     public static final ConfigKey<Boolean> ALLOW_INVALID_USERNAMES = BooleanKey.of("allow-invalid-usernames", false);
 
     /**
+     * If LuckPerms should display the text banner on startup
+     */
+    public static final ConfigKey<Boolean> DISPLAY_STARTUP_BANNER = BooleanKey.of("display-banner", true);
+
+    /**
      * If LuckPerms should produce extra logging output when it handles logins.
      */
     public static final ConfigKey<Boolean> DEBUG_LOGINS = BooleanKey.of("debug-logins", false);
@@ -487,11 +492,6 @@ public class ConfigKeys {
      * The URL of the tree viewer
      */
     public static final ConfigKey<String> TREE_VIEWER_URL_PATTERN = StringKey.of("tree-viewer-url", "https://luckperms.github.io/treeview/");
-
-    /**
-     * Display banner on startup
-      */
-    public static final ConfigKey<Boolean> DISPLAY_STARTUP_BANNER = BooleanKey.of("display-banner", true);
 
     private static Map<String, ConfigKey<?>> KEYS = null;
 
