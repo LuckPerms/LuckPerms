@@ -52,6 +52,9 @@ use-server-properties-name: false
 # 16 characters or less.
 allow-invalid-usernames: false
 
+# If the startup text should be displayed in console
+display-banner: true
+
 # If LuckPerms should produce extra logging output when it handles logins.
 # Useful if you're having issues with UUID forwarding or data not being loaded.
 debug-logins: false
