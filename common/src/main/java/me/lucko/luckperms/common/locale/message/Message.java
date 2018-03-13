@@ -459,10 +459,6 @@ public enum Message {
         return this.message;
     }
 
-    public String asString(Object... objects) {
-        return asString(null, objects);
-    }
-
     public String asString(@Nullable LocaleManager localeManager, Object... objects) {
         String prefix = null;
         if (localeManager != null) {
