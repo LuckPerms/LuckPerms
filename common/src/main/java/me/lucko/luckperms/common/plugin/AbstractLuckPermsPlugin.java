@@ -98,9 +98,6 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     public final void enable() {
-        // send the startup banner
-        displayBanner(getConsoleSender());
-
         // load some utilities early
         this.verboseHandler = new VerboseHandler(getBootstrap().getScheduler().platformAsync());
         this.permissionVault = new PermissionVault(getBootstrap().getScheduler().platformAsync());
@@ -110,6 +107,11 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         getLogger().info("Loading configuration...");
         this.configuration = new AbstractConfiguration(this, provideConfigurationAdapter());
         this.configuration.loadAll();
+
+        // send the startup banner (optionally)
+        if(getConfiguration().get(ConfigKeys.DISPLAY_STARTUP_BANNER)) {
+            displayBanner(getConsoleSender());
+        }
 
         // load locale
         this.localeManager = new SimpleLocaleManager();
