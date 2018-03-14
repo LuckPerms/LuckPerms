@@ -26,21 +26,26 @@
 package me.lucko.luckperms.common.backup;
 
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.MultimapBuilder;
 
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.sender.DummySender;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.utils.Cycle;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -54,8 +59,8 @@ public class Importer implements Runnable {
 
     private final CommandManager commandManager;
     private final Set<Sender> notify;
-    private final List<String> commands;
-    private final List<ImportCommand> toExecute;
+    private final List<String> commandList;
+    private final List<ImportCommand> commands;
 
     public Importer(CommandManager commandManager, Sender executor, List<String> commands) {
         this.commandManager = commandManager;
@@ -65,7 +70,7 @@ public class Importer implements Runnable {
         } else {
             this.notify = ImmutableSet.of(executor, commandManager.getPlugin().getConsoleSender());
         }
-        this.commands = commands.stream()
+        this.commandList = commands.stream()
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .filter(s -> !s.startsWith("#"))
@@ -73,7 +78,7 @@ public class Importer implements Runnable {
                 .map(s -> s.startsWith("/luckperms ") ? s.substring("/luckperms ".length()) : s)
                 .map(s -> s.startsWith("/lp ") ? s.substring("/lp ".length()) : s)
                 .collect(Collectors.toList());
-        this.toExecute = new ArrayList<>();
+        this.commands = new ArrayList<>();
     }
 
     @Override
@@ -81,11 +86,14 @@ public class Importer implements Runnable {
         long startTime = System.currentTimeMillis();
         this.notify.forEach(s -> Message.IMPORT_START.send(s));
 
+        // start an update task in the background - we'll #join this later
+        CompletableFuture<Void> updateTask = CompletableFuture.runAsync(() -> this.commandManager.getPlugin().getUpdateTaskBuffer().requestDirectly());
+
         // form instances for all commands, and register them
         int index = 1;
-        for (String command : this.commands) {
+        for (String command : this.commandList) {
             ImportCommand cmd = new ImportCommand(this.commandManager, index, command);
-            this.toExecute.add(cmd);
+            this.commands.add(cmd);
 
             if (cmd.getCommand().startsWith("creategroup ") || cmd.getCommand().startsWith("createtrack ")) {
                 cmd.process(); // process immediately
@@ -94,19 +102,19 @@ public class Importer implements Runnable {
             index++;
         }
 
-        // divide commands up into pools
-        Cycle<List<ImportCommand>> commandPools = new Cycle<>(nInstances(128, ArrayList::new));
-
-        String lastTarget = null;
-        for (ImportCommand cmd : this.toExecute) {
-            // if the last target isn't the same, skip to a new pool
-            if (lastTarget == null || !lastTarget.equals(cmd.getTarget())) {
-                commandPools.next();
-            }
-
-            commandPools.current().add(cmd);
-            lastTarget = cmd.getTarget();
+        // split data up into sections for each holder
+        // holder id --> commands
+        ListMultimap<String, ImportCommand> sections = MultimapBuilder.linkedHashKeys().arrayListValues().build();
+        for (ImportCommand cmd : this.commands) {
+            String target = Strings.nullToEmpty(cmd.getTarget());
+            sections.put(target, cmd);
         }
+
+        // join the update task future before scheduling command executions
+        updateTask.join();
+
+        // build a list of commands to be executed by each thread
+        ExecutorService executor = Executors.newFixedThreadPool(128);
 
         // A set of futures, which are really just the threads we need to wait for.
         Set<CompletableFuture<Void>> futures = new HashSet<>();
@@ -114,17 +122,17 @@ public class Importer implements Runnable {
         AtomicInteger processedCount = new AtomicInteger(0);
 
         // iterate through each user sublist.
-        for (List<ImportCommand> subList : commandPools.getBacking()) {
+        for (Collection<ImportCommand> subList : sections.asMap().values()) {
 
             // register and start a new thread to process the sublist
-            futures.add(CompletableFuture.runAsync(() -> {
+            futures.add(CompletableFuture.completedFuture(subList).thenAcceptAsync(sl -> {
 
                 // iterate through each user in the sublist, and grab their data.
-                for (ImportCommand cmd : subList) {
+                for (ImportCommand cmd : sl) {
                     cmd.process();
                     processedCount.incrementAndGet();
                 }
-            }, this.commandManager.getPlugin().getBootstrap().getScheduler().async()));
+            }, executor));
         }
 
         // all of the threads have been scheduled now and are running. we just need to wait for them all to complete
@@ -132,7 +140,7 @@ public class Importer implements Runnable {
 
         while (true) {
             try {
-                overallFuture.get(10, TimeUnit.SECONDS);
+                overallFuture.get(2, TimeUnit.SECONDS);
             } catch (InterruptedException | ExecutionException e) {
                 // abnormal error - just break
                 e.printStackTrace();
@@ -147,11 +155,12 @@ public class Importer implements Runnable {
             break;
         }
 
+        executor.shutdown();
 
         long endTime = System.currentTimeMillis();
         double seconds = (endTime - startTime) / 1000;
 
-        int errors = (int) this.toExecute.stream().filter(v -> v.getResult().wasFailure()).count();
+        int errors = (int) this.commands.stream().filter(v -> v.getResult().wasFailure()).count();
 
         switch (errors) {
             case 0:
@@ -166,7 +175,7 @@ public class Importer implements Runnable {
         }
 
         AtomicInteger errIndex = new AtomicInteger(1);
-        for (ImportCommand e : this.toExecute) {
+        for (ImportCommand e : this.commands) {
             if (e.getResult() != null && e.getResult().wasFailure()) {
                 this.notify.forEach(s -> {
                     Message.IMPORT_END_ERROR_HEADER.send(s, errIndex.get(), e.getId(), e.getCommand(), e.getResult().toString());
@@ -182,8 +191,8 @@ public class Importer implements Runnable {
     }
 
     private void sendProgress(int processedCount) {
-        int percent = (processedCount * 100) / this.commands.size();
-        int errors = (int) this.toExecute.stream().filter(v -> v.isCompleted() && v.getResult().wasFailure()).count();
+        int percent = (processedCount * 100) / this.commandList.size();
+        int errors = (int) this.commands.stream().filter(v -> v.isCompleted() && v.getResult().wasFailure()).count();
 
         if (errors == 1) {
             this.notify.forEach(s -> Message.IMPORT_PROGRESS_SIN.send(s, percent, processedCount, this.commands.size(), errors));

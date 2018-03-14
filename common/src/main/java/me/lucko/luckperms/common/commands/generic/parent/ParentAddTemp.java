@@ -72,9 +72,8 @@ public class ParentAddTemp extends SharedSubCommand {
         TemporaryModifier modifier = ArgumentParser.parseTemporaryModifier(2, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
         MutableContextSet context = ArgumentParser.parseContext(2, args, plugin);
 
-        Group group = plugin.getStorage().loadGroup(groupName).join().orElse(null);
+        Group group = StorageAssistant.loadGroup(groupName, sender, plugin, false);
         if (group == null) {
-            Message.DOES_NOT_EXIST.send(sender, groupName);
             return CommandResult.INVALID_ARGS;
         }
 

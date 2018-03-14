@@ -70,9 +70,8 @@ public class ParentSetTrack extends SharedSubCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        Track track = plugin.getStorage().loadTrack(trackName).join().orElse(null);
+        Track track = StorageAssistant.loadTrack(trackName, sender, plugin);
         if (track == null) {
-            Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.LOADING_ERROR;
         }
 
@@ -100,9 +99,8 @@ public class ParentSetTrack extends SharedSubCommand {
 
         MutableContextSet context = ArgumentParser.parseContext(2, args, plugin);
 
-        Group group = plugin.getStorage().loadGroup(groupName).join().orElse(null);
+        Group group = StorageAssistant.loadGroup(groupName, sender, plugin, false);
         if (group == null) {
-            Message.DOES_NOT_EXIST.send(sender, groupName);
             return CommandResult.LOADING_ERROR;
         }
 

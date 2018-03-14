@@ -73,9 +73,8 @@ public class UserDemote extends SubCommand<User> {
             return CommandResult.INVALID_ARGS;
         }
 
-        Track track = plugin.getStorage().loadTrack(trackName).join().orElse(null);
+        Track track = StorageAssistant.loadTrack(trackName, sender, plugin);
         if (track == null) {
-            Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.LOADING_ERROR;
         }
 

@@ -31,9 +31,9 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.MainCommand;
+import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -73,13 +73,7 @@ public class TrackMainCommand extends MainCommand<Track, String> {
 
     @Override
     protected Track getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        Track track = plugin.getStorage().loadTrack(target).join().orElse(null);
-        if (track == null) {
-            Message.TRACK_NOT_FOUND.send(sender, target);
-            return null;
-        }
-
-        return track;
+        return StorageAssistant.loadTrack(target, sender, plugin);
     }
 
     @Override

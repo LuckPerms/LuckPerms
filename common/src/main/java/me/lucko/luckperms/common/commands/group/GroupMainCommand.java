@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.MainCommand;
+import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.commands.generic.meta.CommandMeta;
 import me.lucko.luckperms.common.commands.generic.other.HolderClear;
 import me.lucko.luckperms.common.commands.generic.other.HolderEditor;
@@ -39,7 +40,6 @@ import me.lucko.luckperms.common.commands.generic.parent.CommandParent;
 import me.lucko.luckperms.common.commands.generic.permission.CommandPermission;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -84,20 +84,7 @@ public class GroupMainCommand extends MainCommand<Group, String> {
 
     @Override
     protected Group getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        Group group = plugin.getStorage().loadGroup(target).join().orElse(null);
-        if (group == null) {
-            // failed to load, but it might be a display name.
-            group = plugin.getGroupManager().getByDisplayName(target);
-
-            // nope, not a display name
-            if (group == null) {
-                Message.GROUP_NOT_FOUND.send(sender, target);
-                return null;
-            }
-        }
-
-        group.auditTemporaryPermissions();
-        return group;
+        return StorageAssistant.loadGroup(target, sender, plugin, true);
     }
 
     @Override

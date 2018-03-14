@@ -65,9 +65,8 @@ public class ParentSet extends SharedSubCommand {
         String groupName = ArgumentParser.parseName(0, args);
         MutableContextSet context = ArgumentParser.parseContext(1, args, plugin);
 
-        Group group = plugin.getStorage().loadGroup(groupName).join().orElse(null);
+        Group group = StorageAssistant.loadGroup(groupName, sender, plugin, false);
         if (group == null) {
-            Message.DOES_NOT_EXIST.send(sender, groupName);
             return CommandResult.LOADING_ERROR;
         }
 
