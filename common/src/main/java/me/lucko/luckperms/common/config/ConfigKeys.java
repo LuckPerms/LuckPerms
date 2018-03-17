@@ -33,7 +33,6 @@ import me.lucko.luckperms.common.assignments.AssignmentRule;
 import me.lucko.luckperms.common.config.keys.AbstractKey;
 import me.lucko.luckperms.common.config.keys.BooleanKey;
 import me.lucko.luckperms.common.config.keys.EnduringKey;
-import me.lucko.luckperms.common.config.keys.IntegerKey;
 import me.lucko.luckperms.common.config.keys.LowercaseStringKey;
 import me.lucko.luckperms.common.config.keys.MapKey;
 import me.lucko.luckperms.common.config.keys.StringKey;
@@ -81,7 +80,13 @@ public class ConfigKeys {
     /**
      * How many minutes to wait between syncs. A value <= 0 will disable syncing.
      */
-    public static final ConfigKey<Integer> SYNC_TIME = EnduringKey.wrap(IntegerKey.of("data.sync-minutes", -1));
+    public static final ConfigKey<Integer> SYNC_TIME = EnduringKey.wrap(AbstractKey.of(c -> {
+        int val = c.getInt("sync-minutes", -1);
+        if (val == -1) {
+            val = c.getInt("data.sync-minutes", -1);
+        }
+        return val;
+    }));
 
     /**
      * If permissions without a server context should be included.
