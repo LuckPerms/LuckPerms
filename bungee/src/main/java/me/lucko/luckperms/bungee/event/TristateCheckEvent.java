@@ -29,26 +29,46 @@ import me.lucko.luckperms.api.Tristate;
 
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Event;
+
+import java.util.Objects;
 
 /**
  * Copy of the internal BungeeCord PermissionCheckEvent, returning a tristate instead of a boolean.
  */
 public class TristateCheckEvent extends Event {
+
     public static Tristate call(CommandSender sender, String permission) {
-        return ProxyServer.getInstance().getPluginManager().callEvent(new TristateCheckEvent(sender, permission)).getResult();
+
+        // calculate a default value based on the internal behaviour of
+        // ConsoleCommandSender and UserConnection in order to replicate the
+        // behaviour of CommandSender#hasPermission
+        Tristate def = Tristate.UNDEFINED;
+        if (!(sender instanceof ProxiedPlayer)) {
+            // if not a ProxiedPlayer, assume it's console.
+            def = Tristate.TRUE;
+        } else if (sender.getPermissions().contains(permission)) {
+            def = Tristate.TRUE;
+        }
+
+        return call(sender, permission, def);
+    }
+
+    public static Tristate call(CommandSender sender, String permission, Tristate def) {
+        Objects.requireNonNull(sender, "sender");
+        Objects.requireNonNull(permission, "permission");
+        Objects.requireNonNull(def, "def");
+
+        TristateCheckEvent event = new TristateCheckEvent(sender, permission, def);
+        return ProxyServer.getInstance().getPluginManager().callEvent(event).getResult();
     }
 
     private final CommandSender sender;
     private final String permission;
-
     private Tristate result;
 
-    public TristateCheckEvent(CommandSender sender, String permission) {
-        this(sender, permission, sender.getPermissions().contains(permission) ? Tristate.TRUE : Tristate.UNDEFINED);
-    }
-
-    public TristateCheckEvent(CommandSender sender, String permission, Tristate result) {
+    private TristateCheckEvent(CommandSender sender, String permission, Tristate result) {
         this.sender = sender;
         this.permission = permission;
         this.result = result;

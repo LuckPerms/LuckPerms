@@ -117,4 +117,21 @@ public class BungeePermissionCheckListener implements Listener {
         this.plugin.getVerboseHandler().offerCheckData(CheckOrigin.PLATFORM_PERMISSION_CHECK, name, ContextSet.empty(), permission, result);
         this.plugin.getPermissionVault().offer(permission);
     }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onOtherTristateCheck(TristateCheckEvent e) {
+        if (e.getSender() instanceof ProxiedPlayer) {
+            return;
+        }
+
+        Objects.requireNonNull(e.getPermission(), "permission");
+        Objects.requireNonNull(e.getSender(), "sender");
+
+        String permission = e.getPermission();
+        Tristate result = e.getResult();
+        String name = "internal/" + e.getSender().getName();
+
+        this.plugin.getVerboseHandler().offerCheckData(CheckOrigin.PLATFORM_LOOKUP_CHECK, name, ContextSet.empty(), permission, result);
+        this.plugin.getPermissionVault().offer(permission);
+    }
 }
