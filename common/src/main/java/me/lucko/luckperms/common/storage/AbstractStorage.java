@@ -57,10 +57,13 @@ import java.util.concurrent.CompletionException;
  */
 public class AbstractStorage implements Storage {
     public static Storage create(LuckPermsPlugin plugin, AbstractDao backing) {
+        // make a base implementation
         Storage base = new AbstractStorage(plugin, backing);
-        Storage phased = PhasedStorage.wrap(base);
+        // wrap with a phaser
+        PhasedStorage phased = PhasedStorage.wrap(base);
+        // wrap with a buffer
         BufferedOutputStorage buffered = BufferedOutputStorage.wrap(phased, 250L);
-        plugin.getBootstrap().getScheduler().asyncRepeating(buffered, 2L);
+        plugin.getBootstrap().getScheduler().asyncRepeating(buffered.buffer(), 2L);
         return buffered;
     }
 

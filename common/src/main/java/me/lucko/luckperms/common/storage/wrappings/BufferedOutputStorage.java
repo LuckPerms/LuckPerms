@@ -25,204 +25,116 @@
 
 package me.lucko.luckperms.common.storage.wrappings;
 
-import me.lucko.luckperms.api.HeldPermission;
-import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.api.event.cause.DeletionCause;
-import me.lucko.luckperms.common.actionlog.Log;
-import me.lucko.luckperms.common.api.delegates.model.ApiStorage;
 import me.lucko.luckperms.common.buffers.Buffer;
-import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.storage.Storage;
-import me.lucko.luckperms.common.storage.dao.AbstractDao;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.lang.reflect.Proxy;
 import java.util.concurrent.CompletableFuture;
 
 /**
  * A storage wrapping that passes save tasks through a buffer
  */
-public class BufferedOutputStorage implements Storage, Runnable {
-    public static BufferedOutputStorage wrap(Storage storage, long flushTime) {
-        return new BufferedOutputStorage(storage, flushTime);
+public interface BufferedOutputStorage extends Storage {
+
+    /**
+     * Creates a new instance of {@link BufferedOutputStorage} which delegates called to the given
+     * {@link Storage} instance.
+     *
+     * @param delegate the delegate storage impl
+     * @param flushTime default flush time for the buffer. See {@link Buffer#flush(long)}
+     * @return the new buffered storage instance
+     */
+    static BufferedOutputStorage wrap(Storage delegate, long flushTime) {
+        // create a buffer handler - we pass the unwrapped delegate here.
+        StorageBuffer buffer = new StorageBuffer(delegate, flushTime);
+
+        // create and return a proxy instance which directs save calls through the buffer
+        return (BufferedOutputStorage) Proxy.newProxyInstance(
+                BufferedOutputStorage.class.getClassLoader(),
+                new Class[]{BufferedOutputStorage.class},
+                (proxy, method, args) -> {
+                    // run save methods through the buffer instance
+                    switch (method.getName()) {
+                        case "saveUser":
+                            return buffer.saveUser((User) args[0]);
+                        case "saveGroup":
+                            return buffer.saveGroup((Group) args[0]);
+                        case "saveTrack":
+                            return buffer.saveTrack((Track) args[0]);
+                    }
+
+                    // provide implementation of #noBuffer
+                    if (method.getName().equals("noBuffer")) {
+                        return delegate;
+                    }
+
+                    // provide implementation of #buffer
+                    if (method.getName().equals("buffer")) {
+                        return buffer;
+                    }
+
+                    // flush the buffer on shutdown
+                    if (method.getName().equals("shutdown")) {
+                        buffer.forceFlush();
+                        // ...and then delegate
+                    }
+
+                    // delegate the call
+                    return method.invoke(delegate, args);
+                }
+        );
     }
 
-    private final Storage delegate;
+    /**
+     * Gets the buffer behind this instance
+     *
+     * @return the buffer
+     */
+    StorageBuffer buffer();
 
-    private final long flushTime;
+    final class StorageBuffer implements Runnable {
+        private final long flushTime;
 
-    private final Buffer<User, Void> userOutputBuffer = Buffer.of(user -> BufferedOutputStorage.this.delegate.saveUser(user).join());
-    private final Buffer<Group, Void> groupOutputBuffer = Buffer.of(group -> BufferedOutputStorage.this.delegate.saveGroup(group).join());
-    private final Buffer<Track, Void> trackOutputBuffer = Buffer.of(track -> BufferedOutputStorage.this.delegate.saveTrack(track).join());
+        private final Buffer<User, Void> userOutputBuffer;
+        private final Buffer<Group, Void> groupOutputBuffer;
+        private final Buffer<Track, Void> trackOutputBuffer;
 
-    private BufferedOutputStorage(Storage delegate, long flushTime) {
-        this.delegate = delegate;
-        this.flushTime = flushTime;
+        private StorageBuffer(Storage delegate, long flushTime) {
+            this.flushTime = flushTime;
+            this.userOutputBuffer = Buffer.of(user -> delegate.saveUser(user).join());
+            this.groupOutputBuffer = Buffer.of(group -> delegate.saveGroup(group).join());
+            this.trackOutputBuffer = Buffer.of(track -> delegate.saveTrack(track).join());
+        }
+
+        public void run() {
+            flush(this.flushTime);
+        }
+
+        public void forceFlush() {
+            flush(-1);
+        }
+
+        public void flush(long flushTime) {
+            this.userOutputBuffer.flush(flushTime);
+            this.groupOutputBuffer.flush(flushTime);
+            this.trackOutputBuffer.flush(flushTime);
+        }
+
+        // copy the required implementation methods from the Storage interface
+
+        private CompletableFuture<Void> saveUser(User user) {
+            return this.userOutputBuffer.enqueue(user);
+        }
+
+        private CompletableFuture<Void> saveGroup(Group group) {
+            return this.groupOutputBuffer.enqueue(group);
+        }
+
+        private CompletableFuture<Void> saveTrack(Track track) {
+            return this.trackOutputBuffer.enqueue(track);
+        }
     }
-
-    @Override
-    public void run() {
-        flush(this.flushTime);
-    }
-
-    public void forceFlush() {
-        flush(-1);
-    }
-
-    public void flush(long flushTime) {
-        this.userOutputBuffer.flush(flushTime);
-        this.groupOutputBuffer.flush(flushTime);
-        this.trackOutputBuffer.flush(flushTime);
-    }
-
-    @Override
-    public Storage noBuffer() {
-        return this.delegate;
-    }
-
-    @Override
-    public void shutdown() {
-        forceFlush();
-        this.delegate.shutdown();
-    }
-
-    @Override
-    public CompletableFuture<Void> saveUser(User user) {
-        return this.userOutputBuffer.enqueue(user);
-    }
-
-    @Override
-    public CompletableFuture<Void> saveGroup(Group group) {
-        return this.groupOutputBuffer.enqueue(group);
-    }
-
-    @Override
-    public CompletableFuture<Void> saveTrack(Track track) {
-        return this.trackOutputBuffer.enqueue(track);
-    }
-
-    // delegate
-
-    @Override
-    public AbstractDao getDao() {
-        return this.delegate.getDao();
-    }
-
-    @Override
-    public CompletableFuture<Set<UUID>> getUniqueUsers() {
-        return this.delegate.getUniqueUsers();
-    }
-
-    @Override
-    public CompletableFuture<Optional<Track>> loadTrack(String name) {
-        return this.delegate.loadTrack(name);
-    }
-
-    @Override
-    public CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(String permission) {
-        return this.delegate.getUsersWithPermission(permission);
-    }
-
-    @Override
-    public CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(String permission) {
-        return this.delegate.getGroupsWithPermission(permission);
-    }
-
-    @Override
-    public CompletableFuture<Void> applyBulkUpdate(BulkUpdate bulkUpdate) {
-        return this.delegate.applyBulkUpdate(bulkUpdate);
-    }
-
-    @Override
-    public CompletableFuture<Void> saveUUIDData(UUID uuid, String username) {
-        return this.delegate.saveUUIDData(uuid, username);
-    }
-
-    @Override
-    public CompletableFuture<Group> createAndLoadGroup(String name, CreationCause cause) {
-        return this.delegate.createAndLoadGroup(name, cause);
-    }
-
-    @Override
-    public Map<String, String> getMeta() {
-        return this.delegate.getMeta();
-    }
-
-    @Override
-    public CompletableFuture<Void> deleteGroup(Group group, DeletionCause cause) {
-        return this.delegate.deleteGroup(group, cause);
-    }
-
-    @Override
-    public CompletableFuture<UUID> getUUID(String username) {
-        return this.delegate.getUUID(username);
-    }
-
-    @Override
-    public CompletableFuture<User> loadUser(UUID uuid, String username) {
-        return this.delegate.loadUser(uuid, username);
-    }
-
-    @Override
-    public CompletableFuture<Track> createAndLoadTrack(String name, CreationCause cause) {
-        return this.delegate.createAndLoadTrack(name, cause);
-    }
-
-    @Override
-    public CompletableFuture<Log> getLog() {
-        return this.delegate.getLog();
-    }
-
-    @Override
-    public ApiStorage getApiDelegate() {
-        return this.delegate.getApiDelegate();
-    }
-
-    @Override
-    public CompletableFuture<String> getName(UUID uuid) {
-        return this.delegate.getName(uuid);
-    }
-
-    @Override
-    public String getName() {
-        return this.delegate.getName();
-    }
-
-    @Override
-    public CompletableFuture<Void> loadAllTracks() {
-        return this.delegate.loadAllTracks();
-    }
-
-    @Override
-    public void init() {
-        this.delegate.init();
-    }
-
-    @Override
-    public CompletableFuture<Void> deleteTrack(Track track, DeletionCause cause) {
-        return this.delegate.deleteTrack(track, cause);
-    }
-
-    @Override
-    public CompletableFuture<Void> logAction(LogEntry entry) {
-        return this.delegate.logAction(entry);
-    }
-
-    @Override
-    public CompletableFuture<Void> loadAllGroups() {
-        return this.delegate.loadAllGroups();
-    }
-
-    @Override
-    public CompletableFuture<Optional<Group>> loadGroup(String name) {
-        return this.delegate.loadGroup(name);
-    }
-
 }

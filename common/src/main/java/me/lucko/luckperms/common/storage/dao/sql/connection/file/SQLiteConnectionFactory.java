@@ -81,7 +81,7 @@ public class SQLiteConnectionFactory extends FlatfileConnectionFactory {
         if (this.connection == null || this.connection.isClosed()) {
             Connection connection = createConnection("jdbc:sqlite:" + this.file.getAbsolutePath());
             if (connection != null) {
-                this.connection = new NonClosableConnection(connection);
+                this.connection = NonClosableConnection.wrap(connection);
             }
         }
 

@@ -70,7 +70,7 @@ public class H2ConnectionFactory extends FlatfileConnectionFactory {
         if (this.connection == null || this.connection.isClosed()) {
             Connection connection = this.driver.connect("jdbc:h2:" + this.file.getAbsolutePath(), new Properties());
             if (connection != null) {
-                this.connection = new NonClosableConnection(connection);
+                this.connection = NonClosableConnection.wrap(connection);
             }
         }
 
