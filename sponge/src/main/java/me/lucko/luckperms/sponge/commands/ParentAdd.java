@@ -36,7 +36,7 @@ import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
@@ -56,7 +56,7 @@ public class ParentAdd extends SubCommand<LPSubjectData> {
         String name = args.get(1);
         ImmutableContextSet contextSet = ArgumentParser.parseContextSponge(2, args);
 
-        LuckPermsService service = Sponge.getServiceManager().provideUnchecked(LuckPermsService.class);
+        LPPermissionService service = Sponge.getServiceManager().provideUnchecked(LPPermissionService.class);
         if (service.getLoadedCollections().keySet().stream().map(String::toLowerCase).noneMatch(s -> s.equalsIgnoreCase(collection))) {
             MessageUtils.sendPluginMessage(sender, "Warning: SubjectCollection '&4" + collection + "&c' doesn't already exist.");
         }
