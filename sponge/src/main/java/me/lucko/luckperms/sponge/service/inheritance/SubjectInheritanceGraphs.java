@@ -46,6 +46,7 @@ public final class SubjectInheritanceGraphs {
         @Override
         public Iterable<? extends CalculatedSubject> successors(CalculatedSubject subject) {
             return subject.getCombinedParents().stream()
+                    .map(ref -> ref.resolveLp().join())
                     .filter(p -> p instanceof CalculatedSubject)
                     .map(p -> ((CalculatedSubject) p))
                     .collect(Collectors.toList());
@@ -66,6 +67,7 @@ public final class SubjectInheritanceGraphs {
         @Override
         public Iterable<? extends CalculatedSubject> successors(CalculatedSubject subject) {
             return subject.getCombinedParents(this.contextSet).stream()
+                    .map(ref -> ref.resolveLp().join())
                     .filter(p -> p instanceof CalculatedSubject)
                     .map(p -> ((CalculatedSubject) p))
                     .collect(Collectors.toList());
