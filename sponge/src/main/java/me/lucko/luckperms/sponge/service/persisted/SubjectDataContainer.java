@@ -252,7 +252,7 @@ public class SubjectDataContainer {
             for (LPSubjectReference ref : e.getValue()) {
                 JsonObject parent = new JsonObject();
                 parent.addProperty("collection", ref.getCollectionIdentifier());
-                parent.addProperty("subject", ref.getCollectionIdentifier());
+                parent.addProperty("subject", ref.getSubjectIdentifier());
                 data.add(parent);
             }
             section.add("data", data);
