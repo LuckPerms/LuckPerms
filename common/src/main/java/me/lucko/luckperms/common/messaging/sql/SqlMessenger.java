@@ -82,4 +82,9 @@ public class SqlMessenger extends AbstractSqlMessenger {
     protected Connection getConnection() throws SQLException {
         return this.sqlDao.getProvider().getConnection();
     }
+
+    @Override
+    protected String getTableName() {
+        return this.sqlDao.getPrefix().apply("{prefix}_messages");
+    }
 }

@@ -49,15 +49,16 @@ public abstract class AbstractSqlMessenger implements Messenger {
     }
 
     protected abstract Connection getConnection() throws SQLException;
+    protected abstract String getTableName();
 
     public void init() throws SQLException {
         try (Connection c = getConnection()) {
             // init table
-            try (PreparedStatement ps = c.prepareStatement("CREATE TABLE IF NOT EXISTS `luckperms_messages` (`id` INT AUTO_INCREMENT NOT NULL, `time` TIMESTAMP NOT NULL, `msg` TEXT NOT NULL, PRIMARY KEY (`id`))")) {
+            try (PreparedStatement ps = c.prepareStatement("CREATE TABLE IF NOT EXISTS `" + getTableName() + "` (`id` INT AUTO_INCREMENT NOT NULL, `time` TIMESTAMP NOT NULL, `msg` TEXT NOT NULL, PRIMARY KEY (`id`))")) {
                 ps.execute();
             }
             // pull last id
-            try (PreparedStatement ps = c.prepareStatement("SELECT MAX(`id`) as `latest` FROM `luckperms_messages`")) {
+            try (PreparedStatement ps = c.prepareStatement("SELECT MAX(`id`) as `latest` FROM `" + getTableName() + "`")) {
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         this.lastId = rs.getLong("latest");
@@ -70,7 +71,7 @@ public abstract class AbstractSqlMessenger implements Messenger {
     @Override
     public void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage) {
         try (Connection c = getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement("INSERT INTO luckperms_messages(`time`, `msg`) VALUES(NOW(), ?)")) {
+            try (PreparedStatement ps = c.prepareStatement("INSERT INTO " + getTableName() + "(`time`, `msg`) VALUES(NOW(), ?)")) {
                 ps.setString(1, outgoingMessage.asEncodedString());
                 ps.execute();
             }
@@ -81,7 +82,7 @@ public abstract class AbstractSqlMessenger implements Messenger {
 
     public void pollMessages() {
         try (Connection c = getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement("SELECT `id`, `msg` FROM luckperms_messages WHERE `id` > ? AND (NOW() - `time` > 60)")) {
+            try (PreparedStatement ps = c.prepareStatement("SELECT `id`, `msg` FROM " + getTableName() + " WHERE `id` > ? AND (NOW() - `time` > 60)")) {
                 ps.setLong(1, this.lastId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -100,7 +101,7 @@ public abstract class AbstractSqlMessenger implements Messenger {
 
     public void runHousekeeping() {
         try (Connection c = getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement("DELETE FROM luckperms_messages WHERE (NOW() - `time` > 60)")) {
+            try (PreparedStatement ps = c.prepareStatement("DELETE FROM " + getTableName() + " WHERE (NOW() - `time` > 60)")) {
                 ps.execute();
             }
         } catch (SQLException e) {
