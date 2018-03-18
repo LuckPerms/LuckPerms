@@ -72,9 +72,9 @@ public final class DescriptionBuilder implements PermissionDescription.Builder {
 
     @Nonnull
     @Override
-    public PermissionDescription.Builder assign(@Nonnull String permission, boolean value) {
-        Objects.requireNonNull(permission, "permission");
-        this.roles.put(permission, Tristate.fromBoolean(value));
+    public PermissionDescription.Builder assign(@Nonnull String role, boolean value) {
+        Objects.requireNonNull(role, "role");
+        this.roles.put(role, Tristate.fromBoolean(value));
         return this;
     }
 
@@ -90,8 +90,8 @@ public final class DescriptionBuilder implements PermissionDescription.Builder {
         // Set role-templates
         LPSubjectCollection subjects = this.service.getCollection(PermissionService.SUBJECTS_ROLE_TEMPLATE);
         for (Map.Entry<String, Tristate> assignment : this.roles.entrySet()) {
-            LPSubject subject = subjects.loadSubject(assignment.getKey()).join();
-            subject.getTransientSubjectData().setPermission(ContextSet.empty(), this.id, assignment.getValue());
+            LPSubject roleSubject = subjects.loadSubject(assignment.getKey()).join();
+            roleSubject.getTransientSubjectData().setPermission(ContextSet.empty(), this.id, assignment.getValue());
         }
 
         this.service.getPlugin().getPermissionVault().offer(this.id);
