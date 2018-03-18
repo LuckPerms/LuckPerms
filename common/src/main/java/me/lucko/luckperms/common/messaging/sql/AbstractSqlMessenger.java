@@ -82,7 +82,7 @@ public abstract class AbstractSqlMessenger implements Messenger {
 
     public void pollMessages() {
         try (Connection c = getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement("SELECT `id`, `msg` FROM " + getTableName() + " WHERE `id` > ? AND (NOW() - `time` > 60)")) {
+            try (PreparedStatement ps = c.prepareStatement("SELECT `id`, `msg` FROM " + getTableName() + " WHERE `id` > ? AND (NOW() - `time` < 30)")) {
                 ps.setLong(1, this.lastId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {

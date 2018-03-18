@@ -85,6 +85,6 @@ public class SqlMessenger extends AbstractSqlMessenger {
 
     @Override
     protected String getTableName() {
-        return this.sqlDao.getPrefix().apply("{prefix}_messages");
+        return this.sqlDao.getPrefix().apply("{prefix}messages");
     }
 }
