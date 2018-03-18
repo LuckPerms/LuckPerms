@@ -194,6 +194,10 @@ watch-files: true
 #   for LuckPerms to poll the database for changes.
 #
 # - Possible options:
+#   => sql           Uses the SQL database to form a queue system for communication. Will only work
+#                    when 'storage-method' is set to MySQL or MariaDB. This is chosen by default if
+#                    the option is set to 'none' and SQL storage is in use. Set to 'notsql' to
+#                    disable this.
 #   => bungee        Uses the plugin messaging channels to communicate with the proxy.
 #                    LuckPerms must be installed on your proxy & all connected servers backend
 #                    servers. Won't work if you have more than one BungeeCord proxy.

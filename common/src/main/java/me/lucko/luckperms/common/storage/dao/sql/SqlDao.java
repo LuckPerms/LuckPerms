@@ -129,6 +129,10 @@ public class SqlDao extends AbstractDao {
         return this.gson;
     }
 
+    public AbstractConnectionFactory getProvider() {
+        return this.provider;
+    }
+
     public Function<String, String> getPrefix() {
         return this.prefix;
     }

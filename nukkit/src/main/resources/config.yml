@@ -197,6 +197,9 @@ watch-files: true
 #   for LuckPerms to poll the database for changes.
 #
 # - Possible options:
+#   => sql       Uses the SQL database to form a queue system for communication. Will only work when
+#                'storage-method' is set to MySQL or MariaDB. This is chosen by default if the
+#                option is set to 'none' and SQL storage is in use. Set to 'notsql' to disable this.
 #   => redis     Uses Redis pub-sub to push changes. Your server connection info must be configured
 #                below.
 #   => none      Disables the service.

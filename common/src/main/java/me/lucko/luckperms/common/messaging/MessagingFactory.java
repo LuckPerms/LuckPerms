@@ -25,12 +25,18 @@
 
 package me.lucko.luckperms.common.messaging;
 
+import com.google.common.base.Preconditions;
+
 import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
 import me.lucko.luckperms.api.messenger.Messenger;
 import me.lucko.luckperms.api.messenger.MessengerProvider;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.messaging.redis.RedisMessenger;
+import me.lucko.luckperms.common.messaging.sql.SqlMessenger;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.dao.sql.SqlDao;
+import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.MariaDbConnectionFactory;
+import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.MySqlConnectionFactory;
 
 import javax.annotation.Nonnull;
 
@@ -51,7 +57,14 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
             messagingType = "redis";
         }
 
-        if (messagingType.equals("none")) {
+        if (messagingType.equals("none") && this.plugin.getStorage().getDao() instanceof SqlDao) {
+            SqlDao dao = (SqlDao) this.plugin.getStorage().getDao();
+            if (dao.getProvider() instanceof MySqlConnectionFactory || dao.getProvider() instanceof MariaDbConnectionFactory) {
+                messagingType = "sql";
+            }
+        }
+
+        if (messagingType.equals("none") || messagingType.equals("notsql")) {
             return null;
         }
 
@@ -77,6 +90,12 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
             } else {
                 this.plugin.getLogger().warn("Messaging Service was set to redis, but redis is not enabled!");
             }
+        } else if (messagingType.equals("sql")) {
+            try {
+                return new LuckPermsMessagingService(this.plugin, new SqlMessengerProvider());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         return null;
@@ -96,6 +115,26 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
             RedisMessenger redis = new RedisMessenger(getPlugin(), incomingMessageConsumer);
             redis.init(getPlugin().getConfiguration().get(ConfigKeys.REDIS_ADDRESS), getPlugin().getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
             return redis;
+        }
+    }
+
+    private class SqlMessengerProvider implements MessengerProvider {
+
+        @Nonnull
+        @Override
+        public String getName() {
+            return "Sql";
+        }
+
+        @Nonnull
+        @Override
+        public Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer) {
+            SqlDao dao = (SqlDao) getPlugin().getStorage().getDao();
+            Preconditions.checkState(dao.getProvider() instanceof MySqlConnectionFactory || dao.getProvider() instanceof MariaDbConnectionFactory, "not a supported sql type");
+
+            SqlMessenger sql = new SqlMessenger(getPlugin(), dao, incomingMessageConsumer);
+            sql.init();
+            return sql;
         }
     }
 

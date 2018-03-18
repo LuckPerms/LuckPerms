@@ -1,0 +1,112 @@
+/*
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
+
+package me.lucko.luckperms.common.messaging.sql;
+
+import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
+import me.lucko.luckperms.api.messenger.Messenger;
+import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import javax.annotation.Nonnull;
+
+/**
+ * An implementation of {@link Messenger} using SQL.
+ */
+public abstract class AbstractSqlMessenger implements Messenger {
+
+    private final IncomingMessageConsumer consumer;
+    private long lastId = -1;
+
+    protected AbstractSqlMessenger(IncomingMessageConsumer consumer) {
+        this.consumer = consumer;
+    }
+
+    protected abstract Connection getConnection() throws SQLException;
+
+    public void init() throws SQLException {
+        try (Connection c = getConnection()) {
+            // init table
+            try (PreparedStatement ps = c.prepareStatement("CREATE TABLE IF NOT EXISTS `luckperms_messages` (`id` INT AUTO_INCREMENT NOT NULL, `time` TIMESTAMP NOT NULL, `msg` TEXT NOT NULL, PRIMARY KEY (`id`))")) {
+                ps.execute();
+            }
+            // pull last id
+            try (PreparedStatement ps = c.prepareStatement("SELECT MAX(`id`) as `latest` FROM `luckperms_messages`")) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        this.lastId = rs.getLong("latest");
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage) {
+        try (Connection c = getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement("INSERT INTO luckperms_messages(`time`, `msg`) VALUES(NOW(), ?)")) {
+                ps.setString(1, outgoingMessage.asEncodedString());
+                ps.execute();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void pollMessages() {
+        try (Connection c = getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement("SELECT `id`, `msg` FROM luckperms_messages WHERE `id` > ? AND (NOW() - `time` > 60)")) {
+                ps.setLong(1, this.lastId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        long id = rs.getLong("id");
+                        this.lastId = Math.max(this.lastId, id);
+
+                        String message = rs.getString("msg");
+                        this.consumer.consumeIncomingMessageAsString(message);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void runHousekeeping() {
+        try (Connection c = getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement("DELETE FROM luckperms_messages WHERE (NOW() - `time` > 60)")) {
+                ps.execute();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+}
