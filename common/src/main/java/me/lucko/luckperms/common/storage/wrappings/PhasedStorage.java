@@ -66,7 +66,7 @@ public interface PhasedStorage extends Storage {
                         case "getName":
                         case "init":
                         case "getMeta":
-                            return method.invoke(proxy, args);
+                            return method.invoke(delegate, args);
                     }
 
                     // await the phaser on shutdown
