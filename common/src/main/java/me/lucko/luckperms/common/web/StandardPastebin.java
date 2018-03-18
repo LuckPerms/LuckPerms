@@ -114,7 +114,7 @@ public enum StandardPastebin implements Pastebin {
             outputStream = byteOut;
         }
 
-        try (Writer writer = new OutputStreamWriter(outputStream)) {
+        try (Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
             GSON.toJson(content, writer);
         } catch (IOException e) {
             throw new RuntimeException(e);
