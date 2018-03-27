@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.nukkit;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.sender.Sender;
 
@@ -35,12 +32,10 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandExecutor;
 import cn.nukkit.command.CommandSender;
 
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class NukkitCommandExecutor extends CommandManager implements CommandExecutor {
-    private static final Splitter ARGUMENT_SPLITTER = Splitter.on(COMMAND_SEPARATOR_PATTERN).omitEmptyStrings();
-    private static final Joiner ARGUMENT_JOINER = Joiner.on(' ');
-
     private final LPNukkitPlugin plugin;
 
     NukkitCommandExecutor(LPNukkitPlugin plugin) {
@@ -51,9 +46,8 @@ public class NukkitCommandExecutor extends CommandManager implements CommandExec
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         Sender lpSender = this.plugin.getSenderFactory().wrap(sender);
-        List<String> arguments = stripQuotes(ARGUMENT_SPLITTER.splitToList(ARGUMENT_JOINER.join(args)));
 
-        onCommand(lpSender, label, arguments);
+        onCommand(lpSender, label, new ArrayList<>(Arrays.asList(args)));
         return true;
     }
 }
