@@ -32,6 +32,7 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandExecutor;
 import cn.nukkit.command.CommandSender;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class NukkitCommandExecutor extends CommandManager implements CommandExecutor {
@@ -46,7 +47,7 @@ public class NukkitCommandExecutor extends CommandManager implements CommandExec
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         Sender lpSender = this.plugin.getSenderFactory().wrap(sender);
 
-        onCommand(lpSender, label, Arrays.asList(args));
+        onCommand(lpSender, label, new ArrayList<>(Arrays.asList(args)));
         return true;
     }
 }
