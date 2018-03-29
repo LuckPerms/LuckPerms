@@ -86,7 +86,7 @@ public class SearchCommand extends SingleCommand {
         if (!matchedUsers.isEmpty()) {
             LoadingCache<UUID, String> uuidLookups = Caffeine.newBuilder()
                     .build(u -> {
-                        String s = plugin.getStorage().getName(u).join();
+                        String s = plugin.getStorage().getPlayerName(u).join();
                         if (s == null || s.isEmpty() || s.equals("null")) {
                             s = u.toString();
                         }

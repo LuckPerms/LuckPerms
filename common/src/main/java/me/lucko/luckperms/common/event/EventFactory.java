@@ -72,8 +72,8 @@ import me.lucko.luckperms.common.event.impl.EventUserFirstLogin;
 import me.lucko.luckperms.common.event.impl.EventUserLoad;
 import me.lucko.luckperms.common.event.impl.EventUserLoginProcess;
 import me.lucko.luckperms.common.event.impl.EventUserPromote;
-import me.lucko.luckperms.common.event.model.EntitySender;
-import me.lucko.luckperms.common.event.model.SourceEntity;
+import me.lucko.luckperms.common.event.model.EntitySourceImpl;
+import me.lucko.luckperms.common.event.model.SenderEntity;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
@@ -268,12 +268,12 @@ public final class EventFactory {
     }
 
     public void handleUserDemote(User user, Track track, String from, String to, Sender source) {
-        EventUserDemote event = new EventUserDemote(track.getApiDelegate(), new ApiUser(user), from, to, new SourceEntity(new EntitySender(source)));
+        EventUserDemote event = new EventUserDemote(track.getApiDelegate(), new ApiUser(user), from, to, new EntitySourceImpl(new SenderEntity(source)));
         fireEventAsync(event);
     }
 
     public void handleUserPromote(User user, Track track, String from, String to, Sender source) {
-        EventUserPromote event = new EventUserPromote(track.getApiDelegate(), new ApiUser(user), from, to, new SourceEntity(new EntitySender(source)));
+        EventUserPromote event = new EventUserPromote(track.getApiDelegate(), new ApiUser(user), from, to, new EntitySourceImpl(new SenderEntity(source)));
         fireEventAsync(event);
     }
 

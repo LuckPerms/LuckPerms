@@ -96,7 +96,7 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
                 }
             }
 
-            uuid = plugin.getStorage().getUUID(target.toLowerCase()).join();
+            uuid = plugin.getStorage().getPlayerUuid(target.toLowerCase()).join();
             if (uuid == null) {
                 if (!plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
                     Message.USER_NOT_FOUND.send(sender, target);
@@ -111,7 +111,7 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
             }
         }
 
-        String name = plugin.getStorage().getName(uuid).join();
+        String name = plugin.getStorage().getPlayerName(uuid).join();
         return UserIdentifier.of(uuid, name);
     }
 

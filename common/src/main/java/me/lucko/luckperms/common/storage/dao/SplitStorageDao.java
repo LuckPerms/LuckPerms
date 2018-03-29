@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.PlayerSaveResult;
 import me.lucko.luckperms.common.storage.SplitStorageType;
 import me.lucko.luckperms.common.storage.StorageType;
 
@@ -191,17 +192,17 @@ public class SplitStorageDao extends AbstractDao {
     }
 
     @Override
-    public void saveUUIDData(UUID uuid, String username) throws Exception {
-        this.backing.get(this.types.get(SplitStorageType.UUID)).saveUUIDData(uuid, username);
+    public PlayerSaveResult savePlayerData(UUID uuid, String username) throws Exception {
+        return this.backing.get(this.types.get(SplitStorageType.UUID)).savePlayerData(uuid, username);
     }
 
     @Override
-    public UUID getUUID(String username) throws Exception {
-        return this.backing.get(this.types.get(SplitStorageType.UUID)).getUUID(username);
+    public UUID getPlayerUuid(String username) throws Exception {
+        return this.backing.get(this.types.get(SplitStorageType.UUID)).getPlayerUuid(username);
     }
 
     @Override
-    public String getName(UUID uuid) throws Exception {
-        return this.backing.get(this.types.get(SplitStorageType.UUID)).getName(uuid);
+    public String getPlayerName(UUID uuid) throws Exception {
+        return this.backing.get(this.types.get(SplitStorageType.UUID)).getPlayerName(uuid);
     }
 }

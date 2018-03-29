@@ -86,7 +86,7 @@ public class LogRecent extends SubCommand<Log> {
                 }
             }
 
-            uuid = plugin.getStorage().getUUID(target.toLowerCase()).join();
+            uuid = plugin.getStorage().getPlayerUuid(target.toLowerCase()).join();
             if (uuid == null) {
                 if (!plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
                     Message.USER_NOT_FOUND.send(sender, target);

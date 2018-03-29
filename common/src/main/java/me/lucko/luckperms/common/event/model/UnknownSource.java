@@ -25,32 +25,25 @@
 
 package me.lucko.luckperms.common.event.model;
 
-import me.lucko.luckperms.api.Entity;
-import me.lucko.luckperms.api.event.source.EntitySource;
+import me.lucko.luckperms.api.event.source.Source;
 
 import javax.annotation.Nonnull;
 
-public class SourceEntity implements EntitySource {
-    private final Entity entity;
+public final class UnknownSource implements Source {
+    private static final Source INSTANCE = new UnknownSource();
 
-    public SourceEntity(Entity entity) {
-        this.entity = entity;
-    }
+    private UnknownSource() {
 
-    @Nonnull
-    @Override
-    public Entity getEntity() {
-        return this.entity;
     }
 
     @Nonnull
     @Override
     public Type getType() {
-        return Type.ENTITY;
+        return Type.UNKNOWN;
     }
 
     @Override
     public String toString() {
-        return "Sender(type=ENTITY, entity=" + this.entity + ")";
+        return "Source(type=UNKNOWN)";
     }
 }

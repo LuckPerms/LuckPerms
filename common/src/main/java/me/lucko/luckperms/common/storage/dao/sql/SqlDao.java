@@ -46,6 +46,7 @@ import me.lucko.luckperms.common.node.NodeHeldPermission;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
+import me.lucko.luckperms.common.storage.PlayerSaveResult;
 import me.lucko.luckperms.common.storage.dao.AbstractDao;
 import me.lucko.luckperms.common.storage.dao.sql.connection.AbstractConnectionFactory;
 import me.lucko.luckperms.common.storage.dao.sql.connection.file.SQLiteConnectionFactory;
@@ -68,8 +69,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -83,14 +82,15 @@ public class SqlDao extends AbstractDao {
     private static final String USER_PERMISSIONS_SELECT_DISTINCT = "SELECT DISTINCT uuid FROM {prefix}user_permissions";
     private static final String USER_PERMISSIONS_SELECT_PERMISSION = "SELECT uuid, value, server, world, expiry, contexts FROM {prefix}user_permissions WHERE permission=?";
 
-    private static final String PLAYER_SELECT = "SELECT username, primary_group FROM {prefix}players WHERE uuid=?";
-    private static final String PLAYER_SELECT_UUID = "SELECT uuid FROM {prefix}players WHERE username=? LIMIT 1";
-    private static final String PLAYER_SELECT_USERNAME = "SELECT username FROM {prefix}players WHERE uuid=? LIMIT 1";
-    private static final String PLAYER_SELECT_PRIMARY_GROUP = "SELECT primary_group FROM {prefix}players WHERE uuid=? LIMIT 1";
+    private static final String PLAYER_SELECT_UUID_BY_USERNAME = "SELECT uuid FROM {prefix}players WHERE username=? LIMIT 1";
+    private static final String PLAYER_SELECT_USERNAME_BY_UUID = "SELECT username FROM {prefix}players WHERE uuid=? LIMIT 1";
+    private static final String PLAYER_UPDATE_USERNAME_FOR_UUID = "UPDATE {prefix}players SET username=? WHERE uuid=?";
     private static final String PLAYER_INSERT = "INSERT INTO {prefix}players VALUES(?, ?, ?)";
-    private static final String PLAYER_UPDATE = "UPDATE {prefix}players SET username=? WHERE uuid=?";
-    private static final String PLAYER_DELETE = "DELETE FROM {prefix}players WHERE username=? AND NOT uuid=?";
-    private static final String PLAYER_UPDATE_PRIMARY_GROUP = "UPDATE {prefix}players SET primary_group=? WHERE uuid=?";
+    private static final String PLAYER_SELECT_ALL_UUIDS_BY_USERNAME = "SELECT uuid FROM {prefix}players WHERE username=? AND NOT uuid=?";
+    private static final String PLAYER_DELETE_ALL_UUIDS_BY_USERNAME = "DELETE FROM {prefix}players WHERE username=? AND NOT uuid=?";
+    private static final String PLAYER_SELECT_BY_UUID = "SELECT username, primary_group FROM {prefix}players WHERE uuid=?";
+    private static final String PLAYER_SELECT_PRIMARY_GROUP_BY_UUID = "SELECT primary_group FROM {prefix}players WHERE uuid=? LIMIT 1";
+    private static final String PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID = "UPDATE {prefix}players SET primary_group=? WHERE uuid=?";
 
     private static final String GROUP_PERMISSIONS_SELECT = "SELECT permission, value, server, world, expiry, contexts FROM {prefix}group_permissions WHERE name=?";
     private static final String GROUP_PERMISSIONS_DELETE = "DELETE FROM {prefix}group_permissions WHERE name=?";
@@ -295,8 +295,8 @@ public class SqlDao extends AbstractDao {
         user.getIoLock().lock();
         try {
             List<NodeModel> data = new ArrayList<>();
-            AtomicReference<String> primaryGroup = new AtomicReference<>(null);
-            AtomicReference<String> userName = new AtomicReference<>(null);
+            String primaryGroup = null;
+            String userName = null;
 
             // Collect user permissions
             try (Connection c = this.provider.getConnection()) {
@@ -319,27 +319,26 @@ public class SqlDao extends AbstractDao {
 
             // Collect user meta (username & primary group)
             try (Connection c = this.provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT))) {
+                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT_BY_UUID))) {
                     ps.setString(1, user.getUuid().toString());
 
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
-                            userName.set(rs.getString("username"));
-                            primaryGroup.set(rs.getString("primary_group"));
+                            userName = rs.getString("username");
+                            primaryGroup = rs.getString("primary_group");
                         }
                     }
                 }
             }
 
             // update username & primary group
-            String pg = primaryGroup.get();
-            if (pg == null) {
-                pg = NodeFactory.DEFAULT_GROUP_NAME;
+            if (primaryGroup == null) {
+                primaryGroup = NodeFactory.DEFAULT_GROUP_NAME;
             }
-            user.getPrimaryGroup().setStoredValue(pg);
+            user.getPrimaryGroup().setStoredValue(primaryGroup);
 
             // Update their username to what was in the storage if the one in the local instance is null
-            user.setName(userName.get(), true);
+            user.setName(userName, true);
 
             // If the user has any data in storage
             if (!data.isEmpty()) {
@@ -378,7 +377,7 @@ public class SqlDao extends AbstractDao {
                         ps.setString(1, user.getUuid().toString());
                         ps.execute();
                     }
-                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_UPDATE_PRIMARY_GROUP))) {
+                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID))) {
                         ps.setString(1, NodeFactory.DEFAULT_GROUP_NAME);
                         ps.setString(2, user.getUuid().toString());
                         ps.execute();
@@ -453,7 +452,7 @@ public class SqlDao extends AbstractDao {
             try (Connection c = this.provider.getConnection()) {
                 boolean hasPrimaryGroupSaved;
 
-                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT_PRIMARY_GROUP))) {
+                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT_PRIMARY_GROUP_BY_UUID))) {
                     ps.setString(1, user.getUuid().toString());
                     try (ResultSet rs = ps.executeQuery()) {
                         hasPrimaryGroupSaved = rs.next();
@@ -462,7 +461,7 @@ public class SqlDao extends AbstractDao {
 
                 if (hasPrimaryGroupSaved) {
                     // update
-                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_UPDATE_PRIMARY_GROUP))) {
+                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID))) {
                         ps.setString(1, user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
                         ps.setString(2, user.getUuid().toString());
                         ps.execute();
@@ -772,24 +771,23 @@ public class SqlDao extends AbstractDao {
         Track track = this.plugin.getTrackManager().getOrMake(name);
         track.getIoLock().lock();
         try {
-            AtomicBoolean exists = new AtomicBoolean(false);
-            AtomicReference<String> groups = new AtomicReference<>(null);
-
+            boolean exists = false;
+            String groups = null;
             try (Connection c = this.provider.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(TRACK_SELECT))) {
                     ps.setString(1, track.getName());
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
-                            exists.set(true);
-                            groups.set(rs.getString("groups"));
+                            exists = true;
+                            groups = rs.getString("groups");
                         }
                     }
                 }
             }
 
-            if (exists.get()) {
+            if (exists) {
                 // Track exists, let's load.
-                track.setGroups(this.gson.fromJson(groups.get(), LIST_STRING_TYPE));
+                track.setGroups(this.gson.fromJson(groups, LIST_STRING_TYPE));
             } else {
                 String json = this.gson.toJson(track.getGroups());
                 try (Connection c = this.provider.getConnection()) {
@@ -813,14 +811,13 @@ public class SqlDao extends AbstractDao {
             track.getIoLock().lock();
         }
         try {
-            AtomicReference<String> groups = new AtomicReference<>(null);
-
+            String groups;
             try (Connection c = this.provider.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(TRACK_SELECT))) {
                     ps.setString(1, name);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
-                            groups.set(rs.getString("groups"));
+                            groups = rs.getString("groups");
                         } else {
                             return Optional.empty();
                         }
@@ -833,7 +830,7 @@ public class SqlDao extends AbstractDao {
                 track.getIoLock().lock();
             }
 
-            track.setGroups(this.gson.fromJson(groups.get(), LIST_STRING_TYPE));
+            track.setGroups(this.gson.fromJson(groups, LIST_STRING_TYPE));
             return Optional.of(track);
 
         } finally {
@@ -911,91 +908,91 @@ public class SqlDao extends AbstractDao {
     }
 
     @Override
-    public void saveUUIDData(UUID uuid, String username) throws SQLException {
-        final String u = username.toLowerCase();
-        AtomicReference<String> remoteUserName = new AtomicReference<>(null);
+    public PlayerSaveResult savePlayerData(UUID uuid, String username) throws SQLException {
+        username = username.toLowerCase();
 
-        // cleanup any old values
-        try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_DELETE))) {
-                ps.setString(1, u);
-                ps.setString(2, uuid.toString());
-                ps.execute();
-            }
-        }
+        // find any existing mapping
+        String oldUsername = getPlayerName(uuid);
 
-        try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT_USERNAME))) {
-                ps.setString(1, uuid.toString());
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        remoteUserName.set(rs.getString("username"));
+        // do the insert
+        if (!username.equalsIgnoreCase(oldUsername)) {
+            try (Connection c = this.provider.getConnection()) {
+                if (oldUsername != null) {
+                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_UPDATE_USERNAME_FOR_UUID))) {
+                        ps.setString(1, username);
+                        ps.setString(2, uuid.toString());
+                        ps.execute();
+                    }
+                } else {
+                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_INSERT))) {
+                        ps.setString(1, uuid.toString());
+                        ps.setString(2, username);
+                        ps.setString(3, NodeFactory.DEFAULT_GROUP_NAME);
+                        ps.execute();
                     }
                 }
             }
         }
 
-        if (remoteUserName.get() != null) {
-            // the value is already correct
-            if (remoteUserName.get().equals(u)) {
-                return;
-            }
+        PlayerSaveResult result = PlayerSaveResult.determineBaseResult(username, oldUsername);
 
+        Set<UUID> conflicting = new HashSet<>();
+        try (Connection c = this.provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT_ALL_UUIDS_BY_USERNAME))) {
+                ps.setString(1, username);
+                ps.setString(2, uuid.toString());
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        conflicting.add(UUID.fromString(rs.getString("uuid")));
+                    }
+                }
+            }
+        }
+
+        if (!conflicting.isEmpty()) {
+            // remove the mappings for conflicting uuids
             try (Connection c = this.provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_UPDATE))) {
-                    ps.setString(1, u);
+                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_DELETE_ALL_UUIDS_BY_USERNAME))) {
+                    ps.setString(1, username);
                     ps.setString(2, uuid.toString());
                     ps.execute();
                 }
             }
-        } else {
-            // first time we've seen this uuid
-            try (Connection c = this.provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_INSERT))) {
-                    ps.setString(1, uuid.toString());
-                    ps.setString(2, u);
-                    ps.setString(3, NodeFactory.DEFAULT_GROUP_NAME);
-                    ps.execute();
-                }
-            }
+            result = result.withOtherUuidsPresent(conflicting);
         }
+
+        return result;
     }
 
     @Override
-    public UUID getUUID(String username) throws SQLException {
-        final String u = username.toLowerCase();
-        final AtomicReference<UUID> uuid = new AtomicReference<>(null);
-
+    public UUID getPlayerUuid(String username) throws SQLException {
+        username = username.toLowerCase();
         try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT_UUID))) {
-                ps.setString(1, u);
+            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT_UUID_BY_USERNAME))) {
+                ps.setString(1, username);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        uuid.set(UUID.fromString(rs.getString("uuid")));
+                        return UUID.fromString(rs.getString("uuid"));
                     }
                 }
             }
         }
-
-        return uuid.get();
+        return null;
     }
 
     @Override
-    public String getName(UUID uuid) throws SQLException {
-        final AtomicReference<String> name = new AtomicReference<>(null);
-
+    public String getPlayerName(UUID uuid) throws SQLException {
         try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT_USERNAME))) {
+            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT_USERNAME_BY_UUID))) {
                 ps.setString(1, uuid.toString());
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        name.set(rs.getString("username"));
+                        return rs.getString("username");
                     }
                 }
             }
         }
-
-        return name.get();
+        return null;
     }
 
     /**

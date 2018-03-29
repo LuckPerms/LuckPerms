@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.assignments.AssignmentRule;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.PlayerSaveResult;
 
 import java.util.Set;
 import java.util.UUID;
@@ -61,11 +62,16 @@ public abstract class AbstractConnectionListener implements ConnectionListener {
         this.plugin.getUserManager().getHouseKeeper().registerUsage(u);
 
         // save uuid data.
-        String name = this.plugin.getStorage().noBuffer().getName(u).join();
-        if (name == null) {
+        PlayerSaveResult saveResult = this.plugin.getStorage().savePlayerData(u, username).join();
+        if (saveResult.includes(PlayerSaveResult.Status.CLEAN_INSERT)) {
             this.plugin.getEventFactory().handleUserFirstLogin(u, username);
         }
-        this.plugin.getStorage().noBuffer().saveUUIDData(u, username);
+
+        if (saveResult.includes(PlayerSaveResult.Status.OTHER_UUIDS_PRESENT_FOR_USERNAME)) {
+            this.plugin.getLogger().warn("LuckPerms already has data for player '" + username + "' - but this data is stored under a different uuid.");
+            this.plugin.getLogger().warn("'" + username + "' has previously used the unique ids " + saveResult.getOtherUuids() + " but is now connecting with '" + u + "'");
+            this.plugin.getLogger().warn("This is usually because the server is not authenticating correctly. If you're using BungeeCord, please ensure that IP-Forwarding is setup correctly!");
+        }
 
         User user = this.plugin.getStorage().noBuffer().loadUser(u, username).join();
         if (user == null) {

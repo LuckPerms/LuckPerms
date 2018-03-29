@@ -26,9 +26,12 @@
 package me.lucko.luckperms.common.storage.dao.file;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.Maps;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.SetMultimap;
 
-import me.lucko.luckperms.common.utils.DateUtil;
+import me.lucko.luckperms.common.storage.PlayerSaveResult;
+import me.lucko.luckperms.common.utils.Uuids;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -36,19 +39,60 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nullable;
 
 public class FileUuidCache {
-    private static final Splitter KV_SPLIT = Splitter.on('=').omitEmptyStrings();
-    private static final Splitter TIME_SPLIT = Splitter.on('|').omitEmptyStrings();
+    private static final Splitter KV_SPLIT = Splitter.on(':').omitEmptyStrings();
+    private static final Splitter LEGACY_KV_SPLIT = Splitter.on('=').omitEmptyStrings();
+    private static final Splitter LEGACY_TIME_SPLIT = Splitter.on('|').omitEmptyStrings();
 
-    // the map for lookups
-    private final Map<String, Map.Entry<UUID, Long>> lookupMap = new ConcurrentHashMap<>();
+    // the lookup map
+    private final LookupMap lookupMap = new LookupMap();
+
+    private static final class LookupMap extends ConcurrentHashMap<UUID, String> {
+        private final SetMultimap<String, UUID> reverse = Multimaps.newSetMultimap(new ConcurrentHashMap<>(), ConcurrentHashMap::newKeySet);
+
+        @Override
+        public String put(UUID key, String value) {
+            String existing = super.put(key, value);
+
+            // check if we need to remove a reverse entry which has been replaced
+            // existing might be null
+            if (!value.equalsIgnoreCase(existing)) {
+                if (existing != null) {
+                    this.reverse.remove(existing.toLowerCase(), key);
+                }
+            }
+
+            this.reverse.put(value.toLowerCase(), key);
+            return existing;
+        }
+
+        @Override
+        public String remove(Object k) {
+            UUID key = (UUID) k;
+            String username = super.remove(key);
+            if (username != null) {
+                this.reverse.remove(username.toLowerCase(), key);
+            }
+            return username;
+        }
+
+        public String lookupUsername(UUID uuid) {
+            return super.get(uuid);
+        }
+
+        public Set<UUID> lookupUuid(String name) {
+            return this.reverse.get(name.toLowerCase());
+        }
+    }
 
     /**
      * Adds a mapping to the cache
@@ -56,8 +100,25 @@ public class FileUuidCache {
      * @param uuid the uuid of the player
      * @param username the username of the player
      */
-    public void addMapping(UUID uuid, String username) {
-        this.lookupMap.put(username.toLowerCase(), Maps.immutableEntry(uuid, DateUtil.unixSecondsNow()));
+    public PlayerSaveResult addMapping(UUID uuid, String username) {
+        // perform the insert
+        String oldUsername = this.lookupMap.put(uuid, username);
+
+        PlayerSaveResult result = PlayerSaveResult.determineBaseResult(username, oldUsername);
+
+        Set<UUID> conflicting = new HashSet<>(this.lookupMap.lookupUuid(username));
+        conflicting.remove(uuid);
+
+        if (!conflicting.isEmpty()) {
+            // remove the mappings for conflicting uuids
+            for (UUID conflict : conflicting) {
+                this.lookupMap.remove(conflict);
+            }
+
+            result = result.withOtherUuidsPresent(conflicting);
+        }
+
+        return result;
     }
 
     /**
@@ -67,9 +128,9 @@ public class FileUuidCache {
      * @return a uuid, or null
      */
     @Nullable
-    public UUID lookup(String username) {
-        Map.Entry<UUID, Long> ret = this.lookupMap.get(username.toLowerCase());
-        return ret == null ? null : ret.getKey();
+    public UUID lookupUuid(String username) {
+        Set<UUID> uuids = this.lookupMap.lookupUuid(username);
+        return Iterables.getFirst(uuids, null);
     }
 
     /**
@@ -79,23 +140,46 @@ public class FileUuidCache {
      * @return a username, or null
      */
     public String lookupUsername(UUID uuid) {
-        String username = null;
-        Long time = Long.MIN_VALUE;
+        return this.lookupMap.lookupUsername(uuid);
+    }
 
-        for (Map.Entry<String, Map.Entry<UUID, Long>> ent : this.lookupMap.entrySet()) {
-            if (!ent.getValue().getKey().equals(uuid)) {
-                continue;
+    private void loadEntry(String entry) {
+        if (entry.contains(":")) {
+            // new format
+            Iterator<String> parts = KV_SPLIT.split(entry).iterator();
+
+            if (!parts.hasNext()) return;
+            String uuidPart = parts.next();
+
+            if (!parts.hasNext()) return;
+            String usernamePart = parts.next();
+
+            UUID uuid = Uuids.fromString(uuidPart);
+            if (uuid == null) return;
+
+            this.lookupMap.put(uuid, usernamePart);
+        } else if (entry.contains("=")) {
+            // old format
+            Iterator<String> parts = LEGACY_KV_SPLIT.split(entry).iterator();
+
+            if (!parts.hasNext()) return;
+            String usernamePart = parts.next();
+
+            if (!parts.hasNext()) return;
+            String uuidPart = parts.next();
+
+            // contains a time
+            if (uuidPart.contains("|")) {
+                Iterator<String> valueParts = LEGACY_TIME_SPLIT.split(uuidPart).iterator();
+                if (!valueParts.hasNext()) return;
+                uuidPart = valueParts.next();
             }
 
-            Long t = ent.getValue().getValue();
+            UUID uuid = Uuids.fromString(uuidPart);
+            if (uuid == null) return;
 
-            if (t > time) {
-                time = t;
-                username = ent.getKey();
-            }
+            this.lookupMap.put(uuid, usernamePart);
         }
-
-        return username;
     }
 
     public void load(File file) {
@@ -104,61 +188,14 @@ public class FileUuidCache {
         }
 
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
-
             String entry;
             while ((entry = reader.readLine()) != null) {
                 entry = entry.trim();
                 if (entry.isEmpty() || entry.startsWith("#")) {
                     continue;
                 }
-
-                Iterator<String> parts = KV_SPLIT.split(entry).iterator();
-
-                if (!parts.hasNext()) continue;
-                String key = parts.next();
-
-                if (!parts.hasNext()) continue;
-                String value = parts.next();
-
-                UUID uid;
-                Long t;
-
-                // contains a time (backwards compat)
-                if (value.contains("|")) {
-                    // try to split and extract the time element from the end.
-                    Iterator<String> valueParts = TIME_SPLIT.split(value).iterator();
-
-                    if (!valueParts.hasNext()) continue;
-                    String uuid = valueParts.next();
-
-                    if (!valueParts.hasNext()) continue;
-                    String time = valueParts.next();
-
-                    try {
-                        uid = UUID.fromString(uuid);
-                    } catch (IllegalArgumentException e) {
-                        continue;
-                    }
-
-                    try {
-                        t = Long.parseLong(time);
-                    } catch (NumberFormatException e) {
-                        continue;
-                    }
-                } else {
-                    // just parse from the value
-                    try {
-                        uid = UUID.fromString(value);
-                    } catch (IllegalArgumentException e) {
-                        continue;
-                    }
-
-                    t = 0L;
-                }
-
-                this.lookupMap.put(key, Maps.immutableEntry(uid, t));
+                loadEntry(entry);
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -168,13 +205,11 @@ public class FileUuidCache {
         try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
             writer.write("# LuckPerms UUID lookup cache");
             writer.newLine();
-
-            for (Map.Entry<String, Map.Entry<UUID, Long>> ent : this.lookupMap.entrySet()) {
-                String out = ent.getKey() + "=" + ent.getValue().getKey().toString() + "|" + ent.getValue().getValue().toString();
+            for (Map.Entry<UUID, String> ent : this.lookupMap.entrySet()) {
+                String out = ent.getKey() + ":" + ent.getValue();
                 writer.write(out);
                 writer.newLine();
             }
-
             writer.flush();
         } catch (IOException e) {
             e.printStackTrace();

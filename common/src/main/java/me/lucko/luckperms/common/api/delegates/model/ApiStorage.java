@@ -254,7 +254,7 @@ public class ApiStorage implements me.lucko.luckperms.api.Storage {
     public CompletableFuture<Boolean> saveUUIDData(@Nonnull String username, @Nonnull UUID uuid) {
         Objects.requireNonNull(username, "username");
         Objects.requireNonNull(uuid, "uuid");
-        return this.handle.noBuffer().saveUUIDData(uuid, checkUsername(username))
+        return this.handle.noBuffer().savePlayerData(uuid, checkUsername(username))
                 .thenApply(r -> true)
                 .exceptionally(consumeExceptionToFalse());
     }
@@ -263,13 +263,13 @@ public class ApiStorage implements me.lucko.luckperms.api.Storage {
     @Override
     public CompletableFuture<UUID> getUUID(@Nonnull String username) {
         Objects.requireNonNull(username, "username");
-        return this.handle.noBuffer().getUUID(checkUsername(username));
+        return this.handle.noBuffer().getPlayerUuid(checkUsername(username));
     }
 
     @Nonnull
     @Override
     public CompletableFuture<String> getName(@Nonnull UUID uuid) {
         Objects.requireNonNull(uuid, "uuid");
-        return this.handle.noBuffer().getName(uuid);
+        return this.handle.noBuffer().getPlayerName(uuid);
     }
 }

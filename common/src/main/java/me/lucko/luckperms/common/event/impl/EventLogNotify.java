@@ -29,7 +29,7 @@ import me.lucko.luckperms.api.Entity;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.log.LogNotifyEvent;
 import me.lucko.luckperms.common.event.AbstractEvent;
-import me.lucko.luckperms.common.event.model.EntitySender;
+import me.lucko.luckperms.common.event.model.SenderEntity;
 import me.lucko.luckperms.common.sender.Sender;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -56,7 +56,7 @@ public class EventLogNotify extends AbstractEvent implements LogNotifyEvent {
     @Override
     public synchronized Entity getNotifiable() {
         if (this.notifiable == null) {
-            this.notifiable = new EntitySender(this.sender);
+            this.notifiable = new SenderEntity(this.sender);
         }
         return this.notifiable;
     }

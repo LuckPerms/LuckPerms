@@ -34,6 +34,7 @@ import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.UpdateOptions;
 
 import me.lucko.luckperms.api.HeldPermission;
@@ -56,6 +57,7 @@ import me.lucko.luckperms.common.node.NodeHeldPermission;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
+import me.lucko.luckperms.common.storage.PlayerSaveResult;
 import me.lucko.luckperms.common.storage.StorageCredentials;
 import me.lucko.luckperms.common.storage.dao.AbstractDao;
 
@@ -569,29 +571,53 @@ public class MongoDao extends AbstractDao {
     }
 
     @Override
-    public void saveUUIDData(UUID uuid, String username) {
+    public PlayerSaveResult savePlayerData(UUID uuid, String username) {
+        username = username.toLowerCase();
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
-        c.replaceOne(new Document("_id", uuid), new Document("_id", uuid).append("name", username.toLowerCase()), new UpdateOptions().upsert(true));
+
+        // find any existing mapping
+        String oldUsername = getPlayerName(uuid);
+
+        // do the insert
+        if (!username.equalsIgnoreCase(oldUsername)) {
+            c.replaceOne(new Document("_id", uuid), new Document("_id", uuid).append("name", username), new UpdateOptions().upsert(true));
+        }
+
+        PlayerSaveResult result = PlayerSaveResult.determineBaseResult(username, oldUsername);
+
+        Set<UUID> conflicting = new HashSet<>();
+        try (MongoCursor<Document> cursor = c.find(new Document("name", username)).iterator()) {
+            if (cursor.hasNext()) {
+                conflicting.add(cursor.next().get("_id", UUID.class));
+            }
+        }
+        conflicting.remove(uuid);
+
+        if (!conflicting.isEmpty()) {
+            // remove the mappings for conflicting uuids
+            c.deleteMany(Filters.and(conflicting.stream().map(u -> Filters.eq("_id", u)).collect(Collectors.toList())));
+            result = result.withOtherUuidsPresent(conflicting);
+        }
+
+        return result;
     }
 
     @Override
-    public UUID getUUID(String username) {
+    public UUID getPlayerUuid(String username) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
-        try (MongoCursor<Document> cursor = c.find(new Document("name", username.toLowerCase())).iterator()) {
-            if (cursor.hasNext()) {
-                return cursor.next().get("_id", UUID.class);
-            }
+        Document doc = c.find(new Document("name", username.toLowerCase())).first();
+        if (doc != null) {
+            return doc.get("_id", UUID.class);
         }
         return null;
     }
 
     @Override
-    public String getName(UUID uuid) {
+    public String getPlayerName(UUID uuid) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
-        try (MongoCursor<Document> cursor = c.find(new Document("_id", uuid)).iterator()) {
-            if (cursor.hasNext()) {
-                return cursor.next().get("name", String.class);
-            }
+        Document doc = c.find(new Document("_id", uuid)).first();
+        if (doc != null) {
+            return doc.get("name", String.class);
         }
         return null;
     }

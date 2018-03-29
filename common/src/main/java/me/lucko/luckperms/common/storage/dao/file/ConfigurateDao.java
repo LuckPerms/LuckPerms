@@ -47,6 +47,7 @@ import me.lucko.luckperms.common.node.NodeHeldPermission;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
+import me.lucko.luckperms.common.storage.PlayerSaveResult;
 import me.lucko.luckperms.common.storage.dao.AbstractDao;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.common.utils.Uuids;
@@ -670,17 +671,17 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public void saveUUIDData(UUID uuid, String username) {
-        this.uuidCache.addMapping(uuid, username);
+    public PlayerSaveResult savePlayerData(UUID uuid, String username) {
+        return this.uuidCache.addMapping(uuid, username);
     }
 
     @Override
-    public UUID getUUID(String username) {
-        return this.uuidCache.lookup(username);
+    public UUID getPlayerUuid(String username) {
+        return this.uuidCache.lookupUuid(username);
     }
 
     @Override
-    public String getName(UUID uuid) {
+    public String getPlayerName(UUID uuid) {
         return this.uuidCache.lookupUsername(uuid);
     }
 

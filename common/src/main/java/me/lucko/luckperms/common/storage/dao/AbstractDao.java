@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.PlayerSaveResult;
 
 import java.util.Collections;
 import java.util.List;
@@ -105,12 +106,12 @@ public abstract class AbstractDao {
 
     public abstract void deleteTrack(Track track) throws Exception;
 
-    public abstract void saveUUIDData(UUID uuid, String username) throws Exception;
+    public abstract PlayerSaveResult savePlayerData(UUID uuid, String username) throws Exception;
 
     @Nullable
-    public abstract UUID getUUID(String username) throws Exception;
+    public abstract UUID getPlayerUuid(String username) throws Exception;
 
     @Nullable
-    public abstract String getName(UUID uuid) throws Exception;
+    public abstract String getPlayerName(UUID uuid) throws Exception;
 
 }

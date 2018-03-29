@@ -67,6 +67,7 @@ public class UserInfo extends SubCommand<User> {
         Message.USER_INFO_GENERAL.send(sender,
                 user.getName().orElse("Unknown"),
                 user.getUuid(),
+                user.getUuid().version() == 4 ? "&2mojang" : "&8offline",
                 status.asString(plugin.getLocaleManager()),
                 user.getPrimaryGroup().getValue()
         );

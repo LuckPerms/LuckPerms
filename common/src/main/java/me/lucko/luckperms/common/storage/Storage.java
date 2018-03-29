@@ -99,9 +99,9 @@ public interface Storage {
 
     CompletableFuture<Void> deleteTrack(Track track, DeletionCause cause);
 
-    CompletableFuture<Void> saveUUIDData(UUID uuid, String username);
+    CompletableFuture<PlayerSaveResult> savePlayerData(UUID uuid, String username);
 
-    CompletableFuture<UUID> getUUID(String username);
+    CompletableFuture<UUID> getPlayerUuid(String username);
 
-    CompletableFuture<String> getName(UUID uuid);
+    CompletableFuture<String> getPlayerName(UUID uuid);
 }

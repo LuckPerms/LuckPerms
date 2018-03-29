@@ -290,17 +290,17 @@ public class AbstractStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Void> saveUUIDData(UUID uuid, String username) {
-        return makeFuture(() -> this.dao.saveUUIDData(uuid, username));
+    public CompletableFuture<PlayerSaveResult> savePlayerData(UUID uuid, String username) {
+        return makeFuture(() -> this.dao.savePlayerData(uuid, username));
     }
 
     @Override
-    public CompletableFuture<UUID> getUUID(String username) {
-        return makeFuture(() -> this.dao.getUUID(username));
+    public CompletableFuture<UUID> getPlayerUuid(String username) {
+        return makeFuture(() -> this.dao.getPlayerUuid(username));
     }
 
     @Override
-    public CompletableFuture<String> getName(UUID uuid) {
-        return makeFuture(() -> this.dao.getName(uuid));
+    public CompletableFuture<String> getPlayerName(UUID uuid) {
+        return makeFuture(() -> this.dao.getPlayerName(uuid));
     }
 }

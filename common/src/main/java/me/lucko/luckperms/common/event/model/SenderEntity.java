@@ -25,25 +25,48 @@
 
 package me.lucko.luckperms.common.event.model;
 
-import me.lucko.luckperms.api.event.source.Source;
+import me.lucko.luckperms.api.Entity;
+import me.lucko.luckperms.common.sender.Sender;
+
+import java.util.UUID;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-public final class SourceUnknown implements Source {
-    private static final Source INSTANCE = new SourceUnknown();
+public class SenderEntity implements Entity {
+    private final Sender sender;
 
-    private SourceUnknown() {
+    public SenderEntity(Sender sender) {
+        this.sender = sender;
+    }
 
+    @Nullable
+    @Override
+    public UUID getUniqueId() {
+        if (this.sender.isConsole()) {
+            return null;
+        }
+        return this.sender.getUuid();
+    }
+
+    @Nonnull
+    @Override
+    public String getName() {
+        return this.sender.getName();
     }
 
     @Nonnull
     @Override
     public Type getType() {
-        return Type.UNKNOWN;
+        if (this.sender.isConsole()) {
+            return Type.CONSOLE;
+        } else {
+            return Type.PLAYER;
+        }
     }
 
     @Override
     public String toString() {
-        return "Source(type=UNKNOWN)";
+        return "SenderEntity(type=" + getType() + ", sender=" + this.sender + ")";
     }
 }

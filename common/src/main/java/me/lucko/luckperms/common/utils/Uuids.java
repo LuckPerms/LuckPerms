@@ -41,7 +41,7 @@ public final class Uuids {
     public static final Predicate<String> PREDICATE = s -> parseNullable(s) != null;
 
     @Nullable
-    private static UUID fromString(String s) {
+    public static UUID fromString(String s) {
         try {
             return UUID.fromString(s);
         } catch (IllegalArgumentException e) {

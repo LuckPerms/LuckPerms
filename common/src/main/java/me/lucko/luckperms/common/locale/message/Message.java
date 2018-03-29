@@ -309,7 +309,7 @@ public enum Message {
 
     USER_INFO_GENERAL(
             "{PREFIX}&b&l> &bUser Info: &f{}" + "\n" +
-            "{PREFIX}&f- &3UUID: &f{}" + "\n" +
+            "{PREFIX}&f- &3UUID: &f{} &7(type: {}&7)" + "\n" +
             "{PREFIX}&f- &3Status: {}" + "\n" +
             "{PREFIX}&f- &3Primary Group: &f{}",
             false
