@@ -86,7 +86,7 @@ public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> 
                         .collect(Collectors.toList());
 
                 for (Track t : tracks) {
-                    lines.add(Maps.immutableEntry(t, MessageUtils.listToArrowSep(t.getGroups(), groupName) + MessageUtils.getAppendableNodeContextString(node)));
+                    lines.add(Maps.immutableEntry(t, MessageUtils.getAppendableNodeContextString(node) + "\n" + MessageUtils.listToArrowSep(t.getGroups(), groupName)));
                 }
             }
         } else {
