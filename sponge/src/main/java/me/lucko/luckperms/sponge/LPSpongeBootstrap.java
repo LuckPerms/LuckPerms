@@ -236,16 +236,14 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
 
     @Override
     public String getServerVersion() {
-        return getGame().getPlatform().getContainer(Platform.Component.API).getName() + ": " + 
-                getGame().getPlatform().getContainer(Platform.Component.API).getVersion().orElse("null") + " - " +
-                getGame().getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getName() + ": " +
-                getGame().getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getVersion().orElse("null");
+        PluginContainer api = getGame().getPlatform().getContainer(Platform.Component.API);
+        PluginContainer impl = getGame().getPlatform().getContainer(Platform.Component.IMPLEMENTATION);
+        return api.getName() + ": " + api.getVersion().orElse("null") + " - " + impl.getName() + ": " + impl.getVersion().orElse("null");
     }
     
     @Override
     public File getDataDirectory() {
-        Path serverRoot = getConfigPath().getParent().getParent();
-        Path dataDirectory = serverRoot.resolve("luckperms");
+        Path dataDirectory = this.game.getGameDirectory().resolve("luckperms");
         try {
             Files.createDirectories(dataDirectory);
         } catch (IOException e) {
