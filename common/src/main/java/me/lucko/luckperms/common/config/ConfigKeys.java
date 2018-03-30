@@ -359,7 +359,13 @@ public class ConfigKeys {
     /**
      * The world rewrites map
      */
-    public static final ConfigKey<Map<String, String>> WORLD_REWRITES = MapKey.of("world-rewrite");
+    public static final ConfigKey<Map<String, String>> WORLD_REWRITES = AbstractKey.of(c -> {
+        return c.getMap("world-rewrite", ImmutableMap.of()).entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        e -> e.getKey().toLowerCase(),
+                        e -> e.getValue().toLowerCase()
+                ));
+    });
 
     /**
      * The group name rewrites map
