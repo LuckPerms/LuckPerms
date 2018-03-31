@@ -106,7 +106,7 @@ public class SqlDao extends AbstractDao {
     private static final String GROUP_DELETE = "DELETE FROM {prefix}groups WHERE name=?";
 
     private static final String TRACK_INSERT = "INSERT INTO {prefix}tracks VALUES(?, ?)";
-    private static final String TRACK_SELECT = "SELECT 'groups' FROM {prefix}tracks WHERE name=?";
+    private static final String TRACK_SELECT = "SELECT groups FROM {prefix}tracks WHERE name=?";
     private static final String TRACK_SELECT_ALL = "SELECT * FROM {prefix}tracks";
     private static final String TRACK_UPDATE = "UPDATE {prefix}tracks SET groups=? WHERE name=?";
     private static final String TRACK_DELETE = "DELETE FROM {prefix}tracks WHERE name=?";
