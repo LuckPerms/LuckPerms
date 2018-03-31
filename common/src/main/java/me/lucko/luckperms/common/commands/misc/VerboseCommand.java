@@ -105,10 +105,10 @@ public class VerboseCommand extends SingleCommand {
             return CommandResult.SUCCESS;
         }
 
-        if (mode.equals("off") || mode.equals("false") || mode.equals("paste")) {
+        if (mode.equals("off") || mode.equals("false") || mode.equals("paste") || mode.equals("upload")) {
             VerboseListener listener = plugin.getVerboseHandler().unregisterListener(sender.getUuid());
 
-            if (mode.equals("paste")) {
+            if (mode.equals("paste") || mode.equals("upload")) {
                 if (listener == null) {
                     Message.VERBOSE_OFF.send(sender);
                 } else {
@@ -140,11 +140,11 @@ public class VerboseCommand extends SingleCommand {
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         if (args.isEmpty()) {
-            return ImmutableList.of("on", "record", "off", "paste");
+            return ImmutableList.of("on", "record", "off", "upload");
         }
 
         if (args.size() == 1) {
-            return Stream.of("on", "record", "off", "paste").filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
+            return Stream.of("on", "record", "off", "upload").filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
         }
 
         return Collections.emptyList();
