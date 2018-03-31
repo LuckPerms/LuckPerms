@@ -102,8 +102,8 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         displayBanner(getConsoleSender());
 
         // load some utilities early
-        this.verboseHandler = new VerboseHandler(getBootstrap().getScheduler().platformAsync());
-        this.permissionVault = new PermissionVault(getBootstrap().getScheduler().platformAsync());
+        this.verboseHandler = new VerboseHandler();
+        this.permissionVault = new PermissionVault();
         this.logDispatcher = new LogDispatcher(this);
 
         // load configuration
@@ -194,8 +194,8 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         performEarlyDisableTasks();
 
         // shutdown permission vault and verbose handler tasks
-        this.permissionVault.shutdown();
-        this.verboseHandler.shutdown();
+        this.permissionVault.stop();
+        this.verboseHandler.stop();
 
         // remove any hooks into the platform
         removePlatformHooks();

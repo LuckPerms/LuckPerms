@@ -116,15 +116,6 @@ public class NukkitSchedulerAdapter implements SchedulerAdapter {
         }
     }
 
-
-    public ExecutorService asyncFallback() {
-        return this.asyncFallback;
-    }
-
-    public Executor asyncNukkit() {
-        return this.asyncNukkit;
-    }
-
     @Override
     public Executor sync() {
         return this.sync;
@@ -133,6 +124,11 @@ public class NukkitSchedulerAdapter implements SchedulerAdapter {
     @Override
     public Executor async() {
         return this.async;
+    }
+
+    @Override
+    public Executor platformAsync() {
+        return this.asyncNukkit;
     }
 
     public void setUseFallback(boolean useFallback) {

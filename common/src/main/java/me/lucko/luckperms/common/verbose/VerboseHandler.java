@@ -28,18 +28,19 @@ package me.lucko.luckperms.common.verbose;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.utils.RepeatingTask;
 
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Accepts {@link CheckData} and passes it onto registered {@link VerboseListener}s.
  */
-public class VerboseHandler implements Runnable {
+public class VerboseHandler extends RepeatingTask {
 
     // the listeners currently registered
     private final Map<UUID, VerboseListener> listeners;
@@ -50,14 +51,10 @@ public class VerboseHandler implements Runnable {
     // if there are any listeners currently registered
     private boolean listening = false;
 
-    // if the handler should shutdown
-    private boolean shutdown = false;
-
-    public VerboseHandler(Executor executor) {
+    public VerboseHandler() {
+        super(100, TimeUnit.MILLISECONDS, "luckperms-verbose");
         this.listeners = new ConcurrentHashMap<>();
         this.queue = new ConcurrentLinkedQueue<>();
-
-        executor.execute(this);
     }
 
     /**
@@ -111,27 +108,15 @@ public class VerboseHandler implements Runnable {
     }
 
     @Override
-    public void run() {
-        while (true) {
+    protected void tick() {
+        // remove listeners where the sender is no longer valid
+        this.listeners.values().removeIf(l -> !l.getNotifiedSender().isValid());
 
-            // remove listeners where the sender is no longer valid
-            this.listeners.values().removeIf(l -> !l.getNotifiedSender().isValid());
+        // handle all checks in the queue
+        flush();
 
-            // handle all checks in the queue
-            flush();
-
-            // break the loop if the handler has been shutdown
-            if (this.shutdown) {
-                return;
-            }
-
-            // update listening state
-            this.listening = !this.listeners.isEmpty();
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ignored) {}
-        }
+        // update listening state
+        this.listening = !this.listeners.isEmpty();
     }
 
     /**
@@ -143,9 +128,5 @@ public class VerboseHandler implements Runnable {
                 listener.acceptData(e);
             }
         }
-    }
-
-    public void shutdown() {
-        this.shutdown = true;
     }
 }

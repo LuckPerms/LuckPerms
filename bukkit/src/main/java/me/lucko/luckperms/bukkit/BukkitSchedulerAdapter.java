@@ -116,15 +116,6 @@ public class BukkitSchedulerAdapter implements SchedulerAdapter {
         }
     }
 
-
-    public ExecutorService asyncFallback() {
-        return this.asyncFallback;
-    }
-
-    public Executor asyncBukkit() {
-        return this.asyncBukkit;
-    }
-
     @Override
     public Executor sync() {
         return this.sync;
@@ -133,6 +124,11 @@ public class BukkitSchedulerAdapter implements SchedulerAdapter {
     @Override
     public Executor async() {
         return this.async;
+    }
+
+    @Override
+    public Executor platformAsync() {
+        return this.asyncBukkit;
     }
 
     public void setUseFallback(boolean useFallback) {

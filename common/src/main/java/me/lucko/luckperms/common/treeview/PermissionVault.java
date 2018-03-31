@@ -28,6 +28,8 @@ package me.lucko.luckperms.common.treeview;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 
+import me.lucko.luckperms.common.utils.RepeatingTask;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -35,13 +37,13 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
  * Stores a collection of all permissions known to the platform.
  */
-public class PermissionVault implements Runnable {
+public class PermissionVault extends RepeatingTask {
     private static final Splitter DOT_SPLIT = Splitter.on('.').omitEmptyStrings();
 
     // the root node in the tree
@@ -53,15 +55,11 @@ public class PermissionVault implements Runnable {
     // a queue of permission strings to be processed by the tree
     private final Queue<String> queue;
 
-    // if the handler should shutdown
-    private boolean shutdown = false;
-
-    public PermissionVault(Executor executor) {
+    public PermissionVault() {
+        super(1000, TimeUnit.MILLISECONDS, "luckperms-permission-vault");
         this.rootNode = new TreeNode();
         this.knownPermissions = ConcurrentHashMap.newKeySet(3000);
         this.queue = new ConcurrentLinkedQueue<>();
-
-        executor.execute(this);
     }
 
     public TreeNode getRootNode() {
@@ -69,27 +67,17 @@ public class PermissionVault implements Runnable {
     }
 
     @Override
-    public void run() {
-        while (true) {
-            for (String e; (e = this.queue.poll()) != null; ) {
-                try {
-                    String s = e.toLowerCase();
-                    // only attempt an insert if we're not seen this permission before
-                    if (this.knownPermissions.add(s)) {
-                        insert(s);
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-
-            if (this.shutdown) {
-                return;
-            }
-
+    protected void tick() {
+        for (String e; (e = this.queue.poll()) != null; ) {
             try {
-                Thread.sleep(5000);
-            } catch (InterruptedException ignored) {}
+                String s = e.toLowerCase();
+                // only attempt an insert if we're not seen this permission before
+                if (this.knownPermissions.add(s)) {
+                    insert(s);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
@@ -125,10 +113,6 @@ public class PermissionVault implements Runnable {
         for (String part : parts) {
             current = current.getChildMap().computeIfAbsent(part, s -> new TreeNode());
         }
-    }
-
-    public void shutdown() {
-        this.shutdown = true;
     }
 
 }
