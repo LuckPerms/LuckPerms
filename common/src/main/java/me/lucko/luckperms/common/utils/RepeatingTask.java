@@ -38,7 +38,15 @@ public abstract class RepeatingTask {
 
     protected RepeatingTask(long time, TimeUnit unit, String nameFormat) {
         this.executor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat(nameFormat).build());
-        this.executor.scheduleAtFixedRate(this::tick, time, time, unit);
+        this.executor.scheduleAtFixedRate(this::run, time, time, unit);
+    }
+
+    private void run() {
+        try {
+            tick();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     protected abstract void tick();
