@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.storage;
 
-import me.lucko.luckperms.common.utils.DateUtil;
-
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -56,8 +54,6 @@ public final class DataConstraints {
     public static final Predicate<String> TRACK_NAME_TEST = s -> !s.isEmpty() && s.length() <= MAX_TRACK_NAME_LENGTH && !s.contains(" ");
 
     public static final Predicate<String> TRACK_NAME_TEST_ALLOW_SPACE = s -> !s.isEmpty() && s.length() <= MAX_TRACK_NAME_LENGTH;
-
-    public static final Predicate<Long> TIME_TEST = unixTime -> !DateUtil.shouldExpire(unixTime);
 
     public static final Predicate<String> SERVER_NAME_TEST = s -> !s.isEmpty() && s.length() <= MAX_SERVER_LENGTH && !s.contains(" ");
 

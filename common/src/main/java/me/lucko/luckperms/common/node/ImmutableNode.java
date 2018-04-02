@@ -34,7 +34,6 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.processors.WildcardProcessor;
-import me.lucko.luckperms.common.utils.DateUtil;
 
 import java.util.Date;
 import java.util.List;
@@ -248,12 +247,12 @@ public final class ImmutableNode implements Node {
     @Override
     public long getSecondsTilExpiry() {
         checkState(isTemporary(), "Node does not have an expiry time.");
-        return this.expireAt - DateUtil.unixSecondsNow();
+        return this.expireAt - System.currentTimeMillis() / 1000L;
     }
 
     @Override
     public boolean hasExpired() {
-        return isTemporary() && this.expireAt < DateUtil.unixSecondsNow();
+        return isTemporary() && this.expireAt < System.currentTimeMillis() / 1000L;
     }
 
     @Override

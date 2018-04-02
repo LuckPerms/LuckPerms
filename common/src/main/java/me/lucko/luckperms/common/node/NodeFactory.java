@@ -56,7 +56,7 @@ public final class NodeFactory {
     private static final String WEIGHT_NODE_MARKER = WEIGHT_KEY + ".";
 
     // used to split prefix/suffix/meta nodes
-    private static final Splitter META_SPLITTER = Splitter.on(PatternCache.compileDelimitedMatcher(".", "\\")).limit(2);
+    private static final Splitter META_SPLITTER = Splitter.on(PatternCache.compileDelimiterPattern(".", "\\")).limit(2);
 
     public static Node.Builder builder(String s) {
         return new NodeBuilder(s);

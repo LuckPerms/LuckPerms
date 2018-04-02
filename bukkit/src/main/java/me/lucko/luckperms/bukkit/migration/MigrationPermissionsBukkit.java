@@ -100,7 +100,7 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
         ConfigurationSection usersSection = config.getConfigurationSection("users");
 
         Iterators.iterate(usersSection.getKeys(false), key -> {
-            UUID uuid = BukkitMigrationUtils.lookupUuid(log, key);
+            UUID uuid = BukkitUuids.lookupUuid(log, key);
             if (uuid == null) {
                 return;
             }

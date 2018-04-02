@@ -58,16 +58,16 @@ public final class LegacyNodeFactory {
     private static final String[] GENERIC_DELIMITERS = new String[]{".", "/", "-", "$"};
 
     // legacy node format delimiters
-    private static final Pattern LEGACY_SERVER_DELIM = PatternCache.compileDelimitedMatcher("/", "\\");
+    private static final Pattern LEGACY_SERVER_DELIM = PatternCache.compileDelimiterPattern("/", "\\");
     private static final Splitter LEGACY_SERVER_SPLITTER = Splitter.on(LEGACY_SERVER_DELIM).limit(2);
-    private static final Pattern LEGACY_WORLD_DELIM = PatternCache.compileDelimitedMatcher("-", "\\");
+    private static final Pattern LEGACY_WORLD_DELIM = PatternCache.compileDelimiterPattern("-", "\\");
     private static final Splitter LEGACY_WORLD_SPLITTER = Splitter.on(LEGACY_WORLD_DELIM).limit(2);
-    private static final Pattern LEGACY_EXPIRY_DELIM = PatternCache.compileDelimitedMatcher("$", "\\");
+    private static final Pattern LEGACY_EXPIRY_DELIM = PatternCache.compileDelimiterPattern("$", "\\");
     private static final Splitter LEGACY_EXPIRY_SPLITTER = Splitter.on(LEGACY_EXPIRY_DELIM).limit(2);
-    private static final Pattern LEGACY_CONTEXT_DELIM = PatternCache.compileDelimitedMatcher(")", "\\");
+    private static final Pattern LEGACY_CONTEXT_DELIM = PatternCache.compileDelimiterPattern(")", "\\");
     private static final Splitter CONTEXT_SPLITTER = Splitter.on(LEGACY_CONTEXT_DELIM).limit(2);
-    private static final Pattern LEGACY_CONTEXT_PAIR_DELIM = PatternCache.compileDelimitedMatcher(",", "\\");
-    private static final Pattern LEGACY_CONTEXT_PAIR_PART_DELIM = PatternCache.compileDelimitedMatcher("=", "\\");
+    private static final Pattern LEGACY_CONTEXT_PAIR_DELIM = PatternCache.compileDelimiterPattern(",", "\\");
+    private static final Pattern LEGACY_CONTEXT_PAIR_PART_DELIM = PatternCache.compileDelimiterPattern("=", "\\");
     private static final Splitter.MapSplitter LEGACY_CONTEXT_PART_SPLITTER = Splitter.on(LEGACY_CONTEXT_PAIR_DELIM)
             .withKeyValueSeparator(Splitter.on(LEGACY_CONTEXT_PAIR_PART_DELIM));
 

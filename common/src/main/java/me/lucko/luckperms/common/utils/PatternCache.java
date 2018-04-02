@@ -27,47 +27,56 @@ package me.lucko.luckperms.common.utils;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.google.common.collect.Maps;
 
-import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public final class PatternCache {
 
-    private static final NullablePattern NULL_PATTERN = new NullablePattern(null);
-
-    private static final LoadingCache<String, NullablePattern> CACHE = Caffeine.newBuilder().build(s -> {
-        try {
-            return new NullablePattern(Pattern.compile(s));
-        } catch (PatternSyntaxException e) {
-            return NULL_PATTERN;
-        }
-    });
-
-    private static final LoadingCache<Map.Entry<String, String>, String> DELIMITER_CACHE = Caffeine.newBuilder()
-            .build(e -> {
-                // note the reversed order
-                return "(?<!" + Pattern.quote(e.getValue()) + ")" + Pattern.quote(e.getKey());
+    private static final LoadingCache<String, CachedPattern> CACHE = Caffeine.newBuilder()
+            .build(s -> {
+                try {
+                    return new CachedPattern(Pattern.compile(s));
+                } catch (PatternSyntaxException e) {
+                    return new CachedPattern(e);
+                }
             });
 
     public static Pattern compile(String regex) {
-        return CACHE.get(regex).pattern;
+        CachedPattern pattern = CACHE.get(regex);
+        Objects.requireNonNull(pattern, "pattern");
+        if (pattern.ex != null) {
+            throw pattern.ex;
+        } else {
+            return pattern.instance;
+        }
     }
 
-    public static String buildDelimitedMatcher(String delim, String esc) {
-        return DELIMITER_CACHE.get(Maps.immutableEntry(delim, esc));
+    /**
+     * Compiles delimiter pattern with the given escape sequence.
+     *
+     * @param delimiter the delimiter (the thing separating components)
+     * @param escape the string used to escape the delimiter where the pattern shouldn't match
+     * @return a pattern
+     */
+    public static Pattern compileDelimiterPattern(String delimiter, String escape) {
+        String pattern = "(?<!" + Pattern.quote(escape) + ")" + Pattern.quote(delimiter);
+        return compile(pattern);
     }
 
-    public static Pattern compileDelimitedMatcher(String delim, String esc) {
-        return compile(buildDelimitedMatcher(delim, esc));
-    }
+    private static final class CachedPattern {
+        private final Pattern instance;
+        private final PatternSyntaxException ex;
 
-    private static final class NullablePattern {
-        private final Pattern pattern;
+        public CachedPattern(Pattern instance) {
+            this.instance = instance;
+            this.ex = null;
+        }
 
-        public NullablePattern(Pattern pattern) {
-            this.pattern = pattern;
+        public CachedPattern(PatternSyntaxException ex) {
+            this.instance = null;
+            this.ex = ex;
         }
     }
 

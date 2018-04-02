@@ -28,10 +28,10 @@ package me.lucko.luckperms.bukkit.compat;
 import org.bukkit.Bukkit;
 
 public final class ReflectionUtil {
-    private static final String SERVER_VERSION = _getServerVersion();
+    private static final String SERVER_VERSION = getServerVersion();
     private static final boolean CHAT_COMPATIBLE = !SERVER_VERSION.startsWith(".v1_7_");
 
-    private static String _getServerVersion() {
+    private static String getServerVersion() {
         Class<?> server = Bukkit.getServer().getClass();
         if (!server.getSimpleName().equals("CraftServer")) {
             return ".";
@@ -45,16 +45,12 @@ public final class ReflectionUtil {
         }
     }
 
-    private static String getServerVersion() {
-        return SERVER_VERSION;
-    }
-
     public static boolean isChatCompatible() {
         return CHAT_COMPATIBLE;
     }
 
     public static String nms(String className) {
-        return "net.minecraft.server" + getServerVersion() + className;
+        return "net.minecraft.server" + SERVER_VERSION + className;
     }
 
     public static Class<?> nmsClass(String className) throws ClassNotFoundException {
@@ -62,7 +58,7 @@ public final class ReflectionUtil {
     }
 
     public static String obc(String className) {
-        return "org.bukkit.craftbukkit" + getServerVersion() + className;
+        return "org.bukkit.craftbukkit" + SERVER_VERSION + className;
     }
 
     public static Class<?> obcClass(String className) throws ClassNotFoundException {

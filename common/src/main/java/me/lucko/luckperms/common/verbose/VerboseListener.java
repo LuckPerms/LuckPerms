@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.utils.DateUtil;
+import me.lucko.luckperms.common.utils.DurationFormatter;
 import me.lucko.luckperms.common.utils.StackTracePrinter;
 import me.lucko.luckperms.common.utils.TextUtils;
 import me.lucko.luckperms.common.utils.gson.JArray;
@@ -181,7 +181,7 @@ public class VerboseListener {
         String startDate = DATE_FORMAT.format(new Date(this.startTime));
         String endDate = DATE_FORMAT.format(new Date(now));
         long secondsTaken = (now - this.startTime) / 1000L;
-        String duration = DateUtil.formatTimeShort(secondsTaken);
+        String duration = DurationFormatter.CONCISE.format(secondsTaken);
 
         String filter;
         if (this.filter.isBlank()){

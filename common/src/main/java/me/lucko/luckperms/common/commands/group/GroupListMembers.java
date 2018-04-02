@@ -46,7 +46,7 @@ import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.HolderType;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.utils.DateUtil;
+import me.lucko.luckperms.common.utils.DurationFormatter;
 import me.lucko.luckperms.common.utils.Iterators;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.TextUtils;
@@ -150,7 +150,7 @@ public class GroupListMembers extends SubCommand<Group> {
             return "";
         }
 
-        return " &8(&7expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()) + "&8)";
+        return " &8(&7expires in " + DurationFormatter.LONG.formatDateDiff(node.getExpiryUnixTime()) + "&8)";
     }
 
     private static Consumer<BuildableComponent.Builder<? ,?>> makeFancy(String holderName, HolderType holderType, String label, HeldPermission<?> perm) {

@@ -45,7 +45,7 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.utils.DateUtil;
+import me.lucko.luckperms.common.utils.DurationFormatter;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.web.WebEditor;
 
@@ -141,7 +141,7 @@ public class ApplyEditsCommand extends SingleCommand {
 
     private static String formatNode(Node n) {
         return n.getPermission() + " &7(" + (n.getValuePrimitive() ? "&a" : "&c") + n.getValuePrimitive() + "&7)" + MessageUtils.getAppendableNodeContextString(n) +
-                (n.isTemporary() ? " &7(" + DateUtil.formatDateDiffShort(n.getExpiryUnixTime()) + ")" : "");
+                (n.isTemporary() ? " &7(" + DurationFormatter.CONCISE.formatDateDiff(n.getExpiryUnixTime()) + ")" : "");
     }
 
     private static Map.Entry<Set<Node>, Set<Node>> diff(Set<Node> before, Set<Node> after) {

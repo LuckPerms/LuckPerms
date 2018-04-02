@@ -46,7 +46,7 @@ import me.lucko.luckperms.common.model.TemporaryModifier;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.utils.DateUtil;
+import me.lucko.luckperms.common.utils.DurationFormatter;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
@@ -87,7 +87,7 @@ public class PermissionSetTemp extends SharedSubCommand {
 
         if (result.getKey().asBoolean()) {
             duration = result.getValue().getExpiryUnixTime();
-            Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, value, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), MessageUtils.contextSetToString(context));
+            Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, value, holder.getFriendlyName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("permission", "settemp", node, value, duration, context)

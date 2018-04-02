@@ -25,7 +25,12 @@
 
 package me.lucko.luckperms.common.event;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 
 import me.lucko.luckperms.api.event.Cancellable;
 import me.lucko.luckperms.api.event.EventBus;
@@ -34,7 +39,8 @@ import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import java.util.Map;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,13 +48,42 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 
+/**
+ * Simple implementation of EventBus.
+ */
 public class LuckPermsEventBus implements EventBus {
 
+    /**
+     * The plugin instance
+     */
     private final LuckPermsPlugin plugin;
 
+    /**
+     * The api provider instance
+     */
     private final LuckPermsApiProvider apiProvider;
 
-    private final Map<Class<? extends LuckPermsEvent>, Set<LuckPermsEventHandler<?>>> handlerMap = new ConcurrentHashMap<>();
+    /**
+     * The registered handlers in this event bus
+     */
+    private final Multimap<Class<? extends LuckPermsEvent>, LuckPermsEventHandler<?>> handlerMap = Multimaps.newSetMultimap(new ConcurrentHashMap<>(), ConcurrentHashMap::newKeySet);
+
+    /**
+     * A cache of event class --> applicable handlers.
+     *
+     * A registered "handler" will be passed all possible events it can handle, according to
+     * {@link Class#isAssignableFrom(Class)}.
+     */
+    private final LoadingCache<Class<? extends LuckPermsEvent>, List<LuckPermsEventHandler<?>>> handlerCache = Caffeine.newBuilder()
+            .build(eventClass -> {
+                ImmutableList.Builder<LuckPermsEventHandler<?>> matched = ImmutableList.builder();
+                LuckPermsEventBus.this.handlerMap.asMap().forEach((clazz, handlers) -> {
+                    if (clazz.isAssignableFrom(eventClass)) {
+                        matched.addAll(handlers);
+                    }
+                });
+                return matched.build();
+            });
 
     public LuckPermsEventBus(LuckPermsPlugin plugin, LuckPermsApiProvider apiProvider) {
         this.plugin = plugin;
@@ -68,36 +103,28 @@ public class LuckPermsEventBus implements EventBus {
             throw new IllegalArgumentException("class " + eventClass.getName() + " does not implement LuckPermsEvent");
         }
 
-        Set<LuckPermsEventHandler<?>> handlers = this.handlerMap.computeIfAbsent(eventClass, c -> ConcurrentHashMap.newKeySet());
-
         LuckPermsEventHandler<T> eventHandler = new LuckPermsEventHandler<>(this, eventClass, handler);
-        handlers.add(eventHandler);
+        this.handlerMap.put(eventClass, eventHandler);
+        this.handlerCache.invalidateAll();
 
         return eventHandler;
     }
 
     @Nonnull
     @Override
-    @SuppressWarnings("unchecked")
     public <T extends LuckPermsEvent> Set<EventHandler<T>> getHandlers(@Nonnull Class<T> eventClass) {
-        Set<LuckPermsEventHandler<?>> handlers = this.handlerMap.get(eventClass);
-        if (handlers == null) {
-            return ImmutableSet.of();
-        } else {
-            ImmutableSet.Builder<EventHandler<T>> ret = ImmutableSet.builder();
-            for (LuckPermsEventHandler<?> handler : handlers) {
-                ret.add((EventHandler<T>) handler);
-            }
-
-            return ret.build();
+        Collection<LuckPermsEventHandler<?>> handlers = this.handlerMap.asMap().get(eventClass);
+        ImmutableSet.Builder<EventHandler<T>> ret = ImmutableSet.builder();
+        for (LuckPermsEventHandler<?> handler : handlers) {
+            //noinspection unchecked
+            ret.add((EventHandler<T>) handler);
         }
+        return ret.build();
     }
 
     public void unregisterHandler(LuckPermsEventHandler<?> handler) {
-        Set<LuckPermsEventHandler<?>> handlers = this.handlerMap.get(handler.getEventClass());
-        if (handlers != null) {
-            handlers.remove(handler);
-        }
+        this.handlerMap.remove(handler.getEventClass(), handler);
+        this.handlerCache.invalidateAll();
     }
 
     public void fireEvent(LuckPermsEvent event) {
@@ -105,12 +132,13 @@ public class LuckPermsEventBus implements EventBus {
             ((AbstractEvent) event).setApi(this.apiProvider);
         }
 
-        for (Map.Entry<Class<? extends LuckPermsEvent>, Set<LuckPermsEventHandler<?>>> ent : this.handlerMap.entrySet()) {
-            if (!ent.getKey().isAssignableFrom(event.getClass())) {
-                continue;
-            }
+        List<LuckPermsEventHandler<?>> handlers = this.handlerCache.get(event.getClass());
+        if (handlers == null) {
+            return;
+        }
 
-            ent.getValue().forEach(h -> h.handle(event));
+        for (LuckPermsEventHandler<?> handler : handlers) {
+            handler.handle(event);
         }
     }
 

@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.utils.DateUtil;
+import me.lucko.luckperms.common.utils.DurationFormatter;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
@@ -66,7 +66,7 @@ public class InfoCommand extends SingleCommand {
                 plugin.getContextManager().getStaticContextString().orElse("None"),
                 plugin.getBootstrap().getPlayerCount(),
                 plugin.getConnectionListener().getUniqueConnections().size(),
-                DateUtil.formatTimeBrief((System.currentTimeMillis() - plugin.getBootstrap().getStartupTime()) / 1000L),
+                DurationFormatter.CONCISE_LOW_ACCURACY.format((System.currentTimeMillis() - plugin.getBootstrap().getStartupTime()) / 1000L),
                 plugin.getUserManager().getAll().size(),
                 plugin.getGroupManager().getAll().size(),
                 plugin.getTrackManager().getAll().size()

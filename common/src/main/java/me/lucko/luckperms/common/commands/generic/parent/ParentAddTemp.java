@@ -47,7 +47,7 @@ import me.lucko.luckperms.common.model.TemporaryModifier;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.utils.DateUtil;
+import me.lucko.luckperms.common.utils.DurationFormatter;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
@@ -96,7 +96,7 @@ public class ParentAddTemp extends SharedSubCommand {
 
         if (ret.getKey().asBoolean()) {
             duration = ret.getValue().getExpiryUnixTime();
-            Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), DateUtil.formatDateDiff(duration), MessageUtils.contextSetToString(context));
+            Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("parent", "addtemp", group.getName(), duration, context)

@@ -36,7 +36,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.HolderType;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.Storage;
-import me.lucko.luckperms.common.utils.Cycle;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -52,10 +51,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -180,13 +183,8 @@ public class Exporter implements Runnable {
 
             write(writer, "# Export users");
 
-            // divide into 16 pools.
-            Cycle<List<UUID>> userPools = new Cycle<>(nInstances(32, ArrayList::new));
-            for (UUID uuid : users) {
-                userPools.next().add(uuid);
-            }
-
-            this.log.log("Split users into " + userPools.getBacking().size() + " threads for export.");
+            // create a threadpool to process the users concurrently
+            ExecutorService executor = Executors.newFixedThreadPool(32);
 
             // Setup a file writing lock. We don't want multiple threads writing at the same time.
             // The write function accepts a list of strings, as we want a user's data to be grouped together.
@@ -203,74 +201,74 @@ public class Exporter implements Runnable {
                 }
             };
 
-            // A set of futures, which are really just the threads we need to wait for.
+            // A set of futures, which are really just the processes we need to wait for.
             Set<CompletableFuture<Void>> futures = new HashSet<>();
 
             AtomicInteger userCount = new AtomicInteger(0);
 
-            // iterate through each user sublist.
-            for (List<UUID> subList : userPools.getBacking()) {
-
-                // register and start a new thread to process the sublist
+            // iterate through each user.
+            for (UUID uuid : users) {
+                // register a task for the user, and schedule it's execution with the pool
                 futures.add(CompletableFuture.runAsync(() -> {
+                    // actually export the user. this output will be fed to the writing function when we have all of the user's data.
+                    List<String> output = new ArrayList<>();
 
-                    // iterate through each user in the sublist, and grab their data.
-                    for (UUID uuid : subList) {
-                        try {
-                            // actually export the user. this output will be fed to the writing function when we have all of the user's data.
-                            List<String> output = new ArrayList<>();
+                    User user = this.plugin.getStorage().loadUser(uuid, null).join();
+                    output.add("# Export user: " + user.getUuid().toString() + " - " + user.getName().orElse("unknown username"));
 
-                            User user = this.plugin.getStorage().loadUser(uuid, null).join();
-                            output.add("# Export user: " + user.getUuid().toString() + " - " + user.getName().orElse("unknown username"));
-
-                            boolean inDefault = false;
-                            for (Node node : user.getEnduringNodes().values()) {
-                                if (node.isGroupNode() && node.getGroupName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
-                                    inDefault = true;
-                                    continue;
-                                }
-
-                                output.add("/lp " + NodeFactory.nodeAsCommand(node, user.getUuid().toString(), HolderType.USER, true));
-                            }
-
-                            if (!user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
-                                output.add("/lp user " + user.getUuid().toString() + " switchprimarygroup " + user.getPrimaryGroup().getStoredValue().get());
-                            }
-
-                            if (!inDefault) {
-                                output.add("/lp user " + user.getUuid().toString() + " parent remove default");
-                            }
-
-                            this.plugin.getUserManager().cleanup(user);
-                            writeFunction.accept(output);
-
-                            this.log.logProgress("Exported {} users so far.", userCount.incrementAndGet());
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                    boolean inDefault = false;
+                    for (Node node : user.getEnduringNodes().values()) {
+                        if (node.isGroupNode() && node.getGroupName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
+                            inDefault = true;
+                            continue;
                         }
+
+                        output.add("/lp " + NodeFactory.nodeAsCommand(node, user.getUuid().toString(), HolderType.USER, true));
                     }
-                }, this.plugin.getBootstrap().getScheduler().async()));
+
+                    if (!user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
+                        output.add("/lp user " + user.getUuid().toString() + " switchprimarygroup " + user.getPrimaryGroup().getStoredValue().get());
+                    }
+
+                    if (!inDefault) {
+                        output.add("/lp user " + user.getUuid().toString() + " parent remove default");
+                    }
+
+                    this.plugin.getUserManager().cleanup(user);
+                    writeFunction.accept(output);
+
+                    userCount.incrementAndGet();
+                }, executor));
             }
 
             // all of the threads have been scheduled now and are running. we just need to wait for them all to complete
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()])).join();
+            CompletableFuture<Void> overallFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
+
+            while (true) {
+                try {
+                    overallFuture.get(5, TimeUnit.SECONDS);
+                } catch (InterruptedException | ExecutionException e) {
+                    // abnormal error - just break
+                    e.printStackTrace();
+                    break;
+                } catch (TimeoutException e) {
+                    // still executing - send a progress report and continue waiting
+                    this.log.logAllProgress("Exported {} users so far.", userCount.get());
+                    continue;
+                }
+
+                // process is complete
+                break;
+            }
+
+            executor.shutdown();
 
             this.log.log("Exported " + userCount.get() + " users.");
-
             writer.flush();
             this.log.getListeners().forEach(l -> Message.LOG_EXPORT_SUCCESS.send(l, this.filePath.toFile().getAbsolutePath()));
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private static <T> List<T> nInstances(int count, Supplier<T> supplier) {
-        List<T> ret = new ArrayList<>(count);
-        for (int i = 0; i < count; i++) {
-            ret.add(supplier.get());
-        }
-        return ret;
     }
 }

@@ -155,7 +155,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
             AtomicInteger userCount = new AtomicInteger(0);
             Iterators.iterate(world.getAll(CalculableType.USER), user -> {
                 // There is no mention of UUIDs in the API. I assume that name = uuid. idk?
-                UUID uuid = BukkitMigrationUtils.lookupUuid(log, user.getName());
+                UUID uuid = BukkitUuids.lookupUuid(log, user.getName());
                 if (uuid == null) {
                     return;
                 }

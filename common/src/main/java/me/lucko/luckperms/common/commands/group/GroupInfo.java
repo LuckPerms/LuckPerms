@@ -37,7 +37,7 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.utils.DateUtil;
+import me.lucko.luckperms.common.utils.DurationFormatter;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
@@ -83,7 +83,7 @@ public class GroupInfo extends SubCommand<Group> {
             Message.INFO_TEMP_PARENT_HEADER.send(sender);
             for (Node node : tempParents) {
                 Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + MessageUtils.getAppendableNodeContextString(node));
-                Message.EMPTY.send(sender, "&f-    &2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()));
+                Message.EMPTY.send(sender, "&f-    &2-    expires in " + DurationFormatter.LONG.formatDateDiff(node.getExpiryUnixTime()));
             }
         }
         return CommandResult.SUCCESS;

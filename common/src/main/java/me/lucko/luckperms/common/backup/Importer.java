@@ -113,10 +113,10 @@ public class Importer implements Runnable {
         // join the update task future before scheduling command executions
         updateTask.join();
 
-        // build a list of commands to be executed by each thread
+        // create a threadpool for the processing
         ExecutorService executor = Executors.newFixedThreadPool(128);
 
-        // A set of futures, which are really just the threads we need to wait for.
+        // A set of futures, which are really just the processes we need to wait for.
         Set<CompletableFuture<Void>> futures = new HashSet<>();
 
         AtomicInteger processedCount = new AtomicInteger(0);

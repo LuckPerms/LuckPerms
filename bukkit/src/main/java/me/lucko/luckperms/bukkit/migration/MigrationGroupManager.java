@@ -163,7 +163,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
             AtomicInteger userWorldCount = new AtomicInteger(0);
             Iterators.iterate(wdh.getUserList(), user -> {
-                UUID uuid = BukkitMigrationUtils.lookupUuid(log, user.getUUID());
+                UUID uuid = BukkitUuids.lookupUuid(log, user.getUUID());
                 if (uuid == null) {
                     return;
                 }

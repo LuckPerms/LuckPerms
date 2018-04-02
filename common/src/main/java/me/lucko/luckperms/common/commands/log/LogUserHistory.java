@@ -37,7 +37,7 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.DataConstraints;
-import me.lucko.luckperms.common.utils.DateUtil;
+import me.lucko.luckperms.common.utils.DurationFormatter;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.Uuids;
 
@@ -119,12 +119,12 @@ public class LogUserHistory extends SubCommand<Log> {
         String name = entries.values().stream().findAny().get().getActedName();
         Message.LOG_HISTORY_USER_HEADER.send(sender, name, page, maxPage);
 
-        long now = DateUtil.unixSecondsNow();
+        long now = System.currentTimeMillis() / 1000L;
         for (Map.Entry<Integer, ExtendedLogEntry> e : entries.entrySet()) {
             long time = e.getValue().getTimestamp();
             Message.LOG_ENTRY.send(sender,
                     e.getKey(),
-                    DateUtil.formatTimeBrief(now - time),
+                    DurationFormatter.CONCISE_LOW_ACCURACY.format(now - time),
                     e.getValue().getActorFriendlyString(),
                     Character.toString(e.getValue().getType().getCode()),
                     e.getValue().getActedFriendlyString(),

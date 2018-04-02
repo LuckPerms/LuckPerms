@@ -45,7 +45,7 @@ import me.lucko.luckperms.common.node.NodeWithContextComparator;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.CollationKeyCache;
-import me.lucko.luckperms.common.utils.DateUtil;
+import me.lucko.luckperms.common.utils.DurationFormatter;
 import me.lucko.luckperms.common.utils.Iterators;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.TextUtils;
@@ -120,7 +120,7 @@ public class PermissionInfo extends SharedSubCommand {
         for (LocalizedNode node : content) {
             String s = "&3> " + (node.getValuePrimitive() ? "&a" : "&c") + node.getPermission() + (sender.isConsole() ? " &7(" + node.getValuePrimitive() + "&7)" : "") + MessageUtils.getAppendableNodeContextString(node);
             if (node.isTemporary()) {
-                s += "\n&2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime());
+                s += "\n&2-    expires in " + DurationFormatter.LONG.formatDateDiff(node.getExpiryUnixTime());
             }
 
             TextComponent message = TextUtils.fromLegacy(s, CommandManager.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build();

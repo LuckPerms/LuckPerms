@@ -36,7 +36,6 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.utils.DateUtil;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -353,7 +352,7 @@ public class ExtendedLogEntry implements LogEntry {
         @Override
         public ExtendedLogEntry build() {
             if (this.timestamp == 0L) {
-                timestamp(DateUtil.unixSecondsNow());
+                timestamp(System.currentTimeMillis() / 1000L);
             }
 
             Objects.requireNonNull(this.actor, "actor");

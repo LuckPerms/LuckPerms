@@ -116,7 +116,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
             // store user data for later
             Set<Membership> members = entity.getMemberships();
             for (Membership membership : members) {
-                UUID uuid = BukkitMigrationUtils.lookupUuid(log, membership.getMember());
+                UUID uuid = BukkitUuids.lookupUuid(log, membership.getMember());
                 if (uuid == null) {
                     continue;
                 }

@@ -46,7 +46,7 @@ import me.lucko.luckperms.common.model.TemporaryModifier;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.utils.DateUtil;
+import me.lucko.luckperms.common.utils.DurationFormatter;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.TextUtils;
 
@@ -93,7 +93,7 @@ public class MetaSetTemp extends SharedSubCommand {
         holder.clearMetaKeys(key, context, true);
         duration = holder.setPermission(n, modifier).getValue().getExpiryUnixTime();
 
-        TextComponent.Builder builder = TextUtils.fromLegacy(Message.SET_META_TEMP_SUCCESS.asString(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), MessageUtils.contextSetToString(context)), CommandManager.SECTION_CHAR).toBuilder();
+        TextComponent.Builder builder = TextUtils.fromLegacy(Message.SET_META_TEMP_SUCCESS.asString(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(context)), CommandManager.SECTION_CHAR).toBuilder();
         HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
                 TextUtils.joinNewline("¥3Raw key: ¥r" + key, "¥3Raw value: ¥r" + value),
                 '¥'

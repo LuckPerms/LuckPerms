@@ -162,7 +162,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         int userWeight = maxWeight + 5;
 
         Iterators.iterate(manager.getUsers(), user -> {
-            UUID u = BukkitMigrationUtils.lookupUuid(log, user.getIdentifier());
+            UUID u = BukkitUuids.lookupUuid(log, user.getIdentifier());
             if (u == null) {
                 return;
             }

@@ -32,13 +32,13 @@ import org.bukkit.Bukkit;
 
 import java.util.UUID;
 
-public final class BukkitMigrationUtils {
+public final class BukkitUuids {
 
-    @SuppressWarnings("deprecation")
     public static UUID lookupUuid(ProgressLogger log, String s) {
         UUID uuid = Uuids.parseNullable(s);
         if (uuid == null) {
             try {
+                //noinspection deprecation
                 uuid = Bukkit.getOfflinePlayer(s).getUniqueId();
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -50,6 +50,6 @@ public final class BukkitMigrationUtils {
         return uuid;
     }
 
-    private BukkitMigrationUtils() {}
+    private BukkitUuids() {}
 
 }

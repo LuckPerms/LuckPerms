@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.model.TemporaryModifier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.DataConstraints;
-import me.lucko.luckperms.common.utils.DateUtil;
+import me.lucko.luckperms.common.utils.DateParser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,17 +101,21 @@ public class ArgumentParser {
             duration = Long.parseLong(args.get(index));
         } catch (NumberFormatException e) {
             try {
-                duration = DateUtil.parseDateDiff(args.get(index), true);
-            } catch (DateUtil.IllegalDateException e1) {
+                duration = DateParser.parseDate(args.get(index), true);
+            } catch (IllegalArgumentException e1) {
                 throw new InvalidDateException(args.get(index));
             }
         }
 
-        if (DateUtil.shouldExpire(duration)) {
+        if (shouldExpire(duration)) {
             throw new PastDateException();
         }
 
         return duration;
+    }
+
+    private static boolean shouldExpire(long unixTime) {
+        return unixTime < (System.currentTimeMillis() / 1000L);
     }
 
     public static Optional<TemporaryModifier> parseTemporaryModifier(int index, List<String> args) {

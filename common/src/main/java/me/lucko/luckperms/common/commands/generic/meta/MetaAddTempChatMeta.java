@@ -48,7 +48,7 @@ import me.lucko.luckperms.common.model.TemporaryModifier;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.utils.DateUtil;
+import me.lucko.luckperms.common.utils.DurationFormatter;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.TextUtils;
 
@@ -95,7 +95,7 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
         if (ret.getKey().asBoolean()) {
             duration = ret.getValue().getExpiryUnixTime();
 
-            TextComponent.Builder builder = TextUtils.fromLegacy(Message.ADD_TEMP_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), this.type.name().toLowerCase(), meta, priority, DateUtil.formatDateDiff(duration), MessageUtils.contextSetToString(context)), CommandManager.SECTION_CHAR).toBuilder();
+            TextComponent.Builder builder = TextUtils.fromLegacy(Message.ADD_TEMP_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), this.type.name().toLowerCase(), meta, priority, DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(context)), CommandManager.SECTION_CHAR).toBuilder();
             HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
                     "¥3Raw " + this.type.name().toLowerCase() + ": ¥r" + meta,
                     '¥'
