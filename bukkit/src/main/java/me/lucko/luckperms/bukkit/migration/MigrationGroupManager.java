@@ -39,9 +39,11 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.references.UserIdentifier;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Iterators;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.Uuids;
 
 import org.anjocaido.groupmanager.GlobalGroups;
 import org.anjocaido.groupmanager.GroupManager;
@@ -112,7 +114,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         log.log("Migrated " + globalGroupCount.get() + " global groups");
 
         // Collect data
-        Map<UUID, Set<Node>> users = new HashMap<>();
+        Map<UserIdentifier, Set<Node>> users = new HashMap<>();
         Map<UUID, String> primaryGroups = new HashMap<>();
         Map<String, Set<Node>> groups = new HashMap<>();
 
@@ -166,16 +168,23 @@ public class MigrationGroupManager extends SubCommand<Object> {
                     return;
                 }
 
-                users.putIfAbsent(uuid, new HashSet<>());
+                String lastName = user.getLastName();
+                if (Uuids.parse(lastName).isPresent()) {
+                    lastName = null;
+                }
+
+                UserIdentifier id = UserIdentifier.of(uuid, lastName);
+
+                users.putIfAbsent(id, new HashSet<>());
 
                 for (String node : user.getPermissionList()) {
                     if (node.isEmpty()) continue;
-                    users.get(uuid).add(MigrationUtils.parseNode(node, true).setWorld(worldMappingFunc.apply(world)).build());
+                    users.get(id).add(MigrationUtils.parseNode(node, true).setWorld(worldMappingFunc.apply(world)).build());
                 }
 
                 // Collect sub groups
                 String finalWorld = worldMappingFunc.apply(world);
-                users.get(uuid).addAll(user.subGroupListStringCopy().stream()
+                users.get(id).addAll(user.subGroupListStringCopy().stream()
                         .filter(n -> !n.isEmpty())
                         .map(n -> NodeFactory.groupNode(MigrationUtils.standardizeName(n)))
                         .map(n -> NodeFactory.make(n, true, null, finalWorld))
@@ -194,9 +203,9 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
                     if (key.equals(NodeFactory.PREFIX_KEY) || key.equals(NodeFactory.SUFFIX_KEY)) {
                         ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
-                        users.get(uuid).add(NodeFactory.buildChatMetaNode(type, 100, value).setWorld(worldMappingFunc.apply(world)).build());
+                        users.get(id).add(NodeFactory.buildChatMetaNode(type, 100, value).setWorld(worldMappingFunc.apply(world)).build());
                     } else {
-                        users.get(uuid).add(NodeFactory.buildMetaNode(key, value).setWorld(worldMappingFunc.apply(world)).build());
+                        users.get(id).add(NodeFactory.buildMetaNode(key, value).setWorld(worldMappingFunc.apply(world)).build());
                     }
                 }
 
@@ -225,13 +234,13 @@ public class MigrationGroupManager extends SubCommand<Object> {
         log.log("Starting user migration.");
         AtomicInteger userCount = new AtomicInteger(0);
         Iterators.iterate(users.entrySet(), e -> {
-            User user = plugin.getStorage().loadUser(e.getKey(), null).join();
+            User user = plugin.getStorage().loadUser(e.getKey().getUuid(), e.getKey().getUsername().orElse(null)).join();
 
             for (Node node : e.getValue()) {
                 user.setPermission(node);
             }
 
-            String primaryGroup = primaryGroups.get(e.getKey());
+            String primaryGroup = primaryGroups.get(e.getKey().getUuid());
             if (primaryGroup != null && !primaryGroup.isEmpty()) {
                 user.setPermission(NodeFactory.buildGroupNode(primaryGroup).build());
                 user.getPrimaryGroup().setStoredValue(primaryGroup);

@@ -27,14 +27,27 @@ package me.lucko.luckperms.common.references;
 
 import me.lucko.luckperms.common.model.User;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Used to identify a specific {@link User}.
  */
 public final class UserIdentifier implements Identifiable<UUID> {
-    public static UserIdentifier of(UUID uuid, String username) {
+
+    /**
+     * Creates a {@link UserIdentifier}.
+     *
+     * @param uuid the uuid of the user
+     * @param username the username of the user, nullable
+     * @return
+     */
+    public static UserIdentifier of(@Nonnull UUID uuid, @Nullable String username) {
+        Objects.requireNonNull(uuid, "uuid");
         if (username == null || username.equalsIgnoreCase("null") || username.isEmpty()) {
             username = null;
         }
@@ -48,6 +61,10 @@ public final class UserIdentifier implements Identifiable<UUID> {
     private UserIdentifier(UUID uuid, String username) {
         this.uuid = uuid;
         this.username = username;
+    }
+
+    public UUID getUuid() {
+        return this.uuid;
     }
 
     @Override
@@ -74,10 +91,6 @@ public final class UserIdentifier implements Identifiable<UUID> {
 
     @Override
     public String toString() {
-        return "UserIdentifier(uuid=" + this.uuid + ", username=" + this.getUsername() + ")";
-    }
-
-    public UUID getUuid() {
-        return this.uuid;
+        return "UserIdentifier(uuid=" + this.uuid + ", username=" + this.username + ")";
     }
 }
