@@ -45,7 +45,7 @@ public class BungeeCommandExecutor extends Command implements TabExecutor {
     private final LPBungeePlugin plugin;
     private final CommandManager manager;
 
-    BungeeCommandExecutor(LPBungeePlugin plugin, CommandManager manager) {
+    public BungeeCommandExecutor(LPBungeePlugin plugin, CommandManager manager) {
         super("luckpermsbungee", null, "lpb", "bperm", "bperms", "bpermission", "bpermissions");
         this.plugin = plugin;
         this.manager = manager;

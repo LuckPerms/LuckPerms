@@ -31,16 +31,20 @@ import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 
 /**
- * The internal LuckPerms event bus.
+ * The LuckPerms event bus.
  *
- * <p>LuckPerms events are posted to any listeners registered with the bus.</p>
+ * <p>Used to subscribe (or "listen") to LuckPerms events.</p>
  *
  * @since 3.0
  */
 public interface EventBus {
 
     /**
-     * Subscribes to an event.
+     * Registers a new subscription to the given event.
+     *
+     * <p>The returned {@link EventHandler} instance encapsulates the subscription state. It has
+     * methods which can be used to terminate the subscription, or view stats about the nature of
+     * the subscription.</p>
      *
      * @param eventClass the event class
      * @param handler    the event handler
@@ -48,7 +52,28 @@ public interface EventBus {
      * @return an event handler instance representing this subscription
      */
     @Nonnull
-    <T extends LuckPermsEvent> EventHandler<T> subscribe(@Nonnull Class<T> eventClass, @Nonnull Consumer<T> handler);
+    <T extends LuckPermsEvent> EventHandler<T> subscribe(@Nonnull Class<T> eventClass, @Nonnull Consumer<? super T> handler);
+
+    /**
+     * Registers a new subscription to the given event.
+     *
+     * <p>The returned {@link EventHandler} instance encapsulates the subscription state. It has
+     * methods which can be used to terminate the subscription, or view stats about the nature of
+     * the subscription.</p>
+     *
+     * <p>Unlike {@link #subscribe(Class, Consumer)}, this method accepts an additional parameter
+     * for {@code plugin}. This object must be a "plugin" instance on the platform, and is used to
+     * automatically {@link EventHandler#unregister() unregister} the subscription when the
+     * corresponding plugin is disabled.</p>
+     *
+     * @param <T>        the event class
+     * @param plugin     a plugin instance to bind the subscription to.
+     * @param eventClass the event class
+     * @param handler    the event handler
+     * @return an event handler instance representing this subscription
+     */
+    @Nonnull
+    <T extends LuckPermsEvent> EventHandler<T> subscribe(Object plugin, @Nonnull Class<T> eventClass, @Nonnull Consumer<? super T> handler);
 
     /**
      * Gets a set of all registered handlers for a given event.

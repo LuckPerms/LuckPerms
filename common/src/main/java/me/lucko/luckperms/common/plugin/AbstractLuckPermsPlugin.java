@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.contexts.LuckPermsCalculator;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.dependencies.DependencyRegistry;
+import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.event.EventFactory;
 import me.lucko.luckperms.common.inheritance.InheritanceHandler;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -160,7 +161,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // register with the LP API
         this.apiProvider = new LuckPermsApiProvider(this);
-        this.eventFactory = new EventFactory(this, this.apiProvider);
+        this.eventFactory = new EventFactory(provideEventBus(this.apiProvider));
         ApiRegistrationUtil.registerProvider(this.apiProvider);
         registerApiOnPlatform(this.apiProvider);
 
@@ -234,6 +235,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     protected abstract PlatformCalculatorFactory provideCalculatorFactory();
     protected abstract void setupContextManager();
     protected abstract void setupPlatformHooks();
+    protected abstract AbstractEventBus provideEventBus(LuckPermsApiProvider apiProvider);
     protected abstract void registerApiOnPlatform(LuckPermsApi api);
     protected abstract void registerHousekeepingTasks();
     protected abstract void performFinalSetup();

@@ -27,11 +27,13 @@ package me.lucko.luckperms.nukkit;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LuckPermsApi;
+import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculators.PlatformCalculatorFactory;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.listener.ConnectionListener;
 import me.lucko.luckperms.common.managers.group.StandardGroupManager;
 import me.lucko.luckperms.common.managers.track.StandardTrackManager;
@@ -160,6 +162,11 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
             // the entire pluginmanager instance is replaced by some plugins :(
             this.bootstrap.getScheduler().asyncLater(injector, 1L);
         }
+    }
+
+    @Override
+    protected AbstractEventBus provideEventBus(LuckPermsApiProvider apiProvider) {
+        return new NukkitEventBus(this, apiProvider);
     }
 
     @Override

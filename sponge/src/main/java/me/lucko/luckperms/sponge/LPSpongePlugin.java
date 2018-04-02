@@ -27,12 +27,14 @@ package me.lucko.luckperms.sponge;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LuckPermsApi;
+import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculators.PlatformCalculatorFactory;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.managers.track.StandardTrackManager;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 import me.lucko.luckperms.common.model.User;
@@ -157,6 +159,11 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
             this.bootstrap.getGame().getServiceManager().setProvider(this.bootstrap, LPPermissionService.class, this.service);
             this.bootstrap.getGame().getServiceManager().setProvider(this.bootstrap, PermissionService.class, this.service.sponge());
         }
+    }
+
+    @Override
+    protected AbstractEventBus provideEventBus(LuckPermsApiProvider apiProvider) {
+        return new SpongeEventBus(this, apiProvider);
     }
 
     @Override

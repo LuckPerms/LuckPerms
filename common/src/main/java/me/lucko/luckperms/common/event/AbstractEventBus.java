@@ -39,6 +39,7 @@ import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -51,7 +52,7 @@ import javax.annotation.Nonnull;
 /**
  * Simple implementation of EventBus.
  */
-public class LuckPermsEventBus implements EventBus {
+public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
 
     /**
      * The plugin instance
@@ -77,7 +78,7 @@ public class LuckPermsEventBus implements EventBus {
     private final LoadingCache<Class<? extends LuckPermsEvent>, List<LuckPermsEventHandler<?>>> handlerCache = Caffeine.newBuilder()
             .build(eventClass -> {
                 ImmutableList.Builder<LuckPermsEventHandler<?>> matched = ImmutableList.builder();
-                LuckPermsEventBus.this.handlerMap.asMap().forEach((clazz, handlers) -> {
+                AbstractEventBus.this.handlerMap.asMap().forEach((clazz, handlers) -> {
                     if (clazz.isAssignableFrom(eventClass)) {
                         matched.addAll(handlers);
                     }
@@ -85,29 +86,30 @@ public class LuckPermsEventBus implements EventBus {
                 return matched.build();
             });
 
-    public LuckPermsEventBus(LuckPermsPlugin plugin, LuckPermsApiProvider apiProvider) {
+    protected AbstractEventBus(LuckPermsPlugin plugin, LuckPermsApiProvider apiProvider) {
         this.plugin = plugin;
         this.apiProvider = apiProvider;
     }
 
+    public LuckPermsPlugin getPlugin() {
+        return this.plugin;
+    }
+
     @Nonnull
     @Override
-    public <T extends LuckPermsEvent> EventHandler<T> subscribe(@Nonnull Class<T> eventClass, @Nonnull Consumer<T> handler) {
+    public <T extends LuckPermsEvent> EventHandler<T> subscribe(@Nonnull Class<T> eventClass, @Nonnull Consumer<? super T> handler) {
         Objects.requireNonNull(eventClass, "eventClass");
         Objects.requireNonNull(handler, "handler");
+        return registerSubscription(eventClass, handler, null);
+    }
 
-        if (!eventClass.isInterface()) {
-            throw new IllegalArgumentException("class " + eventClass + " is not an interface");
-        }
-        if (!LuckPermsEvent.class.isAssignableFrom(eventClass)) {
-            throw new IllegalArgumentException("class " + eventClass.getName() + " does not implement LuckPermsEvent");
-        }
-
-        LuckPermsEventHandler<T> eventHandler = new LuckPermsEventHandler<>(this, eventClass, handler);
-        this.handlerMap.put(eventClass, eventHandler);
-        this.handlerCache.invalidateAll();
-
-        return eventHandler;
+    @Nonnull
+    @Override
+    public <T extends LuckPermsEvent> EventHandler<T> subscribe(Object plugin, @Nonnull Class<T> eventClass, @Nonnull Consumer<? super T> handler) {
+        Objects.requireNonNull(plugin, "plugin");
+        Objects.requireNonNull(eventClass, "eventClass");
+        Objects.requireNonNull(handler, "handler");
+        return registerSubscription(eventClass, handler, checkPlugin(plugin));
     }
 
     @Nonnull
@@ -122,11 +124,79 @@ public class LuckPermsEventBus implements EventBus {
         return ret.build();
     }
 
+    /**
+     * Checks that the given plugin object is a valid plugin instance for the platform
+     *
+     * @param plugin the object
+     * @return a plugin
+     * @throws IllegalArgumentException if the plugin is invalid
+     */
+    protected abstract P checkPlugin(Object plugin) throws IllegalArgumentException;
+
+    /**
+     * Registers a subscription for the given class, handler and plugin
+     *
+     * @param eventClass the event class
+     * @param handler the handler
+     * @param plugin the plugin, nullable
+     * @param <T> the event type
+     * @return the resultant handler
+     */
+    private <T extends LuckPermsEvent> EventHandler<T> registerSubscription(Class<T> eventClass, Consumer<? super T> handler, Object plugin) {
+        if (!eventClass.isInterface()) {
+            throw new IllegalArgumentException("class " + eventClass + " is not an interface");
+        }
+        if (!LuckPermsEvent.class.isAssignableFrom(eventClass)) {
+            throw new IllegalArgumentException("class " + eventClass.getName() + " does not implement LuckPermsEvent");
+        }
+
+        LuckPermsEventHandler<T> eventHandler = new LuckPermsEventHandler<>(this, eventClass, handler, plugin);
+        this.handlerMap.put(eventClass, eventHandler);
+        this.handlerCache.invalidateAll();
+
+        return eventHandler;
+    }
+
+    /**
+     * Removes a specific handler from the bus
+     *
+     * @param handler the handler to remove
+     */
     public void unregisterHandler(LuckPermsEventHandler<?> handler) {
         this.handlerMap.remove(handler.getEventClass(), handler);
         this.handlerCache.invalidateAll();
     }
 
+    /**
+     * Removes all handlers for a specific plugin
+     *
+     * @param plugin the plugin
+     */
+    protected void unregisterHandlers(P plugin) {
+        List<LuckPermsEventHandler<?>> handlers = new ArrayList<>(this.handlerMap.values());
+        for (LuckPermsEventHandler<?> handler : handlers) {
+            if (handler.getPlugin() == plugin) {
+                handler.unregister();
+            }
+        }
+    }
+
+    /**
+     * Unregisters all handlers in this event bus
+     */
+    @Override
+    public void close() {
+        List<LuckPermsEventHandler<?>> handlers = new ArrayList<>(this.handlerMap.values());
+        for (LuckPermsEventHandler<?> handler : handlers) {
+            handler.unregister();
+        }
+    }
+
+    /**
+     * Fires the given event to all registered handlers in this event bus
+     *
+     * @param event the event to fire
+     */
     public void fireEvent(LuckPermsEvent event) {
         if (event instanceof AbstractEvent) {
             ((AbstractEvent) event).setApi(this.apiProvider);
@@ -142,14 +212,15 @@ public class LuckPermsEventBus implements EventBus {
         }
     }
 
+    /**
+     * Fires the given event asynchronously to all registered handlers in this event bus
+     *
+     * @param event the event to fire
+     */
     public void fireEventAsync(LuckPermsEvent event) {
         if (event instanceof Cancellable) {
             throw new IllegalArgumentException("cannot call Cancellable event async");
         }
         this.plugin.getBootstrap().getScheduler().doAsync(() -> fireEvent(event));
-    }
-
-    public LuckPermsPlugin getPlugin() {
-        return this.plugin;
     }
 }

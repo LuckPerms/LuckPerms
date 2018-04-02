@@ -38,7 +38,7 @@ import java.util.Arrays;
 public class NukkitCommandExecutor extends CommandManager implements CommandExecutor {
     private final LPNukkitPlugin plugin;
 
-    NukkitCommandExecutor(LPNukkitPlugin plugin) {
+    public NukkitCommandExecutor(LPNukkitPlugin plugin) {
         super(plugin);
         this.plugin = plugin;
     }

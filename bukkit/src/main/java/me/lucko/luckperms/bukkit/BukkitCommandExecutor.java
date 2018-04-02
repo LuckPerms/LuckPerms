@@ -45,7 +45,7 @@ public class BukkitCommandExecutor extends CommandManager implements CommandExec
 
     private final LPBukkitPlugin plugin;
 
-    BukkitCommandExecutor(LPBukkitPlugin plugin) {
+    public BukkitCommandExecutor(LPBukkitPlugin plugin) {
         super(plugin);
         this.plugin = plugin;
     }

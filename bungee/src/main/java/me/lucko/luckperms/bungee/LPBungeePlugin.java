@@ -34,10 +34,12 @@ import me.lucko.luckperms.bungee.contexts.RedisBungeeCalculator;
 import me.lucko.luckperms.bungee.listeners.BungeeConnectionListener;
 import me.lucko.luckperms.bungee.listeners.BungeePermissionCheckListener;
 import me.lucko.luckperms.bungee.messaging.BungeeMessagingFactory;
+import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculators.PlatformCalculatorFactory;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.listener.ConnectionListener;
 import me.lucko.luckperms.common.managers.group.StandardGroupManager;
 import me.lucko.luckperms.common.managers.track.StandardTrackManager;
@@ -137,6 +139,11 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void setupPlatformHooks() {
 
+    }
+
+    @Override
+    protected AbstractEventBus provideEventBus(LuckPermsApiProvider apiProvider) {
+        return new BungeeEventBus(this, apiProvider);
     }
 
     @Override

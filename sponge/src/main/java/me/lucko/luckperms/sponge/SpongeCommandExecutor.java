@@ -52,7 +52,7 @@ public class SpongeCommandExecutor extends CommandManager implements CommandCall
 
     private final LPSpongePlugin plugin;
 
-    SpongeCommandExecutor(LPSpongePlugin plugin) {
+    public SpongeCommandExecutor(LPSpongePlugin plugin) {
         super(plugin);
         this.plugin = plugin;
     }

@@ -23,58 +23,38 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.event;
+package me.lucko.luckperms.nukkit;
 
-import java.util.function.Consumer;
+import me.lucko.luckperms.common.api.LuckPermsApiProvider;
+import me.lucko.luckperms.common.event.AbstractEventBus;
 
-import javax.annotation.Nonnull;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.Listener;
+import cn.nukkit.event.plugin.PluginDisableEvent;
+import cn.nukkit.plugin.Plugin;
 
-/**
- * Represents a subscription to a {@link LuckPermsEvent}.
- *
- * @param <T> the event class
- */
-public interface EventHandler<T extends LuckPermsEvent> extends AutoCloseable {
+public class NukkitEventBus extends AbstractEventBus<Plugin> implements Listener {
+    public NukkitEventBus(LPNukkitPlugin plugin, LuckPermsApiProvider apiProvider) {
+        super(plugin, apiProvider);
 
-    /**
-     * Gets the class this handler is listening to
-     *
-     * @return the event class
-     */
-    @Nonnull
-    Class<T> getEventClass();
-
-    /**
-     * Returns true if this handler is active
-     *
-     * @return true if this handler is still active
-     */
-    boolean isActive();
-
-    /**
-     * Unregisters this handler from the event bus
-     *
-     * @return true if the handler wasn't already unregistered
-     */
-    boolean unregister();
-
-    /**
-     * Gets the event consumer responsible for handling the event
-     *
-     * @return the event consumer
-     */
-    @Nonnull
-    Consumer<? super T> getConsumer();
-
-    /**
-     * Gets the number of times this handler has been called
-     *
-     * @return the number of times this handler has been called
-     */
-    int getCallCount();
+        // register listener
+        LPNukkitBootstrap bootstrap = plugin.getBootstrap();
+        bootstrap.getServer().getPluginManager().registerEvents(this, bootstrap);
+    }
 
     @Override
-    default void close() {
-        unregister();
+    protected Plugin checkPlugin(Object plugin) throws IllegalArgumentException {
+        if (plugin instanceof Plugin) {
+            return (Plugin) plugin;
+        }
+
+        throw new IllegalArgumentException("Object " + plugin + " (" + plugin.getClass().getName() + ") is not a plugin.");
     }
+
+    @EventHandler
+    public void onPluginDisable(PluginDisableEvent e) {
+        Plugin plugin = e.getPlugin();
+        unregisterHandlers(plugin);
+    }
+
 }

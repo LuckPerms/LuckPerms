@@ -37,7 +37,6 @@ import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.api.event.log.LogBroadcastEvent;
 import me.lucko.luckperms.api.event.log.LogNotifyEvent;
-import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.api.delegates.model.ApiPermissionHolder;
 import me.lucko.luckperms.common.api.delegates.model.ApiUser;
 import me.lucko.luckperms.common.event.impl.EventConfigReload;
@@ -78,7 +77,6 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 
 import java.util.Collection;
@@ -87,13 +85,13 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class EventFactory {
-    private final LuckPermsEventBus eventBus;
+    private final AbstractEventBus eventBus;
 
-    public EventFactory(LuckPermsPlugin plugin, LuckPermsApiProvider apiProvider) {
-        this.eventBus = new LuckPermsEventBus(plugin, apiProvider);
+    public EventFactory(AbstractEventBus eventBus) {
+        this.eventBus = eventBus;
     }
 
-    public LuckPermsEventBus getEventBus() {
+    public AbstractEventBus getEventBus() {
         return this.eventBus;
     }
 

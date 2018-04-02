@@ -33,21 +33,51 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
+/**
+ * Simple implementation of {@link EventHandler}.
+ *
+ * @param <T> the event type
+ */
 public class LuckPermsEventHandler<T extends LuckPermsEvent> implements EventHandler<T> {
-    private final LuckPermsEventBus eventBus;
 
+    /**
+     * The event bus which created this handler
+     */
+    private final AbstractEventBus<?> eventBus;
+
+    /**
+     * The event class
+     */
     private final Class<T> eventClass;
 
-    private final Consumer<T> consumer;
+    /**
+     * The delegate "event handler"
+     */
+    private final Consumer<? super T> consumer;
 
+    /**
+     * The plugin which "owns" this handler
+     */
+    @Nullable
+    private final Object plugin;
+
+    /**
+     * If this handler is active
+     */
     private final AtomicBoolean active = new AtomicBoolean(true);
+
+    /**
+     * How many times this handler has been called
+     */
     private final AtomicInteger callCount = new AtomicInteger(0);
 
-    public LuckPermsEventHandler(LuckPermsEventBus eventBus, Class<T> eventClass, Consumer<T> consumer) {
+    public LuckPermsEventHandler(AbstractEventBus<?> eventBus, Class<T> eventClass, Consumer<? super T> consumer, @Nullable Object plugin) {
         this.eventBus = eventBus;
         this.eventClass = eventClass;
         this.consumer = consumer;
+        this.plugin = plugin;
     }
 
     @Override
@@ -91,7 +121,12 @@ public class LuckPermsEventHandler<T extends LuckPermsEvent> implements EventHan
 
     @Nonnull
     @Override
-    public Consumer<T> getConsumer() {
+    public Consumer<? super T> getConsumer() {
         return this.consumer;
+    }
+
+    @Nullable
+    public Object getPlugin() {
+        return this.plugin;
     }
 }
