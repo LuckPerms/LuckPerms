@@ -94,7 +94,7 @@ public final class DescriptionBuilder implements PermissionDescription.Builder {
             roleSubject.getTransientSubjectData().setPermission(ContextSet.empty(), this.id, assignment.getValue());
         }
 
-        this.service.getPlugin().getPermissionVault().offer(this.id);
+        this.service.getPlugin().getPermissionRegistry().offer(this.id);
 
         // null stuff so this instance can be reused
         this.roles.clear();

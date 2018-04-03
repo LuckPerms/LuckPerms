@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.command.utils;
 import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.treeview.PermissionVault;
+import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.treeview.TreeNode;
 
 import java.util.ArrayList;
@@ -59,7 +59,7 @@ public final class TabCompletions {
         }
     }
 
-    public static List<String> getPermissionTabComplete(List<String> args, PermissionVault cache) {
+    public static List<String> getPermissionTabComplete(List<String> args, PermissionRegistry cache) {
         if (args.size() <= 1) {
             if (args.isEmpty() || args.get(0).equals("")) {
                 return cache.getRootNode().getChildren()

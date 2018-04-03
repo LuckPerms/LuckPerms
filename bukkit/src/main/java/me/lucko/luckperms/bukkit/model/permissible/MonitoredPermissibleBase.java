@@ -72,7 +72,7 @@ public class MonitoredPermissibleBase extends PermissibleBase {
 
     private void logCheck(CheckOrigin origin, String permission, boolean result) {
         this.plugin.getVerboseHandler().offerCheckData(origin, this.name, ContextSet.empty(), permission, Tristate.fromBoolean(result));
-        this.plugin.getPermissionVault().offer(permission);
+        this.plugin.getPermissionRegistry().offer(permission);
     }
 
     PermissibleBase getDelegate() {

@@ -107,6 +107,6 @@ public class PermissionSetTemp extends SharedSubCommand {
         if (!ret.isEmpty()) {
             return ret;
         }
-        return getPermissionTabComplete(args, plugin.getPermissionVault());
+        return getPermissionTabComplete(args, plugin.getPermissionRegistry());
     }
 }

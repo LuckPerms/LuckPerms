@@ -104,7 +104,7 @@ public class SearchCommand extends SingleCommand {
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        return TabCompletions.getPermissionTabComplete(args, plugin.getPermissionVault());
+        return TabCompletions.getPermissionTabComplete(args, plugin.getPermissionRegistry());
     }
 
     private static <T> void sendResult(Sender sender, List<HeldPermission<T>> results, Function<T, String> lookupFunction, Message headerMessage, HolderType holderType, String label, int page) {

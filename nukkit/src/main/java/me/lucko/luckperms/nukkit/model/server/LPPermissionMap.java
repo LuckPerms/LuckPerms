@@ -32,7 +32,7 @@ import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.treeview.PermissionVault;
+import me.lucko.luckperms.common.treeview.PermissionRegistry;
 
 import cn.nukkit.permission.Permission;
 import cn.nukkit.plugin.PluginManager;
@@ -50,7 +50,7 @@ import javax.annotation.Nonnull;
  *
  * This instance allows LuckPerms to intercept calls to
  * {@link PluginManager#addPermission(Permission)} and record permissions in the
- * {@link PermissionVault}.
+ * {@link PermissionRegistry}.
  *
  * It also allows us to pre-determine child permission relationships.
  *
@@ -94,7 +94,7 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
 
     @Override
     public Permission put(@Nonnull String key, @Nonnull Permission value) {
-        this.plugin.getPermissionVault().offer(key);
+        this.plugin.getPermissionRegistry().offer(key);
         Permission ret = super.put(key, value);
         update();
         return ret;
@@ -102,14 +102,14 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
 
     @Override
     public void putAll(@Nonnull Map<? extends String, ? extends Permission> m) {
-        this.plugin.getPermissionVault().offerAll(m.keySet());
+        this.plugin.getPermissionRegistry().offerAll(m.keySet());
         super.putAll(m);
         update();
     }
 
     @Override
     public Permission putIfAbsent(String key, Permission value) {
-        this.plugin.getPermissionVault().offer(key);
+        this.plugin.getPermissionRegistry().offer(key);
         Permission ret = super.putIfAbsent(key, value);
         update();
         return ret;

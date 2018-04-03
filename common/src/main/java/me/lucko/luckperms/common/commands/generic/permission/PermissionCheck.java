@@ -72,6 +72,6 @@ public class PermissionCheck extends SharedSubCommand {
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        return getPermissionTabComplete(args, plugin.getPermissionVault());
+        return getPermissionTabComplete(args, plugin.getPermissionRegistry());
     }
 }

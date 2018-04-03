@@ -50,7 +50,7 @@ import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.dao.file.FileWatcher;
-import me.lucko.luckperms.common.treeview.PermissionVault;
+import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 
 import java.util.Collections;
@@ -208,11 +208,11 @@ public interface LuckPermsPlugin {
     VerboseHandler getVerboseHandler();
 
     /**
-     * Gets the permission caching instance for the platform.
+     * Gets the permission registry for the platform.
      *
-     * @return the permission cache instance
+     * @return the permission registry
      */
-    PermissionVault getPermissionVault();
+    PermissionRegistry getPermissionRegistry();
 
     /**
      * Gets the log dispatcher running on the platform

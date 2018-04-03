@@ -56,7 +56,7 @@ import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.storage.dao.file.FileWatcher;
 import me.lucko.luckperms.common.tasks.UpdateTask;
-import me.lucko.luckperms.common.treeview.PermissionVault;
+import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 
 import java.io.File;
@@ -71,7 +71,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
     // init during enable
     private VerboseHandler verboseHandler;
-    private PermissionVault permissionVault;
+    private PermissionRegistry permissionRegistry;
     private LogDispatcher logDispatcher;
     private LuckPermsConfiguration configuration;
     private LocaleManager localeManager;
@@ -104,7 +104,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // load some utilities early
         this.verboseHandler = new VerboseHandler();
-        this.permissionVault = new PermissionVault();
+        this.permissionRegistry = new PermissionRegistry();
         this.logDispatcher = new LogDispatcher(this);
 
         // load configuration
@@ -195,7 +195,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         performEarlyDisableTasks();
 
         // shutdown permission vault and verbose handler tasks
-        this.permissionVault.stop();
+        this.permissionRegistry.stop();
         this.verboseHandler.stop();
 
         // remove any hooks into the platform
@@ -266,8 +266,8 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public PermissionVault getPermissionVault() {
-        return this.permissionVault;
+    public PermissionRegistry getPermissionRegistry() {
+        return this.permissionRegistry;
     }
 
     @Override

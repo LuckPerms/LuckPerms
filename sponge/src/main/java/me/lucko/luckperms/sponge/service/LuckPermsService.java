@@ -55,10 +55,10 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.text.Text;
 
 import java.io.File;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
@@ -95,7 +95,7 @@ public class LuckPermsService implements LPPermissionService {
     /**
      * A set of registered permission description instances
      */
-    private final Set<LPPermissionDescription> permissionDescriptions;
+    private final Map<String, LPPermissionDescription> permissionDescriptions;
 
     /**
      * The loaded collections in this service
@@ -107,7 +107,7 @@ public class LuckPermsService implements LPPermissionService {
         this.plugin = plugin;
         this.referenceFactory = new SubjectReferenceFactory(this);
         this.spongeProxy = ProxyFactory.toSponge(this);
-        this.permissionDescriptions = ConcurrentHashMap.newKeySet();
+        this.permissionDescriptions = new ConcurrentHashMap<>();
 
         // init subject storage
         this.storage = new SubjectStorage(this, new File(plugin.getBootstrap().getDataDirectory(), "sponge-data"));
@@ -199,37 +199,30 @@ public class LuckPermsService implements LPPermissionService {
     @Override
     public LPPermissionDescription registerPermissionDescription(String id, Text description, PluginContainer owner) {
         SimplePermissionDescription desc = new SimplePermissionDescription(this, id, description, owner);
-        this.permissionDescriptions.add(desc);
+        this.permissionDescriptions.put(id, desc);
+        this.plugin.getPermissionRegistry().offer(id);
         return desc;
     }
 
     @Override
     public Optional<LPPermissionDescription> getDescription(String s) {
         Objects.requireNonNull(s);
-        for (LPPermissionDescription d : this.permissionDescriptions) {
-            if (d.getId().equals(s)) {
-                return Optional.of(d);
-            }
-        }
-
-        return Optional.empty();
+        return Optional.ofNullable(this.permissionDescriptions.get(s));
     }
 
     @Override
     public ImmutableSet<LPPermissionDescription> getDescriptions() {
-        Set<LPPermissionDescription> descriptions = new HashSet<>(this.permissionDescriptions);
+        Map<String, LPPermissionDescription> descriptions = new HashMap<>(this.permissionDescriptions);
 
         // collect known values from the permission vault
-        for (String knownPermission : this.plugin.getPermissionVault().getKnownPermissions()) {
-            LPPermissionDescription desc = new SimplePermissionDescription(this, knownPermission, null, null);
-
+        for (String perm : this.plugin.getPermissionRegistry().getKnownPermissions()) {
             // don't override plugin defined values
-            if (!descriptions.contains(desc)) {
-                descriptions.add(desc);
+            if (!descriptions.containsKey(perm)) {
+                descriptions.put(perm, new SimplePermissionDescription(this, perm, null, null));
             }
         }
 
-        return ImmutableSet.copyOf(descriptions);
+        return ImmutableSet.copyOf(descriptions.values());
     }
 
     @Override

@@ -84,6 +84,6 @@ public class CheckCommand extends SingleCommand {
         }
 
         args.remove(0);
-        return TabCompletions.getPermissionTabComplete(args, plugin.getPermissionVault());
+        return TabCompletions.getPermissionTabComplete(args, plugin.getPermissionRegistry());
     }
 }

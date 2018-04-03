@@ -43,6 +43,7 @@ import me.lucko.luckperms.common.sender.DummySender;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
+import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.sponge.calculators.SpongeCalculatorFactory;
 import me.lucko.luckperms.sponge.commands.SpongeMainCommand;
 import me.lucko.luckperms.sponge.contexts.SpongeContextManager;
@@ -60,6 +61,7 @@ import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.tasks.ServiceCacheHousekeepingTask;
 
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 
@@ -150,6 +152,11 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
         getLogger().info("Registering PermissionService...");
         this.updateEventHandler = UpdateEventHandler.obtain(this);
         this.service = new LuckPermsService(this);
+
+        // before registering our permission service, copy any existing permission descriptions
+        PermissionRegistry permissionRegistry = getPermissionRegistry();
+        this.bootstrap.getGame().getServiceManager().provide(PermissionService.class)
+                .ifPresent(ps -> ps.getDescriptions().stream().map(PermissionDescription::getId).forEach(permissionRegistry::offer));
 
         if (this.bootstrap.getGame().getPluginManager().getPlugin("permissionsex").isPresent()) {
             getLogger().warn("Detected PermissionsEx - assuming it's loaded for migration.");

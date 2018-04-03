@@ -83,7 +83,7 @@ public class TreeCommand extends SingleCommand {
             user = null;
         }
 
-        TreeView view = new TreeView(plugin.getPermissionVault(), selection);
+        TreeView view = new TreeView(plugin.getPermissionRegistry(), selection);
         if (!view.hasData()) {
             Message.TREE_EMPTY.send(sender);
             return CommandResult.FAILURE;

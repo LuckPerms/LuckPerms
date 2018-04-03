@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 /**
  * Stores a collection of all permissions known to the platform.
  */
-public class PermissionVault extends RepeatingTask {
+public class PermissionRegistry extends RepeatingTask {
     private static final Splitter DOT_SPLIT = Splitter.on('.').omitEmptyStrings();
 
     // the root node in the tree
@@ -55,7 +55,7 @@ public class PermissionVault extends RepeatingTask {
     // a queue of permission strings to be processed by the tree
     private final Queue<String> queue;
 
-    public PermissionVault() {
+    public PermissionRegistry() {
         super(1000, TimeUnit.MILLISECONDS, "luckperms-permission-vault");
         this.rootNode = new TreeNode();
         this.knownPermissions = ConcurrentHashMap.newKeySet(3000);

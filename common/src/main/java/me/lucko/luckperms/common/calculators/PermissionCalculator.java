@@ -100,7 +100,7 @@ public class PermissionCalculator implements CacheLoader<String, Tristate> {
         // offer the permission to the permission vault
         // we only need to do this once per permission, so it doesn't matter
         // that this call is behind the cache.
-        this.plugin.getPermissionVault().offer(permission);
+        this.plugin.getPermissionRegistry().offer(permission);
 
         for (PermissionProcessor processor : this.processors) {
             Tristate result = processor.hasPermission(permission);

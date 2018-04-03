@@ -52,7 +52,7 @@ public class TreeView {
     // the actual tree object
     private final ImmutableTreeNode view;
 
-    public TreeView(PermissionVault source, String rootPosition) {
+    public TreeView(PermissionRegistry source, String rootPosition) {
         if (rootPosition.equals("") || rootPosition.equals("*")) {
             rootPosition = ".";
         } else if (!rootPosition.equals(".") && rootPosition.endsWith(".")) {
@@ -79,7 +79,7 @@ public class TreeView {
      * @param source the node source
      * @return the root, if it exists
      */
-    private static Optional<TreeNode> findRoot(String rootPosition, PermissionVault source) {
+    private static Optional<TreeNode> findRoot(String rootPosition, PermissionRegistry source) {
         // get the root of the permission vault
         TreeNode root = source.getRootNode();
 

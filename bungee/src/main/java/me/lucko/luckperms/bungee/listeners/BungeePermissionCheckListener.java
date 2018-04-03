@@ -115,7 +115,7 @@ public class BungeePermissionCheckListener implements Listener {
         String name = "internal/" + e.getSender().getName();
 
         this.plugin.getVerboseHandler().offerCheckData(CheckOrigin.PLATFORM_PERMISSION_CHECK, name, ContextSet.empty(), permission, result);
-        this.plugin.getPermissionVault().offer(permission);
+        this.plugin.getPermissionRegistry().offer(permission);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -132,6 +132,6 @@ public class BungeePermissionCheckListener implements Listener {
         String name = "internal/" + e.getSender().getName();
 
         this.plugin.getVerboseHandler().offerCheckData(CheckOrigin.PLATFORM_LOOKUP_CHECK, name, ContextSet.empty(), permission, result);
-        this.plugin.getPermissionVault().offer(permission);
+        this.plugin.getPermissionRegistry().offer(permission);
     }
 }

@@ -103,7 +103,7 @@ public final class WebEditor {
                 )
                 .add("knownPermissions", new JArray()
                         .consume(arr -> {
-                            for (String perm : plugin.getPermissionVault().rootAsList()) {
+                            for (String perm : plugin.getPermissionRegistry().rootAsList()) {
                                 arr.add(perm);
                             }
                         })
