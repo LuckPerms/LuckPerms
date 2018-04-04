@@ -292,6 +292,14 @@ public interface Node {
     ContextSet getFullContexts();
 
     /**
+     * Returns if the node is a "standard" permission node.
+     *
+     * @return true if this is a regular permission node
+     * @since 4.2
+     */
+    boolean isRegularPermissionNode();
+
+    /**
      * Returns if this is a group node.
      *
      * @return true if this is a group node

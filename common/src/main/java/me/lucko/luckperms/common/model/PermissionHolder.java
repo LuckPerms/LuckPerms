@@ -330,9 +330,35 @@ public abstract class PermissionHolder {
     }
 
     public boolean removeIf(Predicate<Node> predicate) {
+        return removeIf(predicate, null);
+    }
+
+    public boolean removeIf(Predicate<Node> predicate, Runnable taskIfSuccess) {
         ImmutableCollection<Node> before = getEnduringNodes().values();
         if (!this.enduringNodes.removeIf(predicate)) {
             return false;
+        }
+        if (taskIfSuccess != null) {
+            taskIfSuccess.run();
+        }
+        invalidateCache();
+        ImmutableCollection<Node> after = getEnduringNodes().values();
+
+        this.plugin.getEventFactory().handleNodeClear(this, before, after);
+        return true;
+    }
+
+    public boolean removeIf(ContextSet contextSet, Predicate<Node> predicate) {
+        return removeIf(contextSet, predicate, null);
+    }
+
+    public boolean removeIf(ContextSet contextSet, Predicate<Node> predicate, Runnable taskIfSuccess) {
+        ImmutableCollection<Node> before = getEnduringNodes().values();
+        if (!this.enduringNodes.removeIf(contextSet, predicate)) {
+            return false;
+        }
+        if (taskIfSuccess != null) {
+            taskIfSuccess.run();
         }
         invalidateCache();
         ImmutableCollection<Node> after = getEnduringNodes().values();
@@ -820,86 +846,44 @@ public abstract class PermissionHolder {
         return true;
     }
 
+    public boolean clearPermissions() {
+        return removeIf(Node::isRegularPermissionNode);
+    }
+
+    public boolean clearPermissions(ContextSet contextSet) {
+        return removeIf(contextSet, Node::isRegularPermissionNode);
+    }
+
     public boolean clearParents(boolean giveDefault) {
-        ImmutableCollection<Node> before = getEnduringNodes().values();
-
-        if (!this.enduringNodes.removeIf(Node::isGroupNode)) {
-            return false;
-        }
-        if (this.getType().isUser() && giveDefault) {
-            this.plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
-        }
-
-        invalidateCache();
-        ImmutableCollection<Node> after = getEnduringNodes().values();
-
-        this.plugin.getEventFactory().handleNodeClear(this, before, after);
-        return true;
+        return removeIf(Node::isGroupNode, () -> {
+            if (this.getType().isUser() && giveDefault) {
+                this.plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
+            }
+        });
     }
 
     public boolean clearParents(ContextSet contextSet, boolean giveDefault) {
-        ImmutableCollection<Node> before = getEnduringNodes().values();
-
-        if (!this.enduringNodes.removeIf(contextSet, Node::isGroupNode)) {
-            return false;
-        }
-        if (this.getType().isUser() && giveDefault) {
-            this.plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
-        }
-
-        invalidateCache();
-        ImmutableCollection<Node> after = getEnduringNodes().values();
-
-        this.plugin.getEventFactory().handleNodeClear(this, before, after);
-        return true;
+        return removeIf(contextSet, Node::isGroupNode, () -> {
+            if (this.getType().isUser() && giveDefault) {
+                this.plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
+            }
+        });
     }
 
     public boolean clearMeta(MetaType type) {
-        ImmutableCollection<Node> before = getEnduringNodes().values();
-        if (!this.enduringNodes.removeIf(type::matches)) {
-            return false;
-        }
-        invalidateCache();
-        ImmutableCollection<Node> after = getEnduringNodes().values();
-
-        this.plugin.getEventFactory().handleNodeClear(this, before, after);
-        return true;
+        return removeIf(type::matches);
     }
 
     public boolean clearMeta(MetaType type, ContextSet contextSet) {
-        ImmutableCollection<Node> before = getEnduringNodes().values();
-        if (!this.enduringNodes.removeIf(contextSet, type::matches)) {
-            return false;
-        }
-        invalidateCache();
-        ImmutableCollection<Node> after = getEnduringNodes().values();
-
-        this.plugin.getEventFactory().handleNodeClear(this, before, after);
-        return true;
+        return removeIf(contextSet, type::matches);
     }
 
     public boolean clearMetaKeys(String key, boolean temp) {
-        ImmutableCollection<Node> before = getEnduringNodes().values();
-        if (!this.enduringNodes.removeIf(n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key))) {
-            return false;
-        }
-        invalidateCache();
-        ImmutableCollection<Node> after = getEnduringNodes().values();
-
-        this.plugin.getEventFactory().handleNodeClear(this, before, after);
-        return true;
+        return removeIf(n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key));
     }
 
     public boolean clearMetaKeys(String key, ContextSet contextSet, boolean temp) {
-        ImmutableCollection<Node> before = getEnduringNodes().values();
-        if (!this.enduringNodes.removeIf(contextSet, n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key))) {
-            return false;
-        }
-        invalidateCache();
-        ImmutableCollection<Node> after = getEnduringNodes().values();
-
-        this.plugin.getEventFactory().handleNodeClear(this, before, after);
-        return true;
+        return removeIf(contextSet, n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key));
     }
 
     public boolean clearTransientNodes() {

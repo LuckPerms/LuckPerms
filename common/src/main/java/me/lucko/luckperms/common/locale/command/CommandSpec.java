@@ -240,6 +240,11 @@ public enum CommandSpec {
                     Argument.create("context...", false, "the contexts to check in")
             )
     ),
+    PERMISSION_CLEAR("Clears all permissions",
+            Argument.list(
+                    Argument.create("context...", false, "the contexts to filter by")
+            )
+    ),
 
     PARENT_INFO("Lists the groups that this object inherits from",
             Argument.list(

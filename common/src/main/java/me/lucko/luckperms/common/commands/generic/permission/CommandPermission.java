@@ -43,6 +43,7 @@ public class CommandPermission<T extends PermissionHolder> extends SharedMainCom
                 .add(new PermissionUnsetTemp(locale))
                 .add(new PermissionCheck(locale))
                 .add(new PermissionCheckInherits(locale))
+                .add(new PermissionClear(locale))
                 .build());
     }
 }

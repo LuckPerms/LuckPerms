@@ -172,6 +172,11 @@ public abstract class ForwardingNode implements Node {
     }
 
     @Override
+    public boolean isRegularPermissionNode() {
+        return delegate().isRegularPermissionNode();
+    }
+
+    @Override
     public boolean isGroupNode() {
         return delegate().isGroupNode();
     }

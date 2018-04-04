@@ -245,8 +245,10 @@ public enum Message {
     UNSET_INHERIT_SUCCESS("&b{}&a no longer inherits permissions from &b{}&a in context {}&a.", true),
     UNSET_TEMP_INHERIT_SUCCESS("&b{}&a no longer temporarily inherits permissions from &b{}&a in context {}&a.", true),
 
-    CLEAR_SUCCESS("&b{}&a's permissions were cleared in context {}&a. (&b{}&a nodes were removed.)", true),
-    CLEAR_SUCCESS_SINGULAR("&b{}&a's permissions were cleared in context {}&a. (&b{}&a node was removed.)", true),
+    CLEAR_SUCCESS("&b{}&a's nodes were cleared in context {}&a. (&b{}&a nodes were removed.)", true),
+    CLEAR_SUCCESS_SINGULAR("&b{}&a's nodes were cleared in context {}&a. (&b{}&a node was removed.)", true),
+    PERMISSION_CLEAR_SUCCESS("&b{}&a's permissions were cleared in context {}&a. (&b{}&a nodes were removed.)", true),
+    PERMISSION_CLEAR_SUCCESS_SINGULAR("&b{}&a's permissions were cleared in context {}&a. (&b{}&a node was removed.)", true),
     PARENT_CLEAR_SUCCESS("&b{}&a's parents were cleared in context {}&a. (&b{}&a nodes were removed.)", true),
     PARENT_CLEAR_SUCCESS_SINGULAR("&b{}&a's parents were cleared in context {}&a. (&b{}&a node was removed.)", true),
 

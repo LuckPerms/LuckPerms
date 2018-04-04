@@ -256,6 +256,11 @@ public final class ImmutableNode implements Node {
     }
 
     @Override
+    public boolean isRegularPermissionNode() {
+        return !isGroupNode() && !isPrefix() && !isSuffix() && !isMeta();
+    }
+
+    @Override
     public boolean isGroupNode() {
         return this.groupName != null;
     }
