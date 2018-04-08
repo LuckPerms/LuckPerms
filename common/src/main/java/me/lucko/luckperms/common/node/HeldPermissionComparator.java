@@ -25,46 +25,27 @@
 
 package me.lucko.luckperms.common.node;
 
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.utils.CollationKeyCache;
+import me.lucko.luckperms.api.HeldPermission;
 
 import java.util.Comparator;
 
-public class NodeComparator implements Comparator<Node> {
+public class HeldPermissionComparator<T extends Comparable<T>> implements Comparator<HeldPermission<T>> {
 
-    private static final Comparator<? super Node> INSTANCE = new NodeComparator();
-    private static final Comparator<? super Node> REVERSE = INSTANCE.reversed();
-
-    public static Comparator<? super Node> normal() {
-        return INSTANCE;
+    public static <T extends Comparable<T>> Comparator<? super HeldPermission<T>> normal() {
+        return new HeldPermissionComparator<>();
     }
 
-    public static Comparator<? super Node> reverse() {
-        return REVERSE;
+    public static <T extends Comparable<T>> Comparator<? super HeldPermission<T>> reverse() {
+        return HeldPermissionComparator.<T>normal().reversed();
     }
 
     @Override
-    public int compare(Node o1, Node o2) {
-        if (o1.equals(o2)) {
-            return 0;
+    public int compare(HeldPermission<T> o1, HeldPermission<T> o2) {
+        int i = o1.getHolder().compareTo(o2.getHolder());
+        if (i != 0) {
+            return i;
         }
 
-        if (o1.isTemporary() != o2.isTemporary()) {
-            return o1.isTemporary() ? 1 : -1;
-        }
-
-        if (o1.isWildcard() != o2.isWildcard()) {
-            return o1.isWildcard() ? 1 : -1;
-        }
-
-        if (o1.isTemporary()) {
-            return o1.getSecondsTilExpiry() < o2.getSecondsTilExpiry() ? 1 : -1;
-        }
-
-        if (o1.isWildcard()) {
-            return o1.getWildcardLevel() > o2.getWildcardLevel() ? 1 : -1;
-        }
-
-        return CollationKeyCache.compareStrings(o1.getPermission(), o2.getPermission()) == 1 ? -1 : 1;
+        return NodeWithContextComparator.normal().compare(o1.asNode(), o2.asNode());
     }
 }

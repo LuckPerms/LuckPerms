@@ -42,6 +42,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.node.HeldPermissionComparator;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.HolderType;
@@ -108,18 +109,9 @@ public class GroupListMembers extends SubCommand<Group> {
         return CommandResult.SUCCESS;
     }
 
-    private static <T> void sendResult(Sender sender, List<HeldPermission<T>> results, Function<T, String> lookupFunction, Message headerMessage, HolderType holderType, String label, int page) {
+    private static <T extends Comparable<T>> void sendResult(Sender sender, List<HeldPermission<T>> results, Function<T, String> lookupFunction, Message headerMessage, HolderType holderType, String label, int page) {
         results = new ArrayList<>(results);
-
-        // we need a deterministic sort order
-        // even though we're comparing uuids here in some cases - it doesn't matter
-        // the import thing is that the order is the same each time the command is executed
-        results.sort((o1, o2) -> {
-            Comparable h1 = (Comparable) o1.getHolder();
-            Comparable h2 = (Comparable) o2.getHolder();
-            //noinspection unchecked
-            return h1.compareTo(h2);
-        });
+        results.sort(HeldPermissionComparator.normal());
 
         int pageIndex = page - 1;
         List<List<HeldPermission<T>>> pages = Iterators.divideIterable(results, 15);

@@ -169,10 +169,9 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
         return getResource(path);
     }
 
-    @Nullable
     @Override
-    public Player getPlayer(UUID uuid) {
-        return getServer().getOnlinePlayers().get(uuid);
+    public Optional<Player> getPlayer(UUID uuid) {
+        return Optional.ofNullable(getServer().getOnlinePlayers().get(uuid));
     }
 
     @Override

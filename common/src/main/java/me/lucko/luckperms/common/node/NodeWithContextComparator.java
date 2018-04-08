@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.node;
 
-import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.utils.CollationKeyCache;
 
@@ -34,26 +33,23 @@ import java.util.Comparator;
 /**
  * Compares permission nodes based upon their supposed "priority".
  */
-public class NodeWithContextComparator implements Comparator<LocalizedNode> {
+public class NodeWithContextComparator implements Comparator<Node> {
 
-    private static final Comparator<LocalizedNode> INSTANCE = new NodeWithContextComparator();
-    private static final Comparator<LocalizedNode> REVERSE = INSTANCE.reversed();
+    private static final Comparator<? super Node> INSTANCE = new NodeWithContextComparator();
+    private static final Comparator<? super Node> REVERSE = INSTANCE.reversed();
 
-    public static Comparator<LocalizedNode> normal() {
+    public static Comparator<? super Node> normal() {
         return INSTANCE;
     }
 
-    public static Comparator<LocalizedNode> reverse() {
+    public static Comparator<? super Node> reverse() {
         return REVERSE;
     }
 
     private NodeWithContextComparator() {}
 
     @Override
-    public int compare(LocalizedNode one, LocalizedNode two) {
-        Node o1 = one.getNode();
-        Node o2 = two.getNode();
-
+    public int compare(Node o1, Node o2) {
         if (o1.equals(o2)) {
             return 0;
         }

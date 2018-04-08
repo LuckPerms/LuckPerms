@@ -262,14 +262,13 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
         return getClass().getClassLoader().getResourceAsStream(path);
     }
 
-    @Nullable
     @Override
-    public Player getPlayer(UUID uuid) {
+    public Optional<Player> getPlayer(UUID uuid) {
         if (!getGame().isServerAvailable()) {
-            return null;
+            return Optional.empty();
         }
 
-        return getGame().getServer().getPlayer(uuid).orElse(null);
+        return getGame().getServer().getPlayer(uuid);
     }
 
     @Override

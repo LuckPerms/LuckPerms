@@ -31,15 +31,16 @@ import me.lucko.luckperms.api.context.ContextSet;
 
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
-public final class NodeHeldPermission<T> implements HeldPermission<T> {
-    public static <T> NodeHeldPermission<T> of(T holder, NodeModel nodeModel) {
+public final class NodeHeldPermission<T extends Comparable<T>> implements HeldPermission<T> {
+    public static <T extends Comparable<T>> NodeHeldPermission<T> of(T holder, NodeModel nodeModel) {
         return of(holder, nodeModel.toNode());
     }
 
-    public static <T> NodeHeldPermission<T> of(T holder, Node node) {
+    public static <T extends Comparable<T>> NodeHeldPermission<T> of(T holder, Node node) {
         return new NodeHeldPermission<>(holder, node);
     }
 

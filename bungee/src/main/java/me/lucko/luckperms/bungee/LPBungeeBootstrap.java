@@ -166,10 +166,9 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
         return getResourceAsStream(path);
     }
 
-    @Nullable
     @Override
-    public ProxiedPlayer getPlayer(UUID uuid) {
-        return getProxy().getPlayer(uuid);
+    public Optional<ProxiedPlayer> getPlayer(UUID uuid) {
+        return Optional.ofNullable(getProxy().getPlayer(uuid));
     }
 
     @Override

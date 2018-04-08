@@ -179,11 +179,7 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
 
     @Override
     public Optional<Contexts> getContextForUser(User user) {
-        ProxiedPlayer player = this.bootstrap.getPlayer(user.getUuid());
-        if (player == null) {
-            return Optional.empty();
-        }
-        return Optional.of(this.contextManager.getApplicableContexts(player));
+        return this.bootstrap.getPlayer(user.getUuid()).map(player -> this.contextManager.getApplicableContexts(player));
     }
 
     @Override

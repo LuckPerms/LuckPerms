@@ -36,6 +36,7 @@ import net.kyori.text.Component;
 import net.kyori.text.serializer.ComponentSerializers;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.chat.ComponentSerializer;
 
 import java.util.UUID;
 
@@ -67,7 +68,7 @@ public class BungeeSenderFactory extends SenderFactory<CommandSender> {
 
     @Override
     protected void sendMessage(CommandSender sender, Component message) {
-        sender.sendMessage(net.md_5.bungee.chat.ComponentSerializer.parse(ComponentSerializers.JSON.serialize(message)));
+        sender.sendMessage(ComponentSerializer.parse(ComponentSerializers.JSON.serialize(message)));
     }
 
     @Override

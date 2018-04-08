@@ -158,8 +158,7 @@ public interface LuckPermsBootstrap {
      * @param uuid the users unique id
      * @return a player object, or null, if one couldn't be found.
      */
-    @Nullable
-    Object getPlayer(UUID uuid);
+    Optional<?> getPlayer(UUID uuid);
 
     /**
      * Lookup a uuid from a username, using the servers internal uuid cache.
