@@ -48,6 +48,7 @@ import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -337,7 +338,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
     Contexts contextForLookup(User user, String world) {
         MutableContextSet context;
 
-        Player player = user == null ? null : this.plugin.getBootstrap().getPlayer(user.getUuid());
+        Player player = Optional.ofNullable(user).flatMap(u -> this.plugin.getBootstrap().getPlayer(u.getUuid())).orElse(null);
         if (player != null) {
             context = this.plugin.getContextManager().getApplicableContext(player).mutableCopy();
         } else {
