@@ -157,7 +157,7 @@ public class SqlDao extends AbstractDao {
 
             // Init tables
             if (!tableExists(this.prefix.apply("{prefix}user_permissions"))) {
-                String schemaFileName = "schema/" + this.provider.getName().toLowerCase() + ".sql";
+                String schemaFileName = "me/lucko/luckperms/schema/" + this.provider.getName().toLowerCase() + ".sql";
                 try (InputStream is = this.plugin.getBootstrap().getResourceStream(schemaFileName)) {
                     if (is == null) {
                         throw new Exception("Couldn't locate schema file for " + this.provider.getName());
