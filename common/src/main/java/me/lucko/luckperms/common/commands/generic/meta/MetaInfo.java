@@ -53,7 +53,7 @@ import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
 
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -79,7 +79,7 @@ public class MetaInfo extends SharedSubCommand {
 
         SortedSet<Map.Entry<Integer, LocalizedNode>> prefixes = new TreeSet<>(MetaComparator.INSTANCE.reversed());
         SortedSet<Map.Entry<Integer, LocalizedNode>> suffixes = new TreeSet<>(MetaComparator.INSTANCE.reversed());
-        Set<LocalizedNode> meta = new HashSet<>();
+        Set<LocalizedNode> meta = new LinkedHashSet<>();
 
         // Collect data
         for (LocalizedNode node : holder.resolveInheritances()) {
