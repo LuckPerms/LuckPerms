@@ -78,16 +78,16 @@ public class ApplyEditsCommand extends SingleCommand {
         if (data.has("tabs") && data.get("tabs").isJsonArray()) {
             JsonArray rows = data.get("tabs").getAsJsonArray();
             for (JsonElement row : rows) {
-                read(row.getAsJsonObject(), code, sender, plugin);
+                read(row.getAsJsonObject(), sender, plugin);
             }
         } else {
-            read(data, code, sender, plugin);
+            read(data, sender, plugin);
         }
 
         return CommandResult.SUCCESS;
     }
 
-    private boolean read(JsonObject data, String code, Sender sender, LuckPermsPlugin plugin) {
+    private boolean read(JsonObject data, Sender sender, LuckPermsPlugin plugin) {
         if (!data.has("who") || data.get("who").getAsString().isEmpty()) {
             Message.APPLY_EDITS_NO_TARGET.send(sender);
             return false;
@@ -111,28 +111,38 @@ public class ApplyEditsCommand extends SingleCommand {
         Set<Node> after = nodes.stream().map(NodeModel::toNode).collect(Collectors.toSet());
 
         Map.Entry<Set<Node>, Set<Node>> diff = diff(before, after);
-        int additions = diff.getKey().size();
-        int deletions = diff.getValue().size();
+        Set<Node> diffAdded = diff.getKey();
+        Set<Node> diffRemoved = diff.getValue();
+
+        int additions = diffAdded.size();
+        int deletions = diffRemoved.size();
 
         if (additions == 0 && deletions == 0) {
             return false;
         }
 
-        ExtendedLogEntry.build().actor(sender).acted(holder)
-                .action("applyedits", code)
-                .build().submit(plugin, sender);
-
         holder.setEnduringNodes(after);
+
+        for (Node n : diffAdded) {
+            ExtendedLogEntry.build().actor(sender).acted(holder)
+                    .action("webeditor", "add", n.getPermission(), n.getValuePrimitive(), n.getFullContexts())
+                    .build().submit(plugin, sender);
+        }
+        for (Node n : diffRemoved) {
+            ExtendedLogEntry.build().actor(sender).acted(holder)
+                    .action("webeditor", "remove", n.getPermission(), n.getValuePrimitive(), n.getFullContexts())
+                    .build().submit(plugin, sender);
+        }
 
         String additionsSummary = "addition" + (additions == 1 ? "" : "s");
         String deletionsSummary = "deletion" + (deletions == 1 ? "" : "s");
 
         Message.APPLY_EDITS_SUCCESS.send(sender, holder.getFriendlyName());
         Message.APPLY_EDITS_SUCCESS_SUMMARY.send(sender, additions, additionsSummary, deletions, deletionsSummary);
-        for (Node n : diff.getKey()) {
+        for (Node n : diffAdded) {
             Message.APPLY_EDITS_DIFF_ADDED.send(sender, formatNode(n));
         }
-        for (Node n : diff.getValue()) {
+        for (Node n : diffRemoved) {
             Message.APPLY_EDITS_DIFF_REMOVED.send(sender, formatNode(n));
         }
         StorageAssistant.save(holder, sender, plugin);
