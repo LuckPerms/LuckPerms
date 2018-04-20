@@ -33,14 +33,12 @@ import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import cn.nukkit.Player;
 import cn.nukkit.plugin.PluginBase;
 
-import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 /**
  * Bootstrap plugin for LuckPerms running on Nukkit.
@@ -160,8 +158,8 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     }
 
     @Override
-    public File getDataDirectory() {
-        return getDataFolder();
+    public Path getDataDirectory() {
+        return getDataFolder().toPath().toAbsolutePath();
     }
 
     @Override

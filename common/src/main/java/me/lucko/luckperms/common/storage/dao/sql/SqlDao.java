@@ -151,63 +151,56 @@ public class SqlDao extends AbstractDao {
     }
 
     @Override
-    public void init() {
-        try {
-            this.provider.init();
+    public void init() throws Exception {
+        this.provider.init();
 
-            // Init tables
-            if (!tableExists(this.prefix.apply("{prefix}user_permissions"))) {
-                String schemaFileName = "me/lucko/luckperms/schema/" + this.provider.getName().toLowerCase() + ".sql";
-                try (InputStream is = this.plugin.getBootstrap().getResourceStream(schemaFileName)) {
-                    if (is == null) {
-                        throw new Exception("Couldn't locate schema file for " + this.provider.getName());
-                    }
-
-                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-                        try (Connection connection = this.provider.getConnection()) {
-                            try (Statement s = connection.createStatement()) {
-                                StringBuilder sb = new StringBuilder();
-                                String line;
-                                while ((line = reader.readLine()) != null) {
-                                    if (line.startsWith("--") || line.startsWith("#")) continue;
-
-                                    sb.append(line);
-
-                                    // check for end of declaration
-                                    if (line.endsWith(";")) {
-                                        sb.deleteCharAt(sb.length() - 1);
-
-                                        String result = this.prefix.apply(sb.toString().trim());
-                                        if (!result.isEmpty()) s.addBatch(result);
-
-                                        // reset
-                                        sb = new StringBuilder();
-                                    }
-                                }
-                                s.executeBatch();
-                            }
-                        }
-                    }
+        // Init tables
+        if (!tableExists(this.prefix.apply("{prefix}user_permissions"))) {
+            String schemaFileName = "me/lucko/luckperms/schema/" + this.provider.getName().toLowerCase() + ".sql";
+            try (InputStream is = this.plugin.getBootstrap().getResourceStream(schemaFileName)) {
+                if (is == null) {
+                    throw new Exception("Couldn't locate schema file for " + this.provider.getName());
                 }
-            }
 
-            // migrations
-            try {
-                if (!(this.provider instanceof SQLiteConnectionFactory) && !(this.provider instanceof PostgreConnectionFactory)) {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
                     try (Connection connection = this.provider.getConnection()) {
                         try (Statement s = connection.createStatement()) {
-                            s.execute(this.prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN actor_name VARCHAR(100)"));
-                            s.execute(this.prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN action VARCHAR(300)"));
+                            StringBuilder sb = new StringBuilder();
+                            String line;
+                            while ((line = reader.readLine()) != null) {
+                                if (line.startsWith("--") || line.startsWith("#")) continue;
+
+                                sb.append(line);
+
+                                // check for end of declaration
+                                if (line.endsWith(";")) {
+                                    sb.deleteCharAt(sb.length() - 1);
+
+                                    String result = this.prefix.apply(sb.toString().trim());
+                                    if (!result.isEmpty()) s.addBatch(result);
+
+                                    // reset
+                                    sb = new StringBuilder();
+                                }
+                            }
+                            s.executeBatch();
                         }
                     }
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+        }
 
-
+        // migrations
+        try {
+            if (!(this.provider instanceof SQLiteConnectionFactory) && !(this.provider instanceof PostgreConnectionFactory)) {
+                try (Connection connection = this.provider.getConnection()) {
+                    try (Statement s = connection.createStatement()) {
+                        s.execute(this.prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN actor_name VARCHAR(100)"));
+                        s.execute(this.prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN action VARCHAR(300)"));
+                    }
+                }
+            }
         } catch (Exception e) {
-            this.plugin.getLogger().severe("Error occurred whilst initialising the database.");
             e.printStackTrace();
         }
     }

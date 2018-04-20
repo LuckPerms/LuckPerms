@@ -36,14 +36,12 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 /**
  * Bootstrap plugin for LuckPerms running on Bukkit.
@@ -197,8 +195,8 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     }
 
     @Override
-    public File getDataDirectory() {
-        return getDataFolder();
+    public Path getDataDirectory() {
+        return getDataFolder().toPath().toAbsolutePath();
     }
 
     @Override

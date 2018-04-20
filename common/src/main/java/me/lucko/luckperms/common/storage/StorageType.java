@@ -31,15 +31,25 @@ import java.util.List;
 
 public enum StorageType {
 
-    JSON("JSON", "json", "flatfile"),
+    // Config file based
     YAML("YAML", "yaml", "yml"),
+    JSON("JSON", "json", "flatfile"),
     HOCON("HOCON", "hocon"),
+    YAML_COMBINED("YAML Combined", "yaml-combined"),
+    JSON_COMBINED("JSON Combined", "json-combined"),
+    HOCON_COMBINED("HOCON Combined", "hocon-combined"),
+
+    // Remote databases
     MONGODB("MongoDB", "mongodb"),
     MARIADB("MariaDB", "mariadb"),
     MYSQL("MySQL", "mysql"),
     POSTGRESQL("PostgreSQL", "postgresql"),
+
+    // Local databases
     SQLITE("SQLite", "sqlite"),
     H2("H2", "h2"),
+
+    // Custom
     CUSTOM("Custom", "custom");
 
     private final String name;

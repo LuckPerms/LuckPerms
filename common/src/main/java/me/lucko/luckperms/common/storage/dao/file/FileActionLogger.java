@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.storage.dao.file;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.command.CommandManager;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
@@ -40,9 +40,9 @@ public class FileActionLogger {
     private static final String LOG_FORMAT = "%s(%s): [%s] %s(%s) --> %s";
     private final Logger actionLogger = Logger.getLogger("luckperms_actions");
 
-    public void init(File file) {
+    public void init(Path file) {
         try {
-            FileHandler fh = new FileHandler(file.getAbsolutePath(), 0, 1, true);
+            FileHandler fh = new FileHandler(file.toString(), 0, 1, true);
             fh.setFormatter(new Formatter() {
                 @Override
                 public String format(LogRecord record) {

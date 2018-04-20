@@ -35,9 +35,9 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 
 public class SimpleLocaleManager implements LocaleManager {
@@ -46,8 +46,8 @@ public class SimpleLocaleManager implements LocaleManager {
     private Map<CommandSpec, CommandSpecData> commands = ImmutableMap.of();
 
     @Override
-    public void tryLoad(LuckPermsPlugin plugin, File file) {
-        if (file.exists()) {
+    public void tryLoad(LuckPermsPlugin plugin, Path file) {
+        if (Files.exists(file)) {
             plugin.getLogger().info("Found lang.yml - loading messages...");
             try {
                 loadFromFile(file);
@@ -59,8 +59,8 @@ public class SimpleLocaleManager implements LocaleManager {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void loadFromFile(File file) throws Exception {
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+    public void loadFromFile(Path file) throws Exception {
+        try (BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
             ImmutableMap.Builder<Message, String> messages = ImmutableMap.builder();
             ImmutableMap.Builder<CommandSpec, CommandSpecData> commands = ImmutableMap.builder();
 

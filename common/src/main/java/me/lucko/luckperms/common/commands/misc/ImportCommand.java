@@ -36,7 +36,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -58,16 +57,14 @@ public class ImportCommand extends SingleCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        File f = new File(plugin.getBootstrap().getDataDirectory(), args.get(0));
-        if (!f.exists()) {
-            Message.IMPORT_LOG_DOESNT_EXIST.send(sender, f.getAbsolutePath());
+        Path path = plugin.getBootstrap().getDataDirectory().resolve(args.get(0));
+        if (!Files.exists(path)) {
+            Message.IMPORT_LOG_DOESNT_EXIST.send(sender, path.toString());
             return CommandResult.INVALID_ARGS;
         }
 
-        Path path = f.toPath();
-
         if (!Files.isReadable(path)) {
-            Message.IMPORT_LOG_NOT_READABLE.send(sender, f.getAbsolutePath());
+            Message.IMPORT_LOG_NOT_READABLE.send(sender, path.toString());
             return CommandResult.FAILURE;
         }
 

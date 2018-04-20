@@ -29,9 +29,11 @@ import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.classloader.IsolatedClassLoader;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.EnumSet;
@@ -44,13 +46,17 @@ public class SQLiteConnectionFactory extends FlatfileConnectionFactory {
     // the active connection
     private NonClosableConnection connection;
 
-    public SQLiteConnectionFactory(LuckPermsPlugin plugin, File file) {
+    public SQLiteConnectionFactory(LuckPermsPlugin plugin, Path file) {
         super("SQLite", file);
 
         // backwards compat
-        File data = new File(file.getParent(), "luckperms.sqlite");
-        if (data.exists()) {
-            data.renameTo(file);
+        Path data = file.getParent().resolve("luckperms.sqlite");
+        if (Files.exists(data)) {
+            try {
+                Files.move(data, file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         // setup the classloader
@@ -79,7 +85,7 @@ public class SQLiteConnectionFactory extends FlatfileConnectionFactory {
     @Override
     public synchronized Connection getConnection() throws SQLException {
         if (this.connection == null || this.connection.isClosed()) {
-            Connection connection = createConnection("jdbc:sqlite:" + this.file.getAbsolutePath());
+            Connection connection = createConnection("jdbc:sqlite:" + this.file.toString());
             if (connection != null) {
                 this.connection = NonClosableConnection.wrap(connection);
             }

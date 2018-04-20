@@ -68,7 +68,7 @@ public class SplitStorageDao extends AbstractDao {
             }
         }
         if (failed) {
-            throw new RuntimeException("One of the backing failed to init");
+            throw new RuntimeException("One of the backings failed to init");
         }
     }
 

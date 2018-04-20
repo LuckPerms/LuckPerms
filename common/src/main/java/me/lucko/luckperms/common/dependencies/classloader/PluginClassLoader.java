@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.dependencies.classloader;
 
-import java.io.File;
 import java.net.URL;
+import java.nio.file.Path;
 
 /**
  * Represents the plugins classloader
@@ -35,6 +35,6 @@ public interface PluginClassLoader {
 
     void loadJar(URL url);
 
-    void loadJar(File file);
+    void loadJar(Path file);
 
 }

@@ -23,55 +23,23 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.dao.sql.connection.file;
+package me.lucko.luckperms.common.storage.dao.file.loader;
 
-import me.lucko.luckperms.common.storage.dao.sql.connection.AbstractConnectionFactory;
+import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
 
-import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.DecimalFormat;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
-abstract class FlatfileConnectionFactory extends AbstractConnectionFactory {
-    protected static final DecimalFormat DF = new DecimalFormat("#.##");
-
-    protected final Path file;
-
-    FlatfileConnectionFactory(String name, Path file) {
-        super(name);
-        this.file = file;
-    }
+public class HoconLoader implements ConfigurateLoader {
 
     @Override
-    public void init() {
-
-    }
-
-    protected Path getWriteFile() {
-        return this.file;
-    }
-
-    @Override
-    public Map<String, String> getMeta() {
-        Map<String, String> ret = new LinkedHashMap<>();
-
-        Path databaseFile = getWriteFile();
-        if (Files.exists(databaseFile)) {
-            long length;
-            try {
-                length = Files.size(databaseFile);
-            } catch (IOException e) {
-                length = 0;
-            }
-
-            double size = length / 1048576D;
-            ret.put("File Size", DF.format(size) + "MB");
-        } else {
-            ret.put("File Size", "0MB");
-        }
-
-        return ret;
+    public ConfigurationLoader<? extends ConfigurationNode> loader(Path path) {
+        return HoconConfigurationLoader.builder()
+                .setSource(() -> Files.newBufferedReader(path, StandardCharsets.UTF_8))
+                .setSink(() -> Files.newBufferedWriter(path, StandardCharsets.UTF_8))
+                .build();
     }
 }

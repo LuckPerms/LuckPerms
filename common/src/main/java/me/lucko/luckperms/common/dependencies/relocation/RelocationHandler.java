@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.dependencies.classloader.IsolatedClassLoader;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.nio.file.Path;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -70,14 +71,14 @@ public class RelocationHandler {
         }
     }
 
-    public void remap(File input, File output, List<Relocation> relocations) throws Exception {
+    public void remap(Path input, Path output, List<Relocation> relocations) throws Exception {
         Map<String, String> mappings = new HashMap<>();
         for (Relocation relocation : relocations) {
             mappings.put(relocation.getPattern(), relocation.getRelocatedPattern());
         }
 
         // create and invoke a new relocator
-        Object relocator = this.jarRelocatorConstructor.newInstance(input, output, mappings);
+        Object relocator = this.jarRelocatorConstructor.newInstance(input.toFile(), output.toFile(), mappings);
         this.jarRelocatorRunMethod.invoke(relocator);
     }
 }

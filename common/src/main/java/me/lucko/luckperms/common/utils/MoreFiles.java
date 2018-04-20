@@ -23,32 +23,20 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.dao.file;
+package me.lucko.luckperms.common.utils;
 
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-
-import org.yaml.snakeyaml.DumperOptions;
-
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
-import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
-
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class YamlDao extends ConfigurateDao {
-    public YamlDao(LuckPermsPlugin plugin, String dataFolderName) {
-        super(plugin, "YAML", ".yml", dataFolderName);
+public final class MoreFiles {
+
+    public static Path createFileIfNotExists(Path path) throws IOException {
+        if (!Files.exists(path)) {
+            Files.createFile(path);
+        }
+        return path;
     }
 
-    @Override
-    protected ConfigurationLoader<? extends ConfigurationNode> loader(Path path) {
-        return YAMLConfigurationLoader.builder()
-                .setFlowStyle(DumperOptions.FlowStyle.BLOCK)
-                .setIndent(2)
-                .setSource(() -> Files.newBufferedReader(path, StandardCharsets.UTF_8))
-                .setSink(() -> Files.newBufferedWriter(path, StandardCharsets.UTF_8))
-                .build();
-    }
+    private MoreFiles() {}
 }

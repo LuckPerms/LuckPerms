@@ -36,7 +36,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -57,16 +56,14 @@ public class ExportCommand extends SingleCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        File f = new File(plugin.getBootstrap().getDataDirectory(), args.get(0));
-        if (f.exists()) {
-            Message.LOG_EXPORT_ALREADY_EXISTS.send(sender, f.getAbsolutePath());
+        Path path = plugin.getBootstrap().getDataDirectory().resolve(args.get(0));
+        if (Files.exists(path)) {
+            Message.LOG_EXPORT_ALREADY_EXISTS.send(sender, path.toString());
             return CommandResult.INVALID_ARGS;
         }
 
-        Path path = f.toPath();
-
         try {
-            f.createNewFile();
+            Files.createFile(path);
         } catch (IOException e) {
             Message.LOG_EXPORT_FAILURE.send(sender);
             e.printStackTrace();
@@ -74,7 +71,7 @@ public class ExportCommand extends SingleCommand {
         }
 
         if (!Files.isWritable(path)) {
-            Message.LOG_EXPORT_NOT_WRITABLE.send(sender, f.getAbsolutePath());
+            Message.LOG_EXPORT_NOT_WRITABLE.send(sender, path.toString());
             return CommandResult.FAILURE;
         }
 

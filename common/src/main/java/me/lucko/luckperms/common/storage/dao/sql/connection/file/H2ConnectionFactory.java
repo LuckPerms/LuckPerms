@@ -29,9 +29,11 @@ import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.classloader.IsolatedClassLoader;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
@@ -45,13 +47,17 @@ public class H2ConnectionFactory extends FlatfileConnectionFactory {
     // the active connection
     private NonClosableConnection connection;
 
-    public H2ConnectionFactory(LuckPermsPlugin plugin, File file) {
+    public H2ConnectionFactory(LuckPermsPlugin plugin, Path file) {
         super("H2", file);
 
         // backwards compat
-        File data = new File(file.getParent(), "luckperms.db.mv.db");
-        if (data.exists()) {
-            data.renameTo(new File(file.getParent(), file.getName() + ".mv.db"));
+        Path data = file.getParent().resolve("luckperms.db.mv.db");
+        if (Files.exists(data)) {
+            try {
+                Files.move(data, getWriteFile());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         // setup the classloader
@@ -68,7 +74,7 @@ public class H2ConnectionFactory extends FlatfileConnectionFactory {
     @Override
     public synchronized Connection getConnection() throws SQLException {
         if (this.connection == null || this.connection.isClosed()) {
-            Connection connection = this.driver.connect("jdbc:h2:" + this.file.getAbsolutePath(), new Properties());
+            Connection connection = this.driver.connect("jdbc:h2:" + this.file.toString(), new Properties());
             if (connection != null) {
                 this.connection = NonClosableConnection.wrap(connection);
             }
@@ -89,8 +95,8 @@ public class H2ConnectionFactory extends FlatfileConnectionFactory {
     }
 
     @Override
-    protected File getWriteFile() {
+    protected Path getWriteFile() {
         // h2 appends this to the end of the database file
-        return new File(super.file.getParent(), super.file.getName() + ".mv.db");
+        return super.file.getParent().resolve(super.file.getFileName().toString() + ".mv.db");
     }
 }

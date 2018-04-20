@@ -34,10 +34,10 @@ import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * A wrapper for the 'contexts.json' file.
@@ -53,19 +53,23 @@ public class ContextsFile {
     }
 
     public void load() {
-        File file = new File(this.configuration.getPlugin().getBootstrap().getDataDirectory(), "contexts.json");
-        File oldFile = new File(this.configuration.getPlugin().getBootstrap().getDataDirectory(), "static-contexts.json");
-        if (oldFile.exists()) {
-            oldFile.renameTo(file);
+        Path file = this.configuration.getPlugin().getBootstrap().getDataDirectory().resolve("contexts.json");
+        Path oldFile = this.configuration.getPlugin().getBootstrap().getDataDirectory().resolve("static-contexts.json");
+        if (Files.exists(oldFile)) {
+            try {
+                Files.move(oldFile, file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
-        if (!file.exists()) {
+        if (!Files.exists(file)) {
             save();
             return;
         }
 
         boolean save = false;
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+        try (BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
             JsonObject data = new Gson().fromJson(reader, JsonObject.class);
 
             if (data.has("context")) {
@@ -91,10 +95,9 @@ public class ContextsFile {
     }
 
     public void save() {
-        File file = new File(this.configuration.getPlugin().getBootstrap().getDataDirectory(), "contexts.json");
+        Path file = this.configuration.getPlugin().getBootstrap().getDataDirectory().resolve("contexts.json");
 
-        try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
-
+        try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
             JsonObject data = new JsonObject();
             data.add("static-contexts", ContextSetJsonSerializer.serializeContextSet(this.staticContexts));
             data.add("default-contexts", ContextSetJsonSerializer.serializeContextSet(this.defaultContexts));

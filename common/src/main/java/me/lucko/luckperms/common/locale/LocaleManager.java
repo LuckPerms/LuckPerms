@@ -30,7 +30,7 @@ import me.lucko.luckperms.common.locale.command.CommandSpecData;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * Manages translations
@@ -43,7 +43,7 @@ public interface LocaleManager {
      * @param plugin the plugin to log to
      * @param file the file to load from
      */
-    void tryLoad(LuckPermsPlugin plugin, File file);
+    void tryLoad(LuckPermsPlugin plugin, Path file);
 
     /**
      * Loads a locale file
@@ -51,7 +51,7 @@ public interface LocaleManager {
      * @param file the file to load from
      * @throws Exception if the process fails
      */
-    void loadFromFile(File file) throws Exception;
+    void loadFromFile(Path file) throws Exception;
 
     /**
      * Gets the size of loaded translations

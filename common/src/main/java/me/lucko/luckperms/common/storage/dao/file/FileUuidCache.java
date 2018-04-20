@@ -35,10 +35,10 @@ import me.lucko.luckperms.common.utils.Uuids;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -182,12 +182,12 @@ public class FileUuidCache {
         }
     }
 
-    public void load(File file) {
-        if (!file.exists()) {
+    public void load(Path file) {
+        if (!Files.exists(file)) {
             return;
         }
 
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+        try (BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
             String entry;
             while ((entry = reader.readLine()) != null) {
                 entry = entry.trim();
@@ -201,8 +201,8 @@ public class FileUuidCache {
         }
     }
 
-    public void save(File file) {
-        try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
+    public void save(Path file) {
+        try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
             writer.write("# LuckPerms UUID lookup cache");
             writer.newLine();
             for (Map.Entry<UUID, String> ent : this.lookupMap.entrySet()) {

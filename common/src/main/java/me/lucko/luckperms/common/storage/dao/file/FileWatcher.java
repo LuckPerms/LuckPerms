@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.storage.dao.file;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.Iterators;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -38,54 +39,35 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public class FileWatcher implements Runnable {
+public class FileWatcher {
     private static final WatchEvent.Kind[] KINDS = new WatchEvent.Kind[]{
             StandardWatchEventKinds.ENTRY_CREATE,
             StandardWatchEventKinds.ENTRY_DELETE,
             StandardWatchEventKinds.ENTRY_MODIFY
     };
 
-    private final LuckPermsPlugin plugin;
+    private final Path basePath;
+    private final Map<Path, WatchedLocation> watchedLocations;
 
-    private final Map<String, WatchedLocation> keyMap;
-    private final Map<String, Long> internalChanges;
-    private WatchService watchService = null;
+    // the watchservice instance
+    private final WatchService watchService;
 
-    public FileWatcher(LuckPermsPlugin plugin) {
-        this.plugin = plugin;
-        this.keyMap = Collections.synchronizedMap(new HashMap<>());
-        this.internalChanges = Collections.synchronizedMap(new HashMap<>());
-        try {
-            this.watchService = plugin.getBootstrap().getDataDirectory().toPath().getFileSystem().newWatchService();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public FileWatcher(LuckPermsPlugin plugin, Path basePath) throws IOException {
+        this.watchedLocations = Collections.synchronizedMap(new HashMap<>());
+        this.basePath = basePath;
+        this.watchService = basePath.getFileSystem().newWatchService();
+
+        plugin.getBootstrap().getScheduler().asyncLater(this::initLocations, 25L);
+        plugin.getBootstrap().getScheduler().asyncRepeating(this::tick, 10L);
     }
 
-    public void subscribe(String id, Path path, Consumer<String> consumer) {
-        if (this.watchService == null) {
-            return;
-        }
-
-        // Register with a delay to ignore changes made at startup
-        this.plugin.getBootstrap().getScheduler().asyncLater(() -> {
-            this.keyMap.computeIfAbsent(id, s -> {
-                WatchKey key;
-                try {
-                    key = path.register(this.watchService, KINDS);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                return new WatchedLocation(path, key, consumer);
-            });
-        }, 40L);
-    }
-
-    public void registerChange(StorageLocation location, String fileName) {
-        this.internalChanges.put(location.name().toLowerCase() + "/" + fileName, System.currentTimeMillis());
+    public WatchedLocation getWatcher(Path path) {
+        Path relativePath = this.basePath.relativize(path);
+        return this.watchedLocations.computeIfAbsent(relativePath, p -> new WatchedLocation(this, p));
     }
 
     public void close() {
@@ -100,21 +82,78 @@ public class FileWatcher implements Runnable {
         }
     }
 
-    @Override
-    public void run() {
-        long expireTime = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(4);
-        // was either processed last time, or recently modified by the system.
-        this.internalChanges.values().removeIf(lastChange -> lastChange < expireTime);
+    private void initLocations() {
+        for (WatchedLocation loc : this.watchedLocations.values()) {
+            try {
+                loc.setup();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-        List<String> expired = new ArrayList<>();
+    private void tick() {
+        List<Path> expired = new ArrayList<>();
+        for (Map.Entry<Path, WatchedLocation> ent : this.watchedLocations.entrySet()) {
+            boolean valid = ent.getValue().tick();
+            if (!valid) {
+                new RuntimeException("WatchKey no longer valid: " + ent.getKey().toString()).printStackTrace();
+                expired.add(ent.getKey());
+            }
+        }
+        expired.forEach(this.watchedLocations::remove);
+    }
 
-        for (Map.Entry<String, WatchedLocation> ent : this.keyMap.entrySet()) {
-            String id = ent.getKey();
-            Path path = ent.getValue().getPath();
-            WatchKey key = ent.getValue().getKey();
+    /**
+     * Encapsulates a "watcher" in a specific directory.
+     */
+    public static final class WatchedLocation {
+        // the parent watcher
+        private final FileWatcher watcher;
 
-            List<WatchEvent<?>> watchEvents = key.pollEvents();
+        // the relative path to the directory being watched
+        private final Path relativePath;
 
+        // the absolute path to the directory being watched
+        private final Path absolutePath;
+
+        // the times of recent changes
+        private final Map<String, Long> lastChange = Collections.synchronizedMap(new HashMap<>());
+
+        // if the key is registered
+        private boolean ready = false;
+
+        // the watch key
+        private WatchKey key = null;
+
+        // the callback functions
+        private final List<Consumer<Path>> callbacks = new CopyOnWriteArrayList<>();
+
+        private WatchedLocation(FileWatcher watcher, Path relativePath) {
+            this.watcher = watcher;
+            this.relativePath = relativePath;
+            this.absolutePath = this.watcher.basePath.resolve(this.relativePath);
+        }
+
+        private synchronized void setup() throws IOException {
+            if (this.ready) {
+                return;
+            }
+
+            this.key = this.absolutePath.register(this.watcher.watchService, KINDS);
+            this.ready = true;
+        }
+
+        private boolean tick() {
+            if (!this.ready) {
+                return true;
+            }
+
+            // remove old change entries.
+            long expireTime = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(4);
+            this.lastChange.values().removeIf(lastChange -> lastChange < expireTime);
+
+            List<WatchEvent<?>> watchEvents = this.key.pollEvents();
             for (WatchEvent<?> event : watchEvents) {
                 Path context = (Path) event.context();
 
@@ -122,7 +161,6 @@ public class FileWatcher implements Runnable {
                     continue;
                 }
 
-                Path file = path.resolve(context);
                 String fileName = context.toString();
 
                 // ignore temporary changes
@@ -130,50 +168,26 @@ public class FileWatcher implements Runnable {
                     continue;
                 }
 
-                if (this.internalChanges.containsKey(id + "/" + fileName)) {
-                    // This file was modified by the system.
+                // ignore changes already registered to the system
+                if (this.lastChange.containsKey(fileName)) {
                     continue;
                 }
+                this.lastChange.put(fileName, System.currentTimeMillis());
 
-                this.internalChanges.put(id + "/" + fileName, System.currentTimeMillis());
-
-                this.plugin.getLogger().info("[FileWatcher] Detected change in file: " + file.toString());
-
-                // Process the change
-                ent.getValue().getFileConsumer().accept(fileName);
+                // process the change
+                Iterators.iterate(this.callbacks, cb -> cb.accept(context));
             }
 
-            boolean valid = key.reset();
-            if (!valid) {
-                new RuntimeException("WatchKey no longer valid: " + key.toString()).printStackTrace();
-                expired.add(id);
-            }
+            // reset the watch key.
+            return this.key.reset();
         }
 
-        expired.forEach(this.keyMap::remove);
-    }
-
-    private static class WatchedLocation {
-        private final Path path;
-        private final WatchKey key;
-        private final Consumer<String> fileConsumer;
-
-        public WatchedLocation(Path path, WatchKey key, Consumer<String> fileConsumer) {
-            this.path = path;
-            this.key = key;
-            this.fileConsumer = fileConsumer;
+        public void recordChange(String fileName) {
+            this.lastChange.put(fileName, System.currentTimeMillis());
         }
 
-        public Path getPath() {
-            return this.path;
-        }
-
-        public WatchKey getKey() {
-            return this.key;
-        }
-
-        public Consumer<String> getFileConsumer() {
-            return this.fileConsumer;
+        public void addListener(Consumer<Path> updateConsumer) {
+            this.callbacks.add(updateConsumer);
         }
     }
 

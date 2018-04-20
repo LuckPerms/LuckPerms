@@ -34,15 +34,16 @@ import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Handles persisted Subject I/O and (de)serialization
@@ -62,9 +63,9 @@ public class SubjectStorage {
     /**
      * The root directory used to store files
      */
-    private final File container;
+    private final Path container;
 
-    public SubjectStorage(LPPermissionService service, File container) {
+    public SubjectStorage(LPPermissionService service, Path container) {
         this.service = service;
         this.gson = new GsonBuilder().setPrettyPrinting().create();
         this.container = container;
@@ -72,7 +73,11 @@ public class SubjectStorage {
     }
 
     private void checkContainer() {
-        this.container.getParentFile().mkdirs();
+        try {
+            Files.createDirectories(this.container.getParent());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -83,12 +88,14 @@ public class SubjectStorage {
     public Set<String> getSavedCollections() {
         checkContainer();
 
-        File[] dirs = this.container.listFiles(File::isDirectory);
-        if (dirs == null) {
-            return Collections.emptySet();
+        try (Stream<Path> s = Files.list(this.container)) {
+            return s.filter(p -> Files.isDirectory(p))
+                    .map(p -> p.getFileName().toString())
+                    .collect(Collectors.toSet());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ImmutableSet.of();
         }
-
-        return ImmutableSet.copyOf(dirs).stream().map(File::getName).collect(Collectors.toSet());
     }
 
     /**
@@ -98,14 +105,16 @@ public class SubjectStorage {
      * @param subjectIdentifier the identifier of the subject
      * @return a file
      */
-    private File resolveFile(String collectionIdentifier, String subjectIdentifier) {
+    private Path resolveFile(String collectionIdentifier, String subjectIdentifier) {
         checkContainer();
-        File collection = new File(this.container, collectionIdentifier);
-        if (!collection.exists()) {
-            collection.mkdirs();
+        Path collection = this.container.resolve(collectionIdentifier);
+        try {
+            Files.createDirectories(collection);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        return new File(collection, subjectIdentifier + ".json");
+        return collection.resolve(subjectIdentifier + ".json");
     }
 
     /**
@@ -115,7 +124,7 @@ public class SubjectStorage {
      * @throws IOException if the write fails
      */
     public void saveToFile(PersistedSubject subject) throws IOException {
-        File subjectFile = resolveFile(subject.getParentCollection().getIdentifier(), subject.getIdentifier());
+        Path subjectFile = resolveFile(subject.getParentCollection().getIdentifier(), subject.getIdentifier());
         saveToFile(SubjectDataContainer.copyOf(subject.getSubjectData()), subjectFile);
     }
 
@@ -126,14 +135,9 @@ public class SubjectStorage {
      * @param file the file
      * @throws IOException if the write fails
      */
-    public void saveToFile(SubjectDataContainer container, File file) throws IOException {
-        file.getParentFile().mkdirs();
-        if (file.exists()) {
-            file.delete();
-        }
-        file.createNewFile();
-
-        try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
+    public void saveToFile(SubjectDataContainer container, Path file) throws IOException {
+        Files.createDirectories(file.getParent());
+        try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
             this.gson.toJson(container.serialize(), writer);
             writer.flush();
         }
@@ -147,28 +151,27 @@ public class SubjectStorage {
      */
     public Map<String, SubjectDataContainer> loadAllFromFile(String collectionIdentifier) {
         checkContainer();
-        File collection = new File(this.container, collectionIdentifier);
-        if (!collection.exists()) {
+        Path collection = this.container.resolve(collectionIdentifier);
+        if (!Files.exists(collection)) {
             return Collections.emptyMap();
         }
 
-        String[] fileNames = collection.list((dir, name) -> name.endsWith(".json"));
-        if (fileNames == null) return Collections.emptyMap();
-
         Map<String, SubjectDataContainer> holders = new HashMap<>();
-        for (String name : fileNames) {
-            File subjectFile = new File(collection, name);
-
-            try {
-                LoadedSubject s = loadFromFile(subjectFile);
-                if (s != null) {
-                    holders.put(s.identifier, s.data);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        try (Stream<Path> s = Files.list(collection)){
+            s.filter(p -> p.getFileName().toString().endsWith(".json"))
+                    .forEach(subjectFile -> {
+                        try {
+                            LoadedSubject sub = loadFromFile(subjectFile);
+                            if (sub != null) {
+                                holders.put(sub.identifier, sub.data);
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
         return holders;
     }
 
@@ -182,12 +185,12 @@ public class SubjectStorage {
      */
     public LoadedSubject loadFromFile(String collectionIdentifier, String subjectIdentifier) throws IOException {
         checkContainer();
-        File collection = new File(this.container, collectionIdentifier);
-        if (!collection.exists()) {
+        Path collection = this.container.resolve(collectionIdentifier);
+        if (!Files.exists(collection)) {
             return null;
         }
 
-        File subject = new File(collection, subjectIdentifier + ".json");
+        Path subject = collection.resolve(subjectIdentifier + ".json");
         return new LoadedSubject(subjectIdentifier, loadFromFile(subject).data);
     }
 
@@ -198,14 +201,15 @@ public class SubjectStorage {
      * @return a loaded subject
      * @throws IOException if the read fails
      */
-    public LoadedSubject loadFromFile(File file) throws IOException {
-        if (!file.exists()) {
+    public LoadedSubject loadFromFile(Path file) throws IOException {
+        if (!Files.exists(file)) {
             return null;
         }
 
-        String subjectName = file.getName().substring(0, file.getName().length() - ".json".length());
+        String fileName = file.getFileName().toString();
+        String subjectName = fileName.substring(0, fileName.length() - ".json".length());
 
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+        try (BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
             JsonObject data = this.gson.fromJson(reader, JsonObject.class);
             SubjectDataContainer model = SubjectDataContainer.derserialize(this.service, data);
             return new LoadedSubject(subjectName, model);

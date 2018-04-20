@@ -25,44 +25,40 @@
 
 package me.lucko.luckperms.common.storage.dao.file;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.ChatMetaType;
-import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.contexts.ContextSetConfigurateSerializer;
-import me.lucko.luckperms.common.managers.group.GroupManager;
-import me.lucko.luckperms.common.managers.track.TrackManager;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.MetaType;
 import me.lucko.luckperms.common.node.NodeFactory;
-import me.lucko.luckperms.common.node.NodeHeldPermission;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
 import me.lucko.luckperms.common.storage.PlayerSaveResult;
 import me.lucko.luckperms.common.storage.dao.AbstractDao;
+import me.lucko.luckperms.common.storage.dao.file.loader.ConfigurateLoader;
+import me.lucko.luckperms.common.storage.dao.file.loader.JsonLoader;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
-import me.lucko.luckperms.common.utils.Uuids;
+import me.lucko.luckperms.common.utils.MoreFiles;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.SimpleConfigurationNode;
 import ninja.leaping.configurate.Types;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -76,143 +72,70 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public abstract class ConfigurateDao extends AbstractDao {
+/**
+ * Abstract implementation using configurate {@link ConfigurationNode}s to serialize and deserialize
+ * data.
+ */
+public abstract class AbstractConfigurateDao extends AbstractDao {
+
+    // the loader responsible for i/o
+    protected final ConfigurateLoader loader;
+
+    // the name of the data directory
+    private final String dataDirectoryName;
+    // the data directory
+    protected Path dataDirectory;
+
+    // the uuid cache instance
     private final FileUuidCache uuidCache = new FileUuidCache();
+    // the action logger instance
     private final FileActionLogger actionLogger = new FileActionLogger();
 
-    private final String fileExtension;
-    private final String dataFolderName;
+    // the file used to store uuid data
+    private Path uuidDataFile;
+    // the file used to store logged actions
+    private Path actionLogFile;
 
-    private File uuidDataFile;
-    private File actionLogFile;
-
-    private File usersDirectory;
-    private File groupsDirectory;
-    private File tracksDirectory;
-
-    protected ConfigurateDao(LuckPermsPlugin plugin, String name, String fileExtension, String dataFolderName) {
+    protected AbstractConfigurateDao(LuckPermsPlugin plugin, ConfigurateLoader loader, String name, String dataDirectoryName) {
         super(plugin, name);
-        this.fileExtension = fileExtension;
-        this.dataFolderName = dataFolderName;
+        this.loader = loader;
+        this.dataDirectoryName = dataDirectoryName;
     }
 
-    public String getFileExtension() {
-        return this.fileExtension;
-    }
+    /**
+     * Reads a configuration node from the given location
+     *
+     * @param location the location
+     * @param name the name of the object
+     * @return the node
+     * @throws IOException if an io error occurs
+     */
+    protected abstract ConfigurationNode readFile(StorageLocation location, String name) throws IOException;
 
-    protected abstract ConfigurationLoader<? extends ConfigurationNode> loader(Path path);
+    /**
+     * Saves a configuration node to the given location
+     *
+     * @param location the location
+     * @param name the name of the object
+     * @param node the node
+     * @throws IOException if an io error occurs
+     */
+    protected abstract void saveFile(StorageLocation location, String name, ConfigurationNode node) throws IOException;
 
-    private ConfigurationNode readFile(StorageLocation location, String name) throws IOException {
-        File file = new File(getDirectory(location), name + this.fileExtension);
-        registerFileAction(location, file);
-        return readFile(file);
-    }
-
-    private ConfigurationNode readFile(File file) throws IOException {
-        if (!file.exists()) {
-            return null;
-        }
-
-        return loader(file.toPath()).load();
-    }
-
-    private void saveFile(StorageLocation location, String name, ConfigurationNode node) throws IOException {
-        File file = new File(getDirectory(location), name + this.fileExtension);
-        registerFileAction(location, file);
-        saveFile(file, node);
-    }
-
-    private void saveFile(File file, ConfigurationNode node) throws IOException {
-        if (node == null) {
-            if (file.exists()) {
-                file.delete();
-            }
-            return;
-        }
-
-        loader(file.toPath()).save(node);
-    }
-
-    private File getDirectory(StorageLocation location) {
-        switch (location) {
-            case USER:
-                return this.usersDirectory;
-            case GROUP:
-                return this.groupsDirectory;
-            case TRACK:
-                return this.tracksDirectory;
-            default:
-                throw new RuntimeException();
-        }
-    }
-
-    private FilenameFilter getFileTypeFilter() {
-        return (dir, name) -> name.endsWith(this.fileExtension);
-    }
-
-    private Exception reportException(String file, Exception ex) throws Exception {
+    // used to report i/o exceptions which took place in a specific file
+    protected RuntimeException reportException(String file, Exception ex) throws RuntimeException {
         this.plugin.getLogger().warn("Exception thrown whilst performing i/o: " + file);
         ex.printStackTrace();
-        throw ex;
-    }
-
-    private void registerFileAction(StorageLocation type, File file) {
-        this.plugin.getFileWatcher().ifPresent(fileWatcher -> fileWatcher.registerChange(type, file.getName()));
+        throw Throwables.propagate(ex);
     }
 
     @Override
-    public void init() {
-        try {
-            File data = FileUtils.mkdirs(new File(this.plugin.getBootstrap().getDataDirectory(), this.dataFolderName));
+    public void init() throws IOException {
+        this.dataDirectory = this.plugin.getBootstrap().getDataDirectory().resolve(this.dataDirectoryName);
+        Files.createDirectories(this.dataDirectory);
 
-            this.usersDirectory = FileUtils.mkdir(new File(data, "users"));
-            this.groupsDirectory = FileUtils.mkdir(new File(data, "groups"));
-            this.tracksDirectory = FileUtils.mkdir(new File(data, "tracks"));
-            this.uuidDataFile = FileUtils.createNewFile(new File(data, "uuidcache.txt"));
-            this.actionLogFile = FileUtils.createNewFile(new File(data, "actions.log"));
-
-            // Listen for file changes.
-            this.plugin.getFileWatcher().ifPresent(watcher -> {
-                watcher.subscribe("user", this.usersDirectory.toPath(), s -> {
-                    if (!s.endsWith(this.fileExtension)) {
-                        return;
-                    }
-
-                    String user = s.substring(0, s.length() - this.fileExtension.length());
-                    UUID uuid = Uuids.parseNullable(user);
-                    if (uuid == null) {
-                        return;
-                    }
-
-                    User u = this.plugin.getUserManager().getIfLoaded(uuid);
-                    if (u != null) {
-                        this.plugin.getLogger().info("[FileWatcher] Refreshing user " + u.getFriendlyName());
-                        this.plugin.getStorage().loadUser(uuid, null);
-                    }
-                });
-                watcher.subscribe("group", this.groupsDirectory.toPath(), s -> {
-                    if (!s.endsWith(this.fileExtension)) {
-                        return;
-                    }
-
-                    String groupName = s.substring(0, s.length() - this.fileExtension.length());
-                    this.plugin.getLogger().info("[FileWatcher] Refreshing group " + groupName);
-                    this.plugin.getUpdateTaskBuffer().request();
-                });
-                watcher.subscribe("track", this.tracksDirectory.toPath(), s -> {
-                    if (!s.endsWith(this.fileExtension)) {
-                        return;
-                    }
-
-                    String trackName = s.substring(0, s.length() - this.fileExtension.length());
-                    this.plugin.getLogger().info("[FileWatcher] Refreshing track " + trackName);
-                    this.plugin.getStorage().loadAllTracks();
-                });
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
+        this.uuidDataFile = MoreFiles.createFileIfNotExists(this.dataDirectory.resolve("uuidcache.txt"));
+        this.actionLogFile = MoreFiles.createFileIfNotExists(this.dataDirectory.resolve("actions.log"));
 
         this.uuidCache.load(this.uuidDataFile);
         this.actionLogger.init(this.actionLogFile);
@@ -235,70 +158,30 @@ public abstract class ConfigurateDao extends AbstractDao {
         return Log.empty();
     }
 
-    @Override
-    public void applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception {
-        if (bulkUpdate.getDataType().isIncludingUsers()) {
-            File[] files = getDirectory(StorageLocation.USER).listFiles(getFileTypeFilter());
-            if (files == null) {
-                throw new IllegalStateException("Users directory matched no files.");
-            }
+    protected ConfigurationNode processBulkUpdate(BulkUpdate bulkUpdate, ConfigurationNode node) {
+        Set<NodeModel> nodes = readNodes(node);
+        Set<NodeModel> results = nodes.stream()
+                .map(bulkUpdate::apply)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
 
-            for (File file : files) {
-                try {
-                    registerFileAction(StorageLocation.USER, file);
-                    ConfigurationNode object = readFile(file);
-                    Set<NodeModel> nodes = readNodes(object);
-                    Set<NodeModel> results = nodes.stream()
-                            .map(bulkUpdate::apply)
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toSet());
-
-                    if (!nodes.equals(results)) {
-                        writeNodes(object, results);
-                        saveFile(file, object);
-                    }
-                } catch (Exception e) {
-                    throw reportException(file.getName(), e);
-                }
-            }
+        if (nodes.equals(results)) {
+            return null;
         }
 
-        if (bulkUpdate.getDataType().isIncludingGroups()) {
-            File[] files = getDirectory(StorageLocation.GROUP).listFiles(getFileTypeFilter());
-            if (files == null) {
-                throw new IllegalStateException("Groups directory matched no files.");
-            }
-
-            for (File file : files) {
-                try {
-                    registerFileAction(StorageLocation.GROUP, file);
-                    ConfigurationNode object = readFile(file);
-                    Set<NodeModel> nodes = readNodes(object);
-                    Set<NodeModel> results = nodes.stream()
-                            .map(bulkUpdate::apply)
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toSet());
-
-                    if (!nodes.equals(results)) {
-                        writeNodes(object, results);
-                        saveFile(file, object);
-                    }
-                } catch (Exception e) {
-                    throw reportException(file.getName(), e);
-                }
-            }
-        }
+        writeNodes(node, results);
+        return node;
     }
 
     @Override
-    public User loadUser(UUID uuid, String username) throws Exception {
+    public User loadUser(UUID uuid, String username) {
         User user = this.plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
         user.getIoLock().lock();
         try {
             ConfigurationNode object = readFile(StorageLocation.USER, uuid.toString());
             if (object != null) {
                 String name = object.getNode("name").getString();
-                user.getPrimaryGroup().setStoredValue(object.getNode(this instanceof JsonDao ? "primaryGroup" : "primary-group").getString());
+                user.getPrimaryGroup().setStoredValue(object.getNode(this.loader instanceof JsonLoader ? "primaryGroup" : "primary-group").getString());
 
                 Set<Node> nodes = readNodes(object).stream().map(NodeModel::toNode).collect(Collectors.toSet());
                 user.setEnduringNodes(nodes);
@@ -329,16 +212,18 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public void saveUser(User user) throws Exception {
+    public void saveUser(User user) {
         user.getIoLock().lock();
         try {
             if (!this.plugin.getUserManager().shouldSave(user)) {
                 saveFile(StorageLocation.USER, user.getUuid().toString(), null);
             } else {
                 ConfigurationNode data = SimpleConfigurationNode.root();
-                data.getNode("uuid").setValue(user.getUuid().toString());
+                if (this instanceof SeparatedConfigurateDao) {
+                    data.getNode("uuid").setValue(user.getUuid().toString());
+                }
                 data.getNode("name").setValue(user.getName().orElse("null"));
-                data.getNode(this instanceof JsonDao ? "primaryGroup" : "primary-group").setValue(user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
+                data.getNode(this.loader instanceof JsonLoader ? "primaryGroup" : "primary-group").setValue(user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
 
                 Set<NodeModel> nodes = user.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
                 writeNodes(data, nodes);
@@ -353,44 +238,7 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public Set<UUID> getUniqueUsers() {
-        String[] fileNames = this.usersDirectory.list(getFileTypeFilter());
-        if (fileNames == null) return null;
-        return Arrays.stream(fileNames)
-                .map(s -> s.substring(0, s.length() - this.fileExtension.length()))
-                .map(UUID::fromString)
-                .collect(Collectors.toSet());
-    }
-
-    @Override
-    public List<HeldPermission<UUID>> getUsersWithPermission(String permission) throws Exception {
-        List<HeldPermission<UUID>> held = new ArrayList<>();
-        File[] files = getDirectory(StorageLocation.USER).listFiles(getFileTypeFilter());
-        if (files == null) {
-            throw new IllegalStateException("Users directory matched no files.");
-        }
-
-        for (File file : files) {
-            try {
-                registerFileAction(StorageLocation.USER, file);
-                ConfigurationNode object = readFile(file);
-                UUID holder = UUID.fromString(file.getName().substring(0, file.getName().length() - this.fileExtension.length()));
-                Set<NodeModel> nodes = readNodes(object);
-                for (NodeModel e : nodes) {
-                    if (!e.getPermission().equalsIgnoreCase(permission)) {
-                        continue;
-                    }
-                    held.add(NodeHeldPermission.of(holder, e));
-                }
-            } catch (Exception e) {
-                throw reportException(file.getName(), e);
-            }
-        }
-        return held;
-    }
-
-    @Override
-    public Group createAndLoadGroup(String name) throws Exception {
+    public Group createAndLoadGroup(String name) {
         Group group = this.plugin.getGroupManager().getOrMake(name);
         group.getIoLock().lock();
         try {
@@ -401,7 +249,9 @@ public abstract class ConfigurateDao extends AbstractDao {
                 group.setEnduringNodes(nodes);
             } else {
                 ConfigurationNode data = SimpleConfigurationNode.root();
-                data.getNode("name").setValue(group.getName());
+                if (this instanceof SeparatedConfigurateDao) {
+                    data.getNode("name").setValue(group.getName());
+                }
 
                 Set<NodeModel> nodes = group.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
                 writeNodes(data, nodes);
@@ -418,7 +268,7 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public Optional<Group> loadGroup(String name) throws Exception {
+    public Optional<Group> loadGroup(String name) {
         Group group = this.plugin.getGroupManager().getIfLoaded(name);
         if (group != null) {
             group.getIoLock().lock();
@@ -452,41 +302,13 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public void loadAllGroups() throws IOException {
-        String[] fileNames = this.groupsDirectory.list(getFileTypeFilter());
-        if (fileNames == null) {
-            throw new IOException("Not a directory");
-        }
-        List<String> groups = Arrays.stream(fileNames)
-                .map(s -> s.substring(0, s.length() - this.fileExtension.length()))
-                .collect(Collectors.toList());
-
-        boolean success = true;
-        for (String g : groups) {
-            try {
-                loadGroup(g);
-            } catch (Exception e) {
-                e.printStackTrace();
-                success = false;
-            }
-        }
-
-        if (!success) {
-            throw new RuntimeException("Exception occurred whilst loading a group");
-        }
-
-        GroupManager<?> gm = this.plugin.getGroupManager();
-        gm.getAll().values().stream()
-                .filter(g -> !groups.contains(g.getName()))
-                .forEach(gm::unload);
-    }
-
-    @Override
-    public void saveGroup(Group group) throws Exception {
+    public void saveGroup(Group group) {
         group.getIoLock().lock();
         try {
             ConfigurationNode data = SimpleConfigurationNode.root();
-            data.getNode("name").setValue(group.getName());
+            if (this instanceof SeparatedConfigurateDao) {
+                data.getNode("name").setValue(group.getName());
+            }
 
             Set<NodeModel> nodes = group.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
             writeNodes(data, nodes);
@@ -500,15 +322,10 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public void deleteGroup(Group group) throws Exception {
+    public void deleteGroup(Group group) {
         group.getIoLock().lock();
         try {
-            File groupFile = new File(this.groupsDirectory, group.getName() + this.fileExtension);
-            registerFileAction(StorageLocation.GROUP, groupFile);
-
-            if (groupFile.exists()) {
-                groupFile.delete();
-            }
+            saveFile(StorageLocation.GROUP, group.getName(), null);
         } catch (Exception e) {
             throw reportException(group.getName(), e);
         } finally {
@@ -518,34 +335,7 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public List<HeldPermission<String>> getGroupsWithPermission(String permission) throws Exception {
-        List<HeldPermission<String>> held = new ArrayList<>();
-        File[] files = getDirectory(StorageLocation.GROUP).listFiles(getFileTypeFilter());
-        if (files == null) {
-            throw new IllegalStateException("Groups directory matched no files.");
-        }
-
-        for (File file : files) {
-            try {
-                registerFileAction(StorageLocation.GROUP, file);
-                ConfigurationNode object = readFile(file);
-                String holder = file.getName().substring(0, file.getName().length() - this.fileExtension.length());
-                Set<NodeModel> nodes = readNodes(object);
-                for (NodeModel e : nodes) {
-                    if (!e.getPermission().equalsIgnoreCase(permission)) {
-                        continue;
-                    }
-                    held.add(NodeHeldPermission.of(holder, e));
-                }
-            } catch (Exception e) {
-                throw reportException(file.getName(), e);
-            }
-        }
-        return held;
-    }
-
-    @Override
-    public Track createAndLoadTrack(String name) throws Exception {
+    public Track createAndLoadTrack(String name) {
         Track track = this.plugin.getTrackManager().getOrMake(name);
         track.getIoLock().lock();
         try {
@@ -559,7 +349,9 @@ public abstract class ConfigurateDao extends AbstractDao {
                 track.setGroups(groups);
             } else {
                 ConfigurationNode data = SimpleConfigurationNode.root();
-                data.getNode("name").setValue(name);
+                if (this instanceof SeparatedConfigurateDao) {
+                    data.getNode("name").setValue(name);
+                }
                 data.getNode("groups").setValue(track.getGroups());
                 saveFile(StorageLocation.TRACK, name, data);
             }
@@ -573,7 +365,7 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public Optional<Track> loadTrack(String name) throws Exception {
+    public Optional<Track> loadTrack(String name) {
         Track track = this.plugin.getTrackManager().getIfLoaded(name);
         if (track != null) {
             track.getIoLock().lock();
@@ -608,41 +400,13 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public void loadAllTracks() throws IOException {
-        String[] fileNames = this.tracksDirectory.list(getFileTypeFilter());
-        if (fileNames == null) {
-            throw new IOException("Not a directory");
-        }
-        List<String> tracks = Arrays.stream(fileNames)
-                .map(s -> s.substring(0, s.length() - this.fileExtension.length()))
-                .collect(Collectors.toList());
-
-        boolean success = true;
-        for (String t : tracks) {
-            try {
-                loadTrack(t);
-            } catch (Exception e) {
-                e.printStackTrace();
-                success = false;
-            }
-        }
-
-        if (!success) {
-            throw new RuntimeException("Exception occurred whilst loading a track");
-        }
-
-        TrackManager<?> tm = this.plugin.getTrackManager();
-        tm.getAll().values().stream()
-                .filter(t -> !tracks.contains(t.getName()))
-                .forEach(tm::unload);
-    }
-
-    @Override
-    public void saveTrack(Track track) throws Exception {
+    public void saveTrack(Track track) {
         track.getIoLock().lock();
         try {
             ConfigurationNode data = SimpleConfigurationNode.root();
-            data.getNode("name").setValue(track.getName());
+            if (this instanceof SeparatedConfigurateDao) {
+                data.getNode("name").setValue(track.getName());
+            }
             data.getNode("groups").setValue(track.getGroups());
             saveFile(StorageLocation.TRACK, track.getName(), data);
         } catch (Exception e) {
@@ -653,15 +417,10 @@ public abstract class ConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public void deleteTrack(Track track) throws Exception {
+    public void deleteTrack(Track track) {
         track.getIoLock().lock();
         try {
-            File trackFile = new File(this.tracksDirectory, track.getName() + this.fileExtension);
-            registerFileAction(StorageLocation.TRACK, trackFile);
-
-            if (trackFile.exists()) {
-                trackFile.delete();
-            }
+            saveFile(StorageLocation.TRACK, track.getName(), null);
         } catch (Exception e) {
             throw reportException(track.getName(), e);
         } finally {
@@ -736,7 +495,7 @@ public abstract class ConfigurateDao extends AbstractDao {
         return Maps.immutableEntry(entry.getKey().toString(), entry.getValue());
     }
 
-    private static Set<NodeModel> readNodes(ConfigurationNode data) {
+    protected static Set<NodeModel> readNodes(ConfigurationNode data) {
         Set<NodeModel> nodes = new HashSet<>();
 
         if (data.getNode("permissions").hasListChildren()) {
@@ -924,5 +683,4 @@ public abstract class ConfigurateDao extends AbstractDao {
             to.getNode("meta").setValue(metaSection);
         }
     }
-
 }

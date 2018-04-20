@@ -47,9 +47,12 @@ public class DependencyRegistry {
     ));
 
     private static final Map<StorageType, List<Dependency>> STORAGE_DEPENDENCIES = ImmutableMap.<StorageType, List<Dependency>>builder()
-            .put(StorageType.JSON, ImmutableList.of(Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_GSON))
             .put(StorageType.YAML, ImmutableList.of(Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_YAML))
+            .put(StorageType.JSON, ImmutableList.of(Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_GSON))
             .put(StorageType.HOCON, ImmutableList.of(Dependency.HOCON_CONFIG, Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_HOCON))
+            .put(StorageType.YAML_COMBINED, ImmutableList.of(Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_YAML))
+            .put(StorageType.JSON_COMBINED, ImmutableList.of(Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_GSON))
+            .put(StorageType.HOCON_COMBINED, ImmutableList.of(Dependency.HOCON_CONFIG, Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_HOCON))
             .put(StorageType.MONGODB, ImmutableList.of(Dependency.MONGODB_DRIVER))
             .put(StorageType.MARIADB, ImmutableList.of(Dependency.MARIADB_DRIVER, Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI))
             .put(StorageType.MYSQL, ImmutableList.of(Dependency.MYSQL_DRIVER, Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI))

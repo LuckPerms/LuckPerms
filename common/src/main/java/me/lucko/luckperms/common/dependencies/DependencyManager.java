@@ -34,11 +34,12 @@ import me.lucko.luckperms.common.dependencies.relocation.RelocationHandler;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
 
-import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class DependencyManager {
     private final LuckPermsPlugin plugin;
     private final MessageDigest digest;
     private final DependencyRegistry registry;
-    private final EnumMap<Dependency, File> loaded = new EnumMap<>(Dependency.class);
+    private final EnumMap<Dependency, Path> loaded = new EnumMap<>(Dependency.class);
     private final Map<ImmutableSet<Dependency>, IsolatedClassLoader> loaders = new HashMap<>();
     private RelocationHandler relocationHandler = null;
 
@@ -78,12 +79,13 @@ public class DependencyManager {
         return this.relocationHandler;
     }
 
-    private File getSaveDirectory() {
-        File saveDirectory = new File(this.plugin.getBootstrap().getDataDirectory(), "lib");
-        if (!(saveDirectory.exists() || saveDirectory.mkdirs())) {
-            throw new RuntimeException("Unable to create lib dir - " + saveDirectory.getPath());
+    private Path getSaveDirectory() {
+        Path saveDirectory = this.plugin.getBootstrap().getDataDirectory().resolve("lib");
+        try {
+            Files.createDirectories(saveDirectory);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to create lib directory", e);
         }
-
         return saveDirectory;
     }
 
@@ -106,7 +108,7 @@ public class DependencyManager {
                     .map(this.loaded::get)
                     .map(file -> {
                         try {
-                            return file.toURI().toURL();
+                            return file.toUri().toURL();
                         } catch (MalformedURLException e) {
                             throw new RuntimeException(e);
                         }
@@ -124,7 +126,7 @@ public class DependencyManager {
     }
 
     public void loadDependencies(Set<Dependency> dependencies) {
-        File saveDirectory = getSaveDirectory();
+        Path saveDirectory = getSaveDirectory();
 
         // create a list of file sources
         List<Source> sources = new ArrayList<>();
@@ -136,7 +138,7 @@ public class DependencyManager {
             }
 
             try {
-                File file = downloadDependency(saveDirectory, dependency);
+                Path file = downloadDependency(saveDirectory, dependency);
                 sources.add(new Source(dependency, file));
             } catch (Throwable e) {
                 this.plugin.getLogger().severe("Exception whilst downloading dependency " + dependency.name());
@@ -156,11 +158,11 @@ public class DependencyManager {
                     continue;
                 }
 
-                File input = source.file;
-                File output = new File(input.getParentFile(), "remapped-" + input.getName());
+                Path input = source.file;
+                Path output = input.getParent().resolve("remapped-" + input.getFileName().toString());
 
                 // if the remapped file exists already, just use that.
-                if (output.exists()) {
+                if (Files.exists(output)) {
                     remappedJars.add(new Source(source.dependency, output));
                     continue;
                 }
@@ -169,7 +171,7 @@ public class DependencyManager {
                 RelocationHandler relocationHandler = getRelocationHandler();
 
                 // attempt to remap the jar.
-                this.plugin.getLogger().info("Attempting to apply relocations to " + input.getName() + "...");
+                this.plugin.getLogger().info("Attempting to apply relocations to " + input.getFileName().toString() + "...");
                 relocationHandler.remap(input, output, relocations);
 
                 remappedJars.add(new Source(source.dependency, output));
@@ -190,18 +192,18 @@ public class DependencyManager {
                 this.plugin.getBootstrap().getPluginClassLoader().loadJar(source.file);
                 this.loaded.put(source.dependency, source.file);
             } catch (Throwable e) {
-                this.plugin.getLogger().severe("Failed to load dependency jar '" + source.file.getName() + "'.");
+                this.plugin.getLogger().severe("Failed to load dependency jar '" + source.file.getFileName().toString() + "'.");
                 e.printStackTrace();
             }
         }
     }
 
-    private File downloadDependency(File saveDirectory, Dependency dependency) throws Exception {
+    private Path downloadDependency(Path saveDirectory, Dependency dependency) throws Exception {
         String fileName = dependency.name().toLowerCase() + "-" + dependency.getVersion() + ".jar";
-        File file = new File(saveDirectory, fileName);
+        Path file = saveDirectory.resolve(fileName);
 
         // if the file already exists, don't attempt to re-download it.
-        if (file.exists()) {
+        if (Files.exists(file)) {
             return file;
         }
 
@@ -226,11 +228,11 @@ public class DependencyManager {
             }
 
             // if the checksum matches, save the content to disk
-            Files.write(file.toPath(), bytes);
+            Files.write(file, bytes);
         }
 
         // ensure the file saved correctly
-        if (!file.exists()) {
+        if (!Files.exists(file)) {
             throw new IllegalStateException("File not present. - " + file.toString());
         } else {
             return file;
@@ -239,9 +241,9 @@ public class DependencyManager {
 
     private static final class Source {
         private final Dependency dependency;
-        private final File file;
+        private final Path file;
 
-        private Source(Dependency dependency, File file) {
+        private Source(Dependency dependency, Path file) {
             this.dependency = dependency;
             this.file = file;
         }

@@ -62,7 +62,7 @@ public abstract class AbstractDao {
         return this.name;
     }
 
-    public abstract void init();
+    public abstract void init() throws Exception;
 
     public abstract void shutdown();
 

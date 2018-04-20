@@ -29,8 +29,8 @@ import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.plugin.SchedulerAdapter;
 
-import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -132,14 +132,14 @@ public interface LuckPermsBootstrap {
      *
      * @return the platforms data folder
      */
-    File getDataDirectory();
+    Path getDataDirectory();
 
     /**
      * Gets the plugins configuration directory
      *
      * @return the config directory
      */
-    default File getConfigDirectory() {
+    default Path getConfigDirectory() {
         return getDataDirectory();
     }
 

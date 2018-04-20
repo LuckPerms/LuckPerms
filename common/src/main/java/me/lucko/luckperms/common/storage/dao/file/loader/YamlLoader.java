@@ -23,43 +23,27 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.dao.file;
+package me.lucko.luckperms.common.storage.dao.file.loader;
 
-import java.io.File;
-import java.io.IOException;
+import org.yaml.snakeyaml.DumperOptions;
 
-public final class FileUtils {
+import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
-    public static File mkdir(File file) throws IOException {
-        if (file.exists()) {
-            return file;
-        }
-        if (!file.mkdir()) {
-            throw new IOException("Unable to create directory - " + file.getPath());
-        }
-        return file;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+public class YamlLoader implements ConfigurateLoader {
+
+    @Override
+    public ConfigurationLoader<? extends ConfigurationNode> loader(Path path) {
+        return YAMLConfigurationLoader.builder()
+                .setFlowStyle(DumperOptions.FlowStyle.BLOCK)
+                .setIndent(2)
+                .setSource(() -> Files.newBufferedReader(path, StandardCharsets.UTF_8))
+                .setSink(() -> Files.newBufferedWriter(path, StandardCharsets.UTF_8))
+                .build();
     }
-
-    public static File mkdirs(File file) throws IOException {
-        if (file.exists()) {
-            return file;
-        }
-        if (!file.mkdirs()) {
-            throw new IOException("Unable to create directory - " + file.getPath());
-        }
-        return file;
-    }
-
-    public static File createNewFile(File file) throws IOException {
-        if (file.exists()) {
-            return file;
-        }
-        if (!file.createNewFile()) {
-            throw new IOException("Unable to create file - " + file.getPath());
-        }
-        return file;
-    }
-
-    private FileUtils() {}
-
 }

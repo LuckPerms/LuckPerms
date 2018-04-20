@@ -54,7 +54,6 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.text.Text;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -110,7 +109,7 @@ public class LuckPermsService implements LPPermissionService {
         this.permissionDescriptions = new ConcurrentHashMap<>();
 
         // init subject storage
-        this.storage = new SubjectStorage(this, new File(plugin.getBootstrap().getDataDirectory(), "sponge-data"));
+        this.storage = new SubjectStorage(this, plugin.getBootstrap().getDataDirectory().resolve("sponge-data"));
 
         // load defaults collection
         this.defaultSubjects = new DefaultsCollection(this);

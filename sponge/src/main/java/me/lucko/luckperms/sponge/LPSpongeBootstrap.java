@@ -51,7 +51,6 @@ import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.SpongeExecutorService;
 import org.spongepowered.api.scheduler.SynchronousExecutor;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -60,8 +59,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 /**
  * Bootstrap plugin for LuckPerms running on Sponge.
@@ -242,19 +239,19 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     }
     
     @Override
-    public File getDataDirectory() {
+    public Path getDataDirectory() {
         Path dataDirectory = this.game.getGameDirectory().resolve("luckperms");
         try {
             Files.createDirectories(dataDirectory);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return dataDirectory.toFile();
+        return dataDirectory.toAbsolutePath();
     }
 
     @Override
-    public File getConfigDirectory() {
-        return this.configDirectory.toFile();
+    public Path getConfigDirectory() {
+        return this.configDirectory.toAbsolutePath();
     }
 
     @Override

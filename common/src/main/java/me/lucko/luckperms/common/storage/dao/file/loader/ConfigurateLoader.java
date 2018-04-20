@@ -23,29 +23,18 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.dao.file;
-
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+package me.lucko.luckperms.common.storage.dao.file.loader;
 
 import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.gson.GsonConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class JsonDao extends ConfigurateDao {
-    public JsonDao(LuckPermsPlugin plugin, String dataFolderName) {
-        super(plugin, "JSON", ".json", dataFolderName);
-    }
+/**
+ * Wraps an object which can produce configurate {@link ConfigurationLoader}s.
+ */
+public interface ConfigurateLoader {
 
-    @Override
-    protected ConfigurationLoader<? extends ConfigurationNode> loader(Path path) {
-        return GsonConfigurationLoader.builder()
-                .setIndent(2)
-                .setSource(() -> Files.newBufferedReader(path, StandardCharsets.UTF_8))
-                .setSink(() -> Files.newBufferedWriter(path, StandardCharsets.UTF_8))
-                .build();
-    }
+    ConfigurationLoader<? extends ConfigurationNode> loader(Path path);
+
 }

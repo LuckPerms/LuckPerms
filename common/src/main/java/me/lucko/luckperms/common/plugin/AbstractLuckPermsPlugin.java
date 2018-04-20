@@ -59,7 +59,7 @@ import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -114,7 +114,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // load locale
         this.localeManager = new SimpleLocaleManager();
-        this.localeManager.tryLoad(this, new File(getBootstrap().getConfigDirectory(), "lang.yml"));
+        this.localeManager.tryLoad(this, getBootstrap().getConfigDirectory().resolve("lang.yml"));
 
         // now the configuration is loaded, we can create a storage factory and load initial dependencies
         StorageFactory storageFactory = new StorageFactory(this);
@@ -127,8 +127,11 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         // initialise the storage
         // first, setup the file watcher, if enabled
         if (getConfiguration().get(ConfigKeys.WATCH_FILES)) {
-            this.fileWatcher = new FileWatcher(this);
-            getBootstrap().getScheduler().asyncRepeating(this.fileWatcher, 30L);
+            try {
+                this.fileWatcher = new FileWatcher(this, getBootstrap().getDataDirectory());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         // initialise storage
