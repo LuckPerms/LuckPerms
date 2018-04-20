@@ -40,7 +40,7 @@ public abstract class AbstractEvent implements LuckPermsEvent {
         return this.api;
     }
 
-    public void setApi(LuckPermsApi api) {
+    void setApi(LuckPermsApi api) {
         this.api = api;
     }
 }

@@ -41,4 +41,16 @@ public interface Graph<N> {
      */
     Iterable<? extends N> successors(N node);
 
+    /**
+     * Returns an iterable which will traverse this graph using the specified algorithm starting
+     * at the given node.
+     *
+     * @param algorithm the algorithm to use when traversing
+     * @param startNode the start node in the inheritance graph
+     * @return an iterable
+     */
+    default Iterable<N> traverse(TraversalAlgorithm algorithm, N startNode) {
+        return GraphTraversers.traverseUsing(algorithm, this, startNode);
+    }
+
 }

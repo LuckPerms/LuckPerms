@@ -26,25 +26,11 @@
 package me.lucko.luckperms.common.inheritance;
 
 import me.lucko.luckperms.common.graph.Graph;
-import me.lucko.luckperms.common.graph.GraphTraversers;
-import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.model.PermissionHolder;
 
 /**
  * A {@link Graph} which represents an "inheritance tree".
  */
 public interface InheritanceGraph extends Graph<PermissionHolder> {
-
-    /**
-     * Returns an iterable which will traverse this inheritance graph using the
-     * specified algorithm starting at the given node.
-     *
-     * @param algorithm the algorithm to use when traversing
-     * @param startNode the start node in the inheritance graph
-     * @return an iterable
-     */
-    default Iterable<PermissionHolder> traverse(TraversalAlgorithm algorithm, PermissionHolder startNode) {
-        return GraphTraversers.traverseUsing(algorithm, this, startNode);
-    }
 
 }
