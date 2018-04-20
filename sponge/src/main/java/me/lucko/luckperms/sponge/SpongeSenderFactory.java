@@ -74,7 +74,14 @@ public class SpongeSenderFactory extends SenderFactory<CommandSource> {
 
     @Override
     protected Tristate getPermissionValue(CommandSource source, String node) {
-        return CompatibilityUtil.convertTristate(source.getPermissionValue(source.getActiveContexts(), node));
+        Tristate ret = CompatibilityUtil.convertTristate(source.getPermissionValue(source.getActiveContexts(), node));
+
+        // check the permdefault
+        if (ret == Tristate.UNDEFINED && source.hasPermission(node)) {
+            ret = Tristate.TRUE;
+        }
+
+        return ret;
     }
 
     @Override
