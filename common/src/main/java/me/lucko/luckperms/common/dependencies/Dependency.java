@@ -43,14 +43,14 @@ public enum Dependency {
     ASM(
             "org.ow2.asm",
             "asm",
-            "6.0",
-            "3Ylxx0pOaXiZqOlcquTqh2DqbEhtxrl7F5XnV2BCBGE="
+            "6.1.1",
+            "3TtUZBXdS63i6+O0fHgoqwYj7iM2YEBo4tgQI/n42DM="
     ),
     ASM_COMMONS(
             "org.ow2.asm",
             "asm-commons",
-            "6.0",
-            "8bzlxkipagF73NAf5dWa+YRSl/17ebgcAVpvu9lxmr8="
+            "6.1.1",
+            "hvVtP58zCQu9/PZjAniac17Kdfol6uidP7E/TrE7VtE="
     ),
     JAR_RELOCATOR(
             "me.lucko",
@@ -69,15 +69,15 @@ public enum Dependency {
     OKIO(
             "com{}squareup{}" + RelocationHelper.OKIO_STRING,
             RelocationHelper.OKIO_STRING,
-            "1.13.0",
-            "c0Jpw+vFCQ47I1ZttVj0IfC0AnJ3x5rV0Xa47BaLuFA=",
+            "1.14.0",
+            "RjPDMfUGQuvnldwInWpZKK/0MHHJ0X54QKAJ7qL+laM=",
             Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
     ),
     OKHTTP(
             "com{}squareup{}" + RelocationHelper.OKHTTP3_STRING,
             "okhttp",
-            "3.9.1",
-            "oNAQF6QruiblB/xtRIuzblNvS25hL3xC3jC72sK3eF4=",
+            "3.10.0",
+            "Sso+VSr7HOtH+JVmhfYpWiduSfoD+QZvi2voO+xW+2Y=",
             Relocation.allOf(
                     Relocation.of(RelocationHelper.OKHTTP3_STRING, RelocationHelper.OKHTTP3_STRING),
                     Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
@@ -86,15 +86,15 @@ public enum Dependency {
     MARIADB_DRIVER(
             "org{}mariadb{}jdbc",
             "mariadb-java-client",
-            "2.2.1",
-            "K/WUWx66IX2PpclGA6Eeczs5FyuzqBdcmS/IzNLzKW8=",
+            "2.2.3",
+            "82fbZTV5j9yZChgxl9bo7FtKFwh36an5CEN21mzyrLs=",
             Relocation.of("mariadb", "org{}mariadb{}jdbc")
     ),
     MYSQL_DRIVER(
             "mysql",
             "mysql-connector-java",
-            "5.1.45",
-            "WbqXFalbltVXkMdH8kxUmr1kXNHpQdrlSxOMATMwDWQ=",
+            "5.1.46",
+            "MSIIl2HmQD8C6Kge1KLWWi4QKXNGUboA8uqS2SD/ex4=",
             Relocation.of("mysql", "com{}mysql")
     ),
     POSTGRESQL_DRIVER(
@@ -107,8 +107,8 @@ public enum Dependency {
     H2_DRIVER(
             "com.h2database",
             "h2",
-            "1.4.196",
-            "CgX0oNW4WEAUiq3OY6QjtdPDbvRHVjibT6rQjScz+vU="
+            "1.4.197",
+            "N/UhbhSvJ3KTDf+bhzQ1PwqA6Juj8z4GVEHeZTfF6EI="
             // we don't apply relocations to h2 - it gets loaded via
             // an isolated classloader
     ),
@@ -123,8 +123,8 @@ public enum Dependency {
     HIKARI(
             "com{}zaxxer",
             "HikariCP",
-            "2.7.8",
-            "nmp5eJvNRsz/4fxakr4re5Tdx/U4wy8BlSU2si0j/ZY=",
+            "3.1.0",
+            "TBo58lIW2Ukyh3VYKUwOliccAeRx+y9FxdDzsD8UUUw=",
             Relocation.of("hikari", "com{}zaxxer{}hikari")
     ),
     SLF4J_SIMPLE(
@@ -142,8 +142,8 @@ public enum Dependency {
     MONGODB_DRIVER(
             "org.mongodb",
             "mongo-java-driver",
-            "3.6.1",
-            "Po8eyOBWv8XjREKSFrQh/NKHvLabtOysxbEFiD35cEk=",
+            "3.6.3",
+            "73CzTswq0jwDVi4EXyE4BGyZWsyiKMbxQa8WLow/wu8=",
             Relocation.allOf(
                     Relocation.of("mongodb", "com{}mongodb"),
                     Relocation.of("bson", "org{}bson")
@@ -163,8 +163,8 @@ public enum Dependency {
     COMMONS_POOL_2(
             "org.apache.commons",
             "commons-pool2",
-            "2.4.2",
-            "IREqpnNzPfzQRTVN33WzHh1GS5nI5RWXQ0myUyJUzFM=",
+            "2.5.0",
+            "IRhwQ8eZcdnISLlxhA3oQdoOXE3zDJI6lpFBMfue+Wk=",
             Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
     ),
     CONFIGURATE_CORE(
@@ -267,7 +267,7 @@ public enum Dependency {
                 byte[] hash = digest.digest(bytes);
 
                 if (Arrays.equals(hash, dependency.getChecksum())) {
-                    System.out.println("MATCH " + dependency.name() + ": " + Base64.getEncoder().encodeToString(hash));
+                    System.out.println("MATCH    " + dependency.name() + ": " + Base64.getEncoder().encodeToString(hash));
                 } else {
                     System.out.println("NO MATCH " + dependency.name() + ": " + Base64.getEncoder().encodeToString(hash));
                 }
