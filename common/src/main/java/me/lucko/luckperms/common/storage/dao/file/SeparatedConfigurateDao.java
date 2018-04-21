@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.node.NodeHeldPermission;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.dao.file.loader.ConfigurateLoader;
+import me.lucko.luckperms.common.utils.MoreFiles;
 import me.lucko.luckperms.common.utils.Uuids;
 
 import ninja.leaping.configurate.ConfigurationNode;
@@ -147,9 +148,9 @@ public class SeparatedConfigurateDao extends AbstractConfigurateDao {
     public void init() throws IOException {
         super.init();
 
-        this.usersDirectory = Files.createDirectory(super.dataDirectory.resolve("users"));
-        this.groupsDirectory = Files.createDirectory(super.dataDirectory.resolve("groups"));
-        this.tracksDirectory = Files.createDirectory(super.dataDirectory.resolve("tracks"));
+        this.usersDirectory = MoreFiles.createDirectoryIfNotExists(super.dataDirectory.resolve("users"));
+        this.groupsDirectory = MoreFiles.createDirectoryIfNotExists(super.dataDirectory.resolve("groups"));
+        this.tracksDirectory = MoreFiles.createDirectoryIfNotExists(super.dataDirectory.resolve("tracks"));
 
         // Listen for file changes.
         FileWatcher watcher = this.plugin.getFileWatcher().orElse(null);

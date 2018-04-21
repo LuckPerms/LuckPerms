@@ -38,5 +38,14 @@ public final class MoreFiles {
         return path;
     }
 
+    public static Path createDirectoryIfNotExists(Path path) throws IOException {
+        if (Files.exists(path) && Files.isDirectory(path)) {
+            return path;
+        }
+
+        Files.createDirectory(path);
+        return path;
+    }
+
     private MoreFiles() {}
 }
