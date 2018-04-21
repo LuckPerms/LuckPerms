@@ -183,7 +183,7 @@ public class MongoDao extends AbstractDao {
                         .timestamp(d.getLong("timestamp"))
                         .actor(d.get("actor", UUID.class))
                         .actorName(d.getString("actorName"))
-                        .type(LogEntry.Type.valueOf(d.getString("type").toCharArray()[0]))
+                        .type(LogEntry.Type.valueOf(d.getString("type").charAt(0)))
                         .acted(actedUuid)
                         .actedName(d.getString("actedName"))
                         .action(d.getString("action"))

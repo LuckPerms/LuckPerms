@@ -89,17 +89,16 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
     // the uuid cache instance
     private final FileUuidCache uuidCache = new FileUuidCache();
     // the action logger instance
-    private final FileActionLogger actionLogger = new FileActionLogger();
+    private final FileActionLogger actionLogger;
 
     // the file used to store uuid data
     private Path uuidDataFile;
-    // the file used to store logged actions
-    private Path actionLogFile;
 
     protected AbstractConfigurateDao(LuckPermsPlugin plugin, ConfigurateLoader loader, String name, String dataDirectoryName) {
         super(plugin, name);
         this.loader = loader;
         this.dataDirectoryName = dataDirectoryName;
+        this.actionLogger = new FileActionLogger(plugin);
     }
 
     /**
@@ -135,15 +134,15 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
         Files.createDirectories(this.dataDirectory);
 
         this.uuidDataFile = MoreFiles.createFileIfNotExists(this.dataDirectory.resolve("uuidcache.txt"));
-        this.actionLogFile = MoreFiles.createFileIfNotExists(this.dataDirectory.resolve("actions.log"));
-
         this.uuidCache.load(this.uuidDataFile);
-        this.actionLogger.init(this.actionLogFile);
+
+        this.actionLogger.init(this.dataDirectory.resolve("actions.json"));
     }
 
     @Override
     public void shutdown() {
         this.uuidCache.save(this.uuidDataFile);
+        this.actionLogger.flush();
     }
 
     @Override
@@ -152,10 +151,8 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
     }
 
     @Override
-    public Log getLog() {
-        // File based daos don't support viewing log data from in-game.
-        // You can just read the file in a text editor.
-        return Log.empty();
+    public Log getLog() throws IOException {
+        return this.actionLogger.getLog();
     }
 
     protected ConfigurationNode processBulkUpdate(BulkUpdate bulkUpdate, ConfigurationNode node) {
