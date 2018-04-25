@@ -107,24 +107,28 @@ public final class ApiTrack implements me.lucko.luckperms.api.Track {
         return this.handle.demote(ApiUser.cast(user), contextSet, Predicates.alwaysTrue(), null);
     }
 
+    @Nonnull
     @Override
     public DataMutateResult appendGroup(@Nonnull Group group) {
         Objects.requireNonNull(group, "group");
         return this.handle.appendGroup(ApiGroup.cast(group));
     }
 
+    @Nonnull
     @Override
     public DataMutateResult insertGroup(@Nonnull Group group, int position) throws IndexOutOfBoundsException {
         Objects.requireNonNull(group, "group");
         return this.handle.insertGroup(ApiGroup.cast(group), position);
     }
 
+    @Nonnull
     @Override
     public DataMutateResult removeGroup(@Nonnull Group group) {
         Objects.requireNonNull(group, "group");
         return this.handle.removeGroup(ApiGroup.cast(group));
     }
 
+    @Nonnull
     @Override
     public DataMutateResult removeGroup(@Nonnull String group) {
         Objects.requireNonNull(group, "group");

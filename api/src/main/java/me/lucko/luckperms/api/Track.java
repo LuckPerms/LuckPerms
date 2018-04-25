@@ -120,6 +120,7 @@ public interface Track {
      * @throws NullPointerException      if the group is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
      */
+    @Nonnull
     DataMutateResult appendGroup(@Nonnull Group group);
 
     /**
@@ -132,6 +133,7 @@ public interface Track {
      * @throws NullPointerException      if the group is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
      */
+    @Nonnull
     DataMutateResult insertGroup(@Nonnull Group group, int position) throws IndexOutOfBoundsException;
 
     /**
@@ -142,6 +144,7 @@ public interface Track {
      * @throws NullPointerException  if the group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
+    @Nonnull
     DataMutateResult removeGroup(@Nonnull Group group);
 
     /**
@@ -151,6 +154,7 @@ public interface Track {
      * @return the result of the operation
      * @throws NullPointerException if the group is null
      */
+    @Nonnull
     DataMutateResult removeGroup(@Nonnull String group);
 
     /**

@@ -74,6 +74,7 @@ public interface User extends PermissionHolder {
      * @throws IllegalStateException     if the user is not a member of that group
      * @throws NullPointerException      if the group is null
      */
+    @Nonnull
     DataMutateResult setPrimaryGroup(@Nonnull String group);
 
     /**

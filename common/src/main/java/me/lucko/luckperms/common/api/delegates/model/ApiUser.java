@@ -72,6 +72,7 @@ public final class ApiUser extends ApiPermissionHolder implements me.lucko.luckp
         return this.handle.getPrimaryGroup().getValue();
     }
 
+    @Nonnull
     @Override
     public DataMutateResult setPrimaryGroup(@Nonnull String group) {
         Objects.requireNonNull(group, "group");
