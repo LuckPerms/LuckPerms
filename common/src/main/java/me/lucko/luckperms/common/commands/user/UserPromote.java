@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.commands.user;
 
-import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.PromotionResult;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
@@ -40,18 +40,14 @@ import me.lucko.luckperms.common.command.utils.TabCompletions;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
-import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class UserPromote extends SubCommand<User> {
     public UserPromote(LocaleManager locale) {
@@ -89,97 +85,52 @@ public class UserPromote extends SubCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
-        // Load applicable groups
-        Set<Node> nodes = user.getEnduringNodes().values().stream()
-                .filter(Node::isGroupNode)
-                .filter(Node::getValuePrimitive)
-                .filter(node -> node.getFullContexts().makeImmutable().equals(context.makeImmutable()))
-                .collect(Collectors.toSet());
-
-        nodes.removeIf(g -> !track.containsGroup(g.getGroupName()));
-
-        if (nodes.isEmpty()) {
-            String first = track.getGroups().get(0);
-
-            Group nextGroup = plugin.getGroupManager().getIfLoaded(first);
-            if (nextGroup == null) {
-                Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, first);
+        PromotionResult result = track.promote(user, context, s -> !ArgumentPermissions.checkArguments(plugin, sender, getPermission().get(), track.getName(), s), sender);
+        switch (result.getStatus()) {
+            case MALFORMED_TRACK:
+                Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, result.getGroupTo().get());
                 return CommandResult.LOADING_ERROR;
-            }
-
-            if (ArgumentPermissions.checkArguments(plugin, sender, getPermission().get(), track.getName(), nextGroup.getName())) {
+            case UNDEFINED_FAILURE:
                 Message.COMMAND_NO_PERMISSION.send(sender);
                 return CommandResult.NO_PERMISSION;
+            case AMBIGUOUS_CALL:
+                Message.TRACK_AMBIGUOUS_CALL.send(sender, user.getFriendlyName());
+                return CommandResult.FAILURE;
+            case END_OF_TRACK:
+                Message.USER_PROMOTE_ERROR_ENDOFTRACK.send(sender, track.getName(), user.getFriendlyName());
+                return CommandResult.STATE_ERROR;
+
+            case ADDED_TO_FIRST_GROUP: {
+                Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFriendlyName(), result.getGroupTo().get(), MessageUtils.contextSetToString(context));
+
+                ExtendedLogEntry.build().actor(sender).acted(user)
+                        .action("promote", track.getName(), context)
+                        .build().submit(plugin, sender);
+
+                StorageAssistant.save(user, sender, plugin);
+                return CommandResult.SUCCESS;
             }
 
-            user.setPermission(NodeFactory.buildGroupNode(nextGroup.getId()).withExtraContext(context).build());
+            case SUCCESS: {
+                String groupFrom = result.getGroupFrom().get();
+                String groupTo = result.getGroupTo().get();
 
-            Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFriendlyName(), nextGroup.getFriendlyName(), MessageUtils.contextSetToString(context));
+                Message.USER_PROMOTE_SUCCESS.send(sender, user.getFriendlyName(), track.getName(), groupFrom, groupTo, MessageUtils.contextSetToString(context));
+                if (!silent) {
+                    Message.EMPTY.send(sender, MessageUtils.listToArrowSep(track.getGroups(), groupFrom, groupTo, false));
+                }
 
-            ExtendedLogEntry.build().actor(sender).acted(user)
-                    .action("promote", track.getName(), context)
-                    .build().submit(plugin, sender);
+                ExtendedLogEntry.build().actor(sender).acted(user)
+                        .action("promote", track.getName(), context)
+                        .build().submit(plugin, sender);
 
-            StorageAssistant.save(user, sender, plugin);
-            plugin.getEventFactory().handleUserPromote(user, track, null, first, sender);
-            return CommandResult.SUCCESS;
+                StorageAssistant.save(user, sender, plugin);
+                return CommandResult.SUCCESS;
+            }
+
+            default:
+                throw new AssertionError("Unknown status: " + result.getStatus());
         }
-
-        if (nodes.size() != 1) {
-            Message.TRACK_AMBIGUOUS_CALL.send(sender, user.getFriendlyName());
-            return CommandResult.FAILURE;
-        }
-
-        final Node oldNode = nodes.stream().findAny().get();
-        final String old = oldNode.getGroupName();
-        final String next;
-        try {
-            next = track.getNext(old);
-        } catch (IllegalArgumentException e) {
-            Message.TRACK_DOES_NOT_CONTAIN.send(sender, track.getName(), old);
-            return CommandResult.STATE_ERROR;
-        }
-
-        if (next == null) {
-            Message.USER_PROMOTE_ERROR_ENDOFTRACK.send(sender, track.getName(), user.getFriendlyName());
-            return CommandResult.STATE_ERROR;
-        }
-
-        if (!plugin.getStorage().loadGroup(next).join().isPresent()) {
-            Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, next);
-            return CommandResult.STATE_ERROR;
-        }
-
-        Group nextGroup = plugin.getGroupManager().getIfLoaded(next);
-        if (nextGroup == null) {
-            Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, next);
-            return CommandResult.LOADING_ERROR;
-        }
-
-        if (ArgumentPermissions.checkArguments(plugin, sender, getPermission().get(), track.getName(), nextGroup.getName())) {
-            Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
-        }
-
-        user.unsetPermission(oldNode);
-        user.setPermission(NodeFactory.buildGroupNode(nextGroup.getName()).withExtraContext(context).build());
-
-        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(old)) {
-            user.getPrimaryGroup().setStoredValue(nextGroup.getName());
-        }
-
-        Message.USER_PROMOTE_SUCCESS.send(sender, user.getFriendlyName(), track.getName(), old, nextGroup.getFriendlyName(), MessageUtils.contextSetToString(context));
-        if (!silent) {
-            Message.EMPTY.send(sender, MessageUtils.listToArrowSep(track.getGroups(), old, nextGroup.getName(), false));
-        }
-
-        ExtendedLogEntry.build().actor(sender).acted(user)
-                .action("promote", track.getName(), context)
-                .build().submit(plugin, sender);
-
-        StorageAssistant.save(user, sender, plugin);
-        plugin.getEventFactory().handleUserPromote(user, track, old, nextGroup.getName(), sender);
-        return CommandResult.SUCCESS;
     }
 
     @Override

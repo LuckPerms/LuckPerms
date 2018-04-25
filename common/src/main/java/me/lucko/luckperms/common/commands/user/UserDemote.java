@@ -25,9 +25,7 @@
 
 package me.lucko.luckperms.common.commands.user;
 
-import com.google.common.collect.Iterables;
-
-import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.DemotionResult;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
@@ -42,18 +40,14 @@ import me.lucko.luckperms.common.command.utils.TabCompletions;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
-import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class UserDemote extends SubCommand<User> {
     public UserDemote(LocaleManager locale) {
@@ -91,78 +85,52 @@ public class UserDemote extends SubCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
-        // Load applicable groups
-        Set<Node> nodes = user.getEnduringNodes().values().stream()
-                .filter(Node::isGroupNode)
-                .filter(Node::getValuePrimitive)
-                .filter(node -> node.getFullContexts().makeImmutable().equals(context.makeImmutable()))
-                .collect(Collectors.toSet());
+        DemotionResult result = track.demote(user, context, s -> !ArgumentPermissions.checkArguments(plugin, sender, getPermission().get(), track.getName(), s), sender);
+        switch (result.getStatus()) {
+            case NOT_ON_TRACK:
+                Message.USER_TRACK_ERROR_NOT_CONTAIN_GROUP.send(sender, user.getFriendlyName(), track.getName());
+                return CommandResult.FAILURE;
+            case AMBIGUOUS_CALL:
+                Message.TRACK_AMBIGUOUS_CALL.send(sender, user.getFriendlyName());
+                return CommandResult.FAILURE;
+            case UNDEFINED_FAILURE:
+                Message.COMMAND_NO_PERMISSION.send(sender);
+                return CommandResult.NO_PERMISSION;
+            case MALFORMED_TRACK:
+                Message.USER_DEMOTE_ERROR_MALFORMED.send(sender, result.getGroupTo().get());
+                return CommandResult.LOADING_ERROR;
 
-        nodes.removeIf(g -> !track.containsGroup(g.getGroupName()));
+            case REMOVED_FROM_FIRST_GROUP: {
+                Message.USER_DEMOTE_ENDOFTRACK.send(sender, track.getName(), user.getFriendlyName(), result.getGroupFrom().get());
 
-        if (nodes.isEmpty()) {
-            Message.USER_TRACK_ERROR_NOT_CONTAIN_GROUP.send(sender, user.getFriendlyName(), track.getName());
-            return CommandResult.FAILURE;
+                ExtendedLogEntry.build().actor(sender).acted(user)
+                        .action("demote", track.getName(), context)
+                        .build().submit(plugin, sender);
+
+                StorageAssistant.save(user, sender, plugin);
+                return CommandResult.SUCCESS;
+            }
+
+            case SUCCESS: {
+                String groupFrom = result.getGroupFrom().get();
+                String groupTo = result.getGroupTo().get();
+
+                Message.USER_DEMOTE_SUCCESS.send(sender, user.getFriendlyName(), track.getName(), groupFrom, groupTo, MessageUtils.contextSetToString(context));
+                if (!silent) {
+                    Message.EMPTY.send(sender, MessageUtils.listToArrowSep(track.getGroups(), groupTo, groupFrom, true));
+                }
+
+                ExtendedLogEntry.build().actor(sender).acted(user)
+                        .action("demote", track.getName(), context)
+                        .build().submit(plugin, sender);
+
+                StorageAssistant.save(user, sender, plugin);
+                return CommandResult.SUCCESS;
+            }
+
+            default:
+                throw new AssertionError("Unknown status: " + result.getStatus());
         }
-
-        if (nodes.size() != 1) {
-            Message.TRACK_AMBIGUOUS_CALL.send(sender, user.getFriendlyName());
-            return CommandResult.FAILURE;
-        }
-
-        final Node oldNode = Iterables.getFirst(nodes, null);
-        final String old = oldNode.getGroupName();
-        final String previous;
-        try {
-            previous = track.getPrevious(old);
-        } catch (IllegalArgumentException e) {
-            Message.TRACK_DOES_NOT_CONTAIN.send(sender, track.getName(), old);
-            return CommandResult.STATE_ERROR;
-        }
-
-        if (ArgumentPermissions.checkArguments(plugin, sender, getPermission().get(), track.getName(), oldNode.getGroupName())) {
-            Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
-        }
-
-        if (previous == null) {
-            user.unsetPermission(oldNode);
-            Message.USER_DEMOTE_ENDOFTRACK.send(sender, track.getName(), user.getFriendlyName(), old);
-
-            ExtendedLogEntry.build().actor(sender).acted(user)
-                    .action("demote", track.getName(), context)
-                    .build().submit(plugin, sender);
-
-            StorageAssistant.save(user, sender, plugin);
-            plugin.getEventFactory().handleUserDemote(user, track, old, null, sender);
-            return CommandResult.SUCCESS;
-        }
-
-        Group previousGroup = plugin.getStorage().loadGroup(previous).join().orElse(null);
-        if (previousGroup == null) {
-            Message.USER_DEMOTE_ERROR_MALFORMED.send(sender, previous);
-            return CommandResult.LOADING_ERROR;
-        }
-
-        user.unsetPermission(oldNode);
-        user.setPermission(NodeFactory.buildGroupNode(previousGroup.getName()).withExtraContext(context).build());
-
-        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(old)) {
-            user.getPrimaryGroup().setStoredValue(previousGroup.getName());
-        }
-
-        Message.USER_DEMOTE_SUCCESS.send(sender, user.getFriendlyName(), track.getName(), old, previousGroup.getFriendlyName(), MessageUtils.contextSetToString(context));
-        if (!silent) {
-            Message.EMPTY.send(sender, MessageUtils.listToArrowSep(track.getGroups(), previousGroup.getName(), old, true));
-        }
-
-        ExtendedLogEntry.build().actor(sender).acted(user)
-                .action("demote", track.getName(), context)
-                .build().submit(plugin, sender);
-
-        StorageAssistant.save(user, sender, plugin);
-        plugin.getEventFactory().handleUserDemote(user, track, old, previousGroup.getName(), sender);
-        return CommandResult.SUCCESS;
     }
 
     @Override

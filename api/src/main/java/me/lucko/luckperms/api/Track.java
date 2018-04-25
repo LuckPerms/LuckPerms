@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.api;
 
+import me.lucko.luckperms.api.context.ContextSet;
+
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -87,6 +89,28 @@ public interface Track {
      */
     @Nullable
     String getPrevious(@Nonnull Group current);
+
+    /**
+     * Promotes the given user along this track.
+     *
+     * @param user the user to promote
+     * @param contextSet the contexts to promote the user in
+     * @return the result of the action
+     * @since 4.2
+     */
+    @Nonnull
+    PromotionResult promote(@Nonnull User user, @Nonnull ContextSet contextSet);
+
+    /**
+     * Demotes the given user along this track.
+     *
+     * @param user the user to demote
+     * @param contextSet the contexts to demote the user in
+     * @return the result of the action
+     * @since 4.2
+     */
+    @Nonnull
+    DemotionResult demote(@Nonnull User user, @Nonnull ContextSet contextSet);
 
     /**
      * Appends a group to the end of this track

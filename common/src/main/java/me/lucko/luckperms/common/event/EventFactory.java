@@ -37,6 +37,7 @@ import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.api.event.log.LogBroadcastEvent;
 import me.lucko.luckperms.api.event.log.LogNotifyEvent;
+import me.lucko.luckperms.api.event.source.Source;
 import me.lucko.luckperms.common.api.delegates.model.ApiPermissionHolder;
 import me.lucko.luckperms.common.api.delegates.model.ApiUser;
 import me.lucko.luckperms.common.event.impl.EventConfigReload;
@@ -73,6 +74,7 @@ import me.lucko.luckperms.common.event.impl.EventUserLoginProcess;
 import me.lucko.luckperms.common.event.impl.EventUserPromote;
 import me.lucko.luckperms.common.event.model.EntitySourceImpl;
 import me.lucko.luckperms.common.event.model.SenderEntity;
+import me.lucko.luckperms.common.event.model.UnknownSource;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
@@ -83,6 +85,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.annotation.Nullable;
 
 public final class EventFactory {
     private final AbstractEventBus eventBus;
@@ -265,13 +269,15 @@ public final class EventFactory {
         fireEvent(event);
     }
 
-    public void handleUserDemote(User user, Track track, String from, String to, Sender source) {
-        EventUserDemote event = new EventUserDemote(track.getApiDelegate(), new ApiUser(user), from, to, new EntitySourceImpl(new SenderEntity(source)));
+    public void handleUserDemote(User user, Track track, String from, String to, @Nullable Sender source) {
+        Source s = source == null ? UnknownSource.INSTANCE : new EntitySourceImpl(new SenderEntity(source));
+        EventUserDemote event = new EventUserDemote(track.getApiDelegate(), new ApiUser(user), from, to, s);
         fireEventAsync(event);
     }
 
-    public void handleUserPromote(User user, Track track, String from, String to, Sender source) {
-        EventUserPromote event = new EventUserPromote(track.getApiDelegate(), new ApiUser(user), from, to, new EntitySourceImpl(new SenderEntity(source)));
+    public void handleUserPromote(User user, Track track, String from, String to, @Nullable Sender source) {
+        Source s = source == null ? UnknownSource.INSTANCE : new EntitySourceImpl(new SenderEntity(source));
+        EventUserPromote event = new EventUserPromote(track.getApiDelegate(), new ApiUser(user), from, to, s);
         fireEventAsync(event);
     }
 

@@ -26,40 +26,49 @@
 package me.lucko.luckperms.api;
 
 /**
- * Represents the result of a data mutation call on a LuckPerms object.
+ * Represents the result to a "mutation" on an object.
  *
- * <p>Usually as the result to a call on a {@link PermissionHolder} or {@link Track}.</p>
+ * @since 4.2
  */
-public enum DataMutateResult implements MutateResult {
+public interface MutateResult {
 
     /**
-     * Indicates the mutation was a success
+     * Instance of {@link MutateResult} which always reports success.
      */
-    SUCCESS(true),
+    MutateResult GENERIC_SUCCESS = () -> true;
 
     /**
-     * Indicates the mutation failed because the subject of the action already has something
+     * Instance of {@link MutateResult} which always reports failure.
      */
-    ALREADY_HAS(false),
+    MutateResult GENERIC_FAILURE = () -> false;
 
     /**
-     * Indicates the mutation failed because the subject of the action lacks something
+     * Gets if the operation which produced this result completed successfully.
+     *
+     * @return if the result indicates a success
      */
-    LACKS(false),
+    boolean wasSuccess();
 
     /**
-     * Indicates the mutation failed
+     * Gets if the operation which produced this result failed.
+     *
+     * @return if the result indicates a failure
      */
-    FAIL(false);
-
-    private final boolean success;
-
-    DataMutateResult(boolean success) {
-        this.success = success;
+    default boolean wasFailure() {
+        return !wasSuccess();
     }
 
-    @Override
-    public boolean wasSuccess() {
-        return this.success;
+    /**
+     * Gets a boolean representation of the result.
+     *
+     * <p>A value of <code>true</code> marks that the operation {@link #wasSuccess() was a success}
+     * and a value of <code>false</code> marks that the operation
+     * {@link #wasFailure() was a failure}.</p>
+     *
+     * @return a boolean representation
+     */
+    default boolean asBoolean() {
+        return wasSuccess();
     }
+
 }

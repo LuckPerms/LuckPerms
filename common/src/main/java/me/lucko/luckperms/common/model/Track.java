@@ -28,15 +28,27 @@ package me.lucko.luckperms.common.model;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.DataMutateResult;
+import me.lucko.luckperms.api.DemotionResult;
+import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.PromotionResult;
+import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.api.DemotionResults;
+import me.lucko.luckperms.common.api.PromotionResults;
 import me.lucko.luckperms.common.api.delegates.model.ApiTrack;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.Identifiable;
+import me.lucko.luckperms.common.sender.Sender;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 public final class Track implements Identifiable<String> {
 
@@ -257,6 +269,119 @@ public final class Track implements Identifiable<String> {
         List<String> before = ImmutableList.copyOf(this.groups);
         this.groups.clear();
         this.plugin.getEventFactory().handleTrackClear(this, before);
+    }
+
+    public PromotionResult promote(User user, ContextSet context, Predicate<String> nextGroupPermissionChecker, @Nullable Sender sender) {
+        if (getSize() <= 1) {
+            throw new IllegalStateException("Track contains one or fewer groups, unable to promote");
+        }
+
+        // find all groups that are inherited by the user in the exact contexts given and applicable to this track
+        List<Node> nodes = user.getEnduringNodes().get(context.makeImmutable()).stream()
+                .filter(Node::isGroupNode)
+                .filter(Node::getValuePrimitive)
+                .filter(node -> containsGroup(node.getGroupName()))
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (nodes.isEmpty()) {
+            String first = getGroups().get(0);
+
+            Group nextGroup = this.plugin.getGroupManager().getIfLoaded(first);
+            if (nextGroup == null) {
+                return PromotionResults.malformedTrack(first);
+            }
+
+            if (!nextGroupPermissionChecker.test(nextGroup.getName())) {
+                return PromotionResults.undefinedFailure();
+            }
+
+            user.setPermission(NodeFactory.buildGroupNode(nextGroup.getId()).withExtraContext(context).build());
+            this.plugin.getEventFactory().handleUserPromote(user, this, null, first, sender);
+            return PromotionResults.addedToFirst(first);
+        }
+
+        if (nodes.size() != 1) {
+            return PromotionResults.ambiguousCall();
+        }
+
+        Node oldNode = nodes.get(0);
+        String old = oldNode.getGroupName();
+        String next = getNext(old);
+
+        if (next == null) {
+            return PromotionResults.endOfTrack();
+        }
+
+        Group nextGroup = this.plugin.getGroupManager().getIfLoaded(next);
+        if (nextGroup == null) {
+            return PromotionResults.malformedTrack(next);
+        }
+
+        if (!nextGroupPermissionChecker.test(nextGroup.getName())) {
+            return PromotionResults.undefinedFailure();
+        }
+
+        user.unsetPermission(oldNode);
+        user.setPermission(NodeFactory.buildGroupNode(nextGroup.getName()).withExtraContext(context).build());
+
+        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(old)) {
+            user.getPrimaryGroup().setStoredValue(nextGroup.getName());
+        }
+
+        this.plugin.getEventFactory().handleUserPromote(user, this, old, nextGroup.getName(), sender);
+        return PromotionResults.success(old, nextGroup.getName());
+    }
+
+    public DemotionResult demote(User user, ContextSet context, Predicate<String> previousGroupPermissionChecker, @Nullable Sender sender) {
+        if (getSize() <= 1) {
+            throw new IllegalStateException("Track contains one or fewer groups, unable to demote");
+        }
+
+        // find all groups that are inherited by the user in the exact contexts given and applicable to this track
+        List<Node> nodes = user.getEnduringNodes().get(context.makeImmutable()).stream()
+                .filter(Node::isGroupNode)
+                .filter(Node::getValuePrimitive)
+                .filter(node -> containsGroup(node.getGroupName()))
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (nodes.isEmpty()) {
+            return DemotionResults.notOnTrack();
+        }
+
+        if (nodes.size() != 1) {
+            return DemotionResults.ambiguousCall();
+        }
+
+        Node oldNode = nodes.get(0);
+        String old = oldNode.getGroupName();
+        String previous = getPrevious(old);
+
+        if (!previousGroupPermissionChecker.test(oldNode.getGroupName())) {
+            return DemotionResults.undefinedFailure();
+        }
+
+        if (previous == null) {
+            user.unsetPermission(oldNode);
+            this.plugin.getEventFactory().handleUserDemote(user, this, old, null, sender);
+            return DemotionResults.removedFromFirst(old);
+        }
+
+        Group previousGroup = this.plugin.getGroupManager().getIfLoaded(previous);
+        if (previousGroup == null) {
+            return DemotionResults.malformedTrack(previous);
+        }
+
+        user.unsetPermission(oldNode);
+        user.setPermission(NodeFactory.buildGroupNode(previousGroup.getName()).withExtraContext(context).build());
+
+        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(old)) {
+            user.getPrimaryGroup().setStoredValue(previousGroup.getName());
+        }
+
+        this.plugin.getEventFactory().handleUserDemote(user, this, old, previousGroup.getName(), sender);
+        return DemotionResults.success(old, previousGroup.getName());
     }
 
     @Override

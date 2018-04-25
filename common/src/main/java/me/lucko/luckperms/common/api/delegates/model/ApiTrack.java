@@ -28,8 +28,13 @@ package me.lucko.luckperms.common.api.delegates.model;
 import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.DataMutateResult;
+import me.lucko.luckperms.api.DemotionResult;
 import me.lucko.luckperms.api.Group;
+import me.lucko.luckperms.api.PromotionResult;
+import me.lucko.luckperms.api.User;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 import java.util.Objects;
@@ -88,6 +93,18 @@ public final class ApiTrack implements me.lucko.luckperms.api.Track {
         } catch (IllegalArgumentException e) {
             return null;
         }
+    }
+
+    @Nonnull
+    @Override
+    public PromotionResult promote(@Nonnull User user, @Nonnull ContextSet contextSet) {
+        return this.handle.promote(ApiUser.cast(user), contextSet, Predicates.alwaysTrue(), null);
+    }
+
+    @Nonnull
+    @Override
+    public DemotionResult demote(@Nonnull User user, @Nonnull ContextSet contextSet) {
+        return this.handle.demote(ApiUser.cast(user), contextSet, Predicates.alwaysTrue(), null);
     }
 
     @Override

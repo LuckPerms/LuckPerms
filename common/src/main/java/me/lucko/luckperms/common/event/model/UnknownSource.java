@@ -30,7 +30,7 @@ import me.lucko.luckperms.api.event.source.Source;
 import javax.annotation.Nonnull;
 
 public final class UnknownSource implements Source {
-    private static final Source INSTANCE = new UnknownSource();
+    public static final Source INSTANCE = new UnknownSource();
 
     private UnknownSource() {
 

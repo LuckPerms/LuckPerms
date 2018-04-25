@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.storage;
 
 import com.google.common.collect.ImmutableSet;
 
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
@@ -52,7 +51,7 @@ public final class PlayerSaveResult {
     }
 
     public static PlayerSaveResult usernameUpdated(String oldUsername) {
-        return new PlayerSaveResult(oldUsername, null, Status.USERNAME_UPDATED);
+        return new PlayerSaveResult(EnumSet.of(Status.USERNAME_UPDATED), oldUsername, null);
     }
 
     public static PlayerSaveResult determineBaseResult(String username, String oldUsername) {
@@ -77,12 +76,8 @@ public final class PlayerSaveResult {
         this.otherUuids = otherUuids;
     }
 
-    private PlayerSaveResult(@Nullable String oldUsername, @Nullable Set<UUID> otherUuids, Status... status) {
-        this(EnumSet.copyOf(Arrays.asList(status)), oldUsername, otherUuids);
-    }
-
-    private PlayerSaveResult(Status... status) {
-        this(null, null, status);
+    private PlayerSaveResult(Status status) {
+        this(EnumSet.of(status), null, null);
     }
 
     /**
