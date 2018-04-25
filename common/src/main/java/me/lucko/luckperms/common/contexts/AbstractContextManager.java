@@ -28,6 +28,8 @@ package me.lucko.luckperms.common.contexts;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Contexts;
@@ -64,18 +66,12 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
 
     // caches context lookups
     private final LoadingCache<T, Contexts> lookupCache = Caffeine.newBuilder()
-            .weakKeys()
             .expireAfterWrite(50L, TimeUnit.MILLISECONDS) // expire roughly every tick
             .build(new Loader());
 
     // caches static context lookups
-    private final LoadingCache<Object, Contexts> staticLookupCache = Caffeine.newBuilder()
-            .initialCapacity(1)
-            .expireAfterWrite(50L, TimeUnit.MILLISECONDS) // expire roughly every tick
-            .build(new StaticLoader());
-
-    // the single key used in the static lookup cache
-    private final Object staticCacheKey = new Object();
+    @SuppressWarnings("Guava")
+    private final Supplier<Contexts> staticLookupCache = Suppliers.memoizeWithExpiration(new StaticLoader(), 50L, TimeUnit.MILLISECONDS);
 
     protected AbstractContextManager(LuckPermsPlugin plugin, Class<T> subjectClass) {
         this.plugin = plugin;
@@ -125,7 +121,7 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
 
     @Override
     public Contexts getStaticContexts() {
-        return this.staticLookupCache.get(this.staticCacheKey);
+        return this.staticLookupCache.get();
     }
 
     @Override
@@ -211,9 +207,9 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
         }
     }
 
-    private final class StaticLoader implements CacheLoader<Object, Contexts> {
+    private final class StaticLoader implements Supplier<Contexts> {
         @Override
-        public Contexts load(@Nonnull Object o) {
+        public Contexts get() {
             MutableContextSet accumulator = MutableContextSet.create();
 
             for (StaticContextCalculator calculator : AbstractContextManager.this.staticCalculators) {
