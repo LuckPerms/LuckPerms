@@ -240,13 +240,13 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     
     @Override
     public Path getDataDirectory() {
-        Path dataDirectory = this.game.getGameDirectory().resolve("luckperms");
+        Path dataDirectory = this.game.getGameDirectory().toAbsolutePath().resolve("luckperms");
         try {
             Files.createDirectories(dataDirectory);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return dataDirectory.toAbsolutePath();
+        return dataDirectory;
     }
 
     @Override

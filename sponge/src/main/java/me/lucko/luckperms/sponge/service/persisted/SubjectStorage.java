@@ -30,6 +30,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
+import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 
 import java.io.BufferedReader;
@@ -42,7 +43,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -69,15 +69,6 @@ public class SubjectStorage {
         this.service = service;
         this.gson = new GsonBuilder().setPrettyPrinting().create();
         this.container = container;
-        checkContainer();
-    }
-
-    private void checkContainer() {
-        try {
-            Files.createDirectories(this.container.getParent());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -86,12 +77,14 @@ public class SubjectStorage {
      * @return the identifiers of all known collections
      */
     public Set<String> getSavedCollections() {
-        checkContainer();
+        if (!Files.exists(this.container)) {
+            return ImmutableSet.of();
+        }
 
         try (Stream<Path> s = Files.list(this.container)) {
             return s.filter(p -> Files.isDirectory(p))
                     .map(p -> p.getFileName().toString())
-                    .collect(Collectors.toSet());
+                    .collect(ImmutableCollectors.toSet());
         } catch (IOException e) {
             e.printStackTrace();
             return ImmutableSet.of();
@@ -106,7 +99,6 @@ public class SubjectStorage {
      * @return a file
      */
     private Path resolveFile(String collectionIdentifier, String subjectIdentifier) {
-        checkContainer();
         Path collection = this.container.resolve(collectionIdentifier);
         try {
             Files.createDirectories(collection);
@@ -150,7 +142,6 @@ public class SubjectStorage {
      * @return a map of found subjects
      */
     public Map<String, SubjectDataContainer> loadAllFromFile(String collectionIdentifier) {
-        checkContainer();
         Path collection = this.container.resolve(collectionIdentifier);
         if (!Files.exists(collection)) {
             return Collections.emptyMap();
@@ -184,7 +175,6 @@ public class SubjectStorage {
      * @throws IOException if the read fails
      */
     public LoadedSubject loadFromFile(String collectionIdentifier, String subjectIdentifier) throws IOException {
-        checkContainer();
         Path collection = this.container.resolve(collectionIdentifier);
         if (!Files.exists(collection)) {
             return null;
