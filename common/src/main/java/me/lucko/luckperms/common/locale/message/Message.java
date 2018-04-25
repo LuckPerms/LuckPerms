@@ -419,6 +419,7 @@ public enum Message {
     IMPORT_PROGRESS("&b(Import) &b-> &f{}&f% complete &7- &b{}&f/&b{} &foperations complete with &c{} &ferrors.", true),
     IMPORT_PROGRESS_SIN("&b(Import) &b-> &f{}&f% complete &7- &b{}&f/&b{} &foperations complete with &c{} &ferror.", true),
     IMPORT_START("&b(Import) &b-> &fStarting import process.", true),
+    IMPORT_INFO("&b(Import) &b-> &f{}.", true),
 
     IMPORT_END_COMPLETE("&b(Import) &a&lCOMPLETED &7- took &b{} &7seconds - &7No errors.", true),
     IMPORT_END_COMPLETE_ERR("&b(Import) &a&lCOMPLETED &7- took &b{} &7seconds - &c{} errors.", true),

@@ -30,6 +30,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.CommandResult;
@@ -89,6 +90,8 @@ public class Importer implements Runnable {
         // start an update task in the background - we'll #join this later
         CompletableFuture<Void> updateTask = CompletableFuture.runAsync(() -> this.commandManager.getPlugin().getUpdateTaskBuffer().requestDirectly());
 
+        this.notify.forEach(s -> Message.IMPORT_INFO.send(s, "Processing commands..."));
+
         // form instances for all commands, and register them
         int index = 1;
         for (String command : this.commandList) {
@@ -106,15 +109,18 @@ public class Importer implements Runnable {
         // holder id --> commands
         ListMultimap<String, ImportCommand> sections = MultimapBuilder.linkedHashKeys().arrayListValues().build();
         for (ImportCommand cmd : this.commands) {
-            String target = Strings.nullToEmpty(cmd.getTarget());
-            sections.put(target, cmd);
+            sections.put(Strings.nullToEmpty(cmd.getTarget()), cmd);
         }
+
+        this.notify.forEach(s -> Message.IMPORT_INFO.send(s, "Waiting for initial update task to complete..."));
 
         // join the update task future before scheduling command executions
         updateTask.join();
 
+        this.notify.forEach(s -> Message.IMPORT_INFO.send(s, "Setting up command executor..."));
+
         // create a threadpool for the processing
-        ExecutorService executor = Executors.newFixedThreadPool(128);
+        ExecutorService executor = Executors.newFixedThreadPool(128, new ThreadFactoryBuilder().setNameFormat("luckperms-importer-%d").build());
 
         // A set of futures, which are really just the processes we need to wait for.
         Set<CompletableFuture<Void>> futures = new HashSet<>();
@@ -137,6 +143,8 @@ public class Importer implements Runnable {
 
         // all of the threads have been scheduled now and are running. we just need to wait for them all to complete
         CompletableFuture<Void> overallFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
+
+        this.notify.forEach(s -> Message.IMPORT_INFO.send(s, "All commands have been processed and scheduled - now waiting for the execution to complete."));
 
         while (true) {
             try {
