@@ -32,7 +32,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -282,26 +281,11 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
      * Removes a context from this set.
      *
      * @param key   the key to remove
-     * @param value the value to remove (case sensitive)
+     * @param value the value to remove
      * @throws NullPointerException if the key or value is null
      */
     public void remove(@Nonnull String key, @Nonnull String value) {
         this.map.remove(sanitizeKey(key), sanitizeValue(value));
-    }
-
-    /**
-     * Removes a context from this set. (case-insensitive)
-     *
-     * @param key   the key to remove
-     * @param value the value to remove
-     * @throws NullPointerException if the key or value is null
-     */
-    public void removeIgnoreCase(@Nonnull String key, @Nonnull String value) {
-        String v = sanitizeValue(value);
-        Collection<String> strings = this.map.asMap().get(sanitizeKey(key));
-        if (strings != null) {
-            strings.removeIf(e -> e.equalsIgnoreCase(v));
-        }
     }
 
     /**

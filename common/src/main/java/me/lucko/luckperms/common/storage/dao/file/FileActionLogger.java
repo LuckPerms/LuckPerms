@@ -25,10 +25,11 @@
 
 package me.lucko.luckperms.common.storage.dao.file;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.internal.Streams;
+import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
@@ -49,6 +50,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class FileActionLogger {
+    private static final JsonParser JSON_PARSER = new JsonParser();
+    private static final Gson GSON = new Gson();
 
     /**
      * The path to save logger content to
@@ -94,7 +97,7 @@ public class FileActionLogger {
 
                 if (Files.exists(this.contentFile)) {
                     try (JsonReader reader = new JsonReader(Files.newBufferedReader(this.contentFile, StandardCharsets.UTF_8))) {
-                        array = Streams.parse(reader).getAsJsonArray();
+                        array = JSON_PARSER.parse(reader).getAsJsonArray();
                     } catch (IOException e) {
                         e.printStackTrace();
                         array = new JsonArray();
@@ -123,7 +126,7 @@ public class FileActionLogger {
                 // write the full content back to the file
                 try (JsonWriter writer = new JsonWriter(Files.newBufferedWriter(this.contentFile, StandardCharsets.UTF_8))) {
                     writer.setIndent("  ");
-                    Streams.write(array, writer);
+                    GSON.toJson(array, writer);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -136,7 +139,7 @@ public class FileActionLogger {
     public Log getLog() throws IOException {
         Log.Builder log = Log.builder();
         try (JsonReader reader = new JsonReader(Files.newBufferedReader(this.contentFile, StandardCharsets.UTF_8))) {
-            JsonArray array = Streams.parse(reader).getAsJsonArray();
+            JsonArray array = JSON_PARSER.parse(reader).getAsJsonArray();
             for (JsonElement element : array) {
                 JsonObject object = element.getAsJsonObject();
 

@@ -69,27 +69,6 @@ abstract class AbstractContextSet implements ContextSet {
     }
 
     @Override
-    public boolean hasIgnoreCase(@Nonnull String key, @Nonnull String value) {
-        String v = sanitizeValue(value);
-
-        Collection<String> values = backing().asMap().get(sanitizeKey(key));
-        if (values == null || values.isEmpty()) {
-            return false;
-        }
-
-        if (values.contains(v)) {
-            return true;
-        }
-
-        for (String val : values) {
-            if (val.equalsIgnoreCase(v)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
     public boolean isEmpty() {
         return backing().isEmpty();
     }
@@ -134,7 +113,7 @@ abstract class AbstractContextSet implements ContextSet {
         if (stringIsEmpty(value)) {
             throw new IllegalArgumentException("value is (effectively) empty");
         }
-        return value;
+        return value.toLowerCase();
     }
 
     private static boolean stringIsEmpty(String s) {
