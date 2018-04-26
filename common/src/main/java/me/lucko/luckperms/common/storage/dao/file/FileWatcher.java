@@ -164,7 +164,7 @@ public class FileWatcher {
                 String fileName = context.toString();
 
                 // ignore temporary changes
-                if (fileName.endsWith(".tmp")) {
+                if (fileName.endsWith(".tmp") || fileName.endsWith(".swp") || fileName.endsWith(".swx") || fileName.endsWith(".swpz")) {
                     continue;
                 }
 
