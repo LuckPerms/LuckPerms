@@ -27,6 +27,7 @@ package me.lucko.luckperms.api.context;
 
 import com.google.common.collect.Multimap;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -60,7 +61,7 @@ import javax.annotation.Nonnull;
  *
  * @since 2.13
  */
-public interface ContextSet {
+public interface ContextSet extends Iterable<Map.Entry<String, String>> {
 
     /**
      * Creates an {@link ImmutableContextSet} from a context pair.
@@ -229,6 +230,20 @@ public interface ContextSet {
      */
     @Nonnull
     Multimap<String, String> toMultimap();
+
+    /**
+     * Returns an {@link Iterator} over each of the context pairs in this set.
+     *
+     * <p>The returned iterator represents the state of the set at the time of creation. It is not
+     * updated as the set changes.</p>
+     *
+     * <p>The iterator does not support {@link Iterator#remove()} calls.</p>
+     *
+     * @return an iterator
+     */
+    @Nonnull
+    @Override
+    Iterator<Map.Entry<String, String>> iterator();
 
     /**
      * Returns if the {@link ContextSet} contains at least one value for the

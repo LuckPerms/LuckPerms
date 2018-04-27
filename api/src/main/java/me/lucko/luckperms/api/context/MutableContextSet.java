@@ -26,15 +26,18 @@
 package me.lucko.luckperms.api.context;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Spliterator;
 
 import javax.annotation.Nonnull;
 
@@ -143,9 +146,17 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
     @Nonnull
     public static MutableContextSet fromSet(@Nonnull ContextSet contextSet) {
         Objects.requireNonNull(contextSet, "contextSet");
-        MutableContextSet set = create();
-        set.addAll(contextSet);
-        return set;
+
+        if (contextSet instanceof ImmutableContextSet) {
+            SetMultimap<String, String> map = ((ImmutableContextSet) contextSet).backing();
+            return new MutableContextSet(map);
+        } else if (contextSet instanceof MutableContextSet) {
+            return contextSet.mutableCopy();
+        } else {
+            MutableContextSet set = create();
+            set.addAll(contextSet);
+            return set;
+        }
     }
 
     /**
@@ -164,13 +175,20 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
         this.map = Multimaps.synchronizedSetMultimap(HashMultimap.create());
     }
 
-    private MutableContextSet(MutableContextSet other) {
-        this.map = Multimaps.synchronizedSetMultimap(HashMultimap.create(other.map));
+    private MutableContextSet(SetMultimap<String, String> other) {
+        this.map = Multimaps.synchronizedSetMultimap(HashMultimap.create(other));
     }
 
     @Override
-    protected Multimap<String, String> backing() {
+    protected SetMultimap<String, String> backing() {
         return this.map;
+    }
+
+    @Override
+    protected void copyTo(SetMultimap<String, String> other) {
+        synchronized (this.map) {
+            other.putAll(this.map);
+        }
     }
 
     @Override
@@ -185,25 +203,58 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
         if (this.map.isEmpty()) {
             return ImmutableContextSet.empty();
         }
-        return new ImmutableContextSet(ImmutableSetMultimap.copyOf(this.map));
+        synchronized (this.map) {
+            return new ImmutableContextSet(ImmutableSetMultimap.copyOf(this.map));
+        }
     }
 
     @Nonnull
     @Override
     public MutableContextSet mutableCopy() {
-        return new MutableContextSet(this);
+        synchronized (this.map) {
+            return new MutableContextSet(this.map);
+        }
     }
 
     @Nonnull
     @Override
     public Set<Map.Entry<String, String>> toSet() {
-        return ImmutableSet.copyOf(this.map.entries());
+        synchronized (this.map) {
+            // map.entries() returns immutable Map.Entry instances, so we can just call copyOf
+            return ImmutableSet.copyOf(this.map.entries());
+        }
+    }
+
+    @Nonnull
+    @Override
+    @Deprecated
+    public Map<String, String> toMap() {
+        ImmutableMap.Builder<String, String> m = ImmutableMap.builder();
+        synchronized (this.map) {
+            for (Map.Entry<String, String> e : this.map.entries()) {
+                m.put(e.getKey(), e.getValue());
+            }
+        }
+        return m.build();
     }
 
     @Nonnull
     @Override
     public Multimap<String, String> toMultimap() {
-        return ImmutableSetMultimap.copyOf(this.map);
+        synchronized (this.map) {
+            return ImmutableSetMultimap.copyOf(this.map);
+        }
+    }
+
+    @Nonnull
+    @Override
+    public Iterator<Map.Entry<String, String>> iterator() {
+        return toSet().iterator();
+    }
+
+    @Override
+    public Spliterator<Map.Entry<String, String>> spliterator() {
+        return toSet().spliterator();
     }
 
     /**
@@ -271,7 +322,9 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
         Objects.requireNonNull(contextSet, "contextSet");
         if (contextSet instanceof AbstractContextSet) {
             AbstractContextSet other = ((AbstractContextSet) contextSet);
-            this.map.putAll(other.backing());
+            synchronized (this.map) {
+                other.copyTo(this.map);
+            }
         } else {
             addAll(contextSet.toMultimap());
         }

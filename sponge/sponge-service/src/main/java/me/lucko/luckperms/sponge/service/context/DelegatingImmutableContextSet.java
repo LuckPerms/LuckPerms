@@ -77,7 +77,7 @@ public class DelegatingImmutableContextSet extends AbstractDelegatingContextSet 
     }
 
     private final class ContextSetIterator implements Iterator<Context> {
-        private final Iterator<Map.Entry<String, String>> it = DelegatingImmutableContextSet.this.delegate.toSet().iterator();
+        private final Iterator<Map.Entry<String, String>> it = DelegatingImmutableContextSet.this.delegate.iterator();
 
         @Override
         public boolean hasNext() {

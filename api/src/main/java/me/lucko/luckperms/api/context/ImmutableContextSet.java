@@ -25,12 +25,16 @@
 
 package me.lucko.luckperms.api.context;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.SetMultimap;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Spliterator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
@@ -164,8 +168,13 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
     }
 
     @Override
-    protected Multimap<String, String> backing() {
+    protected SetMultimap<String, String> backing() {
         return this.map;
+    }
+
+    @Override
+    protected void copyTo(SetMultimap<String, String> other) {
+        other.putAll(this.map);
     }
 
     @Override
@@ -194,8 +203,30 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
 
     @Nonnull
     @Override
+    @Deprecated
+    public Map<String, String> toMap() {
+        ImmutableMap.Builder<String, String> m = ImmutableMap.builder();
+        for (Map.Entry<String, String> e : this.map.entries()) {
+            m.put(e.getKey(), e.getValue());
+        }
+        return m.build();
+    }
+
+    @Nonnull
+    @Override
     public Multimap<String, String> toMultimap() {
         return this.map;
+    }
+
+    @Nonnull
+    @Override
+    public Iterator<Map.Entry<String, String>> iterator() {
+        return this.map.entries().iterator();
+    }
+
+    @Override
+    public Spliterator<Map.Entry<String, String>> spliterator() {
+        return this.map.entries().spliterator();
     }
 
     @Override

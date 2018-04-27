@@ -25,12 +25,11 @@
 
 package me.lucko.luckperms.api.context;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.SetMultimap;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -38,18 +37,9 @@ import javax.annotation.Nonnull;
 
 abstract class AbstractContextSet implements ContextSet {
 
-    protected abstract Multimap<String, String> backing();
+    protected abstract SetMultimap<String, String> backing();
 
-    @Nonnull
-    @Override
-    @Deprecated
-    public Map<String, String> toMap() {
-        ImmutableMap.Builder<String, String> m = ImmutableMap.builder();
-        for (Map.Entry<String, String> e : backing().entries()) {
-            m.put(e.getKey(), e.getValue());
-        }
-        return m.build();
-    }
+    protected abstract void copyTo(SetMultimap<String, String> other);
 
     @Override
     public boolean containsKey(@Nonnull String key) {
