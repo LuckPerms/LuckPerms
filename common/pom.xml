@@ -83,7 +83,7 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>19.0</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
         <!-- caffeine -->
         <dependency>
@@ -109,9 +109,9 @@
 
         <!-- configurate -->
         <dependency>
-            <groupId>ninja.leaping.configurate</groupId>
+            <groupId>me.lucko.configurate</groupId>
             <artifactId>configurate-core</artifactId>
-            <version>3.3</version>
+            <version>3.4</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
@@ -122,9 +122,9 @@
         </dependency>
         <!-- configurate yaml -->
         <dependency>
-            <groupId>ninja.leaping.configurate</groupId>
+            <groupId>me.lucko.configurate</groupId>
             <artifactId>configurate-yaml</artifactId>
-            <version>3.3</version>
+            <version>3.4</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
@@ -135,9 +135,9 @@
         </dependency>
         <!-- configurate gson -->
         <dependency>
-            <groupId>ninja.leaping.configurate</groupId>
+            <groupId>me.lucko.configurate</groupId>
             <artifactId>configurate-gson</artifactId>
-            <version>3.3</version>
+            <version>3.4</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
@@ -148,10 +148,23 @@
         </dependency>
         <!-- configurate hocon -->
         <dependency>
-            <groupId>ninja.leaping.configurate</groupId>
+            <groupId>me.lucko.configurate</groupId>
             <artifactId>configurate-hocon</artifactId>
-            <version>3.3</version>
+            <version>3.4</version>
             <scope>provided</scope>
+        </dependency>
+        <!-- configurate toml -->
+        <dependency>
+            <groupId>me.lucko.configurate</groupId>
+            <artifactId>configurate-toml</artifactId>
+            <version>3.4</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.moandjiezana.toml</groupId>
+                    <artifactId>toml4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- HikariCP -->
         <dependency>

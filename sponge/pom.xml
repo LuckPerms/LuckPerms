@@ -93,12 +93,8 @@
                                     <shadedPattern>me.lucko.luckperms.lib.jedis</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>redis.clients.util</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.jedisutil</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.apache.commons.pool2</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.commonspool2</shadedPattern>
+                                    <pattern>ninja.leaping.configurate</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.configurate</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -157,6 +153,32 @@
             <groupId>org.spongepowered</groupId>
             <artifactId>spongeapi</artifactId>
             <version>8.0.0-SNAPSHOT</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>ninja.leaping.configurate</groupId>
+                    <artifactId>configurate-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ninja.leaping.configurate</groupId>
+                    <artifactId>configurate-hocon</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ninja.leaping.configurate</groupId>
+                    <artifactId>configurate-gson</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ninja.leaping.configurate</groupId>
+                    <artifactId>configurate-yaml</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- configurate -->
+        <dependency>
+            <groupId>me.lucko.configurate</groupId>
+            <artifactId>configurate-hocon</artifactId>
+            <version>3.4</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -168,31 +168,31 @@ public enum Dependency {
             Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
     ),
     CONFIGURATE_CORE(
-            "ninja{}leaping{}configurate",
+            "me{}lucko{}configurate",
             "configurate-core",
-            "3.3",
-            "4leBJEqj1kVszaifZeKNl4hgHxG5M+Nk5TJKkPW2s4Y=",
+            "3.4",
+            "XetsTkFaqO7NS7wpGyTK68P29AUl+NsbLZIldvvXUAg=",
             Relocation.of("configurate", "ninja{}leaping{}configurate")
     ),
     CONFIGURATE_GSON(
-            "ninja{}leaping{}configurate",
+            "me{}lucko{}configurate",
             "configurate-gson",
-            "3.3",
-            "4HxrW3/ZKdn095x/W4gylQMNskdmteXYVxVv0UKGJA4=",
+            "3.4",
+            "1Glt4ijo6xQ8MatviUO+36AbZH5qR+f3tWx466iYZug=",
             Relocation.of("configurate", "ninja{}leaping{}configurate")
     ),
     CONFIGURATE_YAML(
-            "ninja{}leaping{}configurate",
+            "me{}lucko{}configurate",
             "configurate-yaml",
-            "3.3",
-            "hgADp3g+xHHPD34bAuxMWtB+OQ718Tlw69jVp2KPJNk=",
+            "3.4",
+            "icv/JayTYDOSCpbm60qU7EccSxUYVVXQOU7CFZqUK2Y=",
             Relocation.of("configurate", "ninja{}leaping{}configurate")
     ),
     CONFIGURATE_HOCON(
-            "ninja{}leaping{}configurate",
+            "me{}lucko{}configurate",
             "configurate-hocon",
-            "3.3",
-            "UIy5FVmsBUG6+Z1mpIEE2EXgtOI1ZL0p/eEW+BbtGLU=",
+            "3.4",
+            "A27PLuPnh/rlpcHIABCwjo4QPvjUXaKRUh7sMvbp+Y0=",
             Relocation.allOf(
                     Relocation.of("configurate", "ninja{}leaping{}configurate"),
                     Relocation.of("hocon", "com{}typesafe{}config")
@@ -204,6 +204,23 @@ public enum Dependency {
             "1.3.1",
             "5vrfxhCCINOmuGqn5OFsnnu4V7pYlViGMIuxOXImSvA=",
             Relocation.of("hocon", "com{}typesafe{}config")
+    ),
+    CONFIGURATE_TOML(
+            "me{}lucko{}configurate",
+            "configurate-toml",
+            "3.4",
+            "skbgSFsBg6wVeudWyCYIzJpz+Ia3CSTVLCGlnF4XD+A=",
+            Relocation.allOf(
+                    Relocation.of("configurate", "ninja{}leaping{}configurate"),
+                    Relocation.of("toml4j", "com{}moandjiezana{}toml")
+            )
+    ),
+    TOML4J(
+            "com{}moandjiezana{}toml",
+            "toml4j",
+            "0.7.2",
+            "9UdeY+fonl22IiNImux6Vr0wNUN3IHehfCy1TBnKOiA=",
+            Relocation.of("toml4j", "com{}moandjiezana{}toml")
     );
 
     private final String url;

@@ -93,20 +93,8 @@
                                     <shadedPattern>me.lucko.luckperms.lib.jedis</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>redis.clients.util</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.jedisutil</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.apache.commons.pool2</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.commonspool2</shadedPattern>
-                                </relocation>
-                                <relocation>
                                     <pattern>ninja.leaping.configurate</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.configurate</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.typesafe.config</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.hocon</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

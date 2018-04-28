@@ -39,8 +39,8 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.contexts.LuckPermsCalculator;
+import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
-import me.lucko.luckperms.common.dependencies.DependencyRegistry;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.event.EventFactory;
 import me.lucko.luckperms.common.inheritance.InheritanceHandler;
@@ -95,7 +95,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // load dependencies
         this.dependencyManager = new DependencyManager(this);
-        this.dependencyManager.loadDependencies(DependencyRegistry.GLOBAL_DEPENDENCIES);
+        this.dependencyManager.loadDependencies(getGlobalDependencies());
     }
 
     public final void enable() {
@@ -230,6 +230,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     protected abstract void setupSenderFactory();
+    protected abstract Set<Dependency> getGlobalDependencies();
     protected abstract ConfigurationAdapter provideConfigurationAdapter();
     protected abstract void registerPlatformListeners();
     protected abstract MessagingFactory<?> provideMessagingFactory();

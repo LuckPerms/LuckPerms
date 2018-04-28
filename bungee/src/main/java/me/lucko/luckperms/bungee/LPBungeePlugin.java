@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.calculators.PlatformCalculatorFactory;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.listener.ConnectionListener;
 import me.lucko.luckperms.common.managers.group.StandardGroupManager;
@@ -57,7 +58,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.EnumSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -86,6 +89,11 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void setupSenderFactory() {
         this.senderFactory = new BungeeSenderFactory(this);
+    }
+
+    @Override
+    protected Set<Dependency> getGlobalDependencies() {
+        return EnumSet.of(Dependency.CAFFEINE, Dependency.OKIO, Dependency.OKHTTP);
     }
 
     @Override

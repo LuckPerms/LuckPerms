@@ -74,6 +74,11 @@ use-server-uuid-cache: false
 #   |=> YAML (.yml files)
 #   |=> JSON (.json files)
 #   |=> HOCON (.conf files)
+#   |=> TOML (.toml files)
+#   |
+#   | By default, user, group and track data is separated into different files. Data can be combined
+#   | and all stored in the same file by switching to a combined storage variant.
+#   | Just add '-combined' to the end of the storage-method, e.g. 'yaml-combined'
 #
 # - A H2 database is the default option.
 # - If you want to edit data manually in "traditional" storage files, we suggest using YAML.

@@ -48,6 +48,7 @@ import me.lucko.luckperms.common.storage.PlayerSaveResult;
 import me.lucko.luckperms.common.storage.dao.AbstractDao;
 import me.lucko.luckperms.common.storage.dao.file.loader.ConfigurateLoader;
 import me.lucko.luckperms.common.storage.dao.file.loader.JsonLoader;
+import me.lucko.luckperms.common.storage.dao.file.loader.YamlLoader;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.common.utils.MoreFiles;
 
@@ -480,16 +481,37 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
         }
     }
 
-    private static Map.Entry<String, ConfigurationNode> parseEntry(ConfigurationNode appended) {
+    private static Map.Entry<String, ConfigurationNode> parseEntry(ConfigurationNode appended, String keyFieldName) {
         if (!appended.hasMapChildren()) {
             return null;
         }
-        Map.Entry<Object, ? extends ConfigurationNode> entry = Iterables.getFirst(appended.getChildrenMap().entrySet(), null);
-        if (entry == null || !entry.getValue().hasMapChildren()) {
+
+        Map<Object, ? extends ConfigurationNode> children = appended.getChildrenMap();
+        if (children.isEmpty()) {
             return null;
         }
 
-        return Maps.immutableEntry(entry.getKey().toString(), entry.getValue());
+        // if children.size == 1 and the only entry doesn't have a key called "permission" - assume
+        // the key refers to the name of the permission
+        if (children.size() == 1) {
+            Map.Entry<Object, ? extends ConfigurationNode> entry = Iterables.getFirst(children.entrySet(), null);
+            if (entry != null) {
+                String permission = entry.getKey().toString();
+                ConfigurationNode attributes = entry.getValue();
+
+                if (!permission.equals(keyFieldName)) {
+                    return Maps.immutableEntry(permission, attributes);
+                }
+            }
+        }
+
+        // assume 'appended' is the actual entry.
+        String permission = children.get(keyFieldName).getString(null);
+        if (permission == null) {
+            return null;
+        }
+
+        return Maps.immutableEntry(permission, appended);
     }
 
     protected static Set<NodeModel> readNodes(ConfigurationNode data) {
@@ -504,7 +526,7 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
                     continue;
                 }
 
-                Map.Entry<String, ConfigurationNode> entry = parseEntry(appended);
+                Map.Entry<String, ConfigurationNode> entry = parseEntry(appended, "permission");
                 if (entry == null) {
                     continue;
                 }
@@ -521,7 +543,7 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
                     continue;
                 }
 
-                Map.Entry<String, ConfigurationNode> entry = parseEntry(appended);
+                Map.Entry<String, ConfigurationNode> entry = parseEntry(appended, "group");
                 if (entry == null) {
                     continue;
                 }
@@ -534,7 +556,7 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
             if (data.getNode(keyName).hasListChildren()) {
                 List<? extends ConfigurationNode> children = data.getNode(keyName).getChildrenList();
                 for (ConfigurationNode appended : children) {
-                    Map.Entry<String, ConfigurationNode> entry = parseEntry(appended);
+                    Map.Entry<String, ConfigurationNode> entry = parseEntry(appended, chatMetaType.toString());
                     if (entry == null) {
                         continue;
                     }
@@ -546,7 +568,7 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
         if (data.getNode("meta").hasListChildren()) {
             List<? extends ConfigurationNode> children = data.getNode("meta").getChildrenList();
             for (ConfigurationNode appended : children) {
-                Map.Entry<String, ConfigurationNode> entry = parseEntry(appended);
+                Map.Entry<String, ConfigurationNode> entry = parseEntry(appended, "key");
                 if (entry == null) {
                     continue;
                 }
@@ -587,7 +609,24 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
                 node.getContexts().isEmpty();
     }
 
-    private static void writeNodes(ConfigurationNode to, Set<NodeModel> nodes) {
+    private void appendNode(ConfigurationNode base, String key, ConfigurationNode attributes, String keyFieldName) {
+        if (this.loader instanceof YamlLoader) {
+            // create a map node with a single entry of key --> attributes
+            ConfigurationNode appended = SimpleConfigurationNode.root();
+            appended.getNode(key).setValue(attributes);
+
+            base.getAppendedNode().setValue(appended);
+        } else {
+            // include the attributes and key in the same map
+            ConfigurationNode appended = SimpleConfigurationNode.root();
+            appended.getNode(keyFieldName).setValue(key);
+            appended.mergeValuesFrom(appended);
+
+            base.getAppendedNode().setValue(appended);
+        }
+    }
+
+    private void writeNodes(ConfigurationNode to, Set<NodeModel> nodes) {
         ConfigurationNode permissionsSection = SimpleConfigurationNode.root();
         ConfigurationNode parentsSection = SimpleConfigurationNode.root();
         ConfigurationNode prefixesSection = SimpleConfigurationNode.root();
@@ -598,7 +637,7 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
             Node n = node.toNode();
 
             // just add a string to the list.
-            if (isPlain(node)) {
+            if (this.loader instanceof YamlLoader && isPlain(node)) {
                 if (n.isGroupNode()) {
                     parentsSection.getAppendedNode().setValue(n.getGroupName());
                     continue;
@@ -618,15 +657,12 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
                 attributes.getNode("priority").setValue(entry.getKey());
                 writeAttributesTo(attributes, node, false);
 
-                ConfigurationNode appended = SimpleConfigurationNode.root();
-                appended.getNode(entry.getValue()).setValue(attributes);
-
                 switch (chatMetaType) {
                     case PREFIX:
-                        prefixesSection.getAppendedNode().setValue(appended);
+                        appendNode(prefixesSection, entry.getValue(), attributes, "prefix");
                         break;
                     case SUFFIX:
-                        suffixesSection.getAppendedNode().setValue(appended);
+                        appendNode(suffixesSection, entry.getValue(), attributes, "suffix");
                         break;
                     default:
                         throw new AssertionError();
@@ -639,28 +675,19 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
                 attributes.getNode("value").setValue(meta.getValue());
                 writeAttributesTo(attributes, node, false);
 
-                ConfigurationNode appended = SimpleConfigurationNode.root();
-                appended.getNode(meta.getKey()).setValue(attributes);
-
-                metaSection.getAppendedNode().setValue(appended);
+                appendNode(metaSection, meta.getKey(), attributes, "key");
             } else if (n.isGroupNode() && n.getValuePrimitive()) {
                 // handle group nodes
                 ConfigurationNode attributes = SimpleConfigurationNode.root();
                 writeAttributesTo(attributes, node, false);
 
-                ConfigurationNode appended = SimpleConfigurationNode.root();
-                appended.getNode(n.getGroupName()).setValue(attributes);
-
-                parentsSection.getAppendedNode().setValue(appended);
+                appendNode(parentsSection, n.getGroupName(), attributes, "group");
             } else {
                 // handle regular permissions and negated meta+prefixes+suffixes
                 ConfigurationNode attributes = SimpleConfigurationNode.root();
                 writeAttributesTo(attributes, node, true);
 
-                ConfigurationNode appended = SimpleConfigurationNode.root();
-                appended.getNode(n.getPermission()).setValue(attributes);
-
-                permissionsSection.getAppendedNode().setValue(appended);
+                appendNode(permissionsSection, n.getPermission(), attributes, "permission");
             }
         }
 

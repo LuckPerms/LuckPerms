@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.managers.track.StandardTrackManager;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
@@ -60,7 +61,6 @@ import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.tasks.ServiceCacheHousekeepingTask;
 
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -70,8 +70,10 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -104,6 +106,12 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void setupSenderFactory() {
         this.senderFactory = new SpongeSenderFactory(this);
+    }
+
+    @Override
+    protected Set<Dependency> getGlobalDependencies() {
+        return EnumSet.of(Dependency.CAFFEINE, Dependency.OKIO, Dependency.OKHTTP,
+                Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_HOCON, Dependency.HOCON_CONFIG);
     }
 
     @Override

@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.storage.dao.file.CombinedConfigurateDao;
 import me.lucko.luckperms.common.storage.dao.file.SeparatedConfigurateDao;
 import me.lucko.luckperms.common.storage.dao.file.loader.HoconLoader;
 import me.lucko.luckperms.common.storage.dao.file.loader.JsonLoader;
+import me.lucko.luckperms.common.storage.dao.file.loader.TomlLoader;
 import me.lucko.luckperms.common.storage.dao.file.loader.YamlLoader;
 import me.lucko.luckperms.common.storage.dao.mongodb.MongoDao;
 import me.lucko.luckperms.common.storage.dao.sql.SqlDao;
@@ -168,12 +169,16 @@ public class StorageFactory {
                 return new SeparatedConfigurateDao(this.plugin, new JsonLoader(), "JSON", ".json", "json-storage");
             case HOCON:
                 return new SeparatedConfigurateDao(this.plugin, new HoconLoader(), "HOCON", ".conf", "hocon-storage");
+            case TOML:
+                return new SeparatedConfigurateDao(this.plugin, new TomlLoader(), "TOML", ".toml", "toml-storage");
             case YAML_COMBINED:
                 return new CombinedConfigurateDao(this.plugin, new YamlLoader(), "YAML Combined", ".yml", "yaml-storage");
             case JSON_COMBINED:
                 return new CombinedConfigurateDao(this.plugin, new JsonLoader(), "JSON Combined", ".json", "json-storage");
             case HOCON_COMBINED:
                 return new CombinedConfigurateDao(this.plugin, new HoconLoader(), "HOCON Combined", ".conf", "hocon-storage");
+            case TOML_COMBINED:
+                return new CombinedConfigurateDao(this.plugin, new TomlLoader(), "TOML Combined", ".toml", "toml-storage");
             default:
                 throw new RuntimeException("Unknown method: " + method);
         }

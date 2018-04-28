@@ -49,6 +49,7 @@ import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.listener.ConnectionListener;
 import me.lucko.luckperms.common.managers.group.StandardGroupManager;
@@ -70,8 +71,10 @@ import org.bukkit.plugin.ServicePriority;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -104,6 +107,11 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void setupSenderFactory() {
         this.senderFactory = new BukkitSenderFactory(this);
+    }
+
+    @Override
+    protected Set<Dependency> getGlobalDependencies() {
+        return EnumSet.of(Dependency.CAFFEINE, Dependency.OKIO, Dependency.OKHTTP);
     }
 
     @Override

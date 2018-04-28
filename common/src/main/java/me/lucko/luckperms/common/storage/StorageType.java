@@ -35,9 +35,11 @@ public enum StorageType {
     YAML("YAML", "yaml", "yml"),
     JSON("JSON", "json", "flatfile"),
     HOCON("HOCON", "hocon"),
+    TOML("TOML", "toml"),
     YAML_COMBINED("YAML Combined", "yaml-combined"),
     JSON_COMBINED("JSON Combined", "json-combined"),
     HOCON_COMBINED("HOCON Combined", "hocon-combined"),
+    TOML_COMBINED("TOML Combined", "toml-combined"),
 
     // Remote databases
     MONGODB("MongoDB", "mongodb"),
