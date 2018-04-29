@@ -73,7 +73,7 @@ public abstract class AbstractConnectionListener implements ConnectionListener {
             this.plugin.getLogger().warn("This is usually because the server is not authenticating correctly. If you're using BungeeCord, please ensure that IP-Forwarding is setup correctly!");
         }
 
-        User user = this.plugin.getStorage().noBuffer().loadUser(u, username).join();
+        User user = this.plugin.getStorage().loadUser(u, username).join();
         if (user == null) {
             throw new NullPointerException("User is null");
         } else {
@@ -87,7 +87,7 @@ public abstract class AbstractConnectionListener implements ConnectionListener {
 
             // If they were given a default, persist the new assignments back to the storage.
             if (save) {
-                this.plugin.getStorage().noBuffer().saveUser(user).join();
+                this.plugin.getStorage().saveUser(user).join();
             }
 
             // Does some minimum pre-calculations to (maybe) speed things up later.

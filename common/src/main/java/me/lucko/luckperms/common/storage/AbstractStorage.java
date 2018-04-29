@@ -40,7 +40,6 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.dao.AbstractDao;
-import me.lucko.luckperms.common.storage.wrappings.BufferedOutputStorage;
 import me.lucko.luckperms.common.storage.wrappings.PhasedStorage;
 
 import java.util.List;
@@ -60,11 +59,7 @@ public class AbstractStorage implements Storage {
         // make a base implementation
         Storage base = new AbstractStorage(plugin, backing);
         // wrap with a phaser
-        PhasedStorage phased = PhasedStorage.wrap(base);
-        // wrap with a buffer
-        BufferedOutputStorage buffered = BufferedOutputStorage.wrap(phased, 250L);
-        plugin.getBootstrap().getScheduler().asyncRepeating(buffered.buffer(), 2L);
-        return buffered;
+        return PhasedStorage.wrap(base);
     }
 
     private final LuckPermsPlugin plugin;

@@ -60,7 +60,7 @@ public class ApiGroupManager extends ApiAbstractManager<Group, me.lucko.luckperm
     @Override
     public CompletableFuture<me.lucko.luckperms.api.Group> createAndLoadGroup(@Nonnull String name) {
         name = ApiUtils.checkName(Objects.requireNonNull(name, "name"));
-        return this.plugin.getStorage().noBuffer().createAndLoadGroup(name, CreationCause.API)
+        return this.plugin.getStorage().createAndLoadGroup(name, CreationCause.API)
                 .thenApply(this::getDelegateFor);
     }
 
@@ -68,14 +68,14 @@ public class ApiGroupManager extends ApiAbstractManager<Group, me.lucko.luckperm
     @Override
     public CompletableFuture<Optional<me.lucko.luckperms.api.Group>> loadGroup(@Nonnull String name) {
         name = ApiUtils.checkName(Objects.requireNonNull(name, "name"));
-        return this.plugin.getStorage().noBuffer().loadGroup(name).thenApply(opt -> opt.map(this::getDelegateFor));
+        return this.plugin.getStorage().loadGroup(name).thenApply(opt -> opt.map(this::getDelegateFor));
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Void> saveGroup(@Nonnull me.lucko.luckperms.api.Group group) {
         Objects.requireNonNull(group, "group");
-        return this.plugin.getStorage().noBuffer().saveGroup(ApiGroup.cast(group));
+        return this.plugin.getStorage().saveGroup(ApiGroup.cast(group));
     }
 
     @Nonnull
@@ -85,13 +85,13 @@ public class ApiGroupManager extends ApiAbstractManager<Group, me.lucko.luckperm
         if (group.getName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
             throw new IllegalArgumentException("Cannot delete the default group.");
         }
-        return this.plugin.getStorage().noBuffer().deleteGroup(ApiGroup.cast(group), DeletionCause.API);
+        return this.plugin.getStorage().deleteGroup(ApiGroup.cast(group), DeletionCause.API);
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Void> loadAllGroups() {
-        return this.plugin.getStorage().noBuffer().loadAllGroups();
+        return this.plugin.getStorage().loadAllGroups();
     }
 
     @Override

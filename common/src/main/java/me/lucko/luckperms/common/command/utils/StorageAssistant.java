@@ -101,7 +101,7 @@ public final class StorageAssistant {
         }
 
         try {
-            plugin.getStorage().noBuffer().saveUser(user).get();
+            plugin.getStorage().saveUser(user).get();
         } catch (Exception e) {
             e.printStackTrace();
             Message.USER_SAVE_ERROR.send(sender, user.getFriendlyName());
@@ -125,7 +125,7 @@ public final class StorageAssistant {
         }
 
         try {
-            plugin.getStorage().noBuffer().saveGroup(group).get();
+            plugin.getStorage().saveGroup(group).get();
         } catch (Exception e) {
             e.printStackTrace();
             Message.GROUP_SAVE_ERROR.send(sender, group.getFriendlyName());
@@ -149,7 +149,7 @@ public final class StorageAssistant {
         }
 
         try {
-            plugin.getStorage().noBuffer().saveTrack(track).get();
+            plugin.getStorage().saveTrack(track).get();
         } catch (Exception e) {
             e.printStackTrace();
             Message.TRACK_SAVE_ERROR.send(sender, track.getName());

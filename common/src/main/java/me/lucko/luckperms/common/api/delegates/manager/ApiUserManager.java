@@ -64,7 +64,7 @@ public class ApiUserManager extends ApiAbstractManager<User, me.lucko.luckperms.
             this.plugin.getUserManager().getHouseKeeper().registerApiUsage(uuid);
         }
 
-        return this.plugin.getStorage().noBuffer().loadUser(uuid, username)
+        return this.plugin.getStorage().loadUser(uuid, username)
                 .thenApply(this::getDelegateFor);
     }
 
@@ -72,7 +72,7 @@ public class ApiUserManager extends ApiAbstractManager<User, me.lucko.luckperms.
     @Override
     public CompletableFuture<Void> saveUser(@Nonnull me.lucko.luckperms.api.User user) {
         Objects.requireNonNull(user, "user");
-        return this.plugin.getStorage().noBuffer().saveUser(ApiUser.cast(user));
+        return this.plugin.getStorage().saveUser(ApiUser.cast(user));
     }
 
     @Override

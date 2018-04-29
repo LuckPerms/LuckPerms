@@ -59,7 +59,7 @@ public class ApiTrackManager extends ApiAbstractManager<Track, me.lucko.luckperm
     @Override
     public CompletableFuture<me.lucko.luckperms.api.Track> createAndLoadTrack(@Nonnull String name) {
         name = ApiUtils.checkName(Objects.requireNonNull(name, "name"));
-        return this.plugin.getStorage().noBuffer().createAndLoadTrack(name, CreationCause.API)
+        return this.plugin.getStorage().createAndLoadTrack(name, CreationCause.API)
                 .thenApply(this::getDelegateFor);
     }
 
@@ -67,27 +67,27 @@ public class ApiTrackManager extends ApiAbstractManager<Track, me.lucko.luckperm
     @Override
     public CompletableFuture<Optional<me.lucko.luckperms.api.Track>> loadTrack(@Nonnull String name) {
         name = ApiUtils.checkName(Objects.requireNonNull(name, "name"));
-        return this.plugin.getStorage().noBuffer().loadTrack(name).thenApply(opt -> opt.map(this::getDelegateFor));
+        return this.plugin.getStorage().loadTrack(name).thenApply(opt -> opt.map(this::getDelegateFor));
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Void> saveTrack(@Nonnull me.lucko.luckperms.api.Track track) {
         Objects.requireNonNull(track, "track");
-        return this.plugin.getStorage().noBuffer().saveTrack(ApiTrack.cast(track));
+        return this.plugin.getStorage().saveTrack(ApiTrack.cast(track));
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Void> deleteTrack(@Nonnull me.lucko.luckperms.api.Track track) {
         Objects.requireNonNull(track, "track");
-        return this.plugin.getStorage().noBuffer().deleteTrack(ApiTrack.cast(track), DeletionCause.API);
+        return this.plugin.getStorage().deleteTrack(ApiTrack.cast(track), DeletionCause.API);
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Void> loadAllTracks() {
-        return this.plugin.getStorage().noBuffer().loadAllTracks();
+        return this.plugin.getStorage().loadAllTracks();
     }
 
     @Override

@@ -211,13 +211,18 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
         for (EntityMetadata metadata : entity.getMetadata()) {
             String key = metadata.getName().toLowerCase();
-            if (key.isEmpty() || metadata.getStringValue().isEmpty()) continue;
+            Object value = metadata.getValue();
+
+            if (key.isEmpty() || value == null) continue;
+
+            String valueString = value.toString();
+            if (valueString.isEmpty()) continue;
 
             if (key.equals(NodeFactory.PREFIX_KEY) || key.equals(NodeFactory.SUFFIX_KEY)) {
                 ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
-                holder.setPermission(NodeFactory.buildChatMetaNode(type, weight, metadata.getStringValue()).build());
+                holder.setPermission(NodeFactory.buildChatMetaNode(type, weight, valueString).build());
             } else {
-                holder.setPermission(NodeFactory.buildMetaNode(key, metadata.getStringValue()).build());
+                holder.setPermission(NodeFactory.buildMetaNode(key, valueString).build());
             }
         }
     }
