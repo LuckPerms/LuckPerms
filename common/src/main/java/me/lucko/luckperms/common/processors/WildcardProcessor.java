@@ -25,13 +25,21 @@
 
 package me.lucko.luckperms.common.processors;
 
+import com.google.common.collect.ImmutableMap;
+
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.node.ImmutableNode;
 
+import java.util.Collections;
+import java.util.Map;
+
 public class WildcardProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
     public static final String WILDCARD_SUFFIX = ".*";
-    private static final String GLOBAL_WILDCARD_1 = "*";
-    private static final String GLOBAL_WILDCARD_2 = "'*'";
+    private static final String GLOBAL_WILDCARD = "*";
+    private static final String GLOBAL_WILDCARD_WITH_QUOTES = "'*'";
+
+    private Map<String, Boolean> wildcardPermissions = Collections.emptyMap();
+    private Tristate globalWildcardState = Tristate.UNDEFINED;
 
     @Override
     public Tristate hasPermission(String permission) {
@@ -45,19 +53,34 @@ public class WildcardProcessor extends AbstractPermissionProcessor implements Pe
 
             node = node.substring(0, endIndex);
             if (!node.isEmpty()) {
-                Tristate t = Tristate.fromNullableBoolean(this.sourceMap.get(node + WILDCARD_SUFFIX));
+                Tristate t = Tristate.fromNullableBoolean(this.wildcardPermissions.get(node));
                 if (t != Tristate.UNDEFINED) {
                     return t;
                 }
             }
         }
 
-        Tristate t = Tristate.fromNullableBoolean(this.sourceMap.get(GLOBAL_WILDCARD_1));
-        if (t != Tristate.UNDEFINED) {
-            return t;
-        }
-
-        return Tristate.fromNullableBoolean(this.sourceMap.get(GLOBAL_WILDCARD_2));
+        return this.globalWildcardState;
     }
 
+    @Override
+    public void refresh() {
+        ImmutableMap.Builder<String, Boolean> builder = ImmutableMap.builder();
+        for (Map.Entry<String, Boolean> e : this.sourceMap.entrySet()) {
+            String key = e.getKey();
+            if (!key.endsWith(WILDCARD_SUFFIX) || key.length() <= 2) {
+                continue;
+            }
+
+            builder.put(key.substring(0, key.length() - 2), e.getValue());
+        }
+        this.wildcardPermissions = builder.build();
+
+        Tristate state = Tristate.fromNullableBoolean(this.sourceMap.get(GLOBAL_WILDCARD));
+        if (state == Tristate.UNDEFINED) {
+            state = Tristate.fromNullableBoolean(this.sourceMap.get(GLOBAL_WILDCARD_WITH_QUOTES));
+        }
+
+        this.globalWildcardState = state;
+    }
 }
