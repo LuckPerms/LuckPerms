@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.dependencies.relocation.Relocation;
 import me.lucko.luckperms.common.dependencies.relocation.RelocationHandler;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
+import me.lucko.luckperms.common.utils.MoreFiles;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,7 +83,7 @@ public class DependencyManager {
     private Path getSaveDirectory() {
         Path saveDirectory = this.plugin.getBootstrap().getDataDirectory().resolve("lib");
         try {
-            Files.createDirectories(saveDirectory);
+            MoreFiles.createDirectoriesIfNotExists(saveDirectory);
         } catch (IOException e) {
             throw new RuntimeException("Unable to create lib directory", e);
         }

@@ -31,6 +31,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
+import me.lucko.luckperms.common.utils.MoreFiles;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 
 import java.io.BufferedReader;
@@ -101,7 +102,7 @@ public class SubjectStorage {
     private Path resolveFile(String collectionIdentifier, String subjectIdentifier) {
         Path collection = this.container.resolve(collectionIdentifier);
         try {
-            Files.createDirectories(collection);
+            MoreFiles.createDirectoriesIfNotExists(collection);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -128,7 +129,7 @@ public class SubjectStorage {
      * @throws IOException if the write fails
      */
     public void saveToFile(SubjectDataContainer container, Path file) throws IOException {
-        Files.createDirectories(file.getParent());
+        MoreFiles.createDirectoriesIfNotExists(file.getParent());
         try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
             this.gson.toJson(container.serialize(), writer);
             writer.flush();

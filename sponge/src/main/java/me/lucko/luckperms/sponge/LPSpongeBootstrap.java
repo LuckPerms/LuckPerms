@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.plugin.SchedulerAdapter;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+import me.lucko.luckperms.common.utils.MoreFiles;
 import me.lucko.luckperms.sponge.utils.VersionData;
 
 import org.slf4j.Logger;
@@ -53,7 +54,6 @@ import org.spongepowered.api.scheduler.SynchronousExecutor;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.UUID;
@@ -242,7 +242,7 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     public Path getDataDirectory() {
         Path dataDirectory = this.game.getGameDirectory().toAbsolutePath().resolve("luckperms");
         try {
-            Files.createDirectories(dataDirectory);
+            MoreFiles.createDirectoriesIfNotExists(dataDirectory);
         } catch (IOException e) {
             e.printStackTrace();
         }

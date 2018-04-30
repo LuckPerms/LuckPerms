@@ -57,7 +57,6 @@ import ninja.leaping.configurate.SimpleConfigurationNode;
 import ninja.leaping.configurate.Types;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -132,7 +131,7 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
     @Override
     public void init() throws IOException {
         this.dataDirectory = this.plugin.getBootstrap().getDataDirectory().resolve(this.dataDirectoryName);
-        Files.createDirectories(this.dataDirectory);
+        MoreFiles.createDirectoriesIfNotExists(this.dataDirectory);
 
         this.uuidDataFile = MoreFiles.createFileIfNotExists(this.dataDirectory.resolve("uuidcache.txt"));
         this.uuidCache.load(this.uuidDataFile);

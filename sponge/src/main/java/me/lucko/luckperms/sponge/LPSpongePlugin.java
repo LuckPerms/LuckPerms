@@ -45,6 +45,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
+import me.lucko.luckperms.common.utils.MoreFiles;
 import me.lucko.luckperms.sponge.calculators.SpongeCalculatorFactory;
 import me.lucko.luckperms.sponge.commands.SpongeMainCommand;
 import me.lucko.luckperms.sponge.contexts.SpongeContextManager;
@@ -223,7 +224,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
         Path path = this.bootstrap.getConfigPath().resolve("luckperms.conf");
         if (!Files.exists(path)) {
             try {
-                Files.createDirectories(this.bootstrap.getConfigPath());
+                MoreFiles.createDirectoriesIfNotExists(this.bootstrap.getConfigPath());
                 try (InputStream is = getClass().getClassLoader().getResourceAsStream("luckperms.conf")) {
                     Files.copy(is, path);
                 }
