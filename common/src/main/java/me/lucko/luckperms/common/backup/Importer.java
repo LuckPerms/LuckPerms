@@ -142,7 +142,7 @@ public class Importer implements Runnable {
         }
 
         // all of the threads have been scheduled now and are running. we just need to wait for them all to complete
-        CompletableFuture<Void> overallFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
+        CompletableFuture<Void> overallFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 
         this.notify.forEach(s -> Message.IMPORT_INFO.send(s, "All commands have been processed and scheduled - now waiting for the execution to complete."));
 

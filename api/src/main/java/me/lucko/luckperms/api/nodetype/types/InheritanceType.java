@@ -23,37 +23,35 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.references;
+package me.lucko.luckperms.api.nodetype.types;
 
-import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.nodetype.NodeType;
+import me.lucko.luckperms.api.nodetype.NodeTypeKey;
 
-public enum HolderType {
+import javax.annotation.Nonnull;
 
-    USER(true, false),
-    GROUP(false, true);
+/**
+ * A sub-type of {@link Node} used to mark that the holder of the node should inherit
+ * from another group.
+ *
+ * @since 4.2
+ */
+public interface InheritanceType extends NodeType {
 
-    private final boolean user;
-    private final boolean group;
+    /**
+     * The key for this type.
+     */
+    NodeTypeKey<InheritanceType> KEY = new NodeTypeKey<InheritanceType>(){};
 
-    HolderType(boolean user, boolean group) {
-        this.user = user;
-        this.group = group;
-    }
+    /**
+     * Gets the name of the group to be inherited.
+     *
+     * <p>This is no guarantee that this group exists.</p>
+     *
+     * @return the name of the group
+     */
+    @Nonnull
+    String getGroupName();
 
-    public boolean matches(PermissionHolder holder) {
-        return holder.getType() == this;
-    }
-
-    @Override
-    public String toString() {
-        return name().toLowerCase();
-    }
-
-    public boolean isUser() {
-        return this.user;
-    }
-
-    public boolean isGroup() {
-        return this.group;
-    }
 }

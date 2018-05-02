@@ -23,57 +23,62 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.references;
+package me.lucko.luckperms.common.node.utils;
 
-import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.api.LocalizedNode;
+import me.lucko.luckperms.api.Tristate;
 
-import java.util.function.Consumer;
+import java.util.Objects;
+import java.util.Optional;
 
-public final class UserReference implements HolderReference<User, UserIdentifier> {
-    public static UserReference of(UserIdentifier id) {
-        return new UserReference(id);
+/**
+ * The result of an inheritance lookup
+ */
+public final class InheritanceInfo {
+    public static InheritanceInfo of(LocalizedNode node) {
+        Objects.requireNonNull(node, "node");
+        return new InheritanceInfo(node.getTristate(), node.getLocation());
     }
 
-    private final UserIdentifier id;
-
-    private UserReference(UserIdentifier id) {
-        this.id = id;
+    public static InheritanceInfo empty() {
+        return new InheritanceInfo(Tristate.UNDEFINED, null);
     }
 
-    @Override
-    public HolderType getType() {
-        return HolderType.USER;
+    private final Tristate result;
+    private final String location;
+
+    private InheritanceInfo(Tristate result, String location) {
+        this.result = result;
+        this.location = location;
     }
 
-    @Override
-    public void apply(LuckPermsPlugin plugin, Consumer<User> consumer) {
-        User user = plugin.getUserManager().getIfLoaded(this.id);
-        if (user == null) return;
-
-        consumer.accept(user);
-    }
-
-    @Override
-    public UserIdentifier getId() {
-        return this.id;
+    public Optional<String> getLocation() {
+        return Optional.ofNullable(this.location);
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
-        if (!(o instanceof UserReference)) return false;
-        final UserReference other = (UserReference) o;
-        return this.id.equals(other.id);
+        if (!(o instanceof InheritanceInfo)) return false;
+        final InheritanceInfo other = (InheritanceInfo) o;
+        return this.result == other.result && this.getLocation().equals(other.getLocation());
     }
 
     @Override
     public int hashCode() {
-        return this.id.hashCode();
+        final int PRIME = 59;
+        int result = 1;
+        result = result * PRIME + this.result.hashCode();
+        result = result * PRIME + this.getLocation().hashCode();
+        return result;
     }
 
     @Override
     public String toString() {
-        return "UserReference(id=" + this.getId() + ")";
+        return "InheritanceInfo(result=" + this.result + ", location=" + this.getLocation() + ")";
+    }
+
+    public Tristate getResult() {
+        return this.result;
     }
 }

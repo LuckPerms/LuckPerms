@@ -23,29 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node;
+package me.lucko.luckperms.api.nodetype;
 
-import me.lucko.luckperms.api.HeldPermission;
+import me.lucko.luckperms.api.Node;
 
-import java.util.Comparator;
+/**
+ * Superinterface for extended {@link Node} types.
+ *
+ * <p>The 'permission' property of a {@link Node} is also used in some cases to represent state
+ * beyond a granted permission. This state is encapsulated by extra {@link NodeType} data which
+ * can be obtained from this instance using {@link Node#getTypeData(NodeTypeKey)}.</p>
+ *
+ * <p>Type data is mapped by {@link NodeTypeKey}s, which are usually stored as static members of the
+ * corresponding {@link NodeType} class under the <code>KEY</code> field.</p>
+ *
+ * @since 4.2
+ */
+public interface NodeType {
 
-public class HeldPermissionComparator<T extends Comparable<T>> implements Comparator<HeldPermission<T>> {
-
-    public static <T extends Comparable<T>> Comparator<? super HeldPermission<T>> normal() {
-        return new HeldPermissionComparator<>();
-    }
-
-    public static <T extends Comparable<T>> Comparator<? super HeldPermission<T>> reverse() {
-        return HeldPermissionComparator.<T>normal().reversed();
-    }
-
-    @Override
-    public int compare(HeldPermission<T> o1, HeldPermission<T> o2) {
-        int i = o1.getHolder().compareTo(o2.getHolder());
-        if (i != 0) {
-            return i;
-        }
-
-        return NodeWithContextComparator.normal().compare(o1.asNode(), o2.asNode());
-    }
 }

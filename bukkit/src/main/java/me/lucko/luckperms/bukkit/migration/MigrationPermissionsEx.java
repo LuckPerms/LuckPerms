@@ -39,7 +39,8 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.model.NodeTypes;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Iterators;
@@ -288,9 +289,9 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 }
 
                 String key = opt.getKey().toLowerCase();
-                boolean ignore = key.equals(NodeFactory.PREFIX_KEY) ||
-                        key.equals(NodeFactory.SUFFIX_KEY) ||
-                        key.equals(NodeFactory.WEIGHT_KEY) ||
+                boolean ignore = key.equals(NodeTypes.PREFIX_KEY) ||
+                        key.equals(NodeTypes.SUFFIX_KEY) ||
+                        key.equals(NodeTypes.WEIGHT_KEY) ||
                         key.equals("rank") ||
                         key.equals("rank-ladder") ||
                         key.equals("name") ||

@@ -39,7 +39,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
 
 import net.milkbowl.vault.permission.Permission;
@@ -210,7 +210,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
 
         ContextSet contexts = contextForLookup(user, world).getContexts();
 
-        String[] ret = user.getEnduringNodes().values().stream()
+        String[] ret = user.enduringData().immutable().values().stream()
                 .filter(Node::isGroupNode)
                 .filter(n -> n.shouldApplyWithContext(contexts))
                 .map(n -> {

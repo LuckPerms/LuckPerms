@@ -23,57 +23,29 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.references;
+package me.lucko.luckperms.common.node.comparator;
 
-import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.api.HeldPermission;
 
-import java.util.function.Consumer;
+import java.util.Comparator;
 
-public final class GroupReference implements HolderReference<Group, String> {
-    public static GroupReference of(String id) {
-        return new GroupReference(id);
+public class HeldPermissionComparator<T extends Comparable<T>> implements Comparator<HeldPermission<T>> {
+
+    public static <T extends Comparable<T>> Comparator<? super HeldPermission<T>> normal() {
+        return new HeldPermissionComparator<>();
     }
 
-    private final String id;
-
-    private GroupReference(String id) {
-        this.id = id;
-    }
-
-    @Override
-    public HolderType getType() {
-        return HolderType.GROUP;
+    public static <T extends Comparable<T>> Comparator<? super HeldPermission<T>> reverse() {
+        return HeldPermissionComparator.<T>normal().reversed();
     }
 
     @Override
-    public void apply(LuckPermsPlugin plugin, Consumer<Group> consumer) {
-        Group group = plugin.getGroupManager().getIfLoaded(this.id);
-        if (group == null) return;
+    public int compare(HeldPermission<T> o1, HeldPermission<T> o2) {
+        int i = o1.getHolder().compareTo(o2.getHolder());
+        if (i != 0) {
+            return i;
+        }
 
-        consumer.accept(group);
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) return true;
-        if (!(o instanceof GroupReference)) return false;
-        final GroupReference other = (GroupReference) o;
-        return this.getId().equals(other.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return this.id.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "GroupReference(id=" + this.getId() + ")";
+        return NodeWithContextComparator.normal().compare(o1.asNode(), o2.asNode());
     }
 }

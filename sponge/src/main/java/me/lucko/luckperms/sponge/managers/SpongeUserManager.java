@@ -37,7 +37,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.managers.user.AbstractUserManager;
 import me.lucko.luckperms.common.managers.user.UserHousekeeper;
-import me.lucko.luckperms.common.references.UserIdentifier;
+import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.common.utils.Uuids;
 import me.lucko.luckperms.sponge.LPSpongePlugin;

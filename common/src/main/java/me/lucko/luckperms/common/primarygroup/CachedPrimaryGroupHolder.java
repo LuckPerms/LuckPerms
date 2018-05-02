@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.primarygroup;
 import me.lucko.luckperms.common.buffers.Cache;
 import me.lucko.luckperms.common.caching.handlers.StateListener;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
 
 /**
  * Abstract implementation of {@link StateListener} which caches all lookups.

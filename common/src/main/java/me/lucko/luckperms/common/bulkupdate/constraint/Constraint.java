@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.bulkupdate.constraint;
 
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.comparisons.Comparison;
-import me.lucko.luckperms.common.node.NodeModel;
+import me.lucko.luckperms.common.node.model.NodeDataContainer;
 
 /**
  * Represents a query constraint
@@ -59,7 +59,7 @@ public class Constraint {
      * @param node the node
      * @return true if satisfied
      */
-    public boolean isSatisfiedBy(NodeModel node) {
+    public boolean isSatisfiedBy(NodeDataContainer node) {
         switch (this.field) {
             case PERMISSION:
                 return this.comparison.matches(node.getPermission(), this.value);

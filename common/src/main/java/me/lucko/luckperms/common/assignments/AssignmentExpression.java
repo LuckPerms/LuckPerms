@@ -30,8 +30,9 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.StandardNodeEquality;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.LegacyNodeFactory;
+import me.lucko.luckperms.common.node.factory.LegacyNodeFactory;
 import me.lucko.luckperms.common.utils.Scripting;
 
 import java.util.List;
@@ -61,7 +62,7 @@ public class AssignmentExpression {
             throw new NullPointerException("script engine");
         }
 
-        Predicate<Node> checker = node -> holder.hasPermission(node, StandardNodeEquality.IGNORE_VALUE_OR_IF_TEMPORARY) == tristate;
+        Predicate<Node> checker = node -> holder.hasPermission(NodeMapType.ENDURING, node, StandardNodeEquality.IGNORE_VALUE_OR_IF_TEMPORARY) == tristate;
 
         String exp = this.expression.stream().map(t -> t.forExpression(checker)).collect(Collectors.joining())
                 .replace("&", "&&").replace("|", "||");

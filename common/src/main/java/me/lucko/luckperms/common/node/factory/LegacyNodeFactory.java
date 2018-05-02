@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node;
+package me.lucko.luckperms.common.node.factory;
 
 import com.google.common.base.Splitter;
 
@@ -40,17 +40,17 @@ public final class LegacyNodeFactory {
     /**
      * The characters which are delimited when serializing a permission string
      */
-    static final String[] PERMISSION_DELIMITERS = new String[]{"/", "-", "$", "(", ")", "=", ","};
+    public static final String[] PERMISSION_DELIMITERS = new String[]{"/", "-", "$", "(", ")", "=", ","};
 
     /**
      * The characters which are delimited when serializing a server or world string
      */
-    static final String[] SERVER_WORLD_DELIMITERS = new String[]{"/", "-"};
+    public static final String[] SERVER_WORLD_DELIMITERS = new String[]{"/", "-"};
 
     /**
      * The characters which are delimited when serializing a context set
      */
-    static final String[] CONTEXT_DELIMITERS = new String[]{"=", "(", ")", ","};
+    private static final String[] CONTEXT_DELIMITERS = new String[]{"=", "(", ")", ","};
 
     /**
      * The characters which are delimited when serializing meta/prefix/suffix strings
@@ -146,7 +146,7 @@ public final class LegacyNodeFactory {
         return escapeDelimiters(s, GENERIC_DELIMITERS);
     }
 
-    static String unescapeCharacters(String s) {
+    public static String unescapeCharacters(String s) {
         if (s == null) {
             throw new NullPointerException();
         }
@@ -172,7 +172,7 @@ public final class LegacyNodeFactory {
         return s;
     }
 
-    static String unescapeDelimiters(String s, String... delimiters) {
+    public static String unescapeDelimiters(String s, String... delimiters) {
         if (s == null) {
             return null;
         }

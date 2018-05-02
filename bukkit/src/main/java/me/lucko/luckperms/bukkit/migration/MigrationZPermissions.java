@@ -39,7 +39,8 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.model.NodeTypes;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Iterators;
@@ -218,7 +219,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
             String valueString = value.toString();
             if (valueString.isEmpty()) continue;
 
-            if (key.equals(NodeFactory.PREFIX_KEY) || key.equals(NodeFactory.SUFFIX_KEY)) {
+            if (key.equals(NodeTypes.PREFIX_KEY) || key.equals(NodeTypes.SUFFIX_KEY)) {
                 ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
                 holder.setPermission(NodeFactory.buildChatMetaNode(type, weight, valueString).build());
             } else {

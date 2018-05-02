@@ -29,30 +29,37 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.api.delegates.model.ApiGroup;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
+import me.lucko.luckperms.common.buffers.Cache;
 import me.lucko.luckperms.common.caching.GroupCachedData;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.references.GroupReference;
-import me.lucko.luckperms.common.references.HolderType;
-import me.lucko.luckperms.common.references.Identifiable;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.concurrent.CompletableFuture;
 
 public class Group extends PermissionHolder implements Identifiable<String> {
+    private final ApiGroup apiDelegate = new ApiGroup(this);
 
     /**
      * The name of the group
      */
     private final String name;
 
-    private final ApiGroup apiDelegate = new ApiGroup(this);
+    /**
+     * Caches the holders weight
+     * @see #getWeight()
+     */
+    private final Cache<OptionalInt> weightCache = new WeightCache(this);
 
     /**
      * The groups data cache instance
      */
     private final GroupCachedData cachedData;
 
+    /**
+     * The group's cached data refresh buffer
+     */
     private final GroupRefreshBuffer refreshBuffer;
 
     public Group(String name, LuckPermsPlugin plugin) {
@@ -65,6 +72,12 @@ public class Group extends PermissionHolder implements Identifiable<String> {
 
         // invalidate our caches when data is updated
         getStateListeners().add(this.refreshBuffer::request);
+    }
+
+    @Override
+    protected void invalidateCache() {
+        this.weightCache.invalidate();
+        super.invalidateCache();
     }
 
     public String getName() {
@@ -92,7 +105,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
 
     public Optional<String> getDisplayName() {
         String name = null;
-        for (Node n : getEnduringNodes().get(ImmutableContextSet.empty())) {
+        for (Node n : enduringData().immutable().get(ImmutableContextSet.empty())) {
             if (!n.getPermission().startsWith("displayname.")) {
                 continue;
             }
@@ -116,8 +129,8 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     }
 
     @Override
-    public GroupReference toReference() {
-        return GroupReference.of(getId());
+    public OptionalInt getWeight() {
+        return this.weightCache.get();
     }
 
     @Override

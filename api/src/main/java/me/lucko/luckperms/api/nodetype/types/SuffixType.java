@@ -23,45 +23,49 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node;
+package me.lucko.luckperms.api.nodetype.types;
 
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.nodetype.NodeType;
+import me.lucko.luckperms.api.nodetype.NodeTypeKey;
 
-import java.util.Objects;
+import java.util.Map;
+
+import javax.annotation.Nonnull;
 
 /**
- * Holds a Node and plus an owning object. All calls are passed onto the contained Node instance.
+ * A sub-type of {@link Node} used to store suffix assignments.
+ *
+ * @since 4.2
  */
-public final class ImmutableTransientNode<O> extends ForwardingNode implements Node {
-    public static <O> ImmutableTransientNode<O> of(Node node, O owner) {
-        Objects.requireNonNull(node, "node");
-        Objects.requireNonNull(owner, "owner");
-        return new ImmutableTransientNode<>(node, owner);
-    }
+public interface SuffixType extends NodeType {
 
-    private final Node node;
-    private final O owner;
+    /**
+     * The key for this type.
+     */
+    NodeTypeKey<SuffixType> KEY = new NodeTypeKey<SuffixType>(){};
 
-    private ImmutableTransientNode(Node node, O owner) {
-        this.node = node;
-        this.owner = owner;
-    }
+    /**
+     * Gets the priority of the suffix assignment.
+     *
+     * @return the priority
+     */
+    int getPriority();
 
-    @Override
-    protected Node delegate() {
-        return this.node;
-    }
+    /**
+     * Gets the actual suffix string.
+     *
+     * @return the suffix
+     */
+    @Nonnull
+    String getSuffix();
 
-    public Node getNode() {
-        return this.node;
-    }
+    /**
+     * Gets a representation of this instance as a {@link Map.Entry}.
+     *
+     * @return a map entry representation of the priority and suffix string
+     */
+    @Nonnull
+    Map.Entry<Integer, String> getAsEntry();
 
-    public O getOwner() {
-        return this.owner;
-    }
-
-    @Override
-    public String toString() {
-        return "ImmutableTransientNode(node=" + this.getNode() + ", owner=" + this.getOwner() + ")";
-    }
 }

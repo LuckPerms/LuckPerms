@@ -72,12 +72,12 @@ public class UserInfo extends SubCommand<User> {
                 user.getPrimaryGroup().getValue()
         );
 
-        Set<Node> parents = user.getEnduringData().asSet().stream()
+        Set<Node> parents = user.enduringData().asSet().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::isPermanent)
                 .collect(Collectors.toSet());
 
-        Set<Node> tempParents = user.getEnduringData().asSet().stream()
+        Set<Node> tempParents = user.enduringData().asSet().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::isTemporary)
                 .collect(Collectors.toSet());

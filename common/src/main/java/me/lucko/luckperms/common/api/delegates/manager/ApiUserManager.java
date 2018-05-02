@@ -29,8 +29,8 @@ import me.lucko.luckperms.common.api.ApiUtils;
 import me.lucko.luckperms.common.api.delegates.model.ApiUser;
 import me.lucko.luckperms.common.managers.user.UserManager;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.references.UserIdentifier;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.util.Objects;

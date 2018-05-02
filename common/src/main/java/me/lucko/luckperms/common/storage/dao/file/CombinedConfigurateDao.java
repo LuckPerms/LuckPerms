@@ -29,8 +29,8 @@ import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.managers.group.GroupManager;
 import me.lucko.luckperms.common.managers.track.TrackManager;
-import me.lucko.luckperms.common.node.NodeHeldPermission;
-import me.lucko.luckperms.common.node.NodeModel;
+import me.lucko.luckperms.common.node.model.NodeDataContainer;
+import me.lucko.luckperms.common.node.model.NodeHeldPermission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.dao.file.loader.ConfigurateLoader;
 
@@ -270,8 +270,8 @@ public class CombinedConfigurateDao extends AbstractConfigurateDao {
                     UUID holder = UUID.fromString(entry.getKey().toString());
                     ConfigurationNode object = entry.getValue();
 
-                    Set<NodeModel> nodes = readNodes(object);
-                    for (NodeModel e : nodes) {
+                    Set<NodeDataContainer> nodes = readNodes(object);
+                    for (NodeDataContainer e : nodes) {
                         if (!e.getPermission().equalsIgnoreCase(permission)) {
                             continue;
                         }
@@ -324,8 +324,8 @@ public class CombinedConfigurateDao extends AbstractConfigurateDao {
                     String holder = entry.getKey().toString();
                     ConfigurationNode object = entry.getValue();
 
-                    Set<NodeModel> nodes = readNodes(object);
-                    for (NodeModel e : nodes) {
+                    Set<NodeDataContainer> nodes = readNodes(object);
+                    for (NodeDataContainer e : nodes) {
                         if (!e.getPermission().equalsIgnoreCase(permission)) {
                             continue;
                         }

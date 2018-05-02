@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -60,7 +60,7 @@ public class LogNotify extends SubCommand<Log> {
 
         // if they don't have the perm, they're not ignoring
         // if set to false, ignore it, return false
-        return ret.map(Node::getValuePrimitive).orElse(false);
+        return ret.map(Node::getValue).orElse(false);
     }
 
     private static void setIgnoring(LuckPermsPlugin plugin, UUID uuid, boolean state) {

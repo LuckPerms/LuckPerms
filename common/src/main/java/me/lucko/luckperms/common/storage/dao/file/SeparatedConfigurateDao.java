@@ -30,8 +30,8 @@ import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.managers.group.GroupManager;
 import me.lucko.luckperms.common.managers.track.TrackManager;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.NodeHeldPermission;
-import me.lucko.luckperms.common.node.NodeModel;
+import me.lucko.luckperms.common.node.model.NodeDataContainer;
+import me.lucko.luckperms.common.node.model.NodeHeldPermission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.dao.file.loader.ConfigurateLoader;
 import me.lucko.luckperms.common.utils.MoreFiles;
@@ -263,8 +263,8 @@ public class SeparatedConfigurateDao extends AbstractConfigurateDao {
                             registerFileAction(StorageLocation.USER, file);
                             ConfigurationNode object = readFile(file);
                             UUID holder = UUID.fromString(fileName.substring(0, fileName.length() - this.fileExtension.length()));
-                            Set<NodeModel> nodes = readNodes(object);
-                            for (NodeModel e : nodes) {
+                            Set<NodeDataContainer> nodes = readNodes(object);
+                            for (NodeDataContainer e : nodes) {
                                 if (!e.getPermission().equalsIgnoreCase(permission)) {
                                     continue;
                                 }
@@ -319,8 +319,8 @@ public class SeparatedConfigurateDao extends AbstractConfigurateDao {
                             registerFileAction(StorageLocation.GROUP, file);
                             ConfigurationNode object = readFile(file);
                             String holder = fileName.substring(0, fileName.length() - this.fileExtension.length());
-                            Set<NodeModel> nodes = readNodes(object);
-                            for (NodeModel e : nodes) {
+                            Set<NodeDataContainer> nodes = readNodes(object);
+                            for (NodeDataContainer e : nodes) {
                                 if (!e.getPermission().equalsIgnoreCase(permission)) {
                                     continue;
                                 }

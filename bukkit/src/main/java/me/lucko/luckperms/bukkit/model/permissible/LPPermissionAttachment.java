@@ -31,8 +31,8 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.bukkit.model.dummy.DummyPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.ImmutableTransientNode;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.model.ImmutableTransientNode;
 
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionRemovedExecutor;

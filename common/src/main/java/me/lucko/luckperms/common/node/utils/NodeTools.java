@@ -23,34 +23,46 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.references;
+package me.lucko.luckperms.common.node.utils;
 
-import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.NodeEqualityPredicate;
 
-import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
-/**
- * A reference to a specific {@link PermissionHolder}.
- *
- * @param <S> the holder type
- * @param <I> the holder identifier type
- */
-public interface HolderReference<S, I> extends Identifiable<I> {
+public final class NodeTools {
 
-    /**
-     * Gets the holder type
-     *
-     * @return the holder type
-     */
-    HolderType getType();
+    public static <T extends Node> void removeEqual(Iterator<T> it, NodeEqualityPredicate equalityPredicate) {
+        List<T> alreadyIn = new ArrayList<>();
 
-    /**
-     * Applies an action to this reference, if it is present and exists.
-     *
-     * @param plugin the plugin
-     * @param consumer the action
-     */
-    void apply(LuckPermsPlugin plugin, Consumer<S> consumer);
+        iterate:
+        while (it.hasNext()) {
+            T next = it.next();
 
+            for (T other : alreadyIn) {
+                if (next.equals(other, equalityPredicate)) {
+                    it.remove();
+                    continue iterate;
+                }
+            }
+
+            alreadyIn.add(next);
+        }
+    }
+
+    public static <T extends Node> void removeSamePermission(Iterator<T> it) {
+        Set<String> alreadyIn = new HashSet<>();
+        while (it.hasNext()) {
+            T next = it.next();
+            if (!alreadyIn.add(next.getPermission())) {
+                it.remove();
+            }
+        }
+    }
+
+    private NodeTools() {}
 }

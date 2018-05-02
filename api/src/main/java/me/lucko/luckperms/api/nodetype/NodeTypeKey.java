@@ -23,48 +23,34 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node;
+package me.lucko.luckperms.api.nodetype;
 
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.utils.CollationKeyCache;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
-import java.util.Comparator;
+import javax.annotation.Nonnull;
 
-public class NodeComparator implements Comparator<Node> {
+/**
+ * Marks an instance used as a key for a {@link NodeType}.
+ *
+ * <p>A single instance of this interface is created and stored statically for
+ * each sub-interface of {@link NodeType}.</p>
+ *
+ * @param <N> the type of the {@link NodeType} being indexed by this key
+ * @since 4.2
+ */
+public interface NodeTypeKey<N extends NodeType> {
 
-    private static final Comparator<? super Node> INSTANCE = new NodeComparator();
-    private static final Comparator<? super Node> REVERSE = INSTANCE.reversed();
-
-    public static Comparator<? super Node> normal() {
-        return INSTANCE;
+    /**
+     * Gets the {@link Class#getSimpleName() class name} of the represented type.
+     *
+     * @return the name of the represented type
+     */
+    @Nonnull
+    default String getTypeName() {
+        ParameterizedType thisType = (ParameterizedType) getClass().getGenericSuperclass();
+        Type nodeType = thisType.getActualTypeArguments()[0];
+        return ((Class) nodeType).getSimpleName();
     }
 
-    public static Comparator<? super Node> reverse() {
-        return REVERSE;
-    }
-
-    @Override
-    public int compare(Node o1, Node o2) {
-        if (o1.equals(o2)) {
-            return 0;
-        }
-
-        if (o1.isTemporary() != o2.isTemporary()) {
-            return o1.isTemporary() ? 1 : -1;
-        }
-
-        if (o1.isWildcard() != o2.isWildcard()) {
-            return o1.isWildcard() ? 1 : -1;
-        }
-
-        if (o1.isTemporary()) {
-            return o1.getSecondsTilExpiry() < o2.getSecondsTilExpiry() ? 1 : -1;
-        }
-
-        if (o1.isWildcard()) {
-            return o1.getWildcardLevel() > o2.getWildcardLevel() ? 1 : -1;
-        }
-
-        return CollationKeyCache.compareStrings(o1.getPermission(), o2.getPermission()) == 1 ? -1 : 1;
-    }
 }

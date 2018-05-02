@@ -39,8 +39,8 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.MetaType;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.model.NodeTypes;
+import me.lucko.luckperms.common.node.utils.MetaType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -68,13 +68,13 @@ public class MetaClear extends SharedSubCommand {
             if (typeId.equals("chat") || typeId.equals("chatmeta")) {
                 type = MetaType.CHAT;
             }
-            if (typeId.equals(NodeFactory.META_KEY)) {
+            if (typeId.equals(NodeTypes.META_KEY)) {
                 type = MetaType.META;
             }
-            if (typeId.equals(NodeFactory.PREFIX_KEY) || typeId.equals("prefixes")) {
+            if (typeId.equals(NodeTypes.PREFIX_KEY) || typeId.equals("prefixes")) {
                 type = MetaType.PREFIX;
             }
-            if (typeId.equals(NodeFactory.SUFFIX_KEY) || typeId.equals("suffixes")) {
+            if (typeId.equals(NodeTypes.SUFFIX_KEY) || typeId.equals("suffixes")) {
                 type = MetaType.SUFFIX;
             }
 
@@ -87,7 +87,7 @@ public class MetaClear extends SharedSubCommand {
             type = MetaType.ANY;
         }
 
-        int before = holder.getEnduringNodes().size();
+        int before = holder.enduringData().immutable().size();
 
         MutableContextSet context = ArgumentParser.parseContext(0, args, plugin);
 
@@ -102,7 +102,7 @@ public class MetaClear extends SharedSubCommand {
             holder.clearMeta(type, context);
         }
 
-        int changed = before - holder.getEnduringNodes().size();
+        int changed = before - holder.enduringData().immutable().size();
         if (changed == 1) {
             Message.META_CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), MessageUtils.contextSetToString(context), changed);
         } else {

@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.managers.user;
 
 import me.lucko.luckperms.common.managers.Manager;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.references.UserIdentifier;
+import me.lucko.luckperms.common.model.UserIdentifier;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;

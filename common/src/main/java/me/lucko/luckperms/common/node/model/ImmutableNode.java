@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node;
+package me.lucko.luckperms.common.node.model;
 
 import com.google.common.collect.ImmutableList;
 
@@ -33,75 +33,67 @@ import me.lucko.luckperms.api.StandardNodeEquality;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.nodetype.NodeType;
+import me.lucko.luckperms.api.nodetype.NodeTypeKey;
+import me.lucko.luckperms.common.node.factory.LegacyNodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeBuilder;
+import me.lucko.luckperms.common.node.utils.ShorthandParser;
 import me.lucko.luckperms.common.processors.WildcardProcessor;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkState;
 
 /**
  * An immutable implementation of {@link Node}.
  */
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class ImmutableNode implements Node {
 
     /**
      * The character which separates each part of a permission node
      */
     public static final char NODE_SEPARATOR = '.';
-    public static final int NODE_SEPARATOR_CODE = Character.getNumericValue('.');
+
+    /**
+     * The numeric value of {@link #NODE_SEPARATOR}
+     */
+    public static final int NODE_SEPARATOR_CODE = Character.getNumericValue(NODE_SEPARATOR);
+
+    // node attributes
 
     private final String permission;
-
     private final boolean value;
-
     private boolean override;
 
-    // nullable
+    @Nullable
     private final String server;
-    // nullable
+    @Nullable
     private final String world;
 
-    // 0L for no expiry
-    private final long expireAt;
-
+    private final long expireAt; // 0L for no expiry
     private final ImmutableContextSet contexts;
-
     private final ImmutableContextSet fullContexts;
 
-    /*
-     * CACHED STATE
-     *
-     * These values are based upon the node state above, and are stored here
-     * to make node comparison and manipulation faster.
-     *
-     * This increases the memory footprint of this class by a bit, but it is
-     * worth it for the gain in speed.
-     *
-     * The methods on this class are called v. frequently.
-     */
 
-    // storing optionals as a field type is usually a bad idea, however, the
-    // #getServer and #getWorld methods are called frequently when comparing nodes.
-    // without caching these values, it creates quite a bit of object churn
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+
+    // cached state
+
     private final Optional<String> optServer;
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private final Optional<String> optWorld;
 
+    // this class is immutable, so we can cache the hashcode calculation
     private final int hashCode;
 
-    // all nullable
-    private String groupName;
     private final int wildcardLevel;
-    private Map.Entry<String, String> meta;
-    private Map.Entry<Integer, String> prefix;
-    private Map.Entry<Integer, String> suffix;
-
+    private final Map<NodeTypeKey<?>, NodeType> resolvedTypes;
     private final List<String> resolvedShorthand;
 
     /**
@@ -114,8 +106,7 @@ public final class ImmutableNode implements Node {
      * @param world      the world this node applies on
      * @param contexts   any additional contexts applying to this node
      */
-    @SuppressWarnings("deprecation")
-    ImmutableNode(String permission, boolean value, boolean override, long expireAt, String server, String world, ContextSet contexts) {
+    public ImmutableNode(String permission, boolean value, boolean override, long expireAt, String server, String world, ContextSet contexts) {
         if (permission == null || permission.isEmpty()) {
             throw new IllegalArgumentException("Empty permission");
         }
@@ -134,11 +125,8 @@ public final class ImmutableNode implements Node {
         this.contexts = contexts == null ? ContextSet.empty() : contexts.makeImmutable();
 
         // define cached state
-        this.groupName = NodeFactory.parseGroupNode(this.permission);
         this.wildcardLevel = this.permission.endsWith(WildcardProcessor.WILDCARD_SUFFIX) ? this.permission.chars().filter(num -> num == NODE_SEPARATOR_CODE).sum() : -1;
-        this.meta = NodeFactory.parseMetaNode(this.permission);
-        this.prefix = NodeFactory.parsePrefixNode(this.permission);
-        this.suffix = NodeFactory.parseSuffixNode(this.permission);
+        this.resolvedTypes = NodeTypes.parseTypes(this.permission);
         this.resolvedShorthand = ImmutableList.copyOf(ShorthandParser.parseShorthand(getPermission()));
         this.optServer = Optional.ofNullable(this.server);
         this.optWorld = Optional.ofNullable(this.world);
@@ -173,7 +161,7 @@ public final class ImmutableNode implements Node {
     }
 
     @Override
-    public boolean getValuePrimitive() {
+    public boolean getValue() {
         return this.value;
     }
 
@@ -227,6 +215,11 @@ public final class ImmutableNode implements Node {
     }
 
     @Override
+    public boolean shouldApplyWithContext(@Nonnull ContextSet contextSet) {
+        return getFullContexts().isSatisfiedBy(contextSet);
+    }
+
+    @Override
     public boolean isTemporary() {
         return this.expireAt != 0L;
     }
@@ -256,23 +249,6 @@ public final class ImmutableNode implements Node {
     }
 
     @Override
-    public boolean isRegularPermissionNode() {
-        return !isGroupNode() && !isPrefix() && !isSuffix() && !isMeta();
-    }
-
-    @Override
-    public boolean isGroupNode() {
-        return this.groupName != null;
-    }
-
-    @Nonnull
-    @Override
-    public String getGroupName() {
-        checkState(isGroupNode(), "Node is not a group node");
-        return this.groupName;
-    }
-
-    @Override
     public boolean isWildcard() {
         return this.wildcardLevel != -1;
     }
@@ -284,44 +260,17 @@ public final class ImmutableNode implements Node {
     }
 
     @Override
-    public boolean isMeta() {
-        return this.meta != null;
-    }
-
-    @Nonnull
-    @Override
-    public Map.Entry<String, String> getMeta() {
-        checkState(isMeta(), "Node is not a meta node");
-        return this.meta;
+    public boolean hasTypeData() {
+        return !this.resolvedTypes.isEmpty();
     }
 
     @Override
-    public boolean isPrefix() {
-        return this.prefix != null;
-    }
+    public <T extends NodeType> Optional<T> getTypeData(NodeTypeKey<T> key) {
+        Objects.requireNonNull(key, "key");
 
-    @Nonnull
-    @Override
-    public Map.Entry<Integer, String> getPrefix() {
-        checkState(isPrefix(), "Node is not a prefix node");
-        return this.prefix;
-    }
-
-    @Override
-    public boolean isSuffix() {
-        return this.suffix != null;
-    }
-
-    @Nonnull
-    @Override
-    public Map.Entry<Integer, String> getSuffix() {
-        checkState(isSuffix(), "Node is not a suffix node");
-        return this.suffix;
-    }
-
-    @Override
-    public boolean shouldApplyWithContext(@Nonnull ContextSet contextSet) {
-        return getFullContexts().isSatisfiedBy(contextSet);
+        //noinspection unchecked
+        T result = (T) this.resolvedTypes.get(key);
+        return Optional.ofNullable(result);
     }
 
     @Nonnull

@@ -30,8 +30,8 @@ import com.google.common.base.Preconditions;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.ImmutableTransientNode;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.model.ImmutableTransientNode;
 import me.lucko.luckperms.nukkit.model.dummy.DummyPlugin;
 
 import cn.nukkit.permission.Permission;

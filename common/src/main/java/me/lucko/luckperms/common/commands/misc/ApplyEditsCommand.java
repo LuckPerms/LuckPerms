@@ -41,8 +41,9 @@ import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.NodeModel;
+import me.lucko.luckperms.common.node.model.NodeDataContainer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.DurationFormatter;
@@ -105,10 +106,10 @@ public class ApplyEditsCommand extends SingleCommand {
             return false;
         }
 
-        Set<NodeModel> nodes = WebEditor.deserializePermissions(data.getAsJsonArray("nodes"));
+        Set<NodeDataContainer> nodes = WebEditor.deserializePermissions(data.getAsJsonArray("nodes"));
 
-        Set<Node> before = new HashSet<>(holder.getEnduringNodes().values());
-        Set<Node> after = nodes.stream().map(NodeModel::toNode).collect(Collectors.toSet());
+        Set<Node> before = new HashSet<>(holder.enduringData().immutable().values());
+        Set<Node> after = nodes.stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
 
         Map.Entry<Set<Node>, Set<Node>> diff = diff(before, after);
         Set<Node> diffAdded = diff.getKey();
@@ -121,16 +122,16 @@ public class ApplyEditsCommand extends SingleCommand {
             return false;
         }
 
-        holder.setEnduringNodes(after);
+        holder.setNodes(NodeMapType.ENDURING, after);
 
         for (Node n : diffAdded) {
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("webeditor", "add", n.getPermission(), n.getValuePrimitive(), n.getFullContexts())
+                    .action("webeditor", "add", n.getPermission(), n.getValue(), n.getFullContexts())
                     .build().submit(plugin, sender);
         }
         for (Node n : diffRemoved) {
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("webeditor", "remove", n.getPermission(), n.getValuePrimitive(), n.getFullContexts())
+                    .action("webeditor", "remove", n.getPermission(), n.getValue(), n.getFullContexts())
                     .build().submit(plugin, sender);
         }
 
@@ -150,7 +151,7 @@ public class ApplyEditsCommand extends SingleCommand {
     }
 
     private static String formatNode(Node n) {
-        return n.getPermission() + " &7(" + (n.getValuePrimitive() ? "&a" : "&c") + n.getValuePrimitive() + "&7)" + MessageUtils.getAppendableNodeContextString(n) +
+        return n.getPermission() + " &7(" + (n.getValue() ? "&a" : "&c") + n.getValue() + "&7)" + MessageUtils.getAppendableNodeContextString(n) +
                 (n.isTemporary() ? " &7(" + DurationFormatter.CONCISE.formatDateDiff(n.getExpiryUnixTime()) + ")" : "");
     }
 

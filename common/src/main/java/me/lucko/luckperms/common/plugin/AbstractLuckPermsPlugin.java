@@ -31,7 +31,6 @@ import me.lucko.luckperms.common.api.ApiRegistrationUtil;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.UpdateTaskBuffer;
-import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.PlatformCalculatorFactory;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.config.AbstractConfiguration;
@@ -80,7 +79,6 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private InternalMessagingService messagingService = null;
     private BufferedRequest<Void> updateTaskBuffer;
     private InheritanceHandler inheritanceHandler;
-    private CachedStateManager cachedStateManager;
     private PlatformCalculatorFactory calculatorFactory;
     private LuckPermsApiProvider apiProvider;
     private EventFactory eventFactory;
@@ -147,7 +145,6 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         // load internal managers
         getLogger().info("Loading internal permission managers...");
         this.inheritanceHandler = new InheritanceHandler(this);
-        this.cachedStateManager = new CachedStateManager();
 
         // setup user/group/track manager
         setupManagers();
@@ -312,11 +309,6 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     @Override
     public InheritanceHandler getInheritanceHandler() {
         return this.inheritanceHandler;
-    }
-
-    @Override
-    public CachedStateManager getCachedStateManager() {
-        return this.cachedStateManager;
     }
 
     @Override

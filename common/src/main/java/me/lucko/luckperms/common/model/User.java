@@ -31,10 +31,6 @@ import me.lucko.luckperms.common.caching.UserCachedData;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
-import me.lucko.luckperms.common.references.HolderType;
-import me.lucko.luckperms.common.references.Identifiable;
-import me.lucko.luckperms.common.references.UserIdentifier;
-import me.lucko.luckperms.common.references.UserReference;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -159,11 +155,6 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     @Override
     public String getFriendlyName() {
         return this.name != null ? this.name : this.uuid.toString();
-    }
-
-    @Override
-    public UserReference toReference() {
-        return UserReference.of(getId());
     }
 
     @Override

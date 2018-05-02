@@ -30,9 +30,9 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.managers.AbstractManager;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.model.UserIdentifier;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.references.UserIdentifier;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -83,7 +83,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
             String pg = user.getPrimaryGroup().getValue();
             boolean has = false;
 
-            for (Node node : user.getEnduringNodes().get(ImmutableContextSet.empty())) {
+            for (Node node : user.enduringData().immutable().get(ImmutableContextSet.empty())) {
                 if (node.isGroupNode() && node.getGroupName().equalsIgnoreCase(pg)) {
                     has = true;
                     break;
@@ -92,7 +92,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
 
             // need to find a new primary group for the user.
             if (!has) {
-                String group = user.getEnduringNodes().get(ImmutableContextSet.empty()).stream()
+                String group = user.enduringData().immutable().get(ImmutableContextSet.empty()).stream()
                         .filter(Node::isGroupNode)
                         .findFirst()
                         .map(Node::getGroupName)
@@ -109,7 +109,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
         // check that all users are member of at least one group
         boolean hasGroup = false;
         if (user.getPrimaryGroup().getStoredValue().isPresent()) {
-            for (Node node : user.getEnduringNodes().values()) {
+            for (Node node : user.enduringData().immutable().values()) {
                 if (node.hasSpecificContext()) {
                     continue;
                 }
@@ -160,11 +160,11 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
      */
     @Override
     public boolean shouldSave(User user) {
-        if (user.getEnduringNodes().size() != 1) {
+        if (user.enduringData().immutable().size() != 1) {
             return true;
         }
 
-        for (Node node : user.getEnduringNodes().values()) {
+        for (Node node : user.enduringData().immutable().values()) {
             // There's only one.
             if (!node.isGroupNode()) {
                 return true;

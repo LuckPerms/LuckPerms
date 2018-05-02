@@ -123,7 +123,7 @@ public final class EventFactory {
     }
 
     public void handleGroupDelete(Group group, DeletionCause cause) {
-        EventGroupDelete event = new EventGroupDelete(group.getName(), ImmutableSet.copyOf(group.getEnduringNodes().values()), cause);
+        EventGroupDelete event = new EventGroupDelete(group.getName(), ImmutableSet.copyOf(group.enduringData().immutable().values()), cause);
         fireEventAsync(event);
     }
 

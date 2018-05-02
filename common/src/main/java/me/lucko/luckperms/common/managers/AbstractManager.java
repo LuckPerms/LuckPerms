@@ -30,7 +30,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 
-import me.lucko.luckperms.common.references.Identifiable;
+import me.lucko.luckperms.common.model.Identifiable;
 
 import java.util.Map;
 

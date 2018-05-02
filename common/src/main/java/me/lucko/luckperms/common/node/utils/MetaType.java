@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node;
+package me.lucko.luckperms.common.node.utils;
 
 import me.lucko.luckperms.api.Node;
 

@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.bulkupdate.action;
 
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.constraint.QueryField;
-import me.lucko.luckperms.common.node.NodeModel;
+import me.lucko.luckperms.common.node.model.NodeDataContainer;
 
 public class UpdateAction implements Action {
 
@@ -52,7 +52,7 @@ public class UpdateAction implements Action {
     }
 
     @Override
-    public NodeModel apply(NodeModel from) {
+    public NodeDataContainer apply(NodeDataContainer from) {
         switch (this.field) {
             case PERMISSION:
                 return from.setPermission(this.value);

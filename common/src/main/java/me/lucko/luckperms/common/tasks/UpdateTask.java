@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.tasks;
 
 import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.concurrent.CompletableFuture;

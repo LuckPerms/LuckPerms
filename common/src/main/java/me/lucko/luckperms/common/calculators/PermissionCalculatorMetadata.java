@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.calculators;
 
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.common.references.HolderType;
+import me.lucko.luckperms.common.model.HolderType;
 
 /**
  * Metadata about a given {@link PermissionCalculator}.

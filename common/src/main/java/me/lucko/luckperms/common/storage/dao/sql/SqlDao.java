@@ -39,13 +39,14 @@ import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.managers.group.GroupManager;
 import me.lucko.luckperms.common.managers.track.TrackManager;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.NodeFactory;
-import me.lucko.luckperms.common.node.NodeHeldPermission;
-import me.lucko.luckperms.common.node.NodeModel;
+import me.lucko.luckperms.common.model.UserIdentifier;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.model.NodeDataContainer;
+import me.lucko.luckperms.common.node.model.NodeHeldPermission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.references.UserIdentifier;
 import me.lucko.luckperms.common.storage.PlayerSaveResult;
 import me.lucko.luckperms.common.storage.dao.AbstractDao;
 import me.lucko.luckperms.common.storage.dao.sql.connection.AbstractConnectionFactory;
@@ -287,7 +288,7 @@ public class SqlDao extends AbstractDao {
         User user = this.plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
         user.getIoLock().lock();
         try {
-            List<NodeModel> data = new ArrayList<>();
+            List<NodeDataContainer> data = new ArrayList<>();
             String primaryGroup = null;
             String userName = null;
 
@@ -335,8 +336,8 @@ public class SqlDao extends AbstractDao {
 
             // If the user has any data in storage
             if (!data.isEmpty()) {
-                Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
-                user.setEnduringNodes(nodes);
+                Set<Node> nodes = data.stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
+                user.setNodes(NodeMapType.ENDURING, nodes);
 
                 // Save back to the store if data they were given any defaults or had permissions expire
                 if (this.plugin.getUserManager().giveDefaultIfNeeded(user, false) | user.auditTemporaryPermissions()) {
@@ -380,7 +381,7 @@ public class SqlDao extends AbstractDao {
             }
 
             // Get a snapshot of current data.
-            Set<NodeModel> remote = new HashSet<>();
+            Set<NodeDataContainer> remote = new HashSet<>();
             try (Connection c = this.provider.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_SELECT))) {
                     ps.setString(1, user.getUuid().toString());
@@ -399,17 +400,17 @@ public class SqlDao extends AbstractDao {
                 }
             }
 
-            Set<NodeModel> local = user.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toSet());
+            Set<NodeDataContainer> local = user.enduringData().immutable().values().stream().map(NodeDataContainer::fromNode).collect(Collectors.toSet());
 
-            Map.Entry<Set<NodeModel>, Set<NodeModel>> diff = compareSets(local, remote);
+            Map.Entry<Set<NodeDataContainer>, Set<NodeDataContainer>> diff = compareSets(local, remote);
 
-            Set<NodeModel> toAdd = diff.getKey();
-            Set<NodeModel> toRemove = diff.getValue();
+            Set<NodeDataContainer> toAdd = diff.getKey();
+            Set<NodeDataContainer> toRemove = diff.getValue();
 
             if (!toRemove.isEmpty()) {
                 try (Connection c = this.provider.getConnection()) {
                     try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_DELETE_SPECIFIC))) {
-                        for (NodeModel nd : toRemove) {
+                        for (NodeDataContainer nd : toRemove) {
                             ps.setString(1, user.getUuid().toString());
                             ps.setString(2, nd.getPermission());
                             ps.setBoolean(3, nd.getValue());
@@ -427,7 +428,7 @@ public class SqlDao extends AbstractDao {
             if (!toAdd.isEmpty()) {
                 try (Connection c = this.provider.getConnection()) {
                     try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_INSERT))) {
-                        for (NodeModel nd : toAdd) {
+                        for (NodeDataContainer nd : toAdd) {
                             ps.setString(1, user.getUuid().toString());
                             ps.setString(2, nd.getPermission());
                             ps.setBoolean(3, nd.getValue());
@@ -506,7 +507,7 @@ public class SqlDao extends AbstractDao {
                         long expiry = rs.getLong("expiry");
                         String contexts = rs.getString("contexts");
 
-                        NodeModel data = deserializeNode(permission, value, server, world, expiry, contexts);
+                        NodeDataContainer data = deserializeNode(permission, value, server, world, expiry, contexts);
                         held.add(NodeHeldPermission.of(holder, data));
                     }
                 }
@@ -565,7 +566,7 @@ public class SqlDao extends AbstractDao {
         Group group = this.plugin.getGroupManager().getOrMake(name);
         group.getIoLock().lock();
         try {
-            List<NodeModel> data = new ArrayList<>();
+            List<NodeDataContainer> data = new ArrayList<>();
 
             try (Connection c = this.provider.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_SELECT))) {
@@ -586,8 +587,8 @@ public class SqlDao extends AbstractDao {
             }
 
             if (!data.isEmpty()) {
-                Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
-                group.setEnduringNodes(nodes);
+                Set<Node> nodes = data.stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
+                group.setNodes(NodeMapType.ENDURING, nodes);
             } else {
                 group.clearNodes();
             }
@@ -636,7 +637,7 @@ public class SqlDao extends AbstractDao {
         group.getIoLock().lock();
         try {
             // Empty data, just delete.
-            if (group.getEnduringNodes().isEmpty()) {
+            if (group.enduringData().immutable().isEmpty()) {
                 try (Connection c = this.provider.getConnection()) {
                     try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_DELETE))) {
                         ps.setString(1, group.getName());
@@ -647,7 +648,7 @@ public class SqlDao extends AbstractDao {
             }
 
             // Get a snapshot of current data
-            Set<NodeModel> remote = new HashSet<>();
+            Set<NodeDataContainer> remote = new HashSet<>();
             try (Connection c = this.provider.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_SELECT))) {
                     ps.setString(1, group.getName());
@@ -666,17 +667,17 @@ public class SqlDao extends AbstractDao {
                 }
             }
 
-            Set<NodeModel> local = group.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toSet());
+            Set<NodeDataContainer> local = group.enduringData().immutable().values().stream().map(NodeDataContainer::fromNode).collect(Collectors.toSet());
 
-            Map.Entry<Set<NodeModel>, Set<NodeModel>> diff = compareSets(local, remote);
+            Map.Entry<Set<NodeDataContainer>, Set<NodeDataContainer>> diff = compareSets(local, remote);
 
-            Set<NodeModel> toAdd = diff.getKey();
-            Set<NodeModel> toRemove = diff.getValue();
+            Set<NodeDataContainer> toAdd = diff.getKey();
+            Set<NodeDataContainer> toRemove = diff.getValue();
 
             if (!toRemove.isEmpty()) {
                 try (Connection c = this.provider.getConnection()) {
                     try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_DELETE_SPECIFIC))) {
-                        for (NodeModel nd : toRemove) {
+                        for (NodeDataContainer nd : toRemove) {
                             ps.setString(1, group.getName());
                             ps.setString(2, nd.getPermission());
                             ps.setBoolean(3, nd.getValue());
@@ -694,7 +695,7 @@ public class SqlDao extends AbstractDao {
             if (!toAdd.isEmpty()) {
                 try (Connection c = this.provider.getConnection()) {
                     try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_INSERT))) {
-                        for (NodeModel nd : toAdd) {
+                        for (NodeDataContainer nd : toAdd) {
                             ps.setString(1, group.getName());
                             ps.setString(2, nd.getPermission());
                             ps.setBoolean(3, nd.getValue());
@@ -750,7 +751,7 @@ public class SqlDao extends AbstractDao {
                         long expiry = rs.getLong("expiry");
                         String contexts = rs.getString("contexts");
 
-                        NodeModel data = deserializeNode(permission, value, server, world, expiry, contexts);
+                        NodeDataContainer data = deserializeNode(permission, value, server, world, expiry, contexts);
                         held.add(NodeHeldPermission.of(holder, data));
                     }
                 }
@@ -994,20 +995,20 @@ public class SqlDao extends AbstractDao {
      * @param remote the remote set
      * @return the entries to add to remote, and the entries to remove from remote
      */
-    private static Map.Entry<Set<NodeModel>, Set<NodeModel>> compareSets(Set<NodeModel> local, Set<NodeModel> remote) {
+    private static Map.Entry<Set<NodeDataContainer>, Set<NodeDataContainer>> compareSets(Set<NodeDataContainer> local, Set<NodeDataContainer> remote) {
         // entries in local but not remote need to be added
         // entries in remote but not local need to be removed
 
-        Set<NodeModel> toAdd = new HashSet<>(local);
+        Set<NodeDataContainer> toAdd = new HashSet<>(local);
         toAdd.removeAll(remote);
 
-        Set<NodeModel> toRemove = new HashSet<>(remote);
+        Set<NodeDataContainer> toRemove = new HashSet<>(remote);
         toRemove.removeAll(local);
 
         return Maps.immutableEntry(toAdd, toRemove);
     }
 
-    private NodeModel deserializeNode(String permission, boolean value, String server, String world, long expiry, String contexts) {
-        return NodeModel.of(permission, value, server, world, expiry, ContextSetJsonSerializer.deserializeContextSet(this.gson, contexts).makeImmutable());
+    private NodeDataContainer deserializeNode(String permission, boolean value, String server, String world, long expiry, String contexts) {
+        return NodeDataContainer.of(permission, value, server, world, expiry, ContextSetJsonSerializer.deserializeContextSet(this.gson, contexts).makeImmutable());
     }
 }

@@ -40,8 +40,8 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.NodeFactory;
-import me.lucko.luckperms.common.node.NodeWithContextComparator;
+import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.CollationKeyCache;
@@ -77,10 +77,10 @@ public class ParentInfo extends SharedSubCommand {
         SortMode sortMode = SortMode.determine(args);
 
         // get the holders nodes
-        List<LocalizedNode> nodes = new ArrayList<>(holder.getEnduringData().asSortedSet());
+        List<LocalizedNode> nodes = new ArrayList<>(holder.enduringData().asSortedSet());
 
         // remove irrelevant types (these are displayed in the other info commands)
-        nodes.removeIf(node -> !node.isGroupNode() || !node.getValuePrimitive());
+        nodes.removeIf(node -> !node.isGroupNode() || !node.getValue());
 
         // handle empty
         if (nodes.isEmpty()) {

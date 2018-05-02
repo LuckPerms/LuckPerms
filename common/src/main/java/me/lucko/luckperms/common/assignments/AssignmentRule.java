@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.assignments;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.LegacyNodeFactory;
+import me.lucko.luckperms.common.node.factory.LegacyNodeFactory;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.util.List;

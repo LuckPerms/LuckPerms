@@ -23,13 +23,15 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node;
+package me.lucko.luckperms.common.node.model;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.NodeEqualityPredicate;
 import me.lucko.luckperms.api.StandardNodeEquality;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.nodetype.NodeType;
+import me.lucko.luckperms.api.nodetype.NodeTypeKey;
 
 import java.util.Date;
 import java.util.List;
@@ -58,15 +60,9 @@ public abstract class ForwardingNode implements Node {
         return delegate().getPermission();
     }
 
-    @Nonnull
     @Override
-    public Boolean getValue() {
+    public boolean getValue() {
         return delegate().getValue();
-    }
-
-    @Override
-    public boolean getValuePrimitive() {
-        return delegate().getValuePrimitive();
     }
 
     @Nonnull
@@ -172,11 +168,6 @@ public abstract class ForwardingNode implements Node {
     }
 
     @Override
-    public boolean isRegularPermissionNode() {
-        return delegate().isRegularPermissionNode();
-    }
-
-    @Override
     public boolean isGroupNode() {
         return delegate().isGroupNode();
     }
@@ -195,6 +186,21 @@ public abstract class ForwardingNode implements Node {
     @Override
     public int getWildcardLevel() throws IllegalStateException {
         return delegate().getWildcardLevel();
+    }
+
+    @Override
+    public boolean hasTypeData() {
+        return delegate().hasTypeData();
+    }
+
+    @Override
+    public <T extends NodeType> Optional<T> getTypeData(NodeTypeKey<T> key) {
+        return delegate().getTypeData(key);
+    }
+
+    @Override
+    public <T extends NodeType> T typeData(NodeTypeKey<T> key) throws IllegalStateException {
+        return delegate().typeData(key);
     }
 
     @Override

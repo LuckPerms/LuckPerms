@@ -30,10 +30,13 @@ import com.google.common.collect.ListMultimap;
 
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
+import me.lucko.luckperms.api.nodetype.types.MetaType;
+import me.lucko.luckperms.api.nodetype.types.PrefixType;
+import me.lucko.luckperms.api.nodetype.types.SuffixType;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.metastacking.MetaStack;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStack;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.model.NodeTypes;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Comparator;
@@ -73,22 +76,19 @@ public class MetaAccumulator {
     }
 
     public void accumulateNode(LocalizedNode n) {
-        if (n.isMeta()) {
-            Map.Entry<String, String> entry = n.getMeta();
-            this.meta.put(entry.getKey(), entry.getValue());
-        }
+        n.getTypeData(MetaType.KEY).ifPresent(metaType ->
+                this.meta.put(metaType.getKey(), metaType.getValue())
+        );
 
-        if (n.isPrefix()) {
-            Map.Entry<Integer, String> value = n.getPrefix();
-            this.prefixes.putIfAbsent(value.getKey(), value.getValue());
+        n.getTypeData(PrefixType.KEY).ifPresent(prefix -> {
+            this.prefixes.putIfAbsent(prefix.getPriority(), prefix.getPrefix());
             this.prefixStack.accumulateToAll(n);
-        }
+        });
 
-        if (n.isSuffix()) {
-            Map.Entry<Integer, String> value = n.getSuffix();
-            this.suffixes.putIfAbsent(value.getKey(), value.getValue());
+        n.getTypeData(SuffixType.KEY).ifPresent(suffix -> {
+            this.suffixes.putIfAbsent(suffix.getPriority(), suffix.getSuffix());
             this.suffixStack.accumulateToAll(n);
-        }
+        });
     }
 
     public void accumulateMeta(String key, String value) {
@@ -103,8 +103,8 @@ public class MetaAccumulator {
     // (it's not going to accumulate more nodes)
     // Therefore, it should be ok to set the weight meta key, if not already present.
     public ListMultimap<String, String> getMeta() {
-        if (!this.meta.containsKey(NodeFactory.WEIGHT_KEY) && this.weight != 0) {
-            this.meta.put(NodeFactory.WEIGHT_KEY, String.valueOf(this.weight));
+        if (!this.meta.containsKey(NodeTypes.WEIGHT_KEY) && this.weight != 0) {
+            this.meta.put(NodeTypes.WEIGHT_KEY, String.valueOf(this.weight));
         }
 
         return this.meta;

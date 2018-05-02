@@ -151,11 +151,7 @@ public abstract class CalculatedSubject implements LPSubject {
                 throw new AssertionError();
         }
 
-        for (LPSubjectReference entry : merging) {
-            if (!parents.contains(entry)) {
-                parents.add(entry);
-            }
-        }
+        parents.addAll(merging);
         return parents;
     }
 
@@ -175,11 +171,7 @@ public abstract class CalculatedSubject implements LPSubject {
                 throw new AssertionError();
         }
 
-        for (LPSubjectReference entry : merging) {
-            if (!parents.contains(entry)) {
-                parents.add(entry);
-            }
-        }
+        parents.addAll(merging);
         return parents;
     }
 
@@ -189,11 +181,7 @@ public abstract class CalculatedSubject implements LPSubject {
 
         Iterable<CalculatedSubject> traversal = graph.traverse(TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER, this);
         for (CalculatedSubject subject : traversal) {
-            for (LPSubjectReference entry : subject.getCombinedParents(filter)) {
-                if (!result.contains(entry)) {
-                    result.add(entry);
-                }
-            }
+            result.addAll(subject.getCombinedParents(filter));
         }
 
         return result;
@@ -205,11 +193,7 @@ public abstract class CalculatedSubject implements LPSubject {
 
         Iterable<CalculatedSubject> traversal = graph.traverse(TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER, this);
         for (CalculatedSubject subject : traversal) {
-            for (LPSubjectReference entry : subject.getCombinedParents()) {
-                if (!result.contains(entry)) {
-                    result.add(entry);
-                }
-            }
+            result.addAll(subject.getCombinedParents());
         }
 
         return result;

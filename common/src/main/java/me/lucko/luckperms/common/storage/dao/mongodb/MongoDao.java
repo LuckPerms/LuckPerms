@@ -49,14 +49,15 @@ import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.managers.group.GroupManager;
 import me.lucko.luckperms.common.managers.track.TrackManager;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.LegacyNodeFactory;
-import me.lucko.luckperms.common.node.NodeFactory;
-import me.lucko.luckperms.common.node.NodeHeldPermission;
-import me.lucko.luckperms.common.node.NodeModel;
+import me.lucko.luckperms.common.model.UserIdentifier;
+import me.lucko.luckperms.common.node.factory.LegacyNodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.model.NodeDataContainer;
+import me.lucko.luckperms.common.node.model.NodeHeldPermission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.references.UserIdentifier;
 import me.lucko.luckperms.common.storage.PlayerSaveResult;
 import me.lucko.luckperms.common.storage.StorageCredentials;
 import me.lucko.luckperms.common.storage.dao.AbstractDao;
@@ -204,8 +205,8 @@ public class MongoDao extends AbstractDao {
                     Document d = cursor.next();
 
                     UUID uuid = d.get("_id", UUID.class);
-                    Set<NodeModel> nodes = new HashSet<>(nodesFromDoc(d));
-                    Set<NodeModel> results = nodes.stream()
+                    Set<NodeDataContainer> nodes = new HashSet<>(nodesFromDoc(d));
+                    Set<NodeDataContainer> results = nodes.stream()
                             .map(bulkUpdate::apply)
                             .filter(Objects::nonNull)
                             .collect(Collectors.toSet());
@@ -229,8 +230,8 @@ public class MongoDao extends AbstractDao {
                     Document d = cursor.next();
 
                     String holder = d.getString("_id");
-                    Set<NodeModel> nodes = new HashSet<>(nodesFromDoc(d));
-                    Set<NodeModel> results = nodes.stream()
+                    Set<NodeDataContainer> nodes = new HashSet<>(nodesFromDoc(d));
+                    Set<NodeDataContainer> results = nodes.stream()
                             .map(bulkUpdate::apply)
                             .filter(Objects::nonNull)
                             .collect(Collectors.toSet());
@@ -262,8 +263,8 @@ public class MongoDao extends AbstractDao {
                     String name = d.getString("name");
                     user.getPrimaryGroup().setStoredValue(d.getString("primaryGroup"));
 
-                    Set<Node> nodes = nodesFromDoc(d).stream().map(NodeModel::toNode).collect(Collectors.toSet());
-                    user.setEnduringNodes(nodes);
+                    Set<Node> nodes = nodesFromDoc(d).stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
+                    user.setNodes(NodeMapType.ENDURING, nodes);
                     user.setName(name, true);
 
                     boolean save = this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
@@ -326,8 +327,8 @@ public class MongoDao extends AbstractDao {
                 Document d = cursor.next();
                 UUID holder = d.get("_id", UUID.class);
 
-                Set<NodeModel> nodes = new HashSet<>(nodesFromDoc(d));
-                for (NodeModel e : nodes) {
+                Set<NodeDataContainer> nodes = new HashSet<>(nodesFromDoc(d));
+                for (NodeDataContainer e : nodes) {
                     if (!e.getPermission().equalsIgnoreCase(permission)) {
                         continue;
                     }
@@ -347,8 +348,8 @@ public class MongoDao extends AbstractDao {
             try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
                 if (cursor.hasNext()) {
                     Document d = cursor.next();
-                    Set<Node> nodes = nodesFromDoc(d).stream().map(NodeModel::toNode).collect(Collectors.toSet());
-                    group.setEnduringNodes(nodes);
+                    Set<Node> nodes = nodesFromDoc(d).stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
+                    group.setNodes(NodeMapType.ENDURING, nodes);
                 } else {
                     c.insertOne(groupToDoc(group));
                 }
@@ -379,8 +380,8 @@ public class MongoDao extends AbstractDao {
                 }
 
                 Document d = cursor.next();
-                Set<Node> nodes = nodesFromDoc(d).stream().map(NodeModel::toNode).collect(Collectors.toSet());
-                group.setEnduringNodes(nodes);
+                Set<Node> nodes = nodesFromDoc(d).stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
+                group.setNodes(NodeMapType.ENDURING, nodes);
             }
         } finally {
             if (group != null) {
@@ -453,8 +454,8 @@ public class MongoDao extends AbstractDao {
                 Document d = cursor.next();
 
                 String holder = d.getString("_id");
-                Set<NodeModel> nodes = new HashSet<>(nodesFromDoc(d));
-                for (NodeModel e : nodes) {
+                Set<NodeDataContainer> nodes = new HashSet<>(nodesFromDoc(d));
+                for (NodeDataContainer e : nodes) {
                     if (!e.getPermission().equalsIgnoreCase(permission)) {
                         continue;
                     }
@@ -623,8 +624,8 @@ public class MongoDao extends AbstractDao {
     }
 
     private static Document userToDoc(User user) {
-        List<Document> nodes = user.getEnduringNodes().values().stream()
-                .map(NodeModel::fromNode)
+        List<Document> nodes = user.enduringData().immutable().values().stream()
+                .map(NodeDataContainer::fromNode)
                 .map(MongoDao::nodeToDoc)
                 .collect(Collectors.toList());
 
@@ -634,8 +635,8 @@ public class MongoDao extends AbstractDao {
                 .append("permissions", nodes);
     }
 
-    private static List<NodeModel> nodesFromDoc(Document document) {
-        List<NodeModel> nodes = new ArrayList<>();
+    private static List<NodeDataContainer> nodesFromDoc(Document document) {
+        List<NodeDataContainer> nodes = new ArrayList<>();
 
         // legacy
         if (document.containsKey("perms") && document.get("perms") instanceof Map) {
@@ -644,7 +645,7 @@ public class MongoDao extends AbstractDao {
             for (Map.Entry<String, Boolean> e : permsMap.entrySet()) {
                 // legacy permission key deserialisation
                 String permission = e.getKey().replace("[**DOT**]", ".").replace("[**DOLLAR**]", "$");
-                nodes.add(NodeModel.fromNode(LegacyNodeFactory.fromLegacyString(permission, e.getValue())));
+                nodes.add(NodeDataContainer.fromNode(LegacyNodeFactory.fromLegacyString(permission, e.getValue())));
             }
         }
 
@@ -661,8 +662,8 @@ public class MongoDao extends AbstractDao {
     }
 
     private static Document groupToDoc(Group group) {
-        List<Document> nodes = group.getEnduringNodes().values().stream()
-                .map(NodeModel::fromNode)
+        List<Document> nodes = group.enduringData().immutable().values().stream()
+                .map(NodeDataContainer::fromNode)
                 .map(MongoDao::nodeToDoc)
                 .collect(Collectors.toList());
 
@@ -673,7 +674,7 @@ public class MongoDao extends AbstractDao {
         return new Document("_id", track.getName()).append("groups", track.getGroups());
     }
 
-    private static Document nodeToDoc(NodeModel node) {
+    private static Document nodeToDoc(NodeDataContainer node) {
         Document document = new Document();
 
         document.append("permission", node.getPermission());
@@ -698,7 +699,7 @@ public class MongoDao extends AbstractDao {
         return document;
     }
 
-    private static NodeModel nodeFromDoc(Document document) {
+    private static NodeDataContainer nodeFromDoc(Document document) {
         String permission = document.getString("permission");
         boolean value = true;
         String server = "global";
@@ -725,7 +726,7 @@ public class MongoDao extends AbstractDao {
             context = docsToContextSet(contexts).makeImmutable();
         }
 
-        return NodeModel.of(permission, value, server, world, expiry, context);
+        return NodeDataContainer.of(permission, value, server, world, expiry, context);
     }
 
     private static List<Document> contextSetToDocs(ContextSet contextSet) {

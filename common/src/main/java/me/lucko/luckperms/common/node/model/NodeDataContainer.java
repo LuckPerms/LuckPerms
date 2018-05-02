@@ -23,10 +23,11 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node;
+package me.lucko.luckperms.common.node.model;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
 
 import java.util.Objects;
 
@@ -36,12 +37,12 @@ import java.util.Objects;
  *
  * All values are non-null.
  */
-public final class NodeModel {
+public final class NodeDataContainer {
 
-    public static NodeModel fromNode(Node node) {
-        NodeModel model = of(
+    public static NodeDataContainer fromNode(Node node) {
+        NodeDataContainer model = of(
                 node.getPermission(),
-                node.getValuePrimitive(),
+                node.getValue(),
                 node.getServer().orElse("global"),
                 node.getWorld().orElse("global"),
                 node.isTemporary() ? node.getExpiryUnixTime() : 0L,
@@ -51,11 +52,11 @@ public final class NodeModel {
         return model;
     }
 
-    public static NodeModel of(String permission, boolean value, String server, String world, long expiry, ImmutableContextSet contexts) {
-        return new NodeModel(permission, value, server, world, expiry, contexts);
+    public static NodeDataContainer of(String permission, boolean value, String server, String world, long expiry, ImmutableContextSet contexts) {
+        return new NodeDataContainer(permission, value, server, world, expiry, contexts);
     }
 
-    public static NodeModel of(String permission) {
+    public static NodeDataContainer of(String permission) {
         return of(permission, true, "global", "global", 0L, ImmutableContextSet.empty());
     }
 
@@ -67,7 +68,7 @@ public final class NodeModel {
     private final ImmutableContextSet contexts;
     private Node node = null;
 
-    private NodeModel(String permission, boolean value, String server, String world, long expiry, ImmutableContextSet contexts) {
+    private NodeDataContainer(String permission, boolean value, String server, String world, long expiry, ImmutableContextSet contexts) {
         this.permission = Objects.requireNonNull(permission, "permission");
         this.value = value;
         this.server = Objects.requireNonNull(server, "server");
@@ -114,35 +115,35 @@ public final class NodeModel {
         return this.contexts;
     }
 
-    public NodeModel setPermission(String permission) {
+    public NodeDataContainer setPermission(String permission) {
         return of(permission, this.value, this.server, this.world, this.expiry, this.contexts);
     }
 
-    public NodeModel setValue(boolean value) {
+    public NodeDataContainer setValue(boolean value) {
         return of(this.permission, value, this.server, this.world, this.expiry, this.contexts);
     }
 
-    public NodeModel setServer(String server) {
+    public NodeDataContainer setServer(String server) {
         return of(this.permission, this.value, server, this.world, this.expiry, this.contexts);
     }
 
-    public NodeModel setWorld(String world) {
+    public NodeDataContainer setWorld(String world) {
         return of(this.permission, this.value, this.server, world, this.expiry, this.contexts);
     }
 
-    public NodeModel setExpiry(long expiry) {
+    public NodeDataContainer setExpiry(long expiry) {
         return of(this.permission, this.value, this.server, this.world, expiry, this.contexts);
     }
 
-    public NodeModel setContexts(ImmutableContextSet contexts) {
+    public NodeDataContainer setContexts(ImmutableContextSet contexts) {
         return of(this.permission, this.value, this.server, this.world, this.expiry, contexts);
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
-        if (!(o instanceof NodeModel)) return false;
-        final NodeModel other = (NodeModel) o;
+        if (!(o instanceof NodeDataContainer)) return false;
+        final NodeDataContainer other = (NodeDataContainer) o;
 
         return this.getPermission().equals(other.getPermission()) &&
                 this.getValue() == other.getValue() &&

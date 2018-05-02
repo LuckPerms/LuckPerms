@@ -29,11 +29,11 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.logging.ProgressLogger;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.references.HolderType;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.Storage;
 
@@ -127,7 +127,7 @@ public class Exporter implements Runnable {
                 }
 
                 write(writer, "# Export group: " + group.getName());
-                for (Node node : group.getEnduringNodes().values()) {
+                for (Node node : group.enduringData().immutable().values()) {
                     write(writer, "/lp " + NodeFactory.nodeAsCommand(node, group.getName(), HolderType.GROUP, true));
                 }
                 write(writer, "");
@@ -217,7 +217,7 @@ public class Exporter implements Runnable {
                     output.add("# Export user: " + user.getUuid().toString() + " - " + user.getName().orElse("unknown username"));
 
                     boolean inDefault = false;
-                    for (Node node : user.getEnduringNodes().values()) {
+                    for (Node node : user.enduringData().immutable().values()) {
                         if (node.isGroupNode() && node.getGroupName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
                             inDefault = true;
                             continue;
@@ -242,7 +242,7 @@ public class Exporter implements Runnable {
             }
 
             // all of the threads have been scheduled now and are running. we just need to wait for them all to complete
-            CompletableFuture<Void> overallFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
+            CompletableFuture<Void> overallFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 
             while (true) {
                 try {

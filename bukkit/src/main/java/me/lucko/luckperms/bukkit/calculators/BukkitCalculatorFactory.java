@@ -36,11 +36,11 @@ import me.lucko.luckperms.common.calculators.AbstractCalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
 import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.processors.MapProcessor;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
 import me.lucko.luckperms.common.processors.RegexProcessor;
 import me.lucko.luckperms.common.processors.WildcardProcessor;
-import me.lucko.luckperms.common.references.HolderType;
 
 public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
     private final LPBukkitPlugin plugin;

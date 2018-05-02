@@ -37,9 +37,9 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.buffers.Cache;
 import me.lucko.luckperms.common.contexts.ContextSetComparator;
-import me.lucko.luckperms.common.node.ImmutableLocalizedNode;
-import me.lucko.luckperms.common.node.NodeComparator;
-import me.lucko.luckperms.common.node.NodeWithContextComparator;
+import me.lucko.luckperms.common.node.comparator.NodeComparator;
+import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
+import me.lucko.luckperms.common.node.model.ImmutableLocalizedNode;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -207,7 +207,7 @@ public final class NodeMap {
         try {
             ImmutableContextSet context = node.getFullContexts().makeImmutable();
             this.map.put(context, node);
-            if (node.isGroupNode() && node.getValuePrimitive()) {
+            if (node.isGroupNode() && node.getValue()) {
                 this.inheritanceMap.put(context, node);
             }
         } finally {
@@ -233,7 +233,7 @@ public final class NodeMap {
         try {
             ImmutableContextSet context = node.getFullContexts().makeImmutable();
             this.map.remove(context, node);
-            if (node.isGroupNode() && node.getValuePrimitive()) {
+            if (node.isGroupNode() && node.getValue()) {
                 this.inheritanceMap.remove(context, node);
             }
         } finally {
@@ -293,7 +293,7 @@ public final class NodeMap {
 
             this.map.putAll(multimap);
             for (Map.Entry<ImmutableContextSet, Node> entry : this.map.entries()) {
-                if (entry.getValue().isGroupNode() && entry.getValue().getValuePrimitive()) {
+                if (entry.getValue().isGroupNode() && entry.getValue().getValue()) {
                     this.inheritanceMap.put(entry.getKey(), entry.getValue());
                 }
             }
@@ -342,7 +342,7 @@ public final class NodeMap {
                     if (removed != null) {
                         removed.add(entry);
                     }
-                    if (entry.isGroupNode() && entry.getValuePrimitive()) {
+                    if (entry.isGroupNode() && entry.getValue()) {
                         this.inheritanceMap.remove(entry.getFullContexts().makeImmutable(), entry);
                     }
                     work = true;

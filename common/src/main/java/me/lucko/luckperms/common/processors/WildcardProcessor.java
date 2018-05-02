@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.processors;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.node.ImmutableNode;
+import me.lucko.luckperms.common.node.model.ImmutableNode;
 
 import java.util.Collections;
 import java.util.Map;

@@ -26,8 +26,8 @@
 package me.lucko.luckperms.common.managers.user;
 
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.references.UserIdentifier;
 
 import java.util.concurrent.TimeUnit;
 

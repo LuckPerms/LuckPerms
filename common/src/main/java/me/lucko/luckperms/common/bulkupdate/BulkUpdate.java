@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.bulkupdate;
 
 import me.lucko.luckperms.common.bulkupdate.action.Action;
 import me.lucko.luckperms.common.bulkupdate.constraint.Constraint;
-import me.lucko.luckperms.common.node.NodeModel;
+import me.lucko.luckperms.common.node.model.NodeDataContainer;
 
 import java.util.List;
 import java.util.Objects;
@@ -59,7 +59,7 @@ public final class BulkUpdate {
      * @param node the node to check
      * @return true if satisfied
      */
-    public boolean satisfiesConstraints(NodeModel node) {
+    public boolean satisfiesConstraints(NodeDataContainer node) {
         for (Constraint constraint : this.constraints) {
             if (!constraint.isSatisfiedBy(node)) {
                 return false;
@@ -74,7 +74,7 @@ public final class BulkUpdate {
      * @param from the node to base changes from
      * @return the new nodemodel instance, or null if the node should be deleted.
      */
-    public NodeModel apply(NodeModel from) {
+    public NodeDataContainer apply(NodeDataContainer from) {
         if (!satisfiesConstraints(from)) {
             return from; // make no change
         }

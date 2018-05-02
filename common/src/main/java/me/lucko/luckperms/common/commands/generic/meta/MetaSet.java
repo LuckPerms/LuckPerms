@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.StandardNodeEquality;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
@@ -39,8 +40,9 @@ import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -79,7 +81,7 @@ public class MetaSet extends SharedSubCommand {
 
         Node n = NodeFactory.buildMetaNode(key, value).withExtraContext(context).build();
 
-        if (holder.hasPermission(n).asBoolean()) {
+        if (holder.hasPermission(NodeMapType.ENDURING, n, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
             Message.ALREADY_HAS_META.send(sender, holder.getFriendlyName(), key, value, MessageUtils.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }

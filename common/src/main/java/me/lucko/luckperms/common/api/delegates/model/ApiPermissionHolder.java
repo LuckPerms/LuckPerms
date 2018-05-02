@@ -36,6 +36,7 @@ import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.NodeEqualityPredicate;
+import me.lucko.luckperms.api.StandardNodeEquality;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.CachedData;
 import me.lucko.luckperms.api.context.ContextSet;
@@ -44,14 +45,18 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.MetaType;
+import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
+import me.lucko.luckperms.common.node.utils.MetaType;
+import me.lucko.luckperms.common.node.utils.NodeTools;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
@@ -99,13 +104,13 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.PermissionHol
     @Nonnull
     @Override
     public ImmutableSetMultimap<ImmutableContextSet, Node> getNodes() {
-        return this.handle.getEnduringNodes();
+        return this.handle.enduringData().immutable();
     }
 
     @Nonnull
     @Override
     public ImmutableSetMultimap<ImmutableContextSet, Node> getTransientNodes() {
-        return this.handle.getTransientNodes();
+        return this.handle.transientData().immutable();
     }
 
     @Nonnull
@@ -123,33 +128,55 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.PermissionHol
     @Nonnull
     @Override
     public Set<Node> getEnduringPermissions() {
-        return ImmutableSet.copyOf(this.handle.getEnduringNodes().values());
+        return ImmutableSet.copyOf(this.handle.enduringData().immutable().values());
     }
 
     @Nonnull
     @Override
     public Set<Node> getTransientPermissions() {
-        return ImmutableSet.copyOf(this.handle.getTransientNodes().values());
+        return ImmutableSet.copyOf(this.handle.transientData().immutable().values());
     }
 
     @Nonnull
     @Override
     public SortedSet<LocalizedNode> getAllNodes(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
-        return ImmutableSortedSet.copyOfSorted(this.handle.resolveInheritancesAlmostEqual(contexts));
+
+        List<LocalizedNode> nodes = new LinkedList<>();
+        this.handle.accumulateInheritancesTo(nodes, contexts);
+        NodeTools.removeEqual(nodes.iterator(), StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
+
+        SortedSet<LocalizedNode> ret = new TreeSet<>(NodeWithContextComparator.reverse());
+        ret.addAll(nodes);
+
+        return ImmutableSortedSet.copyOfSorted(ret);
     }
 
     @Nonnull
     @Override
     public SortedSet<LocalizedNode> getAllNodes() {
-        return ImmutableSortedSet.copyOfSorted(this.handle.resolveInheritancesAlmostEqual());
+        List<LocalizedNode> nodes = new LinkedList<>();
+        this.handle.accumulateInheritancesTo(nodes);
+        NodeTools.removeEqual(nodes.iterator(), StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
+
+        SortedSet<LocalizedNode> ret = new TreeSet<>(NodeWithContextComparator.reverse());
+        ret.addAll(nodes);
+
+        return ImmutableSortedSet.copyOfSorted(ret);
     }
 
     @Nonnull
     @Override
     public Set<LocalizedNode> getAllNodesFiltered(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
-        return ImmutableSet.copyOf(this.handle.getAllNodes(contexts));
+
+        List<LocalizedNode> entries = this.handle.getAllEntries(contexts);
+
+        NodeTools.removeSamePermission(entries.iterator());
+        SortedSet<LocalizedNode> ret = new TreeSet<>(NodeWithContextComparator.reverse());
+        ret.addAll(entries);
+
+        return ImmutableSet.copyOf(ret);
     }
 
     @Nonnull
@@ -187,21 +214,21 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.PermissionHol
     @Override
     public Tristate hasPermission(@Nonnull Node node) {
         Objects.requireNonNull(node, "node");
-        return this.handle.hasPermission(NodeMapType.ENDURING, node);
+        return this.handle.hasPermission(NodeMapType.ENDURING, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
     }
 
     @Nonnull
     @Override
     public Tristate hasTransientPermission(@Nonnull Node node) {
         Objects.requireNonNull(node, "node");
-        return this.handle.hasPermission(NodeMapType.TRANSIENT, node);
+        return this.handle.hasPermission(NodeMapType.TRANSIENT, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
     }
 
     @Nonnull
     @Override
     public Tristate inheritsPermission(@Nonnull Node node) {
         Objects.requireNonNull(node, "node");
-        return this.handle.inheritsPermission(node);
+        return this.handle.inheritsPermission(node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
     }
 
     @Override

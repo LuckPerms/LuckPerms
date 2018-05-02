@@ -23,9 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.references;
-
-import me.lucko.luckperms.common.model.User;
+package me.lucko.luckperms.common.model;
 
 import java.util.Objects;
 import java.util.Optional;

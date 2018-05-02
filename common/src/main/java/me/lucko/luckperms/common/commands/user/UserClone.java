@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -99,7 +100,7 @@ public class UserClone extends SubCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
-        otherUser.replaceEnduringNodes(user.getEnduringNodes());
+        otherUser.replaceNodes(NodeMapType.ENDURING, user.enduringData().immutable());
 
         Message.CLONE_SUCCESS.send(sender, user.getFriendlyName(), otherUser.getFriendlyName());
 

@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.DataConstraints;
@@ -78,7 +79,7 @@ public class GroupRename extends SubCommand<Group> {
             return CommandResult.FAILURE;
         }
 
-        newGroup.replaceEnduringNodes(group.getEnduringNodes());
+        newGroup.replaceNodes(NodeMapType.ENDURING, group.enduringData().immutable());
 
         Message.RENAME_SUCCESS.send(sender, group.getName(), newGroup.getName());
 

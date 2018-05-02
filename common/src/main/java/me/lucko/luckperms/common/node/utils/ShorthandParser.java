@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node;
+package me.lucko.luckperms.common.node.utils;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;

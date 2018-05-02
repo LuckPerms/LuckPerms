@@ -73,9 +73,9 @@ public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> 
 
         if (holder.getType().isUser()) {
             // if the holder is a user, we want to query parent groups for tracks
-            Set<Node> nodes = holder.getEnduringNodes().values().stream()
+            Set<Node> nodes = holder.enduringData().immutable().values().stream()
                     .filter(Node::isGroupNode)
-                    .filter(Node::getValuePrimitive)
+                    .filter(Node::getValue)
                     .filter(Node::isPermanent)
                     .collect(Collectors.toSet());
 

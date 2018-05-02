@@ -29,7 +29,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.caching.GroupData;
 import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.references.HolderType;
+import me.lucko.luckperms.common.model.HolderType;
 
 /**
  * Holds an easily accessible cache of a groups's data in a number of contexts

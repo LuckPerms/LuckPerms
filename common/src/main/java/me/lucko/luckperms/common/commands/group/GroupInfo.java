@@ -62,12 +62,12 @@ public class GroupInfo extends SubCommand<Group> {
                 group.getWeight().isPresent() ? group.getWeight().getAsInt() : "None"
         );
 
-        Set<Node> parents = group.getEnduringData().asSet().stream()
+        Set<Node> parents = group.enduringData().asSet().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::isPermanent)
                 .collect(Collectors.toSet());
 
-        Set<Node> tempParents = group.getEnduringData().asSet().stream()
+        Set<Node> tempParents = group.enduringData().asSet().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::isTemporary)
                 .collect(Collectors.toSet());

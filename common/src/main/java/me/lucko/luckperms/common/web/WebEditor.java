@@ -37,7 +37,7 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.NodeModel;
+import me.lucko.luckperms.common.node.model.NodeDataContainer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Uuids;
@@ -78,7 +78,7 @@ public final class WebEditor {
                                 obj.add("uuid", ((User) holder).getUuid().toString());
                             }
                         }))
-                .add("nodes", serializePermissions(holder.getEnduringNodes().values().stream().map(NodeModel::fromNode)));
+                .add("nodes", serializePermissions(holder.enduringData().immutable().values().stream().map(NodeDataContainer::fromNode)));
     }
 
     public static JsonObject formPayload(List<PermissionHolder> holders, Sender sender, String cmdLabel, LuckPermsPlugin plugin) {
@@ -168,7 +168,7 @@ public final class WebEditor {
         }
     }
 
-    private static JsonArray serializePermissions(Stream<NodeModel> nodes) {
+    private static JsonArray serializePermissions(Stream<NodeDataContainer> nodes) {
         JsonArray arr = new JsonArray();
         nodes.forEach(node -> {
             JsonObject attributes = new JsonObject();
@@ -196,8 +196,8 @@ public final class WebEditor {
         return arr;
     }
 
-    public static Set<NodeModel> deserializePermissions(JsonArray permissionsSection) {
-        Set<NodeModel> nodes = new HashSet<>();
+    public static Set<NodeDataContainer> deserializePermissions(JsonArray permissionsSection) {
+        Set<NodeDataContainer> nodes = new HashSet<>();
 
         for (JsonElement ent : permissionsSection) {
             if (!ent.isJsonObject()) {
@@ -231,7 +231,7 @@ public final class WebEditor {
                 context = ContextSetJsonSerializer.deserializeContextSet(contexts).makeImmutable();
             }
 
-            nodes.add(NodeModel.of(permission, value, server, world, expiry, context));
+            nodes.add(NodeDataContainer.of(permission, value, server, world, expiry, context));
         }
 
         return nodes;

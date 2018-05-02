@@ -23,19 +23,15 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node;
-
-import com.google.common.base.Splitter;
-import com.google.common.collect.Maps;
+package me.lucko.luckperms.common.node.factory;
 
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.references.HolderType;
-import me.lucko.luckperms.common.utils.PatternCache;
+import me.lucko.luckperms.common.model.HolderType;
+import me.lucko.luckperms.common.node.model.NodeTypes;
 
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -43,20 +39,6 @@ import java.util.Map;
  */
 public final class NodeFactory {
     public static final String DEFAULT_GROUP_NAME = "default";
-
-    public static final String PREFIX_KEY = "prefix";
-    public static final String SUFFIX_KEY = "suffix";
-    public static final String META_KEY = "meta";
-    public static final String WEIGHT_KEY = "weight";
-
-    private static final String GROUP_NODE_MARKER = "group.";
-    private static final String PREFIX_NODE_MARKER = PREFIX_KEY + ".";
-    private static final String SUFFIX_NODE_MARKER = SUFFIX_KEY + ".";
-    private static final String META_NODE_MARKER = META_KEY + ".";
-    private static final String WEIGHT_NODE_MARKER = WEIGHT_KEY + ".";
-
-    // used to split prefix/suffix/meta nodes
-    private static final Splitter META_SPLITTER = Splitter.on(PatternCache.compileDelimiterPattern(".", "\\")).limit(2);
 
     public static Node.Builder builder(String s) {
         return new NodeBuilder(s);
@@ -91,7 +73,7 @@ public final class NodeFactory {
     }
 
     public static String groupNode(String groupName) {
-        return GROUP_NODE_MARKER + groupName;
+        return NodeTypes.GROUP_NODE_MARKER + groupName;
     }
 
     public static String chatMetaNode(ChatMetaType type, int priority, String value) {
@@ -99,19 +81,19 @@ public final class NodeFactory {
     }
 
     public static String prefixNode(int priority, String prefix) {
-        return PREFIX_NODE_MARKER + priority + "." + LegacyNodeFactory.escapeCharacters(prefix);
+        return NodeTypes.PREFIX_NODE_MARKER + priority + "." + LegacyNodeFactory.escapeCharacters(prefix);
     }
 
     public static String suffixNode(int priority, String suffix) {
-        return SUFFIX_NODE_MARKER + priority + "." + LegacyNodeFactory.escapeCharacters(suffix);
+        return NodeTypes.SUFFIX_NODE_MARKER + priority + "." + LegacyNodeFactory.escapeCharacters(suffix);
     }
 
     public static String metaNode(String key, String value) {
-        return META_NODE_MARKER + LegacyNodeFactory.escapeCharacters(key) + "." + LegacyNodeFactory.escapeCharacters(value);
+        return NodeTypes.META_NODE_MARKER + LegacyNodeFactory.escapeCharacters(key) + "." + LegacyNodeFactory.escapeCharacters(value);
     }
 
     public static String weightNode(int weight) {
-        return WEIGHT_NODE_MARKER + weight;
+        return NodeTypes.WEIGHT_NODE_MARKER + weight;
     }
 
     public static Node make(String node) {
@@ -232,7 +214,7 @@ public final class NodeFactory {
             return appendContextToCommand(sb, node).toString();
         }
 
-        if (node.getValuePrimitive() && (node.isPrefix() || node.isSuffix())) {
+        if (node.getValue() && (node.isPrefix() || node.isSuffix())) {
             ChatMetaType chatMetaType = node.isPrefix() ? ChatMetaType.PREFIX : ChatMetaType.SUFFIX;
 
             sb.append("meta ");
@@ -267,7 +249,7 @@ public final class NodeFactory {
             return appendContextToCommand(sb, node).toString();
         }
 
-        if (node.getValuePrimitive() && node.isMeta()) {
+        if (node.getValue() && node.isMeta()) {
             sb.append("meta ");
 
             if (set) {
@@ -329,7 +311,7 @@ public final class NodeFactory {
             sb.append(perm);
         }
         if (set) {
-            sb.append(" ").append(node.getValuePrimitive());
+            sb.append(" ").append(node.getValue());
 
             if (node.isTemporary()) {
                 sb.append(" ").append(node.getExpiryUnixTime());
@@ -353,73 +335,6 @@ public final class NodeFactory {
         }
 
         return sb;
-    }
-
-    public static String parseGroupNode(String s) {
-        String lower = s.toLowerCase();
-        if (!lower.startsWith(GROUP_NODE_MARKER)) {
-            return null;
-        }
-        return lower.substring(GROUP_NODE_MARKER.length()).intern();
-    }
-
-    public static Map.Entry<String, String> parseMetaNode(String s) {
-        if (!s.toLowerCase().startsWith(META_NODE_MARKER)) {
-            return null;
-        }
-
-        Iterator<String> metaParts = META_SPLITTER.split(s.substring(META_NODE_MARKER.length())).iterator();
-
-        if (!metaParts.hasNext()) return null;
-        String key = metaParts.next();
-
-        if (!metaParts.hasNext()) return null;
-        String value = metaParts.next();
-
-        return Maps.immutableEntry(LegacyNodeFactory.unescapeCharacters(key).intern(), LegacyNodeFactory.unescapeCharacters(value).intern());
-    }
-
-    private static Map.Entry<Integer, String> parseChatMetaNode(String marker, String s) {
-        if (!s.toLowerCase().startsWith(marker)) {
-            return null;
-        }
-
-        Iterator<String> metaParts = META_SPLITTER.split(s.substring(marker.length())).iterator();
-
-        if (!metaParts.hasNext()) return null;
-        String priority = metaParts.next();
-
-        if (!metaParts.hasNext()) return null;
-        String value = metaParts.next();
-
-        try {
-            int p = Integer.parseInt(priority);
-            String v = LegacyNodeFactory.unescapeCharacters(value).intern();
-            return Maps.immutableEntry(p, v);
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    public static Map.Entry<Integer, String> parsePrefixNode(String s) {
-        return parseChatMetaNode(PREFIX_NODE_MARKER, s);
-    }
-
-    public static Map.Entry<Integer, String> parseSuffixNode(String s) {
-        return parseChatMetaNode(SUFFIX_NODE_MARKER, s);
-    }
-
-    public static Integer parseWeightNode(String s) {
-        String lower = s.toLowerCase();
-        if (!lower.startsWith(WEIGHT_NODE_MARKER)) {
-            return null;
-        }
-        String i = lower.substring(WEIGHT_NODE_MARKER.length());
-        try {
-            return Integer.parseInt(i);
-        } catch (NumberFormatException e) {
-            return null;
-        }
     }
 
     private NodeFactory() {}

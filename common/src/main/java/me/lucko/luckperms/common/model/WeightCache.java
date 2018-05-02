@@ -27,35 +27,21 @@ package me.lucko.luckperms.common.model;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.nodetype.types.WeightType;
 import me.lucko.luckperms.common.buffers.Cache;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.node.NodeFactory;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalInt;
 
 /**
  * Cache instance to supply the weight of a {@link PermissionHolder}.
  */
 public class WeightCache extends Cache<OptionalInt> {
-    private static final Cache<OptionalInt> NULL = new Cache<OptionalInt>() {
-        @Override
-        protected OptionalInt supply() {
-            return OptionalInt.empty();
-        }
-    };
-
-    public static Cache<OptionalInt> getFor(PermissionHolder holder) {
-        if (holder.getType().isUser()) {
-            return NULL;
-        }
-
-        return new WeightCache(((Group) holder));
-    }
-
     private final Group group;
 
-    private WeightCache(Group group) {
+    public WeightCache(Group group) {
         this.group = group;
     }
 
@@ -64,14 +50,16 @@ public class WeightCache extends Cache<OptionalInt> {
         boolean seen = false;
         int best = 0;
         for (Node n : this.group.getOwnNodes(ImmutableContextSet.empty())) {
-            Integer weight = NodeFactory.parseWeightNode(n.getPermission());
-            if (weight == null) {
+            Optional<WeightType> weight = n.getTypeData(WeightType.KEY);
+            if (!weight.isPresent()) {
                 continue;
             }
 
-            if (!seen || weight > best) {
+            int value = weight.get().getWeight();
+
+            if (!seen || value > best) {
                 seen = true;
-                best = weight;
+                best = value;
             }
         }
         OptionalInt weight = seen ? OptionalInt.of(best) : OptionalInt.empty();

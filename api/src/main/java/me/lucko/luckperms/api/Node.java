@@ -28,6 +28,13 @@ package me.lucko.luckperms.api;
 import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.nodetype.NodeType;
+import me.lucko.luckperms.api.nodetype.NodeTypeKey;
+import me.lucko.luckperms.api.nodetype.types.InheritanceType;
+import me.lucko.luckperms.api.nodetype.types.MetaType;
+import me.lucko.luckperms.api.nodetype.types.PrefixType;
+import me.lucko.luckperms.api.nodetype.types.SuffixType;
+import me.lucko.luckperms.api.nodetype.types.WeightType;
 
 import java.util.Date;
 import java.util.List;
@@ -64,7 +71,7 @@ import javax.annotation.concurrent.Immutable;
  * <p></p>
  * <ul>
  *     <li>{@link #getPermission() permission} - the actual permission string</li>
- *     <li>{@link #getValuePrimitive() value} - the value of the node (false for negated)</li>
+ *     <li>{@link #getValue() value} - the value of the node (false for negated)</li>
  *     <li>{@link #isOverride() override} - if the node is marked as having special priority over other nodes</li>
  *     <li>{@link #getServer() server} - the specific server where this node should apply</li>
  *     <li>{@link #getWorld() world} - the specific world where this node should apply</li>
@@ -72,14 +79,22 @@ import javax.annotation.concurrent.Immutable;
  *     <li>{@link #getExpiry() expiry} - the time when this node should expire</li>
  * </ul>
  *
- * <p>Nodes can also fall into the following sub categories.</p>
+ * <p>The 'permission' property of a {@link Node} is also used in some cases to represent state
+ * beyond a granted permission. This state is encapsulated by extra {@link NodeType} data which
+ * can be obtained from this instance using {@link #getTypeData(NodeTypeKey)}.</p>
+ *
+ * <p>Type data is mapped by {@link NodeTypeKey}s, which are usually stored as static members of the
+ * corresponding {@link NodeType} class under the <code>KEY</code> field.</p>
+ *
+ * <p>The current types are:</p>
  * <p></p>
  * <ul>
  *     <li>normal - just a regular permission</li>
- *     <li>{@link #isGroupNode() group node} - a "group node" marks that the holder should inherit data from another group</li>
- *     <li>{@link #isPrefix() prefix} - represents an assigned prefix</li>
- *     <li>{@link #isSuffix() suffix} - represents an assigned suffix</li>
- *     <li>{@link #isMeta() meta} - represents an assigned meta option</li>
+ *     <li>{@link InheritanceType} - an "inheritance node" marks that the holder should inherit data from another group</li>
+ *     <li>{@link PrefixType} - represents an assigned prefix</li>
+ *     <li>{@link SuffixType} - represents an assigned suffix</li>
+ *     <li>{@link MetaType} - represents an assigned meta option</li>
+ *     <li>{@link WeightType} - marks the weight of the object holding this node</li>
  * </ul>
  *
  * <p>The core node state must be immutable in all implementations.</p>
@@ -108,19 +123,7 @@ public interface Node {
      *
      * @return the nodes value
      */
-    @Nonnull
-    default Boolean getValue() {
-        return getValuePrimitive();
-    }
-
-    /**
-     * Gets the value of the node.
-     *
-     *  <p>A negated setting would result in a value of <code>false</code>.</p>
-     *
-     * @return the nodes value
-     */
-    boolean getValuePrimitive();
+    boolean getValue();
 
     /**
      * Gets the value of this node as a {@link Tristate}.
@@ -129,18 +132,18 @@ public interface Node {
      */
     @Nonnull
     default Tristate getTristate() {
-        return Tristate.fromBoolean(getValuePrimitive());
+        return Tristate.fromBoolean(getValue());
     }
 
     /**
      * Gets if the node is negated.
      *
-     * <p>This is the inverse of the {@link #getValuePrimitive() value}.</p>
+     * <p>This is the inverse of the {@link #getValue() value}.</p>
      *
      * @return true if the node is negated
      */
     default boolean isNegated() {
-        return !getValuePrimitive();
+        return !getValue();
     }
 
     /**
@@ -209,7 +212,8 @@ public interface Node {
     boolean shouldApplyWithContext(@Nonnull ContextSet contextSet);
 
     /**
-     * Resolves any shorthand parts of this node and returns the full list.
+     * Resolves any shorthand parts of this node and returns the full list of
+     * resolved nodes.
      *
      * <p>The list will not contain the exact permission itself.</p>
      *
@@ -219,7 +223,7 @@ public interface Node {
     List<String> resolveShorthand();
 
     /**
-     * Gets if this node is temporary (will automatically expire).
+     * Gets if this node is assigned temporarily.
      *
      * @return true if this node will expire in the future
      */
@@ -292,30 +296,6 @@ public interface Node {
     ContextSet getFullContexts();
 
     /**
-     * Returns if the node is a "standard" permission node.
-     *
-     * @return true if this is a regular permission node
-     * @since 4.2
-     */
-    boolean isRegularPermissionNode();
-
-    /**
-     * Returns if this is a group node.
-     *
-     * @return true if this is a group node
-     */
-    boolean isGroupNode();
-
-    /**
-     * Gets the name of the group, if this is a group node.
-     *
-     * @return the name of the group
-     * @throws IllegalStateException if this is not a group node. See {@link #isGroupNode()}
-     */
-    @Nonnull
-    String getGroupName() throws IllegalStateException;
-
-    /**
      * Gets if this node is a wildcard permission.
      *
      * @return true if this node is a wildcard permission
@@ -325,58 +305,135 @@ public interface Node {
     /**
      * Gets the level of this wildcard.
      *
+     * <p>The node <code>luckperms.*</code> has a wildcard level of 1.</p>
+     * <p>The node <code>luckperms.user.permission.*</code> has a wildcard level of 3.</p>
+     *
+     * <p>Nodes with a higher wildcard level are more specific and have priority over
+     * less specific nodes (nodes with a lower wildcard level).</p>
+     *
      * @return the wildcard level
      * @throws IllegalStateException if this is not a wildcard
      */
     int getWildcardLevel() throws IllegalStateException;
 
     /**
-     * Gets if this node is a meta node.
+     * Gets if this node has any extra {@link NodeType} data attached to it.
      *
-     * @return true if this node is a meta node
+     * @return if this node has any type data
+     * @since 4.2
      */
-    boolean isMeta();
+    boolean hasTypeData();
 
     /**
-     * Gets the meta value from this node.
+     * Gets the type data corresponding to the given <code>key</code>, if present.
      *
-     * @return the meta value
-     * @throws IllegalStateException if this node is not a meta node
+     * @param key the key
+     * @param <T> the {@link NodeType} type
+     * @return the data, if present
+     * @since 4.2
+     */
+    <T extends NodeType> Optional<T> getTypeData(NodeTypeKey<T> key);
+
+    /**
+     * Gets the type data corresponding to the given <code>key</code>, throwing an exception
+     * if no data is present.
+     *
+     * @param key the key
+     * @param <T> the {@link NodeType} type
+     * @return the data
+     * @throws IllegalStateException if data isn't present
+     * @since 4.2
+     */
+    default <T extends NodeType> T typeData(NodeTypeKey<T> key) throws IllegalStateException {
+        return getTypeData(key)
+                .orElseThrow(() ->
+                        new IllegalStateException("Node '" + getPermission() + "' does not have the '" + key.getTypeName() + "' type.")
+                );
+    }
+
+    /**
+     * Gets if this node has {@link InheritanceType} type data.
+     *
+     * @return true if this is a inheritance (group) node.
+     */
+    default boolean isGroupNode() {
+        return getTypeData(InheritanceType.KEY).isPresent();
+    }
+
+    /**
+     * Gets the name of the inherited group if this node has {@link InheritanceType} type data,
+     * throwing an exception if the data is not present.
+     *
+     * @return the name of the group
+     * @throws IllegalStateException if this node doesn't have {@link InheritanceType} data
      */
     @Nonnull
-    Map.Entry<String, String> getMeta() throws IllegalStateException;
+    default String getGroupName() throws IllegalStateException {
+        return typeData(InheritanceType.KEY).getGroupName();
+    }
 
     /**
-     * Gets if this node is a prefix node.
+     * Gets if this node has {@link MetaType} type data.
+     *
+     * @return true if this is a meta node.
+     */
+    default boolean isMeta() {
+        return getTypeData(MetaType.KEY).isPresent();
+    }
+
+    /**
+     * Gets the meta entry if this node has {@link MetaType} type data,
+     * throwing an exception if the data is not present.
+     *
+     * @return the meta entry
+     * @throws IllegalStateException if this node doesn't have {@link MetaType} data
+     */
+    @Nonnull
+    default Map.Entry<String, String> getMeta() throws IllegalStateException {
+        return typeData(MetaType.KEY);
+    }
+
+    /**
+     * Gets if this node has {@link PrefixType} type data.
      *
      * @return true if this node is a prefix node
      */
-    boolean isPrefix();
+    default boolean isPrefix() {
+        return getTypeData(PrefixType.KEY).isPresent();
+    }
 
     /**
-     * Gets the prefix value from this node.
+     * Gets the prefix entry if this node has {@link PrefixType} type data,
+     * throwing an exception if the data is not present.
      *
-     * @return the prefix value
-     * @throws IllegalStateException if this node is a not a prefix node
+     * @return the meta entry
+     * @throws IllegalStateException if this node doesn't have {@link PrefixType} data
      */
     @Nonnull
-    Map.Entry<Integer, String> getPrefix() throws IllegalStateException;
+    default Map.Entry<Integer, String> getPrefix() throws IllegalStateException {
+        return typeData(PrefixType.KEY).getAsEntry();
+    }
 
     /**
-     * Gets if this node is a suffix node.
+     * Gets if this node has {@link SuffixType} type data.
      *
      * @return true if this node is a suffix node
      */
-    boolean isSuffix();
+    default boolean isSuffix() {
+        return getTypeData(SuffixType.KEY).isPresent();
+    }
 
     /**
-     * Gets the suffix value from this node.
+     * Gets the suffix entry if this node has {@link SuffixType} type data,
+     * throwing an exception if the data is not present.
      *
-     * @return the suffix value
-     * @throws IllegalStateException if this node is a not a suffix node
+     * @return the meta entry
+     * @throws IllegalStateException if this node doesn't have {@link SuffixType} data
      */
     @Nonnull
-    Map.Entry<Integer, String> getSuffix() throws IllegalStateException;
+    default Map.Entry<Integer, String> getSuffix() throws IllegalStateException {
+        return typeData(SuffixType.KEY).getAsEntry();
+    }
 
     /**
      * Gets if this Node is equal to another node.

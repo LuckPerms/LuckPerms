@@ -23,62 +23,52 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node;
+package me.lucko.luckperms.common.node.model;
 
 import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.Node;
 
 import java.util.Objects;
-import java.util.Optional;
+
+import javax.annotation.Nonnull;
 
 /**
- * The result of an inheritance lookup
+ * Holds a Node and where it was inherited from. All calls are passed onto the contained Node instance.
  */
-public final class InheritanceInfo {
-    public static InheritanceInfo of(LocalizedNode node) {
+public final class ImmutableLocalizedNode extends ForwardingNode implements LocalizedNode {
+    public static ImmutableLocalizedNode of(Node node, String location) {
         Objects.requireNonNull(node, "node");
-        return new InheritanceInfo(node.getTristate(), node.getLocation());
+        Objects.requireNonNull(location, "location");
+        return new ImmutableLocalizedNode(node, location);
     }
 
-    public static InheritanceInfo empty() {
-        return new InheritanceInfo(Tristate.UNDEFINED, null);
-    }
-
-    private final Tristate result;
+    private final Node node;
     private final String location;
 
-    private InheritanceInfo(Tristate result, String location) {
-        this.result = result;
+    private ImmutableLocalizedNode(Node node, String location) {
+        this.node = node;
         this.location = location;
     }
 
-    public Optional<String> getLocation() {
-        return Optional.ofNullable(this.location);
+    @Override
+    protected Node delegate() {
+        return this.node;
     }
 
+    @Nonnull
     @Override
-    public boolean equals(Object o) {
-        if (o == this) return true;
-        if (!(o instanceof InheritanceInfo)) return false;
-        final InheritanceInfo other = (InheritanceInfo) o;
-        return this.result == other.result && this.getLocation().equals(other.getLocation());
+    public Node getNode() {
+        return this.node;
     }
 
+    @Nonnull
     @Override
-    public int hashCode() {
-        final int PRIME = 59;
-        int result = 1;
-        result = result * PRIME + this.result.hashCode();
-        result = result * PRIME + this.getLocation().hashCode();
-        return result;
+    public String getLocation() {
+        return this.location;
     }
 
     @Override
     public String toString() {
-        return "InheritanceInfo(result=" + this.result + ", location=" + this.getLocation() + ")";
-    }
-
-    public Tristate getResult() {
-        return this.result;
+        return "ImmutableLocalizedNode(node=" + this.getNode() + ", location=" + this.getLocation() + ")";
     }
 }

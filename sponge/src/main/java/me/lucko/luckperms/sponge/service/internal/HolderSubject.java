@@ -36,7 +36,8 @@ import me.lucko.luckperms.common.inheritance.InheritanceGraph;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.model.NodeTypes;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.model.SpongeGroup;
@@ -133,13 +134,13 @@ public abstract class HolderSubject<T extends PermissionHolder> implements LPSub
     @Override
     public Optional<String> getOption(ImmutableContextSet contexts, String s) {
         MetaData data = this.parent.getCachedData().getMetaData(this.plugin.getContextManager().formContexts(contexts));
-        if (s.equalsIgnoreCase(NodeFactory.PREFIX_KEY)) {
+        if (s.equalsIgnoreCase(NodeTypes.PREFIX_KEY)) {
             if (data.getPrefix() != null) {
                 return Optional.of(data.getPrefix());
             }
         }
 
-        if (s.equalsIgnoreCase(NodeFactory.SUFFIX_KEY)) {
+        if (s.equalsIgnoreCase(NodeTypes.SUFFIX_KEY)) {
             if (data.getSuffix() != null) {
                 return Optional.of(data.getSuffix());
             }

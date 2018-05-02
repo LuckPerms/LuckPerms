@@ -47,7 +47,7 @@ public class ParentsByWeightHolder extends CachedPrimaryGroupHolder {
 
         Set<Group> groups = new LinkedHashSet<>();
         for (Node node : this.user.getOwnNodes(contexts.getContexts())) {
-            if (!node.getValuePrimitive() || !node.isGroupNode()) {
+            if (!node.getValue() || !node.isGroupNode()) {
                 continue;
             }
 

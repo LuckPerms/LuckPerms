@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.managers;
 
-import me.lucko.luckperms.common.references.Identifiable;
+import me.lucko.luckperms.common.model.Identifiable;
 
 import java.util.Map;
 import java.util.function.Function;

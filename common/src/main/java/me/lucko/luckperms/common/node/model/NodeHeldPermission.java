@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node;
+package me.lucko.luckperms.common.node.model;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
@@ -31,13 +31,12 @@ import me.lucko.luckperms.api.context.ContextSet;
 
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
 public final class NodeHeldPermission<T extends Comparable<T>> implements HeldPermission<T> {
-    public static <T extends Comparable<T>> NodeHeldPermission<T> of(T holder, NodeModel nodeModel) {
-        return of(holder, nodeModel.toNode());
+    public static <T extends Comparable<T>> NodeHeldPermission<T> of(T holder, NodeDataContainer node) {
+        return of(holder, node.toNode());
     }
 
     public static <T extends Comparable<T>> NodeHeldPermission<T> of(T holder, Node node) {
@@ -60,7 +59,7 @@ public final class NodeHeldPermission<T extends Comparable<T>> implements HeldPe
 
     @Override
     public boolean getValue() {
-        return this.node.getValuePrimitive();
+        return this.node.getValue();
     }
 
     @Nonnull

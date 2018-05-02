@@ -26,7 +26,7 @@
 package me.lucko.luckperms.sponge.processors;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.node.ImmutableNode;
+import me.lucko.luckperms.common.node.model.ImmutableNode;
 import me.lucko.luckperms.common.processors.AbstractPermissionProcessor;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
 

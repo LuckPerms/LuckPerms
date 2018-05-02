@@ -41,11 +41,10 @@ import me.lucko.luckperms.common.command.utils.TabCompletions;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
-import me.lucko.luckperms.common.node.HeldPermissionComparator;
-import me.lucko.luckperms.common.node.NodeFactory;
-import me.lucko.luckperms.common.node.NodeHeldPermission;
+import me.lucko.luckperms.common.model.HolderType;
+import me.lucko.luckperms.common.node.comparator.HeldPermissionComparator;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.references.HolderType;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.DurationFormatter;
 import me.lucko.luckperms.common.utils.Iterators;
@@ -147,7 +146,7 @@ public class SearchCommand extends SingleCommand {
 
     private static Consumer<BuildableComponent.Builder<?, ?>> makeFancy(String holderName, HolderType holderType, String label, HeldPermission<?> perm) {
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
-                "&3> " + (perm.asNode().getValuePrimitive() ? "&a" : "&c") + perm.asNode().getPermission(),
+                "&3> " + (perm.asNode().getValue() ? "&a" : "&c") + perm.asNode().getPermission(),
                 " ",
                 "&7Click to remove this node from " + holderName
         ), CommandManager.AMPERSAND_CHAR));

@@ -37,13 +37,14 @@ import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.contexts.ContextSetConfigurateSerializer;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.MetaType;
-import me.lucko.luckperms.common.node.NodeFactory;
-import me.lucko.luckperms.common.node.NodeModel;
+import me.lucko.luckperms.common.model.UserIdentifier;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.model.NodeDataContainer;
+import me.lucko.luckperms.common.node.utils.MetaType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.references.UserIdentifier;
 import me.lucko.luckperms.common.storage.PlayerSaveResult;
 import me.lucko.luckperms.common.storage.dao.AbstractDao;
 import me.lucko.luckperms.common.storage.dao.file.loader.ConfigurateLoader;
@@ -156,8 +157,8 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
     }
 
     protected ConfigurationNode processBulkUpdate(BulkUpdate bulkUpdate, ConfigurationNode node) {
-        Set<NodeModel> nodes = readNodes(node);
-        Set<NodeModel> results = nodes.stream()
+        Set<NodeDataContainer> nodes = readNodes(node);
+        Set<NodeDataContainer> results = nodes.stream()
                 .map(bulkUpdate::apply)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
@@ -180,8 +181,8 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
                 String name = object.getNode("name").getString();
                 user.getPrimaryGroup().setStoredValue(object.getNode(this.loader instanceof JsonLoader ? "primaryGroup" : "primary-group").getString());
 
-                Set<Node> nodes = readNodes(object).stream().map(NodeModel::toNode).collect(Collectors.toSet());
-                user.setEnduringNodes(nodes);
+                Set<Node> nodes = readNodes(object).stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
+                user.setNodes(NodeMapType.ENDURING, nodes);
                 user.setName(name, true);
 
                 boolean save = this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
@@ -222,7 +223,7 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
                 data.getNode("name").setValue(user.getName().orElse("null"));
                 data.getNode(this.loader instanceof JsonLoader ? "primaryGroup" : "primary-group").setValue(user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
 
-                Set<NodeModel> nodes = user.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
+                Set<NodeDataContainer> nodes = user.enduringData().immutable().values().stream().map(NodeDataContainer::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
                 writeNodes(data, nodes);
 
                 saveFile(StorageLocation.USER, user.getUuid().toString(), data);
@@ -242,15 +243,15 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
             ConfigurationNode object = readFile(StorageLocation.GROUP, name);
 
             if (object != null) {
-                Set<Node> nodes = readNodes(object).stream().map(NodeModel::toNode).collect(Collectors.toSet());
-                group.setEnduringNodes(nodes);
+                Set<Node> nodes = readNodes(object).stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
+                group.setNodes(NodeMapType.ENDURING, nodes);
             } else {
                 ConfigurationNode data = SimpleConfigurationNode.root();
                 if (this instanceof SeparatedConfigurateDao) {
                     data.getNode("name").setValue(group.getName());
                 }
 
-                Set<NodeModel> nodes = group.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
+                Set<NodeDataContainer> nodes = group.enduringData().immutable().values().stream().map(NodeDataContainer::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
                 writeNodes(data, nodes);
 
                 saveFile(StorageLocation.GROUP, name, data);
@@ -283,9 +284,9 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
                 group.getIoLock().lock();
             }
 
-            Set<NodeModel> data = readNodes(object);
-            Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
-            group.setEnduringNodes(nodes);
+            Set<NodeDataContainer> data = readNodes(object);
+            Set<Node> nodes = data.stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
+            group.setNodes(NodeMapType.ENDURING, nodes);
 
         } catch (Exception e) {
             throw reportException(name, e);
@@ -307,7 +308,7 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
                 data.getNode("name").setValue(group.getName());
             }
 
-            Set<NodeModel> nodes = group.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
+            Set<NodeDataContainer> nodes = group.enduringData().immutable().values().stream().map(NodeDataContainer::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
             writeNodes(data, nodes);
 
             saveFile(StorageLocation.GROUP, group.getName(), data);
@@ -441,7 +442,7 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
         return this.uuidCache.lookupUsername(uuid);
     }
 
-    private static NodeModel readAttributes(ConfigurationNode attributes, Function<ConfigurationNode, String> permissionFunction) {
+    private static NodeDataContainer readAttributes(ConfigurationNode attributes, Function<ConfigurationNode, String> permissionFunction) {
         boolean value = attributes.getNode("value").getBoolean(true);
         String server = attributes.getNode("server").getString("global");
         String world = attributes.getNode("world").getString("global");
@@ -453,10 +454,10 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
             context = ContextSetConfigurateSerializer.deserializeContextSet(contextMap).makeImmutable();
         }
 
-        return NodeModel.of(permissionFunction.apply(attributes), value, server, world, expiry, context);
+        return NodeDataContainer.of(permissionFunction.apply(attributes), value, server, world, expiry, context);
     }
 
-    private static Collection<NodeModel> readAttributes(ConfigurationNode attributes, String permission) {
+    private static Collection<NodeDataContainer> readAttributes(ConfigurationNode attributes, String permission) {
         boolean value = attributes.getNode("value").getBoolean(true);
         String server = attributes.getNode("server").getString("global");
         String world = attributes.getNode("world").getString("global");
@@ -470,13 +471,13 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
 
         ConfigurationNode batchAttribute = attributes.getNode("permissions");
         if (permission.startsWith("luckperms.batch") && !batchAttribute.isVirtual() && batchAttribute.hasListChildren()) {
-            List<NodeModel> nodes = new ArrayList<>();
+            List<NodeDataContainer> nodes = new ArrayList<>();
             for (ConfigurationNode element : batchAttribute.getChildrenList()) {
-                nodes.add(NodeModel.of(element.getString(), value, server, world, expiry, context));
+                nodes.add(NodeDataContainer.of(element.getString(), value, server, world, expiry, context));
             }
             return nodes;
         } else {
-            return Collections.singleton(NodeModel.of(permission, value, server, world, expiry, context));
+            return Collections.singleton(NodeDataContainer.of(permission, value, server, world, expiry, context));
         }
     }
 
@@ -513,15 +514,15 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
         return Maps.immutableEntry(permission, appended);
     }
 
-    protected static Set<NodeModel> readNodes(ConfigurationNode data) {
-        Set<NodeModel> nodes = new HashSet<>();
+    protected static Set<NodeDataContainer> readNodes(ConfigurationNode data) {
+        Set<NodeDataContainer> nodes = new HashSet<>();
 
         if (data.getNode("permissions").hasListChildren()) {
             List<? extends ConfigurationNode> children = data.getNode("permissions").getChildrenList();
             for (ConfigurationNode appended : children) {
                 String plainValue = appended.getValue(Types::strictAsString);
                 if (plainValue != null) {
-                    nodes.add(NodeModel.of(plainValue));
+                    nodes.add(NodeDataContainer.of(plainValue));
                     continue;
                 }
 
@@ -538,7 +539,7 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
             for (ConfigurationNode appended : children) {
                 String stringValue = appended.getValue(Types::strictAsString);
                 if (stringValue != null) {
-                    nodes.add(NodeModel.of(NodeFactory.groupNode(stringValue)));
+                    nodes.add(NodeDataContainer.of(NodeFactory.groupNode(stringValue)));
                     continue;
                 }
 
@@ -578,7 +579,7 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
         return nodes;
     }
 
-    private static void writeAttributesTo(ConfigurationNode attributes, NodeModel node, boolean writeValue) {
+    private static void writeAttributesTo(ConfigurationNode attributes, NodeDataContainer node, boolean writeValue) {
         if (writeValue) {
             attributes.getNode("value").setValue(node.getValue());
         }
@@ -600,7 +601,7 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
         }
     }
 
-    private static boolean isPlain(NodeModel node) {
+    private static boolean isPlain(NodeDataContainer node) {
         return node.getValue() &&
                 node.getServer().equalsIgnoreCase("global") &&
                 node.getWorld().equalsIgnoreCase("global") &&
@@ -625,14 +626,14 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
         }
     }
 
-    private void writeNodes(ConfigurationNode to, Set<NodeModel> nodes) {
+    private void writeNodes(ConfigurationNode to, Set<NodeDataContainer> nodes) {
         ConfigurationNode permissionsSection = SimpleConfigurationNode.root();
         ConfigurationNode parentsSection = SimpleConfigurationNode.root();
         ConfigurationNode prefixesSection = SimpleConfigurationNode.root();
         ConfigurationNode suffixesSection = SimpleConfigurationNode.root();
         ConfigurationNode metaSection = SimpleConfigurationNode.root();
 
-        for (NodeModel node : nodes) {
+        for (NodeDataContainer node : nodes) {
             Node n = node.toNode();
 
             // just add a string to the list.
@@ -648,7 +649,7 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
             }
 
             ChatMetaType chatMetaType = ChatMetaType.ofNode(n).orElse(null);
-            if (chatMetaType != null && n.getValuePrimitive()) {
+            if (chatMetaType != null && n.getValue()) {
                 // handle prefixes / suffixes
                 Map.Entry<Integer, String> entry = chatMetaType.getEntry(n);
 
@@ -666,7 +667,7 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
                     default:
                         throw new AssertionError();
                 }
-            } else if (n.isMeta() && n.getValuePrimitive()) {
+            } else if (n.isMeta() && n.getValue()) {
                 // handle meta nodes
                 Map.Entry<String, String> meta = n.getMeta();
 
@@ -675,7 +676,7 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
                 writeAttributesTo(attributes, node, false);
 
                 appendNode(metaSection, meta.getKey(), attributes, "key");
-            } else if (n.isGroupNode() && n.getValuePrimitive()) {
+            } else if (n.isGroupNode() && n.getValue()) {
                 // handle group nodes
                 ConfigurationNode attributes = SimpleConfigurationNode.root();
                 writeAttributesTo(attributes, node, false);

@@ -23,12 +23,13 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node;
+package me.lucko.luckperms.common.node.factory;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.node.model.ImmutableNode;
 
 import java.util.Map;
 import java.util.Objects;
@@ -39,7 +40,7 @@ import javax.annotation.Nonnull;
 /**
  * Builds node instances
  */
-class NodeBuilder implements Node.Builder {
+public class NodeBuilder implements Node.Builder {
     protected String permission;
     private ImmutableContextSet.Builder extraContexts = ImmutableContextSet.builder();
     private Boolean value = true;
@@ -48,7 +49,7 @@ class NodeBuilder implements Node.Builder {
     private String world = null;
     private long expireAt = 0L;
 
-    protected NodeBuilder() {
+    NodeBuilder() {
 
     }
 
@@ -56,7 +57,7 @@ class NodeBuilder implements Node.Builder {
         this.permission = permission;
     }
 
-    NodeBuilder(Node other) {
+    public NodeBuilder(Node other) {
         this.permission = other.getPermission();
         copyFrom(other);
     }
@@ -64,7 +65,7 @@ class NodeBuilder implements Node.Builder {
     @Override
     public Node.Builder copyFrom(@Nonnull Node node) {
         Objects.requireNonNull(node, "node");
-        this.value = node.getValuePrimitive();
+        this.value = node.getValue();
         this.override = node.isOverride();
         this.server = node.getServer().orElse(null);
         this.world = node.getWorld().orElse(null);

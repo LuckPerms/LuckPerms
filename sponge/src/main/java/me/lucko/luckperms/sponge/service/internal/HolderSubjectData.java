@@ -38,7 +38,8 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.model.NodeTypes;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
@@ -72,7 +73,7 @@ public class HolderSubjectData implements LPSubjectData {
     }
 
     private Stream<Node> streamNodes() {
-        return this.holder.getNodes(this.type).values().stream();
+        return this.holder.getData(this.type).immutable().values().stream();
     }
 
     @Override
@@ -93,10 +94,10 @@ public class HolderSubjectData implements LPSubjectData {
     @Override
     public ImmutableMap<ImmutableContextSet, ImmutableMap<String, Boolean>> getAllPermissions() {
         ImmutableMap.Builder<ImmutableContextSet, ImmutableMap<String, Boolean>> ret = ImmutableMap.builder();
-        for (Map.Entry<ImmutableContextSet, Collection<Node>> entry : this.holder.getNodes(this.type).asMap().entrySet()) {
+        for (Map.Entry<ImmutableContextSet, Collection<Node>> entry : this.holder.getData(this.type).immutable().asMap().entrySet()) {
             ImmutableMap.Builder<String, Boolean> builder = ImmutableMap.builder();
             for (Node n : entry.getValue()) {
-                builder.put(n.getPermission(), n.getValuePrimitive());
+                builder.put(n.getPermission(), n.getValue());
             }
             ret.put(entry.getKey(), builder.build());
         }
@@ -182,7 +183,7 @@ public class HolderSubjectData implements LPSubjectData {
     @Override
     public ImmutableMap<ImmutableContextSet, ImmutableList<LPSubjectReference>> getAllParents() {
         ImmutableMap.Builder<ImmutableContextSet, ImmutableList<LPSubjectReference>> ret = ImmutableMap.builder();
-        for (Map.Entry<ImmutableContextSet, Collection<Node>> entry : this.holder.getNodes(this.type).asMap().entrySet()) {
+        for (Map.Entry<ImmutableContextSet, Collection<Node>> entry : this.holder.getData(this.type).immutable().asMap().entrySet()) {
             ImmutableList.Builder<LPSubjectReference> builder = ImmutableList.builder();
             for (Node n : entry.getValue()) {
                 if (n.isGroupNode()) {
@@ -294,8 +295,8 @@ public class HolderSubjectData implements LPSubjectData {
         Map<ImmutableContextSet, Integer> minPrefixPriority = new HashMap<>();
         Map<ImmutableContextSet, Integer> minSuffixPriority = new HashMap<>();
 
-        for (Node n : this.holder.getNodes(this.type).values()) {
-            if (!n.getValuePrimitive()) continue;
+        for (Node n : this.holder.getData(this.type).immutable().values()) {
+            if (!n.getValue()) continue;
             if (!n.isMeta() && !n.isPrefix() && !n.isSuffix()) continue;
 
             ImmutableContextSet immutableContexts = n.getFullContexts().makeImmutable();
@@ -309,7 +310,7 @@ public class HolderSubjectData implements LPSubjectData {
             if (n.isPrefix()) {
                 Map.Entry<Integer, String> value = n.getPrefix();
                 if (value.getKey() > minPrefixPriority.get(immutableContexts)) {
-                    options.get(immutableContexts).put(NodeFactory.PREFIX_KEY, value.getValue());
+                    options.get(immutableContexts).put(NodeTypes.PREFIX_KEY, value.getValue());
                     minPrefixPriority.put(immutableContexts, value.getKey());
                 }
                 continue;
@@ -318,7 +319,7 @@ public class HolderSubjectData implements LPSubjectData {
             if (n.isSuffix()) {
                 Map.Entry<Integer, String> value = n.getSuffix();
                 if (value.getKey() > minSuffixPriority.get(immutableContexts)) {
-                    options.get(immutableContexts).put(NodeFactory.SUFFIX_KEY, value.getValue());
+                    options.get(immutableContexts).put(NodeTypes.SUFFIX_KEY, value.getValue());
                     minSuffixPriority.put(immutableContexts, value.getKey());
                 }
                 continue;
@@ -344,7 +345,7 @@ public class HolderSubjectData implements LPSubjectData {
         Objects.requireNonNull(value, "value");
 
         Node node;
-        if (key.equalsIgnoreCase(NodeFactory.PREFIX_KEY) || key.equalsIgnoreCase(NodeFactory.SUFFIX_KEY)) {
+        if (key.equalsIgnoreCase(NodeTypes.PREFIX_KEY) || key.equalsIgnoreCase(NodeTypes.SUFFIX_KEY)) {
             // special handling.
             ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
 
@@ -393,9 +394,9 @@ public class HolderSubjectData implements LPSubjectData {
 
         List<Node> toRemove = streamNodes()
                 .filter(n -> {
-                    if (key.equalsIgnoreCase(NodeFactory.PREFIX_KEY)) {
+                    if (key.equalsIgnoreCase(NodeTypes.PREFIX_KEY)) {
                         return n.isPrefix();
-                    } else if (key.equalsIgnoreCase(NodeFactory.SUFFIX_KEY)) {
+                    } else if (key.equalsIgnoreCase(NodeTypes.SUFFIX_KEY)) {
                         return n.isSuffix();
                     } else {
                         return n.isMeta() && n.getMeta().getKey().equals(key);

@@ -29,7 +29,7 @@ import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.api.delegates.model.ApiGroup;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
 
 import java.util.Objects;
 

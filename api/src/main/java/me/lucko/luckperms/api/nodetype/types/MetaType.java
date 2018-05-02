@@ -23,46 +23,47 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node;
+package me.lucko.luckperms.api.nodetype.types;
 
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.NodeEqualityPredicate;
+import me.lucko.luckperms.api.nodetype.NodeType;
+import me.lucko.luckperms.api.nodetype.NodeTypeKey;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
-public final class NodeTools {
+import javax.annotation.Nonnull;
 
-    public static <T extends Node> void removeEqual(Iterator<T> it, NodeEqualityPredicate equalityPredicate) {
-        List<T> alreadyIn = new ArrayList<>();
+/**
+ * A sub-type of {@link Node} used to store meta assignments.
+ *
+ * @since 4.2
+ */
+public interface MetaType extends NodeType, Map.Entry<String, String> {
 
-        iterate:
-        while (it.hasNext()) {
-            T next = it.next();
+    /**
+     * The key for this type.
+     */
+    NodeTypeKey<MetaType> KEY = new NodeTypeKey<MetaType>(){};
 
-            for (T other : alreadyIn) {
-                if (next.equals(other, equalityPredicate)) {
-                    it.remove();
-                    continue iterate;
-                }
-            }
+    /**
+     * Gets the meta key.
+     *
+     * @return the meta key
+     */
+    @Nonnull
+    String getKey();
 
-            alreadyIn.add(next);
-        }
+    /**
+     * Gets the meta value.
+     *
+     * @return the meta value
+     */
+    @Nonnull
+    String getValue();
+
+    @Override
+    @Deprecated
+    default String setValue(String value) {
+        throw new UnsupportedOperationException();
     }
-
-    public static <T extends Node> void removeSamePermission(Iterator<T> it) {
-        Set<String> alreadyIn = new HashSet<>();
-        while (it.hasNext()) {
-            T next = it.next();
-            if (!alreadyIn.add(next.getPermission())) {
-                it.remove();
-            }
-        }
-    }
-
-    private NodeTools() {}
 }

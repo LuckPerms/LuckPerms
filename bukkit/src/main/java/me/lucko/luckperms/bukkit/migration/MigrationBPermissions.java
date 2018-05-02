@@ -42,7 +42,8 @@ import me.lucko.luckperms.common.logging.ProgressLogger;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.model.NodeTypes;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Iterators;
@@ -212,7 +213,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 continue;
             }
 
-            if (meta.getKey().equalsIgnoreCase(NodeFactory.PREFIX_KEY) || meta.getKey().equalsIgnoreCase(NodeFactory.SUFFIX_KEY)) {
+            if (meta.getKey().equalsIgnoreCase(NodeTypes.PREFIX_KEY) || meta.getKey().equalsIgnoreCase(NodeTypes.SUFFIX_KEY)) {
                 ChatMetaType type = ChatMetaType.valueOf(meta.getKey().toUpperCase());
                 holder.setPermission(NodeFactory.buildChatMetaNode(type, c.getPriority(), meta.getValue()).setWorld(world.getName()).build());
                 continue;

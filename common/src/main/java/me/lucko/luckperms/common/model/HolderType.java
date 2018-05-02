@@ -23,19 +23,35 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.references;
+package me.lucko.luckperms.common.model;
 
-/**
- * Interface to represent an identifiable object
- */
-public interface Identifiable<T> {
+public enum HolderType {
 
-    /**
-     * Returns the objects identifier.
-     * If the type is a {@link String}, this method must return a {@link String#toLowerCase()} representation
-     *
-     * @return the identifier
-     */
-    T getId();
+    USER(true, false),
+    GROUP(false, true);
 
+    private final boolean user;
+    private final boolean group;
+
+    HolderType(boolean user, boolean group) {
+        this.user = user;
+        this.group = group;
+    }
+
+    public boolean matches(PermissionHolder holder) {
+        return holder.getType() == this;
+    }
+
+    @Override
+    public String toString() {
+        return name().toLowerCase();
+    }
+
+    public boolean isUser() {
+        return this.user;
+    }
+
+    public boolean isGroup() {
+        return this.group;
+    }
 }

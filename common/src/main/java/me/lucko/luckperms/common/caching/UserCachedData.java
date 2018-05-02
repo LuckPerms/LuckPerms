@@ -28,8 +28,8 @@ package me.lucko.luckperms.common.caching;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.references.HolderType;
 
 /**
  * Holds an easily accessible cache of a user's data in a number of contexts

@@ -37,9 +37,10 @@ import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.logging.ProgressLogger;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.model.UserIdentifier;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.model.NodeTypes;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.references.UserIdentifier;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Iterators;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -149,7 +150,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
                     if (key.isEmpty() || value.isEmpty()) continue;
                     if (key.equals("build")) continue;
 
-                    if (key.equals(NodeFactory.PREFIX_KEY) || key.equals(NodeFactory.SUFFIX_KEY)) {
+                    if (key.equals(NodeTypes.PREFIX_KEY) || key.equals(NodeTypes.SUFFIX_KEY)) {
                         ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
                         groups.get(groupName).add(NodeFactory.buildChatMetaNode(type, 50, value).setWorld(worldMappingFunc.apply(world)).build());
                     } else {
@@ -201,7 +202,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
                     if (key.isEmpty() || value.isEmpty()) continue;
                     if (key.equals("build")) continue;
 
-                    if (key.equals(NodeFactory.PREFIX_KEY) || key.equals(NodeFactory.SUFFIX_KEY)) {
+                    if (key.equals(NodeTypes.PREFIX_KEY) || key.equals(NodeTypes.SUFFIX_KEY)) {
                         ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
                         users.get(id).add(NodeFactory.buildChatMetaNode(type, 100, value).setWorld(worldMappingFunc.apply(world)).build());
                     } else {

@@ -23,52 +23,48 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node;
+package me.lucko.luckperms.common.node.comparator;
 
-import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.utils.CollationKeyCache;
 
-import java.util.Objects;
+import java.util.Comparator;
 
-import javax.annotation.Nonnull;
+public class NodeComparator implements Comparator<Node> {
 
-/**
- * Holds a Node and where it was inherited from. All calls are passed onto the contained Node instance.
- */
-public final class ImmutableLocalizedNode extends ForwardingNode implements LocalizedNode {
-    public static ImmutableLocalizedNode of(Node node, String location) {
-        Objects.requireNonNull(node, "node");
-        Objects.requireNonNull(location, "location");
-        return new ImmutableLocalizedNode(node, location);
+    private static final Comparator<? super Node> INSTANCE = new NodeComparator();
+    private static final Comparator<? super Node> REVERSE = INSTANCE.reversed();
+
+    public static Comparator<? super Node> normal() {
+        return INSTANCE;
     }
 
-    private final Node node;
-    private final String location;
-
-    private ImmutableLocalizedNode(Node node, String location) {
-        this.node = node;
-        this.location = location;
+    public static Comparator<? super Node> reverse() {
+        return REVERSE;
     }
 
     @Override
-    protected Node delegate() {
-        return this.node;
-    }
+    public int compare(Node o1, Node o2) {
+        if (o1.equals(o2)) {
+            return 0;
+        }
 
-    @Nonnull
-    @Override
-    public Node getNode() {
-        return this.node;
-    }
+        if (o1.isTemporary() != o2.isTemporary()) {
+            return o1.isTemporary() ? 1 : -1;
+        }
 
-    @Nonnull
-    @Override
-    public String getLocation() {
-        return this.location;
-    }
+        if (o1.isWildcard() != o2.isWildcard()) {
+            return o1.isWildcard() ? 1 : -1;
+        }
 
-    @Override
-    public String toString() {
-        return "ImmutableLocalizedNode(node=" + this.getNode() + ", location=" + this.getLocation() + ")";
+        if (o1.isTemporary()) {
+            return o1.getSecondsTilExpiry() < o2.getSecondsTilExpiry() ? 1 : -1;
+        }
+
+        if (o1.isWildcard()) {
+            return o1.getWildcardLevel() > o2.getWildcardLevel() ? 1 : -1;
+        }
+
+        return CollationKeyCache.compareStrings(o1.getPermission(), o2.getPermission()) == 1 ? -1 : 1;
     }
 }

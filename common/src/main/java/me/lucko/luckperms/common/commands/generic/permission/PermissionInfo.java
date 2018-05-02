@@ -40,8 +40,8 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.NodeFactory;
-import me.lucko.luckperms.common.node.NodeWithContextComparator;
+import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.CollationKeyCache;
@@ -77,14 +77,12 @@ public class PermissionInfo extends SharedSubCommand {
         SortMode sortMode = SortMode.determine(args);
 
         // get the holders nodes
-        List<LocalizedNode> nodes = new ArrayList<>(holder.getEnduringData().asSortedSet());
+        List<LocalizedNode> nodes = new ArrayList<>(holder.enduringData().asSortedSet());
 
         // remove irrelevant types (these are displayed in the other info commands)
-        nodes.removeIf(node ->
-                // remove if the node is a group node, and if the value isn't false and if the group actually exists
-                (node.isGroupNode() && node.getValuePrimitive() && plugin.getGroupManager().isLoaded(node.getGroupName())) ||
-                // remove if the node is a meta node
-                node.isPrefix() || node.isSuffix() || node.isMeta()
+        nodes.removeIf(node -> (node.isGroupNode() && node.getValue() && plugin.getGroupManager().isLoaded(node.getGroupName())) ||
+        // remove if the node is a meta node
+        node.isPrefix() || node.isSuffix() || node.isMeta()
         );
 
         // handle empty
@@ -118,7 +116,7 @@ public class PermissionInfo extends SharedSubCommand {
 
         // send content
         for (LocalizedNode node : content) {
-            String s = "&3> " + (node.getValuePrimitive() ? "&a" : "&c") + node.getPermission() + (sender.isConsole() ? " &7(" + node.getValuePrimitive() + "&7)" : "") + MessageUtils.getAppendableNodeContextString(node);
+            String s = "&3> " + (node.getValue() ? "&a" : "&c") + node.getPermission() + (sender.isConsole() ? " &7(" + node.getValue() + "&7)" : "") + MessageUtils.getAppendableNodeContextString(node);
             if (node.isTemporary()) {
                 s += "\n&2-    expires in " + DurationFormatter.LONG.formatDateDiff(node.getExpiryUnixTime());
             }
@@ -142,7 +140,7 @@ public class PermissionInfo extends SharedSubCommand {
 
     private static Consumer<BuildableComponent.Builder<?, ?>> makeFancy(PermissionHolder holder, String label, Node node) {
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
-                "¥3> " + (node.getValuePrimitive() ? "¥a" : "¥c") + node.getPermission(),
+                "¥3> " + (node.getValue() ? "¥a" : "¥c") + node.getPermission(),
                 " ",
                 "¥7Click to remove this node from " + holder.getFriendlyName()
         ), '¥'));

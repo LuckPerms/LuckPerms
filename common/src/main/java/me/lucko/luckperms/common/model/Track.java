@@ -35,9 +35,8 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.api.DemotionResults;
 import me.lucko.luckperms.common.api.PromotionResults;
 import me.lucko.luckperms.common.api.delegates.model.ApiTrack;
-import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.references.Identifiable;
 import me.lucko.luckperms.common.sender.Sender;
 
 import java.util.ArrayList;
@@ -277,9 +276,9 @@ public final class Track implements Identifiable<String> {
         }
 
         // find all groups that are inherited by the user in the exact contexts given and applicable to this track
-        List<Node> nodes = user.getEnduringNodes().get(context.makeImmutable()).stream()
+        List<Node> nodes = user.enduringData().immutable().get(context.makeImmutable()).stream()
                 .filter(Node::isGroupNode)
-                .filter(Node::getValuePrimitive)
+                .filter(Node::getValue)
                 .filter(node -> containsGroup(node.getGroupName()))
                 .distinct()
                 .collect(Collectors.toList());
@@ -339,9 +338,9 @@ public final class Track implements Identifiable<String> {
         }
 
         // find all groups that are inherited by the user in the exact contexts given and applicable to this track
-        List<Node> nodes = user.getEnduringNodes().get(context.makeImmutable()).stream()
+        List<Node> nodes = user.enduringData().immutable().get(context.makeImmutable()).stream()
                 .filter(Node::isGroupNode)
-                .filter(Node::getValuePrimitive)
+                .filter(node -> node.getValue())
                 .filter(node -> containsGroup(node.getGroupName()))
                 .distinct()
                 .collect(Collectors.toList());
