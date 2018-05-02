@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.utils.PatternCache;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
@@ -193,6 +194,24 @@ public final class NodeTypes {
         public String getGroupName() {
             return this.groupName;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Inheritance that = (Inheritance) o;
+            return Objects.equals(this.groupName, that.groupName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.groupName);
+        }
+
+        @Override
+        public String toString() {
+            return "InheritanceType{groupName='" + this.groupName + "'}";
+        }
     }
 
     private static final class Meta implements MetaType {
@@ -214,6 +233,25 @@ public final class NodeTypes {
         @Override
         public String getValue() {
             return this.value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Meta that = (Meta) o;
+            return Objects.equals(this.key, that.key) &&
+                    Objects.equals(this.value, that.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.key, this.value);
+        }
+
+        @Override
+        public String toString() {
+            return "MetaType{key='" + this.key + "', value='" + this.value + "'}";
         }
     }
     
@@ -257,6 +295,25 @@ public final class NodeTypes {
         public String setValue(String value) {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Prefix that = (Prefix) o;
+            return this.priority == that.priority &&
+                    Objects.equals(this.prefix, that.prefix);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.priority, this.prefix);
+        }
+
+        @Override
+        public String toString() {
+            return "PrefixType{priority=" + this.priority + ", prefix='" + this.prefix + "'}";
+        }
     }
 
     private static final class Suffix implements SuffixType, Map.Entry<Integer, String> {
@@ -299,6 +356,25 @@ public final class NodeTypes {
         public String setValue(String value) {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Suffix that = (Suffix) o;
+            return this.priority == that.priority &&
+                    Objects.equals(this.suffix, that.suffix);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.priority, this.suffix);
+        }
+
+        @Override
+        public String toString() {
+            return "SuffixType{priority=" + this.priority + ", suffix='" + this.suffix + "'}";
+        }
     }
 
     private static final class Weight implements WeightType {
@@ -311,6 +387,24 @@ public final class NodeTypes {
         @Override
         public int getWeight() {
             return this.weight;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Weight that = (Weight) o;
+            return this.weight == that.weight;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.weight);
+        }
+
+        @Override
+        public String toString() {
+            return "WeightType{weight=" + this.weight + '}';
         }
     }
 
