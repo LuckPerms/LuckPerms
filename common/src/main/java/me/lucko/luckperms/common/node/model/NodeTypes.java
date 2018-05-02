@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.api.nodetype.NodeType;
 import me.lucko.luckperms.api.nodetype.NodeTypeKey;
+import me.lucko.luckperms.api.nodetype.types.DisplayNameType;
 import me.lucko.luckperms.api.nodetype.types.InheritanceType;
 import me.lucko.luckperms.api.nodetype.types.MetaType;
 import me.lucko.luckperms.api.nodetype.types.PrefixType;
@@ -51,12 +52,14 @@ public final class NodeTypes {
     public static final String SUFFIX_KEY = "suffix";
     public static final String META_KEY = "meta";
     public static final String WEIGHT_KEY = "weight";
+    public static final String DISPLAY_NAME_KEY = "displayname";
 
     public static final String GROUP_NODE_MARKER = "group.";
     public static final String PREFIX_NODE_MARKER = PREFIX_KEY + ".";
     public static final String SUFFIX_NODE_MARKER = SUFFIX_KEY + ".";
     public static final String META_NODE_MARKER = META_KEY + ".";
     public static final String WEIGHT_NODE_MARKER = WEIGHT_KEY + ".";
+    public static final String DISPLAY_NAME_NODE_MARKER = DISPLAY_NAME_KEY + ".";
 
     // used to split prefix/suffix/meta nodes
     private static final Splitter META_SPLITTER = Splitter.on(PatternCache.compileDelimiterPattern(".", "\\")).limit(2);
@@ -87,6 +90,11 @@ public final class NodeTypes {
         type = parseWeightType(s);
         if (type != null) {
             results.put(WeightType.KEY, type);
+        }
+
+        type = parseDisplayNameType(s);
+        if (type != null) {
+            results.put(DisplayNameType.KEY, type);
         }
 
         if (results.isEmpty()) {
@@ -180,6 +188,14 @@ public final class NodeTypes {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    private static DisplayNameType parseDisplayNameType(String s) {
+        if (!s.toLowerCase().startsWith(DISPLAY_NAME_NODE_MARKER)) {
+            return null;
+        }
+
+        return new DisplayName(s.substring(DISPLAY_NAME_NODE_MARKER.length()));
     }
 
     private static final class Inheritance implements InheritanceType {
@@ -405,6 +421,38 @@ public final class NodeTypes {
         @Override
         public String toString() {
             return "WeightType{weight=" + this.weight + '}';
+        }
+    }
+
+    private static final class DisplayName implements DisplayNameType {
+        private final String displayName;
+
+        private DisplayName(String displayName) {
+            this.displayName = displayName;
+        }
+
+        @Nonnull
+        @Override
+        public String getDisplayName() {
+            return this.displayName;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            DisplayName that = (DisplayName) o;
+            return Objects.equals(this.displayName, that.displayName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.displayName);
+        }
+
+        @Override
+        public String toString() {
+            return "DisplayName{displayName='" + this.displayName + '\'' + '}';
         }
     }
 

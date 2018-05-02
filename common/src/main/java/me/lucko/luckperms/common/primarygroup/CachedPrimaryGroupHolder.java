@@ -30,6 +30,8 @@ import me.lucko.luckperms.common.caching.handlers.StateListener;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 
+import javax.annotation.Nonnull;
+
 /**
  * Abstract implementation of {@link StateListener} which caches all lookups.
  */
@@ -37,6 +39,7 @@ public abstract class CachedPrimaryGroupHolder extends StoredHolder implements S
 
     // cache lookups
     private final Cache<String> cache = new Cache<String>() {
+        @Nonnull
         @Override
         protected String supply() {
             return calculateValue();

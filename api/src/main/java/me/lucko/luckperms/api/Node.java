@@ -30,6 +30,7 @@ import com.google.common.base.Preconditions;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.nodetype.NodeType;
 import me.lucko.luckperms.api.nodetype.NodeTypeKey;
+import me.lucko.luckperms.api.nodetype.types.DisplayNameType;
 import me.lucko.luckperms.api.nodetype.types.InheritanceType;
 import me.lucko.luckperms.api.nodetype.types.MetaType;
 import me.lucko.luckperms.api.nodetype.types.PrefixType;
@@ -95,6 +96,7 @@ import javax.annotation.concurrent.Immutable;
  *     <li>{@link SuffixType} - represents an assigned suffix</li>
  *     <li>{@link MetaType} - represents an assigned meta option</li>
  *     <li>{@link WeightType} - marks the weight of the object holding this node</li>
+ *     <li>{@link DisplayNameType} - marks the display name of the object holding this node</li>
  * </ul>
  *
  * <p>The core node state must be immutable in all implementations.</p>

@@ -26,63 +26,42 @@
 package me.lucko.luckperms.common.buffers;
 
 import java.util.Optional;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import javax.annotation.Nonnull;
 
 /**
- * Thread-safe caching utility
+ * Simple one element cache implementation.
  *
  * @param <T> the type being stored
  */
 public abstract class Cache<T> {
-    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-    private T cached = null;
+    private volatile T value = null;
 
+    @Nonnull
     protected abstract T supply();
 
     public final T get() {
-        // try to just read from the cached value
-        this.lock.readLock().lock();
-        try {
-            if (this.cached != null) {
-                return this.cached;
+        T val = this.value;
+
+        // double checked locking
+        if (val == null) {
+            synchronized (this) {
+                val = this.value;
+                if (val == null) {
+                    val = supply();
+                    this.value = val;
+                }
             }
-        } finally {
-            // we have to release the read lock, as it is not possible
-            // to acquire the write lock whilst holding a read lock
-            this.lock.readLock().unlock();
         }
 
-        this.lock.writeLock().lock();
-        try {
-            // Since the lock was unlocked momentarily, we need
-            // to check again for a cached value
-            if (this.cached != null) {
-                return this.cached;
-            }
-
-            // call the supplier and set the cached value
-            this.cached = supply();
-            return this.cached;
-        } finally {
-            this.lock.writeLock().unlock();
-        }
+        return val;
     }
 
     public final Optional<T> getIfPresent() {
-        this.lock.readLock().lock();
-        try {
-            return Optional.ofNullable(this.cached);
-        } finally {
-            this.lock.readLock().unlock();
-        }
+        return Optional.ofNullable(this.value);
     }
 
     public final void invalidate() {
-        this.lock.writeLock().lock();
-        try {
-            this.cached = null;
-        } finally {
-            this.lock.writeLock().unlock();
-        }
+        this.value = null;
     }
 }

@@ -23,44 +23,32 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.managers.group;
+package me.lucko.luckperms.api.nodetype.types;
 
-import me.lucko.luckperms.common.managers.AbstractManager;
-import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.nodetype.NodeType;
+import me.lucko.luckperms.api.nodetype.NodeTypeKey;
 
-import java.util.Optional;
+import javax.annotation.Nonnull;
 
-public abstract class AbstractGroupManager<T extends Group> extends AbstractManager<String, Group, T> implements GroupManager<T> {
+/**
+ * A sub-type of {@link Node} used to mark the display name of the node's holder.
+ *
+ * @since 4.2
+ */
+public interface DisplayNameType extends NodeType {
 
-    @Override
-    public T getByDisplayName(String name) {
-        // try to get an exact match first
-        T g = getIfLoaded(name);
-        if (g != null) {
-            return g;
-        }
+    /**
+     * The key for this type.
+     */
+    NodeTypeKey<DisplayNameType> KEY = new NodeTypeKey<DisplayNameType>(){};
 
-        // then try exact display name matches
-        for (T group : getAll().values()) {
-            Optional<String> displayName = group.getDisplayName();
-            if (displayName.isPresent() && displayName.get().equals(name)) {
-                return group;
-            }
-        }
+    /**
+     * Gets the display name.
+     *
+     * @return the display name
+     */
+    @Nonnull
+    String getDisplayName();
 
-        // then try case insensitive name matches
-        for (T group : getAll().values()) {
-            Optional<String> displayName = group.getDisplayName();
-            if (displayName.isPresent() && displayName.get().equalsIgnoreCase(name)) {
-                return group;
-            }
-        }
-
-        return null;
-    }
-
-    @Override
-    protected String sanitizeIdentifier(String s) {
-        return s.toLowerCase();
-    }
 }

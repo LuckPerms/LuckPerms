@@ -53,6 +53,7 @@ import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -363,6 +364,7 @@ public final class NodeMap {
             this.handle = handle;
         }
 
+        @Nonnull
         @Override
         protected ImmutableSetMultimap<ImmutableContextSet, Node> supply() {
             this.handle.lock.lock();

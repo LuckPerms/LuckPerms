@@ -26,12 +26,12 @@
 package me.lucko.luckperms.common.model;
 
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.nodetype.types.DisplayNameType;
 import me.lucko.luckperms.common.api.delegates.model.ApiGroup;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.Cache;
 import me.lucko.luckperms.common.caching.GroupCachedData;
-import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Optional;
@@ -47,10 +47,14 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     private final String name;
 
     /**
-     * Caches the holders weight
-     * @see #getWeight()
+     * Caches the groups weight
      */
     private final Cache<OptionalInt> weightCache = new WeightCache(this);
+
+    /**
+     * Caches the groups display name
+     */
+    private final Cache<Optional<String>> displayNameCache = new DisplayNameCache(this);
 
     /**
      * The groups data cache instance
@@ -77,6 +81,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     @Override
     protected void invalidateCache() {
         this.weightCache.invalidate();
+        this.displayNameCache.invalidate();
         super.invalidateCache();
     }
 
@@ -104,22 +109,17 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     }
 
     public Optional<String> getDisplayName() {
-        String name = null;
-        for (Node n : enduringData().immutable().get(ImmutableContextSet.empty())) {
-            if (!n.getPermission().startsWith("displayname.")) {
-                continue;
+        return this.displayNameCache.get();
+    }
+
+    public Optional<String> getDisplayName(ContextSet contextSet) {
+        for (Node n : getData(NodeMapType.ENDURING).immutable().get(contextSet.makeImmutable())) {
+            Optional<DisplayNameType> displayName = n.getTypeData(DisplayNameType.KEY);
+            if (displayName.isPresent()) {
+                return Optional.of(displayName.get().getDisplayName());
             }
-
-            name = n.getPermission().substring("displayname.".length());
-            break;
         }
-
-        if (name != null) {
-            return Optional.of(name);
-        }
-
-        name = getPlugin().getConfiguration().get(ConfigKeys.GROUP_NAME_REWRITES).get(getObjectName());
-        return name == null || name.equals(getObjectName()) ? Optional.empty() : Optional.of(name);
+        return Optional.empty();
     }
 
     @Override

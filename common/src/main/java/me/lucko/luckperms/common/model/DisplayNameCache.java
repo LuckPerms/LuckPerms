@@ -23,44 +23,40 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.managers.group;
+package me.lucko.luckperms.common.model;
 
-import me.lucko.luckperms.common.managers.AbstractManager;
-import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.nodetype.types.DisplayNameType;
+import me.lucko.luckperms.common.buffers.Cache;
+import me.lucko.luckperms.common.config.ConfigKeys;
 
 import java.util.Optional;
 
-public abstract class AbstractGroupManager<T extends Group> extends AbstractManager<String, Group, T> implements GroupManager<T> {
+import javax.annotation.Nonnull;
 
-    @Override
-    public T getByDisplayName(String name) {
-        // try to get an exact match first
-        T g = getIfLoaded(name);
-        if (g != null) {
-            return g;
-        }
+/**
+ * Cache instance to supply the display name of a {@link Group}.
+ */
+public class DisplayNameCache extends Cache<Optional<String>> {
+    private final Group group;
 
-        // then try exact display name matches
-        for (T group : getAll().values()) {
-            Optional<String> displayName = group.getDisplayName();
-            if (displayName.isPresent() && displayName.get().equals(name)) {
-                return group;
-            }
-        }
-
-        // then try case insensitive name matches
-        for (T group : getAll().values()) {
-            Optional<String> displayName = group.getDisplayName();
-            if (displayName.isPresent() && displayName.get().equalsIgnoreCase(name)) {
-                return group;
-            }
-        }
-
-        return null;
+    public DisplayNameCache(Group group) {
+        this.group = group;
     }
 
+    @Nonnull
     @Override
-    protected String sanitizeIdentifier(String s) {
-        return s.toLowerCase();
+    protected Optional<String> supply() {
+        // query for a displayname node
+        for (Node n : this.group.getOwnNodes(this.group.getPlugin().getContextManager().getStaticContext())) {
+            Optional<DisplayNameType> displayName = n.getTypeData(DisplayNameType.KEY);
+            if (displayName.isPresent()) {
+                return Optional.of(displayName.get().getDisplayName());
+            }
+        }
+
+        // fallback to config
+        String name = this.group.getPlugin().getConfiguration().get(ConfigKeys.GROUP_NAME_REWRITES).get(this.group.getObjectName());
+        return name == null || name.equals(this.group.getObjectName()) ? Optional.empty() : Optional.of(name);
     }
 }

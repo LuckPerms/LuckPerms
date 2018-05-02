@@ -169,7 +169,8 @@ public enum CommandSpec {
     ),
     GROUP_SET_DISPLAY_NAME("Set the groups display name",
             Argument.list(
-                    Argument.create("name", true, "the name to set")
+                    Argument.create("name", true, "the name to set"),
+                    Argument.create("context...", false, "the contexts to set the name in")
             )
     ),
     GROUP_RENAME("Rename the group",

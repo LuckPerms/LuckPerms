@@ -35,8 +35,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import javax.annotation.Nonnull;
+
 /**
- * Cache instance to supply the weight of a {@link PermissionHolder}.
+ * Cache instance to supply the weight of a {@link Group}.
  */
 public class WeightCache extends Cache<OptionalInt> {
     private final Group group;
@@ -45,6 +47,7 @@ public class WeightCache extends Cache<OptionalInt> {
         this.group = group;
     }
 
+    @Nonnull
     @Override
     protected OptionalInt supply() {
         boolean seen = false;
