@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.common.caching;
 
+import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Contexts;
@@ -43,7 +43,6 @@ import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStack;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -51,6 +50,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Abstract implementation of {@link CachedData}.
@@ -65,16 +65,16 @@ public abstract class AbstractCachedData implements CachedData {
     /**
      * The cache used for {@link PermissionCache} instances.
      */
-    private final LoadingCache<Contexts, PermissionCache> permission = Caffeine.newBuilder()
+    private final AsyncLoadingCache<Contexts, PermissionCache> permission = Caffeine.newBuilder()
             .expireAfterAccess(2, TimeUnit.MINUTES)
-            .build(new PermissionCacheLoader());
+            .buildAsync(new PermissionCacheLoader());
 
     /**
      * The cache used for {@link MetaCache} instances.
      */
-    private final LoadingCache<MetaContexts, MetaCache> meta = Caffeine.newBuilder()
+    private final AsyncLoadingCache<MetaContexts, MetaCache> meta = Caffeine.newBuilder()
             .expireAfterAccess(2, TimeUnit.MINUTES)
-            .build(new MetaCacheLoader());
+            .buildAsync(new MetaCacheLoader());
 
     public AbstractCachedData(LuckPermsPlugin plugin) {
         this.plugin = plugin;
@@ -190,7 +190,7 @@ public abstract class AbstractCachedData implements CachedData {
         Objects.requireNonNull(contexts, "contexts");
 
         //noinspection ConstantConditions
-        return this.permission.get(contexts);
+        return this.permission.get(contexts).join();
     }
 
     @Nonnull
@@ -199,7 +199,7 @@ public abstract class AbstractCachedData implements CachedData {
         Objects.requireNonNull(contexts, "contexts");
 
         //noinspection ConstantConditions
-        return this.meta.get(contexts);
+        return this.meta.get(contexts).join();
     }
 
     @Nonnull
@@ -233,13 +233,13 @@ public abstract class AbstractCachedData implements CachedData {
     @Override
     public void recalculatePermissions(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
-        this.permission.refresh(contexts);
+        this.permission.synchronous().refresh(contexts);
     }
 
     @Override
     public void recalculateMeta(@Nonnull MetaContexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
-        this.meta.refresh(contexts);
+        this.meta.synchronous().refresh(contexts);
     }
 
     @Override
@@ -254,13 +254,19 @@ public abstract class AbstractCachedData implements CachedData {
         Objects.requireNonNull(contexts, "contexts");
 
         // get the previous value - to use when recalculating
-        PermissionCache previous = this.permission.getIfPresent(contexts);
+        CompletableFuture<PermissionCache> previous = this.permission.getIfPresent(contexts);
 
-        // invalidate the entry
-        this.permission.invalidate(contexts);
+        // invalidate any previous setting
+        this.permission.synchronous().invalidate(contexts);
 
-        // repopulate the cache
-        return CompletableFuture.supplyAsync(() -> this.permission.get(contexts, c -> calculatePermissions(c, previous)));
+        // if the previous value is already calculated, use it when recalculating.
+        PermissionCache value = getIfReady(previous);
+        if (value != null) {
+            return this.permission.get(contexts, c -> calculatePermissions(c, value));
+        }
+
+        // otherwise, just calculate a new value
+        return this.permission.get(contexts);
     }
 
     @Nonnull
@@ -269,13 +275,19 @@ public abstract class AbstractCachedData implements CachedData {
         Objects.requireNonNull(contexts, "contexts");
 
         // get the previous value - to use when recalculating
-        MetaCache previous = this.meta.getIfPresent(contexts);
+        CompletableFuture<MetaCache> previous = this.meta.getIfPresent(contexts);
 
-        // invalidate the entry
-        this.meta.invalidate(contexts);
+        // invalidate any previous setting
+        this.meta.synchronous().invalidate(contexts);
 
-        // repopulate the cache
-        return CompletableFuture.supplyAsync(() -> this.meta.get(contexts, c -> calculateMeta(c, previous)));
+        // if the previous value is already calculated, use it when recalculating.
+        MetaCache value = getIfReady(previous);
+        if (value != null) {
+            return this.meta.get(contexts, c -> calculateMeta(c, value));
+        }
+
+        // otherwise, just calculate a new value
+        return this.meta.get(contexts);
     }
 
     @Nonnull
@@ -287,28 +299,32 @@ public abstract class AbstractCachedData implements CachedData {
 
     @Override
     public void recalculatePermissions() {
-        Set<Contexts> keys = this.permission.asMap().keySet();
+        Set<Contexts> keys = this.permission.synchronous().asMap().keySet();
         keys.forEach(this::recalculatePermissions);
     }
 
     @Override
     public void recalculateMeta() {
-        Set<MetaContexts> keys = this.meta.asMap().keySet();
+        Set<MetaContexts> keys = this.meta.synchronous().asMap().keySet();
         keys.forEach(this::recalculateMeta);
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Void> reloadPermissions() {
-        Set<Contexts> keys = new HashSet<>(this.permission.asMap().keySet());
+        Set<Contexts> keys = this.permission.synchronous().asMap().keySet();
         return CompletableFuture.allOf(keys.stream().map(this::reloadPermissions).toArray(CompletableFuture[]::new));
     }
 
     @Nonnull
     @Override
     public CompletableFuture<Void> reloadMeta() {
-        Set<MetaContexts> keys = new HashSet<>(this.meta.asMap().keySet());
+        Set<MetaContexts> keys = this.meta.synchronous().asMap().keySet();
         return CompletableFuture.allOf(keys.stream().map(this::reloadMeta).toArray(CompletableFuture[]::new));
+    }
+
+    public CompletableFuture<Void> reloadAll() {
+        return CompletableFuture.allOf(reloadPermissions(), reloadMeta());
     }
 
     @Override
@@ -324,34 +340,45 @@ public abstract class AbstractCachedData implements CachedData {
     @Override
     public void invalidatePermissions(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
-        this.permission.invalidate(contexts);
+        this.permission.synchronous().invalidate(contexts);
     }
 
     @Override
     public void invalidateMeta(@Nonnull MetaContexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
-        this.meta.invalidate(contexts);
+        this.meta.synchronous().invalidate(contexts);
     }
 
     @Override
     public void invalidateMeta(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
-        this.meta.invalidate(getDefaultMetaContexts(contexts));
+        this.meta.synchronous().invalidate(getDefaultMetaContexts(contexts));
     }
 
     @Override
     public void invalidatePermissionCalculators() {
-        this.permission.asMap().values().forEach(PermissionCache::invalidateCache);
+        this.permission.synchronous().asMap().values().forEach(PermissionCache::invalidateCache);
     }
 
     public void invalidateCaches() {
-        this.permission.invalidateAll();
-        this.meta.invalidateAll();
+        this.permission.synchronous().invalidateAll();
+        this.meta.synchronous().invalidateAll();
     }
 
     public void doCacheCleanup() {
-        this.permission.cleanUp();
-        this.meta.cleanUp();
+        this.permission.synchronous().cleanUp();
+        this.meta.synchronous().cleanUp();
+    }
+
+    private static boolean isReady(@Nullable CompletableFuture<?> future) {
+        return (future != null) && future.isDone()
+                && !future.isCompletedExceptionally()
+                && (future.join() != null);
+    }
+
+    /** Returns the current value or null if either not done or failed. */
+    private static <V> V getIfReady(@Nullable CompletableFuture<V> future) {
+        return isReady(future) ? future.join() : null;
     }
 
     private final class PermissionCacheLoader implements CacheLoader<Contexts, PermissionCache> {

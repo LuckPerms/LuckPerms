@@ -49,6 +49,13 @@ public class SpongeUser extends User implements SpongePermissionHolder {
     }
 
     @Override
+    protected void invalidateCache() {
+        super.invalidateCache();
+
+        this.spongeData.fireUpdateEvent();
+    }
+
+    @Override
     public UserSubject sponge() {
         return this.spongeData;
     }

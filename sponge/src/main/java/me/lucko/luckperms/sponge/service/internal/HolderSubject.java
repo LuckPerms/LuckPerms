@@ -66,12 +66,11 @@ public abstract class HolderSubject<T extends PermissionHolder> implements LPSub
         this.plugin = plugin;
         this.subjectData = new HolderSubjectData(plugin.getService(), NodeMapType.ENDURING, parent, this);
         this.transientSubjectData = new HolderSubjectData(plugin.getService(), NodeMapType.TRANSIENT, parent, this);
+    }
 
-        // fire update event
-        parent.getStateListeners().add(() -> {
-            plugin.getUpdateEventHandler().fireUpdateEvent(this.subjectData);
-            plugin.getUpdateEventHandler().fireUpdateEvent(this.transientSubjectData);
-        });
+    public void fireUpdateEvent() {
+        this.plugin.getUpdateEventHandler().fireUpdateEvent(this.subjectData);
+        this.plugin.getUpdateEventHandler().fireUpdateEvent(this.transientSubjectData);
     }
 
     public T getParent() {

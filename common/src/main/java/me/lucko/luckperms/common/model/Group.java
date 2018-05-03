@@ -29,7 +29,6 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.nodetype.types.DisplayNameType;
 import me.lucko.luckperms.common.api.delegates.model.ApiGroup;
-import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.Cache;
 import me.lucko.luckperms.common.caching.GroupCachedData;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -61,32 +60,64 @@ public class Group extends PermissionHolder implements Identifiable<String> {
      */
     private final GroupCachedData cachedData;
 
-    /**
-     * The group's cached data refresh buffer
-     */
-    private final GroupRefreshBuffer refreshBuffer;
-
     public Group(String name, LuckPermsPlugin plugin) {
-        super(name, plugin);
+        super(plugin);
         this.name = name.toLowerCase();
 
-        this.refreshBuffer = new GroupRefreshBuffer(plugin, this);
         this.cachedData = new GroupCachedData(this);
         getPlugin().getEventFactory().handleGroupCacheLoad(this, this.cachedData);
-
-        // invalidate our caches when data is updated
-        getStateListeners().add(this.refreshBuffer::request);
     }
 
     @Override
     protected void invalidateCache() {
+        super.invalidateCache();
+
+        // invalidate our caches
         this.weightCache.invalidate();
         this.displayNameCache.invalidate();
-        super.invalidateCache();
     }
 
+    // name getters
     public String getName() {
         return this.name;
+    }
+
+    @Override
+    public String getObjectName() {
+        return this.name;
+    }
+
+    @Override
+    public String getId() {
+        return this.name;
+    }
+
+    @Override
+    public String getFriendlyName() {
+        Optional<String> dn = getDisplayName();
+        return dn.map(s -> this.name + " (" + s + ")").orElse(this.name);
+    }
+
+    public Optional<String> getDisplayName() {
+        return this.displayNameCache.get();
+    }
+
+    /**
+     * Gets a display name value exactly matching a specific context.
+     *
+     * <p>Note that the behaviour of {@link #getDisplayName()} is not the same as this.</p>
+     *
+     * @param contextSet the contexts to lookup in
+     * @return the display name
+     */
+    public Optional<String> getDisplayName(ContextSet contextSet) {
+        for (Node n : getData(NodeMapType.ENDURING).immutable().get(contextSet.makeImmutable())) {
+            Optional<DisplayNameType> displayName = n.getTypeData(DisplayNameType.KEY);
+            if (displayName.isPresent()) {
+                return Optional.of(displayName.get().getDisplayName());
+            }
+        }
+        return Optional.empty();
     }
 
     public ApiGroup getApiDelegate() {
@@ -99,36 +130,6 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     }
 
     @Override
-    public BufferedRequest<Void> getRefreshBuffer() {
-        return this.refreshBuffer;
-    }
-
-    @Override
-    public String getId() {
-        return this.name;
-    }
-
-    public Optional<String> getDisplayName() {
-        return this.displayNameCache.get();
-    }
-
-    public Optional<String> getDisplayName(ContextSet contextSet) {
-        for (Node n : getData(NodeMapType.ENDURING).immutable().get(contextSet.makeImmutable())) {
-            Optional<DisplayNameType> displayName = n.getTypeData(DisplayNameType.KEY);
-            if (displayName.isPresent()) {
-                return Optional.of(displayName.get().getDisplayName());
-            }
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public String getFriendlyName() {
-        Optional<String> dn = getDisplayName();
-        return dn.map(s -> this.name + " (" + s + ")").orElse(this.name);
-    }
-
-    @Override
     public OptionalInt getWeight() {
         return this.weightCache.get();
     }
@@ -138,11 +139,10 @@ public class Group extends PermissionHolder implements Identifiable<String> {
         return HolderType.GROUP;
     }
 
-    private CompletableFuture<Void> reloadCachedData() {
-        return CompletableFuture.allOf(
-                this.cachedData.reloadPermissions(),
-                this.cachedData.reloadMeta()
-        ).thenAccept(n -> getPlugin().getEventFactory().handleGroupDataRecalculate(this, this.cachedData));
+    @Override
+    public CompletableFuture<Void> reloadCachedData() {
+        return this.cachedData.reloadAll()
+                .thenAccept(n -> getPlugin().getEventFactory().handleGroupDataRecalculate(this, this.cachedData));
     }
 
     @Override
@@ -161,20 +161,6 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     @Override
     public String toString() {
         return "Group(name=" + this.name + ")";
-    }
-
-    private static final class GroupRefreshBuffer extends BufferedRequest<Void> {
-        private final Group group;
-
-        private GroupRefreshBuffer(LuckPermsPlugin plugin, Group group) {
-            super(50L, 5L, plugin.getBootstrap().getScheduler().async());
-            this.group = group;
-        }
-
-        @Override
-        protected Void perform() {
-            return this.group.reloadCachedData().join();
-        }
     }
 
 }

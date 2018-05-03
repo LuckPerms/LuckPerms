@@ -86,11 +86,6 @@ public class SpongeConfigAdapter extends AbstractConfigurationAdapter implements
     }
 
     @Override
-    public boolean contains(String path) {
-        return !resolvePath(path).isVirtual();
-    }
-
-    @Override
     public String getString(String path, String def) {
         return resolvePath(path).getString(def);
     }

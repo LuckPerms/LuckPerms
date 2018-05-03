@@ -62,11 +62,6 @@ public class BungeeConfigAdapter extends AbstractConfigurationAdapter implements
     }
 
     @Override
-    public boolean contains(String path) {
-        return this.configuration.contains(path);
-    }
-
-    @Override
     public String getString(String path, String def) {
         return this.configuration.getString(path, def);
     }

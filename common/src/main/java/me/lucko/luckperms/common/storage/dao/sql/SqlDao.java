@@ -356,7 +356,7 @@ public class SqlDao extends AbstractDao {
         } finally {
             user.getIoLock().unlock();
         }
-        user.getRefreshBuffer().requestDirectly();
+        user.reloadCachedData().join();
         return user;
     }
 
@@ -595,7 +595,7 @@ public class SqlDao extends AbstractDao {
         } finally {
             group.getIoLock().unlock();
         }
-        group.getRefreshBuffer().requestDirectly();
+        group.reloadCachedData().join();
         return Optional.of(group);
     }
 

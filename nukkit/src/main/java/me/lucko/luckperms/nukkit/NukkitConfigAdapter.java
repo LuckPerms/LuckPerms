@@ -56,11 +56,6 @@ public class NukkitConfigAdapter extends AbstractConfigurationAdapter implements
     }
 
     @Override
-    public boolean contains(String path) {
-        return this.configuration.exists(path);
-    }
-
-    @Override
     public String getString(String path, String def) {
         return this.configuration.getString(path, def);
     }

@@ -26,16 +26,15 @@
 package me.lucko.luckperms.common.primarygroup;
 
 import me.lucko.luckperms.common.buffers.Cache;
-import me.lucko.luckperms.common.caching.handlers.StateListener;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 
 import javax.annotation.Nonnull;
 
 /**
- * Abstract implementation of {@link StateListener} which caches all lookups.
+ * Abstract implementation of {@link PrimaryGroupHolder} which caches all lookups.
  */
-public abstract class CachedPrimaryGroupHolder extends StoredHolder implements StateListener {
+public abstract class CachedPrimaryGroupHolder extends StoredHolder {
 
     // cache lookups
     private final Cache<String> cache = new Cache<String>() {
@@ -48,20 +47,18 @@ public abstract class CachedPrimaryGroupHolder extends StoredHolder implements S
 
     public CachedPrimaryGroupHolder(User user) {
         super(user);
-        user.getStateListeners().add(this);
     }
 
     protected abstract String calculateValue();
+
+    public void invalidate() {
+        this.cache.invalidate();;
+    }
 
     @Override
     public final String getValue() {
         String s = this.cache.get();
         return s != null ? s : getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME);
-    }
-
-    @Override
-    public void onStateChange() {
-        this.cache.invalidate();
     }
 
 }

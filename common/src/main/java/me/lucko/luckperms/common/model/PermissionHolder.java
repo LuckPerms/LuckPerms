@@ -40,9 +40,7 @@ import me.lucko.luckperms.api.StandardNodeEquality;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.caching.HolderCachedData;
-import me.lucko.luckperms.common.caching.handlers.StateListener;
 import me.lucko.luckperms.common.caching.type.MetaAccumulator;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.inheritance.InheritanceComparator;
@@ -67,7 +65,7 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
@@ -94,18 +92,6 @@ import java.util.function.Predicate;
  * and the potential for very large inheritance trees.</p>
  */
 public abstract class PermissionHolder {
-
-    /**
-     * The name of this object.
-     *
-     * <p>Used as a base for identifying permission holding objects. Also acts
-     * as a method for preventing circular inheritance issues.</p>
-     *
-     * @see User#getUuid()
-     * @see Group#getName()
-     * @see #getObjectName()
-     */
-    private final String objectName;
 
     /**
      * Reference to the main plugin instance
@@ -146,18 +132,15 @@ public abstract class PermissionHolder {
     private final Comparator<Group> inheritanceComparator = InheritanceComparator.getFor(this);
 
     /**
-     * A set of runnables which are called when this objects state changes.
+     * Creates a new instance
+     *
+     * @param plugin the plugin instance
      */
-    private final Set<StateListener> stateListeners = ConcurrentHashMap.newKeySet();
-
-    protected PermissionHolder(String objectName, LuckPermsPlugin plugin) {
-        this.objectName = objectName;
+    protected PermissionHolder(LuckPermsPlugin plugin) {
         this.plugin = plugin;
     }
 
-    public String getObjectName() {
-        return this.objectName;
-    }
+    // getters
 
     public LuckPermsPlugin getPlugin() {
         return this.plugin;
@@ -166,52 +149,6 @@ public abstract class PermissionHolder {
     public Lock getIoLock() {
         return this.ioLock;
     }
-
-    public Set<StateListener> getStateListeners() {
-        return this.stateListeners;
-    }
-
-    protected void invalidateCache() {
-        this.enduringNodes.invalidate();
-        this.transientNodes.invalidate();
-
-        // Invalidate listeners
-        for (StateListener listener : this.stateListeners) {
-            try {
-                listener.onStateChange();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * Gets the friendly name of this permission holder (for use in commands, etc)
-     *
-     * @return the holders "friendly" name
-     */
-    public abstract String getFriendlyName();
-
-    /**
-     * Gets the holders cached data
-     *
-     * @return the holders cached data
-     */
-    public abstract HolderCachedData<?> getCachedData();
-
-    /**
-     * Gets the holders refresh buffer
-     *
-     * @return the holders refresh buffer
-     */
-    public abstract BufferedRequest<Void> getRefreshBuffer();
-
-    /**
-     * Returns the type of this PermissionHolder.
-     *
-     * @return this holders type
-     */
-    public abstract HolderType getType();
 
     public Comparator<Group> getInheritanceComparator() {
         return this.inheritanceComparator;
@@ -234,6 +171,51 @@ public abstract class PermissionHolder {
 
     public NodeMap transientData() {
         return this.transientNodes;
+    }
+
+    /**
+     * Gets the unique name of this holder object.
+     *
+     * <p>Used as a base for identifying permission holding objects. Also acts
+     * as a method for preventing circular inheritance issues.</p>
+     *
+     * @return the object name
+     */
+    public abstract String getObjectName();
+
+    /**
+     * Gets the friendly name of this permission holder (for use in commands, etc)
+     *
+     * @return the holders "friendly" name
+     */
+    public abstract String getFriendlyName();
+
+    /**
+     * Gets the holders cached data
+     *
+     * @return the holders cached data
+     */
+    public abstract HolderCachedData<?> getCachedData();
+
+    /**
+     * Returns the type of this PermissionHolder.
+     *
+     * @return this holders type
+     */
+    public abstract HolderType getType();
+
+    /**
+     * Reloads the holder's cached data.
+     *
+     * @return a future encapsulating the result
+     */
+    public abstract CompletableFuture<Void> reloadCachedData();
+
+    protected void invalidateCache() {
+        this.enduringNodes.invalidate();
+        this.transientNodes.invalidate();
+
+        reloadCachedData();
     }
 
     public void setNodes(NodeMapType type, Set<Node> set) {

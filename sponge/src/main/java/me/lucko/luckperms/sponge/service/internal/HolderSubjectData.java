@@ -450,7 +450,7 @@ public class HolderSubjectData implements LPSubjectData {
             // don't bother saving to primary storage. just refresh
             if (t.getType().isUser()) {
                 User user = ((User) t);
-                return user.getRefreshBuffer().request();
+                return user.reloadCachedData();
             } else {
                 return this.service.getPlugin().getUpdateTaskBuffer().request();
             }
@@ -465,7 +465,7 @@ public class HolderSubjectData implements LPSubjectData {
                     fut.complete(null);
                 }
 
-                user.getRefreshBuffer().request().thenAccept(fut::complete);
+                user.reloadCachedData().thenAccept(fut::complete);
             }, this.service.getPlugin().getBootstrap().getScheduler().async());
             return fut;
         } else {

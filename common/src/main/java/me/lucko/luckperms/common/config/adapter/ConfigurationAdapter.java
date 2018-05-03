@@ -36,8 +36,6 @@ public interface ConfigurationAdapter {
 
     void reload();
 
-    boolean contains(String path);
-
     String getString(String path, String def);
 
     int getInt(String path, int def);
