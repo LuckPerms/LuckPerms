@@ -151,7 +151,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
             t.printStackTrace();
         }
 
-        this.plugin.refreshAutoOp(user, player);
+        this.plugin.refreshAutoOp(player);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -160,24 +160,13 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
            If the connection was cancelled here, we need to do something to clean up the data that was loaded. */
 
         // Check to see if this connection was denied at LOW. Even if it was denied at LOW, their data will still be present.
-        boolean denied = false;
         if (this.deniedLogin.remove(e.getPlayer().getUniqueId())) {
-            denied = true;
-
             // This is a problem, as they were denied at low priority, but are now being allowed.
             if (e.getResult() == PlayerLoginEvent.Result.ALLOWED) {
                 this.plugin.getLogger().severe("Player connection was re-allowed for " + e.getPlayer().getUniqueId());
                 e.disallow(PlayerLoginEvent.Result.KICK_OTHER, "");
             }
         }
-
-        // Login event was cancelled by another plugin since we first loaded their data
-        if (denied || e.getResult() != PlayerLoginEvent.Result.ALLOWED) {
-            return;
-        }
-
-        // everything is going well. login was processed ok, this is just to refresh auto-op status.
-        this.plugin.refreshAutoOp(this.plugin.getUserManager().getIfLoaded(e.getPlayer().getUniqueId()), e.getPlayer());
     }
 
     // Wait until the last priority to unload, so plugins can still perform permission checks on this event

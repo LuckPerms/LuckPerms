@@ -95,7 +95,7 @@ public class BukkitPlatformListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onWorldChange(PlayerChangedWorldEvent e) {
         this.plugin.getContextManager().invalidateCache(e.getPlayer());
-        this.plugin.refreshAutoOp(this.plugin.getUserManager().getIfLoaded(e.getPlayer().getUniqueId()), e.getPlayer());
+        this.plugin.refreshAutoOp(e.getPlayer());
     }
 
 }

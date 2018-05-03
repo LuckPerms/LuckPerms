@@ -27,6 +27,7 @@ package me.lucko.luckperms.bukkit;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LuckPermsApi;
+import me.lucko.luckperms.api.event.user.UserDataRecalculateEvent;
 import me.lucko.luckperms.bukkit.calculators.BukkitCalculatorFactory;
 import me.lucko.luckperms.bukkit.contexts.BukkitContextManager;
 import me.lucko.luckperms.bukkit.contexts.WorldCalculator;
@@ -44,6 +45,7 @@ import me.lucko.luckperms.bukkit.model.server.LPPermissionMap;
 import me.lucko.luckperms.bukkit.model.server.LPSubscriptionMap;
 import me.lucko.luckperms.bukkit.vault.VaultHookManager;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
+import me.lucko.luckperms.common.api.delegates.model.ApiUser;
 import me.lucko.luckperms.common.calculators.PlatformCalculatorFactory;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -62,6 +64,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
@@ -229,8 +232,22 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
             // this throws an exception if the plugin is /reloaded, grr
         }
 
+        // remove all operators on startup if they're disabled
         if (!getConfiguration().get(ConfigKeys.OPS_ENABLED)) {
-            this.bootstrap.getScheduler().doSync(() -> this.bootstrap.getServer().getOperators().forEach(o -> o.setOp(false)));
+            this.bootstrap.getScheduler().platformAsync().execute(() -> {
+                for (OfflinePlayer player : this.bootstrap.getServer().getOperators()) {
+                    player.setOp(false);
+                }
+            });
+        }
+
+        // register autoop listener
+        if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
+            getApiProvider().getEventBus().subscribe(UserDataRecalculateEvent.class, event -> {
+                User user = ApiUser.cast(event.getUser());
+                Optional<Player> player = getBootstrap().getPlayer(user.getUuid());
+                player.ifPresent(this::refreshAutoOp);
+            });
         }
 
         // replace the temporary executor when the Bukkit one starts
@@ -296,15 +313,16 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
         }
     }
 
-    public void refreshAutoOp(User user, Player player) {
-        if (user == null) {
-            return;
-        }
-
+    public void refreshAutoOp(Player player) {
         if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
-            Map<String, Boolean> backing = user.getCachedData().getPermissionData(this.contextManager.getApplicableContexts(player)).getImmutableBacking();
-            boolean op = Optional.ofNullable(backing.get("luckperms.autoop")).orElse(false);
-            player.setOp(op);
+            User user = getUserManager().getIfLoaded(player.getUniqueId());
+            if (user == null) {
+                player.setOp(false);
+                return;
+            }
+
+            Map<String, Boolean> permData = user.getCachedData().getPermissionData(this.contextManager.getApplicableContexts(player)).getImmutableBacking();
+            player.setOp(permData.getOrDefault("luckperms.autoop", false));
         }
     }
 

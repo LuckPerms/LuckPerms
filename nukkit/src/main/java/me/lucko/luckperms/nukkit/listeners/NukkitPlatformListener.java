@@ -90,7 +90,7 @@ public class NukkitPlatformListener implements Listener {
         if (e.getEntity() instanceof Player) {
             Player player = (Player) e.getEntity();
             this.plugin.getContextManager().invalidateCache(player);
-            this.plugin.refreshAutoOp(this.plugin.getUserManager().getIfLoaded(player.getUniqueId()), player);
+            this.plugin.refreshAutoOp(player);
         }
     }
 
