@@ -178,9 +178,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
         // set the transient node
         User user = this.permissible.getUser();
-        if (user.setTransientPermission(transientNode).asBoolean()) {
-            user.reloadCachedData();
-        }
+        user.setTransientPermission(transientNode);
     }
 
     private void unsetPermissionInternal(String name) {
@@ -190,17 +188,13 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
         // remove transient permissions from the holder which were added by this attachment & equal the permission
         User user = this.permissible.getUser();
-        if (user.removeIfTransient(n -> n instanceof ImmutableTransientNode && ((ImmutableTransientNode) n).getOwner() == this && n.getPermission().equals(name))) {
-            user.reloadCachedData();
-        }
+        user.removeIfTransient(n -> n instanceof ImmutableTransientNode && ((ImmutableTransientNode) n).getOwner() == this && n.getPermission().equals(name));
     }
 
     private void clearInternal() {
         // remove all transient permissions added by this attachment
         User user = this.permissible.getUser();
-        if (user.removeIfTransient(n -> n instanceof ImmutableTransientNode && ((ImmutableTransientNode) n).getOwner() == this)) {
-            user.reloadCachedData();
-        }
+        user.removeIfTransient(n -> n instanceof ImmutableTransientNode && ((ImmutableTransientNode) n).getOwner() == this);
     }
 
     @Override

@@ -63,7 +63,6 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
@@ -203,17 +202,18 @@ public abstract class PermissionHolder {
     public abstract HolderType getType();
 
     /**
-     * Reloads the holder's cached data.
-     *
-     * @return a future encapsulating the result
+     * Invalidates the holder's cached data.
      */
-    public abstract CompletableFuture<Void> reloadCachedData();
+    public void invalidateCachedData() {
+        getCachedData().invalidateCaches();
+    }
 
     protected void invalidateCache() {
         this.enduringNodes.invalidate();
         this.transientNodes.invalidate();
 
-        reloadCachedData();
+        invalidateCachedData();
+        getPlugin().getEventFactory().handleDataRecalculate(this);
     }
 
     public void setNodes(NodeMapType type, Set<? extends Node> set) {

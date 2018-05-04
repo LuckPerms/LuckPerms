@@ -99,13 +99,13 @@ public final class ApiUser extends ApiPermissionHolder implements me.lucko.luckp
     @Override
     @Deprecated
     public void refreshPermissions() {
-        this.handle.reloadCachedData().join();
+
     }
 
     @Override
     @Deprecated
     public void setupDataCache() {
-        this.handle.preCalculateData();
+
     }
 
     @Override

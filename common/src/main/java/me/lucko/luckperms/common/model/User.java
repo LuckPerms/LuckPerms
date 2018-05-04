@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.model;
 
-import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.common.api.delegates.model.ApiUser;
 import me.lucko.luckperms.common.caching.UserCachedData;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -34,11 +34,11 @@ import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
 
 public class User extends PermissionHolder implements Identifiable<UserIdentifier> {
+    private final ApiUser apiDelegate = new ApiUser(this);
 
     /**
      * The users Mojang UUID
@@ -109,6 +109,10 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         return this.name != null ? this.name : this.uuid.toString();
     }
 
+    public ApiUser getApiDelegate() {
+        return this.apiDelegate;
+    }
+
     @Override
     public UserCachedData getCachedData() {
         return this.cachedData;
@@ -170,26 +174,6 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     @Override
     public HolderType getType() {
         return HolderType.USER;
-    }
-
-    /**
-     * Sets up the UserData cache
-     * Blocking call.
-     */
-    public void preCalculateData() {
-        // first try to refresh any existing permissions
-        reloadCachedData().join();
-
-        // pre-calc the allowall & global contexts
-        // since contexts change so frequently, it's not worth trying to calculate any more than this.
-        this.cachedData.preCalculate(Contexts.allowAll());
-        this.cachedData.preCalculate(Contexts.global());
-    }
-
-    @Override
-    public CompletableFuture<Void> reloadCachedData() {
-        return this.cachedData.reloadAll()
-                .thenAccept(n -> getPlugin().getEventFactory().handleUserDataRecalculate(this, this.cachedData));
     }
 
     /**

@@ -202,7 +202,7 @@ public class SubjectStorage {
 
         try (BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
             JsonObject data = this.gson.fromJson(reader, JsonObject.class);
-            SubjectDataContainer model = SubjectDataContainer.derserialize(this.service, data);
+            SubjectDataContainer model = SubjectDataContainer.deserialize(this.service, data);
             return new LoadedSubject(subjectName, model);
         }
     }

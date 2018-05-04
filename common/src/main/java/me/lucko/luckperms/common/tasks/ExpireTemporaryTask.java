@@ -56,9 +56,6 @@ public class ExpireTemporaryTask implements Runnable {
             }
             if (user.auditTemporaryPermissions()) {
                 this.plugin.getStorage().saveUser(user);
-                if (!groupChanges) {
-                    user.reloadCachedData();
-                }
             }
         }
 

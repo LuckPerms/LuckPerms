@@ -287,7 +287,6 @@ public class MongoDao extends AbstractDao {
         } finally {
             user.getIoLock().unlock();
         }
-        user.reloadCachedData().join();
         return user;
     }
 
@@ -358,7 +357,6 @@ public class MongoDao extends AbstractDao {
         } finally {
             group.getIoLock().unlock();
         }
-        group.reloadCachedData().join();
         return group;
     }
 
@@ -389,7 +387,6 @@ public class MongoDao extends AbstractDao {
                 group.getIoLock().unlock();
             }
         }
-        group.reloadCachedData().join();
         return Optional.of(group);
     }
 

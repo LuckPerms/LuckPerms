@@ -403,7 +403,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
     void holderSave(PermissionHolder holder) {
         if (holder.getType().isUser()) {
             User u = (User) holder;
-            this.plugin.getStorage().saveUser(u).thenRunAsync(() -> u.reloadCachedData(), this.plugin.getBootstrap().getScheduler().async());
+            this.plugin.getStorage().saveUser(u);
         }
         if (holder.getType().isGroup()) {
             Group g = (Group) holder;

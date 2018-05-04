@@ -81,8 +81,6 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
                     user.getIoLock().lock();
                     user.getIoLock().unlock();
 
-                    // ok, data is here, let's do the pre-calculation stuff.
-                    user.preCalculateData();
                     return user.sponge();
                 }
 
@@ -94,7 +92,6 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
                     throw new RuntimeException();
                 }
 
-                user.preCalculateData();
                 return user.sponge();
             });
 

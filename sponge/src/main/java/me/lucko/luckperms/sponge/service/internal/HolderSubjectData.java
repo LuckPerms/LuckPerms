@@ -448,10 +448,7 @@ public class HolderSubjectData implements LPSubjectData {
         // handle transient first
         if (this.type == NodeMapType.TRANSIENT) {
             // don't bother saving to primary storage. just refresh
-            if (t.getType().isUser()) {
-                User user = ((User) t);
-                return user.reloadCachedData();
-            } else {
+            if (t.getType().isGroup()) {
                 return this.service.getPlugin().getUpdateTaskBuffer().request();
             }
         }
@@ -459,26 +456,11 @@ public class HolderSubjectData implements LPSubjectData {
         // handle enduring
         if (t.getType().isUser()) {
             User user = ((User) t);
-            CompletableFuture<Void> fut = new CompletableFuture<>();
-            this.service.getPlugin().getStorage().saveUser(user).whenCompleteAsync((v, ex) -> {
-                if (ex != null) {
-                    fut.complete(null);
-                }
-
-                user.reloadCachedData().thenAccept(fut::complete);
-            }, this.service.getPlugin().getBootstrap().getScheduler().async());
-            return fut;
+            return this.service.getPlugin().getStorage().saveUser(user);
         } else {
             Group group = ((Group) t);
-            CompletableFuture<Void> fut = new CompletableFuture<>();
-            this.service.getPlugin().getStorage().saveGroup(group).whenCompleteAsync((v, ex) -> {
-                if (ex != null) {
-                    fut.complete(null);
-                }
-
-                this.service.getPlugin().getUpdateTaskBuffer().request().thenAccept(fut::complete);
-            }, this.service.getPlugin().getBootstrap().getScheduler().async());
-            return fut;
+            return this.service.getPlugin().getStorage().saveGroup(group)
+                    .thenCompose(v -> this.service.getPlugin().getUpdateTaskBuffer().request());
         }
     }
 }

@@ -35,7 +35,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.concurrent.CompletableFuture;
 
 public class Group extends PermissionHolder implements Identifiable<String> {
     private final ApiGroup apiDelegate = new ApiGroup(this);
@@ -137,12 +136,6 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     @Override
     public HolderType getType() {
         return HolderType.GROUP;
-    }
-
-    @Override
-    public CompletableFuture<Void> reloadCachedData() {
-        return this.cachedData.reloadAll()
-                .thenAccept(n -> getPlugin().getEventFactory().handleGroupDataRecalculate(this, this.cachedData));
     }
 
     @Override

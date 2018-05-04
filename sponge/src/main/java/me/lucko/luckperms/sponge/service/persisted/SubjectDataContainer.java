@@ -67,7 +67,7 @@ public class SubjectDataContainer {
      * @param root the root json object
      * @return a container representing the json data
      */
-    public static SubjectDataContainer derserialize(LPPermissionService service, JsonObject root) {
+    public static SubjectDataContainer deserialize(LPPermissionService service, JsonObject root) {
         return new SubjectDataContainer(service, root);
     }
 

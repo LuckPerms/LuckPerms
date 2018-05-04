@@ -117,11 +117,6 @@ public final class EventFactory {
         fireEventAsync(event);
     }
 
-    public void handleGroupDataRecalculate(Group group, GroupData data) {
-        EventGroupDataRecalculate event = new EventGroupDataRecalculate(group.getApiDelegate(), data);
-        fireEventAsync(event);
-    }
-
     public void handleGroupDelete(Group group, DeletionCause cause) {
         EventGroupDelete event = new EventGroupDelete(group.getName(), ImmutableSet.copyOf(group.enduringData().immutable().values()), cause);
         fireEventAsync(event);
@@ -249,9 +244,16 @@ public final class EventFactory {
         fireEventAsync(event);
     }
 
-    public void handleUserDataRecalculate(User user, UserData data) {
-        EventUserDataRecalculate event = new EventUserDataRecalculate(new ApiUser(user), data);
-        fireEventAsync(event);
+    public void handleDataRecalculate(PermissionHolder holder) {
+        if (holder.getType().isUser()) {
+            User user = (User) holder;
+            EventUserDataRecalculate event = new EventUserDataRecalculate(user.getApiDelegate(), user.getCachedData());
+            fireEventAsync(event);
+        } else {
+            Group group = (Group) holder;
+            EventGroupDataRecalculate event = new EventGroupDataRecalculate(group.getApiDelegate(), group.getCachedData());
+            fireEventAsync(event);
+        }
     }
 
     public void handleUserFirstLogin(UUID uuid, String username) {

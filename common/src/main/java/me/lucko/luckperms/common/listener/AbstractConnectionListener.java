@@ -89,9 +89,6 @@ public abstract class AbstractConnectionListener implements ConnectionListener {
             if (save) {
                 this.plugin.getStorage().saveUser(user).join();
             }
-
-            // Does some minimum pre-calculations to (maybe) speed things up later.
-            user.preCalculateData();
         }
 
         final long time = System.currentTimeMillis() - startTime;

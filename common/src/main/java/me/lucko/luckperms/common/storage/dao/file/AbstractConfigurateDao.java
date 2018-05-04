@@ -205,7 +205,6 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
         } finally {
             user.getIoLock().unlock();
         }
-        user.reloadCachedData().join();
         return user;
     }
 
@@ -261,7 +260,6 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
         } finally {
             group.getIoLock().unlock();
         }
-        group.reloadCachedData().join();
         return group;
     }
 
@@ -295,7 +293,6 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
                 group.getIoLock().unlock();
             }
         }
-        group.reloadCachedData().join();
         return Optional.of(group);
     }
 

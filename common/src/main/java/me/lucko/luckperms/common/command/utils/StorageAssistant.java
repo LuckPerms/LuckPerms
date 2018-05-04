@@ -108,8 +108,6 @@ public final class StorageAssistant {
             return;
         }
 
-        user.reloadCachedData().join();
-
         Optional<InternalMessagingService> messagingService = plugin.getMessagingService();
         if (messagingService.isPresent() && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
             messagingService.get().pushUserUpdate(user);

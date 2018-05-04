@@ -32,7 +32,6 @@ import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.SimpleConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -67,22 +66,11 @@ public class SpongeConfigAdapter extends AbstractConfigurationAdapter implements
     }
 
     private ConfigurationNode resolvePath(String path) {
-        Iterable<String> paths = Splitter.on('.').split(path);
-        ConfigurationNode node = this.root;
-
-        if (node == null) {
+        if (this.root == null) {
             throw new RuntimeException("Config is not loaded.");
         }
 
-        for (String s : paths) {
-            node = node.getNode(s);
-
-            if (node == null) {
-                return SimpleConfigurationNode.root();
-            }
-        }
-
-        return node;
+        return this.root.getNode(Splitter.on('.').splitToList(path).toArray());
     }
 
     @Override
