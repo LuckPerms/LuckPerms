@@ -111,7 +111,7 @@ public class PermissionRegistry extends RepeatingTask {
         // insert the permission into the node structure
         TreeNode current = this.rootNode;
         for (String part : parts) {
-            current = current.getChildMap().computeIfAbsent(part, s -> new TreeNode());
+            current = current.resolve(part);
         }
     }
 

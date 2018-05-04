@@ -38,11 +38,15 @@ public class TreeNode {
     private Map<String, TreeNode> children = null;
 
     // lazy init
-    public synchronized Map<String, TreeNode> getChildMap() {
+    private synchronized Map<String, TreeNode> getChildMap() {
         if (this.children == null) {
             this.children = new ConcurrentHashMap<>();
         }
         return this.children;
+    }
+
+    public TreeNode resolve(String s) {
+        return getChildMap().computeIfAbsent(s, x -> new TreeNode());
     }
 
     public Optional<Map<String, TreeNode>> getChildren() {

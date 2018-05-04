@@ -44,7 +44,7 @@ public class IsolatedClassLoader extends URLClassLoader {
          * ClassLoader#getSystemClassLoader returns the AppClassLoader
          *
          * Calling #getParent on this returns the ExtClassLoader (Java 8) or
-         * the PlatformClassLoader (Java 8). Since we want this classloader to
+         * the PlatformClassLoader (Java 9). Since we want this classloader to
          * be isolated from the Minecraft server (the app), we set the parent
          * to be the platform class loader.
          */

@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.storage;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class StorageCredentials {
 
@@ -52,19 +53,19 @@ public class StorageCredentials {
     }
 
     public String getAddress() {
-        return this.address;
+        return Objects.requireNonNull(this.address, "address");
     }
 
     public String getDatabase() {
-        return this.database;
+        return Objects.requireNonNull(this.database, "database");
     }
 
     public String getUsername() {
-        return this.username;
+        return Objects.requireNonNull(this.username, "username");
     }
 
     public String getPassword() {
-        return this.password;
+        return Objects.requireNonNull(this.password, "password");
     }
 
     public int getMaxPoolSize() {
