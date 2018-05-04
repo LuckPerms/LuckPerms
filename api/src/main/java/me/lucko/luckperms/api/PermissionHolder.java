@@ -84,6 +84,9 @@ public interface PermissionHolder {
     /**
      * Refreshes and applies any changes to the cached holder data.
      *
+     * <p>Calling this method is unnecessary in most cases. Cache updates are handled
+     * behind the scenes by the implementation.</p>
+     *
      * @return the task future
      * @since 4.0
      */
