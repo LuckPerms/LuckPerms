@@ -25,40 +25,49 @@
 
 package me.lucko.luckperms.common.primarygroup;
 
-import me.lucko.luckperms.common.buffers.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 
 /**
  * Abstract implementation of {@link PrimaryGroupHolder} which caches all lookups.
  */
-public abstract class CachedPrimaryGroupHolder extends StoredHolder {
+public abstract class ContextualHolder extends StoredHolder {
 
     // cache lookups
-    private final Cache<String> cache = new Cache<String>() {
-        @Nonnull
-        @Override
-        protected String supply() {
-            return calculateValue();
-        }
-    };
+    private final LoadingCache<Contexts, Optional<String>> cache = Caffeine.newBuilder()
+            .expireAfterAccess(1, TimeUnit.MINUTES)
+            .build(this::calculateValue);
 
-    public CachedPrimaryGroupHolder(User user) {
+    public ContextualHolder(User user) {
         super(user);
     }
 
-    protected abstract String calculateValue();
+    @Nonnull
+    protected abstract Optional<String> calculateValue(Contexts contexts);
 
-    public void invalidate() {
-        this.cache.invalidate();;
+    public void invalidateCache() {
+        this.cache.invalidateAll();
     }
 
     @Override
     public final String getValue() {
-        String s = this.cache.get();
-        return s != null ? s : getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME);
+        Contexts contexts = this.user.getPlugin().getContextForUser(this.user).orElse(null);
+        if (contexts == null) {
+            contexts = this.user.getPlugin().getContextManager().getStaticContexts();
+        }
+
+        return Objects.requireNonNull(this.cache.get(contexts))
+                .orElseGet(() -> getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
     }
 
 }

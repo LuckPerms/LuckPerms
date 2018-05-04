@@ -31,26 +31,21 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 
-public class ParentsByWeightHolder extends CachedPrimaryGroupHolder {
+import javax.annotation.Nonnull;
+
+public class ParentsByWeightHolder extends ContextualHolder {
     public ParentsByWeightHolder(User user) {
         super(user);
     }
 
+    @Nonnull
     @Override
-    protected String calculateValue() {
-        Contexts contexts = this.user.getPlugin().getContextForUser(this.user).orElse(null);
-        if (contexts == null) {
-            contexts = this.user.getPlugin().getContextManager().getStaticContexts();
-        }
-
+    protected Optional<String> calculateValue(Contexts contexts) {
         Set<Group> groups = new LinkedHashSet<>();
-        for (Node node : this.user.getOwnNodes(contexts.getContexts())) {
-            if (!node.getValue() || !node.isGroupNode()) {
-                continue;
-            }
-
+        for (Node node : this.user.getOwnGroupNodes(contexts.getContexts())) {
             Group group = this.user.getPlugin().getGroupManager().getIfLoaded(node.getGroupName());
             if (group != null) {
                 groups.add(group);
@@ -70,6 +65,6 @@ public class ParentsByWeightHolder extends CachedPrimaryGroupHolder {
             }
         }
 
-        return bestGroup == null ? null : bestGroup.getName();
+        return bestGroup == null ? Optional.empty() : Optional.of(bestGroup.getName());
     }
 }

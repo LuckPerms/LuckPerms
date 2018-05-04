@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.primarygroup;
 
-import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.inheritance.InheritanceGraph;
@@ -34,43 +32,39 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 
-import java.util.List;
+import java.util.Optional;
 
-public class AllParentsByWeightHolder extends CachedPrimaryGroupHolder {
+import javax.annotation.Nonnull;
+
+public class AllParentsByWeightHolder extends ContextualHolder {
     public AllParentsByWeightHolder(User user) {
         super(user);
     }
 
+    @Nonnull
     @Override
-    protected String calculateValue() {
-        Contexts contexts = this.user.getPlugin().getContextForUser(this.user).orElse(null);
-        if (contexts == null) {
-            contexts = this.user.getPlugin().getContextManager().getStaticContexts();
-        }
-
+    protected Optional<String> calculateValue(Contexts contexts) {
         InheritanceGraph graph = this.user.getPlugin().getInheritanceHandler().getGraph(contexts);
 
         // fully traverse the graph, obtain a list of permission holders the user inherits from
-        List<PermissionHolder> traversal = ImmutableList.copyOf(graph.traverse(this.user.getPlugin().getConfiguration().get(ConfigKeys.INHERITANCE_TRAVERSAL_ALGORITHM), this.user));
+        Iterable<PermissionHolder> traversal = graph.traverse(this.user.getPlugin().getConfiguration().get(ConfigKeys.INHERITANCE_TRAVERSAL_ALGORITHM), this.user);
 
         Group bestGroup = null;
 
-        if (!traversal.isEmpty()) {
-            int best = 0;
-            for (PermissionHolder holder : traversal) {
-                if (!(holder instanceof Group)) {
-                    continue;
-                }
-                Group g = ((Group) holder);
+        int best = 0;
+        for (PermissionHolder holder : traversal) {
+            if (!(holder instanceof Group)) {
+                continue;
+            }
+            Group g = ((Group) holder);
 
-                int weight = g.getWeight().orElse(0);
-                if (bestGroup == null || g.getWeight().orElse(0) > best) {
-                    bestGroup = g;
-                    best = weight;
-                }
+            int weight = g.getWeight().orElse(0);
+            if (bestGroup == null || g.getWeight().orElse(0) > best) {
+                bestGroup = g;
+                best = weight;
             }
         }
 
-        return bestGroup == null ? null : bestGroup.getName();
+        return bestGroup == null ? Optional.empty() : Optional.of(bestGroup.getName());
     }
 }

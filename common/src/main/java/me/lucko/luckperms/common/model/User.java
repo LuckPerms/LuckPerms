@@ -29,7 +29,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.common.caching.UserCachedData;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.primarygroup.CachedPrimaryGroupHolder;
+import me.lucko.luckperms.common.primarygroup.ContextualHolder;
 import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
 
 import java.util.Optional;
@@ -81,8 +81,8 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         super.invalidateCache();
 
         // invalidate our caches
-        if (this.primaryGroup instanceof CachedPrimaryGroupHolder) {
-            ((CachedPrimaryGroupHolder) this.primaryGroup).invalidate();
+        if (this.primaryGroup instanceof ContextualHolder) {
+            ((ContextualHolder) this.primaryGroup).invalidateCache();
         }
     }
 
