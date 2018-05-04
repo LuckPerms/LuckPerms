@@ -190,7 +190,7 @@ public abstract class AbstractCachedData implements CachedData {
         Objects.requireNonNull(contexts, "contexts");
 
         //noinspection ConstantConditions
-        return this.permission.get(contexts).join();
+        return this.permission.synchronous().get(contexts);
     }
 
     @Nonnull
@@ -199,7 +199,7 @@ public abstract class AbstractCachedData implements CachedData {
         Objects.requireNonNull(contexts, "contexts");
 
         //noinspection ConstantConditions
-        return this.meta.get(contexts).join();
+        return this.meta.synchronous().get(contexts);
     }
 
     @Nonnull

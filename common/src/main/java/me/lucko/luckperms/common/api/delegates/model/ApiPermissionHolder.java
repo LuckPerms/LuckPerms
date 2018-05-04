@@ -46,6 +46,7 @@ import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.node.utils.MetaType;
 import me.lucko.luckperms.common.node.utils.NodeTools;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
@@ -104,13 +105,15 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.PermissionHol
     @Nonnull
     @Override
     public ImmutableSetMultimap<ImmutableContextSet, Node> getNodes() {
-        return this.handle.enduringData().immutable();
+        //noinspection unchecked
+        return (ImmutableSetMultimap) this.handle.enduringData().immutable();
     }
 
     @Nonnull
     @Override
     public ImmutableSetMultimap<ImmutableContextSet, Node> getTransientNodes() {
-        return this.handle.transientData().immutable();
+        //noinspection unchecked
+        return (ImmutableSetMultimap) this.handle.transientData().immutable();
     }
 
     @Nonnull
@@ -183,7 +186,7 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.PermissionHol
     @Override
     public Map<String, Boolean> exportNodes(@Nonnull Contexts contexts, boolean lowerCase) {
         Objects.requireNonNull(contexts, "contexts");
-        return ImmutableMap.copyOf(this.handle.exportNodesAndShorthand(contexts, lowerCase));
+        return ImmutableMap.copyOf(this.handle.exportPermissions(contexts, lowerCase, true));
     }
 
     @Nonnull
@@ -234,14 +237,26 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.PermissionHol
     @Override
     public boolean inheritsGroup(@Nonnull me.lucko.luckperms.api.Group group) {
         Objects.requireNonNull(group, "group");
-        return this.handle.inheritsGroup(ApiGroup.cast(group));
+
+        Group g = ApiGroup.cast(group);
+        if (this.handle.getType().isGroup() && g.getName().equals(this.handle.getObjectName())) {
+            return true;
+        }
+
+        return this.handle.hasPermission(NodeMapType.ENDURING, NodeFactory.buildGroupNode(g.getName()).build(), StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean();
     }
 
     @Override
     public boolean inheritsGroup(@Nonnull me.lucko.luckperms.api.Group group, @Nonnull ContextSet contextSet) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(contextSet, "contextSet");
-        return this.handle.inheritsGroup(ApiGroup.cast(group), contextSet);
+
+        Group g = ApiGroup.cast(group);
+        if (this.handle.getType().isGroup() && g.getName().equals(this.handle.getObjectName())) {
+            return true;
+        }
+
+        return this.handle.hasPermission(NodeMapType.ENDURING, NodeFactory.buildGroupNode(g.getName()).withExtraContext(contextSet).build(), StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean();
     }
 
     @Nonnull

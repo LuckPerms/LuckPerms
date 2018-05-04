@@ -170,17 +170,17 @@ public final class EventFactory {
         fireEventAsync(event);
     }
 
-    public void handleNodeAdd(Node node, PermissionHolder target, Collection<Node> before, Collection<Node> after) {
+    public void handleNodeAdd(Node node, PermissionHolder target, Collection<? extends Node> before, Collection<? extends Node> after) {
         EventNodeAdd event = new EventNodeAdd(node, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
         fireEventAsync(event);
     }
 
-    public void handleNodeClear(PermissionHolder target, Collection<Node> before, Collection<Node> after) {
+    public void handleNodeClear(PermissionHolder target, Collection<? extends Node> before, Collection<? extends Node> after) {
         EventNodeClear event = new EventNodeClear(getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
         fireEventAsync(event);
     }
 
-    public void handleNodeRemove(Node node, PermissionHolder target, Collection<Node> before, Collection<Node> after) {
+    public void handleNodeRemove(Node node, PermissionHolder target, Collection<? extends Node> before, Collection<? extends Node> after) {
         EventNodeRemove event = new EventNodeRemove(node, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
         fireEventAsync(event);
     }

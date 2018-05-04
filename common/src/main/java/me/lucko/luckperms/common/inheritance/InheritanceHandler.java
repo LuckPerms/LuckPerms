@@ -82,7 +82,7 @@ public class InheritanceHandler {
         @Override
         public Iterable<? extends PermissionHolder> successors(PermissionHolder holder) {
             Set<Group> successors = new TreeSet<>(holder.getInheritanceComparator());
-            List<Node> nodes = holder.getOwnGroupNodes();
+            List<? extends Node> nodes = holder.getOwnGroupNodes();
             for (Node n : nodes) {
                 Group g = this.plugin.getGroupManager().getIfLoaded(n.getGroupName());
                 if (g != null) {
@@ -109,7 +109,7 @@ public class InheritanceHandler {
         @Override
         public Iterable<? extends PermissionHolder> successors(PermissionHolder holder) {
             Set<Group> successors = new TreeSet<>(holder.getInheritanceComparator());
-            List<Node> nodes = holder.getOwnGroupNodes(this.context.getContexts());
+            List<? extends Node> nodes = holder.getOwnGroupNodes(this.context.getContexts());
             for (Node n : nodes) {
                 // effectively: if not (we're applying global groups or it's specific anyways)
                 if (!((this.context.hasSetting(LookupSetting.APPLY_PARENTS_SET_WITHOUT_SERVER) || n.isServerSpecific()) && (this.context.hasSetting(LookupSetting.APPLY_PARENTS_SET_WITHOUT_WORLD) || n.isWorldSpecific()))) {

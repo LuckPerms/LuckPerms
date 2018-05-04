@@ -44,7 +44,7 @@ public enum StandardNodeEquality implements NodeEqualityPredicate {
 
     /**
      * All attributes must match, except for
-     * {@link Node#getValuePrimitive() value}, which is ignored.
+     * {@link Node#getValue() value}, which is ignored.
      */
     IGNORE_VALUE,
 
@@ -59,14 +59,14 @@ public enum StandardNodeEquality implements NodeEqualityPredicate {
 
     /**
      * All attributes must match, except for
-     * {@link Node#getValuePrimitive() value} and the
+     * {@link Node#getValue() value} and the
      * {@link Node#getExpiry() expiry time}, which are ignored.
      */
     IGNORE_EXPIRY_TIME_AND_VALUE,
 
     /**
      * All attributes must match, except for
-     * {@link Node#getValuePrimitive() value} and the if the node is
+     * {@link Node#getValue() value} and the if the node is
      * {@link Node#isTemporary() temporary}, which are ignored.
      */
     IGNORE_VALUE_OR_IF_TEMPORARY;

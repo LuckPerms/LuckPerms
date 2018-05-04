@@ -54,7 +54,7 @@ public class LogNotify extends SubCommand<Log> {
             return false;
         }
 
-        Optional<Node> ret = user.getOwnNodes().stream()
+        Optional<? extends Node> ret = user.getOwnNodes().stream()
                 .filter(n -> n.getPermission().equalsIgnoreCase("luckperms.log.notify.ignoring"))
                 .findFirst();
 

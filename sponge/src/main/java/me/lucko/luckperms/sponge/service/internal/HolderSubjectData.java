@@ -72,7 +72,7 @@ public class HolderSubjectData implements LPSubjectData {
         this.parentSubject = parentSubject;
     }
 
-    private Stream<Node> streamNodes() {
+    private Stream<? extends Node> streamNodes() {
         return this.holder.getData(this.type).immutable().values().stream();
     }
 
@@ -94,7 +94,7 @@ public class HolderSubjectData implements LPSubjectData {
     @Override
     public ImmutableMap<ImmutableContextSet, ImmutableMap<String, Boolean>> getAllPermissions() {
         ImmutableMap.Builder<ImmutableContextSet, ImmutableMap<String, Boolean>> ret = ImmutableMap.builder();
-        for (Map.Entry<ImmutableContextSet, Collection<Node>> entry : this.holder.getData(this.type).immutable().asMap().entrySet()) {
+        for (Map.Entry<ImmutableContextSet, ? extends Collection<? extends Node>> entry : this.holder.getData(this.type).immutable().asMap().entrySet()) {
             ImmutableMap.Builder<String, Boolean> builder = ImmutableMap.builder();
             for (Node n : entry.getValue()) {
                 builder.put(n.getPermission(), n.getValue());
@@ -183,7 +183,7 @@ public class HolderSubjectData implements LPSubjectData {
     @Override
     public ImmutableMap<ImmutableContextSet, ImmutableList<LPSubjectReference>> getAllParents() {
         ImmutableMap.Builder<ImmutableContextSet, ImmutableList<LPSubjectReference>> ret = ImmutableMap.builder();
-        for (Map.Entry<ImmutableContextSet, Collection<Node>> entry : this.holder.getData(this.type).immutable().asMap().entrySet()) {
+        for (Map.Entry<ImmutableContextSet, ? extends Collection<? extends Node>> entry : this.holder.getData(this.type).immutable().asMap().entrySet()) {
             ImmutableList.Builder<LPSubjectReference> builder = ImmutableList.builder();
             for (Node n : entry.getValue()) {
                 if (n.isGroupNode()) {

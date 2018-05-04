@@ -29,6 +29,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.caching.MetaContexts;
 import me.lucko.luckperms.common.caching.type.MetaAccumulator;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.PermissionHolder;
 
 import java.util.Map;
@@ -60,12 +61,12 @@ public abstract class HolderCachedData<T extends PermissionHolder> extends Abstr
 
     @Override
     protected Map<String, Boolean> resolvePermissions() {
-        return this.holder.exportNodesAndShorthand(true);
+        return this.holder.exportPermissions(true, this.plugin.getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND));
     }
 
     @Override
     protected Map<String, Boolean> resolvePermissions(Contexts contexts) {
-        return this.holder.exportNodesAndShorthand(contexts, true);
+        return this.holder.exportPermissions(contexts, true, this.plugin.getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND));
     }
 
     @Override

@@ -556,7 +556,7 @@ public interface Node {
          *
          * @param value the value
          * @return the builder
-         * @see Node#getValuePrimitive()
+         * @see Node#getValue()
          */
         @Nonnull
         Builder setValue(boolean value);
