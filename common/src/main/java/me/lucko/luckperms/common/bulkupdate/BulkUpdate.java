@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.bulkupdate;
 
 import me.lucko.luckperms.common.bulkupdate.action.Action;
-import me.lucko.luckperms.common.bulkupdate.constraint.Constraint;
+import me.lucko.luckperms.common.bulkupdate.query.Query;
 import me.lucko.luckperms.common.node.model.NodeDataContainer;
 
 import java.util.List;
@@ -45,12 +45,12 @@ public final class BulkUpdate {
     private final Action action;
 
     // a set of constraints which data must match to be acted upon
-    private final List<Constraint> constraints;
+    private final List<Query> queries;
 
-    public BulkUpdate(DataType dataType, Action action, List<Constraint> constraints) {
+    public BulkUpdate(DataType dataType, Action action, List<Query> queries) {
         this.dataType = dataType;
         this.action = action;
-        this.constraints = constraints;
+        this.queries = queries;
     }
 
     /**
@@ -60,8 +60,8 @@ public final class BulkUpdate {
      * @return true if satisfied
      */
     public boolean satisfiesConstraints(NodeDataContainer node) {
-        for (Constraint constraint : this.constraints) {
-            if (!constraint.isSatisfiedBy(node)) {
+        for (Query query : this.queries) {
+            if (!query.isSatisfiedBy(node)) {
                 return false;
             }
         }
@@ -98,21 +98,21 @@ public final class BulkUpdate {
         sb.append(this.action.getAsSql());
 
         // if there are no constraints, just return without a WHERE clause
-        if (this.constraints.isEmpty()) {
+        if (this.queries.isEmpty()) {
             return sb.append(";").toString();
         }
 
         // append constraints
         sb.append(" WHERE");
-        for (int i = 0; i < this.constraints.size(); i++) {
-            Constraint constraint = this.constraints.get(i);
+        for (int i = 0; i < this.queries.size(); i++) {
+            Query query = this.queries.get(i);
 
             sb.append(" ");
             if (i != 0) {
                 sb.append("AND ");
             }
 
-            sb.append(constraint.getAsSql());
+            sb.append(query.getAsSql());
         }
 
         return sb.append(";").toString();
@@ -147,8 +147,8 @@ public final class BulkUpdate {
         return this.action;
     }
 
-    public List<Constraint> getConstraints() {
-        return this.constraints;
+    public List<Query> getQueries() {
+        return this.queries;
     }
 
     @Override
@@ -159,12 +159,12 @@ public final class BulkUpdate {
 
         return Objects.equals(this.getDataType(), that.getDataType()) &&
                 Objects.equals(this.getAction(), that.getAction()) &&
-                Objects.equals(this.getConstraints(), that.getConstraints());
+                Objects.equals(this.getQueries(), that.getQueries());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getDataType(), getAction(), getConstraints());
+        return Objects.hash(getDataType(), getAction(), getQueries());
     }
 
     @Override
@@ -172,6 +172,6 @@ public final class BulkUpdate {
         return "BulkUpdate(" +
                 "dataType=" + this.getDataType() + ", " +
                 "action=" + this.getAction() + ", " +
-                "constraints=" + this.getConstraints() + ")";
+                "constraints=" + this.getQueries() + ")";
     }
 }

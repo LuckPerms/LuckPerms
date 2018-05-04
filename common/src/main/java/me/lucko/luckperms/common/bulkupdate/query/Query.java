@@ -23,38 +23,33 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.bulkupdate.constraint;
+package me.lucko.luckperms.common.bulkupdate.query;
 
-import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.bulkupdate.comparisons.Comparison;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
 import me.lucko.luckperms.common.node.model.NodeDataContainer;
 
 /**
- * Represents a query constraint
+ * Represents a query component
  */
-public class Constraint {
+public class Query {
 
-    public static Constraint of(QueryField field, Comparison comparison, String value) {
-        return new Constraint(field, comparison, value);
+    public static Query of(QueryField field, Constraint constraint) {
+        return new Query(field, constraint);
     }
 
-    // the field this constraint is comparing against
+    // the field this query is comparing against
     private final QueryField field;
 
-    // the comparison type being used in this constraint
-    private final Comparison comparison;
+    // the constraint
+    private final Constraint constraint;
 
-    // the expression being compared against
-    private final String value;
-
-    private Constraint(QueryField field, Comparison comparison, String value) {
+    private Query(QueryField field, Constraint constraint) {
         this.field = field;
-        this.comparison = comparison;
-        this.value = value;
+        this.constraint = constraint;
     }
 
     /**
-     * Returns if the given node satisfies this constraint
+     * Returns if the given node satisfies this query
      *
      * @param node the node
      * @return true if satisfied
@@ -62,29 +57,25 @@ public class Constraint {
     public boolean isSatisfiedBy(NodeDataContainer node) {
         switch (this.field) {
             case PERMISSION:
-                return this.comparison.matches(node.getPermission(), this.value);
+                return this.constraint.eval(node.getPermission());
             case SERVER:
-                return this.comparison.matches(node.getServer(), this.value);
+                return this.constraint.eval(node.getServer());
             case WORLD:
-                return this.comparison.matches(node.getWorld(), this.value);
+                return this.constraint.eval(node.getWorld());
             default:
                 throw new RuntimeException();
         }
     }
 
     public String getAsSql() {
-        return this.field.getSqlName() + " " + this.comparison.getAsSql() + " " + BulkUpdate.escapeStringForSql(this.value);
+        return this.constraint.getAsSql(this.field.getSqlName());
     }
 
     public QueryField getField() {
         return this.field;
     }
 
-    public Comparison getComparison() {
-        return this.comparison;
-    }
-
-    public String getValue() {
-        return this.value;
+    public Constraint getConstraint() {
+        return this.constraint;
     }
 }

@@ -35,6 +35,7 @@ import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.api.delegates.model.ApiStorage;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -181,9 +182,9 @@ public class AbstractStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(String permission) {
+    public CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(Constraint constraint) {
         return makeFuture(() -> {
-            List<HeldPermission<UUID>> result = this.dao.getUsersWithPermission(permission);
+            List<HeldPermission<UUID>> result = this.dao.getUsersWithPermission(constraint);
             result.removeIf(entry -> entry.asNode().hasExpired());
             return ImmutableList.copyOf(result);
         });
@@ -233,9 +234,9 @@ public class AbstractStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(String permission) {
+    public CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(Constraint constraint) {
         return makeFuture(() -> {
-            List<HeldPermission<String>> result = this.dao.getGroupsWithPermission(permission);
+            List<HeldPermission<String>> result = this.dao.getGroupsWithPermission(constraint);
             result.removeIf(entry -> entry.asNode().hasExpired());
             return ImmutableList.copyOf(result);
         });

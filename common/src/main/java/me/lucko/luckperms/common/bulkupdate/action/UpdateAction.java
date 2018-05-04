@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.bulkupdate.action;
 
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.bulkupdate.constraint.QueryField;
+import me.lucko.luckperms.common.bulkupdate.query.QueryField;
 import me.lucko.luckperms.common.node.model.NodeDataContainer;
 
 public class UpdateAction implements Action {

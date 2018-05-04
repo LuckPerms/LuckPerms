@@ -35,6 +35,7 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
 import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.managers.group.GroupManager;
 import me.lucko.luckperms.common.managers.track.TrackManager;
@@ -81,7 +82,7 @@ public class SqlDao extends AbstractDao {
     private static final String USER_PERMISSIONS_DELETE = "DELETE FROM {prefix}user_permissions WHERE uuid=?";
     private static final String USER_PERMISSIONS_INSERT = "INSERT INTO {prefix}user_permissions(uuid, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
     private static final String USER_PERMISSIONS_SELECT_DISTINCT = "SELECT DISTINCT uuid FROM {prefix}user_permissions";
-    private static final String USER_PERMISSIONS_SELECT_PERMISSION = "SELECT uuid, value, server, world, expiry, contexts FROM {prefix}user_permissions WHERE permission=?";
+    private static final String USER_PERMISSIONS_SELECT_PERMISSION = "SELECT uuid, permission, value, server, world, expiry, contexts FROM {prefix}user_permissions WHERE";
 
     private static final String PLAYER_SELECT_UUID_BY_USERNAME = "SELECT uuid FROM {prefix}players WHERE username=? LIMIT 1";
     private static final String PLAYER_SELECT_USERNAME_BY_UUID = "SELECT username FROM {prefix}players WHERE uuid=? LIMIT 1";
@@ -97,7 +98,7 @@ public class SqlDao extends AbstractDao {
     private static final String GROUP_PERMISSIONS_DELETE = "DELETE FROM {prefix}group_permissions WHERE name=?";
     private static final String GROUP_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM {prefix}group_permissions WHERE name=? AND permission=? AND value=? AND server=? AND world=? AND expiry=? AND contexts=?";
     private static final String GROUP_PERMISSIONS_INSERT = "INSERT INTO {prefix}group_permissions(name, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
-    private static final String GROUP_PERMISSIONS_SELECT_PERMISSION = "SELECT name, value, server, world, expiry, contexts FROM {prefix}group_permissions WHERE permission=?";
+    private static final String GROUP_PERMISSIONS_SELECT_PERMISSION = "SELECT name, permission, value, server, world, expiry, contexts FROM {prefix}group_permissions WHERE";
 
     private static final String GROUP_SELECT_ALL = "SELECT name FROM {prefix}groups";
     private static final String MYSQL_GROUP_INSERT = "INSERT INTO {prefix}groups (name) VALUES(?) ON DUPLICATE KEY UPDATE name=name";
@@ -493,21 +494,21 @@ public class SqlDao extends AbstractDao {
     }
 
     @Override
-    public List<HeldPermission<UUID>> getUsersWithPermission(String permission) throws SQLException {
+    public List<HeldPermission<UUID>> getUsersWithPermission(Constraint constraint) throws SQLException {
         List<HeldPermission<UUID>> held = new ArrayList<>();
         try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_SELECT_PERMISSION))) {
-                ps.setString(1, permission);
+            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_SELECT_PERMISSION + constraint.getAsSql("permission")))) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         UUID holder = UUID.fromString(rs.getString("uuid"));
+                        String perm = rs.getString("permission");
                         boolean value = rs.getBoolean("value");
                         String server = rs.getString("server");
                         String world = rs.getString("world");
                         long expiry = rs.getLong("expiry");
                         String contexts = rs.getString("contexts");
 
-                        NodeDataContainer data = deserializeNode(permission, value, server, world, expiry, contexts);
+                        NodeDataContainer data = deserializeNode(perm, value, server, world, expiry, contexts);
                         held.add(NodeHeldPermission.of(holder, data));
                     }
                 }
@@ -737,21 +738,21 @@ public class SqlDao extends AbstractDao {
     }
 
     @Override
-    public List<HeldPermission<String>> getGroupsWithPermission(String permission) throws SQLException {
+    public List<HeldPermission<String>> getGroupsWithPermission(Constraint constraint) throws SQLException {
         List<HeldPermission<String>> held = new ArrayList<>();
         try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_SELECT_PERMISSION))) {
-                ps.setString(1, permission);
+            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_SELECT_PERMISSION + constraint.getAsSql("permission")))) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         String holder = rs.getString("name");
+                        String perm = rs.getString("permission");
                         boolean value = rs.getBoolean("value");
                         String server = rs.getString("server");
                         String world = rs.getString("world");
                         long expiry = rs.getLong("expiry");
                         String contexts = rs.getString("contexts");
 
-                        NodeDataContainer data = deserializeNode(permission, value, server, world, expiry, contexts);
+                        NodeDataContainer data = deserializeNode(perm, value, server, world, expiry, contexts);
                         held.add(NodeHeldPermission.of(holder, data));
                     }
                 }

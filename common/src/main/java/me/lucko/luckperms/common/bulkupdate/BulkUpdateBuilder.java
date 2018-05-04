@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.bulkupdate;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.bulkupdate.action.Action;
-import me.lucko.luckperms.common.bulkupdate.constraint.Constraint;
+import me.lucko.luckperms.common.bulkupdate.query.Query;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -49,7 +49,7 @@ public class BulkUpdateBuilder {
     private Action action = null;
 
     // a set of constraints which data must match to be acted upon
-    private final Set<Constraint> constraints = new LinkedHashSet<>();
+    private final Set<Query> queries = new LinkedHashSet<>();
 
     private BulkUpdateBuilder() {
     }
@@ -64,8 +64,8 @@ public class BulkUpdateBuilder {
         return this;
     }
 
-    public BulkUpdateBuilder constraint(Constraint constraint) {
-        this.constraints.add(constraint);
+    public BulkUpdateBuilder query(Query query) {
+        this.queries.add(query);
         return this;
     }
 
@@ -74,7 +74,7 @@ public class BulkUpdateBuilder {
             throw new IllegalStateException("no action specified");
         }
 
-        return new BulkUpdate(this.dataType, this.action, ImmutableList.copyOf(this.constraints));
+        return new BulkUpdate(this.dataType, this.action, ImmutableList.copyOf(this.queries));
     }
 
     @Override
@@ -82,6 +82,6 @@ public class BulkUpdateBuilder {
         return "BulkUpdateBuilder(" +
                 "dataType=" + this.dataType + ", " +
                 "action=" + this.action + ", " +
-                "constraints=" + this.constraints + ")";
+                "constraints=" + this.queries + ")";
     }
 }

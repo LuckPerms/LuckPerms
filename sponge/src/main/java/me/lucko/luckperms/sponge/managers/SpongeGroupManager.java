@@ -36,6 +36,8 @@ import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.event.cause.CreationCause;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
+import me.lucko.luckperms.common.bulkupdate.comparisons.StandardComparison;
 import me.lucko.luckperms.common.managers.group.AbstractGroupManager;
 import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
@@ -187,7 +189,7 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
         return CompletableFuture.supplyAsync(() -> {
             ImmutableMap.Builder<LPSubjectReference, Boolean> ret = ImmutableMap.builder();
 
-            List<HeldPermission<String>> lookup = this.plugin.getStorage().getGroupsWithPermission(permission).join();
+            List<HeldPermission<String>> lookup = this.plugin.getStorage().getGroupsWithPermission(Constraint.of(StandardComparison.EQUAL, permission)).join();
             for (HeldPermission<String> holder : lookup) {
                 if (holder.asNode().getFullContexts().equals(ImmutableContextSet.empty())) {
                     ret.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder()), holder.getValue());
@@ -203,7 +205,7 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
         return CompletableFuture.supplyAsync(() -> {
             ImmutableMap.Builder<LPSubjectReference, Boolean> ret = ImmutableMap.builder();
 
-            List<HeldPermission<String>> lookup = this.plugin.getStorage().getGroupsWithPermission(permission).join();
+            List<HeldPermission<String>> lookup = this.plugin.getStorage().getGroupsWithPermission(Constraint.of(StandardComparison.EQUAL, permission)).join();
             for (HeldPermission<String> holder : lookup) {
                 if (holder.asNode().getFullContexts().equals(contexts)) {
                     ret.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder()), holder.getValue());

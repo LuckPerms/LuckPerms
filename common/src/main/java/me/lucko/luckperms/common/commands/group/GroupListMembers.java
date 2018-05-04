@@ -31,6 +31,8 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
+import me.lucko.luckperms.common.bulkupdate.comparisons.StandardComparison;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
@@ -77,13 +79,13 @@ public class GroupListMembers extends SubCommand<Group> {
             return CommandResult.NO_PERMISSION;
         }
 
-        String query = NodeFactory.groupNode(group.getName());
+        Constraint constraint = Constraint.of(StandardComparison.EQUAL, NodeFactory.groupNode(group.getName()));
         int page = ArgumentParser.parseIntOrElse(0, args, 1);
 
         Message.SEARCH_SEARCHING_MEMBERS.send(sender, group.getName());
 
-        List<HeldPermission<UUID>> matchedUsers = plugin.getStorage().getUsersWithPermission(query).join();
-        List<HeldPermission<String>> matchedGroups = plugin.getStorage().getGroupsWithPermission(query).join();
+        List<HeldPermission<UUID>> matchedUsers = plugin.getStorage().getUsersWithPermission(constraint).join();
+        List<HeldPermission<String>> matchedGroups = plugin.getStorage().getGroupsWithPermission(constraint).join();
 
         int users = matchedUsers.size();
         int groups = matchedGroups.size();

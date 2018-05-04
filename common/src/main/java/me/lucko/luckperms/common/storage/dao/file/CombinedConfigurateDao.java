@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.storage.dao.file;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
 import me.lucko.luckperms.common.managers.group.GroupManager;
 import me.lucko.luckperms.common.managers.track.TrackManager;
 import me.lucko.luckperms.common.node.model.NodeDataContainer;
@@ -262,7 +263,7 @@ public class CombinedConfigurateDao extends AbstractConfigurateDao {
     }
 
     @Override
-    public List<HeldPermission<UUID>> getUsersWithPermission(String permission) throws Exception {
+    public List<HeldPermission<UUID>> getUsersWithPermission(Constraint constraint) throws Exception {
         List<HeldPermission<UUID>> held = new ArrayList<>();
         this.usersLoader.apply(false, true, root -> {
             for (Map.Entry<Object, ? extends ConfigurationNode> entry : root.getChildrenMap().entrySet()) {
@@ -272,7 +273,7 @@ public class CombinedConfigurateDao extends AbstractConfigurateDao {
 
                     Set<NodeDataContainer> nodes = readNodes(object);
                     for (NodeDataContainer e : nodes) {
-                        if (!e.getPermission().equalsIgnoreCase(permission)) {
+                        if (!constraint.eval(e.getPermission())) {
                             continue;
                         }
                         held.add(NodeHeldPermission.of(holder, e));
@@ -316,7 +317,7 @@ public class CombinedConfigurateDao extends AbstractConfigurateDao {
     }
 
     @Override
-    public List<HeldPermission<String>> getGroupsWithPermission(String permission) throws Exception {
+    public List<HeldPermission<String>> getGroupsWithPermission(Constraint constraint) throws Exception {
         List<HeldPermission<String>> held = new ArrayList<>();
         this.groupsLoader.apply(false, true, root -> {
             for (Map.Entry<Object, ? extends ConfigurationNode> entry : root.getChildrenMap().entrySet()) {
@@ -326,7 +327,7 @@ public class CombinedConfigurateDao extends AbstractConfigurateDao {
 
                     Set<NodeDataContainer> nodes = readNodes(object);
                     for (NodeDataContainer e : nodes) {
-                        if (!e.getPermission().equalsIgnoreCase(permission)) {
+                        if (!constraint.eval(e.getPermission())) {
                             continue;
                         }
                         held.add(NodeHeldPermission.of(holder, e));

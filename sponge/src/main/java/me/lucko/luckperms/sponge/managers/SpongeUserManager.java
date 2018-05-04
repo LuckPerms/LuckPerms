@@ -35,6 +35,8 @@ import com.google.common.collect.Maps;
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
+import me.lucko.luckperms.common.bulkupdate.comparisons.StandardComparison;
 import me.lucko.luckperms.common.managers.user.AbstractUserManager;
 import me.lucko.luckperms.common.managers.user.UserHousekeeper;
 import me.lucko.luckperms.common.model.UserIdentifier;
@@ -212,7 +214,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
         return CompletableFuture.supplyAsync(() -> {
             ImmutableMap.Builder<LPSubjectReference, Boolean> ret = ImmutableMap.builder();
 
-            List<HeldPermission<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(permission).join();
+            List<HeldPermission<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(Constraint.of(StandardComparison.EQUAL, permission)).join();
             for (HeldPermission<UUID> holder : lookup) {
                 if (holder.asNode().getFullContexts().equals(ImmutableContextSet.empty())) {
                     ret.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder().toString()), holder.getValue());
@@ -228,7 +230,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
         return CompletableFuture.supplyAsync(() -> {
             ImmutableMap.Builder<LPSubjectReference, Boolean> ret = ImmutableMap.builder();
 
-            List<HeldPermission<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(permission).join();
+            List<HeldPermission<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(Constraint.of(StandardComparison.EQUAL, permission)).join();
             for (HeldPermission<UUID> holder : lookup) {
                 if (holder.asNode().getFullContexts().equals(contexts)) {
                     ret.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder().toString()), holder.getValue());

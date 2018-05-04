@@ -31,6 +31,9 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Comparison;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
+import me.lucko.luckperms.common.bulkupdate.comparisons.StandardComparison;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
@@ -66,13 +69,19 @@ import java.util.stream.Collectors;
 
 public class SearchCommand extends SingleCommand {
     public SearchCommand(LocaleManager locale) {
-        super(CommandSpec.SEARCH.localize(locale), "Search", CommandPermission.SEARCH, Predicates.notInRange(1, 2));
+        super(CommandSpec.SEARCH.localize(locale), "Search", CommandPermission.SEARCH, Predicates.notInRange(1, 3));
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        String query = args.get(0);
-        int page = ArgumentParser.parseIntOrElse(1, args, 1);
+        Comparison comparison = StandardComparison.parseComparison(args.get(0));
+        if (comparison == null) {
+            comparison = StandardComparison.EQUAL;
+            args.add(0, "==");
+        }
+
+        Constraint query = Constraint.of(comparison, args.get(1));
+        int page = ArgumentParser.parseIntOrElse(2, args, 1);
 
         Message.SEARCH_SEARCHING.send(sender, query);
 
@@ -93,11 +102,11 @@ public class SearchCommand extends SingleCommand {
                         }
                         return s;
                     });
-            sendResult(sender, matchedUsers, uuidLookups::get, Message.SEARCH_SHOWING_USERS, HolderType.USER, label, page);
+            sendResult(sender, matchedUsers, uuidLookups::get, Message.SEARCH_SHOWING_USERS, HolderType.USER, label, page, comparison);
         }
 
         if (!matchedGroups.isEmpty()) {
-            sendResult(sender, matchedGroups, Function.identity(), Message.SEARCH_SHOWING_GROUPS, HolderType.GROUP, label, page);
+            sendResult(sender, matchedGroups, Function.identity(), Message.SEARCH_SHOWING_GROUPS, HolderType.GROUP, label, page, comparison);
         }
 
         return CommandResult.SUCCESS;
@@ -108,7 +117,7 @@ public class SearchCommand extends SingleCommand {
         return TabCompletions.getPermissionTabComplete(args, plugin.getPermissionRegistry());
     }
 
-    private static <T extends Comparable<T>> void sendResult(Sender sender, List<HeldPermission<T>> results, Function<T, String> lookupFunction, Message headerMessage, HolderType holderType, String label, int page) {
+    private static <T extends Comparable<T>> void sendResult(Sender sender, List<HeldPermission<T>> results, Function<T, String> lookupFunction, Message headerMessage, HolderType holderType, String label, int page, Comparison comparison) {
         results = new ArrayList<>(results);
         results.sort(HeldPermissionComparator.normal());
 
@@ -130,7 +139,13 @@ public class SearchCommand extends SingleCommand {
         headerMessage.send(sender, page, pages.size(), results.size());
 
         for (Map.Entry<String, HeldPermission<T>> ent : mappedContent) {
-            String s = "&3> &b" + ent.getKey() + " &7- " + (ent.getValue().getValue() ? "&a" : "&c") + ent.getValue().getValue() + getNodeExpiryString(ent.getValue().asNode()) + MessageUtils.getAppendableNodeContextString(ent.getValue().asNode());
+            // only show the permission in the results if the comparison isn't equals
+            String permission = "";
+            if (comparison != StandardComparison.EQUAL) {
+                permission = "&7 - (" + ent.getValue().getPermission() + ")";
+            }
+
+            String s = "&3> &b" + ent.getKey() + permission + "&7 - " + (ent.getValue().getValue() ? "&a" : "&c") + ent.getValue().getValue() + getNodeExpiryString(ent.getValue().asNode()) + MessageUtils.getAppendableNodeContextString(ent.getValue().asNode());
             TextComponent message = TextUtils.fromLegacy(s, CommandManager.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), holderType, label, ent.getValue())).build();
             sender.sendMessage(message);
         }

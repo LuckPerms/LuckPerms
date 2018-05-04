@@ -29,6 +29,7 @@ import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -82,7 +83,7 @@ public abstract class AbstractDao {
 
     public abstract Set<UUID> getUniqueUsers() throws Exception;
 
-    public abstract List<HeldPermission<UUID>> getUsersWithPermission(String permission) throws Exception;
+    public abstract List<HeldPermission<UUID>> getUsersWithPermission(Constraint constraint) throws Exception;
 
     public abstract Group createAndLoadGroup(String name) throws Exception;
 
@@ -94,7 +95,7 @@ public abstract class AbstractDao {
 
     public abstract void deleteGroup(Group group) throws Exception;
 
-    public abstract List<HeldPermission<String>> getGroupsWithPermission(String permission) throws Exception;
+    public abstract List<HeldPermission<String>> getGroupsWithPermission(Constraint constraint) throws Exception;
 
     public abstract Track createAndLoadTrack(String name) throws Exception;
 

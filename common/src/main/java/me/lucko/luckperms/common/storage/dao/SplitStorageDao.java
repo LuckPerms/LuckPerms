@@ -31,6 +31,7 @@ import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -132,8 +133,8 @@ public class SplitStorageDao extends AbstractDao {
     }
 
     @Override
-    public List<HeldPermission<UUID>> getUsersWithPermission(String permission) throws Exception {
-        return this.backing.get(this.types.get(SplitStorageType.USER)).getUsersWithPermission(permission);
+    public List<HeldPermission<UUID>> getUsersWithPermission(Constraint constraint) throws Exception {
+        return this.backing.get(this.types.get(SplitStorageType.USER)).getUsersWithPermission(constraint);
     }
 
     @Override
@@ -162,8 +163,8 @@ public class SplitStorageDao extends AbstractDao {
     }
 
     @Override
-    public List<HeldPermission<String>> getGroupsWithPermission(String permission) throws Exception {
-        return this.backing.get(this.types.get(SplitStorageType.GROUP)).getGroupsWithPermission(permission);
+    public List<HeldPermission<String>> getGroupsWithPermission(Constraint constraint) throws Exception {
+        return this.backing.get(this.types.get(SplitStorageType.GROUP)).getGroupsWithPermission(constraint);
     }
 
     @Override

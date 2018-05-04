@@ -33,6 +33,8 @@ import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
+import me.lucko.luckperms.common.bulkupdate.comparisons.StandardComparison;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.Storage;
@@ -148,7 +150,7 @@ public class ApiStorage implements me.lucko.luckperms.api.Storage {
     @Override
     public CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(@Nonnull String permission) {
         Objects.requireNonNull(permission, "permission");
-        return this.handle.getUsersWithPermission(permission).exceptionally(consumeExceptionToNull());
+        return this.handle.getUsersWithPermission(Constraint.of(StandardComparison.EQUAL, permission)).exceptionally(consumeExceptionToNull());
     }
 
     @Nonnull
@@ -202,7 +204,7 @@ public class ApiStorage implements me.lucko.luckperms.api.Storage {
     @Override
     public CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(@Nonnull String permission) {
         Objects.requireNonNull(permission, "permission");
-        return this.handle.getGroupsWithPermission(permission).exceptionally(consumeExceptionToNull());
+        return this.handle.getGroupsWithPermission(Constraint.of(StandardComparison.EQUAL, permission)).exceptionally(consumeExceptionToNull());
     }
 
     @Nonnull

@@ -34,9 +34,10 @@ import me.lucko.luckperms.common.bulkupdate.DataType;
 import me.lucko.luckperms.common.bulkupdate.action.DeleteAction;
 import me.lucko.luckperms.common.bulkupdate.action.UpdateAction;
 import me.lucko.luckperms.common.bulkupdate.comparisons.Comparison;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
 import me.lucko.luckperms.common.bulkupdate.comparisons.StandardComparison;
-import me.lucko.luckperms.common.bulkupdate.constraint.Constraint;
-import me.lucko.luckperms.common.bulkupdate.constraint.QueryField;
+import me.lucko.luckperms.common.bulkupdate.query.Query;
+import me.lucko.luckperms.common.bulkupdate.query.QueryField;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
@@ -141,7 +142,7 @@ public class BulkUpdateCommand extends SingleCommand {
             }
 
             String expr = parts[2];
-            bulkUpdateBuilder.constraint(Constraint.of(field, comparison, expr));
+            bulkUpdateBuilder.query(Query.of(field, Constraint.of(comparison, expr)));
         }
 
         String id = String.format("%04d", ThreadLocalRandom.current().nextInt(10000));

@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.storage.dao.file;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
 import me.lucko.luckperms.common.managers.group.GroupManager;
 import me.lucko.luckperms.common.managers.track.TrackManager;
 import me.lucko.luckperms.common.model.User;
@@ -253,7 +254,7 @@ public class SeparatedConfigurateDao extends AbstractConfigurateDao {
     }
 
     @Override
-    public List<HeldPermission<UUID>> getUsersWithPermission(String permission) throws Exception {
+    public List<HeldPermission<UUID>> getUsersWithPermission(Constraint constraint) throws Exception {
         List<HeldPermission<UUID>> held = new ArrayList<>();
         try (Stream<Path> stream = Files.list(getDirectory(StorageLocation.USER))) {
             stream.filter(getFileTypeFilter())
@@ -265,7 +266,7 @@ public class SeparatedConfigurateDao extends AbstractConfigurateDao {
                             UUID holder = UUID.fromString(fileName.substring(0, fileName.length() - this.fileExtension.length()));
                             Set<NodeDataContainer> nodes = readNodes(object);
                             for (NodeDataContainer e : nodes) {
-                                if (!e.getPermission().equalsIgnoreCase(permission)) {
+                                if (!constraint.eval(e.getPermission())) {
                                     continue;
                                 }
                                 held.add(NodeHeldPermission.of(holder, e));
@@ -309,7 +310,7 @@ public class SeparatedConfigurateDao extends AbstractConfigurateDao {
     }
 
     @Override
-    public List<HeldPermission<String>> getGroupsWithPermission(String permission) throws Exception {
+    public List<HeldPermission<String>> getGroupsWithPermission(Constraint constraint) throws Exception {
         List<HeldPermission<String>> held = new ArrayList<>();
         try (Stream<Path> stream = Files.list(getDirectory(StorageLocation.USER))) {
             stream.filter(getFileTypeFilter())
@@ -321,7 +322,7 @@ public class SeparatedConfigurateDao extends AbstractConfigurateDao {
                             String holder = fileName.substring(0, fileName.length() - this.fileExtension.length());
                             Set<NodeDataContainer> nodes = readNodes(object);
                             for (NodeDataContainer e : nodes) {
-                                if (!e.getPermission().equalsIgnoreCase(permission)) {
+                                if (!constraint.eval(e.getPermission())) {
                                     continue;
                                 }
                                 held.add(NodeHeldPermission.of(holder, e));

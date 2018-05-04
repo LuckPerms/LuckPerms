@@ -46,6 +46,7 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
 import me.lucko.luckperms.common.managers.group.GroupManager;
 import me.lucko.luckperms.common.managers.track.TrackManager;
 import me.lucko.luckperms.common.model.Group;
@@ -319,7 +320,7 @@ public class MongoDao extends AbstractDao {
     }
 
     @Override
-    public List<HeldPermission<UUID>> getUsersWithPermission(String permission) {
+    public List<HeldPermission<UUID>> getUsersWithPermission(Constraint constraint) {
         List<HeldPermission<UUID>> held = new ArrayList<>();
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
         try (MongoCursor<Document> cursor = c.find().iterator()) {
@@ -329,7 +330,7 @@ public class MongoDao extends AbstractDao {
 
                 Set<NodeDataContainer> nodes = new HashSet<>(nodesFromDoc(d));
                 for (NodeDataContainer e : nodes) {
-                    if (!e.getPermission().equalsIgnoreCase(permission)) {
+                    if (!constraint.eval(e.getPermission())) {
                         continue;
                     }
                     held.add(NodeHeldPermission.of(holder, e));
@@ -446,7 +447,7 @@ public class MongoDao extends AbstractDao {
     }
 
     @Override
-    public List<HeldPermission<String>> getGroupsWithPermission(String permission) {
+    public List<HeldPermission<String>> getGroupsWithPermission(Constraint constraint) {
         List<HeldPermission<String>> held = new ArrayList<>();
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
         try (MongoCursor<Document> cursor = c.find().iterator()) {
@@ -456,7 +457,7 @@ public class MongoDao extends AbstractDao {
                 String holder = d.getString("_id");
                 Set<NodeDataContainer> nodes = new HashSet<>(nodesFromDoc(d));
                 for (NodeDataContainer e : nodes) {
-                    if (!e.getPermission().equalsIgnoreCase(permission)) {
+                    if (!constraint.eval(e.getPermission())) {
                         continue;
                     }
                     held.add(NodeHeldPermission.of(holder, e));

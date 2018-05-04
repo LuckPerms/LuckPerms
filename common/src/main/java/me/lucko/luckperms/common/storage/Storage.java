@@ -32,6 +32,7 @@ import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.api.delegates.model.ApiStorage;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -75,7 +76,7 @@ public interface Storage {
 
     CompletableFuture<Set<UUID>> getUniqueUsers();
 
-    CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(String permission);
+    CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(Constraint constraint);
 
     CompletableFuture<Group> createAndLoadGroup(String name, CreationCause cause);
 
@@ -87,7 +88,7 @@ public interface Storage {
 
     CompletableFuture<Void> deleteGroup(Group group, DeletionCause cause);
 
-    CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(String permission);
+    CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(Constraint constraint);
 
     CompletableFuture<Track> createAndLoadTrack(String name, CreationCause cause);
 

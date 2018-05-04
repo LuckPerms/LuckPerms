@@ -23,32 +23,46 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.bulkupdate.constraint;
+package me.lucko.luckperms.common.bulkupdate.comparisons;
 
-/**
- * Represents a field being used in an update
- */
-public enum QueryField {
+import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 
-    PERMISSION("permission"),
-    SERVER("server"),
-    WORLD("world");
+public class Constraint {
 
-    private final String sqlName;
-
-    public static QueryField of(String s) {
-        try {
-            return valueOf(s.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
+    public static Constraint of(Comparison comparison, String expression) {
+        return new Constraint(comparison, expression);
     }
 
-    QueryField(String sqlName) {
-        this.sqlName = sqlName;
+    // the comparison type being used in this query
+    private final Comparison comparison;
+
+    // the expression being compared against
+    private final String expression;
+
+    private Constraint(Comparison comparison, String expression) {
+        this.comparison = comparison;
+        this.expression = expression;
     }
 
-    public String getSqlName() {
-        return this.sqlName;
+    /**
+     * Returns if the given value satisfies this constraint
+     *
+     * @param value the value
+     * @return true if satisfied
+     */
+    public boolean eval(String value) {
+        return this.comparison.matches(value, this.expression);
+    }
+
+    public String getAsSql(String field) {
+        return field + " " + this.comparison.getAsSql() + " " + BulkUpdate.escapeStringForSql(this.expression);
+    }
+
+    public Comparison getComparison() {
+        return this.comparison;
+    }
+
+    public String getExpression() {
+        return this.expression;
     }
 }
