@@ -79,12 +79,14 @@ public class Exporter implements Runnable {
     private final LuckPermsPlugin plugin;
     private final Sender executor;
     private final Path filePath;
+    private final boolean includeUsers;
     private final ProgressLogger log;
 
-    public Exporter(LuckPermsPlugin plugin, Sender executor, Path filePath) {
+    public Exporter(LuckPermsPlugin plugin, Sender executor, Path filePath, boolean includeUsers) {
         this.plugin = plugin;
         this.executor = executor;
         this.filePath = filePath;
+        this.includeUsers = includeUsers;
 
         this.log = new ProgressLogger(null, Message.EXPORT_LOG, Message.EXPORT_LOG_PROGRESS);
         this.log.addListener(plugin.getConsoleSender());
@@ -169,101 +171,103 @@ public class Exporter implements Runnable {
 
             this.log.log("Exported " + tracks.size() + " tracks.");
 
+            if (this.includeUsers) {
+                // Users are migrated in separate threads.
+                // This is because there are likely to be a lot of them, and because we can.
+                // It's a big speed improvement, since the database/files are split up and can handle concurrent reads.
 
-            // Users are migrated in separate threads.
-            // This is because there are likely to be a lot of them, and because we can.
-            // It's a big speed improvement, since the database/files are split up and can handle concurrent reads.
+                this.log.log("Starting user export. Finding a list of unique users to export.");
 
-            this.log.log("Starting user export. Finding a list of unique users to export.");
+                // Find all of the unique users we need to export
+                Storage ds = this.plugin.getStorage();
+                Set<UUID> users = ds.getUniqueUsers().join();
+                this.log.log("Found " + users.size() + " unique users to export.");
 
-            // Find all of the unique users we need to export
-            Storage ds = this.plugin.getStorage();
-            Set<UUID> users = ds.getUniqueUsers().join();
-            this.log.log("Found " + users.size() + " unique users to export.");
+                write(writer, "# Export users");
 
-            write(writer, "# Export users");
+                // create a threadpool to process the users concurrently
+                ExecutorService executor = Executors.newFixedThreadPool(32);
 
-            // create a threadpool to process the users concurrently
-            ExecutorService executor = Executors.newFixedThreadPool(32);
-
-            // Setup a file writing lock. We don't want multiple threads writing at the same time.
-            // The write function accepts a list of strings, as we want a user's data to be grouped together.
-            // This means it can be processed and added in one go.
-            ReentrantLock lock = new ReentrantLock();
-            Consumer<List<String>> writeFunction = strings -> {
-                lock.lock();
-                try {
-                    for (String s : strings) {
-                        write(writer, s);
+                // Setup a file writing lock. We don't want multiple threads writing at the same time.
+                // The write function accepts a list of strings, as we want a user's data to be grouped together.
+                // This means it can be processed and added in one go.
+                ReentrantLock lock = new ReentrantLock();
+                Consumer<List<String>> writeFunction = strings -> {
+                    lock.lock();
+                    try {
+                        for (String s : strings) {
+                            write(writer, s);
+                        }
+                    } finally {
+                        lock.unlock();
                     }
-                } finally {
-                    lock.unlock();
-                }
-            };
+                };
 
-            // A set of futures, which are really just the processes we need to wait for.
-            Set<CompletableFuture<Void>> futures = new HashSet<>();
+                // A set of futures, which are really just the processes we need to wait for.
+                Set<CompletableFuture<Void>> futures = new HashSet<>();
 
-            AtomicInteger userCount = new AtomicInteger(0);
+                AtomicInteger userCount = new AtomicInteger(0);
 
-            // iterate through each user.
-            for (UUID uuid : users) {
-                // register a task for the user, and schedule it's execution with the pool
-                futures.add(CompletableFuture.runAsync(() -> {
-                    // actually export the user. this output will be fed to the writing function when we have all of the user's data.
-                    List<String> output = new ArrayList<>();
+                // iterate through each user.
+                for (UUID uuid : users) {
+                    // register a task for the user, and schedule it's execution with the pool
+                    futures.add(CompletableFuture.runAsync(() -> {
+                        // actually export the user. this output will be fed to the writing function when we have all of the user's data.
+                        List<String> output = new ArrayList<>();
 
-                    User user = this.plugin.getStorage().loadUser(uuid, null).join();
-                    output.add("# Export user: " + user.getUuid().toString() + " - " + user.getName().orElse("unknown username"));
+                        User user = this.plugin.getStorage().loadUser(uuid, null).join();
+                        output.add("# Export user: " + user.getUuid().toString() + " - " + user.getName().orElse("unknown username"));
 
-                    boolean inDefault = false;
-                    for (Node node : user.enduringData().immutable().values()) {
-                        if (node.isGroupNode() && node.getGroupName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
-                            inDefault = true;
-                            continue;
+                        boolean inDefault = false;
+                        for (Node node : user.enduringData().immutable().values()) {
+                            if (node.isGroupNode() && node.getGroupName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
+                                inDefault = true;
+                                continue;
+                            }
+
+                            output.add("/lp " + NodeFactory.nodeAsCommand(node, user.getUuid().toString(), HolderType.USER, true));
                         }
 
-                        output.add("/lp " + NodeFactory.nodeAsCommand(node, user.getUuid().toString(), HolderType.USER, true));
-                    }
+                        if (!user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
+                            output.add("/lp user " + user.getUuid().toString() + " switchprimarygroup " + user.getPrimaryGroup().getStoredValue().get());
+                        }
 
-                    if (!user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
-                        output.add("/lp user " + user.getUuid().toString() + " switchprimarygroup " + user.getPrimaryGroup().getStoredValue().get());
-                    }
+                        if (!inDefault) {
+                            output.add("/lp user " + user.getUuid().toString() + " parent remove default");
+                        }
 
-                    if (!inDefault) {
-                        output.add("/lp user " + user.getUuid().toString() + " parent remove default");
-                    }
+                        this.plugin.getUserManager().cleanup(user);
+                        writeFunction.accept(output);
 
-                    this.plugin.getUserManager().cleanup(user);
-                    writeFunction.accept(output);
-
-                    userCount.incrementAndGet();
-                }, executor));
-            }
-
-            // all of the threads have been scheduled now and are running. we just need to wait for them all to complete
-            CompletableFuture<Void> overallFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
-
-            while (true) {
-                try {
-                    overallFuture.get(5, TimeUnit.SECONDS);
-                } catch (InterruptedException | ExecutionException e) {
-                    // abnormal error - just break
-                    e.printStackTrace();
-                    break;
-                } catch (TimeoutException e) {
-                    // still executing - send a progress report and continue waiting
-                    this.log.logAllProgress("Exported {} users so far.", userCount.get());
-                    continue;
+                        userCount.incrementAndGet();
+                    }, executor));
                 }
 
-                // process is complete
-                break;
+                // all of the threads have been scheduled now and are running. we just need to wait for them all to complete
+                CompletableFuture<Void> overallFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+
+                while (true) {
+                    try {
+                        overallFuture.get(5, TimeUnit.SECONDS);
+                    } catch (InterruptedException | ExecutionException e) {
+                        // abnormal error - just break
+                        e.printStackTrace();
+                        break;
+                    } catch (TimeoutException e) {
+                        // still executing - send a progress report and continue waiting
+                        this.log.logAllProgress("Exported {} users so far.", userCount.get());
+                        continue;
+                    }
+
+                    // process is complete
+                    break;
+                }
+
+                executor.shutdown();
+                this.log.log("Exported " + userCount.get() + " users.");
             }
 
-            executor.shutdown();
 
-            this.log.log("Exported " + userCount.get() + " users.");
             writer.flush();
             this.log.getListeners().forEach(l -> Message.LOG_EXPORT_SUCCESS.send(l, this.filePath.toFile().getAbsolutePath()));
 

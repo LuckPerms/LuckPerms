@@ -46,7 +46,7 @@ public class ExportCommand extends SingleCommand {
     private final AtomicBoolean running = new AtomicBoolean(false);
 
     public ExportCommand(LocaleManager locale) {
-        super(CommandSpec.EXPORT.localize(locale), "Export", CommandPermission.EXPORT, Predicates.not(1));
+        super(CommandSpec.EXPORT.localize(locale), "Export", CommandPermission.EXPORT, Predicates.notInRange(1, 2));
     }
 
     @Override
@@ -57,6 +57,8 @@ public class ExportCommand extends SingleCommand {
         }
 
         Path path = plugin.getBootstrap().getDataDirectory().resolve(args.get(0));
+        boolean includeUsers = !args.remove("--without-users");
+
         if (Files.exists(path)) {
             Message.LOG_EXPORT_ALREADY_EXISTS.send(sender, path.toString());
             return CommandResult.INVALID_ARGS;
@@ -80,7 +82,7 @@ public class ExportCommand extends SingleCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        Exporter exporter = new Exporter(plugin, sender, path);
+        Exporter exporter = new Exporter(plugin, sender, path, includeUsers);
 
         // Run the exporter in its own thread.
         plugin.getBootstrap().getScheduler().doAsync(() -> {
