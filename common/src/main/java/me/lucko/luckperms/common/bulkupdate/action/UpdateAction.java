@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.bulkupdate.action;
 
-import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
 import me.lucko.luckperms.common.bulkupdate.query.QueryField;
 import me.lucko.luckperms.common.node.model.NodeDataContainer;
 
@@ -66,7 +66,8 @@ public class UpdateAction implements Action {
     }
 
     @Override
-    public String getAsSql() {
-        return "UPDATE {table} SET " + this.field.getSqlName() + "=" + BulkUpdate.escapeStringForSql(this.value);
+    public void appendSql(PreparedStatementBuilder builder) {
+        builder.append("UPDATE {table} SET " + this.field.getSqlName() + "=?");
+        builder.variable(this.value);
     }
 }

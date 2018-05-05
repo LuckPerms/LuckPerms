@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.bulkupdate.comparisons;
 
+import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
+
 /**
  * A method of comparing two strings
  */
@@ -49,9 +51,7 @@ public interface Comparison {
 
     /**
      * Returns the comparison operator in SQL form
-     *
-     * @return a sql form of this comparison
      */
-    String getAsSql();
+    void appendSql(PreparedStatementBuilder builder);
 
 }

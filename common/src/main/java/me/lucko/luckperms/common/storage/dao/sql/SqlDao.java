@@ -35,6 +35,7 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
 import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
 import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.managers.group.GroupManager;
@@ -265,20 +266,18 @@ public class SqlDao extends AbstractDao {
 
     @Override
     public void applyBulkUpdate(BulkUpdate bulkUpdate) throws SQLException {
-        String queryString = bulkUpdate.buildAsSql();
-
         try (Connection c = this.provider.getConnection()) {
             if (bulkUpdate.getDataType().isIncludingUsers()) {
                 String table = this.prefix.apply("{prefix}user_permissions");
-                try (Statement s = c.createStatement()) {
-                    s.execute(queryString.replace("{table}", table));
+                try (PreparedStatement ps = bulkUpdate.buildAsSql().build(c, q -> q.replace("{table}", table))) {
+                    ps.execute();
                 }
             }
 
             if (bulkUpdate.getDataType().isIncludingGroups()) {
                 String table = this.prefix.apply("{prefix}group_permissions");
-                try (Statement s = c.createStatement()) {
-                    s.execute(queryString.replace("{table}", table));
+                try (PreparedStatement ps = bulkUpdate.buildAsSql().build(c, q -> q.replace("{table}", table))) {
+                    ps.execute();
                 }
             }
         }
@@ -494,9 +493,12 @@ public class SqlDao extends AbstractDao {
 
     @Override
     public List<HeldPermission<UUID>> getUsersWithPermission(Constraint constraint) throws SQLException {
+        PreparedStatementBuilder builder = new PreparedStatementBuilder().append(USER_PERMISSIONS_SELECT_PERMISSION);
+        constraint.appendSql(builder, "permission");
+
         List<HeldPermission<UUID>> held = new ArrayList<>();
         try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_SELECT_PERMISSION + constraint.getAsSql("permission")))) {
+            try (PreparedStatement ps = builder.build(c, this.prefix)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         UUID holder = UUID.fromString(rs.getString("uuid"));
@@ -737,9 +739,12 @@ public class SqlDao extends AbstractDao {
 
     @Override
     public List<HeldPermission<String>> getGroupsWithPermission(Constraint constraint) throws SQLException {
+        PreparedStatementBuilder builder = new PreparedStatementBuilder().append(GROUP_PERMISSIONS_SELECT_PERMISSION);
+        constraint.appendSql(builder, "permission");
+
         List<HeldPermission<String>> held = new ArrayList<>();
         try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_SELECT_PERMISSION + constraint.getAsSql("permission")))) {
+            try (PreparedStatement ps = builder.build(c, this.prefix)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         String holder = rs.getString("name");

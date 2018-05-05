@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.bulkupdate.action;
 
+import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
 import me.lucko.luckperms.common.node.model.NodeDataContainer;
 
 /**
@@ -54,6 +55,6 @@ public interface Action {
      *
      * @return the action in sql form
      */
-    String getAsSql();
+    void appendSql(PreparedStatementBuilder builder);
 
 }

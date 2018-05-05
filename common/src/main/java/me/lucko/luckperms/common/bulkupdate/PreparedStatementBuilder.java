@@ -23,32 +23,47 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.bulkupdate.action;
+package me.lucko.luckperms.common.bulkupdate;
 
-import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
-import me.lucko.luckperms.common.node.model.NodeDataContainer;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
-public class DeleteAction implements Action {
+public class PreparedStatementBuilder {
+    private final StringBuilder sb = new StringBuilder();
+    private final List<String> variables = new ArrayList<>();
 
-    public static DeleteAction create() {
-        return new DeleteAction();
+    public PreparedStatementBuilder() {
+
     }
 
-    private DeleteAction() {
+    public PreparedStatementBuilder append(String s) {
+        this.sb.append(s);
+        return this;
     }
 
-    @Override
-    public String getName() {
-        return "delete";
+    public PreparedStatementBuilder variable(String variable) {
+        this.variables.add(variable);
+        return this;
     }
 
-    @Override
-    public NodeDataContainer apply(NodeDataContainer from) {
-        return null; // this action just deletes nodes, so return null
+    public PreparedStatement build(Connection connection, Function<String, String> mapping) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement(mapping.apply(this.sb.toString()));
+        for (int i = 0; i < this.variables.size(); i++) {
+            String var = this.variables.get(i);
+            statement.setString(i + 1, var);
+        }
+        return statement;
     }
 
-    @Override
-    public void appendSql(PreparedStatementBuilder builder) {
-        builder.append("DELETE FROM {table}");
+    public String toReadableString() {
+        String s = this.sb.toString();
+        for (String var : this.variables) {
+            s = s.replaceFirst("\\?", var);
+        }
+        return s;
     }
 }

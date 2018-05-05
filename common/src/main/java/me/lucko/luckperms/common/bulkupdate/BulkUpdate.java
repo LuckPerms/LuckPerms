@@ -87,56 +87,35 @@ public final class BulkUpdate {
      *
      * @return this query in SQL form
      */
-    public String buildAsSql() {
+    public PreparedStatementBuilder buildAsSql() {
         // DELETE FROM {table} WHERE ...
         // UPDATE {table} SET ... WHERE ...
 
-        StringBuilder sb = new StringBuilder();
+        PreparedStatementBuilder builder = new PreparedStatementBuilder();
 
         // add the action
         // (DELETE FROM or UPDATE)
-        sb.append(this.action.getAsSql());
+        this.action.appendSql(builder);
 
         // if there are no constraints, just return without a WHERE clause
         if (this.queries.isEmpty()) {
-            return sb.append(";").toString();
+            return builder;
         }
 
         // append constraints
-        sb.append(" WHERE");
+        builder.append(" WHERE");
         for (int i = 0; i < this.queries.size(); i++) {
             Query query = this.queries.get(i);
 
-            sb.append(" ");
+            builder.append(" ");
             if (i != 0) {
-                sb.append("AND ");
+                builder.append("AND ");
             }
 
-            sb.append(query.getAsSql());
+            query.appendSql(builder);
         }
 
-        return sb.append(";").toString();
-    }
-
-    /**
-     * Utility to appropriately escape a string for use in a query.
-     *
-     * @param s the string to escape
-     * @return an escaped string
-     */
-    public static String escapeStringForSql(String s) {
-        if (s.equalsIgnoreCase("true") || s.equalsIgnoreCase("false")) {
-            return s.toLowerCase();
-        }
-
-        try {
-            Integer.parseInt(s);
-            return s;
-        } catch (NumberFormatException e) {
-            // ignored
-        }
-
-        return "'" + s + "'";
+        return builder;
     }
 
     public DataType getDataType() {

@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.bulkupdate.comparisons;
 
+import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
+
 /**
  * An enumeration of standard {@link Comparison}s.
  */
@@ -88,8 +90,8 @@ public enum StandardComparison implements Comparison {
     }
 
     @Override
-    public String getAsSql() {
-        return this.asSql;
+    public void appendSql(PreparedStatementBuilder builder) {
+        builder.append(this.asSql);
     }
 
     public static StandardComparison parseComparison(String s) {

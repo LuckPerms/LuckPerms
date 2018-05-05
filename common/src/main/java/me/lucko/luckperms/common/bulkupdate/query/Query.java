@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.bulkupdate.query;
 
+import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
 import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
 import me.lucko.luckperms.common.node.model.NodeDataContainer;
 
@@ -67,8 +68,8 @@ public class Query {
         }
     }
 
-    public String getAsSql() {
-        return this.constraint.getAsSql(this.field.getSqlName());
+    public void appendSql(PreparedStatementBuilder builder) {
+        this.constraint.appendSql(builder, this.field.getSqlName());
     }
 
     public QueryField getField() {

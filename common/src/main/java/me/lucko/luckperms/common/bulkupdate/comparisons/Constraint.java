@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.bulkupdate.comparisons;
 
-import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
 
 public class Constraint {
 
@@ -54,8 +54,12 @@ public class Constraint {
         return this.comparison.matches(value, this.expression);
     }
 
-    public String getAsSql(String field) {
-        return field + " " + this.comparison.getAsSql() + " " + BulkUpdate.escapeStringForSql(this.expression);
+    public void appendSql(PreparedStatementBuilder builder, String field) {
+        // e.g. field LIKE ?
+        builder.append(field + " ");
+        this.comparison.appendSql(builder);
+        builder.append(" ?");
+        builder.variable(this.expression);
     }
 
     public Comparison getComparison() {

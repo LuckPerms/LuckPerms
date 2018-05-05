@@ -151,7 +151,7 @@ public class BulkUpdateCommand extends SingleCommand {
 
         this.pendingOperations.put(id, bulkUpdate);
 
-        Message.BULK_UPDATE_QUEUED.send(sender, bulkUpdate.buildAsSql().replace("{table}", bulkUpdate.getDataType().getName()));
+        Message.BULK_UPDATE_QUEUED.send(sender, bulkUpdate.buildAsSql().toReadableString().replace("{table}", bulkUpdate.getDataType().getName()));
         Message.BULK_UPDATE_CONFIRM.send(sender, label, id);
 
         return CommandResult.SUCCESS;
