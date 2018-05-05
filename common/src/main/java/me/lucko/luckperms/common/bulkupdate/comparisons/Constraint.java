@@ -69,4 +69,9 @@ public class Constraint {
     public String getExpression() {
         return this.expression;
     }
+
+    @Override
+    public String toString() {
+        return this.comparison + " " + this.expression;
+    }
 }

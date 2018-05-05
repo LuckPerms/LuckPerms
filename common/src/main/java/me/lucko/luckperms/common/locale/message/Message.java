@@ -118,7 +118,7 @@ public enum Message {
     TREE_EMPTY("&cUnable to generate tree. No results were found.", true),
     TREE_URL("&aPermission tree URL:", true),
 
-    SEARCH_SEARCHING("&aSearching for users and groups with &b{}&a...", true),
+    SEARCH_SEARCHING("&aSearching for users and groups with &bpermissions {}&a...", true),
     SEARCH_SEARCHING_MEMBERS("&aSearching for users and groups who inherit from &b{}&a...", true),
     SEARCH_RESULT("&aFound &b{}&a entries from &b{}&a users and &b{}&a groups.", true),
 

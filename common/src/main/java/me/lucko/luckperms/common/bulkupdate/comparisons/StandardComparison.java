@@ -94,6 +94,11 @@ public enum StandardComparison implements Comparison {
         builder.append(this.asSql);
     }
 
+    @Override
+    public String toString() {
+        return this.symbol;
+    }
+
     public static StandardComparison parseComparison(String s) {
         for (StandardComparison t : values()) {
             if (t.getSymbol().equals(s)) {
