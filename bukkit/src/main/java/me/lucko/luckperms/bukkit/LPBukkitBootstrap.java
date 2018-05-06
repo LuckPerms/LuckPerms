@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -211,13 +212,13 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
 
     @Override
     public Optional<UUID> lookupUuid(String username) {
-        try {
-            //noinspection deprecation
-            return Optional.ofNullable(getServer().getOfflinePlayer(username)).flatMap(p -> Optional.ofNullable(p.getUniqueId()));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Optional.empty();
-        }
+        //noinspection deprecation
+        return Optional.ofNullable(getServer().getOfflinePlayer(username)).map(OfflinePlayer::getUniqueId);
+    }
+
+    @Override
+    public Optional<String> lookupUsername(UUID uuid) {
+        return Optional.ofNullable(getServer().getOfflinePlayer(uuid)).map(OfflinePlayer::getName);
     }
 
     @Override

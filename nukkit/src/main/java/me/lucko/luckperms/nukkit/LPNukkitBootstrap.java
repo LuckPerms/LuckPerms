@@ -178,6 +178,11 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     }
 
     @Override
+    public Optional<String> lookupUsername(UUID uuid) {
+        return Optional.empty();
+    }
+
+    @Override
     public int getPlayerCount() {
         return getServer().getOnlinePlayers().size();
     }

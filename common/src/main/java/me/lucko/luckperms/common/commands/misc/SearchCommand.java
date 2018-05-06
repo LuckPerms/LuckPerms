@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.TabCompletions;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -97,10 +98,18 @@ public class SearchCommand extends SingleCommand {
             LoadingCache<UUID, String> uuidLookups = Caffeine.newBuilder()
                     .build(u -> {
                         String s = plugin.getStorage().getPlayerName(u).join();
-                        if (s == null || s.isEmpty() || s.equals("null")) {
-                            s = u.toString();
+                        if (s != null && !s.isEmpty() && !s.equals("null")) {
+                            return s;
                         }
-                        return s;
+
+                        if (plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
+                            s = plugin.getBootstrap().lookupUsername(u).orElse(null);
+                            if (s != null) {
+                                return s;
+                            }
+                        }
+
+                        return u.toString();
                     });
             sendResult(sender, matchedUsers, uuidLookups::get, Message.SEARCH_SHOWING_USERS, HolderType.USER, label, page, comparison);
         }

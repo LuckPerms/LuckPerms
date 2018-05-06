@@ -169,6 +169,14 @@ public interface LuckPermsBootstrap {
     Optional<UUID> lookupUuid(String username);
 
     /**
+     * Lookup a username from a uuid, using the servers internal uuid cache.
+     *
+     * @param uuid the uuid to lookup
+     * @return an optional username, if found
+     */
+    Optional<String> lookupUsername(UUID uuid);
+
+    /**
      * Gets the number of users online on the platform
      *
      * @return the number of users

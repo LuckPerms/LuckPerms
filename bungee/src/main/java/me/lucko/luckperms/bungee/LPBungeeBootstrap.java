@@ -183,6 +183,19 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     }
 
     @Override
+    public Optional<String> lookupUsername(UUID uuid) {
+        if (getProxy().getPluginManager().getPlugin("RedisBungee") != null) {
+            try {
+                return RedisBungeeUtil.lookupUsername(uuid);
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
     public int getPlayerCount() {
         return getProxy().getOnlineCount();
     }

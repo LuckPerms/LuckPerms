@@ -47,6 +47,7 @@ import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.scheduler.AsynchronousExecutor;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.SpongeExecutorService;
@@ -276,6 +277,18 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
 
         return getGame().getServer().getGameProfileManager().get(username)
                 .thenApply(p -> Optional.of(p.getUniqueId()))
+                .exceptionally(x -> Optional.empty())
+                .join();
+    }
+
+    @Override
+    public Optional<String> lookupUsername(UUID uuid) {
+        if (!getGame().isServerAvailable()) {
+            return Optional.empty();
+        }
+
+        return getGame().getServer().getGameProfileManager().get(uuid)
+                .thenApply(GameProfile::getName)
                 .exceptionally(x -> Optional.empty())
                 .join();
     }

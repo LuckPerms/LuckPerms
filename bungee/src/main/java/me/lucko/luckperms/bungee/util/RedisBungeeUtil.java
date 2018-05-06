@@ -39,7 +39,11 @@ public final class RedisBungeeUtil {
      * @return a uuid, if present
      */
     public static Optional<UUID> lookupUuid(String username) {
-        return Optional.ofNullable(RedisBungee.getApi()).flatMap(a -> Optional.ofNullable(a.getUuidFromName(username, true)));
+        return Optional.ofNullable(RedisBungee.getApi()).map(a -> a.getUuidFromName(username, true));
+    }
+
+    public static Optional<String> lookupUsername(UUID uuid) {
+        return Optional.ofNullable(RedisBungee.getApi()).map(a -> a.getNameFromUuid(uuid, true));
     }
 
     private RedisBungeeUtil() {}
