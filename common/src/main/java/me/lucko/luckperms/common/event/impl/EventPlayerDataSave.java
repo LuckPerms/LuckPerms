@@ -23,33 +23,50 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.event.user;
+package me.lucko.luckperms.common.event.impl;
 
-import me.lucko.luckperms.api.User;
-import me.lucko.luckperms.api.caching.UserData;
-import me.lucko.luckperms.api.event.LuckPermsEvent;
+import me.lucko.luckperms.api.PlayerSaveResult;
+import me.lucko.luckperms.api.event.player.PlayerDataSaveEvent;
+import me.lucko.luckperms.common.event.AbstractEvent;
+
+import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
-/**
- * Called when a users {@link UserData} is loaded.
- */
-public interface UserCacheLoadEvent extends LuckPermsEvent {
+public class EventPlayerDataSave extends AbstractEvent implements PlayerDataSaveEvent {
+    private final UUID uuid;
+    private final String username;
+    private final PlayerSaveResult result;
 
-    /**
-     * Gets the user whose data was loaded
-     *
-     * @return the user
-     */
+    public EventPlayerDataSave(UUID uuid, String username, PlayerSaveResult result) {
+        this.uuid = uuid;
+        this.username = username;
+        this.result = result;
+    }
+
     @Nonnull
-    User getUser();
+    @Override
+    public UUID getUuid() {
+        return this.uuid;
+    }
 
-    /**
-     * Gets the data that was loaded
-     *
-     * @return the loaded data
-     */
     @Nonnull
-    UserData getLoadedData();
+    @Override
+    public String getUsername() {
+        return this.username;
+    }
 
+    @Nonnull
+    @Override
+    public PlayerSaveResult getResult() {
+        return this.result;
+    }
+
+    @Override
+    public String toString() {
+        return "PlayerDataSaveEvent(" +
+                "uuid=" + this.uuid + ", " +
+                "username=" + this.username + ", " +
+                "result=" + this.result + ")";
+    }
 }

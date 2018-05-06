@@ -23,33 +23,47 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.event.user;
+package me.lucko.luckperms.api.event.player;
 
-import me.lucko.luckperms.api.User;
-import me.lucko.luckperms.api.caching.UserData;
+import me.lucko.luckperms.api.PlayerSaveResult;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
+import me.lucko.luckperms.api.manager.UserManager;
+
+import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
 /**
- * Called when a users {@link UserData} is loaded.
+ * Called when player data is saved to the storage.
+ *
+ * <p>Data can be saved using {@link UserManager#savePlayerData(UUID, String)}.</p>
+ *
+ * @since 4.3
  */
-public interface UserCacheLoadEvent extends LuckPermsEvent {
+public interface PlayerDataSaveEvent extends LuckPermsEvent {
 
     /**
-     * Gets the user whose data was loaded
+     * Gets the unique ID that was saved.
      *
-     * @return the user
+     * @return the uuid
      */
     @Nonnull
-    User getUser();
+    UUID getUuid();
 
     /**
-     * Gets the data that was loaded
+     * Gets the username that was saved.
      *
-     * @return the loaded data
+     * @return the username
      */
     @Nonnull
-    UserData getLoadedData();
+    String getUsername();
+
+    /**
+     * Gets the result of the operation.
+     *
+     * @return the result
+     */
+    @Nonnull
+    PlayerSaveResult getResult();
 
 }

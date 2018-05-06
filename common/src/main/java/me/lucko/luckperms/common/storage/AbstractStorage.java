@@ -283,7 +283,13 @@ public class AbstractStorage implements Storage {
 
     @Override
     public CompletableFuture<PlayerSaveResult> savePlayerData(UUID uuid, String username) {
-        return makeFuture(() -> this.dao.savePlayerData(uuid, username));
+        return makeFuture(() -> {
+            PlayerSaveResult result = this.dao.savePlayerData(uuid, username);
+            if (result != null) {
+                this.plugin.getEventFactory().handlePlayerDataSave(uuid, username, result);
+            }
+            return result;
+        });
     }
 
     @Override

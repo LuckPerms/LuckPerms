@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.PlayerSaveResult;
 import me.lucko.luckperms.api.caching.GroupData;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
@@ -55,6 +56,7 @@ import me.lucko.luckperms.common.event.impl.EventLogReceive;
 import me.lucko.luckperms.common.event.impl.EventNodeAdd;
 import me.lucko.luckperms.common.event.impl.EventNodeClear;
 import me.lucko.luckperms.common.event.impl.EventNodeRemove;
+import me.lucko.luckperms.common.event.impl.EventPlayerDataSave;
 import me.lucko.luckperms.common.event.impl.EventPostSync;
 import me.lucko.luckperms.common.event.impl.EventPreNetworkSync;
 import me.lucko.luckperms.common.event.impl.EventPreSync;
@@ -258,6 +260,11 @@ public final class EventFactory {
 
     public void handleUserFirstLogin(UUID uuid, String username) {
         EventUserFirstLogin event = new EventUserFirstLogin(uuid, username);
+        fireEventAsync(event);
+    }
+
+    public void handlePlayerDataSave(UUID uuid, String username, PlayerSaveResult result) {
+        EventPlayerDataSave event = new EventPlayerDataSave(uuid, username, result);
         fireEventAsync(event);
     }
 

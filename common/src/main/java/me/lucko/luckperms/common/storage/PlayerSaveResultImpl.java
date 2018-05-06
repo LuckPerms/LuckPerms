@@ -132,4 +132,9 @@ public final class PlayerSaveResultImpl implements PlayerSaveResult {
     public int hashCode() {
         return Objects.hash(this.status, this.oldUsername, this.otherUuids);
     }
+
+    @Override
+    public String toString() {
+        return "PlayerSaveResult(status=" + this.status + ", oldUsername=" + this.oldUsername + ", otherUuids=" + this.otherUuids + ")";
+    }
 }
