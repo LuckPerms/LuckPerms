@@ -23,12 +23,8 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage;
+package me.lucko.luckperms.api;
 
-import com.google.common.collect.ImmutableSet;
-
-import java.util.EnumSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -36,71 +32,19 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Represents the result to a player history save operation
+ * Encapsulates the result of an operation to save uuid data about a player.
+ *
+ * @since 4.2
  */
-public final class PlayerSaveResult {
-    private static final PlayerSaveResult CLEAN_INSERT = new PlayerSaveResult(Status.CLEAN_INSERT);
-    private static final PlayerSaveResult NO_CHANGE = new PlayerSaveResult(Status.NO_CHANGE);
-
-    public static PlayerSaveResult cleanInsert() {
-        return CLEAN_INSERT;
-    }
-
-    public static PlayerSaveResult noChange() {
-        return NO_CHANGE;
-    }
-
-    public static PlayerSaveResult usernameUpdated(String oldUsername) {
-        return new PlayerSaveResult(EnumSet.of(Status.USERNAME_UPDATED), oldUsername, null);
-    }
-
-    public static PlayerSaveResult determineBaseResult(String username, String oldUsername) {
-        PlayerSaveResult result;
-        if (oldUsername == null) {
-            result = PlayerSaveResult.cleanInsert();
-        } else if (oldUsername.equalsIgnoreCase(username)) {
-            result = PlayerSaveResult.noChange();
-        } else {
-            result = PlayerSaveResult.usernameUpdated(oldUsername);
-        }
-        return result;
-    }
-
-    private final Set<Status> status;
-    @Nullable private final String oldUsername;
-    @Nullable private final Set<UUID> otherUuids;
-
-    private PlayerSaveResult(EnumSet<Status> status, @Nullable String oldUsername, @Nullable Set<UUID> otherUuids) {
-        this.status = ImmutableSet.copyOf(status);
-        this.oldUsername = oldUsername;
-        this.otherUuids = otherUuids;
-    }
-
-    private PlayerSaveResult(Status status) {
-        this(EnumSet.of(status), null, null);
-    }
-
-    /**
-     * Returns a new {@link PlayerSaveResult} with the {@link Status#OTHER_UUIDS_PRESENT_FOR_USERNAME}
-     * status attached to the state of this result.
-     *
-     * @param otherUuids the other uuids
-     * @return a new result
-     */
-    public PlayerSaveResult withOtherUuidsPresent(@Nonnull Set<UUID> otherUuids) {
-        EnumSet<Status> status = EnumSet.copyOf(this.status);
-        status.add(Status.OTHER_UUIDS_PRESENT_FOR_USERNAME);
-        return new PlayerSaveResult(status, this.oldUsername, ImmutableSet.copyOf(otherUuids));
-    }
+public interface PlayerSaveResult {
 
     /**
      * Gets the status returned by the operation
      *
      * @return the status
      */
-    public Set<Status> getStatus() {
-        return this.status;
-    }
+    @Nonnull
+    Set<Status> getStatus();
 
     /**
      * Gets if the result includes a certain status code.
@@ -108,9 +52,7 @@ public final class PlayerSaveResult {
      * @param status the status to check for
      * @return if the result includes the status
      */
-    public boolean includes(Status status) {
-        return this.status.contains(status);
-    }
+    boolean includes(@Nonnull Status status);
 
     /**
      * Gets the old username involved in the result
@@ -119,9 +61,7 @@ public final class PlayerSaveResult {
      * @see Status#USERNAME_UPDATED
      */
     @Nullable
-    public String getOldUsername() {
-        return this.oldUsername;
-    }
+    String getOldUsername();
 
     /**
      * Gets the other uuids involved in the result
@@ -130,29 +70,12 @@ public final class PlayerSaveResult {
      * @see Status#OTHER_UUIDS_PRESENT_FOR_USERNAME
      */
     @Nullable
-    public Set<UUID> getOtherUuids() {
-        return this.otherUuids;
-    }
-
-    @Override
-    public boolean equals(Object that) {
-        if (this == that) return true;
-        if (that == null || getClass() != that.getClass()) return false;
-        PlayerSaveResult result = (PlayerSaveResult) that;
-        return Objects.equals(this.status, result.status) &&
-                Objects.equals(this.oldUsername, result.oldUsername) &&
-                Objects.equals(this.otherUuids, result.otherUuids);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.status, this.oldUsername, this.otherUuids);
-    }
+    Set<UUID> getOtherUuids();
 
     /**
      * The various states the result can take
      */
-    public enum Status {
+    enum Status {
 
         /**
          * There was no existing data saved for either the uuid or username

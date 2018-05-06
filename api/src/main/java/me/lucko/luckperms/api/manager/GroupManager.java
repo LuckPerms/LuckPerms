@@ -26,17 +26,31 @@
 package me.lucko.luckperms.api.manager;
 
 import me.lucko.luckperms.api.Group;
+import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Storage;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
  * Represents the object responsible for managing {@link Group} instances.
+ *
+ * <p>All blocking methods return {@link CompletableFuture}s, which will be
+ * populated with the result once the data has been loaded/saved asynchronously.
+ * Care should be taken when using such methods to ensure that the main server
+ * thread is not blocked.</p>
+ *
+ * <p>Methods such as {@link CompletableFuture#get()} and equivalent should
+ * <strong>not</strong> be called on the main server thread. If you need to use
+ * the result of these operations on the main server thread, register a
+ * callback using {@link CompletableFuture#thenAcceptAsync(Consumer, Executor)}.</p>
  *
  * @since 4.0
  */
@@ -137,6 +151,17 @@ public interface GroupManager {
      */
     @Nonnull
     CompletableFuture<Void> loadAllGroups();
+
+    /**
+     * Searches for a list of groups with a given permission.
+     *
+     * @param permission the permission to search for
+     * @return a list of held permissions, or null if the operation failed
+     * @throws NullPointerException if the permission is null
+     * @since 4.2
+     */
+    @Nonnull
+    CompletableFuture<List<HeldPermission<String>>> getWithPermission(@Nonnull String permission);
 
     /**
      * Gets a loaded group.

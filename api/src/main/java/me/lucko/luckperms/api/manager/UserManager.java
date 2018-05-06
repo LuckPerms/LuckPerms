@@ -25,13 +25,18 @@
 
 package me.lucko.luckperms.api.manager;
 
+import me.lucko.luckperms.api.HeldPermission;
+import me.lucko.luckperms.api.PlayerSaveResult;
 import me.lucko.luckperms.api.Storage;
 import me.lucko.luckperms.api.User;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -41,6 +46,16 @@ import javax.annotation.Nullable;
  *
  * <p>Note that User instances are automatically loaded for online players.
  * It's likely that offline players will not have an instance pre-loaded.</p>
+ *
+ * <p>All blocking methods return {@link CompletableFuture}s, which will be
+ * populated with the result once the data has been loaded/saved asynchronously.
+ * Care should be taken when using such methods to ensure that the main server
+ * thread is not blocked.</p>
+ *
+ * <p>Methods such as {@link CompletableFuture#get()} and equivalent should
+ * <strong>not</strong> be called on the main server thread. If you need to use
+ * the result of these operations on the main server thread, register a
+ * callback using {@link CompletableFuture#thenAcceptAsync(Consumer, Executor)}.</p>
  *
  * @since 4.0
  */
@@ -86,6 +101,32 @@ public interface UserManager {
     }
 
     /**
+     * Uses the LuckPerms cache to find a uuid for the given username.
+     *
+     * <p>This lookup is case insensitive.</p>
+     *
+     * @param username the username
+     * @return a uuid, could be null
+     * @throws NullPointerException     if either parameters are null
+     * @throws IllegalArgumentException if the username is invalid
+     * @since 4.2
+     */
+    @Nonnull
+    CompletableFuture<UUID> lookupUuid(@Nonnull String username);
+
+    /**
+     * Uses the LuckPerms cache to find a username for the given uuid.
+     *
+     * @param uuid the uuid
+     * @return a username, could be null
+     * @throws NullPointerException     if either parameters are null
+     * @throws IllegalArgumentException if the username is invalid
+     * @since 4.2
+     */
+    @Nonnull
+    CompletableFuture<String> lookupUsername(@Nonnull UUID uuid);
+
+    /**
      * Saves a user's data back to the plugin's storage provider.
      *
      * <p>You should call this after you make any changes to a user.</p>
@@ -104,6 +145,41 @@ public interface UserManager {
      */
     @Nonnull
     CompletableFuture<Void> saveUser(@Nonnull User user);
+
+    /**
+     * Saves data about a player to the uuid caching system.
+     *
+     * @param uuid     the users mojang unique id
+     * @param username the users username
+     * @return the result of the operation.
+     * @throws NullPointerException     if either parameters are null
+     * @throws IllegalArgumentException if the username is invalid
+     * @since 4.2
+     */
+    @Nonnull
+    CompletableFuture<PlayerSaveResult> savePlayerData(@Nonnull UUID uuid, @Nonnull String username);
+
+    /**
+     * Gets a set all "unique" user UUIDs.
+     *
+     * <p>"Unique" meaning the user isn't just a member of the "default" group.</p>
+     *
+     * @return a set of uuids
+     * @since 4.2
+     */
+    @Nonnull
+    CompletableFuture<Set<UUID>> getUniqueUsers();
+
+    /**
+     * Searches for a list of users with a given permission.
+     *
+     * @param permission the permission to search for
+     * @return a list of held permissions
+     * @throws NullPointerException if the permission is null
+     * @since 4.2
+     */
+    @Nonnull
+    CompletableFuture<List<HeldPermission<UUID>>> getWithPermission(@Nonnull String permission);
 
     /**
      * Gets a loaded user.

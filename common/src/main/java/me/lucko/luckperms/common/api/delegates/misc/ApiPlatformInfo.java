@@ -50,7 +50,7 @@ public class ApiPlatformInfo implements PlatformInfo {
 
     @Override
     public double getApiVersion() {
-        return 4.1;
+        return 4.2;
     }
 
     @Nonnull

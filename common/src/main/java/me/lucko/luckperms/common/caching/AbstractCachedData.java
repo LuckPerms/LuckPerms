@@ -356,13 +356,23 @@ public abstract class AbstractCachedData implements CachedData {
     }
 
     @Override
+    public void invalidatePermissions() {
+        this.permission.synchronous().invalidateAll();
+    }
+
+    @Override
+    public void invalidateMeta() {
+        this.meta.synchronous().invalidateAll();
+    }
+
+    @Override
     public void invalidatePermissionCalculators() {
         this.permission.synchronous().asMap().values().forEach(PermissionCache::invalidateCache);
     }
 
-    public void invalidateCaches() {
-        this.permission.synchronous().invalidateAll();
-        this.meta.synchronous().invalidateAll();
+    public void invalidate() {
+        invalidatePermissions();
+        invalidateMeta();
     }
 
     public void doCacheCleanup() {

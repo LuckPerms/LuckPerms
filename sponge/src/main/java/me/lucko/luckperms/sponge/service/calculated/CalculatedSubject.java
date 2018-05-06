@@ -321,7 +321,7 @@ public abstract class CalculatedSubject implements LPSubject {
 
     @Override
     public void invalidateCaches() {
-        this.cachedData.invalidateCaches();
+        this.cachedData.invalidate();
     }
 
 }

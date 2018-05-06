@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.PlayerSaveResult;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.actionlog.Log;
@@ -113,11 +114,6 @@ public class AbstractStorage implements Storage {
     @Override
     public String getName() {
         return this.dao.getName();
-    }
-
-    @Override
-    public Storage noBuffer() {
-        return this;
     }
 
     @Override

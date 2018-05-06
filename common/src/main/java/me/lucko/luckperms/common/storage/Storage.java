@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.storage;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.PlayerSaveResult;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.actionlog.Log;
@@ -55,8 +56,6 @@ public interface Storage {
     AbstractDao getDao();
 
     String getName();
-
-    Storage noBuffer();
 
     void init();
 

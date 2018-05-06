@@ -32,6 +32,7 @@ import com.google.gson.reflect.TypeToken;
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.PlayerSaveResult;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
@@ -49,7 +50,7 @@ import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.node.model.NodeDataContainer;
 import me.lucko.luckperms.common.node.model.NodeHeldPermission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.storage.PlayerSaveResult;
+import me.lucko.luckperms.common.storage.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.storage.dao.AbstractDao;
 import me.lucko.luckperms.common.storage.dao.sql.connection.AbstractConnectionFactory;
 import me.lucko.luckperms.common.storage.dao.sql.connection.file.SQLiteConnectionFactory;
@@ -932,7 +933,7 @@ public class SqlDao extends AbstractDao {
             }
         }
 
-        PlayerSaveResult result = PlayerSaveResult.determineBaseResult(username, oldUsername);
+        PlayerSaveResultImpl result = PlayerSaveResultImpl.determineBaseResult(username, oldUsername);
 
         Set<UUID> conflicting = new HashSet<>();
         try (Connection c = this.provider.getConnection()) {

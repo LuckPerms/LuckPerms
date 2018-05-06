@@ -99,7 +99,7 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.PermissionHol
     @Nonnull
     @Override
     public CompletableFuture<Void> refreshCachedData() {
-        return CompletableFuture.runAsync(() -> this.handle.getCachedData().invalidateCaches());
+        return CompletableFuture.runAsync(() -> this.handle.getCachedData().invalidate());
     }
 
     @Nonnull

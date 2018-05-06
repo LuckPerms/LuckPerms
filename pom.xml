@@ -6,7 +6,7 @@
 
     <groupId>me.lucko.luckperms</groupId>
     <artifactId>luckperms</artifactId>
-    <version>4.1-SNAPSHOT</version>
+    <version>4.2-SNAPSHOT</version>
 
     <modules>
         <module>api</module>
@@ -55,7 +55,7 @@
         <maven.test.skip>true</maven.test.skip>
 
         <!-- Manually entered release version -->
-        <release.version>4.1</release.version>
+        <release.version>4.2</release.version>
 
         <!-- Get how many commits have been made since the last tag (the previous release) -->
         <patch.version>${git.closest.tag.commit.count}</patch.version>

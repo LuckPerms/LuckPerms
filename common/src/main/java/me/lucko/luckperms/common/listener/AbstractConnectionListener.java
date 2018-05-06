@@ -25,11 +25,12 @@
 
 package me.lucko.luckperms.common.listener;
 
+import me.lucko.luckperms.api.PlayerSaveResult;
 import me.lucko.luckperms.common.assignments.AssignmentRule;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.storage.PlayerSaveResult;
+import me.lucko.luckperms.common.storage.PlayerSaveResultImpl;
 
 import java.util.Set;
 import java.util.UUID;
@@ -63,11 +64,11 @@ public abstract class AbstractConnectionListener implements ConnectionListener {
 
         // save uuid data.
         PlayerSaveResult saveResult = this.plugin.getStorage().savePlayerData(u, username).join();
-        if (saveResult.includes(PlayerSaveResult.Status.CLEAN_INSERT)) {
+        if (saveResult.includes(PlayerSaveResultImpl.Status.CLEAN_INSERT)) {
             this.plugin.getEventFactory().handleUserFirstLogin(u, username);
         }
 
-        if (saveResult.includes(PlayerSaveResult.Status.OTHER_UUIDS_PRESENT_FOR_USERNAME)) {
+        if (saveResult.includes(PlayerSaveResultImpl.Status.OTHER_UUIDS_PRESENT_FOR_USERNAME)) {
             this.plugin.getLogger().warn("LuckPerms already has data for player '" + username + "' - but this data is stored under a different uuid.");
             this.plugin.getLogger().warn("'" + username + "' has previously used the unique ids " + saveResult.getOtherUuids() + " but is now connecting with '" + u + "'");
             this.plugin.getLogger().warn("This is usually because the server is not authenticating correctly. If you're using BungeeCord, please ensure that IP-Forwarding is setup correctly!");

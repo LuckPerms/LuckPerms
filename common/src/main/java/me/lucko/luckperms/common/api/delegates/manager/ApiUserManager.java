@@ -25,14 +25,19 @@
 
 package me.lucko.luckperms.common.api.delegates.manager;
 
+import me.lucko.luckperms.api.HeldPermission;
+import me.lucko.luckperms.api.PlayerSaveResult;
 import me.lucko.luckperms.common.api.ApiUtils;
 import me.lucko.luckperms.common.api.delegates.model.ApiUser;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
+import me.lucko.luckperms.common.bulkupdate.comparisons.StandardComparison;
 import me.lucko.luckperms.common.managers.user.UserManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -70,9 +75,44 @@ public class ApiUserManager extends ApiAbstractManager<User, me.lucko.luckperms.
 
     @Nonnull
     @Override
+    public CompletableFuture<UUID> lookupUuid(@Nonnull String username) {
+        Objects.requireNonNull(username, "username");
+        return this.plugin.getStorage().getPlayerUuid(username);
+    }
+
+    @Nonnull
+    @Override
+    public CompletableFuture<String> lookupUsername(@Nonnull UUID uuid) {
+        Objects.requireNonNull(uuid, "uuid");
+        return this.plugin.getStorage().getPlayerName(uuid);
+    }
+
+    @Nonnull
+    @Override
     public CompletableFuture<Void> saveUser(@Nonnull me.lucko.luckperms.api.User user) {
         Objects.requireNonNull(user, "user");
         return this.plugin.getStorage().saveUser(ApiUser.cast(user));
+    }
+
+    @Nonnull
+    @Override
+    public CompletableFuture<PlayerSaveResult> savePlayerData(@Nonnull UUID uuid, @Nonnull String username) {
+        Objects.requireNonNull(uuid, "uuid");
+        Objects.requireNonNull(username, "username");
+        return this.plugin.getStorage().savePlayerData(uuid, username);
+    }
+
+    @Nonnull
+    @Override
+    public CompletableFuture<Set<UUID>> getUniqueUsers() {
+        return this.plugin.getStorage().getUniqueUsers();
+    }
+
+    @Nonnull
+    @Override
+    public CompletableFuture<List<HeldPermission<UUID>>> getWithPermission(@Nonnull String permission) {
+        Objects.requireNonNull(permission, "permission");
+        return this.plugin.getStorage().getUsersWithPermission(Constraint.of(StandardComparison.EQUAL, permission));
     }
 
     @Override

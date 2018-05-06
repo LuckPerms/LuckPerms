@@ -402,6 +402,20 @@ public interface CachedData {
     void invalidateMeta(@Nonnull Contexts contexts);
 
     /**
+     * Invalidates all cached {@link PermissionData} instances.
+     *
+     * @since 4.2
+     */
+    void invalidatePermissions();
+
+    /**
+     * Invalidates all cached {@link MetaData} instances.
+     *
+     * @since 4.2
+     */
+    void invalidateMeta();
+
+    /**
      * Invalidates all of the underlying Permission calculators.
      *
      * <p>Can be called to allow for an update in defaults.</p>

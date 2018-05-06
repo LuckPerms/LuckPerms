@@ -266,7 +266,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
 
             final User user = getUserManager().getIfLoaded(player.getUniqueId());
             if (user != null) {
-                user.getCachedData().invalidateCaches();
+                user.getCachedData().invalidate();
                 getUserManager().unload(user);
             }
         }

@@ -205,7 +205,7 @@ public abstract class PermissionHolder {
      * Invalidates the holder's cached data.
      */
     public void invalidateCachedData() {
-        getCachedData().invalidateCaches();
+        getCachedData().invalidate();
     }
 
     protected void invalidateCache() {

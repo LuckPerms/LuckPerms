@@ -30,7 +30,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 
-import me.lucko.luckperms.common.storage.PlayerSaveResult;
+import me.lucko.luckperms.api.PlayerSaveResult;
+import me.lucko.luckperms.common.storage.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.utils.Uuids;
 
 import java.io.BufferedReader;
@@ -104,7 +105,7 @@ public class FileUuidCache {
         // perform the insert
         String oldUsername = this.lookupMap.put(uuid, username);
 
-        PlayerSaveResult result = PlayerSaveResult.determineBaseResult(username, oldUsername);
+        PlayerSaveResultImpl result = PlayerSaveResultImpl.determineBaseResult(username, oldUsername);
 
         Set<UUID> conflicting = new HashSet<>(this.lookupMap.lookupUuid(username));
         conflicting.remove(uuid);

@@ -47,8 +47,6 @@ public interface ActionLogger {
     /**
      * Gets a {@link Log} instance from the plugin storage.
      *
-     * <p>Returns the same result as {@link Storage#getLog()}.</p>
-     *
      * @return a log instance
      * @see Storage#getLog()
      */

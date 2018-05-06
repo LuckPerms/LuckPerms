@@ -40,6 +40,7 @@ import com.mongodb.client.model.UpdateOptions;
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.PlayerSaveResult;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
@@ -59,7 +60,7 @@ import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.node.model.NodeDataContainer;
 import me.lucko.luckperms.common.node.model.NodeHeldPermission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.storage.PlayerSaveResult;
+import me.lucko.luckperms.common.storage.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.storage.StorageCredentials;
 import me.lucko.luckperms.common.storage.dao.AbstractDao;
 
@@ -582,7 +583,7 @@ public class MongoDao extends AbstractDao {
             c.replaceOne(new Document("_id", uuid), new Document("_id", uuid).append("name", username), new UpdateOptions().upsert(true));
         }
 
-        PlayerSaveResult result = PlayerSaveResult.determineBaseResult(username, oldUsername);
+        PlayerSaveResultImpl result = PlayerSaveResultImpl.determineBaseResult(username, oldUsername);
 
         Set<UUID> conflicting = new HashSet<>();
         try (MongoCursor<Document> cursor = c.find(new Document("name", username)).iterator()) {

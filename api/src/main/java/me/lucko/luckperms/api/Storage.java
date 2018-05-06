@@ -34,23 +34,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
  * A means of loading and saving permission data to/from the backend.
- *
- * <p>All blocking methods return {@link CompletableFuture}s, which will be
- * populated with the result once the data has been loaded/saved asynchronously.
- * Care should be taken when using such methods to ensure that the main server
- * thread is not blocked.</p>
- *
- * <p>Methods such as {@link CompletableFuture#get()} and equivalent should
- * <strong>not</strong> be called on the main server thread. If you need to use
- * the result of these operations on the main server thread, register a
- * callback using {@link CompletableFuture#thenAcceptAsync(Consumer, Executor)}.</p>
  *
  * @since 2.14
  */
@@ -65,80 +54,6 @@ public interface Storage {
     String getName();
 
     /**
-     * Loads and returns the entire log from storage
-     *
-     * @return a log instance, could be null if loading failed
-     */
-    @Nonnull
-    CompletableFuture<Log> getLog();
-
-    /**
-     * Gets a set all "unique" user UUIDs.
-     *
-     * <p>"Unique" meaning the user isn't just a member of the "default" group.</p>
-     *
-     * @return a set of uuids, or null if the operation failed.
-     */
-    @Nonnull
-    CompletableFuture<Set<UUID>> getUniqueUsers();
-
-    /**
-     * Searches for a list of users with a given permission.
-     *
-     * @param permission the permission to search for
-     * @return a list of held permissions, or null if the operation failed
-     * @throws NullPointerException if the permission is null
-     * @since 2.17
-     */
-    @Nonnull
-    CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(@Nonnull String permission);
-
-    /**
-     * Searches for a list of groups with a given permission.
-     *
-     * @param permission the permission to search for
-     * @return a list of held permissions, or null if the operation failed
-     * @throws NullPointerException if the permission is null
-     * @since 2.17
-     */
-    @Nonnull
-    CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(@Nonnull String permission);
-
-    /**
-     * Saves UUID caching data to the global cache
-     *
-     * @param username the users username
-     * @param uuid     the users mojang unique id
-     * @return true if the operation completed successfully.
-     * @throws NullPointerException     if either parameters are null
-     * @throws IllegalArgumentException if the username is invalid
-     */
-    @Nonnull
-    CompletableFuture<Boolean> saveUUIDData(@Nonnull String username, @Nonnull UUID uuid);
-
-    /**
-     * Gets a UUID from a username
-     *
-     * @param username the corresponding username
-     * @return a uuid object, could be null
-     * @throws NullPointerException     if either parameters are null
-     * @throws IllegalArgumentException if the username is invalid
-     */
-    @Nonnull
-    CompletableFuture<UUID> getUUID(@Nonnull String username);
-
-    /**
-     * Gets a username from a UUID
-     *
-     * @param uuid the corresponding uuid
-     * @return a name string, could be null
-     * @throws NullPointerException if either parameters are null
-     * @since 2.17
-     */
-    @Nonnull
-    CompletableFuture<String> getName(@Nonnull UUID uuid);
-
-    /**
      * Gets whether the storage instance is allowing logins on the platform.
      *
      * @return true if logins are enabled
@@ -146,34 +61,6 @@ public interface Storage {
      */
     @Deprecated
     boolean isAcceptingLogins();
-
-    /**
-     * Returns an executor which will run all passed runnables on the
-     * main server thread.
-     *
-     * <p>This method is deprecated as plugins should create and use their own
-     * executor instances.</p>
-     *
-     * @return an executor instance
-     * @deprecated as plugins should create their own executors
-     */
-    @Nonnull
-    @Deprecated
-    Executor getSyncExecutor();
-
-    /**
-     * Returns an executor which will run all passed runnables asynchronously
-     * using the platforms scheduler and thread pools.
-     *
-     * <p>This method is deprecated as plugins should create and use their own
-     * executor instances.</p>
-     *
-     * @return an executor instance
-     * @deprecated as plugins should create their own executors
-     */
-    @Nonnull
-    @Deprecated
-    Executor getAsyncExecutor();
 
     /**
      * Saves an action to storage
@@ -186,6 +73,16 @@ public interface Storage {
     @Nonnull
     @Deprecated
     CompletableFuture<Boolean> logAction(@Nonnull LogEntry entry);
+
+    /**
+     * Loads and returns the entire log from storage
+     *
+     * @return a log instance, could be null if loading failed
+     * @deprecated in favour of {@link ActionLogger#getLog()}
+     */
+    @Nonnull
+    @Deprecated
+    CompletableFuture<Log> getLog();
 
     /**
      * Loads a user's data from the main storage into the plugins local storage.
@@ -228,6 +125,31 @@ public interface Storage {
     @Nonnull
     @Deprecated
     CompletableFuture<Boolean> saveUser(@Nonnull User user);
+
+    /**
+     * Gets a set all "unique" user UUIDs.
+     *
+     * <p>"Unique" meaning the user isn't just a member of the "default" group.</p>
+     *
+     * @return a set of uuids, or null if the operation failed.
+     * @deprecated in favour of {@link UserManager#getUniqueUsers()}
+     */
+    @Nonnull
+    @Deprecated
+    CompletableFuture<Set<UUID>> getUniqueUsers();
+
+    /**
+     * Searches for a list of users with a given permission.
+     *
+     * @param permission the permission to search for
+     * @return a list of held permissions, or null if the operation failed
+     * @throws NullPointerException if the permission is null
+     * @since 2.17
+     * @deprecated in favour of {@link UserManager#getWithPermission(String)}
+     */
+    @Nonnull
+    @Deprecated
+    CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(@Nonnull String permission);
 
     /**
      * Creates and loads a group into the plugins local storage
@@ -294,6 +216,19 @@ public interface Storage {
     CompletableFuture<Boolean> deleteGroup(@Nonnull Group group);
 
     /**
+     * Searches for a list of groups with a given permission.
+     *
+     * @param permission the permission to search for
+     * @return a list of held permissions, or null if the operation failed
+     * @throws NullPointerException if the permission is null
+     * @since 2.17
+     * @deprecated in favour of {@link GroupManager#getWithPermission(String)}
+     */
+    @Nonnull
+    @Deprecated
+    CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(@Nonnull String permission);
+
+    /**
      * Creates and loads a track into the plugins local storage
      *
      * @param name the name of the track
@@ -354,5 +289,71 @@ public interface Storage {
     @Nonnull
     @Deprecated
     CompletableFuture<Boolean> deleteTrack(@Nonnull Track track);
+
+    /**
+     * Saves UUID caching data to the global cache
+     *
+     * @param username the users username
+     * @param uuid     the users mojang unique id
+     * @return true if the operation completed successfully.
+     * @throws NullPointerException     if either parameters are null
+     * @throws IllegalArgumentException if the username is invalid
+     * @deprecated in favour of {@link UserManager#savePlayerData(UUID, String)}
+     */
+    @Nonnull
+    CompletableFuture<Boolean> saveUUIDData(@Nonnull String username, @Nonnull UUID uuid);
+
+    /**
+     * Gets a UUID from a username
+     *
+     * @param username the corresponding username
+     * @return a uuid object, could be null
+     * @throws NullPointerException     if either parameters are null
+     * @throws IllegalArgumentException if the username is invalid
+     * @deprecated in favour of {@link UserManager#lookupUuid(String)}
+     */
+    @Nonnull
+    CompletableFuture<UUID> getUUID(@Nonnull String username);
+
+    /**
+     * Gets a username from a UUID
+     *
+     * @param uuid the corresponding uuid
+     * @return a name string, could be null
+     * @throws NullPointerException if either parameters are null
+     * @since 2.17
+     * @deprecated in favour of {@link UserManager#lookupUsername(UUID)}
+     */
+    @Nonnull
+    @Deprecated
+    CompletableFuture<String> getName(@Nonnull UUID uuid);
+
+    /**
+     * Returns an executor which will run all passed runnables on the
+     * main server thread.
+     *
+     * <p>This method is deprecated as plugins should create and use their own
+     * executor instances.</p>
+     *
+     * @return an executor instance
+     * @deprecated as plugins should create their own executors
+     */
+    @Nonnull
+    @Deprecated
+    Executor getSyncExecutor();
+
+    /**
+     * Returns an executor which will run all passed runnables asynchronously
+     * using the platforms scheduler and thread pools.
+     *
+     * <p>This method is deprecated as plugins should create and use their own
+     * executor instances.</p>
+     *
+     * @return an executor instance
+     * @deprecated as plugins should create their own executors
+     */
+    @Nonnull
+    @Deprecated
+    Executor getAsyncExecutor();
 
 }
