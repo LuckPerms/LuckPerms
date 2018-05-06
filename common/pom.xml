@@ -111,7 +111,7 @@
         <dependency>
             <groupId>me.lucko.configurate</groupId>
             <artifactId>configurate-core</artifactId>
-            <version>3.4</version>
+            <version>3.5</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
@@ -124,7 +124,7 @@
         <dependency>
             <groupId>me.lucko.configurate</groupId>
             <artifactId>configurate-yaml</artifactId>
-            <version>3.4</version>
+            <version>3.5</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
@@ -137,7 +137,7 @@
         <dependency>
             <groupId>me.lucko.configurate</groupId>
             <artifactId>configurate-gson</artifactId>
-            <version>3.4</version>
+            <version>3.5</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
@@ -150,14 +150,14 @@
         <dependency>
             <groupId>me.lucko.configurate</groupId>
             <artifactId>configurate-hocon</artifactId>
-            <version>3.4</version>
+            <version>3.5</version>
             <scope>provided</scope>
         </dependency>
         <!-- configurate toml -->
         <dependency>
             <groupId>me.lucko.configurate</groupId>
             <artifactId>configurate-toml</artifactId>
-            <version>3.4</version>
+            <version>3.5</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>

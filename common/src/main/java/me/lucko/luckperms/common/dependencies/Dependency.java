@@ -170,29 +170,29 @@ public enum Dependency {
     CONFIGURATE_CORE(
             "me{}lucko{}configurate",
             "configurate-core",
-            "3.4",
-            "XetsTkFaqO7NS7wpGyTK68P29AUl+NsbLZIldvvXUAg=",
+            "3.5",
+            "J+1WnX1g5gr4ne8qA7DuBadLDOsZnOZjwHbdRmVgF6c=",
             Relocation.of("configurate", "ninja{}leaping{}configurate")
     ),
     CONFIGURATE_GSON(
             "me{}lucko{}configurate",
             "configurate-gson",
-            "3.4",
-            "1Glt4ijo6xQ8MatviUO+36AbZH5qR+f3tWx466iYZug=",
+            "3.5",
+            "Q3wp3xpqy41bJW3yUhbHOzm+NUkT4bUUBI2/AQLaa3c=",
             Relocation.of("configurate", "ninja{}leaping{}configurate")
     ),
     CONFIGURATE_YAML(
             "me{}lucko{}configurate",
             "configurate-yaml",
-            "3.4",
-            "icv/JayTYDOSCpbm60qU7EccSxUYVVXQOU7CFZqUK2Y=",
+            "3.5",
+            "Dxr1o3EPbpOOmwraqu+cors8O/nKwJnhS5EiPkTb3fc=",
             Relocation.of("configurate", "ninja{}leaping{}configurate")
     ),
     CONFIGURATE_HOCON(
             "me{}lucko{}configurate",
             "configurate-hocon",
-            "3.4",
-            "A27PLuPnh/rlpcHIABCwjo4QPvjUXaKRUh7sMvbp+Y0=",
+            "3.5",
+            "sOym1KPmQylGSfk90ZFqobuvoZfEWb7XMmMBwbHuxFw=",
             Relocation.allOf(
                     Relocation.of("configurate", "ninja{}leaping{}configurate"),
                     Relocation.of("hocon", "com{}typesafe{}config")
@@ -208,8 +208,8 @@ public enum Dependency {
     CONFIGURATE_TOML(
             "me{}lucko{}configurate",
             "configurate-toml",
-            "3.4",
-            "skbgSFsBg6wVeudWyCYIzJpz+Ia3CSTVLCGlnF4XD+A=",
+            "3.5",
+            "U8p0XSTaNT/uebvLpO/vb6AhVGQDYiZsauSGB9zolPU=",
             Relocation.allOf(
                     Relocation.of("configurate", "ninja{}leaping{}configurate"),
                     Relocation.of("toml4j", "com{}moandjiezana{}toml")
