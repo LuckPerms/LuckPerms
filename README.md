@@ -37,7 +37,7 @@ If you make any changes or improvements to the plugin which you think would be b
 LuckPerms loosely follows the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html). Generally, try to copy the style of code found in the class you're editing. 
 
 #### Project Layout
-The project is split up into 5 seperate modules.
+The project is split up into a few seperate modules.
 
 * **API** - The public, semantically versioned API used by other plugins wishing to integrate with and retrieve data from LuckPerms. This module (for the most part) does not contain any implementation itself, and is provided by the plugin.
 * **Common** - The common module contains most of the code which implements the respective LuckPerms plugins. This abstract module reduces duplicated code throughout the project.
