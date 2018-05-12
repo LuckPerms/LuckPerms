@@ -28,6 +28,9 @@ package me.lucko.luckperms.common.config;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.LookupSetting;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.common.assignments.AssignmentRule;
 import me.lucko.luckperms.common.config.keys.AbstractKey;
@@ -53,6 +56,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,24 +93,19 @@ public class ConfigKeys {
     }));
 
     /**
-     * If permissions without a server context should be included.
+     * The lookup settings for contexts (care should be taken to not mutate this method)
      */
-    public static final ConfigKey<Boolean> INCLUDING_GLOBAL_PERMS = BooleanKey.of("include-global", true);
-
-    /**
-     * If permissions without a world context should be included.
-     */
-    public static final ConfigKey<Boolean> INCLUDING_GLOBAL_WORLD_PERMS = BooleanKey.of("include-global-world", true);
-
-    /**
-     * If groups without a server context should be included.
-     */
-    public static final ConfigKey<Boolean> APPLYING_GLOBAL_GROUPS = BooleanKey.of("apply-global-groups", true);
-
-    /**
-     * If groups without a world context should be included.
-     */
-    public static final ConfigKey<Boolean> APPLYING_GLOBAL_WORLD_GROUPS = BooleanKey.of("apply-global-world-groups", true);
+    public static final ConfigKey<EnumSet<LookupSetting>> LOOKUP_SETTINGS = AbstractKey.of(c -> {
+        return EnumSet.copyOf(Contexts.of(
+                ContextSet.empty(),
+                c.getBoolean("include-global", true),
+                c.getBoolean("include-global-world", true),
+                true,
+                c.getBoolean("apply-global-groups", true),
+                c.getBoolean("apply-global-world-groups", true),
+                false
+        ).getSettings());
+    });
 
     /**
      * # If the servers own UUID cache/lookup facility should be used when there is no record for a player in the LuckPerms cache.

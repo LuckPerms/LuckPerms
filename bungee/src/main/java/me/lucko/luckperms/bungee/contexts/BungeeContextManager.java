@@ -28,7 +28,6 @@ package me.lucko.luckperms.bungee.contexts;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.bungee.LPBungeePlugin;
-import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.contexts.AbstractContextManager;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -40,14 +39,6 @@ public class BungeeContextManager extends AbstractContextManager<ProxiedPlayer> 
 
     @Override
     public Contexts formContexts(ProxiedPlayer subject, ImmutableContextSet contextSet) {
-        return Contexts.of(
-                contextSet,
-                this.plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                this.plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                true,
-                this.plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                this.plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                false
-        );
+        return formContexts(contextSet);
     }
 }

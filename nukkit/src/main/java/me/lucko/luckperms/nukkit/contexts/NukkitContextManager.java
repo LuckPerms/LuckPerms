@@ -26,12 +26,15 @@
 package me.lucko.luckperms.nukkit.contexts;
 
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.LookupSetting;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.contexts.AbstractContextManager;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
 import cn.nukkit.Player;
+
+import java.util.EnumSet;
 
 public class NukkitContextManager extends AbstractContextManager<Player> {
     public NukkitContextManager(LPNukkitPlugin plugin) {
@@ -40,14 +43,12 @@ public class NukkitContextManager extends AbstractContextManager<Player> {
 
     @Override
     public Contexts formContexts(Player subject, ImmutableContextSet contextSet) {
-        return Contexts.of(
-                contextSet,
-                this.plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                this.plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                true,
-                this.plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                this.plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                subject.isOp()
-        );
+        EnumSet<LookupSetting> settings = this.plugin.getConfiguration().get(ConfigKeys.LOOKUP_SETTINGS);
+        if (subject.isOp()) {
+            settings = EnumSet.copyOf(settings);
+            settings.add(LookupSetting.IS_OP);
+        }
+
+        return Contexts.of(contextSet, settings);
     }
 }

@@ -130,6 +130,14 @@ public class Contexts {
         return new Contexts(contextSet.makeImmutable(), ImmutableSet.copyOf(settings));
     }
 
+    private static EnumSet<LookupSetting> asEnumSet(Set<LookupSetting> settings) {
+        if (settings instanceof EnumSet<?>) {
+            return ((EnumSet<LookupSetting>) settings);
+        } else {
+            return EnumSet.copyOf(settings);
+        }
+    }
+
     /**
      * Creates a new {@link Contexts} instance.
      *
@@ -141,7 +149,7 @@ public class Contexts {
         Objects.requireNonNull(contextSet, "contextSet");
         Objects.requireNonNull(settings, "settings");
 
-        EnumSet<LookupSetting> settingsCopy = EnumSet.copyOf(settings);
+        EnumSet<LookupSetting> settingsCopy = asEnumSet(settings);
         if (contextSet.isEmpty() && DEFAULT_SETTINGS.equals(settingsCopy)) {
             return GLOBAL;
         }
