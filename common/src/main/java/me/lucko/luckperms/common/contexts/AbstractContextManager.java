@@ -25,11 +25,8 @@
 
 package me.lucko.luckperms.common.contexts;
 
-import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Contexts;
@@ -38,6 +35,7 @@ import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.api.context.StaticContextCalculator;
+import me.lucko.luckperms.common.buffers.ExpiringCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -64,14 +62,14 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
     private final List<ContextCalculator<? super T>> calculators = new CopyOnWriteArrayList<>();
     private final List<StaticContextCalculator> staticCalculators = new CopyOnWriteArrayList<>();
 
-    // caches context lookups
-    private final LoadingCache<T, Contexts> lookupCache = Caffeine.newBuilder()
-            .expireAfterWrite(50L, TimeUnit.MILLISECONDS) // expire roughly every tick
-            .build(new Loader());
+    // caches the creation of cache instances. cache-ception.
+    // we want to encourage re-use of these instances, it's faster that way
+    private final LoadingCache<T, ContextsCache<T>> subjectCaches = Caffeine.newBuilder()
+            .weakKeys()
+            .build(key -> new ContextsCache<>(key, this));
 
     // caches static context lookups
-    @SuppressWarnings("Guava")
-    private final Supplier<Contexts> staticLookupCache = Suppliers.memoizeWithExpiration(new StaticLoader(), 50L, TimeUnit.MILLISECONDS);
+    private final StaticLookupCache staticLookupCache = new StaticLookupCache();
 
     protected AbstractContextManager(LuckPermsPlugin plugin, Class<T> subjectClass) {
         this.plugin = plugin;
@@ -95,21 +93,20 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
 
     @Override
     public ImmutableContextSet getApplicableContext(T subject) {
-        if (subject == null) {
-            throw new NullPointerException("subject");
-        }
-
-        // this is actually already immutable, but the Contexts method signature returns the interface.
-        // using the makeImmutable method is faster than casting
-        return getApplicableContexts(subject).getContexts().makeImmutable();
+        return getCacheFor(subject).getContextSet();
     }
 
     @Override
     public Contexts getApplicableContexts(T subject) {
+        return getCacheFor(subject).getContexts();
+    }
+
+    @Override
+    public ContextsCache<T> getCacheFor(T subject) {
         if (subject == null) {
             throw new NullPointerException("subject");
         }
-        return this.lookupCache.get(subject);
+        return this.subjectCaches.get(subject);
     }
 
     @Override
@@ -181,52 +178,58 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
             throw new NullPointerException("subject");
         }
 
-        this.lookupCache.invalidate(subject);
+        this.subjectCaches.invalidate(subject);
     }
 
-    private final class Loader implements CacheLoader<T, Contexts> {
-        @Override
-        public Contexts load(@Nonnull T subject) {
-            MutableContextSet accumulator = MutableContextSet.create();
+    Contexts calculate(T subject) {
+        MutableContextSet accumulator = MutableContextSet.create();
 
-            for (ContextCalculator<? super T> calculator : AbstractContextManager.this.calculators) {
-                try {
-                    MutableContextSet ret = calculator.giveApplicableContext(subject, accumulator);
-                    //noinspection ConstantConditions
-                    if (ret == null) {
-                        throw new IllegalStateException(calculator.getClass() + " returned a null context set");
-                    }
-                    accumulator = ret;
-                } catch (Exception e) {
-                    AbstractContextManager.this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating the context of subject " + subject);
-                    e.printStackTrace();
+        for (ContextCalculator<? super T> calculator : AbstractContextManager.this.calculators) {
+            try {
+                MutableContextSet ret = calculator.giveApplicableContext(subject, accumulator);
+                //noinspection ConstantConditions
+                if (ret == null) {
+                    throw new IllegalStateException(calculator.getClass() + " returned a null context set");
                 }
+                accumulator = ret;
+            } catch (Exception e) {
+                AbstractContextManager.this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating the context of subject " + subject);
+                e.printStackTrace();
             }
-
-            return formContexts(subject, accumulator.makeImmutable());
         }
+
+        return formContexts(subject, accumulator.makeImmutable());
     }
 
-    private final class StaticLoader implements Supplier<Contexts> {
-        @Override
-        public Contexts get() {
-            MutableContextSet accumulator = MutableContextSet.create();
+    private Contexts calculateStatic() {
+        MutableContextSet accumulator = MutableContextSet.create();
 
-            for (StaticContextCalculator calculator : AbstractContextManager.this.staticCalculators) {
-                try {
-                    MutableContextSet ret = calculator.giveApplicableContext(accumulator);
-                    //noinspection ConstantConditions
-                    if (ret == null) {
-                        throw new IllegalStateException(calculator.getClass() + " returned a null context set");
-                    }
-                    accumulator = ret;
-                } catch (Exception e) {
-                    AbstractContextManager.this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating static contexts");
-                    e.printStackTrace();
+        for (StaticContextCalculator calculator : this.staticCalculators) {
+            try {
+                MutableContextSet ret = calculator.giveApplicableContext(accumulator);
+                //noinspection ConstantConditions
+                if (ret == null) {
+                    throw new IllegalStateException(calculator.getClass() + " returned a null context set");
                 }
+                accumulator = ret;
+            } catch (Exception e) {
+                this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating static contexts");
+                e.printStackTrace();
             }
+        }
 
-            return formContexts(accumulator.makeImmutable());
+        return formContexts(accumulator.makeImmutable());
+    }
+
+    private final class StaticLookupCache extends ExpiringCache<Contexts> {
+        StaticLookupCache() {
+            super(50L, TimeUnit.MILLISECONDS);
+        }
+
+        @Nonnull
+        @Override
+        public Contexts supply() {
+            return calculateStatic();
         }
     }
 

@@ -66,6 +66,14 @@ public interface ContextManager<T> {
     Contexts getApplicableContexts(T subject);
 
     /**
+     * Gets the cache instance for the given subject.
+     *
+     * @param subject the subject
+     * @return the cache
+     */
+    ContextsCache<T> getCacheFor(T subject);
+
+    /**
      * Gets the contexts from the static calculators in this manager.
      *
      * @return the current active static contexts

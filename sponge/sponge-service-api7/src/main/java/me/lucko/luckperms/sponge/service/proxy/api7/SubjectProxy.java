@@ -26,6 +26,8 @@
 package me.lucko.luckperms.sponge.service.proxy.api7;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.common.contexts.ContextsCache;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
@@ -52,9 +54,14 @@ public final class SubjectProxy implements Subject, ProxiedSubject {
     private final LPPermissionService service;
     private final LPSubjectReference ref;
 
+    private final ContextsCache<Subject> contextsCache;
+
     public SubjectProxy(LPPermissionService service, LPSubjectReference ref) {
         this.service = service;
         this.ref = ref;
+
+        ContextManager<Subject> contextManager = (ContextManager<Subject>) service.getPlugin().getContextManager();
+        this.contextsCache = contextManager.getCacheFor(this);
     }
 
     private CompletableFuture<LPSubject> handle() {
@@ -158,7 +165,7 @@ public final class SubjectProxy implements Subject, ProxiedSubject {
     @Nonnull
     @Override
     public Set<Context> getActiveContexts() {
-        return CompatibilityUtil.convertContexts(this.service.getContextManager().getApplicableContext(this));
+        return CompatibilityUtil.convertContexts(this.contextsCache.getContextSet());
     }
 
     @Override
