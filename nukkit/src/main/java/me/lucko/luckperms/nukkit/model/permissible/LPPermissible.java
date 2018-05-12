@@ -34,6 +34,7 @@ import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import me.lucko.luckperms.nukkit.model.PermissionDefault;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.permission.PermissibleBase;
 import cn.nukkit.permission.Permission;
 import cn.nukkit.permission.PermissionAttachment;
@@ -129,8 +130,17 @@ public class LPPermissible extends PermissibleBase {
             throw new NullPointerException("permission");
         }
 
-        Tristate ts = this.user.getCachedData().getPermissionData(this.contextsCache.getContexts()).getPermissionValue(permission, CheckOrigin.PLATFORM_PERMISSION_CHECK);
-        return ts != Tristate.UNDEFINED ? ts.asBoolean() : PermissionDefault.OP.getValue(isOp());
+        Tristate ts = this.user.getCachedData().getPermissionData(calculateContexts()).getPermissionValue(permission, CheckOrigin.PLATFORM_PERMISSION_CHECK);
+        if(ts != Tristate.UNDEFINED) return ts.asBoolean();
+
+        PermissionDefault permDefault = null;
+
+        Permission perm = Server.getInstance().getPluginManager().getPermission(permission);
+        if (perm != null) {
+            permDefault = PermissionDefault.fromPermission(perm);
+        }
+
+        return (permDefault != null ? permDefault : PermissionDefault.OP).getValue(isOp());
     }
 
     @Override
