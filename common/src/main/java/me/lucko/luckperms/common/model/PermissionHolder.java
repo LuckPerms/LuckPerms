@@ -261,11 +261,11 @@ public abstract class PermissionHolder {
         return ret;
     }
 
-    public boolean removeIf(Predicate<? super Node> predicate) {
+    public boolean removeIf(Predicate<? super LocalizedNode> predicate) {
         return removeIf(predicate, null);
     }
 
-    public boolean removeIf(Predicate<? super Node> predicate, Runnable taskIfSuccess) {
+    public boolean removeIf(Predicate<? super LocalizedNode> predicate, Runnable taskIfSuccess) {
         ImmutableCollection<? extends Node> before = enduringData().immutable().values();
         if (!this.enduringNodes.removeIf(predicate)) {
             return false;
@@ -280,11 +280,11 @@ public abstract class PermissionHolder {
         return true;
     }
 
-    public boolean removeIf(ContextSet contextSet, Predicate<? super Node> predicate) {
+    public boolean removeIf(ContextSet contextSet, Predicate<? super LocalizedNode> predicate) {
         return removeIf(contextSet, predicate, null);
     }
 
-    public boolean removeIf(ContextSet contextSet, Predicate<? super Node> predicate, Runnable taskIfSuccess) {
+    public boolean removeIf(ContextSet contextSet, Predicate<? super LocalizedNode> predicate, Runnable taskIfSuccess) {
         ImmutableCollection<? extends Node> before = enduringData().immutable().values();
         if (!this.enduringNodes.removeIf(contextSet, predicate)) {
             return false;
@@ -299,7 +299,7 @@ public abstract class PermissionHolder {
         return true;
     }
 
-    public boolean removeIfTransient(Predicate<? super Node> predicate) {
+    public boolean removeIfTransient(Predicate<? super LocalizedNode> predicate) {
         boolean result = this.transientNodes.removeIf(predicate);
         if (result) {
             invalidateCache();
@@ -455,7 +455,7 @@ public abstract class PermissionHolder {
         // we don't call events for transient nodes
         boolean transientWork = this.transientNodes.auditTemporaryNodes(null);
 
-        ImmutableCollection<? extends Node> before = enduringData().immutable().values();
+        ImmutableCollection<? extends LocalizedNode> before = enduringData().immutable().values();
         Set<Node> removed = new HashSet<>();
 
         boolean enduringWork = this.enduringNodes.auditTemporaryNodes(removed);

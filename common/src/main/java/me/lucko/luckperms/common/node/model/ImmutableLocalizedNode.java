@@ -40,11 +40,6 @@ public final class ImmutableLocalizedNode extends ForwardingNode implements Loca
         Objects.requireNonNull(node, "node");
         Objects.requireNonNull(location, "location");
 
-        // unwrap
-        while (node instanceof LocalizedNode) {
-            node = ((LocalizedNode) node).getNode();
-        }
-
         return new ImmutableLocalizedNode(node, location);
     }
 

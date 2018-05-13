@@ -27,6 +27,7 @@ package me.lucko.luckperms.nukkit.model.permissible;
 
 import com.google.common.base.Preconditions;
 
+import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
@@ -189,13 +190,13 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
         // remove transient permissions from the holder which were added by this attachment & equal the permission
         User user = this.permissible.getUser();
-        user.removeIfTransient(n -> n instanceof ImmutableTransientNode && ((ImmutableTransientNode) n).getOwner() == this && n.getPermission().equals(name));
+        user.removeIfTransient(LocalizedNode.composedPredicate(n -> n instanceof ImmutableTransientNode && ((ImmutableTransientNode) n).getOwner() == this && n.getPermission().equals(name)));
     }
 
     private void clearInternal() {
         // remove all transient permissions added by this attachment
         User user = this.permissible.getUser();
-        user.removeIfTransient(n -> n instanceof ImmutableTransientNode && ((ImmutableTransientNode) n).getOwner() == this);
+        user.removeIfTransient(LocalizedNode.composedPredicate(n -> n instanceof ImmutableTransientNode && ((ImmutableTransientNode) n).getOwner() == this));
     }
 
     @Override

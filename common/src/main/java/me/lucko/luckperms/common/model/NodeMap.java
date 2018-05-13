@@ -227,13 +227,13 @@ public final class NodeMap {
         setContent(multimap.values());
     }
 
-    boolean removeIf(Predicate<? super Node> predicate) {
+    boolean removeIf(Predicate<? super LocalizedNode> predicate) {
         boolean ret = this.map.values().removeIf(predicate);
         this.inheritanceMap.values().removeIf(predicate);
         return ret;
     }
 
-    boolean removeIf(ContextSet contextSet, Predicate<? super Node> predicate) {
+    boolean removeIf(ContextSet contextSet, Predicate<? super LocalizedNode> predicate) {
         ImmutableContextSet context = contextSet.makeImmutable();
         SortedSet<LocalizedNode> nodes = this.map.get(context);
         boolean ret = nodes.removeIf(predicate);
@@ -241,12 +241,12 @@ public final class NodeMap {
         return ret;
     }
 
-    boolean auditTemporaryNodes(@Nullable Set<Node> removed) {
+    boolean auditTemporaryNodes(@Nullable Set<? super LocalizedNode> removed) {
         boolean work = false;
 
-        Iterator<? extends Node> it = this.map.values().iterator();
+        Iterator<? extends LocalizedNode> it = this.map.values().iterator();
         while (it.hasNext()) {
-            Node entry = it.next();
+            LocalizedNode entry = it.next();
             if (entry.hasExpired()) {
                 if (removed != null) {
                     removed.add(entry);

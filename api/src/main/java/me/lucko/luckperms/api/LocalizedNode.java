@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.api;
 
+import java.util.function.Predicate;
+
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
@@ -35,6 +37,18 @@ import javax.annotation.concurrent.Immutable;
  */
 @Immutable
 public interface LocalizedNode extends Node {
+
+    /**
+     * Returns a predicate which unwraps the localised node parameter before delegating
+     * the handling to the provided predicate.
+     *
+     * @param delegate the delegate predicate.
+     * @return the composed predicate
+     * @since 4.3
+     */
+    static Predicate<? super LocalizedNode> composedPredicate(Predicate<Node> delegate) {
+        return localizedNode -> delegate.test(localizedNode.getNode());
+    }
 
     /**
      * Gets the delegate node
