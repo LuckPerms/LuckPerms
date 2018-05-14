@@ -70,7 +70,7 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
             this.plugin.getLogger().info("Processing pre-login for " + c.getUniqueId() + " - " + c.getName());
         }
 
-        this.plugin.getBootstrap().getScheduler().doAsync(() -> {
+        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
             recordConnection(c.getUniqueId());
 
             /* Actually process the login for the connection.
@@ -139,7 +139,7 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
         this.plugin.getUserManager().getHouseKeeper().registerUsage(player.getUniqueId());
 
         // force a clear of transient nodes
-        this.plugin.getBootstrap().getScheduler().doAsync(() -> {
+        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
             User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
             if (user != null) {
                 user.clearTransientNodes();

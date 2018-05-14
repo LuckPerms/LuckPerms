@@ -85,7 +85,6 @@ public final class ImmutableNode implements Node {
 
 
     // cached state
-
     private final Optional<String> optServer;
     private final Optional<String> optWorld;
 

@@ -25,19 +25,19 @@
 
 package me.lucko.luckperms.common.config.keys;
 
-import me.lucko.luckperms.common.config.ConfigKey;
+import me.lucko.luckperms.common.config.BaseConfigKey;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 
 import java.util.function.Function;
 
-public class AbstractKey<T> implements ConfigKey<T> {
-    public static <T> AbstractKey<T> of(Function<ConfigurationAdapter, T> function) {
-        return new AbstractKey<>(function);
+public class CustomKey<T> extends BaseConfigKey<T> {
+    public static <T> CustomKey<T> of(Function<ConfigurationAdapter, T> function) {
+        return new CustomKey<>(function);
     }
 
     private final Function<ConfigurationAdapter, T> function;
 
-    private AbstractKey(Function<ConfigurationAdapter, T> function) {
+    private CustomKey(Function<ConfigurationAdapter, T> function) {
         this.function = function;
     }
 

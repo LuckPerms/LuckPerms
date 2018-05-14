@@ -61,8 +61,8 @@ public class FileWatcher {
         this.basePath = basePath;
         this.watchService = basePath.getFileSystem().newWatchService();
 
-        plugin.getBootstrap().getScheduler().asyncLater(this::initLocations, 25L);
-        plugin.getBootstrap().getScheduler().asyncRepeating(this::tick, 10L);
+        plugin.getBootstrap().getScheduler().asyncLater(this::initLocations, 5, TimeUnit.SECONDS);
+        plugin.getBootstrap().getScheduler().asyncRepeating(this::tick, 1, TimeUnit.SECONDS);
     }
 
     public WatchedLocation getWatcher(Path path) {

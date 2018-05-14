@@ -23,9 +23,12 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.plugin;
+package me.lucko.luckperms.common.plugin.scheduler;
+
+import me.lucko.luckperms.common.plugin.SchedulerTask;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A scheduler for running tasks using the systems provided by the platform
@@ -39,10 +42,6 @@ public interface SchedulerAdapter {
      */
     Executor async();
 
-    default Executor platformAsync() {
-        return async();
-    }
-
     /**
      * Gets a sync executor instance
      *
@@ -51,46 +50,42 @@ public interface SchedulerAdapter {
     Executor sync();
 
     /**
-     * Executes a runnable async
+     * Executes a task async
      *
-     * @param runnable the runnable
+     * @param task the task
      */
-    void doAsync(Runnable runnable);
+    default void executeAsync(Runnable task) {
+        async().execute(task);
+    }
 
     /**
-     * Executes a runnable sync
+     * Executes a task sync
      *
-     * @param runnable the runnable
+     * @param task the task
      */
-    void doSync(Runnable runnable);
+    default void executeSync(Runnable task) {
+        sync().execute(task);
+    }
 
     /**
-     * Runs a runnable repeatedly until the plugin disables. Will wait for the interval before the first iteration of the task is ran.
-     *  @param runnable the runnable
-     * @param intervalTicks the interval in ticks.
+     * Executes the given task with a delay.
+     *
+     * @param task the task
+     * @param delay the delay
+     * @param unit the unit of delay
+     * @return the resultant task instance
      */
-    SchedulerTask asyncRepeating(Runnable runnable, long intervalTicks);
+    SchedulerTask asyncLater(Runnable task, long delay, TimeUnit unit);
 
     /**
-     * Runs a runnable repeatedly until the plugin disables. Will wait for the interval before the first iteration of the task is ran.
-     *  @param runnable the runnable
-     * @param intervalTicks the interval in ticks.
+     * Executes the given task repeatedly at a given interval.
+     *
+     * @param task the task
+     * @param interval the interval
+     * @param unit the unit of interval
+     * @return the resultant task instance
      */
-    SchedulerTask syncRepeating(Runnable runnable, long intervalTicks);
-
-    /**
-     * Runs a runnable with a delay
-     *  @param runnable the runnable
-     * @param delayTicks the delay in ticks
-     */
-    SchedulerTask asyncLater(Runnable runnable, long delayTicks);
-
-    /**
-     * Runs a runnable with a delay
-     *  @param runnable the runnable
-     * @param delayTicks the delay in ticks
-     */
-    SchedulerTask syncLater(Runnable runnable, long delayTicks);
+    SchedulerTask asyncRepeating(Runnable task, long interval, TimeUnit unit);
 
     /**
      * Shuts down this executor instance

@@ -33,6 +33,7 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
+import me.lucko.luckperms.common.buffers.Cache;
 
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginManager;
@@ -67,8 +68,8 @@ public final class LPDefaultsMap implements Map<Boolean, Set<Permission>> {
     private final Set<Permission> nonOpSet = new DefaultPermissionSet(false);
 
     // fully resolved defaults (accounts for child permissions too)
-    private Map<String, Boolean> resolvedOpDefaults = ImmutableMap.of();
-    private Map<String, Boolean> resolvedNonOpDefaults = ImmutableMap.of();
+    private DefaultsCache opCache = new DefaultsCache(true);
+    private DefaultsCache nonOpCache = new DefaultsCache(false);
 
     // #values and #entrySet results - both immutable
     private final Collection<Set<Permission>> values = ImmutableList.of(this.opSet, this.nonOpSet);
@@ -81,16 +82,20 @@ public final class LPDefaultsMap implements Map<Boolean, Set<Permission>> {
         this.plugin = plugin;
         this.opSet.addAll(existingData.getOrDefault(Boolean.TRUE, Collections.emptySet()));
         this.nonOpSet.addAll(existingData.getOrDefault(Boolean.FALSE, Collections.emptySet()));
-        refreshOp();
-        refreshNonOp();
     }
 
-    public Set<Permission> getOpPermissions() {
-        return this.opSet;
+    @Override
+    public Set<Permission> get(Object key) {
+        boolean b = (boolean) key;
+        return b ? this.opSet : this.nonOpSet;
     }
 
-    public Set<Permission> getNonOpPermissions() {
-        return this.nonOpSet;
+    private DefaultsCache getCache(boolean op) {
+        return op ? this.opCache : this.nonOpCache;
+    }
+
+    private void invalidate(boolean op) {
+        getCache(op).invalidate();
     }
 
     /**
@@ -101,52 +106,8 @@ public final class LPDefaultsMap implements Map<Boolean, Set<Permission>> {
      * @return a tristate result
      */
     public Tristate lookupDefaultPermission(String permission, boolean isOp) {
-        Map<String, Boolean> map = isOp ? this.resolvedOpDefaults : this.resolvedNonOpDefaults;
+        Map<String, Boolean> map = getCache(isOp).get();
         return Tristate.fromNullableBoolean(map.get(permission));
-    }
-
-    private void refresh(boolean op) {
-        if (op) {
-            refreshOp();
-        } else {
-            refreshNonOp();
-        }
-    }
-
-    /**
-     * Refreshes the op data in this provider.
-     */
-    private void refreshOp() {
-        Map<String, Boolean> builder = new HashMap<>();
-        for (Permission perm : getOpPermissions()) {
-            String name = perm.getName().toLowerCase();
-            builder.put(name, true);
-            for (Map.Entry<String, Boolean> child : this.plugin.getPermissionMap().getChildPermissions(name, true).entrySet()) {
-                builder.putIfAbsent(child.getKey(), child.getValue());
-            }
-        }
-        this.resolvedOpDefaults = ImmutableMap.copyOf(builder);
-    }
-
-    /**
-     * Refreshes the non op data in this provider.
-     */
-    private void refreshNonOp() {
-        Map<String, Boolean> builder = new HashMap<>();
-        for (Permission perm : getNonOpPermissions()) {
-            String name = perm.getName().toLowerCase();
-            builder.put(name, true);
-            for (Map.Entry<String, Boolean> child : this.plugin.getPermissionMap().getChildPermissions(name, true).entrySet()) {
-                builder.putIfAbsent(child.getKey(), child.getValue());
-            }
-        }
-        this.resolvedNonOpDefaults = ImmutableMap.copyOf(builder);
-    }
-
-    @Override
-    public Set<Permission> get(Object key) {
-        boolean b = (boolean) key;
-        return b ? this.opSet : this.nonOpSet;
     }
 
     // return wrappers around this map impl
@@ -166,11 +127,33 @@ public final class LPDefaultsMap implements Map<Boolean, Set<Permission>> {
     @Override public void putAll(@Nonnull Map<? extends Boolean, ? extends Set<Permission>> m) { throw new UnsupportedOperationException(); }
     @Override public void clear() { throw new UnsupportedOperationException(); }
 
+    private final class DefaultsCache extends Cache<Map<String, Boolean>> {
+        private final boolean op;
+
+        DefaultsCache(boolean op) {
+            this.op = op;
+        }
+
+        @Nonnull
+        @Override
+        protected Map<String, Boolean> supply() {
+            Map<String, Boolean> builder = new HashMap<>();
+            for (Permission perm : LPDefaultsMap.this.get(this.op)) {
+                String name = perm.getName().toLowerCase();
+                builder.put(name, true);
+                for (Map.Entry<String, Boolean> child : LPDefaultsMap.this.plugin.getPermissionMap().getChildPermissions(name, true).entrySet()) {
+                    builder.putIfAbsent(child.getKey(), child.getValue());
+                }
+            }
+            return ImmutableMap.copyOf(builder);
+        }
+    }
+
     private final class DefaultPermissionSet extends ForwardingSet<Permission> {
         private final Set<Permission> delegate = ConcurrentHashMap.newKeySet();
         private final boolean op;
 
-        private DefaultPermissionSet(boolean op) {
+        DefaultPermissionSet(boolean op) {
             this.op = op;
         }
 
@@ -182,14 +165,14 @@ public final class LPDefaultsMap implements Map<Boolean, Set<Permission>> {
         @Override
         public boolean add(@Nonnull Permission element) {
             boolean ret = super.add(element);
-            refresh(this.op);
+            invalidate(this.op);
             return ret;
         }
 
         @Override
         public boolean addAll(@Nonnull Collection<? extends Permission> collection) {
             boolean ret = super.addAll(collection);
-            refresh(this.op);
+            invalidate(this.op);
             return ret;
         }
     }

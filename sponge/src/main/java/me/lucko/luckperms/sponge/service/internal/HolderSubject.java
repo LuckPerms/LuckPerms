@@ -161,7 +161,7 @@ public abstract class HolderSubject<T extends PermissionHolder> implements LPSub
     @Override
     public void invalidateCaches() {
         // invalidate for all changes
-        this.parent.getCachedData().invalidate();
+        this.parent.invalidateCachedData();
     }
 
 }

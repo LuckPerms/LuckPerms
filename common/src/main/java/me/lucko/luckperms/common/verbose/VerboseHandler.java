@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.verbose;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.RepeatingTask;
 
@@ -51,8 +52,8 @@ public class VerboseHandler extends RepeatingTask {
     // if there are any listeners currently registered
     private boolean listening = false;
 
-    public VerboseHandler() {
-        super(100, TimeUnit.MILLISECONDS, "luckperms-verbose");
+    public VerboseHandler(SchedulerAdapter scheduler) {
+        super(scheduler, 100, TimeUnit.MILLISECONDS);
         this.listeners = new ConcurrentHashMap<>();
         this.queue = new ConcurrentLinkedQueue<>();
     }

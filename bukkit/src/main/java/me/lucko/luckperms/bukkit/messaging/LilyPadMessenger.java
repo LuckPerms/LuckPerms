@@ -87,7 +87,7 @@ public class LilyPadMessenger implements Messenger {
 
     @EventListener
     public void onMessage(MessageEvent event) {
-        this.plugin.getBootstrap().getScheduler().doAsync(() -> {
+        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
             try {
                 String channel = event.getChannel();
 

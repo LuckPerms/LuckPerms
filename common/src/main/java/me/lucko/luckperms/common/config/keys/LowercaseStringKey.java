@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.common.config.keys;
 
-import me.lucko.luckperms.common.config.ConfigKey;
+import me.lucko.luckperms.common.config.BaseConfigKey;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 
-public class LowercaseStringKey implements ConfigKey<String> {
+public class LowercaseStringKey extends BaseConfigKey<String> {
     public static LowercaseStringKey of(String path, String def) {
         return new LowercaseStringKey(path, def);
     }

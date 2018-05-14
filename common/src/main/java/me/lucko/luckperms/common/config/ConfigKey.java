@@ -35,6 +35,16 @@ import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 public interface ConfigKey<T> {
 
     /**
+     * Gets the position of this key within the {@link ConfigKeys} enum.
+     *
+     * <p>This is lazily set when the configuration is loaded for the first time, during the
+     * execution of {@link ConfigKeys#getAllKeys()}.</p>
+     *
+     * @return the position
+     */
+    int ordinal();
+
+    /**
      * Resolves and returns the value mapped to this key using the given config instance.
      *
      * <p>The {@link LuckPermsConfiguration#get(ConfigKey)} method should be used to

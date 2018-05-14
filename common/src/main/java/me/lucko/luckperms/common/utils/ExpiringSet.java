@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.utils;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ForwardingSet;
 
 import java.util.Collection;
@@ -36,22 +36,22 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 
 /**
- * A bad expiring set implementation using Caffeine caches
+ * A simple expiring set implementation using Caffeine caches
  *
  * @param <E> element type
  */
 public class ExpiringSet<E> extends ForwardingSet<E> {
-    private final LoadingCache<E, Boolean> cache;
+    private final Cache<E, Boolean> cache;
     private final Set<E> setView;
 
     public ExpiringSet(long duration, TimeUnit unit) {
-        this.cache = Caffeine.newBuilder().expireAfterAccess(duration, unit).build(key -> Boolean.TRUE);
+        this.cache = Caffeine.newBuilder().expireAfterAccess(duration, unit).build();
         this.setView = this.cache.asMap().keySet();
     }
 
     @Override
     public boolean add(E element) {
-        this.cache.get(element); // simply requesting the element from the cache is sufficient.
+        this.cache.put(element, Boolean.TRUE);
 
         // we don't care about the return value
         return true;

@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.treeview;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.utils.RepeatingTask;
 
 import java.util.Collection;
@@ -55,8 +56,8 @@ public class PermissionRegistry extends RepeatingTask {
     // a queue of permission strings to be processed by the tree
     private final Queue<String> queue;
 
-    public PermissionRegistry() {
-        super(1000, TimeUnit.MILLISECONDS, "luckperms-permission-vault");
+    public PermissionRegistry(SchedulerAdapter scheduler) {
+        super(scheduler, 1, TimeUnit.SECONDS);
         this.rootNode = new TreeNode();
         this.knownPermissions = ConcurrentHashMap.newKeySet(3000);
         this.queue = new ConcurrentLinkedQueue<>();

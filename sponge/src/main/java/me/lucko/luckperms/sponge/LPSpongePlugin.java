@@ -28,7 +28,7 @@ package me.lucko.luckperms.sponge;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
-import me.lucko.luckperms.common.calculators.PlatformCalculatorFactory;
+import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -75,6 +75,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 /**
@@ -146,7 +147,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected PlatformCalculatorFactory provideCalculatorFactory() {
+    protected CalculatorFactory provideCalculatorFactory() {
         return new SpongeCalculatorFactory(this);
     }
 
@@ -189,9 +190,9 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void registerHousekeepingTasks() {
-        this.bootstrap.getScheduler().asyncRepeating(new ExpireTemporaryTask(this), 60L);
-        this.bootstrap.getScheduler().asyncRepeating(new CacheHousekeepingTask(this), 2400L);
-        this.bootstrap.getScheduler().asyncRepeating(new ServiceCacheHousekeepingTask(this.service), 2400L);
+        this.bootstrap.getScheduler().asyncRepeating(new ExpireTemporaryTask(this), 3, TimeUnit.SECONDS);
+        this.bootstrap.getScheduler().asyncRepeating(new CacheHousekeepingTask(this), 2, TimeUnit.MINUTES);
+        this.bootstrap.getScheduler().asyncRepeating(new ServiceCacheHousekeepingTask(this.service), 2, TimeUnit.MINUTES);
     }
 
     @Override

@@ -35,7 +35,7 @@ import me.lucko.luckperms.bungee.listeners.BungeeConnectionListener;
 import me.lucko.luckperms.bungee.listeners.BungeePermissionCheckListener;
 import me.lucko.luckperms.bungee.messaging.BungeeMessagingFactory;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
-import me.lucko.luckperms.common.calculators.PlatformCalculatorFactory;
+import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.contexts.ContextManager;
@@ -61,6 +61,7 @@ import java.nio.file.Files;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 /**
@@ -130,7 +131,7 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected PlatformCalculatorFactory provideCalculatorFactory() {
+    protected CalculatorFactory provideCalculatorFactory() {
         return new BungeeCalculatorFactory(this);
     }
 
@@ -161,8 +162,8 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void registerHousekeepingTasks() {
-        this.bootstrap.getScheduler().asyncRepeating(new ExpireTemporaryTask(this), 60L);
-        this.bootstrap.getScheduler().asyncRepeating(new CacheHousekeepingTask(this), 2400L);
+        this.bootstrap.getScheduler().asyncRepeating(new ExpireTemporaryTask(this), 3, TimeUnit.SECONDS);
+        this.bootstrap.getScheduler().asyncRepeating(new CacheHousekeepingTask(this), 2, TimeUnit.MINUTES);
     }
 
     @Override

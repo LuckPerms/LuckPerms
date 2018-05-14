@@ -221,6 +221,6 @@ public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
         if (event instanceof Cancellable) {
             throw new IllegalArgumentException("cannot call Cancellable event async");
         }
-        this.plugin.getBootstrap().getScheduler().doAsync(() -> fireEvent(event));
+        this.plugin.getBootstrap().getScheduler().executeAsync(() -> fireEvent(event));
     }
 }

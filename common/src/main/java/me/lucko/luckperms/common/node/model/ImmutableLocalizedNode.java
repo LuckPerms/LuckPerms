@@ -52,7 +52,7 @@ public final class ImmutableLocalizedNode extends ForwardingNode implements Loca
     }
 
     @Override
-    protected Node delegate() {
+    public Node delegate() {
         return this.node;
     }
 

@@ -27,12 +27,13 @@ package me.lucko.luckperms.common.messaging.sql;
 
 import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.plugin.SchedulerAdapter;
 import me.lucko.luckperms.common.plugin.SchedulerTask;
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.storage.dao.sql.SqlDao;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
 
 public class SqlMessenger extends AbstractSqlMessenger {
     private final LuckPermsPlugin plugin;
@@ -57,8 +58,8 @@ public class SqlMessenger extends AbstractSqlMessenger {
 
         // schedule poll tasks
         SchedulerAdapter scheduler = this.plugin.getBootstrap().getScheduler();
-        this.pollTask = scheduler.asyncRepeating(this::pollMessages, 20L);
-        this.housekeepingTask = scheduler.asyncRepeating(this::runHousekeeping, 20L * 30);
+        this.pollTask = scheduler.asyncRepeating(this::pollMessages, 1, TimeUnit.SECONDS);
+        this.housekeepingTask = scheduler.asyncRepeating(this::runHousekeeping, 30, TimeUnit.SECONDS);
     }
 
     @Override

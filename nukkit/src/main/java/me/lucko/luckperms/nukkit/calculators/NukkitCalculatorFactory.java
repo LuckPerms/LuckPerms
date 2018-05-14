@@ -29,7 +29,7 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LookupSetting;
-import me.lucko.luckperms.common.calculators.AbstractCalculatorFactory;
+import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
 import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -42,7 +42,7 @@ import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import me.lucko.luckperms.nukkit.processors.ChildProcessor;
 import me.lucko.luckperms.nukkit.processors.DefaultsProcessor;
 
-public class NukkitCalculatorFactory extends AbstractCalculatorFactory {
+public class NukkitCalculatorFactory implements CalculatorFactory {
     private final LPNukkitPlugin plugin;
 
     public NukkitCalculatorFactory(LPNukkitPlugin plugin) {
@@ -71,6 +71,6 @@ public class NukkitCalculatorFactory extends AbstractCalculatorFactory {
             processors.add(new DefaultsProcessor(this.plugin, contexts.hasSetting(LookupSetting.IS_OP)));
         }
 
-        return registerCalculator(new PermissionCalculator(this.plugin, metadata, processors.build()));
+        return new PermissionCalculator(this.plugin, metadata, processors.build());
     }
 }

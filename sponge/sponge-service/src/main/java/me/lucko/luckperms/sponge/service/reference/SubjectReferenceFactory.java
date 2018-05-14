@@ -60,12 +60,13 @@ public final class SubjectReferenceFactory {
      *
      * It's perfectly ok if two instances of the same SubjectReference exist. (hence the 1 hour expiry)
      */
-    private final LoadingCache<SubjectReferenceAttributes, CachedSubjectReference> referenceCache = Caffeine.newBuilder()
-            .expireAfterAccess(1, TimeUnit.HOURS)
-            .build(a -> new CachedSubjectReference(SubjectReferenceFactory.this.service, a.collectionId, a.id));
+    private final LoadingCache<SubjectReferenceAttributes, CachedSubjectReference> referenceCache;
 
     public SubjectReferenceFactory(LPPermissionService service) {
         this.service = service;
+        this.referenceCache = Caffeine.newBuilder()
+                .expireAfterAccess(1, TimeUnit.HOURS)
+                .build(a -> new CachedSubjectReference(this.service, a.collectionId, a.id));
     }
 
     @Deprecated

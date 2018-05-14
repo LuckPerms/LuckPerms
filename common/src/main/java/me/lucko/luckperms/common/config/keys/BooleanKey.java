@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.common.config.keys;
 
-import me.lucko.luckperms.common.config.ConfigKey;
+import me.lucko.luckperms.common.config.BaseConfigKey;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 
-public class BooleanKey implements ConfigKey<Boolean> {
+public class BooleanKey extends BaseConfigKey<Boolean> {
     public static BooleanKey of(String path, boolean def) {
         return new BooleanKey(path, def);
     }

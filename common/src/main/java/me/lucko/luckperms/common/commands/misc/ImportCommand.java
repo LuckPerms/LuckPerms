@@ -86,7 +86,7 @@ public class ImportCommand extends SingleCommand {
         Importer importer = new Importer(plugin.getCommandManager(), sender, commands);
 
         // Run the importer in its own thread.
-        plugin.getBootstrap().getScheduler().doAsync(() -> {
+        plugin.getBootstrap().getScheduler().executeAsync(() -> {
             try {
                 importer.run();
             } finally {

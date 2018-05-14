@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.common.config.keys;
 
-import me.lucko.luckperms.common.config.ConfigKey;
+import me.lucko.luckperms.common.config.BaseConfigKey;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 
-public class IntegerKey implements ConfigKey<Integer> {
+public class IntegerKey extends BaseConfigKey<Integer> {
     public static IntegerKey of(String path, int def) {
         return new IntegerKey(path, def);
     }

@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.plugin.bootstrap;
 
 import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
-import me.lucko.luckperms.common.plugin.SchedulerAdapter;
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 
 import java.io.InputStream;
 import java.nio.file.Path;

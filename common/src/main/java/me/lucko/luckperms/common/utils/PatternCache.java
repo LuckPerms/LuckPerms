@@ -69,12 +69,12 @@ public final class PatternCache {
         private final Pattern instance;
         private final PatternSyntaxException ex;
 
-        public CachedPattern(Pattern instance) {
+        CachedPattern(Pattern instance) {
             this.instance = instance;
             this.ex = null;
         }
 
-        public CachedPattern(PatternSyntaxException ex) {
+        CachedPattern(PatternSyntaxException ex) {
             this.instance = null;
             this.ex = ex;
         }

@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.config.keys;
 
+import me.lucko.luckperms.common.config.BaseConfigKey;
 import me.lucko.luckperms.common.config.ConfigKey;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 
@@ -32,7 +33,7 @@ import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
  * Wrapper class to mark a config key as enduring (doesn't change in the event of a reload)
  * @param <T>
  */
-public class EnduringKey<T> implements ConfigKey<T> {
+public class EnduringKey<T> extends BaseConfigKey<T> {
 
     public static <T> EnduringKey<T> wrap(ConfigKey<T> delegate) {
         return new EnduringKey<>(delegate);

@@ -97,7 +97,7 @@ public class BungeeMessenger implements Messenger, Listener {
 
         if (this.consumer.consumeIncomingMessageAsString(msg)) {
             // Forward to other servers
-            this.plugin.getBootstrap().getScheduler().doAsync(() -> {
+            this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
                 for (ServerInfo server : this.plugin.getBootstrap().getProxy().getServers().values()) {
                     server.sendData(CHANNEL, data, true);
                 }

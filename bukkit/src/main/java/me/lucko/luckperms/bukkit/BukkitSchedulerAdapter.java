@@ -25,158 +25,21 @@
 
 package me.lucko.luckperms.bukkit;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 
-import me.lucko.luckperms.common.plugin.SchedulerAdapter;
-import me.lucko.luckperms.common.plugin.SchedulerTask;
-import me.lucko.luckperms.common.utils.Iterators;
-
-import org.bukkit.scheduler.BukkitScheduler;
-import org.bukkit.scheduler.BukkitTask;
-
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Nonnull;
-
-public class BukkitSchedulerAdapter implements SchedulerAdapter {
-    private final LPBukkitBootstrap bootstrap;
-
-    private final ExecutorService asyncFallback;
-    private final Executor asyncBukkit;
+public class BukkitSchedulerAdapter extends AbstractJavaScheduler implements SchedulerAdapter {
     private final Executor sync;
-    private final Executor async;
-
-    private boolean useFallback = true;
-
-    private final Set<SchedulerTask> tasks = ConcurrentHashMap.newKeySet();
 
     public BukkitSchedulerAdapter(LPBukkitBootstrap bootstrap) {
-        this.bootstrap = bootstrap;
-
-        this.sync = new SyncExecutor();
-        this.asyncFallback = new FallbackAsyncExecutor();
-        this.asyncBukkit = new BukkitAsyncExecutor();
-        this.async = new AsyncExecutor();
-    }
-
-    private BukkitScheduler scheduler() {
-        return this.bootstrap.getServer().getScheduler();
-    }
-
-    @Override
-    public void doAsync(Runnable runnable) {
-        async().execute(runnable);
-    }
-
-    @Override
-    public void doSync(Runnable runnable) {
-        sync().execute(runnable);
-    }
-
-    @Override
-    public SchedulerTask asyncRepeating(Runnable runnable, long intervalTicks) {
-        SchedulerTask task = new BukkitSchedulerTask(scheduler().runTaskTimerAsynchronously(this.bootstrap, runnable, intervalTicks, intervalTicks));
-        this.tasks.add(task);
-        return task;
-    }
-
-    @Override
-    public SchedulerTask syncRepeating(Runnable runnable, long intervalTicks) {
-        SchedulerTask task = new BukkitSchedulerTask(scheduler().runTaskTimer(this.bootstrap, runnable, intervalTicks, intervalTicks));
-        this.tasks.add(task);
-        return task;
-    }
-
-    @Override
-    public SchedulerTask asyncLater(Runnable runnable, long delayTicks) {
-        return new BukkitSchedulerTask(scheduler().runTaskLaterAsynchronously(this.bootstrap, runnable, delayTicks));
-    }
-
-    @Override
-    public SchedulerTask syncLater(Runnable runnable, long delayTicks) {
-        return new BukkitSchedulerTask(scheduler().runTaskLater(this.bootstrap, runnable, delayTicks));
-    }
-
-    @Override
-    public void shutdown() {
-        Iterators.iterate(this.tasks, SchedulerTask::cancel);
-
-        // wait for executor
-        this.asyncFallback.shutdown();
-        try {
-            this.asyncFallback.awaitTermination(30, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        this.sync = r -> bootstrap.getServer().getScheduler().scheduleSyncDelayedTask(bootstrap, r);
     }
 
     @Override
     public Executor sync() {
         return this.sync;
-    }
-
-    @Override
-    public Executor async() {
-        return this.async;
-    }
-
-    @Override
-    public Executor platformAsync() {
-        return this.asyncBukkit;
-    }
-
-    public void setUseFallback(boolean useFallback) {
-        this.useFallback = useFallback;
-    }
-
-    private final class SyncExecutor implements Executor {
-        @Override
-        public void execute(@Nonnull Runnable runnable) {
-            BukkitSchedulerAdapter.this.bootstrap.getServer().getScheduler().scheduleSyncDelayedTask(BukkitSchedulerAdapter.this.bootstrap, runnable);
-        }
-    }
-
-    private final class AsyncExecutor implements Executor {
-        @Override
-        public void execute(@Nonnull Runnable runnable) {
-            if (BukkitSchedulerAdapter.this.useFallback || !BukkitSchedulerAdapter.this.bootstrap.isEnabled()) {
-                BukkitSchedulerAdapter.this.asyncFallback.execute(runnable);
-            } else {
-                BukkitSchedulerAdapter.this.asyncBukkit.execute(runnable);
-            }
-        }
-    }
-
-    private final class BukkitAsyncExecutor implements Executor {
-        @Override
-        public void execute(@Nonnull Runnable runnable) {
-            BukkitSchedulerAdapter.this.bootstrap.getServer().getScheduler().runTaskAsynchronously(BukkitSchedulerAdapter.this.bootstrap, runnable);
-        }
-    }
-
-    private static final class FallbackAsyncExecutor extends ThreadPoolExecutor {
-        private FallbackAsyncExecutor() {
-            super(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), new ThreadFactoryBuilder().setNameFormat("luckperms-fallback-%d").build());
-        }
-    }
-
-    private static final class BukkitSchedulerTask implements SchedulerTask {
-        private final BukkitTask task;
-
-        private BukkitSchedulerTask(BukkitTask task) {
-            this.task = task;
-        }
-
-        @Override
-        public void cancel() {
-            this.task.cancel();
-        }
     }
 
 }

@@ -46,7 +46,7 @@ import me.lucko.luckperms.bukkit.model.server.LPSubscriptionMap;
 import me.lucko.luckperms.bukkit.vault.VaultHookManager;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.api.delegates.model.ApiUser;
-import me.lucko.luckperms.common.calculators.PlatformCalculatorFactory;
+import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
@@ -78,6 +78,7 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 /**
@@ -152,7 +153,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected PlatformCalculatorFactory provideCalculatorFactory() {
+    protected CalculatorFactory provideCalculatorFactory() {
         return new BukkitCalculatorFactory(this);
     }
 
@@ -177,7 +178,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
             // schedule another injection after all plugins have loaded
             // the entire pluginmanager instance is replaced by some plugins :(
-            this.bootstrap.getScheduler().asyncLater(injector, 1L);
+            this.bootstrap.getServer().getScheduler().runTaskLaterAsynchronously(this.bootstrap, injector, 1);
         }
 
         // Provide vault support
@@ -214,8 +215,8 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void registerHousekeepingTasks() {
-        this.bootstrap.getScheduler().asyncRepeating(new ExpireTemporaryTask(this), 60L);
-        this.bootstrap.getScheduler().asyncRepeating(new CacheHousekeepingTask(this), 2400L);
+        this.bootstrap.getScheduler().asyncRepeating(new ExpireTemporaryTask(this), 3, TimeUnit.SECONDS);
+        this.bootstrap.getScheduler().asyncRepeating(new CacheHousekeepingTask(this), 2, TimeUnit.MINUTES);
     }
 
     @Override
@@ -234,7 +235,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
         // remove all operators on startup if they're disabled
         if (!getConfiguration().get(ConfigKeys.OPS_ENABLED)) {
-            this.bootstrap.getScheduler().platformAsync().execute(() -> {
+            this.bootstrap.getServer().getScheduler().runTaskAsynchronously(this.bootstrap, () -> {
                 for (OfflinePlayer player : this.bootstrap.getServer().getOperators()) {
                     player.setOp(false);
                 }
@@ -250,16 +251,13 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
             });
         }
 
-        // replace the temporary executor when the Bukkit one starts
-        this.bootstrap.getServer().getScheduler().runTaskAsynchronously(this.bootstrap, () -> this.bootstrap.getScheduler().setUseFallback(false));
-
         // Load any online users (in the case of a reload)
         for (Player player : this.bootstrap.getServer().getOnlinePlayers()) {
-            this.bootstrap.getScheduler().doAsync(() -> {
+            this.bootstrap.getScheduler().executeAsync(() -> {
                 try {
                     User user = this.connectionListener.loadUser(player.getUniqueId(), player.getName());
                     if (user != null) {
-                        this.bootstrap.getScheduler().doSync(() -> {
+                        this.bootstrap.getScheduler().executeSync(() -> {
                             try {
                                 LPPermissible lpPermissible = new LPPermissible(player, user, this);
                                 PermissibleInjector.inject(player, lpPermissible);
@@ -273,12 +271,6 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
                 }
             });
         }
-    }
-
-    @Override
-    protected void performEarlyDisableTasks() {
-        // Switch back to the fallback executor, the bukkit one won't allow new tasks
-        this.bootstrap.getScheduler().setUseFallback(true);
     }
 
     @Override

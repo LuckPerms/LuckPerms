@@ -183,7 +183,7 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
         this.plugin.getUserManager().getHouseKeeper().registerUsage(player.getUniqueId());
 
         // force a clear of transient nodes
-        this.plugin.getBootstrap().getScheduler().doAsync(() -> {
+        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
             User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
             if (user != null) {
                 user.clearTransientNodes();

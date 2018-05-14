@@ -189,7 +189,6 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
         // remove transient permissions from the holder which were added by this attachment & equal the permission
         User user = this.permissible.getUser();
-
         user.removeIfTransient(LocalizedNode.composedPredicate(n -> n instanceof ImmutableTransientNode && ((ImmutableTransientNode) n).getOwner() == this && n.getPermission().equals(name)));
     }
 

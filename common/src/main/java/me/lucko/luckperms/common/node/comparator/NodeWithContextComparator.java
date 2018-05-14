@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.node.comparator;
 
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.utils.CollationKeyCache;
+import me.lucko.luckperms.common.contexts.ContextSetComparator;
 
 import java.util.Comparator;
 
@@ -58,35 +58,16 @@ public class NodeWithContextComparator implements Comparator<Node> {
             return o1.isOverride() ? 1 : -1;
         }
 
-        if (o1.isServerSpecific() != o2.isServerSpecific()) {
-            return o1.isServerSpecific() ? 1 : -1;
+        int i = ContextSetComparator.normal().compare(
+                o1.getFullContexts().makeImmutable(),
+                o2.getFullContexts().makeImmutable()
+        );
+
+        if (i != 0) {
+            return i;
         }
 
-        if (o1.isWorldSpecific() != o2.isWorldSpecific()) {
-            return o1.isWorldSpecific() ? 1 : -1;
-        }
-
-        if (o1.getContexts().size() != o2.getContexts().size()) {
-            return o1.getContexts().size() > o2.getContexts().size() ? 1 : -1;
-        }
-
-        if (o1.isTemporary() != o2.isTemporary()) {
-            return o1.isTemporary() ? 1 : -1;
-        }
-
-        if (o1.isWildcard() != o2.isWildcard()) {
-            return o1.isWildcard() ? 1 : -1;
-        }
-
-        if (o1.isTemporary()) {
-            return o1.getSecondsTilExpiry() < o2.getSecondsTilExpiry() ? 1 : -1;
-        }
-
-        if (o1.isWildcard()) {
-            return o1.getWildcardLevel() > o2.getWildcardLevel() ? 1 : -1;
-        }
-
-        return CollationKeyCache.compareStrings(o1.getPermission(), o2.getPermission()) == 1 ? -1 : 1;
+        return NodeComparator.normal().compare(o1, o2);
     }
 
 }

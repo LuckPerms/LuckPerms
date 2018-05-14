@@ -35,7 +35,6 @@ import com.google.gson.JsonObject;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.contexts.ContextSetComparator;
 import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
-import me.lucko.luckperms.common.utils.CollationKeyCache;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
@@ -204,7 +203,7 @@ public class SubjectDataContainer {
 
             // sort alphabetically.
             List<Map.Entry<String, Boolean>> perms = new ArrayList<>(e.getValue().entrySet());
-            perms.sort(Map.Entry.comparingByKey(CollationKeyCache.comparator()));
+            perms.sort(Map.Entry.comparingByKey());
 
             for (Map.Entry<String, Boolean> ent : perms) {
                 data.addProperty(ent.getKey(), ent.getValue());
@@ -228,7 +227,7 @@ public class SubjectDataContainer {
 
             // sort alphabetically.
             List<Map.Entry<String, String>> opts = new ArrayList<>(e.getValue().entrySet());
-            opts.sort(Map.Entry.comparingByKey(CollationKeyCache.comparator()));
+            opts.sort(Map.Entry.comparingByKey());
 
             for (Map.Entry<String, String> ent : opts) {
                 data.addProperty(ent.getKey(), ent.getValue());

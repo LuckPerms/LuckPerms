@@ -237,8 +237,6 @@ public class LuckPermsService implements LPPermissionService {
                 subject.invalidateCaches();
             }
         }
-
-        this.plugin.getCalculatorFactory().invalidateAll();
     }
 
 }

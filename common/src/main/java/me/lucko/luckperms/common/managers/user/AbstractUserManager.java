@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractUserManager<T extends User> extends AbstractManager<UserIdentifier, User, T> implements UserManager<T> {
 
@@ -46,7 +47,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
     public AbstractUserManager(LuckPermsPlugin plugin, UserHousekeeper.TimeoutSettings timeoutSettings) {
         this.plugin = plugin;
         this.housekeeper = new UserHousekeeper(plugin, this, timeoutSettings);
-        this.plugin.getBootstrap().getScheduler().asyncRepeating(this.housekeeper, 200L); // every 10 seconds
+        this.plugin.getBootstrap().getScheduler().asyncRepeating(this.housekeeper, 10, TimeUnit.SECONDS);
     }
 
     @Override

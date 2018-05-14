@@ -25,20 +25,16 @@
 
 package me.lucko.luckperms.common.utils;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import me.lucko.luckperms.common.plugin.SchedulerTask;
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public abstract class RepeatingTask {
+    private final SchedulerTask task;
 
-    // the executor thread
-    private final ScheduledExecutorService executor;
-
-    protected RepeatingTask(long time, TimeUnit unit, String nameFormat) {
-        this.executor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat(nameFormat).build());
-        this.executor.scheduleAtFixedRate(this::run, time, time, unit);
+    protected RepeatingTask(SchedulerAdapter scheduler, long time, TimeUnit unit) {
+        this.task = scheduler.asyncRepeating(this::run, time, unit);
     }
 
     private void run() {
@@ -52,11 +48,6 @@ public abstract class RepeatingTask {
     protected abstract void tick();
 
     public void stop() {
-        this.executor.shutdown();
-        try {
-            this.executor.awaitTermination(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        this.task.cancel();
     }
 }

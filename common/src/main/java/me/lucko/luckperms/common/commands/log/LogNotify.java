@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.log;
 
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
@@ -54,7 +55,7 @@ public class LogNotify extends SubCommand<Log> {
             return false;
         }
 
-        Optional<? extends Node> ret = user.getOwnNodes().stream()
+        Optional<? extends Node> ret = user.enduringData().immutable().get(ContextSet.empty()).stream()
                 .filter(n -> n.getPermission().equalsIgnoreCase("luckperms.log.notify.ignoring"))
                 .findFirst();
 
@@ -74,7 +75,7 @@ public class LogNotify extends SubCommand<Log> {
             user.setPermission(NodeFactory.make("luckperms.log.notify.ignoring"));
         } else {
             // remove the perm
-            user.removeIf(n -> n.getPermission().equalsIgnoreCase("luckperms.log.notify.ignoring"));
+            user.removeIf(ContextSet.empty(), n -> n.getPermission().equalsIgnoreCase("luckperms.log.notify.ignoring"));
         }
 
         plugin.getStorage().saveUser(user).join();

@@ -42,7 +42,7 @@ import javax.annotation.Nonnull;
 
 public abstract class ForwardingNode implements Node {
 
-    protected abstract Node delegate();
+    public abstract Node delegate();
 
     @Override
     public int hashCode() {

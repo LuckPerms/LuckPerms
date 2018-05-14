@@ -48,7 +48,7 @@ public final class ImmutableTransientNode<O> extends ForwardingNode implements N
     }
 
     @Override
-    protected Node delegate() {
+    public Node delegate() {
         return this.node;
     }
 

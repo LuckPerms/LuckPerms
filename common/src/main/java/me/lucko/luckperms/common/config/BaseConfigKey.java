@@ -23,25 +23,17 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.calculators;
+package me.lucko.luckperms.common.config;
 
-import com.google.common.collect.MapMaker;
+public abstract class BaseConfigKey<T> implements ConfigKey<T> {
+    int ordinal = -1;
 
-import java.util.Collections;
-import java.util.Set;
+    protected BaseConfigKey() {
 
-public abstract class AbstractCalculatorFactory implements PlatformCalculatorFactory {
-    private final Set<PermissionCalculator> calculators = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
-
-    protected PermissionCalculator registerCalculator(PermissionCalculator calculator) {
-        this.calculators.add(calculator);
-        return calculator;
     }
 
     @Override
-    public void invalidateAll() {
-        for (PermissionCalculator calculator : this.calculators) {
-            calculator.invalidateCache();
-        }
+    public int ordinal() {
+        return this.ordinal;
     }
 }

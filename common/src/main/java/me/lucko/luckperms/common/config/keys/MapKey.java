@@ -27,12 +27,12 @@ package me.lucko.luckperms.common.config.keys;
 
 import com.google.common.collect.ImmutableMap;
 
-import me.lucko.luckperms.common.config.ConfigKey;
+import me.lucko.luckperms.common.config.BaseConfigKey;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 
 import java.util.Map;
 
-public class MapKey implements ConfigKey<Map<String, String>> {
+public class MapKey extends BaseConfigKey<Map<String, String>> {
     public static MapKey of(String path) {
         return new MapKey(path);
     }

@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.api.ApiRegistrationUtil;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.UpdateTaskBuffer;
-import me.lucko.luckperms.common.calculators.PlatformCalculatorFactory;
+import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.config.AbstractConfiguration;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -61,6 +61,7 @@ import me.lucko.luckperms.common.verbose.VerboseHandler;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
@@ -79,7 +80,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private InternalMessagingService messagingService = null;
     private BufferedRequest<Void> updateTaskBuffer;
     private InheritanceHandler inheritanceHandler;
-    private PlatformCalculatorFactory calculatorFactory;
+    private CalculatorFactory calculatorFactory;
     private LuckPermsApiProvider apiProvider;
     private EventFactory eventFactory;
 
@@ -101,14 +102,13 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         displayBanner(getConsoleSender());
 
         // load some utilities early
-        this.verboseHandler = new VerboseHandler();
-        this.permissionRegistry = new PermissionRegistry();
+        this.verboseHandler = new VerboseHandler(getBootstrap().getScheduler());
+        this.permissionRegistry = new PermissionRegistry(getBootstrap().getScheduler());
         this.logDispatcher = new LogDispatcher(this);
 
         // load configuration
         getLogger().info("Loading configuration...");
         this.configuration = new AbstractConfiguration(this, provideConfigurationAdapter());
-        this.configuration.loadAll();
 
         // load locale
         this.localeManager = new SimpleLocaleManager();
@@ -168,10 +168,9 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         // schedule update tasks
         int mins = getConfiguration().get(ConfigKeys.SYNC_TIME);
         if (mins > 0) {
-            long ticks = mins * 60 * 20;
-            getBootstrap().getScheduler().asyncRepeating(() -> this.updateTaskBuffer.request(), ticks);
+            getBootstrap().getScheduler().asyncRepeating(() -> this.updateTaskBuffer.request(), mins, TimeUnit.MINUTES);
         }
-        getBootstrap().getScheduler().asyncLater(() -> this.updateTaskBuffer.request(), 40L);
+        getBootstrap().getScheduler().asyncLater(() -> this.updateTaskBuffer.request(), 2, TimeUnit.SECONDS);
 
         // run an update instantly.
         getLogger().info("Performing initial data load...");
@@ -191,9 +190,6 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     public final void disable() {
-        // perform initial disable tasks
-        performEarlyDisableTasks();
-
         // shutdown permission vault and verbose handler tasks
         this.permissionRegistry.stop();
         this.verboseHandler.stop();
@@ -233,7 +229,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     protected abstract MessagingFactory<?> provideMessagingFactory();
     protected abstract void registerCommands();
     protected abstract void setupManagers();
-    protected abstract PlatformCalculatorFactory provideCalculatorFactory();
+    protected abstract CalculatorFactory provideCalculatorFactory();
     protected abstract void setupContextManager();
     protected abstract void setupPlatformHooks();
     protected abstract AbstractEventBus provideEventBus(LuckPermsApiProvider apiProvider);
@@ -241,7 +237,6 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     protected abstract void registerHousekeepingTasks();
     protected abstract void performFinalSetup();
 
-    protected void performEarlyDisableTasks() {}
     protected void removePlatformHooks() {}
 
     @Override
@@ -312,7 +307,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public PlatformCalculatorFactory getCalculatorFactory() {
+    public CalculatorFactory getCalculatorFactory() {
         return this.calculatorFactory;
     }
 

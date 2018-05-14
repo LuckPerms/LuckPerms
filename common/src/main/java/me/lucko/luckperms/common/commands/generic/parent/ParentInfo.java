@@ -44,7 +44,6 @@ import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.utils.CollationKeyCache;
 import me.lucko.luckperms.common.utils.DurationFormatter;
 import me.lucko.luckperms.common.utils.Iterators;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -126,7 +125,7 @@ public class ParentInfo extends SharedSubCommand {
     }
 
     private static final Comparator<LocalizedNode> ALPHABETICAL_NODE_COMPARATOR = (o1, o2) -> {
-        int i = CollationKeyCache.compareStrings(o1.getGroupName(), o2.getGroupName());
+        int i = o1.getGroupName().compareTo(o2.getGroupName());
         if (i != 0) {
             return i;
         }

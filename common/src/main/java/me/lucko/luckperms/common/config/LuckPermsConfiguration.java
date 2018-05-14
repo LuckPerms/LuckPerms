@@ -60,9 +60,9 @@ public interface LuckPermsConfiguration {
     void reload();
 
     /**
-     * Pre-loads all configuration keys into the cache.
+     * Loads all configuration values.
      */
-    void loadAll();
+    void load();
 
     /**
      * Gets the value of a given context key.

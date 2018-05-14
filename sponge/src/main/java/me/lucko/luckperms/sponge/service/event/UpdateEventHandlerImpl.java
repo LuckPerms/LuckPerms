@@ -39,7 +39,7 @@ public class UpdateEventHandlerImpl implements UpdateEventHandler {
 
     @Override
     public void fireUpdateEvent(LPSubjectData subjectData) {
-        this.plugin.getBootstrap().getScheduler().doAsync(() -> {
+        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
             SubjectDataUpdateEvent event = new LPSubjectDataUpdateEvent(this.plugin, subjectData);
             this.plugin.getBootstrap().getGame().getEventManager().post(event);
         });

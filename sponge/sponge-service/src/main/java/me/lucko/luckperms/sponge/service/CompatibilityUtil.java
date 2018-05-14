@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.sponge.service;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.Tristate;
@@ -39,19 +37,12 @@ import org.spongepowered.api.service.context.Context;
 
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Utility class for converting between Sponge and LuckPerms context and tristate classes
  */
 public final class CompatibilityUtil {
-    private static final LoadingCache<Set<Context>, ImmutableContextSet> SPONGE_TO_LP_CACHE = Caffeine.newBuilder()
-            .expireAfterAccess(10, TimeUnit.MINUTES)
-            .build(ImmutableContextSet::fromEntries);
-
-    private static final LoadingCache<ImmutableContextSet, Set<Context>> LP_TO_SPONGE_CACHE = Caffeine.newBuilder()
-            .expireAfterAccess(10, TimeUnit.MINUTES)
-            .build(DelegatingImmutableContextSet::new);
+    private static final Set<Context> EMPTY = ImmutableSet.of();
 
     public static ImmutableContextSet convertContexts(Set<Context> contexts) {
         Objects.requireNonNull(contexts, "contexts");
@@ -60,12 +51,21 @@ public final class CompatibilityUtil {
             return ((DelegatingContextSet) contexts).getDelegate().makeImmutable();
         }
 
-        return SPONGE_TO_LP_CACHE.get(ImmutableSet.copyOf(contexts));
+        if (contexts.isEmpty()) {
+            return ImmutableContextSet.empty();
+        }
+
+        return ImmutableContextSet.fromEntries(contexts);
     }
 
     public static Set<Context> convertContexts(ContextSet contexts) {
         Objects.requireNonNull(contexts, "contexts");
-        return LP_TO_SPONGE_CACHE.get(contexts.makeImmutable());
+
+        if (contexts.isEmpty()) {
+            return EMPTY;
+        }
+
+        return new DelegatingImmutableContextSet(contexts.makeImmutable());
     }
 
     public static org.spongepowered.api.util.Tristate convertTristate(Tristate tristate) {

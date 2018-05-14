@@ -85,7 +85,7 @@ public class ExportCommand extends SingleCommand {
         Exporter exporter = new Exporter(plugin, sender, path, includeUsers);
 
         // Run the exporter in its own thread.
-        plugin.getBootstrap().getScheduler().doAsync(() -> {
+        plugin.getBootstrap().getScheduler().executeAsync(() -> {
             try {
                 exporter.run();
             } finally {

@@ -25,104 +25,56 @@
 
 package me.lucko.luckperms.bungee;
 
-import me.lucko.luckperms.common.plugin.SchedulerAdapter;
 import me.lucko.luckperms.common.plugin.SchedulerTask;
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.utils.Iterators;
 
 import net.md_5.bungee.api.scheduler.ScheduledTask;
-import net.md_5.bungee.api.scheduler.TaskScheduler;
 
+import java.util.Collections;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 public class BungeeSchedulerAdapter implements SchedulerAdapter {
-
-    // the number of ticks which occur in a second - this is a server implementation detail
-    public static final int TICKS_PER_SECOND = 20;
-    // the number of milliseconds in a second - constant
-    public static final int MILLISECONDS_PER_SECOND = 1000;
-    // the number of milliseconds in a tick - assuming the server runs at a perfect tick rate
-    public static final int MILLISECONDS_PER_TICK = MILLISECONDS_PER_SECOND / TICKS_PER_SECOND;
-
-    private static long ticksToMillis(long ticks) {
-        return ticks * MILLISECONDS_PER_TICK;
-    }
-
     private final LPBungeeBootstrap bootstrap;
 
-    private final Executor asyncExecutor;
-    private final Set<SchedulerTask> tasks = ConcurrentHashMap.newKeySet();
+    private final Executor executor;
+    private final Set<ScheduledTask> tasks = Collections.newSetFromMap(new WeakHashMap<>());
 
     public BungeeSchedulerAdapter(LPBungeeBootstrap bootstrap) {
         this.bootstrap = bootstrap;
-        this.asyncExecutor = r -> bootstrap.getProxy().getScheduler().runAsync(bootstrap, r);
-    }
-
-    private TaskScheduler scheduler() {
-        return this.bootstrap.getProxy().getScheduler();
+        this.executor = r -> bootstrap.getProxy().getScheduler().runAsync(bootstrap, r);
     }
 
     @Override
     public Executor async() {
-        return this.asyncExecutor;
+        return this.executor;
     }
 
     @Override
     public Executor sync() {
-        return this.asyncExecutor;
+        return this.executor;
     }
 
     @Override
-    public void doAsync(Runnable runnable) {
-        this.asyncExecutor.execute(runnable);
+    public SchedulerTask asyncLater(Runnable task, long delay, TimeUnit unit) {
+        ScheduledTask t = this.bootstrap.getProxy().getScheduler().schedule(this.bootstrap, task, delay, unit);
+        this.tasks.add(t);
+        return t::cancel;
     }
 
     @Override
-    public void doSync(Runnable runnable) {
-        doAsync(runnable);
-    }
-
-    @Override
-    public SchedulerTask asyncRepeating(Runnable runnable, long intervalTicks) {
-        long millis = ticksToMillis(intervalTicks);
-        SchedulerTask task = new BungeeSchedulerTask(scheduler().schedule(this.bootstrap, runnable, millis, millis, TimeUnit.MILLISECONDS));
-        this.tasks.add(task);
-        return task;
-    }
-
-    @Override
-    public SchedulerTask syncRepeating(Runnable runnable, long intervalTicks) {
-        return asyncRepeating(runnable, intervalTicks);
-    }
-
-    @Override
-    public SchedulerTask asyncLater(Runnable runnable, long delayTicks) {
-        return new BungeeSchedulerTask(scheduler().schedule(this.bootstrap, runnable, ticksToMillis(delayTicks), TimeUnit.MILLISECONDS));
-    }
-
-    @Override
-    public SchedulerTask syncLater(Runnable runnable, long delayTicks) {
-        return asyncLater(runnable, delayTicks);
+    public SchedulerTask asyncRepeating(Runnable task, long interval, TimeUnit unit) {
+        ScheduledTask t = this.bootstrap.getProxy().getScheduler().schedule(this.bootstrap, task, interval, interval, unit);
+        this.tasks.add(t);
+        return t::cancel;
     }
 
     @Override
     public void shutdown() {
-        Iterators.iterate(this.tasks, SchedulerTask::cancel);
-    }
-
-    private static final class BungeeSchedulerTask implements SchedulerTask {
-        private final ScheduledTask task;
-
-        private BungeeSchedulerTask(ScheduledTask task) {
-            this.task = task;
-        }
-
-        @Override
-        public void cancel() {
-            this.task.cancel();
-        }
+        Iterators.iterate(this.tasks, ScheduledTask::cancel);
     }
 
 }

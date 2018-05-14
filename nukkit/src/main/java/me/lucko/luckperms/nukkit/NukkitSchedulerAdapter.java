@@ -25,158 +25,21 @@
 
 package me.lucko.luckperms.nukkit;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 
-import me.lucko.luckperms.common.plugin.SchedulerAdapter;
-import me.lucko.luckperms.common.plugin.SchedulerTask;
-import me.lucko.luckperms.common.utils.Iterators;
-
-import cn.nukkit.scheduler.ServerScheduler;
-import cn.nukkit.scheduler.TaskHandler;
-
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Nonnull;
-
-public class NukkitSchedulerAdapter implements SchedulerAdapter {
-    private final LPNukkitBootstrap bootstrap;
-
-    private final ExecutorService asyncFallback;
-    private final Executor asyncNukkit;
+public class NukkitSchedulerAdapter extends AbstractJavaScheduler implements SchedulerAdapter {
     private final Executor sync;
-    private final Executor async;
-
-    private boolean useFallback = true;
-
-    private final Set<SchedulerTask> tasks = ConcurrentHashMap.newKeySet();
 
     public NukkitSchedulerAdapter(LPNukkitBootstrap bootstrap) {
-        this.bootstrap = bootstrap;
-
-        this.sync = new SyncExecutor();
-        this.asyncFallback = new FallbackAsyncExecutor();
-        this.asyncNukkit = new NukkitAsyncExecutor();
-        this.async = new AsyncExecutor();
-    }
-
-    private ServerScheduler scheduler() {
-        return this.bootstrap.getServer().getScheduler();
-    }
-
-    @Override
-    public void doAsync(Runnable runnable) {
-        async().execute(runnable);
-    }
-
-    @Override
-    public void doSync(Runnable runnable) {
-        sync().execute(runnable);
-    }
-
-    @Override
-    public SchedulerTask asyncRepeating(Runnable runnable, long intervalTicks) {
-        SchedulerTask task = new NukkitSchedulerTask(scheduler().scheduleDelayedRepeatingTask(this.bootstrap, runnable, (int) intervalTicks, (int) intervalTicks, true));
-        this.tasks.add(task);
-        return task;
-    }
-
-    @Override
-    public SchedulerTask syncRepeating(Runnable runnable, long intervalTicks) {
-        SchedulerTask task = new NukkitSchedulerTask(scheduler().scheduleDelayedRepeatingTask(this.bootstrap, runnable, (int) intervalTicks, (int) intervalTicks, false));
-        this.tasks.add(task);
-        return task;
-    }
-
-    @Override
-    public SchedulerTask asyncLater(Runnable runnable, long delayTicks) {
-        return new NukkitSchedulerTask(scheduler().scheduleDelayedTask(this.bootstrap, runnable, (int) delayTicks, true));
-    }
-
-    @Override
-    public SchedulerTask syncLater(Runnable runnable, long delayTicks) {
-        return new NukkitSchedulerTask(scheduler().scheduleDelayedTask(this.bootstrap, runnable, (int) delayTicks, false));
-    }
-
-    @Override
-    public void shutdown() {
-        Iterators.iterate(this.tasks, SchedulerTask::cancel);
-
-        // wait for executor
-        this.asyncFallback.shutdown();
-        try {
-            this.asyncFallback.awaitTermination(30, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        this.sync = r -> bootstrap.getServer().getScheduler().scheduleTask(bootstrap, r, false);
     }
 
     @Override
     public Executor sync() {
         return this.sync;
-    }
-
-    @Override
-    public Executor async() {
-        return this.async;
-    }
-
-    @Override
-    public Executor platformAsync() {
-        return this.asyncNukkit;
-    }
-
-    public void setUseFallback(boolean useFallback) {
-        this.useFallback = useFallback;
-    }
-
-    private final class SyncExecutor implements Executor {
-        @Override
-        public void execute(@Nonnull Runnable runnable) {
-            NukkitSchedulerAdapter.this.bootstrap.getServer().getScheduler().scheduleTask(NukkitSchedulerAdapter.this.bootstrap, runnable, false);
-        }
-    }
-
-    private final class AsyncExecutor implements Executor {
-        @Override
-        public void execute(@Nonnull Runnable runnable) {
-            if (NukkitSchedulerAdapter.this.useFallback || !NukkitSchedulerAdapter.this.bootstrap.isEnabled()) {
-                NukkitSchedulerAdapter.this.asyncFallback.execute(runnable);
-            } else {
-                NukkitSchedulerAdapter.this.asyncNukkit.execute(runnable);
-            }
-        }
-    }
-
-    private final class NukkitAsyncExecutor implements Executor {
-        @Override
-        public void execute(@Nonnull Runnable runnable) {
-            NukkitSchedulerAdapter.this.bootstrap.getServer().getScheduler().scheduleTask(NukkitSchedulerAdapter.this.bootstrap, runnable, true);
-        }
-    }
-
-    private static final class FallbackAsyncExecutor extends ThreadPoolExecutor {
-        private FallbackAsyncExecutor() {
-            super(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), new ThreadFactoryBuilder().setNameFormat("luckperms-fallback-%d").build());
-        }
-    }
-
-    private static final class NukkitSchedulerTask implements SchedulerTask {
-        private final TaskHandler task;
-
-        private NukkitSchedulerTask(TaskHandler task) {
-            this.task = task;
-        }
-
-        @Override
-        public void cancel() {
-            this.task.cancel();
-        }
     }
 
 }

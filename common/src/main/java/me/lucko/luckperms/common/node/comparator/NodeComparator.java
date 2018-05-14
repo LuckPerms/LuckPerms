@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.node.comparator;
 
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.utils.CollationKeyCache;
 
 import java.util.Comparator;
 
@@ -65,6 +64,6 @@ public class NodeComparator implements Comparator<Node> {
             return o1.getWildcardLevel() > o2.getWildcardLevel() ? 1 : -1;
         }
 
-        return CollationKeyCache.compareStrings(o1.getPermission(), o2.getPermission()) == 1 ? -1 : 1;
+        return o1.getPermission().compareTo(o2.getPermission()) > 0 ? -1 : 1;
     }
 }

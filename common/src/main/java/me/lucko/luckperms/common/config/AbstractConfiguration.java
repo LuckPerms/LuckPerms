@@ -25,34 +25,31 @@
 
 package me.lucko.luckperms.common.config;
 
-import com.github.benmanes.caffeine.cache.CacheLoader;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
-
 import me.lucko.luckperms.common.api.delegates.misc.ApiConfiguration;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.config.keys.EnduringKey;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
+import java.util.Map;
 
 /**
- * An abstract implementation of {@link LuckPermsConfiguration}, backed by a cache.
+ * An abstract implementation of {@link LuckPermsConfiguration}.
+ *
+ * <p>Values are loaded into memory on init.</p>
  */
-public class AbstractConfiguration implements LuckPermsConfiguration, CacheLoader<ConfigKey<?>, Optional<Object>> {
+public class AbstractConfiguration implements LuckPermsConfiguration {
 
-    // the loading cache for config keys --> their value
-    // the value is wrapped in an optional as null values don't get cached.
-    private final LoadingCache<ConfigKey<?>, Optional<Object>> cache = Caffeine.newBuilder().build(this);
+    /**
+     * The configurations loaded values.
+     *
+     * <p>The value corresponding to each key is stored at the index defined
+     * by {@link ConfigKey#ordinal()}.</p>
+     */
+    private Object[] values = null;
 
-    // the plugin instance
     private final LuckPermsPlugin plugin;
-    // the adapter used to read values
     private final ConfigurationAdapter adapter;
+
     // the api delegate
     private final ApiConfiguration delegate = new ApiConfiguration(this);
     // the contextsfile handler
@@ -61,6 +58,52 @@ public class AbstractConfiguration implements LuckPermsConfiguration, CacheLoade
     public AbstractConfiguration(LuckPermsPlugin plugin, ConfigurationAdapter adapter) {
         this.plugin = plugin;
         this.adapter = adapter;
+
+        load();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T get(ConfigKey<T> key) {
+        return (T) this.values[key.ordinal()];
+    }
+
+    @Override
+    public synchronized void load() {
+        // get the map of all keys
+        Map<String, ConfigKey<?>> keys = ConfigKeys.getAllKeys();
+
+        // if this is a reload operation
+        boolean reload = true;
+
+        // if values are null, must be loading for the first time
+        if (this.values == null) {
+            this.values = new Object[keys.size()];
+            reload = false;
+        }
+
+        // load a value for each key.
+        for (ConfigKey<?> key : keys.values()) {
+            // don't reload enduring keys.
+            if (reload && key instanceof EnduringKey) {
+                continue;
+            }
+
+            // load the value for the key
+            Object value = key.get(this.adapter);
+            this.values[key.ordinal()] = value;
+        }
+
+        // load the contexts file
+        this.contextsFile.load();
+    }
+
+    @Override
+    public void reload() {
+        this.adapter.reload();
+        load();
+
+        getPlugin().getEventFactory().handleConfigReload();
     }
 
     public ConfigurationAdapter getAdapter() {
@@ -80,37 +123,5 @@ public class AbstractConfiguration implements LuckPermsConfiguration, CacheLoade
     @Override
     public ContextsFile getContextsFile() {
         return this.contextsFile;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T get(ConfigKey<T> key) {
-        Optional<Object> ret = this.cache.get(key);
-        if (ret == null) {
-            return null;
-        }
-        return (T) ret.orElse(null);
-    }
-
-    @Override
-    public void loadAll() {
-        ConfigKeys.getAllKeys().values().forEach(this.cache::get);
-        this.contextsFile.load();
-    }
-
-    @Override
-    public void reload() {
-        this.adapter.reload();
-
-        Set<ConfigKey<?>> toInvalidate = this.cache.asMap().keySet().stream().filter(k -> !(k instanceof EnduringKey)).collect(Collectors.toSet());
-        this.cache.invalidateAll(toInvalidate);
-
-        loadAll();
-        getPlugin().getEventFactory().handleConfigReload();
-    }
-
-    @Override
-    public Optional<Object> load(@Nonnull ConfigKey<?> key) {
-        return Optional.ofNullable(key.get(this.adapter));
     }
 }
