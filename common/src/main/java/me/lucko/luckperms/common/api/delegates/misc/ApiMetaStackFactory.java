@@ -51,7 +51,7 @@ public class ApiMetaStackFactory implements MetaStackFactory {
     @Override
     public Optional<MetaStackElement> fromString(@Nonnull String definition) {
         Objects.requireNonNull(definition, "definition");
-        return StandardStackElements.parseFromString(this.plugin, definition);
+        return Optional.ofNullable(StandardStackElements.parseFromString(this.plugin, definition));
     }
 
     @Nonnull

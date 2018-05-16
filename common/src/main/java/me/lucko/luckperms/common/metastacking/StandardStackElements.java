@@ -31,416 +31,289 @@ import me.lucko.luckperms.api.metastacking.MetaStackElement;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
+import me.lucko.luckperms.common.utils.Uuids;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Contains the standard {@link MetaStackElement}s provided by LuckPerms.
  */
 public final class StandardStackElements {
-    public static final HighestPriority HIGHEST_PRIORITY = new HighestPriority();
-    public static final LowestPriority LOWEST_PRIORITY = new LowestPriority();
-    public static final HighestPriorityOwn HIGHEST_PRIORITY_OWN = new HighestPriorityOwn();
-    public static final LowestPriorityOwn LOWEST_PRIORITY_OWN = new LowestPriorityOwn();
-    public static final HighestPriorityInherited HIGHEST_PRIORITY_INHERITED = new HighestPriorityInherited();
-    public static final LowestPriorityInherited LOWEST_PRIORITY_INHERITED = new LowestPriorityInherited();
 
-    public static Optional<MetaStackElement> parseFromString(LuckPermsPlugin plugin, String s) {
+    public static MetaStackElement parseFromString(LuckPermsPlugin plugin, String s) {
         s = s.toLowerCase();
 
-        if (s.equals("highest")) {
-            return Optional.of(HIGHEST_PRIORITY);
-        }
+        // static
+        if (s.equals("highest")) return HIGHEST;
+        if (s.equals("lowest")) return LOWEST;
+        if (s.equals("highest_own")) return HIGHEST_OWN;
+        if (s.equals("lowest_own")) return LOWEST_OWN;
+        if (s.equals("highest_inherited")) return HIGHEST_INHERITED;
+        if (s.equals("lowest_inherited")) return LOWEST_INHERITED;
 
-        if (s.equals("lowest")) {
-            return Optional.of(LOWEST_PRIORITY);
-        }
+        // dynamic
+        String p;
+        if ((p = parseParam(s, "highest_on_track_")) != null) return highestFromGroupOnTrack(plugin, p);
+        if ((p = parseParam(s, "lowest_on_track_")) != null) return lowestFromGroupOnTrack(plugin, p);
+        if ((p = parseParam(s, "highest_not_on_track_")) != null) return highestNotFromGroupOnTrack(plugin, p);
+        if ((p = parseParam(s, "lowest_not_on_track_")) != null) return lowestNotFromGroupOnTrack(plugin, p);
+        if ((p = parseParam(s, "highest_from_group_")) != null) return highestFromGroup(p);
+        if ((p = parseParam(s, "lowest_from_group_")) != null) return lowestFromGroup(p);
+        if ((p = parseParam(s, "highest_not_from_group_")) != null) return highestNotFromGroup(p);
+        if ((p = parseParam(s, "lowest_not_from_group_")) != null) return lowestNotFromGroup(p);
 
-        if (s.equals("highest_own")) {
-            return Optional.of(HIGHEST_PRIORITY_OWN);
-        }
+        return null;
+    }
 
-        if (s.equals("lowest_own")) {
-            return Optional.of(LOWEST_PRIORITY_OWN);
+    private static String parseParam(String s, String prefix) {
+        if (s.startsWith(prefix) && s.length() > prefix.length()) {
+            return s.substring(prefix.length());
         }
-
-        if (s.equals("highest_inherited")) {
-            return Optional.of(HIGHEST_PRIORITY_INHERITED);
-        }
-
-        if (s.equals("lowest_inherited")) {
-            return Optional.of(LOWEST_PRIORITY_INHERITED);
-        }
-
-        if (s.startsWith("highest_on_track_") && s.length() > "highest_on_track_".length()) {
-            String track = s.substring("highest_on_track_".length());
-            return Optional.of(new HighestPriorityTrack(plugin, track));
-        }
-
-        if (s.startsWith("lowest_on_track_") && s.length() > "lowest_on_track_".length()) {
-            String track = s.substring("lowest_on_track_".length());
-            return Optional.of(new LowestPriorityTrack(plugin, track));
-        }
-
-        if (s.startsWith("highest_not_on_track_") && s.length() > "highest_not_on_track_".length()) {
-            String track = s.substring("highest_not_on_track_".length());
-            return Optional.of(new HighestPriorityNotOnTrack(plugin, track));
-        }
-
-        if (s.startsWith("lowest_not_on_track_") && s.length() > "lowest_not_on_track_".length()) {
-            String track = s.substring("lowest_not_on_track_".length());
-            return Optional.of(new LowestPriorityNotOnTrack(plugin, track));
-        }
-
-        new IllegalArgumentException("Cannot parse MetaStackElement: " + s).printStackTrace();
-        return Optional.empty();
+        return null;
     }
 
     public static List<MetaStackElement> parseList(LuckPermsPlugin plugin, List<String> strings) {
         return strings.stream()
-                .map(s -> parseFromString(plugin, s))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .map(s -> {
+                    MetaStackElement parsed = parseFromString(plugin, s);
+                    if (parsed == null) {
+                        new IllegalArgumentException("Unable to parse from: " + s).printStackTrace();
+                    }
+                    return parsed;
+                })
+                .filter(Objects::nonNull)
                 .collect(ImmutableCollectors.toList());
     }
 
-    /**
-     * Returns true if the current node has the greater priority
-     * @param current the current entry
-     * @param newEntry the new entry
-     * @return true if the accumulation should return
-     */
-    private static boolean compareEntriesHighest(Map.Entry<Integer, String> current, Map.Entry<Integer, String> newEntry) {
-        return current != null && current.getKey() >= newEntry.getKey();
+    // utility functions, used in combination with FluentMetaStackElement for form full MetaStackElements
+
+    private static final MetaStackElement TYPE_CHECK = (node, type, current) -> type.matches(node);
+    private static final MetaStackElement HIGHEST_CHECK = (node, type, current) -> current == null || type.getEntry(node).getKey() > current.getKey();
+    private static final MetaStackElement LOWEST_CHECK = (node, type, current) -> current == null || type.getEntry(node).getKey() < current.getKey();
+    private static final MetaStackElement OWN_CHECK = (node, type, current) -> Uuids.fromString(node.getLocation()) != null;
+    private static final MetaStackElement INHERITED_CHECK = (node, type, current) -> Uuids.fromString(node.getLocation()) == null;
+
+
+    // implementations
+
+    private static final MetaStackElement HIGHEST = FluentMetaStackElement.builder("HighestPriority")
+            .with(TYPE_CHECK)
+            .with(HIGHEST_CHECK)
+            .build();
+
+    private static final MetaStackElement HIGHEST_OWN = FluentMetaStackElement.builder("HighestPriorityOwn")
+            .with(TYPE_CHECK)
+            .with(OWN_CHECK)
+            .with(HIGHEST_CHECK)
+            .build();
+
+    private static final MetaStackElement HIGHEST_INHERITED = FluentMetaStackElement.builder("HighestPriorityInherited")
+            .with(TYPE_CHECK)
+            .with(INHERITED_CHECK)
+            .with(HIGHEST_CHECK)
+            .build();
+
+    private static MetaStackElement highestFromGroupOnTrack(LuckPermsPlugin plugin, String trackName) {
+        return FluentMetaStackElement.builder("HighestPriorityOnTrack")
+                .param("trackName", trackName)
+                .with(TYPE_CHECK)
+                .with(HIGHEST_CHECK)
+                .with(new FromGroupOnTrackCheck(plugin, trackName))
+                .build();
     }
 
-    /**
-     * Returns true if the current node has the lesser priority
-     * @param current the current entry
-     * @param newEntry the new entry
-     * @return true if the accumulation should return
-     */
-    private static boolean compareEntriesLowest(Map.Entry<Integer, String> current, Map.Entry<Integer, String> newEntry) {
-        return current != null && current.getKey() <= newEntry.getKey();
+    private static MetaStackElement highestNotFromGroupOnTrack(LuckPermsPlugin plugin, String trackName) {
+        return FluentMetaStackElement.builder("HighestPriorityNotOnTrack")
+                .param("trackName", trackName)
+                .with(TYPE_CHECK)
+                .with(HIGHEST_CHECK)
+                .with(new NotFromGroupOnTrackCheck(plugin, trackName))
+                .build();
+    }
+    
+    private static MetaStackElement highestFromGroup(String groupName) {
+        return FluentMetaStackElement.builder("HighestPriorityFromGroup")
+                .param("groupName", groupName)
+                .with(TYPE_CHECK)
+                .with(HIGHEST_CHECK)
+                .with(new FromGroupCheck(groupName))
+                .build();
     }
 
-    /**
-     * Returns true if the node is not held by a user
-     * @param node the node to check
-     * @return true if the accumulation should return
-     */
-    private static boolean checkOwnElement(LocalizedNode node) {
-        try {
-            UUID.fromString(node.getLocation());
-            return false;
-        } catch (IllegalArgumentException e) {
-            return true;
-        }
+    private static MetaStackElement highestNotFromGroup(String groupName) {
+        return FluentMetaStackElement.builder("HighestPriorityNotFromGroup")
+                .param("groupName", groupName)
+                .with(TYPE_CHECK)
+                .with(HIGHEST_CHECK)
+                .with(new NotFromGroupCheck(groupName))
+                .build();
     }
 
-    /**
-     * Returns true if the node is not held by a group on the track
-     * @param node the node to check
-     * @param track the track
-     * @return true if the accumulation should return
-     */
-    private static boolean checkTrackElement(LuckPermsPlugin plugin, LocalizedNode node, String track) {
-        if (node.getLocation() == null || node.getLocation().equals("")) {
-            return true;
-        }
+    private static final MetaStackElement LOWEST = FluentMetaStackElement.builder("LowestPriority")
+            .with(TYPE_CHECK)
+            .with(LOWEST_CHECK)
+            .build();
 
-        Track t = plugin.getTrackManager().getIfLoaded(track);
-        return t == null || !t.containsGroup(node.getLocation());
+    private static final MetaStackElement LOWEST_OWN = FluentMetaStackElement.builder("LowestPriorityOwn")
+            .with(TYPE_CHECK)
+            .with(OWN_CHECK)
+            .with(LOWEST_CHECK)
+            .build();
+
+    private static final MetaStackElement LOWEST_INHERITED = FluentMetaStackElement.builder("LowestPriorityInherited")
+            .with(TYPE_CHECK)
+            .with(INHERITED_CHECK)
+            .with(LOWEST_CHECK)
+            .build();
+
+    private static MetaStackElement lowestFromGroupOnTrack(LuckPermsPlugin plugin, String trackName) {
+        return FluentMetaStackElement.builder("LowestPriorityOnTrack")
+                .param("trackName", trackName)
+                .with(TYPE_CHECK)
+                .with(LOWEST_CHECK)
+                .with(new FromGroupOnTrackCheck(plugin, trackName))
+                .build();
     }
 
-    /**
-     * Returns true if the node is held by a group on the track
-     * @param node the node to check
-     * @param track the track
-     * @return true if the accumulation should return
-     */
-    private static boolean checkNotTrackElement(LuckPermsPlugin plugin, LocalizedNode node, String track) {
-        // it's not come from a group on this track (from the user directly)
-        if (node.getLocation() == null || node.getLocation().equals("")) {
-            return false;
-        }
-
-        Track t = plugin.getTrackManager().getIfLoaded(track);
-        return t == null || t.containsGroup(node.getLocation());
+    private static MetaStackElement lowestNotFromGroupOnTrack(LuckPermsPlugin plugin, String trackName) {
+        return FluentMetaStackElement.builder("LowestPriorityNotOnTrack")
+                .param("trackName", trackName)
+                .with(TYPE_CHECK)
+                .with(LOWEST_CHECK)
+                .with(new NotFromGroupOnTrackCheck(plugin, trackName))
+                .build();
     }
 
-    private static final class HighestPriority implements MetaStackElement {
-        @Override
-        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
-            if (type.shouldIgnore(node)) {
-                return false;
-            }
-
-            Map.Entry<Integer, String> newEntry = type.getEntry(node);
-            return !compareEntriesHighest(current, newEntry);
-        }
-
-        @Override
-        public String toString() {
-            return "StandardStackElements.HighestPriority()";
-        }
+    private static MetaStackElement lowestFromGroup(String groupName) {
+        return FluentMetaStackElement.builder("LowestPriorityFromGroup")
+                .param("groupName", groupName)
+                .with(TYPE_CHECK)
+                .with(LOWEST_CHECK)
+                .with(new FromGroupCheck(groupName))
+                .build();
     }
 
-    private static final class HighestPriorityOwn implements MetaStackElement {
-        @Override
-        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
-            if (type.shouldIgnore(node)) {
-                return false;
-            }
-
-            if (checkOwnElement(node)) {
-                return false;
-            }
-
-            Map.Entry<Integer, String> newEntry = type.getEntry(node);
-            return !compareEntriesHighest(current, newEntry);
-        }
-
-        @Override
-        public String toString() {
-            return "StandardStackElements.HighestPriorityOwn()";
-        }
+    private static MetaStackElement lowestNotFromGroup(String groupName) {
+        return FluentMetaStackElement.builder("LowestPriorityNotFromGroup")
+                .param("groupName", groupName)
+                .with(TYPE_CHECK)
+                .with(LOWEST_CHECK)
+                .with(new NotFromGroupCheck(groupName))
+                .build();
     }
 
-    private static final class HighestPriorityInherited implements MetaStackElement {
-        @Override
-        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
-            if (type.shouldIgnore(node)) {
-                return false;
-            }
-
-            if (!checkOwnElement(node)) {
-                return false;
-            }
-
-            Map.Entry<Integer, String> newEntry = type.getEntry(node);
-            return !compareEntriesHighest(current, newEntry);
-        }
-
-        @Override
-        public String toString() {
-            return "StandardStackElements.HighestPriorityInherited()";
-        }
-    }
-
-    private static final class HighestPriorityTrack implements MetaStackElement {
+    private static final class FromGroupOnTrackCheck implements MetaStackElement {
         private final LuckPermsPlugin plugin;
         private final String trackName;
 
-        public HighestPriorityTrack(LuckPermsPlugin plugin, String trackName) {
+        FromGroupOnTrackCheck(LuckPermsPlugin plugin, String trackName) {
             this.plugin = plugin;
             this.trackName = trackName;
         }
 
         @Override
-        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
-            if (type.shouldIgnore(node)) {
-                return false;
-            }
-
-            Map.Entry<Integer, String> newEntry = type.getEntry(node);
-            return !compareEntriesHighest(current, newEntry) && !checkTrackElement(this.plugin, node, this.trackName);
+        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, @Nullable Map.Entry<Integer, String> current) {
+            Track t = this.plugin.getTrackManager().getIfLoaded(this.trackName);
+            return t != null && t.containsGroup(node.getLocation());
         }
 
         @Override
         public boolean equals(Object o) {
-            if (o == this) return true;
-            if (!(o instanceof HighestPriorityTrack)) return false;
-            final HighestPriorityTrack other = (HighestPriorityTrack) o;
-            return this.trackName.equals(other.trackName);
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            FromGroupOnTrackCheck that = (FromGroupOnTrackCheck) o;
+            return this.trackName.equals(that.trackName);
         }
 
         @Override
         public int hashCode() {
             return this.trackName.hashCode();
         }
-
-        @Override
-        public String toString() {
-            return "StandardStackElements.HighestPriorityTrack(trackName=" + this.trackName + ")";
-        }
     }
 
-    private static final class HighestPriorityNotOnTrack implements MetaStackElement {
+    private static final class NotFromGroupOnTrackCheck implements MetaStackElement {
         private final LuckPermsPlugin plugin;
         private final String trackName;
 
-        public HighestPriorityNotOnTrack(LuckPermsPlugin plugin, String trackName) {
+        NotFromGroupOnTrackCheck(LuckPermsPlugin plugin, String trackName) {
             this.plugin = plugin;
             this.trackName = trackName;
         }
 
         @Override
-        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
-            if (type.shouldIgnore(node)) {
-                return false;
-            }
-
-            Map.Entry<Integer, String> newEntry = type.getEntry(node);
-            return !compareEntriesHighest(current, newEntry) && !checkNotTrackElement(this.plugin, node, this.trackName);
+        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, @Nullable Map.Entry<Integer, String> current) {
+            Track t = this.plugin.getTrackManager().getIfLoaded(this.trackName);
+            return t != null && !t.containsGroup(node.getLocation());
         }
 
         @Override
         public boolean equals(Object o) {
-            if (o == this) return true;
-            if (!(o instanceof HighestPriorityNotOnTrack)) return false;
-            final HighestPriorityNotOnTrack other = (HighestPriorityNotOnTrack) o;
-            return this.trackName.equals(other.trackName);
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            NotFromGroupOnTrackCheck that = (NotFromGroupOnTrackCheck) o;
+            return this.trackName.equals(that.trackName);
         }
 
         @Override
         public int hashCode() {
             return this.trackName.hashCode();
         }
-
-        @Override
-        public String toString() {
-            return "StandardStackElements.HighestPriorityNotOnTrack(trackName=" + this.trackName + ")";
-        }
     }
 
-    private static final class LowestPriority implements MetaStackElement {
-        @Override
-        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
-            if (type.shouldIgnore(node)) {
-                return false;
-            }
+    private static final class FromGroupCheck implements MetaStackElement {
+        private final String groupName;
 
-            Map.Entry<Integer, String> newEntry = type.getEntry(node);
-            return !compareEntriesLowest(current, newEntry);
+        FromGroupCheck(String groupName) {
+            this.groupName = groupName;
         }
 
         @Override
-        public String toString() {
-            return "StandardStackElements.LowestPriority()";
-        }
-    }
-
-    private static final class LowestPriorityOwn implements MetaStackElement {
-        @Override
-        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
-            if (type.shouldIgnore(node)) {
-                return false;
-            }
-
-            if (checkOwnElement(node)) {
-                return false;
-            }
-
-            Map.Entry<Integer, String> newEntry = type.getEntry(node);
-            return !compareEntriesLowest(current, newEntry);
-        }
-
-        @Override
-        public String toString() {
-            return "StandardStackElements.LowestPriorityOwn()";
-        }
-    }
-
-    private static final class LowestPriorityInherited implements MetaStackElement {
-        @Override
-        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
-            if (type.shouldIgnore(node)) {
-                return false;
-            }
-
-            if (!checkOwnElement(node)) {
-                return false;
-            }
-
-            Map.Entry<Integer, String> newEntry = type.getEntry(node);
-            return !compareEntriesLowest(current, newEntry);
-        }
-
-        @Override
-        public String toString() {
-            return "StandardStackElements.LowestPriorityInherited()";
-        }
-    }
-
-    private static final class LowestPriorityTrack implements MetaStackElement {
-        private final LuckPermsPlugin plugin;
-        private final String trackName;
-
-        public LowestPriorityTrack(LuckPermsPlugin plugin, String trackName) {
-            this.plugin = plugin;
-            this.trackName = trackName;
-        }
-
-        @Override
-        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
-            if (type.shouldIgnore(node)) {
-                return false;
-            }
-
-            Map.Entry<Integer, String> entry = type.getEntry(node);
-            return !compareEntriesLowest(current, entry) && !checkTrackElement(this.plugin, node, this.trackName);
+        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, @Nullable Map.Entry<Integer, String> current) {
+            return this.groupName.equals(node.getLocation());
         }
 
         @Override
         public boolean equals(Object o) {
-            if (o == this) return true;
-            if (!(o instanceof LowestPriorityTrack)) return false;
-            final LowestPriorityTrack other = (LowestPriorityTrack) o;
-            return this.trackName.equals(other.trackName);
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            FromGroupCheck that = (FromGroupCheck) o;
+            return this.groupName.equals(that.groupName);
         }
 
         @Override
         public int hashCode() {
-            return this.trackName.hashCode();
-        }
-
-        @Override
-        public String toString() {
-            return "StandardStackElements.LowestPriorityTrack(trackName=" + this.trackName + ")";
+            return this.groupName.hashCode();
         }
     }
 
-    private static final class LowestPriorityNotOnTrack implements MetaStackElement {
-        private final LuckPermsPlugin plugin;
-        private final String trackName;
+    private static final class NotFromGroupCheck implements MetaStackElement {
+        private final String groupName;
 
-        public LowestPriorityNotOnTrack(LuckPermsPlugin plugin, String trackName) {
-            this.plugin = plugin;
-            this.trackName = trackName;
+        NotFromGroupCheck(String groupName) {
+            this.groupName = groupName;
         }
 
         @Override
-        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, Map.Entry<Integer, String> current) {
-            if (type.shouldIgnore(node)) {
-                return false;
-            }
-
-            Map.Entry<Integer, String> newEntry = type.getEntry(node);
-            return !compareEntriesLowest(current, newEntry) && !checkNotTrackElement(this.plugin, node, this.trackName);
+        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, @Nullable Map.Entry<Integer, String> current) {
+            return !this.groupName.equals(node.getLocation());
         }
 
         @Override
         public boolean equals(Object o) {
-            if (o == this) return true;
-            if (!(o instanceof LowestPriorityNotOnTrack)) return false;
-            final LowestPriorityNotOnTrack other = (LowestPriorityNotOnTrack) o;
-            return this.trackName.equals(other.trackName);
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            NotFromGroupCheck that = (NotFromGroupCheck) o;
+            return this.groupName.equals(that.groupName);
         }
 
         @Override
         public int hashCode() {
-            return this.trackName.hashCode();
-        }
-
-        @Override
-        public String toString() {
-            return "StandardStackElements.LowestPriorityNotOnTrack(trackName=" + this.trackName + ")";
+            return this.groupName.hashCode();
         }
     }
 
