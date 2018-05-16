@@ -569,7 +569,7 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
                 if (entry == null) {
                     continue;
                 }
-                nodes.add(readAttributes(entry.getValue(), c -> NodeFactory.metaNode(entry.getKey(), entry.getValue().getNode("value").getString("null"))));
+                nodes.add(readAttributes(entry.getValue(), c -> NodeFactory.metaNode(entry.getKey(), c.getNode("value").getString("null"))));
             }
         }
 
@@ -609,17 +609,13 @@ public abstract class AbstractConfigurateDao extends AbstractDao {
     private void appendNode(ConfigurationNode base, String key, ConfigurationNode attributes, String keyFieldName) {
         if (this.loader instanceof YamlLoader) {
             // create a map node with a single entry of key --> attributes
-            ConfigurationNode appended = SimpleConfigurationNode.root();
+            ConfigurationNode appended = base.getAppendedNode();
             appended.getNode(key).setValue(attributes);
-
-            base.getAppendedNode().setValue(appended);
         } else {
             // include the attributes and key in the same map
-            ConfigurationNode appended = SimpleConfigurationNode.root();
+            ConfigurationNode appended = base.getAppendedNode();
             appended.getNode(keyFieldName).setValue(key);
-            appended.mergeValuesFrom(appended);
-
-            base.getAppendedNode().setValue(appended);
+            appended.mergeValuesFrom(attributes);
         }
     }
 

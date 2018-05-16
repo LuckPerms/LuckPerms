@@ -101,24 +101,24 @@ public final class StandardStackElements {
 
     // implementations
 
-    private static final MetaStackElement HIGHEST = FluentMetaStackElement.builder("HighestPriority")
+    public static final MetaStackElement HIGHEST = FluentMetaStackElement.builder("HighestPriority")
             .with(TYPE_CHECK)
             .with(HIGHEST_CHECK)
             .build();
 
-    private static final MetaStackElement HIGHEST_OWN = FluentMetaStackElement.builder("HighestPriorityOwn")
+    public static final MetaStackElement HIGHEST_OWN = FluentMetaStackElement.builder("HighestPriorityOwn")
             .with(TYPE_CHECK)
             .with(OWN_CHECK)
             .with(HIGHEST_CHECK)
             .build();
 
-    private static final MetaStackElement HIGHEST_INHERITED = FluentMetaStackElement.builder("HighestPriorityInherited")
+    public static final MetaStackElement HIGHEST_INHERITED = FluentMetaStackElement.builder("HighestPriorityInherited")
             .with(TYPE_CHECK)
             .with(INHERITED_CHECK)
             .with(HIGHEST_CHECK)
             .build();
 
-    private static MetaStackElement highestFromGroupOnTrack(LuckPermsPlugin plugin, String trackName) {
+    public static MetaStackElement highestFromGroupOnTrack(LuckPermsPlugin plugin, String trackName) {
         return FluentMetaStackElement.builder("HighestPriorityOnTrack")
                 .param("trackName", trackName)
                 .with(TYPE_CHECK)
@@ -127,7 +127,7 @@ public final class StandardStackElements {
                 .build();
     }
 
-    private static MetaStackElement highestNotFromGroupOnTrack(LuckPermsPlugin plugin, String trackName) {
+    public static MetaStackElement highestNotFromGroupOnTrack(LuckPermsPlugin plugin, String trackName) {
         return FluentMetaStackElement.builder("HighestPriorityNotOnTrack")
                 .param("trackName", trackName)
                 .with(TYPE_CHECK)
@@ -135,8 +135,8 @@ public final class StandardStackElements {
                 .with(new NotFromGroupOnTrackCheck(plugin, trackName))
                 .build();
     }
-    
-    private static MetaStackElement highestFromGroup(String groupName) {
+
+    public static MetaStackElement highestFromGroup(String groupName) {
         return FluentMetaStackElement.builder("HighestPriorityFromGroup")
                 .param("groupName", groupName)
                 .with(TYPE_CHECK)
@@ -145,7 +145,7 @@ public final class StandardStackElements {
                 .build();
     }
 
-    private static MetaStackElement highestNotFromGroup(String groupName) {
+    public static MetaStackElement highestNotFromGroup(String groupName) {
         return FluentMetaStackElement.builder("HighestPriorityNotFromGroup")
                 .param("groupName", groupName)
                 .with(TYPE_CHECK)
@@ -154,24 +154,24 @@ public final class StandardStackElements {
                 .build();
     }
 
-    private static final MetaStackElement LOWEST = FluentMetaStackElement.builder("LowestPriority")
+    public static final MetaStackElement LOWEST = FluentMetaStackElement.builder("LowestPriority")
             .with(TYPE_CHECK)
             .with(LOWEST_CHECK)
             .build();
 
-    private static final MetaStackElement LOWEST_OWN = FluentMetaStackElement.builder("LowestPriorityOwn")
+    public static final MetaStackElement LOWEST_OWN = FluentMetaStackElement.builder("LowestPriorityOwn")
             .with(TYPE_CHECK)
             .with(OWN_CHECK)
             .with(LOWEST_CHECK)
             .build();
 
-    private static final MetaStackElement LOWEST_INHERITED = FluentMetaStackElement.builder("LowestPriorityInherited")
+    public static final MetaStackElement LOWEST_INHERITED = FluentMetaStackElement.builder("LowestPriorityInherited")
             .with(TYPE_CHECK)
             .with(INHERITED_CHECK)
             .with(LOWEST_CHECK)
             .build();
 
-    private static MetaStackElement lowestFromGroupOnTrack(LuckPermsPlugin plugin, String trackName) {
+    public static MetaStackElement lowestFromGroupOnTrack(LuckPermsPlugin plugin, String trackName) {
         return FluentMetaStackElement.builder("LowestPriorityOnTrack")
                 .param("trackName", trackName)
                 .with(TYPE_CHECK)
@@ -180,7 +180,7 @@ public final class StandardStackElements {
                 .build();
     }
 
-    private static MetaStackElement lowestNotFromGroupOnTrack(LuckPermsPlugin plugin, String trackName) {
+    public static MetaStackElement lowestNotFromGroupOnTrack(LuckPermsPlugin plugin, String trackName) {
         return FluentMetaStackElement.builder("LowestPriorityNotOnTrack")
                 .param("trackName", trackName)
                 .with(TYPE_CHECK)
@@ -189,7 +189,7 @@ public final class StandardStackElements {
                 .build();
     }
 
-    private static MetaStackElement lowestFromGroup(String groupName) {
+    public static MetaStackElement lowestFromGroup(String groupName) {
         return FluentMetaStackElement.builder("LowestPriorityFromGroup")
                 .param("groupName", groupName)
                 .with(TYPE_CHECK)
@@ -198,7 +198,7 @@ public final class StandardStackElements {
                 .build();
     }
 
-    private static MetaStackElement lowestNotFromGroup(String groupName) {
+    public static MetaStackElement lowestNotFromGroup(String groupName) {
         return FluentMetaStackElement.builder("LowestPriorityNotFromGroup")
                 .param("groupName", groupName)
                 .with(TYPE_CHECK)

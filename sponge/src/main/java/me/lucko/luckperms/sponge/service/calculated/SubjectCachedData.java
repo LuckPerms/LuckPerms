@@ -48,7 +48,7 @@ import java.util.Map;
 
 public class SubjectCachedData extends AbstractCachedData implements CalculatorFactory {
     private static final MetaStackDefinition DEFAULT_META_STACK = new SimpleMetaStackDefinition(
-            ImmutableList.of(StandardStackElements.HIGHEST_PRIORITY),
+            ImmutableList.of(StandardStackElements.HIGHEST),
             "", "", ""
     );
 
