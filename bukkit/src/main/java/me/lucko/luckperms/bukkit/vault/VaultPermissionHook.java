@@ -345,9 +345,11 @@ public class VaultPermissionHook extends AbstractVaultPermission {
             context = this.plugin.getContextManager().getStaticContext().mutableCopy();
         }
 
+        String playerWorld = player == null ? null : player.getWorld().getName();
+
         // if world is null, we want to do a lookup in the players current context
         // if world is not null, we want to do a lookup in that specific world
-        if (world != null && !world.isEmpty()) {
+        if (world != null && !world.isEmpty() && !world.equalsIgnoreCase(playerWorld)) {
             // remove already accumulated worlds
             context.removeAll(Contexts.WORLD_KEY);
             // add the vault world
