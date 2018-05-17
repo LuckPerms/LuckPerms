@@ -54,18 +54,24 @@ public final class SubjectProxy implements Subject, ProxiedSubject {
     private final LPPermissionService service;
     private final LPSubjectReference ref;
 
-    private final ContextsCache<Subject> contextsCache;
+    private ContextsCache<Subject> contextsCache;
 
     public SubjectProxy(LPPermissionService service, LPSubjectReference ref) {
         this.service = service;
         this.ref = ref;
-
-        ContextManager<Subject> contextManager = (ContextManager<Subject>) service.getPlugin().getContextManager();
-        this.contextsCache = contextManager.getCacheFor(this);
     }
 
     private CompletableFuture<LPSubject> handle() {
         return this.ref.resolveLp();
+    }
+
+    // lazy init
+    private ContextsCache<Subject> getContextsCache() {
+        if (this.contextsCache == null) {
+            ContextManager<Subject> contextManager = (ContextManager<Subject>) this.service.getPlugin().getContextManager();
+            this.contextsCache = contextManager.getCacheFor(this);
+        }
+        return this.contextsCache;
     }
 
     @Nonnull
@@ -165,7 +171,7 @@ public final class SubjectProxy implements Subject, ProxiedSubject {
     @Nonnull
     @Override
     public Set<Context> getActiveContexts() {
-        return CompatibilityUtil.convertContexts(this.contextsCache.getContextSet());
+        return CompatibilityUtil.convertContexts(getContextsCache().getContextSet());
     }
 
     @Override
