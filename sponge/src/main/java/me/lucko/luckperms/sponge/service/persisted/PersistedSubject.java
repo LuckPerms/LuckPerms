@@ -62,6 +62,8 @@ public class PersistedSubject extends CalculatedSubject implements LPSubject {
     private final PersistedSubjectData subjectData;
     private final CalculatedSubjectData transientSubjectData;
 
+    private Subject spongeSubject = null;
+
     /**
      * The save buffer instance for saving changes to disk
      */
@@ -124,7 +126,10 @@ public class PersistedSubject extends CalculatedSubject implements LPSubject {
 
     @Override
     public Subject sponge() {
-        return ProxyFactory.toSponge(this);
+        if (this.spongeSubject == null) {
+            this.spongeSubject = ProxyFactory.toSponge(this);
+        }
+        return this.spongeSubject;
     }
 
     @Override

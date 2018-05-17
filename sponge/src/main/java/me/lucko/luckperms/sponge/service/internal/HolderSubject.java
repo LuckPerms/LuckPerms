@@ -61,6 +61,8 @@ public abstract class HolderSubject<T extends PermissionHolder> implements LPSub
     private final HolderSubjectData subjectData;
     private final HolderSubjectData transientSubjectData;
 
+    private Subject spongeSubject = null;
+
     HolderSubject(LPSpongePlugin plugin, T parent) {
         this.parent = parent;
         this.plugin = plugin;
@@ -78,8 +80,11 @@ public abstract class HolderSubject<T extends PermissionHolder> implements LPSub
     }
 
     @Override
-    public Subject sponge() {
-        return ProxyFactory.toSponge(this);
+    public synchronized Subject sponge() {
+        if (this.spongeSubject == null) {
+            this.spongeSubject = ProxyFactory.toSponge(this);
+        }
+        return this.spongeSubject;
     }
 
     @Override
