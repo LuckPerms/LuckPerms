@@ -77,19 +77,19 @@ public abstract class AbstractConnectionListener implements ConnectionListener {
         User user = this.plugin.getStorage().loadUser(u, username).join();
         if (user == null) {
             throw new NullPointerException("User is null");
-        } else {
-            // Setup defaults for the user
-            boolean save = false;
-            for (AssignmentRule rule : this.plugin.getConfiguration().get(ConfigKeys.DEFAULT_ASSIGNMENTS)) {
-                if (rule.apply(user)) {
-                    save = true;
-                }
-            }
+        }
 
-            // If they were given a default, persist the new assignments back to the storage.
-            if (save) {
-                this.plugin.getStorage().saveUser(user).join();
+        // Setup defaults for the user
+        boolean save = false;
+        for (AssignmentRule rule : this.plugin.getConfiguration().get(ConfigKeys.DEFAULT_ASSIGNMENTS)) {
+            if (rule.apply(user)) {
+                save = true;
             }
+        }
+
+        // If they were given a default, persist the new assignments back to the storage.
+        if (save) {
+            this.plugin.getStorage().saveUser(user).join();
         }
 
         final long time = System.currentTimeMillis() - startTime;

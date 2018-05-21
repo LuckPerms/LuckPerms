@@ -80,6 +80,11 @@ public class AbstractStorage implements Storage {
         return this.dao;
     }
 
+    @Override
+    public ApiStorage getApiDelegate() {
+        return this.apiDelegate;
+    }
+
     private <T> CompletableFuture<T> makeFuture(Callable<T> supplier) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -100,11 +105,6 @@ public class AbstractStorage implements Storage {
                 throw new CompletionException(e);
             }
         }, this.dao.getPlugin().getBootstrap().getScheduler().async());
-    }
-
-    @Override
-    public ApiStorage getApiDelegate() {
-        return this.apiDelegate;
     }
 
     private interface ThrowingRunnable {
