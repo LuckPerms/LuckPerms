@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.listener;
 
 import me.lucko.luckperms.api.PlayerSaveResult;
+import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.assignments.AssignmentRule;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
@@ -56,25 +57,44 @@ public abstract class AbstractConnectionListener implements ConnectionListener {
         this.uniqueConnections.add(uuid);
     }
 
-    public User loadUser(UUID u, String username) {
+    public User loadUser(UUID uuid, String username) {
         final long startTime = System.currentTimeMillis();
 
         // register with the housekeeper to avoid accidental unloads
-        this.plugin.getUserManager().getHouseKeeper().registerUsage(u);
+        this.plugin.getUserManager().getHouseKeeper().registerUsage(uuid);
 
         // save uuid data.
-        PlayerSaveResult saveResult = this.plugin.getStorage().savePlayerData(u, username).join();
+        PlayerSaveResult saveResult = this.plugin.getStorage().savePlayerData(uuid, username).join();
+
+        // fire UserFirstLogin event
         if (saveResult.includes(PlayerSaveResultImpl.Status.CLEAN_INSERT)) {
-            this.plugin.getEventFactory().handleUserFirstLogin(u, username);
+            this.plugin.getEventFactory().handleUserFirstLogin(uuid, username);
         }
 
-        if (saveResult.includes(PlayerSaveResultImpl.Status.OTHER_UUIDS_PRESENT_FOR_USERNAME)) {
-            this.plugin.getLogger().warn("LuckPerms already has data for player '" + username + "' - but this data is stored under a different uuid.");
-            this.plugin.getLogger().warn("'" + username + "' has previously used the unique ids " + saveResult.getOtherUuids() + " but is now connecting with '" + u + "'");
-            this.plugin.getLogger().warn("This is usually because the server is not authenticating correctly. If you're using BungeeCord, please ensure that IP-Forwarding is setup correctly!");
+        // most likely because ip forwarding is not setup correctly
+        // print a warning to the console
+        if (saveResult.includes(PlayerSaveResult.Status.OTHER_UUIDS_PRESENT_FOR_USERNAME)) {
+            Set<UUID> otherUuids = saveResult.getOtherUuids();
+
+            this.plugin.getLogger().warn("LuckPerms already has data for player '" + username + "' - but this data is stored under a different UUID.");
+            this.plugin.getLogger().warn("'" + username + "' has previously used the unique ids " + otherUuids + " but is now connecting with '" + uuid + "'");
+
+            if (uuid.version() == 4) {
+                if (this.plugin.getBootstrap().getType() == PlatformType.BUNGEE) {
+                    this.plugin.getLogger().warn("The UUID the player is connecting with now is Mojang-assigned (type 4). This implies that BungeeCord's IP-Forwarding has not been setup correctly on one (or more) of the backend servers.");
+                } else {
+                    this.plugin.getLogger().warn("The UUID the player is connecting with now is Mojang-assigned (type 4). This implies that one of the other servers in your network is not authenticating correctly.");
+                    this.plugin.getLogger().warn("If you're using BungeeCord, please ensure that IP-Forwarding is setup correctly on all of your backend servers!");
+                }
+            } else {
+                this.plugin.getLogger().warn("The UUID the player is connecting with now is NOT Mojang-assigned (type " + uuid.version() + "). This implies that THIS server is not authenticating correctly, but one (or more) of the other servers/proxies in the network are.");
+                this.plugin.getLogger().warn("If you're using BungeeCord, please ensure that IP-Forwarding is setup correctly on all of your backend servers!");
+            }
+
+            this.plugin.getLogger().warn("See here for more info: https://github.com/lucko/LuckPerms/wiki/Network-Installation#pre-setup");
         }
 
-        User user = this.plugin.getStorage().loadUser(u, username).join();
+        User user = this.plugin.getStorage().loadUser(uuid, username).join();
         if (user == null) {
             throw new NullPointerException("User is null");
         }
