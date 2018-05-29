@@ -34,8 +34,10 @@ import me.lucko.luckperms.api.nodetype.types.DisplayNameType;
 import me.lucko.luckperms.api.nodetype.types.InheritanceType;
 import me.lucko.luckperms.api.nodetype.types.MetaType;
 import me.lucko.luckperms.api.nodetype.types.PrefixType;
+import me.lucko.luckperms.api.nodetype.types.RegexType;
 import me.lucko.luckperms.api.nodetype.types.SuffixType;
 import me.lucko.luckperms.api.nodetype.types.WeightType;
+import me.lucko.luckperms.common.buffers.Cache;
 import me.lucko.luckperms.common.node.factory.LegacyNodeFactory;
 import me.lucko.luckperms.common.utils.PatternCache;
 
@@ -43,8 +45,11 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public final class NodeTypes {
 
@@ -60,10 +65,13 @@ public final class NodeTypes {
     public static final String META_NODE_MARKER = META_KEY + ".";
     public static final String WEIGHT_NODE_MARKER = WEIGHT_KEY + ".";
     public static final String DISPLAY_NAME_NODE_MARKER = DISPLAY_NAME_KEY + ".";
+    public static final String REGEX_MARKER_1 = "r=";
+    public static final String REGEX_MARKER_2 = "R=";
 
     // used to split prefix/suffix/meta nodes
     private static final Splitter META_SPLITTER = Splitter.on(PatternCache.compileDelimiterPattern(".", "\\")).limit(2);
 
+    @Nonnull
     public static Map<NodeTypeKey<?>, NodeType> parseTypes(String s) {
         Map<NodeTypeKey<?>, NodeType> results = new IdentityHashMap<>();
 
@@ -97,6 +105,11 @@ public final class NodeTypes {
             results.put(DisplayNameType.KEY, type);
         }
 
+        type = parseRegexType(s);
+        if (type != null) {
+            results.put(RegexType.KEY, type);
+        }
+
         if (results.isEmpty()) {
             return ImmutableMap.of();
         }
@@ -104,7 +117,8 @@ public final class NodeTypes {
         return results;
     }
 
-    private static InheritanceType parseInheritanceType(String s) {
+    @Nullable
+    public static InheritanceType parseInheritanceType(String s) {
         s = s.toLowerCase();
         if (!s.startsWith(GROUP_NODE_MARKER)) {
             return null;
@@ -114,7 +128,8 @@ public final class NodeTypes {
         return new Inheritance(groupName);
     }
 
-    private static MetaType parseMetaType(String s) {
+    @Nullable
+    public static MetaType parseMetaType(String s) {
         if (!s.toLowerCase().startsWith(META_NODE_MARKER)) {
             return null;
         }
@@ -133,7 +148,8 @@ public final class NodeTypes {
         );
     }
 
-    private static PrefixType parsePrefixType(String s) {
+    @Nullable
+    public static PrefixType parsePrefixType(String s) {
         if (!s.toLowerCase().startsWith(PREFIX_NODE_MARKER)) {
             return null;
         }
@@ -155,7 +171,8 @@ public final class NodeTypes {
         }
     }
 
-    private static SuffixType parseSuffixType(String s) {
+    @Nullable
+    public static SuffixType parseSuffixType(String s) {
         if (!s.toLowerCase().startsWith(SUFFIX_NODE_MARKER)) {
             return null;
         }
@@ -177,7 +194,8 @@ public final class NodeTypes {
         }
     }
 
-    private static WeightType parseWeightType(String s) {
+    @Nullable
+    public static WeightType parseWeightType(String s) {
         String lower = s.toLowerCase();
         if (!lower.startsWith(WEIGHT_NODE_MARKER)) {
             return null;
@@ -190,12 +208,22 @@ public final class NodeTypes {
         }
     }
 
-    private static DisplayNameType parseDisplayNameType(String s) {
+    @Nullable
+    public static DisplayNameType parseDisplayNameType(String s) {
         if (!s.toLowerCase().startsWith(DISPLAY_NAME_NODE_MARKER)) {
             return null;
         }
 
         return new DisplayName(s.substring(DISPLAY_NAME_NODE_MARKER.length()));
+    }
+
+    @Nullable
+    public static RegexType parseRegexType(String s) {
+        if (!s.startsWith(REGEX_MARKER_1) && !s.startsWith(REGEX_MARKER_2)) {
+            return null;
+        }
+
+        return new Regex(s.substring(2));
     }
 
     private static final class Inheritance implements InheritanceType {
@@ -453,6 +481,50 @@ public final class NodeTypes {
         @Override
         public String toString() {
             return "DisplayName{displayName='" + this.displayName + '\'' + '}';
+        }
+    }
+
+    private static final class Regex extends Cache<PatternCache.CachedPattern> implements RegexType {
+        private final String patternString;
+
+        private Regex(String patternString) {
+            this.patternString = patternString;
+        }
+
+        @Nonnull
+        @Override
+        protected PatternCache.CachedPattern supply() {
+            return PatternCache.lookup(this.patternString);
+        }
+
+        @Nonnull
+        @Override
+        public String getPatternString() {
+            return this.patternString;
+        }
+
+        @Nonnull
+        @Override
+        public Optional<Pattern> getPattern() {
+            return Optional.ofNullable(get().getPattern());
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Regex that = (Regex) o;
+            return Objects.equals(this.patternString, that.patternString);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.patternString);
+        }
+
+        @Override
+        public String toString() {
+            return "Regex{pattern=" + this.patternString + '}';
         }
     }
 

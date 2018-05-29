@@ -32,6 +32,8 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import javax.annotation.Nullable;
+
 public final class PatternCache {
 
     private static final LoadingCache<String, CachedPattern> CACHE = Caffeine.newBuilder()
@@ -43,9 +45,14 @@ public final class PatternCache {
                 }
             });
 
-    public static Pattern compile(String regex) {
+    public static CachedPattern lookup(String regex) {
         CachedPattern pattern = CACHE.get(regex);
         Objects.requireNonNull(pattern, "pattern");
+        return pattern;
+    }
+
+    public static Pattern compile(String regex) throws PatternSyntaxException {
+        CachedPattern pattern = lookup(regex);
         if (pattern.ex != null) {
             throw pattern.ex;
         } else {
@@ -60,12 +67,12 @@ public final class PatternCache {
      * @param escape the string used to escape the delimiter where the pattern shouldn't match
      * @return a pattern
      */
-    public static Pattern compileDelimiterPattern(String delimiter, String escape) {
+    public static Pattern compileDelimiterPattern(String delimiter, String escape) throws PatternSyntaxException {
         String pattern = "(?<!" + Pattern.quote(escape) + ")" + Pattern.quote(delimiter);
         return compile(pattern);
     }
 
-    private static final class CachedPattern {
+    public static final class CachedPattern {
         private final Pattern instance;
         private final PatternSyntaxException ex;
 
@@ -77,6 +84,16 @@ public final class PatternCache {
         CachedPattern(PatternSyntaxException ex) {
             this.instance = null;
             this.ex = ex;
+        }
+
+        @Nullable
+        public Pattern getPattern() {
+            return this.instance;
+        }
+
+        @Nullable
+        public PatternSyntaxException getException() {
+            return this.ex;
         }
     }
 

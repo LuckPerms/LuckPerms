@@ -38,16 +38,6 @@ import java.util.regex.Pattern;
 public final class LegacyNodeFactory {
 
     /**
-     * The characters which are delimited when serializing a permission string
-     */
-    public static final String[] PERMISSION_DELIMITERS = new String[]{"/", "-", "$", "(", ")", "=", ","};
-
-    /**
-     * The characters which are delimited when serializing a server or world string
-     */
-    public static final String[] SERVER_WORLD_DELIMITERS = new String[]{"/", "-"};
-
-    /**
      * The characters which are delimited when serializing a context set
      */
     private static final String[] CONTEXT_DELIMITERS = new String[]{"=", "(", ")", ","};

@@ -35,7 +35,7 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.api.nodetype.NodeType;
 import me.lucko.luckperms.api.nodetype.NodeTypeKey;
-import me.lucko.luckperms.common.node.factory.LegacyNodeFactory;
+import me.lucko.luckperms.api.nodetype.types.RegexType;
 import me.lucko.luckperms.common.node.factory.NodeBuilder;
 import me.lucko.luckperms.common.node.utils.ShorthandParser;
 import me.lucko.luckperms.common.processors.WildcardProcessor;
@@ -115,18 +115,18 @@ public final class ImmutableNode implements Node {
         world = standardizeServerWorld(world);
 
         // define core attributes
-        this.permission = LegacyNodeFactory.unescapeDelimiters(permission, LegacyNodeFactory.PERMISSION_DELIMITERS).intern();
+        this.permission = permission.intern();
         this.value = value;
         this.override = override;
         this.expireAt = expireAt;
-        this.server = internString(LegacyNodeFactory.unescapeDelimiters(server, LegacyNodeFactory.SERVER_WORLD_DELIMITERS));
-        this.world = internString(LegacyNodeFactory.unescapeDelimiters(world, LegacyNodeFactory.SERVER_WORLD_DELIMITERS));
+        this.server = internString(server);
+        this.world = internString(world);
         this.contexts = contexts == null ? ContextSet.empty() : contexts.makeImmutable();
 
         // define cached state
         this.wildcardLevel = this.permission.endsWith(WildcardProcessor.WILDCARD_SUFFIX) ? this.permission.chars().filter(num -> num == NODE_SEPARATOR_CODE).sum() : -1;
         this.resolvedTypes = NodeTypes.parseTypes(this.permission);
-        this.resolvedShorthand = ImmutableList.copyOf(ShorthandParser.parseShorthand(getPermission()));
+        this.resolvedShorthand = this.resolvedTypes.containsKey(RegexType.KEY) ? ImmutableList.of() : ImmutableList.copyOf(ShorthandParser.parseShorthand(getPermission()));
         this.optServer = Optional.ofNullable(this.server);
         this.optWorld = Optional.ofNullable(this.world);
 
