@@ -347,7 +347,8 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
      */
     public static final class HikariSupplier implements AutoCloseable {
 
-        private final String address;
+        private final String host;
+        private final String port;
         private final String database;
         private final String username;
         private final String password;
@@ -355,10 +356,17 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         private HikariDataSource hikari;
 
         public HikariSupplier(String address, String database, String username, String password) {
-            this.address = address;
             this.database = database;
             this.username = username;
             this.password = password;
+
+            String[] split = address.split(":");
+            if (split.length != 2) {
+                throw new IllegalArgumentException("Address argument should be in the format hostname:port");
+            }
+
+            this.host = split[0];
+            this.port = split[1];
         }
 
         public void setup(String poolName) {
@@ -366,8 +374,8 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             this.hikari.setPoolName(poolName);
             this.hikari.setMaximumPoolSize(2);
             this.hikari.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
-            this.hikari.addDataSourceProperty("serverName", this.address.split(":")[0]);
-            this.hikari.addDataSourceProperty("port", this.address.split(":")[1]);
+            this.hikari.addDataSourceProperty("serverName", this.host);
+            this.hikari.addDataSourceProperty("port", this.port);
             this.hikari.addDataSourceProperty("databaseName", this.database);
             this.hikari.addDataSourceProperty("user", this.username);
             this.hikari.addDataSourceProperty("password", this.password);
