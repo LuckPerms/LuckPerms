@@ -174,6 +174,11 @@ public final class SubjectProxy implements Subject, ProxiedSubject {
     }
 
     @Override
+    public ImmutableContextSet getActiveContextSet() {
+        return getContextsCache().getContextSet();
+    }
+
+    @Override
     public boolean equals(Object o) {
         return o == this || o instanceof SubjectProxy && this.ref.equals(((SubjectProxy) o).ref);
     }

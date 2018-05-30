@@ -94,6 +94,11 @@ public class LPPermissionAttachment extends PermissionAttachment {
      */
     private PermissionRemovedExecutor removalCallback = null;
 
+    /**
+     * Delegate attachment
+     */
+    private PermissionAttachment source;
+
     public LPPermissionAttachment(LPPermissible permissible, Plugin owner) {
         super(DummyPlugin.INSTANCE, null);
         this.permissible = permissible;
@@ -102,13 +107,14 @@ public class LPPermissionAttachment extends PermissionAttachment {
         injectFakeMap();
     }
 
-    public LPPermissionAttachment(LPPermissible permissible, PermissionAttachment bukkit) {
+    public LPPermissionAttachment(LPPermissible permissible, PermissionAttachment source) {
         super(DummyPlugin.INSTANCE, null);
         this.permissible = permissible;
         this.owner = null;
 
         // copy
-        this.perms.putAll(bukkit.getPermissions());
+        this.perms.putAll(source.getPermissions());
+        this.source = source;
 
         injectFakeMap();
     }
@@ -148,12 +154,16 @@ public class LPPermissionAttachment extends PermissionAttachment {
         this.removalCallback = removalCallback;
     }
 
+    PermissionAttachment getSource() {
+        return this.source;
+    }
+
     /**
      * Hooks this attachment with the parent {@link User} instance.
      */
     public void hook() {
         this.hooked = true;
-        this.permissible.attachments.add(this);
+        this.permissible.lpAttachments.add(this);
         for (Map.Entry<String, Boolean> entry : this.perms.entrySet()) {
             if (entry.getKey() == null || entry.getKey().isEmpty()) {
                 continue;
@@ -214,7 +224,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
         // unhook from the permissible
         this.hooked = false;
-        this.permissible.attachments.remove(this);
+        this.permissible.lpAttachments.remove(this);
         return true;
     }
 
