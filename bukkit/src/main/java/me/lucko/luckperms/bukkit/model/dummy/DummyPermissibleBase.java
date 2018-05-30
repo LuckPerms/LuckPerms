@@ -53,12 +53,12 @@ public class DummyPermissibleBase extends PermissibleBase {
 
     public static void nullFields(PermissibleBase permissibleBase) {
         try {
-            ATTACHMENTS_FIELD.set(permissibleBase, null);
+            ATTACHMENTS_FIELD.set(permissibleBase, Collections.emptyList());
         } catch (Exception e) {
             // ignore
         }
         try {
-            PERMISSIONS_FIELD.set(permissibleBase, null);
+            PERMISSIONS_FIELD.set(permissibleBase, Collections.emptyMap());
         } catch (Exception e) {
             // ignore
         }

@@ -110,7 +110,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
     public LPPermissionAttachment(LPPermissible permissible, PermissionAttachment source) {
         super(DummyPlugin.INSTANCE, null);
         this.permissible = permissible;
-        this.owner = null;
+        this.owner = source.getPlugin();
 
         // copy
         this.perms.putAll(source.getPermissions());
@@ -389,19 +389,29 @@ public class LPPermissionAttachment extends PermissionAttachment {
         @Override
         public Set<String> keySet() {
             // just proxy
-            return LPPermissionAttachment.this.perms.keySet();
+            return Collections.unmodifiableSet(LPPermissionAttachment.this.perms.keySet());
         }
 
         @Override
         public Collection<Boolean> values() {
             // just proxy
-            return LPPermissionAttachment.this.perms.values();
+            return Collections.unmodifiableCollection(LPPermissionAttachment.this.perms.values());
         }
 
         @Override
         public Set<Entry<String, Boolean>> entrySet() {
             // just proxy
-            return LPPermissionAttachment.this.perms.entrySet();
+            return Collections.unmodifiableSet(LPPermissionAttachment.this.perms.entrySet());
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof Map<?, ?> && LPPermissionAttachment.this.perms.equals(obj);
+        }
+
+        @Override
+        public int hashCode() {
+            return LPPermissionAttachment.this.perms.hashCode();
         }
     }
 }
