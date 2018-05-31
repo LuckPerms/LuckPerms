@@ -54,17 +54,18 @@ public class NodeWithContextComparator implements Comparator<Node> {
             return 0;
         }
 
-        if (o1.isOverride() != o2.isOverride()) {
-            return o1.isOverride() ? 1 : -1;
+        int result = Boolean.compare(o1.isOverride(), o2.isOverride());
+        if (result != 0) {
+            return result;
         }
 
-        int i = ContextSetComparator.normal().compare(
+        result = ContextSetComparator.normal().compare(
                 o1.getFullContexts().makeImmutable(),
                 o2.getFullContexts().makeImmutable()
         );
 
-        if (i != 0) {
-            return i;
+        if (result != 0) {
+            return result;
         }
 
         return NodeComparator.normal().compare(o1, o2);

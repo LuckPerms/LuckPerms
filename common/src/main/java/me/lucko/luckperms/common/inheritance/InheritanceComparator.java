@@ -53,21 +53,22 @@ public class InheritanceComparator implements Comparator<Group> {
 
     @Override
     public int compare(Group o1, Group o2) {
-        int ret = Integer.compare(o1.getWeight().orElse(0), o2.getWeight().orElse(0));
-        if (ret != 0) {
+        int result = Integer.compare(o1.getWeight().orElse(0), o2.getWeight().orElse(0));
+        if (result != 0) {
             // note negated value - we want higher weights first!
-            return -ret;
+            return -result;
         }
 
         // failing differing group weights, check if one of the groups is a primary group
         if (this.origin != null) {
-            boolean o1Primary = o1.getName().equalsIgnoreCase(this.origin.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
-            boolean o2Primary = o2.getName().equalsIgnoreCase(this.origin.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
+            // note negative
+            result = -Boolean.compare(
+                    o1.getName().equalsIgnoreCase(this.origin.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME)),
+                    o2.getName().equalsIgnoreCase(this.origin.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME))
+            );
 
-            // one of them is a primary group, and therefore has priority
-            if (o1Primary != o2Primary) {
-                // we want the primary group to come first
-                return o1Primary ? -1 : 1;
+            if (result != 0) {
+                return result;
             }
         }
 

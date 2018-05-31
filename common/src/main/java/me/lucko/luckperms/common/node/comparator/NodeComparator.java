@@ -48,22 +48,42 @@ public class NodeComparator implements Comparator<Node> {
             return 0;
         }
 
-        if (o1.isTemporary() != o2.isTemporary()) {
-            return o1.isTemporary() ? 1 : -1;
+        int result = Boolean.compare(o1.isOverride(), o2.isOverride());
+        if (result != 0) {
+            return result;
         }
 
-        if (o1.isWildcard() != o2.isWildcard()) {
-            return o1.isWildcard() ? 1 : -1;
+        result = Boolean.compare(o1.isTemporary(), o2.isTemporary());
+        if (result != 0) {
+            return result;
+        }
+
+        result = Boolean.compare(o1.isWildcard(), o2.isWildcard());
+        if (result != 0) {
+            return result;
         }
 
         if (o1.isTemporary()) {
-            return o1.getSecondsTilExpiry() < o2.getSecondsTilExpiry() ? 1 : -1;
+            // note vvv
+            result = -Long.compare(o1.getSecondsTilExpiry(), o2.getSecondsTilExpiry());
+            if (result != 0) {
+                return result;
+            }
         }
 
         if (o1.isWildcard()) {
-            return o1.getWildcardLevel() > o2.getWildcardLevel() ? 1 : -1;
+            result = Integer.compare(o1.getWildcardLevel(), o2.getWildcardLevel());
+            if (result != 0) {
+                return result;
+            }
         }
 
-        return o1.getPermission().compareTo(o2.getPermission()) > 0 ? -1 : 1;
+        // note vvv
+        result = -o1.getPermission().compareTo(o2.getPermission());
+        if (result != 0) {
+            return result;
+        }
+
+        throw new AssertionError("nodes are equal? " + o1 + " - " + o2);
     }
 }

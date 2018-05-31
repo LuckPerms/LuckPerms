@@ -53,22 +53,19 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
             return 0;
         }
 
-        boolean o1ServerSpecific = o1.containsKey(Contexts.SERVER_KEY);
-        boolean o2ServerSpecific = o2.containsKey(Contexts.SERVER_KEY);
-        if (o1ServerSpecific != o2ServerSpecific) {
-            return o1ServerSpecific ? 1 : -1;
+        int result = Boolean.compare(o1.containsKey(Contexts.SERVER_KEY), o2.containsKey(Contexts.SERVER_KEY));
+        if (result != 0) {
+            return result;
         }
 
-        boolean o1WorldSpecific = o1.containsKey(Contexts.WORLD_KEY);
-        boolean o2WorldSpecific = o2.containsKey(Contexts.WORLD_KEY);
-        if (o1WorldSpecific != o2WorldSpecific) {
-            return o1WorldSpecific ? 1 : -1;
+        result = Boolean.compare(o1.containsKey(Contexts.WORLD_KEY), o2.containsKey(Contexts.WORLD_KEY));
+        if (result != 0) {
+            return result;
         }
 
-        int o1Size = o1.size();
-        int o2Size = o2.size();
-        if (o1Size != o2Size) {
-            return o1Size > o2Size ? 1 : -1;
+        result = Integer.compare(o1.size(), o2.size());
+        if (result != 0) {
+            return result;
         }
 
         // we *have* to maintain transitivity in this comparator. this may be expensive, but it's necessary, as this
@@ -76,48 +73,36 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
 
         // in order to have consistent ordering, we have to compare the content of the context sets by ordering the
         // elements and then comparing which set is greater.
-        List<Map.Entry<String, String>> o1Map = new ArrayList<>(o1.toSet());
-        List<Map.Entry<String, String>> o2Map = new ArrayList<>(o2.toSet());
-        o1Map.sort(STRING_ENTRY_COMPARATOR);
-        o2Map.sort(STRING_ENTRY_COMPARATOR);
-
-        int o1MapSize = o1Map.size();
-        int o2MapSize = o2Map.size();
-        if (o1MapSize != o2MapSize) {
-            return o1MapSize > o2MapSize ? 1 : -1;
-        }
+        List<Map.Entry<String, String>> o1Entries = new ArrayList<>(o1.toSet());
+        List<Map.Entry<String, String>> o2Entries = new ArrayList<>(o2.toSet());
+        o1Entries.sort(STRING_ENTRY_COMPARATOR);
+        o2Entries.sort(STRING_ENTRY_COMPARATOR);
 
         // size is definitely the same
-        Iterator<Map.Entry<String, String>> it1 = o1Map.iterator();
-        Iterator<Map.Entry<String, String>> it2 = o2Map.iterator();
+        Iterator<Map.Entry<String, String>> it1 = o1Entries.iterator();
+        Iterator<Map.Entry<String, String>> it2 = o2Entries.iterator();
 
         while (it1.hasNext()) {
             Map.Entry<String, String> ent1 = it1.next();
             Map.Entry<String, String> ent2 = it2.next();
 
-            // compare these values.
-            //noinspection StringEquality - strings are intern'd
-            if (ent1.getKey() == ent2.getKey() && ent1.getValue() == ent2.getValue()) {
-                // identical entries. just move on
-                continue;
+            int ret = STRING_ENTRY_COMPARATOR.compare(ent1, ent2);
+            if (ret != 0) {
+                return ret;
             }
-
-            // these entries are at the same position in the ordered sets.
-            // if ent1 is "greater" than ent2, then at this first position, o1 has a "greater" entry, and can therefore be considered
-            // a greater set, and vice versa
-            return STRING_ENTRY_COMPARATOR.compare(ent1, ent2);
         }
 
-        // shouldn't ever reach this point.
-        return 0;
+        throw new AssertionError("sets are equal? " + o1 + " - " + o2);
     }
 
-    private static final Comparator<String> FAST_STRING_COMPARATOR = (o1, o2) -> {
-        //noinspection StringEquality
-        return o1 == o2 ? 0 : o1.compareTo(o2);
-    };
+    @SuppressWarnings("StringEquality")
+    private static final Comparator<String> FAST_STRING_COMPARATOR = (o1, o2) -> o1 == o2 ? 0 : o1.compareTo(o2);
 
     private static final Comparator<Map.Entry<String, String>> STRING_ENTRY_COMPARATOR = (o1, o2) -> {
+        if (o1 == o2) {
+            return 0;
+        }
+
         int ret = FAST_STRING_COMPARATOR.compare(o1.getKey(), o2.getKey());
         if (ret != 0) {
             return ret;
