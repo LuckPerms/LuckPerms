@@ -32,8 +32,12 @@ import cn.nukkit.permission.PermissionAttachmentInfo;
 import cn.nukkit.plugin.Plugin;
 
 import java.lang.reflect.Field;
+import java.util.AbstractList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.RandomAccess;
 
 public class DummyPermissibleBase extends PermissibleBase {
     private static final Field ATTACHMENTS_FIELD;
@@ -53,7 +57,7 @@ public class DummyPermissibleBase extends PermissibleBase {
 
     public static void nullFields(PermissibleBase permissibleBase) {
         try {
-            ATTACHMENTS_FIELD.set(permissibleBase, Collections.emptyList());
+            ATTACHMENTS_FIELD.set(permissibleBase, EMPTY_LIST);
         } catch (Exception e) {
             // ignore
         }
@@ -97,5 +101,32 @@ public class DummyPermissibleBase extends PermissibleBase {
     @Override public void recalculatePermissions() {}
     @Override public void clearPermissions() {}
     @Override public Map<String, PermissionAttachmentInfo> getEffectivePermissions() { return Collections.emptyMap(); }
+
+    // empty list impl that doesn't throw an exception on calls to #add
+    private static final List EMPTY_LIST = new EmptyList<>();
+    private static class EmptyList<E> extends AbstractList<E> implements RandomAccess {
+
+        @Override
+        public boolean add(E e) {
+            // do nothing, but don't throw an exception
+            return true;
+        }
+
+        @Override
+        public boolean addAll(Collection<? extends E> c) {
+            // do nothing
+            return true;
+        }
+
+        @Override
+        public E get(int index) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        @Override
+        public int size() {
+            return 0;
+        }
+    }
 
 }
