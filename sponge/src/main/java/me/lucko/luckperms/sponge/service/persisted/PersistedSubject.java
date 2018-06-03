@@ -70,6 +70,11 @@ public class PersistedSubject extends CalculatedSubject implements LPSubject {
      */
     private final SaveBuffer saveBuffer;
 
+    /**
+     * If a save is pending for this subject
+     */
+    private boolean pendingSave = false;
+
     public PersistedSubject(LuckPermsService service, PersistedCollection parentCollection, String identifier) {
         super(service.getPlugin());
         this.service = service;
@@ -113,6 +118,10 @@ public class PersistedSubject extends CalculatedSubject implements LPSubject {
      * @param container the container to load from
      */
     public void loadData(SubjectDataContainer container) {
+        if (this.pendingSave) {
+            return;
+        }
+
         this.subjectData.setSave(false);
         container.applyToData(this.subjectData);
         this.subjectData.setSave(true);
@@ -122,7 +131,18 @@ public class PersistedSubject extends CalculatedSubject implements LPSubject {
      * Requests that this subjects data is saved to disk
      */
     public void save() {
+        this.pendingSave = true;
         this.saveBuffer.request();
+    }
+
+    void doSave() {
+        try {
+            this.service.getStorage().saveToFile(PersistedSubject.this);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            this.pendingSave = false;
+        }
     }
 
     @Override
@@ -170,11 +190,7 @@ public class PersistedSubject extends CalculatedSubject implements LPSubject {
 
         @Override
         protected Void perform() {
-            try {
-                PersistedSubject.this.service.getStorage().saveToFile(PersistedSubject.this);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            doSave();
             return null;
         }
     }

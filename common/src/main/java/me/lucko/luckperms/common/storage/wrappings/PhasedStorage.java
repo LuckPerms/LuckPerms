@@ -54,11 +54,6 @@ public interface PhasedStorage extends Storage {
                 new Class[]{PhasedStorage.class},
                 (proxy, method, args) -> {
 
-                    // provide implementation of #noBuffer
-                    if (method.getName().equals("noBuffer")) {
-                        return delegate;
-                    }
-
                     // direct delegation
                     switch (method.getName()) {
                         case "getDao":

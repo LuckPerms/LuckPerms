@@ -34,7 +34,7 @@ public class UpdateTaskBuffer extends BufferedRequest<Void> {
     private final LuckPermsPlugin plugin;
 
     public UpdateTaskBuffer(LuckPermsPlugin plugin) {
-        super(250L, TimeUnit.MILLISECONDS, plugin.getBootstrap().getScheduler());
+        super(500L, TimeUnit.MILLISECONDS, plugin.getBootstrap().getScheduler());
         this.plugin = plugin;
     }
 
