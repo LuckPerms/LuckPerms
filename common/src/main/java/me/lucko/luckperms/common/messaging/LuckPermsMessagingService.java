@@ -47,6 +47,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 
@@ -207,7 +208,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
 
     private final class PushUpdateBuffer extends BufferedRequest<Void> {
         public PushUpdateBuffer(LuckPermsPlugin plugin) {
-            super(2000L, 200L, plugin.getBootstrap().getScheduler().async());
+            super(2, TimeUnit.SECONDS, plugin.getBootstrap().getScheduler());
         }
 
         @Override

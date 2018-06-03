@@ -41,6 +41,7 @@ import org.spongepowered.api.service.permission.Subject;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A simple persistable Subject implementation
@@ -164,7 +165,7 @@ public class PersistedSubject extends CalculatedSubject implements LPSubject {
 
     private final class SaveBuffer extends BufferedRequest<Void> {
         public SaveBuffer(LuckPermsPlugin plugin) {
-            super(1000L, 500L, plugin.getBootstrap().getScheduler().async());
+            super(1, TimeUnit.SECONDS, plugin.getBootstrap().getScheduler());
         }
 
         @Override

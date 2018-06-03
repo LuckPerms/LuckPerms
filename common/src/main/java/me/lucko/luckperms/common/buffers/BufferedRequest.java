@@ -25,125 +25,148 @@
 
 package me.lucko.luckperms.common.buffers;
 
-import java.lang.ref.WeakReference;
+import me.lucko.luckperms.common.plugin.SchedulerTask;
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
  * Thread-safe request buffer.
  *
- * Waits for the buffer time to pass before performing the operation. If the task is called again in that time, the
- * buffer time is reset.
+ * Waits for the buffer time to pass before performing the operation.
+ * If the request is called again in that time, the buffer time is reset.
  *
  * @param <T> the return type
  */
 public abstract class BufferedRequest<T> {
-    private final long bufferTimeMillis;
-    private final long sleepInterval;
-    private final Executor executor;
 
-    private WeakReference<Processor<T>> processor = null;
-    private final ReentrantLock lock = new ReentrantLock();
+    /** The buffer time */
+    private final long bufferTime;
+    private final TimeUnit unit;
+    private final SchedulerAdapter schedulerAdapter;
 
-    public BufferedRequest(long bufferTimeMillis, long sleepInterval, Executor executor) {
-        this.bufferTimeMillis = bufferTimeMillis;
-        this.sleepInterval = sleepInterval;
-        this.executor = executor;
+    /** The active processor task, if present */
+    private Processor<T> processor = null;
+
+    /** Mutex to guard processor */
+    private final Object[] mutex = new Object[0];
+
+    /**
+     * Creates a new buffer with the given timeout millis
+     *
+     * @param bufferTime the timeout
+     * @param unit the unit of the timeout
+     */
+    public BufferedRequest(long bufferTime, TimeUnit unit, SchedulerAdapter schedulerAdapter) {
+        this.bufferTime = bufferTime;
+        this.unit = unit;
+        this.schedulerAdapter = schedulerAdapter;
     }
 
+    /**
+     * Makes a request to the buffer
+     *
+     * @return the future
+     */
     public CompletableFuture<T> request() {
-        this.lock.lock();
-        try {
+        synchronized (this.mutex) {
             if (this.processor != null) {
-                Processor<T> p = this.processor.get();
-                if (p != null && p.isUsable()) {
-                    return p.getAndExtend();
+                try {
+                    return this.processor.extendAndGetFuture();
+                } catch (IllegalStateException e) {
+                    // ignore
                 }
             }
 
-            Processor<T> p = new Processor<>(this.bufferTimeMillis, this.sleepInterval, this::perform);
-            this.executor.execute(p);
-            this.processor = new WeakReference<>(p);
-            return p.get();
-
-        } finally {
-            this.lock.unlock();
+            Processor<T> p = this.processor = new Processor<>(this::perform, this.bufferTime, this.unit, this.schedulerAdapter);
+            return p.getFuture();
         }
     }
 
+    /**
+     * Requests the value, bypassing the buffer
+     *
+     * @return the value
+     */
     public T requestDirectly() {
         return perform();
     }
 
+    /**
+     * Performs the buffered task
+     *
+     * @return the result
+     */
     protected abstract T perform();
 
     private static class Processor<R> implements Runnable {
-        private final long delayMillis;
-        private final long sleepMillis;
-        private final Supplier<R> supplier;
-        private final ReentrantLock lock = new ReentrantLock();
-        private final CompletableFuture<R> future = new CompletableFuture<>();
-        private boolean usable = true;
-        private long executionTime;
+        private Supplier<R> supplier;
 
-        public Processor(long delayMillis, long sleepMillis, Supplier<R> supplier) {
-            this.delayMillis = delayMillis;
-            this.sleepMillis = sleepMillis;
+        private final long delay;
+        private final TimeUnit unit;
+
+        private SchedulerAdapter schedulerAdapter;
+        private SchedulerTask task;
+
+        private final Object[] mutex = new Object[0];
+        private CompletableFuture<R> future = new CompletableFuture<>();
+        private boolean usable = true;
+
+        Processor(Supplier<R> supplier, long delay, TimeUnit unit, SchedulerAdapter schedulerAdapter) {
             this.supplier = supplier;
+            this.delay = delay;
+            this.unit = unit;
+            this.schedulerAdapter = schedulerAdapter;
+
+            rescheduleTask();
+        }
+
+        private void rescheduleTask() {
+            synchronized (this.mutex) {
+                if (!this.usable) {
+                    throw new IllegalStateException("Processor not usable");
+                }
+                if (this.task != null) {
+                    this.task.cancel();
+                }
+                this.task = this.schedulerAdapter.asyncLater(this, this.delay, this.unit);
+            }
         }
 
         @Override
         public void run() {
-            this.lock.lock();
+            synchronized (this.mutex) {
+                if (!this.usable) {
+                    throw new IllegalStateException("Task has already ran");
+                }
+                this.usable = false;
+            }
+
+            // compute result
             try {
-                this.executionTime = System.currentTimeMillis() + this.delayMillis;
-            } finally {
-                this.lock.unlock();
+                R result = this.supplier.get();
+                this.future.complete(result);
+            } catch (Exception e) {
+                this.future.completeExceptionally(e);
             }
 
-            while (true) {
-                this.lock.lock();
-                try {
-                    if (System.currentTimeMillis() > this.executionTime) {
-                        this.usable = false;
-                        break;
-                    }
-
-                } finally {
-                    this.lock.unlock();
-                }
-
-                try {
-                    Thread.sleep(this.sleepMillis);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            R result = this.supplier.get();
-            this.future.complete(result);
+            // allow supplier and future to be GCed
+            this.task = null;
+            this.supplier = null;
+            this.future = null;
         }
 
-        public CompletableFuture<R> get() {
+        CompletableFuture<R> getFuture() {
             return this.future;
         }
 
-        public CompletableFuture<R> getAndExtend() {
-            this.lock.lock();
-            try {
-                this.executionTime = System.currentTimeMillis() + this.delayMillis;
-            } finally {
-                this.lock.unlock();
-            }
-
+        CompletableFuture<R> extendAndGetFuture() {
+            rescheduleTask();
             return this.future;
         }
 
-        public boolean isUsable() {
-            return this.usable;
-        }
     }
 
 }

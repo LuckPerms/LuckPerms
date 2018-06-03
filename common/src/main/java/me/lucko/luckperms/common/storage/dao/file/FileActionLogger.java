@@ -47,6 +47,7 @@ import java.nio.file.Path;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class FileActionLogger {
@@ -166,7 +167,7 @@ public class FileActionLogger {
 
     private final class SaveBuffer extends BufferedRequest<Void> {
         public SaveBuffer(LuckPermsPlugin plugin) {
-            super(2000L, 500L, plugin.getBootstrap().getScheduler().async());
+            super(2, TimeUnit.SECONDS, plugin.getBootstrap().getScheduler());
         }
 
         @Override

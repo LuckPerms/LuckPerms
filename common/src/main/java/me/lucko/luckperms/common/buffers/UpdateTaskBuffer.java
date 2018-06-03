@@ -28,11 +28,13 @@ package me.lucko.luckperms.common.buffers;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 
+import java.util.concurrent.TimeUnit;
+
 public class UpdateTaskBuffer extends BufferedRequest<Void> {
     private final LuckPermsPlugin plugin;
 
     public UpdateTaskBuffer(LuckPermsPlugin plugin) {
-        super(250L, 50L, plugin.getBootstrap().getScheduler().async());
+        super(250L, TimeUnit.MILLISECONDS, plugin.getBootstrap().getScheduler());
         this.plugin = plugin;
     }
 
