@@ -36,7 +36,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public abstract class HikariConnectionFactory extends AbstractConnectionFactory {
 
@@ -75,7 +74,7 @@ public abstract class HikariConnectionFactory extends AbstractConnectionFactory 
     @Override
     public void init() {
         HikariConfig config = new HikariConfig();
-        config.setPoolName("luckperms");
+        config.setPoolName("luckperms-hikari");
 
         appendConfigurationInfo(config);
         appendProperties(config, this.configuration);
@@ -84,9 +83,6 @@ public abstract class HikariConnectionFactory extends AbstractConnectionFactory 
         config.setMinimumIdle(this.configuration.getMinIdleConnections());
         config.setMaxLifetime(this.configuration.getMaxLifetime());
         config.setConnectionTimeout(this.configuration.getConnectionTimeout());
-
-        // If a connection is not returned within 10 seconds, it's probably safe to assume it's been leaked.
-        config.setLeakDetectionThreshold(TimeUnit.SECONDS.toMillis(10)); // 10000
 
         // don't perform any initial connection validation - we subsequently call #getConnection
         // to setup the schema anyways
