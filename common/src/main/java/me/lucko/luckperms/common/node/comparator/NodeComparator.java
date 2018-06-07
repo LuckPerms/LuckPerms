@@ -84,6 +84,12 @@ public class NodeComparator implements Comparator<Node> {
             return result;
         }
 
+        // note vvv - we want false to have priority
+        result = -Boolean.compare(o1.getValue(), o2.getValue());
+        if (result != 0) {
+            return result;
+        }
+
         throw new AssertionError("nodes are equal? " + o1 + " - " + o2);
     }
 }
