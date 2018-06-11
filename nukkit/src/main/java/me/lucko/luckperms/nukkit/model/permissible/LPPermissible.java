@@ -46,8 +46,6 @@ import cn.nukkit.plugin.Plugin;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -116,18 +114,18 @@ public class LPPermissible extends PermissibleBase {
     }
 
     /**
-     * Injects a fake 'attachments' list into the superclass, for dumb plugins
+     * Injects a fake 'attachments' set into the superclass, for dumb plugins
      * which for some reason decided to add attachments via reflection.
      *
      * The fake list proxies (some) calls back to the proper methods on this permissible.
      */
     private void injectFakeAttachmentsList() {
-        FakeAttachmentList fakeList = new FakeAttachmentList();
+        FakeAttachmentSet fakeSet = new FakeAttachmentSet();
 
         try {
             // the field we need to modify is in the superclass - it has private
             // and final modifiers so we have to use reflection to modify it.
-            ATTACHMENTS_FIELD.set(this, fakeList);
+            ATTACHMENTS_FIELD.set(this, fakeSet);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -314,7 +312,7 @@ public class LPPermissible extends PermissibleBase {
     }
 
     /**
-     * A fake list to be injected into the superclass. This implementation simply
+     * A fake set to be injected into the superclass. This implementation simply
      * proxies calls back to this permissible instance.
      *
      * Some (clever/dumb??) plugins attempt to add/remove/query attachments using reflection.
@@ -322,7 +320,7 @@ public class LPPermissible extends PermissibleBase {
      * An instance of this map is injected into the super instance so these plugins continue
      * to work with LuckPerms.
      */
-    private final class FakeAttachmentList implements List<PermissionAttachment> {
+    private final class FakeAttachmentSet implements Set<PermissionAttachment> {
 
         @Override
         public boolean add(PermissionAttachment attachment) {
@@ -367,11 +365,6 @@ public class LPPermissible extends PermissibleBase {
             return ImmutableList.<PermissionAttachment>copyOf(LPPermissible.this.lpAttachments).iterator();
         }
 
-        @Override
-        public ListIterator<PermissionAttachment> listIterator() {
-            return ImmutableList.<PermissionAttachment>copyOf(LPPermissible.this.lpAttachments).listIterator();
-        }
-
         @Nonnull
         @Override
         public Object[] toArray() {
@@ -387,16 +380,7 @@ public class LPPermissible extends PermissibleBase {
         @Override public int size() { throw new UnsupportedOperationException(); }
         @Override public boolean isEmpty() { throw new UnsupportedOperationException(); }
         @Override public boolean containsAll(@Nonnull Collection<?> c) { throw new UnsupportedOperationException(); }
-        @Override public boolean addAll(int index, @Nonnull Collection<? extends PermissionAttachment> c) { throw new UnsupportedOperationException(); }
         @Override public boolean removeAll(@Nonnull Collection<?> c) { throw new UnsupportedOperationException(); }
         @Override public boolean retainAll(@Nonnull Collection<?> c) { throw new UnsupportedOperationException(); }
-        @Override public PermissionAttachment get(int index) { throw new UnsupportedOperationException(); }
-        @Override public PermissionAttachment set(int index, PermissionAttachment element) { throw new UnsupportedOperationException(); }
-        @Override public void add(int index, PermissionAttachment element) { throw new UnsupportedOperationException(); }
-        @Override public PermissionAttachment remove(int index) { throw new UnsupportedOperationException(); }
-        @Override public int indexOf(Object o) { throw new UnsupportedOperationException(); }
-        @Override public int lastIndexOf(Object o) { throw new UnsupportedOperationException(); }
-        @Nonnull @Override public ListIterator<PermissionAttachment> listIterator(int index) { throw new UnsupportedOperationException(); }
-        @Nonnull @Override public List<PermissionAttachment> subList(int fromIndex, int toIndex) { throw new UnsupportedOperationException(); }
     }
 }
