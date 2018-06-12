@@ -37,18 +37,16 @@ import me.lucko.luckperms.common.config.AbstractConfiguration;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
-import me.lucko.luckperms.common.contexts.LuckPermsCalculator;
+import me.lucko.luckperms.common.contexts.LPStaticContextsCalculator;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.event.EventFactory;
 import me.lucko.luckperms.common.inheritance.InheritanceHandler;
 import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.SimpleLocaleManager;
-import me.lucko.luckperms.common.logging.Logger;
-import me.lucko.luckperms.common.logging.SenderLogger;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
+import me.lucko.luckperms.common.plugin.util.PluginLogger;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
@@ -66,7 +64,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
     // init during load
-    private Logger logger;
+    private PluginLogger logger;
     private DependencyManager dependencyManager;
 
     // init during enable
@@ -90,7 +88,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     public final void load() {
         // load the sender factory instance and create a new logger for the plugin
         setupSenderFactory();
-        this.logger = new SenderLogger(this, getConsoleSender());
+        this.logger = new PluginLogger(this, getConsoleSender());
 
         // load dependencies
         this.dependencyManager = new DependencyManager(this);
@@ -111,7 +109,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         this.configuration = new AbstractConfiguration(this, provideConfigurationAdapter());
 
         // load locale
-        this.localeManager = new SimpleLocaleManager();
+        this.localeManager = new LocaleManager();
         this.localeManager.tryLoad(this, getBootstrap().getConfigDirectory().resolve("lang.yml"));
 
         // now the configuration is loaded, we can create a storage factory and load initial dependencies
@@ -154,7 +152,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // setup contextmanager & register common calculators
         setupContextManager();
-        getContextManager().registerStaticCalculator(new LuckPermsCalculator(getConfiguration()));
+        getContextManager().registerStaticCalculator(new LPStaticContextsCalculator(getConfiguration()));
 
         // setup platform hooks
         setupPlatformHooks();
@@ -247,7 +245,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public Logger getLogger() {
+    public PluginLogger getLogger() {
         return this.logger;
     }
 

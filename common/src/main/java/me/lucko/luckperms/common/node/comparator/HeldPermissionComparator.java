@@ -41,11 +41,10 @@ public class HeldPermissionComparator<T extends Comparable<T>> implements Compar
 
     @Override
     public int compare(HeldPermission<T> o1, HeldPermission<T> o2) {
-        int i = o1.getHolder().compareTo(o2.getHolder());
+        int i = NodeWithContextComparator.normal().compare(o1.asNode(), o2.asNode());
         if (i != 0) {
             return i;
         }
-
-        return NodeWithContextComparator.normal().compare(o1.asNode(), o2.asNode());
+        return o1.getHolder().compareTo(o2.getHolder());
     }
 }

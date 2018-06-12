@@ -37,15 +37,15 @@ import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.event.EventFactory;
 import me.lucko.luckperms.common.inheritance.InheritanceHandler;
-import me.lucko.luckperms.common.listener.ConnectionListener;
 import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.logging.Logger;
 import me.lucko.luckperms.common.managers.group.GroupManager;
 import me.lucko.luckperms.common.managers.track.TrackManager;
 import me.lucko.luckperms.common.managers.user.UserManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
+import me.lucko.luckperms.common.plugin.util.PluginLogger;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.dao.file.FileWatcher;
@@ -126,7 +126,7 @@ public interface LuckPermsPlugin {
      *
      * @return the plugin's logger
      */
-    Logger getLogger();
+    PluginLogger getLogger();
 
     /**
      * Gets the event factory
@@ -154,7 +154,7 @@ public interface LuckPermsPlugin {
      *
      * @return the connection listener
      */
-    ConnectionListener getConnectionListener();
+    AbstractConnectionListener getConnectionListener();
 
     /**
      * Gets the instance providing locale translations for the plugin

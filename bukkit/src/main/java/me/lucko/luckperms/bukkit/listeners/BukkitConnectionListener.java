@@ -29,9 +29,9 @@ import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.bukkit.model.permissible.LPPermissible;
 import me.lucko.luckperms.bukkit.model.permissible.PermissibleInjector;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.listener.AbstractConnectionListener;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

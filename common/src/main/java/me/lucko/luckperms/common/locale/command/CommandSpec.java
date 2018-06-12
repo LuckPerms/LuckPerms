@@ -25,13 +25,9 @@
 
 package me.lucko.luckperms.common.locale.command;
 
-import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.common.locale.LocaleManager;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 
 /**
  * An enumeration of the command defintion/usage messages used in the plugin.
@@ -570,6 +566,18 @@ public enum CommandSpec {
         this(description, null, args);
     }
 
+    public String getDescription() {
+        return this.description;
+    }
+
+    public String getUsage() {
+        return this.usage;
+    }
+
+    public List<Argument> getArgs() {
+        return this.args;
+    }
+
     /**
      * Creates a {@link LocalizedCommandSpec} for the spec using the platforms locale manager.
      *
@@ -577,67 +585,7 @@ public enum CommandSpec {
      * @return a localized spec instance
      */
     public LocalizedCommandSpec localize(LocaleManager localeManager) {
-        return new Localized(this, localeManager);
-    }
-
-    private static final class Localized implements LocalizedCommandSpec {
-        private final LocaleManager localeManager;
-        private final CommandSpec spec;
-
-        private Localized(CommandSpec spec, LocaleManager localeManager) {
-            this.localeManager = localeManager;
-            this.spec = spec;
-        }
-
-        @Override
-        public String description() {
-            CommandSpecData translation = this.localeManager.getTranslation(this.spec);
-            if (translation != null && translation.getDescription() != null) {
-                return translation.getDescription();
-            }
-
-            // fallback
-            return this.spec.description;
-        }
-
-        @Override
-        public String usage() {
-            CommandSpecData translation = this.localeManager.getTranslation(this.spec);
-            if (translation != null && translation.getUsage() != null) {
-                return translation.getUsage();
-            }
-
-            // fallback
-            return this.spec.usage;
-        }
-
-        @Override
-        public List<Argument> args() {
-            CommandSpecData translation = this.localeManager.getTranslation(this.spec);
-            if (translation == null || translation.getArgs() == null) {
-                // fallback
-                return this.spec.args;
-            }
-
-            List<Argument> args = new ArrayList<>(this.spec.args);
-            ListIterator<Argument> it = args.listIterator();
-            while (it.hasNext()) {
-                Argument next = it.next();
-                String s = translation.getArgs().get(next.getName());
-
-                // if a translation for the given arg key is present, apply the new description.
-                if (s != null) {
-                    it.set(Argument.create(next.getName(), next.isRequired(), s));
-                }
-            }
-
-            return ImmutableList.copyOf(args);
-        }
-
-        @Override
-        public LocaleManager getLocaleManager() {
-            return this.localeManager;
-        }
+        return new LocalizedCommandSpec(this, localeManager);
     }
 
     /**

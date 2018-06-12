@@ -26,9 +26,9 @@
 package me.lucko.luckperms.nukkit.listeners;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.listener.AbstractConnectionListener;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import me.lucko.luckperms.nukkit.model.permissible.LPPermissible;
 import me.lucko.luckperms.nukkit.model.permissible.PermissibleInjector;

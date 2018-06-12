@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.plugin;
+package me.lucko.luckperms.common.plugin.scheduler;
 
 /**
  * Represents a scheduled task

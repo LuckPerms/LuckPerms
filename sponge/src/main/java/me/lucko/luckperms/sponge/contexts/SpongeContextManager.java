@@ -27,12 +27,12 @@ package me.lucko.luckperms.sponge.contexts;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.contexts.AbstractContextManager;
+import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 
 import org.spongepowered.api.service.permission.Subject;
 
-public class SpongeContextManager extends AbstractContextManager<Subject> {
+public class SpongeContextManager extends ContextManager<Subject> {
     public SpongeContextManager(LPSpongePlugin plugin) {
         super(plugin, Subject.class);
     }

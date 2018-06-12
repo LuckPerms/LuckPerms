@@ -23,45 +23,34 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.logging;
+package me.lucko.luckperms.common.contexts;
 
-import me.lucko.luckperms.common.command.utils.MessageUtils;
+import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.context.StaticContextCalculator;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.locale.message.Message;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 
-import java.util.Objects;
+import javax.annotation.Nonnull;
 
-public class SenderLogger implements Logger {
-    private final LuckPermsPlugin plugin;
-    private final Sender console;
+public class LPStaticContextsCalculator implements StaticContextCalculator {
+    private final LuckPermsConfiguration config;
 
-    public SenderLogger(LuckPermsPlugin plugin, Sender console) {
-        this.plugin = plugin;
-        this.console = console;
+    public LPStaticContextsCalculator(LuckPermsConfiguration config) {
+        this.config = config;
     }
 
+    @Nonnull
     @Override
-    public void info(String s) {
-        msg(Message.LOG_INFO, Objects.requireNonNull(s));
-    }
-
-    @Override
-    public void warn(String s) {
-        msg(Message.LOG_WARN, Objects.requireNonNull(s));
-    }
-
-    @Override
-    public void severe(String s) {
-        msg(Message.LOG_ERROR, Objects.requireNonNull(s));
-    }
-
-    private void msg(Message message, String s) {
-        String msg = message.asString(this.plugin.getLocaleManager(), s);
-        if (this.plugin.getConfiguration() != null && !this.plugin.getConfiguration().get(ConfigKeys.USE_COLORED_LOGGER)) {
-            msg = MessageUtils.stripColor(msg);
+    public MutableContextSet giveApplicableContext(@Nonnull MutableContextSet accumulator) {
+        String server = this.config.get(ConfigKeys.SERVER);
+        if (!server.equals("global")) {
+            accumulator.add(Contexts.SERVER_KEY, server);
         }
-        this.console.sendMessage(msg);
+
+        accumulator.addAll(this.config.getContextsFile().getStaticContexts());
+
+        return accumulator;
     }
+
 }

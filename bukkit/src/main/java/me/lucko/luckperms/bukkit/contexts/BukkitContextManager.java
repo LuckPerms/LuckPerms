@@ -30,13 +30,13 @@ import me.lucko.luckperms.api.LookupSetting;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.contexts.AbstractContextManager;
+import me.lucko.luckperms.common.contexts.ContextManager;
 
 import org.bukkit.entity.Player;
 
 import java.util.EnumSet;
 
-public class BukkitContextManager extends AbstractContextManager<Player> {
+public class BukkitContextManager extends ContextManager<Player> {
     public BukkitContextManager(LPBukkitPlugin plugin) {
         super(plugin, Player.class);
     }

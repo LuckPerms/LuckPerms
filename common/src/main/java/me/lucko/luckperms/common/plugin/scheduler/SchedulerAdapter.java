@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.plugin.scheduler;
 
-import me.lucko.luckperms.common.plugin.SchedulerTask;
-
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 

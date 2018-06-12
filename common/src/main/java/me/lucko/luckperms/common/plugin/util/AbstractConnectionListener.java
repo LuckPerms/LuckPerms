@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.listener;
+package me.lucko.luckperms.common.plugin.util;
 
 import me.lucko.luckperms.api.PlayerSaveResult;
 import me.lucko.luckperms.api.platform.PlatformType;
@@ -40,7 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Abstract listener utility for handling new player connections
  */
-public abstract class AbstractConnectionListener implements ConnectionListener {
+public abstract class AbstractConnectionListener {
     private final LuckPermsPlugin plugin;
     private final Set<UUID> uniqueConnections = ConcurrentHashMap.newKeySet();
 
@@ -48,7 +48,11 @@ public abstract class AbstractConnectionListener implements ConnectionListener {
         this.plugin = plugin;
     }
 
-    @Override
+    /**
+     * Gets the unique players which have connected to the server since it started.
+     *
+     * @return the unique connections
+     */
     public Set<UUID> getUniqueConnections() {
         return this.uniqueConnections;
     }

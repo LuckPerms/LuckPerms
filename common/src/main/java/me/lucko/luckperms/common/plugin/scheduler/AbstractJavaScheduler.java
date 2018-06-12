@@ -27,8 +27,6 @@ package me.lucko.luckperms.common.plugin.scheduler;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import me.lucko.luckperms.common.plugin.SchedulerTask;
-
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;

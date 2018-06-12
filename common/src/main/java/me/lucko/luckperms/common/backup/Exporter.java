@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.backup;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.locale.message.Message;
-import me.lucko.luckperms.common.logging.ProgressLogger;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.Track;
@@ -36,6 +35,7 @@ import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.Storage;
+import me.lucko.luckperms.common.utils.ProgressLogger;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

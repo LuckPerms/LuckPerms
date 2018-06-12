@@ -34,16 +34,16 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 
 /**
- * Extension of {@link AbstractContextManager} that implements an expiring lookup cache
+ * Extension of {@link ContextManager} that implements an expiring lookup cache
  * per player.
  *
  * @param <T> the player type
  */
 public final class ContextsCache<T> extends ExpiringCache<Contexts> {
     private final T subject;
-    private final AbstractContextManager<T> contextManager;
+    private final ContextManager<T> contextManager;
 
-    public ContextsCache(T subject, AbstractContextManager<T> contextManager) {
+    public ContextsCache(T subject, ContextManager<T> contextManager) {
         super(50L, TimeUnit.MILLISECONDS); // expire roughly every tick
         this.subject = subject;
         this.contextManager = contextManager;

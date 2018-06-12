@@ -27,9 +27,9 @@ package me.lucko.luckperms.bungee.listeners;
 
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.listener.AbstractConnectionListener;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;

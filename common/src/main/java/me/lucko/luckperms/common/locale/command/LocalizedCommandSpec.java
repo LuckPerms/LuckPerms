@@ -25,26 +25,69 @@
 
 package me.lucko.luckperms.common.locale.command;
 
+import com.google.common.collect.ImmutableList;
+
 import me.lucko.luckperms.common.locale.LocaleManager;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 /**
  * Represents a localized instance of a {@link CommandSpec}.
  */
-public interface LocalizedCommandSpec {
+public class LocalizedCommandSpec {
+    private final LocaleManager localeManager;
+    private final CommandSpec spec;
 
-    /**
-     * Gets the locale manager used to translate the {@link CommandSpec}.
-     *
-     * @return the locale manager
-     */
-    LocaleManager getLocaleManager();
+    public LocalizedCommandSpec(CommandSpec spec, LocaleManager localeManager) {
+        this.localeManager = localeManager;
+        this.spec = spec;
+    }
 
-    String description();
+    public String description() {
+        CommandSpecData translation = this.localeManager.getTranslation(this.spec);
+        if (translation != null && translation.getDescription() != null) {
+            return translation.getDescription();
+        }
 
-    String usage();
+        // fallback
+        return this.spec.getDescription();
+    }
 
-    List<Argument> args();
+    public String usage() {
+        CommandSpecData translation = this.localeManager.getTranslation(this.spec);
+        if (translation != null && translation.getUsage() != null) {
+            return translation.getUsage();
+        }
 
+        // fallback
+        return this.spec.getUsage();
+    }
+
+    public List<Argument> args() {
+        CommandSpecData translation = this.localeManager.getTranslation(this.spec);
+        if (translation == null || translation.getArgs() == null) {
+            // fallback
+            return this.spec.getArgs();
+        }
+
+        List<Argument> args = new ArrayList<>(this.spec.getArgs());
+        ListIterator<Argument> it = args.listIterator();
+        while (it.hasNext()) {
+            Argument next = it.next();
+            String s = translation.getArgs().get(next.getName());
+
+            // if a translation for the given arg key is present, apply the new description.
+            if (s != null) {
+                it.set(Argument.create(next.getName(), next.isRequired(), s));
+            }
+        }
+
+        return ImmutableList.copyOf(args);
+    }
+
+    public LocaleManager getLocaleManager() {
+        return this.localeManager;
+    }
 }
