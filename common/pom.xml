@@ -103,7 +103,7 @@
         <dependency>
             <groupId>com.squareup.okio</groupId>
             <artifactId>okio</artifactId>
-            <version>1.14.0</version>
+            <version>1.14.1</version>
             <scope>provided</scope>
         </dependency>
 
@@ -170,7 +170,7 @@
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>3.1.0</version>
+            <version>3.2.0</version>
             <scope>provided</scope>
         </dependency>
         <!-- Jedis -->
@@ -184,7 +184,7 @@
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
-            <version>3.6.3</version>
+            <version>3.7.1</version>
             <scope>provided</scope>
         </dependency>
         <!-- SnakeYAML -->

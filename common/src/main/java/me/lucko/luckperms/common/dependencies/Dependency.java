@@ -43,14 +43,14 @@ public enum Dependency {
     ASM(
             "org.ow2.asm",
             "asm",
-            "6.1.1",
-            "3TtUZBXdS63i6+O0fHgoqwYj7iM2YEBo4tgQI/n42DM="
+            "6.2",
+            "kXvaiIvFQxhzJdX7wQNCB+7RUldO943xc0ygruQLf8g="
     ),
     ASM_COMMONS(
             "org.ow2.asm",
             "asm-commons",
-            "6.1.1",
-            "hvVtP58zCQu9/PZjAniac17Kdfol6uidP7E/TrE7VtE="
+            "6.2",
+            "FVRZE9sGyYeqQE8CjjNQHZ8n+M7WEvc3J+NUesTeh4w="
     ),
     JAR_RELOCATOR(
             "me.lucko",
@@ -69,8 +69,8 @@ public enum Dependency {
     OKIO(
             "com{}squareup{}" + RelocationHelper.OKIO_STRING,
             RelocationHelper.OKIO_STRING,
-            "1.14.0",
-            "RjPDMfUGQuvnldwInWpZKK/0MHHJ0X54QKAJ7qL+laM=",
+            "1.14.1",
+            "InCF6E8zEsc1QxiVJF3nwKe29qUK30KayCVqFQoR7ck=",
             Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
     ),
     OKHTTP(
@@ -86,8 +86,8 @@ public enum Dependency {
     MARIADB_DRIVER(
             "org{}mariadb{}jdbc",
             "mariadb-java-client",
-            "2.2.3",
-            "82fbZTV5j9yZChgxl9bo7FtKFwh36an5CEN21mzyrLs=",
+            "2.2.5",
+            "kFfgzoMFrFKirAFh/DgobV7vAu9NhdnhZLHD4/PCddI=",
             Relocation.of("mariadb", "org{}mariadb{}jdbc")
     ),
     MYSQL_DRIVER(
@@ -123,8 +123,8 @@ public enum Dependency {
     HIKARI(
             "com{}zaxxer",
             "HikariCP",
-            "3.1.0",
-            "TBo58lIW2Ukyh3VYKUwOliccAeRx+y9FxdDzsD8UUUw=",
+            "3.2.0",
+            "sAjeaLvYWBH0tujwhg0JZsastPLnX6vUbsIJRWnL7+s=",
             Relocation.of("hikari", "com{}zaxxer{}hikari")
     ),
     SLF4J_SIMPLE(
@@ -142,8 +142,8 @@ public enum Dependency {
     MONGODB_DRIVER(
             "org.mongodb",
             "mongo-java-driver",
-            "3.6.3",
-            "73CzTswq0jwDVi4EXyE4BGyZWsyiKMbxQa8WLow/wu8=",
+            "3.7.1",
+            "yllBCqAZwWCNUoMPR0JWilqhVA46+9F47wIcnYOcoy4=",
             Relocation.allOf(
                     Relocation.of("mongodb", "com{}mongodb"),
                     Relocation.of("bson", "org{}bson")
@@ -201,8 +201,8 @@ public enum Dependency {
     HOCON_CONFIG(
             "com{}typesafe",
             "config",
-            "1.3.1",
-            "5vrfxhCCINOmuGqn5OFsnnu4V7pYlViGMIuxOXImSvA=",
+            "1.3.3",
+            "tfHWBx8VSNBb6C9Z+QOcfTeheHvY48Z34x7ida9KRiE=",
             Relocation.of("hocon", "com{}typesafe{}config")
     ),
     CONFIGURATE_TOML(

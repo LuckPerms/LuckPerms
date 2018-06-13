@@ -45,6 +45,3 @@ The project is split up into a few seperate modules.
 
 ## License
 LuckPerms is licensed under the permissive MIT license. Please see [`LICENSE.txt`](https://github.com/lucko/LuckPerms/blob/master/LICENSE.txt) for more info.
-
-## Thanks
-Thanks to ej-technologies for granting LuckPerms an open source licence to their [Java Profiling Software](http://www.ej-technologies.com/products/jprofiler/overview.html "Java Profiler").
