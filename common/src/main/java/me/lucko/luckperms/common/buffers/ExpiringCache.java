@@ -76,5 +76,9 @@ public abstract class ExpiringCache<T> implements Supplier<T> {
         }
         return this.value;
     }
+
+    public void invalidate() {
+        this.expirationNanos = 0;
+    }
 }
 

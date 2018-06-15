@@ -233,7 +233,10 @@ public abstract class ContextManager<T> {
             throw new NullPointerException("subject");
         }
 
-        this.subjectCaches.invalidate(subject);
+        ContextsCache<T> cache = this.subjectCaches.getIfPresent(subject);
+        if (cache != null) {
+            cache.invalidate();
+        }
     }
 
     Contexts calculate(T subject) {
