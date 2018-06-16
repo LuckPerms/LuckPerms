@@ -320,7 +320,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private void displayBanner(Sender sender) {
         sender.sendMessage(MessageUtils.color("&b       &3 __    "));
         sender.sendMessage(MessageUtils.color("&b  |    &3|__)   " + "&2LuckPerms &bv" + getBootstrap().getVersion()));
-        sender.sendMessage(MessageUtils.color("&b  |___ &3|      " + "&8running on " + getBootstrap().getType().getFriendlyName() + " - " + getBootstrap().getServerBrand()));
+        sender.sendMessage(MessageUtils.color("&b  |___ &3|      " + "&8Running on " + getBootstrap().getType().getFriendlyName() + " - " + getBootstrap().getServerBrand()));
         sender.sendMessage("");
     }
 }

@@ -48,6 +48,9 @@
                                 <includes>
                                     <include>me.lucko.luckperms:luckperms-common</include>
                                     <include>me.lucko.luckperms:luckperms-api</include>
+                                    <include>me.lucko.luckperms:luckperms-sponge-service</include>
+                                    <include>me.lucko.luckperms:luckperms-sponge-service-api6</include>
+                                    <include>me.lucko.luckperms:luckperms-sponge-service-api7</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
