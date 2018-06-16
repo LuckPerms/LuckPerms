@@ -111,7 +111,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected Set<Dependency> getGlobalDependencies() {
-        return EnumSet.of(Dependency.CAFFEINE, Dependency.OKIO, Dependency.OKHTTP);
+        return EnumSet.of(Dependency.TEXT, Dependency.CAFFEINE, Dependency.OKIO, Dependency.OKHTTP);
     }
 
     @Override

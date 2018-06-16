@@ -30,6 +30,8 @@ import me.lucko.luckperms.bungee.util.RedisBungeeUtil;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+import me.lucko.luckperms.common.plugin.logging.JavaPluginLogger;
+import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -46,6 +48,11 @@ import java.util.stream.Stream;
  * Bootstrap plugin for LuckPerms running on BungeeCord.
  */
 public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
+
+    /**
+     * The plugin logger
+     */
+    private final PluginLogger logger;
 
     /**
      * A scheduler adapter for the platform
@@ -72,12 +79,18 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     private final CountDownLatch enableLatch = new CountDownLatch(1);
 
     public LPBungeeBootstrap() {
+        this.logger = new JavaPluginLogger(getLogger());
         this.schedulerAdapter = new BungeeSchedulerAdapter(this);
         this.classLoader = new ReflectionClassLoader(this);
         this.plugin = new LPBungeePlugin(this);
     }
 
     // provide adapters
+
+    @Override
+    public PluginLogger getPluginLogger() {
+        return this.logger;
+    }
 
     @Override
     public SchedulerAdapter getScheduler() {

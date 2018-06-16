@@ -44,14 +44,18 @@
                         <configuration>
                             <minimizeJar>false</minimizeJar>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <artifactSet>
+                                <includes>
+                                    <include>me.lucko.luckperms:luckperms-common</include>
+                                    <include>me.lucko.luckperms:luckperms-api</include>
+                                </includes>
+                            </artifactSet>
                             <relocations>
-                                <!-- shaded dependencies -->
+                                <!-- relocated dependencies -->
                                 <relocation>
                                     <pattern>net.kyori.text</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.text</shadedPattern>
                                 </relocation>
-
-                                <!-- relocated dependencies -->
                                 <relocation>
                                     <pattern>com.github.benmanes.caffeine</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.caffeine</shadedPattern>
@@ -115,14 +119,6 @@
             <artifactId>luckperms-common</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
-        </dependency>
-
-        <!-- jsr305 -->
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>3.0.2</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- BungeeCord -->

@@ -30,6 +30,8 @@ import me.lucko.luckperms.bukkit.compat.NullSafeConsoleCommandSender;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+import me.lucko.luckperms.common.plugin.logging.JavaPluginLogger;
+import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
@@ -48,6 +50,11 @@ import java.util.stream.Stream;
  * Bootstrap plugin for LuckPerms running on Bukkit.
  */
 public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap {
+
+    /**
+     * The plugin logger
+     */
+    private final PluginLogger logger;
 
     /**
      * A scheduler adapter for the platform
@@ -83,6 +90,7 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     private boolean incompatibleVersion = false;
 
     public LPBukkitBootstrap() {
+        this.logger = new JavaPluginLogger(getLogger());
         this.schedulerAdapter = new BukkitSchedulerAdapter(this);
         this.classLoader = new ReflectionClassLoader(this);
         this.console = new NullSafeConsoleCommandSender(getServer());
@@ -90,6 +98,11 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     }
 
     // provide adapters
+
+    @Override
+    public PluginLogger getPluginLogger() {
+        return this.logger;
+    }
 
     @Override
     public BukkitSchedulerAdapter getScheduler() {

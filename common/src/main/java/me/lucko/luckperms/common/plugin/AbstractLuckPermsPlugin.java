@@ -46,7 +46,7 @@ import me.lucko.luckperms.common.inheritance.InheritanceHandler;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
-import me.lucko.luckperms.common.plugin.util.PluginLogger;
+import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
@@ -64,7 +64,6 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
     // init during load
-    private PluginLogger logger;
     private DependencyManager dependencyManager;
 
     // init during enable
@@ -86,13 +85,12 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
      * Performs the initial actions to load the plugin
      */
     public final void load() {
-        // load the sender factory instance and create a new logger for the plugin
-        setupSenderFactory();
-        this.logger = new PluginLogger(this, getConsoleSender());
-
         // load dependencies
         this.dependencyManager = new DependencyManager(this);
         this.dependencyManager.loadDependencies(getGlobalDependencies());
+
+        // load the sender factory instance
+        setupSenderFactory();
     }
 
     public final void enable() {
@@ -238,15 +236,15 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     protected void removePlatformHooks() {}
 
     @Override
+    public PluginLogger getLogger() {
+        return getBootstrap().getPluginLogger();
+    }
+
+    @Override
     public void setMessagingService(InternalMessagingService messagingService) {
         if (this.messagingService == null) {
             this.messagingService = messagingService;
         }
-    }
-
-    @Override
-    public PluginLogger getLogger() {
-        return this.logger;
     }
 
     @Override
@@ -320,12 +318,9 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     private void displayBanner(Sender sender) {
-        sender.sendMessage(MessageUtils.color("&b               __       &3 __   ___  __         __  "));
-        sender.sendMessage(MessageUtils.color("&b    |    |  | /  ` |__/ &3|__) |__  |__)  |\\/| /__` "));
-        sender.sendMessage(MessageUtils.color("&b    |___ \\__/ \\__, |  \\ &3|    |___ |  \\  |  | .__/ "));
-        sender.sendMessage(MessageUtils.color(" "));
-        sender.sendMessage(MessageUtils.color("&2  Loading version &bv" + getBootstrap().getVersion() + "&2 on " + getBootstrap().getType().getFriendlyName() + " - " + getBootstrap().getServerBrand()));
-        sender.sendMessage(MessageUtils.color("&8  Running on server version " + getBootstrap().getServerVersion()));
-        sender.sendMessage(MessageUtils.color(" "));
+        sender.sendMessage(MessageUtils.color("&b       &3 __    "));
+        sender.sendMessage(MessageUtils.color("&b  |    &3|__)   " + "&2LuckPerms &bv" + getBootstrap().getVersion()));
+        sender.sendMessage(MessageUtils.color("&b  |___ &3|      " + "&8running on " + getBootstrap().getType().getFriendlyName() + " - " + getBootstrap().getServerBrand()));
+        sender.sendMessage("");
     }
 }

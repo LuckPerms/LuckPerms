@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.plugin.bootstrap;
 
 import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
+import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 
 import java.io.InputStream;
@@ -47,6 +48,13 @@ import javax.annotation.Nullable;
  * "LuckPerms plugin" on their respective platforms.</p>
  */
 public interface LuckPermsBootstrap {
+
+    /**
+     * Gets the plugin logger
+     *
+     * @return the logger
+     */
+    PluginLogger getPluginLogger();
 
     /**
      * Gets an adapter for the platforms scheduler

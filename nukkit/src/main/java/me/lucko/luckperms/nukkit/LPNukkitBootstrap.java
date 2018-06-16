@@ -29,6 +29,7 @@ import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 
 import cn.nukkit.Player;
 import cn.nukkit.plugin.PluginBase;
@@ -44,6 +45,11 @@ import java.util.stream.Stream;
  * Bootstrap plugin for LuckPerms running on Nukkit.
  */
 public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap {
+
+    /**
+     * The plugin logger
+     */
+    private final PluginLogger logger;
 
     /**
      * A scheduler adapter for the platform
@@ -70,12 +76,18 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     private final CountDownLatch enableLatch = new CountDownLatch(1);
 
     public LPNukkitBootstrap() {
+        this.logger = new NukkitPluginLogger(getLogger());
         this.schedulerAdapter = new NukkitSchedulerAdapter(this);
         this.classLoader = new ReflectionClassLoader(this);
         this.plugin = new LPNukkitPlugin(this);
     }
 
     // provide adapters
+
+    @Override
+    public PluginLogger getPluginLogger() {
+        return this.logger;
+    }
 
     @Override
     public NukkitSchedulerAdapter getScheduler() {

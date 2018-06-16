@@ -31,6 +31,8 @@ import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+import me.lucko.luckperms.common.plugin.logging.PluginLogger;
+import me.lucko.luckperms.common.plugin.logging.Slf4jPluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.utils.MoreFiles;
 import me.lucko.luckperms.sponge.utils.VersionData;
@@ -75,6 +77,11 @@ import java.util.stream.Stream;
 public class LPSpongeBootstrap implements LuckPermsBootstrap {
 
     /**
+     * The plugin logger
+     */
+    private final PluginLogger logger;
+
+    /**
      * A scheduler adapter for the platform
      */
     private final SchedulerAdapter schedulerAdapter;
@@ -97,12 +104,6 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     // load/enable latches
     private final CountDownLatch loadLatch = new CountDownLatch(1);
     private final CountDownLatch enableLatch = new CountDownLatch(1);
-
-    /**
-     * Injected plugin logger
-     */
-    @Inject
-    private Logger logger;
 
     /**
      * Reference to the central {@link Game} instance in the API
@@ -129,7 +130,8 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     private PluginContainer pluginContainer;
 
     @Inject
-    public LPSpongeBootstrap(@SynchronousExecutor SpongeExecutorService syncExecutor, @AsynchronousExecutor SpongeExecutorService asyncExecutor) {
+    public LPSpongeBootstrap(Logger logger, @SynchronousExecutor SpongeExecutorService syncExecutor, @AsynchronousExecutor SpongeExecutorService asyncExecutor) {
+        this.logger = new Slf4jPluginLogger(logger);
         this.spongeScheduler = Sponge.getScheduler();
         this.schedulerAdapter = new SpongeSchedulerAdapter(this, this.spongeScheduler, syncExecutor, asyncExecutor);
         this.classLoader = new ReflectionClassLoader(this);
@@ -137,6 +139,11 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     }
 
     // provide adapters
+
+    @Override
+    public PluginLogger getPluginLogger() {
+        return this.logger;
+    }
 
     @Override
     public SchedulerAdapter getScheduler() {
@@ -187,10 +194,6 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     }
 
     // getters for the injected sponge instances
-
-    public Logger getLogger() {
-        return this.logger;
-    }
 
     public Game getGame() {
         return this.game;

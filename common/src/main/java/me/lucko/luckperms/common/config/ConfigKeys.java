@@ -181,11 +181,6 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> USE_ARGUMENT_BASED_COMMAND_PERMISSIONS = BooleanKey.of("argument-based-command-permissions", false);
 
     /**
-     * If the plugin should log messages to the console in color.
-     */
-    public static final ConfigKey<Boolean> USE_COLORED_LOGGER = BooleanKey.of("colored-logger", true);
-
-    /**
      * If wildcards are being applied
      */
     public static final ConfigKey<Boolean> APPLYING_WILDCARDS = EnduringKey.wrap(BooleanKey.of("apply-wildcards", true));

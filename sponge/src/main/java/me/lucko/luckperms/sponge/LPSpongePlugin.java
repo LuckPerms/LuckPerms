@@ -112,7 +112,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected Set<Dependency> getGlobalDependencies() {
-        return EnumSet.of(Dependency.CAFFEINE, Dependency.OKIO, Dependency.OKHTTP,
+        return EnumSet.of(Dependency.TEXT, Dependency.CAFFEINE, Dependency.OKIO, Dependency.OKHTTP,
                 Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_HOCON, Dependency.HOCON_CONFIG);
     }
 
@@ -260,7 +260,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
             return new DummySender(this, CommandManager.CONSOLE_UUID, CommandManager.CONSOLE_NAME) {
                 @Override
                 protected void consumeMessage(String s) {
-                    LPSpongePlugin.this.bootstrap.getLogger().info(s);
+                    LPSpongePlugin.this.bootstrap.getPluginLogger().info(s);
                 }
             };
         }

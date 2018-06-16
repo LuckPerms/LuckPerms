@@ -23,48 +23,29 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.plugin.util;
+package me.lucko.luckperms.common.plugin.logging;
 
-import me.lucko.luckperms.common.command.utils.MessageUtils;
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.locale.message.Message;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.sender.Sender;
+import org.slf4j.Logger;
 
-import java.util.Objects;
+public class Slf4jPluginLogger implements PluginLogger {
+    private final Logger logger;
 
-/**
- * Represents the logger instance being used by LuckPerms on the platform.
- *
- * <p>Messages sent using the logger are sent prefixed with the LuckPerms tag,
- * and on some implementations will be colored depending on the message type.</p>
- */
-public class PluginLogger {
-    private final LuckPermsPlugin plugin;
-    private final Sender console;
-
-    public PluginLogger(LuckPermsPlugin plugin, Sender console) {
-        this.plugin = plugin;
-        this.console = console;
+    public Slf4jPluginLogger(Logger logger) {
+        this.logger = logger;
     }
 
+    @Override
     public void info(String s) {
-        msg(Message.LOG_INFO, Objects.requireNonNull(s));
+        this.logger.info(s);
     }
 
+    @Override
     public void warn(String s) {
-        msg(Message.LOG_WARN, Objects.requireNonNull(s));
+        this.logger.warn(s);
     }
 
+    @Override
     public void severe(String s) {
-        msg(Message.LOG_ERROR, Objects.requireNonNull(s));
-    }
-
-    private void msg(Message message, String s) {
-        String msg = message.asString(this.plugin.getLocaleManager(), s);
-        if (this.plugin.getConfiguration() != null && !this.plugin.getConfiguration().get(ConfigKeys.USE_COLORED_LOGGER)) {
-            msg = MessageUtils.stripColor(msg);
-        }
-        this.console.sendMessage(msg);
+        this.logger.error(s);
     }
 }

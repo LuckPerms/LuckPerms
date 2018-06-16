@@ -59,6 +59,13 @@ public enum Dependency {
             "mmz3ltQbS8xXGA2scM0ZH6raISlt4nukjCiU2l9Jxfs="
     ),
 
+    TEXT(
+            "net{}kyori",
+            "text",
+            "1.11-1.4.0",
+            "drQpwf+oI1+DPrn0iCvEtoID+xXR3dpZK5ySaBrUiok=",
+            Relocation.of("text", "net{}kyori{}text")
+    ),
     CAFFEINE(
             "com{}github{}ben-manes{}caffeine",
             "caffeine",
