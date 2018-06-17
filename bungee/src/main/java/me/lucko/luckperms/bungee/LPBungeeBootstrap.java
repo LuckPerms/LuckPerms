@@ -52,7 +52,7 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     /**
      * The plugin logger
      */
-    private final PluginLogger logger;
+    private PluginLogger logger = null;
 
     /**
      * A scheduler adapter for the platform
@@ -79,7 +79,6 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     private final CountDownLatch enableLatch = new CountDownLatch(1);
 
     public LPBungeeBootstrap() {
-        this.logger = new JavaPluginLogger(getLogger());
         this.schedulerAdapter = new BungeeSchedulerAdapter(this);
         this.classLoader = new ReflectionClassLoader(this);
         this.plugin = new LPBungeePlugin(this);
@@ -89,6 +88,9 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
 
     @Override
     public PluginLogger getPluginLogger() {
+        if (this.logger == null) {
+            throw new IllegalStateException("Logger has not been initialised yet");
+        }
         return this.logger;
     }
 
@@ -106,6 +108,10 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
 
     @Override
     public void onLoad() {
+        // init logger asap
+        this.logger = new JavaPluginLogger(getLogger());
+
+        // call load
         try {
             this.plugin.load();
         } finally {
