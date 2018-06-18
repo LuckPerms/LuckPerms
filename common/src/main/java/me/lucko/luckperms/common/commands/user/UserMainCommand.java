@@ -80,8 +80,7 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
         );
     }
 
-    @Override
-    protected UserIdentifier parseTarget(String target, LuckPermsPlugin plugin, Sender sender) {
+    public static UUID parseTargetUuid(String target, LuckPermsPlugin plugin, Sender sender) {
         UUID uuid = Uuids.parseNullable(target);
         if (uuid == null) {
             if (!plugin.getConfiguration().get(ConfigKeys.ALLOW_INVALID_USERNAMES)) {
@@ -109,6 +108,16 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
                     return null;
                 }
             }
+        }
+
+        return uuid;
+    }
+
+    @Override
+    protected UserIdentifier parseTarget(String target, LuckPermsPlugin plugin, Sender sender) {
+        UUID uuid = parseTargetUuid(target, plugin, sender);
+        if (uuid == null) {
+            return null;
         }
 
         String name = plugin.getStorage().getPlayerName(uuid).join();

@@ -30,16 +30,15 @@ import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.DurationFormatter;
+import me.lucko.luckperms.common.utils.Paginated;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.Uuids;
 
 import java.util.List;
 import java.util.Map;
@@ -57,67 +56,33 @@ public class LogRecent extends SubCommand<Log> {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
         if (args.isEmpty()) {
             // No page or user
-            return showLog(log.getRecentMaxPages(ENTRIES_PER_PAGE), null, sender, log);
+            Paginated<ExtendedLogEntry> content = new Paginated<>(log.getContent());
+            return showLog(content.getMaxPages(ENTRIES_PER_PAGE), false, sender, content);
         }
 
-        if (args.size() == 1) {
-            // Page or user
-            try {
-                int p = Integer.parseInt(args.get(0));
-                // page
-                return showLog(p, null, sender, log);
-            } catch (NumberFormatException ignored) {
-            }
+        int page = ArgumentParser.parseIntOrElse(0, args, Integer.MIN_VALUE);
+        if (page != Integer.MIN_VALUE) {
+            Paginated<ExtendedLogEntry> content = new Paginated<>(log.getContent());
+            return showLog(page, false, sender, content);
         }
 
         // User and possibly page
-        final String target = args.get(0);
-        UUID uuid = Uuids.parseNullable(target);
+        UUID uuid = ArgumentParser.parseUserTarget(0, args, plugin, sender);
         if (uuid == null) {
-            if (!plugin.getConfiguration().get(ConfigKeys.ALLOW_INVALID_USERNAMES)) {
-                if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {
-                    Message.USER_INVALID_ENTRY.send(sender, target);
-                    return CommandResult.INVALID_ARGS;
-                }
-            } else {
-                if (!DataConstraints.PLAYER_USERNAME_TEST_LENIENT.test(target)) {
-                    Message.USER_INVALID_ENTRY.send(sender, target);
-                    return CommandResult.INVALID_ARGS;
-                }
-            }
-
-            uuid = plugin.getStorage().getPlayerUuid(target.toLowerCase()).join();
-            if (uuid == null) {
-                if (!plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
-                    Message.USER_NOT_FOUND.send(sender, target);
-                    return CommandResult.INVALID_ARGS;
-                }
-
-                uuid = plugin.getBootstrap().lookupUuid(target).orElse(null);
-                if (uuid == null) {
-                    Message.USER_NOT_FOUND.send(sender, target);
-                    return CommandResult.INVALID_ARGS;
-                }
-            }
+            return CommandResult.INVALID_ARGS;
         }
 
-        if (args.size() != 2) {
-            // Just user
-            return showLog(log.getRecentMaxPages(uuid, ENTRIES_PER_PAGE), uuid, sender, log);
+        Paginated<ExtendedLogEntry> content = new Paginated<>(log.getContent(uuid));
+        page = ArgumentParser.parseIntOrElse(1, args, Integer.MIN_VALUE);
+        if (page != Integer.MIN_VALUE) {
+            return showLog(page, true, sender, content);
         } else {
-            try {
-                int p = Integer.parseInt(args.get(1));
-                // User and page
-                return showLog(p, uuid, sender, log);
-            } catch (NumberFormatException e) {
-                // Invalid page
-                return showLog(-1, null, sender, log);
-            }
+            return showLog(content.getMaxPages(ENTRIES_PER_PAGE), true, sender, content);
         }
     }
 
-    private static CommandResult showLog(int page, UUID filter, Sender sender, Log log) {
-        int maxPage = (filter != null) ? log.getRecentMaxPages(filter, ENTRIES_PER_PAGE) : log.getRecentMaxPages(ENTRIES_PER_PAGE);
+    private static CommandResult showLog(int page, boolean specificUser, Sender sender, Paginated<ExtendedLogEntry> log) {
+        int maxPage = log.getMaxPages(ENTRIES_PER_PAGE);
         if (maxPage == 0) {
             Message.LOG_NO_ENTRIES.send(sender);
             return CommandResult.STATE_ERROR;
@@ -128,8 +93,8 @@ public class LogRecent extends SubCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        SortedMap<Integer, ExtendedLogEntry> entries = (filter != null) ? log.getRecent(page, filter, ENTRIES_PER_PAGE) : log.getRecent(page, ENTRIES_PER_PAGE);
-        if (filter != null) {
+        SortedMap<Integer, ExtendedLogEntry> entries = log.getPage(page, ENTRIES_PER_PAGE);
+        if (specificUser) {
             String name = entries.values().stream().findAny().get().getActorName();
             if (name.contains("@")) {
                 name = name.split("@")[0];

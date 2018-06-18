@@ -29,14 +29,17 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
+import me.lucko.luckperms.common.commands.user.UserMainCommand;
 import me.lucko.luckperms.common.model.TemporaryModifier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.DateParser;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Utility class to help process arguments, and throw checked exceptions if the arguments are invalid.
@@ -250,6 +253,11 @@ public class ArgumentParser {
         }
 
         return contextSet.makeImmutable();
+    }
+
+    public static UUID parseUserTarget(int index, List<String> args, LuckPermsPlugin plugin, Sender sender) {
+        final String target = args.get(index);
+        return UserMainCommand.parseTargetUuid(target, plugin, sender);
     }
 
     public abstract static class ArgumentException extends CommandException {}

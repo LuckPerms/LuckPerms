@@ -30,16 +30,15 @@ import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.DurationFormatter;
+import me.lucko.luckperms.common.utils.Paginated;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.Uuids;
 
 import java.util.List;
 import java.util.Map;
@@ -55,56 +54,23 @@ public class LogUserHistory extends SubCommand<Log> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
-        String target = args.get(0);
-        int page = Integer.MIN_VALUE;
-
-        if (args.size() == 2) {
-            try {
-                page = Integer.parseInt(args.get(1));
-            } catch (NumberFormatException e) {
-                // invalid page
-                return showLog(-1, null, sender, log);
-            }
-        }
-
-        UUID uuid = Uuids.parseNullable(target);
+        UUID uuid = ArgumentParser.parseUserTarget(0, args, plugin, sender);
         if (uuid == null) {
-            if (!plugin.getConfiguration().get(ConfigKeys.ALLOW_INVALID_USERNAMES)) {
-                if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {
-                    Message.USER_INVALID_ENTRY.send(sender, target);
-                    return CommandResult.INVALID_ARGS;
-                }
-            } else {
-                if (!DataConstraints.PLAYER_USERNAME_TEST_LENIENT.test(target)) {
-                    Message.USER_INVALID_ENTRY.send(sender, target);
-                    return CommandResult.INVALID_ARGS;
-                }
-            }
-
-            uuid = plugin.getStorage().getPlayerUuid(target.toLowerCase()).join();
-            if (uuid == null) {
-                if (!plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
-                    Message.USER_NOT_FOUND.send(sender, target);
-                    return CommandResult.INVALID_ARGS;
-                }
-
-                uuid = plugin.getBootstrap().lookupUuid(target).orElse(null);
-                if (uuid == null) {
-                    Message.USER_NOT_FOUND.send(sender, target);
-                    return CommandResult.INVALID_ARGS;
-                }
-            }
+            return CommandResult.INVALID_ARGS;
         }
 
-        if (page == Integer.MIN_VALUE) {
-            page = log.getUserHistoryMaxPages(uuid, ENTRIES_PER_PAGE);
-        }
+        Paginated<ExtendedLogEntry> content = new Paginated<>(log.getUserHistory(uuid));
 
-        return showLog(page, uuid, sender, log);
+        int page = ArgumentParser.parseIntOrElse(1, args, Integer.MIN_VALUE);
+        if (page != Integer.MIN_VALUE) {
+            return showLog(page, sender, content);
+        } else {
+            return showLog(content.getMaxPages(ENTRIES_PER_PAGE), sender, content);
+        }
     }
 
-    private static CommandResult showLog(int page, UUID user, Sender sender, Log log) {
-        int maxPage = log.getUserHistoryMaxPages(user, ENTRIES_PER_PAGE);
+    private static CommandResult showLog(int page, Sender sender, Paginated<ExtendedLogEntry> log) {
+        int maxPage = log.getMaxPages(ENTRIES_PER_PAGE);
         if (maxPage == 0) {
             Message.LOG_NO_ENTRIES.send(sender);
             return CommandResult.STATE_ERROR;
@@ -115,7 +81,7 @@ public class LogUserHistory extends SubCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        SortedMap<Integer, ExtendedLogEntry> entries = log.getUserHistory(page, user, ENTRIES_PER_PAGE);
+        SortedMap<Integer, ExtendedLogEntry> entries = log.getPage(page, ENTRIES_PER_PAGE);
         String name = entries.values().stream().findAny().get().getActedName();
         Message.LOG_HISTORY_USER_HEADER.send(sender, name, page, maxPage);
 

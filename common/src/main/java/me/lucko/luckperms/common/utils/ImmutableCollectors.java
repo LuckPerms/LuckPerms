@@ -28,7 +28,9 @@ package me.lucko.luckperms.common.utils;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedSet;
 
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.function.Function;
@@ -67,6 +69,15 @@ public final class ImmutableCollectors {
                 EnumSet::add,
                 (l, r) -> { l.addAll(r); return l; },
                 ImmutableSet::copyOf
+        );
+    }
+
+    public static <E> Collector<E, ?, ImmutableSortedSet<E>> toSortedSet(Comparator<? super E> comparator) {
+        return Collector.of(
+                () -> new ImmutableSortedSet.Builder<E>(comparator),
+                ImmutableSortedSet.Builder::add,
+                (l, r) -> l.addAll(r.build()),
+                ImmutableSortedSet.Builder::build
         );
     }
 

@@ -28,11 +28,10 @@ package me.lucko.luckperms.common.actionlog;
 import com.google.common.collect.ImmutableSortedSet;
 
 import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
-import java.util.Set;
-import java.util.SortedMap;
+import java.util.Comparator;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -51,149 +50,49 @@ public class Log {
         return empty;
     }
 
-    private static SortedMap<Integer, ExtendedLogEntry> getPage(Set<ExtendedLogEntry> set, int pageNo, int entries) {
-        if (pageNo < 1) {
-            throw new IllegalArgumentException("pageNo cannot be less than 1: " + pageNo);
-        }
-
-        int minimumEntries = ((pageNo * entries) - entries) + 1;
-        if (set.size() < minimumEntries) {
-            throw new IllegalStateException("Log does not contain that many entries. " +
-                    "Requested: " + minimumEntries + ", Log Count: " + set.size());
-        }
-
-        final SortedMap<Integer, ExtendedLogEntry> out = new TreeMap<>();
-
-        final int max = minimumEntries + entries - 1;
-        int index = 0;
-        for (ExtendedLogEntry e : set) {
-            index++;
-            if (index >= minimumEntries) {
-                out.put(index, e);
-            }
-            if (index == max) {
-                break;
-            }
-        }
-
-        return out;
-    }
-
-    private static int getMaxPages(int size, int entries) {
-        return (int) Math.ceil((double) size / (double) entries);
-    }
-
     private final SortedSet<ExtendedLogEntry> content;
 
     public Log(SortedSet<ExtendedLogEntry> content) {
         this.content = ImmutableSortedSet.copyOfSorted(content);
     }
 
-    public SortedSet<ExtendedLogEntry> getRecent() {
+    public SortedSet<ExtendedLogEntry> getContent() {
         return this.content;
     }
 
-    public SortedMap<Integer, ExtendedLogEntry> getRecent(int pageNo, int entriesPerPage) {
-        return getPage(this.content, pageNo, entriesPerPage);
-    }
-
-    public int getRecentMaxPages(int entriesPerPage) {
-        return getMaxPages(this.content.size(), entriesPerPage);
-    }
-
-    public SortedSet<ExtendedLogEntry> getRecent(UUID actor) {
+    public SortedSet<ExtendedLogEntry> getContent(UUID actor) {
         return this.content.stream()
                 .filter(e -> e.getActor().equals(actor))
                 .collect(Collectors.toCollection(TreeSet::new));
-    }
-
-    public SortedMap<Integer, ExtendedLogEntry> getRecent(int pageNo, UUID actor, int entriesPerPage) {
-        return getPage(getRecent(actor), pageNo, entriesPerPage);
-    }
-
-    public int getRecentMaxPages(UUID actor, int entriesPerPage) {
-        return getMaxPages(this.content.stream()
-                .filter(e -> e.getActor().equals(actor))
-                .mapToInt(x -> 1).sum(), entriesPerPage);
     }
 
     public SortedSet<ExtendedLogEntry> getUserHistory(UUID uuid) {
         return this.content.stream()
                 .filter(e -> e.getType() == LogEntry.Type.USER)
-                .filter(e -> e.getActed().isPresent())
-                .filter(e -> e.getActed().get().equals(uuid))
-                .collect(Collectors.toCollection(TreeSet::new));
-    }
-
-    public SortedMap<Integer, ExtendedLogEntry> getUserHistory(int pageNo, UUID uuid, int entriesPerPage) {
-        return getPage(getUserHistory(uuid), pageNo, entriesPerPage);
-    }
-
-    public int getUserHistoryMaxPages(UUID uuid, int entriesPerPage) {
-        return getMaxPages(this.content.stream()
-                .filter(e -> e.getType() == LogEntry.Type.USER)
-                .filter(e -> e.getActed().isPresent())
-                .filter(e -> e.getActed().get().equals(uuid))
-                .mapToInt(x -> 1).sum(), entriesPerPage);
+                .filter(e -> e.getActed().isPresent() && e.getActed().get().equals(uuid))
+                .collect(ImmutableCollectors.toSortedSet(Comparator.naturalOrder()));
     }
 
     public SortedSet<ExtendedLogEntry> getGroupHistory(String name) {
         return this.content.stream()
                 .filter(e -> e.getType() == LogEntry.Type.GROUP)
                 .filter(e -> e.getActedName().equals(name))
-                .collect(Collectors.toCollection(TreeSet::new));
-    }
-
-    public SortedMap<Integer, ExtendedLogEntry> getGroupHistory(int pageNo, String name, int entriesPerPage) {
-        return getPage(getGroupHistory(name), pageNo, entriesPerPage);
-    }
-
-    public int getGroupHistoryMaxPages(String name, int entriesPerPage) {
-        return getMaxPages(this.content.stream()
-                .filter(e -> e.getType() == LogEntry.Type.GROUP)
-                .filter(e -> e.getActedName().equals(name))
-                .mapToInt(x -> 1).sum(), entriesPerPage);
+                .collect(ImmutableCollectors.toSortedSet(Comparator.naturalOrder()));
     }
 
     public SortedSet<ExtendedLogEntry> getTrackHistory(String name) {
         return this.content.stream()
                 .filter(e -> e.getType() == LogEntry.Type.TRACK)
                 .filter(e -> e.getActedName().equals(name))
-                .collect(Collectors.toCollection(TreeSet::new));
-    }
-
-    public SortedMap<Integer, ExtendedLogEntry> getTrackHistory(int pageNo, String name, int entriesPerPage) {
-        return getPage(getTrackHistory(name), pageNo, entriesPerPage);
-    }
-
-    public int getTrackHistoryMaxPages(String name, int entriesPerPage) {
-        return getMaxPages(this.content.stream()
-                .filter(e -> e.getType() == LogEntry.Type.TRACK)
-                .filter(e -> e.getActedName().equals(name))
-                .mapToInt(x -> 1).sum(), entriesPerPage);
+                .collect(ImmutableCollectors.toSortedSet(Comparator.naturalOrder()));
     }
 
     public SortedSet<ExtendedLogEntry> getSearch(String query) {
         return this.content.stream()
                 .filter(e -> e.matchesSearch(query))
-                .collect(Collectors.toCollection(TreeSet::new));
+                .collect(ImmutableCollectors.toSortedSet(Comparator.naturalOrder()));
     }
 
-    public SortedMap<Integer, ExtendedLogEntry> getSearch(int pageNo, String query, int entriesPerPage) {
-        return getPage(getSearch(query), pageNo, entriesPerPage);
-    }
-
-    public int getSearchMaxPages(String query, int entriesPerPage) {
-        return getMaxPages(this.content.stream()
-                .filter(e -> e.matchesSearch(query))
-                .mapToInt(x -> 1).sum(), entriesPerPage);
-    }
-
-    public SortedSet<ExtendedLogEntry> getContent() {
-        return this.content;
-    }
-
-    @SuppressWarnings("WeakerAccess")
     public static class Builder {
         private final SortedSet<ExtendedLogEntry> content = new TreeSet<>();
 

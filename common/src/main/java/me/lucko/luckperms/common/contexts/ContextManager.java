@@ -259,7 +259,7 @@ public abstract class ContextManager<T> {
         return formContexts(subject, accumulator.makeImmutable());
     }
 
-    private Contexts calculateStatic() {
+    Contexts calculateStatic() {
         MutableContextSet accumulator = MutableContextSet.create();
 
         for (StaticContextCalculator calculator : this.staticCalculators) {

@@ -25,12 +25,10 @@
 
 package me.lucko.luckperms.common.api.delegates.model;
 
-
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 
 import java.util.Objects;
-import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.UUID;
 
@@ -40,7 +38,6 @@ import static me.lucko.luckperms.common.api.ApiUtils.checkName;
 
 @SuppressWarnings("unchecked")
 public class ApiLog implements me.lucko.luckperms.api.Log {
-    private static final int ENTRIES_PER_PAGE = 5;
     private final Log handle;
 
     public ApiLog(Log handle) {
@@ -55,39 +52,9 @@ public class ApiLog implements me.lucko.luckperms.api.Log {
 
     @Nonnull
     @Override
-    public SortedSet<LogEntry> getRecent() {
-        return (SortedSet) this.handle.getRecent();
-    }
-
-    @Nonnull
-    @Override
-    public SortedMap<Integer, LogEntry> getRecent(int pageNo) {
-        return (SortedMap) this.handle.getRecent(pageNo, ENTRIES_PER_PAGE);
-    }
-
-    @Override
-    public int getRecentMaxPages() {
-        return this.handle.getRecentMaxPages(ENTRIES_PER_PAGE);
-    }
-
-    @Nonnull
-    @Override
-    public SortedSet<LogEntry> getRecent(@Nonnull UUID actor) {
+    public SortedSet<LogEntry> getContent(@Nonnull UUID actor) {
         Objects.requireNonNull(actor, "actor");
-        return (SortedSet) this.handle.getRecent(actor);
-    }
-
-    @Nonnull
-    @Override
-    public SortedMap<Integer, LogEntry> getRecent(int pageNo, @Nonnull UUID actor) {
-        Objects.requireNonNull(actor, "actor");
-        return (SortedMap) this.handle.getRecent(pageNo, actor, ENTRIES_PER_PAGE);
-    }
-
-    @Override
-    public int getRecentMaxPages(@Nonnull UUID actor) {
-        Objects.requireNonNull(actor, "actor");
-        return this.handle.getRecentMaxPages(actor, ENTRIES_PER_PAGE);
+        return (SortedSet) this.handle.getContent(actor);
     }
 
     @Nonnull
@@ -99,19 +66,6 @@ public class ApiLog implements me.lucko.luckperms.api.Log {
 
     @Nonnull
     @Override
-    public SortedMap<Integer, LogEntry> getUserHistory(int pageNo, @Nonnull UUID uuid) {
-        Objects.requireNonNull(uuid, "uuid");
-        return (SortedMap) this.handle.getUserHistory(pageNo, uuid, ENTRIES_PER_PAGE);
-    }
-
-    @Override
-    public int getUserHistoryMaxPages(@Nonnull UUID uuid) {
-        Objects.requireNonNull(uuid, "uuid");
-        return this.handle.getUserHistoryMaxPages(uuid, ENTRIES_PER_PAGE);
-    }
-
-    @Nonnull
-    @Override
     public SortedSet<LogEntry> getGroupHistory(@Nonnull String name) {
         Objects.requireNonNull(name, "name");
         return (SortedSet) this.handle.getGroupHistory(checkName(name));
@@ -119,54 +73,8 @@ public class ApiLog implements me.lucko.luckperms.api.Log {
 
     @Nonnull
     @Override
-    public SortedMap<Integer, LogEntry> getGroupHistory(int pageNo, @Nonnull String name) {
-        Objects.requireNonNull(name, "name");
-        return (SortedMap) this.handle.getGroupHistory(pageNo, checkName(name), ENTRIES_PER_PAGE);
-    }
-
-    @Override
-    public int getGroupHistoryMaxPages(@Nonnull String name) {
-        Objects.requireNonNull(name, "name");
-        return this.handle.getGroupHistoryMaxPages(checkName(name), ENTRIES_PER_PAGE);
-    }
-
-    @Nonnull
-    @Override
     public SortedSet<LogEntry> getTrackHistory(@Nonnull String name) {
         Objects.requireNonNull(name, "name");
         return (SortedSet) this.handle.getTrackHistory(checkName(name));
-    }
-
-    @Nonnull
-    @Override
-    public SortedMap<Integer, LogEntry> getTrackHistory(int pageNo, @Nonnull String name) {
-        Objects.requireNonNull(name, "name");
-        return (SortedMap) this.handle.getTrackHistory(pageNo, checkName(name), ENTRIES_PER_PAGE);
-    }
-
-    @Override
-    public int getTrackHistoryMaxPages(@Nonnull String name) {
-        Objects.requireNonNull(name, "name");
-        return this.handle.getTrackHistoryMaxPages(checkName(name), ENTRIES_PER_PAGE);
-    }
-
-    @Nonnull
-    @Override
-    public SortedSet<LogEntry> getSearch(@Nonnull String query) {
-        Objects.requireNonNull(query, "query");
-        return (SortedSet) this.handle.getSearch(query);
-    }
-
-    @Nonnull
-    @Override
-    public SortedMap<Integer, LogEntry> getSearch(int pageNo, @Nonnull String query) {
-        Objects.requireNonNull(query, "query");
-        return (SortedMap) this.handle.getSearch(pageNo, query, ENTRIES_PER_PAGE);
-    }
-
-    @Override
-    public int getSearchMaxPages(@Nonnull String query) {
-        Objects.requireNonNull(query, "query");
-        return this.handle.getSearchMaxPages(query, ENTRIES_PER_PAGE);
     }
 }

@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.DurationFormatter;
+import me.lucko.luckperms.common.utils.Paginated;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
@@ -57,13 +58,23 @@ public class LogSearch extends SubCommand<Log> {
             try {
                 page = Integer.parseInt(args.get(args.size() - 1));
                 args.remove(args.size() - 1);
-            } catch (NumberFormatException ignored) {
+            } catch (NumberFormatException e) {
+                // ignored
             }
         }
 
         final String query = args.stream().collect(Collectors.joining(" "));
+        Paginated<ExtendedLogEntry> content = new Paginated<>(log.getSearch(query));
 
-        int maxPage = log.getSearchMaxPages(query, ENTRIES_PER_PAGE);
+        if (page != Integer.MIN_VALUE) {
+            return showLog(page, query, sender, content);
+        } else {
+            return showLog(content.getMaxPages(ENTRIES_PER_PAGE), query, sender, content);
+        }
+    }
+
+    private static CommandResult showLog(int page, String query, Sender sender, Paginated<ExtendedLogEntry> log) {
+        int maxPage = log.getMaxPages(ENTRIES_PER_PAGE);
         if (maxPage == 0) {
             Message.LOG_NO_ENTRIES.send(sender);
             return CommandResult.STATE_ERROR;
@@ -78,7 +89,7 @@ public class LogSearch extends SubCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        SortedMap<Integer, ExtendedLogEntry> entries = log.getSearch(page, query, ENTRIES_PER_PAGE);
+        SortedMap<Integer, ExtendedLogEntry> entries = log.getPage(page, ENTRIES_PER_PAGE);
         Message.LOG_SEARCH_HEADER.send(sender, query, page, maxPage);
 
         long now = System.currentTimeMillis() / 1000L;

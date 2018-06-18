@@ -30,8 +30,8 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -39,9 +39,7 @@ import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.Uuids;
 
 import java.util.List;
 import java.util.UUID;
@@ -58,35 +56,9 @@ public class UserClone extends SubCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
-        String target = args.get(0);
-
-        UUID uuid = Uuids.parseNullable(target);
+        UUID uuid = ArgumentParser.parseUserTarget(0, args, plugin, sender);
         if (uuid == null) {
-            if (!plugin.getConfiguration().get(ConfigKeys.ALLOW_INVALID_USERNAMES)) {
-                if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {
-                    Message.USER_INVALID_ENTRY.send(sender, target);
-                    return CommandResult.INVALID_ARGS;
-                }
-            } else {
-                if (!DataConstraints.PLAYER_USERNAME_TEST_LENIENT.test(target)) {
-                    Message.USER_INVALID_ENTRY.send(sender, target);
-                    return CommandResult.INVALID_ARGS;
-                }
-            }
-
-            uuid = plugin.getStorage().getPlayerUuid(target.toLowerCase()).join();
-            if (uuid == null) {
-                if (!plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
-                    Message.USER_NOT_FOUND.send(sender, target);
-                    return CommandResult.INVALID_ARGS;
-                }
-
-                uuid = plugin.getBootstrap().lookupUuid(target).orElse(null);
-                if (uuid == null) {
-                    Message.USER_NOT_FOUND.send(sender, target);
-                    return CommandResult.INVALID_ARGS;
-                }
-            }
+            return CommandResult.INVALID_ARGS;
         }
 
         User otherUser = plugin.getStorage().loadUser(uuid, null).join();
