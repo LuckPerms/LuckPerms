@@ -52,7 +52,7 @@ public class OptionSet extends SubCommand<LPSubjectData> {
         ImmutableContextSet contextSet = ArgumentParser.parseContextSponge(2, args);
 
         if (subjectData.setOption(contextSet, key, value).join()) {
-            MessageUtils.sendPluginMessage(sender, "&aSet &f\"" + key + "&f\"&a to &f\"" + value + "&f\"&a in context " + SpongeCommandUtils.contextToString(contextSet));
+            MessageUtils.sendPluginMessage(sender, "&aSet &f\"" + key + "&f\"&a to &f\"" + value + "&f\"&a in context " + SpongeCommandUtils.contextToString(contextSet, plugin.getLocaleManager()));
         } else {
             MessageUtils.sendPluginMessage(sender, "Unable to set option. Does the Subject already have it set?");
         }

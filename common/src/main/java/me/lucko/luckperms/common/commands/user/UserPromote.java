@@ -33,10 +33,11 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.command.utils.TabCompletions;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -101,7 +102,7 @@ public class UserPromote extends SubCommand<User> {
                 return CommandResult.STATE_ERROR;
 
             case ADDED_TO_FIRST_GROUP: {
-                Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFriendlyName(), result.getGroupTo().get(), MessageUtils.contextSetToString(context));
+                Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFriendlyName(), result.getGroupTo().get(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
                 ExtendedLogEntry.build().actor(sender).acted(user)
                         .action("promote", track.getName(), context)
@@ -115,7 +116,7 @@ public class UserPromote extends SubCommand<User> {
                 String groupFrom = result.getGroupFrom().get();
                 String groupTo = result.getGroupTo().get();
 
-                Message.USER_PROMOTE_SUCCESS.send(sender, user.getFriendlyName(), track.getName(), groupFrom, groupTo, MessageUtils.contextSetToString(context));
+                Message.USER_PROMOTE_SUCCESS.send(sender, user.getFriendlyName(), track.getName(), groupFrom, groupTo, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
                 if (!silent) {
                     Message.EMPTY.send(sender, MessageUtils.listToArrowSep(track.getGroups(), groupFrom, groupTo, false));
                 }
@@ -135,6 +136,8 @@ public class UserPromote extends SubCommand<User> {
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        return TabCompletions.getTrackTabComplete(args, plugin);
+        return TabCompleter.create()
+                .at(0, TabCompletions.tracks(plugin))
+                .complete(args);
     }
 }

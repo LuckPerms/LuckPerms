@@ -166,7 +166,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
         // before registering our permission service, copy any existing permission descriptions
         PermissionRegistry permissionRegistry = getPermissionRegistry();
         this.bootstrap.getGame().getServiceManager().provide(PermissionService.class)
-                .ifPresent(ps -> ps.getDescriptions().stream().map(PermissionDescription::getId).forEach(permissionRegistry::offer));
+                .ifPresent(ps -> ps.getDescriptions().stream().map(PermissionDescription::getId).forEach(permissionRegistry::insert));
 
         if (this.bootstrap.getGame().getPluginManager().getPlugin("permissionsex").isPresent()) {
             getLogger().warn("Detected PermissionsEx - assuming it's loaded for migration.");
@@ -268,7 +268,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    public List<Command> getExtraCommands() {
+    public List<Command<?, ?>> getExtraCommands() {
         return Collections.singletonList(new SpongeMainCommand(this));
     }
 

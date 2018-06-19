@@ -141,17 +141,17 @@ public class ApplyEditsCommand extends SingleCommand {
         Message.APPLY_EDITS_SUCCESS.send(sender, holder.getFriendlyName());
         Message.APPLY_EDITS_SUCCESS_SUMMARY.send(sender, additions, additionsSummary, deletions, deletionsSummary);
         for (Node n : diffAdded) {
-            Message.APPLY_EDITS_DIFF_ADDED.send(sender, formatNode(n));
+            Message.APPLY_EDITS_DIFF_ADDED.send(sender, formatNode(plugin.getLocaleManager(), n));
         }
         for (Node n : diffRemoved) {
-            Message.APPLY_EDITS_DIFF_REMOVED.send(sender, formatNode(n));
+            Message.APPLY_EDITS_DIFF_REMOVED.send(sender, formatNode(plugin.getLocaleManager(), n));
         }
         StorageAssistant.save(holder, sender, plugin);
         return true;
     }
 
-    private static String formatNode(Node n) {
-        return n.getPermission() + " &7(" + (n.getValue() ? "&a" : "&c") + n.getValue() + "&7)" + MessageUtils.getAppendableNodeContextString(n) +
+    private static String formatNode(LocaleManager localeManager, Node n) {
+        return n.getPermission() + " &7(" + (n.getValue() ? "&a" : "&c") + n.getValue() + "&7)" + MessageUtils.getAppendableNodeContextString(localeManager, n) +
                 (n.isTemporary() ? " &7(" + DurationFormatter.CONCISE.formatDateDiff(n.getExpiryUnixTime()) + ")" : "");
     }
 

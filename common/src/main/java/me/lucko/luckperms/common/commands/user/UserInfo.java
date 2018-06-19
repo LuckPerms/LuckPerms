@@ -85,15 +85,15 @@ public class UserInfo extends SubCommand<User> {
         if (!parents.isEmpty()) {
             Message.INFO_PARENT_HEADER.send(sender);
             for (Node node : parents) {
-                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + MessageUtils.getAppendableNodeContextString(node));
+                Message.INFO_PARENT_ENTRY.send(sender, node.getGroupName(), MessageUtils.getAppendableNodeContextString(plugin.getLocaleManager(), node));
             }
         }
 
         if (!tempParents.isEmpty()) {
             Message.INFO_TEMP_PARENT_HEADER.send(sender);
             for (Node node : tempParents) {
-                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + MessageUtils.getAppendableNodeContextString(node));
-                Message.EMPTY.send(sender, "&f-    &2-    expires in " + DurationFormatter.LONG.formatDateDiff(node.getExpiryUnixTime()));
+                Message.INFO_PARENT_ENTRY.send(sender, node.getGroupName(), MessageUtils.getAppendableNodeContextString(plugin.getLocaleManager(), node));
+                Message.INFO_PARENT_ENTRY_EXPIRY.send(sender, DurationFormatter.LONG.formatDateDiff(node.getExpiryUnixTime()));
             }
         }
 
@@ -106,7 +106,7 @@ public class UserInfo extends SubCommand<User> {
             ContextSet contextSet = contexts.getContexts();
             if (!contextSet.isEmpty()) {
                 context = contextSet.toSet().stream()
-                        .map(e -> MessageUtils.contextToString(e.getKey(), e.getValue()))
+                        .map(e -> MessageUtils.contextToString(plugin.getLocaleManager(), e.getKey(), e.getValue()))
                         .collect(Collectors.joining(" "));
             }
 
@@ -121,7 +121,7 @@ public class UserInfo extends SubCommand<User> {
             ListMultimap<String, String> metaMap = data.getMetaMultimap();
             if (!metaMap.isEmpty()) {
                 meta = metaMap.entries().stream()
-                        .map(e -> MessageUtils.contextToString(e.getKey(), e.getValue()))
+                        .map(e -> MessageUtils.contextToString(plugin.getLocaleManager(), e.getKey(), e.getValue()))
                         .collect(Collectors.joining(" "));
             }
         }

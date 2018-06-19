@@ -30,7 +30,6 @@ import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
-import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
@@ -95,7 +94,7 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
         if (ret.getKey().asBoolean()) {
             duration = ret.getValue().getExpiryUnixTime();
 
-            TextComponent.Builder builder = TextUtils.fromLegacy(Message.ADD_TEMP_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), this.type.name().toLowerCase(), meta, priority, DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(context)), CommandManager.SECTION_CHAR).toBuilder();
+            TextComponent.Builder builder = Message.ADD_TEMP_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFriendlyName(), this.type.name().toLowerCase(), meta, priority, DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
             HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
                     "¥3Raw " + this.type.name().toLowerCase() + ": ¥r" + meta,
                     '¥'
@@ -110,7 +109,7 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
             StorageAssistant.save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_TEMP_CHAT_META.send(sender, holder.getFriendlyName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(context));
+            Message.ALREADY_HAS_TEMP_CHAT_META.send(sender, holder.getFriendlyName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
     }

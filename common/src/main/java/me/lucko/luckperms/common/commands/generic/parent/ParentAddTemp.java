@@ -34,6 +34,8 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
@@ -52,8 +54,6 @@ import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 import java.util.Map;
-
-import static me.lucko.luckperms.common.command.utils.TabCompletions.getGroupTabComplete;
 
 public class ParentAddTemp extends SharedSubCommand {
     public ParentAddTemp(LocaleManager locale) {
@@ -88,7 +88,7 @@ public class ParentAddTemp extends SharedSubCommand {
         }
 
         if (group.getName().equalsIgnoreCase(holder.getObjectName())) {
-            Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), MessageUtils.contextSetToString(context));
+            Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
 
@@ -96,7 +96,7 @@ public class ParentAddTemp extends SharedSubCommand {
 
         if (ret.getKey().asBoolean()) {
             duration = ret.getValue().getExpiryUnixTime();
-            Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(context));
+            Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("parent", "addtemp", group.getName(), duration, context)
@@ -105,13 +105,15 @@ public class ParentAddTemp extends SharedSubCommand {
             StorageAssistant.save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), MessageUtils.contextSetToString(context));
+            Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
     }
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        return getGroupTabComplete(args, plugin);
+        return TabCompleter.create()
+                .at(0, TabCompletions.groups(plugin))
+                .complete(args);
     }
 }

@@ -29,7 +29,6 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.StandardNodeEquality;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
-import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
@@ -88,14 +87,14 @@ public class MetaSetTemp extends SharedSubCommand {
         Node n = NodeFactory.buildMetaNode(key, value).withExtraContext(context).setExpiry(duration).build();
 
         if (holder.hasPermission(NodeMapType.ENDURING, n, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
-            Message.ALREADY_HAS_TEMP_META.send(sender, holder.getFriendlyName(), key, value, MessageUtils.contextSetToString(context));
+            Message.ALREADY_HAS_TEMP_META.send(sender, holder.getFriendlyName(), key, value, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
 
         holder.clearMetaKeys(key, context, true);
         duration = holder.setPermission(n, modifier).getValue().getExpiryUnixTime();
 
-        TextComponent.Builder builder = TextUtils.fromLegacy(Message.SET_META_TEMP_SUCCESS.asString(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(context)), CommandManager.SECTION_CHAR).toBuilder();
+        TextComponent.Builder builder = Message.SET_META_TEMP_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
         HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
                 TextUtils.joinNewline("¥3Raw key: ¥r" + key, "¥3Raw value: ¥r" + value),
                 '¥'

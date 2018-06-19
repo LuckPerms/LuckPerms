@@ -83,7 +83,7 @@ public class GroupSetDisplayName extends SubCommand<Group> {
         group.removeIf(context, n -> n.getTypeData(DisplayNameType.KEY).isPresent());
 
         if (name.equals(group.getName())) {
-            Message.GROUP_SET_DISPLAY_NAME_REMOVED.send(sender, group.getName(), MessageUtils.contextSetToString(context));
+            Message.GROUP_SET_DISPLAY_NAME_REMOVED.send(sender, group.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             ExtendedLogEntry.build().actor(sender).acted(group)
                     .action("setdisplayname", name, context)
@@ -95,7 +95,7 @@ public class GroupSetDisplayName extends SubCommand<Group> {
 
         group.setPermission(NodeFactory.builder("displayname." + name).withExtraContext(context).build());
 
-        Message.GROUP_SET_DISPLAY_NAME.send(sender, name, group.getName(), MessageUtils.contextSetToString(context));
+        Message.GROUP_SET_DISPLAY_NAME.send(sender, name, group.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
         ExtendedLogEntry.build().actor(sender).acted(group)
                 .action("setdisplayname", name, context)

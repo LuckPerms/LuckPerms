@@ -32,6 +32,8 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -47,8 +49,6 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-
-import static me.lucko.luckperms.common.command.utils.TabCompletions.getGroupTabComplete;
 
 public class UserSwitchPrimaryGroup extends SharedSubCommand {
     public UserSwitchPrimaryGroup(LocaleManager locale) {
@@ -102,6 +102,8 @@ public class UserSwitchPrimaryGroup extends SharedSubCommand {
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        return getGroupTabComplete(args, plugin);
+        return TabCompleter.create()
+                .at(0, TabCompletions.groups(plugin))
+                .complete(args);
     }
 }

@@ -29,16 +29,15 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.sender.Sender;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public final class MessageUtils {
-    private static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + String.valueOf('§') + "[0-9A-FK-OR]");
 
     /**
      * Sends a message to the sender, formatted with the plugin prefix and color scheme
@@ -47,40 +46,8 @@ public final class MessageUtils {
      * @param message the message content
      */
     public static void sendPluginMessage(Sender sender, String message) {
-        String prefix = sender.getPlatform().getLocaleManager().getTranslation(Message.PREFIX);
-        if (prefix == null) {
-            prefix = Message.PREFIX.getMessage();
-        }
-        sender.sendMessage(color(prefix + message));
-    }
-
-    /**
-     * Colorizes a message.
-     *
-     * @param s the message to colorize
-     * @return a colored message
-     */
-    public static String color(String s) {
-        char[] b = s.toCharArray();
-
-        for (int i = 0; i < b.length - 1; ++i) {
-            if (b[i] == '&' && "0123456789AaBbCcDdEeFfKkLlMmNnOoRr".indexOf(b[i + 1]) > -1) {
-                b[i] = 167;
-                b[i + 1] = Character.toLowerCase(b[i + 1]);
-            }
-        }
-
-        return new String(b);
-    }
-
-    /**
-     * Strips all color from a message
-     *
-     * @param s the message to strip color from
-     * @return the message without color
-     */
-    public static String stripColor(String s) {
-        return s == null ? null : STRIP_COLOR_PATTERN.matcher(s).replaceAll("");
+        String prefix = Message.PREFIX.asString(sender.getPlatform().getLocaleManager());
+        sender.sendMessage(Message.colorize(prefix + message));
     }
 
     public static String toCommaSep(Collection<String> strings) {
@@ -163,19 +130,20 @@ public final class MessageUtils {
     /**
      * Produces a string representing a Nodes context, suitable for appending onto another message line.
      *
+     * @param localeManager the locale manager
      * @param node the node to query context from
      * @return a string representing the nodes context, or an empty string if the node applies globally.
      */
-    public static String getAppendableNodeContextString(Node node) {
+    public static String getAppendableNodeContextString(LocaleManager localeManager, Node node) {
         StringBuilder sb = new StringBuilder();
         if (node.isServerSpecific()) {
-            sb.append(" ").append(contextToString(Contexts.SERVER_KEY, node.getServer().get()));
+            sb.append(" ").append(contextToString(localeManager, Contexts.SERVER_KEY, node.getServer().get()));
         }
         if (node.isWorldSpecific()) {
-            sb.append(" ").append(contextToString(Contexts.WORLD_KEY, node.getWorld().get()));
+            sb.append(" ").append(contextToString(localeManager, Contexts.WORLD_KEY, node.getWorld().get()));
         }
         for (Map.Entry<String, String> c : node.getContexts().toSet()) {
-            sb.append(" ").append(contextToString(c.getKey(), c.getValue()));
+            sb.append(" ").append(contextToString(localeManager, c.getKey(), c.getValue()));
         }
 
         return sb.toString();
@@ -184,27 +152,29 @@ public final class MessageUtils {
     /**
      * Converts a context pair to a formatted string, surrounded by (  ) brackets.
      *
+     *
+     * @param localeManager the locale manager
      * @param key the context key
      * @param value the context value
      * @return a formatted string
      */
-    public static String contextToString(String key, String value) {
-        return Message.CONTEXT_PAIR.asString(null, key, value);
+    public static String contextToString(LocaleManager localeManager, String key, String value) {
+        return Message.CONTEXT_PAIR.asString(localeManager, key, value);
     }
 
-    public static String contextSetToString(ContextSet set) {
+    public static String contextSetToString(LocaleManager localeManager, ContextSet set) {
         if (set.isEmpty()) {
-            return Message.CONTEXT_PAIR__GLOBAL_INLINE.asString(null);
+            return Message.CONTEXT_PAIR__GLOBAL_INLINE.asString(localeManager);
         }
 
         StringBuilder sb = new StringBuilder();
 
         for (Map.Entry<String, String> e : set.toSet()) {
-            sb.append(Message.CONTEXT_PAIR_INLINE.asString(null, e.getKey(), e.getValue()));
-            sb.append(Message.CONTEXT_PAIR_SEP.asString(null));
+            sb.append(Message.CONTEXT_PAIR_INLINE.asString(localeManager, e.getKey(), e.getValue()));
+            sb.append(Message.CONTEXT_PAIR_SEP.asString(localeManager));
         }
 
-        return sb.delete(sb.length() - Message.CONTEXT_PAIR_SEP.asString(null).length(), sb.length()).toString();
+        return sb.delete(sb.length() - Message.CONTEXT_PAIR_SEP.asString(localeManager).length(), sb.length()).toString();
     }
 
     private MessageUtils() {}

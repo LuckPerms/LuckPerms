@@ -77,7 +77,7 @@ public class NukkitConfigAdapter extends AbstractConfigurationAdapter implements
     }
 
     @Override
-    public List<String> getObjectList(String path, List<String> def) {
+    public List<String> getKeys(String path, List<String> def) {
         ConfigSection section = this.configuration.getSection(path);
         if (section == null) {
             return def;

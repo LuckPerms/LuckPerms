@@ -53,7 +53,7 @@ public class PermissionClear extends SubCommand<LPSubjectData> {
             MessageUtils.sendPluginMessage(sender, "&aCleared permissions matching contexts &bANY&a.");
         } else {
             subjectData.clearPermissions(contextSet);
-            MessageUtils.sendPluginMessage(sender, "&aCleared permissions matching contexts &b" + SpongeCommandUtils.contextToString(contextSet));
+            MessageUtils.sendPluginMessage(sender, "&aCleared permissions matching contexts &b" + SpongeCommandUtils.contextToString(contextSet, plugin.getLocaleManager()));
         }
         return CommandResult.SUCCESS;
     }

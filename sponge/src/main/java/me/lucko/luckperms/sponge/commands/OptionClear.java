@@ -53,7 +53,7 @@ public class OptionClear extends SubCommand<LPSubjectData> {
             MessageUtils.sendPluginMessage(sender, "&aCleared options matching contexts &bANY&a.");
         } else {
             subjectData.clearOptions(contextSet);
-            MessageUtils.sendPluginMessage(sender, "&aCleared options matching contexts &b" + SpongeCommandUtils.contextToString(contextSet));
+            MessageUtils.sendPluginMessage(sender, "&aCleared options matching contexts &b" + SpongeCommandUtils.contextToString(contextSet, plugin.getLocaleManager()));
         }
         return CommandResult.SUCCESS;
     }

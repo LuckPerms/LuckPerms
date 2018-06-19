@@ -34,6 +34,8 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
@@ -51,9 +53,6 @@ import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 import java.util.Map;
-
-import static me.lucko.luckperms.common.command.utils.TabCompletions.getBoolTabComplete;
-import static me.lucko.luckperms.common.command.utils.TabCompletions.getPermissionTabComplete;
 
 public class PermissionSetTemp extends SharedSubCommand {
     public PermissionSetTemp(LocaleManager locale) {
@@ -87,7 +86,7 @@ public class PermissionSetTemp extends SharedSubCommand {
 
         if (result.getKey().asBoolean()) {
             duration = result.getValue().getExpiryUnixTime();
-            Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, value, holder.getFriendlyName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(context));
+            Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, value, holder.getFriendlyName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("permission", "settemp", node, value, duration, context)
@@ -96,17 +95,16 @@ public class PermissionSetTemp extends SharedSubCommand {
             StorageAssistant.save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, holder.getFriendlyName(), node, MessageUtils.contextSetToString(context));
+            Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, holder.getFriendlyName(), node, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
     }
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        List<String> ret = getBoolTabComplete(args);
-        if (!ret.isEmpty()) {
-            return ret;
-        }
-        return getPermissionTabComplete(args, plugin.getPermissionRegistry());
+        return TabCompleter.create()
+                .at(0, TabCompletions.permissions(plugin))
+                .at(1, TabCompletions.booleans())
+                .complete(args);
     }
 }

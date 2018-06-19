@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.commands.group.CreateGroup;
@@ -97,13 +98,16 @@ public class CommandManager {
     // the default executor to run commands on
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    private final List<Command> mainCommands;
+    private final TabCompletions tabCompletions;
+
+    private final List<Command<?, ?>> mainCommands;
 
     public CommandManager(LuckPermsPlugin plugin) {
         this.plugin = plugin;
         LocaleManager locale = plugin.getLocaleManager();
 
-        this.mainCommands = ImmutableList.<Command>builder()
+        this.tabCompletions = new TabCompletions(plugin);
+        this.mainCommands = ImmutableList.<Command<?, ?>>builder()
                 .add(new UserMainCommand(locale))
                 .add(new GroupMainCommand(locale))
                 .add(new TrackMainCommand(locale))
@@ -135,6 +139,10 @@ public class CommandManager {
 
     public LuckPermsPlugin getPlugin() {
         return this.plugin;
+    }
+
+    public TabCompletions getTabCompletions() {
+        return this.tabCompletions;
     }
 
     public CompletableFuture<CommandResult> onCommand(Sender sender, String label, List<String> args) {
@@ -170,7 +178,7 @@ public class CommandManager {
         }
 
         // Look for the main command.
-        Optional<Command> o = this.mainCommands.stream()
+        Optional<Command<?, ?>> o = this.mainCommands.stream()
                 .filter(m -> m.getName().equalsIgnoreCase(arguments.get(0)))
                 .limit(1)
                 .findAny();
@@ -263,8 +271,7 @@ public class CommandManager {
                 .filter(Command::shouldDisplay)
                 .filter(c -> c.isAuthorized(sender))
                 .forEach(c -> {
-                    @SuppressWarnings("unchecked")
-                    String permission = (String) c.getPermission().map(p -> ((CommandPermission) p).getPermission()).orElse("None");
+                    String permission = c.getPermission().map(CommandPermission::getPermission).orElse("None");
 
                     TextComponent component = TextUtils.fromLegacy("&3> &a" + String.format(c.getUsage(), label), AMPERSAND_CHAR)
                             .toBuilder().applyDeep(comp -> {

@@ -75,15 +75,15 @@ public class GroupInfo extends SubCommand<Group> {
         if (!parents.isEmpty()) {
             Message.INFO_PARENT_HEADER.send(sender);
             for (Node node : parents) {
-                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + MessageUtils.getAppendableNodeContextString(node));
+                Message.INFO_PARENT_ENTRY.send(sender, node.getGroupName(), MessageUtils.getAppendableNodeContextString(plugin.getLocaleManager(), node));
             }
         }
 
         if (!tempParents.isEmpty()) {
             Message.INFO_TEMP_PARENT_HEADER.send(sender);
             for (Node node : tempParents) {
-                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + MessageUtils.getAppendableNodeContextString(node));
-                Message.EMPTY.send(sender, "&f-    &2-    expires in " + DurationFormatter.LONG.formatDateDiff(node.getExpiryUnixTime()));
+                Message.INFO_PARENT_ENTRY.send(sender, node.getGroupName(), MessageUtils.getAppendableNodeContextString(plugin.getLocaleManager(), node));
+                Message.INFO_PARENT_ENTRY_EXPIRY.send(sender, DurationFormatter.LONG.formatDateDiff(node.getExpiryUnixTime()));
             }
         }
         return CommandResult.SUCCESS;

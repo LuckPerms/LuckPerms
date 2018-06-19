@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.command.utils;
+package me.lucko.luckperms.common.command.tabcomplete;
 
 import com.google.common.base.Splitter;
 
@@ -32,43 +32,36 @@ import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.treeview.TreeNode;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Utility methods for handling tab completion.
+ * Common completion suppliers used by the plugin
  */
 public final class TabCompletions {
 
-    public static List<String> getGroupTabComplete(List<String> args, LuckPermsPlugin plugin) {
-        return getTabComplete(new ArrayList<>(plugin.getGroupManager().getAll().keySet()), args);
-    }
+    private static final CompletionSupplier BOOLEAN = CompletionSupplier.startsWith("true", "false");
 
-    public static List<String> getTrackTabComplete(List<String> args, LuckPermsPlugin plugin) {
-        return getTabComplete(new ArrayList<>(plugin.getTrackManager().getAll().keySet()), args);
-    }
+    private final CompletionSupplier groups;
+    private final CompletionSupplier tracks;
+    private final CompletionSupplier permissions;
 
-    public static List<String> getBoolTabComplete(List<String> args) {
-        if (args.size() == 2) {
-            return Arrays.asList("true", "false");
-        } else {
-            return Collections.emptyList();
-        }
-    }
+    public TabCompletions(LuckPermsPlugin plugin) {
+        this.groups = CompletionSupplier.startsWith(() -> plugin.getGroupManager().getAll().keySet());
+        this.tracks = CompletionSupplier.startsWith(() -> plugin.getTrackManager().getAll().keySet());
+        this.permissions = partial -> {
+            PermissionRegistry cache = plugin.getPermissionRegistry();
 
-    public static List<String> getPermissionTabComplete(List<String> args, PermissionRegistry cache) {
-        if (args.size() <= 1) {
-            if (args.isEmpty() || args.get(0).equals("")) {
+            if (partial.isEmpty()) {
                 return cache.getRootNode().getChildren()
                         .map(Map::keySet)
-                        .map(s -> (List<String>) new ArrayList<>(s))
+                        .<List<String>>map(ArrayList::new)
                         .orElse(Collections.emptyList());
             }
 
-            String start = args.get(0).toLowerCase();
+            String start = partial.toLowerCase();
             List<String> parts = new ArrayList<>(Splitter.on('.').splitToList(start));
             TreeNode root = cache.getRootNode();
 
@@ -77,7 +70,7 @@ public final class TabCompletions {
                     return Collections.emptyList();
                 }
 
-                return root.getChildren().get().keySet().stream().filter(s -> s.startsWith(start)).collect(Collectors.toList());
+                return root.getChildren().get().keySet().stream().filter(TabCompleter.startsWithIgnoreCase(start)).collect(Collectors.toList());
             }
 
             String incomplete = parts.remove(parts.size() - 1);
@@ -100,25 +93,29 @@ public final class TabCompletions {
             }
 
             return root.getChildren().get().keySet().stream()
-                    .filter(s -> s.startsWith(incomplete))
+                    .filter(TabCompleter.startsWithIgnoreCase(incomplete))
                     .map(s -> parts.stream().collect(Collectors.joining(".")) + "." + s)
                     .collect(Collectors.toList());
-        }
-
-        return Collections.emptyList();
+        };
     }
 
-    private static List<String> getTabComplete(List<String> options, List<String> args) {
-        if (args.size() <= 1) {
-            if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
-                return options;
-            }
+    // bit of a weird pattern, but meh it kinda works, reduces the boilerplate
+    // of calling the commandmanager + tabcompletions getters every time
 
-            return options.stream().filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
-        }
-
-        return Collections.emptyList();
+    public static CompletionSupplier booleans() {
+        return BOOLEAN;
     }
 
-    private TabCompletions() {}
+    public static CompletionSupplier groups(LuckPermsPlugin plugin) {
+        return plugin.getCommandManager().getTabCompletions().groups;
+    }
+
+    public static CompletionSupplier tracks(LuckPermsPlugin plugin) {
+        return plugin.getCommandManager().getTabCompletions().tracks;
+    }
+
+    public static CompletionSupplier permissions(LuckPermsPlugin plugin) {
+        return plugin.getCommandManager().getTabCompletions().permissions;
+    }
+
 }

@@ -74,9 +74,9 @@ public class ParentClear extends SharedSubCommand {
 
         int changed = before - holder.enduringData().immutable().size();
         if (changed == 1) {
-            Message.PARENT_CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), MessageUtils.contextSetToString(context), changed);
+            Message.PARENT_CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         } else {
-            Message.PARENT_CLEAR_SUCCESS.send(sender, holder.getFriendlyName(), MessageUtils.contextSetToString(context), changed);
+            Message.PARENT_CLEAR_SUCCESS.send(sender, holder.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         }
 
         ExtendedLogEntry.build().actor(sender).acted(holder)

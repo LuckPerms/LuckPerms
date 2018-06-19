@@ -71,7 +71,7 @@ public class MetaUnset extends SharedSubCommand {
         }
 
         if (holder.clearMetaKeys(key, context, false)) {
-            Message.UNSET_META_SUCCESS.send(sender, key, holder.getFriendlyName(), MessageUtils.contextSetToString(context));
+            Message.UNSET_META_SUCCESS.send(sender, key, holder.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("meta", "unset", key, context)
@@ -80,7 +80,7 @@ public class MetaUnset extends SharedSubCommand {
             StorageAssistant.save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOESNT_HAVE_META.send(sender, holder.getFriendlyName(), key, MessageUtils.contextSetToString(context));
+            Message.DOESNT_HAVE_META.send(sender, holder.getFriendlyName(), key, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
     }

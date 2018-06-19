@@ -55,10 +55,9 @@ public class InfoCommand extends SingleCommand {
                 plugin.getBootstrap().getServerVersion()
         );
 
-        Message.EMPTY.send(sender, "&f-  &bStorage:");
-        Message.EMPTY.send(sender, "&f-     &3Type: &f" + plugin.getStorage().getName());
+        Message.INFO_STORAGE.send(sender, plugin.getStorage().getName());
         for (Map.Entry<String, String> e : plugin.getStorage().getMeta().entrySet()) {
-            Message.EMPTY.send(sender, "&f-     &3" + e.getKey() + ": " + formatValue(e.getValue()));
+            Message.INFO_STORAGE_META.send(sender, e.getKey(), formatValue(e.getValue()));
         }
 
         Message.INFO_MIDDLE.send(sender,

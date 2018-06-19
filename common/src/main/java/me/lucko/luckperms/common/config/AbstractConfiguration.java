@@ -106,10 +106,6 @@ public class AbstractConfiguration implements LuckPermsConfiguration {
         getPlugin().getEventFactory().handleConfigReload();
     }
 
-    public ConfigurationAdapter getAdapter() {
-        return this.adapter;
-    }
-
     @Override
     public LuckPermsPlugin getPlugin() {
         return this.plugin;

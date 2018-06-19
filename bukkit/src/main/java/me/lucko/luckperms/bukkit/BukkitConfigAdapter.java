@@ -77,7 +77,7 @@ public class BukkitConfigAdapter extends AbstractConfigurationAdapter implements
     }
 
     @Override
-    public List<String> getObjectList(String path, List<String> def) {
+    public List<String> getKeys(String path, List<String> def) {
         ConfigurationSection section = this.configuration.getConfigurationSection(path);
         if (section == null) {
             return def;

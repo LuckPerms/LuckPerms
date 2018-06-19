@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.group;
 
-import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -37,7 +36,6 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.TextUtils;
 
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
@@ -74,16 +72,16 @@ public class ListGroups extends SingleCommand {
                     TextComponent component;
 
                     if (tracks.isEmpty()) {
-                        component = TextUtils.fromLegacy(Message.GROUPS_LIST_ENTRY.asString(plugin.getLocaleManager(),
+                        component = Message.GROUPS_LIST_ENTRY.asComponent(plugin.getLocaleManager(),
                                 group.getFriendlyName(),
                                 group.getWeight().orElse(0)
-                        ), CommandManager.SECTION_CHAR);
+                        );
                     } else {
-                        component = TextUtils.fromLegacy(Message.GROUPS_LIST_ENTRY_WITH_TRACKS.asString(plugin.getLocaleManager(),
+                        component = Message.GROUPS_LIST_ENTRY_WITH_TRACKS.asComponent(plugin.getLocaleManager(),
                                 group.getFriendlyName(),
                                 group.getWeight().orElse(0),
                                 MessageUtils.toCommaSep(tracks)
-                        ), CommandManager.SECTION_CHAR);
+                        );
                     }
 
                     component = component.toBuilder().applyDeep(c -> {

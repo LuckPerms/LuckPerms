@@ -26,9 +26,9 @@
 package me.lucko.luckperms.common.command.abstraction;
 
 import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.command.Argument;
 import me.lucko.luckperms.common.locale.command.LocalizedCommandSpec;
+import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.sender.Sender;
 
 import java.util.function.Predicate;
@@ -51,23 +51,23 @@ public abstract class SubCommand<T> extends Command<T, Void> {
     public void sendUsage(Sender sender, String label) {
         StringBuilder sb = new StringBuilder();
         if (getArgs().isPresent()) {
-            sb.append("&3 - &7");
+            sb.append(Message.COMMAND_USAGE_ARGUMENT_JOIN.asString(sender.getPlatform().getLocaleManager()));
             for (Argument arg : getArgs().get()) {
-                sb.append(arg.asPrettyString()).append(" ");
+                sb.append(arg.asPrettyString(sender.getPlatform().getLocaleManager())).append(" ");
             }
         }
 
-        MessageUtils.sendPluginMessage(sender, "&3> &a" + getName().toLowerCase() + sb.toString());
+        Message.COMMAND_USAGE_BRIEF.send(sender, getName().toLowerCase(), sb.toString());
     }
 
     @Override
     public void sendDetailedUsage(Sender sender, String label) {
-        MessageUtils.sendPluginMessage(sender, "&3&lCommand Usage &3- &b" + getName());
-        MessageUtils.sendPluginMessage(sender, "&b> &7" + getDescription());
+        Message.COMMAND_USAGE_DETAILED_HEADER.send(sender, getName(), getDescription());
+
         if (getArgs().isPresent()) {
-            MessageUtils.sendPluginMessage(sender, "&3Arguments:");
+            Message.COMMAND_USAGE_DETAILED_ARGS_HEADER.send(sender);
             for (Argument arg : getArgs().get()) {
-                MessageUtils.sendPluginMessage(sender, "&b- " + arg.asPrettyString() + "&3 -> &7" + arg.getDescription());
+                Message.COMMAND_USAGE_DETAILED_ARG.send(sender, arg.asPrettyString(sender.getPlatform().getLocaleManager()), arg.getDescription());
             }
         }
     }

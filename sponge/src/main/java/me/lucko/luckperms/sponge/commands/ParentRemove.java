@@ -70,7 +70,7 @@ public class ParentRemove extends SubCommand<LPSubjectData> {
 
         if (subjectData.removeParent(contextSet, subject.toReference()).join()) {
             MessageUtils.sendPluginMessage(sender, "&aRemoved parent &b" + subject.getParentCollection().getIdentifier() +
-                    "&a/&b" + subject.getIdentifier() + "&a in context " + SpongeCommandUtils.contextToString(contextSet));
+                    "&a/&b" + subject.getIdentifier() + "&a in context " + SpongeCommandUtils.contextToString(contextSet, plugin.getLocaleManager()));
         } else {
             MessageUtils.sendPluginMessage(sender, "Unable to remove parent. Are you sure the Subject has it added?");
         }

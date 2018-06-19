@@ -373,7 +373,7 @@ public final class ConfigKeys {
      * The default assignments being applied by the plugin
      */
     public static final ConfigKey<List<AssignmentRule>> DEFAULT_ASSIGNMENTS = CustomKey.of(c -> {
-        return c.getObjectList("default-assignments", ImmutableList.of()).stream().map(name -> {
+        return c.getKeys("default-assignments", ImmutableList.of()).stream().map(name -> {
             String hasTrue = c.getString("default-assignments." + name + ".if.has-true", null);
             String hasFalse = c.getString("default-assignments." + name + ".if.has-false", null);
             String lacks = c.getString("default-assignments." + name + ".if.lacks", null);

@@ -32,6 +32,8 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -45,8 +47,6 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-
-import static me.lucko.luckperms.common.command.utils.TabCompletions.getPermissionTabComplete;
 
 public class PermissionCheckInherits extends SharedSubCommand {
     public PermissionCheckInherits(LocaleManager locale) {
@@ -71,12 +71,14 @@ public class PermissionCheckInherits extends SharedSubCommand {
         }
 
         String s = MessageUtils.formatTristate(result.getResult());
-        Message.CHECK_INHERITS_PERMISSION.send(sender, holder.getFriendlyName(), node, s, MessageUtils.contextSetToString(context), String.valueOf(location));
+        Message.CHECK_INHERITS_PERMISSION.send(sender, holder.getFriendlyName(), node, s, MessageUtils.contextSetToString(plugin.getLocaleManager(), context), String.valueOf(location));
         return CommandResult.SUCCESS;
     }
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        return getPermissionTabComplete(args, plugin.getPermissionRegistry());
+        return TabCompleter.create()
+                .at(0, TabCompletions.permissions(plugin))
+                .complete(args);
     }
 }

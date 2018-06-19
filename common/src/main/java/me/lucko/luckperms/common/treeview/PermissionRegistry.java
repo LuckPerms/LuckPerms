@@ -26,17 +26,13 @@
 package me.lucko.luckperms.common.treeview;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.utils.RepeatingTask;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -50,16 +46,12 @@ public class PermissionRegistry extends RepeatingTask {
     // the root node in the tree
     private final TreeNode rootNode;
 
-    // the known permissions already in the vault
-    private final Set<String> knownPermissions;
-
     // a queue of permission strings to be processed by the tree
     private final Queue<String> queue;
 
     public PermissionRegistry(SchedulerAdapter scheduler) {
         super(scheduler, 1, TimeUnit.SECONDS);
         this.rootNode = new TreeNode();
-        this.knownPermissions = ConcurrentHashMap.newKeySet(3000);
         this.queue = new ConcurrentLinkedQueue<>();
     }
 
@@ -70,15 +62,7 @@ public class PermissionRegistry extends RepeatingTask {
     @Override
     protected void tick() {
         for (String e; (e = this.queue.poll()) != null; ) {
-            try {
-                String s = e.toLowerCase();
-                // only attempt an insert if we're not seen this permission before
-                if (this.knownPermissions.add(s)) {
-                    insert(s);
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            insert(e);
         }
     }
 
@@ -89,12 +73,12 @@ public class PermissionRegistry extends RepeatingTask {
         this.queue.offer(permission);
     }
 
-    public void offerAll(Collection<? extends String> permissions) {
-        this.queue.addAll(permissions);
-    }
-
-    public Set<String> getKnownPermissions() {
-        return ImmutableSet.copyOf(this.knownPermissions);
+    public void insert(String permission) {
+        try {
+            doInsert(permission);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     public List<String> rootAsList() {
@@ -105,14 +89,17 @@ public class PermissionRegistry extends RepeatingTask {
         return this.rootNode.getDeepSize();
     }
 
-    private void insert(String permission) {
+    private void doInsert(String permission) {
         // split the permission up into parts
         List<String> parts = DOT_SPLIT.splitToList(permission);
 
         // insert the permission into the node structure
         TreeNode current = this.rootNode;
         for (String part : parts) {
-            current = current.resolve(part);
+            current = current.tryInsert(part);
+            if (current == null) {
+                return;
+            }
         }
     }
 

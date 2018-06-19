@@ -104,9 +104,9 @@ public class MetaClear extends SharedSubCommand {
 
         int changed = before - holder.enduringData().immutable().size();
         if (changed == 1) {
-            Message.META_CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), MessageUtils.contextSetToString(context), changed);
+            Message.META_CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         } else {
-            Message.META_CLEAR_SUCCESS.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), MessageUtils.contextSetToString(context), changed);
+            Message.META_CLEAR_SUCCESS.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         }
 
         ExtendedLogEntry.build().actor(sender).acted(holder)

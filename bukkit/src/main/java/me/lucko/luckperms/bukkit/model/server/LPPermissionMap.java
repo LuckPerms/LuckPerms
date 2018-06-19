@@ -99,7 +99,7 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(value, "value");
 
-        this.plugin.getPermissionRegistry().offer(key);
+        this.plugin.getPermissionRegistry().insert(key);
         Permission ret = super.put(key, value);
         update();
         return ret;
@@ -107,9 +107,9 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
 
     @Override
     public void putAll(@Nonnull Map<? extends String, ? extends Permission> m) {
-        this.plugin.getPermissionRegistry().offerAll(m.keySet());
-        super.putAll(m);
-        update();
+        for (Map.Entry<? extends String, ? extends Permission> ent : m.entrySet()) {
+            put(ent.getKey(), ent.getValue());
+        }
     }
 
     @Override
@@ -117,7 +117,7 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(value, "value");
 
-        this.plugin.getPermissionRegistry().offer(key);
+        this.plugin.getPermissionRegistry().insert(key);
         Permission ret = super.putIfAbsent(key, value);
         update();
         return ret;

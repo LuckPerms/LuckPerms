@@ -32,6 +32,8 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
@@ -47,8 +49,6 @@ import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-
-import static me.lucko.luckperms.common.command.utils.TabCompletions.getTrackTabComplete;
 
 public class ParentClearTrack extends SharedSubCommand {
     public ParentClearTrack(LocaleManager locale) {
@@ -105,9 +105,9 @@ public class ParentClearTrack extends SharedSubCommand {
         int changed = before - holder.enduringData().immutable().size();
 
         if (changed == 1) {
-            Message.PARENT_CLEAR_TRACK_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), track.getName(), MessageUtils.contextSetToString(context), changed);
+            Message.PARENT_CLEAR_TRACK_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), track.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         } else {
-            Message.PARENT_CLEAR_TRACK_SUCCESS.send(sender, holder.getFriendlyName(), track.getName(), MessageUtils.contextSetToString(context), changed);
+            Message.PARENT_CLEAR_TRACK_SUCCESS.send(sender, holder.getFriendlyName(), track.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         }
 
         ExtendedLogEntry.build().actor(sender).acted(holder)
@@ -120,6 +120,8 @@ public class ParentClearTrack extends SharedSubCommand {
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        return getTrackTabComplete(args, plugin);
+        return TabCompleter.create()
+                .at(0, TabCompletions.tracks(plugin))
+                .complete(args);
     }
 }

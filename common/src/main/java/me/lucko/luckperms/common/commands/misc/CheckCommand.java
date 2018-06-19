@@ -29,8 +29,10 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
-import me.lucko.luckperms.common.command.utils.TabCompletions;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -75,15 +77,9 @@ public class CheckCommand extends SingleCommand {
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        if (args.isEmpty()) {
-            return plugin.getBootstrap().getPlayerList().collect(Collectors.toList());
-        }
-
-        if (args.size() == 1) {
-            return plugin.getBootstrap().getPlayerList().filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
-        }
-
-        args.remove(0);
-        return TabCompletions.getPermissionTabComplete(args, plugin.getPermissionRegistry());
+        return TabCompleter.create()
+                .at(0, CompletionSupplier.startsWith(() -> plugin.getBootstrap().getPlayerList().collect(Collectors.toList())))
+                .at(1, TabCompletions.permissions(plugin))
+                .complete(args);
     }
 }

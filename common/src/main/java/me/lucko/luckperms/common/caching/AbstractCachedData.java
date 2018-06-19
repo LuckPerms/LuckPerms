@@ -323,10 +323,6 @@ public abstract class AbstractCachedData implements CachedData {
         return CompletableFuture.allOf(keys.stream().map(this::reloadMeta).toArray(CompletableFuture[]::new));
     }
 
-    public CompletableFuture<Void> reloadAll() {
-        return CompletableFuture.allOf(reloadPermissions(), reloadMeta());
-    }
-
     @Override
     public void preCalculate(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");

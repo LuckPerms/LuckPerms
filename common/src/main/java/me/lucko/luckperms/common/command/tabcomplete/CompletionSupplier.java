@@ -23,47 +23,31 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.locale.command;
+package me.lucko.luckperms.common.command.tabcomplete;
 
-import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.message.Message;
+public interface CompletionSupplier {
 
-import javax.annotation.Nullable;
+    CompletionSupplier EMPTY = partial -> Collections.emptyList();
 
-public class Argument {
-    public static Argument create(String name, boolean required, String description) {
-        return new Argument(name, required, description);
+    static CompletionSupplier startsWith(String... strings) {
+        return partial -> Arrays.stream(strings).filter(TabCompleter.startsWithIgnoreCase(partial)).collect(Collectors.toList());
     }
 
-    public static ImmutableList<Argument> list(Argument... args) {
-        return ImmutableList.copyOf(args);
+    static CompletionSupplier startsWith(Collection<String> strings) {
+        return partial -> strings.stream().filter(TabCompleter.startsWithIgnoreCase(partial)).collect(Collectors.toList());
     }
 
-    private final String name;
-    private final boolean required;
-    private final String description;
-
-    private Argument(String name, boolean required, String description) {
-        this.name = name;
-        this.required = required;
-        this.description = description;
+    static CompletionSupplier startsWith(Supplier<? extends Collection<String>> stringsSupplier) {
+        return partial -> stringsSupplier.get().stream().filter(TabCompleter.startsWithIgnoreCase(partial)).collect(Collectors.toList());
     }
 
-    public String asPrettyString(@Nullable LocaleManager localeManager) {
-        return (this.required ? Message.REQUIRED_ARGUMENT : Message.OPTIONAL_ARGUMENT).asString(localeManager, this.name);
-    }
+    List<String> supplyCompletions(String partial);
 
-    public String getName() {
-        return this.name;
-    }
-
-    public boolean isRequired() {
-        return this.required;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
 }

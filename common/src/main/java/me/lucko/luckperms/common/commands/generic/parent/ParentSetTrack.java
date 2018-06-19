@@ -32,6 +32,8 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
@@ -48,9 +50,6 @@ import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-
-import static me.lucko.luckperms.common.command.utils.TabCompletions.getGroupTabComplete;
-import static me.lucko.luckperms.common.command.utils.TabCompletions.getTrackTabComplete;
 
 public class ParentSetTrack extends SharedSubCommand {
     public ParentSetTrack(LocaleManager locale) {
@@ -117,7 +116,7 @@ public class ParentSetTrack extends SharedSubCommand {
         holder.removeIf(node -> node.isGroupNode() && node.getFullContexts().equals(context) && track.containsGroup(node.getGroupName()));
         holder.setPermission(NodeFactory.buildGroupNode(group.getName()).withExtraContext(context).build());
 
-        Message.SET_TRACK_PARENT_SUCCESS.send(sender, holder.getFriendlyName(), track.getName(), group.getFriendlyName(), MessageUtils.contextSetToString(context));
+        Message.SET_TRACK_PARENT_SUCCESS.send(sender, holder.getFriendlyName(), track.getName(), group.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
         ExtendedLogEntry.build().actor(sender).acted(holder)
                 .action("parent", "settrack", track.getName(), groupName, context)
@@ -129,11 +128,9 @@ public class ParentSetTrack extends SharedSubCommand {
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        if (args.isEmpty() || args.size() == 1) {
-            return getTrackTabComplete(args, plugin);
-        }
-
-        args.remove(0);
-        return getGroupTabComplete(args, plugin);
+        return TabCompleter.create()
+                .at(0, TabCompletions.tracks(plugin))
+                .at(1, TabCompletions.groups(plugin))
+                .complete(args);
     }
 }

@@ -25,10 +25,12 @@
 
 package me.lucko.luckperms.common.locale.message;
 
-import me.lucko.luckperms.common.command.utils.MessageUtils;
+import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.TextUtils;
+
+import net.kyori.text.TextComponent;
 
 import javax.annotation.Nullable;
 
@@ -65,7 +67,7 @@ public enum Message {
             "{PREFIX}&3LOG &3&l> &f{}",
             false
     ),
-    VERBOSE_LOG("&3VB &3&l> {}", true),
+    VERBOSE_LOG("&3VB &3&l> &a{}&7 - &a{}&7 - {}{}", true),
     EXPORT_LOG("&3EXPORT &3&l> &f{}", true),
     EXPORT_LOG_PROGRESS("&3EXPORT &3&l> &7{}", true),
     MIGRATION_LOG("&3MIGRATION &7[&3{}&7] &3&l> &f{}", true),
@@ -77,6 +79,19 @@ public enum Message {
      */
     COMMAND_NOT_RECOGNISED("&cCommand not recognised.", true),
     COMMAND_NO_PERMISSION("&cYou do not have permission to use this command!", true),
+
+    MAIN_COMMAND_USAGE_HEADER("&b{} Sub Commands: &7({} ...)", true),
+    COMMAND_USAGE_ARGUMENT_JOIN("&3 - &7", false),
+    COMMAND_USAGE_BRIEF("&3> &a{}{}", false),
+    COMMAND_USAGE_DETAILED_HEADER(
+            "{PREFIX}&3&lCommand Usage &3- &b{}" + "\n" +
+            "{PREFIX}&b> &7{}",
+            false
+    ),
+    COMMAND_USAGE_DETAILED_ARGS_HEADER("&3Arguments:", true),
+    COMMAND_USAGE_DETAILED_ARG("&b- {}&3 -> &7{}", true),
+    REQUIRED_ARGUMENT("&8<&7{}&8>", false),
+    OPTIONAL_ARGUMENT("&8[&7{}&8]", false),
 
 
     /*
@@ -180,6 +195,15 @@ public enum Message {
             "{PREFIX}&f-  {}",
             false
     ),
+
+    INFO_STORAGE(
+            "{PREFIX}&f-  &bStorage:" + "\n" +
+            "{PREFIX}&f-     &3Type: &f{}",
+            false
+    ),
+
+    INFO_STORAGE_META("&f-     &3{}: {}", true),
+
     INFO_MIDDLE(
             "{PREFIX}&f-  &bMessaging: &f{}" + "\n" +
             "{PREFIX}&f-  &bInstance:" + "\n" +
@@ -326,6 +350,8 @@ public enum Message {
 
     INFO_PARENT_HEADER("&f- &aParent Groups:", true),
     INFO_TEMP_PARENT_HEADER("&f- &aTemporary Parent Groups:", true),
+    INFO_PARENT_ENTRY("&f-    &3> &f{}{}", true),
+    INFO_PARENT_ENTRY_EXPIRY("&f-    &2-    expires in {}", true),
     USER_REMOVEGROUP_ERROR_PRIMARY("&aYou cannot remove a user from their primary group.", true),
     USER_PRIMARYGROUP_SUCCESS("&b{}&a's primary group was set to &b{}&a.", true),
     USER_PRIMARYGROUP_WARN_OPTION("&aWarning: The primary group calculation method being used by this server &7({}) &amay not reflect this change.", true),
@@ -433,19 +459,6 @@ public enum Message {
     IMPORT_END_ERROR_CONTENT("&b(Import) &b-> &c{}", true),
     IMPORT_END_ERROR_FOOTER("&b(Import) &7<------------------------------------------>", true);
 
-    public static final Object SKIP_ELEMENT = new Object();
-
-    private static String format(String s, Object... objects) {
-        for (int i = 0; i < objects.length; i++) {
-            Object o = objects[i];
-
-            if (o != SKIP_ELEMENT) {
-                s = s.replace("{" + i + "}", String.valueOf(o));
-            }
-        }
-        return s;
-    }
-
     private final String message;
     private final boolean showPrefix;
 
@@ -459,29 +472,65 @@ public enum Message {
         return this.message;
     }
 
-    public String asString(@Nullable LocaleManager localeManager, Object... objects) {
+    private String getTranslatedMessage(@Nullable LocaleManager localeManager) {
         String prefix = null;
         if (localeManager != null) {
-            prefix = localeManager.getTranslation(PREFIX);
+            prefix = localeManager.getTranslation(this);
         }
         if (prefix == null) {
-            prefix = PREFIX.getMessage();
+            prefix = this.getMessage();
         }
+        return prefix;
+    }
 
-        String s = null;
-        if (localeManager != null) {
-            s = localeManager.getTranslation(this);
-        }
-        if (s == null) {
-            s = this.message;
-        }
+    private String format(@Nullable LocaleManager localeManager, Object... objects) {
+        String prefix = PREFIX.getTranslatedMessage(localeManager);
+        String msg = format(
+                this.getTranslatedMessage(localeManager)
+                        .replace("{PREFIX}", prefix)
+                        .replace("\\n", "\n"),
+                objects
+        );
+        return this.showPrefix ? prefix + msg : msg;
+    }
 
-        s = format(s.replace("{PREFIX}", prefix).replace("\\n", "\n"), objects);
-        return MessageUtils.color(this.showPrefix ? prefix + s : s);
+    public String asString(@Nullable LocaleManager localeManager, Object... objects) {
+        return colorize(format(localeManager, objects));
+    }
+
+    public TextComponent asComponent(@Nullable LocaleManager localeManager, Object... objects) {
+        return TextUtils.fromLegacy(format(localeManager, objects), CommandManager.AMPERSAND_CHAR);
     }
 
     public void send(Sender sender, Object... objects) {
         sender.sendMessage(asString(sender.getPlatform().getLocaleManager(), objects));
+    }
+
+    private static String format(String s, Object... objects) {
+        for (int i = 0; i < objects.length; i++) {
+            Object o = objects[i];
+            s = s.replace("{" + i + "}", String.valueOf(o));
+        }
+        return s;
+    }
+
+    /**
+     * Colorizes a message.
+     *
+     * @param s the message to colorize
+     * @return a colored message
+     */
+    public static String colorize(String s) {
+        char[] b = s.toCharArray();
+
+        for (int i = 0; i < b.length - 1; ++i) {
+            if (b[i] == '&' && "0123456789AaBbCcDdEeFfKkLlMmNnOoRr".indexOf(b[i + 1]) > -1) {
+                b[i] = 167;
+                b[i + 1] = Character.toLowerCase(b[i + 1]);
+            }
+        }
+
+        return new String(b);
     }
 
     /**

@@ -38,6 +38,7 @@ import java.io.BufferedReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.EnumMap;
 import java.util.Map;
 
 public class LocaleManager {
@@ -71,8 +72,8 @@ public class LocaleManager {
     @SuppressWarnings("unchecked")
     public void loadFromFile(Path file) throws Exception {
         try (BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
-            ImmutableMap.Builder<Message, String> messages = ImmutableMap.builder();
-            ImmutableMap.Builder<CommandSpec, CommandSpecData> commands = ImmutableMap.builder();
+            EnumMap<Message, String> messages = new EnumMap<>(Message.class);
+            EnumMap<CommandSpec, CommandSpecData> commands = new EnumMap<>(CommandSpec.class);
 
             Map<String, Object> data = (Map<String, Object>) new Yaml().load(reader);
             for (Map.Entry<String, Object> entry : data.entrySet()) {
@@ -124,18 +125,9 @@ public class LocaleManager {
                 }
             }
 
-            this.messages = messages.build();
-            this.commands = commands.build();
+            this.messages = ImmutableMap.copyOf(messages);
+            this.commands = ImmutableMap.copyOf(commands);
         }
-    }
-
-    /**
-     * Gets the size of loaded translations
-     *
-     * @return the size of the loaded translations
-     */
-    public int getSize() {
-        return this.messages.size() + this.commands.size();
     }
 
     /**

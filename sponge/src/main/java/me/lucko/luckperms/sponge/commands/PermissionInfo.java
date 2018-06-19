@@ -60,7 +60,7 @@ public class PermissionInfo extends SubCommand<LPSubjectData> {
             }
 
             for (Map.Entry<ImmutableContextSet, ImmutableMap<String, Boolean>> e : permissions.entrySet()) {
-                MessageUtils.sendPluginMessage(sender, "&3>> &bContext: " + SpongeCommandUtils.contextToString(e.getKey()) + "\n" + SpongeCommandUtils.nodesToString(e.getValue()));
+                MessageUtils.sendPluginMessage(sender, "&3>> &bContext: " + SpongeCommandUtils.contextToString(e.getKey(), plugin.getLocaleManager()) + "\n" + SpongeCommandUtils.nodesToString(e.getValue()));
             }
 
         } else {
@@ -71,7 +71,7 @@ public class PermissionInfo extends SubCommand<LPSubjectData> {
             }
 
             MessageUtils.sendPluginMessage(sender, "&aShowing permissions matching contexts &b" +
-                    SpongeCommandUtils.contextToString(contextSet) + "&a.\n" + SpongeCommandUtils.nodesToString(permissions));
+                    SpongeCommandUtils.contextToString(contextSet, plugin.getLocaleManager()) + "&a.\n" + SpongeCommandUtils.nodesToString(permissions));
 
         }
         return CommandResult.SUCCESS;

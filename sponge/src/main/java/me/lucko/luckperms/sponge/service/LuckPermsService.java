@@ -199,7 +199,7 @@ public class LuckPermsService implements LPPermissionService {
     public LPPermissionDescription registerPermissionDescription(String id, Text description, PluginContainer owner) {
         SimplePermissionDescription desc = new SimplePermissionDescription(this, id, description, owner);
         this.permissionDescriptions.put(id, desc);
-        this.plugin.getPermissionRegistry().offer(id);
+        this.plugin.getPermissionRegistry().insert(id);
         return desc;
     }
 
@@ -214,7 +214,7 @@ public class LuckPermsService implements LPPermissionService {
         Map<String, LPPermissionDescription> descriptions = new HashMap<>(this.permissionDescriptions);
 
         // collect known values from the permission vault
-        for (String perm : this.plugin.getPermissionRegistry().getKnownPermissions()) {
+        for (String perm : this.plugin.getPermissionRegistry().rootAsList()) {
             // don't override plugin defined values
             if (!descriptions.containsKey(perm)) {
                 descriptions.put(perm, new SimplePermissionDescription(this, perm, null, null));

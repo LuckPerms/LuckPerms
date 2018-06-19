@@ -54,7 +54,7 @@ public class PermissionSet extends SubCommand<LPSubjectData> {
         ImmutableContextSet contextSet = ArgumentParser.parseContextSponge(2, args);
 
         if (subjectData.setPermission(contextSet, node, tristate).join()) {
-            MessageUtils.sendPluginMessage(sender, "&aSet &b" + node + "&a to &b" + tristate.toString().toLowerCase() + "&a in context " + SpongeCommandUtils.contextToString(contextSet));
+            MessageUtils.sendPluginMessage(sender, "&aSet &b" + node + "&a to &b" + tristate.toString().toLowerCase() + "&a in context " + SpongeCommandUtils.contextToString(contextSet, plugin.getLocaleManager()));
         } else {
             MessageUtils.sendPluginMessage(sender, "Unable to set permission. Does the Subject already have it set?");
         }

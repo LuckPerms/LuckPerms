@@ -82,7 +82,7 @@ public class BungeeConfigAdapter extends AbstractConfigurationAdapter implements
     }
 
     @Override
-    public List<String> getObjectList(String path, List<String> def) {
+    public List<String> getKeys(String path, List<String> def) {
         Configuration section = this.configuration.getSection(path);
         if (section == null) {
             return def;

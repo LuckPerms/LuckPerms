@@ -81,8 +81,7 @@ public class PermissionInfo extends SharedSubCommand {
         // remove irrelevant types (these are displayed in the other info commands)
         nodes.removeIf(node -> (node.isGroupNode() && node.getValue() && plugin.getGroupManager().isLoaded(node.getGroupName())) ||
         // remove if the node is a meta node
-        node.isPrefix() || node.isSuffix() || node.isMeta()
-        );
+        node.isPrefix() || node.isSuffix() || node.isMeta());
 
         // handle empty
         if (nodes.isEmpty()) {
@@ -115,7 +114,7 @@ public class PermissionInfo extends SharedSubCommand {
 
         // send content
         for (LocalizedNode node : content) {
-            String s = "&3> " + (node.getValue() ? "&a" : "&c") + node.getPermission() + (sender.isConsole() ? " &7(" + node.getValue() + "&7)" : "") + MessageUtils.getAppendableNodeContextString(node);
+            String s = "&3> " + (node.getValue() ? "&a" : "&c") + node.getPermission() + (sender.isConsole() ? " &7(" + node.getValue() + "&7)" : "") + MessageUtils.getAppendableNodeContextString(plugin.getLocaleManager(), node);
             if (node.isTemporary()) {
                 s += "\n&2-    expires in " + DurationFormatter.LONG.formatDateDiff(node.getExpiryUnixTime());
             }

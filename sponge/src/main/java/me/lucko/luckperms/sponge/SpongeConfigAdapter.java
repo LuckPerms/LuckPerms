@@ -99,7 +99,7 @@ public class SpongeConfigAdapter extends AbstractConfigurationAdapter implements
     }
 
     @Override
-    public List<String> getObjectList(String path, List<String> def) {
+    public List<String> getKeys(String path, List<String> def) {
         ConfigurationNode node = resolvePath(path);
         if (node.isVirtual()) {
             return def;

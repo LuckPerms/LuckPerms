@@ -31,7 +31,8 @@ import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.command.utils.TabCompletions;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -80,6 +81,8 @@ public class DeleteTrack extends SingleCommand {
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        return TabCompletions.getTrackTabComplete(args, plugin);
+        return TabCompleter.create()
+                .at(0, TabCompletions.tracks(plugin))
+                .complete(args);
     }
 }

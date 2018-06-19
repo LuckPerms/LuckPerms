@@ -142,7 +142,7 @@ public class GroupListMembers extends SubCommand<Group> {
         headerMessage.send(sender, page, pages.size(), results.size());
 
         for (Map.Entry<String, HeldPermission<T>> ent : mappedContent) {
-            String s = "&3> &b" + ent.getKey() + " " + getNodeExpiryString(ent.getValue().asNode()) + MessageUtils.getAppendableNodeContextString(ent.getValue().asNode());
+            String s = "&3> &b" + ent.getKey() + " " + getNodeExpiryString(ent.getValue().asNode()) + MessageUtils.getAppendableNodeContextString(sender.getPlatform().getLocaleManager(), ent.getValue().asNode());
             TextComponent message = TextUtils.fromLegacy(s, CommandManager.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), holderType, label, ent.getValue())).build();
             sender.sendMessage(message);
         }

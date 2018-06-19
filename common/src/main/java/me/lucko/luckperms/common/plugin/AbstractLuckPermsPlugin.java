@@ -32,7 +32,6 @@ import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.buffers.UpdateTaskBuffer;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.config.AbstractConfiguration;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
@@ -44,6 +43,7 @@ import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.event.EventFactory;
 import me.lucko.luckperms.common.inheritance.InheritanceHandler;
 import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
@@ -318,9 +318,9 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     private void displayBanner(Sender sender) {
-        sender.sendMessage(MessageUtils.color("&b       &3 __    "));
-        sender.sendMessage(MessageUtils.color("&b  |    &3|__)   " + "&2LuckPerms &bv" + getBootstrap().getVersion()));
-        sender.sendMessage(MessageUtils.color("&b  |___ &3|      " + "&8Running on " + getBootstrap().getType().getFriendlyName() + " - " + getBootstrap().getServerBrand()));
+        sender.sendMessage(Message.colorize("&b       &3 __    "));
+        sender.sendMessage(Message.colorize("&b  |    &3|__)   " + "&2LuckPerms &bv" + getBootstrap().getVersion()));
+        sender.sendMessage(Message.colorize("&b  |___ &3|      " + "&8Running on " + getBootstrap().getType().getFriendlyName() + " - " + getBootstrap().getServerBrand()));
         sender.sendMessage("");
     }
 }

@@ -61,7 +61,7 @@ public class ParentInfo extends SubCommand<LPSubjectData> {
             }
 
             for (Map.Entry<ImmutableContextSet, ImmutableList<LPSubjectReference>> e : parents.entrySet()) {
-                MessageUtils.sendPluginMessage(sender, "&3>> &bContext: " + SpongeCommandUtils.contextToString(e.getKey()) + "\n" + SpongeCommandUtils.parentsToString(e.getValue()));
+                MessageUtils.sendPluginMessage(sender, "&3>> &bContext: " + SpongeCommandUtils.contextToString(e.getKey(), plugin.getLocaleManager()) + "\n" + SpongeCommandUtils.parentsToString(e.getValue()));
             }
 
         } else {
@@ -72,7 +72,7 @@ public class ParentInfo extends SubCommand<LPSubjectData> {
             }
 
             MessageUtils.sendPluginMessage(sender, "&aShowing parents matching contexts &b" +
-                    SpongeCommandUtils.contextToString(contextSet) + "&a.\n" + SpongeCommandUtils.parentsToString(parents));
+                    SpongeCommandUtils.contextToString(contextSet, plugin.getLocaleManager()) + "&a.\n" + SpongeCommandUtils.parentsToString(parents));
 
         }
         return CommandResult.SUCCESS;

@@ -112,7 +112,7 @@ public class ParentInfo extends SharedSubCommand {
 
         // send content
         for (LocalizedNode node : content) {
-            String s = "&3> &a" + node.getGroupName() + MessageUtils.getAppendableNodeContextString(node);
+            String s = "&3> &a" + node.getGroupName() + MessageUtils.getAppendableNodeContextString(plugin.getLocaleManager(), node);
             if (node.isTemporary()) {
                 s += "\n&2  expires in " + DurationFormatter.LONG.formatDateDiff(node.getExpiryUnixTime());
             }

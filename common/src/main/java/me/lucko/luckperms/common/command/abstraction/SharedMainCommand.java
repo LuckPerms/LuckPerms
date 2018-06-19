@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.command.abstraction;
 
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.command.LocalizedCommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -143,9 +142,9 @@ public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T>
 
         if (!subs.isEmpty()) {
             if (user) {
-                MessageUtils.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format("/%s user <user> " + getName().toLowerCase() + " ...)", label));
+                Message.MAIN_COMMAND_USAGE_HEADER.send(sender, getName(), String.format("/%s user <user> " + getName().toLowerCase(), label));
             } else {
-                MessageUtils.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format("/%s group <group> " + getName().toLowerCase() + " ...)", label));
+                Message.MAIN_COMMAND_USAGE_HEADER.send(sender, getName(), String.format("/%s group <group> " + getName().toLowerCase(), label));
             }
 
             for (SharedSubCommand s : subs) {

@@ -86,16 +86,17 @@ public class ImmutableTreeNode implements Comparable<ImmutableTreeNode> {
 
         List<Map.Entry<Integer, String>> results = new ArrayList<>();
         for (Map.Entry<String, ImmutableTreeNode> node : this.children.entrySet()) {
+            String value = node.getKey();
 
             // add self
-            results.add(Maps.immutableEntry(0, node.getKey()));
+            results.add(Maps.immutableEntry(0, value));
 
             // add child nodes, incrementing their level & appending their prefix node
             results.addAll(node.getValue().getNodeEndings().stream()
                     .map(e -> Maps.immutableEntry(
                             e.getKey() + 1, // increment level
                             // add this node's key infront of the child value
-                            node.getKey() + "." + e.getValue())
+                            value + "." + e.getValue())
                     )
                     .collect(Collectors.toList()));
         }

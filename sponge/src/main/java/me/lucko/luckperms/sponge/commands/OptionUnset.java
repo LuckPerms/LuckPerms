@@ -51,7 +51,7 @@ public class OptionUnset extends SubCommand<LPSubjectData> {
         ImmutableContextSet contextSet = ArgumentParser.parseContextSponge(1, args);
 
         if (subjectData.unsetOption(contextSet, key).join()) {
-            MessageUtils.sendPluginMessage(sender, "&aUnset &f\"" + key + "&f\"&a in context " + SpongeCommandUtils.contextToString(contextSet));
+            MessageUtils.sendPluginMessage(sender, "&aUnset &f\"" + key + "&f\"&a in context " + SpongeCommandUtils.contextToString(contextSet, plugin.getLocaleManager()));
         } else {
             MessageUtils.sendPluginMessage(sender, "Unable to unset option. Are you sure the Subject has it set?");
         }

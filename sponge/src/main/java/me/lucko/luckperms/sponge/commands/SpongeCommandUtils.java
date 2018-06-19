@@ -29,6 +29,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
+import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 
 import java.util.List;
@@ -85,8 +86,8 @@ public final class SpongeCommandUtils {
         return sb.toString();
     }
 
-    public static String contextToString(ContextSet set) {
-        return MessageUtils.contextSetToString(set);
+    public static String contextToString(ContextSet set, LocaleManager localeManager) {
+        return MessageUtils.contextSetToString(localeManager, set);
     }
 
     private SpongeCommandUtils() {}

@@ -33,6 +33,8 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
@@ -47,8 +49,6 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-
-import static me.lucko.luckperms.common.command.utils.TabCompletions.getGroupTabComplete;
 
 public class ParentAdd extends SharedSubCommand {
     public ParentAdd(LocaleManager locale) {
@@ -83,7 +83,7 @@ public class ParentAdd extends SharedSubCommand {
         DataMutateResult result = holder.setPermission(NodeFactory.buildGroupNode(group.getName()).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            Message.SET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), MessageUtils.contextSetToString(context));
+            Message.SET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("parent", "add", group.getName(), context)
@@ -92,13 +92,15 @@ public class ParentAdd extends SharedSubCommand {
             StorageAssistant.save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_INHERITS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), MessageUtils.contextSetToString(context));
+            Message.ALREADY_INHERITS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
     }
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        return getGroupTabComplete(args, plugin);
+        return TabCompleter.create()
+                .at(0, TabCompletions.groups(plugin))
+                .complete(args);
     }
 }

@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.command.abstraction;
 
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.command.LocalizedCommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -120,7 +119,7 @@ public abstract class MainCommand<T, I> extends Command<Void, T> {
         final List<String> objects = getTargets(plugin);
 
         if (args.size() <= 1) {
-            if (args.isEmpty() || args.get(0).equals("")) {
+            if (args.isEmpty() || args.get(0).trim().isEmpty()) {
                 return objects;
             }
 
@@ -134,7 +133,7 @@ public abstract class MainCommand<T, I> extends Command<Void, T> {
                 .collect(Collectors.toList());
 
         if (args.size() == 2) {
-            if (args.get(1).equals("")) {
+            if (args.get(1).trim().isEmpty()) {
                 return subs.stream()
                         .map(m -> m.getName().toLowerCase())
                         .collect(Collectors.toList());
@@ -171,12 +170,10 @@ public abstract class MainCommand<T, I> extends Command<Void, T> {
                 .collect(Collectors.toList());
 
         if (!subs.isEmpty()) {
-            MessageUtils.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format(getUsage(), label) + " ...)");
-
+            Message.MAIN_COMMAND_USAGE_HEADER.send(sender, getName(), String.format(getUsage(), label));
             for (Command s : subs) {
                 s.sendUsage(sender, label);
             }
-
         } else {
             Message.COMMAND_NO_PERMISSION.send(sender);
         }

@@ -136,20 +136,29 @@ public class VerboseListener {
     }
 
     private void sendNotification(CheckData data) {
-        String msg = "&a" + data.getCheckTarget() + "&7 - &a" + data.getPermission() + "&7 - " + getTristateColor(data.getResult()) + data.getResult().name().toLowerCase();
         if (this.notifiedSender.isConsole()) {
             // just send as a raw message
-            Message.VERBOSE_LOG.send(this.notifiedSender, msg);
+            Message.VERBOSE_LOG.send(this.notifiedSender,
+                    data.getCheckTarget(),
+                    data.getPermission(),
+                    getTristateColor(data.getResult()),
+                    data.getResult().name().toLowerCase()
+            );
             return;
         }
 
         // form a hoverevent from the check trace
-        TextComponent textComponent = TextUtils.fromLegacy(Message.VERBOSE_LOG.asString(this.notifiedSender.getPlatform().getLocaleManager(), msg));
+        TextComponent textComponent = Message.VERBOSE_LOG.asComponent(this.notifiedSender.getPlatform().getLocaleManager(),
+                data.getCheckTarget(),
+                data.getPermission(),
+                getTristateColor(data.getResult()),
+                data.getResult().name().toLowerCase()
+        );
 
         // build the text
         List<String> hover = new ArrayList<>();
         hover.add("&bOrigin: &2" + data.getCheckOrigin().name());
-        hover.add("&bContext: &r" + MessageUtils.contextSetToString(data.getCheckContext()));
+        hover.add("&bContext: &r" + MessageUtils.contextSetToString(this.notifiedSender.getPlatform().getLocaleManager(), data.getCheckContext()));
         hover.add("&bTrace: &r");
 
         Consumer<StackTraceElement> printer = StackTracePrinter.elementToString(str -> hover.add("&7" + str));
