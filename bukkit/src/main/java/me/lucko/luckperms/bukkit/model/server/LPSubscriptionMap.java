@@ -160,14 +160,15 @@ public final class LPSubscriptionMap extends HashMap<String, Map<Permissible, Bo
 
         private LPSubscriptionValueMap(String permission, Map<Permissible, Boolean> backing) {
             this.permission = permission;
-            this.backing = backing;
+            this.backing = new WeakHashMap<>(backing);
 
             // remove all players from the map
             this.backing.keySet().removeIf(p -> p instanceof Player);
         }
 
         public LPSubscriptionValueMap(String permission) {
-            this(permission, new WeakHashMap<>());
+            this.permission = permission;
+            this.backing = new WeakHashMap<>();
         }
 
         @Override
