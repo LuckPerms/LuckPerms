@@ -108,10 +108,8 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
 
     @Override
     public void onLoad() {
-        // init logger asap
         this.logger = new JavaPluginLogger(getLogger());
 
-        // call load
         try {
             this.plugin.load();
         } finally {

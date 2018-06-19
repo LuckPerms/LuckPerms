@@ -49,7 +49,7 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     /**
      * The plugin logger
      */
-    private final PluginLogger logger;
+    private PluginLogger logger = null;
 
     /**
      * A scheduler adapter for the platform
@@ -76,7 +76,6 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     private final CountDownLatch enableLatch = new CountDownLatch(1);
 
     public LPNukkitBootstrap() {
-        this.logger = new NukkitPluginLogger(getLogger());
         this.schedulerAdapter = new NukkitSchedulerAdapter(this);
         this.classLoader = new ReflectionClassLoader(this);
         this.plugin = new LPNukkitPlugin(this);
@@ -86,6 +85,9 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
 
     @Override
     public PluginLogger getPluginLogger() {
+        if (this.logger == null) {
+            throw new IllegalStateException("Logger has not been initialised yet");
+        }
         return this.logger;
     }
 
@@ -103,6 +105,8 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
 
     @Override
     public void onLoad() {
+        this.logger = new NukkitPluginLogger(getLogger());
+        
         try {
             this.plugin.load();
         } finally {
