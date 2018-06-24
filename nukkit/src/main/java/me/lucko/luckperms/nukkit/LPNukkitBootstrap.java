@@ -106,7 +106,7 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     @Override
     public void onLoad() {
         this.logger = new NukkitPluginLogger(getLogger());
-        
+
         try {
             this.plugin.load();
         } finally {

@@ -54,16 +54,16 @@ public class SpongeCalculatorFactory implements CalculatorFactory {
 
         processors.add(new MapProcessor());
 
-        if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_SPONGE_IMPLICIT_WILDCARDS)) {
-            processors.add(new SpongeWildcardProcessor());
-        }
-
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) {
             processors.add(new RegexProcessor());
         }
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) {
             processors.add(new WildcardProcessor());
+        }
+
+        if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_SPONGE_IMPLICIT_WILDCARDS)) {
+            processors.add(new SpongeWildcardProcessor());
         }
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_SPONGE_DEFAULT_SUBJECTS)) {
