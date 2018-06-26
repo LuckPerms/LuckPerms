@@ -130,7 +130,7 @@ public class Exporter implements Runnable {
 
                 write(writer, "# Export group: " + group.getName());
                 for (Node node : group.enduringData().immutable().values()) {
-                    write(writer, "/lp " + NodeFactory.nodeAsCommand(node, group.getName(), HolderType.GROUP, true));
+                    write(writer, "/lp " + NodeFactory.nodeAsCommand(node, group.getName(), HolderType.GROUP, true, false));
                 }
                 write(writer, "");
                 this.log.logAllProgress("Exported {} groups so far.", groupCount.incrementAndGet());
@@ -225,7 +225,7 @@ public class Exporter implements Runnable {
                                 continue;
                             }
 
-                            output.add("/lp " + NodeFactory.nodeAsCommand(node, user.getUuid().toString(), HolderType.USER, true));
+                            output.add("/lp " + NodeFactory.nodeAsCommand(node, user.getUuid().toString(), HolderType.USER, true, false));
                         }
 
                         if (!user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {

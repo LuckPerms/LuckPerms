@@ -148,7 +148,7 @@ public class VerboseListener {
         }
 
         // form a hoverevent from the check trace
-        TextComponent textComponent = Message.VERBOSE_LOG.asComponent(this.notifiedSender.getPlatform().getLocaleManager(),
+        TextComponent textComponent = Message.VERBOSE_LOG.asComponent(this.notifiedSender.getPlugin().getLocaleManager(),
                 data.getCheckTarget(),
                 data.getPermission(),
                 getTristateColor(data.getResult()),
@@ -158,7 +158,7 @@ public class VerboseListener {
         // build the text
         List<String> hover = new ArrayList<>();
         hover.add("&bOrigin: &2" + data.getCheckOrigin().name());
-        hover.add("&bContext: &r" + MessageUtils.contextSetToString(this.notifiedSender.getPlatform().getLocaleManager(), data.getCheckContext()));
+        hover.add("&bContext: &r" + MessageUtils.contextSetToString(this.notifiedSender.getPlugin().getLocaleManager(), data.getCheckContext()));
         hover.add("&bTrace: &r");
 
         Consumer<StackTraceElement> printer = StackTracePrinter.elementToString(str -> hover.add("&7" + str));

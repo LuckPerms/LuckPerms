@@ -51,9 +51,9 @@ public abstract class SubCommand<T> extends Command<T, Void> {
     public void sendUsage(Sender sender, String label) {
         StringBuilder sb = new StringBuilder();
         if (getArgs().isPresent()) {
-            sb.append(Message.COMMAND_USAGE_ARGUMENT_JOIN.asString(sender.getPlatform().getLocaleManager()));
+            sb.append(Message.COMMAND_USAGE_ARGUMENT_JOIN.asString(sender.getPlugin().getLocaleManager()));
             for (Argument arg : getArgs().get()) {
-                sb.append(arg.asPrettyString(sender.getPlatform().getLocaleManager())).append(" ");
+                sb.append(arg.asPrettyString(sender.getPlugin().getLocaleManager())).append(" ");
             }
         }
 
@@ -67,7 +67,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
         if (getArgs().isPresent()) {
             Message.COMMAND_USAGE_DETAILED_ARGS_HEADER.send(sender);
             for (Argument arg : getArgs().get()) {
-                Message.COMMAND_USAGE_DETAILED_ARG.send(sender, arg.asPrettyString(sender.getPlatform().getLocaleManager()), arg.getDescription());
+                Message.COMMAND_USAGE_DETAILED_ARG.send(sender, arg.asPrettyString(sender.getPlugin().getLocaleManager()), arg.getDescription());
             }
         }
     }

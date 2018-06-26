@@ -143,7 +143,7 @@ public class PermissionInfo extends SharedSubCommand {
                 "¥7Click to remove this node from " + holder.getFriendlyName()
         ), '¥'));
 
-        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType().isGroup() ? holder.getObjectName() : holder.getFriendlyName(), holder.getType(), false);
+        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType().isGroup() ? holder.getObjectName() : holder.getFriendlyName(), holder.getType(), false, !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty());
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
 
         return component -> {

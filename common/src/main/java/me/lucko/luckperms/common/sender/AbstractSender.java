@@ -61,7 +61,7 @@ public final class AbstractSender<T> implements Sender {
     }
 
     @Override
-    public LuckPermsPlugin getPlatform() {
+    public LuckPermsPlugin getPlugin() {
         return this.platform;
     }
 

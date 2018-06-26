@@ -503,7 +503,7 @@ public enum Message {
     }
 
     public void send(Sender sender, Object... objects) {
-        sender.sendMessage(asString(sender.getPlatform().getLocaleManager(), objects));
+        sender.sendMessage(asString(sender.getPlugin().getLocaleManager(), objects));
     }
 
     private static String format(String s, Object... objects) {

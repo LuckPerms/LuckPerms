@@ -46,7 +46,7 @@ public final class MessageUtils {
      * @param message the message content
      */
     public static void sendPluginMessage(Sender sender, String message) {
-        String prefix = Message.PREFIX.asString(sender.getPlatform().getLocaleManager());
+        String prefix = Message.PREFIX.asString(sender.getPlugin().getLocaleManager());
         sender.sendMessage(Message.colorize(prefix + message));
     }
 

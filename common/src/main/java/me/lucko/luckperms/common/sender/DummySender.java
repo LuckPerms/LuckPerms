@@ -74,7 +74,7 @@ public abstract class DummySender implements Sender {
     }
 
     @Override
-    public LuckPermsPlugin getPlatform() {
+    public LuckPermsPlugin getPlugin() {
         return this.platform;
     }
 

@@ -42,11 +42,11 @@ import java.util.UUID;
 public interface Sender {
 
     /**
-     * Gets the platform where the sender is from.
+     * Gets the plugin instance the sender is from.
      *
      * @return the plugin
      */
-    LuckPermsPlugin getPlatform();
+    LuckPermsPlugin getPlugin();
 
     /**
      * Gets the sender's username
@@ -64,7 +64,7 @@ public interface Sender {
     default String getNameWithLocation() {
         String name = getName();
 
-        ContextManager<?> contextManager = getPlatform().getContextManager();
+        ContextManager<?> contextManager = getPlugin().getContextManager();
         if (contextManager == null) {
             return name;
         }

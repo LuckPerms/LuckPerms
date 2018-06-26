@@ -188,7 +188,7 @@ public final class NodeFactory {
         return make(groupNode(group.getName()), server, world, temporary);
     }
 
-    public static String nodeAsCommand(Node node, String id, HolderType type, boolean set) {
+    public static String nodeAsCommand(Node node, String id, HolderType type, boolean set, boolean explicitGlobalContext) {
         StringBuilder sb = new StringBuilder(32);
         sb.append(type.toString()).append(" ").append(id).append(" ");
 
@@ -211,7 +211,7 @@ public final class NodeFactory {
                 sb.append(" ").append(node.getExpiryUnixTime());
             }
 
-            return appendContextToCommand(sb, node).toString();
+            return appendContextToCommand(sb, node, explicitGlobalContext).toString();
         }
 
         if (node.getValue() && (node.isPrefix() || node.isSuffix())) {
@@ -246,7 +246,7 @@ public final class NodeFactory {
                 sb.append(" ").append(node.getExpiryUnixTime());
             }
 
-            return appendContextToCommand(sb, node).toString();
+            return appendContextToCommand(sb, node, explicitGlobalContext).toString();
         }
 
         if (node.getValue() && node.isMeta()) {
@@ -287,7 +287,7 @@ public final class NodeFactory {
                 }
             }
 
-            return appendContextToCommand(sb, node).toString();
+            return appendContextToCommand(sb, node, explicitGlobalContext).toString();
         }
 
         sb.append("permission ");
@@ -318,10 +318,17 @@ public final class NodeFactory {
             }
         }
 
-        return appendContextToCommand(sb, node).toString();
+        return appendContextToCommand(sb, node, explicitGlobalContext).toString();
     }
 
-    private static StringBuilder appendContextToCommand(StringBuilder sb, Node node) {
+    private static StringBuilder appendContextToCommand(StringBuilder sb, Node node, boolean explicitGlobalContext) {
+        if (node.getFullContexts().isEmpty()) {
+            if (explicitGlobalContext) {
+                sb.append(" global");
+            }
+            return sb;
+        }
+
         if (node.getServer().isPresent()) {
             sb.append(" server=").append(node.getServer().get());
         }
