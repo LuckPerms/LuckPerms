@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.contexts.ContextsCache;
+import me.lucko.luckperms.common.contexts.ContextsSupplier;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
@@ -91,7 +91,7 @@ public class LPPermissible extends PermissibleBase {
     private final LPBukkitPlugin plugin;
 
     // caches context lookups for the player
-    private final ContextsCache<Player> contextsCache;
+    private final ContextsSupplier contextsSupplier;
 
     // the players previous permissible. (the one they had before this one was injected)
     private PermissibleBase oldPermissible = null;
@@ -108,7 +108,7 @@ public class LPPermissible extends PermissibleBase {
         this.user = Objects.requireNonNull(user, "user");
         this.player = Objects.requireNonNull(player, "player");
         this.plugin = Objects.requireNonNull(plugin, "plugin");
-        this.contextsCache = plugin.getContextManager().getCacheFor(player);
+        this.contextsSupplier = plugin.getContextManager().getCacheFor(player);
 
         injectFakeAttachmentsList();
     }
@@ -137,7 +137,7 @@ public class LPPermissible extends PermissibleBase {
             throw new NullPointerException("permission");
         }
 
-        Tristate ts = this.user.getCachedData().getPermissionData(this.contextsCache.getContexts()).getPermissionValue(permission, CheckOrigin.PLATFORM_LOOKUP_CHECK);
+        Tristate ts = this.user.getCachedData().getPermissionData(this.contextsSupplier.getContexts()).getPermissionValue(permission, CheckOrigin.PLATFORM_LOOKUP_CHECK);
         return ts != Tristate.UNDEFINED || Permission.DEFAULT_PERMISSION.getValue(isOp());
     }
 
@@ -147,7 +147,7 @@ public class LPPermissible extends PermissibleBase {
             throw new NullPointerException("permission");
         }
 
-        Tristate ts = this.user.getCachedData().getPermissionData(this.contextsCache.getContexts()).getPermissionValue(permission.getName(), CheckOrigin.PLATFORM_LOOKUP_CHECK);
+        Tristate ts = this.user.getCachedData().getPermissionData(this.contextsSupplier.getContexts()).getPermissionValue(permission.getName(), CheckOrigin.PLATFORM_LOOKUP_CHECK);
         if (ts != Tristate.UNDEFINED) {
             return true;
         }
@@ -165,7 +165,7 @@ public class LPPermissible extends PermissibleBase {
             throw new NullPointerException("permission");
         }
 
-        Tristate ts = this.user.getCachedData().getPermissionData(this.contextsCache.getContexts()).getPermissionValue(permission, CheckOrigin.PLATFORM_PERMISSION_CHECK);
+        Tristate ts = this.user.getCachedData().getPermissionData(this.contextsSupplier.getContexts()).getPermissionValue(permission, CheckOrigin.PLATFORM_PERMISSION_CHECK);
         return ts != Tristate.UNDEFINED ? ts.asBoolean() : Permission.DEFAULT_PERMISSION.getValue(isOp());
     }
 
@@ -175,7 +175,7 @@ public class LPPermissible extends PermissibleBase {
             throw new NullPointerException("permission");
         }
 
-        Tristate ts = this.user.getCachedData().getPermissionData(this.contextsCache.getContexts()).getPermissionValue(permission.getName(), CheckOrigin.PLATFORM_PERMISSION_CHECK);
+        Tristate ts = this.user.getCachedData().getPermissionData(this.contextsSupplier.getContexts()).getPermissionValue(permission.getName(), CheckOrigin.PLATFORM_PERMISSION_CHECK);
         if (ts != Tristate.UNDEFINED) {
             return ts.asBoolean();
         }
@@ -205,7 +205,7 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public Set<PermissionAttachmentInfo> getEffectivePermissions() {
-        return this.user.getCachedData().getPermissionData(this.contextsCache.getContexts()).getImmutableBacking().entrySet().stream()
+        return this.user.getCachedData().getPermissionData(this.contextsSupplier.getContexts()).getImmutableBacking().entrySet().stream()
                 .map(entry -> new PermissionAttachmentInfo(this.player, entry.getKey(), null, entry.getValue()))
                 .collect(ImmutableCollectors.toSet());
     }

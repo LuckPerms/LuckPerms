@@ -25,20 +25,75 @@
 
 package me.lucko.luckperms.bungee.contexts;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.common.contexts.ContextsSupplier;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
+import java.util.concurrent.TimeUnit;
+
 public class BungeeContextManager extends ContextManager<ProxiedPlayer> {
+
+    private final LoadingCache<ProxiedPlayer, Contexts> contextsCache = Caffeine.newBuilder()
+            .expireAfterWrite(50, TimeUnit.MILLISECONDS)
+            .build(this::calculate);
+
     public BungeeContextManager(LPBungeePlugin plugin) {
         super(plugin, ProxiedPlayer.class);
     }
 
     @Override
+    public ContextsSupplier getCacheFor(ProxiedPlayer subject) {
+        if (subject == null) {
+            throw new NullPointerException("subject");
+        }
+
+        return new InlineContextsSupplier(subject, this.contextsCache);
+    }
+
+    @Override
+    public ImmutableContextSet getApplicableContext(ProxiedPlayer subject) {
+        return getApplicableContexts(subject).getContexts().makeImmutable();
+    }
+
+    @Override
+    public Contexts getApplicableContexts(ProxiedPlayer subject) {
+        return this.contextsCache.get(subject);
+    }
+
+    @Override
+    public void invalidateCache(ProxiedPlayer subject) {
+        this.contextsCache.invalidate(subject);
+    }
+
+    @Override
     public Contexts formContexts(ProxiedPlayer subject, ImmutableContextSet contextSet) {
         return formContexts(contextSet);
+    }
+
+    private static final class InlineContextsSupplier implements ContextsSupplier {
+        private final ProxiedPlayer key;
+        private final LoadingCache<ProxiedPlayer, Contexts> contextsCache;
+
+        private InlineContextsSupplier(ProxiedPlayer key, LoadingCache<ProxiedPlayer, Contexts> contextsCache) {
+            this.key = key;
+            this.contextsCache = contextsCache;
+        }
+
+        @Override
+        public Contexts getContexts() {
+            return this.contextsCache.get(this.key);
+        }
+
+        @Override
+        public ImmutableContextSet getContextSet() {
+            return getContexts().getContexts().makeImmutable();
+        }
     }
 }

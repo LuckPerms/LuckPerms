@@ -189,6 +189,9 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
                 user.clearTransientNodes();
             }
         });
+
+        // remove their contexts cache
+        this.plugin.getContextManager().onPlayerQuit(player);
     }
 
 }

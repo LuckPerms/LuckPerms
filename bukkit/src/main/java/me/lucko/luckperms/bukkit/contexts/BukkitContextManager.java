@@ -25,20 +25,76 @@
 
 package me.lucko.luckperms.bukkit.contexts;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LookupSetting;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.common.contexts.ContextsCache;
+import me.lucko.luckperms.common.contexts.ContextsSupplier;
 
 import org.bukkit.entity.Player;
 
 import java.util.EnumSet;
+import java.util.concurrent.TimeUnit;
 
 public class BukkitContextManager extends ContextManager<Player> {
+
+    // cache the creation of ContextsCache instances for online players with no expiry
+    private final LoadingCache<Player, ContextsCache<Player>> onlineSubjectCaches = Caffeine.newBuilder()
+            .build(key -> new ContextsCache<>(key, this));
+
+    // cache the creation of ContextsCache instances for offline players with a 1m expiry
+    private final LoadingCache<Player, ContextsCache<Player>> offlineSubjectCaches = Caffeine.newBuilder()
+            .expireAfterAccess(1, TimeUnit.MINUTES)
+            .build(key -> {
+                ContextsCache<Player> cache = this.onlineSubjectCaches.getIfPresent(key);
+                if (cache != null) {
+                    return cache;
+                }
+                return new ContextsCache<>(key, this);
+            });
+
     public BukkitContextManager(LPBukkitPlugin plugin) {
         super(plugin, Player.class);
+    }
+
+    public void onPlayerQuit(Player player) {
+        this.onlineSubjectCaches.invalidate(player);
+    }
+
+    @Override
+    public ContextsSupplier getCacheFor(Player subject) {
+        if (subject == null) {
+            throw new NullPointerException("subject");
+        }
+
+        if (subject.isOnline()) {
+            return this.onlineSubjectCaches.get(subject);
+        } else {
+            return this.offlineSubjectCaches.get(subject);
+        }
+    }
+
+    @Override
+    public void invalidateCache(Player subject) {
+        if (subject == null) {
+            throw new NullPointerException("subject");
+        }
+
+        ContextsCache<Player> cache = this.onlineSubjectCaches.getIfPresent(subject);
+        if (cache != null) {
+            cache.invalidate();
+        }
+
+        cache = this.offlineSubjectCaches.getIfPresent(subject);
+        if (cache != null) {
+            cache.invalidate();
+        }
     }
 
     @Override

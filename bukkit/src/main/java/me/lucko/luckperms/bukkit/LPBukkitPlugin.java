@@ -50,7 +50,6 @@ import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
-import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.managers.group.StandardGroupManager;
@@ -93,7 +92,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     private StandardUserManager userManager;
     private StandardGroupManager groupManager;
     private StandardTrackManager trackManager;
-    private ContextManager<Player> contextManager;
+    private BukkitContextManager contextManager;
     private LPSubscriptionMap subscriptionMap;
     private LPPermissionMap permissionMap;
     private LPDefaultsMap defaultPermissionMap;
@@ -375,7 +374,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    public ContextManager<Player> getContextManager() {
+    public BukkitContextManager getContextManager() {
         return this.contextManager;
     }
 

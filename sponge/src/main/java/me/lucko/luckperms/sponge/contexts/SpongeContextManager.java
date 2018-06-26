@@ -25,16 +25,49 @@
 
 package me.lucko.luckperms.sponge.contexts;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.common.contexts.ContextsCache;
+import me.lucko.luckperms.common.contexts.ContextsSupplier;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 
 import org.spongepowered.api.service.permission.Subject;
 
+import java.util.concurrent.TimeUnit;
+
 public class SpongeContextManager extends ContextManager<Subject> {
+
+    private final LoadingCache<Subject, ContextsCache<Subject>> subjectCaches = Caffeine.newBuilder()
+            .expireAfterAccess(1, TimeUnit.MINUTES)
+            .build(key -> new ContextsCache<>(key, this));
+
     public SpongeContextManager(LPSpongePlugin plugin) {
         super(plugin, Subject.class);
+    }
+
+    @Override
+    public ContextsSupplier getCacheFor(Subject subject) {
+        if (subject == null) {
+            throw new NullPointerException("subject");
+        }
+
+        return subjectCaches.get(subject);
+    }
+
+    @Override
+    public void invalidateCache(Subject subject) {
+        if (subject == null) {
+            throw new NullPointerException("subject");
+        }
+
+        ContextsCache<Subject> cache = this.subjectCaches.getIfPresent(subject);
+        if (cache != null) {
+            cache.invalidate();
+        }
     }
 
     @Override

@@ -27,42 +27,14 @@ package me.lucko.luckperms.common.contexts;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.buffers.ExpiringCache;
-
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Nonnull;
 
 /**
- * Implementation of {@link ContextsSupplier} that caches results.
- *
- * @param <T> the player type
+ * Supplies contexts for a given subject.
  */
-public final class ContextsCache<T> extends ExpiringCache<Contexts> implements ContextsSupplier {
-    private final T subject;
-    private final ContextManager<T> contextManager;
+public interface ContextsSupplier {
 
-    public ContextsCache(T subject, ContextManager<T> contextManager) {
-        super(50L, TimeUnit.MILLISECONDS); // expire roughly every tick
-        this.subject = subject;
-        this.contextManager = contextManager;
-    }
+    Contexts getContexts();
 
-    @Nonnull
-    @Override
-    protected Contexts supply() {
-        return this.contextManager.calculate(this.subject);
-    }
+    ImmutableContextSet getContextSet();
 
-    @Override
-    public Contexts getContexts() {
-        return get();
-    }
-
-    @Override
-    public ImmutableContextSet getContextSet() {
-        // this is actually already immutable, but the Contexts method signature returns the interface.
-        // using the makeImmutable method is faster than casting
-        return get().getContexts().makeImmutable();
-    }
 }
