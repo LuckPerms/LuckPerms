@@ -341,6 +341,20 @@ public enum CommandSpec {
                     Argument.create("context...", false, "the contexts to add the suffix in")
             )
     ),
+    META_SETPREFIX("Sets a prefix",
+            Argument.list(
+                    Argument.create("priority", false, "the priority to set the prefix at"),
+                    Argument.create("prefix", true, "the prefix string"),
+                    Argument.create("context...", false, "the contexts to set the prefix in")
+            )
+    ),
+    META_SETSUFFIX("Sets a suffix",
+            Argument.list(
+                    Argument.create("priority", false, "the priority to set the suffix at"),
+                    Argument.create("suffix", true, "the suffix string"),
+                    Argument.create("context...", false, "the contexts to set the suffix in")
+            )
+    ),
     META_REMOVEPREFIX("Removes a prefix",
             Argument.list(
                     Argument.create("priority", true, "the priority to remove the prefix at"),
@@ -369,6 +383,22 @@ public enum CommandSpec {
                     Argument.create("suffix", true, "the suffix string"),
                     Argument.create("duration", true, "the duration until the suffix expires"),
                     Argument.create("context...", false, "the contexts to add the suffix in")
+            )
+    ),
+    META_SETTEMP_PREFIX("Sets a prefix temporarily",
+            Argument.list(
+                    Argument.create("priority", true, "the priority to set the prefix at"),
+                    Argument.create("prefix", true, "the prefix string"),
+                    Argument.create("duration", true, "the duration until the prefix expires"),
+                    Argument.create("context...", false, "the contexts to set the prefix in")
+            )
+    ),
+    META_SETTEMP_SUFFIX("Sets a suffix temporarily",
+            Argument.list(
+                    Argument.create("priority", true, "the priority to set the suffix at"),
+                    Argument.create("suffix", true, "the suffix string"),
+                    Argument.create("duration", true, "the duration until the suffix expires"),
+                    Argument.create("context...", false, "the contexts to set the suffix in")
             )
     ),
     META_REMOVETEMP_PREFIX("Removes a temporary prefix",

@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.api.ChatMetaType;
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
@@ -360,7 +361,7 @@ public class HolderSubjectData implements LPSubjectData {
                     () -> this.holder.unsetTransientPermission(n)
             ));
 
-            MetaAccumulator metaAccumulator = this.holder.accumulateMeta(null, this.service.getPlugin().getContextManager().formContexts(contexts));
+            MetaAccumulator metaAccumulator = this.holder.accumulateMeta(null, Contexts.of(contexts, Contexts.global().getSettings()));
             int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0);
             priority += 10;
 
