@@ -60,6 +60,7 @@ import me.lucko.luckperms.common.commands.track.TrackMainCommand;
 import me.lucko.luckperms.common.commands.user.UserMainCommand;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.TextUtils;
@@ -69,6 +70,7 @@ import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
@@ -172,7 +174,12 @@ public class CommandManager {
             if (this.mainCommands.stream().anyMatch(c -> c.shouldDisplay() && c.isAuthorized(sender))) {
                 Message.VIEW_AVAILABLE_COMMANDS_PROMPT.send(sender, label);
             } else {
-                Message.NO_PERMISSION_FOR_SUBCOMMANDS.send(sender);
+                Collection<? extends Group> groups = plugin.getGroupManager().getAll().values();
+                if (groups.size() <= 1 && groups.stream().allMatch(g -> g.getOwnNodes().isEmpty())) {
+                    Message.FIRST_TIME_SETUP.send(sender, label, sender.getName());
+                } else {
+                    Message.NO_PERMISSION_FOR_SUBCOMMANDS.send(sender);
+                }
             }
             return CommandResult.INVALID_ARGS;
         }

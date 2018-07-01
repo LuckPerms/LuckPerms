@@ -42,6 +42,8 @@ import me.lucko.luckperms.common.managers.group.GroupManager;
 import me.lucko.luckperms.common.managers.track.TrackManager;
 import me.lucko.luckperms.common.managers.user.UserManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
@@ -77,21 +79,21 @@ public interface LuckPermsPlugin {
      *
      * @return the user manager
      */
-    UserManager<?> getUserManager();
+    UserManager<? extends User> getUserManager();
 
     /**
      * Gets the group manager instance for the platform
      *
      * @return the group manager
      */
-    GroupManager<?> getGroupManager();
+    GroupManager<? extends Group> getGroupManager();
 
     /**
      * Gets the track manager instance for the platform
      *
      * @return the track manager
      */
-    TrackManager<?> getTrackManager();
+    TrackManager<? extends Track> getTrackManager();
 
     /**
      * Gets the plugin's configuration

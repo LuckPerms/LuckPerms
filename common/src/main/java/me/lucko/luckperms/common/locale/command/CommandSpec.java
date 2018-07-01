@@ -38,50 +38,61 @@ import java.util.List;
 @SuppressWarnings("SpellCheckingInspection")
 public enum CommandSpec {
 
-    USER("User commands", "/%s user <user>"),
-    GROUP("Group commands", "/%s group <group>"),
-    TRACK("Track commands", "/%s track <track>"),
-    LOG("Log commands", "/%s log"),
+    USER("A set of commands for managing users within LuckPerms. " +
+            "(A 'user' in LuckPerms is just a player, and can refer to a UUID or username)",
+            "/%s user <user>"
+    ),
+    GROUP("A set of commands for managing groups within LuckPerms. " +
+            "Groups are just collections of permission assignments that can be given to users. " +
+            "New groups are made using the 'creategroup' command.",
+            "/%s group <group>"
+    ),
+    TRACK("A set of commands for managing tracks within LuckPerms. " +
+            "Tracks are a ordered collection of groups which can be used for defining " +
+            "promotions and demotions.",
+            "/%s track <track>"
+    ),
+    LOG("A set of commands for managing the logging functionality within LuckPerms.", "/%s log"),
 
-    SYNC("Sync changes with the storage", "/%s sync"),
-    INFO("Print general plugin info", "/%s info"),
-    EDITOR("Creates a new editor session", "/%s editor [type]",
+    SYNC("Reloads all data from the plugins storage into memory, and applies any changes that are detected.", "/%s sync"),
+    INFO("Prints general information about the active plugin instance.", "/%s info"),
+    EDITOR("Creates a new web editor session", "/%s editor [type]",
             Argument.list(
                     Argument.create("type", false, "the types to load into the editor. ('all', 'users' or 'groups')")
             )
     ),
-    DEBUG("Produce debugging output", "/%s debug"),
-    VERBOSE("Manage verbose permission checking", "/%s verbose <on|record|off|upload> [filter]",
+    DEBUG("Produces a set of internal debugging output", "/%s debug"),
+    VERBOSE("Controls the plugins verbose permission check monitoring system.", "/%s verbose <on|record|off|upload> [filter]",
             Argument.list(
                     Argument.create("on|record|off|upload", true, "whether to enable/disable logging, or to upload the logged output"),
                     Argument.create("filter", false, "the filter to match entries against")
             )
     ),
-    TREE("Generate a tree view of permissions", "/%s tree [scope] [player]",
+    TREE("Generates a tree view (ordered list hierarchy) of all permissions known to LuckPerms.", "/%s tree [scope] [player]",
             Argument.list(
                     Argument.create("scope", false, "the root of the tree. specify \".\" to include all permissions"),
                     Argument.create("player", false, "the name of an online player to check against")
             )
     ),
-    SEARCH("Search for users/groups with a specific permission", "/%s search <permission>",
+    SEARCH("Searchs for all of the users/groups with a specific permission", "/%s search <permission>",
             Argument.list(
                     Argument.create("permission", true, "the permission to search for"),
                     Argument.create("page", false, "the page to view")
             )
     ),
-    CHECK("Perform a standard permission check on an online player", "/%s check <user> <permission>",
+    CHECK("Performs a 'mock' permission check for an online player", "/%s check <user> <permission>",
             Argument.list(
                     Argument.create("user", true, "the user to check"),
                     Argument.create("permission", true, "the permission to check for")
             )
     ),
     NETWORK_SYNC("Sync changes with the storage and request that all other servers on the network do the same", "/%s networksync"),
-    IMPORT("Import data from a file", "/%s import <file>",
+    IMPORT("Imports data from a (previously created) export file", "/%s import <file>",
             Argument.list(
                     Argument.create("file", true, "the file to import from")
             )
     ),
-    EXPORT("Export data to a file", "/%s export <file>",
+    EXPORT("Exports all permissions data to an 'export' file. Be be re-imported at a later time.", "/%s export <file>",
             Argument.list(
                     Argument.create("file", true, "the file to export to")
             )
