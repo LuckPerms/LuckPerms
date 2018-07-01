@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.dependencies;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteStreams;
 
 import me.lucko.luckperms.common.dependencies.relocation.Relocation;
@@ -238,11 +239,11 @@ public enum Dependency {
     private static final String MAVEN_CENTRAL_FORMAT = "https://repo1.maven.org/maven2/%s/%s/%s/%s-%s.jar";
 
     Dependency(String groupId, String artifactId, String version, String checksum) {
-        this(groupId, artifactId, version, checksum, Collections.emptyList());
+        this(groupId, artifactId, version, checksum, ImmutableList.of());
     }
 
     Dependency(String groupId, String artifactId, String version, String checksum, Relocation relocation) {
-        this(groupId, artifactId, version, checksum, Collections.singletonList(relocation));
+        this(groupId, artifactId, version, checksum, ImmutableList.of(relocation));
     }
 
     Dependency(String groupId, String artifactId, String version, String checksum, List<Relocation> relocations) {
@@ -270,7 +271,7 @@ public enum Dependency {
         this.url = url;
         this.version = version;
         this.checksum = Base64.getDecoder().decode(checksum);
-        this.relocations = relocations;
+        this.relocations = ImmutableList.copyOf(relocations);
     }
 
     private static String rewriteEscaping(String s) {

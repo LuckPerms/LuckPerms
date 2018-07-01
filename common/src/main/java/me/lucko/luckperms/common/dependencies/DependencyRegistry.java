@@ -27,8 +27,11 @@ package me.lucko.luckperms.common.dependencies;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonElement;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.dependencies.relocation.Relocation;
+import me.lucko.luckperms.common.dependencies.relocation.RelocationHandler;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
 
@@ -81,6 +84,21 @@ public class DependencyRegistry {
         }
 
         return dependencies;
+    }
+
+    // support for LuckPerms legacy (bukkit 1.7.10)
+    public List<Relocation> getLegacyRelocations(Dependency dependency) {
+        if (RelocationHandler.DEPENDENCIES.contains(dependency)) {
+            return ImmutableList.of();
+        }
+
+        if (JsonElement.class.getName().startsWith("me.lucko")) {
+            return ImmutableList.of(
+                    Relocation.of("guava", "com{}google{}common"),
+                    Relocation.of("gson", "com{}google{}gson")
+            );
+        }
+        return ImmutableList.of();
     }
 
     private static boolean classExists(String className) {

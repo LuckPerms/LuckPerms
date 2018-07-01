@@ -152,7 +152,8 @@ public class DependencyManager {
         for (Source source : sources) {
             try {
                 // apply remap rules
-                List<Relocation> relocations = source.dependency.getRelocations();
+                List<Relocation> relocations = new ArrayList<>(source.dependency.getRelocations());
+                relocations.addAll(this.registry.getLegacyRelocations(source.dependency));
 
                 if (relocations.isEmpty()) {
                     remappedJars.add(source);
@@ -221,12 +222,14 @@ public class DependencyManager {
             // compute a hash for the downloaded file
             byte[] hash = this.digest.digest(bytes);
 
-            this.plugin.getLogger().info("Successfully downloaded '" + fileName + "' with checksum: " + Base64.getEncoder().encodeToString(hash));
-
             // ensure the hash matches the expected checksum
             if (!Arrays.equals(hash, dependency.getChecksum())) {
-                throw new RuntimeException("Downloaded file had an invalid hash. Expected: " + Base64.getEncoder().encodeToString(dependency.getChecksum()));
+                throw new RuntimeException("Downloaded file had an invalid hash. " +
+                        "Expected: " + Base64.getEncoder().encodeToString(dependency.getChecksum()) + " " +
+                        "Actual: " + Base64.getEncoder().encodeToString(hash));
             }
+
+            this.plugin.getLogger().info("Successfully downloaded '" + fileName + "' with matching checksum: " + Base64.getEncoder().encodeToString(hash));
 
             // if the checksum matches, save the content to disk
             Files.write(file, bytes);
