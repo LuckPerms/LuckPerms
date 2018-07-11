@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.storage.StorageCredentials;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class MariaDbConnectionFactory extends HikariConnectionFactory {
@@ -55,6 +56,11 @@ public class MariaDbConnectionFactory extends HikariConnectionFactory {
         // kinda hacky. this will call #setProperties on the datasource, which will append these options
         // onto the connections.
         config.addDataSourceProperty("properties", propertiesString);
+    }
+
+    @Override
+    public Function<String, String> getStatementProcessor() {
+        return s -> s.replace("'", "`"); // use backticks for quotes
     }
 
 }

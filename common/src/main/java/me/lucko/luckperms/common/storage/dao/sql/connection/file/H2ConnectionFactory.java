@@ -39,6 +39,7 @@ import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.EnumSet;
 import java.util.Properties;
+import java.util.function.Function;
 
 public class H2ConnectionFactory extends FlatfileConnectionFactory {
 
@@ -92,6 +93,11 @@ public class H2ConnectionFactory extends FlatfileConnectionFactory {
         if (this.connection != null) {
             this.connection.shutdown();
         }
+    }
+
+    @Override
+    public Function<String, String> getStatementProcessor() {
+        return s -> s.replace("'", "");
     }
 
     @Override

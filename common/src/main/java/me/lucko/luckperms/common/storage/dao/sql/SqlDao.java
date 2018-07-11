@@ -109,10 +109,10 @@ public class SqlDao extends AbstractDao {
     private static final String POSTGRESQL_GROUP_INSERT = "INSERT INTO {prefix}groups (name) VALUES(?) ON CONFLICT (name) DO NOTHING";
     private static final String GROUP_DELETE = "DELETE FROM {prefix}groups WHERE name=?";
 
-    private static final String TRACK_INSERT = "INSERT INTO {prefix}tracks (name, groups) VALUES(?, ?)";
-    private static final String TRACK_SELECT = "SELECT groups FROM {prefix}tracks WHERE name=?";
+    private static final String TRACK_INSERT = "INSERT INTO {prefix}tracks (name, 'groups') VALUES(?, ?)";
+    private static final String TRACK_SELECT = "SELECT 'groups' FROM {prefix}tracks WHERE name=?";
     private static final String TRACK_SELECT_ALL = "SELECT * FROM {prefix}tracks";
-    private static final String TRACK_UPDATE = "UPDATE {prefix}tracks SET groups=? WHERE name=?";
+    private static final String TRACK_UPDATE = "UPDATE {prefix}tracks SET 'groups'=? WHERE name=?";
     private static final String TRACK_DELETE = "DELETE FROM {prefix}tracks WHERE name=?";
 
     private static final String ACTION_INSERT = "INSERT INTO {prefix}actions(time, actor_uuid, actor_name, type, acted_uuid, acted_name, action) VALUES(?, ?, ?, ?, ?, ?, ?)";
@@ -120,12 +120,12 @@ public class SqlDao extends AbstractDao {
 
     private final Gson gson;
     private final AbstractConnectionFactory provider;
-    private final Function<String, String> prefix;
+    private final Function<String, String> statementProcessor;
 
-    public SqlDao(LuckPermsPlugin plugin, AbstractConnectionFactory provider, String prefix) {
+    public SqlDao(LuckPermsPlugin plugin, AbstractConnectionFactory provider, String tablePrefix) {
         super(plugin, provider.getName());
         this.provider = provider;
-        this.prefix = s -> s.replace("{prefix}", prefix);
+        this.statementProcessor = provider.getStatementProcessor().compose(s -> s.replace("{prefix}", tablePrefix));
         this.gson = new Gson();
     }
 
@@ -137,8 +137,8 @@ public class SqlDao extends AbstractDao {
         return this.provider;
     }
 
-    public Function<String, String> getPrefix() {
-        return this.prefix;
+    public Function<String, String> getStatementProcessor() {
+        return this.statementProcessor;
     }
 
     private boolean tableExists(String table) throws SQLException {
@@ -159,7 +159,7 @@ public class SqlDao extends AbstractDao {
         this.provider.init();
 
         // Init tables
-        if (!tableExists(this.prefix.apply("{prefix}user_permissions"))) {
+        if (!tableExists(this.statementProcessor.apply("{prefix}user_permissions"))) {
             String schemaFileName = "me/lucko/luckperms/schema/" + this.provider.getName().toLowerCase() + ".sql";
             try (InputStream is = this.plugin.getBootstrap().getResourceStream(schemaFileName)) {
                 if (is == null) {
@@ -180,7 +180,7 @@ public class SqlDao extends AbstractDao {
                                 if (line.endsWith(";")) {
                                     sb.deleteCharAt(sb.length() - 1);
 
-                                    String result = this.prefix.apply(sb.toString().trim());
+                                    String result = this.statementProcessor.apply(sb.toString().trim());
                                     if (!result.isEmpty()) s.addBatch(result);
 
                                     // reset
@@ -199,8 +199,8 @@ public class SqlDao extends AbstractDao {
             if (!(this.provider instanceof SQLiteConnectionFactory) && !(this.provider instanceof PostgreConnectionFactory)) {
                 try (Connection connection = this.provider.getConnection()) {
                     try (Statement s = connection.createStatement()) {
-                        s.execute(this.prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN actor_name VARCHAR(100)"));
-                        s.execute(this.prefix.apply("ALTER TABLE {prefix}actions MODIFY COLUMN action VARCHAR(300)"));
+                        s.execute(this.statementProcessor.apply("ALTER TABLE {prefix}actions MODIFY COLUMN actor_name VARCHAR(100)"));
+                        s.execute(this.statementProcessor.apply("ALTER TABLE {prefix}actions MODIFY COLUMN action VARCHAR(300)"));
                     }
                 }
             }
@@ -226,7 +226,7 @@ public class SqlDao extends AbstractDao {
     @Override
     public void logAction(LogEntry entry) throws SQLException {
         try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(ACTION_INSERT))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(ACTION_INSERT))) {
                 ps.setLong(1, entry.getTimestamp());
                 ps.setString(2, entry.getActor().toString());
                 ps.setString(3, entry.getActorName());
@@ -243,7 +243,7 @@ public class SqlDao extends AbstractDao {
     public Log getLog() throws SQLException {
         final Log.Builder log = Log.builder();
         try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(ACTION_SELECT_ALL))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(ACTION_SELECT_ALL))) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         final String actedUuid = rs.getString("acted_uuid");
@@ -269,14 +269,14 @@ public class SqlDao extends AbstractDao {
     public void applyBulkUpdate(BulkUpdate bulkUpdate) throws SQLException {
         try (Connection c = this.provider.getConnection()) {
             if (bulkUpdate.getDataType().isIncludingUsers()) {
-                String table = this.prefix.apply("{prefix}user_permissions");
+                String table = this.statementProcessor.apply("{prefix}user_permissions");
                 try (PreparedStatement ps = bulkUpdate.buildAsSql().build(c, q -> q.replace("{table}", table))) {
                     ps.execute();
                 }
             }
 
             if (bulkUpdate.getDataType().isIncludingGroups()) {
-                String table = this.prefix.apply("{prefix}group_permissions");
+                String table = this.statementProcessor.apply("{prefix}group_permissions");
                 try (PreparedStatement ps = bulkUpdate.buildAsSql().build(c, q -> q.replace("{table}", table))) {
                     ps.execute();
                 }
@@ -295,7 +295,7 @@ public class SqlDao extends AbstractDao {
 
             // Collect user permissions
             try (Connection c = this.provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_SELECT))) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_SELECT))) {
                     ps.setString(1, user.getUuid().toString());
 
                     try (ResultSet rs = ps.executeQuery()) {
@@ -314,7 +314,7 @@ public class SqlDao extends AbstractDao {
 
             // Collect user meta (username & primary group)
             try (Connection c = this.provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT_BY_UUID))) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_SELECT_BY_UUID))) {
                     ps.setString(1, user.getUuid().toString());
 
                     try (ResultSet rs = ps.executeQuery()) {
@@ -368,11 +368,11 @@ public class SqlDao extends AbstractDao {
             // Empty data - just delete from the DB.
             if (!this.plugin.getUserManager().shouldSave(user)) {
                 try (Connection c = this.provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_DELETE))) {
+                    try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_DELETE))) {
                         ps.setString(1, user.getUuid().toString());
                         ps.execute();
                     }
-                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID))) {
+                    try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID))) {
                         ps.setString(1, NodeFactory.DEFAULT_GROUP_NAME);
                         ps.setString(2, user.getUuid().toString());
                         ps.execute();
@@ -384,7 +384,7 @@ public class SqlDao extends AbstractDao {
             // Get a snapshot of current data.
             Set<NodeDataContainer> remote = new HashSet<>();
             try (Connection c = this.provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_SELECT))) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_SELECT))) {
                     ps.setString(1, user.getUuid().toString());
 
                     try (ResultSet rs = ps.executeQuery()) {
@@ -410,7 +410,7 @@ public class SqlDao extends AbstractDao {
 
             if (!toRemove.isEmpty()) {
                 try (Connection c = this.provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_DELETE_SPECIFIC))) {
+                    try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_DELETE_SPECIFIC))) {
                         for (NodeDataContainer nd : toRemove) {
                             ps.setString(1, user.getUuid().toString());
                             ps.setString(2, nd.getPermission());
@@ -428,7 +428,7 @@ public class SqlDao extends AbstractDao {
 
             if (!toAdd.isEmpty()) {
                 try (Connection c = this.provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_INSERT))) {
+                    try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_INSERT))) {
                         for (NodeDataContainer nd : toAdd) {
                             ps.setString(1, user.getUuid().toString());
                             ps.setString(2, nd.getPermission());
@@ -447,7 +447,7 @@ public class SqlDao extends AbstractDao {
             try (Connection c = this.provider.getConnection()) {
                 boolean hasPrimaryGroupSaved;
 
-                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT_PRIMARY_GROUP_BY_UUID))) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_SELECT_PRIMARY_GROUP_BY_UUID))) {
                     ps.setString(1, user.getUuid().toString());
                     try (ResultSet rs = ps.executeQuery()) {
                         hasPrimaryGroupSaved = rs.next();
@@ -456,14 +456,14 @@ public class SqlDao extends AbstractDao {
 
                 if (hasPrimaryGroupSaved) {
                     // update
-                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID))) {
+                    try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID))) {
                         ps.setString(1, user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
                         ps.setString(2, user.getUuid().toString());
                         ps.execute();
                     }
                 } else {
                     // insert
-                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_INSERT))) {
+                    try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_INSERT))) {
                         ps.setString(1, user.getUuid().toString());
                         ps.setString(2, user.getName().orElse("null"));
                         ps.setString(3, user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
@@ -481,7 +481,7 @@ public class SqlDao extends AbstractDao {
     public Set<UUID> getUniqueUsers() throws SQLException {
         Set<UUID> uuids = new HashSet<>();
         try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(USER_PERMISSIONS_SELECT_DISTINCT))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_SELECT_DISTINCT))) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         String uuid = rs.getString("uuid");
@@ -500,7 +500,7 @@ public class SqlDao extends AbstractDao {
 
         List<HeldPermission<UUID>> held = new ArrayList<>();
         try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = builder.build(c, this.prefix)) {
+            try (PreparedStatement ps = builder.build(c, this.statementProcessor)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         UUID holder = UUID.fromString(rs.getString("uuid"));
@@ -539,7 +539,7 @@ public class SqlDao extends AbstractDao {
         }
 
         try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(query))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(query))) {
                 ps.setString(1, name);
                 ps.execute();
             }
@@ -553,7 +553,7 @@ public class SqlDao extends AbstractDao {
         // Check the group actually exists
         List<String> groups = new ArrayList<>();
         try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_SELECT_ALL))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_SELECT_ALL))) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         groups.add(rs.getString("name").toLowerCase());
@@ -573,7 +573,7 @@ public class SqlDao extends AbstractDao {
             List<NodeDataContainer> data = new ArrayList<>();
 
             try (Connection c = this.provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_SELECT))) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_SELECT))) {
                     ps.setString(1, group.getName());
 
                     try (ResultSet rs = ps.executeQuery()) {
@@ -607,7 +607,7 @@ public class SqlDao extends AbstractDao {
     public void loadAllGroups() throws SQLException {
         List<String> groups = new ArrayList<>();
         try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_SELECT_ALL))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_SELECT_ALL))) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         groups.add(rs.getString("name").toLowerCase());
@@ -643,7 +643,7 @@ public class SqlDao extends AbstractDao {
             // Empty data, just delete.
             if (group.enduringData().immutable().isEmpty()) {
                 try (Connection c = this.provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_DELETE))) {
+                    try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_DELETE))) {
                         ps.setString(1, group.getName());
                         ps.execute();
                     }
@@ -654,7 +654,7 @@ public class SqlDao extends AbstractDao {
             // Get a snapshot of current data
             Set<NodeDataContainer> remote = new HashSet<>();
             try (Connection c = this.provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_SELECT))) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_SELECT))) {
                     ps.setString(1, group.getName());
 
                     try (ResultSet rs = ps.executeQuery()) {
@@ -680,7 +680,7 @@ public class SqlDao extends AbstractDao {
 
             if (!toRemove.isEmpty()) {
                 try (Connection c = this.provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_DELETE_SPECIFIC))) {
+                    try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_DELETE_SPECIFIC))) {
                         for (NodeDataContainer nd : toRemove) {
                             ps.setString(1, group.getName());
                             ps.setString(2, nd.getPermission());
@@ -698,7 +698,7 @@ public class SqlDao extends AbstractDao {
 
             if (!toAdd.isEmpty()) {
                 try (Connection c = this.provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_INSERT))) {
+                    try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_INSERT))) {
                         for (NodeDataContainer nd : toAdd) {
                             ps.setString(1, group.getName());
                             ps.setString(2, nd.getPermission());
@@ -723,12 +723,12 @@ public class SqlDao extends AbstractDao {
         group.getIoLock().lock();
         try {
             try (Connection c = this.provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_PERMISSIONS_DELETE))) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_DELETE))) {
                     ps.setString(1, group.getName());
                     ps.execute();
                 }
 
-                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(GROUP_DELETE))) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_DELETE))) {
                     ps.setString(1, group.getName());
                     ps.execute();
                 }
@@ -747,7 +747,7 @@ public class SqlDao extends AbstractDao {
 
         List<HeldPermission<String>> held = new ArrayList<>();
         try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = builder.build(c, this.prefix)) {
+            try (PreparedStatement ps = builder.build(c, this.statementProcessor)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         String holder = rs.getString("name");
@@ -775,7 +775,7 @@ public class SqlDao extends AbstractDao {
             boolean exists = false;
             String groups = null;
             try (Connection c = this.provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(TRACK_SELECT))) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(TRACK_SELECT))) {
                     ps.setString(1, track.getName());
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
@@ -792,7 +792,7 @@ public class SqlDao extends AbstractDao {
             } else {
                 String json = this.gson.toJson(track.getGroups());
                 try (Connection c = this.provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(TRACK_INSERT))) {
+                    try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(TRACK_INSERT))) {
                         ps.setString(1, track.getName());
                         ps.setString(2, json);
                         ps.execute();
@@ -814,7 +814,7 @@ public class SqlDao extends AbstractDao {
         try {
             String groups;
             try (Connection c = this.provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(TRACK_SELECT))) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(TRACK_SELECT))) {
                     ps.setString(1, name);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
@@ -845,7 +845,7 @@ public class SqlDao extends AbstractDao {
     public void loadAllTracks() throws SQLException {
         List<String> tracks = new ArrayList<>();
         try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(TRACK_SELECT_ALL))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(TRACK_SELECT_ALL))) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         tracks.add(rs.getString("name").toLowerCase());
@@ -880,7 +880,7 @@ public class SqlDao extends AbstractDao {
         try {
             String s = this.gson.toJson(track.getGroups());
             try (Connection c = this.provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(TRACK_UPDATE))) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(TRACK_UPDATE))) {
                     ps.setString(1, s);
                     ps.setString(2, track.getName());
                     ps.execute();
@@ -896,7 +896,7 @@ public class SqlDao extends AbstractDao {
         track.getIoLock().lock();
         try {
             try (Connection c = this.provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(TRACK_DELETE))) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(TRACK_DELETE))) {
                     ps.setString(1, track.getName());
                     ps.execute();
                 }
@@ -919,13 +919,13 @@ public class SqlDao extends AbstractDao {
         if (!username.equalsIgnoreCase(oldUsername)) {
             try (Connection c = this.provider.getConnection()) {
                 if (oldUsername != null) {
-                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_UPDATE_USERNAME_FOR_UUID))) {
+                    try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_UPDATE_USERNAME_FOR_UUID))) {
                         ps.setString(1, username);
                         ps.setString(2, uuid.toString());
                         ps.execute();
                     }
                 } else {
-                    try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_INSERT))) {
+                    try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_INSERT))) {
                         ps.setString(1, uuid.toString());
                         ps.setString(2, username);
                         ps.setString(3, NodeFactory.DEFAULT_GROUP_NAME);
@@ -939,7 +939,7 @@ public class SqlDao extends AbstractDao {
 
         Set<UUID> conflicting = new HashSet<>();
         try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT_ALL_UUIDS_BY_USERNAME))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_SELECT_ALL_UUIDS_BY_USERNAME))) {
                 ps.setString(1, username);
                 ps.setString(2, uuid.toString());
                 try (ResultSet rs = ps.executeQuery()) {
@@ -953,7 +953,7 @@ public class SqlDao extends AbstractDao {
         if (!conflicting.isEmpty()) {
             // remove the mappings for conflicting uuids
             try (Connection c = this.provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_DELETE_ALL_UUIDS_BY_USERNAME))) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_DELETE_ALL_UUIDS_BY_USERNAME))) {
                     ps.setString(1, username);
                     ps.setString(2, uuid.toString());
                     ps.execute();
@@ -969,7 +969,7 @@ public class SqlDao extends AbstractDao {
     public UUID getPlayerUuid(String username) throws SQLException {
         username = username.toLowerCase();
         try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT_UUID_BY_USERNAME))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_SELECT_UUID_BY_USERNAME))) {
                 ps.setString(1, username);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
@@ -984,7 +984,7 @@ public class SqlDao extends AbstractDao {
     @Override
     public String getPlayerName(UUID uuid) throws SQLException {
         try (Connection c = this.provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.prefix.apply(PLAYER_SELECT_USERNAME_BY_UUID))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_SELECT_USERNAME_BY_UUID))) {
                 ps.setString(1, uuid.toString());
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {

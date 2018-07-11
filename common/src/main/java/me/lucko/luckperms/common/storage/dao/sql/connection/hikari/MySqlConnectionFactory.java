@@ -29,6 +29,8 @@ import com.zaxxer.hikari.HikariConfig;
 
 import me.lucko.luckperms.common.storage.StorageCredentials;
 
+import java.util.function.Function;
+
 public class MySqlConnectionFactory extends HikariConnectionFactory {
     public MySqlConnectionFactory(StorageCredentials configuration) {
         super("MySQL", configuration);
@@ -54,6 +56,11 @@ public class MySqlConnectionFactory extends HikariConnectionFactory {
 
         // append configurable properties
         super.appendProperties(config, credentials);
+    }
+
+    @Override
+    public Function<String, String> getStatementProcessor() {
+        return s -> s.replace("'", "`"); // use backticks for quotes
     }
 
 }

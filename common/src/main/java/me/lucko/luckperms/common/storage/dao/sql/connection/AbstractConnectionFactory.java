@@ -29,6 +29,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.Function;
 
 public abstract class AbstractConnectionFactory {
 
@@ -49,6 +50,8 @@ public abstract class AbstractConnectionFactory {
     public Map<String, String> getMeta() {
         return Collections.emptyMap();
     }
+
+    public abstract Function<String, String> getStatementProcessor();
 
     public abstract Connection getConnection() throws SQLException;
 

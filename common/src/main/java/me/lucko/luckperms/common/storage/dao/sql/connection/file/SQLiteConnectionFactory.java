@@ -38,6 +38,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.EnumSet;
 import java.util.Properties;
+import java.util.function.Function;
 
 public class SQLiteConnectionFactory extends FlatfileConnectionFactory {
 
@@ -103,6 +104,11 @@ public class SQLiteConnectionFactory extends FlatfileConnectionFactory {
         if (this.connection != null) {
             this.connection.shutdown();
         }
+    }
+
+    @Override
+    public Function<String, String> getStatementProcessor() {
+        return s -> s.replace("'", "");
     }
 
 }

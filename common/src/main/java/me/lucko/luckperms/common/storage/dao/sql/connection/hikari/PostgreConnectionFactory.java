@@ -29,6 +29,8 @@ import com.zaxxer.hikari.HikariConfig;
 
 import me.lucko.luckperms.common.storage.StorageCredentials;
 
+import java.util.function.Function;
+
 public class PostgreConnectionFactory extends HikariConnectionFactory {
     public PostgreConnectionFactory(StorageCredentials configuration) {
         super("PostgreSQL", configuration);
@@ -51,5 +53,10 @@ public class PostgreConnectionFactory extends HikariConnectionFactory {
         config.addDataSourceProperty("databaseName", database);
         config.addDataSourceProperty("user", username);
         config.addDataSourceProperty("password", password);
+    }
+
+    @Override
+    public Function<String, String> getStatementProcessor() {
+        return s -> s.replace("'", "");
     }
 }
