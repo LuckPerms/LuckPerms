@@ -44,6 +44,24 @@
             <version>7.0.0</version>
             <scope>provided</scope>
             <optional>true</optional>
+            <exclusions>
+                <exclusion>
+                    <groupId>ninja.leaping.configurate</groupId>
+                    <artifactId>configurate-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ninja.leaping.configurate</groupId>
+                    <artifactId>configurate-hocon</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ninja.leaping.configurate</groupId>
+                    <artifactId>configurate-gson</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ninja.leaping.configurate</groupId>
+                    <artifactId>configurate-yaml</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- guava -->
