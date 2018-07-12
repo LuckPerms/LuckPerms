@@ -312,7 +312,7 @@ public class SeparatedConfigurateDao extends AbstractConfigurateDao {
     @Override
     public List<HeldPermission<String>> getGroupsWithPermission(Constraint constraint) throws Exception {
         List<HeldPermission<String>> held = new ArrayList<>();
-        try (Stream<Path> stream = Files.list(getDirectory(StorageLocation.USER))) {
+        try (Stream<Path> stream = Files.list(getDirectory(StorageLocation.GROUP))) {
             stream.filter(getFileTypeFilter())
                     .forEach(file -> {
                         String fileName = file.getFileName().toString();
