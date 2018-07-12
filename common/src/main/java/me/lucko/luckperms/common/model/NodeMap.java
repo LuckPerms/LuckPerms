@@ -84,18 +84,22 @@ public final class NodeMap {
      * key, and finally by the overall size of the set. Nodes are ordered according to the priority rules
      * defined in {@link NodeComparator}.</p>
      */
-    private final SortedSetMultimap<ImmutableContextSet, LocalizedNode> map = Multimaps.newSortedSetMultimap(
-            new ConcurrentSkipListMap<>(ContextSetComparator.reverse()),
-            VALUE_SET_SUPPLIER
+    private final SortedSetMultimap<ImmutableContextSet, LocalizedNode> map = Multimaps.synchronizedSortedSetMultimap(
+            Multimaps.newSortedSetMultimap(
+                    new ConcurrentSkipListMap<>(ContextSetComparator.reverse()),
+                    VALUE_SET_SUPPLIER
+            )
     );
 
     /**
      * Copy of {@link #map} which only contains group nodes
      * @see Node#isGroupNode()
      */
-    private final SortedSetMultimap<ImmutableContextSet, LocalizedNode> inheritanceMap = Multimaps.newSortedSetMultimap(
-            new ConcurrentSkipListMap<>(ContextSetComparator.reverse()),
-            VALUE_SET_SUPPLIER
+    private final SortedSetMultimap<ImmutableContextSet, LocalizedNode> inheritanceMap = Multimaps.synchronizedSortedSetMultimap(
+            Multimaps.newSortedSetMultimap(
+                    new ConcurrentSkipListMap<>(ContextSetComparator.reverse()),
+                    VALUE_SET_SUPPLIER
+            )
     );
 
     /**
