@@ -56,6 +56,8 @@ public class FileWatcher {
     // the watchservice instance
     private final WatchService watchService;
 
+    private boolean initialised = false;
+
     public FileWatcher(LuckPermsPlugin plugin, Path basePath) throws IOException {
         this.watchedLocations = Collections.synchronizedMap(new HashMap<>());
         this.basePath = basePath;
@@ -90,6 +92,7 @@ public class FileWatcher {
                 e.printStackTrace();
             }
         }
+        this.initialised = true;
     }
 
     private void tick() {
@@ -104,10 +107,14 @@ public class FileWatcher {
         expired.forEach(this.watchedLocations::remove);
     }
 
+    private static boolean isFileTemporary(String fileName) {
+        return fileName.endsWith(".tmp") || fileName.endsWith(".swp") || fileName.endsWith(".swx") || fileName.endsWith(".swpz");
+    }
+
     /**
      * Encapsulates a "watcher" in a specific directory.
      */
-    public static final class WatchedLocation {
+    public final class WatchedLocation {
         // the parent watcher
         private final FileWatcher watcher;
 
@@ -146,7 +153,18 @@ public class FileWatcher {
 
         private boolean tick() {
             if (!this.ready) {
-                return true;
+                // await init
+                if (!FileWatcher.this.initialised) {
+                    return true;
+                }
+
+                try {
+                    setup();
+                    return true;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return false;
+                }
             }
 
             // remove old change entries.
@@ -164,7 +182,7 @@ public class FileWatcher {
                 String fileName = context.toString();
 
                 // ignore temporary changes
-                if (fileName.endsWith(".tmp") || fileName.endsWith(".swp") || fileName.endsWith(".swx") || fileName.endsWith(".swpz")) {
+                if (isFileTemporary(fileName)) {
                     continue;
                 }
 
