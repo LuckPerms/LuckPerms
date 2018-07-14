@@ -87,6 +87,11 @@ public class EditorCommand extends SingleCommand {
                     .forEach(holders::add);
         }
 
+        if (holders.isEmpty()) {
+            Message.EDITOR_NO_MATCH.send(sender);
+            return CommandResult.STATE_ERROR;
+        }
+
         // remove holders which the sender doesn't have perms to view
         holders.removeIf(holder -> ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), holder));
 
