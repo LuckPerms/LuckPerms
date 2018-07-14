@@ -105,7 +105,7 @@ public class LogDispatcher {
     public void dispatchFromRemote(ExtendedLogEntry entry) {
         boolean shouldCancel = !this.plugin.getConfiguration().get(ConfigKeys.BROADCAST_RECEIVED_LOG_ENTRIES) || !this.plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
         if (!this.plugin.getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.REMOTE)) {
-            broadcast(entry, LogNotifyEvent.Origin.LOCAL_API, null);
+            broadcast(entry, LogNotifyEvent.Origin.REMOTE, null);
         }
     }
 }

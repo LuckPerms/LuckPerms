@@ -34,7 +34,6 @@ import me.lucko.luckperms.common.utils.TextUtils;
 import net.kyori.text.Component;
 
 import java.lang.ref.WeakReference;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -131,11 +130,6 @@ public final class AbstractSender<T> implements Sender {
     @Override
     public boolean isValid() {
         return this.reference.get() != null;
-    }
-
-    @Override
-    public Optional<Object> getHandle() {
-        return Optional.ofNullable(this.reference.get());
     }
 
     @Override

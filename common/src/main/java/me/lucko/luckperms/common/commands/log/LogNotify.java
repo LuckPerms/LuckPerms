@@ -45,6 +45,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class LogNotify extends SubCommand<Log> {
+    private static final String IGNORE_NODE = "luckperms.log.notify.ignoring";
+
     public LogNotify(LocaleManager locale) {
         super(CommandSpec.LOG_NOTIFY.localize(locale), "notify", CommandPermission.LOG_NOTIFY, Predicates.notInRange(0, 1));
     }
@@ -56,7 +58,7 @@ public class LogNotify extends SubCommand<Log> {
         }
 
         Optional<? extends Node> ret = user.enduringData().immutable().get(ContextSet.empty()).stream()
-                .filter(n -> n.getPermission().equalsIgnoreCase("luckperms.log.notify.ignoring"))
+                .filter(n -> n.getPermission().equalsIgnoreCase(IGNORE_NODE))
                 .findFirst();
 
         // if they don't have the perm, they're not ignoring
@@ -72,10 +74,10 @@ public class LogNotify extends SubCommand<Log> {
 
         if (state) {
             // add the perm
-            user.setPermission(NodeFactory.make("luckperms.log.notify.ignoring"));
+            user.setPermission(NodeFactory.make(IGNORE_NODE));
         } else {
             // remove the perm
-            user.removeIf(ContextSet.empty(), n -> n.getPermission().equalsIgnoreCase("luckperms.log.notify.ignoring"));
+            user.removeIf(ContextSet.empty(), n -> n.getPermission().equalsIgnoreCase(IGNORE_NODE));
         }
 
         plugin.getStorage().saveUser(user).join();
