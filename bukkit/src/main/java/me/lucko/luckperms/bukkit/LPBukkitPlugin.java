@@ -29,6 +29,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.event.user.UserDataRecalculateEvent;
 import me.lucko.luckperms.bukkit.calculators.BukkitCalculatorFactory;
+import me.lucko.luckperms.bukkit.compat.LuckPermsBrigadier;
 import me.lucko.luckperms.bukkit.contexts.BukkitContextManager;
 import me.lucko.luckperms.bukkit.contexts.WorldCalculator;
 import me.lucko.luckperms.bukkit.listeners.BukkitConnectionListener;
@@ -111,9 +112,22 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
         this.senderFactory = new BukkitSenderFactory(this);
     }
 
+    private static boolean isBrigadierSupported() {
+        try {
+            Class.forName("com.mojang.brigadier.CommandDispatcher");
+            return true;
+        } catch (ClassNotFoundException var1) {
+            return false;
+        }
+    }
+
     @Override
     protected Set<Dependency> getGlobalDependencies() {
-        return EnumSet.of(Dependency.TEXT, Dependency.CAFFEINE, Dependency.OKIO, Dependency.OKHTTP);
+        EnumSet<Dependency> dependencies = EnumSet.of(Dependency.TEXT, Dependency.CAFFEINE, Dependency.OKIO, Dependency.OKHTTP);
+        if (isBrigadierSupported()) {
+            dependencies.add(Dependency.COMMODORE);
+        }
+        return dependencies;
     }
 
     @Override
@@ -139,6 +153,15 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
         PluginCommand cmd = this.bootstrap.getCommand("luckperms");
         cmd.setExecutor(this.commandManager);
         cmd.setTabCompleter(this.commandManager);
+
+        // setup brigadier
+        if (isBrigadierSupported()) {
+            try {
+                LuckPermsBrigadier.register(this, cmd);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override

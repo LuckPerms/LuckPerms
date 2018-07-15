@@ -19,6 +19,16 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+                <includes>
+                    <include>*.yml</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>luckperms-brigadier.json.gz</include>
+                </includes>
             </resource>
         </resources>
         <plugins>
@@ -67,6 +77,10 @@
                                 <relocation>
                                     <pattern>okhttp3</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.okhttp3</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>me.lucko.commodore</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.commodore</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.mariadb.jdbc</pattern>
@@ -126,6 +140,14 @@
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
             <version>1.12.2-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- commodore -->
+        <dependency>
+            <groupId>me.lucko</groupId>
+            <artifactId>commodore</artifactId>
+            <version>1.0</version>
             <scope>provided</scope>
         </dependency>
 

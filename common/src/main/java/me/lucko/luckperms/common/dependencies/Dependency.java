@@ -91,6 +91,13 @@ public enum Dependency {
                     Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
             )
     ),
+    COMMODORE(
+            "me{}lucko",
+            "commodore",
+            "1.0",
+            "Cu7m0zEOTts51dHix2RLKkeUapaek7rKnnxgRQeIlJE=",
+            Relocation.of("commodore", "me{}lucko{}commodore")
+    ),
     MARIADB_DRIVER(
             "org{}mariadb{}jdbc",
             "mariadb-java-client",
