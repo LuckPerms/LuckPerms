@@ -41,7 +41,7 @@ import javax.annotation.Nonnull;
  * An implementation of {@link Messenger} using Redis.
  */
 public class RedisMessenger implements Messenger {
-    private static final String CHANNEL = "lpuc";
+    private static final String CHANNEL = "luckperms:update";
 
     private final LuckPermsPlugin plugin;
     private final IncomingMessageConsumer consumer;

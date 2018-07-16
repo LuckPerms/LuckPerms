@@ -25,6 +25,11 @@
 
 package me.lucko.luckperms.common.messaging;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
 import me.lucko.luckperms.api.messenger.Messenger;
@@ -41,6 +46,7 @@ import me.lucko.luckperms.common.messaging.message.UpdateMessageImpl;
 import me.lucko.luckperms.common.messaging.message.UserUpdateMessageImpl;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.gson.JObject;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -50,8 +56,11 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class LuckPermsMessagingService implements InternalMessagingService, IncomingMessageConsumer {
+    private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
+    
     private final LuckPermsPlugin plugin;
     private final Set<UUID> receivedMessages;
     private final PushUpdateBuffer updateBuffer;
@@ -137,77 +146,127 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
     public boolean consumeIncomingMessage(@Nonnull Message message) {
         Objects.requireNonNull(message, "message");
 
-        if (message instanceof UpdateMessage) {
-            UpdateMessage msg = (UpdateMessage) message;
-            if (!this.receivedMessages.add(msg.getId())) {
-                return false;
-            }
-
-            this.plugin.getLogger().info("[" + getName() + " Messaging] Received update ping with id: " + msg.getId());
-
-            if (this.plugin.getEventFactory().handleNetworkPreSync(false, msg.getId())) {
-                return true;
-            }
-
-            this.plugin.getUpdateTaskBuffer().request();
-            return true;
-
-        } else if (message instanceof UserUpdateMessage) {
-            UserUpdateMessage msg = (UserUpdateMessage) message;
-            if (!this.receivedMessages.add(msg.getId())) {
-                return false;
-            }
-
-            User user = this.plugin.getUserManager().getIfLoaded(msg.getUser());
-            if (user == null) {
-                return true;
-            }
-
-            this.plugin.getLogger().info("[" + getName() + " Messaging] Received user update ping for '" + user.getFriendlyName() + "' with id: " + msg.getId());
-
-            if (this.plugin.getEventFactory().handleNetworkPreSync(false, msg.getId())) {
-                return true;
-            }
-
-            this.plugin.getStorage().loadUser(user.getUuid(), null);
-            return true;
-
-        } else if (message instanceof LogMessage) {
-            LogMessage msg = (LogMessage) message;
-            if (!this.receivedMessages.add(msg.getId())) {
-                return false;
-            }
-
-            this.plugin.getEventFactory().handleLogReceive(msg.getId(), msg.getLogEntry());
-            this.plugin.getLogDispatcher().dispatchFromRemote((ExtendedLogEntry) msg.getLogEntry());
-            return true;
-
-        } else {
-            this.plugin.getLogger().warn("Unable to decode incoming message: " + message + " (" + message.getClass().getName() + ")");
+        if (!this.receivedMessages.add(message.getId())) {
             return false;
         }
+
+        // determine if the message can be handled by us
+        boolean valid = message instanceof UpdateMessage ||
+                message instanceof UserUpdateMessage ||
+                message instanceof LogMessage;
+
+        // instead of throwing an exception here, just return false
+        // it means an instance of LP can gracefully handle messages it doesn't
+        // "understand" yet. (sent from an instance running a newer version, etc)
+        if (!valid) {
+            return false;
+        }
+
+        processIncomingMessage(message);
+        return true;
     }
 
     @Override
     public boolean consumeIncomingMessageAsString(@Nonnull String encodedString) {
         Objects.requireNonNull(encodedString, "encodedString");
+        JsonObject decodedObject = GSON.fromJson(encodedString, JsonObject.class).getAsJsonObject();
 
-        Message decoded = UpdateMessageImpl.decode(encodedString);
-        if (decoded != null) {
-            return consumeIncomingMessage(decoded);
+        // extract id
+        JsonElement idElement = decodedObject.get("id");
+        if (idElement == null) {
+            throw new IllegalStateException("Incoming message has no id argument: " + encodedString);
+        }
+        UUID id = UUID.fromString(idElement.getAsString());
+
+        // ensure the message hasn't been received already
+        if (!this.receivedMessages.add(id)) {
+            return false;
         }
 
-        decoded = UserUpdateMessageImpl.decode(encodedString);
-        if (decoded != null) {
-            return consumeIncomingMessage(decoded);
+        // extract type
+        JsonElement typeElement = decodedObject.get("type");
+        if (typeElement == null) {
+            throw new IllegalStateException("Incoming message has no type argument: " + encodedString);
+        }
+        String type = typeElement.getAsString();
+
+        // extract content
+        @Nullable JsonElement content = decodedObject.get("content");
+
+        // decode message
+        Message decoded;
+        switch (type) {
+            case UpdateMessageImpl.TYPE:
+                decoded = UpdateMessageImpl.decode(content, id);
+                break;
+            case UserUpdateMessageImpl.TYPE:
+                decoded = UserUpdateMessageImpl.decode(content, id);
+                break;
+            case LogMessageImpl.TYPE:
+                decoded = LogMessageImpl.decode(content, id);
+                break;
+            default:
+                // gracefully return if we just don't recognise the type
+                return false;
         }
 
-        decoded = LogMessageImpl.decode(encodedString);
-        return decoded != null && consumeIncomingMessage(decoded);
+        // consume the message
+        processIncomingMessage(decoded);
+        return true;
+    }
+
+    public static String encodeMessageAsString(String type, UUID id, @Nullable JsonElement content) {
+        JsonObject json = new JObject()
+                .add("id", id.toString())
+                .add("type", type)
+                .consume(o -> {
+                    if (content != null) {
+                        o.add("content", content);
+                    }
+                })
+                .toJson();
+
+        return GSON.toJson(json);
+    }
+
+    private void processIncomingMessage(Message message) {
+        if (message instanceof UpdateMessage) {
+            UpdateMessage msg = (UpdateMessage) message;
+
+            this.plugin.getLogger().info("[" + getName() + " Messaging] Received update ping with id: " + msg.getId());
+
+            if (this.plugin.getEventFactory().handleNetworkPreSync(false, msg.getId())) {
+                return;
+            }
+
+            this.plugin.getUpdateTaskBuffer().request();
+        } else if (message instanceof UserUpdateMessage) {
+            UserUpdateMessage msg = (UserUpdateMessage) message;
+
+            User user = this.plugin.getUserManager().getIfLoaded(msg.getUser());
+            if (user == null) {
+                return;
+            }
+
+            this.plugin.getLogger().info("[" + getName() + " Messaging] Received user update ping for '" + user.getFriendlyName() + "' with id: " + msg.getId());
+
+            if (this.plugin.getEventFactory().handleNetworkPreSync(false, msg.getId())) {
+                return;
+            }
+
+            this.plugin.getStorage().loadUser(user.getUuid(), null);
+        } else if (message instanceof LogMessage) {
+            LogMessage msg = (LogMessage) message;
+
+            this.plugin.getEventFactory().handleLogReceive(msg.getId(), msg.getLogEntry());
+            this.plugin.getLogDispatcher().dispatchFromRemote((ExtendedLogEntry) msg.getLogEntry());
+        } else {
+            throw new IllegalArgumentException("Unknown message type: " + message.getClass().getName());
+        }
     }
 
     private final class PushUpdateBuffer extends BufferedRequest<Void> {
-        public PushUpdateBuffer(LuckPermsPlugin plugin) {
+        PushUpdateBuffer(LuckPermsPlugin plugin) {
             super(2, TimeUnit.SECONDS, plugin.getBootstrap().getScheduler());
         }
 

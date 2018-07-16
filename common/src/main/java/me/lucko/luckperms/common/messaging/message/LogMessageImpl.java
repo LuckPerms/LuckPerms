@@ -25,37 +25,27 @@
 
 package me.lucko.luckperms.common.messaging.message;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonElement;
 
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.messenger.message.type.LogMessage;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LogEntryJsonSerializer;
+import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 
-import java.nio.ByteBuffer;
-import java.util.Base64;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class LogMessageImpl extends AbstractMessage implements LogMessage {
-    private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
-    private static final String LOG_HEADER = "log";
+    public static final String TYPE = "log";
 
-    public static LogMessageImpl decode(String msg) {
-        if (msg.startsWith(LOG_HEADER) && msg.length() > LOG_HEADER.length()) {
-            String content = msg.substring(LOG_HEADER.length());
-
-            try {
-                return decodeContent(GSON.fromJson(content, JsonObject.class));
-            } catch (Exception e) {
-                return null;
-            }
+    public static LogMessageImpl decode(@Nullable JsonElement content, UUID id) {
+        if (content == null) {
+            throw new IllegalStateException("Missing content");
         }
 
-        return null;
+        return new LogMessageImpl(id, LogEntryJsonSerializer.deserialize(content));
     }
 
     private final LogEntry logEntry;
@@ -74,65 +64,9 @@ public class LogMessageImpl extends AbstractMessage implements LogMessage {
     @Nonnull
     @Override
     public String asEncodedString() {
-        return LOG_HEADER + GSON.toJson(encodeContent(uuidToString(getId()), this.logEntry));
-    }
-
-    private static String uuidToString(UUID uuid) {
-        ByteBuffer buf = ByteBuffer.allocate(Long.BYTES * 2);
-        buf.putLong(uuid.getMostSignificantBits());
-        buf.putLong(uuid.getLeastSignificantBits());
-        return Base64.getEncoder().encodeToString(buf.array());
-    }
-
-    private static UUID uuidFromString(String s) {
-        try {
-            byte[] bytes = Base64.getDecoder().decode(s);
-            ByteBuffer buf = ByteBuffer.wrap(bytes);
-            return new UUID(buf.getLong(), buf.getLong());
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-
-    private static JsonObject encodeContent(String id, LogEntry entry) {
-        JsonObject data = new JsonObject();
-
-        data.add("id", new JsonPrimitive(id));
-        data.add("actor", new JsonPrimitive(entry.getActor().toString()));
-        data.add("actorName", new JsonPrimitive(entry.getActorName()));
-        data.add("type", new JsonPrimitive(entry.getType().name()));
-        if (entry.getActed().isPresent()) {
-            data.add("acted", new JsonPrimitive(entry.getActed().get().toString()));
-        }
-        data.add("actedName", new JsonPrimitive(entry.getActedName()));
-        data.add("action", new JsonPrimitive(entry.getAction()));
-
-        return data;
-    }
-
-    private static LogMessageImpl decodeContent(JsonObject object) {
-        ExtendedLogEntry.Builder builder = ExtendedLogEntry.build();
-
-        String id = object.get("id").getAsString();
-        if (id == null) {
-            return null;
-        }
-
-        UUID uuid = uuidFromString(id);
-        if (uuid == null) {
-            return null;
-        }
-
-        builder.actor(UUID.fromString(object.get("actor").getAsString()));
-        builder.actorName(object.get("actorName").getAsString());
-        builder.type(LogEntry.Type.valueOf(object.get("type").getAsString()));
-        if (object.has("acted")) {
-            builder.actor(UUID.fromString(object.get("acted").getAsString()));
-        }
-        builder.actedName(object.get("actedName").getAsString());
-        builder.action(object.get("action").getAsString());
-
-        return new LogMessageImpl(uuid, builder.build());
+        return LuckPermsMessagingService.encodeMessageAsString(
+                TYPE, getId(), LogEntryJsonSerializer.serialize(logEntry)
+        );
     }
 
 }

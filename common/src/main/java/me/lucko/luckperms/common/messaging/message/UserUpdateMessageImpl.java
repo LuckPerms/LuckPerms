@@ -25,24 +25,33 @@
 
 package me.lucko.luckperms.common.messaging.message;
 
-import me.lucko.luckperms.api.messenger.message.type.UserUpdateMessage;
+import com.google.gson.JsonElement;
 
-import java.nio.ByteBuffer;
-import java.util.Base64;
+import me.lucko.luckperms.api.messenger.message.type.UserUpdateMessage;
+import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
+import me.lucko.luckperms.common.utils.gson.JObject;
+
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class UserUpdateMessageImpl extends AbstractMessage implements UserUpdateMessage {
-    private static final String USER_UPDATE_HEADER = "userupdate:";
+    public static final String TYPE = "userupdate";
 
-    public static UserUpdateMessageImpl decode(String msg) {
-        if (msg.startsWith(USER_UPDATE_HEADER) && msg.length() > USER_UPDATE_HEADER.length()) {
-            String content = msg.substring(USER_UPDATE_HEADER.length());
-            return decodeContent(content);
+    public static UserUpdateMessageImpl decode(@Nullable JsonElement content, UUID id) {
+        if (content == null) {
+            throw new IllegalStateException("Missing content");
         }
 
-        return null;
+        // extract user uuid
+        JsonElement uuidElement = content.getAsJsonObject().get("userUuid");
+        if (uuidElement == null) {
+            throw new IllegalStateException("Incoming message has no userUuid argument: " + content);
+        }
+        UUID userUuid = UUID.fromString(uuidElement.getAsString());
+
+        return new UserUpdateMessageImpl(id, userUuid);
     }
 
     private final UUID userUuid;
@@ -61,27 +70,8 @@ public class UserUpdateMessageImpl extends AbstractMessage implements UserUpdate
     @Nonnull
     @Override
     public String asEncodedString() {
-        return USER_UPDATE_HEADER + encodeContent(getId(), this.userUuid);
-    }
-
-    private static String encodeContent(UUID id, UUID userUuid) {
-        ByteBuffer buf = ByteBuffer.allocate(Long.BYTES * 4);
-        buf.putLong(id.getMostSignificantBits());
-        buf.putLong(id.getLeastSignificantBits());
-        buf.putLong(userUuid.getMostSignificantBits());
-        buf.putLong(userUuid.getLeastSignificantBits());
-        return Base64.getEncoder().encodeToString(buf.array());
-    }
-
-    private static UserUpdateMessageImpl decodeContent(String s) {
-        try {
-            byte[] bytes = Base64.getDecoder().decode(s);
-            ByteBuffer buf = ByteBuffer.wrap(bytes);
-            UUID id = new UUID(buf.getLong(), buf.getLong());
-            UUID userUuid = new UUID(buf.getLong(), buf.getLong());
-            return new UserUpdateMessageImpl(id, userUuid);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
+        return LuckPermsMessagingService.encodeMessageAsString(
+                TYPE, getId(), new JObject().add("userUuid", userUuid.toString()).toJson()
+        );
     }
 }

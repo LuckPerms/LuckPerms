@@ -43,7 +43,7 @@ import javax.annotation.Nonnull;
  * An implementation of {@link Messenger} using Redis, via RedisBungee's API.
  */
 public class RedisBungeeMessenger implements Messenger, Listener {
-    private static final String CHANNEL = "lpuc";
+    private static final String CHANNEL = "luckperms:update";
 
     private final LPBungeePlugin plugin;
     private final IncomingMessageConsumer consumer;

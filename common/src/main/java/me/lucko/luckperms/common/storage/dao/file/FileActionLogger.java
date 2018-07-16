@@ -28,24 +28,21 @@ package me.lucko.luckperms.common.storage.dao.file;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.actionlog.LogEntryJsonSerializer;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.gson.JObject;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Queue;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -109,19 +106,7 @@ public class FileActionLogger {
 
                 // poll the queue for new entries
                 for (LogEntry e; (e = this.entryQueue.poll()) != null; ) {
-                    JObject object = new JObject()
-                            .add("timestamp", e.getTimestamp())
-                            .add("actor", e.getActor().toString())
-                            .add("actorName", e.getActorName())
-                            .add("type", Character.toString(e.getType().getCode()))
-                            .add("actedName", e.getActedName())
-                            .add("action", e.getAction());
-
-                    if (e.getActed().isPresent()) {
-                        object.add("acted", e.getActed().get().toString());
-                    }
-
-                    array.add(object.toJson());
+                    array.add(LogEntryJsonSerializer.serialize(e));
                 }
 
                 // write the full content back to the file
@@ -142,24 +127,7 @@ public class FileActionLogger {
         try (JsonReader reader = new JsonReader(Files.newBufferedReader(this.contentFile, StandardCharsets.UTF_8))) {
             JsonArray array = JSON_PARSER.parse(reader).getAsJsonArray();
             for (JsonElement element : array) {
-                JsonObject object = element.getAsJsonObject();
-
-                UUID actedUuid = null;
-                if (object.has("acted")) {
-                    actedUuid = UUID.fromString(object.get("acted").getAsString());
-                }
-
-                ExtendedLogEntry e = ExtendedLogEntry.build()
-                        .timestamp(object.get("timestamp").getAsLong())
-                        .actor(UUID.fromString(object.get("actor").getAsString()))
-                        .actorName(object.get("actorName").getAsString())
-                        .type(LogEntry.Type.valueOf(object.get("type").getAsCharacter()))
-                        .acted(actedUuid)
-                        .actedName(object.get("actedName").getAsString())
-                        .action(object.get("action").getAsString())
-                        .build();
-
-                log.add(e);
+                log.add(LogEntryJsonSerializer.deserialize(element));
             }
         }
         return log.build();

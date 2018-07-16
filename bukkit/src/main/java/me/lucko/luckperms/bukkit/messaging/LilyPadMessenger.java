@@ -45,7 +45,7 @@ import javax.annotation.Nonnull;
  * An implementation of {@link Messenger} using LilyPad.
  */
 public class LilyPadMessenger implements Messenger {
-    private static final String CHANNEL = "lpuc";
+    private static final String CHANNEL = "luckperms:update";
 
     private final LPBukkitPlugin plugin;
     private final IncomingMessageConsumer consumer;

@@ -25,24 +25,21 @@
 
 package me.lucko.luckperms.common.messaging.message;
 
-import me.lucko.luckperms.api.messenger.message.type.UpdateMessage;
+import com.google.gson.JsonElement;
 
-import java.nio.ByteBuffer;
-import java.util.Base64;
+import me.lucko.luckperms.api.messenger.message.type.UpdateMessage;
+import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
+
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class UpdateMessageImpl extends AbstractMessage implements UpdateMessage {
-    private static final String UPDATE_HEADER = "update:";
+    public static final String TYPE = "update";
 
-    public static UpdateMessageImpl decode(String msg) {
-        if (msg.startsWith(UPDATE_HEADER) && msg.length() > UPDATE_HEADER.length()) {
-            String content = msg.substring(UPDATE_HEADER.length());
-            return decodeContent(content);
-        }
-
-        return null;
+    public static UpdateMessageImpl decode(@Nullable JsonElement content, UUID id) {
+        return new UpdateMessageImpl(id);
     }
 
     public UpdateMessageImpl(UUID id) {
@@ -52,23 +49,6 @@ public class UpdateMessageImpl extends AbstractMessage implements UpdateMessage 
     @Nonnull
     @Override
     public String asEncodedString() {
-        return UPDATE_HEADER + encodeContent(getId());
-    }
-
-    private static String encodeContent(UUID uuid) {
-        ByteBuffer buf = ByteBuffer.allocate(Long.BYTES * 2);
-        buf.putLong(uuid.getMostSignificantBits());
-        buf.putLong(uuid.getLeastSignificantBits());
-        return Base64.getEncoder().encodeToString(buf.array());
-    }
-
-    private static UpdateMessageImpl decodeContent(String s) {
-        try {
-            byte[] bytes = Base64.getDecoder().decode(s);
-            ByteBuffer buf = ByteBuffer.wrap(bytes);
-            return new UpdateMessageImpl(new UUID(buf.getLong(), buf.getLong()));
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
+        return LuckPermsMessagingService.encodeMessageAsString(TYPE, getId(), null);
     }
 }
