@@ -41,7 +41,7 @@ public enum DurationFormatter {
 
         @Override
         public String format(Calendar from, Calendar to) {
-            return dateDiff(from, to, 4, this.names);
+            return dateDiff(from, to, 4, this.names, true);
         }
     },
 
@@ -50,7 +50,7 @@ public enum DurationFormatter {
 
         @Override
         public String format(Calendar from, Calendar to) {
-            return dateDiff(from, to, 2, this.names);
+            return dateDiff(from, to, 2, this.names, true);
         }
     },
 
@@ -59,7 +59,7 @@ public enum DurationFormatter {
 
         @Override
         public String format(Calendar from, Calendar to) {
-            return dateDiff(from, to, 4, this.names);
+            return dateDiff(from, to, 4, this.names, false);
         }
     };
 
@@ -86,14 +86,12 @@ public enum DurationFormatter {
      * @param names the names to use to format each of the corresponding {@link #CALENDAR_TYPES}
      * @return a formatted string
      */
-    private static String dateDiff(Calendar from, Calendar to, int maxAccuracy, String[] names) {
-        boolean future = false;
+    private static String dateDiff(Calendar from, Calendar to, int maxAccuracy, String[] names, boolean concise) {
         if (to.equals(from)) {
             return "now";
         }
-        if (to.after(from)) {
-            future = true;
-        }
+
+        boolean future = to.after(from);
 
         StringBuilder sb = new StringBuilder();
         int accuracy = 0;
@@ -104,8 +102,17 @@ public enum DurationFormatter {
 
             int diff = dateDiff(CALENDAR_TYPES[i], from, to, future);
             if (diff > 0) {
+                int plural = diff > 1 ? 1 : 0;
+                String unit = names[i * 2 + plural];
+
+                sb.append(" ");
+                sb.append(diff);
+                if (!concise) {
+                    sb.append(" ");
+                }
+                sb.append(unit);
+
                 accuracy++;
-                sb.append(" ").append(diff).append(" ").append(names[i * 2 + (diff > 1 ? 1 : 0)]);
             }
         }
 
@@ -117,12 +124,10 @@ public enum DurationFormatter {
     }
 
     private static int dateDiff(int type, Calendar fromDate, Calendar toDate, boolean future) {
-        int year = Calendar.YEAR;
-
-        int fromYear = fromDate.get(year);
-        int toYear = toDate.get(year);
+        int fromYear = fromDate.get(Calendar.YEAR);
+        int toYear = toDate.get(Calendar.YEAR);
         if (Math.abs(fromYear - toYear) > MAX_YEARS) {
-            toDate.set(year, fromYear + (future ? MAX_YEARS : -MAX_YEARS));
+            toDate.set(Calendar.YEAR, fromYear + (future ? MAX_YEARS : -MAX_YEARS));
         }
 
         int diff = 0;
