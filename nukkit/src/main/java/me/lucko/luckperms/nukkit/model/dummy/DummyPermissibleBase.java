@@ -33,11 +33,15 @@ import cn.nukkit.plugin.Plugin;
 
 import java.lang.reflect.Field;
 import java.util.AbstractList;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.RandomAccess;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class DummyPermissibleBase extends PermissibleBase {
     private static final Field ATTACHMENTS_FIELD;
@@ -52,19 +56,6 @@ public class DummyPermissibleBase extends PermissibleBase {
             PERMISSIONS_FIELD.setAccessible(true);
         } catch (NoSuchFieldException e) {
             throw new ExceptionInInitializerError(e);
-        }
-    }
-
-    public static void nullFields(PermissibleBase permissibleBase) {
-        try {
-            ATTACHMENTS_FIELD.set(permissibleBase, EMPTY_LIST);
-        } catch (Exception e) {
-            // ignore
-        }
-        try {
-            PERMISSIONS_FIELD.set(permissibleBase, Collections.emptyMap());
-        } catch (Exception e) {
-            // ignore
         }
     }
 
@@ -85,7 +76,31 @@ public class DummyPermissibleBase extends PermissibleBase {
 
     private DummyPermissibleBase() {
         super(null);
-        nullFields(this);
+
+        // we want the singleton dummy attachment to be stateless
+        // the behaviour of this class is to fail silently, so we can't use Collections.emptyX
+        try {
+            ATTACHMENTS_FIELD.set(this, new ArrayList<PermissionAttachment>(){
+                @Override public boolean add(PermissionAttachment permissionAttachment) { return true; }
+                @Override public void add(int index, PermissionAttachment element) { }
+                @Override public boolean addAll(Collection<? extends PermissionAttachment> c) { return true; }
+                @Override public boolean addAll(int index, Collection<? extends PermissionAttachment> c) { return true; }
+            });
+        } catch (Exception e) {
+            // ignore
+        }
+        try {
+            PERMISSIONS_FIELD.set(this, new HashMap<String, PermissionAttachmentInfo>() {
+                @Override public PermissionAttachmentInfo put(String key, PermissionAttachmentInfo value) { return null; }
+                @Override public void putAll(Map<? extends String, ? extends PermissionAttachmentInfo> m) { }
+                @Override public PermissionAttachmentInfo putIfAbsent(String key, PermissionAttachmentInfo value) { return null; }
+                @Override public PermissionAttachmentInfo compute(String key, BiFunction<? super String, ? super PermissionAttachmentInfo, ? extends PermissionAttachmentInfo> remappingFunction) { return null; }
+                @Override public PermissionAttachmentInfo computeIfPresent(String key, BiFunction<? super String, ? super PermissionAttachmentInfo, ? extends PermissionAttachmentInfo> remappingFunction) { return null; }
+                @Override public PermissionAttachmentInfo computeIfAbsent(String key, Function<? super String, ? extends PermissionAttachmentInfo> mappingFunction) { return null; }
+            });
+        } catch (Exception e) {
+            // ignore
+        }
     }
 
     @Override public boolean isOp() { return false; }
