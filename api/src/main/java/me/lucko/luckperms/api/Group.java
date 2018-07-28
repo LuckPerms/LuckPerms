@@ -26,10 +26,12 @@
 package me.lucko.luckperms.api;
 
 import me.lucko.luckperms.api.caching.GroupData;
+import me.lucko.luckperms.api.context.ContextSet;
 
 import java.util.OptionalInt;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * An inheritable holder of permission data.
@@ -43,6 +45,33 @@ public interface Group extends PermissionHolder {
      */
     @Nonnull
     String getName();
+
+    /**
+     * Gets the groups "display name", if it has one that differs from it's actual name.
+     *
+     * <p>The lookup is made using the current servers active context.</p>
+     *
+     * <p>Will return <code>null</code> if the groups display name is equal to it's
+     * {@link #getName() actual name}.</p>
+     *
+     * @return the display name
+     * @since 4.3
+     */
+    @Nullable
+    String getDisplayName();
+
+    /**
+     * Gets the groups "display name", if it has one that differs from it's actual name.
+     *
+     * <p>Will return <code>null</code> if the groups display name is equal to it's
+     * {@link #getName() actual name}.</p>
+     *
+     * @param contextSet the contexts to lookup in
+     * @return the display name
+     * @since 4.3
+     */
+    @Nullable
+    String getDisplayName(@Nonnull ContextSet contextSet);
 
     /**
      * Gets the weight of this group, if present.

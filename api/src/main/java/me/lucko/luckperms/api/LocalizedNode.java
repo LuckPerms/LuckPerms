@@ -25,13 +25,12 @@
 
 package me.lucko.luckperms.api;
 
-import java.util.function.Predicate;
-
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 /**
- * A node with a traceable origin
+ * An extension of {@link Node}, providing information about
+ * where the node originated from.
  *
  * @since 2.11
  */
@@ -39,19 +38,9 @@ import javax.annotation.concurrent.Immutable;
 public interface LocalizedNode extends Node {
 
     /**
-     * Returns a predicate which unwraps the localised node parameter before delegating
-     * the handling to the provided predicate.
+     * Gets the delegate node.
      *
-     * @param delegate the delegate predicate.
-     * @return the composed predicate
-     * @since 4.3
-     */
-    static Predicate<? super LocalizedNode> composedPredicate(Predicate<Node> delegate) {
-        return localizedNode -> delegate.test(localizedNode.getNode());
-    }
-
-    /**
-     * Gets the delegate node
+     * <p>Result is never another {@link LocalizedNode} instance.</p>
      *
      * @return the node this instance is representing
      */
@@ -59,10 +48,15 @@ public interface LocalizedNode extends Node {
     Node getNode();
 
     /**
-     * Gets the location where the {@link Node} is inherited from
+     * Gets the location where the {@link Node} is inherited from.
      *
-     * @return where the node was inherited from. Will not return null.
-     * @see PermissionHolder#getObjectName()
+     * <p>The resultant string is the {@link PermissionHolder#getObjectName() object name} of the
+     * permission holder the node was inherited from.</p>
+     *
+     * <p>If the node was not inherited, the {@link PermissionHolder#getObjectName() object name}
+     * of the permission holder itself (the one that defined the node) will be returned.</p>
+     *
+     * @return where the node was inherited from.
      */
     @Nonnull
     String getLocation();

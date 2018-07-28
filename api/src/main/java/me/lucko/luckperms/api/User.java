@@ -48,7 +48,7 @@ public interface User extends PermissionHolder {
     /**
      * Gets the users username
      *
-     * <p>Returns null if no username is associated with this user.</p>
+     * <p>Returns null if no username is known for the user.</p>
      *
      * @return the users username
      */
@@ -58,8 +58,9 @@ public interface User extends PermissionHolder {
     /**
      * Gets the users current primary group.
      *
-     * <p>The result of this method depends on which method is configured for primary group calculation. It may not
-     * be the same as any value set through {@link #setPrimaryGroup(String)}.</p>
+     * <p>The result of this method depends on which method is configured for primary group
+     * calculation. It may not be the same as any value set through
+     * {@link #setPrimaryGroup(String)}.</p>
      *
      * @return the users primary group
      */
@@ -67,7 +68,10 @@ public interface User extends PermissionHolder {
     String getPrimaryGroup();
 
     /**
-     * Sets a users primary group. This will only take effect if platform is using stored primary groups.
+     * Sets a users primary group.
+     *
+     * <p>This modifies the "stored value" for the users primary group, which may or may not
+     * actually take effect, depending on how the platform is calculating primary groups.</p>
      *
      * @param group the new primary group
      * @return if the change was applied successfully
@@ -90,10 +94,9 @@ public interface User extends PermissionHolder {
     /**
      * Refresh and re-assign the users permissions.
      *
-     * <p>This request is not buffered, and the refresh call will be ran directly. This should be called on an
-     * asynchronous thread.</p>
-     *
-     * @deprecated in favour of {@link #refreshCachedData()}.
+     * @deprecated Calling this method is no longer necessary. Permissions data is now refreshed on
+     *             demand, as changes are made. Consider use of {@link #refreshCachedData()}
+     *             instead. This method is now implemented as a no-op.
      */
     @Deprecated
     void refreshPermissions();
@@ -101,11 +104,8 @@ public interface User extends PermissionHolder {
     /**
      * Pre-calculates some values in the user's data cache.
      *
-     * <p>Is it <b>not</b> necessary to call this method before
-     * using {@link #getCachedData()}.</p>
-     *
      * @since 2.17
-     * @deprecated because use of this method is no longer necessary.
+     * @deprecated Use of this method is no longer necessary. It is implemented as a no-op.
      */
     @Deprecated
     void setupDataCache();

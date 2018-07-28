@@ -32,7 +32,7 @@ import javax.annotation.Nonnull;
 
 /**
  * Encapsulates the LuckPerms system which accepts incoming {@link Message}s
- * from implementations of {@link MessengerProvider}.
+ * from implementations of {@link Messenger}.
  *
  * @since 4.1
  */

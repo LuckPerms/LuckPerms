@@ -27,13 +27,13 @@ package me.lucko.luckperms.bukkit.model.permissible;
 
 import com.google.common.base.Preconditions;
 
-import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.bukkit.model.dummy.DummyPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.node.model.ImmutableTransientNode;
+import me.lucko.luckperms.common.node.utils.NodeTools;
 
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionRemovedExecutor;
@@ -199,13 +199,13 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
         // remove transient permissions from the holder which were added by this attachment & equal the permission
         User user = this.permissible.getUser();
-        user.removeIfTransient(LocalizedNode.composedPredicate(n -> n instanceof ImmutableTransientNode && ((ImmutableTransientNode) n).getOwner() == this && n.getPermission().equals(name)));
+        user.removeIfTransient(NodeTools.localizedNodeComposedPredicate(n -> n instanceof ImmutableTransientNode && ((ImmutableTransientNode) n).getOwner() == this && n.getPermission().equals(name)));
     }
 
     private void clearInternal() {
         // remove all transient permissions added by this attachment
         User user = this.permissible.getUser();
-        user.removeIfTransient(LocalizedNode.composedPredicate(n -> n instanceof ImmutableTransientNode && ((ImmutableTransientNode) n).getOwner() == this));
+        user.removeIfTransient(NodeTools.localizedNodeComposedPredicate(n -> n instanceof ImmutableTransientNode && ((ImmutableTransientNode) n).getOwner() == this));
     }
 
     @Override

@@ -28,6 +28,7 @@ package me.lucko.luckperms.api.caching;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.PermissionHolder;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -372,7 +373,14 @@ public interface CachedData {
      * @param contexts the contexts to pre-calculate for
      * @throws NullPointerException if contexts is null
      */
-    void preCalculate(@Nonnull Contexts contexts);
+    default void preCalculate(@Nonnull Contexts contexts) {
+        Objects.requireNonNull(contexts, "contexts");
+
+        // pre-calculate just by requesting the data from this cache.
+        // if the data isn't already loaded, it will be calculated.
+        getPermissionData(contexts);
+        getMetaData(contexts);
+    }
 
     /**
      * Invalidates any cached {@link PermissionData} instances mapped to the given

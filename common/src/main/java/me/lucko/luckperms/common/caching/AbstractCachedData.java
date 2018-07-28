@@ -186,7 +186,7 @@ public abstract class AbstractCachedData implements CachedData {
 
     @Nonnull
     @Override
-    public PermissionCache getPermissionData(@Nonnull Contexts contexts) {
+    public final PermissionCache getPermissionData(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
 
         //noinspection ConstantConditions
@@ -195,7 +195,7 @@ public abstract class AbstractCachedData implements CachedData {
 
     @Nonnull
     @Override
-    public MetaCache getMetaData(@Nonnull MetaContexts contexts) {
+    public final MetaCache getMetaData(@Nonnull MetaContexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
 
         //noinspection ConstantConditions
@@ -204,53 +204,53 @@ public abstract class AbstractCachedData implements CachedData {
 
     @Nonnull
     @Override
-    public MetaCache getMetaData(@Nonnull Contexts contexts) {
+    public final MetaCache getMetaData(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
         return getMetaData(getDefaultMetaContexts(contexts));
     }
 
     @Nonnull
     @Override
-    public PermissionCache calculatePermissions(@Nonnull Contexts contexts) {
+    public final PermissionCache calculatePermissions(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
         return calculatePermissions(contexts, null);
     }
 
     @Nonnull
     @Override
-    public MetaCache calculateMeta(@Nonnull MetaContexts contexts) {
+    public final MetaCache calculateMeta(@Nonnull MetaContexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
         return calculateMeta(contexts, null);
     }
 
     @Nonnull
     @Override
-    public MetaCache calculateMeta(@Nonnull Contexts contexts) {
+    public final MetaCache calculateMeta(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
         return calculateMeta(getDefaultMetaContexts(contexts));
     }
 
     @Override
-    public void recalculatePermissions(@Nonnull Contexts contexts) {
+    public final void recalculatePermissions(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
         this.permission.synchronous().refresh(contexts);
     }
 
     @Override
-    public void recalculateMeta(@Nonnull MetaContexts contexts) {
+    public final void recalculateMeta(@Nonnull MetaContexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
         this.meta.synchronous().refresh(contexts);
     }
 
     @Override
-    public void recalculateMeta(@Nonnull Contexts contexts) {
+    public final void recalculateMeta(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
         recalculateMeta(getDefaultMetaContexts(contexts));
     }
 
     @Nonnull
     @Override
-    public CompletableFuture<PermissionCache> reloadPermissions(@Nonnull Contexts contexts) {
+    public final CompletableFuture<PermissionCache> reloadPermissions(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
 
         // get the previous value - to use when recalculating
@@ -271,7 +271,7 @@ public abstract class AbstractCachedData implements CachedData {
 
     @Nonnull
     @Override
-    public CompletableFuture<MetaCache> reloadMeta(@Nonnull MetaContexts contexts) {
+    public final CompletableFuture<MetaCache> reloadMeta(@Nonnull MetaContexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
 
         // get the previous value - to use when recalculating
@@ -292,86 +292,76 @@ public abstract class AbstractCachedData implements CachedData {
 
     @Nonnull
     @Override
-    public CompletableFuture<MetaCache> reloadMeta(@Nonnull Contexts contexts) {
+    public final CompletableFuture<MetaCache> reloadMeta(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
         return reloadMeta(getDefaultMetaContexts(contexts));
     }
 
     @Override
-    public void recalculatePermissions() {
+    public final void recalculatePermissions() {
         Set<Contexts> keys = this.permission.synchronous().asMap().keySet();
         keys.forEach(this::recalculatePermissions);
     }
 
     @Override
-    public void recalculateMeta() {
+    public final void recalculateMeta() {
         Set<MetaContexts> keys = this.meta.synchronous().asMap().keySet();
         keys.forEach(this::recalculateMeta);
     }
 
     @Nonnull
     @Override
-    public CompletableFuture<Void> reloadPermissions() {
+    public final CompletableFuture<Void> reloadPermissions() {
         Set<Contexts> keys = this.permission.synchronous().asMap().keySet();
         return CompletableFuture.allOf(keys.stream().map(this::reloadPermissions).toArray(CompletableFuture[]::new));
     }
 
     @Nonnull
     @Override
-    public CompletableFuture<Void> reloadMeta() {
+    public final CompletableFuture<Void> reloadMeta() {
         Set<MetaContexts> keys = this.meta.synchronous().asMap().keySet();
         return CompletableFuture.allOf(keys.stream().map(this::reloadMeta).toArray(CompletableFuture[]::new));
     }
 
     @Override
-    public void preCalculate(@Nonnull Contexts contexts) {
-        Objects.requireNonNull(contexts, "contexts");
-
-        // pre-calculate just by requesting the data from this cache.
-        // if the data isn't already loaded, it will be calculated.
-        getPermissionData(contexts);
-        getMetaData(contexts);
-    }
-
-    @Override
-    public void invalidatePermissions(@Nonnull Contexts contexts) {
+    public final void invalidatePermissions(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
         this.permission.synchronous().invalidate(contexts);
     }
 
     @Override
-    public void invalidateMeta(@Nonnull MetaContexts contexts) {
+    public final void invalidateMeta(@Nonnull MetaContexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
         this.meta.synchronous().invalidate(contexts);
     }
 
     @Override
-    public void invalidateMeta(@Nonnull Contexts contexts) {
+    public final void invalidateMeta(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
         this.meta.synchronous().invalidate(getDefaultMetaContexts(contexts));
     }
 
     @Override
-    public void invalidatePermissions() {
+    public final void invalidatePermissions() {
         this.permission.synchronous().invalidateAll();
     }
 
     @Override
-    public void invalidateMeta() {
+    public final void invalidateMeta() {
         this.meta.synchronous().invalidateAll();
     }
 
     @Override
-    public void invalidatePermissionCalculators() {
+    public final void invalidatePermissionCalculators() {
         this.permission.synchronous().asMap().values().forEach(PermissionCache::invalidateCache);
     }
 
-    public void invalidate() {
+    public final void invalidate() {
         invalidatePermissions();
         invalidateMeta();
     }
 
-    public void doCacheCleanup() {
+    public final void doCacheCleanup() {
         this.permission.synchronous().cleanUp();
         this.meta.synchronous().cleanUp();
     }

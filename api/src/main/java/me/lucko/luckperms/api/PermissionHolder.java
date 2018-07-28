@@ -31,29 +31,40 @@ import com.google.common.collect.Multimap;
 import me.lucko.luckperms.api.caching.CachedData;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.manager.GroupManager;
+import me.lucko.luckperms.api.manager.UserManager;
+import me.lucko.luckperms.api.nodetype.types.MetaType;
+import me.lucko.luckperms.api.nodetype.types.PrefixType;
+import me.lucko.luckperms.api.nodetype.types.SuffixType;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
 
 /**
- * An object which holds permissions.
- *
- * <p>Any changes made to permission holding objects will be lost unless the
- * instance is saved back to the {@link Storage}.</p>
+ * Generic superinterface for an object which holds permissions.
  */
 public interface PermissionHolder {
 
     /**
-     * Gets the objects name.
+     * Gets the objects generic name.
      *
-     * <p>{@link User#getUuid()}, {@link User#getName()} or {@link Group#getName()} should normally be used instead of
-     * this method.</p>
+     * <p>The result of this method is guaranteed to be a unique identifier for distinct instances
+     * of the same type of object.</p>
+     *
+     * <p>For {@link User}s, this method returns a {@link UUID#toString() string} representation of
+     * the users {@link User#getUuid() unique id}.</p>
+     *
+     * <p>For {@link Group}s, this method returns the {@link Group#getName() group name}.</p>
+     *
+     * <p>The {@link User#getUuid()}, {@link User#getName()} and {@link Group#getName()} methods
+     * define a "tighter" specification for obtaining object identifiers.</p>
      *
      * @return the identifier for this object. Either a uuid string or name.
      */
@@ -63,8 +74,14 @@ public interface PermissionHolder {
     /**
      * Gets a friendly name for this holder, to be displayed in command output, etc.
      *
-     * <p>This will <strong>always</strong> return a value, eventually falling back to {@link #getObjectName()} if no
-     * other "friendlier" identifiers are present.</p>
+     * <p>This will <strong>always</strong> return a value, eventually falling back to
+     * {@link #getObjectName()} if no other "friendlier" identifiers are present.</p>
+     *
+     * <p>For {@link User}s, this method will attempt to return the {@link User#getName() username},
+     * before falling back to {@link #getObjectName()}.</p>
+     *
+     * <p>For {@link Group}s, this method will attempt to return the groups display name, before
+     * falling back to {@link #getObjectName()}.</p>
      *
      * @return a friendly identifier for this holder
      * @since 3.2
@@ -128,6 +145,8 @@ public interface PermissionHolder {
      *
      * <p>Use {@link #getPermissions()} for a view without duplicates.</p>
      *
+     * <p>This method <b>does not</b> resolve inheritance rules.</p>
+     *
      * @return a list of the holders own nodes.
      * @since 3.3
      */
@@ -137,6 +156,13 @@ public interface PermissionHolder {
     /**
      * Gets a sorted set of all held permissions.
      *
+     * <p>Effectively a sorted version of {@link #getOwnNodes()}, without duplicates. Use the
+     * aforementioned method if you don't require either of these attributes.</p>
+     *
+     * <p>This method <b>does not</b> resolve inheritance rules.</p>
+     *
+     * <p>Although this method is named getPermissions, it will actually return all types of node.</p>
+     *
      * @return an immutable set of permissions in priority order
      * @since 2.6
      */
@@ -144,9 +170,16 @@ public interface PermissionHolder {
     SortedSet<? extends Node> getPermissions();
 
     /**
-     * Similar to {@link #getPermissions()}, except without transient permissions.
+     * Similar to {@link #getPermissions()}, except only including permissions from the enduring
+     * node map. (See {@link #getNodes()})
      *
-     * <p>Unlike transient permissions, enduring permissions will be saved to storage, and exist after the session.</p>
+     * <p>Unlike transient permissions, enduring permissions will be saved to storage, and exist
+     * after the session.</p>
+     *
+     * <p>This method <b>does not</b> resolve inheritance rules.</p>
+     *
+     * <p>Although this method is named getEnduringPermissions, it will actually return all types
+     * of node.</p>
      *
      * @return a set of nodes
      * @since 2.6
@@ -155,9 +188,15 @@ public interface PermissionHolder {
     Set<? extends Node> getEnduringPermissions();
 
     /**
-     * Similar to {@link #getPermissions()}, except without enduring permissions.
+     * Similar to {@link #getPermissions()}, except only including permissions from the enduring
+     * node map. (See {@link #getTransientNodes()})
      *
      * <p>Transient permissions only exist for the duration of the session.</p>
+     *
+     * <p>This method <b>does not</b> resolve inheritance rules.</p>
+     *
+     * <p>Although this method is named getTransientPermissions, it will actually return all types
+     * of node.</p>
      *
      * @return a set of nodes
      * @since 2.6
@@ -166,7 +205,14 @@ public interface PermissionHolder {
     Set<? extends Node> getTransientPermissions();
 
     /**
-     * Processes the nodes and returns the non-temporary ones.
+     * A filtered view of this holders nodes, only including permanent entries.
+     *
+     * <p>Data is sourced from {@link #getOwnNodes()}, filtered, and then collected to a set.</p>
+     *
+     * <p>This method <b>does not</b> resolve inheritance rules.</p>
+     *
+     * <p>Although this method is named getPermanentPermissionNodes, it will actually return all types
+     * of node.</p>
      *
      * @return a set of permanent nodes
      * @since 2.6
@@ -175,7 +221,14 @@ public interface PermissionHolder {
     Set<Node> getPermanentPermissionNodes();
 
     /**
-     * Processes the nodes and returns the temporary ones.
+     * A filtered view of this holders nodes, only including temporary entries.
+     *
+     * <p>Data is sourced from {@link #getOwnNodes()}, filtered, and then collected to a set.</p>
+     *
+     * <p>This method <b>does not</b> resolve inheritance rules.</p>
+     *
+     * <p>Although this method is named getTemporaryPermissionNodes, it will actually return all types
+     * of node.</p>
      *
      * @return a set of temporary nodes
      * @since 2.6
@@ -191,12 +244,16 @@ public interface PermissionHolder {
      *
      * <p>This means the list will contain duplicates.</p>
      *
+     * <p>Inheritance is performed according to the platforms rules, and the order will vary
+     * depending on the accumulation order. By default, the holders own nodes are first in the list,
+     * with the entries from the end of the inheritance tree appearing last.</p>
+     *
      * @param contexts the contexts for the lookup
      * @return a list of nodes
      * @since 3.3
      */
     @Nonnull
-    List<LocalizedNode> resolveInheritances(Contexts contexts);
+    List<LocalizedNode> resolveInheritances(@Nonnull Contexts contexts);
 
     /**
      * Recursively resolves this holders permissions.
@@ -209,6 +266,10 @@ public interface PermissionHolder {
      * <p>Unlike {@link #resolveInheritances(Contexts)}, this method does not
      * filter by context, at all.</p>
      *
+     * <p>Inheritance is performed according to the platforms rules, and the order will vary
+     * depending on the accumulation order. By default, the holders own nodes are first in the list,
+     * with the entries from the end of the inheritance tree appearing last.</p>
+     *
      * @return a list of nodes
      * @since 3.3
      */
@@ -218,13 +279,14 @@ public interface PermissionHolder {
     /**
      * Gets a mutable sorted set of the nodes that this object has and inherits, filtered by context
      *
-     * <p>Unlike {@link #getAllNodesFiltered(Contexts)}, this method will not filter individual nodes. The context is only
-     * used to determine which groups should apply.</p>
+     * <p>Unlike {@link #getAllNodesFiltered(Contexts)}, this method will not filter individual
+     * nodes by context. The context is only used to determine which groups should apply.</p>
      *
-     * <p>Nodes are sorted into priority order.</p>
+     * <p>Nodes are sorted into priority order. The order of inheritance is only important during
+     * the process of flattening inherited entries.</p>
      *
      * @param contexts the context for the lookup
-     * @return a mutable sorted set of permissions
+     * @return an immutable sorted set of permissions
      * @throws NullPointerException if the context is null
      * @since 2.11
      */
@@ -236,9 +298,10 @@ public interface PermissionHolder {
      *
      * <p>Unlike {@link #getAllNodes(Contexts)}, this method does not filter by context, at all.</p>
      *
-     * <p>Nodes are sorted into priority order.</p>
+     * <p>Nodes are sorted into priority order. The order of inheritance is only important during
+     * the process of flattening inherited entries.</p>
      *
-     * @return a mutable sorted set of permissions
+     * @return an immutable sorted set of permissions
      * @throws NullPointerException if the context is null
      * @since 3.3
      */
@@ -248,8 +311,8 @@ public interface PermissionHolder {
     /**
      * Gets a mutable set of the nodes that this object has and inherits, filtered by context.
      *
-     * <p>Unlike {@link #getAllNodes(Contexts)}, this method WILL filter individual nodes, and only return ones that fully
-     * meet the context provided.</p>
+     * <p>Unlike {@link #getAllNodes(Contexts)}, this method WILL filter individual nodes,
+     * and only return ones that fully meet the context provided.</p>
      *
      * @param contexts the context for the lookup
      * @return a mutable set of permissions
@@ -260,22 +323,28 @@ public interface PermissionHolder {
     Set<LocalizedNode> getAllNodesFiltered(@Nonnull Contexts contexts);
 
     /**
-     * Converts the output of {@link #getAllNodesFiltered(Contexts)}, and expands shorthand permissions.
+     * Converts the output of {@link #getAllNodesFiltered(Contexts)} into string and boolean form,
+     * and expands shorthand permissions.
      *
      * @param contexts the context for the lookup
-     * @param lowerCase if the keys should be made lowercase whilst being exported
+     * @param convertToLowercase if the keys should be made lowercase whilst being exported
      * @return a mutable map of permissions
      */
     @Nonnull
-    Map<String, Boolean> exportNodes(@Nonnull Contexts contexts, boolean lowerCase);
+    Map<String, Boolean> exportNodes(@Nonnull Contexts contexts, boolean convertToLowercase);
 
     /**
-     * Removes temporary permissions that have expired
+     * Removes any temporary permissions that have expired.
+     *
+     * <p>This method is called periodically by the platform, so it is only necessary to run
+     * if you want to guarentee that the current data is totally up-to-date.</p>
      */
     void auditTemporaryPermissions();
 
     /**
-     * Checks to see if the object has a certain permission
+     * Checks to see if the object has a certain permission.
+     *
+     * <p>Although this method is named hasPermission, it can be used for all node types.</p>
      *
      * @param node the node to check for
      * @param equalityPredicate how to determine if a node matches
@@ -287,7 +356,9 @@ public interface PermissionHolder {
     Tristate hasPermission(@Nonnull Node node, @Nonnull NodeEqualityPredicate equalityPredicate);
 
     /**
-     * Checks to see if the object has a certain permission
+     * Checks to see if the object has a certain permission.
+     *
+     * <p>Although this method is named hasTransientPermission, it can be used for all node types.</p>
      *
      * @param node the node to check for
      * @param equalityPredicate how to determine if a node matches
@@ -299,7 +370,9 @@ public interface PermissionHolder {
     Tristate hasTransientPermission(@Nonnull Node node, @Nonnull NodeEqualityPredicate equalityPredicate);
 
     /**
-     * Checks to see if the object inherits a certain permission
+     * Checks to see if the object inherits a certain permission.
+     *
+     * <p>Although this method is named inheritsPermission, it can be used for all node types.</p>
      *
      * @param node the node to check for
      * @param equalityPredicate how to determine if a node matches
@@ -311,7 +384,9 @@ public interface PermissionHolder {
     Tristate inheritsPermission(@Nonnull Node node, @Nonnull NodeEqualityPredicate equalityPredicate);
 
     /**
-     * Checks to see if the object has a certain permission
+     * Checks to see if the object has a certain permission.
+     *
+     * <p>Although this method is named hasPermission, it can be used for all node types.</p>
      *
      * @param node the node to check for
      * @return a Tristate for the holders permission status for the node
@@ -322,7 +397,9 @@ public interface PermissionHolder {
     Tristate hasPermission(@Nonnull Node node);
 
     /**
-     * Checks to see if the object has a certain permission
+     * Checks to see if the object has a certain permission.
+     *
+     * <p>Although this method is named hasTransientPermission, it can be used for all node types.</p>
      *
      * @param node the node to check for
      * @return a Tristate for the holders permission status for the node
@@ -333,7 +410,9 @@ public interface PermissionHolder {
     Tristate hasTransientPermission(@Nonnull Node node);
 
     /**
-     * Checks to see if the object inherits a certain permission
+     * Checks to see if the object inherits a certain permission.
+     *
+     * <p>Although this method is named inheritsPermission, it can be used for all node types.</p>
      *
      * @param node the node to check for
      * @return a Tristate for the holders inheritance status for the node
@@ -344,7 +423,11 @@ public interface PermissionHolder {
     Tristate inheritsPermission(@Nonnull Node node);
 
     /**
-     * Check to see if this holder inherits another group directly
+     * Check to see if this holder inherits another group in the global context.
+     *
+     * <p>"Global context" simply means an empty context set.</p>
+     *
+     * <p>This method only checks for direct inheritance - one hop up the inheritance tree.</p>
      *
      * @param group The group to check membership of
      * @return true if the group inherits the other group
@@ -355,7 +438,9 @@ public interface PermissionHolder {
     boolean inheritsGroup(@Nonnull Group group);
 
     /**
-     * Check to see if this holder inherits another group directly
+     * Check to see if this holder inherits another group.
+     *
+     * <p>This method only checks for direct inheritance - one hop up the inheritance tree.</p>
      *
      * @param group The group to check membership of
      * @param contextSet the context set to filter by
@@ -367,7 +452,20 @@ public interface PermissionHolder {
     boolean inheritsGroup(@Nonnull Group group, @Nonnull ContextSet contextSet);
 
     /**
-     * Sets a permission for the object
+     * Sets a permission node for the permission holder.
+     *
+     * <p>Although this method is named setPermission, it can be used for all node types.</p>
+     *
+     * <p>The effect of this mutate operation will not persist in storage unless changes are
+     * explicitly saved. If changes are not saved, the effect will only be observed until the next
+     * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
+     * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
+     * using {@link GroupManager#saveGroup(Group)}.</p>
+     *
+     * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
+     * the backing data from the storage if you haven't done so already, to avoid overwriting changes
+     * made already. This can be done via {@link UserManager#loadUser(UUID)} or
+     * {@link GroupManager#loadGroup(String)} respectively.</p>
      *
      * @param node The node to be set
      * @return the result of the operation
@@ -378,16 +476,20 @@ public interface PermissionHolder {
     DataMutateResult setPermission(@Nonnull Node node);
 
     /**
-     * Sets a transient permission for the object
+     * Sets a transient permission for the permission holder.
      *
      * <p>A transient node is a permission that does not persist.
-     * Whenever a user logs out of the server, or the server restarts, this permission will disappear.
-     * It is never saved to the datastore, and therefore will not apply on other servers.</p>
+     * Whenever a user logs out of the server, or the server restarts, this permission will
+     * disappear. It is never saved to the datastore, and therefore will not apply on other
+     * servers.</p>
      *
-     * <p>This is useful if you want to temporarily set a permission for a user while they're online, but don't
-     * want it to persist, and have to worry about removing it when they log out.</p>
+     * <p>This is useful if you want to temporarily set a permission for a user while they're
+     * online, but don't want it to persist, and have to worry about removing it when they log
+     * out.</p>
      *
-     * <p>For unsetting a transient permission, see {@link #unsetTransientPermission(Node)}</p>
+     * <p>For unsetting a transient permission, see {@link #unsetTransientPermission(Node)}.</p>
+     *
+     * <p>Although this method is named setTransientPermission, it can be used for all node types.</p>
      *
      * @param node The node to be set
      * @return the result of the operation
@@ -398,7 +500,20 @@ public interface PermissionHolder {
     DataMutateResult setTransientPermission(@Nonnull Node node);
 
     /**
-     * Unsets a permission for the object
+     * Unsets a permission for the permission holder.
+     *
+     * <p>Although this method is named unsetPermission, it can be used for all node types.</p>
+     *
+     * <p>The effect of this mutate operation will not persist in storage unless changes are
+     * explicitly saved. If changes are not saved, the effect will only be observed until the next
+     * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
+     * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
+     * using {@link GroupManager#saveGroup(Group)}.</p>
+     *
+     * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
+     * the backing data from the storage if you haven't done so already, to avoid overwriting changes
+     * made already. This can be done via {@link UserManager#loadUser(UUID)} or
+     * {@link GroupManager#loadGroup(String)} respectively.</p>
      *
      * @param node The node to be unset
      * @return the result of the operation
@@ -409,7 +524,9 @@ public interface PermissionHolder {
     DataMutateResult unsetPermission(@Nonnull Node node);
 
     /**
-     * Unsets a transient permission for the object
+     * Unsets a transient permission for the permission holder.
+     *
+     * <p>Although this method is named unsetTransientPermission, it can be used for all node types.</p>
      *
      * @param node The node to be unset
      * @return the result of the operation
@@ -420,7 +537,20 @@ public interface PermissionHolder {
     DataMutateResult unsetTransientPermission(@Nonnull Node node);
 
     /**
-     * Clears any nodes from the holder which pass the predicate
+     * Clears any nodes from the holder which pass the predicate.
+     *
+     * <p>This method only targets enduring data.</p>
+     *
+     * <p>The effect of this mutate operation will not persist in storage unless changes are
+     * explicitly saved. If changes are not saved, the effect will only be observed until the next
+     * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
+     * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
+     * using {@link GroupManager#saveGroup(Group)}.</p>
+     *
+     * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
+     * the backing data from the storage if you haven't done so already, to avoid overwriting changes
+     * made already. This can be done via {@link UserManager#loadUser(UUID)} or
+     * {@link GroupManager#loadGroup(String)} respectively.</p>
      *
      * @param test the predicate to test for nodes which should be removed
      * @since 3.2
@@ -428,7 +558,18 @@ public interface PermissionHolder {
     void clearMatching(@Nonnull Predicate<Node> test);
 
     /**
-     * Clears any transient nodes from the holder which pass the predicate
+     * Clears any transient nodes from the holder which pass the predicate.
+     *
+     * <p>The effect of this mutate operation will not persist in storage unless changes are
+     * explicitly saved. If changes are not saved, the effect will only be observed until the next
+     * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
+     * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
+     * using {@link GroupManager#saveGroup(Group)}.</p>
+     *
+     * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
+     * the backing data from the storage if you haven't done so already, to avoid overwriting changes
+     * made already. This can be done via {@link UserManager#loadUser(UUID)} or
+     * {@link GroupManager#loadGroup(String)} respectively.</p>
      *
      * @param test the predicate to test for nodes which should be removed
      * @since 3.2
@@ -436,14 +577,36 @@ public interface PermissionHolder {
     void clearMatchingTransient(@Nonnull Predicate<Node> test);
 
     /**
-     * Clears all nodes held by the object
+     * Clears all nodes held by the permission holder.
+     *
+     * <p>The effect of this mutate operation will not persist in storage unless changes are
+     * explicitly saved. If changes are not saved, the effect will only be observed until the next
+     * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
+     * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
+     * using {@link GroupManager#saveGroup(Group)}.</p>
+     *
+     * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
+     * the backing data from the storage if you haven't done so already, to avoid overwriting changes
+     * made already. This can be done via {@link UserManager#loadUser(UUID)} or
+     * {@link GroupManager#loadGroup(String)} respectively.</p>
      *
      * @since 2.17
      */
     void clearNodes();
 
     /**
-     * Clears all nodes held by the object in a specific context
+     * Clears all nodes held by the permission holder in a specific context.
+     *
+     * <p>The effect of this mutate operation will not persist in storage unless changes are
+     * explicitly saved. If changes are not saved, the effect will only be observed until the next
+     * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
+     * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
+     * using {@link GroupManager#saveGroup(Group)}.</p>
+     *
+     * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
+     * the backing data from the storage if you haven't done so already, to avoid overwriting changes
+     * made already. This can be done via {@link UserManager#loadUser(UUID)} or
+     * {@link GroupManager#loadGroup(String)} respectively.</p>
      *
      * @param contextSet the contexts to filter by
      * @since 3.2
@@ -451,14 +614,36 @@ public interface PermissionHolder {
     void clearNodes(@Nonnull ContextSet contextSet);
 
     /**
-     * Clears all parent groups
+     * Clears all parent groups.
+     *
+     * <p>The effect of this mutate operation will not persist in storage unless changes are
+     * explicitly saved. If changes are not saved, the effect will only be observed until the next
+     * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
+     * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
+     * using {@link GroupManager#saveGroup(Group)}.</p>
+     *
+     * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
+     * the backing data from the storage if you haven't done so already, to avoid overwriting changes
+     * made already. This can be done via {@link UserManager#loadUser(UUID)} or
+     * {@link GroupManager#loadGroup(String)} respectively.</p>
      *
      * @since 2.17
      */
     void clearParents();
 
     /**
-     * Clears all parent groups in a specific context
+     * Clears all parent groups in a specific context.
+     *
+     * <p>The effect of this mutate operation will not persist in storage unless changes are
+     * explicitly saved. If changes are not saved, the effect will only be observed until the next
+     * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
+     * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
+     * using {@link GroupManager#saveGroup(Group)}.</p>
+     *
+     * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
+     * the backing data from the storage if you haven't done so already, to avoid overwriting changes
+     * made already. This can be done via {@link UserManager#loadUser(UUID)} or
+     * {@link GroupManager#loadGroup(String)} respectively.</p>
      *
      * @param contextSet the contexts to filter by
      * @since 3.2
@@ -466,14 +651,42 @@ public interface PermissionHolder {
     void clearParents(@Nonnull ContextSet contextSet);
 
     /**
-     * Clears all meta held by the object
+     * Clears all meta held by the permission holder.
+     *
+     * <p>Meta nodes in this case, are any nodes which have a {@link MetaType}, {@link PrefixType}
+     * or {@link SuffixType} type.</p>
+     *
+     * <p>The effect of this mutate operation will not persist in storage unless changes are
+     * explicitly saved. If changes are not saved, the effect will only be observed until the next
+     * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
+     * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
+     * using {@link GroupManager#saveGroup(Group)}.</p>
+     *
+     * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
+     * the backing data from the storage if you haven't done so already, to avoid overwriting changes
+     * made already. This can be done via {@link UserManager#loadUser(UUID)} or
+     * {@link GroupManager#loadGroup(String)} respectively.</p>
      *
      * @since 2.17
      */
     void clearMeta();
 
     /**
-     * Clears all meta held by the object in a specific context
+     * Clears all meta held by the permission holder in a specific context.
+     *
+     * <p>Meta nodes in this case, are any nodes which have a {@link MetaType}, {@link PrefixType}
+     * or {@link SuffixType} type.</p>
+     *
+     * <p>The effect of this mutate operation will not persist in storage unless changes are
+     * explicitly saved. If changes are not saved, the effect will only be observed until the next
+     * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
+     * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
+     * using {@link GroupManager#saveGroup(Group)}.</p>
+     *
+     * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
+     * the backing data from the storage if you haven't done so already, to avoid overwriting changes
+     * made already. This can be done via {@link UserManager#loadUser(UUID)} or
+     * {@link GroupManager#loadGroup(String)} respectively.</p>
      *
      * @param contextSet the contexts to filter by
      * @since 3.2
@@ -481,12 +694,12 @@ public interface PermissionHolder {
     void clearMeta(@Nonnull ContextSet contextSet);
 
     /**
-     * Clears all transient permissions the holder has.
+     * Clears all transient nodes the permission holder has.
      */
     void clearTransientNodes();
 
     /**
-     * Sets a permission for the object
+     * Sets a permission for the permission holder.
      *
      * @param node The node to be set
      * @return the result of the operation
@@ -501,7 +714,7 @@ public interface PermissionHolder {
     }
 
     /**
-     * Sets a transient permission for the object
+     * Sets a transient permission for the permission holder.
      *
      * @param node The node to be set
      * @return the result of the operation
@@ -516,7 +729,7 @@ public interface PermissionHolder {
     }
 
     /**
-     * Unsets a permission for the object
+     * Unsets a permission for the permission holder.
      *
      * @param node The node to be unset
      * @throws NullPointerException if the node is null
@@ -531,7 +744,7 @@ public interface PermissionHolder {
     }
 
     /**
-     * Unsets a transient permission for the object
+     * Unsets a transient permission for the permission holder.
      *
      * @param node The node to be unset
      * @throws NullPointerException if the node is null

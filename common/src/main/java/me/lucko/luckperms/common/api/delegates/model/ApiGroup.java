@@ -28,12 +28,14 @@ package me.lucko.luckperms.common.api.delegates.model;
 import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.caching.GroupData;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.model.Group;
 
 import java.util.Objects;
 import java.util.OptionalInt;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public final class ApiGroup extends ApiPermissionHolder implements me.lucko.luckperms.api.Group {
     public static Group cast(me.lucko.luckperms.api.Group group) {
@@ -58,6 +60,18 @@ public final class ApiGroup extends ApiPermissionHolder implements me.lucko.luck
     @Override
     public String getName() {
         return this.handle.getName();
+    }
+
+    @Nullable
+    @Override
+    public String getDisplayName() {
+        return this.handle.getDisplayName().orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public String getDisplayName(@Nonnull ContextSet contextSet) {
+        return this.handle.getDisplayName(contextSet).orElse(null);
     }
 
     @Nonnull

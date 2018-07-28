@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.api;
 
+import me.lucko.luckperms.api.manager.UserManager;
+
 import java.util.Set;
 import java.util.UUID;
 
@@ -33,6 +35,9 @@ import javax.annotation.Nullable;
 
 /**
  * Encapsulates the result of an operation to save uuid data about a player.
+ *
+ * <p>The corresponding method can be found at
+ * {@link UserManager#savePlayerData(UUID, String)}.</p>
  *
  * @since 4.2
  */

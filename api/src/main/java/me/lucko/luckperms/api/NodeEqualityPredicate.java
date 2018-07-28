@@ -33,8 +33,7 @@ import javax.annotation.Nonnull;
  * <p>Generally, individual instances of this interface should fulfil the same
  * requirements as the {@link Object#equals(Object)} contract.</p>
  *
- * <p>Some standard implementations are provided by
- * {@link StandardNodeEquality}.</p>
+ * <p>Some standard implementations are provided by {@link StandardNodeEquality}.</p>
  *
  * @since 4.1
  */

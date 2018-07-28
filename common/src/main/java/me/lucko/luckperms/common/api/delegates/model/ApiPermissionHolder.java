@@ -342,7 +342,7 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.PermissionHol
 
     @Nonnull
     @Override
-    public List<LocalizedNode> resolveInheritances(Contexts contexts) {
+    public List<LocalizedNode> resolveInheritances(@Nonnull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
         return ImmutableList.copyOf(this.handle.resolveInheritances(contexts));
     }
