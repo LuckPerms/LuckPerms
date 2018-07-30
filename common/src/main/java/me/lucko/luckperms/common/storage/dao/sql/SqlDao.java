@@ -102,12 +102,12 @@ public class SqlDao extends AbstractDao {
     private static final String GROUP_PERMISSIONS_INSERT = "INSERT INTO {prefix}group_permissions(name, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
     private static final String GROUP_PERMISSIONS_SELECT_PERMISSION = "SELECT name, permission, value, server, world, expiry, contexts FROM {prefix}group_permissions WHERE ";
 
-    private static final String GROUP_SELECT_ALL = "SELECT name FROM {prefix}groups";
-    private static final String MYSQL_GROUP_INSERT = "INSERT INTO {prefix}groups (name) VALUES(?) ON DUPLICATE KEY UPDATE name=name";
-    private static final String H2_GROUP_INSERT = "MERGE INTO {prefix}groups (name) VALUES(?)";
-    private static final String SQLITE_GROUP_INSERT = "INSERT OR IGNORE INTO {prefix}groups (name) VALUES(?)";
-    private static final String POSTGRESQL_GROUP_INSERT = "INSERT INTO {prefix}groups (name) VALUES(?) ON CONFLICT (name) DO NOTHING";
-    private static final String GROUP_DELETE = "DELETE FROM {prefix}groups WHERE name=?";
+    private static final String GROUP_SELECT_ALL = "SELECT name FROM '{prefix}groups'";
+    private static final String MYSQL_GROUP_INSERT = "INSERT INTO '{prefix}groups' (name) VALUES(?) ON DUPLICATE KEY UPDATE name=name";
+    private static final String H2_GROUP_INSERT = "MERGE INTO '{prefix}groups' (name) VALUES(?)";
+    private static final String SQLITE_GROUP_INSERT = "INSERT OR IGNORE INTO '{prefix}groups' (name) VALUES(?)";
+    private static final String POSTGRESQL_GROUP_INSERT = "INSERT INTO '{prefix}groups' (name) VALUES(?) ON CONFLICT (name) DO NOTHING";
+    private static final String GROUP_DELETE = "DELETE FROM '{prefix}groups' WHERE name=?";
 
     private static final String TRACK_INSERT = "INSERT INTO {prefix}tracks (name, 'groups') VALUES(?, ?)";
     private static final String TRACK_SELECT = "SELECT 'groups' FROM {prefix}tracks WHERE name=?";
