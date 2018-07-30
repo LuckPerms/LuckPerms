@@ -465,7 +465,7 @@ public class SqlDao extends AbstractDao {
                     // insert
                     try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_INSERT))) {
                         ps.setString(1, user.getUuid().toString());
-                        ps.setString(2, user.getName().orElse("null"));
+                        ps.setString(2, user.getName().orElse("null").toLowerCase());
                         ps.setString(3, user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
                         ps.execute();
                     }
@@ -916,7 +916,7 @@ public class SqlDao extends AbstractDao {
         String oldUsername = getPlayerName(uuid);
 
         // do the insert
-        if (!username.equalsIgnoreCase(oldUsername)) {
+        if (!username.equals(oldUsername)) {
             try (Connection c = this.provider.getConnection()) {
                 if (oldUsername != null) {
                     try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_UPDATE_USERNAME_FOR_UUID))) {
