@@ -27,7 +27,7 @@ package me.lucko.luckperms.bukkit.compat;
 
 import org.bukkit.Bukkit;
 
-public final class ReflectionUtil {
+public final class CraftBukkitUtil {
     private static final String SERVER_VERSION = getServerVersion();
     private static final boolean CHAT_COMPATIBLE = !SERVER_VERSION.startsWith(".v1_7_");
 
@@ -65,6 +65,6 @@ public final class ReflectionUtil {
         return Class.forName(obc(className));
     }
 
-    private ReflectionUtil() {}
+    private CraftBukkitUtil() {}
 
 }

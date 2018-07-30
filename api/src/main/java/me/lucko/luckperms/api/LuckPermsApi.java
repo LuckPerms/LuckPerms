@@ -193,6 +193,7 @@ public interface LuckPermsApi {
      * @return the action logger
      * @since 4.1
      */
+    @Nonnull
     ActionLogger getActionLogger();
 
     /**
@@ -218,6 +219,7 @@ public interface LuckPermsApi {
      * @return the context manager
      * @since 4.0
      */
+    @Nonnull
     ContextManager getContextManager();
 
     /**

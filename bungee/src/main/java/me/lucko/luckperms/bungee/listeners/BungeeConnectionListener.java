@@ -71,8 +71,6 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
         }
 
         this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
-            recordConnection(c.getUniqueId());
-
             /* Actually process the login for the connection.
                We do this here to delay the login until the data is ready.
                If the login gets cancelled later on, then this will be cleaned up.
@@ -85,6 +83,7 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
             try {
                 User user = loadUser(c.getUniqueId(), c.getName());
                 this.plugin.getEventFactory().handleUserLoginProcess(c.getUniqueId(), c.getName(), user);
+                recordConnection(c.getUniqueId());
             } catch (Exception ex) {
                 this.plugin.getLogger().severe("Exception occurred whilst loading data for " + c.getUniqueId() + " - " + c.getName());
                 ex.printStackTrace();
@@ -92,7 +91,7 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
                 // there was some error loading
                 if (this.plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {
                     // cancel the login attempt
-                    e.setCancelReason(TextComponent.fromLegacyText(Message.LOADING_ERROR.asString(this.plugin.getLocaleManager())));
+                    e.setCancelReason(TextComponent.fromLegacyText(Message.LOADING_DATABASE_ERROR.asString(this.plugin.getLocaleManager())));
                     e.setCancelled(true);
                 }
             }
@@ -112,10 +111,17 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
         }
 
         if (user == null) {
+            if (!getUniqueConnections().contains(player.getUniqueId())) {
+                this.plugin.getLogger().warn("User " + player.getUniqueId() + " - " + player.getName() +
+                        " doesn't have data pre-loaded, they have never need processed during pre-login in this session.");
+            } else {
+                this.plugin.getLogger().warn("User " + player.getUniqueId() + " - " + player.getName() +
+                        " doesn't currently have data pre-loaded, but they have been processed before in this session.");
+            }
+
             if (this.plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {
                 // disconnect the user
-                this.plugin.getLogger().warn("User " + player.getUniqueId() + " - " + player.getName() + " doesn't have data pre-loaded - cancelling login.");
-                e.getPlayer().disconnect(TextComponent.fromLegacyText(Message.LOADING_ERROR.asString(this.plugin.getLocaleManager())));
+                e.getPlayer().disconnect(TextComponent.fromLegacyText(Message.LOADING_STATE_ERROR.asString(this.plugin.getLocaleManager())));
             } else {
                 // just send a message
                 this.plugin.getBootstrap().getProxy().getScheduler().schedule(this.plugin.getBootstrap(), () -> {
@@ -123,7 +129,7 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
                         return;
                     }
 
-                    player.sendMessage(TextComponent.fromLegacyText(Message.LOADING_ERROR.asString(this.plugin.getLocaleManager())));
+                    player.sendMessage(TextComponent.fromLegacyText(Message.LOADING_STATE_ERROR.asString(this.plugin.getLocaleManager())));
                 }, 1, TimeUnit.SECONDS);
             }
         }

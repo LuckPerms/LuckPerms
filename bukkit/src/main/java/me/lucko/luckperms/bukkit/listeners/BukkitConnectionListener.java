@@ -75,8 +75,6 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
             this.plugin.getLogger().info("Processing pre-login for " + e.getUniqueId() + " - " + e.getName());
         }
 
-        recordConnection(e.getUniqueId());
-
         /* Actually process the login for the connection.
            We do this here to delay the login until the data is ready.
            If the login gets cancelled later on, then this will be cleaned up.
@@ -89,13 +87,14 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
         try {
             User user = loadUser(e.getUniqueId(), e.getName());
             this.plugin.getEventFactory().handleUserLoginProcess(e.getUniqueId(), e.getName(), user);
+            recordConnection(e.getUniqueId());
         } catch (Exception ex) {
             this.plugin.getLogger().severe("Exception occurred whilst loading data for " + e.getUniqueId() + " - " + e.getName());
             ex.printStackTrace();
 
             // deny the connection
             this.deniedAsyncLogin.add(e.getUniqueId());
-            e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Message.LOADING_ERROR.asString(this.plugin.getLocaleManager()));
+            e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Message.LOADING_DATABASE_ERROR.asString(this.plugin.getLocaleManager()));
         }
     }
 
@@ -131,10 +130,19 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
 
         /* User instance is null for whatever reason. Could be that it was unloaded between asyncpre and now. */
         if (user == null) {
-            this.deniedLogin.add(e.getPlayer().getUniqueId());
+            this.deniedLogin.add(player.getUniqueId());
 
-            this.plugin.getLogger().warn("User " + player.getUniqueId() + " - " + player.getName() + " doesn't have data pre-loaded. - denying login.");
-            e.disallow(PlayerLoginEvent.Result.KICK_OTHER, Message.LOADING_ERROR.asString(this.plugin.getLocaleManager()));
+            if (!getUniqueConnections().contains(player.getUniqueId())) {
+                this.plugin.getLogger().warn("User " + player.getUniqueId() + " - " + player.getName() +
+                        " doesn't have data pre-loaded, they have never need processed during pre-login in this session." +
+                        " - denying login.");
+            } else {
+                this.plugin.getLogger().warn("User " + player.getUniqueId() + " - " + player.getName() +
+                        " doesn't currently have data pre-loaded, but they have been processed before in this session." +
+                        " - denying login.");
+            }
+
+            e.disallow(PlayerLoginEvent.Result.KICK_OTHER, Message.LOADING_STATE_ERROR.asString(this.plugin.getLocaleManager()));
             return;
         }
 
@@ -148,7 +156,12 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
             PermissibleInjector.inject(player, lpPermissible);
 
         } catch (Throwable t) {
+            this.plugin.getLogger().warn("Exception thrown when setting up permissions for " +
+                    player.getUniqueId() + " - " + player.getName() + " - denying login.");
             t.printStackTrace();
+
+            e.disallow(PlayerLoginEvent.Result.KICK_OTHER, Message.LOADING_SETUP_ERROR.asString(this.plugin.getLocaleManager()));
+            return;
         }
 
         this.plugin.refreshAutoOp(player);

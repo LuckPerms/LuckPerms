@@ -63,7 +63,9 @@ public enum Message {
     EMPTY("{}", true),
     PLAYER_ONLINE("&aOnline", false),
     PLAYER_OFFLINE("&cOffline", false),
-    LOADING_ERROR("&cPermissions data could not be loaded. Please try again later.", true),
+    LOADING_DATABASE_ERROR("&cA database error occurred whilst loading permissions data. Please try again later.", true),
+    LOADING_STATE_ERROR("&cPermissions data for your user was not loaded during the pre-login stage - unable to continue. Please try again later.", true),
+    LOADING_SETUP_ERROR("&cAn unexpected error occurred whilst setting up your permissions data. Please try again later.", true),
     OP_DISABLED("&bThe vanilla OP system is disabled on this server.", false),
     OP_DISABLED_SPONGE("&2Please note that Server Operator status has no effect on Sponge permission checks when a permission plugin is installed. Please edit user data directly.", true),
 

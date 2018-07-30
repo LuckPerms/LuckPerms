@@ -60,7 +60,7 @@ public class BukkitJsonMessageHandler {
             }
         }
 
-        Class<?> packetChatClass = ReflectionUtil.nmsClass("PacketPlayOutChat");
+        Class<?> packetChatClass = CraftBukkitUtil.nmsClass("PacketPlayOutChat");
         Constructor[] packetConstructors = packetChatClass.getDeclaredConstructors();
         for (Constructor c : packetConstructors) {
             Class<?>[] parameters = c.getParameterTypes();
@@ -70,14 +70,14 @@ public class BukkitJsonMessageHandler {
             }
         }
 
-        Class<?> baseComponentClass = ReflectionUtil.nmsClass("IChatBaseComponent");
+        Class<?> baseComponentClass = CraftBukkitUtil.nmsClass("IChatBaseComponent");
         Class<?> chatSerializerClass;
 
         if (baseComponentClass.getClasses().length > 0) {
             chatSerializerClass = baseComponentClass.getClasses()[0];
         } else {
             // 1.7 class is here instead.
-            chatSerializerClass = ReflectionUtil.nmsClass("ChatSerializer");
+            chatSerializerClass = CraftBukkitUtil.nmsClass("ChatSerializer");
         }
 
         SERIALIZE_METHOD = chatSerializerClass.getDeclaredMethod("a", String.class);

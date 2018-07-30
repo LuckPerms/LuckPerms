@@ -69,8 +69,6 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
             this.plugin.getLogger().info("Processing auth event for " + profile.getUniqueId() + " - " + profile.getName());
         }
 
-        recordConnection(profile.getUniqueId());
-
         /* Actually process the login for the connection.
            We do this here to delay the login until the data is ready.
            If the login gets cancelled later on, then this will be cleaned up.
@@ -83,6 +81,7 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
         try {
             User user = loadUser(profile.getUniqueId(), username);
             this.plugin.getEventFactory().handleUserLoginProcess(profile.getUniqueId(), username, user);
+            recordConnection(profile.getUniqueId());
         } catch (Exception ex) {
             this.plugin.getLogger().severe("Exception occurred whilst loading data for " + profile.getUniqueId() + " - " + profile.getName());
             ex.printStackTrace();
@@ -92,7 +91,7 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
             e.setCancelled(true);
             e.setMessageCancelled(false);
             //noinspection deprecation
-            e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_ERROR.asString(this.plugin.getLocaleManager())));
+            e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_DATABASE_ERROR.asString(this.plugin.getLocaleManager())));
         }
     }
 
@@ -132,11 +131,20 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
         if (user == null) {
             this.deniedLogin.add(profile.getUniqueId());
 
-            this.plugin.getLogger().warn("User " + profile.getUniqueId() + " - " + profile.getName() + " doesn't have data pre-loaded. - denying login.");
+            if (!getUniqueConnections().contains(profile.getUniqueId())) {
+                this.plugin.getLogger().warn("User " + profile.getUniqueId() + " - " + profile.getName() +
+                        " doesn't have data pre-loaded, they have never need processed during pre-login in this session." +
+                        " - denying login.");
+            } else {
+                this.plugin.getLogger().warn("User " + profile.getUniqueId() + " - " + profile.getName() +
+                        " doesn't currently have data pre-loaded, but they have been processed before in this session." +
+                        " - denying login.");
+            }
+
             e.setCancelled(true);
             e.setMessageCancelled(false);
             //noinspection deprecation
-            e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_ERROR.asString(this.plugin.getLocaleManager())));
+            e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_STATE_ERROR.asString(this.plugin.getLocaleManager())));
         }
     }
 

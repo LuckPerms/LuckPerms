@@ -27,7 +27,7 @@ package me.lucko.luckperms.bukkit;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.compat.BukkitJsonMessageHandler;
-import me.lucko.luckperms.bukkit.compat.ReflectionUtil;
+import me.lucko.luckperms.bukkit.compat.CraftBukkitUtil;
 import me.lucko.luckperms.bukkit.compat.SpigotJsonMessageHandler;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -84,7 +84,7 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
 
     @Override
     protected void sendMessage(CommandSender sender, Component message) {
-        if (ReflectionUtil.isChatCompatible() && sender instanceof Player) {
+        if (CraftBukkitUtil.isChatCompatible() && sender instanceof Player) {
             Player player = (Player) sender;
             String json = ComponentSerializers.JSON.serialize(message);
 

@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.bukkit.model.permissible;
 
-import me.lucko.luckperms.bukkit.compat.ReflectionUtil;
+import me.lucko.luckperms.bukkit.compat.CraftBukkitUtil;
 import me.lucko.luckperms.bukkit.model.dummy.DummyPermissibleBase;
 
 import org.bukkit.entity.Player;
@@ -62,7 +62,7 @@ public final class PermissibleInjector {
             Field humanEntityPermissibleField;
             try {
                 // craftbukkit
-                humanEntityPermissibleField = ReflectionUtil.obcClass("entity.CraftHumanEntity").getDeclaredField("perm");
+                humanEntityPermissibleField = CraftBukkitUtil.obcClass("entity.CraftHumanEntity").getDeclaredField("perm");
                 humanEntityPermissibleField.setAccessible(true);
             } catch (Exception e) {
                 // glowstone

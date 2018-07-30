@@ -56,7 +56,7 @@ public class AssignmentExpression {
         this.expression = generateExpression(expression);
     }
 
-    public boolean parse(PermissionHolder holder, Tristate tristate) throws IllegalArgumentException {
+    public boolean eval(PermissionHolder holder, Tristate tristate) throws IllegalArgumentException {
         ScriptEngine engine = Scripting.getScriptEngine();
         if (engine == null) {
             throw new NullPointerException("script engine");

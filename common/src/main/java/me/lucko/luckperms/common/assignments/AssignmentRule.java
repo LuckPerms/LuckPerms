@@ -54,7 +54,7 @@ public class AssignmentRule {
     public boolean apply(User user) {
         if (this.hasTrueExpression != null) {
             try {
-                boolean b = this.hasTrueExpression.parse(user, Tristate.TRUE);
+                boolean b = this.hasTrueExpression.eval(user, Tristate.TRUE);
                 if (!b) {
                     // The holder does not meet this requirement
                     return false;
@@ -68,7 +68,7 @@ public class AssignmentRule {
 
         if (this.hasFalseExpression != null) {
             try {
-                boolean b = this.hasFalseExpression.parse(user, Tristate.FALSE);
+                boolean b = this.hasFalseExpression.eval(user, Tristate.FALSE);
                 if (!b) {
                     // The holder does not meet this requirement
                     return false;
@@ -82,7 +82,7 @@ public class AssignmentRule {
 
         if (this.lacksExpression != null) {
             try {
-                boolean b = this.lacksExpression.parse(user, Tristate.UNDEFINED);
+                boolean b = this.lacksExpression.eval(user, Tristate.UNDEFINED);
                 if (!b) {
                     // The holder does not meet this requirement
                     return false;

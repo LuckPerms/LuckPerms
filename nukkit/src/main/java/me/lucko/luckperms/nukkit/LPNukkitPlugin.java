@@ -133,8 +133,8 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void registerCommands() {
         this.commandManager = new NukkitCommandExecutor(this);
-        PluginCommand main = (PluginCommand) this.bootstrap.getServer().getPluginCommand("luckperms");
-        main.setExecutor(this.commandManager);
+        PluginCommand cmd = (PluginCommand) this.bootstrap.getServer().getPluginCommand("luckperms");
+        cmd.setExecutor(this.commandManager);
     }
 
     @Override

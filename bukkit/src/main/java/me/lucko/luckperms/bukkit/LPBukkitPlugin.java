@@ -72,7 +72,6 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
@@ -137,11 +136,9 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void registerCommands() {
         this.commandManager = new BukkitCommandExecutor(this);
-        PluginCommand main = this.bootstrap.getServer().getPluginCommand("luckperms");
-        main.setExecutor(this.commandManager);
-        main.setTabCompleter(this.commandManager);
-        main.setDescription("Manage permissions");
-        main.setAliases(Arrays.asList("lp", "perm", "perms", "permission", "permissions"));
+        PluginCommand cmd = this.bootstrap.getCommand("luckperms");
+        cmd.setExecutor(this.commandManager);
+        cmd.setTabCompleter(this.commandManager);
     }
 
     @Override
