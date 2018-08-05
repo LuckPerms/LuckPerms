@@ -166,7 +166,6 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         if (mins > 0) {
             getBootstrap().getScheduler().asyncRepeating(() -> this.updateTaskBuffer.request(), mins, TimeUnit.MINUTES);
         }
-        getBootstrap().getScheduler().asyncLater(() -> this.updateTaskBuffer.request(), 2, TimeUnit.SECONDS);
 
         // run an update instantly.
         getLogger().info("Performing initial data load...");
