@@ -76,13 +76,21 @@ public class ApplyEditsCommand extends SingleCommand {
             return CommandResult.FAILURE;
         }
 
+        boolean success = false;
+
         if (data.has("tabs") && data.get("tabs").isJsonArray()) {
             JsonArray rows = data.get("tabs").getAsJsonArray();
             for (JsonElement row : rows) {
-                read(row.getAsJsonObject(), sender, plugin);
+                if (read(row.getAsJsonObject(), sender, plugin)) {
+                    success = true;
+                }
             }
         } else {
-            read(data, sender, plugin);
+            success = read(data, sender, plugin);
+        }
+
+        if (!success) {
+            Message.APPLY_EDITS_TARGET_NO_CHANGES_PRESENT.send(sender);
         }
 
         return CommandResult.SUCCESS;
