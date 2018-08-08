@@ -123,7 +123,7 @@ public final class WebEditor {
     public static PermissionHolder getHolderFromIdentifier(LuckPermsPlugin plugin, Sender sender, String who) {
         if (who.startsWith(GROUP_ID_PATTERN)) {
             String group = who.substring(GROUP_ID_PATTERN.length());
-            Group holder = plugin.getGroupManager().getIfLoaded(group);
+            Group holder = plugin.getStorage().loadGroup(who).join().orElse(null);
             if (holder == null) {
                 Message.APPLY_EDITS_TARGET_GROUP_NOT_EXISTS.send(sender, group);
             }
