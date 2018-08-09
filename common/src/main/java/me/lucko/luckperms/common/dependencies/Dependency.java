@@ -63,8 +63,8 @@ public enum Dependency {
     TEXT(
             "net{}kyori",
             "text",
-            "1.11-1.4.0",
-            "drQpwf+oI1+DPrn0iCvEtoID+xXR3dpZK5ySaBrUiok=",
+            "1.11-1.6.1",
+            "uJC1/KZz/98KdOfAYjBEAR4jLGS0SOY03wUrDLTj3sg=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     EVENT(
