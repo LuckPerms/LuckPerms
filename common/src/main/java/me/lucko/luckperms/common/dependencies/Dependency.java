@@ -44,14 +44,14 @@ public enum Dependency {
     ASM(
             "org.ow2.asm",
             "asm",
-            "6.2",
-            "kXvaiIvFQxhzJdX7wQNCB+7RUldO943xc0ygruQLf8g="
+            "6.2.1",
+            "FGDbbDPMmchOXLMORrAX5NHMmn+8F0EB1vhIKbtkwIU="
     ),
     ASM_COMMONS(
             "org.ow2.asm",
             "asm-commons",
-            "6.2",
-            "FVRZE9sGyYeqQE8CjjNQHZ8n+M7WEvc3J+NUesTeh4w="
+            "6.2.1",
+            "P1eNMe8w+UttH0SBL0H+T5inzUKvNTNfXUhmqzuQGGU="
     ),
     JAR_RELOCATOR(
             "me.lucko",
@@ -63,8 +63,8 @@ public enum Dependency {
     TEXT(
             "net{}kyori",
             "text",
-            "1.11-1.6.1",
-            "uJC1/KZz/98KdOfAYjBEAR4jLGS0SOY03wUrDLTj3sg=",
+            "1.11-1.6.2",
+            "08EGxwOXOdnxvlEZxtGWr3335b/7RIAGd6iHxp0KysQ=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     EVENT(

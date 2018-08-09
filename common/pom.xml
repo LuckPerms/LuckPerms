@@ -48,7 +48,7 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>text</artifactId>
-            <version>1.11-1.6.1</version>
+            <version>1.11-1.6.2</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
