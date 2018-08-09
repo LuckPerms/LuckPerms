@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.api.event.user.track;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when a user is demoted down a track.
  *
@@ -32,4 +34,9 @@ package me.lucko.luckperms.api.event.user.track;
  */
 public interface UserDemoteEvent extends UserTrackEvent {
 
+    @Nonnull
+    @Override
+    default TrackAction getAction() {
+        return TrackAction.DEMOTION;
+    }
 }

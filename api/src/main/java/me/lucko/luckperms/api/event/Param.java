@@ -23,47 +23,27 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.event.impl;
+package me.lucko.luckperms.api.event;
 
-import me.lucko.luckperms.api.User;
-import me.lucko.luckperms.api.event.user.UserLoginProcessEvent;
-import me.lucko.luckperms.common.event.AbstractEvent;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.util.UUID;
+/**
+ * Represents the position of a parameter within an event.
+ *
+ * <p>This is an implementation detail and should not be relied upon.</p>
+ */
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Param {
 
-import javax.annotation.Nonnull;
+    /**
+     * Gets the index of the parameter.
+     *
+     * @return the index
+     */
+    int value();
 
-public class EventUserLoginProcess extends AbstractEvent implements UserLoginProcessEvent {
-
-    private final UUID uuid;
-    private final String username;
-    private final User user;
-
-    public EventUserLoginProcess(UUID uuid, String username, User user) {
-        this.uuid = uuid;
-        this.username = username;
-        this.user = user;
-    }
-
-    @Nonnull
-    @Override
-    public UUID getUuid() {
-        return this.uuid;
-    }
-
-    @Nonnull
-    @Override
-    public String getUsername() {
-        return this.username;
-    }
-
-    @Override
-    public User getUser() {
-        return this.user;
-    }
-
-    @Override
-    public String toString() {
-        return "UserLoginProcessEvent(uuid=" + this.getUuid() + ", username=" + this.getUsername() + ", user=" + this.getUser() + ")";
-    }
 }

@@ -27,6 +27,7 @@ package me.lucko.luckperms.api.event.user;
 
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
+import me.lucko.luckperms.api.event.Param;
 
 import javax.annotation.Nonnull;
 
@@ -41,6 +42,7 @@ public interface UserLoadEvent extends LuckPermsEvent {
      * @return the user that was loaded
      */
     @Nonnull
+    @Param(0)
     User getUser();
 
 }

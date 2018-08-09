@@ -27,6 +27,7 @@ package me.lucko.luckperms.api.event.track.mutate;
 
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
+import me.lucko.luckperms.api.event.Param;
 
 import java.util.List;
 
@@ -43,6 +44,7 @@ public interface TrackMutateEvent extends LuckPermsEvent {
      * @return the track that was mutated
      */
     @Nonnull
+    @Param(0)
     Track getTrack();
 
     /**
@@ -51,6 +53,7 @@ public interface TrackMutateEvent extends LuckPermsEvent {
      * @return the data before the change
      */
     @Nonnull
+    @Param(1)
     List<String> getDataBefore();
 
     /**
@@ -59,6 +62,7 @@ public interface TrackMutateEvent extends LuckPermsEvent {
      * @return the data after the change
      */
     @Nonnull
+    @Param(2)
     List<String> getDataAfter();
 
 }

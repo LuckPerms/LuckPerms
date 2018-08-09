@@ -67,6 +67,10 @@
                                     <shadedPattern>me.lucko.luckperms.lib.text</shadedPattern>
                                 </relocation>
                                 <relocation>
+                                    <pattern>net.kyori.event</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.eventbus</shadedPattern>
+                                </relocation>
+                                <relocation>
                                     <pattern>com.github.benmanes.caffeine</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.caffeine</shadedPattern>
                                 </relocation>

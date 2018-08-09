@@ -27,6 +27,7 @@ package me.lucko.luckperms.api.event.group;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
+import me.lucko.luckperms.api.event.Param;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 
 import java.util.Set;
@@ -44,6 +45,7 @@ public interface GroupDeleteEvent extends LuckPermsEvent {
      * @return the name of the deleted group
      */
     @Nonnull
+    @Param(0)
     String getGroupName();
 
     /**
@@ -52,6 +54,7 @@ public interface GroupDeleteEvent extends LuckPermsEvent {
      * @return a copy of the groups existing data
      */
     @Nonnull
+    @Param(1)
     Set<Node> getExistingData();
 
     /**
@@ -60,6 +63,7 @@ public interface GroupDeleteEvent extends LuckPermsEvent {
      * @return the cause of the deletion
      */
     @Nonnull
+    @Param(2)
     DeletionCause getCause();
 
 }

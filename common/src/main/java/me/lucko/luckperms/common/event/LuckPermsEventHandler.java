@@ -28,6 +28,8 @@ package me.lucko.luckperms.common.event;
 import me.lucko.luckperms.api.event.EventHandler;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 
+import net.kyori.event.EventSubscriber;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -40,7 +42,7 @@ import javax.annotation.Nullable;
  *
  * @param <T> the event type
  */
-public class LuckPermsEventHandler<T extends LuckPermsEvent> implements EventHandler<T> {
+public class LuckPermsEventHandler<T extends LuckPermsEvent> implements EventHandler<T>, EventSubscriber<T> {
 
     /**
      * The event bus which created this handler
@@ -101,11 +103,10 @@ public class LuckPermsEventHandler<T extends LuckPermsEvent> implements EventHan
         return this.callCount.get();
     }
 
-    @SuppressWarnings("unchecked") // we know that this method will never be called if the class doesn't match eventClass
-    void handle(LuckPermsEvent event) {
+    @Override
+    public void invoke(T event) throws Throwable {
         try {
-            T t = (T) event;
-            this.consumer.accept(t);
+            this.consumer.accept(event);
             this.callCount.incrementAndGet();
         } catch (Throwable t) {
             this.eventBus.getPlugin().getLogger().warn("Unable to pass event " + event.getClass().getSimpleName() + " to handler " + this.consumer.getClass().getName());

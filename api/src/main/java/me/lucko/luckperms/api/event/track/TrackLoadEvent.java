@@ -27,6 +27,7 @@ package me.lucko.luckperms.api.event.track;
 
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
+import me.lucko.luckperms.api.event.Param;
 
 import javax.annotation.Nonnull;
 
@@ -43,6 +44,7 @@ public interface TrackLoadEvent extends LuckPermsEvent {
      * @return the track that was loaded
      */
     @Nonnull
+    @Param(0)
     Track getTrack();
 
 }

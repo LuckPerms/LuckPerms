@@ -33,47 +33,47 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.PlayerSaveResult;
 import me.lucko.luckperms.api.caching.GroupData;
 import me.lucko.luckperms.api.caching.UserData;
+import me.lucko.luckperms.api.event.Cancellable;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
+import me.lucko.luckperms.api.event.group.GroupCacheLoadEvent;
+import me.lucko.luckperms.api.event.group.GroupCreateEvent;
+import me.lucko.luckperms.api.event.group.GroupDataRecalculateEvent;
+import me.lucko.luckperms.api.event.group.GroupDeleteEvent;
+import me.lucko.luckperms.api.event.group.GroupLoadAllEvent;
+import me.lucko.luckperms.api.event.group.GroupLoadEvent;
 import me.lucko.luckperms.api.event.log.LogBroadcastEvent;
+import me.lucko.luckperms.api.event.log.LogNetworkPublishEvent;
 import me.lucko.luckperms.api.event.log.LogNotifyEvent;
+import me.lucko.luckperms.api.event.log.LogPublishEvent;
+import me.lucko.luckperms.api.event.log.LogReceiveEvent;
+import me.lucko.luckperms.api.event.node.NodeAddEvent;
+import me.lucko.luckperms.api.event.node.NodeClearEvent;
+import me.lucko.luckperms.api.event.node.NodeRemoveEvent;
+import me.lucko.luckperms.api.event.player.PlayerDataSaveEvent;
 import me.lucko.luckperms.api.event.source.Source;
+import me.lucko.luckperms.api.event.sync.ConfigReloadEvent;
+import me.lucko.luckperms.api.event.sync.PostSyncEvent;
+import me.lucko.luckperms.api.event.sync.PreNetworkSyncEvent;
+import me.lucko.luckperms.api.event.sync.PreSyncEvent;
+import me.lucko.luckperms.api.event.track.TrackCreateEvent;
+import me.lucko.luckperms.api.event.track.TrackDeleteEvent;
+import me.lucko.luckperms.api.event.track.TrackLoadAllEvent;
+import me.lucko.luckperms.api.event.track.TrackLoadEvent;
+import me.lucko.luckperms.api.event.track.mutate.TrackAddGroupEvent;
+import me.lucko.luckperms.api.event.track.mutate.TrackClearEvent;
+import me.lucko.luckperms.api.event.track.mutate.TrackRemoveGroupEvent;
+import me.lucko.luckperms.api.event.user.UserCacheLoadEvent;
+import me.lucko.luckperms.api.event.user.UserDataRecalculateEvent;
+import me.lucko.luckperms.api.event.user.UserFirstLoginEvent;
+import me.lucko.luckperms.api.event.user.UserLoadEvent;
+import me.lucko.luckperms.api.event.user.UserLoginProcessEvent;
+import me.lucko.luckperms.api.event.user.track.UserDemoteEvent;
+import me.lucko.luckperms.api.event.user.track.UserPromoteEvent;
 import me.lucko.luckperms.common.api.delegates.model.ApiPermissionHolder;
 import me.lucko.luckperms.common.api.delegates.model.ApiUser;
-import me.lucko.luckperms.common.event.impl.EventConfigReload;
-import me.lucko.luckperms.common.event.impl.EventGroupCacheLoad;
-import me.lucko.luckperms.common.event.impl.EventGroupCreate;
-import me.lucko.luckperms.common.event.impl.EventGroupDataRecalculate;
-import me.lucko.luckperms.common.event.impl.EventGroupDelete;
-import me.lucko.luckperms.common.event.impl.EventGroupLoad;
-import me.lucko.luckperms.common.event.impl.EventGroupLoadAll;
-import me.lucko.luckperms.common.event.impl.EventLogBroadcast;
-import me.lucko.luckperms.common.event.impl.EventLogNetworkPublish;
-import me.lucko.luckperms.common.event.impl.EventLogNotify;
-import me.lucko.luckperms.common.event.impl.EventLogPublish;
-import me.lucko.luckperms.common.event.impl.EventLogReceive;
-import me.lucko.luckperms.common.event.impl.EventNodeAdd;
-import me.lucko.luckperms.common.event.impl.EventNodeClear;
-import me.lucko.luckperms.common.event.impl.EventNodeRemove;
-import me.lucko.luckperms.common.event.impl.EventPlayerDataSave;
-import me.lucko.luckperms.common.event.impl.EventPostSync;
-import me.lucko.luckperms.common.event.impl.EventPreNetworkSync;
-import me.lucko.luckperms.common.event.impl.EventPreSync;
-import me.lucko.luckperms.common.event.impl.EventTrackAddGroup;
-import me.lucko.luckperms.common.event.impl.EventTrackClear;
-import me.lucko.luckperms.common.event.impl.EventTrackCreate;
-import me.lucko.luckperms.common.event.impl.EventTrackDelete;
-import me.lucko.luckperms.common.event.impl.EventTrackLoad;
-import me.lucko.luckperms.common.event.impl.EventTrackLoadAll;
-import me.lucko.luckperms.common.event.impl.EventTrackRemoveGroup;
-import me.lucko.luckperms.common.event.impl.EventUserCacheLoad;
-import me.lucko.luckperms.common.event.impl.EventUserDataRecalculate;
-import me.lucko.luckperms.common.event.impl.EventUserDemote;
-import me.lucko.luckperms.common.event.impl.EventUserFirstLogin;
-import me.lucko.luckperms.common.event.impl.EventUserLoad;
-import me.lucko.luckperms.common.event.impl.EventUserLoginProcess;
-import me.lucko.luckperms.common.event.impl.EventUserPromote;
+import me.lucko.luckperms.common.event.gen.GeneratedEventSpec;
 import me.lucko.luckperms.common.event.model.EntitySourceImpl;
 import me.lucko.luckperms.common.event.model.SenderEntity;
 import me.lucko.luckperms.common.event.model.UnknownSource;
@@ -85,15 +85,17 @@ import me.lucko.luckperms.common.sender.Sender;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
 public final class EventFactory {
-    private final AbstractEventBus eventBus;
+    private final AbstractEventBus<?> eventBus;
 
-    public EventFactory(AbstractEventBus eventBus) {
+    public EventFactory(AbstractEventBus<?> eventBus) {
         this.eventBus = eventBus;
     }
 
@@ -101,193 +103,174 @@ public final class EventFactory {
         return this.eventBus;
     }
 
-    private void fireEventAsync(LuckPermsEvent event) {
-        this.eventBus.fireEventAsync(event);
+    private void post(LuckPermsEvent event) {
+        this.eventBus.post(event);
     }
 
-    private void fireEvent(LuckPermsEvent event) {
-        this.eventBus.fireEvent(event);
+    private void post(Supplier<LuckPermsEvent> supplier) {
+        this.eventBus.getPlugin().getBootstrap().getScheduler().executeAsync(() -> {
+            LuckPermsEvent event = supplier.get();
+            if (event instanceof Cancellable) {
+                throw new RuntimeException("Cancellable event posted async: " + event);
+            }
+            this.eventBus.post(event);
+        });
+    }
+    
+    private LuckPermsEvent generate(Class<? extends LuckPermsEvent> eventClass, Object... params) {
+        return GeneratedEventSpec.lookup(eventClass).newInstance(this.eventBus.getApiProvider(), params);
     }
 
     public void handleGroupCacheLoad(Group group, GroupData data) {
-        EventGroupCacheLoad event = new EventGroupCacheLoad(group.getApiDelegate(), data);
-        fireEventAsync(event);
+        post(() -> generate(GroupCacheLoadEvent.class, group.getApiDelegate(), data));
     }
 
     public void handleGroupCreate(Group group, CreationCause cause) {
-        EventGroupCreate event = new EventGroupCreate(group.getApiDelegate(), cause);
-        fireEventAsync(event);
+        post(() -> generate(GroupCreateEvent.class, group.getApiDelegate(), cause));
     }
 
     public void handleGroupDelete(Group group, DeletionCause cause) {
-        EventGroupDelete event = new EventGroupDelete(group.getName(), ImmutableSet.copyOf(group.enduringData().immutable().values()), cause);
-        fireEventAsync(event);
+        post(() -> generate(GroupDeleteEvent.class, group.getName(), ImmutableSet.copyOf(group.enduringData().immutable().values()), cause));
     }
 
     public void handleGroupLoadAll() {
-        EventGroupLoadAll event = new EventGroupLoadAll();
-        fireEventAsync(event);
+        post(() -> generate(GroupLoadAllEvent.class));
     }
 
     public void handleGroupLoad(Group group) {
-        EventGroupLoad event = new EventGroupLoad(group.getApiDelegate());
-        fireEventAsync(event);
+        post(() -> generate(GroupLoadEvent.class, group.getApiDelegate()));
     }
 
     public boolean handleLogBroadcast(boolean initialState, LogEntry entry, LogBroadcastEvent.Origin origin) {
         AtomicBoolean cancel = new AtomicBoolean(initialState);
-        EventLogBroadcast event = new EventLogBroadcast(cancel, entry, origin);
-        fireEvent(event);
+        post(generate(LogBroadcastEvent.class, cancel, entry, origin));
         return cancel.get();
     }
 
     public boolean handleLogPublish(boolean initialState, LogEntry entry) {
         AtomicBoolean cancel = new AtomicBoolean(initialState);
-        EventLogPublish event = new EventLogPublish(cancel, entry);
-        fireEvent(event);
+        post(generate(LogPublishEvent.class, cancel, entry));
         return cancel.get();
     }
 
     public boolean handleLogNetworkPublish(boolean initialState, UUID id, LogEntry entry) {
         AtomicBoolean cancel = new AtomicBoolean(initialState);
-        EventLogNetworkPublish event = new EventLogNetworkPublish(cancel, id, entry);
-        fireEvent(event);
+        post(generate(LogNetworkPublishEvent.class, cancel, id, entry));
         return cancel.get();
     }
 
     public boolean handleLogNotify(boolean initialState, LogEntry entry, LogNotifyEvent.Origin origin, Sender sender) {
         AtomicBoolean cancel = new AtomicBoolean(initialState);
-        EventLogNotify event = new EventLogNotify(cancel, entry, origin, sender);
-        fireEvent(event);
+        post(generate(LogNotifyEvent.class, cancel, entry, origin, new SenderEntity(sender)));
         return cancel.get();
     }
 
     public void handleLogReceive(UUID id, LogEntry entry) {
-        EventLogReceive event = new EventLogReceive(id, entry);
-        fireEventAsync(event);
+        post(() -> generate(LogReceiveEvent.class, id, entry));
     }
 
     public void handleNodeAdd(Node node, PermissionHolder target, Collection<? extends Node> before, Collection<? extends Node> after) {
-        EventNodeAdd event = new EventNodeAdd(node, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
-        fireEventAsync(event);
+        post(() -> generate(NodeAddEvent.class, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node));
     }
 
     public void handleNodeClear(PermissionHolder target, Collection<? extends Node> before, Collection<? extends Node> after) {
-        EventNodeClear event = new EventNodeClear(getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
-        fireEventAsync(event);
+        post(() -> generate(NodeClearEvent.class, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after)));
     }
 
     public void handleNodeRemove(Node node, PermissionHolder target, Collection<? extends Node> before, Collection<? extends Node> after) {
-        EventNodeRemove event = new EventNodeRemove(node, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
-        fireEventAsync(event);
+        post(() -> generate(NodeRemoveEvent.class, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node));
     }
 
     public void handleConfigReload() {
-        EventConfigReload event = new EventConfigReload();
-        fireEventAsync(event);
+        post(() -> generate(ConfigReloadEvent.class));
     }
 
     public void handlePostSync() {
-        EventPostSync event = new EventPostSync();
-        fireEventAsync(event);
+        post(() -> generate(PostSyncEvent.class));
     }
 
     public boolean handleNetworkPreSync(boolean initialState, UUID id) {
         AtomicBoolean cancel = new AtomicBoolean(initialState);
-        EventPreNetworkSync event = new EventPreNetworkSync(cancel, id);
-        fireEvent(event);
+        post(generate(PreNetworkSyncEvent.class, cancel, id));
         return cancel.get();
     }
 
     public boolean handlePreSync(boolean initialState) {
         AtomicBoolean cancel = new AtomicBoolean(initialState);
-        EventPreSync event = new EventPreSync(cancel);
-        fireEvent(event);
+        post(generate(PreSyncEvent.class, cancel));
         return cancel.get();
     }
 
     public void handleTrackCreate(Track track, CreationCause cause) {
-        EventTrackCreate event = new EventTrackCreate(track.getApiDelegate(), cause);
-        fireEventAsync(event);
+        post(() -> generate(TrackCreateEvent.class, track.getApiDelegate(), cause));
     }
 
     public void handleTrackDelete(Track track, DeletionCause cause) {
-        EventTrackDelete event = new EventTrackDelete(track.getName(), ImmutableList.copyOf(track.getGroups()), cause);
-        fireEventAsync(event);
+        post(() -> generate(TrackDeleteEvent.class, track.getName(), ImmutableList.copyOf(track.getGroups()), cause));
     }
 
     public void handleTrackLoadAll() {
-        EventTrackLoadAll event = new EventTrackLoadAll();
-        fireEventAsync(event);
+        post(() -> generate(TrackLoadAllEvent.class));
     }
 
     public void handleTrackLoad(Track track) {
-        EventTrackLoad event = new EventTrackLoad(track.getApiDelegate());
-        fireEventAsync(event);
+        post(() -> generate(TrackLoadEvent.class, track.getApiDelegate()));
     }
 
     public void handleTrackAddGroup(Track track, String group, List<String> before, List<String> after) {
-        EventTrackAddGroup event = new EventTrackAddGroup(group, track.getApiDelegate(), ImmutableList.copyOf(before), ImmutableList.copyOf(after));
-        fireEventAsync(event);
+        post(() -> generate(TrackAddGroupEvent.class, track.getApiDelegate(), ImmutableList.copyOf(before), ImmutableList.copyOf(after), group));
     }
 
     public void handleTrackClear(Track track, List<String> before) {
-        EventTrackClear event = new EventTrackClear(track.getApiDelegate(), ImmutableList.copyOf(before), ImmutableList.of());
-        fireEventAsync(event);
+        post(() -> generate(TrackClearEvent.class, track.getApiDelegate(), ImmutableList.copyOf(before), ImmutableList.of()));
     }
 
     public void handleTrackRemoveGroup(Track track, String group, List<String> before, List<String> after) {
-        EventTrackRemoveGroup event = new EventTrackRemoveGroup(group, track.getApiDelegate(), ImmutableList.copyOf(before), ImmutableList.copyOf(after));
-        fireEventAsync(event);
+        post(() -> generate(TrackRemoveGroupEvent.class, track.getApiDelegate(), ImmutableList.copyOf(before), ImmutableList.copyOf(after), group));
     }
 
     public void handleUserCacheLoad(User user, UserData data) {
-        EventUserCacheLoad event = new EventUserCacheLoad(new ApiUser(user), data);
-        fireEventAsync(event);
+        post(() -> generate(UserCacheLoadEvent.class, new ApiUser(user), data));
     }
 
     public void handleDataRecalculate(PermissionHolder holder) {
         if (holder.getType().isUser()) {
             User user = (User) holder;
-            EventUserDataRecalculate event = new EventUserDataRecalculate(user.getApiDelegate(), user.getCachedData());
-            fireEventAsync(event);
+            post(() -> generate(UserDataRecalculateEvent.class, user.getApiDelegate(), user.getCachedData()));
         } else {
             Group group = (Group) holder;
-            EventGroupDataRecalculate event = new EventGroupDataRecalculate(group.getApiDelegate(), group.getCachedData());
-            fireEventAsync(event);
+            post(() -> generate(GroupDataRecalculateEvent.class, group.getApiDelegate(), group.getCachedData()));
         }
     }
 
     public void handleUserFirstLogin(UUID uuid, String username) {
-        EventUserFirstLogin event = new EventUserFirstLogin(uuid, username);
-        fireEventAsync(event);
+        post(() -> generate(UserFirstLoginEvent.class, uuid, username));
     }
 
     public void handlePlayerDataSave(UUID uuid, String username, PlayerSaveResult result) {
-        EventPlayerDataSave event = new EventPlayerDataSave(uuid, username, result);
-        fireEventAsync(event);
+        post(() -> generate(PlayerDataSaveEvent.class, uuid, username, result));
     }
 
     public void handleUserLoad(User user) {
-        EventUserLoad event = new EventUserLoad(new ApiUser(user));
-        fireEventAsync(event);
+        post(() -> generate(UserLoadEvent.class, new ApiUser(user)));
     }
 
     public void handleUserLoginProcess(UUID uuid, String username, User user) {
-        EventUserLoginProcess event = new EventUserLoginProcess(uuid, username, new ApiUser(user));
-        fireEvent(event);
+        post(() -> generate(UserLoginProcessEvent.class, uuid, username, new ApiUser(user)));
     }
 
     public void handleUserDemote(User user, Track track, String from, String to, @Nullable Sender source) {
-        Source s = source == null ? UnknownSource.INSTANCE : new EntitySourceImpl(new SenderEntity(source));
-        EventUserDemote event = new EventUserDemote(track.getApiDelegate(), new ApiUser(user), from, to, s);
-        fireEventAsync(event);
+        post(() -> {
+            Source s = source == null ? UnknownSource.INSTANCE : new EntitySourceImpl(new SenderEntity(source));
+            return generate(UserDemoteEvent.class, s, track.getApiDelegate(), new ApiUser(user), Optional.ofNullable(from), Optional.ofNullable(to));
+        });
     }
 
     public void handleUserPromote(User user, Track track, String from, String to, @Nullable Sender source) {
-        Source s = source == null ? UnknownSource.INSTANCE : new EntitySourceImpl(new SenderEntity(source));
-        EventUserPromote event = new EventUserPromote(track.getApiDelegate(), new ApiUser(user), from, to, s);
-        fireEventAsync(event);
+        post(() -> {
+            Source s = source == null ? UnknownSource.INSTANCE : new EntitySourceImpl(new SenderEntity(source));
+            return generate(UserPromoteEvent.class, s, track.getApiDelegate(), new ApiUser(user), Optional.ofNullable(from), Optional.ofNullable(to));
+        });
     }
 
     private static ApiPermissionHolder getDelegate(PermissionHolder holder) {

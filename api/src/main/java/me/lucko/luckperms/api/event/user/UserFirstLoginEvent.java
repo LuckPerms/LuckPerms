@@ -26,6 +26,7 @@
 package me.lucko.luckperms.api.event.user;
 
 import me.lucko.luckperms.api.event.LuckPermsEvent;
+import me.lucko.luckperms.api.event.Param;
 
 import java.util.UUID;
 
@@ -50,6 +51,7 @@ public interface UserFirstLoginEvent extends LuckPermsEvent {
      * @return the uuid of the user
      */
     @Nonnull
+    @Param(0)
     UUID getUuid();
 
     /**
@@ -58,6 +60,7 @@ public interface UserFirstLoginEvent extends LuckPermsEvent {
      * @return the username of the user
      */
     @Nonnull
+    @Param(1)
     String getUsername();
 
 }

@@ -28,6 +28,7 @@ package me.lucko.luckperms.api.event.log;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.Cancellable;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
+import me.lucko.luckperms.api.event.Param;
 
 import javax.annotation.Nonnull;
 
@@ -42,6 +43,7 @@ public interface LogPublishEvent extends LuckPermsEvent, Cancellable {
      * @return the log entry to be published
      */
     @Nonnull
+    @Param(0)
     LogEntry getEntry();
 
 }

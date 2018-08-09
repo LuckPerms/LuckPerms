@@ -27,6 +27,7 @@ package me.lucko.luckperms.api.event.log;
 
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
+import me.lucko.luckperms.api.event.Param;
 
 import java.util.UUID;
 
@@ -45,6 +46,7 @@ public interface LogReceiveEvent extends LuckPermsEvent {
      * @return the id of the log entry being received
      */
     @Nonnull
+    @Param(0)
     UUID getLogId();
 
     /**
@@ -53,6 +55,7 @@ public interface LogReceiveEvent extends LuckPermsEvent {
      * @return the log entry being received
      */
     @Nonnull
+    @Param(1)
     LogEntry getEntry();
 
 }

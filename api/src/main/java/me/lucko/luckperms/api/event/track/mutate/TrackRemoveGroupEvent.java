@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.api.event.track.mutate;
 
+import me.lucko.luckperms.api.event.Param;
+
 import javax.annotation.Nonnull;
 
 /**
@@ -38,6 +40,7 @@ public interface TrackRemoveGroupEvent extends TrackMutateEvent {
      * @return the group that was removed
      */
     @Nonnull
+    @Param(3)
     String getGroup();
 
 }

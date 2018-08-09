@@ -28,6 +28,7 @@ package me.lucko.luckperms.api.event.group;
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.caching.GroupData;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
+import me.lucko.luckperms.api.event.Param;
 
 import javax.annotation.Nonnull;
 
@@ -44,6 +45,7 @@ public interface GroupCacheLoadEvent extends LuckPermsEvent {
      * @return the group
      */
     @Nonnull
+    @Param(0)
     Group getGroup();
 
     /**
@@ -52,6 +54,7 @@ public interface GroupCacheLoadEvent extends LuckPermsEvent {
      * @return the loaded data
      */
     @Nonnull
+    @Param(1)
     GroupData getLoadedData();
 
 }

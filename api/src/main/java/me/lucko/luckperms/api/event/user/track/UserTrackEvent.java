@@ -28,6 +28,7 @@ package me.lucko.luckperms.api.event.user.track;
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
+import me.lucko.luckperms.api.event.Param;
 import me.lucko.luckperms.api.event.Sourced;
 
 import java.util.Optional;
@@ -45,6 +46,7 @@ public interface UserTrackEvent extends LuckPermsEvent, Sourced {
      * @return the track involved in the event
      */
     @Nonnull
+    @Param(0)
     Track getTrack();
 
     /**
@@ -53,6 +55,7 @@ public interface UserTrackEvent extends LuckPermsEvent, Sourced {
      * @return the user involved in the event
      */
     @Nonnull
+    @Param(1)
     User getUser();
 
     /**
@@ -71,6 +74,7 @@ public interface UserTrackEvent extends LuckPermsEvent, Sourced {
      * @return the group the user was promoted/demoted from
      */
     @Nonnull
+    @Param(2)
     Optional<String> getGroupFrom();
 
     /**
@@ -79,6 +83,7 @@ public interface UserTrackEvent extends LuckPermsEvent, Sourced {
      * @return the group the user was promoted/demoted to
      */
     @Nonnull
+    @Param(3)
     Optional<String> getGroupTo();
 
 }

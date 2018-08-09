@@ -26,6 +26,7 @@
 package me.lucko.luckperms.api.event.node;
 
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.event.Param;
 
 import javax.annotation.Nonnull;
 
@@ -40,6 +41,7 @@ public interface NodeRemoveEvent extends NodeMutateEvent {
      * @return the node that was removed
      */
     @Nonnull
+    @Param(3)
     Node getNode();
 
 }

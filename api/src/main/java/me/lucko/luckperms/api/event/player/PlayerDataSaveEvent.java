@@ -27,6 +27,7 @@ package me.lucko.luckperms.api.event.player;
 
 import me.lucko.luckperms.api.PlayerSaveResult;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
+import me.lucko.luckperms.api.event.Param;
 import me.lucko.luckperms.api.manager.UserManager;
 
 import java.util.UUID;
@@ -48,6 +49,7 @@ public interface PlayerDataSaveEvent extends LuckPermsEvent {
      * @return the uuid
      */
     @Nonnull
+    @Param(0)
     UUID getUuid();
 
     /**
@@ -56,6 +58,7 @@ public interface PlayerDataSaveEvent extends LuckPermsEvent {
      * @return the username
      */
     @Nonnull
+    @Param(1)
     String getUsername();
 
     /**
@@ -64,6 +67,7 @@ public interface PlayerDataSaveEvent extends LuckPermsEvent {
      * @return the result
      */
     @Nonnull
+    @Param(2)
     PlayerSaveResult getResult();
 
 }

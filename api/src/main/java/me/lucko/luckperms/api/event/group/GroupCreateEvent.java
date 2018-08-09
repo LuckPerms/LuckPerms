@@ -27,6 +27,7 @@ package me.lucko.luckperms.api.event.group;
 
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
+import me.lucko.luckperms.api.event.Param;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 
 import javax.annotation.Nonnull;
@@ -42,6 +43,7 @@ public interface GroupCreateEvent extends LuckPermsEvent {
      * @return the new group
      */
     @Nonnull
+    @Param(0)
     Group getGroup();
 
     /**
@@ -50,6 +52,7 @@ public interface GroupCreateEvent extends LuckPermsEvent {
      * @return the cause of the creation
      */
     @Nonnull
+    @Param(1)
     CreationCause getCause();
 
 }

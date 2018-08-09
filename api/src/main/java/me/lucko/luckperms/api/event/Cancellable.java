@@ -40,6 +40,7 @@ public interface Cancellable {
      * @return the cancellation
      */
     @Nonnull
+    @Param(-1)
     AtomicBoolean getCancellationState();
 
     /**

@@ -29,6 +29,7 @@ import me.lucko.luckperms.api.Entity;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.Cancellable;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
+import me.lucko.luckperms.api.event.Param;
 
 import javax.annotation.Nonnull;
 
@@ -50,6 +51,7 @@ public interface LogNotifyEvent extends LuckPermsEvent, Cancellable {
      * @return the log entry to be sent
      */
     @Nonnull
+    @Param(0)
     LogEntry getEntry();
 
     /**
@@ -58,6 +60,7 @@ public interface LogNotifyEvent extends LuckPermsEvent, Cancellable {
      * @return the origin of the log
      */
     @Nonnull
+    @Param(1)
     Origin getOrigin();
 
     /**
@@ -66,6 +69,7 @@ public interface LogNotifyEvent extends LuckPermsEvent, Cancellable {
      * @return the object to notify
      */
     @Nonnull
+    @Param(2)
     Entity getNotifiable();
 
     /**

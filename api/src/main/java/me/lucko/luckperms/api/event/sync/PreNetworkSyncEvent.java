@@ -27,6 +27,7 @@ package me.lucko.luckperms.api.event.sync;
 
 import me.lucko.luckperms.api.event.Cancellable;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
+import me.lucko.luckperms.api.event.Param;
 
 import java.util.UUID;
 
@@ -43,6 +44,7 @@ public interface PreNetworkSyncEvent extends LuckPermsEvent, Cancellable {
      * @return the id of the sync request
      */
     @Nonnull
+    @Param(0)
     UUID getSyncId();
 
 }

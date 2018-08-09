@@ -25,9 +25,12 @@
 
 package me.lucko.luckperms.api.event.node;
 
+import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.PermissionHolder;
+import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
+import me.lucko.luckperms.api.event.Param;
 
 import java.util.Set;
 
@@ -44,6 +47,7 @@ public interface NodeMutateEvent extends LuckPermsEvent {
      * @return the event target
      */
     @Nonnull
+    @Param(0)
     PermissionHolder getTarget();
 
     /**
@@ -52,6 +56,7 @@ public interface NodeMutateEvent extends LuckPermsEvent {
      * @return the data before the change
      */
     @Nonnull
+    @Param(1)
     Set<Node> getDataBefore();
 
     /**
@@ -60,6 +65,7 @@ public interface NodeMutateEvent extends LuckPermsEvent {
      * @return the data after the change
      */
     @Nonnull
+    @Param(2)
     Set<Node> getDataAfter();
 
     /**
@@ -69,7 +75,9 @@ public interface NodeMutateEvent extends LuckPermsEvent {
      *
      * @return if the event is targeting a user
      */
-    boolean isUser();
+    default boolean isUser() {
+        return getTarget() instanceof User;
+    }
 
     /**
      * Gets whether the target of this event is a {@link me.lucko.luckperms.api.Group}
@@ -78,6 +86,8 @@ public interface NodeMutateEvent extends LuckPermsEvent {
      *
      * @return if the event is targeting a group
      */
-    boolean isGroup();
+    default boolean isGroup() {
+        return getTarget() instanceof Group;
+    }
 
 }

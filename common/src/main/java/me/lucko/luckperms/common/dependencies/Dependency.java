@@ -67,6 +67,13 @@ public enum Dependency {
             "drQpwf+oI1+DPrn0iCvEtoID+xXR3dpZK5ySaBrUiok=",
             Relocation.of("text", "net{}kyori{}text")
     ),
+    EVENT(
+            "net{}kyori",
+            "event-api",
+            "2.0.1",
+            "4XVmowvKHCmO38ZO2jeZKh/mD00xBg73zau79s4kTe4=",
+            Relocation.of("eventbus", "net{}kyori{}event")
+    ),
     CAFFEINE(
             "com{}github{}ben-manes{}caffeine",
             "caffeine",
