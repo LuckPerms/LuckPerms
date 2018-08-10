@@ -1,0 +1,36 @@
+dependencies {
+    compile project(':luckperms-api')
+
+    compile  'com.google.code.findbugs:jsr305:3.0.2'
+    compile('net.kyori:text:1.11-1.6.2') {
+        exclude(module: 'checker-qual')
+        exclude(module: 'guava')
+        exclude(module: 'gson')
+    }
+    compile('net.kyori:event-api:2.0.1') {
+        exclude(module: 'checker-qual')
+        exclude(module: 'guava')
+    }
+    compile 'com.google.code.gson:gson:2.7'
+    compile 'com.google.guava:guava:19.0'
+    compile 'com.github.ben-manes.caffeine:caffeine:2.6.2'
+    compile 'com.squareup.okhttp3:okhttp:3.10.0'
+    compile 'com.squareup.okio:okio:1.14.1'
+    compile('me.lucko.configurate:configurate-core:3.5') {
+        exclude(module: 'guava')
+    }
+    compile('me.lucko.configurate:configurate-yaml:3.5') {
+        exclude(module: 'snakeyaml')
+    }
+    compile('me.lucko.configurate:configurate-gson:3.5') {
+        exclude(module: 'gson')
+    }
+    compile 'me.lucko.configurate:configurate-hocon:3.5'
+    compile('me.lucko.configurate:configurate-toml:3.5') {
+        exclude(module: 'toml4j')
+    }
+    compile 'com.zaxxer:HikariCP:3.2.0'
+    compile 'redis.clients:jedis:2.9.0'
+    compile 'org.mongodb:mongo-java-driver:3.7.1'
+    compile 'org.yaml:snakeyaml:1.14'
+}

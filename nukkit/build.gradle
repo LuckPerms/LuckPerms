@@ -1,0 +1,60 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:2.0.4"
+    }
+}
+
+apply plugin: "com.github.johnrengelman.shadow"
+
+repositories {
+    maven {
+        name 'nukkit-repo'
+        url 'https://repo.potestas.xyz/main/'
+    }
+}
+
+dependencies {
+    compile project(':luckperms-common')
+
+    compileOnly 'cn.nukkit:nukkit:1.0-SNAPSHOT'
+}
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        expand 'pluginVersion': project.ext.fullVersion
+        include 'plugin.yml'
+    }
+}
+
+shadowJar {
+    archiveName = "LuckPerms-Nukkit-${project.ext.fullVersion}.jar"
+
+    dependencies {
+        include(dependency('me.lucko.luckperms:.*'))
+    }
+
+    relocate 'net.kyori.text', 'me.lucko.luckperms.lib.text'
+    relocate 'net.kyori.event', 'me.lucko.luckperms.lib.eventbus'
+    relocate 'com.github.benmanes.caffeine', 'me.lucko.luckperms.lib.caffeine'
+    relocate 'okio', 'me.lucko.luckperms.lib.okio'
+    relocate 'okhttp3', 'me.lucko.luckperms.lib.okhttp3'
+    relocate 'me.lucko.commodore', 'me.lucko.luckperms.lib.commodore'
+    relocate 'org.mariadb.jdbc', 'me.lucko.luckperms.lib.mariadb'
+    relocate 'com.mysql', 'me.lucko.luckperms.lib.mysql'
+    relocate 'org.postgresql', 'me.lucko.luckperms.lib.postgresql'
+    relocate 'com.zaxxer.hikari', 'me.lucko.luckperms.lib.hikari'
+    relocate 'com.mongodb', 'me.lucko.luckperms.lib.mongodb'
+    relocate 'org.bson', 'me.lucko.luckperms.lib.bson'
+    relocate 'redis.clients.jedis', 'me.lucko.luckperms.lib.jedis'
+    relocate 'org.apache.commons.pool2', 'me.lucko.luckperms.lib.commonspool2'
+    relocate 'ninja.leaping.configurate', 'me.lucko.luckperms.lib.configurate'
+}
+
+artifacts {
+    archives shadowJar
+}

@@ -1,0 +1,85 @@
+project.version = '4.2'
+
+dependencies {
+    compileOnly 'com.google.guava:guava:19.0'
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+}
+
+if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
+
+    apply plugin: 'signing'
+
+    task javadocJar(type: Jar) {
+        classifier 'javadoc'
+        from javadoc
+    }
+
+    task sourcesJar(type: Jar) {
+        classifier 'sources'
+        from sourceSets.main.allSource
+    }
+
+    artifacts {
+        archives javadocJar
+        archives sourcesJar
+    }
+
+    signing {
+        required = false
+        sign configurations.archives
+    }
+
+    uploadArchives {
+        enabled = true
+
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+                repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
+                    authentication(userName: sonatypeUsername, password: sonatypePassword)
+                }
+
+                pom {
+                    project {
+                        name 'LuckPerms API'
+                        description 'An advanced permissions plugin for Bukkit/Spigot, BungeeCord and Sponge.'
+                        url 'https://github.com/lucko/LuckPerms'
+
+                        licenses {
+                            license {
+                                name 'MIT'
+                                url 'https://opensource.org/licenses/MIT'
+                            }
+                        }
+
+                        developers {
+                            developer {
+                                name 'Luck'
+                                email 'git@lucko.me'
+                                url 'https://github.com/lucko'
+                            }
+                        }
+
+                        scm {
+                            connection 'scm:git:https://github.com/lucko/LuckPerms.git'
+                            developerConnection 'scm:git:git@github.com:lucko/LuckPerms.git'
+                            url 'https://github.com/lucko/LuckPerms'
+
+                        }
+
+                        ciManagement {
+                            system 'Jenkins'
+                            url 'https://ci.lucko.me/job/LuckPerms'
+                        }
+
+                        issueManagement {
+                            system 'GitHub'
+                            url 'https://github.com/lucko/LuckPerms/issues'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

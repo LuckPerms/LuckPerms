@@ -35,7 +35,6 @@ import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.logging.Slf4jPluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.utils.MoreFiles;
-import me.lucko.luckperms.sponge.utils.VersionData;
 
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
@@ -69,7 +68,7 @@ import java.util.stream.Stream;
 @Plugin(
         id = "luckperms",
         name = "LuckPerms",
-        version = VersionData.VERSION,
+        version = "@version@",
         authors = "Luck",
         description = "A permissions plugin",
         url = "https://github.com/lucko/LuckPerms"
@@ -215,7 +214,7 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
 
     @Override
     public String getVersion() {
-        return VersionData.VERSION;
+        return "@version@";
     }
 
     @Override

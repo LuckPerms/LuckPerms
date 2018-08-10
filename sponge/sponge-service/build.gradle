@@ -1,0 +1,18 @@
+dependencies {
+    compile project(':luckperms-common')
+
+    compileOnly('org.spongepowered:spongeapi:7.0.0') {
+        exclude(module: 'configurate-core')
+        exclude(module: 'configurate-hocon')
+        exclude(module: 'configurate-gson')
+        exclude(module: 'configurate-yaml')
+    }
+    compileOnly 'com.google.guava:guava:21.0'
+}
+
+repositories {
+    maven {
+        name 'sponge-repo'
+        url 'https://repo.spongepowered.org/maven'
+    }
+}

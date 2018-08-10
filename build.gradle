@@ -1,0 +1,48 @@
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven'
+
+    group = 'me.lucko.luckperms'
+    version = '4.2-SNAPSHOT'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+
+    def determinePatchVersion = {
+        // get the name of the last tag
+        def lastTag = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'describe', '--tags', '--abbrev=0', '@^'
+            standardOutput = lastTag
+        }
+
+        // get a list of the commits since the last tag
+        def commitsSinceLastTag = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'log', '--oneline', lastTag.toString().trim() + '..@'
+            standardOutput = commitsSinceLastTag
+        }
+
+        // calculate what the patch version should be
+        return Integer.toString(commitsSinceLastTag.toString().split("\n").length)
+    }
+
+    project.ext.majorVersion = '4'
+    project.ext.minorVersion = '2'
+    project.ext.patchVersion = determinePatchVersion()
+    project.ext.fullVersion = project.ext.majorVersion + '.' + project.ext.minorVersion + '.' + project.ext.patchVersion
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+
+        maven {
+            name 'luck-repo'
+            url 'https://repo.lucko.me/'
+        }
+    }
+}
