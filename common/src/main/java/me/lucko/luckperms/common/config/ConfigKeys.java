@@ -322,6 +322,11 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> COMMANDS_ALLOW_OP = EnduringKey.wrap(BooleanKey.of("commands-allow-op", true));
 
     /**
+     * If Vault lookups for offline players on the main server thread should be enabled
+     */
+    public static final ConfigKey<Boolean> VAULT_UNSAFE_LOOKUPS = BooleanKey.of("vault-unsafe-lookups", false);
+
+    /**
      * If the vault server option should be used
      */
     public static final ConfigKey<Boolean> USE_VAULT_SERVER = BooleanKey.of("use-vault-server", true);

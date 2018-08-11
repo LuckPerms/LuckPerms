@@ -26,9 +26,7 @@
 package me.lucko.luckperms.bukkit.vault;
 
 import net.milkbowl.vault.chat.Chat;
-import net.milkbowl.vault.permission.Permission;
 
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -60,15 +58,15 @@ public abstract class AbstractVaultChat extends Chat {
     protected Function<String, String> worldMappingFunction = Function.identity();
 
     // the permission api instance
-    private final Permission permissionApi;
+    private final AbstractVaultPermission permissionApi;
 
-    public AbstractVaultChat(Permission permissionApi) {
+    public AbstractVaultChat(AbstractVaultPermission permissionApi) {
         super(permissionApi);
         this.permissionApi = permissionApi;
     }
 
     @Override
-    public boolean isEnabled() {
+    public final boolean isEnabled() {
         // always return true
         return true;
     }
@@ -130,22 +128,6 @@ public abstract class AbstractVaultChat extends Chat {
         return def;
     }
 
-    // utility methods for upgrading legacy requests
-
-    private static UUID player(String player) {
-        if (player == null) {
-            return null;
-        }
-        return player(Bukkit.getPlayerExact(player));
-    }
-
-    private static UUID player(OfflinePlayer player) {
-        if (player == null) {
-            return null;
-        }
-        return player.getUniqueId();
-    }
-
     private String world(String world) {
         return this.worldMappingFunction.apply(world);
     }
@@ -165,547 +147,547 @@ public abstract class AbstractVaultChat extends Chat {
     }
 
     @Override
-    public String getPlayerPrefix(String world, String player) {
+    public final String getPlayerPrefix(String world, String player) {
         Objects.requireNonNull(player, "player");
-        return getUserChatPrefix(world(world), player(player));
+        return getUserChatPrefix(world(world), this.permissionApi.lookupUuid(player));
     }
 
     @Override
-    public String getPlayerPrefix(String world, OfflinePlayer player) {
+    public final String getPlayerPrefix(String world, OfflinePlayer player) {
         Objects.requireNonNull(player, "player");
-        return getUserChatPrefix(world(world), player(player));
+        return getUserChatPrefix(world(world), player.getUniqueId());
     }
 
     @Override
-    public String getPlayerPrefix(World world, String player) {
+    public final String getPlayerPrefix(World world, String player) {
         Objects.requireNonNull(player, "player");
-        return getUserChatPrefix(world(world), player(player));
+        return getUserChatPrefix(world(world), this.permissionApi.lookupUuid(player));
     }
 
     @Override
-    public String getPlayerPrefix(Player player) {
+    public final String getPlayerPrefix(Player player) {
         Objects.requireNonNull(player, "player");
-        return getUserChatPrefix(world(player), player(player));
+        return getUserChatPrefix(world(player), ((OfflinePlayer) player).getUniqueId());
     }
 
     @Override
-    public void setPlayerPrefix(String world, String player, String prefix) {
+    public final void setPlayerPrefix(String world, String player, String prefix) {
         Objects.requireNonNull(player, "player");
-        setUserChatPrefix(world(world), player(player), prefix);
+        setUserChatPrefix(world(world), this.permissionApi.lookupUuid(player), prefix);
     }
 
     @Override
-    public void setPlayerPrefix(String world, OfflinePlayer player, String prefix) {
+    public final void setPlayerPrefix(String world, OfflinePlayer player, String prefix) {
         Objects.requireNonNull(player, "player");
-        setUserChatPrefix(world(world), player(player), prefix);
+        setUserChatPrefix(world(world), player.getUniqueId(), prefix);
     }
 
     @Override
-    public void setPlayerPrefix(World world, String player, String prefix) {
+    public final void setPlayerPrefix(World world, String player, String prefix) {
         Objects.requireNonNull(player, "player");
-        setUserChatPrefix(world(world), player(player), prefix);
+        setUserChatPrefix(world(world), this.permissionApi.lookupUuid(player), prefix);
     }
 
     @Override
-    public void setPlayerPrefix(Player player, String prefix) {
+    public final void setPlayerPrefix(Player player, String prefix) {
         Objects.requireNonNull(player, "player");
-        setUserChatPrefix(world(player), player(player), prefix);
+        setUserChatPrefix(world(player), ((OfflinePlayer) player).getUniqueId(), prefix);
     }
 
     @Override
-    public String getPlayerSuffix(String world, String player) {
+    public final String getPlayerSuffix(String world, String player) {
         Objects.requireNonNull(player, "player");
-        return getUserChatSuffix(world(world), player(player));
+        return getUserChatSuffix(world(world), this.permissionApi.lookupUuid(player));
     }
 
     @Override
-    public String getPlayerSuffix(String world, OfflinePlayer player) {
+    public final String getPlayerSuffix(String world, OfflinePlayer player) {
         Objects.requireNonNull(player, "player");
-        return getUserChatSuffix(world(world), player(player));
+        return getUserChatSuffix(world(world), player.getUniqueId());
     }
 
     @Override
-    public String getPlayerSuffix(World world, String player) {
+    public final String getPlayerSuffix(World world, String player) {
         Objects.requireNonNull(player, "player");
-        return getUserChatSuffix(world(world), player(player));
+        return getUserChatSuffix(world(world), this.permissionApi.lookupUuid(player));
     }
 
     @Override
-    public String getPlayerSuffix(Player player) {
+    public final String getPlayerSuffix(Player player) {
         Objects.requireNonNull(player, "player");
-        return getUserChatSuffix(world(player), player(player));
+        return getUserChatSuffix(world(player), ((OfflinePlayer) player).getUniqueId());
     }
 
     @Override
-    public void setPlayerSuffix(String world, String player, String suffix) {
+    public final void setPlayerSuffix(String world, String player, String suffix) {
         Objects.requireNonNull(player, "player");
-        setUserChatSuffix(world(world), player(player), suffix);
+        setUserChatSuffix(world(world), this.permissionApi.lookupUuid(player), suffix);
     }
 
     @Override
-    public void setPlayerSuffix(String world, OfflinePlayer player, String suffix) {
+    public final void setPlayerSuffix(String world, OfflinePlayer player, String suffix) {
         Objects.requireNonNull(player, "player");
-        setUserChatSuffix(world(world), player(player), suffix);
+        setUserChatSuffix(world(world), player.getUniqueId(), suffix);
     }
 
     @Override
-    public void setPlayerSuffix(World world, String player, String suffix) {
+    public final void setPlayerSuffix(World world, String player, String suffix) {
         Objects.requireNonNull(player, "player");
-        setUserChatSuffix(world(world), player(player), suffix);
+        setUserChatSuffix(world(world), this.permissionApi.lookupUuid(player), suffix);
     }
 
     @Override
-    public void setPlayerSuffix(Player player, String suffix) {
+    public final void setPlayerSuffix(Player player, String suffix) {
         Objects.requireNonNull(player, "player");
-        setUserChatSuffix(world(player), player(player), suffix);
+        setUserChatSuffix(world(player), ((OfflinePlayer) player).getUniqueId(), suffix);
     }
 
     @Override
-    public String getGroupPrefix(String world, String group) {
+    public final String getGroupPrefix(String world, String group) {
         Objects.requireNonNull(group, "group");
         return getGroupChatPrefix(world(world), group);
     }
 
     @Override
-    public String getGroupPrefix(World world, String group) {
+    public final String getGroupPrefix(World world, String group) {
         Objects.requireNonNull(group, "group");
         return getGroupChatPrefix(world(world), group);
     }
 
     @Override
-    public void setGroupPrefix(String world, String group, String prefix) {
+    public final void setGroupPrefix(String world, String group, String prefix) {
         Objects.requireNonNull(group, "group");
         setGroupChatPrefix(world(world), group, prefix);
     }
 
     @Override
-    public void setGroupPrefix(World world, String group, String prefix) {
+    public final void setGroupPrefix(World world, String group, String prefix) {
         Objects.requireNonNull(group, "group");
         setGroupChatPrefix(world(world), group, prefix);
     }
 
     @Override
-    public String getGroupSuffix(String world, String group) {
+    public final String getGroupSuffix(String world, String group) {
         Objects.requireNonNull(group, "group");
         return getGroupChatSuffix(world(world), group);
     }
 
     @Override
-    public String getGroupSuffix(World world, String group) {
+    public final String getGroupSuffix(World world, String group) {
         Objects.requireNonNull(group, "group");
         return getGroupChatSuffix(world(world), group);
     }
 
     @Override
-    public void setGroupSuffix(String world, String group, String suffix) {
+    public final void setGroupSuffix(String world, String group, String suffix) {
         Objects.requireNonNull(group, "group");
         setGroupChatSuffix(world(world), group, suffix);
     }
 
     @Override
-    public void setGroupSuffix(World world, String group, String suffix) {
+    public final void setGroupSuffix(World world, String group, String suffix) {
         Objects.requireNonNull(group, "group");
         setGroupChatSuffix(world(world), group, suffix);
     }
 
     @Override
-    public int getPlayerInfoInteger(String world, OfflinePlayer player, String node, int defaultValue) {
+    public final int getPlayerInfoInteger(String world, OfflinePlayer player, String node, int defaultValue) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        return intConvert(getUserMeta(world(world), player(player), node), defaultValue);
+        return intConvert(getUserMeta(world(world), player.getUniqueId(), node), defaultValue);
     }
 
     @Override
-    public int getPlayerInfoInteger(String world, String player, String node, int defaultValue) {
+    public final int getPlayerInfoInteger(String world, String player, String node, int defaultValue) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        return intConvert(getUserMeta(world(world), player(player), node), defaultValue);
+        return intConvert(getUserMeta(world(world), this.permissionApi.lookupUuid(player), node), defaultValue);
     }
 
     @Override
-    public int getPlayerInfoInteger(World world, String player, String node, int defaultValue) {
+    public final int getPlayerInfoInteger(World world, String player, String node, int defaultValue) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        return intConvert(getUserMeta(world(world), player(player), node), defaultValue);
+        return intConvert(getUserMeta(world(world), this.permissionApi.lookupUuid(player), node), defaultValue);
     }
 
     @Override
-    public int getPlayerInfoInteger(Player player, String node, int defaultValue) {
+    public final int getPlayerInfoInteger(Player player, String node, int defaultValue) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        return intConvert(getUserMeta(world(player), player(player), node), defaultValue);
+        return intConvert(getUserMeta(world(player), ((OfflinePlayer) player).getUniqueId(), node), defaultValue);
     }
 
     @Override
-    public void setPlayerInfoInteger(String world, OfflinePlayer player, String node, int value) {
+    public final void setPlayerInfoInteger(String world, OfflinePlayer player, String node, int value) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        setUserMeta(world(world), player(player), node, value);
+        setUserMeta(world(world), player.getUniqueId(), node, value);
     }
 
     @Override
-    public void setPlayerInfoInteger(String world, String player, String node, int value) {
+    public final void setPlayerInfoInteger(String world, String player, String node, int value) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        setUserMeta(world(world), player(player), node, value);
+        setUserMeta(world(world), this.permissionApi.lookupUuid(player), node, value);
     }
 
     @Override
-    public void setPlayerInfoInteger(World world, String player, String node, int value) {
+    public final void setPlayerInfoInteger(World world, String player, String node, int value) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        setUserMeta(world(world), player(player), node, value);
+        setUserMeta(world(world), this.permissionApi.lookupUuid(player), node, value);
     }
 
     @Override
-    public void setPlayerInfoInteger(Player player, String node, int value) {
+    public final void setPlayerInfoInteger(Player player, String node, int value) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        setUserMeta(world(player), player(player), node, value);
+        setUserMeta(world(player), ((OfflinePlayer) player).getUniqueId(), node, value);
     }
 
     @Override
-    public int getGroupInfoInteger(String world, String group, String node, int defaultValue) {
+    public final int getGroupInfoInteger(String world, String group, String node, int defaultValue) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(node, "node");
         return intConvert(getGroupMeta(world(world), group, node), defaultValue);
     }
 
     @Override
-    public int getGroupInfoInteger(World world, String group, String node, int defaultValue) {
+    public final int getGroupInfoInteger(World world, String group, String node, int defaultValue) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(node, "node");
         return intConvert(getGroupMeta(world(world), group, node), defaultValue);
     }
 
     @Override
-    public void setGroupInfoInteger(String world, String group, String node, int value) {
+    public final void setGroupInfoInteger(String world, String group, String node, int value) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(node, "node");
         setGroupMeta(world(world), group, node, value);
     }
 
     @Override
-    public void setGroupInfoInteger(World world, String group, String node, int value) {
+    public final void setGroupInfoInteger(World world, String group, String node, int value) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(node, "node");
         setGroupMeta(world(world), group, node, value);
     }
 
     @Override
-    public double getPlayerInfoDouble(String world, OfflinePlayer player, String node, double defaultValue) {
+    public final double getPlayerInfoDouble(String world, OfflinePlayer player, String node, double defaultValue) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        return doubleConvert(getUserMeta(world(world), player(player), node), defaultValue);
+        return doubleConvert(getUserMeta(world(world), player.getUniqueId(), node), defaultValue);
     }
 
     @Override
-    public double getPlayerInfoDouble(String world, String player, String node, double defaultValue) {
+    public final double getPlayerInfoDouble(String world, String player, String node, double defaultValue) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        return doubleConvert(getUserMeta(world(world), player(player), node), defaultValue);
+        return doubleConvert(getUserMeta(world(world), this.permissionApi.lookupUuid(player), node), defaultValue);
     }
 
     @Override
-    public double getPlayerInfoDouble(World world, String player, String node, double defaultValue) {
+    public final double getPlayerInfoDouble(World world, String player, String node, double defaultValue) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        return doubleConvert(getUserMeta(world(world), player(player), node), defaultValue);
+        return doubleConvert(getUserMeta(world(world), this.permissionApi.lookupUuid(player), node), defaultValue);
     }
 
     @Override
-    public double getPlayerInfoDouble(Player player, String node, double defaultValue) {
+    public final double getPlayerInfoDouble(Player player, String node, double defaultValue) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        return doubleConvert(getUserMeta(world(player), player(player), node), defaultValue);
+        return doubleConvert(getUserMeta(world(player), ((OfflinePlayer) player).getUniqueId(), node), defaultValue);
     }
 
     @Override
-    public void setPlayerInfoDouble(String world, OfflinePlayer player, String node, double value) {
+    public final void setPlayerInfoDouble(String world, OfflinePlayer player, String node, double value) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        setUserMeta(world(world), player(player), node, value);
+        setUserMeta(world(world), player.getUniqueId(), node, value);
     }
 
     @Override
-    public void setPlayerInfoDouble(String world, String player, String node, double value) {
+    public final void setPlayerInfoDouble(String world, String player, String node, double value) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        setUserMeta(world(world), player(player), node, value);
+        setUserMeta(world(world), this.permissionApi.lookupUuid(player), node, value);
     }
 
     @Override
-    public void setPlayerInfoDouble(World world, String player, String node, double value) {
+    public final void setPlayerInfoDouble(World world, String player, String node, double value) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        setUserMeta(world(world), player(player), node, value);
+        setUserMeta(world(world), this.permissionApi.lookupUuid(player), node, value);
     }
 
     @Override
-    public void setPlayerInfoDouble(Player player, String node, double value) {
+    public final void setPlayerInfoDouble(Player player, String node, double value) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        setUserMeta(world(player), player(player), node, value);
+        setUserMeta(world(player), ((OfflinePlayer) player).getUniqueId(), node, value);
     }
 
     @Override
-    public double getGroupInfoDouble(String world, String group, String node, double defaultValue) {
+    public final double getGroupInfoDouble(String world, String group, String node, double defaultValue) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(node, "node");
         return doubleConvert(getGroupMeta(world(world), group, node), defaultValue);
     }
 
     @Override
-    public double getGroupInfoDouble(World world, String group, String node, double defaultValue) {
+    public final double getGroupInfoDouble(World world, String group, String node, double defaultValue) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(node, "node");
         return doubleConvert(getGroupMeta(world(world), group, node), defaultValue);
     }
 
     @Override
-    public void setGroupInfoDouble(String world, String group, String node, double value) {
+    public final void setGroupInfoDouble(String world, String group, String node, double value) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(node, "node");
         setGroupMeta(world(world), group, node, value);
     }
 
     @Override
-    public void setGroupInfoDouble(World world, String group, String node, double value) {
+    public final void setGroupInfoDouble(World world, String group, String node, double value) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(node, "node");
         setGroupMeta(world(world), group, node, value);
     }
 
     @Override
-    public boolean getPlayerInfoBoolean(String world, OfflinePlayer player, String node, boolean defaultValue) {
+    public final boolean getPlayerInfoBoolean(String world, OfflinePlayer player, String node, boolean defaultValue) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        return booleanConvert(getUserMeta(world(world), player(player), node), defaultValue);
+        return booleanConvert(getUserMeta(world(world), player.getUniqueId(), node), defaultValue);
     }
 
     @Override
-    public boolean getPlayerInfoBoolean(String world, String player, String node, boolean defaultValue) {
+    public final boolean getPlayerInfoBoolean(String world, String player, String node, boolean defaultValue) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        return booleanConvert(getUserMeta(world(world), player(player), node), defaultValue);
+        return booleanConvert(getUserMeta(world(world), this.permissionApi.lookupUuid(player), node), defaultValue);
     }
 
     @Override
-    public boolean getPlayerInfoBoolean(World world, String player, String node, boolean defaultValue) {
+    public final boolean getPlayerInfoBoolean(World world, String player, String node, boolean defaultValue) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        return booleanConvert(getUserMeta(world(world), player(player), node), defaultValue);
+        return booleanConvert(getUserMeta(world(world), this.permissionApi.lookupUuid(player), node), defaultValue);
     }
 
     @Override
-    public boolean getPlayerInfoBoolean(Player player, String node, boolean defaultValue) {
+    public final boolean getPlayerInfoBoolean(Player player, String node, boolean defaultValue) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        return booleanConvert(getUserMeta(world(player), player(player), node), defaultValue);
+        return booleanConvert(getUserMeta(world(player), ((OfflinePlayer) player).getUniqueId(), node), defaultValue);
     }
 
     @Override
-    public void setPlayerInfoBoolean(String world, OfflinePlayer player, String node, boolean value) {
+    public final void setPlayerInfoBoolean(String world, OfflinePlayer player, String node, boolean value) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        setUserMeta(world(world), player(player), node, value);
+        setUserMeta(world(world), player.getUniqueId(), node, value);
     }
 
     @Override
-    public void setPlayerInfoBoolean(String world, String player, String node, boolean value) {
+    public final void setPlayerInfoBoolean(String world, String player, String node, boolean value) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        setUserMeta(world(world), player(player), node, value);
+        setUserMeta(world(world), this.permissionApi.lookupUuid(player), node, value);
     }
 
     @Override
-    public void setPlayerInfoBoolean(World world, String player, String node, boolean value) {
+    public final void setPlayerInfoBoolean(World world, String player, String node, boolean value) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        setUserMeta(world(world), player(player), node, value);
+        setUserMeta(world(world), this.permissionApi.lookupUuid(player), node, value);
     }
 
     @Override
-    public void setPlayerInfoBoolean(Player player, String node, boolean value) {
+    public final void setPlayerInfoBoolean(Player player, String node, boolean value) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        setUserMeta(world(player), player(player), node, value);
+        setUserMeta(world(player), ((OfflinePlayer) player).getUniqueId(), node, value);
     }
 
     @Override
-    public boolean getGroupInfoBoolean(String world, String group, String node, boolean defaultValue) {
+    public final boolean getGroupInfoBoolean(String world, String group, String node, boolean defaultValue) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(node, "node");
         return booleanConvert(getGroupMeta(world(world), group, node), defaultValue);
     }
 
     @Override
-    public boolean getGroupInfoBoolean(World world, String group, String node, boolean defaultValue) {
+    public final boolean getGroupInfoBoolean(World world, String group, String node, boolean defaultValue) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(node, "node");
         return booleanConvert(getGroupMeta(world(world), group, node), defaultValue);
     }
 
     @Override
-    public void setGroupInfoBoolean(String world, String group, String node, boolean value) {
+    public final void setGroupInfoBoolean(String world, String group, String node, boolean value) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(node, "node");
         setGroupMeta(world(world), group, node, value);
     }
 
     @Override
-    public void setGroupInfoBoolean(World world, String group, String node, boolean value) {
+    public final void setGroupInfoBoolean(World world, String group, String node, boolean value) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(node, "node");
         setGroupMeta(world(world), group, node, value);
     }
 
     @Override
-    public String getPlayerInfoString(String world, OfflinePlayer player, String node, String defaultValue) {
+    public final String getPlayerInfoString(String world, OfflinePlayer player, String node, String defaultValue) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        return strConvert(getUserMeta(world(world), player(player), node), defaultValue);
+        return strConvert(getUserMeta(world(world), player.getUniqueId(), node), defaultValue);
     }
 
     @Override
-    public String getPlayerInfoString(String world, String player, String node, String defaultValue) {
+    public final String getPlayerInfoString(String world, String player, String node, String defaultValue) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        return strConvert(getUserMeta(world(world), player(player), node), defaultValue);
+        return strConvert(getUserMeta(world(world), this.permissionApi.lookupUuid(player), node), defaultValue);
     }
 
     @Override
-    public String getPlayerInfoString(World world, String player, String node, String defaultValue) {
+    public final String getPlayerInfoString(World world, String player, String node, String defaultValue) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        return strConvert(getUserMeta(world(world), player(player), node), defaultValue);
+        return strConvert(getUserMeta(world(world), this.permissionApi.lookupUuid(player), node), defaultValue);
     }
 
     @Override
-    public String getPlayerInfoString(Player player, String node, String defaultValue) {
+    public final String getPlayerInfoString(Player player, String node, String defaultValue) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        return strConvert(getUserMeta(world(player), player(player), node), defaultValue);
+        return strConvert(getUserMeta(world(player), ((OfflinePlayer) player).getUniqueId(), node), defaultValue);
     }
 
     @Override
-    public void setPlayerInfoString(String world, OfflinePlayer player, String node, String value) {
+    public final void setPlayerInfoString(String world, OfflinePlayer player, String node, String value) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        setUserMeta(world(world), player(player), node, value);
+        setUserMeta(world(world), player.getUniqueId(), node, value);
     }
 
     @Override
-    public void setPlayerInfoString(String world, String player, String node, String value) {
+    public final void setPlayerInfoString(String world, String player, String node, String value) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        setUserMeta(world(world), player(player), node, value);
+        setUserMeta(world(world), this.permissionApi.lookupUuid(player), node, value);
     }
 
     @Override
-    public void setPlayerInfoString(World world, String player, String node, String value) {
+    public final void setPlayerInfoString(World world, String player, String node, String value) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        setUserMeta(world(world), player(player), node, value);
+        setUserMeta(world(world), this.permissionApi.lookupUuid(player), node, value);
     }
 
     @Override
-    public void setPlayerInfoString(Player player, String node, String value) {
+    public final void setPlayerInfoString(Player player, String node, String value) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(node, "node");
-        setUserMeta(world(player), player(player), node, value);
+        setUserMeta(world(player), ((OfflinePlayer) player).getUniqueId(), node, value);
     }
 
     @Override
-    public String getGroupInfoString(String world, String group, String node, String defaultValue) {
+    public final String getGroupInfoString(String world, String group, String node, String defaultValue) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(node, "node");
         return strConvert(getGroupMeta(world(world), group, node), defaultValue);
     }
 
     @Override
-    public String getGroupInfoString(World world, String group, String node, String defaultValue) {
+    public final String getGroupInfoString(World world, String group, String node, String defaultValue) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(node, "node");
         return strConvert(getGroupMeta(world(world), group, node), defaultValue);
     }
 
     @Override
-    public void setGroupInfoString(String world, String group, String node, String value) {
+    public final void setGroupInfoString(String world, String group, String node, String value) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(node, "node");
         setGroupMeta(world(world), group, node, value);
     }
 
     @Override
-    public void setGroupInfoString(World world, String group, String node, String value) {
+    public final void setGroupInfoString(World world, String group, String node, String value) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(node, "node");
         setGroupMeta(world(world), group, node, value);
     }
 
     @Override
-    public boolean playerInGroup(String world, OfflinePlayer player, String group) {
+    public final boolean playerInGroup(String world, OfflinePlayer player, String group) {
         return this.permissionApi.playerInGroup(world, player, group);
     }
 
     @Override
-    public boolean playerInGroup(String world, String player, String group) {
+    public final boolean playerInGroup(String world, String player, String group) {
         return this.permissionApi.playerInGroup(world, player, group);
     }
 
     @Override
-    public boolean playerInGroup(World world, String player, String group) {
+    public final boolean playerInGroup(World world, String player, String group) {
         return this.permissionApi.playerInGroup(world, player, group);
     }
 
     @Override
-    public boolean playerInGroup(Player player, String group) {
+    public final boolean playerInGroup(Player player, String group) {
         return this.permissionApi.playerInGroup(player, group);
     }
 
     @Override
-    public String[] getPlayerGroups(String world, OfflinePlayer player) {
+    public final String[] getPlayerGroups(String world, OfflinePlayer player) {
         return this.permissionApi.getPlayerGroups(world, player);
     }
 
     @Override
-    public String[] getPlayerGroups(String world, String player) {
+    public final String[] getPlayerGroups(String world, String player) {
         return this.permissionApi.getPlayerGroups(world, player);
     }
 
     @Override
-    public String[] getPlayerGroups(World world, String player) {
+    public final String[] getPlayerGroups(World world, String player) {
         return this.permissionApi.getPlayerGroups(world, player);
     }
 
     @Override
-    public String[] getPlayerGroups(Player player) {
+    public final String[] getPlayerGroups(Player player) {
         return this.permissionApi.getPlayerGroups(player);
     }
 
     @Override
-    public String getPrimaryGroup(String world, OfflinePlayer player) {
+    public final String getPrimaryGroup(String world, OfflinePlayer player) {
         return this.permissionApi.getPrimaryGroup(world, player);
     }
 
     @Override
-    public String getPrimaryGroup(String world, String player) {
+    public final String getPrimaryGroup(String world, String player) {
         return this.permissionApi.getPrimaryGroup(world, player);
     }
 
     @Override
-    public String getPrimaryGroup(World world, String player) {
+    public final String getPrimaryGroup(World world, String player) {
         return this.permissionApi.getPrimaryGroup(world, player);
     }
 
     @Override
-    public String getPrimaryGroup(Player player) {
+    public final String getPrimaryGroup(Player player) {
         return this.permissionApi.getPrimaryGroup(player);
     }
 
     @Override
-    public String[] getGroups() {
+    public final String[] getGroups() {
         return this.permissionApi.getGroups();
     }
 

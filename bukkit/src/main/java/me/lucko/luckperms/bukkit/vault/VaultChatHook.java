@@ -56,13 +56,10 @@ import java.util.UUID;
  * time to execute. (database queries, re-population of caches, etc) In these cases, the
  * methods will return immediately and the change will be executed asynchronously.
  *
- * Users of the Vault API expect these methods to be "main thread friendly", so unfortunately,
- * we have to favour so called "performance" for consistency. The Vault API really wasn't designed
- * with database backed permission plugins in mind. :(
- *
- * The methods which query offline players will explicitly FAIL if the corresponding player is not online.
- * We cannot risk blocking the main thread to load in their data. Again, this is due to crap Vault
- * design. There is nothing I can do about it.
+ * Methods that have to query data from the database will throw exceptions when called
+ * from the main thread. Users of the Vault API expect these methods to be "main thread friendly",
+ * which they simply cannot be, as LP utilises databases for data storage. Server admins
+ * willing to take the risk of lagging their server can disable these exceptions in the config file.
  */
 public class VaultChatHook extends AbstractVaultChat {
 
@@ -86,13 +83,9 @@ public class VaultChatHook extends AbstractVaultChat {
 
     @Override
     public String getUserChatPrefix(String world, UUID uuid) {
-        if (uuid == null) {
-            return null;
-        }
-        User user = getUser(uuid);
-        if (user == null) {
-            return null;
-        }
+        Objects.requireNonNull(uuid, "uuid");
+
+        User user = this.permissionHook.lookupUser(uuid);
         Contexts contexts = this.permissionHook.contextForLookup(user, world);
         MetaCache metaData = user.getCachedData().getMetaData(contexts);
         String ret = metaData.getPrefix();
@@ -104,13 +97,9 @@ public class VaultChatHook extends AbstractVaultChat {
 
     @Override
     public String getUserChatSuffix(String world, UUID uuid) {
-        if (uuid == null) {
-            return null;
-        }
-        User user = getUser(uuid);
-        if (user == null) {
-            return null;
-        }
+        Objects.requireNonNull(uuid, "uuid");
+
+        User user = this.permissionHook.lookupUser(uuid);
         Contexts contexts = this.permissionHook.contextForLookup(user, world);
         MetaCache metaData = user.getCachedData().getMetaData(contexts);
         String ret = metaData.getSuffix();
@@ -122,38 +111,26 @@ public class VaultChatHook extends AbstractVaultChat {
 
     @Override
     public void setUserChatPrefix(String world, UUID uuid, String prefix) {
-        if (uuid == null) {
-            return;
-        }
-        User user = getUser(uuid);
-        if (user == null) {
-            return;
-        }
+        Objects.requireNonNull(uuid, "uuid");
+
+        User user = this.permissionHook.lookupUser(uuid);
         setChatMeta(user, ChatMetaType.PREFIX, prefix, world);
     }
 
     @Override
     public void setUserChatSuffix(String world, UUID uuid, String suffix) {
-        if (uuid == null) {
-            return;
-        }
-        User user = getUser(uuid);
-        if (user == null) {
-            return;
-        }
+        Objects.requireNonNull(uuid, "uuid");
+
+        User user = this.permissionHook.lookupUser(uuid);
         setChatMeta(user, ChatMetaType.SUFFIX, suffix, world);
     }
 
     @Override
     public String getUserMeta(String world, UUID uuid, String key) {
-        if (uuid == null) {
-            return null;
-        }
+        Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(key, "key");
-        User user = getUser(uuid);
-        if (user == null) {
-            return null;
-        }
+
+        User user = this.permissionHook.lookupUser(uuid);
         Contexts contexts = this.permissionHook.contextForLookup(user, world);
         MetaCache metaData = user.getCachedData().getMetaData(contexts);
         String ret = metaData.getMeta().get(key);
@@ -165,14 +142,10 @@ public class VaultChatHook extends AbstractVaultChat {
 
     @Override
     public void setUserMeta(String world, UUID uuid, String key, Object value) {
-        if (uuid == null) {
-            return;
-        }
+        Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(key, "key");
-        User user = getUser(uuid);
-        if (user == null) {
-            return;
-        }
+
+        User user = this.permissionHook.lookupUser(uuid);
         setMeta(user, key, value, world);
     }
 
@@ -257,10 +230,6 @@ public class VaultChatHook extends AbstractVaultChat {
     }
 
     // utility methods for getting user and group instances
-
-    private User getUser(UUID uuid) {
-        return this.plugin.getUserManager().getIfLoaded(uuid);
-    }
 
     private Group getGroup(String name) {
         return this.plugin.getGroupManager().getByDisplayName(name);

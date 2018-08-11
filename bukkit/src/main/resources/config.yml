@@ -480,6 +480,17 @@ commands-allow-op: true
 # | Vault integration settings                                                                   | #
 # +----------------------------------------------------------------------------------------------+ #
 
+# If Vault lookups for offline players on the main server thread should be enabled.
+#
+# LuckPerms has a "catch" for plugins attempting to perform unsafe offline player data lookups
+# from the main server thread. This catch raises an exception (causes an error to occur) when unsafe
+# lookups are made, instead of allowing the lookup to happen, which would likely cause the server
+# to lag.
+#
+# However, if you're willing to accept the consequences, the catch can be disabled by setting this
+# option to 'true.
+vault-unsafe-lookups: false
+
 # If the vault-server option below should be used.
 #
 # - When this option is set to false, the server value defined above under "server" is used.

@@ -44,6 +44,7 @@ import me.lucko.luckperms.common.verbose.CheckOrigin;
 
 import net.milkbowl.vault.permission.Permission;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
@@ -62,13 +63,10 @@ import java.util.concurrent.Executors;
  * time to execute. (database queries, re-population of caches, etc) In these cases, the
  * methods will return immediately and the change will be executed asynchronously.
  *
- * Users of the Vault API expect these methods to be "main thread friendly", so unfortunately,
- * we have to favour so called "performance" for consistency. The Vault API really wasn't designed
- * with database backed permission plugins in mind. :(
- *
- * The methods which query offline players will explicitly FAIL if the corresponding player is not online.
- * We cannot risk blocking the main thread to load in their data. Again, this is due to crap Vault
- * design. There is nothing I can do about it.
+ * Methods that have to query data from the database will throw exceptions when called
+ * from the main thread. Users of the Vault API expect these methods to be "main thread friendly",
+ * which they simply cannot be, as LP utilises databases for data storage. Server admins
+ * willing to take the risk of lagging their server can disable these exceptions in the config file.
  */
 public class VaultPermissionHook extends AbstractVaultPermission {
 
@@ -97,16 +95,66 @@ public class VaultPermissionHook extends AbstractVaultPermission {
         return "LuckPerms";
     }
 
-    // override this check to delegate to Player#hasPermission
     @Override
-    public boolean has(Player player, String permission) {
-        return player.hasPermission(permission);
+    public UUID lookupUuid(String player) {
+        Objects.requireNonNull(player, "player");
+
+        // are they online?
+        Player onlinePlayer = Bukkit.getPlayerExact(player);
+        if (onlinePlayer != null) {
+            return onlinePlayer.getUniqueId();
+        }
+
+        // are we on the main thread?
+        if (Bukkit.isPrimaryThread() && !this.plugin.getConfiguration().get(ConfigKeys.VAULT_UNSAFE_LOOKUPS)) {
+            throw new RuntimeException(
+                    "Unable to lookup a UUID for '" + player + "'. \n" +
+                    "This request was made on the main server thread. \n" +
+                    "It is not safe to execute a request to load username data from the database in this context. \n" +
+                    "If you are a plugin author, please either make your request asynchronously, \n" +
+                    "or provide an 'OfflinePlayer' object with the UUID already populated. \n" +
+                    "Server admins can disable this catch by setting 'vault-unsafe-lookups' to true in the LP config, \n" +
+                    "but should consider the consequences (lag) before doing so."
+            );
+        }
+
+        // lookup a username from the database
+        UUID uuid = plugin.getStorage().getPlayerUuid(player.toLowerCase()).join();
+        if (uuid == null) {
+            uuid = plugin.getBootstrap().lookupUuid(player).orElse(null);
+        }
+
+        // unable to find a user, throw an exception
+        if (uuid == null) {
+            throw new IllegalArgumentException("Unable to find a UUID for player '" + player + "'.");
+        }
+
+        return uuid;
     }
 
-    // override this check to delegate to Player#hasPermission
-    @Override
-    public boolean playerHas(Player player, String permission) {
-        return player.hasPermission(permission);
+    public User lookupUser(UUID uuid) {
+        Objects.requireNonNull(uuid, "uuid");
+
+        // loaded already?
+        User user = this.plugin.getUserManager().getIfLoaded(uuid);
+        if (user != null) {
+            return user;
+        }
+
+        // are we on the main thread?
+        if (Bukkit.isPrimaryThread() && !this.plugin.getConfiguration().get(ConfigKeys.VAULT_UNSAFE_LOOKUPS)) {
+            throw new RuntimeException(
+                    "Unable to obtain user data for '" + uuid + "'. \n" +
+                    "This request was made on the main server thread. \n" +
+                    "It is not safe to execute a request to load user data from the database in this context. \n" +
+                    "If you are a plugin author, please consider making your request asynchronously. \n" +
+                    "Server admins can disable this catch by setting 'vault-unsafe-lookups' to true in the LP config, \n" +
+                    "but should consider the consequences (lag) before doing so."
+            );
+        }
+
+        // load an instance from the DB
+        return this.plugin.getStorage().loadUser(uuid, null).join();
     }
 
     @Override
@@ -118,16 +166,10 @@ public class VaultPermissionHook extends AbstractVaultPermission {
 
     @Override
     public boolean userHasPermission(String world, UUID uuid, String permission) {
-        if (uuid == null) {
-            return false;
-        }
+        Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(permission, "permission");
 
-        User user = getUser(uuid);
-        if (user == null) {
-            return false;
-        }
-
+        User user = lookupUser(uuid);
         Contexts contexts = contextForLookup(user, world);
         PermissionCache permissionData = user.getCachedData().getPermissionData(contexts);
 
@@ -140,74 +182,50 @@ public class VaultPermissionHook extends AbstractVaultPermission {
 
     @Override
     public boolean userAddPermission(String world, UUID uuid, String permission) {
-        if (uuid == null) {
-            return false;
-        }
+        Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(permission, "permission");
 
-        User user = getUser(uuid);
-        if (user == null) {
-            return false;
-        }
-
+        User user = lookupUser(uuid);
         holderAddPermission(user, permission, world);
         return true;
     }
 
     @Override
     public boolean userRemovePermission(String world, UUID uuid, String permission) {
-        if (uuid == null) {
-            return false;
-        }
+        Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(permission, "permission");
 
-        User user = getUser(uuid);
-        if (user == null) {
-            return false;
-        }
-
+        User user = lookupUser(uuid);
         holderRemovePermission(user, permission, world);
         return true;
     }
 
     @Override
     public boolean userInGroup(String world, UUID uuid, String group) {
-        if (uuid == null) {
-            return false;
-        }
+        Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(group, "group");
         return userHasPermission(world, uuid, NodeFactory.groupNode(rewriteGroupName(group)));
     }
 
     @Override
     public boolean userAddGroup(String world, UUID uuid, String group) {
-        if (uuid == null) {
-            return false;
-        }
+        Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(group, "group");
         return checkGroupExists(group) && userAddPermission(world, uuid, NodeFactory.groupNode(rewriteGroupName(group)));
     }
 
     @Override
     public boolean userRemoveGroup(String world, UUID uuid, String group) {
-        if (uuid == null) {
-            return false;
-        }
+        Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(group, "group");
         return checkGroupExists(group) && userRemovePermission(world, uuid, NodeFactory.groupNode(rewriteGroupName(group)));
     }
 
     @Override
     public String[] userGetGroups(String world, UUID uuid) {
-        if (uuid == null) {
-            return new String[0];
-        }
+        Objects.requireNonNull(uuid, "uuid");
 
-        User user = getUser(uuid);
-        if (user == null) {
-            return new String[0];
-        }
-
+        User user = lookupUser(uuid);
         ContextSet contexts = contextForLookup(user, world).getContexts();
 
         String[] ret = user.enduringData().immutable().values().stream()
@@ -231,15 +249,9 @@ public class VaultPermissionHook extends AbstractVaultPermission {
 
     @Override
     public String userGetPrimaryGroup(String world, UUID uuid) {
-        if (uuid == null) {
-            return null;
-        }
+        Objects.requireNonNull(uuid, "uuid");
 
-        User user = getUser(uuid);
-        if (user == null) {
-            return null;
-        }
-
+        User user = lookupUser(uuid);
         String value = user.getPrimaryGroup().getValue();
         Group group = getGroup(value);
         if (group != null) {
@@ -302,10 +314,6 @@ public class VaultPermissionHook extends AbstractVaultPermission {
     }
 
     // utility methods for getting user and group instances
-
-    private User getUser(UUID uuid) {
-        return this.plugin.getUserManager().getIfLoaded(uuid);
-    }
 
     private Group getGroup(String name) {
         return this.plugin.getGroupManager().getByDisplayName(name);
