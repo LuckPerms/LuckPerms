@@ -12,7 +12,7 @@ buildscript {
 apply plugin: "com.github.johnrengelman.shadow"
 
 dependencies {
-    compile project(':luckperms-common')
+    compile project(':common')
 
     compileOnly 'net.md-5:bungeecord-api:1.12-SNAPSHOT'
     compileOnly 'com.imaginarycode.minecraft:RedisBungee:0.4'

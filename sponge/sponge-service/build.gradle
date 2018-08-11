@@ -1,5 +1,5 @@
 dependencies {
-    compile project(':luckperms-common')
+    compile project(':common')
 
     compileOnly('org.spongepowered:spongeapi:7.0.0') {
         exclude(module: 'configurate-core')

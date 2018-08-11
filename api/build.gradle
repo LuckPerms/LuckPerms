@@ -30,8 +30,6 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
     }
 
     uploadArchives {
-        enabled = true
-
         repositories {
             mavenDeployer {
                 beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }

@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    compile project(':luckperms-common')
+    compile project(':common')
 
     compileOnly 'cn.nukkit:nukkit:1.0-SNAPSHOT'
 }

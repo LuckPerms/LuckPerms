@@ -21,7 +21,7 @@ repositories {
 }
 
 dependencies {
-    compile project(':luckperms-common')
+    compile project(':common')
     compile project(':sponge:sponge-service')
     compile project(':sponge:sponge-service-api6')
     compile project(':sponge:sponge-service-api7')

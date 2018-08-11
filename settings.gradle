@@ -1,23 +1,6 @@
 rootProject.name = 'luckperms'
+include 'api', 'common', 'bukkit', 'bukkit-legacy', 'bungee', 'sponge', 'sponge:sponge-service', 'sponge:sponge-service-api6', 'sponge:sponge-service-api7', 'nukkit'
 
-include 'api'
-findProject(':api')?.name = 'luckperms-api'
-
-include 'common'
-findProject(':common')?.name = 'luckperms-common'
-
-include 'bukkit'
-findProject(':bukkit')?.name = 'luckperms-bukkit'
-
-include 'bungee'
-findProject(':bungee')?.name = 'luckperms-bungee'
-
-include 'sponge'
-findProject(':sponge')?.name = 'luckperms-sponge'
-include 'sponge:sponge-service', 'sponge:sponge-service-api6', 'sponge:sponge-service-api7'
-
-include 'nukkit'
-findProject(':nukkit')?.name = 'luckperms-nukkit'
 
 
 

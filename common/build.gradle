@@ -1,5 +1,5 @@
 dependencies {
-    compile project(':luckperms-api')
+    compile project(':api')
 
     compile  'com.google.code.findbugs:jsr305:3.0.2'
     compile('net.kyori:text:1.11-1.6.2') {

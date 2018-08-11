@@ -1,5 +1,5 @@
 dependencies {
-    compile project(':luckperms-common')
+    compile project(':common')
     compile project(':sponge:sponge-service')
 
     compileOnly('org.spongepowered:spongeapi:7.0.0') {

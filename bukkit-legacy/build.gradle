@@ -1,0 +1,42 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:2.0.4"
+    }
+}
+
+apply plugin: "com.github.johnrengelman.shadow"
+
+repositories {
+    maven {
+        name 'spigot-repo'
+        url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+}
+
+dependencies {
+    compile project(path: ':bukkit', configuration: 'shadow')
+    compile 'com.google.code.gson:gson:2.7'
+    compile 'com.google.guava:guava:19.0'
+}
+
+shadowJar {
+    archiveName = "LuckPerms-Bukkit-Legacy-${project.ext.fullVersion}.jar"
+
+    dependencies {
+        include(dependency('me.lucko.luckperms:.*'))
+        include(dependency('com.google.guava:guava:.*'))
+        include(dependency('com.google.code.gson:gson:.*'))
+    }
+
+    relocate 'com.google.common', 'me.lucko.luckperms.lib.guava'
+    relocate 'com.google.gson', 'me.lucko.luckperms.lib.gson'
+}
+
+artifacts {
+    archives shadowJar
+}
