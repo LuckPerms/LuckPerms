@@ -36,7 +36,7 @@ import lilypad.client.connect.api.event.MessageEvent;
 import lilypad.client.connect.api.request.RequestException;
 import lilypad.client.connect.api.request.impl.MessageRequest;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 import javax.annotation.Nonnull;
@@ -69,15 +69,7 @@ public class LilyPadMessenger implements Messenger {
 
     @Override
     public void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage) {
-        MessageRequest request;
-
-        try {
-            request = new MessageRequest(Collections.emptyList(), CHANNEL, outgoingMessage.asEncodedString());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return;
-        }
-
+        MessageRequest request = new MessageRequest(Collections.emptyList(), CHANNEL, outgoingMessage.asEncodedString().getBytes(StandardCharsets.UTF_8));
         try {
             this.connect.request(request);
         } catch (RequestException e) {
@@ -88,18 +80,12 @@ public class LilyPadMessenger implements Messenger {
     @EventListener
     public void onMessage(MessageEvent event) {
         this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
-            try {
-                String channel = event.getChannel();
-
-                if (!channel.equals(CHANNEL)) {
-                    return;
-                }
-
-                String message = event.getMessageAsString();
-                this.consumer.consumeIncomingMessageAsString(message);
-            } catch (Exception e) {
-                e.printStackTrace();
+            String channel = event.getChannel();
+            if (!channel.equals(CHANNEL)) {
+                return;
             }
+            String message = new String(event.getMessage(), StandardCharsets.UTF_8);
+            this.consumer.consumeIncomingMessageAsString(message);
         });
     }
 }
