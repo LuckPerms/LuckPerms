@@ -14,21 +14,20 @@ The latest **downloads** can be found on the [project's homepage](https://luckpe
 More information about the project & how to use the plugin can be found in the [wiki](https://github.com/lucko/LuckPerms/wiki).
 
 ## Building
-LuckPerms uses Maven to handle dependencies.
+LuckPerms uses Gradle to handle dependencies & building.
 
 #### Requirements
 * Java 8 JDK or newer
-* Maven 3.3.x or newer (the older versions will not work.)
 * Git
 
 #### Compiling from source
 ```sh
 git clone https://github.com/lucko/LuckPerms.git
 cd LuckPerms/
-mvn clean package
+./gradlew build
 ```
 
-You can find the output jars in the `target` directories.
+You can find the output jars in the `build/libs` directories.
 
 ## Contributing
 #### Pull Requests
