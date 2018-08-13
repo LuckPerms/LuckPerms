@@ -25,23 +25,20 @@
 
 package me.lucko.luckperms.common.event;
 
-import com.google.common.collect.ImmutableSet;
-
 import me.lucko.luckperms.api.event.EventBus;
 import me.lucko.luckperms.api.event.EventHandler;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.Predicates;
 
 import net.kyori.event.EventSubscriber;
 import net.kyori.event.SimpleEventBus;
 
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
@@ -122,11 +119,7 @@ public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
     @Nonnull
     @Override
     public <T extends LuckPermsEvent> Set<EventHandler<T>> getHandlers(@Nonnull Class<T> eventClass) {
-        Set<LuckPermsEventHandler<?>> handlers = this.bus.getHandlers();
-        handlers.removeIf(h -> !h.getEventClass().isAssignableFrom(eventClass));
-
-        //noinspection unchecked
-        return (Set) ImmutableSet.copyOf(handlers);
+        return this.bus.getHandlers(eventClass);
     }
 
     /**
@@ -160,19 +153,15 @@ public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
         }
 
         public void unregisterAll() {
-            unregisterMatching(Predicates.alwaysTrue());
+            super.unregisterAll();
         }
 
-        public Set<LuckPermsEventHandler<?>> getHandlers() {
-            Set<LuckPermsEventHandler<?>> handlers = new HashSet<>();
-
-            // bit of a hack
-            unregisterMatching(sub -> {
-                handlers.add((LuckPermsEventHandler<?>) sub);
-                return false;
-            });
-
-            return handlers;
+        public <T extends LuckPermsEvent> Set<EventHandler<T>> getHandlers(Class<T> eventClass) {
+            //noinspection unchecked
+            return super.subscribers().values().stream()
+                    .filter(s -> s instanceof EventHandler && ((EventHandler<?>) s).getEventClass().isAssignableFrom(eventClass))
+                    .map(s -> ((EventHandler<T>) s))
+                    .collect(Collectors.toSet());
         }
     }
 }

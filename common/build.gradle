@@ -7,7 +7,7 @@ dependencies {
         exclude(module: 'guava')
         exclude(module: 'gson')
     }
-    compile('net.kyori:event-api:2.0.1') {
+    compile('net.kyori:event-api:2.0.2') {
         exclude(module: 'checker-qual')
         exclude(module: 'guava')
     }
