@@ -12,6 +12,10 @@ subprojects {
         options.encoding = 'UTF-8'
     }
 
+    jar {
+        from '../LICENSE.txt'
+    }
+
     def determinePatchVersion = {
         // get the name of the last tag
         def lastTag = new ByteArrayOutputStream()
