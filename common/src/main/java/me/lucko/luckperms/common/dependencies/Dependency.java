@@ -70,8 +70,8 @@ public enum Dependency {
     EVENT(
             "net{}kyori",
             "event-api",
-            "2.0.2",
-            "+69FXQhgPlBtg/OvEiB+hvpbdGyUquj4cORHV1gnN1w=",
+            "3.0.0",
+            "yjvdTdAyktl3iFEQFLHC3qYwwt7/DbCd7Zc8Q4SlIag=",
             Relocation.of("eventbus", "net{}kyori{}event")
     ),
     CAFFEINE(

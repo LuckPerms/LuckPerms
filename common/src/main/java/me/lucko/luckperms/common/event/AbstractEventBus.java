@@ -31,13 +31,11 @@ import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import net.kyori.event.EventSubscriber;
 import net.kyori.event.SimpleEventBus;
 
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -137,7 +135,7 @@ public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
      * @param plugin the plugin
      */
     protected void unregisterHandlers(P plugin) {
-        this.bus.unregisterMatching(sub -> ((LuckPermsEventHandler) sub).getPlugin() == plugin);
+        this.bus.unregister(sub -> ((LuckPermsEventHandler) sub).getPlugin() == plugin);
     }
 
     @Override
@@ -147,13 +145,8 @@ public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
 
     private static final class Bus extends SimpleEventBus<LuckPermsEvent> {
 
-        @Override
-        public void unregisterMatching(@Nonnull Predicate<EventSubscriber<?>> predicate) {
-            super.unregisterMatching(predicate);
-        }
-
-        public void unregisterAll() {
-            super.unregisterAll();
+        public Bus() {
+            super(LuckPermsEvent.class);
         }
 
         public <T extends LuckPermsEvent> Set<EventHandler<T>> getHandlers(Class<T> eventClass) {
