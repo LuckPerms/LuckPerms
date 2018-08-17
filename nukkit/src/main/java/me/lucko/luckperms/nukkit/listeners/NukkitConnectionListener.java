@@ -57,10 +57,10 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
         this.plugin = plugin;
     }
 
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerPreLogin(PlayerAsyncPreLoginEvent e) {
         /* Called when the player first attempts a connection with the server.
-           Listening on LOW priority to allow plugins to modify username / UUID data here. (auth plugins) */
+           Listening on HIGH priority to allow plugins to modify username / UUID data here. (auth plugins) */
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
             this.plugin.getLogger().info("Processing pre-login for " + e.getUuid() + " - " + e.getName());
