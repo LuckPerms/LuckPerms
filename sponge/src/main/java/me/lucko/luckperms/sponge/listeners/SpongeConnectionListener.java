@@ -56,11 +56,11 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
         this.plugin = plugin;
     }
 
-    @Listener(order = Order.EARLY)
+    @Listener(order = Order.LATE)
     @IsCancelled(Tristate.UNDEFINED)
     public void onClientAuth(ClientConnectionEvent.Auth e) {
         /* Called when the player first attempts a connection with the server.
-           Listening on AFTER_PRE priority to allow plugins to modify username / UUID data here. (auth plugins) */
+           Listening on LATE priority to allow plugins to modify username / UUID data here. (auth plugins) */
 
         final GameProfile profile = e.getProfile();
         final String username = profile.getName().orElseThrow(() -> new RuntimeException("No username present for user " + profile.getUniqueId()));
