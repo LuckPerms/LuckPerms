@@ -51,10 +51,10 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
         this.plugin = plugin;
     }
 
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerLogin(LoginEvent e) {
         /* Called when the player first attempts a connection with the server.
-           Listening on LOW priority to allow plugins to modify username / UUID data here. (auth plugins)
+           Listening on HIGH priority to allow plugins to modify username / UUID data here. (auth plugins)
 
            Delay the login here, as we want to cache UUID data before the player is connected to a backend bukkit server.
            This means that a player will have the same UUID across the network, even if parts of the network are running in
