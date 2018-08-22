@@ -1,5 +1,5 @@
 rootProject.name = 'luckperms'
-include 'api', 'common', 'bukkit', 'bukkit-legacy', 'bungee', 'sponge', 'sponge:sponge-service', 'sponge:sponge-service-api6', 'sponge:sponge-service-api7', 'nukkit'
+include 'api', 'common', 'bukkit', 'bukkit-legacy', 'bungee', 'sponge', 'sponge:sponge-service', 'sponge:sponge-service-api6', 'sponge:sponge-service-api7', 'nukkit', 'nemisys'
 
 
 
