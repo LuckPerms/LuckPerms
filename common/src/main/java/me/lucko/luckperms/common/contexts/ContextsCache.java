@@ -51,7 +51,7 @@ public final class ContextsCache<T> extends ExpiringCache<Contexts> implements C
     @Nonnull
     @Override
     protected Contexts supply() {
-        return this.contextManager.calculateStatic();
+        return this.contextManager.calculate(this.subject);
     }
 
     @Override
