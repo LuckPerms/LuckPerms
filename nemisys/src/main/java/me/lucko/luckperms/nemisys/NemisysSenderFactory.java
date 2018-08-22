@@ -31,7 +31,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.common.utils.TextUtils;
 
-import net.kyori.text.Component;
 import org.itxtech.nemisys.Player;
 import org.itxtech.nemisys.command.CommandSender;
 import org.itxtech.nemisys.command.ConsoleCommandSender;
@@ -72,7 +71,7 @@ public class NemisysSenderFactory extends SenderFactory<CommandSender> {
     }
 
     @Override
-    protected void sendMessage(CommandSender sender, Component message) {
+    protected void sendMessage(CommandSender sender, net.kyori.text.Component message) {
         // Fallback to legacy format
         sendMessage(sender, TextUtils.toLegacy(message));
     }

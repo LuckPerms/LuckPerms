@@ -2,7 +2,7 @@ name: LuckPerms
 version: ${pluginVersion}
 api: ["1.0.5"]
 description: A permissions plugin
-author: ["Luck", "NycuRO"]
+author: Luck
 website: https://github.com/lucko/LuckPerms
 
 main: me.lucko.luckperms.nemisys.LPNemisysBootstrap

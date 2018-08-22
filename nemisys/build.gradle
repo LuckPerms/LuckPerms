@@ -14,7 +14,7 @@ apply plugin: "com.github.johnrengelman.shadow"
 dependencies {
     compile project(':common')
 
-    compile fileTree(dir: 'lib', include: ['*.jar'])
+    compile fileTree(dir: 'lib', include: ['nemisys-1.0-SNAPSHOT.jar'])
 }
 
 processResources {
