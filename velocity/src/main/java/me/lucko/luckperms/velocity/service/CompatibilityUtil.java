@@ -23,25 +23,41 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge;
+package me.lucko.luckperms.velocity.service;
 
-import me.lucko.luckperms.common.config.adapter.ConfigurateConfigAdapter;
-import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.api.Tristate;
 
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
+import java.util.Objects;
 
-import java.nio.file.Path;
+/**
+ * Utility class for converting between Velocity and LuckPerms tristate classes
+ */
+public final class CompatibilityUtil {
 
-public class SpongeConfigAdapter extends ConfigurateConfigAdapter implements ConfigurationAdapter {
-    public SpongeConfigAdapter(LuckPermsPlugin plugin, Path path) {
-        super(plugin, path);
+    public static com.velocitypowered.api.permission.Tristate convertTristate(Tristate tristate) {
+        Objects.requireNonNull(tristate, "tristate");
+        switch (tristate) {
+            case TRUE:
+                return com.velocitypowered.api.permission.Tristate.TRUE;
+            case FALSE:
+                return com.velocitypowered.api.permission.Tristate.FALSE;
+            default:
+                return com.velocitypowered.api.permission.Tristate.UNDEFINED;
+        }
     }
 
-    @Override
-    protected ConfigurationLoader<? extends ConfigurationNode> createLoader(Path path) {
-        return HoconConfigurationLoader.builder().setPath(path).build();
+    public static Tristate convertTristate(com.velocitypowered.api.permission.Tristate tristate) {
+        Objects.requireNonNull(tristate, "tristate");
+        switch (tristate) {
+            case TRUE:
+                return Tristate.TRUE;
+            case FALSE:
+                return Tristate.FALSE;
+            default:
+                return Tristate.UNDEFINED;
+        }
     }
+
+    private CompatibilityUtil() {}
+
 }

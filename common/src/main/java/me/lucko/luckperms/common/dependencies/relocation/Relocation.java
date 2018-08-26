@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.dependencies.relocation;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public final class Relocation {
     private static final String RELOCATION_PREFIX = "me.lucko.luckperms.lib.";
@@ -55,4 +56,17 @@ public final class Relocation {
         return this.relocatedPattern;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Relocation that = (Relocation) o;
+        return Objects.equals(this.pattern, that.pattern) &&
+                Objects.equals(this.relocatedPattern, that.relocatedPattern);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.pattern, this.relocatedPattern);
+    }
 }

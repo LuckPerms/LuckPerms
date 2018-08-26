@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 
+import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.dependencies.relocation.Relocation;
 import me.lucko.luckperms.common.dependencies.relocation.RelocationHandler;
@@ -86,19 +87,24 @@ public class DependencyRegistry {
         return dependencies;
     }
 
-    // support for LuckPerms legacy (bukkit 1.7.10)
-    public List<Relocation> getLegacyRelocations(Dependency dependency) {
-        if (RelocationHandler.DEPENDENCIES.contains(dependency)) {
-            return ImmutableList.of();
+    public void applyRelocationSettings(Dependency dependency, List<Relocation> relocations) {
+        PlatformType type = this.plugin.getBootstrap().getType();
+
+        // support for LuckPerms legacy (bukkit 1.7.10)
+        if (!RelocationHandler.DEPENDENCIES.contains(dependency) && JsonElement.class.getName().startsWith("me.lucko")) {
+            relocations.add(Relocation.of("guava", "com{}google{}common"));
+            relocations.add(Relocation.of("gson", "com{}google{}gson"));
         }
 
-        if (JsonElement.class.getName().startsWith("me.lucko")) {
-            return ImmutableList.of(
-                    Relocation.of("guava", "com{}google{}common"),
-                    Relocation.of("gson", "com{}google{}gson")
-            );
+        // don't relocate text when running on Velocity
+        if (dependency == Dependency.TEXT && type == PlatformType.VELOCITY) {
+            relocations.remove(Relocation.of("text", "net{}kyori{}text"));
         }
-        return ImmutableList.of();
+
+        // relocate yaml within configurate when running velocity
+        if (dependency == Dependency.CONFIGURATE_YAML && type == PlatformType.VELOCITY) {
+            relocations.add(Relocation.of("yaml", "org{}yaml{}snakeyaml"));
+        }
     }
 
     private static boolean classExists(String className) {

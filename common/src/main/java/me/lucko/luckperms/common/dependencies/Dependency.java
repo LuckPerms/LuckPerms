@@ -210,6 +210,13 @@ public enum Dependency {
             "Dxr1o3EPbpOOmwraqu+cors8O/nKwJnhS5EiPkTb3fc=",
             Relocation.of("configurate", "ninja{}leaping{}configurate")
     ),
+    SNAKEYAML(
+            "org.yaml",
+            "snakeyaml",
+            "1.21",
+            "5DywaD9wgEuDPfqlrAMv8Uugx1jUoenq62ZAUV34P68=",
+            Relocation.of("yaml", "org{}yaml{}snakeyaml")
+    ),
     CONFIGURATE_HOCON(
             "me{}lucko{}configurate",
             "configurate-hocon",

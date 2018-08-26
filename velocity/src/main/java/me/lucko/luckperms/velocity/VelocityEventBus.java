@@ -23,25 +23,33 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge;
+package me.lucko.luckperms.velocity;
 
-import me.lucko.luckperms.common.config.adapter.ConfigurateConfigAdapter;
-import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import com.velocitypowered.api.plugin.PluginContainer;
 
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
+import me.lucko.luckperms.common.api.LuckPermsApiProvider;
+import me.lucko.luckperms.common.event.AbstractEventBus;
 
-import java.nio.file.Path;
+public class VelocityEventBus extends AbstractEventBus<PluginContainer> {
+    private final LPVelocityPlugin plugin;
 
-public class SpongeConfigAdapter extends ConfigurateConfigAdapter implements ConfigurationAdapter {
-    public SpongeConfigAdapter(LuckPermsPlugin plugin, Path path) {
-        super(plugin, path);
+    public VelocityEventBus(LPVelocityPlugin plugin, LuckPermsApiProvider apiProvider) {
+        super(plugin, apiProvider);
+        this.plugin = plugin;
     }
 
     @Override
-    protected ConfigurationLoader<? extends ConfigurationNode> createLoader(Path path) {
-        return HoconConfigurationLoader.builder().setPath(path).build();
+    protected PluginContainer checkPlugin(Object plugin) throws IllegalArgumentException {
+        if (plugin instanceof PluginContainer) {
+            return (PluginContainer) plugin;
+        }
+
+        PluginContainer pluginContainer = this.plugin.getBootstrap().getProxy().getPluginManager().fromInstance(plugin).orElse(null);
+        if (pluginContainer != null) {
+            return pluginContainer;
+        }
+
+        throw new IllegalArgumentException("Object " + plugin + " (" + plugin.getClass().getName() + ") is not a plugin.");
     }
+
 }

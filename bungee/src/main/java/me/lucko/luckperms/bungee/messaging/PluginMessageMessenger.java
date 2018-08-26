@@ -23,9 +23,8 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.messaging;
+package me.lucko.luckperms.bungee.messaging;
 
-import com.google.common.collect.Iterables;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
@@ -33,72 +32,76 @@ import com.google.common.io.ByteStreams;
 import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
 import me.lucko.luckperms.api.messenger.Messenger;
 import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
-import me.lucko.luckperms.bukkit.LPBukkitPlugin;
+import me.lucko.luckperms.bungee.LPBungeePlugin;
 
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.messaging.PluginMessageListener;
-import org.bukkit.scheduler.BukkitRunnable;
-
-import java.util.Collection;
+import net.md_5.bungee.api.config.ServerInfo;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.event.PluginMessageEvent;
+import net.md_5.bungee.api.plugin.Listener;
+import net.md_5.bungee.event.EventHandler;
 
 import javax.annotation.Nonnull;
 
 /**
  * An implementation of {@link Messenger} using the plugin messaging channels.
  */
-public class BungeeMessenger implements Messenger, PluginMessageListener {
+public class PluginMessageMessenger implements Messenger, Listener {
     private static final String CHANNEL = "luckperms:update";
 
-    private final LPBukkitPlugin plugin;
+    private final LPBungeePlugin plugin;
     private final IncomingMessageConsumer consumer;
 
-    public BungeeMessenger(LPBukkitPlugin plugin, IncomingMessageConsumer consumer) {
+    public PluginMessageMessenger(LPBungeePlugin plugin, IncomingMessageConsumer consumer) {
         this.plugin = plugin;
         this.consumer = consumer;
     }
 
     public void init() {
-        this.plugin.getBootstrap().getServer().getMessenger().registerOutgoingPluginChannel(this.plugin.getBootstrap(), CHANNEL);
-        this.plugin.getBootstrap().getServer().getMessenger().registerIncomingPluginChannel(this.plugin.getBootstrap(), CHANNEL, this);
+        this.plugin.getBootstrap().getProxy().getPluginManager().registerListener(this.plugin.getBootstrap(), this);
+        this.plugin.getBootstrap().getProxy().registerChannel(CHANNEL);
     }
 
     @Override
     public void close() {
-        this.plugin.getBootstrap().getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin.getBootstrap(), CHANNEL);
-        this.plugin.getBootstrap().getServer().getMessenger().unregisterOutgoingPluginChannel(this.plugin.getBootstrap(), CHANNEL);
+        this.plugin.getBootstrap().getProxy().unregisterChannel(CHANNEL);
     }
 
     @Override
     public void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                Collection<? extends Player> players = BungeeMessenger.this.plugin.getBootstrap().getServer().getOnlinePlayers();
-                Player p = Iterables.getFirst(players, null);
-                if (p == null) {
-                    return;
-                }
+        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+        out.writeUTF(outgoingMessage.asEncodedString());
 
-                ByteArrayDataOutput out = ByteStreams.newDataOutput();
-                out.writeUTF(outgoingMessage.asEncodedString());
+        byte[] data = out.toByteArray();
 
-                byte[] data = out.toByteArray();
-
-                p.sendPluginMessage(BungeeMessenger.this.plugin.getBootstrap(), CHANNEL, data);
-                cancel();
-            }
-        }.runTaskTimer(this.plugin.getBootstrap(), 1L, 100L);
+        for (ServerInfo server : this.plugin.getBootstrap().getProxy().getServers().values()) {
+            server.sendData(CHANNEL, data, false);
+        }
     }
 
-    @Override
-    public void onPluginMessageReceived(String s, Player player, byte[] bytes) {
-        if (!s.equals(CHANNEL)) {
+    @EventHandler
+    public void onPluginMessage(PluginMessageEvent e) {
+        if (!e.getTag().equals(CHANNEL)) {
             return;
         }
 
-        ByteArrayDataInput in = ByteStreams.newDataInput(bytes);
+        e.setCancelled(true);
+
+        if (e.getSender() instanceof ProxiedPlayer) {
+            return;
+        }
+
+        byte[] data = e.getData();
+
+        ByteArrayDataInput in = ByteStreams.newDataInput(data);
         String msg = in.readUTF();
 
-        this.consumer.consumeIncomingMessageAsString(msg);
+        if (this.consumer.consumeIncomingMessageAsString(msg)) {
+            // Forward to other servers
+            this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
+                for (ServerInfo server : this.plugin.getBootstrap().getProxy().getServers().values()) {
+                    server.sendData(CHANNEL, data, false);
+                }
+            });
+        }
     }
 }

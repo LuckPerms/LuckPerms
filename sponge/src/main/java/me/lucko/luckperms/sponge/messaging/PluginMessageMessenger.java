@@ -47,7 +47,7 @@ import javax.annotation.Nonnull;
 /**
  * An implementation of {@link Messenger} using the plugin messaging channels.
  */
-public class BungeeMessenger implements Messenger, RawDataListener {
+public class PluginMessageMessenger implements Messenger, RawDataListener {
     private static final String CHANNEL = "luckperms:update";
 
     private final LPSpongePlugin plugin;
@@ -55,7 +55,7 @@ public class BungeeMessenger implements Messenger, RawDataListener {
 
     private ChannelBinding.RawDataChannel channel = null;
 
-    public BungeeMessenger(LPSpongePlugin plugin, IncomingMessageConsumer consumer) {
+    public PluginMessageMessenger(LPSpongePlugin plugin, IncomingMessageConsumer consumer) {
         this.plugin = plugin;
         this.consumer = consumer;
     }

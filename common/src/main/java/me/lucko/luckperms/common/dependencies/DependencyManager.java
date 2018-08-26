@@ -153,7 +153,7 @@ public class DependencyManager {
             try {
                 // apply remap rules
                 List<Relocation> relocations = new ArrayList<>(source.dependency.getRelocations());
-                relocations.addAll(this.registry.getLegacyRelocations(source.dependency));
+                this.registry.applyRelocationSettings(source.dependency, relocations);
 
                 if (relocations.isEmpty()) {
                     remappedJars.add(source);

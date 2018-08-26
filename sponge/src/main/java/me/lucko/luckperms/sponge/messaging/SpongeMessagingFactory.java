@@ -42,9 +42,9 @@ public class SpongeMessagingFactory extends MessagingFactory<LPSpongePlugin> {
 
     @Override
     protected InternalMessagingService getServiceFor(String messagingType) {
-        if (messagingType.equals("bungee")) {
+        if (messagingType.equals("pluginmsg") || messagingType.equals("bungee") || messagingType.equals("velocity")) {
             try {
-                return new LuckPermsMessagingService(getPlugin(), new BungeeMessengerProvider());
+                return new LuckPermsMessagingService(getPlugin(), new PluginMessageMessengerProvider());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -53,20 +53,20 @@ public class SpongeMessagingFactory extends MessagingFactory<LPSpongePlugin> {
         return super.getServiceFor(messagingType);
     }
 
-    private class BungeeMessengerProvider implements MessengerProvider {
+    private class PluginMessageMessengerProvider implements MessengerProvider {
 
         @Nonnull
         @Override
         public String getName() {
-            return "Bungee";
+            return "PluginMessage";
         }
 
         @Nonnull
         @Override
         public Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer) {
-            BungeeMessenger bungeeMessaging = new BungeeMessenger(getPlugin(), incomingMessageConsumer);
-            bungeeMessaging.init();
-            return bungeeMessaging;
+            PluginMessageMessenger messenger = new PluginMessageMessenger(getPlugin(), incomingMessageConsumer);
+            messenger.init();
+            return messenger;
         }
     }
 
