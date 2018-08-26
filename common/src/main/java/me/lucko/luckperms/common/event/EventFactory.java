@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.event;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
-import me.lucko.luckperms.LuckPerms;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.PlayerSaveResult;

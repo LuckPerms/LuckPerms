@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.event;
 
-import com.oracle.tools.packager.mac.MacAppBundler;
-
 import me.lucko.luckperms.api.event.EventBus;
 import me.lucko.luckperms.api.event.EventHandler;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
@@ -34,10 +32,8 @@ import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.event.EventSubscriber;
-import net.kyori.event.PostResult;
 import net.kyori.event.SimpleEventBus;
 
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
