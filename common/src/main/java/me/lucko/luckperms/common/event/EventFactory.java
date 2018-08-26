@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.event;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
+import me.lucko.luckperms.LuckPerms;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.PlayerSaveResult;
@@ -103,171 +104,204 @@ public final class EventFactory {
         return this.eventBus;
     }
 
+    private boolean shouldPost(Class<? extends LuckPermsEvent> eventClass){
+        return this.eventBus.shouldPost(eventClass);
+    }
+
     private void post(LuckPermsEvent event) {
         this.eventBus.post(event);
     }
 
-    private void post(Supplier<LuckPermsEvent> supplier) {
+    private <T extends LuckPermsEvent> void post(Class<T> eventClass, Supplier<T> supplier) {
+        if (Cancellable.class.isAssignableFrom(eventClass)) {
+            throw new RuntimeException("Cancellable event cannot be posted async (" + eventClass + ")");
+        }
+
         this.eventBus.getPlugin().getBootstrap().getScheduler().executeAsync(() -> {
-            LuckPermsEvent event = supplier.get();
-            if (event instanceof Cancellable) {
-                throw new RuntimeException("Cancellable event posted async: " + event);
+            if (!shouldPost(eventClass)) {
+                return;
             }
+            T event = supplier.get();
             this.eventBus.post(event);
         });
     }
     
-    private LuckPermsEvent generate(Class<? extends LuckPermsEvent> eventClass, Object... params) {
-        return GeneratedEventSpec.lookup(eventClass).newInstance(this.eventBus.getApiProvider(), params);
+    @SuppressWarnings("unchecked")
+    private <T extends LuckPermsEvent> T generate(Class<T> eventClass, Object... params) {
+        return (T) GeneratedEventSpec.lookup(eventClass).newInstance(this.eventBus.getApiProvider(), params);
     }
 
     public void handleGroupCacheLoad(Group group, GroupData data) {
-        post(() -> generate(GroupCacheLoadEvent.class, group.getApiDelegate(), data));
+        post(GroupCacheLoadEvent.class, () -> generate(GroupCacheLoadEvent.class, group.getApiDelegate(), data));
     }
 
     public void handleGroupCreate(Group group, CreationCause cause) {
-        post(() -> generate(GroupCreateEvent.class, group.getApiDelegate(), cause));
+        post(GroupCreateEvent.class, () -> generate(GroupCreateEvent.class, group.getApiDelegate(), cause));
     }
 
     public void handleGroupDelete(Group group, DeletionCause cause) {
-        post(() -> generate(GroupDeleteEvent.class, group.getName(), ImmutableSet.copyOf(group.enduringData().immutable().values()), cause));
+        post(GroupDeleteEvent.class, () -> generate(GroupDeleteEvent.class, group.getName(), ImmutableSet.copyOf(group.enduringData().immutable().values()), cause));
     }
 
     public void handleGroupLoadAll() {
-        post(() -> generate(GroupLoadAllEvent.class));
+        post(GroupLoadAllEvent.class, () -> generate(GroupLoadAllEvent.class));
     }
 
     public void handleGroupLoad(Group group) {
-        post(() -> generate(GroupLoadEvent.class, group.getApiDelegate()));
+        post(GroupLoadEvent.class, () -> generate(GroupLoadEvent.class, group.getApiDelegate()));
     }
 
     public boolean handleLogBroadcast(boolean initialState, LogEntry entry, LogBroadcastEvent.Origin origin) {
+        if (!shouldPost(LogBroadcastEvent.class)) {
+            return initialState;
+        }
+
         AtomicBoolean cancel = new AtomicBoolean(initialState);
         post(generate(LogBroadcastEvent.class, cancel, entry, origin));
         return cancel.get();
     }
 
     public boolean handleLogPublish(boolean initialState, LogEntry entry) {
+        if (!shouldPost(LogPublishEvent.class)) {
+            return initialState;
+        }
+
         AtomicBoolean cancel = new AtomicBoolean(initialState);
         post(generate(LogPublishEvent.class, cancel, entry));
         return cancel.get();
     }
 
     public boolean handleLogNetworkPublish(boolean initialState, UUID id, LogEntry entry) {
+        if (!shouldPost(LogNetworkPublishEvent.class)) {
+            return initialState;
+        }
+
         AtomicBoolean cancel = new AtomicBoolean(initialState);
         post(generate(LogNetworkPublishEvent.class, cancel, id, entry));
         return cancel.get();
     }
 
     public boolean handleLogNotify(boolean initialState, LogEntry entry, LogNotifyEvent.Origin origin, Sender sender) {
+        if (!shouldPost(LogNotifyEvent.class)) {
+            return initialState;
+        }
+
         AtomicBoolean cancel = new AtomicBoolean(initialState);
         post(generate(LogNotifyEvent.class, cancel, entry, origin, new SenderEntity(sender)));
         return cancel.get();
     }
 
     public void handleLogReceive(UUID id, LogEntry entry) {
-        post(() -> generate(LogReceiveEvent.class, id, entry));
+        post(LogReceiveEvent.class, () -> generate(LogReceiveEvent.class, id, entry));
     }
 
     public void handleNodeAdd(Node node, PermissionHolder target, Collection<? extends Node> before, Collection<? extends Node> after) {
-        post(() -> generate(NodeAddEvent.class, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node));
+        post(NodeAddEvent.class, () -> generate(NodeAddEvent.class, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node));
     }
 
     public void handleNodeClear(PermissionHolder target, Collection<? extends Node> before, Collection<? extends Node> after) {
-        post(() -> generate(NodeClearEvent.class, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after)));
+        post(NodeClearEvent.class, () -> generate(NodeClearEvent.class, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after)));
     }
 
     public void handleNodeRemove(Node node, PermissionHolder target, Collection<? extends Node> before, Collection<? extends Node> after) {
-        post(() -> generate(NodeRemoveEvent.class, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node));
+        post(NodeRemoveEvent.class, () -> generate(NodeRemoveEvent.class, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node));
     }
 
     public void handleConfigReload() {
-        post(() -> generate(ConfigReloadEvent.class));
+        post(ConfigReloadEvent.class, () -> generate(ConfigReloadEvent.class));
     }
 
     public void handlePostSync() {
-        post(() -> generate(PostSyncEvent.class));
+        post(PostSyncEvent.class, () -> generate(PostSyncEvent.class));
     }
 
     public boolean handleNetworkPreSync(boolean initialState, UUID id) {
+        if (!shouldPost(PreNetworkSyncEvent.class)) {
+            return initialState;
+        }
+
         AtomicBoolean cancel = new AtomicBoolean(initialState);
         post(generate(PreNetworkSyncEvent.class, cancel, id));
         return cancel.get();
     }
 
     public boolean handlePreSync(boolean initialState) {
+        if (!shouldPost(PreSyncEvent.class)) {
+            return initialState;
+        }
+
         AtomicBoolean cancel = new AtomicBoolean(initialState);
         post(generate(PreSyncEvent.class, cancel));
         return cancel.get();
     }
 
     public void handleTrackCreate(Track track, CreationCause cause) {
-        post(() -> generate(TrackCreateEvent.class, track.getApiDelegate(), cause));
+        post(TrackCreateEvent.class, () -> generate(TrackCreateEvent.class, track.getApiDelegate(), cause));
     }
 
     public void handleTrackDelete(Track track, DeletionCause cause) {
-        post(() -> generate(TrackDeleteEvent.class, track.getName(), ImmutableList.copyOf(track.getGroups()), cause));
+        post(TrackDeleteEvent.class, () -> generate(TrackDeleteEvent.class, track.getName(), ImmutableList.copyOf(track.getGroups()), cause));
     }
 
     public void handleTrackLoadAll() {
-        post(() -> generate(TrackLoadAllEvent.class));
+        post(TrackLoadAllEvent.class, () -> generate(TrackLoadAllEvent.class));
     }
 
     public void handleTrackLoad(Track track) {
-        post(() -> generate(TrackLoadEvent.class, track.getApiDelegate()));
+        post(TrackLoadEvent.class, () -> generate(TrackLoadEvent.class, track.getApiDelegate()));
     }
 
     public void handleTrackAddGroup(Track track, String group, List<String> before, List<String> after) {
-        post(() -> generate(TrackAddGroupEvent.class, track.getApiDelegate(), ImmutableList.copyOf(before), ImmutableList.copyOf(after), group));
+        post(TrackAddGroupEvent.class, () -> generate(TrackAddGroupEvent.class, track.getApiDelegate(), ImmutableList.copyOf(before), ImmutableList.copyOf(after), group));
     }
 
     public void handleTrackClear(Track track, List<String> before) {
-        post(() -> generate(TrackClearEvent.class, track.getApiDelegate(), ImmutableList.copyOf(before), ImmutableList.of()));
+        post(TrackClearEvent.class, () -> generate(TrackClearEvent.class, track.getApiDelegate(), ImmutableList.copyOf(before), ImmutableList.of()));
     }
 
     public void handleTrackRemoveGroup(Track track, String group, List<String> before, List<String> after) {
-        post(() -> generate(TrackRemoveGroupEvent.class, track.getApiDelegate(), ImmutableList.copyOf(before), ImmutableList.copyOf(after), group));
+        post(TrackRemoveGroupEvent.class, () -> generate(TrackRemoveGroupEvent.class, track.getApiDelegate(), ImmutableList.copyOf(before), ImmutableList.copyOf(after), group));
     }
 
     public void handleUserCacheLoad(User user, UserData data) {
-        post(() -> generate(UserCacheLoadEvent.class, new ApiUser(user), data));
+        post(UserCacheLoadEvent.class, () -> generate(UserCacheLoadEvent.class, new ApiUser(user), data));
     }
 
     public void handleDataRecalculate(PermissionHolder holder) {
         if (holder.getType().isUser()) {
             User user = (User) holder;
-            post(() -> generate(UserDataRecalculateEvent.class, user.getApiDelegate(), user.getCachedData()));
+            post(UserDataRecalculateEvent.class, () -> generate(UserDataRecalculateEvent.class, user.getApiDelegate(), user.getCachedData()));
         } else {
             Group group = (Group) holder;
-            post(() -> generate(GroupDataRecalculateEvent.class, group.getApiDelegate(), group.getCachedData()));
+            post(GroupDataRecalculateEvent.class, () -> generate(GroupDataRecalculateEvent.class, group.getApiDelegate(), group.getCachedData()));
         }
     }
 
     public void handleUserFirstLogin(UUID uuid, String username) {
-        post(() -> generate(UserFirstLoginEvent.class, uuid, username));
+        post(UserFirstLoginEvent.class, () -> generate(UserFirstLoginEvent.class, uuid, username));
     }
 
     public void handlePlayerDataSave(UUID uuid, String username, PlayerSaveResult result) {
-        post(() -> generate(PlayerDataSaveEvent.class, uuid, username, result));
+        post(PlayerDataSaveEvent.class, () -> generate(PlayerDataSaveEvent.class, uuid, username, result));
     }
 
     public void handleUserLoad(User user) {
-        post(() -> generate(UserLoadEvent.class, new ApiUser(user)));
+        post(UserLoadEvent.class, () -> generate(UserLoadEvent.class, new ApiUser(user)));
     }
 
     public void handleUserLoginProcess(UUID uuid, String username, User user) {
-        post(() -> generate(UserLoginProcessEvent.class, uuid, username, new ApiUser(user)));
+        post(UserLoginProcessEvent.class, () -> generate(UserLoginProcessEvent.class, uuid, username, new ApiUser(user)));
     }
 
     public void handleUserDemote(User user, Track track, String from, String to, @Nullable Sender source) {
-        post(() -> {
+        post(UserDemoteEvent.class, () -> {
             Source s = source == null ? UnknownSource.INSTANCE : new EntitySourceImpl(new SenderEntity(source));
             return generate(UserDemoteEvent.class, s, track.getApiDelegate(), new ApiUser(user), Optional.ofNullable(from), Optional.ofNullable(to));
         });
     }
 
     public void handleUserPromote(User user, Track track, String from, String to, @Nullable Sender source) {
-        post(() -> {
+        post(UserPromoteEvent.class, () -> {
             Source s = source == null ? UnknownSource.INSTANCE : new EntitySourceImpl(new SenderEntity(source));
             return generate(UserPromoteEvent.class, s, track.getApiDelegate(), new ApiUser(user), Optional.ofNullable(from), Optional.ofNullable(to));
         });
