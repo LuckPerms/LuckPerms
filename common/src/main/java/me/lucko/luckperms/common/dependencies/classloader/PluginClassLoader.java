@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.dependencies.classloader;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.file.Path;
 
 /**

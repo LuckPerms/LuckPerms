@@ -26,21 +26,17 @@
 package me.lucko.luckperms.common.config.adapter;
 
 import com.google.common.base.Splitter;
-import com.google.common.base.Supplier;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.loader.AbstractConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class ConfigurateConfigAdapter extends AbstractConfigurationAdapter implements ConfigurationAdapter {

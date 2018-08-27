@@ -28,7 +28,6 @@ package me.lucko.luckperms.velocity.calculators;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.velocity.LPVelocityPlugin;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
 import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
@@ -37,6 +36,7 @@ import me.lucko.luckperms.common.processors.MapProcessor;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
 import me.lucko.luckperms.common.processors.RegexProcessor;
 import me.lucko.luckperms.common.processors.WildcardProcessor;
+import me.lucko.luckperms.velocity.LPVelocityPlugin;
 
 public class VelocityCalculatorFactory implements CalculatorFactory {
     private final LPVelocityPlugin plugin;

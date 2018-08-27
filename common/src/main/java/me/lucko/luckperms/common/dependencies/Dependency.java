@@ -36,7 +36,6 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.List;
 
 public enum Dependency {
@@ -278,14 +277,6 @@ public enum Dependency {
                 ),
                 version, checksum, relocations
         );
-    }
-
-    Dependency(String url, String version, String checksum) {
-        this(url, version, checksum, Collections.emptyList());
-    }
-
-    Dependency(String url, String version, String checksum, Relocation relocation) {
-        this(url, version, checksum, Collections.singletonList(relocation));
     }
 
     Dependency(String url, String version, String checksum, List<Relocation> relocations) {
