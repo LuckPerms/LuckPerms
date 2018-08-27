@@ -536,6 +536,10 @@ public abstract class PermissionHolder {
      * @param node the node to set
      */
     public DataMutateResult setPermission(Node node) {
+        return setPermission(node, true);
+    }
+
+    public DataMutateResult setPermission(Node node, boolean callEvent) {
         if (hasPermission(NodeMapType.ENDURING, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE) != Tristate.UNDEFINED) {
             return DataMutateResult.ALREADY_HAS;
         }
@@ -545,7 +549,9 @@ public abstract class PermissionHolder {
         invalidateCache();
         ImmutableCollection<? extends Node> after = enduringData().immutable().values();
 
-        this.plugin.getEventFactory().handleNodeAdd(node, this, before, after);
+        if (callEvent) {
+            this.plugin.getEventFactory().handleNodeAdd(node, this, before, after);
+        }
         return DataMutateResult.SUCCESS;
     }
 
