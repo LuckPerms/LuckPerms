@@ -226,6 +226,21 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> APPLY_NUKKIT_ATTACHMENT_PERMISSIONS = EnduringKey.wrap(BooleanKey.of("apply-nukkit-attachment-permissions", true));
 
     /**
+     * If Nukkit child permissions are being applied. This setting is ignored on other platforms.
+     */
+    public static final ConfigKey<Boolean> APPLY_NEMISYS_CHILD_PERMISSIONS = EnduringKey.wrap(BooleanKey.of("apply-nemisys-child-permissions", true));
+
+    /**
+     * If Nukkit default permissions are being applied. This setting is ignored on other platforms.
+     */
+    public static final ConfigKey<Boolean> APPLY_NEMISYS_DEFAULT_PERMISSIONS = EnduringKey.wrap(BooleanKey.of("apply-nemisys-default-permissions", true));
+
+    /**
+     * If Nukkit attachment permissions are being applied. This setting is ignored on other platforms.
+     */
+    public static final ConfigKey<Boolean> APPLY_NEMISYS_ATTACHMENT_PERMISSIONS = EnduringKey.wrap(BooleanKey.of("apply-nemisys-attachment-permissions", true));
+
+    /**
      * If BungeeCord configured permissions are being applied. This setting is ignored on other platforms.
      */
     public static final ConfigKey<Boolean> APPLY_BUNGEE_CONFIG_PERMISSIONS = EnduringKey.wrap(BooleanKey.of("apply-bungee-config-permissions", false));
