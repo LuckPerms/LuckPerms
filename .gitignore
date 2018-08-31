@@ -73,6 +73,7 @@ $RECYCLE.BIN/
 ### Gradle ###
 .gradle
 /build/
+/out/
 gradle-app.setting
 !gradle-wrapper.jar
 .gradletasknamecache
