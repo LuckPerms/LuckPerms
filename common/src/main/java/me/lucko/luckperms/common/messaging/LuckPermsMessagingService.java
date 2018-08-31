@@ -114,7 +114,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
     public void pushUpdate() {
         this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
             UUID requestId = generatePingId();
-            this.plugin.getLogger().info("[" + getName() + " Messaging] Sending ping with id: " + requestId);
+            this.plugin.getLogger().info("[Messaging] Sending ping with id: " + requestId);
             this.messenger.sendOutgoingMessage(new UpdateMessageImpl(requestId));
         });
     }
@@ -123,7 +123,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
     public void pushUserUpdate(User user) {
         this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
             UUID requestId = generatePingId();
-            this.plugin.getLogger().info("[" + getName() + " Messaging] Sending user ping for '" + user.getFriendlyName() + "' with id: " + requestId);
+            this.plugin.getLogger().info("[Messaging] Sending user ping for '" + user.getFriendlyName() + "' with id: " + requestId);
             this.messenger.sendOutgoingMessage(new UserUpdateMessageImpl(requestId, user.getUuid()));
         });
     }
@@ -137,7 +137,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
                 return;
             }
 
-            this.plugin.getLogger().info("[" + getName() + " Messaging] Sending log with id: " + requestId);
+            this.plugin.getLogger().info("[Messaging] Sending log with id: " + requestId);
             this.messenger.sendOutgoingMessage(new LogMessageImpl(requestId, logEntry));
         });
     }
@@ -233,7 +233,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
         if (message instanceof UpdateMessage) {
             UpdateMessage msg = (UpdateMessage) message;
 
-            this.plugin.getLogger().info("[" + getName() + " Messaging] Received update ping with id: " + msg.getId());
+            this.plugin.getLogger().info("[Messaging] Received update ping with id: " + msg.getId());
 
             if (this.plugin.getEventFactory().handleNetworkPreSync(false, msg.getId())) {
                 return;
@@ -248,7 +248,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
                 return;
             }
 
-            this.plugin.getLogger().info("[" + getName() + " Messaging] Received user update ping for '" + user.getFriendlyName() + "' with id: " + msg.getId());
+            this.plugin.getLogger().info("[Messaging] Received user update ping for '" + user.getFriendlyName() + "' with id: " + msg.getId());
 
             if (this.plugin.getEventFactory().handleNetworkPreSync(false, msg.getId())) {
                 return;
