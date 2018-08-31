@@ -23,15 +23,33 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.dependencies.classloader;
+package me.lucko.luckperms.velocity;
 
-import java.nio.file.Path;
+import com.velocitypowered.api.plugin.PluginContainer;
 
-/**
- * Represents the plugins classloader
- */
-public interface PluginClassLoader {
+import me.lucko.luckperms.common.api.LuckPermsApiProvider;
+import me.lucko.luckperms.common.event.AbstractEventBus;
 
-    void loadJar(Path file);
+public class VelocityEventBus extends AbstractEventBus<PluginContainer> {
+    private final LPVelocityPlugin plugin;
+
+    public VelocityEventBus(LPVelocityPlugin plugin, LuckPermsApiProvider apiProvider) {
+        super(plugin, apiProvider);
+        this.plugin = plugin;
+    }
+
+    @Override
+    protected PluginContainer checkPlugin(Object plugin) throws IllegalArgumentException {
+        if (plugin instanceof PluginContainer) {
+            return (PluginContainer) plugin;
+        }
+
+        PluginContainer pluginContainer = this.plugin.getBootstrap().getProxy().getPluginManager().fromInstance(plugin).orElse(null);
+        if (pluginContainer != null) {
+            return pluginContainer;
+        }
+
+        throw new IllegalArgumentException("Object " + plugin + " (" + plugin.getClass().getName() + ") is not a plugin.");
+    }
 
 }

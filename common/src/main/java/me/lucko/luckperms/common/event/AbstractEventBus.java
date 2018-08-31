@@ -31,6 +31,7 @@ import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import net.kyori.event.EventSubscriber;
 import net.kyori.event.SimpleEventBus;
 
 import java.util.Objects;
@@ -81,6 +82,10 @@ public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
 
     public void post(LuckPermsEvent event) {
         this.bus.post(event);
+    }
+
+    public boolean shouldPost(Class<? extends LuckPermsEvent> eventClass) {
+        return this.bus.hasSubscribers(eventClass);
     }
 
     @Nonnull
@@ -144,9 +149,13 @@ public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
     }
 
     private static final class Bus extends SimpleEventBus<LuckPermsEvent> {
-
-        public Bus() {
+        Bus() {
             super(LuckPermsEvent.class);
+        }
+
+        @Override
+        protected boolean shouldPost(LuckPermsEvent event, EventSubscriber<?> subscriber) {
+            return true;
         }
 
         public <T extends LuckPermsEvent> Set<EventHandler<T>> getHandlers(Class<T> eventClass) {

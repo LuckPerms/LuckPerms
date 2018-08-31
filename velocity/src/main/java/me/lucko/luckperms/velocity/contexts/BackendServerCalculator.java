@@ -23,25 +23,39 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge;
+package me.lucko.luckperms.velocity.contexts;
 
-import me.lucko.luckperms.common.config.adapter.ConfigurateConfigAdapter;
-import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
+import com.velocitypowered.api.proxy.Player;
+
+import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.context.ContextCalculator;
+import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
+import javax.annotation.Nonnull;
 
-import java.nio.file.Path;
+public class BackendServerCalculator implements ContextCalculator<Player> {
 
-public class SpongeConfigAdapter extends ConfigurateConfigAdapter implements ConfigurationAdapter {
-    public SpongeConfigAdapter(LuckPermsPlugin plugin, Path path) {
-        super(plugin, path);
+    private static String getServer(Player player) {
+        return player.getCurrentServer().isPresent() ? player.getCurrentServer().get().getServerInfo().getName().toLowerCase() : null;
     }
 
+    private final LuckPermsPlugin plugin;
+
+    public BackendServerCalculator(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    @Nonnull
     @Override
-    protected ConfigurationLoader<? extends ConfigurationNode> createLoader(Path path) {
-        return HoconConfigurationLoader.builder().setPath(path).build();
+    public MutableContextSet giveApplicableContext(@Nonnull Player subject, @Nonnull MutableContextSet accumulator) {
+        String server = getServer(subject);
+        while (server != null && !accumulator.has(Contexts.WORLD_KEY, server)) {
+            accumulator.add(Contexts.WORLD_KEY, server);
+            server = this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(server, server).toLowerCase();
+        }
+
+        return accumulator;
     }
 }

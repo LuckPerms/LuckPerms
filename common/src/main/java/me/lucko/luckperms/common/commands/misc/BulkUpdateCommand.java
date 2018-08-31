@@ -63,6 +63,11 @@ public class BulkUpdateCommand extends SingleCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) throws CommandException {
+        if (!sender.isConsole()) {
+            Message.BULK_UPDATE_MUST_USE_CONSOLE.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         if (args.size() == 2 && args.get(0).equalsIgnoreCase("confirm")) {
 
             String id = args.get(1);
@@ -155,10 +160,5 @@ public class BulkUpdateCommand extends SingleCommand {
         Message.BULK_UPDATE_CONFIRM.send(sender, label, id);
 
         return CommandResult.SUCCESS;
-    }
-
-    @Override
-    public boolean isAuthorized(Sender sender) {
-        return sender.isConsole(); // we only want console to be able to use this command
     }
 }

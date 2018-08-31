@@ -23,15 +23,25 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.dependencies.classloader;
+package me.lucko.luckperms.velocity;
+
+import me.lucko.luckperms.common.config.adapter.ConfigurateConfigAdapter;
+import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+
+import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 import java.nio.file.Path;
 
-/**
- * Represents the plugins classloader
- */
-public interface PluginClassLoader {
+public class VelocityConfigAdapter extends ConfigurateConfigAdapter implements ConfigurationAdapter {
+    public VelocityConfigAdapter(LuckPermsPlugin plugin, Path path) {
+        super(plugin, path);
+    }
 
-    void loadJar(Path file);
-
+    @Override
+    protected ConfigurationLoader<? extends ConfigurationNode> createLoader(Path path) {
+        return YAMLConfigurationLoader.builder().setPath(path).build();
+    }
 }

@@ -50,7 +50,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -330,14 +329,6 @@ public class Importer implements Runnable {
         public void setResult(CommandResult result) {
             this.result = result;
         }
-    }
-
-    private static <T> List<T> nInstances(int count, Supplier<T> supplier) {
-        List<T> ret = new ArrayList<>(count);
-        for (int i = 0; i < count; i++) {
-            ret.add(supplier.get());
-        }
-        return ret;
     }
 
 }

@@ -56,19 +56,10 @@ public class ReflectionClassLoader implements PluginClassLoader {
     }
 
     @Override
-    public void loadJar(URL url) {
-        try {
-            ADD_URL_METHOD.invoke(this.classLoader, url);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
     public void loadJar(Path file) {
         try {
-            loadJar(file.toUri().toURL());
-        } catch (MalformedURLException e) {
+            ADD_URL_METHOD.invoke(this.classLoader, file.toUri().toURL());
+        } catch (IllegalAccessException | InvocationTargetException | MalformedURLException e) {
             throw new RuntimeException(e);
         }
     }

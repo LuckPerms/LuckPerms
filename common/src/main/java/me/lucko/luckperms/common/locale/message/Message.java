@@ -332,6 +332,7 @@ public enum Message {
     UNSET_META_SUCCESS("&aUnset meta key &f'{}&f'&a for &b{}&a in context {}&a.", true),
     UNSET_META_TEMP_SUCCESS("&aUnset temporary meta key &f'{}&f'&a for &b{}&a in context {}&a.", true),
 
+    BULK_UPDATE_MUST_USE_CONSOLE("&cThe bulk update command can only be used from the console.", true),
     BULK_UPDATE_INVALID_DATA_TYPE("&cInvalid type. Was expecting 'all', 'users' or 'groups'.", true),
     BULK_UPDATE_INVALID_CONSTRAINT("&cInvalid constraint &4{}&c. Constraints should be in the format '&f<field> <comparison operator> <value>&c'.", true),
     BULK_UPDATE_INVALID_COMPARISON("&cInvalid comparison operator '&4{}&c'. Expected one of the following: &f==  !=  ~~  ~!", true),

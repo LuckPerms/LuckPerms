@@ -42,9 +42,9 @@ public class BungeeMessagingFactory extends MessagingFactory<LPBungeePlugin> {
 
     @Override
     protected InternalMessagingService getServiceFor(String messagingType) {
-        if (messagingType.equals("bungee")) {
+        if (messagingType.equals("pluginmsg") || messagingType.equals("bungee")) {
             try {
-                return new LuckPermsMessagingService(getPlugin(), new BungeeMessengerProvider());
+                return new LuckPermsMessagingService(getPlugin(), new PluginMessageMessengerProvider());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -63,20 +63,20 @@ public class BungeeMessagingFactory extends MessagingFactory<LPBungeePlugin> {
         return super.getServiceFor(messagingType);
     }
 
-    private class BungeeMessengerProvider implements MessengerProvider {
+    private class PluginMessageMessengerProvider implements MessengerProvider {
 
         @Nonnull
         @Override
         public String getName() {
-            return "Bungee";
+            return "PluginMessage";
         }
 
         @Nonnull
         @Override
         public Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer) {
-            BungeeMessenger bungeeMessaging = new BungeeMessenger(getPlugin(), incomingMessageConsumer);
-            bungeeMessaging.init();
-            return bungeeMessaging;
+            PluginMessageMessenger messenger = new PluginMessageMessenger(getPlugin(), incomingMessageConsumer);
+            messenger.init();
+            return messenger;
         }
     }
 
@@ -91,9 +91,9 @@ public class BungeeMessagingFactory extends MessagingFactory<LPBungeePlugin> {
         @Nonnull
         @Override
         public Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer) {
-            RedisBungeeMessenger redisBungeeMessaging = new RedisBungeeMessenger(getPlugin(), incomingMessageConsumer);
-            redisBungeeMessaging.init();
-            return redisBungeeMessaging;
+            RedisBungeeMessenger messenger = new RedisBungeeMessenger(getPlugin(), incomingMessageConsumer);
+            messenger.init();
+            return messenger;
         }
     }
 }

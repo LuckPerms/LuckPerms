@@ -1,0 +1,54 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:2.0.4"
+        classpath "gradle.plugin.ninja.miserable:blossom:1.0.1"
+    }
+}
+
+apply plugin: "com.github.johnrengelman.shadow"
+apply plugin: "ninja.miserable.blossom"
+
+dependencies {
+    compile project(':common')
+
+    compileOnly 'com.velocitypowered:velocity-api:1.0-SNAPSHOT'
+}
+
+blossom {
+    replaceTokenIn('src/main/java/me/lucko/luckperms/velocity/LPVelocityBootstrap.java')
+    replaceToken '@version@', project.ext.fullVersion
+}
+
+shadowJar {
+    archiveName = "LuckPerms-Velocity-${project.ext.fullVersion}.jar"
+
+    dependencies {
+        include(dependency('me.lucko.luckperms:.*'))
+    }
+
+    // relocate 'net.kyori.text', 'me.lucko.luckperms.lib.text'   (included in velocity!)
+    relocate 'net.kyori.event', 'me.lucko.luckperms.lib.eventbus'
+    relocate 'com.github.benmanes.caffeine', 'me.lucko.luckperms.lib.caffeine'
+    relocate 'okio', 'me.lucko.luckperms.lib.okio'
+    relocate 'okhttp3', 'me.lucko.luckperms.lib.okhttp3'
+    relocate 'me.lucko.commodore', 'me.lucko.luckperms.lib.commodore'
+    relocate 'org.mariadb.jdbc', 'me.lucko.luckperms.lib.mariadb'
+    relocate 'com.mysql', 'me.lucko.luckperms.lib.mysql'
+    relocate 'org.postgresql', 'me.lucko.luckperms.lib.postgresql'
+    relocate 'com.zaxxer.hikari', 'me.lucko.luckperms.lib.hikari'
+    relocate 'com.mongodb', 'me.lucko.luckperms.lib.mongodb'
+    relocate 'org.bson', 'me.lucko.luckperms.lib.bson'
+    relocate 'redis.clients.jedis', 'me.lucko.luckperms.lib.jedis'
+    relocate 'org.apache.commons.pool2', 'me.lucko.luckperms.lib.commonspool2'
+    relocate 'ninja.leaping.configurate', 'me.lucko.luckperms.lib.configurate'
+    relocate 'org.yaml.snakeyaml', 'me.lucko.luckperms.lib.yaml'
+}
+
+artifacts {
+    archives shadowJar
+}

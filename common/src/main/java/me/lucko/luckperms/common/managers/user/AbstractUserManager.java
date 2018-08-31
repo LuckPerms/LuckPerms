@@ -124,7 +124,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
 
         if (!hasGroup) {
             user.getPrimaryGroup().setStoredValue(NodeFactory.DEFAULT_GROUP_NAME);
-            user.setPermission(NodeFactory.buildGroupNode(NodeFactory.DEFAULT_GROUP_NAME).build());
+            user.setPermission(NodeFactory.buildGroupNode(NodeFactory.DEFAULT_GROUP_NAME).build(), false);
             work = true;
         }
 

@@ -23,15 +23,41 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.dependencies.classloader;
+package me.lucko.luckperms.velocity.service;
 
-import java.nio.file.Path;
+import me.lucko.luckperms.api.Tristate;
+
+import java.util.Objects;
 
 /**
- * Represents the plugins classloader
+ * Utility class for converting between Velocity and LuckPerms tristate classes
  */
-public interface PluginClassLoader {
+public final class CompatibilityUtil {
 
-    void loadJar(Path file);
+    public static com.velocitypowered.api.permission.Tristate convertTristate(Tristate tristate) {
+        Objects.requireNonNull(tristate, "tristate");
+        switch (tristate) {
+            case TRUE:
+                return com.velocitypowered.api.permission.Tristate.TRUE;
+            case FALSE:
+                return com.velocitypowered.api.permission.Tristate.FALSE;
+            default:
+                return com.velocitypowered.api.permission.Tristate.UNDEFINED;
+        }
+    }
+
+    public static Tristate convertTristate(com.velocitypowered.api.permission.Tristate tristate) {
+        Objects.requireNonNull(tristate, "tristate");
+        switch (tristate) {
+            case TRUE:
+                return Tristate.TRUE;
+            case FALSE:
+                return Tristate.FALSE;
+            default:
+                return Tristate.UNDEFINED;
+        }
+    }
+
+    private CompatibilityUtil() {}
 
 }

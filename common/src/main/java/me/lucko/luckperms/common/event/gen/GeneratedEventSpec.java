@@ -129,8 +129,8 @@ public class GeneratedEventSpec {
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             if (TO_STRING_METHOD.equals(method)) {
                 return "GeneratedEvent(" +
-                        "proxy=" + proxy + ", " +
-                        "class=" + GeneratedEventSpec.this.eventClass.toString() + ", " +
+                        "proxy=" + proxy.getClass().getName() + "@" + Integer.toHexString(proxy.hashCode()) + ", " +
+                        "class=" + GeneratedEventSpec.this.eventClass.getName() + ", " +
                         "fields=" + Arrays.toString(this.fields) + ")";
             }
             if (EQUALS_METHOD.equals(method)) {

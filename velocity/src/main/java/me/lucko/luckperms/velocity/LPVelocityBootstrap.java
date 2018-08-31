@@ -23,38 +23,27 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge;
+package me.lucko.luckperms.velocity;
 
 import com.google.inject.Inject;
+import com.velocitypowered.api.event.PostOrder;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
+import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ProxyServer;
 
 import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
-import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.logging.Slf4jPluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
-import me.lucko.luckperms.common.utils.MoreFiles;
 
 import org.slf4j.Logger;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.Platform;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.config.ConfigDir;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
-import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
-import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.scheduler.AsynchronousExecutor;
-import org.spongepowered.api.scheduler.Scheduler;
-import org.spongepowered.api.scheduler.SpongeExecutorService;
-import org.spongepowered.api.scheduler.SynchronousExecutor;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -63,7 +52,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
 
 /**
- * Bootstrap plugin for LuckPerms running on Sponge.
+ * Bootstrap plugin for LuckPerms running on Velocity.
  */
 @Plugin(
         id = "luckperms",
@@ -73,7 +62,7 @@ import java.util.stream.Stream;
         description = "A permissions plugin",
         url = "https://github.com/lucko/LuckPerms"
 )
-public class LPSpongeBootstrap implements LuckPermsBootstrap {
+public class LPVelocityBootstrap implements LuckPermsBootstrap {
 
     /**
      * The plugin logger
@@ -93,7 +82,7 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     /**
      * The plugin instance
      */
-    private final LPSpongePlugin plugin;
+    private final LPVelocityPlugin plugin;
 
     /**
      * The time when the plugin was enabled
@@ -104,37 +93,19 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     private final CountDownLatch loadLatch = new CountDownLatch(1);
     private final CountDownLatch enableLatch = new CountDownLatch(1);
 
-    /**
-     * Reference to the central {@link Game} instance in the API
-     */
     @Inject
-    private Game game;
+    private ProxyServer proxy;
 
-    /**
-     * Reference to the sponge scheduler
-     */
-    private final Scheduler spongeScheduler;
-
-    /**
-     * Injected configuration directory for the plugin
-     */
     @Inject
-    @ConfigDir(sharedRoot = false)
+    @DataDirectory
     private Path configDirectory;
 
-    /**
-     * Injected plugin container for the plugin
-     */
     @Inject
-    private PluginContainer pluginContainer;
-
-    @Inject
-    public LPSpongeBootstrap(Logger logger, @SynchronousExecutor SpongeExecutorService syncExecutor, @AsynchronousExecutor SpongeExecutorService asyncExecutor) {
+    public LPVelocityBootstrap(Logger logger) {
         this.logger = new Slf4jPluginLogger(logger);
-        this.spongeScheduler = Sponge.getScheduler();
-        this.schedulerAdapter = new SpongeSchedulerAdapter(this, this.spongeScheduler, syncExecutor, asyncExecutor);
-        this.classLoader = new ReflectionClassLoader(this);
-        this.plugin = new LPSpongePlugin(this);
+        this.schedulerAdapter = new VelocitySchedulerAdapter(this);
+        this.classLoader = new VelocityClassLoader(this);
+        this.plugin = new LPVelocityPlugin(this);
     }
 
     // provide adapters
@@ -156,8 +127,8 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
 
     // lifecycle
 
-    @Listener(order = Order.FIRST)
-    public void onEnable(GamePreInitializationEvent event) {
+    @Subscribe(order = PostOrder.FIRST)
+    public void onEnable(ProxyInitializeEvent e) {
         this.startTime = System.currentTimeMillis();
         try {
             this.plugin.load();
@@ -172,13 +143,8 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
         }
     }
 
-    @Listener(order = Order.LATE)
-    public void onLateEnable(GamePreInitializationEvent event) {
-        this.plugin.lateEnable();
-    }
-
-    @Listener
-    public void onDisable(GameStoppingServerEvent event) {
+    @Subscribe(order = PostOrder.LAST)
+    public void onDisable(ProxyShutdownEvent e) {
         this.plugin.disable();
     }
 
@@ -194,16 +160,8 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
 
     // getters for the injected sponge instances
 
-    public Game getGame() {
-        return this.game;
-    }
-
-    public Scheduler getSpongeScheduler() {
-        return this.spongeScheduler;
-    }
-
-    public PluginContainer getPluginContainer() {
-        return this.pluginContainer;
+    public ProxyServer getProxy() {
+        return this.proxy;
     }
 
     // provide information about the plugin
@@ -222,34 +180,21 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
 
     @Override
     public PlatformType getType() {
-        return PlatformType.SPONGE;
+        return PlatformType.VELOCITY;
     }
 
     @Override
     public String getServerBrand() {
-        return getGame().getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getName();
+        return "Velocity";
     }
 
     @Override
     public String getServerVersion() {
-        PluginContainer api = getGame().getPlatform().getContainer(Platform.Component.API);
-        PluginContainer impl = getGame().getPlatform().getContainer(Platform.Component.IMPLEMENTATION);
-        return api.getName() + ": " + api.getVersion().orElse("null") + " - " + impl.getName() + ": " + impl.getVersion().orElse("null");
-    }
-    
-    @Override
-    public Path getDataDirectory() {
-        Path dataDirectory = this.game.getGameDirectory().toAbsolutePath().resolve("luckperms");
-        try {
-            MoreFiles.createDirectoriesIfNotExists(dataDirectory);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return dataDirectory;
+        return ProxyServer.class.getPackage().getImplementationVersion();
     }
 
     @Override
-    public Path getConfigDirectory() {
+    public Path getDataDirectory() {
         return this.configDirectory.toAbsolutePath();
     }
 
@@ -260,55 +205,37 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
 
     @Override
     public Optional<Player> getPlayer(UUID uuid) {
-        if (!getGame().isServerAvailable()) {
-            return Optional.empty();
-        }
-
-        return getGame().getServer().getPlayer(uuid);
+        return this.proxy.getPlayer(uuid);
     }
 
     @Override
     public Optional<UUID> lookupUuid(String username) {
-        if (!getGame().isServerAvailable()) {
-            return Optional.empty();
-        }
-
-        return getGame().getServer().getGameProfileManager().get(username)
-                .thenApply(p -> Optional.of(p.getUniqueId()))
-                .exceptionally(x -> Optional.empty())
-                .join();
+        return Optional.empty();
     }
 
     @Override
     public Optional<String> lookupUsername(UUID uuid) {
-        if (!getGame().isServerAvailable()) {
-            return Optional.empty();
-        }
-
-        return getGame().getServer().getGameProfileManager().get(uuid)
-                .thenApply(GameProfile::getName)
-                .exceptionally(x -> Optional.empty())
-                .join();
+        return Optional.empty();
     }
 
     @Override
     public int getPlayerCount() {
-        return getGame().isServerAvailable() ? getGame().getServer().getOnlinePlayers().size() : 0;
+        return this.proxy.getPlayerCount();
     }
 
     @Override
     public Stream<String> getPlayerList() {
-        return getGame().isServerAvailable() ? getGame().getServer().getOnlinePlayers().stream().map(Player::getName) : Stream.empty();
+        return this.proxy.getAllPlayers().stream().map(Player::getUsername);
     }
 
     @Override
     public Stream<UUID> getOnlinePlayers() {
-        return getGame().isServerAvailable() ? getGame().getServer().getOnlinePlayers().stream().map(Player::getUniqueId) : Stream.empty();
+        return this.proxy.getAllPlayers().stream().map(Player::getUniqueId);
     }
 
     @Override
     public boolean isPlayerOnline(UUID uuid) {
-        return getGame().isServerAvailable() ? getGame().getServer().getPlayer(uuid).map(Player::isOnline).orElse(false) : false;
+        Player player = this.proxy.getPlayer(uuid).orElse(null);
+        return player != null && player.isActive();
     }
-    
 }

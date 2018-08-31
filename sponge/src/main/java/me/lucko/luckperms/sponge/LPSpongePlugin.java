@@ -222,10 +222,10 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     }
 
     private Path resolveConfig() {
-        Path path = this.bootstrap.getConfigPath().resolve("luckperms.conf");
+        Path path = this.bootstrap.getConfigDirectory().resolve("luckperms.conf");
         if (!Files.exists(path)) {
             try {
-                MoreFiles.createDirectoriesIfNotExists(this.bootstrap.getConfigPath());
+                MoreFiles.createDirectoriesIfNotExists(this.bootstrap.getConfigDirectory());
                 try (InputStream is = getClass().getClassLoader().getResourceAsStream("luckperms.conf")) {
                     Files.copy(is, path);
                 }

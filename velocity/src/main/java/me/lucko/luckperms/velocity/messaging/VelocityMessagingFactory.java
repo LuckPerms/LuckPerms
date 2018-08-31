@@ -23,40 +23,30 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.messaging;
+package me.lucko.luckperms.velocity.messaging;
 
 import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
 import me.lucko.luckperms.api.messenger.Messenger;
 import me.lucko.luckperms.api.messenger.MessengerProvider;
-import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
+import me.lucko.luckperms.velocity.LPVelocityPlugin;
 
 import javax.annotation.Nonnull;
 
-public class BukkitMessagingFactory extends MessagingFactory<LPBukkitPlugin> {
-    public BukkitMessagingFactory(LPBukkitPlugin plugin) {
+public class VelocityMessagingFactory extends MessagingFactory<LPVelocityPlugin> {
+    public VelocityMessagingFactory(LPVelocityPlugin plugin) {
         super(plugin);
     }
 
     @Override
     protected InternalMessagingService getServiceFor(String messagingType) {
-        if (messagingType.equals("pluginmsg") || messagingType.equals("bungee") || messagingType.equals("velocity")) {
+        if (messagingType.equals("pluginmsg") || messagingType.equals("velocity")) {
             try {
                 return new LuckPermsMessagingService(getPlugin(), new PluginMessageMessengerProvider());
             } catch (Exception e) {
                 e.printStackTrace();
-            }
-        } else if (messagingType.equals("lilypad")) {
-            if (getPlugin().getBootstrap().getServer().getPluginManager().getPlugin("LilyPad-Connect") == null) {
-                getPlugin().getLogger().warn("LilyPad-Connect plugin not present.");
-            } else {
-                try {
-                    return new LuckPermsMessagingService(getPlugin(), new LilyPadMessengerProvider());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
             }
         }
 
@@ -75,23 +65,6 @@ public class BukkitMessagingFactory extends MessagingFactory<LPBukkitPlugin> {
         @Override
         public Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer) {
             PluginMessageMessenger messenger = new PluginMessageMessenger(getPlugin(), incomingMessageConsumer);
-            messenger.init();
-            return messenger;
-        }
-    }
-
-    private class LilyPadMessengerProvider implements MessengerProvider {
-
-        @Nonnull
-        @Override
-        public String getName() {
-            return "LilyPad";
-        }
-
-        @Nonnull
-        @Override
-        public Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer) {
-            LilyPadMessenger messenger = new LilyPadMessenger(getPlugin(), incomingMessageConsumer);
             messenger.init();
             return messenger;
         }
