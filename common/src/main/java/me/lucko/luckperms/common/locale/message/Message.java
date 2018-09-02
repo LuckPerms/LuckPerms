@@ -449,6 +449,7 @@ public enum Message {
 
     IMPORT_ALREADY_RUNNING("&cAnother import process is already running. Please wait for it to finish and try again.", true),
     EXPORT_ALREADY_RUNNING("&cAnother export process is already running. Please wait for it to finish and try again.", true),
+    FILE_NOT_WITHIN_DIRECTORY("&cError: File &4{}&c must be a direct child of the data directory.", true),
     IMPORT_LOG_DOESNT_EXIST("&cError: File &4{}&c does not exist.", true),
     IMPORT_LOG_NOT_READABLE("&cError: File &4{}&c is not readable.", true),
     IMPORT_LOG_FAILURE("&cAn unexpected error occured whilst reading from the log file.", true),

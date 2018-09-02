@@ -57,7 +57,14 @@ public class ImportCommand extends SingleCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        Path path = plugin.getBootstrap().getDataDirectory().resolve(args.get(0));
+        Path dataDirectory = plugin.getBootstrap().getDataDirectory();
+        Path path = dataDirectory.resolve(args.get(0));
+
+        if (!path.getParent().equals(dataDirectory) || path.getFileName().toString().equals("config.yml")) {
+            Message.FILE_NOT_WITHIN_DIRECTORY.send(sender, path.toString());
+            return CommandResult.INVALID_ARGS;
+        }
+
         if (!Files.exists(path)) {
             Message.IMPORT_LOG_DOESNT_EXIST.send(sender, path.toString());
             return CommandResult.INVALID_ARGS;
