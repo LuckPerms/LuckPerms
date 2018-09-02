@@ -114,15 +114,15 @@ public enum Dependency {
     MYSQL_DRIVER(
             "mysql",
             "mysql-connector-java",
-            "8.0.12",
-            "WwntuHAFEqUm6xCcMI6edS2es9kV9rHTO9vblwfth5k=",
+            "5.1.47",
+            "5PhASPOSsrN7r0ao1QjkuN2uKG0gnvmVueEYhSAcGSM=",
             Relocation.of("mysql", "com{}mysql")
     ),
     POSTGRESQL_DRIVER(
             "org{}postgresql",
             "postgresql",
-            "42.2.4",
-            "VaC2Pg/weQ5w+VzAt6JFMIW73IuQGKX6ypDj2ectMbg=",
+            "9.4.1212",
+            "DLKhWL4xrPIY4KThjI89usaKO8NIBkaHc/xECUsMNl0=",
             Relocation.of("postgresql", "org{}postgresql")
     ),
     H2_DRIVER(
