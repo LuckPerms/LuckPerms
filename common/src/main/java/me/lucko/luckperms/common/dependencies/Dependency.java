@@ -62,8 +62,8 @@ public enum Dependency {
     TEXT(
             "net{}kyori",
             "text",
-            "1.11-1.6.2",
-            "08EGxwOXOdnxvlEZxtGWr3335b/7RIAGd6iHxp0KysQ=",
+            "1.11-1.6.4",
+            "V821j+n8AWhAvLhHjfXQ+/4284Gn4oXTYYfLkLjvs8o=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     EVENT(
@@ -83,15 +83,15 @@ public enum Dependency {
     OKIO(
             "com{}squareup{}" + RelocationHelper.OKIO_STRING,
             RelocationHelper.OKIO_STRING,
-            "1.14.1",
-            "InCF6E8zEsc1QxiVJF3nwKe29qUK30KayCVqFQoR7ck=",
+            "1.15.0",
+            "aT+jGafohDMAYCsgQCO3Z08Qbry1d/LdWAchK2YRi9I=",
             Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
     ),
     OKHTTP(
             "com{}squareup{}" + RelocationHelper.OKHTTP3_STRING,
             "okhttp",
-            "3.10.0",
-            "Sso+VSr7HOtH+JVmhfYpWiduSfoD+QZvi2voO+xW+2Y=",
+            "3.11.0",
+            "4nx3QkSPgW2hyscrTKKDsNeSB0ngn13QrAF+QHFKLv4=",
             Relocation.allOf(
                     Relocation.of(RelocationHelper.OKHTTP3_STRING, RelocationHelper.OKHTTP3_STRING),
                     Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
@@ -107,22 +107,22 @@ public enum Dependency {
     MARIADB_DRIVER(
             "org{}mariadb{}jdbc",
             "mariadb-java-client",
-            "2.2.5",
-            "kFfgzoMFrFKirAFh/DgobV7vAu9NhdnhZLHD4/PCddI=",
+            "2.2.6",
+            "TSj72P1Oojmw75SC9Wznfi7xl6YNUjqO48hOuYT8dv4=",
             Relocation.of("mariadb", "org{}mariadb{}jdbc")
     ),
     MYSQL_DRIVER(
             "mysql",
             "mysql-connector-java",
-            "5.1.46",
-            "MSIIl2HmQD8C6Kge1KLWWi4QKXNGUboA8uqS2SD/ex4=",
+            "8.0.12",
+            "WwntuHAFEqUm6xCcMI6edS2es9kV9rHTO9vblwfth5k=",
             Relocation.of("mysql", "com{}mysql")
     ),
     POSTGRESQL_DRIVER(
             "org{}postgresql",
             "postgresql",
-            "9.4.1212",
-            "DLKhWL4xrPIY4KThjI89usaKO8NIBkaHc/xECUsMNl0=",
+            "42.2.4",
+            "VaC2Pg/weQ5w+VzAt6JFMIW73IuQGKX6ypDj2ectMbg=",
             Relocation.of("postgresql", "org{}postgresql")
     ),
     H2_DRIVER(
@@ -136,8 +136,8 @@ public enum Dependency {
     SQLITE_DRIVER(
             "org.xerial",
             "sqlite-jdbc",
-            "3.21.0",
-            "bglRaH4Y+vQFZV7TfOdsVLO3rJpauJ+IwjuRULAb45Y="
+            "3.23.1",
+            "1XCvY2or6Z4gvpUQ+2FaqBmyBZhXst1iWuy/93R2YzE="
             // we don't apply relocations to sqlite - it gets loaded via
             // an isolated classloader
     ),
@@ -163,8 +163,8 @@ public enum Dependency {
     MONGODB_DRIVER(
             "org.mongodb",
             "mongo-java-driver",
-            "3.7.1",
-            "yllBCqAZwWCNUoMPR0JWilqhVA46+9F47wIcnYOcoy4=",
+            "3.8.1",
+            "gIIEEA9QdRUVcI+CVh+w/py0NlLOD+TBNQ/cjNav1p4=",
             Relocation.allOf(
                     Relocation.of("mongodb", "com{}mongodb"),
                     Relocation.of("bson", "org{}bson")
@@ -184,8 +184,8 @@ public enum Dependency {
     COMMONS_POOL_2(
             "org.apache.commons",
             "commons-pool2",
-            "2.5.0",
-            "IRhwQ8eZcdnISLlxhA3oQdoOXE3zDJI6lpFBMfue+Wk=",
+            "2.6.0",
+            "kpPYiPvZCVFrhwCkvZHpglS4sf4Vr7bD1jVsnWckut4=",
             Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
     ),
     CONFIGURATE_CORE(
@@ -212,8 +212,8 @@ public enum Dependency {
     SNAKEYAML(
             "org.yaml",
             "snakeyaml",
-            "1.21",
-            "5DywaD9wgEuDPfqlrAMv8Uugx1jUoenq62ZAUV34P68=",
+            "1.22",
+            "2rQd+SF15BNbBI4lyB5s//a+4Fv0wo8gAEhYfDKcNJ8=",
             Relocation.of("yaml", "org{}yaml{}snakeyaml")
     ),
     CONFIGURATE_HOCON(

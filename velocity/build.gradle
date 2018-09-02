@@ -13,6 +13,13 @@ buildscript {
 apply plugin: "com.github.johnrengelman.shadow"
 apply plugin: "ninja.miserable.blossom"
 
+repositories {
+    maven {
+        name 'velocity-repo'
+        url 'https://repo.velocitypowered.com/snapshots/'
+    }
+}
+
 dependencies {
     compile project(':common')
 
