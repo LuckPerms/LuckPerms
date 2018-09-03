@@ -1,4 +1,4 @@
-![alt text](https://i.imgur.com/7TwJZ5e.png "Banner")
+![alt text](https://i.imgur.com/ToguFkQ.png "Banner")
 # LuckPerms [![Build Status](https://ci.lucko.me/job/LuckPerms/badge/icon)](https://ci.lucko.me/job/LuckPerms/) [![Javadocs](https://javadoc.io/badge/me.lucko.luckperms/luckperms-api.svg)](https://javadoc.io/doc/me.lucko.luckperms/luckperms-api) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/me.lucko.luckperms/luckperms-api/badge.svg)](https://maven-badges.herokuapp.com/maven-central/me.lucko.luckperms/luckperms-api)
 
 LuckPerms is an advanced permissions implementation aiming to be a fast, reliable and flexible alternative to existing permission plugins. The project's main goals are centered around high performance and a wide feature set, filling the gaps of functionality and building upon existing features found in other plugins.
