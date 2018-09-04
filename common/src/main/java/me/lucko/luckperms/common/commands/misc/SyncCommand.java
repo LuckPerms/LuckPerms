@@ -45,7 +45,7 @@ public class SyncCommand extends SingleCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         Message.UPDATE_TASK_REQUEST.send(sender);
-        plugin.getUpdateTaskBuffer().request().join();
+        plugin.getSyncTaskBuffer().request().join();
         Message.UPDATE_TASK_COMPLETE.send(sender);
         return CommandResult.SUCCESS;
     }

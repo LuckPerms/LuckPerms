@@ -239,7 +239,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
                 return;
             }
 
-            this.plugin.getUpdateTaskBuffer().request();
+            this.plugin.getSyncTaskBuffer().request();
         } else if (message instanceof UserUpdateMessage) {
             UserUpdateMessage msg = (UserUpdateMessage) message;
 

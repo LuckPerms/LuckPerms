@@ -29,8 +29,6 @@ import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.ApiRegistrationUtil;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
-import me.lucko.luckperms.common.buffers.BufferedRequest;
-import me.lucko.luckperms.common.buffers.UpdateTaskBuffer;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.config.AbstractConfiguration;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -52,7 +50,7 @@ import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.storage.dao.file.FileWatcher;
-import me.lucko.luckperms.common.tasks.UpdateTask;
+import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 
@@ -75,7 +73,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private FileWatcher fileWatcher = null;
     private Storage storage;
     private InternalMessagingService messagingService = null;
-    private BufferedRequest<Void> updateTaskBuffer;
+    private SyncTask.Buffer syncTaskBuffer;
     private InheritanceHandler inheritanceHandler;
     private CalculatorFactory calculatorFactory;
     private LuckPermsApiProvider apiProvider;
@@ -133,7 +131,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         this.messagingService = provideMessagingFactory().getInstance();
 
         // setup the update task buffer
-        this.updateTaskBuffer = new UpdateTaskBuffer(this);
+        this.syncTaskBuffer = new SyncTask.Buffer(this);
 
         // register commands
         registerCommands();
@@ -164,13 +162,13 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         // schedule update tasks
         int mins = getConfiguration().get(ConfigKeys.SYNC_TIME);
         if (mins > 0) {
-            getBootstrap().getScheduler().asyncRepeating(() -> this.updateTaskBuffer.request(), mins, TimeUnit.MINUTES);
+            getBootstrap().getScheduler().asyncRepeating(() -> this.syncTaskBuffer.request(), mins, TimeUnit.MINUTES);
         }
 
         // run an update instantly.
         getLogger().info("Performing initial data load...");
         try {
-            new UpdateTask(this, true).run();
+            new SyncTask(this, true).run();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -292,8 +290,8 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public BufferedRequest<Void> getUpdateTaskBuffer() {
-        return this.updateTaskBuffer;
+    public SyncTask.Buffer getSyncTaskBuffer() {
+        return this.syncTaskBuffer;
     }
 
     @Override

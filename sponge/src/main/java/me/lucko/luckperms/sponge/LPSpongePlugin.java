@@ -212,7 +212,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    public void onPostUpdate() {
+    public void performPlatformDataSync() {
         for (LPSubjectCollection collection : this.service.getLoadedCollections().values()) {
             if (collection instanceof PersistedCollection) {
                 ((PersistedCollection) collection).loadAll();

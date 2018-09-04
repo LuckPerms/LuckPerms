@@ -187,7 +187,7 @@ public class SeparatedConfigurateDao extends AbstractConfigurateDao {
 
                 String groupName = s.substring(0, s.length() - this.fileExtension.length());
                 this.plugin.getLogger().info("[FileWatcher] Detected change in group file for " + groupName + " - reloading...");
-                this.plugin.getUpdateTaskBuffer().request();
+                this.plugin.getSyncTaskBuffer().request();
             });
 
             this.trackWatcher = watcher.getWatcher(this.tracksDirectory);

@@ -87,7 +87,7 @@ public class Importer implements Runnable {
         this.notify.forEach(s -> Message.IMPORT_START.send(s));
 
         // start an update task in the background - we'll #join this later
-        CompletableFuture<Void> updateTask = CompletableFuture.runAsync(() -> this.commandManager.getPlugin().getUpdateTaskBuffer().requestDirectly());
+        CompletableFuture<Void> updateTask = CompletableFuture.runAsync(() -> this.commandManager.getPlugin().getSyncTaskBuffer().requestDirectly());
 
         this.notify.forEach(s -> Message.IMPORT_INFO.send(s, "Processing commands..."));
 

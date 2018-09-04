@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.plugin;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
-import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.abstraction.Command;
@@ -51,6 +50,7 @@ import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.dao.file.FileWatcher;
+import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 
@@ -249,16 +249,16 @@ public interface LuckPermsPlugin {
     }
 
     /**
-     * Gets the update task buffer of the platform, used for scheduling and running update tasks.
+     * Gets the sync task buffer of the platform, used for scheduling and running sync tasks.
      *
-     * @return the update task buffer instance
+     * @return the sync task buffer instance
      */
-    BufferedRequest<Void> getUpdateTaskBuffer();
+    SyncTask.Buffer getSyncTaskBuffer();
 
     /**
      * Called at the end of the sync task.
      */
-    default void onPostUpdate() {
+    default void performPlatformDataSync() {
 
     }
 

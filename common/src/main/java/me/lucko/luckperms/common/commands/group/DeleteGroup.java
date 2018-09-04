@@ -83,7 +83,7 @@ public class DeleteGroup extends SingleCommand {
                 .action("delete")
                 .build().submit(plugin, sender);
 
-        plugin.getUpdateTaskBuffer().request();
+        plugin.getSyncTaskBuffer().request();
         return CommandResult.SUCCESS;
     }
 

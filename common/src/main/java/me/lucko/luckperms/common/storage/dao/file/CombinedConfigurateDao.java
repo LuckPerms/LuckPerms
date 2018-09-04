@@ -201,11 +201,11 @@ public class CombinedConfigurateDao extends AbstractConfigurateDao {
                 if (path.getFileName().equals(this.usersFile.getFileName())) {
                     this.plugin.getLogger().info("[FileWatcher] Detected change in users file - reloading...");
                     this.usersLoader.reload();
-                    this.plugin.getUpdateTaskBuffer().request();
+                    this.plugin.getSyncTaskBuffer().request();
                 } else if (path.getFileName().equals(this.groupsFile.getFileName())) {
                     this.plugin.getLogger().info("[FileWatcher] Detected change in groups file - reloading...");
                     this.groupsLoader.reload();
-                    this.plugin.getUpdateTaskBuffer().request();
+                    this.plugin.getSyncTaskBuffer().request();
                 } else if (path.getFileName().equals(this.tracksFile.getFileName())) {
                     this.plugin.getLogger().info("[FileWatcher] Detected change in tracks file - reloading...");
                     this.tracksLoader.reload();

@@ -113,7 +113,7 @@ public class LuckPermsApiProvider implements LuckPermsApi {
     @Nonnull
     @Override
     public CompletableFuture<Void> runUpdateTask() {
-        return this.plugin.getUpdateTaskBuffer().request();
+        return this.plugin.getSyncTaskBuffer().request();
     }
 
     @Nonnull

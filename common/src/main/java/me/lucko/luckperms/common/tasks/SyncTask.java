@@ -26,17 +26,19 @@
 package me.lucko.luckperms.common.tasks;
 
 import me.lucko.luckperms.api.event.cause.CreationCause;
+import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
- * System wide update task for LuckPerms.
+ * System wide sync task for LuckPerms.
  *
  * <p>Ensures that all local data is consistent with the storage.</p>
  */
-public class UpdateTask implements Runnable {
+public class SyncTask implements Runnable {
     private final LuckPermsPlugin plugin;
 
     /**
@@ -44,7 +46,7 @@ public class UpdateTask implements Runnable {
      */
     private final boolean initialUpdate;
 
-    public UpdateTask(LuckPermsPlugin plugin, boolean initialUpdate) {
+    public SyncTask(LuckPermsPlugin plugin, boolean initialUpdate) {
         this.plugin = plugin;
         this.initialUpdate = initialUpdate;
     }
@@ -76,8 +78,23 @@ public class UpdateTask implements Runnable {
             userUpdateFut.join();
         }
 
-        this.plugin.onPostUpdate();
+        this.plugin.performPlatformDataSync();
 
         this.plugin.getEventFactory().handlePostSync();
+    }
+
+    public static class Buffer extends BufferedRequest<Void> {
+        private final LuckPermsPlugin plugin;
+
+        public Buffer(LuckPermsPlugin plugin) {
+            super(500L, TimeUnit.MILLISECONDS, plugin.getBootstrap().getScheduler());
+            this.plugin = plugin;
+        }
+
+        @Override
+        protected Void perform() {
+            new SyncTask(this.plugin, false).run();
+            return null;
+        }
     }
 }
