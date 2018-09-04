@@ -39,8 +39,6 @@ import me.lucko.luckperms.common.metastacking.MetaStack;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.annotation.Nonnull;
 
@@ -48,7 +46,6 @@ import javax.annotation.Nonnull;
  * Holds cached meta for a given context
  */
 public class MetaCache implements MetaData {
-    private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     /**
      * The contexts this container is holding data for
@@ -67,51 +64,40 @@ public class MetaCache implements MetaData {
     }
 
     public void loadMeta(MetaAccumulator meta) {
-        this.lock.writeLock().lock();
-        try {
-            this.metaMultimap = ImmutableListMultimap.copyOf(meta.getMeta());
+        meta.complete();
 
-            //noinspection unchecked
-            Map<String, List<String>> metaMap = (Map) this.metaMultimap.asMap();
-            ImmutableMap.Builder<String, String> metaMapBuilder = ImmutableMap.builder();
+        this.metaMultimap = ImmutableListMultimap.copyOf(meta.getMeta());
 
-            for (Map.Entry<String, List<String>> e : metaMap.entrySet()) {
-                if (e.getValue().isEmpty()) {
-                    continue;
-                }
+        //noinspection unchecked
+        Map<String, List<String>> metaMap = (Map) this.metaMultimap.asMap();
+        ImmutableMap.Builder<String, String> metaMapBuilder = ImmutableMap.builder();
 
-                // take the value which was accumulated first
-                metaMapBuilder.put(e.getKey(), e.getValue().get(0));
+        for (Map.Entry<String, List<String>> e : metaMap.entrySet()) {
+            if (e.getValue().isEmpty()) {
+                continue;
             }
-            this.meta = metaMapBuilder.build();
 
-            this.prefixes = ImmutableSortedMap.copyOfSorted(meta.getPrefixes());
-            this.suffixes = ImmutableSortedMap.copyOfSorted(meta.getSuffixes());
-            this.prefixStack = meta.getPrefixStack();
-            this.suffixStack = meta.getSuffixStack();
-        } finally {
-            this.lock.writeLock().unlock();
+            // take the value which was accumulated first
+            metaMapBuilder.put(e.getKey(), e.getValue().get(0));
         }
+        this.meta = metaMapBuilder.build();
+
+        this.prefixes = ImmutableSortedMap.copyOfSorted(meta.getPrefixes());
+        this.suffixes = ImmutableSortedMap.copyOfSorted(meta.getSuffixes());
+        this.prefixStack = meta.getPrefixStack();
+        this.suffixStack = meta.getSuffixStack();
     }
 
     @Override
     public String getPrefix() {
-        this.lock.readLock().lock();
-        try {
-            return this.prefixStack == null ? null : this.prefixStack.toFormattedString();
-        } finally {
-            this.lock.readLock().unlock();
-        }
+        MetaStack prefixStack = this.prefixStack;
+        return prefixStack == null ? null : prefixStack.toFormattedString();
     }
 
     @Override
     public String getSuffix() {
-        this.lock.readLock().lock();
-        try {
-            return this.suffixStack == null ? null : this.suffixStack.toFormattedString();
-        } finally {
-            this.lock.readLock().unlock();
-        }
+        MetaStack suffixStack = this.suffixStack;
+        return suffixStack == null ? null : suffixStack.toFormattedString();
     }
 
     @Nonnull

@@ -362,6 +362,7 @@ public class HolderSubjectData implements LPSubjectData {
             ));
 
             MetaAccumulator metaAccumulator = this.holder.accumulateMeta(null, Contexts.of(contexts, Contexts.global().getSettings()));
+            metaAccumulator.complete();
             int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0);
             priority += 10;
 

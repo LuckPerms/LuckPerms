@@ -262,8 +262,8 @@ public class VaultChatHook extends AbstractVaultChat {
 
             // find the max inherited priority & add 10
             MetaAccumulator metaAccumulator = holder.accumulateMeta(null, createContextForWorldSet(world));
-            int priority = (type == ChatMetaType.PREFIX ? metaAccumulator.getPrefixes() : metaAccumulator.getSuffixes()).keySet().stream()
-                    .mapToInt(e -> e).max().orElse(0) + 10;
+            metaAccumulator.complete();
+            int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0) + 10;
 
             Node.Builder chatMetaNode = NodeFactory.buildChatMetaNode(type, priority, value);
             chatMetaNode.setServer(this.permissionHook.getVaultServer());

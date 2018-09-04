@@ -44,18 +44,32 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Holds temporary mutable meta whilst this object is passed up the
  * inheritance tree to accumulate meta from parents
  */
 public class MetaAccumulator {
+
     public static MetaAccumulator makeFromConfig(LuckPermsPlugin plugin) {
         return new MetaAccumulator(
                 new SimpleMetaStack(plugin.getConfiguration().get(ConfigKeys.PREFIX_FORMATTING_OPTIONS), ChatMetaType.PREFIX),
                 new SimpleMetaStack(plugin.getConfiguration().get(ConfigKeys.SUFFIX_FORMATTING_OPTIONS), ChatMetaType.SUFFIX)
         );
     }
+
+    /**
+     * Represents the current state of a {@link MetaAccumulator}.
+     */
+    private enum State {
+        /** Marks that the accumulator is still gaining (accumulating) new data. */
+        ACCUMULATING,
+        /** Marks that the process of gaining (accumulating) new data is complete. */
+        COMPLETE
+    }
+
+    private final AtomicReference<State> state = new AtomicReference<>(State.ACCUMULATING);
 
     private final ListMultimap<String, String> meta;
     private final SortedMap<Integer, String> prefixes;
@@ -75,7 +89,34 @@ public class MetaAccumulator {
         this.suffixStack = suffixStack;
     }
 
+    private void ensureState(State state) {
+        if (this.state.get() != state) {
+            throw new IllegalStateException("State must be " + state + ", but is actually " + this.state.get());
+        }
+    }
+
+    /**
+     * "Completes" the accumulator, preventing any further changes.
+     *
+     * Also performs some final processing on the accumulators state, before
+     * data is read.
+     */
+    public void complete() {
+        if (!this.state.compareAndSet(State.ACCUMULATING, State.COMPLETE)) {
+            return;
+        }
+
+        // perform final changes
+        if (!this.meta.containsKey(NodeTypes.WEIGHT_KEY) && this.weight != 0) {
+            this.meta.put(NodeTypes.WEIGHT_KEY, String.valueOf(this.weight));
+        }
+    }
+
+    // accumulate methods
+
     public void accumulateNode(LocalizedNode n) {
+        ensureState(State.ACCUMULATING);
+
         n.getTypeData(MetaType.KEY).ifPresent(metaType ->
                 this.meta.put(metaType.getKey(), metaType.getValue())
         );
@@ -92,60 +133,60 @@ public class MetaAccumulator {
     }
 
     public void accumulateMeta(String key, String value) {
+        ensureState(State.ACCUMULATING);
         this.meta.put(key, value);
     }
 
     public void accumulateWeight(int weight) {
+        ensureState(State.ACCUMULATING);
         this.weight = Math.max(this.weight, weight);
     }
 
-    // We can assume that if this method is being called, this holder is effectively finalized.
-    // (it's not going to accumulate more nodes)
-    // Therefore, it should be ok to set the weight meta key, if not already present.
-    public ListMultimap<String, String> getMeta() {
-        if (!this.meta.containsKey(NodeTypes.WEIGHT_KEY) && this.weight != 0) {
-            this.meta.put(NodeTypes.WEIGHT_KEY, String.valueOf(this.weight));
-        }
+    // read methods
 
+    public ListMultimap<String, String> getMeta() {
+        ensureState(State.COMPLETE);
         return this.meta;
     }
 
     public Map<Integer, String> getChatMeta(ChatMetaType type) {
+        ensureState(State.COMPLETE);
         return type == ChatMetaType.PREFIX ? this.prefixes : this.suffixes;
     }
 
-    public MetaStack getStack(ChatMetaType type) {
-        return type == ChatMetaType.PREFIX ? this.prefixStack : this.suffixStack;
-    }
-
     public SortedMap<Integer, String> getPrefixes() {
+        ensureState(State.COMPLETE);
         return this.prefixes;
     }
 
     public SortedMap<Integer, String> getSuffixes() {
+        ensureState(State.COMPLETE);
         return this.suffixes;
     }
 
     public int getWeight() {
+        ensureState(State.COMPLETE);
         return this.weight;
     }
 
     public MetaStack getPrefixStack() {
+        ensureState(State.COMPLETE);
         return this.prefixStack;
     }
 
     public MetaStack getSuffixStack() {
+        ensureState(State.COMPLETE);
         return this.suffixStack;
     }
 
     @Override
     public String toString() {
         return "MetaAccumulator(" +
-                "meta=" + this.getMeta() + ", " +
-                "prefixes=" + this.getPrefixes() + ", " +
-                "suffixes=" + this.getSuffixes() + ", " +
-                "weight=" + this.getWeight() + ", " +
-                "prefixStack=" + this.getPrefixStack() + ", " +
-                "suffixStack=" + this.getSuffixStack() + ")";
+                "meta=" + this.meta + ", " +
+                "prefixes=" + this.prefixes + ", " +
+                "suffixes=" + this.suffixes + ", " +
+                "weight=" + this.weight + ", " +
+                "prefixStack=" + this.prefixStack + ", " +
+                "suffixStack=" + this.suffixStack + ")";
     }
 }
