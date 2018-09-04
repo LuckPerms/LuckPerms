@@ -51,17 +51,14 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * An implementation of the Vault {@link Permission} API using LuckPerms.
  *
- * Methods which change the state of data objects are likely to return immediately.
- *
  * LuckPerms is a multithreaded permissions plugin, and some actions require considerable
  * time to execute. (database queries, re-population of caches, etc) In these cases, the
- * methods will return immediately and the change will be executed asynchronously.
+ * operations required to make the edit apply will be processed immediately, but the process
+ * of saving the change to the plugin storage will happen in the background.
  *
  * Methods that have to query data from the database will throw exceptions when called
  * from the main thread. Users of the Vault API expect these methods to be "main thread friendly",
@@ -73,21 +70,13 @@ public class VaultPermissionHook extends AbstractVaultPermission {
     // the plugin instance
     private final LPBukkitPlugin plugin;
 
-    // an executor for Vault modifications.
-    private final ExecutorService executor;
-
     public VaultPermissionHook(LPBukkitPlugin plugin) {
         this.plugin = plugin;
-        this.executor = Executors.newSingleThreadExecutor();
         this.worldMappingFunction = world -> isIgnoreWorld() ? null : world;
     }
 
     public LPBukkitPlugin getPlugin() {
         return this.plugin;
-    }
-
-    public ExecutorService getExecutor() {
-        return this.executor;
     }
 
     @Override
@@ -119,9 +108,9 @@ public class VaultPermissionHook extends AbstractVaultPermission {
         }
 
         // lookup a username from the database
-        UUID uuid = plugin.getStorage().getPlayerUuid(player.toLowerCase()).join();
+        UUID uuid = this.plugin.getStorage().getPlayerUuid(player.toLowerCase()).join();
         if (uuid == null) {
-            uuid = plugin.getBootstrap().lookupUuid(player).orElse(null);
+            uuid = this.plugin.getBootstrap().lookupUuid(player).orElse(null);
         }
 
         // unable to find a user, throw an exception
@@ -186,8 +175,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
         Objects.requireNonNull(permission, "permission");
 
         User user = lookupUser(uuid);
-        holderAddPermission(user, permission, world);
-        return true;
+        return holderAddPermission(user, permission, world);
     }
 
     @Override
@@ -196,8 +184,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
         Objects.requireNonNull(permission, "permission");
 
         User user = lookupUser(uuid);
-        holderRemovePermission(user, permission, world);
-        return true;
+        return holderRemovePermission(user, permission, world);
     }
 
     @Override
@@ -295,8 +282,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
             return false;
         }
 
-        holderAddPermission(group, permission, world);
-        return true;
+        return holderAddPermission(group, permission, world);
     }
 
     @Override
@@ -309,8 +295,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
             return false;
         }
 
-        holderRemovePermission(group, permission, world);
-        return true;
+        return holderRemovePermission(group, permission, world);
     }
 
     // utility methods for getting user and group instances
@@ -380,7 +365,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
 
     // utility methods for modifying the state of PermissionHolders
 
-    private void holderAddPermission(PermissionHolder holder, String permission, String world) {
+    private boolean holderAddPermission(PermissionHolder holder, String permission, String world) {
         Objects.requireNonNull(permission, "permission is null");
         Preconditions.checkArgument(!permission.isEmpty(), "permission is an empty string");
 
@@ -388,14 +373,13 @@ public class VaultPermissionHook extends AbstractVaultPermission {
             logMsg("#holderAddPermission: %s - %s - %s", holder.getFriendlyName(), permission, world);
         }
 
-        this.executor.execute(() -> {
-            if (holder.setPermission(NodeFactory.make(permission, true, getVaultServer(), world)).asBoolean()) {
-                holderSave(holder);
-            }
-        });
+        if (holder.setPermission(NodeFactory.make(permission, true, getVaultServer(), world)).asBoolean()) {
+            return holderSave(holder);
+        }
+        return false;
     }
 
-    private void holderRemovePermission(PermissionHolder holder, String permission, String world) {
+    private boolean holderRemovePermission(PermissionHolder holder, String permission, String world) {
         Objects.requireNonNull(permission, "permission is null");
         Preconditions.checkArgument(!permission.isEmpty(), "permission is an empty string");
 
@@ -403,22 +387,32 @@ public class VaultPermissionHook extends AbstractVaultPermission {
             logMsg("#holderRemovePermission: %s - %s - %s", holder.getFriendlyName(), permission, world);
         }
 
-        this.executor.execute(() -> {
-            if (holder.unsetPermission(NodeFactory.make(permission, getVaultServer(), world)).asBoolean()) {
-                holderSave(holder);
-            }
-        });
+        if (holder.unsetPermission(NodeFactory.make(permission, getVaultServer(), world)).asBoolean()) {
+            return holderSave(holder);
+        }
+        return false;
     }
 
-    void holderSave(PermissionHolder holder) {
+    boolean holderSave(PermissionHolder holder) {
         if (holder.getType().isUser()) {
             User u = (User) holder;
+
+            // we don't need to join this call - the save operation
+            // can happen in the background.
             this.plugin.getStorage().saveUser(u);
-        }
-        if (holder.getType().isGroup()) {
+        } else if (holder.getType().isGroup()) {
             Group g = (Group) holder;
-            this.plugin.getStorage().saveGroup(g).thenRunAsync(() -> this.plugin.getUpdateTaskBuffer().request(), this.plugin.getBootstrap().getScheduler().async());
+
+            // invalidate caches - they have potentially been affected by
+            // this change.
+            this.plugin.getGroupManager().invalidateAllGroupCaches();
+            this.plugin.getUserManager().invalidateAllUserCaches();
+
+            // we don't need to join this call - the save operation
+            // can happen in the background.
+            this.plugin.getStorage().saveGroup(g);
         }
+        return true;
     }
 
     // helper methods to just pull values from the config.

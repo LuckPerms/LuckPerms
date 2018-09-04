@@ -29,6 +29,7 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.managers.AbstractManager;
+import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
@@ -151,6 +152,11 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
                 () -> this.plugin.getBootstrap().getOnlinePlayers().forEach(u -> this.plugin.getStorage().loadUser(u, null).join()),
                 this.plugin.getBootstrap().getScheduler().async()
         );
+    }
+
+    @Override
+    public void invalidateAllUserCaches() {
+        getAll().values().forEach(PermissionHolder::invalidateCachedData);
     }
 
     /**

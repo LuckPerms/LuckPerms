@@ -60,7 +60,8 @@ public class ExpireTemporaryTask implements Runnable {
         }
 
         if (groupChanges) {
-            this.plugin.getUpdateTaskBuffer().request();
+            this.plugin.getGroupManager().invalidateAllGroupCaches();
+            this.plugin.getUserManager().invalidateAllUserCaches();
         }
     }
 

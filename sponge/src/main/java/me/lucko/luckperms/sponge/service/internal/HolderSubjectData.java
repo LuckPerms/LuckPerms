@@ -451,7 +451,9 @@ public class HolderSubjectData implements LPSubjectData {
         if (this.type == NodeMapType.TRANSIENT) {
             // don't bother saving to primary storage. just refresh
             if (t.getType().isGroup()) {
-                return this.service.getPlugin().getUpdateTaskBuffer().request();
+                this.service.getPlugin().getGroupManager().invalidateAllGroupCaches();
+                this.service.getPlugin().getUserManager().invalidateAllUserCaches();
+                return CompletableFuture.completedFuture(null);
             }
         }
 
@@ -461,8 +463,9 @@ public class HolderSubjectData implements LPSubjectData {
             return this.service.getPlugin().getStorage().saveUser(user);
         } else {
             Group group = ((Group) t);
-            return this.service.getPlugin().getStorage().saveGroup(group)
-                    .thenCompose(v -> this.service.getPlugin().getUpdateTaskBuffer().request());
+            this.service.getPlugin().getGroupManager().invalidateAllGroupCaches();
+            this.service.getPlugin().getUserManager().invalidateAllUserCaches();
+            return this.service.getPlugin().getStorage().saveGroup(group);
         }
     }
 }

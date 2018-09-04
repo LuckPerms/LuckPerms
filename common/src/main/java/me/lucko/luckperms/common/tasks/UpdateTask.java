@@ -70,6 +70,7 @@ public class UpdateTask implements Runnable {
         this.plugin.getStorage().loadAllTracks().join();
 
         // Refresh all online users.
+        this.plugin.getUserManager().invalidateAllUserCaches();
         CompletableFuture<Void> userUpdateFut = this.plugin.getUserManager().updateAllUsers();
         if (!this.initialUpdate) {
             userUpdateFut.join();

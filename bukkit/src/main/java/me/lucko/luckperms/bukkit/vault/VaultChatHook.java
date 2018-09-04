@@ -50,11 +50,10 @@ import java.util.UUID;
 /**
  * An implementation of the Vault {@link Chat} API using LuckPerms.
  *
- * Methods which change the state of data objects are likely to return immediately.
- *
  * LuckPerms is a multithreaded permissions plugin, and some actions require considerable
  * time to execute. (database queries, re-population of caches, etc) In these cases, the
- * methods will return immediately and the change will be executed asynchronously.
+ * operations required to make the edit apply will be processed immediately, but the process
+ * of saving the change to the plugin storage will happen in the background.
  *
  * Methods that have to query data from the database will throw exceptions when called
  * from the main thread. Users of the Vault API expect these methods to be "main thread friendly",
@@ -251,27 +250,25 @@ public class VaultChatHook extends AbstractVaultChat {
             logMsg("#setChatMeta: %s - %s - %s - %s", holder.getFriendlyName(), type, value, world);
         }
 
-        this.permissionHook.getExecutor().execute(() -> {
-            // remove all prefixes/suffixes directly set on the user/group
-            holder.removeIf(type::matches);
+        // remove all prefixes/suffixes directly set on the user/group
+        holder.removeIf(type::matches);
 
-            if (value == null) {
-                this.permissionHook.holderSave(holder);
-                return;
-            }
-
-            // find the max inherited priority & add 10
-            MetaAccumulator metaAccumulator = holder.accumulateMeta(null, createContextForWorldSet(world));
-            metaAccumulator.complete();
-            int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0) + 10;
-
-            Node.Builder chatMetaNode = NodeFactory.buildChatMetaNode(type, priority, value);
-            chatMetaNode.setServer(this.permissionHook.getVaultServer());
-            chatMetaNode.setWorld(world);
-
-            holder.setPermission(chatMetaNode.build());
+        if (value == null) {
             this.permissionHook.holderSave(holder);
-        });
+            return;
+        }
+
+        // find the max inherited priority & add 10
+        MetaAccumulator metaAccumulator = holder.accumulateMeta(null, createContextForWorldSet(world));
+        metaAccumulator.complete();
+        int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0) + 10;
+
+        Node.Builder chatMetaNode = NodeFactory.buildChatMetaNode(type, priority, value);
+        chatMetaNode.setServer(this.permissionHook.getVaultServer());
+        chatMetaNode.setWorld(world);
+
+        holder.setPermission(chatMetaNode.build()); // assume success
+        this.permissionHook.holderSave(holder);
     }
 
     private void setMeta(PermissionHolder holder, String key, Object value, String world) {
@@ -279,27 +276,25 @@ public class VaultChatHook extends AbstractVaultChat {
             logMsg("#setMeta: %s - %s - %s - %s", holder.getFriendlyName(), key, value, world);
         }
 
-        this.permissionHook.getExecutor().execute(() -> {
-            holder.removeIf(n -> n.isMeta() && n.getMeta().getKey().equals(key));
+        holder.removeIf(n -> n.isMeta() && n.getMeta().getKey().equals(key));
 
-            if (value == null) {
-                this.permissionHook.holderSave(holder);
-                return;
-            }
-
-            Node.Builder metaNode;
-            if (key.equalsIgnoreCase(NodeTypes.PREFIX_KEY) || key.equalsIgnoreCase(NodeTypes.SUFFIX_KEY)) {
-                metaNode = NodeFactory.buildChatMetaNode(ChatMetaType.valueOf(key.toUpperCase()), 100, value.toString());
-            } else {
-                metaNode = NodeFactory.buildMetaNode(key, value.toString());
-            }
-
-            metaNode.setServer(this.permissionHook.getVaultServer());
-            metaNode.setWorld(world);
-
-            holder.setPermission(metaNode.build());
+        if (value == null) {
             this.permissionHook.holderSave(holder);
-        });
+            return;
+        }
+
+        Node.Builder metaNode;
+        if (key.equalsIgnoreCase(NodeTypes.PREFIX_KEY) || key.equalsIgnoreCase(NodeTypes.SUFFIX_KEY)) {
+            metaNode = NodeFactory.buildChatMetaNode(ChatMetaType.valueOf(key.toUpperCase()), 100, value.toString());
+        } else {
+            metaNode = NodeFactory.buildMetaNode(key, value.toString());
+        }
+
+        metaNode.setServer(this.permissionHook.getVaultServer());
+        metaNode.setWorld(world);
+
+        holder.setPermission(metaNode.build()); // assume success
+        this.permissionHook.holderSave(holder);
     }
 
     private Contexts createContextForWorldSet(String world) {

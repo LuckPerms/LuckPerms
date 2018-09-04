@@ -80,8 +80,13 @@ public interface UserManager<T extends User> extends Manager<UserIdentifier, Use
     void cleanup(User user);
 
     /**
-     * Reloads the data of all online users
+     * Reloads the data of all *online* users
      */
     CompletableFuture<Void> updateAllUsers();
+
+    /**
+     * Invalidates the cached data for *loaded* users.
+     */
+    void invalidateAllUserCaches();
 
 }

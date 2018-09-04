@@ -130,7 +130,8 @@ public final class StorageAssistant {
             return;
         }
 
-        plugin.getUpdateTaskBuffer().requestDirectly();
+        plugin.getGroupManager().invalidateAllGroupCaches();
+        plugin.getUserManager().invalidateAllUserCaches();
 
         Optional<InternalMessagingService> messagingService = plugin.getMessagingService();
         if (messagingService.isPresent() && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
@@ -154,7 +155,8 @@ public final class StorageAssistant {
             return;
         }
 
-        plugin.getUpdateTaskBuffer().requestDirectly();
+        plugin.getGroupManager().invalidateAllGroupCaches();
+        plugin.getUserManager().invalidateAllUserCaches();
 
         Optional<InternalMessagingService> messagingService = plugin.getMessagingService();
         if (messagingService.isPresent() && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {

@@ -38,4 +38,9 @@ public interface GroupManager<T extends Group> extends Manager<String, Group, T>
      */
     T getByDisplayName(String name);
 
+    /**
+     * Invalidates the cached data for *loaded* groups.
+     */
+    void invalidateAllGroupCaches();
+
 }
