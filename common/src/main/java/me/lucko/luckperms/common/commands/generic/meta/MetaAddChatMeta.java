@@ -77,7 +77,8 @@ public class MetaAddChatMeta extends SharedSubCommand {
         String meta = ArgumentParser.parseString(1, args);
         MutableContextSet context = ArgumentParser.parseContext(2, args, plugin);
 
-        if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
+                ArgumentPermissions.checkGroup(plugin, sender, holder, context)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }

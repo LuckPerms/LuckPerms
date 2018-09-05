@@ -280,6 +280,11 @@ primary-group-calculation: parents-by-weight
 #   the arguments given within the command.
 argument-based-command-permissions: false
 
+# If the plugin should check whether senders are a member of a given group before they're able to
+# edit the groups data or add/remove other users to/from it.
+# Note: these limitations do not apply to the web editor!
+require-sender-group-membership-to-modify: false
+
 # If the plugin should send log notifications to users whenever permissions are modified.
 #
 # - Notifications are only sent to those with the appropriate permission to receive them

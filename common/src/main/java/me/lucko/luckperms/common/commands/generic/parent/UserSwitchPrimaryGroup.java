@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.commands.generic.parent;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.StandardNodeEquality;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
@@ -76,6 +77,14 @@ public class UserSwitchPrimaryGroup extends SharedSubCommand {
         if (group == null) {
             Message.DOES_NOT_EXIST.send(sender, args.get(0).toLowerCase());
             return CommandResult.INVALID_ARGS;
+        }
+
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, ContextSet.empty()) ||
+                ArgumentPermissions.checkGroup(plugin, sender, holder, ContextSet.empty()) ||
+                ArgumentPermissions.checkGroup(plugin, sender, group, ContextSet.empty()) ||
+                ArgumentPermissions.checkArguments(plugin, sender, permission, group.getName())) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
         }
 
         if (user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(group.getName())) {

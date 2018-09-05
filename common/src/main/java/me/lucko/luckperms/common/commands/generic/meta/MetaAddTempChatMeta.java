@@ -82,7 +82,8 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
         TemporaryMergeBehaviour modifier = ArgumentParser.parseTemporaryModifier(3, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
         MutableContextSet context = ArgumentParser.parseContext(3, args, plugin);
 
-        if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
+                ArgumentPermissions.checkGroup(plugin, sender, holder, context)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }

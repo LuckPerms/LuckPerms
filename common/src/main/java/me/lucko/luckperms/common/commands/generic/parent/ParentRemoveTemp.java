@@ -64,12 +64,10 @@ public class ParentRemoveTemp extends SharedSubCommand {
         String groupName = ArgumentParser.parseNameWithSpace(0, args);
         MutableContextSet context = ArgumentParser.parseContext(1, args, plugin);
 
-        if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
-            Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
-        }
-
-        if (ArgumentPermissions.checkArguments(plugin, sender, permission, groupName)) {
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
+                ArgumentPermissions.checkGroup(plugin, sender, holder, context) ||
+                ArgumentPermissions.checkGroup(plugin, sender, groupName, context) ||
+                ArgumentPermissions.checkArguments(plugin, sender, permission, groupName)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }

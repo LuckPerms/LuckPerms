@@ -69,12 +69,9 @@ public class MetaSet extends SharedSubCommand {
         String value = args.get(1);
         MutableContextSet context = ArgumentParser.parseContext(2, args, plugin);
 
-        if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
-            Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
-        }
-
-        if (ArgumentPermissions.checkArguments(plugin, sender, permission, key)) {
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
+                ArgumentPermissions.checkGroup(plugin, sender, holder, context) ||
+                ArgumentPermissions.checkArguments(plugin, sender, permission, key)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }

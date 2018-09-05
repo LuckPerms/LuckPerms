@@ -49,6 +49,7 @@ import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 public class UserDemote extends SubCommand<User> {
     public UserDemote(LocaleManager locale) {
@@ -88,7 +89,11 @@ public class UserDemote extends SubCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
-        DemotionResult result = track.demote(user, context, s -> !ArgumentPermissions.checkArguments(plugin, sender, getPermission().get(), track.getName(), s), sender, removeFromFirst);
+        Predicate<String> previousGroupPermissionChecker = s ->
+                !ArgumentPermissions.checkArguments(plugin, sender, getPermission().get(), track.getName(), s) &&
+                !ArgumentPermissions.checkGroup(plugin, sender, s, context);
+
+        DemotionResult result = track.demote(user, context, previousGroupPermissionChecker, sender, removeFromFirst);
         switch (result.getStatus()) {
             case NOT_ON_TRACK:
                 Message.USER_TRACK_ERROR_NOT_CONTAIN_GROUP.send(sender, user.getFriendlyName(), track.getName());

@@ -49,6 +49,7 @@ import me.lucko.luckperms.common.storage.DataConstraints;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 public class UserPromote extends SubCommand<User> {
     public UserPromote(LocaleManager locale) {
@@ -88,7 +89,11 @@ public class UserPromote extends SubCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
-        PromotionResult result = track.promote(user, context, s -> !ArgumentPermissions.checkArguments(plugin, sender, getPermission().get(), track.getName(), s), sender, addToFirst);
+        Predicate<String> nextGroupPermissionChecker = s ->
+                !ArgumentPermissions.checkArguments(plugin, sender, getPermission().get(), track.getName(), s) &&
+                !ArgumentPermissions.checkGroup(plugin, sender, s, context);
+
+        PromotionResult result = track.promote(user, context, nextGroupPermissionChecker, sender, addToFirst);
         switch (result.getStatus()) {
             case MALFORMED_TRACK:
                 Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, result.getGroupTo().get());

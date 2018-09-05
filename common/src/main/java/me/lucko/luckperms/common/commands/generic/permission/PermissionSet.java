@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.nodetype.types.InheritanceType;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
@@ -43,6 +44,7 @@ import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.model.NodeTypes;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -65,14 +67,19 @@ public class PermissionSet extends SharedSubCommand {
         boolean value = ArgumentParser.parseBoolean(1, args);
         MutableContextSet context = ArgumentParser.parseContext(2, args, plugin);
 
-        if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
+                ArgumentPermissions.checkGroup(plugin, sender, holder, context) ||
+                ArgumentPermissions.checkArguments(plugin, sender, permission, node)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        if (ArgumentPermissions.checkArguments(plugin, sender, permission, node)) {
-            Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+        InheritanceType inheritanceType = NodeTypes.parseInheritanceType(node);
+        if (inheritanceType != null) {
+            if (ArgumentPermissions.checkGroup(plugin, sender, inheritanceType.getGroupName(), context)) {
+                Message.COMMAND_NO_PERMISSION.send(sender);
+                return CommandResult.NO_PERMISSION;
+            }
         }
 
         DataMutateResult result = holder.setPermission(NodeFactory.builder(node).setValue(value).withExtraContext(context).build());

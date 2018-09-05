@@ -61,7 +61,8 @@ public class HolderClear<T extends PermissionHolder> extends SubCommand<T> {
 
         MutableContextSet context = ArgumentParser.parseContext(0, args, plugin);
 
-        if (ArgumentPermissions.checkContext(plugin, sender, getPermission().get(), context)) {
+        if (ArgumentPermissions.checkContext(plugin, sender, getPermission().get(), context) ||
+                ArgumentPermissions.checkGroup(plugin, sender, holder, context)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }

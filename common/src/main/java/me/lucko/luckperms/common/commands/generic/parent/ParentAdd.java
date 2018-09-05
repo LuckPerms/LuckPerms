@@ -70,12 +70,10 @@ public class ParentAdd extends SharedSubCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
-            Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
-        }
-
-        if (ArgumentPermissions.checkArguments(plugin, sender, permission, group.getName())) {
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
+                ArgumentPermissions.checkGroup(plugin, sender, holder, context) ||
+                ArgumentPermissions.checkGroup(plugin, sender, group, context) ||
+                ArgumentPermissions.checkArguments(plugin, sender, permission, group.getName())) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }

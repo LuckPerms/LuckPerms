@@ -103,12 +103,10 @@ public class ParentSetTrack extends SharedSubCommand {
             return CommandResult.LOADING_ERROR;
         }
 
-        if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
-            Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
-        }
-
-        if (ArgumentPermissions.checkArguments(plugin, sender, permission, track.getName(), group.getName())) {
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
+                ArgumentPermissions.checkGroup(plugin, sender, holder, context) ||
+                ArgumentPermissions.checkGroup(plugin, sender, group, context) ||
+                ArgumentPermissions.checkArguments(plugin, sender, permission, track.getName(), group.getName())) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }

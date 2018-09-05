@@ -182,6 +182,12 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> USE_ARGUMENT_BASED_COMMAND_PERMISSIONS = BooleanKey.of("argument-based-command-permissions", false);
 
     /**
+     * If the plugin should check whether senders are a member of a given group
+     * before they're able to edit the groups permissions or add/remove it from other users.
+     */
+    public static final ConfigKey<Boolean> REQUIRE_SENDER_GROUP_MEMBERSHIP_TO_MODIFY = BooleanKey.of("require-sender-group-membership-to-modify", false);
+
+    /**
      * If wildcards are being applied
      */
     public static final ConfigKey<Boolean> APPLYING_WILDCARDS = EnduringKey.wrap(BooleanKey.of("apply-wildcards", true));

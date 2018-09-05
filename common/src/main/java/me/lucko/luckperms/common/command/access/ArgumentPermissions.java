@@ -25,14 +25,19 @@
 
 package me.lucko.luckperms.common.command.access;
 
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.caching.type.PermissionCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.verbose.CheckOrigin;
 
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -252,6 +257,49 @@ public final class ArgumentPermissions {
         }
 
         return false;
+    }
+
+    /**
+     * Checks if the sender has permission to act using a given group, if holder is a group.
+     *
+     * @param plugin the plugin instance
+     * @param sender the sender to check
+     * @param holder the target group (doesn't have to be a group instance - this method checks that)
+     * @param contextSet the contexts the sender is trying to act within
+     * @return true if the sender should NOT be allowed to act, true if they should
+     */
+    public static boolean checkGroup(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, ContextSet contextSet) {
+        if (holder.getType().isGroup()) {
+            return checkGroup(plugin, sender, ((Group) holder).getName(), contextSet);
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the sender has permission to act using a given group
+     *
+     * @param plugin the plugin instance
+     * @param sender the sender to check
+     * @param targetGroupName the target group
+     * @param contextSet the contexts the sender is trying to act within
+     * @return true if the sender should NOT be allowed to act, true if they should
+     */
+    public static boolean checkGroup(LuckPermsPlugin plugin, Sender sender, String targetGroupName, ContextSet contextSet) {
+        if (!plugin.getConfiguration().get(ConfigKeys.REQUIRE_SENDER_GROUP_MEMBERSHIP_TO_MODIFY)) {
+            return false;
+        }
+
+        if (sender.isConsole()) {
+            return false;
+        }
+
+        User user = plugin.getUserManager().getIfLoaded(sender.getUuid());
+        if (user == null) {
+            throw new IllegalStateException("Unable to get a User for " + sender.getUuid() + " - " + sender.getName());
+        }
+
+        PermissionCache permissionData = user.getCachedData().getPermissionData(Contexts.of(contextSet, Contexts.global().getSettings()));
+        return !permissionData.getPermissionValue(NodeFactory.groupNode(targetGroupName), CheckOrigin.INTERNAL).asBoolean();
     }
 
     private ArgumentPermissions() {}
