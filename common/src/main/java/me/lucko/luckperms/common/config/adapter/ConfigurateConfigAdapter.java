@@ -39,13 +39,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public abstract class ConfigurateConfigAdapter extends AbstractConfigurationAdapter implements ConfigurationAdapter {
-
+public abstract class ConfigurateConfigAdapter implements ConfigurationAdapter {
+    private final LuckPermsPlugin plugin;
     private final Path path;
     private ConfigurationNode root;
 
     public ConfigurateConfigAdapter(LuckPermsPlugin plugin, Path path) {
-        super(plugin);
+        this.plugin = plugin;
         this.path = path;
         reload();
     }
@@ -76,7 +76,7 @@ public abstract class ConfigurateConfigAdapter extends AbstractConfigurationAdap
     }
 
     @Override
-    public int getInt(String path, int def) {
+    public int getInteger(String path, int def) {
         return resolvePath(path).getInt(def);
     }
 
@@ -86,7 +86,7 @@ public abstract class ConfigurateConfigAdapter extends AbstractConfigurationAdap
     }
 
     @Override
-    public List<String> getList(String path, List<String> def) {
+    public List<String> getStringList(String path, List<String> def) {
         ConfigurationNode node = resolvePath(path);
         if (node.isVirtual()) {
             return def;
@@ -107,7 +107,7 @@ public abstract class ConfigurateConfigAdapter extends AbstractConfigurationAdap
 
     @SuppressWarnings("unchecked")
     @Override
-    public Map<String, String> getMap(String path, Map<String, String> def) {
+    public Map<String, String> getStringMap(String path, Map<String, String> def) {
         ConfigurationNode node = resolvePath(path);
         if (node.isVirtual()) {
             return def;
@@ -115,5 +115,10 @@ public abstract class ConfigurateConfigAdapter extends AbstractConfigurationAdap
 
         Map<String, Object> m = (Map<String, Object>) node.getValue(Collections.emptyMap());
         return m.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, v -> v.getValue().toString()));
+    }
+
+    @Override
+    public LuckPermsPlugin getPlugin() {
+        return this.plugin;
     }
 }

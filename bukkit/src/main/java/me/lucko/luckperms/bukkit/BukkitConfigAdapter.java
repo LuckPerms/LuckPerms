@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.bukkit;
 
-import me.lucko.luckperms.common.config.adapter.AbstractConfigurationAdapter;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -39,13 +38,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class BukkitConfigAdapter extends AbstractConfigurationAdapter implements ConfigurationAdapter {
-
+public class BukkitConfigAdapter implements ConfigurationAdapter {
+    private final LuckPermsPlugin plugin;
     private final File file;
     private YamlConfiguration configuration;
 
     public BukkitConfigAdapter(LuckPermsPlugin plugin, File file) {
-        super(plugin);
+        this.plugin = plugin;
         this.file = file;
         reload();
     }
@@ -61,7 +60,7 @@ public class BukkitConfigAdapter extends AbstractConfigurationAdapter implements
     }
 
     @Override
-    public int getInt(String path, int def) {
+    public int getInteger(String path, int def) {
         return this.configuration.getInt(path, def);
     }
 
@@ -71,7 +70,7 @@ public class BukkitConfigAdapter extends AbstractConfigurationAdapter implements
     }
 
     @Override
-    public List<String> getList(String path, List<String> def) {
+    public List<String> getStringList(String path, List<String> def) {
         List<String> ret = this.configuration.getStringList(path);
         return ret == null ? def : ret;
     }
@@ -88,7 +87,7 @@ public class BukkitConfigAdapter extends AbstractConfigurationAdapter implements
     }
 
     @Override
-    public Map<String, String> getMap(String path, Map<String, String> def) {
+    public Map<String, String> getStringMap(String path, Map<String, String> def) {
         Map<String, String> map = new HashMap<>();
         ConfigurationSection section = this.configuration.getConfigurationSection(path);
         if (section == null) {
@@ -100,5 +99,10 @@ public class BukkitConfigAdapter extends AbstractConfigurationAdapter implements
         }
 
         return map;
+    }
+
+    @Override
+    public LuckPermsPlugin getPlugin() {
+        return this.plugin;
     }
 }

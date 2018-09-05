@@ -37,8 +37,8 @@ public interface ConfigKey<T> {
     /**
      * Gets the position of this key within the {@link ConfigKeys} enum.
      *
-     * <p>This is lazily set when the configuration is loaded for the first time, during the
-     * execution of {@link ConfigKeys#getAllKeys()}.</p>
+     * <p>This is set shortly after the key is created, during the initialisation
+     * of {@link ConfigKeys}.</p>
      *
      * @return the position
      */

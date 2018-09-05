@@ -100,7 +100,7 @@ public class ApiConfiguration implements LPConfiguration {
         @Nonnull
         @Override
         public Object getObject(String key) {
-            ConfigKey<?> configKey = ConfigKeys.getAllKeys().get(key.toUpperCase());
+            ConfigKey<?> configKey = ConfigKeys.getKeys().get(key.toUpperCase());
             if (configKey == null) {
                 throw new IllegalArgumentException("Unknown key: " + key);
             }

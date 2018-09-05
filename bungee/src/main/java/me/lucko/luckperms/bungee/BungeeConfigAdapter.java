@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.bungee;
 
-import me.lucko.luckperms.common.config.adapter.AbstractConfigurationAdapter;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -41,13 +40,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class BungeeConfigAdapter extends AbstractConfigurationAdapter implements ConfigurationAdapter {
-
+public class BungeeConfigAdapter implements ConfigurationAdapter {
+    private final LuckPermsPlugin plugin;
     private final File file;
     private Configuration configuration;
 
     public BungeeConfigAdapter(LuckPermsPlugin plugin, File file) {
-        super(plugin);
+        this.plugin = plugin;
         this.file = file;
         reload();
     }
@@ -67,7 +66,7 @@ public class BungeeConfigAdapter extends AbstractConfigurationAdapter implements
     }
 
     @Override
-    public int getInt(String path, int def) {
+    public int getInteger(String path, int def) {
         return this.configuration.getInt(path, def);
     }
 
@@ -77,7 +76,7 @@ public class BungeeConfigAdapter extends AbstractConfigurationAdapter implements
     }
 
     @Override
-    public List<String> getList(String path, List<String> def) {
+    public List<String> getStringList(String path, List<String> def) {
         return Optional.ofNullable(this.configuration.getStringList(path)).orElse(def);
     }
 
@@ -92,7 +91,7 @@ public class BungeeConfigAdapter extends AbstractConfigurationAdapter implements
     }
 
     @Override
-    public Map<String, String> getMap(String path, Map<String, String> def) {
+    public Map<String, String> getStringMap(String path, Map<String, String> def) {
         Map<String, String> map = new HashMap<>();
         Configuration section = this.configuration.getSection(path);
         if (section == null) {
@@ -104,5 +103,10 @@ public class BungeeConfigAdapter extends AbstractConfigurationAdapter implements
         }
 
         return map;
+    }
+
+    @Override
+    public LuckPermsPlugin getPlugin() {
+        return this.plugin;
     }
 }

@@ -38,14 +38,14 @@ public interface ConfigurationAdapter {
 
     String getString(String path, String def);
 
-    int getInt(String path, int def);
+    int getInteger(String path, int def);
 
     boolean getBoolean(String path, boolean def);
 
-    List<String> getList(String path, List<String> def);
+    List<String> getStringList(String path, List<String> def);
 
     List<String> getKeys(String path, List<String> def);
 
-    Map<String, String> getMap(String path, Map<String, String> def);
+    Map<String, String> getStringMap(String path, Map<String, String> def);
 
 }

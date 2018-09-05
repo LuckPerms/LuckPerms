@@ -27,10 +27,7 @@ package me.lucko.luckperms.common.config;
 
 import me.lucko.luckperms.common.api.delegates.misc.ApiConfiguration;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
-import me.lucko.luckperms.common.config.keys.EnduringKey;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-
-import java.util.Map;
 
 /**
  * An abstract implementation of {@link LuckPermsConfiguration}.
@@ -70,22 +67,18 @@ public class AbstractConfiguration implements LuckPermsConfiguration {
 
     @Override
     public synchronized void load() {
-        // get the map of all keys
-        Map<String, ConfigKey<?>> keys = ConfigKeys.getAllKeys();
-
         // if this is a reload operation
         boolean reload = true;
 
         // if values are null, must be loading for the first time
         if (this.values == null) {
-            this.values = new Object[keys.size()];
+            this.values = new Object[ConfigKeys.size()];
             reload = false;
         }
 
-        // load a value for each key.
-        for (ConfigKey<?> key : keys.values()) {
+        for (ConfigKey<?> key : ConfigKeys.getKeys().values()) {
             // don't reload enduring keys.
-            if (reload && key instanceof EnduringKey) {
+            if (reload && key instanceof ConfigKeyTypes.EnduringKey) {
                 continue;
             }
 
