@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.StandardNodeEquality;
+import me.lucko.luckperms.api.TemporaryMergeBehaviour;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
@@ -43,7 +44,6 @@ import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.model.TemporaryModifier;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -71,7 +71,7 @@ public class MetaSetTemp extends SharedSubCommand {
         String key = args.get(0);
         String value = args.get(1);
         long duration = ArgumentParser.parseDuration(2, args);
-        TemporaryModifier modifier = ArgumentParser.parseTemporaryModifier(3, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
+        TemporaryMergeBehaviour modifier = ArgumentParser.parseTemporaryModifier(3, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
         MutableContextSet context = ArgumentParser.parseContext(3, args, plugin);
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
@@ -92,7 +92,7 @@ public class MetaSetTemp extends SharedSubCommand {
         }
 
         holder.clearMetaKeys(key, context, true);
-        duration = holder.setPermission(n, modifier).getValue().getExpiryUnixTime();
+        duration = holder.setPermission(n, modifier).getMergedNode().getExpiryUnixTime();
 
         TextComponent.Builder builder = Message.SET_META_TEMP_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
         HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(

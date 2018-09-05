@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.model;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 import me.lucko.luckperms.api.Contexts;
@@ -37,6 +36,8 @@ import me.lucko.luckperms.api.LookupSetting;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.NodeEqualityPredicate;
 import me.lucko.luckperms.api.StandardNodeEquality;
+import me.lucko.luckperms.api.TemporaryDataMutateResult;
+import me.lucko.luckperms.api.TemporaryMergeBehaviour;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
@@ -66,6 +67,8 @@ import java.util.TreeSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
+
+import javax.annotation.Nonnull;
 
 /**
  * Represents an object that can hold permissions, (a user or group)
@@ -519,22 +522,10 @@ public abstract class PermissionHolder {
         return InheritanceInfo.empty();
     }
 
-    /**
-     * Check if the holder inherits a node
-     *
-     * @param node the node to check
-     * @param equalityPredicate how to match
-     * @return the Tristate result
-     */
     public Tristate inheritsPermission(Node node, NodeEqualityPredicate equalityPredicate) {
         return searchForInheritedMatch(node, equalityPredicate).getResult();
     }
 
-    /**
-     * Sets a permission node
-     *
-     * @param node the node to set
-     */
     public DataMutateResult setPermission(Node node) {
         return setPermission(node, true);
     }
@@ -555,85 +546,99 @@ public abstract class PermissionHolder {
         return DataMutateResult.SUCCESS;
     }
 
-    /**
-     * Sets a permission node, applying a temporary modifier if the node is temporary.
-     * @param node the node to set
-     * @param modifier the modifier to use for the operation
-     * @return the node that was actually set, respective of the modifier
-     */
-    public Map.Entry<DataMutateResult, Node> setPermission(Node node, TemporaryModifier modifier) {
-        // If the node is temporary, we should take note of the modifier
-        if (node.isTemporary()) {
-            if (modifier == TemporaryModifier.ACCUMULATE) {
-                // Try to accumulate with an existing node
-                Optional<? extends Node> existing = searchForMatch(NodeMapType.ENDURING, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
-
-                // An existing node was found
-                if (existing.isPresent()) {
-                    Node previous = existing.get();
-
-                    // Create a new node with the same properties, but add the expiry dates together
-                    Node newNode = node.toBuilder().setExpiry(previous.getExpiryUnixTime() + node.getSecondsTilExpiry()).build();
-
-                    // Remove the old node & add the new one.
-                    ImmutableCollection<? extends Node> before = enduringData().immutable().values();
-                    this.enduringNodes.replace(newNode, previous);
-                    invalidateCache();
-                    ImmutableCollection<? extends Node> after = enduringData().immutable().values();
-
-                    this.plugin.getEventFactory().handleNodeAdd(newNode, this, before, after);
-                    return Maps.immutableEntry(DataMutateResult.SUCCESS, newNode);
-                }
-
-            } else if (modifier == TemporaryModifier.REPLACE) {
-                // Try to replace an existing node
-                Optional<? extends Node> existing = searchForMatch(NodeMapType.ENDURING, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
-
-                // An existing node was found
-                if (existing.isPresent()) {
-                    Node previous = existing.get();
-
-                    // Only replace if the new expiry time is greater than the old one.
-                    if (node.getExpiryUnixTime() > previous.getExpiryUnixTime()) {
-
-                        ImmutableCollection<? extends Node> before = enduringData().immutable().values();
-                        this.enduringNodes.replace(node, previous);
-                        invalidateCache();
-                        ImmutableCollection<? extends Node> after = enduringData().immutable().values();
-
-                        this.plugin.getEventFactory().handleNodeAdd(node, this, before, after);
-                        return Maps.immutableEntry(DataMutateResult.SUCCESS, node);
-                    }
-                }
-            }
-
-            // DENY behaviour is the default anyways.
+    public TemporaryDataMutateResult setPermission(Node node, TemporaryMergeBehaviour modifier) {
+        TemporaryDataMutateResult result = handleTemporaryMergeBehaviour(NodeMapType.ENDURING, node, modifier);
+        if (result != null) {
+            return result;
         }
 
         // Fallback to the normal handling.
-        return Maps.immutableEntry(setPermission(node), node);
+        return new TemporaryResult(setPermission(node), node);
     }
 
-    /**
-     * Sets a transient permission node
-     *
-     * @param node the node to set
-     */
     public DataMutateResult setTransientPermission(Node node) {
         if (hasPermission(NodeMapType.TRANSIENT, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE) != Tristate.UNDEFINED) {
             return DataMutateResult.ALREADY_HAS;
         }
 
+        // don't call any events for transient operations
         this.transientNodes.add(node);
         invalidateCache();
         return DataMutateResult.SUCCESS;
     }
 
-    /**
-     * Unsets a permission node
-     *
-     * @param node the node to unset
-     */
+    public TemporaryDataMutateResult setTransientPermission(Node node, TemporaryMergeBehaviour modifier) {
+        TemporaryDataMutateResult result = handleTemporaryMergeBehaviour(NodeMapType.TRANSIENT, node, modifier);
+        if (result != null) {
+            return result;
+        }
+
+        // Fallback to the normal handling.
+        return new TemporaryResult(setTransientPermission(node), node);
+    }
+
+    private TemporaryDataMutateResult handleTemporaryMergeBehaviour(NodeMapType nodeMapType, Node node, TemporaryMergeBehaviour mergeBehaviour) {
+        // If the node is temporary, we should take note of the modifier
+        if (!node.isTemporary() || mergeBehaviour == TemporaryMergeBehaviour.FAIL_WITH_ALREADY_HAS) {
+            return null;
+        }
+
+        Node previous = searchForMatch(nodeMapType, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE).orElse(null);
+        if (previous == null) {
+            return null;
+        }
+
+        NodeMap data = getData(nodeMapType);
+        boolean callEvents = nodeMapType == NodeMapType.ENDURING;
+
+        switch (mergeBehaviour) {
+            case ADD_NEW_DURATION_TO_EXISTING: {
+                // Create a new node with the same properties, but add the expiry dates together
+                Node newNode = node.toBuilder().setExpiry(previous.getExpiryUnixTime() + node.getSecondsTilExpiry()).build();
+
+                // Remove the old node & add the new one.
+                ImmutableCollection<? extends Node> before = null;
+                if (callEvents) {
+                    before = data.immutable().values();
+                }
+
+                data.replace(newNode, previous);
+                invalidateCache();
+
+                if (callEvents) {
+                    ImmutableCollection<? extends Node> after = data.immutable().values();
+                    this.plugin.getEventFactory().handleNodeAdd(newNode, this, before, after);
+                }
+
+                return new TemporaryResult(DataMutateResult.SUCCESS, newNode);
+            }
+            case REPLACE_EXISTING_IF_DURATION_LONGER: {
+                // Only replace if the new expiry time is greater than the old one.
+                if (node.getExpiryUnixTime() <= previous.getExpiryUnixTime()) {
+                    break;
+                }
+
+                ImmutableCollection<? extends Node> before = null;
+                if (callEvents) {
+                    before = data.immutable().values();
+                }
+
+                data.replace(node, previous);
+                invalidateCache();
+
+                if (callEvents) {
+                    ImmutableCollection<? extends Node> after = data.immutable().values();
+                    this.plugin.getEventFactory().handleNodeAdd(node, this, before, after);
+                }
+
+                return new TemporaryResult(DataMutateResult.SUCCESS, node);
+            }
+            default:
+                break;
+        }
+        return null;
+    }
+
     public DataMutateResult unsetPermission(Node node) {
         if (hasPermission(NodeMapType.ENDURING, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE) == Tristate.UNDEFINED) {
             return DataMutateResult.LACKS;
@@ -648,16 +653,12 @@ public abstract class PermissionHolder {
         return DataMutateResult.SUCCESS;
     }
 
-    /**
-     * Unsets a transient permission node
-     *
-     * @param node the node to unset
-     */
     public DataMutateResult unsetTransientPermission(Node node) {
         if (hasPermission(NodeMapType.TRANSIENT, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE) == Tristate.UNDEFINED) {
             return DataMutateResult.LACKS;
         }
 
+        // don't call any events for transient operations
         this.transientNodes.remove(node);
         invalidateCache();
         return DataMutateResult.SUCCESS;
@@ -742,5 +743,27 @@ public abstract class PermissionHolder {
 
     public OptionalInt getWeight() {
         return OptionalInt.empty();
+    }
+
+    private static final class TemporaryResult implements TemporaryDataMutateResult {
+        private final DataMutateResult result;
+        private final Node mergedNode;
+
+        private TemporaryResult(DataMutateResult result, Node mergedNode) {
+            this.result = result;
+            this.mergedNode = mergedNode;
+        }
+
+        @Nonnull
+        @Override
+        public DataMutateResult getResult() {
+            return this.result;
+        }
+
+        @Nonnull
+        @Override
+        public Node getMergedNode() {
+            return this.mergedNode;
+        }
     }
 }

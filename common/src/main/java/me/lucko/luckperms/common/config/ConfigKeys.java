@@ -30,9 +30,11 @@ import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LookupSetting;
+import me.lucko.luckperms.api.TemporaryMergeBehaviour;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.common.assignments.AssignmentRule;
+import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.config.keys.BooleanKey;
 import me.lucko.luckperms.common.config.keys.CustomKey;
 import me.lucko.luckperms.common.config.keys.EnduringKey;
@@ -42,7 +44,6 @@ import me.lucko.luckperms.common.config.keys.StringKey;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
-import me.lucko.luckperms.common.model.TemporaryModifier;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.primarygroup.AllParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.ParentsByWeightHolder;
@@ -133,13 +134,13 @@ public final class ConfigKeys {
     /**
      * Controls how temporary add commands should behave
      */
-    public static final ConfigKey<TemporaryModifier> TEMPORARY_ADD_BEHAVIOUR = CustomKey.of(c -> {
+    public static final ConfigKey<TemporaryMergeBehaviour> TEMPORARY_ADD_BEHAVIOUR = CustomKey.of(c -> {
         String option = c.getString("temporary-add-behaviour", "deny").toLowerCase();
         if (!option.equals("deny") && !option.equals("replace") && !option.equals("accumulate")) {
             option = "deny";
         }
 
-        return TemporaryModifier.valueOf(option.toUpperCase());
+        return ArgumentParser.parseTemporaryModifier(option);
     });
 
     /**

@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.commands.generic.parent;
 
-import me.lucko.luckperms.api.DataMutateResult;
-import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.TemporaryDataMutateResult;
+import me.lucko.luckperms.api.TemporaryMergeBehaviour;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
@@ -45,7 +45,6 @@ import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.model.TemporaryModifier;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -53,7 +52,6 @@ import me.lucko.luckperms.common.utils.DurationFormatter;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-import java.util.Map;
 
 public class ParentAddTemp extends SharedSubCommand {
     public ParentAddTemp(LocaleManager locale) {
@@ -69,7 +67,7 @@ public class ParentAddTemp extends SharedSubCommand {
 
         String groupName = ArgumentParser.parseName(0, args);
         long duration = ArgumentParser.parseDuration(1, args);
-        TemporaryModifier modifier = ArgumentParser.parseTemporaryModifier(2, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
+        TemporaryMergeBehaviour modifier = ArgumentParser.parseTemporaryModifier(2, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
         MutableContextSet context = ArgumentParser.parseContext(2, args, plugin);
 
         Group group = StorageAssistant.loadGroup(groupName, sender, plugin, false);
@@ -92,10 +90,10 @@ public class ParentAddTemp extends SharedSubCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        Map.Entry<DataMutateResult, Node> ret = holder.setPermission(NodeFactory.buildGroupNode(group.getName()).setExpiry(duration).withExtraContext(context).build(), modifier);
+        TemporaryDataMutateResult ret = holder.setPermission(NodeFactory.buildGroupNode(group.getName()).setExpiry(duration).withExtraContext(context).build(), modifier);
 
-        if (ret.getKey().asBoolean()) {
-            duration = ret.getValue().getExpiryUnixTime();
+        if (ret.getResult().asBoolean()) {
+            duration = ret.getMergedNode().getExpiryUnixTime();
             Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)

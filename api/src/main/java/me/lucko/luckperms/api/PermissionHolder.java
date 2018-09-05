@@ -476,6 +476,31 @@ public interface PermissionHolder {
     DataMutateResult setPermission(@Nonnull Node node);
 
     /**
+     * Sets a permission node for the permission holder.
+     *
+     * <p>Although this method is named setPermission, it can be used for all node types.</p>
+     *
+     * <p>The effect of this mutate operation will not persist in storage unless changes are
+     * explicitly saved. If changes are not saved, the effect will only be observed until the next
+     * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
+     * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
+     * using {@link GroupManager#saveGroup(Group)}.</p>
+     *
+     * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
+     * the backing data from the storage if you haven't done so already, to avoid overwriting changes
+     * made already. This can be done via {@link UserManager#loadUser(UUID)} or
+     * {@link GroupManager#loadGroup(String)} respectively.</p>
+     *
+     * @param node The node to be set
+     * @param temporaryMergeBehaviour The behaviour used to merge temporary permission entries
+     * @return the result of the operation
+     * @throws NullPointerException if the node is null
+     * @since 4.3
+     */
+    @Nonnull
+    TemporaryDataMutateResult setPermission(@Nonnull Node node, @Nonnull TemporaryMergeBehaviour temporaryMergeBehaviour);
+
+    /**
      * Sets a transient permission for the permission holder.
      *
      * <p>A transient node is a permission that does not persist.
@@ -498,6 +523,31 @@ public interface PermissionHolder {
      */
     @Nonnull
     DataMutateResult setTransientPermission(@Nonnull Node node);
+
+    /**
+     * Sets a transient permission for the permission holder.
+     *
+     * <p>A transient node is a permission that does not persist.
+     * Whenever a user logs out of the server, or the server restarts, this permission will
+     * disappear. It is never saved to the datastore, and therefore will not apply on other
+     * servers.</p>
+     *
+     * <p>This is useful if you want to temporarily set a permission for a user while they're
+     * online, but don't want it to persist, and have to worry about removing it when they log
+     * out.</p>
+     *
+     * <p>For unsetting a transient permission, see {@link #unsetTransientPermission(Node)}.</p>
+     *
+     * <p>Although this method is named setTransientPermission, it can be used for all node types.</p>
+     *
+     * @param node The node to be se
+     * @param temporaryMergeBehaviour The behaviour used to merge temporary permission entries
+     * @return the result of the operation
+     * @throws NullPointerException if the node is null
+     * @since 4.3
+     */
+    @Nonnull
+    TemporaryDataMutateResult setTransientPermission(@Nonnull Node node, @Nonnull TemporaryMergeBehaviour temporaryMergeBehaviour);
 
     /**
      * Unsets a permission for the permission holder.

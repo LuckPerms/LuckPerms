@@ -27,8 +27,8 @@ package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.DataMutateResult;
-import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.TemporaryDataMutateResult;
+import me.lucko.luckperms.api.TemporaryMergeBehaviour;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.caching.type.MetaAccumulator;
@@ -46,7 +46,6 @@ import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.model.TemporaryModifier;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -58,7 +57,6 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
 
 import java.util.List;
-import java.util.Map;
 import java.util.OptionalInt;
 
 public class MetaSetTempChatMeta extends SharedSubCommand {
@@ -85,7 +83,7 @@ public class MetaSetTempChatMeta extends SharedSubCommand {
         int priority = ArgumentParser.parseIntOrElse(0, args, Integer.MIN_VALUE);
         String meta;
         long duration;
-        TemporaryModifier modifier;
+        TemporaryMergeBehaviour modifier;
         MutableContextSet context;
 
         if (priority == Integer.MIN_VALUE) {
@@ -129,10 +127,10 @@ public class MetaSetTempChatMeta extends SharedSubCommand {
             }
         }
 
-        Map.Entry<DataMutateResult, Node> ret = holder.setPermission(NodeFactory.buildChatMetaNode(this.type, priority, meta).setExpiry(duration).withExtraContext(context).build(), modifier);
+        TemporaryDataMutateResult ret = holder.setPermission(NodeFactory.buildChatMetaNode(this.type, priority, meta).setExpiry(duration).withExtraContext(context).build(), modifier);
 
-        if (ret.getKey().asBoolean()) {
-            duration = ret.getValue().getExpiryUnixTime();
+        if (ret.getResult().asBoolean()) {
+            duration = ret.getMergedNode().getExpiryUnixTime();
 
             TextComponent.Builder builder = Message.ADD_TEMP_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFriendlyName(), this.type.name().toLowerCase(), meta, priority, DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
             HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(

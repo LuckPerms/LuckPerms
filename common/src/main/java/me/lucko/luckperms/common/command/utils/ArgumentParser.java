@@ -26,11 +26,11 @@
 package me.lucko.luckperms.common.command.utils;
 
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.TemporaryMergeBehaviour;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.commands.user.UserMainCommand;
-import me.lucko.luckperms.common.model.TemporaryModifier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.DataConstraints;
@@ -121,14 +121,27 @@ public class ArgumentParser {
         return unixTime < (System.currentTimeMillis() / 1000L);
     }
 
-    public static Optional<TemporaryModifier> parseTemporaryModifier(int index, List<String> args) {
+    public static TemporaryMergeBehaviour parseTemporaryModifier(String s) {
+        switch (s.toLowerCase()) {
+            case "accumulate":
+                return TemporaryMergeBehaviour.ADD_NEW_DURATION_TO_EXISTING;
+            case "replace":
+                return TemporaryMergeBehaviour.REPLACE_EXISTING_IF_DURATION_LONGER;
+            case "deny":
+                return TemporaryMergeBehaviour.FAIL_WITH_ALREADY_HAS;
+            default:
+                throw new IllegalArgumentException("Unknown value: " + s);
+        }
+    }
+
+    public static Optional<TemporaryMergeBehaviour> parseTemporaryModifier(int index, List<String> args) {
         if (index < 0 || index >= args.size()) {
             return Optional.empty();
         }
 
         String s = args.get(index);
         try {
-            Optional<TemporaryModifier> ret = Optional.of(TemporaryModifier.valueOf(s.toUpperCase()));
+            Optional<TemporaryMergeBehaviour> ret = Optional.of(parseTemporaryModifier(s));
             args.remove(index);
             return ret;
         } catch (IllegalArgumentException e) {

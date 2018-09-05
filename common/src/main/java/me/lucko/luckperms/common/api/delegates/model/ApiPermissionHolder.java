@@ -37,6 +37,8 @@ import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.NodeEqualityPredicate;
 import me.lucko.luckperms.api.StandardNodeEquality;
+import me.lucko.luckperms.api.TemporaryDataMutateResult;
+import me.lucko.luckperms.api.TemporaryMergeBehaviour;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.CachedData;
 import me.lucko.luckperms.api.context.ContextSet;
@@ -268,9 +270,25 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.PermissionHol
 
     @Nonnull
     @Override
+    public TemporaryDataMutateResult setPermission(@Nonnull Node node, @Nonnull TemporaryMergeBehaviour temporaryMergeBehaviour) {
+        Objects.requireNonNull(node, "node");
+        Objects.requireNonNull(temporaryMergeBehaviour, "temporaryMergeBehaviour");
+        return this.handle.setPermission(node, temporaryMergeBehaviour);
+    }
+
+    @Nonnull
+    @Override
     public DataMutateResult setTransientPermission(@Nonnull Node node) {
         Objects.requireNonNull(node, "node");
         return this.handle.setTransientPermission(node);
+    }
+
+    @Nonnull
+    @Override
+    public TemporaryDataMutateResult setTransientPermission(@Nonnull Node node, @Nonnull TemporaryMergeBehaviour temporaryMergeBehaviour) {
+        Objects.requireNonNull(node, "node");
+        Objects.requireNonNull(temporaryMergeBehaviour, "temporaryMergeBehaviour");
+        return this.handle.setTransientPermission(node, temporaryMergeBehaviour);
     }
 
     @Nonnull

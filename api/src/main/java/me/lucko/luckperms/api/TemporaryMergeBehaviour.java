@@ -23,26 +23,36 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.model;
+package me.lucko.luckperms.api;
 
 /**
- * Controls how temporary permissions/parents/meta should be set
+ * Controls how the implementation should behave when new temporary nodes are set
+ * that would otherwise conflict with existing entries.
+ *
+ * <p>The default behaviour of {@link PermissionHolder#setPermission(Node)} is
+ * to return a result of {@link DataMutateResult#ALREADY_HAS} when an equivalent
+ * node is found. This can be replicated using {@link #FAIL_WITH_ALREADY_HAS}.</p>
+ *
+ * <p>However, the {@link PermissionHolder#setPermission(Node, TemporaryMergeBehaviour)}
+ * method allows this behaviour to be customized for temporary permissions.</p>
+ *
+ * @since 4.3
  */
-public enum TemporaryModifier {
+public enum TemporaryMergeBehaviour {
 
     /**
-     * Durations will be added to the existing expiry time of a permission
+     * Expiry durations will be added to the existing expiry time of a permission.
      */
-    ACCUMULATE,
+    ADD_NEW_DURATION_TO_EXISTING,
 
     /**
-     * Durations will be replaced if the new duration is later than the current expiration
+     * Expiry durations will be replaced if the new duration is longer than the current one.
      */
-    REPLACE,
+    REPLACE_EXISTING_IF_DURATION_LONGER,
 
     /**
-     * The command will just fail if you try to add another permission with the same expiry
+     * The operation will fail if an existing temporary node is present.
      */
-    DENY
+    FAIL_WITH_ALREADY_HAS
 
 }
