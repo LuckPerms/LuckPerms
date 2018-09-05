@@ -62,6 +62,8 @@ public class UserDemote extends SubCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
+        boolean removeFromFirst = !args.remove("--dont-remove-from-first");
+
         final String trackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(trackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender, trackName);
@@ -86,7 +88,7 @@ public class UserDemote extends SubCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
-        DemotionResult result = track.demote(user, context, s -> !ArgumentPermissions.checkArguments(plugin, sender, getPermission().get(), track.getName(), s), sender);
+        DemotionResult result = track.demote(user, context, s -> !ArgumentPermissions.checkArguments(plugin, sender, getPermission().get(), track.getName(), s), sender, removeFromFirst);
         switch (result.getStatus()) {
             case NOT_ON_TRACK:
                 Message.USER_TRACK_ERROR_NOT_CONTAIN_GROUP.send(sender, user.getFriendlyName(), track.getName());
@@ -102,6 +104,11 @@ public class UserDemote extends SubCommand<User> {
                 return CommandResult.LOADING_ERROR;
 
             case REMOVED_FROM_FIRST_GROUP: {
+                if (!removeFromFirst && !result.getGroupFrom().isPresent()) {
+                    Message.USER_DEMOTE_ENDOFTRACK_NOT_REMOVED.send(sender, track.getName(), user.getFriendlyName());
+                    return CommandResult.STATE_ERROR;
+                }
+
                 Message.USER_DEMOTE_ENDOFTRACK.send(sender, track.getName(), user.getFriendlyName(), result.getGroupFrom().get());
 
                 ExtendedLogEntry.build().actor(sender).acted(user)

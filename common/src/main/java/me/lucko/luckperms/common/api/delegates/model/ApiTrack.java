@@ -98,13 +98,13 @@ public final class ApiTrack implements me.lucko.luckperms.api.Track {
     @Nonnull
     @Override
     public PromotionResult promote(@Nonnull User user, @Nonnull ContextSet contextSet) {
-        return this.handle.promote(ApiUser.cast(user), contextSet, Predicates.alwaysTrue(), null);
+        return this.handle.promote(ApiUser.cast(user), contextSet, Predicates.alwaysTrue(), null, true);
     }
 
     @Nonnull
     @Override
     public DemotionResult demote(@Nonnull User user, @Nonnull ContextSet contextSet) {
-        return this.handle.demote(ApiUser.cast(user), contextSet, Predicates.alwaysTrue(), null);
+        return this.handle.demote(ApiUser.cast(user), contextSet, Predicates.alwaysTrue(), null, true);
     }
 
     @Nonnull

@@ -270,7 +270,7 @@ public final class Track implements Identifiable<String> {
         this.plugin.getEventFactory().handleTrackClear(this, before);
     }
 
-    public PromotionResult promote(User user, ContextSet context, Predicate<String> nextGroupPermissionChecker, @Nullable Sender sender) {
+    public PromotionResult promote(User user, ContextSet context, Predicate<String> nextGroupPermissionChecker, @Nullable Sender sender, boolean addToFirst) {
         if (getSize() <= 1) {
             throw new IllegalStateException("Track contains one or fewer groups, unable to promote");
         }
@@ -284,6 +284,10 @@ public final class Track implements Identifiable<String> {
                 .collect(Collectors.toList());
 
         if (nodes.isEmpty()) {
+            if (!addToFirst) {
+                return PromotionResults.addedToFirst(null);
+            }
+
             String first = getGroups().get(0);
 
             Group nextGroup = this.plugin.getGroupManager().getIfLoaded(first);
@@ -332,7 +336,7 @@ public final class Track implements Identifiable<String> {
         return PromotionResults.success(old, nextGroup.getName());
     }
 
-    public DemotionResult demote(User user, ContextSet context, Predicate<String> previousGroupPermissionChecker, @Nullable Sender sender) {
+    public DemotionResult demote(User user, ContextSet context, Predicate<String> previousGroupPermissionChecker, @Nullable Sender sender, boolean removeFromFirst) {
         if (getSize() <= 1) {
             throw new IllegalStateException("Track contains one or fewer groups, unable to demote");
         }
@@ -340,7 +344,7 @@ public final class Track implements Identifiable<String> {
         // find all groups that are inherited by the user in the exact contexts given and applicable to this track
         List<Node> nodes = user.enduringData().immutable().get(context.makeImmutable()).stream()
                 .filter(Node::isGroupNode)
-                .filter(node -> node.getValue())
+                .filter(Node::getValue)
                 .filter(node -> containsGroup(node.getGroupName()))
                 .distinct()
                 .collect(Collectors.toList());
@@ -362,6 +366,10 @@ public final class Track implements Identifiable<String> {
         }
 
         if (previous == null) {
+            if (!removeFromFirst) {
+                return DemotionResults.removedFromFirst(null);
+            }
+
             user.unsetPermission(oldNode);
             this.plugin.getEventFactory().handleUserDemote(user, this, old, null, sender);
             return DemotionResults.removedFromFirst(old);

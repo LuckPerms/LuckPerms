@@ -62,6 +62,8 @@ public class UserPromote extends SubCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
+        boolean addToFirst = !args.remove("--dont-add-to-first");
+
         final String trackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(trackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender, trackName);
@@ -86,7 +88,7 @@ public class UserPromote extends SubCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
-        PromotionResult result = track.promote(user, context, s -> !ArgumentPermissions.checkArguments(plugin, sender, getPermission().get(), track.getName(), s), sender);
+        PromotionResult result = track.promote(user, context, s -> !ArgumentPermissions.checkArguments(plugin, sender, getPermission().get(), track.getName(), s), sender, addToFirst);
         switch (result.getStatus()) {
             case MALFORMED_TRACK:
                 Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, result.getGroupTo().get());
@@ -102,6 +104,11 @@ public class UserPromote extends SubCommand<User> {
                 return CommandResult.STATE_ERROR;
 
             case ADDED_TO_FIRST_GROUP: {
+                if (!addToFirst && !result.getGroupTo().isPresent()) {
+                    Message.USER_PROMOTE_NOT_ON_TRACK.send(sender, track.getName(), user.getFriendlyName());
+                    return CommandResult.STATE_ERROR;
+                }
+
                 Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFriendlyName(), result.getGroupTo().get(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
                 ExtendedLogEntry.build().actor(sender).acted(user)
