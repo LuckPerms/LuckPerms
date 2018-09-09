@@ -75,7 +75,6 @@ public class VaultHookManager {
 
         if (this.permissionHook != null) {
             sm.unregister(Permission.class, this.permissionHook);
-            this.permissionHook.getExecutor().shutdown();
             this.permissionHook = null;
         }
 
