@@ -146,7 +146,7 @@ public class ApplyEditsCommand extends SingleCommand {
         String additionsSummary = "addition" + (additions == 1 ? "" : "s");
         String deletionsSummary = "deletion" + (deletions == 1 ? "" : "s");
 
-        Message.APPLY_EDITS_SUCCESS.send(sender, holder.getFriendlyName());
+        Message.APPLY_EDITS_SUCCESS.send(sender, holder.getFormattedDisplayName());
         Message.APPLY_EDITS_SUCCESS_SUMMARY.send(sender, additions, additionsSummary, deletions, deletionsSummary);
         for (Node n : diffAdded) {
             Message.APPLY_EDITS_DIFF_ADDED.send(sender, formatNode(plugin.getLocaleManager(), n));

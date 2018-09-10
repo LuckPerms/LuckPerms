@@ -68,7 +68,7 @@ public class MetaUnsetTemp extends SharedSubCommand {
         }
 
         if (holder.clearMetaKeys(key, context, true)) {
-            Message.UNSET_META_TEMP_SUCCESS.send(sender, key, holder.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.UNSET_META_TEMP_SUCCESS.send(sender, key, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("meta", "unsettemp", key, context)
@@ -77,7 +77,7 @@ public class MetaUnsetTemp extends SharedSubCommand {
             StorageAssistant.save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOESNT_HAVE_TEMP_META.send(sender, holder.getFriendlyName(), key, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.DOESNT_HAVE_TEMP_META.send(sender, holder.getFormattedDisplayName(), key, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
     }

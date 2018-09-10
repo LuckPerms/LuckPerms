@@ -62,7 +62,7 @@ public class GroupSetWeight extends SubCommand<Group> {
         group.removeIf(n -> n.getTypeData(WeightType.KEY).isPresent());
         group.setPermission(NodeFactory.buildWeightNode(weight).build());
 
-        Message.GROUP_SET_WEIGHT.send(sender, weight, group.getFriendlyName());
+        Message.GROUP_SET_WEIGHT.send(sender, weight, group.getFormattedDisplayName());
 
         ExtendedLogEntry.build().actor(sender).acted(group)
                 .action("setweight", weight)

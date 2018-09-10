@@ -96,10 +96,10 @@ public class UserDemote extends SubCommand<User> {
         DemotionResult result = track.demote(user, context, previousGroupPermissionChecker, sender, removeFromFirst);
         switch (result.getStatus()) {
             case NOT_ON_TRACK:
-                Message.USER_TRACK_ERROR_NOT_CONTAIN_GROUP.send(sender, user.getFriendlyName(), track.getName());
+                Message.USER_TRACK_ERROR_NOT_CONTAIN_GROUP.send(sender, user.getFormattedDisplayName(), track.getName());
                 return CommandResult.FAILURE;
             case AMBIGUOUS_CALL:
-                Message.TRACK_AMBIGUOUS_CALL.send(sender, user.getFriendlyName());
+                Message.TRACK_AMBIGUOUS_CALL.send(sender, user.getFormattedDisplayName());
                 return CommandResult.FAILURE;
             case UNDEFINED_FAILURE:
                 Message.COMMAND_NO_PERMISSION.send(sender);
@@ -110,11 +110,11 @@ public class UserDemote extends SubCommand<User> {
 
             case REMOVED_FROM_FIRST_GROUP: {
                 if (!removeFromFirst && !result.getGroupFrom().isPresent()) {
-                    Message.USER_DEMOTE_ENDOFTRACK_NOT_REMOVED.send(sender, track.getName(), user.getFriendlyName());
+                    Message.USER_DEMOTE_ENDOFTRACK_NOT_REMOVED.send(sender, track.getName(), user.getFormattedDisplayName());
                     return CommandResult.STATE_ERROR;
                 }
 
-                Message.USER_DEMOTE_ENDOFTRACK.send(sender, track.getName(), user.getFriendlyName(), result.getGroupFrom().get());
+                Message.USER_DEMOTE_ENDOFTRACK.send(sender, track.getName(), user.getFormattedDisplayName(), result.getGroupFrom().get());
 
                 ExtendedLogEntry.build().actor(sender).acted(user)
                         .action("demote", track.getName(), context)
@@ -128,7 +128,7 @@ public class UserDemote extends SubCommand<User> {
                 String groupFrom = result.getGroupFrom().get();
                 String groupTo = result.getGroupTo().get();
 
-                Message.USER_DEMOTE_SUCCESS.send(sender, user.getFriendlyName(), track.getName(), groupFrom, groupTo, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+                Message.USER_DEMOTE_SUCCESS.send(sender, user.getFormattedDisplayName(), track.getName(), groupFrom, groupTo, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
                 if (!silent) {
                     Message.EMPTY.send(sender, MessageUtils.listToArrowSep(track.getGroups(), groupTo, groupFrom, true));
                 }

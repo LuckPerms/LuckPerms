@@ -149,7 +149,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
     @Override
     public String[] getGroups() {
         return this.plugin.getGroupManager().getAll().values().stream()
-                .map(g -> g.getDisplayName().orElse(g.getName()))
+                .map(Group::getPlainDisplayName)
                 .toArray(String[]::new);
     }
 
@@ -164,7 +164,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
 
         Tristate result = permissionData.getPermissionValue(permission, CheckOrigin.INTERNAL);
         if (log()) {
-            logMsg("#userHasPermission: %s - %s - %s - %s", user.getFriendlyName(), contexts.getContexts().toMultimap(), permission, result);
+            logMsg("#userHasPermission: %s - %s - %s - %s", user.getPlainDisplayName(), contexts.getContexts().toMultimap(), permission, result);
         }
         return result.asBoolean();
     }
@@ -221,14 +221,14 @@ public class VaultPermissionHook extends AbstractVaultPermission {
                 .map(n -> {
                     Group group = this.plugin.getGroupManager().getIfLoaded(n.getGroupName());
                     if (group != null) {
-                        return group.getDisplayName().orElse(group.getName());
+                        return group.getPlainDisplayName();
                     }
                     return n.getGroupName();
                 })
                 .toArray(String[]::new);
 
         if (log()) {
-            logMsg("#userGetGroups: %s - %s - %s", user.getFriendlyName(), contexts, Arrays.toString(ret));
+            logMsg("#userGetGroups: %s - %s - %s", user.getPlainDisplayName(), contexts, Arrays.toString(ret));
         }
 
         return ret;
@@ -242,11 +242,11 @@ public class VaultPermissionHook extends AbstractVaultPermission {
         String value = user.getPrimaryGroup().getValue();
         Group group = getGroup(value);
         if (group != null) {
-            value = group.getDisplayName().orElse(group.getName());
+            value = group.getPlainDisplayName();
         }
 
         if (log()) {
-            logMsg("#userGetPrimaryGroup: %s - %s - %s", user.getFriendlyName(), world, value);
+            logMsg("#userGetPrimaryGroup: %s - %s - %s", user.getPlainDisplayName(), world, value);
         }
 
         return value;
@@ -370,7 +370,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
         Preconditions.checkArgument(!permission.isEmpty(), "permission is an empty string");
 
         if (log()) {
-            logMsg("#holderAddPermission: %s - %s - %s", holder.getFriendlyName(), permission, world);
+            logMsg("#holderAddPermission: %s - %s - %s", holder.getPlainDisplayName(), permission, world);
         }
 
         if (holder.setPermission(NodeFactory.make(permission, true, getVaultServer(), world)).asBoolean()) {
@@ -384,7 +384,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
         Preconditions.checkArgument(!permission.isEmpty(), "permission is an empty string");
 
         if (log()) {
-            logMsg("#holderRemovePermission: %s - %s - %s", holder.getFriendlyName(), permission, world);
+            logMsg("#holderRemovePermission: %s - %s - %s", holder.getPlainDisplayName(), permission, world);
         }
 
         if (holder.unsetPermission(NodeFactory.make(permission, getVaultServer(), world)).asBoolean()) {

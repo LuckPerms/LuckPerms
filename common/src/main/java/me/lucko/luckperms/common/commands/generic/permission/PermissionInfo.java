@@ -85,7 +85,7 @@ public class PermissionInfo extends SharedSubCommand {
 
         // handle empty
         if (nodes.isEmpty()) {
-            Message.PERMISSION_INFO_NO_DATA.send(sender, holder.getFriendlyName());
+            Message.PERMISSION_INFO_NO_DATA.send(sender, holder.getFormattedDisplayName());
             return CommandResult.SUCCESS;
         }
 
@@ -110,7 +110,7 @@ public class PermissionInfo extends SharedSubCommand {
         List<LocalizedNode> content = pages.get(pageIndex);
 
         // send header
-        Message.PERMISSION_INFO.send(sender, holder.getFriendlyName(), page, pages.size(), nodes.size());
+        Message.PERMISSION_INFO.send(sender, holder.getFormattedDisplayName(), page, pages.size(), nodes.size());
 
         // send content
         for (LocalizedNode node : content) {
@@ -140,10 +140,10 @@ public class PermissionInfo extends SharedSubCommand {
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
                 "¥3> " + (node.getValue() ? "¥a" : "¥c") + node.getPermission(),
                 " ",
-                "¥7Click to remove this node from " + holder.getFriendlyName()
+                "¥7Click to remove this node from " + holder.getFormattedDisplayName()
         ), '¥'));
 
-        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType().isGroup() ? holder.getObjectName() : holder.getFriendlyName(), holder.getType(), false, !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty());
+        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType().isGroup() ? holder.getObjectName() : holder.getFormattedDisplayName(), holder.getType(), false, !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty());
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
 
         return component -> {

@@ -71,7 +71,7 @@ public class PermissionCheckInherits extends SharedSubCommand {
         }
 
         String s = MessageUtils.formatTristate(result.getResult());
-        Message.CHECK_INHERITS_PERMISSION.send(sender, holder.getFriendlyName(), node, s, MessageUtils.contextSetToString(plugin.getLocaleManager(), context), String.valueOf(location));
+        Message.CHECK_INHERITS_PERMISSION.send(sender, holder.getFormattedDisplayName(), node, s, MessageUtils.contextSetToString(plugin.getLocaleManager(), context), String.valueOf(location));
         return CommandResult.SUCCESS;
     }
 

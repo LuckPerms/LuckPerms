@@ -84,7 +84,7 @@ public class PermissionUnsetTemp extends SharedSubCommand {
         DataMutateResult result = holder.unsetPermission(NodeFactory.builder(node).setExpiry(10L).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, holder.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("permission", "unsettemp", node, context)
@@ -93,7 +93,7 @@ public class PermissionUnsetTemp extends SharedSubCommand {
             StorageAssistant.save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_HAVE_TEMP_PERMISSION.send(sender, holder.getFriendlyName(), node, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.DOES_NOT_HAVE_TEMP_PERMISSION.send(sender, holder.getFormattedDisplayName(), node, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
     }

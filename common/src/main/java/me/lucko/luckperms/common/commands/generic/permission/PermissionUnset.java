@@ -84,7 +84,7 @@ public class PermissionUnset extends SharedSubCommand {
         DataMutateResult result = holder.unsetPermission(NodeFactory.builder(node).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            Message.UNSETPERMISSION_SUCCESS.send(sender, node, holder.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.UNSETPERMISSION_SUCCESS.send(sender, node, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("permission", "unset", node, context)
@@ -93,7 +93,7 @@ public class PermissionUnset extends SharedSubCommand {
             StorageAssistant.save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_HAVE_PERMISSION.send(sender, holder.getFriendlyName(), node, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.DOES_NOT_HAVE_PERMISSION.send(sender, holder.getFormattedDisplayName(), node, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
     }

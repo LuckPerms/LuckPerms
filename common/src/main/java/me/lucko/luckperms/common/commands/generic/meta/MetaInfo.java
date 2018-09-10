@@ -96,23 +96,23 @@ public class MetaInfo extends SharedSubCommand {
         }
 
         if (prefixes.isEmpty()) {
-            Message.CHAT_META_PREFIX_NONE.send(sender, holder.getFriendlyName());
+            Message.CHAT_META_PREFIX_NONE.send(sender, holder.getFormattedDisplayName());
         } else {
-            Message.CHAT_META_PREFIX_HEADER.send(sender, holder.getFriendlyName());
+            Message.CHAT_META_PREFIX_HEADER.send(sender, holder.getFormattedDisplayName());
             sendChatMetaMessage(ChatMetaType.PREFIX, prefixes, sender, holder, label);
         }
 
         if (suffixes.isEmpty()) {
-            Message.CHAT_META_SUFFIX_NONE.send(sender, holder.getFriendlyName());
+            Message.CHAT_META_SUFFIX_NONE.send(sender, holder.getFormattedDisplayName());
         } else {
-            Message.CHAT_META_SUFFIX_HEADER.send(sender, holder.getFriendlyName());
+            Message.CHAT_META_SUFFIX_HEADER.send(sender, holder.getFormattedDisplayName());
             sendChatMetaMessage(ChatMetaType.SUFFIX, suffixes, sender, holder, label);
         }
 
         if (meta.isEmpty()) {
-            Message.META_NONE.send(sender, holder.getFriendlyName());
+            Message.META_NONE.send(sender, holder.getFormattedDisplayName());
         } else {
-            Message.META_HEADER.send(sender, holder.getFriendlyName());
+            Message.META_HEADER.send(sender, holder.getFormattedDisplayName());
             sendMetaMessage(meta, sender, holder, label);
         }
 
@@ -163,10 +163,10 @@ public class MetaInfo extends SharedSubCommand {
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
                 "¥3> ¥a" + type.getEntry(node).getKey() + " ¥7- ¥r" + type.getEntry(node).getValue(),
                 " ",
-                "¥7Click to remove this " + type.name().toLowerCase() + " from " + holder.getFriendlyName()
+                "¥7Click to remove this " + type.name().toLowerCase() + " from " + holder.getFormattedDisplayName()
         ), '¥'));
 
-        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType().isGroup() ? holder.getObjectName() : holder.getFriendlyName(), holder.getType(), false, !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty());
+        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType().isGroup() ? holder.getObjectName() : holder.getFormattedDisplayName(), holder.getType(), false, !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty());
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
 
         return component -> {
@@ -187,10 +187,10 @@ public class MetaInfo extends SharedSubCommand {
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
                 "¥3> ¥r" + node.getMeta().getKey() + " ¥7- ¥r" + node.getMeta().getValue(),
                 " ",
-                "¥7Click to remove this meta pair from " + holder.getFriendlyName()
+                "¥7Click to remove this meta pair from " + holder.getFormattedDisplayName()
         ), '¥'));
 
-        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType().isGroup() ? holder.getObjectName() : holder.getFriendlyName(), holder.getType(), false, !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty());
+        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType().isGroup() ? holder.getObjectName() : holder.getFormattedDisplayName(), holder.getType(), false, !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty());
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
 
         return component -> {

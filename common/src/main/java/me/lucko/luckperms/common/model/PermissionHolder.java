@@ -184,11 +184,19 @@ public abstract class PermissionHolder {
     public abstract String getObjectName();
 
     /**
-     * Gets the friendly name of this permission holder (for use in commands, etc)
+     * Gets the formatted display name of this permission holder
+     * (for use in commands, etc)
      *
-     * @return the holders "friendly" name
+     * @return the holders formatted display name
      */
-    public abstract String getFriendlyName();
+    public abstract String getFormattedDisplayName();
+
+    /**
+     * Gets a display name for this permission holder, without any formatting.
+     *
+     * @return the display name
+     */
+    public abstract String getPlainDisplayName();
 
     /**
      * Gets the holders cached data

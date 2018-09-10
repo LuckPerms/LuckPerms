@@ -88,18 +88,18 @@ public class UserSwitchPrimaryGroup extends SharedSubCommand {
         }
 
         if (user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(group.getName())) {
-            Message.USER_PRIMARYGROUP_ERROR_ALREADYHAS.send(sender, user.getFriendlyName(), group.getFriendlyName());
+            Message.USER_PRIMARYGROUP_ERROR_ALREADYHAS.send(sender, user.getFormattedDisplayName(), group.getFormattedDisplayName());
             return CommandResult.STATE_ERROR;
         }
 
         Node node = NodeFactory.buildGroupNode(group.getName()).build();
         if (!user.hasPermission(NodeMapType.ENDURING, node, StandardNodeEquality.IGNORE_VALUE).asBoolean()) {
-            Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, user.getFriendlyName(), group.getName());
+            Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, user.getFormattedDisplayName(), group.getName());
             user.setPermission(node);
         }
 
         user.getPrimaryGroup().setStoredValue(group.getName());
-        Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user.getFriendlyName(), group.getFriendlyName());
+        Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user.getFormattedDisplayName(), group.getFormattedDisplayName());
 
         ExtendedLogEntry.build().actor(sender).acted(user)
                 .action("parent", "switchprimarygroup", group.getName())

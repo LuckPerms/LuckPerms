@@ -84,7 +84,7 @@ public class ParentSet extends SharedSubCommand {
             ((User) holder).getPrimaryGroup().setStoredValue(group.getName());
         }
 
-        Message.SET_PARENT_SUCCESS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+        Message.SET_PARENT_SUCCESS.send(sender, holder.getFormattedDisplayName(), group.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
         ExtendedLogEntry.build().actor(sender).acted(holder)
                 .action("parent", "set", group.getName(), context)

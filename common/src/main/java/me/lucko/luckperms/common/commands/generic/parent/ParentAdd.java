@@ -81,7 +81,7 @@ public class ParentAdd extends SharedSubCommand {
         DataMutateResult result = holder.setPermission(NodeFactory.buildGroupNode(group.getName()).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            Message.SET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.SET_INHERIT_SUCCESS.send(sender, holder.getFormattedDisplayName(), group.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("parent", "add", group.getName(), context)
@@ -90,7 +90,7 @@ public class ParentAdd extends SharedSubCommand {
             StorageAssistant.save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_INHERITS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.ALREADY_INHERITS.send(sender, holder.getFormattedDisplayName(), group.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
     }

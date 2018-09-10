@@ -105,8 +105,13 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     }
 
     @Override
-    public String getFriendlyName() {
+    public String getFormattedDisplayName() {
         return this.name != null ? this.name : this.uuid.toString();
+    }
+
+    @Override
+    public String getPlainDisplayName() {
+        return getFormattedDisplayName();
     }
 
     public ApiUser getApiDelegate() {

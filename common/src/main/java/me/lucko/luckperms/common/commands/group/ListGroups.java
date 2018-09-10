@@ -73,12 +73,12 @@ public class ListGroups extends SingleCommand {
 
                     if (tracks.isEmpty()) {
                         component = Message.GROUPS_LIST_ENTRY.asComponent(plugin.getLocaleManager(),
-                                group.getFriendlyName(),
+                                group.getFormattedDisplayName(),
                                 group.getWeight().orElse(0)
                         );
                     } else {
                         component = Message.GROUPS_LIST_ENTRY_WITH_TRACKS.asComponent(plugin.getLocaleManager(),
-                                group.getFriendlyName(),
+                                group.getFormattedDisplayName(),
                                 group.getWeight().orElse(0),
                                 MessageUtils.toCommaSep(tracks)
                         );

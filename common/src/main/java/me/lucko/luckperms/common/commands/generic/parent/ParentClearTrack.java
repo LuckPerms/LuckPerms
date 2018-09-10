@@ -102,9 +102,9 @@ public class ParentClearTrack extends SharedSubCommand {
         int changed = before - holder.enduringData().immutable().size();
 
         if (changed == 1) {
-            Message.PARENT_CLEAR_TRACK_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), track.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
+            Message.PARENT_CLEAR_TRACK_SUCCESS_SINGULAR.send(sender, holder.getFormattedDisplayName(), track.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         } else {
-            Message.PARENT_CLEAR_TRACK_SUCCESS.send(sender, holder.getFriendlyName(), track.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
+            Message.PARENT_CLEAR_TRACK_SUCCESS.send(sender, holder.getFormattedDisplayName(), track.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         }
 
         ExtendedLogEntry.build().actor(sender).acted(holder)

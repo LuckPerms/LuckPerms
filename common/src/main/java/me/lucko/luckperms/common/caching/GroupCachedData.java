@@ -42,6 +42,6 @@ public class GroupCachedData extends HolderCachedData<Group> implements GroupDat
 
     @Override
     protected PermissionCalculatorMetadata getMetadataForContexts(Contexts contexts) {
-        return PermissionCalculatorMetadata.of(HolderType.GROUP, this.holder.getFriendlyName(), contexts.getContexts());
+        return PermissionCalculatorMetadata.of(HolderType.GROUP, this.holder.getPlainDisplayName(), contexts.getContexts());
     }
 }

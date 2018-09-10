@@ -42,6 +42,6 @@ public class UserCachedData extends HolderCachedData<User> implements UserData {
 
     @Override
     protected PermissionCalculatorMetadata getMetadataForContexts(Contexts contexts) {
-        return PermissionCalculatorMetadata.of(HolderType.USER, this.holder.getFriendlyName(), contexts.getContexts());
+        return PermissionCalculatorMetadata.of(HolderType.USER, this.holder.getPlainDisplayName(), contexts.getContexts());
     }
 }

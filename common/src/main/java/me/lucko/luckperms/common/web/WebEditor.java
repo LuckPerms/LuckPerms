@@ -72,7 +72,7 @@ public final class WebEditor {
         return new JObject()
                 .add("who", new JObject()
                         .add("id", getHolderIdentifier(holder))
-                        .add("friendly", holder.getFriendlyName())
+                        .add("friendly", holder.getPlainDisplayName())
                         .consume(obj -> {
                             if (holder.getType().isUser()) {
                                 obj.add("uuid", ((User) holder).getUuid().toString());

@@ -84,7 +84,7 @@ public class ParentAddTemp extends SharedSubCommand {
         }
 
         if (group.getName().equalsIgnoreCase(holder.getObjectName())) {
-            Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFormattedDisplayName(), group.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
 
@@ -92,7 +92,7 @@ public class ParentAddTemp extends SharedSubCommand {
 
         if (ret.getResult().asBoolean()) {
             duration = ret.getMergedNode().getExpiryUnixTime();
-            Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFormattedDisplayName(), group.getFormattedDisplayName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("parent", "addtemp", group.getName(), duration, context)
@@ -101,7 +101,7 @@ public class ParentAddTemp extends SharedSubCommand {
             StorageAssistant.save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFriendlyName(), group.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFormattedDisplayName(), group.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
     }

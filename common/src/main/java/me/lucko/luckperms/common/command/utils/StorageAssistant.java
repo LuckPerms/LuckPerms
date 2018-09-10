@@ -104,7 +104,7 @@ public final class StorageAssistant {
             plugin.getStorage().saveUser(user).get();
         } catch (Exception e) {
             e.printStackTrace();
-            Message.USER_SAVE_ERROR.send(sender, user.getFriendlyName());
+            Message.USER_SAVE_ERROR.send(sender, user.getFormattedDisplayName());
             return;
         }
 
@@ -126,7 +126,7 @@ public final class StorageAssistant {
             plugin.getStorage().saveGroup(group).get();
         } catch (Exception e) {
             e.printStackTrace();
-            Message.GROUP_SAVE_ERROR.send(sender, group.getFriendlyName());
+            Message.GROUP_SAVE_ERROR.send(sender, group.getFormattedDisplayName());
             return;
         }
 

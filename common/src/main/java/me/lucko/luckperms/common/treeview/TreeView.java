@@ -142,7 +142,7 @@ public class TreeView {
         JObject checks;
         if (user != null && checker != null) {
             metadata.add("referenceUser", new JObject()
-                    .add("name", user.getFriendlyName())
+                    .add("name", user.getPlainDisplayName())
                     .add("uuid", user.getUuid().toString())
             );
 

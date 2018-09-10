@@ -92,9 +92,14 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     }
 
     @Override
-    public String getFriendlyName() {
+    public String getFormattedDisplayName() {
         Optional<String> dn = getDisplayName();
         return dn.map(s -> this.name + " &r(" + s + "&r)").orElse(this.name);
+    }
+
+    @Override
+    public String getPlainDisplayName() {
+        return getDisplayName().orElse(getName());
     }
 
     public Optional<String> getDisplayName() {

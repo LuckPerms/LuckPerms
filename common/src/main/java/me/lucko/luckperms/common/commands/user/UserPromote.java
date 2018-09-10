@@ -102,19 +102,19 @@ public class UserPromote extends SubCommand<User> {
                 Message.COMMAND_NO_PERMISSION.send(sender);
                 return CommandResult.NO_PERMISSION;
             case AMBIGUOUS_CALL:
-                Message.TRACK_AMBIGUOUS_CALL.send(sender, user.getFriendlyName());
+                Message.TRACK_AMBIGUOUS_CALL.send(sender, user.getFormattedDisplayName());
                 return CommandResult.FAILURE;
             case END_OF_TRACK:
-                Message.USER_PROMOTE_ERROR_ENDOFTRACK.send(sender, track.getName(), user.getFriendlyName());
+                Message.USER_PROMOTE_ERROR_ENDOFTRACK.send(sender, track.getName(), user.getFormattedDisplayName());
                 return CommandResult.STATE_ERROR;
 
             case ADDED_TO_FIRST_GROUP: {
                 if (!addToFirst && !result.getGroupTo().isPresent()) {
-                    Message.USER_PROMOTE_NOT_ON_TRACK.send(sender, track.getName(), user.getFriendlyName());
+                    Message.USER_PROMOTE_NOT_ON_TRACK.send(sender, track.getName(), user.getFormattedDisplayName());
                     return CommandResult.STATE_ERROR;
                 }
 
-                Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFriendlyName(), result.getGroupTo().get(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+                Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFormattedDisplayName(), result.getGroupTo().get(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
                 ExtendedLogEntry.build().actor(sender).acted(user)
                         .action("promote", track.getName(), context)
@@ -128,7 +128,7 @@ public class UserPromote extends SubCommand<User> {
                 String groupFrom = result.getGroupFrom().get();
                 String groupTo = result.getGroupTo().get();
 
-                Message.USER_PROMOTE_SUCCESS.send(sender, user.getFriendlyName(), track.getName(), groupFrom, groupTo, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+                Message.USER_PROMOTE_SUCCESS.send(sender, user.getFormattedDisplayName(), track.getName(), groupFrom, groupTo, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
                 if (!silent) {
                     Message.EMPTY.send(sender, MessageUtils.listToArrowSep(track.getGroups(), groupFrom, groupTo, false));
                 }

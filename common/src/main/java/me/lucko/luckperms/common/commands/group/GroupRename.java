@@ -75,7 +75,7 @@ public class GroupRename extends SubCommand<Group> {
             plugin.getStorage().deleteGroup(group, DeletionCause.COMMAND).get();
         } catch (Exception e) {
             e.printStackTrace();
-            Message.DELETE_ERROR.send(sender, group.getFriendlyName());
+            Message.DELETE_ERROR.send(sender, group.getFormattedDisplayName());
             return CommandResult.FAILURE;
         }
 

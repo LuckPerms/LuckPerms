@@ -85,7 +85,7 @@ public class PermissionSet extends SharedSubCommand {
         DataMutateResult result = holder.setPermission(NodeFactory.builder(node).setValue(value).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            Message.SETPERMISSION_SUCCESS.send(sender, node, value, holder.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.SETPERMISSION_SUCCESS.send(sender, node, value, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("permission", "set", node, value, context)
@@ -94,7 +94,7 @@ public class PermissionSet extends SharedSubCommand {
             StorageAssistant.save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HASPERMISSION.send(sender, holder.getFriendlyName(), node, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.ALREADY_HASPERMISSION.send(sender, holder.getFormattedDisplayName(), node, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
     }

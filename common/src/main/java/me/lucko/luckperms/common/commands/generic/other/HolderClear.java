@@ -75,9 +75,9 @@ public class HolderClear<T extends PermissionHolder> extends SubCommand<T> {
 
         int changed = before - holder.enduringData().immutable().size();
         if (changed == 1) {
-            Message.CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
+            Message.CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         } else {
-            Message.CLEAR_SUCCESS.send(sender, holder.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
+            Message.CLEAR_SUCCESS.send(sender, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         }
 
         ExtendedLogEntry.build().actor(sender).acted(holder)

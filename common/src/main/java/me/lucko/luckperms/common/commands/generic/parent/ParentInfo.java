@@ -83,7 +83,7 @@ public class ParentInfo extends SharedSubCommand {
 
         // handle empty
         if (nodes.isEmpty()) {
-            Message.PARENT_INFO_NO_DATA.send(sender, holder.getFriendlyName());
+            Message.PARENT_INFO_NO_DATA.send(sender, holder.getFormattedDisplayName());
             return CommandResult.SUCCESS;
         }
 
@@ -108,7 +108,7 @@ public class ParentInfo extends SharedSubCommand {
         List<LocalizedNode> content = pages.get(pageIndex);
 
         // send header
-        Message.PARENT_INFO.send(sender, holder.getFriendlyName(), page, pages.size(), nodes.size());
+        Message.PARENT_INFO.send(sender, holder.getFormattedDisplayName(), page, pages.size(), nodes.size());
 
         // send content
         for (LocalizedNode node : content) {
@@ -138,10 +138,10 @@ public class ParentInfo extends SharedSubCommand {
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
                 "&3> &f" + node.getGroupName(),
                 " ",
-                "&7Click to remove this parent from " + holder.getFriendlyName()
+                "&7Click to remove this parent from " + holder.getFormattedDisplayName()
         ), CommandManager.AMPERSAND_CHAR));
 
-        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType().isGroup() ? holder.getObjectName() : holder.getFriendlyName(), holder.getType(), false, !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty());
+        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType().isGroup() ? holder.getObjectName() : holder.getFormattedDisplayName(), holder.getType(), false, !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty());
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
 
         return component -> {

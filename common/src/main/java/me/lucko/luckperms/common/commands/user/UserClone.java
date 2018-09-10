@@ -74,7 +74,7 @@ public class UserClone extends SubCommand<User> {
 
         otherUser.replaceNodes(NodeMapType.ENDURING, user.enduringData().immutable());
 
-        Message.CLONE_SUCCESS.send(sender, user.getFriendlyName(), otherUser.getFriendlyName());
+        Message.CLONE_SUCCESS.send(sender, user.getFormattedDisplayName(), otherUser.getFormattedDisplayName());
 
         ExtendedLogEntry.build().actor(sender).acted(otherUser)
                 .action("clone", user.getName())

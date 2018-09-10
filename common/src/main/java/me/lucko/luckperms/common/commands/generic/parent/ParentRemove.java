@@ -90,7 +90,7 @@ public class ParentRemove extends SharedSubCommand {
 
         DataMutateResult result = holder.unsetPermission(NodeFactory.buildGroupNode(groupName).withExtraContext(context).build());
         if (result.asBoolean()) {
-            Message.UNSET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), groupName, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.UNSET_INHERIT_SUCCESS.send(sender, holder.getFormattedDisplayName(), groupName, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("parent", "remove", groupName, context)
@@ -103,7 +103,7 @@ public class ParentRemove extends SharedSubCommand {
             StorageAssistant.save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_INHERIT.send(sender, holder.getFriendlyName(), groupName, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.DOES_NOT_INHERIT.send(sender, holder.getFormattedDisplayName(), groupName, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
     }

@@ -102,11 +102,11 @@ public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> 
         }
 
         if (lines.isEmpty()) {
-            Message.LIST_TRACKS_EMPTY.send(sender, holder.getFriendlyName());
+            Message.LIST_TRACKS_EMPTY.send(sender, holder.getFormattedDisplayName());
             return CommandResult.SUCCESS;
         }
 
-        Message.LIST_TRACKS.send(sender, holder.getFriendlyName());
+        Message.LIST_TRACKS.send(sender, holder.getFormattedDisplayName());
         for (Map.Entry<Track, String> line : lines) {
             Message.LIST_TRACKS_ENTRY.send(sender, line.getKey().getName(), line.getValue());
         }

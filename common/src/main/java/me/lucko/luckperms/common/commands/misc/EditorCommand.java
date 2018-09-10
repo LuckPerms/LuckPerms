@@ -83,7 +83,7 @@ public class EditorCommand extends SingleCommand {
         }
         if (type.includingUsers) {
             plugin.getUserManager().getAll().values().stream()
-                    .sorted((o1, o2) -> o1.getFriendlyName().compareToIgnoreCase(o2.getFriendlyName()))
+                    .sorted((o1, o2) -> o1.getFormattedDisplayName().compareToIgnoreCase(o2.getFormattedDisplayName()))
                     .forEach(holders::add);
         }
 

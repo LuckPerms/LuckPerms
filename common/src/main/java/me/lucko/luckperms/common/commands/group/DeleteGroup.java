@@ -73,11 +73,11 @@ public class DeleteGroup extends SingleCommand {
             plugin.getStorage().deleteGroup(group, DeletionCause.COMMAND).get();
         } catch (Exception e) {
             e.printStackTrace();
-            Message.DELETE_ERROR.send(sender, group.getFriendlyName());
+            Message.DELETE_ERROR.send(sender, group.getFormattedDisplayName());
             return CommandResult.FAILURE;
         }
 
-        Message.DELETE_SUCCESS.send(sender, group.getFriendlyName());
+        Message.DELETE_SUCCESS.send(sender, group.getFormattedDisplayName());
 
         ExtendedLogEntry.build().actor(sender).actedName(groupName).type(LogEntry.Type.GROUP)
                 .action("delete")

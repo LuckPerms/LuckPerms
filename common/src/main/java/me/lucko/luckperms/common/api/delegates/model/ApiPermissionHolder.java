@@ -85,11 +85,7 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.PermissionHol
     @Nonnull
     @Override
     public String getFriendlyName() {
-        if (this.handle.getType().isGroup()) {
-            Group group = (Group) this.handle;
-            return group.getDisplayName().orElse(group.getName());
-        }
-        return this.handle.getFriendlyName();
+        return this.handle.getPlainDisplayName();
     }
 
     @Nonnull

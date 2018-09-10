@@ -67,7 +67,7 @@ public class PermissionCheck extends SharedSubCommand {
         Tristate result = holder.hasPermission(NodeMapType.ENDURING, NodeFactory.builder(node).withExtraContext(context).build(), StandardNodeEquality.IGNORE_VALUE_OR_IF_TEMPORARY);
         String s = MessageUtils.formatTristate(result);
 
-        Message.CHECK_PERMISSION.send(sender, holder.getFriendlyName(), node, s, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+        Message.CHECK_PERMISSION.send(sender, holder.getFormattedDisplayName(), node, s, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
         return CommandResult.SUCCESS;
     }
 

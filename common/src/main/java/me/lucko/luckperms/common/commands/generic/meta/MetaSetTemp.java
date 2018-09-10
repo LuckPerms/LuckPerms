@@ -84,14 +84,14 @@ public class MetaSetTemp extends SharedSubCommand {
         Node n = NodeFactory.buildMetaNode(key, value).withExtraContext(context).setExpiry(duration).build();
 
         if (holder.hasPermission(NodeMapType.ENDURING, n, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
-            Message.ALREADY_HAS_TEMP_META.send(sender, holder.getFriendlyName(), key, value, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.ALREADY_HAS_TEMP_META.send(sender, holder.getFormattedDisplayName(), key, value, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
 
         holder.clearMetaKeys(key, context, true);
         duration = holder.setPermission(n, modifier).getMergedNode().getExpiryUnixTime();
 
-        TextComponent.Builder builder = Message.SET_META_TEMP_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
+        TextComponent.Builder builder = Message.SET_META_TEMP_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, holder.getFormattedDisplayName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
         HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
                 TextUtils.joinNewline("¥3Raw key: ¥r" + key, "¥3Raw value: ¥r" + value),
                 '¥'

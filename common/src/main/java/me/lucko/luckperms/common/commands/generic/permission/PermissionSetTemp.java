@@ -91,7 +91,7 @@ public class PermissionSetTemp extends SharedSubCommand {
 
         if (result.getResult().asBoolean()) {
             duration = result.getMergedNode().getExpiryUnixTime();
-            Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, value, holder.getFriendlyName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, value, holder.getFormattedDisplayName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("permission", "settemp", node, value, duration, context)
@@ -100,7 +100,7 @@ public class PermissionSetTemp extends SharedSubCommand {
             StorageAssistant.save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, holder.getFriendlyName(), node, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, holder.getFormattedDisplayName(), node, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
     }

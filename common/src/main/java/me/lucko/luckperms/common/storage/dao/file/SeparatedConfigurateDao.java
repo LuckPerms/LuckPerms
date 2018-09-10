@@ -172,7 +172,7 @@ public class SeparatedConfigurateDao extends AbstractConfigurateDao {
 
                 User u = this.plugin.getUserManager().getIfLoaded(uuid);
                 if (u != null) {
-                    this.plugin.getLogger().info("[FileWatcher] Detected change in user file for " + u.getFriendlyName() + " - reloading...");
+                    this.plugin.getLogger().info("[FileWatcher] Detected change in user file for " + u.getPlainDisplayName() + " - reloading...");
                     this.plugin.getStorage().loadUser(uuid, null);
                 }
             });

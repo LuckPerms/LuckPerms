@@ -75,9 +75,9 @@ public class PermissionClear extends SharedSubCommand {
 
         int changed = before - holder.enduringData().immutable().size();
         if (changed == 1) {
-            Message.PERMISSION_CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
+            Message.PERMISSION_CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         } else {
-            Message.PERMISSION_CLEAR_SUCCESS.send(sender, holder.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
+            Message.PERMISSION_CLEAR_SUCCESS.send(sender, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         }
 
         ExtendedLogEntry.build().actor(sender).acted(holder)

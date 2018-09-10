@@ -79,14 +79,14 @@ public class MetaSet extends SharedSubCommand {
         Node n = NodeFactory.buildMetaNode(key, value).withExtraContext(context).build();
 
         if (holder.hasPermission(NodeMapType.ENDURING, n, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
-            Message.ALREADY_HAS_META.send(sender, holder.getFriendlyName(), key, value, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.ALREADY_HAS_META.send(sender, holder.getFormattedDisplayName(), key, value, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
 
         holder.clearMetaKeys(key, context, false);
         holder.setPermission(n);
 
-        TextComponent.Builder builder = Message.SET_META_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
+        TextComponent.Builder builder = Message.SET_META_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
         HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
                 TextUtils.joinNewline("¥3Raw key: ¥r" + key, "¥3Raw value: ¥r" + value),
                 '¥'

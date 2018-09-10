@@ -89,7 +89,7 @@ public class VaultChatHook extends AbstractVaultChat {
         MetaCache metaData = user.getCachedData().getMetaData(contexts);
         String ret = metaData.getPrefix();
         if (log()) {
-            logMsg("#getUserChatPrefix: %s - %s - %s", user.getFriendlyName(), contexts.getContexts().toMultimap(), ret);
+            logMsg("#getUserChatPrefix: %s - %s - %s", user.getPlainDisplayName(), contexts.getContexts().toMultimap(), ret);
         }
         return Strings.nullToEmpty(ret);
     }
@@ -103,7 +103,7 @@ public class VaultChatHook extends AbstractVaultChat {
         MetaCache metaData = user.getCachedData().getMetaData(contexts);
         String ret = metaData.getSuffix();
         if (log()) {
-            logMsg("#getUserChatSuffix: %s - %s - %s", user.getFriendlyName(), contexts.getContexts().toMultimap(), ret);
+            logMsg("#getUserChatSuffix: %s - %s - %s", user.getPlainDisplayName(), contexts.getContexts().toMultimap(), ret);
         }
         return Strings.nullToEmpty(ret);
     }
@@ -134,7 +134,7 @@ public class VaultChatHook extends AbstractVaultChat {
         MetaCache metaData = user.getCachedData().getMetaData(contexts);
         String ret = metaData.getMeta().get(key);
         if (log()) {
-            logMsg("#getUserMeta: %s - %s - %s - %s", user.getFriendlyName(), contexts.getContexts().toMultimap(), key, ret);
+            logMsg("#getUserMeta: %s - %s - %s - %s", user.getPlainDisplayName(), contexts.getContexts().toMultimap(), key, ret);
         }
         return ret;
     }
@@ -247,7 +247,7 @@ public class VaultChatHook extends AbstractVaultChat {
 
     private void setChatMeta(PermissionHolder holder, ChatMetaType type, String value, String world) {
         if (log()) {
-            logMsg("#setChatMeta: %s - %s - %s - %s", holder.getFriendlyName(), type, value, world);
+            logMsg("#setChatMeta: %s - %s - %s - %s", holder.getPlainDisplayName(), type, value, world);
         }
 
         // remove all prefixes/suffixes directly set on the user/group
@@ -273,7 +273,7 @@ public class VaultChatHook extends AbstractVaultChat {
 
     private void setMeta(PermissionHolder holder, String key, Object value, String world) {
         if (log()) {
-            logMsg("#setMeta: %s - %s - %s - %s", holder.getFriendlyName(), key, value, world);
+            logMsg("#setMeta: %s - %s - %s - %s", holder.getPlainDisplayName(), key, value, world);
         }
 
         holder.removeIf(n -> n.isMeta() && n.getMeta().getKey().equals(key));

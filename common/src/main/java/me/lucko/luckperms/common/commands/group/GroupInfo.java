@@ -58,7 +58,7 @@ public class GroupInfo extends SubCommand<Group> {
 
         Message.GROUP_INFO_GENERAL.send(sender,
                 group.getName(),
-                group.getDisplayName().orElse(group.getName()),
+                group.getPlainDisplayName(),
                 group.getWeight().isPresent() ? group.getWeight().getAsInt() : "None"
         );
 
