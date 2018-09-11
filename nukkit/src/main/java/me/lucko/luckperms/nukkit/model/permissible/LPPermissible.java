@@ -242,7 +242,10 @@ public class LPPermissible extends PermissibleBase {
             throw new NullPointerException("plugin");
         }
         if (permission == null) {
-            throw new NullPointerException("permission");
+            return addAttachment(plugin);
+        }
+        if (value == null) {
+            return addAttachment(plugin, permission);   
         }
 
         PermissionAttachment ret = addAttachment(plugin);
