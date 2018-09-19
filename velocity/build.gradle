@@ -1,17 +1,7 @@
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "com.github.jengelman.gradle.plugins:shadow:2.0.4"
-        classpath "gradle.plugin.ninja.miserable:blossom:1.0.1"
-    }
+plugins {
+    id 'net.kyori.blossom' version '1.1.0'
+    id 'com.github.johnrengelman.shadow' version '2.0.4'
 }
-
-apply plugin: "com.github.johnrengelman.shadow"
-apply plugin: "ninja.miserable.blossom"
 
 repositories {
     maven {
