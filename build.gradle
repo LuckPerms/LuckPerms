@@ -41,7 +41,7 @@ subprojects {
     project.ext.fullVersion = project.ext.majorVersion + '.' + project.ext.minorVersion + '.' + project.ext.patchVersion
 
     repositories {
-        mavenLocal()
+        //mavenLocal()
         mavenCentral()
 
         maven {

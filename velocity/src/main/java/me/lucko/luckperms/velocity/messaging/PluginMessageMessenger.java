@@ -28,13 +28,15 @@ package me.lucko.luckperms.velocity.messaging;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import com.velocitypowered.api.event.EventManager;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.connection.PluginMessageEvent;
+import com.velocitypowered.api.event.connection.PluginMessageEvent.ForwardResult;
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
-import com.velocitypowered.api.proxy.messages.ChannelMessageSource;
-import com.velocitypowered.api.proxy.messages.ChannelRegistrar;
-import com.velocitypowered.api.proxy.messages.ChannelSide;
-import com.velocitypowered.api.proxy.messages.MessageHandler;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
 import me.lucko.luckperms.api.messenger.Messenger;
@@ -43,12 +45,10 @@ import me.lucko.luckperms.velocity.LPVelocityPlugin;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Optional;
-
 /**
  * An implementation of {@link Messenger} using the plugin messaging channels.
  */
-public class PluginMessageMessenger implements Messenger, MessageHandler {
+public class PluginMessageMessenger implements Messenger {
     private static final ChannelIdentifier CHANNEL = MinecraftChannelIdentifier.create("luckperms", "update");
 
     private final LPVelocityPlugin plugin;
@@ -60,24 +60,22 @@ public class PluginMessageMessenger implements Messenger, MessageHandler {
     }
 
     public void init() {
-        ChannelRegistrar channelRegistrar = this.plugin.getBootstrap().getProxy().getChannelRegistrar();
-        channelRegistrar.register(this, CHANNEL);
+        ProxyServer proxy = this.plugin.getBootstrap().getProxy();
+        proxy.getChannelRegistrar().register(CHANNEL);
+        proxy.getEventManager().register(this.plugin.getBootstrap(), this);
     }
 
     @Override
     public void close() {
-        // TODO: no way to unregister an individual MessageHandler?
+        ProxyServer proxy = this.plugin.getBootstrap().getProxy();
+        proxy.getChannelRegistrar().unregister(CHANNEL);
+        proxy.getEventManager().unregisterListener(this.plugin.getBootstrap(), this);
     }
 
-    private void dispatchMessage(byte[] data) {
-        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
-            this.plugin.getBootstrap().getProxy().getAllPlayers().stream()
-                    .map(Player::getCurrentServer)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .distinct()
-                    .forEach(server -> server.sendPluginMessage(CHANNEL, data));
-        });
+    private void dispatchMessage(byte[] message) {
+        for (RegisteredServer server : this.plugin.getBootstrap().getProxy().getAllServers()) {
+            server.sendPluginMessage(CHANNEL, message);
+        }
     }
 
     @Override
@@ -85,25 +83,31 @@ public class PluginMessageMessenger implements Messenger, MessageHandler {
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF(outgoingMessage.asEncodedString());
 
-        byte[] data = out.toByteArray();
-        dispatchMessage(data);
+        byte[] message = out.toByteArray();
+        dispatchMessage(message);
     }
 
-    @Override
-    public ForwardStatus handle(ChannelMessageSource source, ChannelSide side, ChannelIdentifier channel, byte[] data) {
-        if (side == ChannelSide.FROM_CLIENT) {
-            return ForwardStatus.HANDLED;
+    @Subscribe
+    public void onPluginMessage(PluginMessageEvent e) {
+        // compare the underlying text representation of the channel
+        // the namespaced representation is used by legacy servers too, so we
+        // are able to support both. :)
+        if (!e.getIdentifier().getId().equals(CHANNEL.getId())) {
+            return;
         }
 
-        ByteArrayDataInput in = ByteStreams.newDataInput(data);
+        e.setResult(ForwardResult.handled());
+
+        if (e.getSource() instanceof Player) {
+            return;
+        }
+
+        ByteArrayDataInput in = e.dataAsDataStream();
         String msg = in.readUTF();
 
         if (this.consumer.consumeIncomingMessageAsString(msg)) {
             // Forward to other servers
-            this.plugin.getBootstrap().getScheduler().executeAsync(() -> dispatchMessage(data));
+            this.plugin.getBootstrap().getScheduler().executeAsync(() -> dispatchMessage(e.getData()));
         }
-
-        return ForwardStatus.HANDLED;
     }
-
 }

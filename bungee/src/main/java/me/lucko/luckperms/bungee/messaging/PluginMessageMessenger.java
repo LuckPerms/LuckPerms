@@ -34,6 +34,7 @@ import me.lucko.luckperms.api.messenger.Messenger;
 import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PluginMessageEvent;
@@ -57,13 +58,22 @@ public class PluginMessageMessenger implements Messenger, Listener {
     }
 
     public void init() {
-        this.plugin.getBootstrap().getProxy().getPluginManager().registerListener(this.plugin.getBootstrap(), this);
-        this.plugin.getBootstrap().getProxy().registerChannel(CHANNEL);
+        ProxyServer proxy = this.plugin.getBootstrap().getProxy();
+        proxy.getPluginManager().registerListener(this.plugin.getBootstrap(), this);
+        proxy.registerChannel(CHANNEL);
     }
 
     @Override
     public void close() {
-        this.plugin.getBootstrap().getProxy().unregisterChannel(CHANNEL);
+        ProxyServer proxy = this.plugin.getBootstrap().getProxy();
+        proxy.unregisterChannel(CHANNEL);
+        proxy.getPluginManager().unregisterListener(this);
+    }
+
+    private void dispatchMessage(byte[] message) {
+        for (ServerInfo server : this.plugin.getBootstrap().getProxy().getServers().values()) {
+            server.sendData(CHANNEL, message, false);
+        }
     }
 
     @Override
@@ -71,11 +81,8 @@ public class PluginMessageMessenger implements Messenger, Listener {
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF(outgoingMessage.asEncodedString());
 
-        byte[] data = out.toByteArray();
-
-        for (ServerInfo server : this.plugin.getBootstrap().getProxy().getServers().values()) {
-            server.sendData(CHANNEL, data, false);
-        }
+        byte[] message = out.toByteArray();
+        dispatchMessage(message);
     }
 
     @EventHandler
@@ -97,11 +104,7 @@ public class PluginMessageMessenger implements Messenger, Listener {
 
         if (this.consumer.consumeIncomingMessageAsString(msg)) {
             // Forward to other servers
-            this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
-                for (ServerInfo server : this.plugin.getBootstrap().getProxy().getServers().values()) {
-                    server.sendData(CHANNEL, data, false);
-                }
-            });
+            this.plugin.getBootstrap().getScheduler().executeAsync(() -> dispatchMessage(data));
         }
     }
 }
