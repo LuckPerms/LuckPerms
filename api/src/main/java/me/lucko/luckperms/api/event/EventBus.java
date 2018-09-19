@@ -51,8 +51,7 @@ public interface EventBus {
      * @param <T>        the event class
      * @return an event handler instance representing this subscription
      */
-    @NonNull
-    <T extends LuckPermsEvent> EventHandler<T> subscribe(@NonNull Class<T> eventClass, @NonNull Consumer<? super T> handler);
+    @NonNull <T extends LuckPermsEvent> EventHandler<T> subscribe(@NonNull Class<T> eventClass, @NonNull Consumer<? super T> handler);
 
     /**
      * Registers a new subscription to the given event.
@@ -72,8 +71,7 @@ public interface EventBus {
      * @param handler    the event handler
      * @return an event handler instance representing this subscription
      */
-    @NonNull
-    <T extends LuckPermsEvent> EventHandler<T> subscribe(Object plugin, @NonNull Class<T> eventClass, @NonNull Consumer<? super T> handler);
+    @NonNull <T extends LuckPermsEvent> EventHandler<T> subscribe(Object plugin, @NonNull Class<T> eventClass, @NonNull Consumer<? super T> handler);
 
     /**
      * Gets a set of all registered handlers for a given event.
@@ -82,7 +80,6 @@ public interface EventBus {
      * @param <T>        the event class
      * @return an immutable set of event handlers
      */
-    @NonNull
-    <T extends LuckPermsEvent> Set<EventHandler<T>> getHandlers(@NonNull Class<T> eventClass);
+    @NonNull <T extends LuckPermsEvent> Set<EventHandler<T>> getHandlers(@NonNull Class<T> eventClass);
 
 }

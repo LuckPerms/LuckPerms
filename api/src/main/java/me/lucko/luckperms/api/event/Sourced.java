@@ -44,8 +44,6 @@ public interface Sourced {
      *
      * @return the source
      */
-    @NonNull
-    @Param(-1)
-    Source getSource();
+    @NonNull @Param(-1) Source getSource();
 
 }

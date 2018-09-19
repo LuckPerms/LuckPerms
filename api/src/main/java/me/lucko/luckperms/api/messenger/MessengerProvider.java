@@ -35,8 +35,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * <p>Users wishing to provide their own implementation for the plugins
  * "Messaging Service" should implement and register this interface.</p>
  *
- * @since 4.1
  * @see LuckPermsApi#registerMessengerProvider(MessengerProvider)
+ * @since 4.1
  */
 public interface MessengerProvider {
 
@@ -45,8 +45,7 @@ public interface MessengerProvider {
      *
      * @return the provider name
      */
-    @NonNull
-    String getName();
+    @NonNull String getName();
 
     /**
      * Creates and returns a new {@link Messenger} instance, which passes
@@ -59,7 +58,6 @@ public interface MessengerProvider {
      *                                incoming messages to
      * @return a new messenger agent instance
      */
-    @NonNull
-    Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer);
+    @NonNull Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer);
 
 }

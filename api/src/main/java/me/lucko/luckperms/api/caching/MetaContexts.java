@@ -45,7 +45,7 @@ public final class MetaContexts {
     /**
      * Creates a new meta contexts instance
      *
-     * @param contexts the standard contexts for the query
+     * @param contexts              the standard contexts for the query
      * @param prefixStackDefinition the prefix stack definition to be used
      * @param suffixStackDefinition the suffix stack definition to be used
      * @return the new instance
@@ -64,7 +64,7 @@ public final class MetaContexts {
     /**
      * Creates a new meta contexts instance
      *
-     * @param contexts the standard contexts for the query
+     * @param contexts              the standard contexts for the query
      * @param prefixStackDefinition the prefix stack definition to be used
      * @param suffixStackDefinition the suffix stack definition to be used
      */

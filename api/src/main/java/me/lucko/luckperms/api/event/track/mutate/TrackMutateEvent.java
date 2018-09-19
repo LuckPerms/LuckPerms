@@ -43,26 +43,20 @@ public interface TrackMutateEvent extends LuckPermsEvent {
      *
      * @return the track that was mutated
      */
-    @NonNull
-    @Param(0)
-    Track getTrack();
+    @NonNull @Param(0) Track getTrack();
 
     /**
      * Gets an immutable copy of the tracks data before the change
      *
      * @return the data before the change
      */
-    @NonNull
-    @Param(1)
-    List<String> getDataBefore();
+    @NonNull @Param(1) List<String> getDataBefore();
 
     /**
      * Gets an immutable copy of the tracks data after the change
      *
      * @return the data after the change
      */
-    @NonNull
-    @Param(2)
-    List<String> getDataAfter();
+    @NonNull @Param(2) List<String> getDataAfter();
 
 }

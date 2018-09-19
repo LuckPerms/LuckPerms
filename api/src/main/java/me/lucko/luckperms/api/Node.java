@@ -70,13 +70,13 @@ import java.util.stream.Stream;
  * <p>Nodes have the following attributes:</p>
  * <p></p>
  * <ul>
- *     <li>{@link #getPermission() permission} - the actual permission string</li>
- *     <li>{@link #getValue() value} - the value of the node (false for negated)</li>
- *     <li>{@link #isOverride() override} - if the node is marked as having special priority over other nodes</li>
- *     <li>{@link #getServer() server} - the specific server where this node should apply</li>
- *     <li>{@link #getWorld() world} - the specific world where this node should apply</li>
- *     <li>{@link #getContexts() context} - the additional contexts required for this node to apply </li>
- *     <li>{@link #getExpiry() expiry} - the time when this node should expire</li>
+ * <li>{@link #getPermission() permission} - the actual permission string</li>
+ * <li>{@link #getValue() value} - the value of the node (false for negated)</li>
+ * <li>{@link #isOverride() override} - if the node is marked as having special priority over other nodes</li>
+ * <li>{@link #getServer() server} - the specific server where this node should apply</li>
+ * <li>{@link #getWorld() world} - the specific world where this node should apply</li>
+ * <li>{@link #getContexts() context} - the additional contexts required for this node to apply </li>
+ * <li>{@link #getExpiry() expiry} - the time when this node should expire</li>
  * </ul>
  *
  * <p>The 'permission' property of a {@link Node} is also used in some cases to represent state
@@ -89,13 +89,13 @@ import java.util.stream.Stream;
  * <p>The current types are:</p>
  * <p></p>
  * <ul>
- *     <li>normal - just a regular permission</li>
- *     <li>{@link InheritanceType} - an "inheritance node" marks that the holder should inherit data from another group</li>
- *     <li>{@link PrefixType} - represents an assigned prefix</li>
- *     <li>{@link SuffixType} - represents an assigned suffix</li>
- *     <li>{@link MetaType} - represents an assigned meta option</li>
- *     <li>{@link WeightType} - marks the weight of the object holding this node</li>
- *     <li>{@link DisplayNameType} - marks the display name of the object holding this node</li>
+ * <li>normal - just a regular permission</li>
+ * <li>{@link InheritanceType} - an "inheritance node" marks that the holder should inherit data from another group</li>
+ * <li>{@link PrefixType} - represents an assigned prefix</li>
+ * <li>{@link SuffixType} - represents an assigned suffix</li>
+ * <li>{@link MetaType} - represents an assigned meta option</li>
+ * <li>{@link WeightType} - marks the weight of the object holding this node</li>
+ * <li>{@link DisplayNameType} - marks the display name of the object holding this node</li>
  * </ul>
  *
  * <p>The core node state must be immutable in all implementations.</p>
@@ -113,8 +113,7 @@ public interface Node {
      *
      * @return the actual permission node
      */
-    @NonNull
-    String getPermission();
+    @NonNull String getPermission();
 
     /**
      * Gets the value of the node.
@@ -160,16 +159,14 @@ public interface Node {
      *
      * @return an {@link Optional} containing the server, if one is defined
      */
-    @NonNull
-    Optional<String> getServer();
+    @NonNull Optional<String> getServer();
 
     /**
      * Gets the world this node applies on, if the node is world specific.
      *
      * @return an {@link Optional} containing the world, if one is defined
      */
-    @NonNull
-    Optional<String> getWorld();
+    @NonNull Optional<String> getWorld();
 
     /**
      * Gets if this node is server specific.
@@ -218,8 +215,7 @@ public interface Node {
      *
      * @return a list of full nodes
      */
-    @NonNull
-    List<String> resolveShorthand();
+    @NonNull List<String> resolveShorthand();
 
     /**
      * Gets if this node is assigned temporarily.
@@ -251,8 +247,7 @@ public interface Node {
      * @return the {@link Date} when this node will expire
      * @throws IllegalStateException if the node is not temporary
      */
-    @NonNull
-    Date getExpiry() throws IllegalStateException;
+    @NonNull Date getExpiry() throws IllegalStateException;
 
     /**
      * Gets the number of seconds until this permission will expire.
@@ -279,20 +274,18 @@ public interface Node {
      * @return the extra contexts required for this node to apply
      * @since 2.13
      */
-    @NonNull
-    ContextSet getContexts();
+    @NonNull ContextSet getContexts();
 
     /**
      * The same as {@link #getContexts()}, but also includes context pairs for
      * "server" and "world" keys if present.
      *
      * @return the full contexts required for this node to apply
-     * @since 3.1
      * @see Contexts#SERVER_KEY
      * @see Contexts#WORLD_KEY
+     * @since 3.1
      */
-    @NonNull
-    ContextSet getFullContexts();
+    @NonNull ContextSet getFullContexts();
 
     /**
      * Gets if this node is a wildcard permission.
@@ -344,10 +337,7 @@ public interface Node {
      * @since 4.2
      */
     default <T extends NodeType> T typeData(NodeTypeKey<T> key) throws IllegalStateException {
-        return getTypeData(key)
-                .orElseThrow(() ->
-                        new IllegalStateException("Node '" + getPermission() + "' does not have the '" + key.getTypeName() + "' type.")
-                );
+        return getTypeData(key).orElseThrow(() -> new IllegalStateException("Node '" + getPermission() + "' does not have the '" + key.getTypeName() + "' type."));
     }
 
     /**
@@ -444,7 +434,7 @@ public interface Node {
      * Gets if this Node is equal to another node as defined by the given
      * {@link StandardNodeEquality} predicate.
      *
-     * @param other the other node
+     * @param other             the other node
      * @param equalityPredicate the predicate
      * @return true if this node is considered equal
      * @since 4.1
@@ -455,7 +445,7 @@ public interface Node {
      * Gets if this Node is equal to another node as defined by the given
      * {@link NodeEqualityPredicate}.
      *
-     * @param other the other node
+     * @param other             the other node
      * @param equalityPredicate the predicate
      * @return true if this node is considered equal
      * @since 4.1
@@ -470,8 +460,8 @@ public interface Node {
      *
      * @param other the other node
      * @return true if the two nodes are almost equal
-     * @deprecated in favour of {@link #equals(Node, NodeEqualityPredicate)}
      * @see StandardNodeEquality#IGNORE_VALUE
+     * @deprecated in favour of {@link #equals(Node, NodeEqualityPredicate)}
      */
     @Deprecated
     default boolean equalsIgnoringValue(@NonNull Node other) {
@@ -484,8 +474,8 @@ public interface Node {
      *
      * @param other the other node
      * @return true if the two nodes are almost equal
-     * @deprecated in favour of {@link #equals(Node, NodeEqualityPredicate)}
      * @see StandardNodeEquality#IGNORE_EXPIRY_TIME_AND_VALUE
+     * @deprecated in favour of {@link #equals(Node, NodeEqualityPredicate)}
      */
     @Deprecated
     default boolean almostEquals(@NonNull Node other) {
@@ -498,9 +488,9 @@ public interface Node {
      *
      * @param other the other node
      * @return true if the two nodes are almost equal
+     * @see StandardNodeEquality#IGNORE_VALUE_OR_IF_TEMPORARY
      * @since 2.8
      * @deprecated in favour of {@link #equals(Node, NodeEqualityPredicate)}
-     * @see StandardNodeEquality#IGNORE_VALUE_OR_IF_TEMPORARY
      */
     @Deprecated
     default boolean equalsIgnoringValueOrTemp(@NonNull Node other) {
@@ -541,8 +531,7 @@ public interface Node {
          * @return the builder
          * @see Node#isNegated()
          */
-        @NonNull
-        Builder setNegated(boolean negated);
+        @NonNull Builder setNegated(boolean negated);
 
         /**
          * Sets the value of the node.
@@ -551,8 +540,7 @@ public interface Node {
          * @return the builder
          * @see Node#getValue()
          */
-        @NonNull
-        Builder setValue(boolean value);
+        @NonNull Builder setValue(boolean value);
 
         /**
          * Sets the override property for the node.
@@ -564,8 +552,7 @@ public interface Node {
          * @return the builder
          * @see Node#isOverride()
          */
-        @NonNull
-        Builder setOverride(boolean override);
+        @NonNull Builder setOverride(boolean override);
 
         /**
          * Sets the time when the node should expire.
@@ -577,8 +564,7 @@ public interface Node {
          * @return the builder
          * @see Node#getExpiryUnixTime()
          */
-        @NonNull
-        Builder setExpiry(long expiryUnixTimestamp);
+        @NonNull Builder setExpiry(long expiryUnixTimestamp);
 
         /**
          * Sets the time when the node should expire.
@@ -587,7 +573,7 @@ public interface Node {
          * system time.</p>
          *
          * @param duration how long the node should be added for
-         * @param unit the unit <code>duration</code> is measured in
+         * @param unit     the unit <code>duration</code> is measured in
          * @return the builder
          * @since 4.2
          */
@@ -604,8 +590,7 @@ public interface Node {
          * @return the builder
          * @since 4.2
          */
-        @NonNull
-        Builder clearExpiry();
+        @NonNull Builder clearExpiry();
 
         /**
          * Sets the world value for the node.
@@ -614,8 +599,7 @@ public interface Node {
          * @return the builder
          * @see Node#getWorld()
          */
-        @NonNull
-        Builder setWorld(@Nullable String world);
+        @NonNull Builder setWorld(@Nullable String world);
 
         /**
          * Sets the server value for the node.
@@ -624,20 +608,18 @@ public interface Node {
          * @return the builder
          * @see Node#getServer()
          */
-        @NonNull
-        Builder setServer(@Nullable String server);
+        @NonNull Builder setServer(@Nullable String server);
 
         /**
          * Appends an extra context onto the node.
          *
-         * @param key the context key
+         * @param key   the context key
          * @param value the context value
          * @return the builder
          * @see ContextSet
          * @see Node#getContexts()
          */
-        @NonNull
-        Builder withExtraContext(@NonNull String key, @NonNull String value);
+        @NonNull Builder withExtraContext(@NonNull String key, @NonNull String value);
 
         /**
          * Appends extra contexts onto the node.
@@ -647,8 +629,7 @@ public interface Node {
          * @see ContextSet
          * @see Node#getContexts()
          */
-        @NonNull
-        Builder withExtraContext(@NonNull Map<String, String> map);
+        @NonNull Builder withExtraContext(@NonNull Map<String, String> map);
 
         /**
          * Appends extra contexts onto the node.
@@ -658,8 +639,7 @@ public interface Node {
          * @see ContextSet
          * @see Node#getContexts()
          */
-        @NonNull
-        Builder withExtraContext(@NonNull Set<Map.Entry<String, String>> context);
+        @NonNull Builder withExtraContext(@NonNull Set<Map.Entry<String, String>> context);
 
         /**
          * Appends an extra context onto the node.
@@ -669,8 +649,7 @@ public interface Node {
          * @see ContextSet
          * @see Node#getContexts()
          */
-        @NonNull
-        Builder withExtraContext(Map.@NonNull Entry<String, String> entry);
+        @NonNull Builder withExtraContext(Map.@NonNull Entry<String, String> entry);
 
         /**
          * Appends extra contexts onto the node.
@@ -680,8 +659,7 @@ public interface Node {
          * @see ContextSet
          * @see Node#getContexts()
          */
-        @NonNull
-        Builder withExtraContext(@NonNull ContextSet contextSet);
+        @NonNull Builder withExtraContext(@NonNull ContextSet contextSet);
 
         /**
          * Sets the extra contexts for the node.
@@ -692,16 +670,14 @@ public interface Node {
          * @see Node#getContexts()
          * @since 4.2
          */
-        @NonNull
-        Builder setExtraContext(@NonNull ContextSet contextSet);
+        @NonNull Builder setExtraContext(@NonNull ContextSet contextSet);
 
         /**
          * Creates a {@link Node} instance from the builder.
          *
          * @return a new node instance
          */
-        @NonNull
-        Node build();
+        @NonNull Node build();
     }
 
 }

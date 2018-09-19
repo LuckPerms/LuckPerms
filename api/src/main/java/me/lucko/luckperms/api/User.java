@@ -42,8 +42,7 @@ public interface User extends PermissionHolder {
      *
      * @return the users Mojang assigned unique id
      */
-    @NonNull
-    UUID getUuid();
+    @NonNull UUID getUuid();
 
     /**
      * Gets the users username
@@ -52,8 +51,7 @@ public interface User extends PermissionHolder {
      *
      * @return the users username
      */
-    @Nullable
-    String getName();
+    @Nullable String getName();
 
     /**
      * Gets the users current primary group.
@@ -64,8 +62,7 @@ public interface User extends PermissionHolder {
      *
      * @return the users primary group
      */
-    @NonNull
-    String getPrimaryGroup();
+    @NonNull String getPrimaryGroup();
 
     /**
      * Sets a users primary group.
@@ -75,11 +72,10 @@ public interface User extends PermissionHolder {
      *
      * @param group the new primary group
      * @return if the change was applied successfully
-     * @throws IllegalStateException     if the user is not a member of that group
-     * @throws NullPointerException      if the group is null
+     * @throws IllegalStateException if the user is not a member of that group
+     * @throws NullPointerException  if the group is null
      */
-    @NonNull
-    DataMutateResult setPrimaryGroup(@NonNull String group);
+    @NonNull DataMutateResult setPrimaryGroup(@NonNull String group);
 
     /**
      * Gets the user's {@link UserData} cache.
@@ -87,16 +83,15 @@ public interface User extends PermissionHolder {
      * @return the users cached data.
      * @since 3.2
      */
-    @NonNull
     @Override
-    UserData getCachedData();
+    @NonNull UserData getCachedData();
 
     /**
      * Refresh and re-assign the users permissions.
      *
      * @deprecated Calling this method is no longer necessary. Permissions data is now refreshed on
-     *             demand, as changes are made. Consider use of {@link #refreshCachedData()}
-     *             instead. This method is now implemented as a no-op.
+     * demand, as changes are made. Consider use of {@link #refreshCachedData()}
+     * instead. This method is now implemented as a no-op.
      */
     @Deprecated
     void refreshPermissions();

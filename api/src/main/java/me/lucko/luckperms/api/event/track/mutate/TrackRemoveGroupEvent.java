@@ -39,8 +39,6 @@ public interface TrackRemoveGroupEvent extends TrackMutateEvent {
      *
      * @return the group that was removed
      */
-    @NonNull
-    @Param(3)
-    String getGroup();
+    @NonNull @Param(3) String getGroup();
 
 }

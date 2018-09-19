@@ -42,8 +42,7 @@ public interface PlatformInfo {
      *
      * @return the version of the plugin running on the platform
      */
-    @NonNull
-    String getVersion();
+    @NonNull String getVersion();
 
     /**
      * Gets the API version
@@ -57,16 +56,14 @@ public interface PlatformInfo {
      *
      * @return the type of platform LuckPerms is running on
      */
-    @NonNull
-    PlatformType getType();
+    @NonNull PlatformType getType();
 
     /**
      * Gets the unique players which have connected to the server since it started.
      *
      * @return the unique connections
      */
-    @NonNull
-    Set<UUID> getUniqueConnections();
+    @NonNull Set<UUID> getUniqueConnections();
 
     /**
      * Gets the time when the plugin first started in milliseconds.

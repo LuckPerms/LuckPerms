@@ -39,8 +39,7 @@ public interface LPConfiguration {
      *
      * @return the name of this server
      */
-    @NonNull
-    String getServer();
+    @NonNull String getServer();
 
     /**
      * Gets if the users on this server will have their global permissions applied
@@ -78,8 +77,7 @@ public interface LPConfiguration {
      *
      * @return the storage method string from the configuration
      */
-    @NonNull
-    String getStorageMethod();
+    @NonNull String getStorageMethod();
 
     /**
      * Gets true if split storage is enabled
@@ -96,11 +94,9 @@ public interface LPConfiguration {
      * method. For example: key = user, value = json
      * @since 2.7
      */
-    @NonNull
-    Map<String, String> getSplitStorageOptions();
+    @NonNull Map<String, String> getSplitStorageOptions();
 
-    @NonNull
-    Unsafe unsafe();
+    @NonNull Unsafe unsafe();
 
     interface Unsafe {
 
@@ -115,8 +111,7 @@ public interface LPConfiguration {
          * @return the corresponding object, if one is present
          * @throws IllegalArgumentException if the key isn't known
          */
-        @NonNull
-        Object getObject(String key);
+        @NonNull Object getObject(String key);
     }
 
 }

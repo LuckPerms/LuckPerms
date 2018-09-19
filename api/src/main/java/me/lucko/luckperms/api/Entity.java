@@ -49,24 +49,21 @@ public interface Entity {
      *
      * @return the uuid of the object, if available
      */
-    @Nullable
-    UUID getUniqueId();
+    @Nullable UUID getUniqueId();
 
     /**
      * Gets the name of the object
      *
      * @return the object name
      */
-    @NonNull
-    String getName();
+    @NonNull String getName();
 
     /**
      * Gets the entities type.
      *
      * @return the type
      */
-    @NonNull
-    Type getType();
+    @NonNull Type getType();
 
     /**
      * The different types of {@link Entity}

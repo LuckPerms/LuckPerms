@@ -44,15 +44,15 @@ public interface RegexType extends NodeType {
     /**
      * The key for this type.
      */
-    NodeTypeKey<RegexType> KEY = new NodeTypeKey<RegexType>(){};
+    NodeTypeKey<RegexType> KEY = new NodeTypeKey<RegexType>() {
+    };
 
     /**
      * Gets the non-compiled pattern string.
      *
      * @return the pattern string
      */
-    @NonNull
-    String getPatternString();
+    @NonNull String getPatternString();
 
     /**
      * Gets the pattern for the regex node.
@@ -61,7 +61,6 @@ public interface RegexType extends NodeType {
      *
      * @return the pattern
      */
-    @NonNull
-    Optional<Pattern> getPattern();
+    @NonNull Optional<Pattern> getPattern();
 
 }

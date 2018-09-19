@@ -45,7 +45,6 @@ public interface UserUpdateMessage extends Message {
      *
      * @return the user
      */
-    @NonNull
-    UUID getUser();
+    @NonNull UUID getUser();
 
 }

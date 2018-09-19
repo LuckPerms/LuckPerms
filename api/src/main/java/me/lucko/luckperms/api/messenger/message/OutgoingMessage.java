@@ -56,7 +56,6 @@ public interface OutgoingMessage extends Message {
      *
      * @return an encoded string form of the message
      */
-    @NonNull
-    String asEncodedString();
+    @NonNull String asEncodedString();
 
 }

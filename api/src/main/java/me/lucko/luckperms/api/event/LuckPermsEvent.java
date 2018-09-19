@@ -41,7 +41,6 @@ public interface LuckPermsEvent {
      *
      * @return the api instance
      */
-    @NonNull
-    LuckPermsApi getApi();
+    @NonNull LuckPermsApi getApi();
 
 }

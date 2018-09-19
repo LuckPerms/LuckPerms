@@ -52,24 +52,21 @@ public interface LogEntry extends Comparable<LogEntry> {
      *
      * @return the actor id
      */
-    @NonNull
-    UUID getActor();
+    @NonNull UUID getActor();
 
     /**
      * Gets the name describing the actor.
      *
      * @return the name of the actor
      */
-    @NonNull
-    String getActorName();
+    @NonNull String getActorName();
 
     /**
      * Gets the type of action.
      *
      * @return the action type
      */
-    @NonNull
-    Type getType();
+    @NonNull Type getType();
 
     /**
      * Gets the uuid of the object which was acted upon.
@@ -78,16 +75,14 @@ public interface LogEntry extends Comparable<LogEntry> {
      *
      * @return the uuid of acted object
      */
-    @NonNull
-    Optional<UUID> getActed();
+    @NonNull Optional<UUID> getActed();
 
     /**
      * Gets the name describing the object which was acted upon
      *
      * @return the name of the acted object
      */
-    @NonNull
-    String getActedName();
+    @NonNull String getActedName();
 
     /**
      * Returns a string describing the action which took place.
@@ -97,8 +92,7 @@ public interface LogEntry extends Comparable<LogEntry> {
      *
      * @return the action
      */
-    @NonNull
-    String getAction();
+    @NonNull String getAction();
 
     /**
      * Represents the type of a {@link LogEntry}.
@@ -106,19 +100,7 @@ public interface LogEntry extends Comparable<LogEntry> {
      * @since 3.3
      */
     enum Type {
-        USER('U'),
-        GROUP('G'),
-        TRACK('T');
-
-        private final char code;
-
-        Type(char code) {
-            this.code = code;
-        }
-
-        public char getCode() {
-            return this.code;
-        }
+        USER('U'), GROUP('G'), TRACK('T');
 
         public static @NonNull Type valueOf(char code) {
             switch (code) {
@@ -135,6 +117,16 @@ public interface LogEntry extends Comparable<LogEntry> {
                     throw new IllegalArgumentException("Unknown code: " + code);
             }
         }
+
+        private final char code;
+
+        Type(char code) {
+            this.code = code;
+        }
+
+        public char getCode() {
+            return this.code;
+        }
     }
 
     /**
@@ -149,8 +141,7 @@ public interface LogEntry extends Comparable<LogEntry> {
          * @return the builder
          * @see LogEntry#getTimestamp()
          */
-        @NonNull
-        Builder setTimestamp(long timestamp);
+        @NonNull Builder setTimestamp(long timestamp);
 
         /**
          * Sets the actor of the entry.
@@ -159,8 +150,7 @@ public interface LogEntry extends Comparable<LogEntry> {
          * @return the builder
          * @see LogEntry#getActor()
          */
-        @NonNull
-        Builder setActor(@NonNull UUID actor);
+        @NonNull Builder setActor(@NonNull UUID actor);
 
         /**
          * Sets the actor name of the entry.
@@ -169,8 +159,7 @@ public interface LogEntry extends Comparable<LogEntry> {
          * @return the builder
          * @see LogEntry#getActorName()
          */
-        @NonNull
-        Builder setActorName(@NonNull String actorName);
+        @NonNull Builder setActorName(@NonNull String actorName);
 
         /**
          * Sets the type of the entry.
@@ -179,8 +168,7 @@ public interface LogEntry extends Comparable<LogEntry> {
          * @return the builder
          * @see LogEntry#getType()
          */
-        @NonNull
-        Builder setType(@NonNull Type type);
+        @NonNull Builder setType(@NonNull Type type);
 
         /**
          * Sets the acted object for the entry.
@@ -189,8 +177,7 @@ public interface LogEntry extends Comparable<LogEntry> {
          * @return the builder
          * @see LogEntry#getActed()
          */
-        @NonNull
-        Builder setActed(@Nullable UUID acted);
+        @NonNull Builder setActed(@Nullable UUID acted);
 
         /**
          * Sets the acted name for the entry.
@@ -199,8 +186,7 @@ public interface LogEntry extends Comparable<LogEntry> {
          * @return the builder
          * @see LogEntry#getActedName()
          */
-        @NonNull
-        Builder setActedName(@NonNull String actedName);
+        @NonNull Builder setActedName(@NonNull String actedName);
 
         /**
          * Sets the action of the entry.
@@ -209,16 +195,14 @@ public interface LogEntry extends Comparable<LogEntry> {
          * @return the builder
          * @see LogEntry#getAction()
          */
-        @NonNull
-        Builder setAction(@NonNull String action);
+        @NonNull Builder setAction(@NonNull String action);
 
         /**
          * Creates a {@link LogEntry} instance from the builder.
          *
          * @return a new log entry instance
          */
-        @NonNull
-        LogEntry build();
+        @NonNull LogEntry build();
 
     }
 

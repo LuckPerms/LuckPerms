@@ -44,26 +44,20 @@ public interface GroupDeleteEvent extends LuckPermsEvent {
      *
      * @return the name of the deleted group
      */
-    @NonNull
-    @Param(0)
-    String getGroupName();
+    @NonNull @Param(0) String getGroupName();
 
     /**
      * Gets an immutable copy of the groups existing data
      *
      * @return a copy of the groups existing data
      */
-    @NonNull
-    @Param(1)
-    Set<Node> getExistingData();
+    @NonNull @Param(1) Set<Node> getExistingData();
 
     /**
      * Gets the cause of the deletion
      *
      * @return the cause of the deletion
      */
-    @NonNull
-    @Param(2)
-    DeletionCause getCause();
+    @NonNull @Param(2) DeletionCause getCause();
 
 }

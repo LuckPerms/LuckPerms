@@ -42,8 +42,7 @@ public interface Track {
      *
      * @return the name of this track
      */
-    @NonNull
-    String getName();
+    @NonNull String getName();
 
     /**
      * Gets a list of the groups on this track
@@ -54,8 +53,7 @@ public interface Track {
      *
      * @return an ordered {@link List} of the groups on this track
      */
-    @NonNull
-    List<String> getGroups();
+    @NonNull List<String> getGroups();
 
     /**
      * Gets the number of groups on this track
@@ -74,8 +72,7 @@ public interface Track {
      * @throws NullPointerException  if the group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
-    @Nullable
-    String getNext(@NonNull Group current);
+    @Nullable String getNext(@NonNull Group current);
 
     /**
      * Gets the previous group on the track, before the one provided
@@ -87,41 +84,37 @@ public interface Track {
      * @throws NullPointerException  if the group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
-    @Nullable
-    String getPrevious(@NonNull Group current);
+    @Nullable String getPrevious(@NonNull Group current);
 
     /**
      * Promotes the given user along this track.
      *
-     * @param user the user to promote
+     * @param user       the user to promote
      * @param contextSet the contexts to promote the user in
      * @return the result of the action
      * @since 4.2
      */
-    @NonNull
-    PromotionResult promote(@NonNull User user, @NonNull ContextSet contextSet);
+    @NonNull PromotionResult promote(@NonNull User user, @NonNull ContextSet contextSet);
 
     /**
      * Demotes the given user along this track.
      *
-     * @param user the user to demote
+     * @param user       the user to demote
      * @param contextSet the contexts to demote the user in
      * @return the result of the action
      * @since 4.2
      */
-    @NonNull
-    DemotionResult demote(@NonNull User user, @NonNull ContextSet contextSet);
+    @NonNull DemotionResult demote(@NonNull User user, @NonNull ContextSet contextSet);
 
     /**
      * Appends a group to the end of this track
      *
      * @param group the group to append
      * @return the result of the operation
-     * @throws NullPointerException      if the group is null
-     * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
+     * @throws NullPointerException  if the group is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
-    @NonNull
-    DataMutateResult appendGroup(@NonNull Group group);
+    @NonNull DataMutateResult appendGroup(@NonNull Group group);
 
     /**
      * Inserts a group at a certain position on this track
@@ -133,8 +126,7 @@ public interface Track {
      * @throws NullPointerException      if the group is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
      */
-    @NonNull
-    DataMutateResult insertGroup(@NonNull Group group, int position) throws IndexOutOfBoundsException;
+    @NonNull DataMutateResult insertGroup(@NonNull Group group, int position) throws IndexOutOfBoundsException;
 
     /**
      * Removes a group from this track
@@ -144,8 +136,7 @@ public interface Track {
      * @throws NullPointerException  if the group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
-    @NonNull
-    DataMutateResult removeGroup(@NonNull Group group);
+    @NonNull DataMutateResult removeGroup(@NonNull Group group);
 
     /**
      * Removes a group from this track
@@ -154,8 +145,7 @@ public interface Track {
      * @return the result of the operation
      * @throws NullPointerException if the group is null
      */
-    @NonNull
-    DataMutateResult removeGroup(@NonNull String group);
+    @NonNull DataMutateResult removeGroup(@NonNull String group);
 
     /**
      * Checks if a group features on this track

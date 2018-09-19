@@ -41,14 +41,14 @@ public interface DisplayNameType extends NodeType {
     /**
      * The key for this type.
      */
-    NodeTypeKey<DisplayNameType> KEY = new NodeTypeKey<DisplayNameType>(){};
+    NodeTypeKey<DisplayNameType> KEY = new NodeTypeKey<DisplayNameType>() {
+    };
 
     /**
      * Gets the display name.
      *
      * @return the display name
      */
-    @NonNull
-    String getDisplayName();
+    @NonNull String getDisplayName();
 
 }

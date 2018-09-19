@@ -45,8 +45,7 @@ public interface PermissionData extends CachedDataContainer {
      * @return a tristate result
      * @throws NullPointerException if permission is null
      */
-    @NonNull
-    Tristate getPermissionValue(@NonNull String permission);
+    @NonNull Tristate getPermissionValue(@NonNull String permission);
 
     /**
      * Invalidates the underlying permission calculator cache.
@@ -60,7 +59,6 @@ public interface PermissionData extends CachedDataContainer {
      *
      * @return an immutable set of permissions
      */
-    @NonNull
-    Map<String, Boolean> getImmutableBacking();
+    @NonNull Map<String, Boolean> getImmutableBacking();
 
 }

@@ -41,7 +41,6 @@ public interface EntitySource extends Source {
      *
      * @return the entity
      */
-    @NonNull
-    Entity getEntity();
+    @NonNull Entity getEntity();
 
 }

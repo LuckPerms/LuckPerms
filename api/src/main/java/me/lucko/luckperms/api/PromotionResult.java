@@ -41,8 +41,7 @@ public interface PromotionResult extends MutateResult {
      *
      * @return the status
      */
-    @NonNull
-    Status getStatus();
+    @NonNull Status getStatus();
 
     @Override
     default boolean wasSuccess() {
@@ -57,8 +56,7 @@ public interface PromotionResult extends MutateResult {
      *
      * @return the group the user was promoted from.
      */
-    @NonNull
-    Optional<String> getGroupFrom();
+    @NonNull Optional<String> getGroupFrom();
 
     /**
      * Gets the name of the group the user was promoted from, if applicable.
@@ -71,8 +69,7 @@ public interface PromotionResult extends MutateResult {
      *
      * @return the group the user was promoted to.
      */
-    @NonNull
-    Optional<String> getGroupTo();
+    @NonNull Optional<String> getGroupTo();
 
     /**
      * The result status

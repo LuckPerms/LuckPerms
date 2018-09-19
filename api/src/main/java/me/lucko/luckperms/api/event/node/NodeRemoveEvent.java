@@ -40,8 +40,6 @@ public interface NodeRemoveEvent extends NodeMutateEvent {
      *
      * @return the node that was removed
      */
-    @NonNull
-    @Param(3)
-    Node getNode();
+    @NonNull @Param(3) Node getNode();
 
 }

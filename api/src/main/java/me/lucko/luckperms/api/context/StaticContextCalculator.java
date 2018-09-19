@@ -43,13 +43,12 @@ public interface StaticContextCalculator extends ContextCalculator<Object> {
      * @param accumulator a map of contexts to add to
      * @return the map
      */
-    @NonNull
-    MutableContextSet giveApplicableContext(@NonNull MutableContextSet accumulator);
+    @NonNull MutableContextSet giveApplicableContext(@NonNull MutableContextSet accumulator);
 
     /**
      * Gives the subject all of the applicable contexts they meet
      *
-     * @param subject the subject to add contexts to
+     * @param subject     the subject to add contexts to
      * @param accumulator a map of contexts to add to
      * @return the map
      */

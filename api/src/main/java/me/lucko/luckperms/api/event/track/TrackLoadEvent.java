@@ -43,8 +43,6 @@ public interface TrackLoadEvent extends LuckPermsEvent {
      *
      * @return the track that was loaded
      */
-    @NonNull
-    @Param(0)
-    Track getTrack();
+    @NonNull @Param(0) Track getTrack();
 
 }

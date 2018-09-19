@@ -44,9 +44,9 @@ import java.util.Optional;
  *
  * <p></p>
  * <ul>
- *     <li>{@code org.bukkit.entity.Player}</li>
- *     <li>{@code net.md_5.bungee.api.connection.ProxiedPlayer}</li>
- *     <li>{@code org.spongepowered.api.service.permission.Subject}</li>
+ * <li>{@code org.bukkit.entity.Player}</li>
+ * <li>{@code net.md_5.bungee.api.connection.ProxiedPlayer}</li>
+ * <li>{@code org.spongepowered.api.service.permission.Subject}</li>
  * </ul>
  *
  * @since 4.0
@@ -59,8 +59,7 @@ public interface ContextManager {
      * @param subject the subject
      * @return the applicable context for the subject
      */
-    @NonNull
-    ImmutableContextSet getApplicableContext(@NonNull Object subject);
+    @NonNull ImmutableContextSet getApplicableContext(@NonNull Object subject);
 
     /**
      * Queries the ContextManager for current context values for the subject.
@@ -68,8 +67,7 @@ public interface ContextManager {
      * @param subject the subject
      * @return the applicable context for the subject
      */
-    @NonNull
-    Contexts getApplicableContexts(@NonNull Object subject);
+    @NonNull Contexts getApplicableContexts(@NonNull Object subject);
 
     /**
      * Queries the ContextManager for current context values for the given User.
@@ -83,8 +81,7 @@ public interface ContextManager {
      * @param user the user
      * @return the applicable context for the subject
      */
-    @NonNull
-    Optional<ImmutableContextSet> lookupApplicableContext(@NonNull User user);
+    @NonNull Optional<ImmutableContextSet> lookupApplicableContext(@NonNull User user);
 
     /**
      * Queries the ContextManager for current context values for the given User.
@@ -98,8 +95,7 @@ public interface ContextManager {
      * @param user the user
      * @return the applicable context for the subject
      */
-    @NonNull
-    Optional<Contexts> lookupApplicableContexts(@NonNull User user);
+    @NonNull Optional<Contexts> lookupApplicableContexts(@NonNull User user);
 
     /**
      * Gets the contexts from the static calculators in this manager.
@@ -109,8 +105,7 @@ public interface ContextManager {
      *
      * @return the current active static contexts
      */
-    @NonNull
-    ImmutableContextSet getStaticContext();
+    @NonNull ImmutableContextSet getStaticContext();
 
     /**
      * Gets the contexts from the static calculators in this manager.
@@ -120,8 +115,7 @@ public interface ContextManager {
      *
      * @return the current active static contexts
      */
-    @NonNull
-    Contexts getStaticContexts();
+    @NonNull Contexts getStaticContexts();
 
     /**
      * Forms a {@link Contexts} instance from an {@link ImmutableContextSet}.
@@ -129,12 +123,11 @@ public interface ContextManager {
      * <p>This method relies on the plugins configuration to form the
      * {@link Contexts} instance.</p>
      *
-     * @param subject the reference subject
+     * @param subject    the reference subject
      * @param contextSet the context set
      * @return a contexts instance
      */
-    @NonNull
-    Contexts formContexts(@NonNull Object subject, @NonNull ImmutableContextSet contextSet);
+    @NonNull Contexts formContexts(@NonNull Object subject, @NonNull ImmutableContextSet contextSet);
 
     /**
      * Forms a {@link Contexts} instance from an {@link ImmutableContextSet}.
@@ -145,8 +138,7 @@ public interface ContextManager {
      * @param contextSet the context set
      * @return a contexts instance
      */
-    @NonNull
-    Contexts formContexts(@NonNull ImmutableContextSet contextSet);
+    @NonNull Contexts formContexts(@NonNull ImmutableContextSet contextSet);
 
     /**
      * Registers a context calculator with the manager.

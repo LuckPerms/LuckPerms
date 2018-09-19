@@ -48,8 +48,8 @@ public interface MetaStackElement {
      *
      * <p>The element being considered can be retrieved using {@link ChatMetaType#getEntry(Node)}.</p>
      *
-     * @param node the node being considered
-     * @param type the type of entry being accumulated
+     * @param node    the node being considered
+     * @param type    the type of entry being accumulated
      * @param current the current value being used. If this returns true, the current value will be replaced by this entry
      * @return true if the node should be accumulated into this element, replacing the current value
      */

@@ -45,16 +45,14 @@ public interface HeldPermission<T> {
      *
      * @return the holder
      */
-    @NonNull
-    T getHolder();
+    @NonNull T getHolder();
 
     /**
      * Gets the permission being held
      *
      * @return the permission
      */
-    @NonNull
-    String getPermission();
+    @NonNull String getPermission();
 
     /**
      * Gets the value of the permission
@@ -68,16 +66,14 @@ public interface HeldPermission<T> {
      *
      * @return the server
      */
-    @NonNull
-    Optional<String> getServer();
+    @NonNull Optional<String> getServer();
 
     /**
      * Gets the world where the permission is held
      *
      * @return the world
      */
-    @NonNull
-    Optional<String> getWorld();
+    @NonNull Optional<String> getWorld();
 
     /**
      * Gets the time in unix time when the permission will expire
@@ -98,7 +94,6 @@ public interface HeldPermission<T> {
      *
      * @return a Node copy of this permission
      */
-    @NonNull
-    Node asNode();
+    @NonNull Node asNode();
 
 }

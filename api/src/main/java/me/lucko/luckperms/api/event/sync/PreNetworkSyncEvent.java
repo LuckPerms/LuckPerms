@@ -43,8 +43,6 @@ public interface PreNetworkSyncEvent extends LuckPermsEvent, Cancellable {
      *
      * @return the id of the sync request
      */
-    @NonNull
-    @Param(0)
-    UUID getSyncId();
+    @NonNull @Param(0) UUID getSyncId();
 
 }

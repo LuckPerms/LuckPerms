@@ -62,8 +62,7 @@ public interface LuckPermsApi {
      * @return the platform info
      * @since 4.0
      */
-    @NonNull
-    PlatformInfo getPlatformInfo();
+    @NonNull PlatformInfo getPlatformInfo();
 
     /**
      * Gets the {@link UserManager}, responsible for managing
@@ -78,8 +77,7 @@ public interface LuckPermsApi {
      * @return the user manager
      * @since 4.0
      */
-    @NonNull
-    UserManager getUserManager();
+    @NonNull UserManager getUserManager();
 
     /**
      * Gets the {@link GroupManager}, responsible for managing
@@ -94,8 +92,7 @@ public interface LuckPermsApi {
      * @return the group manager
      * @since 4.0
      */
-    @NonNull
-    GroupManager getGroupManager();
+    @NonNull GroupManager getGroupManager();
 
     /**
      * Gets the {@link TrackManager}, responsible for managing
@@ -110,8 +107,7 @@ public interface LuckPermsApi {
      * @return the track manager
      * @since 4.0
      */
-    @NonNull
-    TrackManager getTrackManager();
+    @NonNull TrackManager getTrackManager();
 
     /**
      * Schedules the execution of an update task, and returns an encapsulation
@@ -125,8 +121,7 @@ public interface LuckPermsApi {
      * @return a future
      * @since 4.0
      */
-    @NonNull
-    CompletableFuture<Void> runUpdateTask();
+    @NonNull CompletableFuture<Void> runUpdateTask();
 
     /**
      * Gets the {@link EventBus}, used for subscribing to internal LuckPerms
@@ -135,16 +130,14 @@ public interface LuckPermsApi {
      * @return the event bus
      * @since 3.0
      */
-    @NonNull
-    EventBus getEventBus();
+    @NonNull EventBus getEventBus();
 
     /**
      * Gets a representation of the plugins configuration
      *
      * @return the configuration
      */
-    @NonNull
-    LPConfiguration getConfiguration();
+    @NonNull LPConfiguration getConfiguration();
 
     /**
      * Gets an object representing the plugins primary {@link Storage} backend.
@@ -155,8 +148,7 @@ public interface LuckPermsApi {
      * @return a storage instance
      * @since 2.14
      */
-    @NonNull
-    Storage getStorage();
+    @NonNull Storage getStorage();
 
     /**
      * Gets the {@link MessagingService}, if present.
@@ -170,8 +162,7 @@ public interface LuckPermsApi {
      *
      * @return the messaging service instance, if present.
      */
-    @NonNull
-    Optional<MessagingService> getMessagingService();
+    @NonNull Optional<MessagingService> getMessagingService();
 
     /**
      * Registers a {@link MessengerProvider} for use by the platform.
@@ -193,8 +184,7 @@ public interface LuckPermsApi {
      * @return the action logger
      * @since 4.1
      */
-    @NonNull
-    ActionLogger getActionLogger();
+    @NonNull ActionLogger getActionLogger();
 
     /**
      * Gets a {@link UuidCache}.
@@ -204,11 +194,10 @@ public interface LuckPermsApi {
      *
      * @return the uuid cache
      * @deprecated this feature is now handled internally - and the API returns a
-     *             No-op implementation of this class.
+     * No-op implementation of this class.
      */
-    @NonNull
     @Deprecated
-    UuidCache getUuidCache();
+    @NonNull UuidCache getUuidCache();
 
     /**
      * Gets the {@link ContextManager}.
@@ -219,8 +208,7 @@ public interface LuckPermsApi {
      * @return the context manager
      * @since 4.0
      */
-    @NonNull
-    ContextManager getContextManager();
+    @NonNull ContextManager getContextManager();
 
     /**
      * Gets the {@link NodeFactory}.
@@ -229,8 +217,7 @@ public interface LuckPermsApi {
      *
      * @return the node factory
      */
-    @NonNull
-    NodeFactory getNodeFactory();
+    @NonNull NodeFactory getNodeFactory();
 
     /**
      * Gets the {@link MetaStackFactory}.
@@ -242,8 +229,7 @@ public interface LuckPermsApi {
      * @return the meta stack factory
      * @since 3.2
      */
-    @NonNull
-    MetaStackFactory getMetaStackFactory();
+    @NonNull MetaStackFactory getMetaStackFactory();
 
 
 

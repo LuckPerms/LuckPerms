@@ -41,8 +41,7 @@ public interface DemotionResult extends MutateResult {
      *
      * @return the status
      */
-    @NonNull
-    Status getStatus();
+    @NonNull Status getStatus();
 
     @Override
     default boolean wasSuccess() {
@@ -60,8 +59,7 @@ public interface DemotionResult extends MutateResult {
      *
      * @return the group the user was demoted from.
      */
-    @NonNull
-    Optional<String> getGroupFrom();
+    @NonNull Optional<String> getGroupFrom();
 
     /**
      * Gets the name of the group the user was demoted from, if applicable.
@@ -71,8 +69,7 @@ public interface DemotionResult extends MutateResult {
      *
      * @return the group the user was demoted to.
      */
-    @NonNull
-    Optional<String> getGroupTo();
+    @NonNull Optional<String> getGroupTo();
 
     /**
      * The result status

@@ -69,7 +69,7 @@ public interface NodeFactory {
      *
      * @param groupName the name of the group
      * @return a node builder instance
-     * @throws NullPointerException  if the groupName is null
+     * @throws NullPointerException if the groupName is null
      * @since 4.0
      */
     Node.@NonNull Builder makeGroupNode(@NonNull String groupName);
@@ -87,9 +87,9 @@ public interface NodeFactory {
     /**
      * Creates a node builder for the given chat meta type
      *
-     * @param type the type
+     * @param type     the type
      * @param priority the priority
-     * @param value the value for the prefix/suffix
+     * @param value    the value for the prefix/suffix
      * @return a node builder instance
      * @throws NullPointerException if the type or value is null
      * @since 3.2

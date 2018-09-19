@@ -39,8 +39,7 @@ public interface TemporaryDataMutateResult {
      *
      * @return the result
      */
-    @NonNull
-    DataMutateResult getResult();
+    @NonNull DataMutateResult getResult();
 
     /**
      * Gets the node that resulted from any {@link TemporaryMergeBehaviour}
@@ -51,7 +50,6 @@ public interface TemporaryDataMutateResult {
      *
      * @return the resultant node
      */
-    @NonNull
-    Node getMergedNode();
+    @NonNull Node getMergedNode();
 
 }

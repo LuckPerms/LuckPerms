@@ -44,17 +44,13 @@ public interface GroupDataRecalculateEvent extends LuckPermsEvent {
      *
      * @return the group
      */
-    @NonNull
-    @Param(0)
-    Group getGroup();
+    @NonNull @Param(0) Group getGroup();
 
     /**
      * Gets the data that was recalculated
      *
      * @return the data
      */
-    @NonNull
-    @Param(1)
-    GroupData getData();
+    @NonNull @Param(1) GroupData getData();
 
 }

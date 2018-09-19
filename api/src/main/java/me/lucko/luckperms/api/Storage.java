@@ -50,8 +50,7 @@ public interface Storage {
      *
      * @return the name of the implementation
      */
-    @NonNull
-    String getName();
+    @NonNull String getName();
 
     /**
      * Gets whether the storage instance is allowing logins on the platform.
@@ -70,9 +69,8 @@ public interface Storage {
      * @throws NullPointerException if entry is null
      * @deprecated in favour of {@link ActionLogger#submit(LogEntry)}.
      */
-    @NonNull
     @Deprecated
-    CompletableFuture<Boolean> logAction(@NonNull LogEntry entry);
+    @NonNull CompletableFuture<Boolean> logAction(@NonNull LogEntry entry);
 
     /**
      * Loads and returns the entire log from storage
@@ -80,9 +78,8 @@ public interface Storage {
      * @return a log instance, could be null if loading failed
      * @deprecated in favour of {@link ActionLogger#getLog()}
      */
-    @NonNull
     @Deprecated
-    CompletableFuture<Log> getLog();
+    @NonNull CompletableFuture<Log> getLog();
 
     /**
      * Loads a user's data from the main storage into the plugins local storage.
@@ -93,9 +90,8 @@ public interface Storage {
      * @throws NullPointerException if uuid is null
      * @deprecated in favour of {@link UserManager#loadUser(UUID, String)}
      */
-    @NonNull
     @Deprecated
-    CompletableFuture<Boolean> loadUser(@NonNull UUID uuid, @Nullable String username);
+    @NonNull CompletableFuture<Boolean> loadUser(@NonNull UUID uuid, @Nullable String username);
 
     /**
      * Loads a user's data from the main storage into the plugins local storage.
@@ -121,9 +117,8 @@ public interface Storage {
      * @throws IllegalStateException if the user instance was not obtained from LuckPerms.
      * @deprecated in favour of {@link UserManager#saveUser(User)}
      */
-    @NonNull
     @Deprecated
-    CompletableFuture<Boolean> saveUser(@NonNull User user);
+    @NonNull CompletableFuture<Boolean> saveUser(@NonNull User user);
 
     /**
      * Gets a set all "unique" user UUIDs.
@@ -133,9 +128,8 @@ public interface Storage {
      * @return a set of uuids, or null if the operation failed.
      * @deprecated in favour of {@link UserManager#getUniqueUsers()}
      */
-    @NonNull
     @Deprecated
-    CompletableFuture<Set<UUID>> getUniqueUsers();
+    @NonNull CompletableFuture<Set<UUID>> getUniqueUsers();
 
     /**
      * Searches for a list of users with a given permission.
@@ -146,9 +140,8 @@ public interface Storage {
      * @since 2.17
      * @deprecated in favour of {@link UserManager#getWithPermission(String)}
      */
-    @NonNull
     @Deprecated
-    CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(@NonNull String permission);
+    @NonNull CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(@NonNull String permission);
 
     /**
      * Creates and loads a group into the plugins local storage
@@ -159,9 +152,8 @@ public interface Storage {
      * @throws IllegalArgumentException if the name is invalid
      * @deprecated in favour of {@link GroupManager#createAndLoadGroup(String)}
      */
-    @NonNull
     @Deprecated
-    CompletableFuture<Boolean> createAndLoadGroup(@NonNull String name);
+    @NonNull CompletableFuture<Boolean> createAndLoadGroup(@NonNull String name);
 
     /**
      * Loads a group into the plugins local storage.
@@ -172,9 +164,8 @@ public interface Storage {
      * @throws IllegalArgumentException if the name is invalid
      * @deprecated in favour of {@link GroupManager#loadGroup(String)}
      */
-    @NonNull
     @Deprecated
-    CompletableFuture<Boolean> loadGroup(@NonNull String name);
+    @NonNull CompletableFuture<Boolean> loadGroup(@NonNull String name);
 
     /**
      * Loads all groups from the storage into memory
@@ -182,9 +173,8 @@ public interface Storage {
      * @return true if the operation completed successfully.
      * @deprecated in favour of {@link GroupManager#loadAllGroups()}
      */
-    @NonNull
     @Deprecated
-    CompletableFuture<Boolean> loadAllGroups();
+    @NonNull CompletableFuture<Boolean> loadAllGroups();
 
     /**
      * Saves a group back to storage.
@@ -197,9 +187,8 @@ public interface Storage {
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      * @deprecated in favour of {@link GroupManager#saveGroup(Group)}
      */
-    @NonNull
     @Deprecated
-    CompletableFuture<Boolean> saveGroup(@NonNull Group group);
+    @NonNull CompletableFuture<Boolean> saveGroup(@NonNull Group group);
 
     /**
      * Permanently deletes a group from storage.
@@ -210,9 +199,8 @@ public interface Storage {
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      * @deprecated in favour of {@link GroupManager#deleteGroup(Group)}
      */
-    @NonNull
     @Deprecated
-    CompletableFuture<Boolean> deleteGroup(@NonNull Group group);
+    @NonNull CompletableFuture<Boolean> deleteGroup(@NonNull Group group);
 
     /**
      * Searches for a list of groups with a given permission.
@@ -223,9 +211,8 @@ public interface Storage {
      * @since 2.17
      * @deprecated in favour of {@link GroupManager#getWithPermission(String)}
      */
-    @NonNull
     @Deprecated
-    CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(@NonNull String permission);
+    @NonNull CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(@NonNull String permission);
 
     /**
      * Creates and loads a track into the plugins local storage
@@ -236,9 +223,8 @@ public interface Storage {
      * @throws IllegalArgumentException if the name is invalid
      * @deprecated in favour of {@link TrackManager#createAndLoadTrack(String)}
      */
-    @NonNull
     @Deprecated
-    CompletableFuture<Boolean> createAndLoadTrack(@NonNull String name);
+    @NonNull CompletableFuture<Boolean> createAndLoadTrack(@NonNull String name);
 
     /**
      * Loads a track into the plugins local storage.
@@ -249,9 +235,8 @@ public interface Storage {
      * @throws IllegalArgumentException if the name is invalid
      * @deprecated in favour of {@link TrackManager#loadTrack(String)}
      */
-    @NonNull
     @Deprecated
-    CompletableFuture<Boolean> loadTrack(@NonNull String name);
+    @NonNull CompletableFuture<Boolean> loadTrack(@NonNull String name);
 
     /**
      * Loads all tracks from the storage into memory
@@ -259,9 +244,8 @@ public interface Storage {
      * @return true if the operation completed successfully.
      * @deprecated in favour of {@link TrackManager#loadAllTracks()}
      */
-    @NonNull
     @Deprecated
-    CompletableFuture<Boolean> loadAllTracks();
+    @NonNull CompletableFuture<Boolean> loadAllTracks();
 
     /**
      * Saves a track back to storage. You should call this after you make any changes to a track.
@@ -272,9 +256,8 @@ public interface Storage {
      * @throws IllegalStateException if the track instance was not obtained from LuckPerms.
      * @deprecated in favour of {@link TrackManager#saveTrack(Track)}
      */
-    @NonNull
     @Deprecated
-    CompletableFuture<Boolean> saveTrack(@NonNull Track track);
+    @NonNull CompletableFuture<Boolean> saveTrack(@NonNull Track track);
 
     /**
      * Permanently deletes a track from storage
@@ -285,9 +268,8 @@ public interface Storage {
      * @throws IllegalStateException if the track instance was not obtained from LuckPerms.
      * @deprecated in favour of {@link TrackManager#deleteTrack(Track)}
      */
-    @NonNull
     @Deprecated
-    CompletableFuture<Boolean> deleteTrack(@NonNull Track track);
+    @NonNull CompletableFuture<Boolean> deleteTrack(@NonNull Track track);
 
     /**
      * Saves UUID caching data to the global cache
@@ -299,8 +281,7 @@ public interface Storage {
      * @throws IllegalArgumentException if the username is invalid
      * @deprecated in favour of {@link UserManager#savePlayerData(UUID, String)}
      */
-    @NonNull
-    CompletableFuture<Boolean> saveUUIDData(@NonNull String username, @NonNull UUID uuid);
+    @NonNull CompletableFuture<Boolean> saveUUIDData(@NonNull String username, @NonNull UUID uuid);
 
     /**
      * Gets a UUID from a username
@@ -311,8 +292,7 @@ public interface Storage {
      * @throws IllegalArgumentException if the username is invalid
      * @deprecated in favour of {@link UserManager#lookupUuid(String)}
      */
-    @NonNull
-    CompletableFuture<UUID> getUUID(@NonNull String username);
+    @NonNull CompletableFuture<UUID> getUUID(@NonNull String username);
 
     /**
      * Gets a username from a UUID
@@ -323,9 +303,7 @@ public interface Storage {
      * @since 2.17
      * @deprecated in favour of {@link UserManager#lookupUsername(UUID)}
      */
-    @NonNull
-    @Deprecated
-    CompletableFuture<String> getName(@NonNull UUID uuid);
+    @NonNull @Deprecated CompletableFuture<String> getName(@NonNull UUID uuid);
 
     /**
      * Returns an executor which will run all passed runnables on the
@@ -337,9 +315,7 @@ public interface Storage {
      * @return an executor instance
      * @deprecated as plugins should create their own executors
      */
-    @NonNull
-    @Deprecated
-    Executor getSyncExecutor();
+    @NonNull @Deprecated Executor getSyncExecutor();
 
     /**
      * Returns an executor which will run all passed runnables asynchronously
@@ -351,8 +327,6 @@ public interface Storage {
      * @return an executor instance
      * @deprecated as plugins should create their own executors
      */
-    @NonNull
-    @Deprecated
-    Executor getAsyncExecutor();
+    @NonNull @Deprecated Executor getAsyncExecutor();
 
 }

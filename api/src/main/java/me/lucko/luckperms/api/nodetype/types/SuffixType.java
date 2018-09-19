@@ -43,7 +43,8 @@ public interface SuffixType extends NodeType {
     /**
      * The key for this type.
      */
-    NodeTypeKey<SuffixType> KEY = new NodeTypeKey<SuffixType>(){};
+    NodeTypeKey<SuffixType> KEY = new NodeTypeKey<SuffixType>() {
+    };
 
     /**
      * Gets the priority of the suffix assignment.
@@ -57,8 +58,7 @@ public interface SuffixType extends NodeType {
      *
      * @return the suffix
      */
-    @NonNull
-    String getSuffix();
+    @NonNull String getSuffix();
 
     /**
      * Gets a representation of this instance as a {@link Map.Entry}.

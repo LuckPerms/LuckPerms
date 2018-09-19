@@ -43,8 +43,7 @@ public interface Source {
      *
      * @return the type
      */
-    @NonNull
-    Type getType();
+    @NonNull Type getType();
 
     /**
      * Represents a type of source

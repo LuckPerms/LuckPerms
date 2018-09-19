@@ -39,7 +39,8 @@ public interface WeightType extends NodeType {
     /**
      * The key for this type.
      */
-    NodeTypeKey<WeightType> KEY = new NodeTypeKey<WeightType>(){};
+    NodeTypeKey<WeightType> KEY = new NodeTypeKey<WeightType>() {
+    };
 
     /**
      * Gets the weight value.

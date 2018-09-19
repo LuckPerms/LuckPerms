@@ -72,8 +72,7 @@ public interface TrackManager {
      * @throws NullPointerException if the name is null
      * @since 4.1
      */
-    @NonNull
-    CompletableFuture<Track> createAndLoadTrack(@NonNull String name);
+    @NonNull CompletableFuture<Track> createAndLoadTrack(@NonNull String name);
 
     /**
      * Loads a track from the plugin's storage provider into memory.
@@ -93,8 +92,7 @@ public interface TrackManager {
      * @throws NullPointerException if the name is null
      * @since 4.1
      */
-    @NonNull
-    CompletableFuture<Optional<Track>> loadTrack(@NonNull String name);
+    @NonNull CompletableFuture<Optional<Track>> loadTrack(@NonNull String name);
 
     /**
      * Saves a track's data back to the plugin's storage provider.
@@ -113,8 +111,7 @@ public interface TrackManager {
      * @throws IllegalStateException if the track instance was not obtained from LuckPerms.
      * @since 4.1
      */
-    @NonNull
-    CompletableFuture<Void> saveTrack(@NonNull Track track);
+    @NonNull CompletableFuture<Void> saveTrack(@NonNull Track track);
 
     /**
      * Permanently deletes a track from the plugin's storage provider.
@@ -125,15 +122,13 @@ public interface TrackManager {
      * <p>Unlike the method in {@link Storage}, when a track cannot be deleted,
      * the future will be {@link CompletableFuture completed exceptionally}.</p>
      *
-     *
      * @param track the track to delete
      * @return a future to encapsulate the operation.
      * @throws NullPointerException  if track is null
      * @throws IllegalStateException if the track instance was not obtained from LuckPerms.
      * @since 4.1
      */
-    @NonNull
-    CompletableFuture<Void> deleteTrack(@NonNull Track track);
+    @NonNull CompletableFuture<Void> deleteTrack(@NonNull Track track);
 
     /**
      * Loads all tracks into memory.
@@ -147,8 +142,7 @@ public interface TrackManager {
      * @return a future to encapsulate the operation.
      * @since 4.1
      */
-    @NonNull
-    CompletableFuture<Void> loadAllTracks();
+    @NonNull CompletableFuture<Void> loadAllTracks();
 
     /**
      * Gets a loaded track.
@@ -157,8 +151,7 @@ public interface TrackManager {
      * @return a {@link Track} object, if one matching the name exists, or null if not
      * @throws NullPointerException if the name is null
      */
-    @Nullable
-    Track getTrack(@NonNull String name);
+    @Nullable Track getTrack(@NonNull String name);
 
     /**
      * Gets a loaded track.
@@ -178,8 +171,7 @@ public interface TrackManager {
      *
      * @return a {@link Set} of {@link Track} objects
      */
-    @NonNull
-    Set<Track> getLoadedTracks();
+    @NonNull Set<Track> getLoadedTracks();
 
     /**
      * Check if a track is loaded in memory

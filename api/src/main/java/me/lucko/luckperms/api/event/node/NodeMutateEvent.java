@@ -46,27 +46,21 @@ public interface NodeMutateEvent extends LuckPermsEvent {
      *
      * @return the event target
      */
-    @NonNull
-    @Param(0)
-    PermissionHolder getTarget();
+    @NonNull @Param(0) PermissionHolder getTarget();
 
     /**
      * Gets an immutable copy of the holders data before the change
      *
      * @return the data before the change
      */
-    @NonNull
-    @Param(1)
-    Set<Node> getDataBefore();
+    @NonNull @Param(1) Set<Node> getDataBefore();
 
     /**
      * Gets an immutable copy of the holders data after the change
      *
      * @return the data after the change
      */
-    @NonNull
-    @Param(2)
-    Set<Node> getDataAfter();
+    @NonNull @Param(2) Set<Node> getDataAfter();
 
     /**
      * Gets whether the target of this event is a {@link me.lucko.luckperms.api.User}

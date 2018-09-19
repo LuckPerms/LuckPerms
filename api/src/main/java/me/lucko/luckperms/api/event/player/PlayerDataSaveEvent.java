@@ -48,26 +48,20 @@ public interface PlayerDataSaveEvent extends LuckPermsEvent {
      *
      * @return the uuid
      */
-    @NonNull
-    @Param(0)
-    UUID getUuid();
+    @NonNull @Param(0) UUID getUuid();
 
     /**
      * Gets the username that was saved.
      *
      * @return the username
      */
-    @NonNull
-    @Param(1)
-    String getUsername();
+    @NonNull @Param(1) String getUsername();
 
     /**
      * Gets the result of the operation.
      *
      * @return the result
      */
-    @NonNull
-    @Param(2)
-    PlayerSaveResult getResult();
+    @NonNull @Param(2) PlayerSaveResult getResult();
 
 }

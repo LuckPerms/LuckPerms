@@ -42,8 +42,7 @@ public interface LocalizedNode extends Node {
      *
      * @return the node this instance is representing
      */
-    @NonNull
-    Node getNode();
+    @NonNull Node getNode();
 
     /**
      * Gets the location where the {@link Node} is inherited from.
@@ -56,7 +55,6 @@ public interface LocalizedNode extends Node {
      *
      * @return where the node was inherited from.
      */
-    @NonNull
-    String getLocation();
+    @NonNull String getLocation();
 
 }

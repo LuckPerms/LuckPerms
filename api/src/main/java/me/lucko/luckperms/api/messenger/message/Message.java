@@ -46,7 +46,6 @@ public interface Message {
      *
      * @return the id of the message
      */
-    @NonNull
-    UUID getId();
+    @NonNull UUID getId();
 
 }

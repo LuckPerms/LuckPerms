@@ -47,8 +47,7 @@ public interface MetaData extends CachedDataContainer {
      *
      * @return the contexts this container is caching
      */
-    @NonNull
-    MetaContexts getMetaContexts();
+    @NonNull MetaContexts getMetaContexts();
 
     /**
      * Gets an immutable copy of the meta this user has.
@@ -62,8 +61,7 @@ public interface MetaData extends CachedDataContainer {
      * @return an immutable multimap of meta
      * @since 3.3
      */
-    @NonNull
-    ListMultimap<String, String> getMetaMultimap();
+    @NonNull ListMultimap<String, String> getMetaMultimap();
 
     /**
      * Gets an immutable copy of the meta this user has.
@@ -73,8 +71,7 @@ public interface MetaData extends CachedDataContainer {
      *
      * @return an immutable map of meta
      */
-    @NonNull
-    Map<String, String> getMeta();
+    @NonNull Map<String, String> getMeta();
 
     /**
      * Gets an immutable sorted map of all of the prefixes the user has, whereby the first value is the highest priority
@@ -82,8 +79,7 @@ public interface MetaData extends CachedDataContainer {
      *
      * @return a sorted map of prefixes
      */
-    @NonNull
-    SortedMap<Integer, String> getPrefixes();
+    @NonNull SortedMap<Integer, String> getPrefixes();
 
     /**
      * Gets an immutable sorted map of all of the suffixes the user has, whereby the first value is the highest priority
@@ -91,24 +87,21 @@ public interface MetaData extends CachedDataContainer {
      *
      * @return a sorted map of suffixes
      */
-    @NonNull
-    SortedMap<Integer, String> getSuffixes();
+    @NonNull SortedMap<Integer, String> getSuffixes();
 
     /**
      * Gets the user's highest priority prefix, or null if the user has no prefixes
      *
      * @return a prefix string, or null
      */
-    @Nullable
-    String getPrefix();
+    @Nullable String getPrefix();
 
     /**
      * Gets the user's highest priority suffix, or null if the user has no suffixes
      *
      * @return a suffix string, or null
      */
-    @Nullable
-    String getSuffix();
+    @Nullable String getSuffix();
 
     /**
      * Gets the definition used for the prefix stack
@@ -116,8 +109,7 @@ public interface MetaData extends CachedDataContainer {
      * @return the definition used for the prefix stack
      * @since 3.2
      */
-    @NonNull
-    MetaStackDefinition getPrefixStackDefinition();
+    @NonNull MetaStackDefinition getPrefixStackDefinition();
 
     /**
      * Gets the definition used for the suffix stack
@@ -125,7 +117,6 @@ public interface MetaData extends CachedDataContainer {
      * @return the definition used for the suffix stack
      * @since 3.2
      */
-    @NonNull
-    MetaStackDefinition getSuffixStackDefinition();
+    @NonNull MetaStackDefinition getSuffixStackDefinition();
 
 }

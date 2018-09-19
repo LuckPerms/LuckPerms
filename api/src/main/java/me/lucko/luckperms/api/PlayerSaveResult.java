@@ -48,8 +48,7 @@ public interface PlayerSaveResult {
      *
      * @return the status
      */
-    @NonNull
-    Set<Status> getStatus();
+    @NonNull Set<Status> getStatus();
 
     /**
      * Gets if the result includes a certain status code.
@@ -65,8 +64,7 @@ public interface PlayerSaveResult {
      * @return the old username
      * @see Status#USERNAME_UPDATED
      */
-    @Nullable
-    String getOldUsername();
+    @Nullable String getOldUsername();
 
     /**
      * Gets the other uuids involved in the result
@@ -74,8 +72,7 @@ public interface PlayerSaveResult {
      * @return the other uuids
      * @see Status#OTHER_UUIDS_PRESENT_FOR_USERNAME
      */
-    @Nullable
-    Set<UUID> getOtherUuids();
+    @Nullable Set<UUID> getOtherUuids();
 
     /**
      * The various states the result can take

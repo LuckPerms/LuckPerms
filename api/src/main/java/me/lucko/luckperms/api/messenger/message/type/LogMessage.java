@@ -44,7 +44,6 @@ public interface LogMessage extends Message {
      *
      * @return the log entry
      */
-    @NonNull
-    LogEntry getLogEntry();
+    @NonNull LogEntry getLogEntry();
 
 }

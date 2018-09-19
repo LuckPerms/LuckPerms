@@ -35,7 +35,6 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface LPSubjectReference extends SubjectReference {
 
-    @NonNull
-    CompletableFuture<LPSubject> resolveLp();
+    @NonNull CompletableFuture<LPSubject> resolveLp();
 
 }

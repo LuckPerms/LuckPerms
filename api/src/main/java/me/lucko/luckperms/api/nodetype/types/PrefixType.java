@@ -43,7 +43,8 @@ public interface PrefixType extends NodeType {
     /**
      * The key for this type.
      */
-    NodeTypeKey<PrefixType> KEY = new NodeTypeKey<PrefixType>(){};
+    NodeTypeKey<PrefixType> KEY = new NodeTypeKey<PrefixType>() {
+    };
 
     /**
      * Gets the priority of the prefix assignment.
@@ -57,8 +58,7 @@ public interface PrefixType extends NodeType {
      *
      * @return the prefix
      */
-    @NonNull
-    String getPrefix();
+    @NonNull String getPrefix();
 
     /**
      * Gets a representation of this instance as a {@link Map.Entry}.

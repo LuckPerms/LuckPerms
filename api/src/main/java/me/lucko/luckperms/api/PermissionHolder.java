@@ -68,8 +68,7 @@ public interface PermissionHolder {
      *
      * @return the identifier for this object. Either a uuid string or name.
      */
-    @NonNull
-    String getObjectName();
+    @NonNull String getObjectName();
 
     /**
      * Gets a friendly name for this holder, to be displayed in command output, etc.
@@ -86,8 +85,7 @@ public interface PermissionHolder {
      * @return a friendly identifier for this holder
      * @since 3.2
      */
-    @NonNull
-    String getFriendlyName();
+    @NonNull String getFriendlyName();
 
     /**
      * Gets the holders {@link CachedData} cache.
@@ -95,8 +93,7 @@ public interface PermissionHolder {
      * @return the holders cached data.
      * @since 3.2
      */
-    @NonNull
-    CachedData getCachedData();
+    @NonNull CachedData getCachedData();
 
     /**
      * Refreshes and applies any changes to the cached holder data.
@@ -107,8 +104,7 @@ public interface PermissionHolder {
      * @return the task future
      * @since 4.0
      */
-    @NonNull
-    CompletableFuture<Void> refreshCachedData();
+    @NonNull CompletableFuture<Void> refreshCachedData();
 
     /**
      * Gets the backing multimap containing every permission this holder has.
@@ -119,8 +115,7 @@ public interface PermissionHolder {
      * @return the holders own permissions
      * @since 3.3
      */
-    @NonNull
-    ImmutableSetMultimap<ImmutableContextSet, Node> getNodes();
+    @NonNull ImmutableSetMultimap<ImmutableContextSet, Node> getNodes();
 
     /**
      * Gets the backing multimap containing every transient permission this holder has.
@@ -132,8 +127,7 @@ public interface PermissionHolder {
      * @return the holders own permissions
      * @since 3.3
      */
-    @NonNull
-    ImmutableSetMultimap<ImmutableContextSet, Node> getTransientNodes();
+    @NonNull ImmutableSetMultimap<ImmutableContextSet, Node> getTransientNodes();
 
     /**
      * Gets a flattened/squashed view of the holders permissions.
@@ -150,8 +144,7 @@ public interface PermissionHolder {
      * @return a list of the holders own nodes.
      * @since 3.3
      */
-    @NonNull
-    List<Node> getOwnNodes();
+    @NonNull List<Node> getOwnNodes();
 
     /**
      * Gets a sorted set of all held permissions.
@@ -166,8 +159,7 @@ public interface PermissionHolder {
      * @return an immutable set of permissions in priority order
      * @since 2.6
      */
-    @NonNull
-    SortedSet<? extends Node> getPermissions();
+    @NonNull SortedSet<? extends Node> getPermissions();
 
     /**
      * Similar to {@link #getPermissions()}, except only including permissions from the enduring
@@ -184,8 +176,7 @@ public interface PermissionHolder {
      * @return a set of nodes
      * @since 2.6
      */
-    @NonNull
-    Set<? extends Node> getEnduringPermissions();
+    @NonNull Set<? extends Node> getEnduringPermissions();
 
     /**
      * Similar to {@link #getPermissions()}, except only including permissions from the enduring
@@ -201,8 +192,7 @@ public interface PermissionHolder {
      * @return a set of nodes
      * @since 2.6
      */
-    @NonNull
-    Set<? extends Node> getTransientPermissions();
+    @NonNull Set<? extends Node> getTransientPermissions();
 
     /**
      * A filtered view of this holders nodes, only including permanent entries.
@@ -217,8 +207,7 @@ public interface PermissionHolder {
      * @return a set of permanent nodes
      * @since 2.6
      */
-    @NonNull
-    Set<Node> getPermanentPermissionNodes();
+    @NonNull Set<Node> getPermanentPermissionNodes();
 
     /**
      * A filtered view of this holders nodes, only including temporary entries.
@@ -233,8 +222,7 @@ public interface PermissionHolder {
      * @return a set of temporary nodes
      * @since 2.6
      */
-    @NonNull
-    Set<Node> getTemporaryPermissionNodes();
+    @NonNull Set<Node> getTemporaryPermissionNodes();
 
     /**
      * Recursively resolves this holders permissions.
@@ -252,8 +240,7 @@ public interface PermissionHolder {
      * @return a list of nodes
      * @since 3.3
      */
-    @NonNull
-    List<LocalizedNode> resolveInheritances(@NonNull Contexts contexts);
+    @NonNull List<LocalizedNode> resolveInheritances(@NonNull Contexts contexts);
 
     /**
      * Recursively resolves this holders permissions.
@@ -273,8 +260,7 @@ public interface PermissionHolder {
      * @return a list of nodes
      * @since 3.3
      */
-    @NonNull
-    List<LocalizedNode> resolveInheritances();
+    @NonNull List<LocalizedNode> resolveInheritances();
 
     /**
      * Gets a mutable sorted set of the nodes that this object has and inherits, filtered by context
@@ -290,8 +276,7 @@ public interface PermissionHolder {
      * @throws NullPointerException if the context is null
      * @since 2.11
      */
-    @NonNull
-    SortedSet<LocalizedNode> getAllNodes(@NonNull Contexts contexts);
+    @NonNull SortedSet<LocalizedNode> getAllNodes(@NonNull Contexts contexts);
 
     /**
      * Gets a mutable sorted set of the nodes that this object has and inherits.
@@ -305,8 +290,7 @@ public interface PermissionHolder {
      * @throws NullPointerException if the context is null
      * @since 3.3
      */
-    @NonNull
-    SortedSet<LocalizedNode> getAllNodes();
+    @NonNull SortedSet<LocalizedNode> getAllNodes();
 
     /**
      * Gets a mutable set of the nodes that this object has and inherits, filtered by context.
@@ -319,19 +303,17 @@ public interface PermissionHolder {
      * @throws NullPointerException if the context is null
      * @since 2.11
      */
-    @NonNull
-    Set<LocalizedNode> getAllNodesFiltered(@NonNull Contexts contexts);
+    @NonNull Set<LocalizedNode> getAllNodesFiltered(@NonNull Contexts contexts);
 
     /**
      * Converts the output of {@link #getAllNodesFiltered(Contexts)} into string and boolean form,
      * and expands shorthand permissions.
      *
-     * @param contexts the context for the lookup
+     * @param contexts           the context for the lookup
      * @param convertToLowercase if the keys should be made lowercase whilst being exported
      * @return a mutable map of permissions
      */
-    @NonNull
-    Map<String, Boolean> exportNodes(@NonNull Contexts contexts, boolean convertToLowercase);
+    @NonNull Map<String, Boolean> exportNodes(@NonNull Contexts contexts, boolean convertToLowercase);
 
     /**
      * Removes any temporary permissions that have expired.
@@ -346,42 +328,39 @@ public interface PermissionHolder {
      *
      * <p>Although this method is named hasPermission, it can be used for all node types.</p>
      *
-     * @param node the node to check for
+     * @param node              the node to check for
      * @param equalityPredicate how to determine if a node matches
      * @return a Tristate for the holders permission status for the node
      * @throws NullPointerException if the node is null
      * @since 4.1
      */
-    @NonNull
-    Tristate hasPermission(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate);
+    @NonNull Tristate hasPermission(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate);
 
     /**
      * Checks to see if the object has a certain permission.
      *
      * <p>Although this method is named hasTransientPermission, it can be used for all node types.</p>
      *
-     * @param node the node to check for
+     * @param node              the node to check for
      * @param equalityPredicate how to determine if a node matches
      * @return a Tristate for the holders permission status for the node
      * @throws NullPointerException if the node is null
      * @since 4.1
      */
-    @NonNull
-    Tristate hasTransientPermission(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate);
+    @NonNull Tristate hasTransientPermission(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate);
 
     /**
      * Checks to see if the object inherits a certain permission.
      *
      * <p>Although this method is named inheritsPermission, it can be used for all node types.</p>
      *
-     * @param node the node to check for
+     * @param node              the node to check for
      * @param equalityPredicate how to determine if a node matches
      * @return a Tristate for the holders inheritance status for the node
      * @throws NullPointerException if the node is null
      * @since 4.1
      */
-    @NonNull
-    Tristate inheritsPermission(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate);
+    @NonNull Tristate inheritsPermission(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate);
 
     /**
      * Checks to see if the object has a certain permission.
@@ -393,8 +372,7 @@ public interface PermissionHolder {
      * @throws NullPointerException if the node is null
      * @since 2.6
      */
-    @NonNull
-    Tristate hasPermission(@NonNull Node node);
+    @NonNull Tristate hasPermission(@NonNull Node node);
 
     /**
      * Checks to see if the object has a certain permission.
@@ -406,8 +384,7 @@ public interface PermissionHolder {
      * @throws NullPointerException if the node is null
      * @since 2.6
      */
-    @NonNull
-    Tristate hasTransientPermission(@NonNull Node node);
+    @NonNull Tristate hasTransientPermission(@NonNull Node node);
 
     /**
      * Checks to see if the object inherits a certain permission.
@@ -419,8 +396,7 @@ public interface PermissionHolder {
      * @throws NullPointerException if the node is null
      * @since 2.6
      */
-    @NonNull
-    Tristate inheritsPermission(@NonNull Node node);
+    @NonNull Tristate inheritsPermission(@NonNull Node node);
 
     /**
      * Check to see if this holder inherits another group in the global context.
@@ -442,7 +418,7 @@ public interface PermissionHolder {
      *
      * <p>This method only checks for direct inheritance - one hop up the inheritance tree.</p>
      *
-     * @param group The group to check membership of
+     * @param group      The group to check membership of
      * @param contextSet the context set to filter by
      * @return true if the group inherits the other group
      * @throws NullPointerException  if the group is null
@@ -472,8 +448,7 @@ public interface PermissionHolder {
      * @throws NullPointerException if the node is null
      * @since 4.0
      */
-    @NonNull
-    DataMutateResult setPermission(@NonNull Node node);
+    @NonNull DataMutateResult setPermission(@NonNull Node node);
 
     /**
      * Sets a permission node for the permission holder.
@@ -491,14 +466,13 @@ public interface PermissionHolder {
      * made already. This can be done via {@link UserManager#loadUser(UUID)} or
      * {@link GroupManager#loadGroup(String)} respectively.</p>
      *
-     * @param node The node to be set
+     * @param node                    The node to be set
      * @param temporaryMergeBehaviour The behaviour used to merge temporary permission entries
      * @return the result of the operation
      * @throws NullPointerException if the node is null
      * @since 4.3
      */
-    @NonNull
-    TemporaryDataMutateResult setPermission(@NonNull Node node, @NonNull TemporaryMergeBehaviour temporaryMergeBehaviour);
+    @NonNull TemporaryDataMutateResult setPermission(@NonNull Node node, @NonNull TemporaryMergeBehaviour temporaryMergeBehaviour);
 
     /**
      * Sets a transient permission for the permission holder.
@@ -521,8 +495,7 @@ public interface PermissionHolder {
      * @throws NullPointerException if the node is null
      * @since 4.0
      */
-    @NonNull
-    DataMutateResult setTransientPermission(@NonNull Node node);
+    @NonNull DataMutateResult setTransientPermission(@NonNull Node node);
 
     /**
      * Sets a transient permission for the permission holder.
@@ -540,14 +513,13 @@ public interface PermissionHolder {
      *
      * <p>Although this method is named setTransientPermission, it can be used for all node types.</p>
      *
-     * @param node The node to be se
+     * @param node                    The node to be se
      * @param temporaryMergeBehaviour The behaviour used to merge temporary permission entries
      * @return the result of the operation
      * @throws NullPointerException if the node is null
      * @since 4.3
      */
-    @NonNull
-    TemporaryDataMutateResult setTransientPermission(@NonNull Node node, @NonNull TemporaryMergeBehaviour temporaryMergeBehaviour);
+    @NonNull TemporaryDataMutateResult setTransientPermission(@NonNull Node node, @NonNull TemporaryMergeBehaviour temporaryMergeBehaviour);
 
     /**
      * Unsets a permission for the permission holder.
@@ -570,8 +542,7 @@ public interface PermissionHolder {
      * @throws NullPointerException if the node is null
      * @since 4.0
      */
-    @NonNull
-    DataMutateResult unsetPermission(@NonNull Node node);
+    @NonNull DataMutateResult unsetPermission(@NonNull Node node);
 
     /**
      * Unsets a transient permission for the permission holder.
@@ -583,8 +554,7 @@ public interface PermissionHolder {
      * @throws NullPointerException if the node is null
      * @since 4.0
      */
-    @NonNull
-    DataMutateResult unsetTransientPermission(@NonNull Node node);
+    @NonNull DataMutateResult unsetTransientPermission(@NonNull Node node);
 
     /**
      * Clears any nodes from the holder which pass the predicate.
@@ -780,8 +750,8 @@ public interface PermissionHolder {
      * Unsets a permission for the permission holder.
      *
      * @param node The node to be unset
-     * @throws NullPointerException if the node is null
      * @return the result of the operation
+     * @throws NullPointerException if the node is null
      * @since 3.1
      * @deprecated now forwards to {@link #unsetPermission(Node)}
      */
@@ -794,8 +764,8 @@ public interface PermissionHolder {
      * Unsets a transient permission for the permission holder.
      *
      * @param node The node to be unset
-     * @throws NullPointerException if the node is null
      * @return the result of the operation
+     * @throws NullPointerException if the node is null
      * @since 3.1
      * @deprecated now forwards to {@link #unsetTransientPermission(Node)}
      */

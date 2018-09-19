@@ -42,17 +42,13 @@ public interface UserDataRecalculateEvent extends LuckPermsEvent {
      *
      * @return the user
      */
-    @NonNull
-    @Param(0)
-    User getUser();
+    @NonNull @Param(0) User getUser();
 
     /**
      * Gets the data that was recalculated
      *
      * @return the data
      */
-    @NonNull
-    @Param(1)
-    UserData getData();
+    @NonNull @Param(1) UserData getData();
 
 }

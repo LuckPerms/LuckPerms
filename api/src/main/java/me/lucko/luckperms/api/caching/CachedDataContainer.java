@@ -41,7 +41,6 @@ public interface CachedDataContainer {
      *
      * @return the contexts this container is caching
      */
-    @NonNull
-    Contexts getContexts();
+    @NonNull Contexts getContexts();
 
 }

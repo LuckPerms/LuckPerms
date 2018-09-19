@@ -45,26 +45,21 @@ public interface UserTrackEvent extends LuckPermsEvent, Sourced {
      *
      * @return the track involved in the event
      */
-    @NonNull
-    @Param(0)
-    Track getTrack();
+    @NonNull @Param(0) Track getTrack();
 
     /**
      * Gets the user who was promoted or demoted
      *
      * @return the user involved in the event
      */
-    @NonNull
-    @Param(1)
-    User getUser();
+    @NonNull @Param(1) User getUser();
 
     /**
      * Gets the action performed
      *
      * @return the action performed
      */
-    @NonNull
-    TrackAction getAction();
+    @NonNull TrackAction getAction();
 
     /**
      * Gets the group the user was promoted/demoted from.
@@ -73,17 +68,13 @@ public interface UserTrackEvent extends LuckPermsEvent, Sourced {
      *
      * @return the group the user was promoted/demoted from
      */
-    @NonNull
-    @Param(2)
-    Optional<String> getGroupFrom();
+    @NonNull @Param(2) Optional<String> getGroupFrom();
 
     /**
      * Gets the group the user was promoted/demoted to
      *
      * @return the group the user was promoted/demoted to
      */
-    @NonNull
-    @Param(3)
-    Optional<String> getGroupTo();
+    @NonNull @Param(3) Optional<String> getGroupTo();
 
 }

@@ -43,23 +43,22 @@ public interface MetaType extends NodeType, Map.Entry<String, String> {
     /**
      * The key for this type.
      */
-    NodeTypeKey<MetaType> KEY = new NodeTypeKey<MetaType>(){};
+    NodeTypeKey<MetaType> KEY = new NodeTypeKey<MetaType>() {
+    };
 
     /**
      * Gets the meta key.
      *
      * @return the meta key
      */
-    @NonNull
-    String getKey();
+    @NonNull String getKey();
 
     /**
      * Gets the meta value.
      *
      * @return the meta value
      */
-    @NonNull
-    String getValue();
+    @NonNull String getValue();
 
     @Override
     @Deprecated

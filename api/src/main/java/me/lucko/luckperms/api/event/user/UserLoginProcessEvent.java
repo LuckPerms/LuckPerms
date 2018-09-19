@@ -52,26 +52,20 @@ public interface UserLoginProcessEvent extends LuckPermsEvent {
      *
      * @return the uuid of the connection which was processed
      */
-    @NonNull
-    @Param(0)
-    UUID getUuid();
+    @NonNull @Param(0) UUID getUuid();
 
     /**
      * Gets the username of the connection which was processed
      *
      * @return the username of the connection which was processed
      */
-    @NonNull
-    @Param(1)
-    String getUsername();
+    @NonNull @Param(1) String getUsername();
 
     /**
      * Gets the resultant User instance which was loaded.
      *
      * @return the user instance
      */
-    @NonNull
-    @Param(2)
-    User getUser();
+    @NonNull @Param(2) User getUser();
 
 }

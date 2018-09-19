@@ -44,7 +44,6 @@ public interface ContextCalculator<T> {
      * @return the map
      * @since 2.13
      */
-    @NonNull
-    MutableContextSet giveApplicableContext(@NonNull T subject, @NonNull MutableContextSet accumulator);
+    @NonNull MutableContextSet giveApplicableContext(@NonNull T subject, @NonNull MutableContextSet accumulator);
 
 }

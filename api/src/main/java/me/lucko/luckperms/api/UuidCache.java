@@ -34,7 +34,7 @@ import java.util.UUID;
  * LuckPerms UUIDs.
  *
  * @deprecated this feature is now handled internally - and the API returns a
- *             No-op implementation of this class.
+ * No-op implementation of this class.
  */
 @Deprecated
 public interface UuidCache {
@@ -50,9 +50,8 @@ public interface UuidCache {
      *                   <code>ProxiedPlayer#getUniqueId</code>
      * @return the corresponding internal UUID
      */
-    @NonNull
     @Deprecated
-    UUID getUUID(@NonNull UUID mojangUuid);
+    @NonNull UUID getUUID(@NonNull UUID mojangUuid);
 
     /**
      * Gets a users "external", server assigned unique id, from the internal
@@ -62,8 +61,7 @@ public interface UuidCache {
      *                     <code>User#getUuid</code>
      * @return the corresponding external UUID
      */
-    @NonNull
     @Deprecated
-    UUID getExternalUUID(@NonNull UUID internalUuid);
+    @NonNull UUID getExternalUUID(@NonNull UUID internalUuid);
 
 }

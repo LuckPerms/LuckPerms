@@ -43,8 +43,7 @@ public interface MetaStackFactory {
      * @param definition the definition
      * @return the parsed element, if present
      */
-    @NonNull
-    Optional<MetaStackElement> fromString(@NonNull String definition);
+    @NonNull Optional<MetaStackElement> fromString(@NonNull String definition);
 
     /**
      * Parses a list of {@link MetaStackElement}s from string, using the pre-defined elements in the plugin.
@@ -54,19 +53,17 @@ public interface MetaStackFactory {
      * @param definitions the definition strings
      * @return a list of parsed elements
      */
-    @NonNull
-    List<MetaStackElement> fromStrings(@NonNull List<String> definitions);
+    @NonNull List<MetaStackElement> fromStrings(@NonNull List<String> definitions);
 
     /**
      * Creates a new {@link MetaStackDefinition} with the given properties.
      *
-     * @param elements the elements to be included in the stack.
-     * @param startSpacer the spacer to be included at the start of the stacks output
+     * @param elements     the elements to be included in the stack.
+     * @param startSpacer  the spacer to be included at the start of the stacks output
      * @param middleSpacer the spacer to be included between stack elements
-     * @param endSpacer the spacer to be included at the end of the stacks output
+     * @param endSpacer    the spacer to be included at the end of the stacks output
      * @return the new stack definition instance
      */
-    @NonNull
-    MetaStackDefinition createDefinition(@NonNull List<MetaStackElement> elements, @NonNull String startSpacer, @NonNull String middleSpacer, @NonNull String endSpacer);
+    @NonNull MetaStackDefinition createDefinition(@NonNull List<MetaStackElement> elements, @NonNull String startSpacer, @NonNull String middleSpacer, @NonNull String endSpacer);
 
 }

@@ -71,14 +71,13 @@ public interface UserManager {
      * <p>Unlike the method in {@link Storage}, when a user cannot be loaded,
      * the future will be {@link CompletableFuture completed exceptionally}.</p>
      *
-     * @param uuid the uuid of the user
+     * @param uuid     the uuid of the user
      * @param username the username, if known
      * @return the resultant user
      * @throws NullPointerException if the uuid is null
      * @since 4.1
      */
-    @NonNull
-    CompletableFuture<User> loadUser(@NonNull UUID uuid, @Nullable String username);
+    @NonNull CompletableFuture<User> loadUser(@NonNull UUID uuid, @Nullable String username);
 
     /**
      * Loads a user from the plugin's storage provider into memory.
@@ -110,8 +109,7 @@ public interface UserManager {
      * @throws IllegalArgumentException if the username is invalid
      * @since 4.2
      */
-    @NonNull
-    CompletableFuture<UUID> lookupUuid(@NonNull String username);
+    @NonNull CompletableFuture<UUID> lookupUuid(@NonNull String username);
 
     /**
      * Uses the LuckPerms cache to find a username for the given uuid.
@@ -122,8 +120,7 @@ public interface UserManager {
      * @throws IllegalArgumentException if the username is invalid
      * @since 4.2
      */
-    @NonNull
-    CompletableFuture<String> lookupUsername(@NonNull UUID uuid);
+    @NonNull CompletableFuture<String> lookupUsername(@NonNull UUID uuid);
 
     /**
      * Saves a user's data back to the plugin's storage provider.
@@ -142,8 +139,7 @@ public interface UserManager {
      * @throws IllegalStateException if the user instance was not obtained from LuckPerms.
      * @since 4.1
      */
-    @NonNull
-    CompletableFuture<Void> saveUser(@NonNull User user);
+    @NonNull CompletableFuture<Void> saveUser(@NonNull User user);
 
     /**
      * Saves data about a player to the uuid caching system.
@@ -155,8 +151,7 @@ public interface UserManager {
      * @throws IllegalArgumentException if the username is invalid
      * @since 4.2
      */
-    @NonNull
-    CompletableFuture<PlayerSaveResult> savePlayerData(@NonNull UUID uuid, @NonNull String username);
+    @NonNull CompletableFuture<PlayerSaveResult> savePlayerData(@NonNull UUID uuid, @NonNull String username);
 
     /**
      * Gets a set all "unique" user UUIDs.
@@ -166,8 +161,7 @@ public interface UserManager {
      * @return a set of uuids
      * @since 4.2
      */
-    @NonNull
-    CompletableFuture<Set<UUID>> getUniqueUsers();
+    @NonNull CompletableFuture<Set<UUID>> getUniqueUsers();
 
     /**
      * Searches for a list of users with a given permission.
@@ -177,8 +171,7 @@ public interface UserManager {
      * @throws NullPointerException if the permission is null
      * @since 4.2
      */
-    @NonNull
-    CompletableFuture<List<HeldPermission<UUID>>> getWithPermission(@NonNull String permission);
+    @NonNull CompletableFuture<List<HeldPermission<UUID>>> getWithPermission(@NonNull String permission);
 
     /**
      * Gets a loaded user.
@@ -187,8 +180,7 @@ public interface UserManager {
      * @return a {@link User} object, if one matching the uuid is loaded, or null if not
      * @throws NullPointerException if the uuid is null
      */
-    @Nullable
-    User getUser(@NonNull UUID uuid);
+    @Nullable User getUser(@NonNull UUID uuid);
 
     /**
      * Gets a loaded user.
@@ -208,8 +200,7 @@ public interface UserManager {
      * @return a {@link User} object, if one matching the uuid is loaded, or null if not
      * @throws NullPointerException if the name is null
      */
-    @Nullable
-    User getUser(@NonNull String name);
+    @Nullable User getUser(@NonNull String name);
 
     /**
      * Gets a loaded user.
@@ -227,8 +218,7 @@ public interface UserManager {
      *
      * @return a {@link Set} of {@link User} objects
      */
-    @NonNull
-    Set<User> getLoadedUsers();
+    @NonNull Set<User> getLoadedUsers();
 
     /**
      * Check if a user is loaded in memory

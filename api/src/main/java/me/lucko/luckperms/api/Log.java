@@ -47,8 +47,7 @@ public interface Log {
      *
      * @return the content
      */
-    @NonNull
-    SortedSet<LogEntry> getContent();
+    @NonNull SortedSet<LogEntry> getContent();
 
     /**
      * Gets the entries in the log performed by the given actor.
@@ -56,8 +55,7 @@ public interface Log {
      * @param actor the uuid of the actor to filter by
      * @return the content for the given actor
      */
-    @NonNull
-    SortedSet<LogEntry> getContent(@NonNull UUID actor);
+    @NonNull SortedSet<LogEntry> getContent(@NonNull UUID actor);
 
     /**
      * Gets the log content for a given user
@@ -65,8 +63,7 @@ public interface Log {
      * @param uuid the uuid to filter by
      * @return all content in this log where the user = uuid
      */
-    @NonNull
-    SortedSet<LogEntry> getUserHistory(@NonNull UUID uuid);
+    @NonNull SortedSet<LogEntry> getUserHistory(@NonNull UUID uuid);
 
     /**
      * Gets the log content for a given group
@@ -74,8 +71,7 @@ public interface Log {
      * @param name the name to filter by
      * @return all content in this log where the group = name
      */
-    @NonNull
-    SortedSet<LogEntry> getGroupHistory(@NonNull String name);
+    @NonNull SortedSet<LogEntry> getGroupHistory(@NonNull String name);
 
     /**
      * Gets the log content for a given track
@@ -83,7 +79,6 @@ public interface Log {
      * @param name the name to filter by
      * @return all content in this log where the track = name
      */
-    @NonNull
-    SortedSet<LogEntry> getTrackHistory(@NonNull String name);
+    @NonNull SortedSet<LogEntry> getTrackHistory(@NonNull String name);
 
 }

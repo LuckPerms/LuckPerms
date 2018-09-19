@@ -43,8 +43,6 @@ public interface GroupLoadEvent extends LuckPermsEvent {
      *
      * @return the group that was loaded
      */
-    @NonNull
-    @Param(0)
-    Group getGroup();
+    @NonNull @Param(0) Group getGroup();
 
 }

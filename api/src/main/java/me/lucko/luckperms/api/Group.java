@@ -43,8 +43,7 @@ public interface Group extends PermissionHolder {
      *
      * @return the name of the group
      */
-    @NonNull
-    String getName();
+    @NonNull String getName();
 
     /**
      * Gets the groups "display name", if it has one that differs from it's actual name.
@@ -57,8 +56,7 @@ public interface Group extends PermissionHolder {
      * @return the display name
      * @since 4.3
      */
-    @Nullable
-    String getDisplayName();
+    @Nullable String getDisplayName();
 
     /**
      * Gets the groups "display name", if it has one that differs from it's actual name.
@@ -70,8 +68,7 @@ public interface Group extends PermissionHolder {
      * @return the display name
      * @since 4.3
      */
-    @Nullable
-    String getDisplayName(@NonNull ContextSet contextSet);
+    @Nullable String getDisplayName(@NonNull ContextSet contextSet);
 
     /**
      * Gets the weight of this group, if present.
@@ -79,8 +76,7 @@ public interface Group extends PermissionHolder {
      * @return the group weight
      * @since 2.17
      */
-    @NonNull
-    OptionalInt getWeight();
+    @NonNull OptionalInt getWeight();
 
     /**
      * Gets the groups's {@link GroupData} cache.
@@ -88,8 +84,7 @@ public interface Group extends PermissionHolder {
      * @return the groups cached data.
      * @since 4.0
      */
-    @NonNull
     @Override
-    GroupData getCachedData();
+    @NonNull GroupData getCachedData();
 
 }

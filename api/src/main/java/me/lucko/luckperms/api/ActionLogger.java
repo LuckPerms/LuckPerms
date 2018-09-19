@@ -49,8 +49,7 @@ public interface ActionLogger {
      * @return a log instance
      * @see Storage#getLog()
      */
-    @NonNull
-    CompletableFuture<Log> getLog();
+    @NonNull CompletableFuture<Log> getLog();
 
     /**
      * Submits a log entry to the plugin to be handled.
@@ -68,8 +67,7 @@ public interface ActionLogger {
      * @param entry the entry to submit
      * @return a future which will complete when the action is done
      */
-    @NonNull
-    CompletableFuture<Void> submit(@NonNull LogEntry entry);
+    @NonNull CompletableFuture<Void> submit(@NonNull LogEntry entry);
 
     /**
      * Submits a log entry to the plugins storage handler.
@@ -79,8 +77,7 @@ public interface ActionLogger {
      * @param entry the entry to submit
      * @return a future which will complete when the action is done
      */
-    @NonNull
-    CompletableFuture<Void> submitToStorage(@NonNull LogEntry entry);
+    @NonNull CompletableFuture<Void> submitToStorage(@NonNull LogEntry entry);
 
     /**
      * Submits a log entry to the plugins log broadcasting handler.
@@ -91,7 +88,6 @@ public interface ActionLogger {
      * @param entry the entry to submit
      * @return a future which will complete when the action is done
      */
-    @NonNull
-    CompletableFuture<Void> broadcastAction(@NonNull LogEntry entry);
+    @NonNull CompletableFuture<Void> broadcastAction(@NonNull LogEntry entry);
 
 }

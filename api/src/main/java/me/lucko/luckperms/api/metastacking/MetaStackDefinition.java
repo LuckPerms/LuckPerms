@@ -47,31 +47,27 @@ public interface MetaStackDefinition {
      *
      * @return the elements in this stack
      */
-    @NonNull
-    List<MetaStackElement> getElements();
+    @NonNull List<MetaStackElement> getElements();
 
     /**
      * Gets the spacer string added before any stack elements
      *
      * @return the start spacer
      */
-    @NonNull
-    String getStartSpacer();
+    @NonNull String getStartSpacer();
 
     /**
      * Gets the spacer added between stack elements
      *
      * @return the middle spacer
      */
-    @NonNull
-    String getMiddleSpacer();
+    @NonNull String getMiddleSpacer();
 
     /**
      * Gets the spacer added after any stack elements
      *
      * @return the end spacer
      */
-    @NonNull
-    String getEndSpacer();
+    @NonNull String getEndSpacer();
 
 }

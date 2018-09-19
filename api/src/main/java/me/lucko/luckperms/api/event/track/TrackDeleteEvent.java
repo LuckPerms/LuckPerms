@@ -43,26 +43,20 @@ public interface TrackDeleteEvent extends LuckPermsEvent {
      *
      * @return the name of the deleted track
      */
-    @NonNull
-    @Param(0)
-    String getTrackName();
+    @NonNull @Param(0) String getTrackName();
 
     /**
      * Gets an immutable copy of the tracks existing data
      *
      * @return a copy of the tracks existing data
      */
-    @NonNull
-    @Param(1)
-    List<String> getExistingData();
+    @NonNull @Param(1) List<String> getExistingData();
 
     /**
      * Gets the cause of the deletion
      *
      * @return the cause of the deletion
      */
-    @NonNull
-    @Param(2)
-    DeletionCause getCause();
+    @NonNull @Param(2) DeletionCause getCause();
 
 }

@@ -78,9 +78,9 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
     /**
      * Creates an {@link ImmutableContextSet} from two context pairs.
      *
-     * @param key1 the first key
+     * @param key1   the first key
      * @param value1 the first value
-     * @param key2 the second key
+     * @param key2   the second key
      * @param value2 the second value
      * @return a new ImmutableContextSet containing the two pairs
      * @throws NullPointerException if any of the keys or values are null
@@ -163,8 +163,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      *
      * @return an immutable representation of this set
      */
-    @NonNull
-    ImmutableContextSet makeImmutable();
+    @NonNull ImmutableContextSet makeImmutable();
 
     /**
      * Creates a mutable copy of this {@link ContextSet}.
@@ -175,8 +174,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return a mutable ContextSet
      * @since 2.16
      */
-    @NonNull
-    MutableContextSet mutableCopy();
+    @NonNull MutableContextSet mutableCopy();
 
     /**
      * Returns a {@link Set} of {@link Map.Entry}s representing the current
@@ -187,8 +185,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      *
      * @return an immutable set
      */
-    @NonNull
-    Set<Map.Entry<String, String>> toSet();
+    @NonNull Set<Map.Entry<String, String>> toSet();
 
     /**
      * Returns a {@link Map} <b>loosely</b> representing the current state of
@@ -207,9 +204,8 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return an immutable map
      * @deprecated because the resultant map may not contain all data in the ContextSet
      */
-    @NonNull
     @Deprecated
-    Map<String, String> toMap();
+    @NonNull Map<String, String> toMap();
 
     /**
      * Returns a {@link Multimap} representing the current state of this
@@ -221,8 +217,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return a multimap
      * @since 2.16
      */
-    @NonNull
-    Multimap<String, String> toMultimap();
+    @NonNull Multimap<String, String> toMultimap();
 
     /**
      * Returns an {@link Iterator} over each of the context pairs in this set.
@@ -234,9 +229,8 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      *
      * @return an iterator
      */
-    @NonNull
     @Override
-    Iterator<Map.Entry<String, String>> iterator();
+    @NonNull Iterator<Map.Entry<String, String>> iterator();
 
     /**
      * Returns if the {@link ContextSet} contains at least one value for the
@@ -258,8 +252,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return a set of values
      * @throws NullPointerException if the key is null
      */
-    @NonNull
-    Set<String> getValues(@NonNull String key);
+    @NonNull Set<String> getValues(@NonNull String key);
 
     /**
      * Returns any value from this {@link ContextSet} matching the key, if present.

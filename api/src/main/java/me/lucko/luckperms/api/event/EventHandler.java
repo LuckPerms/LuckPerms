@@ -41,8 +41,7 @@ public interface EventHandler<T extends LuckPermsEvent> extends AutoCloseable {
      *
      * @return the event class
      */
-    @NonNull
-    Class<T> getEventClass();
+    @NonNull Class<T> getEventClass();
 
     /**
      * Returns true if this handler is active
@@ -63,8 +62,7 @@ public interface EventHandler<T extends LuckPermsEvent> extends AutoCloseable {
      *
      * @return the event consumer
      */
-    @NonNull
-    Consumer<? super T> getConsumer();
+    @NonNull Consumer<? super T> getConsumer();
 
     /**
      * Gets the number of times this handler has been called

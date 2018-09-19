@@ -42,7 +42,8 @@ public interface InheritanceType extends NodeType {
     /**
      * The key for this type.
      */
-    NodeTypeKey<InheritanceType> KEY = new NodeTypeKey<InheritanceType>(){};
+    NodeTypeKey<InheritanceType> KEY = new NodeTypeKey<InheritanceType>() {
+    };
 
     /**
      * Gets the name of the group to be inherited.
@@ -51,7 +52,6 @@ public interface InheritanceType extends NodeType {
      *
      * @return the name of the group
      */
-    @NonNull
-    String getGroupName();
+    @NonNull String getGroupName();
 
 }
