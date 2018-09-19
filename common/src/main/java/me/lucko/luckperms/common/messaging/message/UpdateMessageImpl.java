@@ -30,10 +30,10 @@ import com.google.gson.JsonElement;
 import me.lucko.luckperms.api.messenger.message.type.UpdateMessage;
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 
-import java.util.UUID;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.UUID;
 
 public class UpdateMessageImpl extends AbstractMessage implements UpdateMessage {
     public static final String TYPE = "update";
@@ -46,9 +46,8 @@ public class UpdateMessageImpl extends AbstractMessage implements UpdateMessage 
         super(id);
     }
 
-    @Nonnull
     @Override
-    public String asEncodedString() {
+    public @NonNull String asEncodedString() {
         return LuckPermsMessagingService.encodeMessageAsString(TYPE, getId(), null);
     }
 }

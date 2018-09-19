@@ -31,11 +31,10 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.permission.Subject;
-
-import javax.annotation.Nonnull;
 
 public class WorldCalculator implements ContextCalculator<Subject> {
     private final LuckPermsPlugin plugin;
@@ -44,9 +43,8 @@ public class WorldCalculator implements ContextCalculator<Subject> {
         this.plugin = plugin;
     }
 
-    @Nonnull
     @Override
-    public MutableContextSet giveApplicableContext(@Nonnull Subject subject, @Nonnull MutableContextSet accumulator) {
+    public @NonNull MutableContextSet giveApplicableContext(@NonNull Subject subject, @NonNull MutableContextSet accumulator) {
         CommandSource source = subject.getCommandSource().orElse(null);
         if (source == null || !(source instanceof Player)) {
             return accumulator;

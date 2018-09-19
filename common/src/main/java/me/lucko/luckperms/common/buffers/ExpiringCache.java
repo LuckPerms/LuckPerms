@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.common.buffers;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-
-import javax.annotation.Nonnull;
 
 /**
  * An expiring supplier extension.
@@ -50,8 +50,7 @@ public abstract class ExpiringCache<T> implements Supplier<T> {
         this.durationNanos = unit.toNanos(duration);
     }
 
-    @Nonnull
-    protected abstract T supply();
+    protected abstract @NonNull T supply();
 
     @Override
     public T get() {

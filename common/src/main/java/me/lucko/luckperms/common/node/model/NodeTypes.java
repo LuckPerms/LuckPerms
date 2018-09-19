@@ -41,15 +41,15 @@ import me.lucko.luckperms.common.buffers.Cache;
 import me.lucko.luckperms.common.node.factory.LegacyNodeFactory;
 import me.lucko.luckperms.common.utils.PatternCache;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public final class NodeTypes {
 
@@ -71,8 +71,7 @@ public final class NodeTypes {
     // used to split prefix/suffix/meta nodes
     private static final Splitter META_SPLITTER = Splitter.on(PatternCache.compileDelimiterPattern(".", "\\")).limit(2);
 
-    @Nonnull
-    public static Map<NodeTypeKey<?>, NodeType> parseTypes(String s) {
+    public static @NonNull Map<NodeTypeKey<?>, NodeType> parseTypes(String s) {
         Map<NodeTypeKey<?>, NodeType> results = new IdentityHashMap<>();
 
         NodeType type = parseInheritanceType(s);
@@ -117,8 +116,7 @@ public final class NodeTypes {
         return results;
     }
 
-    @Nullable
-    public static InheritanceType parseInheritanceType(String s) {
+    public static @Nullable InheritanceType parseInheritanceType(String s) {
         s = s.toLowerCase();
         if (!s.startsWith(GROUP_NODE_MARKER)) {
             return null;
@@ -128,8 +126,7 @@ public final class NodeTypes {
         return new Inheritance(groupName);
     }
 
-    @Nullable
-    public static MetaType parseMetaType(String s) {
+    public static @Nullable MetaType parseMetaType(String s) {
         if (!s.toLowerCase().startsWith(META_NODE_MARKER)) {
             return null;
         }
@@ -148,8 +145,7 @@ public final class NodeTypes {
         );
     }
 
-    @Nullable
-    public static PrefixType parsePrefixType(String s) {
+    public static @Nullable PrefixType parsePrefixType(String s) {
         if (!s.toLowerCase().startsWith(PREFIX_NODE_MARKER)) {
             return null;
         }
@@ -171,8 +167,7 @@ public final class NodeTypes {
         }
     }
 
-    @Nullable
-    public static SuffixType parseSuffixType(String s) {
+    public static @Nullable SuffixType parseSuffixType(String s) {
         if (!s.toLowerCase().startsWith(SUFFIX_NODE_MARKER)) {
             return null;
         }
@@ -194,8 +189,7 @@ public final class NodeTypes {
         }
     }
 
-    @Nullable
-    public static WeightType parseWeightType(String s) {
+    public static @Nullable WeightType parseWeightType(String s) {
         String lower = s.toLowerCase();
         if (!lower.startsWith(WEIGHT_NODE_MARKER)) {
             return null;
@@ -208,8 +202,7 @@ public final class NodeTypes {
         }
     }
 
-    @Nullable
-    public static DisplayNameType parseDisplayNameType(String s) {
+    public static @Nullable DisplayNameType parseDisplayNameType(String s) {
         if (!s.toLowerCase().startsWith(DISPLAY_NAME_NODE_MARKER)) {
             return null;
         }
@@ -217,8 +210,7 @@ public final class NodeTypes {
         return new DisplayName(s.substring(DISPLAY_NAME_NODE_MARKER.length()));
     }
 
-    @Nullable
-    public static RegexType parseRegexType(String s) {
+    public static @Nullable RegexType parseRegexType(String s) {
         if (!s.startsWith(REGEX_MARKER_1) && !s.startsWith(REGEX_MARKER_2)) {
             return null;
         }
@@ -233,9 +225,8 @@ public final class NodeTypes {
             this.groupName = groupName;
         }
 
-        @Nonnull
         @Override
-        public String getGroupName() {
+        public @NonNull String getGroupName() {
             return this.groupName;
         }
 
@@ -267,15 +258,13 @@ public final class NodeTypes {
             this.value = value;
         }
 
-        @Nonnull
         @Override
-        public String getKey() {
+        public @NonNull String getKey() {
             return this.key;
         }
 
-        @Nonnull
         @Override
-        public String getValue() {
+        public @NonNull String getValue() {
             return this.value;
         }
 
@@ -313,15 +302,13 @@ public final class NodeTypes {
             return this.priority;
         }
 
-        @Nonnull
         @Override
-        public String getPrefix() {
+        public @NonNull String getPrefix() {
             return this.prefix;
         }
 
-        @Nonnull
         @Override
-        public Map.Entry<Integer, String> getAsEntry() {
+        public Map.@NonNull Entry<Integer, String> getAsEntry() {
             return this;
         }
 
@@ -374,15 +361,13 @@ public final class NodeTypes {
             return this.priority;
         }
 
-        @Nonnull
         @Override
-        public String getSuffix() {
+        public @NonNull String getSuffix() {
             return this.suffix;
         }
 
-        @Nonnull
         @Override
-        public Map.Entry<Integer, String> getAsEntry() {
+        public Map.@NonNull Entry<Integer, String> getAsEntry() {
             return this;
         }
 
@@ -459,9 +444,8 @@ public final class NodeTypes {
             this.displayName = displayName;
         }
 
-        @Nonnull
         @Override
-        public String getDisplayName() {
+        public @NonNull String getDisplayName() {
             return this.displayName;
         }
 
@@ -491,21 +475,18 @@ public final class NodeTypes {
             this.patternString = patternString;
         }
 
-        @Nonnull
         @Override
-        protected PatternCache.CachedPattern supply() {
+        protected PatternCache.@NonNull CachedPattern supply() {
             return PatternCache.lookup(this.patternString);
         }
 
-        @Nonnull
         @Override
-        public String getPatternString() {
+        public @NonNull String getPatternString() {
             return this.patternString;
         }
 
-        @Nonnull
         @Override
-        public Optional<Pattern> getPattern() {
+        public @NonNull Optional<Pattern> getPattern() {
             return Optional.ofNullable(get().getPattern());
         }
 

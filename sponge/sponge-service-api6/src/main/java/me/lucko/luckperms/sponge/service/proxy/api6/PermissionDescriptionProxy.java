@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionDescription;
@@ -36,8 +37,6 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.text.Text;
 
 import java.util.Map;
-
-import javax.annotation.Nonnull;
 
 public final class PermissionDescriptionProxy implements PermissionDescription {
     private final LPPermissionService service;
@@ -48,27 +47,23 @@ public final class PermissionDescriptionProxy implements PermissionDescription {
         this.handle = handle;
     }
 
-    @Nonnull
     @Override
-    public String getId() {
+    public @NonNull String getId() {
         return this.handle.getId();
     }
 
-    @Nonnull
     @Override
-    public Text getDescription() {
+    public @NonNull Text getDescription() {
         return this.handle.getDescription().orElse(Text.EMPTY);
     }
 
-    @Nonnull
     @Override
-    public PluginContainer getOwner() {
+    public @NonNull PluginContainer getOwner() {
         return this.handle.getOwner().orElseGet(() -> Sponge.getGame().getPluginManager().fromInstance(this.service.getPlugin()).orElseThrow(() -> new RuntimeException("Unable to get LuckPerms instance.")));
     }
 
-    @Nonnull
     @Override
-    public Map<Subject, Boolean> getAssignedSubjects(@Nonnull String s) {
+    public @NonNull Map<Subject, Boolean> getAssignedSubjects(@NonNull String s) {
         return this.handle.getAssignedSubjects(s).entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         e -> new SubjectProxy(this.service, e.getKey().toReference()),

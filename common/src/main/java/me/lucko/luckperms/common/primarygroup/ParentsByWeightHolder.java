@@ -30,20 +30,19 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
-
-import javax.annotation.Nonnull;
 
 public class ParentsByWeightHolder extends ContextualHolder {
     public ParentsByWeightHolder(User user) {
         super(user);
     }
 
-    @Nonnull
     @Override
-    protected Optional<String> calculateValue(Contexts contexts) {
+    protected @NonNull Optional<String> calculateValue(Contexts contexts) {
         Set<Group> groups = new LinkedHashSet<>();
         for (Node node : this.user.getOwnGroupNodes(contexts.getContexts())) {
             Group group = this.user.getPlugin().getGroupManager().getIfLoaded(node.getGroupName());

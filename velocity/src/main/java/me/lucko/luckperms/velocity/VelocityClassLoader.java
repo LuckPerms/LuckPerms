@@ -38,6 +38,6 @@ public class VelocityClassLoader implements PluginClassLoader {
 
     @Override
     public void loadJar(Path file) {
-        this.bootstrap.getProxy().getPluginManager().addToClasspath(bootstrap, file);
+        this.bootstrap.getProxy().getPluginManager().addToClasspath(this.bootstrap, file);
     }
 }

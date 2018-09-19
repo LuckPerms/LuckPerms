@@ -40,7 +40,7 @@ import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * An implementation of {@link Messenger} using the plugin messaging channels.
@@ -67,7 +67,7 @@ public class PluginMessageMessenger implements Messenger, Listener {
     }
 
     @Override
-    public void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage) {
+    public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF(outgoingMessage.asEncodedString());
 

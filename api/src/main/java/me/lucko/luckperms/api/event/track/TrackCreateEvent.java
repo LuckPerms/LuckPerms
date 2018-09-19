@@ -30,7 +30,7 @@ import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a track is created
@@ -42,7 +42,7 @@ public interface TrackCreateEvent extends LuckPermsEvent {
      *
      * @return the new track
      */
-    @Nonnull
+    @NonNull
     @Param(0)
     Track getTrack();
 
@@ -51,7 +51,7 @@ public interface TrackCreateEvent extends LuckPermsEvent {
      *
      * @return the cause of the creation
      */
-    @Nonnull
+    @NonNull
     @Param(1)
     CreationCause getCause();
 

@@ -28,10 +28,10 @@ package me.lucko.luckperms.common.event.model;
 import me.lucko.luckperms.api.Entity;
 import me.lucko.luckperms.common.sender.Sender;
 
-import java.util.UUID;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.UUID;
 
 public class SenderEntity implements Entity {
     private final Sender sender;
@@ -40,24 +40,21 @@ public class SenderEntity implements Entity {
         this.sender = sender;
     }
 
-    @Nullable
     @Override
-    public UUID getUniqueId() {
+    public @Nullable UUID getUniqueId() {
         if (this.sender.isConsole()) {
             return null;
         }
         return this.sender.getUuid();
     }
 
-    @Nonnull
     @Override
-    public String getName() {
+    public @NonNull String getName() {
         return this.sender.getName();
     }
 
-    @Nonnull
     @Override
-    public Type getType() {
+    public @NonNull Type getType() {
         if (this.sender.isConsole()) {
             return Type.CONSOLE;
         } else {

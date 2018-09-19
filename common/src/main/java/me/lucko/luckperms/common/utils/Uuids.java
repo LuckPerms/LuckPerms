@@ -25,12 +25,12 @@
 
 package me.lucko.luckperms.common.utils;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-
-import javax.annotation.Nullable;
 
 /**
  * Utilities for working with {@link UUID}s.
@@ -40,8 +40,7 @@ public final class Uuids {
 
     public static final Predicate<String> PREDICATE = s -> parseNullable(s) != null;
 
-    @Nullable
-    public static UUID fromString(String s) {
+    public static @Nullable UUID fromString(String s) {
         try {
             return UUID.fromString(s);
         } catch (IllegalArgumentException e) {
@@ -49,8 +48,7 @@ public final class Uuids {
         }
     }
 
-    @Nullable
-    public static UUID parseNullable(String s) {
+    public static @Nullable UUID parseNullable(String s) {
         UUID uuid = fromString(s);
         if (uuid == null) {
             uuid = fromString(UUID_PATTERN.matcher(s).replaceAll("$1-$2-$3-$4-$5"));

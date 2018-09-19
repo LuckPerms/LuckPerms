@@ -28,7 +28,7 @@ package me.lucko.luckperms.api.event.node;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.Param;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a node is added to a holder
@@ -40,7 +40,7 @@ public interface NodeAddEvent extends NodeMutateEvent {
      *
      * @return the node that was added
      */
-    @Nonnull
+    @NonNull
     @Param(3)
     Node getNode();
 

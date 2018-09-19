@@ -29,11 +29,10 @@ import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 
-import java.util.Map;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
+import java.util.Map;
 
 /**
  * Represents an element within a {@link MetaStackDefinition}.
@@ -42,7 +41,6 @@ import javax.annotation.concurrent.Immutable;
  *
  * @since 3.2
  */
-@Immutable
 public interface MetaStackElement {
 
     /**
@@ -55,6 +53,6 @@ public interface MetaStackElement {
      * @param current the current value being used. If this returns true, the current value will be replaced by this entry
      * @return true if the node should be accumulated into this element, replacing the current value
      */
-    boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, @Nullable Map.Entry<Integer, String> current);
+    boolean shouldAccumulate(@NonNull LocalizedNode node, @NonNull ChatMetaType type, Map.@Nullable Entry<Integer, String> current);
 
 }

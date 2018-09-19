@@ -25,10 +25,9 @@
 
 package me.lucko.luckperms.api.metastacking;
 
-import java.util.List;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import java.util.List;
 
 /**
  * Represents a meta stack model, consisting of a chain of elements, separated by spacers.
@@ -41,7 +40,6 @@ import javax.annotation.concurrent.Immutable;
  *
  * @since 2.3
  */
-@Immutable
 public interface MetaStackDefinition {
 
     /**
@@ -49,7 +47,7 @@ public interface MetaStackDefinition {
      *
      * @return the elements in this stack
      */
-    @Nonnull
+    @NonNull
     List<MetaStackElement> getElements();
 
     /**
@@ -57,7 +55,7 @@ public interface MetaStackDefinition {
      *
      * @return the start spacer
      */
-    @Nonnull
+    @NonNull
     String getStartSpacer();
 
     /**
@@ -65,7 +63,7 @@ public interface MetaStackDefinition {
      *
      * @return the middle spacer
      */
-    @Nonnull
+    @NonNull
     String getMiddleSpacer();
 
     /**
@@ -73,7 +71,7 @@ public interface MetaStackDefinition {
      *
      * @return the end spacer
      */
-    @Nonnull
+    @NonNull
     String getEndSpacer();
 
 }

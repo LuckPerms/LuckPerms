@@ -28,9 +28,9 @@ package me.lucko.luckperms.common.messaging.message;
 import me.lucko.luckperms.api.messenger.message.Message;
 import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
 
-import java.util.UUID;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.UUID;
 
 public abstract class AbstractMessage implements Message, OutgoingMessage {
     private final UUID id;
@@ -39,9 +39,8 @@ public abstract class AbstractMessage implements Message, OutgoingMessage {
         this.id = id;
     }
 
-    @Nonnull
     @Override
-    public UUID getId() {
+    public @NonNull UUID getId() {
         return this.id;
     }
 

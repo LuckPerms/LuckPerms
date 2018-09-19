@@ -32,9 +32,9 @@ import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.model.Identifiable;
 
-import java.util.Map;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.Map;
 
 /**
  * An abstract manager class
@@ -48,12 +48,12 @@ public abstract class AbstractManager<I, C extends Identifiable<I>, T extends C>
     private final LoadingCache<I, T> objects = Caffeine.newBuilder()
             .build(new CacheLoader<I, T>() {
                 @Override
-                public T load(@Nonnull I i) {
+                public T load(@NonNull I i) {
                     return apply(i);
                 }
 
                 @Override
-                public T reload(@Nonnull I i, @Nonnull T t) {
+                public T reload(@NonNull I i, @NonNull T t) {
                     return t; // Never needs to be refreshed.
                 }
             });

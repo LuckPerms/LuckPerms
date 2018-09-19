@@ -33,14 +33,14 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
 
 public abstract class MainCommand<T, I> extends Command<Void, T> {
 
@@ -189,9 +189,8 @@ public abstract class MainCommand<T, I> extends Command<Void, T> {
         return getChildren().get().stream().anyMatch(sc -> sc.isAuthorized(sender));
     }
 
-    @Nonnull
     @Override
-    public Optional<List<Command<T, ?>>> getChildren() {
+    public @NonNull Optional<List<Command<T, ?>>> getChildren() {
         return super.getChildren();
     }
 }

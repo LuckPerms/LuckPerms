@@ -27,11 +27,11 @@ package me.lucko.luckperms.common.treeview;
 
 import com.google.common.collect.Maps;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.Nullable;
 
 /**
  * Represents one "branch" or "level" of the node tree
@@ -86,8 +86,7 @@ public class TreeNode {
         return this.children;
     }
 
-    @Nullable
-    public TreeNode tryInsert(String s) {
+    public @Nullable TreeNode tryInsert(String s) {
         Map<String, TreeNode> childMap = getChildMap();
         if (!allowInsert(this)) {
             return null;

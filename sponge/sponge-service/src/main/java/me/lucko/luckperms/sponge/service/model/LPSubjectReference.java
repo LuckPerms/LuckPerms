@@ -25,18 +25,17 @@
 
 package me.lucko.luckperms.sponge.service.model;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.permission.SubjectReference;
 
 import java.util.concurrent.CompletableFuture;
-
-import javax.annotation.Nonnull;
 
 /**
  * LuckPerms model for the Sponge {@link SubjectReference}
  */
 public interface LPSubjectReference extends SubjectReference {
 
-    @Nonnull
+    @NonNull
     CompletableFuture<LPSubject> resolveLp();
 
 }

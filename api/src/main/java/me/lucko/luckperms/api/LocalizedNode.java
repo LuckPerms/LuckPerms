@@ -25,8 +25,7 @@
 
 package me.lucko.luckperms.api;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * An extension of {@link Node}, providing information about
@@ -34,7 +33,6 @@ import javax.annotation.concurrent.Immutable;
  *
  * @since 2.11
  */
-@Immutable
 public interface LocalizedNode extends Node {
 
     /**
@@ -44,7 +42,7 @@ public interface LocalizedNode extends Node {
      *
      * @return the node this instance is representing
      */
-    @Nonnull
+    @NonNull
     Node getNode();
 
     /**
@@ -58,7 +56,7 @@ public interface LocalizedNode extends Node {
      *
      * @return where the node was inherited from.
      */
-    @Nonnull
+    @NonNull
     String getLocation();
 
 }

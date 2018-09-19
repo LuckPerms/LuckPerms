@@ -46,7 +46,7 @@ public class HttpClient {
 
     private static OkHttpClient client = null;
 
-    private synchronized static OkHttpClient getClient() {
+    private static synchronized OkHttpClient getClient() {
         if (client == null) {
             client = new OkHttpClient.Builder()
                     .proxySelector(new NullSafeProxySelector())

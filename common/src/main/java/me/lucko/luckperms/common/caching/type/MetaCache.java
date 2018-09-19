@@ -36,11 +36,11 @@ import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.MetaStack;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
-
-import javax.annotation.Nonnull;
 
 /**
  * Holds cached meta for a given context
@@ -100,51 +100,43 @@ public class MetaCache implements MetaData {
         return suffixStack == null ? null : suffixStack.toFormattedString();
     }
 
-    @Nonnull
     @Override
-    public MetaStackDefinition getPrefixStackDefinition() {
+    public @NonNull MetaStackDefinition getPrefixStackDefinition() {
         return this.prefixStack.getDefinition();
     }
 
-    @Nonnull
     @Override
-    public MetaStackDefinition getSuffixStackDefinition() {
+    public @NonNull MetaStackDefinition getSuffixStackDefinition() {
         return this.suffixStack.getDefinition();
     }
 
-    @Nonnull
     @Override
-    public Contexts getContexts() {
+    public @NonNull Contexts getContexts() {
         return this.metaContexts.getContexts();
     }
 
-    @Nonnull
     @Override
-    public MetaContexts getMetaContexts() {
+    public @NonNull MetaContexts getMetaContexts() {
         return this.metaContexts;
     }
 
-    @Nonnull
     @Override
-    public ListMultimap<String, String> getMetaMultimap() {
+    public @NonNull ListMultimap<String, String> getMetaMultimap() {
         return this.metaMultimap;
     }
 
-    @Nonnull
     @Override
-    public Map<String, String> getMeta() {
+    public @NonNull Map<String, String> getMeta() {
         return this.meta;
     }
 
-    @Nonnull
     @Override
-    public SortedMap<Integer, String> getPrefixes() {
+    public @NonNull SortedMap<Integer, String> getPrefixes() {
         return this.prefixes;
     }
 
-    @Nonnull
     @Override
-    public SortedMap<Integer, String> getSuffixes() {
+    public @NonNull SortedMap<Integer, String> getSuffixes() {
         return this.suffixes;
     }
 

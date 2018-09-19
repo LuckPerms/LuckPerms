@@ -41,6 +41,7 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -51,8 +52,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.Nonnull;
 
 /**
  * PermissibleBase for LuckPerms.
@@ -361,7 +360,7 @@ public class LPPermissible extends PermissibleBase {
         }
 
         @Override
-        public boolean addAll(@Nonnull Collection<? extends PermissionAttachment> c) {
+        public boolean addAll(@NonNull Collection<? extends PermissionAttachment> c) {
             boolean modified = false;
             for (PermissionAttachment e : c) {
                 if (add(e)) {
@@ -387,31 +386,31 @@ public class LPPermissible extends PermissibleBase {
             return ImmutableList.<PermissionAttachment>copyOf(LPPermissible.this.lpAttachments).listIterator();
         }
 
-        @Nonnull
         @Override
-        public Object[] toArray() {
+        public @NonNull Object[] toArray() {
             return ImmutableList.<PermissionAttachment>copyOf(LPPermissible.this.lpAttachments).toArray();
         }
 
-        @Nonnull
         @Override
-        public <T> T[] toArray(@Nonnull T[] a) {
+        public @NonNull <T> T[] toArray(@NonNull T[] a) {
             return ImmutableList.<PermissionAttachment>copyOf(LPPermissible.this.lpAttachments).toArray(a);
         }
 
         @Override public int size() { throw new UnsupportedOperationException(); }
         @Override public boolean isEmpty() { throw new UnsupportedOperationException(); }
-        @Override public boolean containsAll(@Nonnull Collection<?> c) { throw new UnsupportedOperationException(); }
-        @Override public boolean addAll(int index, @Nonnull Collection<? extends PermissionAttachment> c) { throw new UnsupportedOperationException(); }
-        @Override public boolean removeAll(@Nonnull Collection<?> c) { throw new UnsupportedOperationException(); }
-        @Override public boolean retainAll(@Nonnull Collection<?> c) { throw new UnsupportedOperationException(); }
+        @Override public boolean containsAll(@NonNull Collection<?> c) { throw new UnsupportedOperationException(); }
+        @Override public boolean addAll(int index, @NonNull Collection<? extends PermissionAttachment> c) { throw new UnsupportedOperationException(); }
+        @Override public boolean removeAll(@NonNull Collection<?> c) { throw new UnsupportedOperationException(); }
+        @Override public boolean retainAll(@NonNull Collection<?> c) { throw new UnsupportedOperationException(); }
         @Override public PermissionAttachment get(int index) { throw new UnsupportedOperationException(); }
         @Override public PermissionAttachment set(int index, PermissionAttachment element) { throw new UnsupportedOperationException(); }
         @Override public void add(int index, PermissionAttachment element) { throw new UnsupportedOperationException(); }
         @Override public PermissionAttachment remove(int index) { throw new UnsupportedOperationException(); }
         @Override public int indexOf(Object o) { throw new UnsupportedOperationException(); }
         @Override public int lastIndexOf(Object o) { throw new UnsupportedOperationException(); }
-        @Nonnull @Override public ListIterator<PermissionAttachment> listIterator(int index) { throw new UnsupportedOperationException(); }
-        @Nonnull @Override public List<PermissionAttachment> subList(int fromIndex, int toIndex) { throw new UnsupportedOperationException(); }
+        @Override
+        public @NonNull ListIterator<PermissionAttachment> listIterator(int index) { throw new UnsupportedOperationException(); }
+        @Override
+        public @NonNull List<PermissionAttachment> subList(int fromIndex, int toIndex) { throw new UnsupportedOperationException(); }
     }
 }

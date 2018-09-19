@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.api.event;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Represents an event that can be cancelled
@@ -39,7 +39,7 @@ public interface Cancellable {
      *
      * @return the cancellation
      */
-    @Nonnull
+    @NonNull
     @Param(-1)
     AtomicBoolean getCancellationState();
 

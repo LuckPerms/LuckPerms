@@ -32,10 +32,10 @@ import me.lucko.luckperms.api.messenger.message.type.LogMessage;
 import me.lucko.luckperms.common.actionlog.LogEntryJsonSerializer;
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 
-import java.util.UUID;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.UUID;
 
 public class LogMessageImpl extends AbstractMessage implements LogMessage {
     public static final String TYPE = "log";
@@ -55,17 +55,15 @@ public class LogMessageImpl extends AbstractMessage implements LogMessage {
         this.logEntry = logEntry;
     }
 
-    @Nonnull
     @Override
-    public LogEntry getLogEntry() {
+    public @NonNull LogEntry getLogEntry() {
         return this.logEntry;
     }
 
-    @Nonnull
     @Override
-    public String asEncodedString() {
+    public @NonNull String asEncodedString() {
         return LuckPermsMessagingService.encodeMessageAsString(
-                TYPE, getId(), LogEntryJsonSerializer.serialize(logEntry)
+                TYPE, getId(), LogEntryJsonSerializer.serialize(this.logEntry)
         );
     }
 

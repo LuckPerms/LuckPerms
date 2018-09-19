@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.Subject;
@@ -39,8 +40,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import javax.annotation.Nonnull;
-
 public final class PermissionDescriptionProxy implements PermissionDescription {
     private final LPPermissionService service;
     private final LPPermissionDescription handle;
@@ -50,27 +49,23 @@ public final class PermissionDescriptionProxy implements PermissionDescription {
         this.handle = handle;
     }
 
-    @Nonnull
     @Override
-    public String getId() {
+    public @NonNull String getId() {
         return this.handle.getId();
     }
 
-    @Nonnull
     @Override
-    public Optional<Text> getDescription() {
+    public @NonNull Optional<Text> getDescription() {
         return this.handle.getDescription();
     }
 
-    @Nonnull
     @Override
-    public Optional<PluginContainer> getOwner() {
+    public @NonNull Optional<PluginContainer> getOwner() {
         return this.handle.getOwner();
     }
 
-    @Nonnull
     @Override
-    public Map<Subject, Boolean> getAssignedSubjects(@Nonnull String s) {
+    public @NonNull Map<Subject, Boolean> getAssignedSubjects(@NonNull String s) {
         return this.handle.getAssignedSubjects(s).entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         e -> new SubjectProxy(this.service, e.getKey().toReference()),
@@ -78,10 +73,9 @@ public final class PermissionDescriptionProxy implements PermissionDescription {
                 ));
     }
 
-    @Nonnull
-    @SuppressWarnings("unchecked")
     @Override
-    public CompletableFuture<Map<SubjectReference, Boolean>> findAssignedSubjects(@Nonnull String s) {
+    @SuppressWarnings("unchecked")
+    public @NonNull CompletableFuture<Map<SubjectReference, Boolean>> findAssignedSubjects(@NonNull String s) {
         return (CompletableFuture) this.handle.findAssignedSubjects(s);
     }
 

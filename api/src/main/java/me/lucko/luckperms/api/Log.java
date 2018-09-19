@@ -25,11 +25,10 @@
 
 package me.lucko.luckperms.api;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.SortedSet;
 import java.util.UUID;
-
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
 
 /**
  * Represents the internal LuckPerms log.
@@ -41,7 +40,6 @@ import javax.annotation.concurrent.Immutable;
  *
  * <p>All methods are thread safe, and return immutable and thread safe collections.</p>
  */
-@Immutable
 public interface Log {
 
     /**
@@ -49,7 +47,7 @@ public interface Log {
      *
      * @return the content
      */
-    @Nonnull
+    @NonNull
     SortedSet<LogEntry> getContent();
 
     /**
@@ -58,8 +56,8 @@ public interface Log {
      * @param actor the uuid of the actor to filter by
      * @return the content for the given actor
      */
-    @Nonnull
-    SortedSet<LogEntry> getContent(@Nonnull UUID actor);
+    @NonNull
+    SortedSet<LogEntry> getContent(@NonNull UUID actor);
 
     /**
      * Gets the log content for a given user
@@ -67,8 +65,8 @@ public interface Log {
      * @param uuid the uuid to filter by
      * @return all content in this log where the user = uuid
      */
-    @Nonnull
-    SortedSet<LogEntry> getUserHistory(@Nonnull UUID uuid);
+    @NonNull
+    SortedSet<LogEntry> getUserHistory(@NonNull UUID uuid);
 
     /**
      * Gets the log content for a given group
@@ -76,8 +74,8 @@ public interface Log {
      * @param name the name to filter by
      * @return all content in this log where the group = name
      */
-    @Nonnull
-    SortedSet<LogEntry> getGroupHistory(@Nonnull String name);
+    @NonNull
+    SortedSet<LogEntry> getGroupHistory(@NonNull String name);
 
     /**
      * Gets the log content for a given track
@@ -85,7 +83,7 @@ public interface Log {
      * @param name the name to filter by
      * @return all content in this log where the track = name
      */
-    @Nonnull
-    SortedSet<LogEntry> getTrackHistory(@Nonnull String name);
+    @NonNull
+    SortedSet<LogEntry> getTrackHistory(@NonNull String name);
 
 }

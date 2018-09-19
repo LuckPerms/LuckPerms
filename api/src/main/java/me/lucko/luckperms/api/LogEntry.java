@@ -25,19 +25,17 @@
 
 package me.lucko.luckperms.api;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
 
 /**
  * Represents a logged action.
  *
  * @see ActionLogger#newEntryBuilder() for creating an instance
  */
-@Immutable
 public interface LogEntry extends Comparable<LogEntry> {
 
     /**
@@ -54,7 +52,7 @@ public interface LogEntry extends Comparable<LogEntry> {
      *
      * @return the actor id
      */
-    @Nonnull
+    @NonNull
     UUID getActor();
 
     /**
@@ -62,7 +60,7 @@ public interface LogEntry extends Comparable<LogEntry> {
      *
      * @return the name of the actor
      */
-    @Nonnull
+    @NonNull
     String getActorName();
 
     /**
@@ -70,7 +68,7 @@ public interface LogEntry extends Comparable<LogEntry> {
      *
      * @return the action type
      */
-    @Nonnull
+    @NonNull
     Type getType();
 
     /**
@@ -80,7 +78,7 @@ public interface LogEntry extends Comparable<LogEntry> {
      *
      * @return the uuid of acted object
      */
-    @Nonnull
+    @NonNull
     Optional<UUID> getActed();
 
     /**
@@ -88,7 +86,7 @@ public interface LogEntry extends Comparable<LogEntry> {
      *
      * @return the name of the acted object
      */
-    @Nonnull
+    @NonNull
     String getActedName();
 
     /**
@@ -99,7 +97,7 @@ public interface LogEntry extends Comparable<LogEntry> {
      *
      * @return the action
      */
-    @Nonnull
+    @NonNull
     String getAction();
 
     /**
@@ -122,8 +120,7 @@ public interface LogEntry extends Comparable<LogEntry> {
             return this.code;
         }
 
-        @Nonnull
-        public static Type valueOf(char code) {
+        public static @NonNull Type valueOf(char code) {
             switch (code) {
                 case 'U':
                 case 'u':
@@ -152,7 +149,7 @@ public interface LogEntry extends Comparable<LogEntry> {
          * @return the builder
          * @see LogEntry#getTimestamp()
          */
-        @Nonnull
+        @NonNull
         Builder setTimestamp(long timestamp);
 
         /**
@@ -162,8 +159,8 @@ public interface LogEntry extends Comparable<LogEntry> {
          * @return the builder
          * @see LogEntry#getActor()
          */
-        @Nonnull
-        Builder setActor(@Nonnull UUID actor);
+        @NonNull
+        Builder setActor(@NonNull UUID actor);
 
         /**
          * Sets the actor name of the entry.
@@ -172,8 +169,8 @@ public interface LogEntry extends Comparable<LogEntry> {
          * @return the builder
          * @see LogEntry#getActorName()
          */
-        @Nonnull
-        Builder setActorName(@Nonnull String actorName);
+        @NonNull
+        Builder setActorName(@NonNull String actorName);
 
         /**
          * Sets the type of the entry.
@@ -182,8 +179,8 @@ public interface LogEntry extends Comparable<LogEntry> {
          * @return the builder
          * @see LogEntry#getType()
          */
-        @Nonnull
-        Builder setType(@Nonnull Type type);
+        @NonNull
+        Builder setType(@NonNull Type type);
 
         /**
          * Sets the acted object for the entry.
@@ -192,7 +189,7 @@ public interface LogEntry extends Comparable<LogEntry> {
          * @return the builder
          * @see LogEntry#getActed()
          */
-        @Nonnull
+        @NonNull
         Builder setActed(@Nullable UUID acted);
 
         /**
@@ -202,8 +199,8 @@ public interface LogEntry extends Comparable<LogEntry> {
          * @return the builder
          * @see LogEntry#getActedName()
          */
-        @Nonnull
-        Builder setActedName(@Nonnull String actedName);
+        @NonNull
+        Builder setActedName(@NonNull String actedName);
 
         /**
          * Sets the action of the entry.
@@ -212,15 +209,15 @@ public interface LogEntry extends Comparable<LogEntry> {
          * @return the builder
          * @see LogEntry#getAction()
          */
-        @Nonnull
-        Builder setAction(@Nonnull String action);
+        @NonNull
+        Builder setAction(@NonNull String action);
 
         /**
          * Creates a {@link LogEntry} instance from the builder.
          *
          * @return a new log entry instance
          */
-        @Nonnull
+        @NonNull
         LogEntry build();
 
     }

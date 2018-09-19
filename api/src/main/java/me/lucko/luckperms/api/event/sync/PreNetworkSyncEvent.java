@@ -29,9 +29,9 @@ import me.lucko.luckperms.api.event.Cancellable;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
 
-import java.util.UUID;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.UUID;
 
 /**
  * Called before a received network sync task runs
@@ -43,7 +43,7 @@ public interface PreNetworkSyncEvent extends LuckPermsEvent, Cancellable {
      *
      * @return the id of the sync request
      */
-    @Nonnull
+    @NonNull
     @Param(0)
     UUID getSyncId();
 

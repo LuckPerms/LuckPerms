@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.api;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents three different states of a setting.
@@ -61,8 +61,7 @@ public enum Tristate {
      * @param val the boolean value
      * @return {@link #TRUE} or {@link #FALSE}, if the value is <code>true</code> or <code>false</code>, respectively.
      */
-    @Nonnull
-    public static Tristate fromBoolean(boolean val) {
+    public static @NonNull Tristate fromBoolean(boolean val) {
         return val ? TRUE : FALSE;
     }
 
@@ -77,8 +76,7 @@ public enum Tristate {
      *         is <code>null</code>, <code>true</code> or <code>false</code>, respectively.
      * @since 4.1
      */
-    @Nonnull
-    public static Tristate fromNullableBoolean(Boolean val) {
+    public static @NonNull Tristate fromNullableBoolean(Boolean val) {
         return val == null ? UNDEFINED : val ? TRUE : FALSE;
     }
 

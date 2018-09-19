@@ -29,10 +29,10 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.nodetype.NodeType;
 import me.lucko.luckperms.api.nodetype.NodeTypeKey;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Optional;
 import java.util.regex.Pattern;
-
-import javax.annotation.Nonnull;
 
 /**
  * A sub-type of {@link Node} used to store regex permissions.
@@ -51,7 +51,7 @@ public interface RegexType extends NodeType {
      *
      * @return the pattern string
      */
-    @Nonnull
+    @NonNull
     String getPatternString();
 
     /**
@@ -61,7 +61,7 @@ public interface RegexType extends NodeType {
      *
      * @return the pattern
      */
-    @Nonnull
+    @NonNull
     Optional<Pattern> getPattern();
 
 }

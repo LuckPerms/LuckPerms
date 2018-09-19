@@ -29,11 +29,11 @@ import com.google.common.collect.ListMultimap;
 
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Map;
 import java.util.SortedMap;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Holds cached meta lookup data for a specific set of contexts.
@@ -47,7 +47,7 @@ public interface MetaData extends CachedDataContainer {
      *
      * @return the contexts this container is caching
      */
-    @Nonnull
+    @NonNull
     MetaContexts getMetaContexts();
 
     /**
@@ -62,7 +62,7 @@ public interface MetaData extends CachedDataContainer {
      * @return an immutable multimap of meta
      * @since 3.3
      */
-    @Nonnull
+    @NonNull
     ListMultimap<String, String> getMetaMultimap();
 
     /**
@@ -73,7 +73,7 @@ public interface MetaData extends CachedDataContainer {
      *
      * @return an immutable map of meta
      */
-    @Nonnull
+    @NonNull
     Map<String, String> getMeta();
 
     /**
@@ -82,7 +82,7 @@ public interface MetaData extends CachedDataContainer {
      *
      * @return a sorted map of prefixes
      */
-    @Nonnull
+    @NonNull
     SortedMap<Integer, String> getPrefixes();
 
     /**
@@ -91,7 +91,7 @@ public interface MetaData extends CachedDataContainer {
      *
      * @return a sorted map of suffixes
      */
-    @Nonnull
+    @NonNull
     SortedMap<Integer, String> getSuffixes();
 
     /**
@@ -116,7 +116,7 @@ public interface MetaData extends CachedDataContainer {
      * @return the definition used for the prefix stack
      * @since 3.2
      */
-    @Nonnull
+    @NonNull
     MetaStackDefinition getPrefixStackDefinition();
 
     /**
@@ -125,7 +125,7 @@ public interface MetaData extends CachedDataContainer {
      * @return the definition used for the suffix stack
      * @since 3.2
      */
-    @Nonnull
+    @NonNull
     MetaStackDefinition getSuffixStackDefinition();
 
 }

@@ -32,9 +32,9 @@ import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.api.delegates.model.ApiLog;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import java.util.concurrent.CompletableFuture;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.concurrent.CompletableFuture;
 
 public class ApiActionLogger implements ActionLogger {
     private final LuckPermsPlugin plugin;
@@ -43,33 +43,28 @@ public class ApiActionLogger implements ActionLogger {
         this.plugin = plugin;
     }
 
-    @Nonnull
     @Override
-    public LogEntry.Builder newEntryBuilder() {
+    public LogEntry.@NonNull Builder newEntryBuilder() {
         return ExtendedLogEntry.build();
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<Log> getLog() {
+    public @NonNull CompletableFuture<Log> getLog() {
         return this.plugin.getStorage().getLog().thenApply(ApiLog::new);
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<Void> submit(@Nonnull LogEntry entry) {
+    public @NonNull CompletableFuture<Void> submit(@NonNull LogEntry entry) {
         return CompletableFuture.runAsync(() -> this.plugin.getLogDispatcher().dispatchFromApi((ExtendedLogEntry) entry), this.plugin.getBootstrap().getScheduler().async());
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<Void> submitToStorage(@Nonnull LogEntry entry) {
+    public @NonNull CompletableFuture<Void> submitToStorage(@NonNull LogEntry entry) {
         return this.plugin.getStorage().logAction(entry);
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<Void> broadcastAction(@Nonnull LogEntry entry) {
+    public @NonNull CompletableFuture<Void> broadcastAction(@NonNull LogEntry entry) {
         return CompletableFuture.runAsync(() -> this.plugin.getLogDispatcher().broadcastFromApi((ExtendedLogEntry) entry), this.plugin.getBootstrap().getScheduler().async());
     }
 }

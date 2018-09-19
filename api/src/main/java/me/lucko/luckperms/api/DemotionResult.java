@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.api;
 
-import java.util.Optional;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.Optional;
 
 /**
  * Encapsulates the result of {@link User}s demotion along a {@link Track}.
@@ -41,7 +41,7 @@ public interface DemotionResult extends MutateResult {
      *
      * @return the status
      */
-    @Nonnull
+    @NonNull
     Status getStatus();
 
     @Override
@@ -60,7 +60,7 @@ public interface DemotionResult extends MutateResult {
      *
      * @return the group the user was demoted from.
      */
-    @Nonnull
+    @NonNull
     Optional<String> getGroupFrom();
 
     /**
@@ -71,7 +71,7 @@ public interface DemotionResult extends MutateResult {
      *
      * @return the group the user was demoted to.
      */
-    @Nonnull
+    @NonNull
     Optional<String> getGroupTo();
 
     /**

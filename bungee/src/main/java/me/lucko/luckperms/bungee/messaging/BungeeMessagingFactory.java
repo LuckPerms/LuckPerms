@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BungeeMessagingFactory extends MessagingFactory<LPBungeePlugin> {
     public BungeeMessagingFactory(LPBungeePlugin plugin) {
@@ -65,15 +65,13 @@ public class BungeeMessagingFactory extends MessagingFactory<LPBungeePlugin> {
 
     private class PluginMessageMessengerProvider implements MessengerProvider {
 
-        @Nonnull
         @Override
-        public String getName() {
+        public @NonNull String getName() {
             return "PluginMessage";
         }
 
-        @Nonnull
         @Override
-        public Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer) {
+        public @NonNull Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer) {
             PluginMessageMessenger messenger = new PluginMessageMessenger(getPlugin(), incomingMessageConsumer);
             messenger.init();
             return messenger;
@@ -82,15 +80,13 @@ public class BungeeMessagingFactory extends MessagingFactory<LPBungeePlugin> {
 
     private class RedisBungeeMessengerProvider implements MessengerProvider {
 
-        @Nonnull
         @Override
-        public String getName() {
+        public @NonNull String getName() {
             return "RedisBungee";
         }
 
-        @Nonnull
         @Override
-        public Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer) {
+        public @NonNull Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer) {
             RedisBungeeMessenger messenger = new RedisBungeeMessenger(getPlugin(), incomingMessageConsumer);
             messenger.init();
             return messenger;

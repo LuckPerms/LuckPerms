@@ -41,9 +41,9 @@ import me.lucko.luckperms.api.messenger.Messenger;
 import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
 import me.lucko.luckperms.velocity.LPVelocityPlugin;
 
-import java.util.Optional;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.Optional;
 
 /**
  * An implementation of {@link Messenger} using the plugin messaging channels.
@@ -81,7 +81,7 @@ public class PluginMessageMessenger implements Messenger, MessageHandler {
     }
 
     @Override
-    public void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage) {
+    public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF(outgoingMessage.asEncodedString());
 

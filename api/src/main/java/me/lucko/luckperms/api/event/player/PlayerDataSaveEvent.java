@@ -30,9 +30,9 @@ import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
 import me.lucko.luckperms.api.manager.UserManager;
 
-import java.util.UUID;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.UUID;
 
 /**
  * Called when player data is saved to the storage.
@@ -48,7 +48,7 @@ public interface PlayerDataSaveEvent extends LuckPermsEvent {
      *
      * @return the uuid
      */
-    @Nonnull
+    @NonNull
     @Param(0)
     UUID getUuid();
 
@@ -57,7 +57,7 @@ public interface PlayerDataSaveEvent extends LuckPermsEvent {
      *
      * @return the username
      */
-    @Nonnull
+    @NonNull
     @Param(1)
     String getUsername();
 
@@ -66,7 +66,7 @@ public interface PlayerDataSaveEvent extends LuckPermsEvent {
      *
      * @return the result
      */
-    @Nonnull
+    @NonNull
     @Param(2)
     PlayerSaveResult getResult();
 

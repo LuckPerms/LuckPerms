@@ -29,11 +29,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
-
-import javax.annotation.Nonnull;
 
 abstract class AbstractContextSet implements ContextSet {
 
@@ -42,19 +42,18 @@ abstract class AbstractContextSet implements ContextSet {
     protected abstract void copyTo(SetMultimap<String, String> other);
 
     @Override
-    public boolean containsKey(@Nonnull String key) {
+    public boolean containsKey(@NonNull String key) {
         return backing().containsKey(sanitizeKey(key));
     }
 
-    @Nonnull
     @Override
-    public Set<String> getValues(@Nonnull String key) {
+    public @NonNull Set<String> getValues(@NonNull String key) {
         Collection<String> values = backing().asMap().get(sanitizeKey(key));
         return values != null ? ImmutableSet.copyOf(values) : ImmutableSet.of();
     }
 
     @Override
-    public boolean has(@Nonnull String key, @Nonnull String value) {
+    public boolean has(@NonNull String key, @NonNull String value) {
         return backing().containsEntry(sanitizeKey(key), sanitizeValue(value));
     }
 

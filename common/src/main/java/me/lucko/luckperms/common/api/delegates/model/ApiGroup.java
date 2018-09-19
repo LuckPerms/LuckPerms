@@ -31,11 +31,11 @@ import me.lucko.luckperms.api.caching.GroupData;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.model.Group;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Objects;
 import java.util.OptionalInt;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public final class ApiGroup extends ApiPermissionHolder implements me.lucko.luckperms.api.Group {
     public static Group cast(me.lucko.luckperms.api.Group group) {
@@ -56,33 +56,28 @@ public final class ApiGroup extends ApiPermissionHolder implements me.lucko.luck
         return this.handle;
     }
 
-    @Nonnull
     @Override
-    public String getName() {
+    public @NonNull String getName() {
         return this.handle.getName();
     }
 
-    @Nullable
     @Override
-    public String getDisplayName() {
+    public @Nullable String getDisplayName() {
         return this.handle.getDisplayName().orElse(null);
     }
 
-    @Nullable
     @Override
-    public String getDisplayName(@Nonnull ContextSet contextSet) {
+    public @Nullable String getDisplayName(@NonNull ContextSet contextSet) {
         return this.handle.getDisplayName(contextSet).orElse(null);
     }
 
-    @Nonnull
     @Override
-    public OptionalInt getWeight() {
+    public @NonNull OptionalInt getWeight() {
         return this.handle.getWeight();
     }
 
-    @Nonnull
     @Override
-    public GroupData getCachedData() {
+    public @NonNull GroupData getCachedData() {
         return this.handle.getCachedData();
     }
 

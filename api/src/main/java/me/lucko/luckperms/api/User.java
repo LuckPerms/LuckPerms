@@ -27,10 +27,10 @@ package me.lucko.luckperms.api;
 
 import me.lucko.luckperms.api.caching.UserData;
 
-import java.util.UUID;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.UUID;
 
 /**
  * A player which holds permission data.
@@ -42,7 +42,7 @@ public interface User extends PermissionHolder {
      *
      * @return the users Mojang assigned unique id
      */
-    @Nonnull
+    @NonNull
     UUID getUuid();
 
     /**
@@ -64,7 +64,7 @@ public interface User extends PermissionHolder {
      *
      * @return the users primary group
      */
-    @Nonnull
+    @NonNull
     String getPrimaryGroup();
 
     /**
@@ -78,8 +78,8 @@ public interface User extends PermissionHolder {
      * @throws IllegalStateException     if the user is not a member of that group
      * @throws NullPointerException      if the group is null
      */
-    @Nonnull
-    DataMutateResult setPrimaryGroup(@Nonnull String group);
+    @NonNull
+    DataMutateResult setPrimaryGroup(@NonNull String group);
 
     /**
      * Gets the user's {@link UserData} cache.
@@ -87,7 +87,7 @@ public interface User extends PermissionHolder {
      * @return the users cached data.
      * @since 3.2
      */
-    @Nonnull
+    @NonNull
     @Override
     UserData getCachedData();
 

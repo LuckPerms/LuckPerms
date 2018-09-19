@@ -29,9 +29,9 @@ import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
 
-import java.util.List;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * Called when a track is changed
@@ -43,7 +43,7 @@ public interface TrackMutateEvent extends LuckPermsEvent {
      *
      * @return the track that was mutated
      */
-    @Nonnull
+    @NonNull
     @Param(0)
     Track getTrack();
 
@@ -52,7 +52,7 @@ public interface TrackMutateEvent extends LuckPermsEvent {
      *
      * @return the data before the change
      */
-    @Nonnull
+    @NonNull
     @Param(1)
     List<String> getDataBefore();
 
@@ -61,7 +61,7 @@ public interface TrackMutateEvent extends LuckPermsEvent {
      *
      * @return the data after the change
      */
-    @Nonnull
+    @NonNull
     @Param(2)
     List<String> getDataAfter();
 

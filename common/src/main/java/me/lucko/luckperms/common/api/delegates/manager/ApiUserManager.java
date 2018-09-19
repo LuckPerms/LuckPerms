@@ -37,14 +37,14 @@ import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class ApiUserManager extends ApiAbstractManager<User, me.lucko.luckperms.api.User, UserManager<?>> implements me.lucko.luckperms.api.manager.UserManager {
     public ApiUserManager(LuckPermsPlugin plugin, UserManager<?> handle) {
@@ -59,9 +59,8 @@ public class ApiUserManager extends ApiAbstractManager<User, me.lucko.luckperms.
         return new ApiUser(internal);
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<me.lucko.luckperms.api.User> loadUser(@Nonnull UUID uuid, @Nullable String username) {
+    public @NonNull CompletableFuture<me.lucko.luckperms.api.User> loadUser(@NonNull UUID uuid, @Nullable String username) {
         Objects.requireNonNull(uuid, "uuid");
         ApiUtils.checkUsername(username);
 
@@ -73,76 +72,69 @@ public class ApiUserManager extends ApiAbstractManager<User, me.lucko.luckperms.
                 .thenApply(this::getDelegateFor);
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<UUID> lookupUuid(@Nonnull String username) {
+    public @NonNull CompletableFuture<UUID> lookupUuid(@NonNull String username) {
         Objects.requireNonNull(username, "username");
         return this.plugin.getStorage().getPlayerUuid(username);
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<String> lookupUsername(@Nonnull UUID uuid) {
+    public @NonNull CompletableFuture<String> lookupUsername(@NonNull UUID uuid) {
         Objects.requireNonNull(uuid, "uuid");
         return this.plugin.getStorage().getPlayerName(uuid);
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<Void> saveUser(@Nonnull me.lucko.luckperms.api.User user) {
+    public @NonNull CompletableFuture<Void> saveUser(me.lucko.luckperms.api.@NonNull User user) {
         Objects.requireNonNull(user, "user");
         return this.plugin.getStorage().saveUser(ApiUser.cast(user));
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<PlayerSaveResult> savePlayerData(@Nonnull UUID uuid, @Nonnull String username) {
+    public @NonNull CompletableFuture<PlayerSaveResult> savePlayerData(@NonNull UUID uuid, @NonNull String username) {
         Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(username, "username");
         return this.plugin.getStorage().savePlayerData(uuid, username);
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<Set<UUID>> getUniqueUsers() {
+    public @NonNull CompletableFuture<Set<UUID>> getUniqueUsers() {
         return this.plugin.getStorage().getUniqueUsers();
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<List<HeldPermission<UUID>>> getWithPermission(@Nonnull String permission) {
+    public @NonNull CompletableFuture<List<HeldPermission<UUID>>> getWithPermission(@NonNull String permission) {
         Objects.requireNonNull(permission, "permission");
         return this.plugin.getStorage().getUsersWithPermission(Constraint.of(StandardComparison.EQUAL, permission));
     }
 
     @Override
-    public me.lucko.luckperms.api.User getUser(@Nonnull UUID uuid) {
+    public me.lucko.luckperms.api.User getUser(@NonNull UUID uuid) {
         Objects.requireNonNull(uuid, "uuid");
         return getDelegateFor(this.handle.getIfLoaded(uuid));
     }
 
     @Override
-    public me.lucko.luckperms.api.User getUser(@Nonnull String name) {
+    public me.lucko.luckperms.api.User getUser(@NonNull String name) {
         Objects.requireNonNull(name, "name");
         return getDelegateFor(this.handle.getByUsername(name));
     }
 
-    @Nonnull
     @Override
-    public Set<me.lucko.luckperms.api.User> getLoadedUsers() {
+    public @NonNull Set<me.lucko.luckperms.api.User> getLoadedUsers() {
         return this.handle.getAll().values().stream()
                 .map(this::getDelegateFor)
                 .collect(ImmutableCollectors.toSet());
     }
 
     @Override
-    public boolean isLoaded(@Nonnull UUID uuid) {
+    public boolean isLoaded(@NonNull UUID uuid) {
         Objects.requireNonNull(uuid, "uuid");
         return this.handle.isLoaded(UserIdentifier.of(uuid, null));
     }
 
     @Override
-    public void cleanupUser(@Nonnull me.lucko.luckperms.api.User user) {
+    public void cleanupUser(me.lucko.luckperms.api.@NonNull User user) {
         Objects.requireNonNull(user, "user");
         this.handle.getHouseKeeper().clearApiUsage(ApiUser.cast(user).getUuid());
     }

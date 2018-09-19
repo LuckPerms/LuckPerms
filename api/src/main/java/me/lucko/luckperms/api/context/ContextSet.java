@@ -27,13 +27,13 @@ package me.lucko.luckperms.api.context;
 
 import com.google.common.collect.Multimap;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-
-import javax.annotation.Nonnull;
 
 /**
  * A set of contexts.
@@ -71,8 +71,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return a new ImmutableContextSet containing one context pair
      * @throws NullPointerException if key or value is null
      */
-    @Nonnull
-    static ImmutableContextSet singleton(@Nonnull String key, @Nonnull String value) {
+    static @NonNull ImmutableContextSet singleton(@NonNull String key, @NonNull String value) {
         return ImmutableContextSet.singleton(key, value);
     }
 
@@ -87,8 +86,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @throws NullPointerException if any of the keys or values are null
      * @since 3.1
      */
-    @Nonnull
-    static ImmutableContextSet of(@Nonnull String key1, @Nonnull String value1, @Nonnull String key2, @Nonnull String value2) {
+    static @NonNull ImmutableContextSet of(@NonNull String key1, @NonNull String value1, @NonNull String key2, @NonNull String value2) {
         return ImmutableContextSet.of(key1, value1, key2, value2);
     }
 
@@ -99,8 +97,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return a new ImmutableContextSet representing the pairs in the iterable
      * @throws NullPointerException if the iterable is null
      */
-    @Nonnull
-    static ImmutableContextSet fromEntries(@Nonnull Iterable<? extends Map.Entry<String, String>> iterable) {
+    static @NonNull ImmutableContextSet fromEntries(@NonNull Iterable<? extends Map.Entry<String, String>> iterable) {
         return ImmutableContextSet.fromEntries(iterable);
     }
 
@@ -111,8 +108,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return a new ImmutableContextSet representing the pairs from the map
      * @throws NullPointerException if the map is null
      */
-    @Nonnull
-    static ImmutableContextSet fromMap(@Nonnull Map<String, String> map) {
+    static @NonNull ImmutableContextSet fromMap(@NonNull Map<String, String> map) {
         return ImmutableContextSet.fromMap(map);
     }
 
@@ -124,8 +120,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @throws NullPointerException if the multimap is null
      * @since 2.16
      */
-    @Nonnull
-    static ImmutableContextSet fromMultimap(@Nonnull Multimap<String, String> multimap) {
+    static @NonNull ImmutableContextSet fromMultimap(@NonNull Multimap<String, String> multimap) {
         return ImmutableContextSet.fromMultimap(multimap);
     }
 
@@ -138,8 +133,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return a new ImmutableContextSet with the same content and the one provided
      * @throws NullPointerException if contextSet is null
      */
-    @Nonnull
-    static ImmutableContextSet fromSet(@Nonnull ContextSet contextSet) {
+    static @NonNull ImmutableContextSet fromSet(@NonNull ContextSet contextSet) {
         return ImmutableContextSet.fromSet(contextSet);
     }
 
@@ -148,8 +142,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      *
      * @return an empty ImmutableContextSet
      */
-    @Nonnull
-    static ImmutableContextSet empty() {
+    static @NonNull ImmutableContextSet empty() {
         return ImmutableContextSet.empty();
     }
 
@@ -170,7 +163,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      *
      * @return an immutable representation of this set
      */
-    @Nonnull
+    @NonNull
     ImmutableContextSet makeImmutable();
 
     /**
@@ -182,7 +175,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return a mutable ContextSet
      * @since 2.16
      */
-    @Nonnull
+    @NonNull
     MutableContextSet mutableCopy();
 
     /**
@@ -194,7 +187,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      *
      * @return an immutable set
      */
-    @Nonnull
+    @NonNull
     Set<Map.Entry<String, String>> toSet();
 
     /**
@@ -214,7 +207,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return an immutable map
      * @deprecated because the resultant map may not contain all data in the ContextSet
      */
-    @Nonnull
+    @NonNull
     @Deprecated
     Map<String, String> toMap();
 
@@ -228,7 +221,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return a multimap
      * @since 2.16
      */
-    @Nonnull
+    @NonNull
     Multimap<String, String> toMultimap();
 
     /**
@@ -241,7 +234,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      *
      * @return an iterator
      */
-    @Nonnull
+    @NonNull
     @Override
     Iterator<Map.Entry<String, String>> iterator();
 
@@ -253,7 +246,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return true if the set contains a value for the key
      * @throws NullPointerException if the key is null
      */
-    boolean containsKey(@Nonnull String key);
+    boolean containsKey(@NonNull String key);
 
     /**
      * Returns a {@link Set} of the values mapped to the given key.
@@ -265,8 +258,8 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return a set of values
      * @throws NullPointerException if the key is null
      */
-    @Nonnull
-    Set<String> getValues(@Nonnull String key);
+    @NonNull
+    Set<String> getValues(@NonNull String key);
 
     /**
      * Returns any value from this {@link ContextSet} matching the key, if present.
@@ -278,8 +271,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return an optional containing any match
      * @since 3.1
      */
-    @Nonnull
-    default Optional<String> getAnyValue(@Nonnull String key) {
+    default @NonNull Optional<String> getAnyValue(@NonNull String key) {
         return getValues(key).stream().findAny();
     }
 
@@ -291,7 +283,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return true if the set contains the context pair
      * @throws NullPointerException if the key or value is null
      */
-    boolean has(@Nonnull String key, @Nonnull String value);
+    boolean has(@NonNull String key, @NonNull String value);
 
     /**
      * Returns if the {@link ContextSet} contains a given context pairing.
@@ -300,7 +292,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return true if the set contains the context pair
      * @throws NullPointerException if the key or value is null
      */
-    default boolean has(@Nonnull Map.Entry<String, String> entry) {
+    default boolean has(Map.@NonNull Entry<String, String> entry) {
         Objects.requireNonNull(entry, "entry");
         return has(entry.getKey(), entry.getValue());
     }
@@ -317,7 +309,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return true if all entries in this set are also in the other set
      * @since 3.1
      */
-    default boolean isSatisfiedBy(@Nonnull ContextSet other) {
+    default boolean isSatisfiedBy(@NonNull ContextSet other) {
         if (this == other) {
             return true;
         }

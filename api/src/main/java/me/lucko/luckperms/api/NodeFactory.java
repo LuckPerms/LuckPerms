@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.api;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Assists with constructing {@link Node} instances.
@@ -41,8 +41,7 @@ public interface NodeFactory {
      * @return a node builder instance
      * @throws NullPointerException if the permission is null
      */
-    @Nonnull
-    Node.Builder newBuilder(@Nonnull String permission);
+    Node.@NonNull Builder newBuilder(@NonNull String permission);
 
     /**
      * Creates a node builder instance from an existing node
@@ -51,8 +50,7 @@ public interface NodeFactory {
      * @return a node builder instance
      * @throws NullPointerException if the other node is null
      */
-    @Nonnull
-    Node.Builder newBuilderFromExisting(@Nonnull Node other);
+    Node.@NonNull Builder newBuilderFromExisting(@NonNull Node other);
 
 
     /**
@@ -64,8 +62,7 @@ public interface NodeFactory {
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      * @since 3.1
      */
-    @Nonnull
-    Node.Builder makeGroupNode(@Nonnull Group group);
+    Node.@NonNull Builder makeGroupNode(@NonNull Group group);
 
     /**
      * Creates a node builder from a group
@@ -75,8 +72,7 @@ public interface NodeFactory {
      * @throws NullPointerException  if the groupName is null
      * @since 4.0
      */
-    @Nonnull
-    Node.Builder makeGroupNode(@Nonnull String groupName);
+    Node.@NonNull Builder makeGroupNode(@NonNull String groupName);
 
     /**
      * Creates a node builder from a key value pair
@@ -86,8 +82,7 @@ public interface NodeFactory {
      * @return a node builder instance
      * @throws NullPointerException if the key or value is null
      */
-    @Nonnull
-    Node.Builder makeMetaNode(@Nonnull String key, @Nonnull String value);
+    Node.@NonNull Builder makeMetaNode(@NonNull String key, @NonNull String value);
 
     /**
      * Creates a node builder for the given chat meta type
@@ -99,8 +94,7 @@ public interface NodeFactory {
      * @throws NullPointerException if the type or value is null
      * @since 3.2
      */
-    @Nonnull
-    Node.Builder makeChatMetaNode(@Nonnull ChatMetaType type, int priority, @Nonnull String value);
+    Node.@NonNull Builder makeChatMetaNode(@NonNull ChatMetaType type, int priority, @NonNull String value);
 
     /**
      * Creates a node builder from a prefix string and priority
@@ -110,8 +104,7 @@ public interface NodeFactory {
      * @return a node builder instance
      * @throws NullPointerException if the prefix is null
      */
-    @Nonnull
-    Node.Builder makePrefixNode(int priority, @Nonnull String prefix);
+    Node.@NonNull Builder makePrefixNode(int priority, @NonNull String prefix);
 
     /**
      * Creates a node builder from a prefix string and priority
@@ -121,7 +114,6 @@ public interface NodeFactory {
      * @return a node builder instance
      * @throws NullPointerException if the suffix is null
      */
-    @Nonnull
-    Node.Builder makeSuffixNode(int priority, @Nonnull String suffix);
+    Node.@NonNull Builder makeSuffixNode(int priority, @NonNull String suffix);
 
 }

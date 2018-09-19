@@ -29,7 +29,7 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.nodetype.NodeType;
 import me.lucko.luckperms.api.nodetype.NodeTypeKey;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * A sub-type of {@link Node} used to mark that the holder of the node should inherit
@@ -51,7 +51,7 @@ public interface InheritanceType extends NodeType {
      *
      * @return the name of the group
      */
-    @Nonnull
+    @NonNull
     String getGroupName();
 
 }

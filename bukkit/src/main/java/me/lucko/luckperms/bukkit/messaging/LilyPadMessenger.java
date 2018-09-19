@@ -30,6 +30,8 @@ import me.lucko.luckperms.api.messenger.Messenger;
 import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import lilypad.client.connect.api.Connect;
 import lilypad.client.connect.api.event.EventListener;
 import lilypad.client.connect.api.event.MessageEvent;
@@ -38,8 +40,6 @@ import lilypad.client.connect.api.request.impl.MessageRequest;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-
-import javax.annotation.Nonnull;
 
 /**
  * An implementation of {@link Messenger} using LilyPad.
@@ -68,7 +68,7 @@ public class LilyPadMessenger implements Messenger {
     }
 
     @Override
-    public void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage) {
+    public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
         MessageRequest request = new MessageRequest(Collections.emptyList(), CHANNEL, outgoingMessage.asEncodedString().getBytes(StandardCharsets.UTF_8));
         try {
             this.connect.request(request);

@@ -48,15 +48,15 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.gson.JObject;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class LuckPermsMessagingService implements InternalMessagingService, IncomingMessageConsumer {
     private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
@@ -143,7 +143,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
     }
 
     @Override
-    public boolean consumeIncomingMessage(@Nonnull Message message) {
+    public boolean consumeIncomingMessage(@NonNull Message message) {
         Objects.requireNonNull(message, "message");
 
         if (!this.receivedMessages.add(message.getId())) {
@@ -167,7 +167,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
     }
 
     @Override
-    public boolean consumeIncomingMessageAsString(@Nonnull String encodedString) {
+    public boolean consumeIncomingMessageAsString(@NonNull String encodedString) {
         Objects.requireNonNull(encodedString, "encodedString");
         JsonObject decodedObject = GSON.fromJson(encodedString, JsonObject.class).getAsJsonObject();
 

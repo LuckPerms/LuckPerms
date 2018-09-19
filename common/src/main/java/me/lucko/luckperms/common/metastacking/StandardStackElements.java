@@ -33,12 +33,12 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.common.utils.Uuids;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Contains the standard {@link MetaStackElement}s provided by LuckPerms.
@@ -217,7 +217,7 @@ public final class StandardStackElements {
         }
 
         @Override
-        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, @Nullable Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(@NonNull LocalizedNode node, @NonNull ChatMetaType type, Map.@Nullable Entry<Integer, String> current) {
             Track t = this.plugin.getTrackManager().getIfLoaded(this.trackName);
             return t != null && t.containsGroup(node.getLocation());
         }
@@ -246,7 +246,7 @@ public final class StandardStackElements {
         }
 
         @Override
-        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, @Nullable Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(@NonNull LocalizedNode node, @NonNull ChatMetaType type, Map.@Nullable Entry<Integer, String> current) {
             Track t = this.plugin.getTrackManager().getIfLoaded(this.trackName);
             return t != null && !t.containsGroup(node.getLocation());
         }
@@ -273,7 +273,7 @@ public final class StandardStackElements {
         }
 
         @Override
-        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, @Nullable Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(@NonNull LocalizedNode node, @NonNull ChatMetaType type, Map.@Nullable Entry<Integer, String> current) {
             return this.groupName.equals(node.getLocation());
         }
 
@@ -299,7 +299,7 @@ public final class StandardStackElements {
         }
 
         @Override
-        public boolean shouldAccumulate(@Nonnull LocalizedNode node, @Nonnull ChatMetaType type, @Nullable Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(@NonNull LocalizedNode node, @NonNull ChatMetaType type, Map.@Nullable Entry<Integer, String> current) {
             return !this.groupName.equals(node.getLocation());
         }
 

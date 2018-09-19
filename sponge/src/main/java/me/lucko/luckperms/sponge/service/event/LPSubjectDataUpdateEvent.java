@@ -28,14 +28,13 @@ package me.lucko.luckperms.sponge.service.event;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.event.permission.SubjectDataUpdateEvent;
 import org.spongepowered.api.service.permission.SubjectData;
-
-import javax.annotation.Nonnull;
 
 public class LPSubjectDataUpdateEvent extends AbstractEvent implements SubjectDataUpdateEvent {
     private final LPSpongePlugin plugin;
@@ -55,9 +54,8 @@ public class LPSubjectDataUpdateEvent extends AbstractEvent implements SubjectDa
         return this.subjectData;
     }
 
-    @Nonnull
     @Override
-    public Cause getCause() {
+    public @NonNull Cause getCause() {
         EventContext eventContext = EventContext.builder()
                 .add(EventContextKeys.PLUGIN, this.plugin.getBootstrap().getPluginContainer())
                 .build();

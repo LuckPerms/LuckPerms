@@ -27,11 +27,10 @@ package me.lucko.luckperms.api;
 
 import me.lucko.luckperms.api.context.ContextSet;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Optional;
 import java.util.OptionalLong;
-
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
 
 /**
  * A relationship between a {@link PermissionHolder} and a permission.
@@ -39,7 +38,6 @@ import javax.annotation.concurrent.Immutable;
  * @param <T> the identifier type of the holder
  * @since 2.17
  */
-@Immutable
 public interface HeldPermission<T> {
 
     /**
@@ -47,7 +45,7 @@ public interface HeldPermission<T> {
      *
      * @return the holder
      */
-    @Nonnull
+    @NonNull
     T getHolder();
 
     /**
@@ -55,7 +53,7 @@ public interface HeldPermission<T> {
      *
      * @return the permission
      */
-    @Nonnull
+    @NonNull
     String getPermission();
 
     /**
@@ -70,7 +68,7 @@ public interface HeldPermission<T> {
      *
      * @return the server
      */
-    @Nonnull
+    @NonNull
     Optional<String> getServer();
 
     /**
@@ -78,7 +76,7 @@ public interface HeldPermission<T> {
      *
      * @return the world
      */
-    @Nonnull
+    @NonNull
     Optional<String> getWorld();
 
     /**
@@ -100,7 +98,7 @@ public interface HeldPermission<T> {
      *
      * @return a Node copy of this permission
      */
-    @Nonnull
+    @NonNull
     Node asNode();
 
 }

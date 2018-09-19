@@ -29,9 +29,9 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.nodetype.NodeType;
 import me.lucko.luckperms.api.nodetype.NodeTypeKey;
 
-import java.util.Map;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.Map;
 
 /**
  * A sub-type of {@link Node} used to store suffix assignments.
@@ -57,7 +57,7 @@ public interface SuffixType extends NodeType {
      *
      * @return the suffix
      */
-    @Nonnull
+    @NonNull
     String getSuffix();
 
     /**
@@ -65,7 +65,6 @@ public interface SuffixType extends NodeType {
      *
      * @return a map entry representation of the priority and suffix string
      */
-    @Nonnull
-    Map.Entry<Integer, String> getAsEntry();
+    Map.@NonNull Entry<Integer, String> getAsEntry();
 
 }

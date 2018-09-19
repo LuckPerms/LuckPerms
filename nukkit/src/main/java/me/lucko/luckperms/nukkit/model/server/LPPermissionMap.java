@@ -34,6 +34,8 @@ import com.google.common.collect.ImmutableMap;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import cn.nukkit.permission.Permission;
 import cn.nukkit.plugin.PluginManager;
 
@@ -41,9 +43,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 
 /**
  * A replacement map for the 'permissions' instance in Nukkit's SimplePluginManager.
@@ -93,7 +92,7 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
     }
 
     @Override
-    public Permission put(@Nonnull String key, @Nonnull Permission value) {
+    public Permission put(@NonNull String key, @NonNull Permission value) {
         this.plugin.getPermissionRegistry().insert(key);
         Permission ret = super.put(key, value);
         update();
@@ -101,7 +100,7 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
     }
 
     @Override
-    public void putAll(@Nonnull Map<? extends String, ? extends Permission> m) {
+    public void putAll(@NonNull Map<? extends String, ? extends Permission> m) {
         for (Map.Entry<? extends String, ? extends Permission> ent : m.entrySet()) {
             put(ent.getKey(), ent.getValue());
         }
@@ -122,9 +121,8 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
             this.value = value;
         }
 
-        @CheckForNull
         @Override
-        public Map<String, Boolean> load(@Nonnull String key) {
+        public Map<String, Boolean> load(@NonNull String key) {
             Map<String, Boolean> children = new HashMap<>();
             resolveChildren(children, Collections.singletonMap(key, this.value), false);
             children.remove(key, this.value);

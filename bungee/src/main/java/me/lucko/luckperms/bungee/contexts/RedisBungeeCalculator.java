@@ -31,14 +31,13 @@ import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.api.context.StaticContextCalculator;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class RedisBungeeCalculator implements StaticContextCalculator {
     private static final String PROXY_KEY = "proxy";
 
-    @Nonnull
     @Override
-    public MutableContextSet giveApplicableContext(@Nonnull MutableContextSet accumulator) {
+    public @NonNull MutableContextSet giveApplicableContext(@NonNull MutableContextSet accumulator) {
         RedisBungeeAPI redisBungee = RedisBungee.getApi();
         if (redisBungee != null) {
             accumulator.add(PROXY_KEY, redisBungee.getServerId());

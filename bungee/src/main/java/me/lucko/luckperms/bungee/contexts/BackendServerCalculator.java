@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BackendServerCalculator implements ContextCalculator<ProxiedPlayer> {
 
@@ -47,9 +47,8 @@ public class BackendServerCalculator implements ContextCalculator<ProxiedPlayer>
         this.plugin = plugin;
     }
 
-    @Nonnull
     @Override
-    public MutableContextSet giveApplicableContext(@Nonnull ProxiedPlayer subject, @Nonnull MutableContextSet accumulator) {
+    public @NonNull MutableContextSet giveApplicableContext(@NonNull ProxiedPlayer subject, @NonNull MutableContextSet accumulator) {
         String server = getServer(subject);
         while (server != null && !accumulator.has(Contexts.WORLD_KEY, server)) {
             accumulator.add(Contexts.WORLD_KEY, server);

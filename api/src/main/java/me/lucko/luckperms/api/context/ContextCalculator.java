@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.api.context;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Calculates whether contexts are applicable to a {@link T subject}.
@@ -44,7 +44,7 @@ public interface ContextCalculator<T> {
      * @return the map
      * @since 2.13
      */
-    @Nonnull
-    MutableContextSet giveApplicableContext(@Nonnull T subject, @Nonnull MutableContextSet accumulator);
+    @NonNull
+    MutableContextSet giveApplicableContext(@NonNull T subject, @NonNull MutableContextSet accumulator);
 
 }

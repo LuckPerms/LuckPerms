@@ -35,6 +35,7 @@ import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 import me.lucko.luckperms.sponge.service.model.ProxiedSubject;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
@@ -46,8 +47,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-
-import javax.annotation.Nonnull;
 
 @SuppressWarnings("unchecked")
 public final class SubjectProxy implements Subject, ProxiedSubject {
@@ -74,21 +73,18 @@ public final class SubjectProxy implements Subject, ProxiedSubject {
         return this.contextsSupplier;
     }
 
-    @Nonnull
     @Override
-    public LPSubjectReference asSubjectReference() {
+    public @NonNull LPSubjectReference asSubjectReference() {
         return this.ref;
     }
 
-    @Nonnull
     @Override
-    public Optional<CommandSource> getCommandSource() {
+    public @NonNull Optional<CommandSource> getCommandSource() {
         return handle().thenApply(LPSubject::getCommandSource).join();
     }
 
-    @Nonnull
     @Override
-    public SubjectCollection getContainingCollection() {
+    public @NonNull SubjectCollection getContainingCollection() {
         return this.service.getCollection(this.ref.getCollectionIdentifier()).sponge();
     }
 
@@ -103,23 +99,22 @@ public final class SubjectProxy implements Subject, ProxiedSubject {
     }
 
     @Override
-    public boolean hasPermission(@Nonnull Set<Context> contexts, @Nonnull String permission) {
+    public boolean hasPermission(@NonNull Set<Context> contexts, @NonNull String permission) {
         return handle().thenApply(handle -> handle.getPermissionValue(CompatibilityUtil.convertContexts(contexts), permission).asBoolean()).join();
     }
 
     @Override
-    public boolean hasPermission(@Nonnull String permission) {
+    public boolean hasPermission(@NonNull String permission) {
         return handle().thenApply(handle -> handle.getPermissionValue(ImmutableContextSet.empty(), permission).asBoolean()).join();
     }
 
-    @Nonnull
     @Override
-    public Tristate getPermissionValue(@Nonnull Set<Context> contexts, @Nonnull String permission) {
+    public @NonNull Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String permission) {
         return handle().thenApply(handle -> CompatibilityUtil.convertTristate(handle.getPermissionValue(CompatibilityUtil.convertContexts(contexts), permission))).join();
     }
 
     @Override
-    public boolean isChildOf(@Nonnull Subject parent) {
+    public boolean isChildOf(@NonNull Subject parent) {
         return handle().thenApply(handle -> handle.isChildOf(
                 ImmutableContextSet.empty(),
                 this.service.getReferenceFactory().obtain(parent)
@@ -127,38 +122,34 @@ public final class SubjectProxy implements Subject, ProxiedSubject {
     }
 
     @Override
-    public boolean isChildOf(@Nonnull Set<Context> contexts, @Nonnull Subject parent) {
+    public boolean isChildOf(@NonNull Set<Context> contexts, @NonNull Subject parent) {
         return handle().thenApply(handle -> handle.isChildOf(
                 CompatibilityUtil.convertContexts(contexts),
                 this.service.getReferenceFactory().obtain(parent)
         )).join();
     }
 
-    @Nonnull
     @Override
-    public List<Subject> getParents() {
+    public @NonNull List<Subject> getParents() {
         return (List) handle().thenApply(handle -> handle.getParents(ImmutableContextSet.empty()).stream()
                 .map(s -> new SubjectProxy(this.service, s))
                 .collect(ImmutableCollectors.toList())).join();
     }
 
-    @Nonnull
     @Override
-    public List<Subject> getParents(@Nonnull Set<Context> contexts) {
+    public @NonNull List<Subject> getParents(@NonNull Set<Context> contexts) {
         return (List) handle().thenApply(handle -> handle.getParents(CompatibilityUtil.convertContexts(contexts)).stream()
                 .map(s -> new SubjectProxy(this.service, s))
                 .collect(ImmutableCollectors.toList())).join();
     }
 
-    @Nonnull
     @Override
-    public Optional<String> getOption(@Nonnull Set<Context> contexts, @Nonnull String key) {
+    public @NonNull Optional<String> getOption(@NonNull Set<Context> contexts, @NonNull String key) {
         return handle().thenApply(handle -> handle.getOption(CompatibilityUtil.convertContexts(contexts), key)).join();
     }
 
-    @Nonnull
     @Override
-    public Optional<String> getOption(@Nonnull String key) {
+    public @NonNull Optional<String> getOption(@NonNull String key) {
         return handle().thenApply(handle -> handle.getOption(ImmutableContextSet.empty(), key)).join();
     }
 
@@ -167,9 +158,8 @@ public final class SubjectProxy implements Subject, ProxiedSubject {
         return this.ref.getSubjectIdentifier();
     }
 
-    @Nonnull
     @Override
-    public Set<Context> getActiveContexts() {
+    public @NonNull Set<Context> getActiveContexts() {
         return CompatibilityUtil.convertContexts(getContextsCache().getContextSet());
     }
 

@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.message.Message;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class Argument {
     public static Argument create(String name, boolean required, String description) {

@@ -30,6 +30,7 @@ import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -43,8 +44,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
-import javax.annotation.Nonnull;
-
 @SuppressWarnings("unchecked")
 public final class SubjectCollectionProxy implements SubjectCollection {
     private final LPSubjectCollection handle;
@@ -53,57 +52,48 @@ public final class SubjectCollectionProxy implements SubjectCollection {
         this.handle = handle;
     }
 
-    @Nonnull
     @Override
-    public String getIdentifier() {
+    public @NonNull String getIdentifier() {
         return this.handle.getIdentifier();
     }
 
-    @Nonnull
     @Override
-    public Predicate<String> getIdentifierValidityPredicate() {
+    public @NonNull Predicate<String> getIdentifierValidityPredicate() {
         return this.handle.getIdentifierValidityPredicate();
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<Subject> loadSubject(@Nonnull String s) {
+    public @NonNull CompletableFuture<Subject> loadSubject(@NonNull String s) {
         return this.handle.loadSubject(s).thenApply(LPSubject::sponge);
     }
 
-    @Nonnull
     @Override
-    public Optional<Subject> getSubject(@Nonnull String s) {
+    public @NonNull Optional<Subject> getSubject(@NonNull String s) {
         return this.handle.getSubject(s).map(LPSubject::sponge);
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<Boolean> hasSubject(@Nonnull String s) {
+    public @NonNull CompletableFuture<Boolean> hasSubject(@NonNull String s) {
         return this.handle.hasRegistered(s);
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<Map<String, Subject>> loadSubjects(@Nonnull Set<String> set) {
+    public @NonNull CompletableFuture<Map<String, Subject>> loadSubjects(@NonNull Set<String> set) {
         return this.handle.loadSubjects(set).thenApply(subs -> subs.stream().collect(ImmutableCollectors.toMap(LPSubject::getIdentifier, LPSubject::sponge)));
     }
 
-    @Nonnull
     @Override
-    public Collection<Subject> getLoadedSubjects() {
+    public @NonNull Collection<Subject> getLoadedSubjects() {
         return this.handle.getLoadedSubjects().stream().map(LPSubject::sponge).collect(ImmutableCollectors.toSet());
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<Set<String>> getAllIdentifiers() {
+    public @NonNull CompletableFuture<Set<String>> getAllIdentifiers() {
         return (CompletableFuture) this.handle.getAllIdentifiers();
     }
 
-    @Nonnull
     @Override
-    public SubjectReference newSubjectReference(@Nonnull String subjectIdentifier) {
+    public @NonNull SubjectReference newSubjectReference(@NonNull String subjectIdentifier) {
         Objects.requireNonNull(subjectIdentifier, "identifier");
         if (!this.handle.getIdentifierValidityPredicate().test(subjectIdentifier)) {
             throw new IllegalArgumentException("Subject identifier '" + subjectIdentifier + "' does not pass the validity predicate");
@@ -112,21 +102,18 @@ public final class SubjectCollectionProxy implements SubjectCollection {
         return this.handle.getService().getReferenceFactory().obtain(getIdentifier(), subjectIdentifier);
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<Map<SubjectReference, Boolean>> getAllWithPermission(@Nonnull String s) {
+    public @NonNull CompletableFuture<Map<SubjectReference, Boolean>> getAllWithPermission(@NonNull String s) {
         return (CompletableFuture) this.handle.getAllWithPermission(s);
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<Map<SubjectReference, Boolean>> getAllWithPermission(@Nonnull Set<Context> set, @Nonnull String s) {
+    public @NonNull CompletableFuture<Map<SubjectReference, Boolean>> getAllWithPermission(@NonNull Set<Context> set, @NonNull String s) {
         return (CompletableFuture) this.handle.getAllWithPermission(CompatibilityUtil.convertContexts(set), s);
     }
 
-    @Nonnull
     @Override
-    public Map<Subject, Boolean> getLoadedWithPermission(@Nonnull String s) {
+    public @NonNull Map<Subject, Boolean> getLoadedWithPermission(@NonNull String s) {
         return this.handle.getLoadedWithPermission(s).entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         sub -> sub.getKey().sponge(),
@@ -134,9 +121,8 @@ public final class SubjectCollectionProxy implements SubjectCollection {
                 ));
     }
 
-    @Nonnull
     @Override
-    public Map<Subject, Boolean> getLoadedWithPermission(@Nonnull Set<Context> set, @Nonnull String s) {
+    public @NonNull Map<Subject, Boolean> getLoadedWithPermission(@NonNull Set<Context> set, @NonNull String s) {
         return this.handle.getLoadedWithPermission(CompatibilityUtil.convertContexts(set), s).entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         sub -> sub.getKey().sponge(),
@@ -144,14 +130,13 @@ public final class SubjectCollectionProxy implements SubjectCollection {
                 ));
     }
 
-    @Nonnull
     @Override
-    public Subject getDefaults() {
+    public @NonNull Subject getDefaults() {
         return this.handle.getDefaults().sponge();
     }
 
     @Override
-    public void suggestUnload(@Nonnull String s) {
+    public void suggestUnload(@NonNull String s) {
         // unused by lp
     }
 

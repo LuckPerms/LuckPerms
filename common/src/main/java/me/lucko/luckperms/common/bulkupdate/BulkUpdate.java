@@ -136,7 +136,7 @@ public final class BulkUpdate {
         if (!(o instanceof BulkUpdate)) return false;
         final BulkUpdate that = (BulkUpdate) o;
 
-        return Objects.equals(this.getDataType(), that.getDataType()) &&
+        return this.getDataType() == that.getDataType() &&
                 Objects.equals(this.getAction(), that.getAction()) &&
                 Objects.equals(this.getQueries(), that.getQueries());
     }

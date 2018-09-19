@@ -52,6 +52,8 @@ import me.lucko.luckperms.common.node.utils.MetaType;
 import me.lucko.luckperms.common.node.utils.NodeTools;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -67,8 +69,6 @@ import java.util.TreeSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
-
-import javax.annotation.Nonnull;
 
 /**
  * Represents an object that can hold permissions, (a user or group)
@@ -762,15 +762,13 @@ public abstract class PermissionHolder {
             this.mergedNode = mergedNode;
         }
 
-        @Nonnull
         @Override
-        public DataMutateResult getResult() {
+        public @NonNull DataMutateResult getResult() {
             return this.result;
         }
 
-        @Nonnull
         @Override
-        public Node getMergedNode() {
+        public @NonNull Node getMergedNode() {
             return this.mergedNode;
         }
     }

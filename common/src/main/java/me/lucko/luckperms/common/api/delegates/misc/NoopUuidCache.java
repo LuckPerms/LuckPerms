@@ -27,9 +27,9 @@ package me.lucko.luckperms.common.api.delegates.misc;
 
 import me.lucko.luckperms.api.UuidCache;
 
-import java.util.UUID;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.UUID;
 
 @Deprecated
 @SuppressWarnings({"DeprecatedIsStillUsed", "deprecation"})
@@ -40,17 +40,15 @@ public class NoopUuidCache implements UuidCache {
 
     }
 
-    @Nonnull
-    @Override
     @Deprecated
-    public UUID getUUID(@Nonnull UUID external) {
+    @Override
+    public @NonNull UUID getUUID(@NonNull UUID external) {
         return external;
     }
 
-    @Nonnull
-    @Override
     @Deprecated
-    public UUID getExternalUUID(@Nonnull UUID internal) {
+    @Override
+    public @NonNull UUID getExternalUUID(@NonNull UUID internal) {
         return internal;
     }
 }

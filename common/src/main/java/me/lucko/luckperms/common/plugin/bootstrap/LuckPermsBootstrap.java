@@ -30,6 +30,8 @@ import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
@@ -38,8 +40,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 /**
  * Bootstrap plugin interface
@@ -126,8 +126,7 @@ public interface LuckPermsBootstrap {
      *
      * @return the server name
      */
-    @Nullable
-    default String getServerName() {
+    default @Nullable String getServerName() {
         return null;
     }
 

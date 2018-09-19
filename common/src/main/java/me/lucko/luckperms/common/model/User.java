@@ -32,10 +32,10 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.primarygroup.ContextualHolder;
 import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 public class User extends PermissionHolder implements Identifiable<UserIdentifier> {
     private final ApiUser apiDelegate = new ApiUser(this);
@@ -48,8 +48,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     /**
      * The last known username of a player
      */
-    @Nullable
-    private String name = null;
+    private @Nullable String name = null;
 
     /**
      * The users primary group

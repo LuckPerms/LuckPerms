@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.utils.TextUtils;
 
 import net.kyori.text.TextComponent;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * An enumeration of some of the messages used within the plugin.

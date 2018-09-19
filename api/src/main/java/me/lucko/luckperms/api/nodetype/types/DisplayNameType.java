@@ -29,7 +29,7 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.nodetype.NodeType;
 import me.lucko.luckperms.api.nodetype.NodeTypeKey;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * A sub-type of {@link Node} used to mark the display name of the node's holder.
@@ -48,7 +48,7 @@ public interface DisplayNameType extends NodeType {
      *
      * @return the display name
      */
-    @Nonnull
+    @NonNull
     String getDisplayName();
 
 }

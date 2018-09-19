@@ -32,6 +32,8 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.buffers.Cache;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import cn.nukkit.permission.Permission;
 import cn.nukkit.plugin.PluginManager;
 
@@ -39,8 +41,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.Nonnull;
 
 /**
  * A replacement map for the 'defaultPerms' instance in Nukkit's SimplePluginManager.
@@ -61,8 +61,8 @@ public final class LPDefaultsMap {
     private final Map<String, Permission> nonOpSet = new DefaultPermissionSet(false);
 
     // fully resolved defaults (accounts for child permissions too)
-    private DefaultsCache opCache = new DefaultsCache(true);
-    private DefaultsCache nonOpCache = new DefaultsCache(false);
+    private final DefaultsCache opCache = new DefaultsCache(true);
+    private final DefaultsCache nonOpCache = new DefaultsCache(false);
 
     public LPDefaultsMap(LPNukkitPlugin plugin, Map<Boolean, Map<String, Permission>> existingData) {
         this.plugin = plugin;
@@ -118,7 +118,7 @@ public final class LPDefaultsMap {
         }
 
         @Override
-        public Permission put(String key, Permission value) {
+        public Permission put(@NonNull String key, @NonNull Permission value) {
             Permission ret = super.put(key, value);
             invalidate(this.op);
             return ret;
@@ -132,7 +132,7 @@ public final class LPDefaultsMap {
         }
 
         @Override
-        public void putAll(Map<? extends String, ? extends Permission> map) {
+        public void putAll(@NonNull Map<? extends String, ? extends Permission> map) {
             super.putAll(map);
             invalidate(this.op);
         }
@@ -145,9 +145,8 @@ public final class LPDefaultsMap {
             this.op = op;
         }
 
-        @Nonnull
         @Override
-        protected Map<String, Boolean> supply() {
+        protected @NonNull Map<String, Boolean> supply() {
             Map<String, Boolean> builder = new HashMap<>();
             for (Permission perm : LPDefaultsMap.this.get(this.op).values()) {
                 String name = perm.getName().toLowerCase();

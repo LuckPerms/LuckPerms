@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.api;
 
-import java.util.Map;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.Map;
 
 /**
  * Wrapper around parts of the LuckPerms configuration file
@@ -39,7 +39,7 @@ public interface LPConfiguration {
      *
      * @return the name of this server
      */
-    @Nonnull
+    @NonNull
     String getServer();
 
     /**
@@ -78,7 +78,7 @@ public interface LPConfiguration {
      *
      * @return the storage method string from the configuration
      */
-    @Nonnull
+    @NonNull
     String getStorageMethod();
 
     /**
@@ -96,10 +96,10 @@ public interface LPConfiguration {
      * method. For example: key = user, value = json
      * @since 2.7
      */
-    @Nonnull
+    @NonNull
     Map<String, String> getSplitStorageOptions();
 
-    @Nonnull
+    @NonNull
     Unsafe unsafe();
 
     interface Unsafe {
@@ -115,7 +115,7 @@ public interface LPConfiguration {
          * @return the corresponding object, if one is present
          * @throws IllegalArgumentException if the key isn't known
          */
-        @Nonnull
+        @NonNull
         Object getObject(String key);
     }
 

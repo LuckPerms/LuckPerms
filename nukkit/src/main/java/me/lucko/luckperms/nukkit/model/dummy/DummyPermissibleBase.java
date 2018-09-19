@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.nukkit.model.dummy;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import cn.nukkit.permission.PermissibleBase;
 import cn.nukkit.permission.Permission;
 import cn.nukkit.permission.PermissionAttachment;
@@ -128,7 +130,7 @@ public class DummyPermissibleBase extends PermissibleBase {
         }
 
         @Override
-        public boolean addAll(Collection<? extends E> c) {
+        public boolean addAll(@NonNull Collection<? extends E> c) {
             // do nothing
             return true;
         }

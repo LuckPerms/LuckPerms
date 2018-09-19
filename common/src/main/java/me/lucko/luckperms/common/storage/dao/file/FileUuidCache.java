@@ -34,6 +34,9 @@ import me.lucko.luckperms.api.PlayerSaveResult;
 import me.lucko.luckperms.common.storage.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.utils.Uuids;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -47,8 +50,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.Nullable;
-
 public class FileUuidCache {
     private static final Splitter KV_SPLIT = Splitter.on(':').omitEmptyStrings();
     private static final Splitter LEGACY_KV_SPLIT = Splitter.on('=').omitEmptyStrings();
@@ -61,7 +62,7 @@ public class FileUuidCache {
         private final SetMultimap<String, UUID> reverse = Multimaps.newSetMultimap(new ConcurrentHashMap<>(), ConcurrentHashMap::newKeySet);
 
         @Override
-        public String put(UUID key, String value) {
+        public String put(@NonNull UUID key, @NonNull String value) {
             String existing = super.put(key, value);
 
             // check if we need to remove a reverse entry which has been replaced
@@ -77,7 +78,7 @@ public class FileUuidCache {
         }
 
         @Override
-        public String remove(Object k) {
+        public String remove(@NonNull Object k) {
             UUID key = (UUID) k;
             String username = super.remove(key);
             if (username != null) {
@@ -128,8 +129,7 @@ public class FileUuidCache {
      * @param username the username to lookup with
      * @return a uuid, or null
      */
-    @Nullable
-    public UUID lookupUuid(String username) {
+    public @Nullable UUID lookupUuid(String username) {
         Set<UUID> uuids = this.lookupMap.lookupUuid(username);
         return Iterables.getFirst(uuids, null);
     }

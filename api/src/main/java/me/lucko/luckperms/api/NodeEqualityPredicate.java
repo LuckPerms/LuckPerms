@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.api;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * A rule for determining if two nodes are equal.
@@ -47,6 +47,6 @@ public interface NodeEqualityPredicate {
      * @param o2 the second node
      * @return true if equal
      */
-    boolean areEqual(@Nonnull Node o1, @Nonnull Node o2);
+    boolean areEqual(@NonNull Node o1, @NonNull Node o2);
 
 }

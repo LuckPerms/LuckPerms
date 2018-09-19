@@ -32,9 +32,9 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
-import java.util.Map;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.Map;
 
 public class ApiConfiguration implements LPConfiguration {
     private final LuckPermsConfiguration handle;
@@ -45,9 +45,8 @@ public class ApiConfiguration implements LPConfiguration {
         this.unsafe = new UnsafeImpl();
     }
 
-    @Nonnull
     @Override
-    public String getServer() {
+    public @NonNull String getServer() {
         return this.handle.get(ConfigKeys.SERVER);
     }
 
@@ -71,9 +70,8 @@ public class ApiConfiguration implements LPConfiguration {
         return this.handle.get(ConfigKeys.LOOKUP_SETTINGS).contains(LookupSetting.APPLY_PARENTS_SET_WITHOUT_WORLD);
     }
 
-    @Nonnull
     @Override
-    public String getStorageMethod() {
+    public @NonNull String getStorageMethod() {
         return this.handle.get(ConfigKeys.STORAGE_METHOD);
     }
 
@@ -82,24 +80,21 @@ public class ApiConfiguration implements LPConfiguration {
         return this.handle.get(ConfigKeys.SPLIT_STORAGE);
     }
 
-    @Nonnull
     @Override
-    public Map<String, String> getSplitStorageOptions() {
+    public @NonNull Map<String, String> getSplitStorageOptions() {
         return this.handle.get(ConfigKeys.SPLIT_STORAGE_OPTIONS).entrySet().stream()
                 .collect(ImmutableCollectors.toMap(e -> e.getKey().name().toLowerCase(), Map.Entry::getValue));
     }
 
-    @Nonnull
     @Override
-    public Unsafe unsafe() {
+    public @NonNull Unsafe unsafe() {
         return this.unsafe;
     }
 
     private final class UnsafeImpl implements Unsafe {
 
-        @Nonnull
         @Override
-        public Object getObject(String key) {
+        public @NonNull Object getObject(String key) {
             ConfigKey<?> configKey = ConfigKeys.getKeys().get(key.toUpperCase());
             if (configKey == null) {
                 throw new IllegalArgumentException("Unknown key: " + key);

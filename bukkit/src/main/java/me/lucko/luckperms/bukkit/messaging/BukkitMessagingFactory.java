@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BukkitMessagingFactory extends MessagingFactory<LPBukkitPlugin> {
     public BukkitMessagingFactory(LPBukkitPlugin plugin) {
@@ -65,15 +65,13 @@ public class BukkitMessagingFactory extends MessagingFactory<LPBukkitPlugin> {
 
     private class PluginMessageMessengerProvider implements MessengerProvider {
 
-        @Nonnull
         @Override
-        public String getName() {
+        public @NonNull String getName() {
             return "PluginMessage";
         }
 
-        @Nonnull
         @Override
-        public Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer) {
+        public @NonNull Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer) {
             PluginMessageMessenger messenger = new PluginMessageMessenger(getPlugin(), incomingMessageConsumer);
             messenger.init();
             return messenger;
@@ -82,15 +80,13 @@ public class BukkitMessagingFactory extends MessagingFactory<LPBukkitPlugin> {
 
     private class LilyPadMessengerProvider implements MessengerProvider {
 
-        @Nonnull
         @Override
-        public String getName() {
+        public @NonNull String getName() {
             return "LilyPad";
         }
 
-        @Nonnull
         @Override
-        public Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer) {
+        public @NonNull Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer) {
             LilyPadMessenger messenger = new LilyPadMessenger(getPlugin(), incomingMessageConsumer);
             messenger.init();
             return messenger;

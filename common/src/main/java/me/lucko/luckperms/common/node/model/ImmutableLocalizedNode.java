@@ -28,9 +28,9 @@ package me.lucko.luckperms.common.node.model;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 
-import java.util.Objects;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.Objects;
 
 /**
  * Holds a Node and where it was inherited from. All calls are passed onto the contained Node instance.
@@ -56,15 +56,13 @@ public final class ImmutableLocalizedNode extends ForwardingNode implements Loca
         return this.node;
     }
 
-    @Nonnull
     @Override
-    public Node getNode() {
+    public @NonNull Node getNode() {
         return this.node;
     }
 
-    @Nonnull
     @Override
-    public String getLocation() {
+    public @NonNull String getLocation() {
         return this.location;
     }
 

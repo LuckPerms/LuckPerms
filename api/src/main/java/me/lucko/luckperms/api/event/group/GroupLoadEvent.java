@@ -29,7 +29,7 @@ import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a group is loaded into memory from the storage.
@@ -43,7 +43,7 @@ public interface GroupLoadEvent extends LuckPermsEvent {
      *
      * @return the group that was loaded
      */
-    @Nonnull
+    @NonNull
     @Param(0)
     Group getGroup();
 

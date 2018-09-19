@@ -29,14 +29,13 @@ import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.permission.Subject;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Nonnull;
 
 /**
  * Represents a reference to a given Subject.
@@ -59,14 +58,12 @@ final class CachedSubjectReference implements LPSubjectReference {
     /**
      * The identifier of the collection which holds the subject
      */
-    @Nonnull
-    private final String collectionIdentifier;
+    private final @NonNull String collectionIdentifier;
 
     /**
      * The identifier of the subject
      */
-    @Nonnull
-    private final String subjectIdentifier;
+    private final @NonNull String subjectIdentifier;
 
     // cache
     private long lastLookup = 0L;
@@ -78,15 +75,13 @@ final class CachedSubjectReference implements LPSubjectReference {
         this.subjectIdentifier = Objects.requireNonNull(subjectIdentifier);
     }
 
-    @Nonnull
     @Override
-    public String getCollectionIdentifier() {
+    public @NonNull String getCollectionIdentifier() {
         return this.collectionIdentifier;
     }
 
-    @Nonnull
     @Override
-    public String getSubjectIdentifier() {
+    public @NonNull String getSubjectIdentifier() {
         return this.subjectIdentifier;
     }
 
@@ -134,9 +129,8 @@ final class CachedSubjectReference implements LPSubjectReference {
         return s;
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<LPSubject> resolveLp() {
+    public @NonNull CompletableFuture<LPSubject> resolveLp() {
         // check if there is a cached value before loading
         LPSubject s = tryCache();
         if (s != null) {
@@ -147,9 +141,8 @@ final class CachedSubjectReference implements LPSubjectReference {
         return CompletableFuture.supplyAsync(this::resolveDirectly);
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<Subject> resolve() {
+    public @NonNull CompletableFuture<Subject> resolve() {
         // check if there is a cached value before loading
         LPSubject s = tryCache();
         if (s != null) {

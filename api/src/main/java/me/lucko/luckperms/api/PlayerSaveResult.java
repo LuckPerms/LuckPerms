@@ -27,11 +27,11 @@ package me.lucko.luckperms.api;
 
 import me.lucko.luckperms.api.manager.UserManager;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Set;
 import java.util.UUID;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Encapsulates the result of an operation to save uuid data about a player.
@@ -48,7 +48,7 @@ public interface PlayerSaveResult {
      *
      * @return the status
      */
-    @Nonnull
+    @NonNull
     Set<Status> getStatus();
 
     /**
@@ -57,7 +57,7 @@ public interface PlayerSaveResult {
      * @param status the status to check for
      * @return if the result includes the status
      */
-    boolean includes(@Nonnull Status status);
+    boolean includes(@NonNull Status status);
 
     /**
      * Gets the old username involved in the result

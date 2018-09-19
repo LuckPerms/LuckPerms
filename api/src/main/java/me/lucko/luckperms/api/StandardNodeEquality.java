@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.api;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Standard {@link NodeEqualityPredicate}s.
@@ -72,7 +72,7 @@ public enum StandardNodeEquality implements NodeEqualityPredicate {
     IGNORE_VALUE_OR_IF_TEMPORARY;
 
     @Override
-    public boolean areEqual(@Nonnull Node o1, @Nonnull Node o2) {
+    public boolean areEqual(@NonNull Node o1, @NonNull Node o2) {
         return o1.standardEquals(o2, this);
     }
 }

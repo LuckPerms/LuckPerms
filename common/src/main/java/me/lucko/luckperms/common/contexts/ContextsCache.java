@@ -29,9 +29,9 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.buffers.ExpiringCache;
 
-import java.util.concurrent.TimeUnit;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Implementation of {@link ContextsSupplier} that caches results.
@@ -48,9 +48,8 @@ public final class ContextsCache<T> extends ExpiringCache<Contexts> implements C
         this.contextManager = contextManager;
     }
 
-    @Nonnull
     @Override
-    protected Contexts supply() {
+    protected @NonNull Contexts supply() {
         return this.contextManager.calculate(this.subject);
     }
 

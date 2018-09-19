@@ -27,9 +27,9 @@ package me.lucko.luckperms.api.messenger.message.type;
 
 import me.lucko.luckperms.api.messenger.message.Message;
 
-import java.util.UUID;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.UUID;
 
 /**
  * Represents an "user update" message.
@@ -45,7 +45,7 @@ public interface UserUpdateMessage extends Message {
      *
      * @return the user
      */
-    @Nonnull
+    @NonNull
     UUID getUser();
 
 }

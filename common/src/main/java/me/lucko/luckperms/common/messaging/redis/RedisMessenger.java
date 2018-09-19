@@ -30,12 +30,12 @@ import me.lucko.luckperms.api.messenger.Messenger;
 import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPubSub;
-
-import javax.annotation.Nonnull;
 
 /**
  * An implementation of {@link Messenger} using Redis.
@@ -76,7 +76,7 @@ public class RedisMessenger implements Messenger {
     }
 
     @Override
-    public void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage) {
+    public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
         try (Jedis jedis = this.jedisPool.getResource()) {
             jedis.publish(CHANNEL, outgoingMessage.asEncodedString());
         } catch (Exception e) {

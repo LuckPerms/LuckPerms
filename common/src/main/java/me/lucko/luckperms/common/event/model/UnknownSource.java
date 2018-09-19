@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.event.model;
 
 import me.lucko.luckperms.api.event.source.Source;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class UnknownSource implements Source {
     public static final Source INSTANCE = new UnknownSource();
@@ -36,9 +36,8 @@ public final class UnknownSource implements Source {
 
     }
 
-    @Nonnull
     @Override
-    public Type getType() {
+    public @NonNull Type getType() {
         return Type.UNKNOWN;
     }
 

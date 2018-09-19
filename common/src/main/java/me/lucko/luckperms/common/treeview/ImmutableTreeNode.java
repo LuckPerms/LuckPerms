@@ -29,6 +29,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -37,8 +39,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.annotation.Nonnull;
 
 /**
  * An immutable and sorted version of TreeNode
@@ -117,7 +117,7 @@ public class ImmutableTreeNode implements Comparable<ImmutableTreeNode> {
     }
 
     @Override
-    public int compareTo(@Nonnull ImmutableTreeNode o) {
+    public int compareTo(@NonNull ImmutableTreeNode o) {
         return (this.children != null) == o.getChildren().isPresent() ? 0 : (this.children != null ? 1 : -1);
     }
 }

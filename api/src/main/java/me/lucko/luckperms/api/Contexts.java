@@ -30,12 +30,11 @@ import com.google.common.collect.ImmutableSet;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
-
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
 
 /**
  * Encapsulates the {@link ContextSet contexts} and {@link LookupSetting settings} for
@@ -45,7 +44,6 @@ import javax.annotation.concurrent.Immutable;
  *
  * @since 2.11
  */
-@Immutable
 public class Contexts {
 
     /**
@@ -82,8 +80,7 @@ public class Contexts {
      *
      * @return a context that will satisfy all contextual requirements.
      */
-    @Nonnull
-    public static Contexts allowAll() {
+    public static @NonNull Contexts allowAll() {
         return FullySatisfiedContexts.getInstance();
     }
 
@@ -96,8 +93,7 @@ public class Contexts {
      * @return the global contexts
      * @since 3.3
      */
-    @Nonnull
-    public static Contexts global() {
+    public static @NonNull Contexts global() {
         return GLOBAL;
     }
 
@@ -113,8 +109,7 @@ public class Contexts {
      * @param isOp the value of {@link LookupSetting#IS_OP}
      * @return a new instance
      */
-    @Nonnull
-    public static Contexts of(@Nonnull ContextSet contextSet, boolean includeNodesSetWithoutServer, boolean includeNodesSetWithoutWorld, boolean resolveInheritance, boolean applyParentsWithoutServer, boolean applyParentsWithoutWorld, boolean isOp) {
+    public static @NonNull Contexts of(@NonNull ContextSet contextSet, boolean includeNodesSetWithoutServer, boolean includeNodesSetWithoutWorld, boolean resolveInheritance, boolean applyParentsWithoutServer, boolean applyParentsWithoutWorld, boolean isOp) {
         Objects.requireNonNull(contextSet, "contextSet");
         EnumSet<LookupSetting> settings = formSettings(
                 includeNodesSetWithoutServer,
@@ -145,7 +140,7 @@ public class Contexts {
      * @param settings the settings
      * @return a new instance
      */
-    public static Contexts of(@Nonnull ContextSet contextSet, @Nonnull Set<LookupSetting> settings) {
+    public static Contexts of(@NonNull ContextSet contextSet, @NonNull Set<LookupSetting> settings) {
         Objects.requireNonNull(contextSet, "contextSet");
         Objects.requireNonNull(settings, "settings");
 
@@ -183,7 +178,7 @@ public class Contexts {
      * @deprecated in favour of {@link #of(ContextSet, boolean, boolean, boolean, boolean, boolean, boolean)}
      */
     @Deprecated
-    public Contexts(@Nonnull ContextSet contextSet, boolean includeNodesSetWithoutServer, boolean includeNodesSetWithoutWorld, boolean resolveInheritance, boolean applyParentsWithoutServer, boolean applyParentsWithoutWorld, boolean isOp) {
+    public Contexts(@NonNull ContextSet contextSet, boolean includeNodesSetWithoutServer, boolean includeNodesSetWithoutWorld, boolean resolveInheritance, boolean applyParentsWithoutServer, boolean applyParentsWithoutWorld, boolean isOp) {
         this.contextSet = Objects.requireNonNull(contextSet, "contextSet").makeImmutable();
         this.settings = ImmutableSet.copyOf(formSettings(
                 includeNodesSetWithoutServer,
@@ -196,7 +191,7 @@ public class Contexts {
         this.hashCode = calculateHashCode();
     }
 
-    protected Contexts(@Nonnull ImmutableContextSet contextSet, @Nonnull ImmutableSet<LookupSetting> settings) {
+    protected Contexts(@NonNull ImmutableContextSet contextSet, @NonNull ImmutableSet<LookupSetting> settings) {
         this.contextSet = contextSet;
         this.settings = settings;
         this.hashCode = calculateHashCode();
@@ -208,8 +203,7 @@ public class Contexts {
      * @return an immutable context from this instance
      * @since 2.13
      */
-    @Nonnull
-    public ContextSet getContexts() {
+    public @NonNull ContextSet getContexts() {
         return this.contextSet;
     }
 
@@ -219,8 +213,7 @@ public class Contexts {
      * @return the settings
      * @since 4.2
      */
-    @Nonnull
-    public Set<LookupSetting> getSettings() {
+    public @NonNull Set<LookupSetting> getSettings() {
         return this.settings;
     }
 
@@ -231,7 +224,7 @@ public class Contexts {
      * @return the value
      * @since 4.2
      */
-    public boolean hasSetting(@Nonnull LookupSetting setting) {
+    public boolean hasSetting(@NonNull LookupSetting setting) {
         return this.settings.contains(setting);
     }
 
@@ -307,9 +300,8 @@ public class Contexts {
         return hasSetting(LookupSetting.APPLY_PARENTS_SET_WITHOUT_WORLD);
     }
 
-    @Nonnull
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         return "Contexts(contextSet=" + this.contextSet + ", settings=" + this.settings + ")";
     }
 

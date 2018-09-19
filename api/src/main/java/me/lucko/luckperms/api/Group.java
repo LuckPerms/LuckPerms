@@ -28,10 +28,10 @@ package me.lucko.luckperms.api;
 import me.lucko.luckperms.api.caching.GroupData;
 import me.lucko.luckperms.api.context.ContextSet;
 
-import java.util.OptionalInt;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.OptionalInt;
 
 /**
  * An inheritable holder of permission data.
@@ -43,7 +43,7 @@ public interface Group extends PermissionHolder {
      *
      * @return the name of the group
      */
-    @Nonnull
+    @NonNull
     String getName();
 
     /**
@@ -71,7 +71,7 @@ public interface Group extends PermissionHolder {
      * @since 4.3
      */
     @Nullable
-    String getDisplayName(@Nonnull ContextSet contextSet);
+    String getDisplayName(@NonNull ContextSet contextSet);
 
     /**
      * Gets the weight of this group, if present.
@@ -79,7 +79,7 @@ public interface Group extends PermissionHolder {
      * @return the group weight
      * @since 2.17
      */
-    @Nonnull
+    @NonNull
     OptionalInt getWeight();
 
     /**
@@ -88,7 +88,7 @@ public interface Group extends PermissionHolder {
      * @return the groups cached data.
      * @since 4.0
      */
-    @Nonnull
+    @NonNull
     @Override
     GroupData getCachedData();
 

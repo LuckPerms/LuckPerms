@@ -27,10 +27,10 @@ package me.lucko.luckperms.api;
 
 import me.lucko.luckperms.api.context.ContextSet;
 
-import java.util.List;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * An ordered chain of {@link Group}s.
@@ -42,7 +42,7 @@ public interface Track {
      *
      * @return the name of this track
      */
-    @Nonnull
+    @NonNull
     String getName();
 
     /**
@@ -54,7 +54,7 @@ public interface Track {
      *
      * @return an ordered {@link List} of the groups on this track
      */
-    @Nonnull
+    @NonNull
     List<String> getGroups();
 
     /**
@@ -75,7 +75,7 @@ public interface Track {
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
     @Nullable
-    String getNext(@Nonnull Group current);
+    String getNext(@NonNull Group current);
 
     /**
      * Gets the previous group on the track, before the one provided
@@ -88,7 +88,7 @@ public interface Track {
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
     @Nullable
-    String getPrevious(@Nonnull Group current);
+    String getPrevious(@NonNull Group current);
 
     /**
      * Promotes the given user along this track.
@@ -98,8 +98,8 @@ public interface Track {
      * @return the result of the action
      * @since 4.2
      */
-    @Nonnull
-    PromotionResult promote(@Nonnull User user, @Nonnull ContextSet contextSet);
+    @NonNull
+    PromotionResult promote(@NonNull User user, @NonNull ContextSet contextSet);
 
     /**
      * Demotes the given user along this track.
@@ -109,8 +109,8 @@ public interface Track {
      * @return the result of the action
      * @since 4.2
      */
-    @Nonnull
-    DemotionResult demote(@Nonnull User user, @Nonnull ContextSet contextSet);
+    @NonNull
+    DemotionResult demote(@NonNull User user, @NonNull ContextSet contextSet);
 
     /**
      * Appends a group to the end of this track
@@ -120,8 +120,8 @@ public interface Track {
      * @throws NullPointerException      if the group is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
      */
-    @Nonnull
-    DataMutateResult appendGroup(@Nonnull Group group);
+    @NonNull
+    DataMutateResult appendGroup(@NonNull Group group);
 
     /**
      * Inserts a group at a certain position on this track
@@ -133,8 +133,8 @@ public interface Track {
      * @throws NullPointerException      if the group is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
      */
-    @Nonnull
-    DataMutateResult insertGroup(@Nonnull Group group, int position) throws IndexOutOfBoundsException;
+    @NonNull
+    DataMutateResult insertGroup(@NonNull Group group, int position) throws IndexOutOfBoundsException;
 
     /**
      * Removes a group from this track
@@ -144,8 +144,8 @@ public interface Track {
      * @throws NullPointerException  if the group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
-    @Nonnull
-    DataMutateResult removeGroup(@Nonnull Group group);
+    @NonNull
+    DataMutateResult removeGroup(@NonNull Group group);
 
     /**
      * Removes a group from this track
@@ -154,8 +154,8 @@ public interface Track {
      * @return the result of the operation
      * @throws NullPointerException if the group is null
      */
-    @Nonnull
-    DataMutateResult removeGroup(@Nonnull String group);
+    @NonNull
+    DataMutateResult removeGroup(@NonNull String group);
 
     /**
      * Checks if a group features on this track
@@ -165,7 +165,7 @@ public interface Track {
      * @throws NullPointerException  if the group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
-    boolean containsGroup(@Nonnull Group group);
+    boolean containsGroup(@NonNull Group group);
 
     /**
      * Checks if a group features on this track
@@ -174,7 +174,7 @@ public interface Track {
      * @return true if the group is on this track
      * @throws NullPointerException if the group is null
      */
-    boolean containsGroup(@Nonnull String group);
+    boolean containsGroup(@NonNull String group);
 
     /**
      * Clear all of the groups from this track

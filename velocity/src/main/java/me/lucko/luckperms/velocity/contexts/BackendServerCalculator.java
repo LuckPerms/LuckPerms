@@ -33,7 +33,7 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BackendServerCalculator implements ContextCalculator<Player> {
 
@@ -47,9 +47,8 @@ public class BackendServerCalculator implements ContextCalculator<Player> {
         this.plugin = plugin;
     }
 
-    @Nonnull
     @Override
-    public MutableContextSet giveApplicableContext(@Nonnull Player subject, @Nonnull MutableContextSet accumulator) {
+    public @NonNull MutableContextSet giveApplicableContext(@NonNull Player subject, @NonNull MutableContextSet accumulator) {
         String server = getServer(subject);
         while (server != null && !accumulator.has(Contexts.WORLD_KEY, server)) {
             accumulator.add(Contexts.WORLD_KEY, server);

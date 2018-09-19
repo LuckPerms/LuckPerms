@@ -29,13 +29,13 @@ import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.PlayerSaveResult;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Represents the result to a player history save operation
@@ -69,8 +69,8 @@ public final class PlayerSaveResultImpl implements PlayerSaveResult {
     }
 
     private final Set<Status> status;
-    @Nullable private final String oldUsername;
-    @Nullable private final Set<UUID> otherUuids;
+    private final @Nullable String oldUsername;
+    private final @Nullable Set<UUID> otherUuids;
 
     private PlayerSaveResultImpl(EnumSet<Status> status, @Nullable String oldUsername, @Nullable Set<UUID> otherUuids) {
         this.status = ImmutableSet.copyOf(status);
@@ -89,32 +89,29 @@ public final class PlayerSaveResultImpl implements PlayerSaveResult {
      * @param otherUuids the other uuids
      * @return a new result
      */
-    public PlayerSaveResultImpl withOtherUuidsPresent(@Nonnull Set<UUID> otherUuids) {
+    public PlayerSaveResultImpl withOtherUuidsPresent(@NonNull Set<UUID> otherUuids) {
         EnumSet<Status> status = EnumSet.copyOf(this.status);
         status.add(Status.OTHER_UUIDS_PRESENT_FOR_USERNAME);
         return new PlayerSaveResultImpl(status, this.oldUsername, ImmutableSet.copyOf(otherUuids));
     }
 
-    @Nonnull
     @Override
-    public Set<Status> getStatus() {
+    public @NonNull Set<Status> getStatus() {
         return this.status;
     }
 
     @Override
-    public boolean includes(@Nonnull Status status) {
+    public boolean includes(@NonNull Status status) {
         return this.status.contains(status);
     }
 
-    @Nullable
     @Override
-    public String getOldUsername() {
+    public @Nullable String getOldUsername() {
         return this.oldUsername;
     }
 
-    @Nullable
     @Override
-    public Set<UUID> getOtherUuids() {
+    public @Nullable Set<UUID> getOtherUuids() {
         return this.otherUuids;
     }
 

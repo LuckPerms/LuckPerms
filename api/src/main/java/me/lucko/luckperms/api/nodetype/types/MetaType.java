@@ -29,9 +29,9 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.nodetype.NodeType;
 import me.lucko.luckperms.api.nodetype.NodeTypeKey;
 
-import java.util.Map;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.Map;
 
 /**
  * A sub-type of {@link Node} used to store meta assignments.
@@ -50,7 +50,7 @@ public interface MetaType extends NodeType, Map.Entry<String, String> {
      *
      * @return the meta key
      */
-    @Nonnull
+    @NonNull
     String getKey();
 
     /**
@@ -58,7 +58,7 @@ public interface MetaType extends NodeType, Map.Entry<String, String> {
      *
      * @return the meta value
      */
-    @Nonnull
+    @NonNull
     String getValue();
 
     @Override

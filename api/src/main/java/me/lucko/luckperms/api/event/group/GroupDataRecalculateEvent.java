@@ -30,7 +30,7 @@ import me.lucko.luckperms.api.caching.GroupData;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a groups cached data is refreshed
@@ -44,7 +44,7 @@ public interface GroupDataRecalculateEvent extends LuckPermsEvent {
      *
      * @return the group
      */
-    @Nonnull
+    @NonNull
     @Param(0)
     Group getGroup();
 
@@ -53,7 +53,7 @@ public interface GroupDataRecalculateEvent extends LuckPermsEvent {
      *
      * @return the data
      */
-    @Nonnull
+    @NonNull
     @Param(1)
     GroupData getData();
 

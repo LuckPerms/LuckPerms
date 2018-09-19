@@ -35,13 +35,13 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * An abstract command class
@@ -56,34 +56,29 @@ public abstract class Command<T, S> {
      *
      * Contains details about usage, description, etc
      */
-    @Nonnull
-    private final LocalizedCommandSpec spec;
+    private final @NonNull LocalizedCommandSpec spec;
 
     /**
      * The name of the command. Should be properly capitalised.
      */
-    @Nonnull
-    private final String name;
+    private final @NonNull String name;
 
     /**
      * The permission required to use this command. Nullable.
      */
-    @Nullable
-    private final CommandPermission permission;
+    private final @Nullable CommandPermission permission;
 
     /**
      * A predicate used for testing the size of the arguments list passed to this command
      */
-    @Nonnull
-    private Predicate<Integer> argumentCheck = Predicates.alwaysFalse();
+    private final @NonNull Predicate<Integer> argumentCheck;
 
     /**
      * Child commands. Nullable.
      */
-    @Nullable
-    private final List<Command<S, ?>> children;
+    private final @Nullable List<Command<S, ?>> children;
 
-    public Command(@Nonnull LocalizedCommandSpec spec, @Nonnull String name, @Nullable CommandPermission permission, @Nonnull Predicate<Integer> argumentCheck, @Nullable List<Command<S, ?>> children) {
+    public Command(@NonNull LocalizedCommandSpec spec, @NonNull String name, @Nullable CommandPermission permission, @NonNull Predicate<Integer> argumentCheck, @Nullable List<Command<S, ?>> children) {
         this.spec = spec;
         this.name = name;
         this.permission = permission;
@@ -91,11 +86,11 @@ public abstract class Command<T, S> {
         this.children = children == null ? null : ImmutableList.copyOf(children);
     }
 
-    public Command(@Nonnull LocalizedCommandSpec spec, @Nonnull String name, @Nullable CommandPermission permission, @Nonnull Predicate<Integer> argumentCheck) {
+    public Command(@NonNull LocalizedCommandSpec spec, @NonNull String name, @Nullable CommandPermission permission, @NonNull Predicate<Integer> argumentCheck) {
         this(spec, name, permission, argumentCheck, null);
     }
 
-    public Command(@Nonnull LocalizedCommandSpec spec, @Nonnull String name, @Nonnull Predicate<Integer> argumentCheck) {
+    public Command(@NonNull LocalizedCommandSpec spec, @NonNull String name, @NonNull Predicate<Integer> argumentCheck) {
         this(spec, name, null, argumentCheck, null);
     }
 
@@ -104,8 +99,7 @@ public abstract class Command<T, S> {
      *
      * @return the command spec
      */
-    @Nonnull
-    public LocalizedCommandSpec getSpec() {
+    public @NonNull LocalizedCommandSpec getSpec() {
         return this.spec;
     }
 
@@ -116,8 +110,7 @@ public abstract class Command<T, S> {
      *
      * @return the command name
      */
-    @Nonnull
-    public String getName() {
+    public @NonNull String getName() {
         return this.name;
     }
 
@@ -126,8 +119,7 @@ public abstract class Command<T, S> {
      *
      * @return the command permission
      */
-    @Nonnull
-    public Optional<CommandPermission> getPermission() {
+    public @NonNull Optional<CommandPermission> getPermission() {
         return Optional.ofNullable(this.permission);
     }
 
@@ -137,8 +129,7 @@ public abstract class Command<T, S> {
      *
      * @return the argument checking predicate
      */
-    @Nonnull
-    public Predicate<Integer> getArgumentCheck() {
+    public @NonNull Predicate<Integer> getArgumentCheck() {
         return this.argumentCheck;
     }
 
@@ -147,8 +138,7 @@ public abstract class Command<T, S> {
      *
      * @return any child commands
      */
-    @Nonnull
-    public Optional<List<Command<S, ?>>> getChildren() {
+    public @NonNull Optional<List<Command<S, ?>>> getChildren() {
         return Optional.ofNullable(this.children);
     }
 

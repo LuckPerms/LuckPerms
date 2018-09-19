@@ -32,6 +32,8 @@ import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -41,46 +43,39 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 public final class DescriptionBuilder implements PermissionDescription.Builder {
-    @Nonnull private final LPPermissionService service;
-    @Nonnull private final PluginContainer container;
-    @Nonnull private final Map<String, Tristate> roles = new HashMap<>();
-    @Nullable private String id = null;
-    @Nullable private Text description = null;
+    private final @NonNull LPPermissionService service;
+    private final @NonNull PluginContainer container;
+    private final @NonNull Map<String, Tristate> roles = new HashMap<>();
+    private @Nullable String id = null;
+    private @Nullable Text description = null;
 
-    public DescriptionBuilder(@Nonnull LPPermissionService service, @Nonnull PluginContainer container) {
+    public DescriptionBuilder(@NonNull LPPermissionService service, @NonNull PluginContainer container) {
         this.service = Objects.requireNonNull(service, "service");
         this.container = Objects.requireNonNull(container, "container");
     }
 
-    @Nonnull
     @Override
-    public PermissionDescription.Builder id(@Nonnull String id) {
+    public PermissionDescription.@NonNull Builder id(@NonNull String id) {
         this.id = Objects.requireNonNull(id, "id");
         return this;
     }
 
-    @Nonnull
     @Override
-    public PermissionDescription.Builder description(@Nonnull Text description) {
+    public PermissionDescription.@NonNull Builder description(@NonNull Text description) {
         this.description = Objects.requireNonNull(description, "description");
         return this;
     }
 
-    @Nonnull
     @Override
-    public PermissionDescription.Builder assign(@Nonnull String role, boolean value) {
+    public PermissionDescription.@NonNull Builder assign(@NonNull String role, boolean value) {
         Objects.requireNonNull(role, "role");
         this.roles.put(role, Tristate.fromBoolean(value));
         return this;
     }
 
-    @Nonnull
     @Override
-    public PermissionDescription register() throws IllegalStateException {
+    public @NonNull PermissionDescription register() throws IllegalStateException {
         if (this.id == null) {
             throw new IllegalStateException("id cannot be null");
         }

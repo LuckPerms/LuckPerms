@@ -33,13 +33,13 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.Spliterator;
-
-import javax.annotation.Nonnull;
 
 /**
  * A mutable implementation of {@link ContextSet}.
@@ -56,8 +56,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
      * @return a new MutableContextSet containing one context pair
      * @throws NullPointerException if key or value is null
      */
-    @Nonnull
-    public static MutableContextSet singleton(@Nonnull String key, @Nonnull String value) {
+    public static @NonNull MutableContextSet singleton(@NonNull String key, @NonNull String value) {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(value, "value");
         MutableContextSet set = MutableContextSet.create();
@@ -76,8 +75,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
      * @throws NullPointerException if any of the keys or values are null
      * @since 3.1
      */
-    @Nonnull
-    public static MutableContextSet of(@Nonnull String key1, @Nonnull String value1, @Nonnull String key2, @Nonnull String value2) {
+    public static @NonNull MutableContextSet of(@NonNull String key1, @NonNull String value1, @NonNull String key2, @NonNull String value2) {
         Objects.requireNonNull(key1, "key1");
         Objects.requireNonNull(value1, "value1");
         Objects.requireNonNull(key2, "key2");
@@ -95,8 +93,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
      * @return a new MutableContextSet representing the pairs in the iterable
      * @throws NullPointerException if the iterable is null
      */
-    @Nonnull
-    public static MutableContextSet fromEntries(@Nonnull Iterable<? extends Map.Entry<String, String>> iterable) {
+    public static @NonNull MutableContextSet fromEntries(@NonNull Iterable<? extends Map.Entry<String, String>> iterable) {
         Objects.requireNonNull(iterable, "iterable");
         MutableContextSet set = create();
         set.addAll(iterable);
@@ -110,8 +107,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
      * @return a new MutableContextSet representing the pairs from the map
      * @throws NullPointerException if the map is null
      */
-    @Nonnull
-    public static MutableContextSet fromMap(@Nonnull Map<String, String> map) {
+    public static @NonNull MutableContextSet fromMap(@NonNull Map<String, String> map) {
         Objects.requireNonNull(map, "map");
         MutableContextSet set = create();
         set.addAll(map);
@@ -126,8 +122,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
      * @throws NullPointerException if the multimap is null
      * @since 2.16
      */
-    @Nonnull
-    public static MutableContextSet fromMultimap(@Nonnull Multimap<String, String> multimap) {
+    public static @NonNull MutableContextSet fromMultimap(@NonNull Multimap<String, String> multimap) {
         Objects.requireNonNull(multimap, "multimap");
         MutableContextSet set = create();
         set.addAll(multimap);
@@ -143,8 +138,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
      * @return a new MutableContextSet with the same content and the one provided
      * @throws NullPointerException if contextSet is null
      */
-    @Nonnull
-    public static MutableContextSet fromSet(@Nonnull ContextSet contextSet) {
+    public static @NonNull MutableContextSet fromSet(@NonNull ContextSet contextSet) {
         Objects.requireNonNull(contextSet, "contextSet");
 
         if (contextSet instanceof ImmutableContextSet) {
@@ -164,8 +158,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
      *
      * @return a new MutableContextSet
      */
-    @Nonnull
-    public static MutableContextSet create() {
+    public static @NonNull MutableContextSet create() {
         return new MutableContextSet();
     }
 
@@ -196,9 +189,8 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
         return false;
     }
 
-    @Nonnull
     @Override
-    public ImmutableContextSet makeImmutable() {
+    public @NonNull ImmutableContextSet makeImmutable() {
         // if the map is empty, don't create a new instance
         if (this.map.isEmpty()) {
             return ImmutableContextSet.empty();
@@ -208,27 +200,24 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
         }
     }
 
-    @Nonnull
     @Override
-    public MutableContextSet mutableCopy() {
+    public @NonNull MutableContextSet mutableCopy() {
         synchronized (this.map) {
             return new MutableContextSet(this.map);
         }
     }
 
-    @Nonnull
     @Override
-    public Set<Map.Entry<String, String>> toSet() {
+    public @NonNull Set<Map.Entry<String, String>> toSet() {
         synchronized (this.map) {
             // map.entries() returns immutable Map.Entry instances, so we can just call copyOf
             return ImmutableSet.copyOf(this.map.entries());
         }
     }
 
-    @Nonnull
-    @Override
     @Deprecated
-    public Map<String, String> toMap() {
+    @Override
+    public @NonNull Map<String, String> toMap() {
         ImmutableMap.Builder<String, String> m = ImmutableMap.builder();
         synchronized (this.map) {
             for (Map.Entry<String, String> e : this.map.entries()) {
@@ -238,17 +227,15 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
         return m.build();
     }
 
-    @Nonnull
     @Override
-    public Multimap<String, String> toMultimap() {
+    public @NonNull Multimap<String, String> toMultimap() {
         synchronized (this.map) {
             return ImmutableSetMultimap.copyOf(this.map);
         }
     }
 
-    @Nonnull
     @Override
-    public Iterator<Map.Entry<String, String>> iterator() {
+    public @NonNull Iterator<Map.Entry<String, String>> iterator() {
         return toSet().iterator();
     }
 
@@ -264,7 +251,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
      * @param value the value to add
      * @throws NullPointerException if the key or value is null
      */
-    public void add(@Nonnull String key, @Nonnull String value) {
+    public void add(@NonNull String key, @NonNull String value) {
         this.map.put(sanitizeKey(key), sanitizeValue(value));
     }
 
@@ -274,7 +261,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
      * @param entry the entry to add
      * @throws NullPointerException if the entry is null
      */
-    public void add(@Nonnull Map.Entry<String, String> entry) {
+    public void add(Map.@NonNull Entry<String, String> entry) {
         Objects.requireNonNull(entry, "entry");
         add(entry.getKey(), entry.getValue());
     }
@@ -285,7 +272,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
      * @param iterable an iterable of key value context pairs
      * @throws NullPointerException if iterable is null
      */
-    public void addAll(@Nonnull Iterable<? extends Map.Entry<String, String>> iterable) {
+    public void addAll(@NonNull Iterable<? extends Map.Entry<String, String>> iterable) {
         for (Map.Entry<String, String> e : Objects.requireNonNull(iterable, "iterable")) {
             add(e);
         }
@@ -297,7 +284,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
      * @param map the map to add from
      * @throws NullPointerException if the map is null
      */
-    public void addAll(@Nonnull Map<String, String> map) {
+    public void addAll(@NonNull Map<String, String> map) {
         addAll(Objects.requireNonNull(map, "map").entrySet());
     }
 
@@ -308,7 +295,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
      * @throws NullPointerException if the map is null
      * @since 3.4
      */
-    public void addAll(@Nonnull Multimap<String, String> multimap) {
+    public void addAll(@NonNull Multimap<String, String> multimap) {
         addAll(Objects.requireNonNull(multimap, "multimap").entries());
     }
 
@@ -318,7 +305,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
      * @param contextSet the set to add from
      * @throws NullPointerException if the contextSet is null
      */
-    public void addAll(@Nonnull ContextSet contextSet) {
+    public void addAll(@NonNull ContextSet contextSet) {
         Objects.requireNonNull(contextSet, "contextSet");
         if (contextSet instanceof AbstractContextSet) {
             AbstractContextSet other = ((AbstractContextSet) contextSet);
@@ -337,7 +324,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
      * @param value the value to remove
      * @throws NullPointerException if the key or value is null
      */
-    public void remove(@Nonnull String key, @Nonnull String value) {
+    public void remove(@NonNull String key, @NonNull String value) {
         this.map.remove(sanitizeKey(key), sanitizeValue(value));
     }
 
@@ -347,7 +334,7 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
      * @param key the key to remove
      * @throws NullPointerException if the key is null
      */
-    public void removeAll(@Nonnull String key) {
+    public void removeAll(@NonNull String key) {
         this.map.removeAll(sanitizeKey(key));
     }
 

@@ -28,9 +28,9 @@ package me.lucko.luckperms.api.context;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.User;
 
-import java.util.Optional;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.Optional;
 
 /**
  * Manages {@link ContextCalculator}s, and calculates applicable contexts for a
@@ -59,8 +59,8 @@ public interface ContextManager {
      * @param subject the subject
      * @return the applicable context for the subject
      */
-    @Nonnull
-    ImmutableContextSet getApplicableContext(@Nonnull Object subject);
+    @NonNull
+    ImmutableContextSet getApplicableContext(@NonNull Object subject);
 
     /**
      * Queries the ContextManager for current context values for the subject.
@@ -68,8 +68,8 @@ public interface ContextManager {
      * @param subject the subject
      * @return the applicable context for the subject
      */
-    @Nonnull
-    Contexts getApplicableContexts(@Nonnull Object subject);
+    @NonNull
+    Contexts getApplicableContexts(@NonNull Object subject);
 
     /**
      * Queries the ContextManager for current context values for the given User.
@@ -83,8 +83,8 @@ public interface ContextManager {
      * @param user the user
      * @return the applicable context for the subject
      */
-    @Nonnull
-    Optional<ImmutableContextSet> lookupApplicableContext(@Nonnull User user);
+    @NonNull
+    Optional<ImmutableContextSet> lookupApplicableContext(@NonNull User user);
 
     /**
      * Queries the ContextManager for current context values for the given User.
@@ -98,8 +98,8 @@ public interface ContextManager {
      * @param user the user
      * @return the applicable context for the subject
      */
-    @Nonnull
-    Optional<Contexts> lookupApplicableContexts(@Nonnull User user);
+    @NonNull
+    Optional<Contexts> lookupApplicableContexts(@NonNull User user);
 
     /**
      * Gets the contexts from the static calculators in this manager.
@@ -109,7 +109,7 @@ public interface ContextManager {
      *
      * @return the current active static contexts
      */
-    @Nonnull
+    @NonNull
     ImmutableContextSet getStaticContext();
 
     /**
@@ -120,7 +120,7 @@ public interface ContextManager {
      *
      * @return the current active static contexts
      */
-    @Nonnull
+    @NonNull
     Contexts getStaticContexts();
 
     /**
@@ -133,8 +133,8 @@ public interface ContextManager {
      * @param contextSet the context set
      * @return a contexts instance
      */
-    @Nonnull
-    Contexts formContexts(@Nonnull Object subject, @Nonnull ImmutableContextSet contextSet);
+    @NonNull
+    Contexts formContexts(@NonNull Object subject, @NonNull ImmutableContextSet contextSet);
 
     /**
      * Forms a {@link Contexts} instance from an {@link ImmutableContextSet}.
@@ -145,15 +145,15 @@ public interface ContextManager {
      * @param contextSet the context set
      * @return a contexts instance
      */
-    @Nonnull
-    Contexts formContexts(@Nonnull ImmutableContextSet contextSet);
+    @NonNull
+    Contexts formContexts(@NonNull ImmutableContextSet contextSet);
 
     /**
      * Registers a context calculator with the manager.
      *
      * @param calculator the calculator
      */
-    void registerCalculator(@Nonnull ContextCalculator<?> calculator);
+    void registerCalculator(@NonNull ContextCalculator<?> calculator);
 
     /**
      * Registers a static context calculator with the manager.
@@ -162,13 +162,13 @@ public interface ContextManager {
      *
      * @param calculator the calculator
      */
-    void registerStaticCalculator(@Nonnull StaticContextCalculator calculator);
+    void registerStaticCalculator(@NonNull StaticContextCalculator calculator);
 
     /**
      * Invalidates the lookup cache for a given subject
      *
      * @param subject the subject
      */
-    void invalidateCache(@Nonnull Object subject);
+    void invalidateCache(@NonNull Object subject);
 
 }

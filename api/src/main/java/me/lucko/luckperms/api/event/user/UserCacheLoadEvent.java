@@ -30,7 +30,7 @@ import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a users {@link UserData} is loaded.
@@ -42,7 +42,7 @@ public interface UserCacheLoadEvent extends LuckPermsEvent {
      *
      * @return the user
      */
-    @Nonnull
+    @NonNull
     @Param(0)
     User getUser();
 
@@ -51,7 +51,7 @@ public interface UserCacheLoadEvent extends LuckPermsEvent {
      *
      * @return the loaded data
      */
-    @Nonnull
+    @NonNull
     @Param(1)
     UserData getLoadedData();
 

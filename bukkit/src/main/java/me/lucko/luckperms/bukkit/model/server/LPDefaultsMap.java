@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.buffers.Cache;
 
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginManager;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -44,8 +45,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.Nonnull;
 
 /**
  * A replacement map for the 'defaultPerms' instance in Bukkit's SimplePluginManager.
@@ -68,8 +67,8 @@ public final class LPDefaultsMap implements Map<Boolean, Set<Permission>> {
     private final Set<Permission> nonOpSet = new DefaultPermissionSet(false);
 
     // fully resolved defaults (accounts for child permissions too)
-    private DefaultsCache opCache = new DefaultsCache(true);
-    private DefaultsCache nonOpCache = new DefaultsCache(false);
+    private final DefaultsCache opCache = new DefaultsCache(true);
+    private final DefaultsCache nonOpCache = new DefaultsCache(false);
 
     // #values and #entrySet results - both immutable
     private final Collection<Set<Permission>> values = ImmutableList.of(this.opSet, this.nonOpSet);
@@ -111,9 +110,12 @@ public final class LPDefaultsMap implements Map<Boolean, Set<Permission>> {
     }
 
     // return wrappers around this map impl
-    @Nonnull @Override public Collection<Set<Permission>> values() { return this.values; }
-    @Nonnull @Override public Set<Entry<Boolean, Set<Permission>>> entrySet() { return this.entrySet; }
-    @Nonnull @Override public Set<Boolean> keySet() { return KEY_SET; }
+    @Override
+    public @NonNull Collection<Set<Permission>> values() { return this.values; }
+    @Override
+    public @NonNull Set<Entry<Boolean, Set<Permission>>> entrySet() { return this.entrySet; }
+    @Override
+    public @NonNull Set<Boolean> keySet() { return KEY_SET; }
 
     // return accurate results for the Map spec
     @Override public int size() { return 2; }
@@ -124,7 +126,7 @@ public final class LPDefaultsMap implements Map<Boolean, Set<Permission>> {
     // throw unsupported operation exceptions
     @Override public Set<Permission> put(Boolean key, Set<Permission> value) { throw new UnsupportedOperationException(); }
     @Override public Set<Permission> remove(Object key) { throw new UnsupportedOperationException(); }
-    @Override public void putAll(@Nonnull Map<? extends Boolean, ? extends Set<Permission>> m) { throw new UnsupportedOperationException(); }
+    @Override public void putAll(@NonNull Map<? extends Boolean, ? extends Set<Permission>> m) { throw new UnsupportedOperationException(); }
     @Override public void clear() { throw new UnsupportedOperationException(); }
 
     private final class DefaultsCache extends Cache<Map<String, Boolean>> {
@@ -134,9 +136,8 @@ public final class LPDefaultsMap implements Map<Boolean, Set<Permission>> {
             this.op = op;
         }
 
-        @Nonnull
         @Override
-        protected Map<String, Boolean> supply() {
+        protected @NonNull Map<String, Boolean> supply() {
             Map<String, Boolean> builder = new HashMap<>();
             for (Permission perm : LPDefaultsMap.this.get(this.op)) {
                 String name = perm.getName().toLowerCase();
@@ -163,14 +164,14 @@ public final class LPDefaultsMap implements Map<Boolean, Set<Permission>> {
         }
 
         @Override
-        public boolean add(@Nonnull Permission element) {
+        public boolean add(@NonNull Permission element) {
             boolean ret = super.add(element);
             invalidate(this.op);
             return ret;
         }
 
         @Override
-        public boolean addAll(@Nonnull Collection<? extends Permission> collection) {
+        public boolean addAll(@NonNull Collection<? extends Permission> collection) {
             boolean ret = super.addAll(collection);
             invalidate(this.op);
             return ret;

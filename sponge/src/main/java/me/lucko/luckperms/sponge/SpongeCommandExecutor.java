@@ -30,6 +30,8 @@ import com.google.common.base.Splitter;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.sender.Sender;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -43,9 +45,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 public class SpongeCommandExecutor extends CommandManager implements CommandCallable {
     private static final Splitter TAB_COMPLETE_ARGUMENT_SPLITTER = Splitter.on(COMMAND_SEPARATOR_PATTERN);
     private static final Splitter ARGUMENT_SPLITTER = Splitter.on(COMMAND_SEPARATOR_PATTERN).omitEmptyStrings();
@@ -57,9 +56,8 @@ public class SpongeCommandExecutor extends CommandManager implements CommandCall
         this.plugin = plugin;
     }
 
-    @Nonnull
     @Override
-    public CommandResult process(@Nonnull CommandSource source, @Nonnull String s) {
+    public @NonNull CommandResult process(@NonNull CommandSource source, @NonNull String s) {
         Sender lpSender = this.plugin.getSenderFactory().wrap(source);
         List<String> arguments = processSelectors(source, CommandManager.stripQuotes(ARGUMENT_SPLITTER.splitToList(s)));
 
@@ -67,9 +65,8 @@ public class SpongeCommandExecutor extends CommandManager implements CommandCall
         return CommandResult.success();
     }
 
-    @Nonnull
     @Override
-    public List<String> getSuggestions(@Nonnull CommandSource source, @Nonnull String s, @Nullable Location<World> location) {
+    public @NonNull List<String> getSuggestions(@NonNull CommandSource source, @NonNull String s, @Nullable Location<World> location) {
         Sender lpSender = this.plugin.getSenderFactory().wrap(source);
         List<String> arguments = processSelectors(source, CommandManager.stripQuotes(TAB_COMPLETE_ARGUMENT_SPLITTER.splitToList(s)));
 
@@ -77,25 +74,22 @@ public class SpongeCommandExecutor extends CommandManager implements CommandCall
     }
 
     @Override
-    public boolean testPermission(@Nonnull CommandSource source) {
+    public boolean testPermission(@NonNull CommandSource source) {
         return true; // we run permission checks internally
     }
 
-    @Nonnull
     @Override
-    public Optional<Text> getShortDescription(@Nonnull CommandSource source) {
+    public @NonNull Optional<Text> getShortDescription(@NonNull CommandSource source) {
         return Optional.of(Text.of("Manage permissions"));
     }
 
-    @Nonnull
     @Override
-    public Optional<Text> getHelp(@Nonnull CommandSource source) {
+    public @NonNull Optional<Text> getHelp(@NonNull CommandSource source) {
         return Optional.of(Text.of("Run /luckperms to view usage."));
     }
 
-    @Nonnull
     @Override
-    public Text getUsage(@Nonnull CommandSource source) {
+    public @NonNull Text getUsage(@NonNull CommandSource source) {
         return Text.of("/luckperms");
     }
 

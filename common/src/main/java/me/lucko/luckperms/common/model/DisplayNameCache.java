@@ -30,9 +30,9 @@ import me.lucko.luckperms.api.nodetype.types.DisplayNameType;
 import me.lucko.luckperms.common.buffers.Cache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 
-import java.util.Optional;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.Optional;
 
 /**
  * Cache instance to supply the display name of a {@link Group}.
@@ -44,9 +44,8 @@ public class DisplayNameCache extends Cache<Optional<String>> {
         this.group = group;
     }
 
-    @Nonnull
     @Override
-    protected Optional<String> supply() {
+    protected @NonNull Optional<String> supply() {
         // query for a displayname node
         for (Node n : this.group.getOwnNodes(this.group.getPlugin().getContextManager().getStaticContext())) {
             Optional<DisplayNameType> displayName = n.getTypeData(DisplayNameType.KEY);

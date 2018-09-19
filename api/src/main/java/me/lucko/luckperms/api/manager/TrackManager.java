@@ -28,14 +28,14 @@ package me.lucko.luckperms.api.manager;
 import me.lucko.luckperms.api.Storage;
 import me.lucko.luckperms.api.Track;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Represents the object responsible for managing {@link Track} instances.
@@ -72,8 +72,8 @@ public interface TrackManager {
      * @throws NullPointerException if the name is null
      * @since 4.1
      */
-    @Nonnull
-    CompletableFuture<Track> createAndLoadTrack(@Nonnull String name);
+    @NonNull
+    CompletableFuture<Track> createAndLoadTrack(@NonNull String name);
 
     /**
      * Loads a track from the plugin's storage provider into memory.
@@ -93,8 +93,8 @@ public interface TrackManager {
      * @throws NullPointerException if the name is null
      * @since 4.1
      */
-    @Nonnull
-    CompletableFuture<Optional<Track>> loadTrack(@Nonnull String name);
+    @NonNull
+    CompletableFuture<Optional<Track>> loadTrack(@NonNull String name);
 
     /**
      * Saves a track's data back to the plugin's storage provider.
@@ -113,8 +113,8 @@ public interface TrackManager {
      * @throws IllegalStateException if the track instance was not obtained from LuckPerms.
      * @since 4.1
      */
-    @Nonnull
-    CompletableFuture<Void> saveTrack(@Nonnull Track track);
+    @NonNull
+    CompletableFuture<Void> saveTrack(@NonNull Track track);
 
     /**
      * Permanently deletes a track from the plugin's storage provider.
@@ -132,8 +132,8 @@ public interface TrackManager {
      * @throws IllegalStateException if the track instance was not obtained from LuckPerms.
      * @since 4.1
      */
-    @Nonnull
-    CompletableFuture<Void> deleteTrack(@Nonnull Track track);
+    @NonNull
+    CompletableFuture<Void> deleteTrack(@NonNull Track track);
 
     /**
      * Loads all tracks into memory.
@@ -147,7 +147,7 @@ public interface TrackManager {
      * @return a future to encapsulate the operation.
      * @since 4.1
      */
-    @Nonnull
+    @NonNull
     CompletableFuture<Void> loadAllTracks();
 
     /**
@@ -158,7 +158,7 @@ public interface TrackManager {
      * @throws NullPointerException if the name is null
      */
     @Nullable
-    Track getTrack(@Nonnull String name);
+    Track getTrack(@NonNull String name);
 
     /**
      * Gets a loaded track.
@@ -169,8 +169,7 @@ public interface TrackManager {
      * @return an optional {@link Track} object
      * @throws NullPointerException if the name is null
      */
-    @Nonnull
-    default Optional<Track> getTrackOpt(@Nonnull String name) {
+    default @NonNull Optional<Track> getTrackOpt(@NonNull String name) {
         return Optional.ofNullable(getTrack(name));
     }
 
@@ -179,7 +178,7 @@ public interface TrackManager {
      *
      * @return a {@link Set} of {@link Track} objects
      */
-    @Nonnull
+    @NonNull
     Set<Track> getLoadedTracks();
 
     /**
@@ -189,6 +188,6 @@ public interface TrackManager {
      * @return true if the track is loaded
      * @throws NullPointerException if the name is null
      */
-    boolean isLoaded(@Nonnull String name);
+    boolean isLoaded(@NonNull String name);
 
 }

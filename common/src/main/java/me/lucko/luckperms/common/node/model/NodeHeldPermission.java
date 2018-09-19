@@ -29,10 +29,10 @@ import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Optional;
 import java.util.OptionalLong;
-
-import javax.annotation.Nonnull;
 
 public final class NodeHeldPermission<T extends Comparable<T>> implements HeldPermission<T> {
     public static <T extends Comparable<T>> NodeHeldPermission<T> of(T holder, NodeDataContainer node) {
@@ -51,9 +51,8 @@ public final class NodeHeldPermission<T extends Comparable<T>> implements HeldPe
         this.node = node;
     }
 
-    @Nonnull
     @Override
-    public String getPermission() {
+    public @NonNull String getPermission() {
         return this.node.getPermission();
     }
 
@@ -62,15 +61,13 @@ public final class NodeHeldPermission<T extends Comparable<T>> implements HeldPe
         return this.node.getValue();
     }
 
-    @Nonnull
     @Override
-    public Optional<String> getServer() {
+    public @NonNull Optional<String> getServer() {
         return this.node.getServer();
     }
 
-    @Nonnull
     @Override
-    public Optional<String> getWorld() {
+    public @NonNull Optional<String> getWorld() {
         return this.node.getWorld();
     }
 
@@ -84,15 +81,13 @@ public final class NodeHeldPermission<T extends Comparable<T>> implements HeldPe
         return this.node.getContexts();
     }
 
-    @Nonnull
     @Override
-    public Node asNode() {
+    public @NonNull Node asNode() {
         return this.node;
     }
 
-    @Nonnull
     @Override
-    public T getHolder() {
+    public @NonNull T getHolder() {
         return this.holder;
     }
 

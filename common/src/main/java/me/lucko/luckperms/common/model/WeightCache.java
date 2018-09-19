@@ -31,11 +31,11 @@ import me.lucko.luckperms.api.nodetype.types.WeightType;
 import me.lucko.luckperms.common.buffers.Cache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
-
-import javax.annotation.Nonnull;
 
 /**
  * Cache instance to supply the weight of a {@link Group}.
@@ -47,9 +47,8 @@ public class WeightCache extends Cache<OptionalInt> {
         this.group = group;
     }
 
-    @Nonnull
     @Override
-    protected OptionalInt supply() {
+    protected @NonNull OptionalInt supply() {
         boolean seen = false;
         int best = 0;
         for (Node n : this.group.getOwnNodes(ImmutableContextSet.empty())) {

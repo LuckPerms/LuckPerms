@@ -54,7 +54,7 @@ public class VelocityContextManager extends ContextManager<Player> {
             throw new NullPointerException("subject");
         }
 
-        return subjectCaches.get(subject);
+        return this.subjectCaches.get(subject);
     }
 
     @Override

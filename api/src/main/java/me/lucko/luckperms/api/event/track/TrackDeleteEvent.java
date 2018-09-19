@@ -29,9 +29,9 @@ import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 
-import java.util.List;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * Called when a track is deleted
@@ -43,7 +43,7 @@ public interface TrackDeleteEvent extends LuckPermsEvent {
      *
      * @return the name of the deleted track
      */
-    @Nonnull
+    @NonNull
     @Param(0)
     String getTrackName();
 
@@ -52,7 +52,7 @@ public interface TrackDeleteEvent extends LuckPermsEvent {
      *
      * @return a copy of the tracks existing data
      */
-    @Nonnull
+    @NonNull
     @Param(1)
     List<String> getExistingData();
 
@@ -61,7 +61,7 @@ public interface TrackDeleteEvent extends LuckPermsEvent {
      *
      * @return the cause of the deletion
      */
-    @Nonnull
+    @NonNull
     @Param(2)
     DeletionCause getCause();
 

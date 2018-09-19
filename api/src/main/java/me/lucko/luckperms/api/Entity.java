@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.api;
 
-import java.util.UUID;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.UUID;
 
 /**
  * Represents an entity on the server.
@@ -57,7 +57,7 @@ public interface Entity {
      *
      * @return the object name
      */
-    @Nonnull
+    @NonNull
     String getName();
 
     /**
@@ -65,7 +65,7 @@ public interface Entity {
      *
      * @return the type
      */
-    @Nonnull
+    @NonNull
     Type getType();
 
     /**

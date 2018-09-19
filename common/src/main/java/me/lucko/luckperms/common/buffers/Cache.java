@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.common.buffers;
 
-import java.util.Optional;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.Optional;
 
 /**
  * Simple one element cache implementation.
@@ -37,8 +37,7 @@ import javax.annotation.Nonnull;
 public abstract class Cache<T> {
     private volatile T value = null;
 
-    @Nonnull
-    protected abstract T supply();
+    protected abstract @NonNull T supply();
 
     public final T get() {
         T val = this.value;

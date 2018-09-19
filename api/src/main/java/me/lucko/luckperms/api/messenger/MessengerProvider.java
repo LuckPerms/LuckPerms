@@ -27,7 +27,7 @@ package me.lucko.luckperms.api.messenger;
 
 import me.lucko.luckperms.api.LuckPermsApi;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents a provider for {@link Messenger} instances.
@@ -45,7 +45,7 @@ public interface MessengerProvider {
      *
      * @return the provider name
      */
-    @Nonnull
+    @NonNull
     String getName();
 
     /**
@@ -59,7 +59,7 @@ public interface MessengerProvider {
      *                                incoming messages to
      * @return a new messenger agent instance
      */
-    @Nonnull
-    Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer);
+    @NonNull
+    Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer);
 
 }

@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.api;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * A means to push changes to other servers using the platforms networking
@@ -71,6 +71,6 @@ public interface MessagingService {
      * @param user the user to push the update for
      * @since 4.1
      */
-    void pushUserUpdate(@Nonnull User user);
+    void pushUserUpdate(@NonNull User user);
 
 }

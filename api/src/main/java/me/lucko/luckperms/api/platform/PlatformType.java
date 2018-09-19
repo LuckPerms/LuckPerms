@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.api.platform;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents a type of platform which LuckPerms can run on.
@@ -51,8 +51,7 @@ public enum PlatformType {
      *
      * @return a readable name
      */
-    @Nonnull
-    public String getFriendlyName() {
+    public @NonNull String getFriendlyName() {
         return this.friendlyName;
     }
 }

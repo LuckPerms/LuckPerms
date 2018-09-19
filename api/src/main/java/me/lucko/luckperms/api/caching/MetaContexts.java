@@ -28,10 +28,9 @@ package me.lucko.luckperms.api.caching;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 
-import java.util.Objects;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import java.util.Objects;
 
 /**
  * Encapsulates the options and settings for a meta lookup.
@@ -41,7 +40,6 @@ import javax.annotation.concurrent.Immutable;
  *
  * @since 3.2
  */
-@Immutable
 public final class MetaContexts {
 
     /**
@@ -52,7 +50,7 @@ public final class MetaContexts {
      * @param suffixStackDefinition the suffix stack definition to be used
      * @return the new instance
      */
-    public static MetaContexts of(@Nonnull Contexts contexts, @Nonnull MetaStackDefinition prefixStackDefinition, @Nonnull MetaStackDefinition suffixStackDefinition) {
+    public static MetaContexts of(@NonNull Contexts contexts, @NonNull MetaStackDefinition prefixStackDefinition, @NonNull MetaStackDefinition suffixStackDefinition) {
         return new MetaContexts(contexts, prefixStackDefinition, suffixStackDefinition);
     }
 
@@ -70,31 +68,27 @@ public final class MetaContexts {
      * @param prefixStackDefinition the prefix stack definition to be used
      * @param suffixStackDefinition the suffix stack definition to be used
      */
-    public MetaContexts(@Nonnull Contexts contexts, @Nonnull MetaStackDefinition prefixStackDefinition, @Nonnull MetaStackDefinition suffixStackDefinition) {
+    public MetaContexts(@NonNull Contexts contexts, @NonNull MetaStackDefinition prefixStackDefinition, @NonNull MetaStackDefinition suffixStackDefinition) {
         this.contexts = Objects.requireNonNull(contexts, "contexts");
         this.prefixStackDefinition = Objects.requireNonNull(prefixStackDefinition, "prefixStackDefinition");
         this.suffixStackDefinition = Objects.requireNonNull(suffixStackDefinition, "suffixStackDefinition");
         this.hashCode = calculateHashCode();
     }
 
-    @Nonnull
-    public Contexts getContexts() {
+    public @NonNull Contexts getContexts() {
         return this.contexts;
     }
 
-    @Nonnull
-    public MetaStackDefinition getPrefixStackDefinition() {
+    public @NonNull MetaStackDefinition getPrefixStackDefinition() {
         return this.prefixStackDefinition;
     }
 
-    @Nonnull
-    public MetaStackDefinition getSuffixStackDefinition() {
+    public @NonNull MetaStackDefinition getSuffixStackDefinition() {
         return this.suffixStackDefinition;
     }
 
     @Override
-    @Nonnull
-    public String toString() {
+    public @NonNull String toString() {
         return "MetaContexts(" +
                 "contexts=" + this.getContexts() + ", " +
                 "prefixStackDefinition=" + this.getPrefixStackDefinition() + ", " +

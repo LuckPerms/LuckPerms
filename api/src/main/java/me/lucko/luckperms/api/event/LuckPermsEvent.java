@@ -27,7 +27,7 @@ package me.lucko.luckperms.api.event;
 
 import me.lucko.luckperms.api.LuckPermsApi;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * A superinterface for all LuckPerms events.
@@ -41,7 +41,7 @@ public interface LuckPermsEvent {
      *
      * @return the api instance
      */
-    @Nonnull
+    @NonNull
     LuckPermsApi getApi();
 
 }

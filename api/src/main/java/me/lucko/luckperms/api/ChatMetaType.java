@@ -25,11 +25,11 @@
 
 package me.lucko.luckperms.api;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
-import javax.annotation.Nonnull;
 
 /**
  * Represents a type of chat meta
@@ -43,13 +43,12 @@ public enum ChatMetaType {
      */
     PREFIX("prefix") {
         @Override
-        public boolean matches(@Nonnull Node node) {
+        public boolean matches(@NonNull Node node) {
             return Objects.requireNonNull(node, "node").isPrefix();
         }
 
-        @Nonnull
         @Override
-        public Map.Entry<Integer, String> getEntry(@Nonnull Node node) {
+        public Map.@NonNull Entry<Integer, String> getEntry(@NonNull Node node) {
             return Objects.requireNonNull(node, "node").getPrefix();
         }
     },
@@ -59,13 +58,12 @@ public enum ChatMetaType {
      */
     SUFFIX("suffix") {
         @Override
-        public boolean matches(@Nonnull Node node) {
+        public boolean matches(@NonNull Node node) {
             return Objects.requireNonNull(node, "node").isSuffix();
         }
 
-        @Nonnull
         @Override
-        public Map.Entry<Integer, String> getEntry(@Nonnull Node node) {
+        public Map.@NonNull Entry<Integer, String> getEntry(@NonNull Node node) {
             return Objects.requireNonNull(node, "node").getSuffix();
         }
     };
@@ -82,7 +80,7 @@ public enum ChatMetaType {
      * @param node the node to test
      * @return true if the node has the same type
      */
-    public abstract boolean matches(@Nonnull Node node);
+    public abstract boolean matches(@NonNull Node node);
 
     /**
      * Returns if the passed node should be ignored when searching for meta of this type
@@ -90,7 +88,7 @@ public enum ChatMetaType {
      * @param node the node to test
      * @return true if the node does not share the same type
      */
-    public boolean shouldIgnore(@Nonnull Node node) {
+    public boolean shouldIgnore(@NonNull Node node) {
         return !matches(node);
     }
 
@@ -101,8 +99,7 @@ public enum ChatMetaType {
      * @return the entry
      * @throws IllegalStateException if the node does not share the same type
      */
-    @Nonnull
-    public abstract Map.Entry<Integer, String> getEntry(@Nonnull Node node);
+    public abstract Map.@NonNull Entry<Integer, String> getEntry(@NonNull Node node);
 
     @Override
     public String toString() {
@@ -116,8 +113,7 @@ public enum ChatMetaType {
      * @return the parsed chat meta type
      * @since 3.4
      */
-    @Nonnull
-    public static Optional<ChatMetaType> ofNode(@Nonnull Node node) {
+    public static @NonNull Optional<ChatMetaType> ofNode(@NonNull Node node) {
         if (node.isPrefix()) {
             return Optional.of(PREFIX);
         } else if (node.isSuffix()) {

@@ -42,6 +42,9 @@ import me.lucko.luckperms.common.node.comparator.NodeComparator;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.node.model.ImmutableLocalizedNode;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -54,9 +57,6 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Predicate;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * A map of nodes held by a {@link PermissionHolder}.
@@ -273,9 +273,8 @@ public final class NodeMap {
             this.handle = handle;
         }
 
-        @Nonnull
         @Override
-        protected ImmutableSetMultimap<ImmutableContextSet, LocalizedNode> supply() {
+        protected @NonNull ImmutableSetMultimap<ImmutableContextSet, LocalizedNode> supply() {
             return ImmutableSetMultimap.copyOf(this.handle.map);
         }
     }

@@ -29,12 +29,12 @@ import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
 import me.lucko.luckperms.api.messenger.Messenger;
 import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import javax.annotation.Nonnull;
 
 /**
  * An implementation of {@link Messenger} using SQL.
@@ -69,7 +69,7 @@ public abstract class AbstractSqlMessenger implements Messenger {
     }
 
     @Override
-    public void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage) {
+    public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
         try (Connection c = getConnection()) {
             try (PreparedStatement ps = c.prepareStatement("INSERT INTO " + getTableName() + "(`time`, `msg`) VALUES(NOW(), ?)")) {
                 ps.setString(1, outgoingMessage.asEncodedString());

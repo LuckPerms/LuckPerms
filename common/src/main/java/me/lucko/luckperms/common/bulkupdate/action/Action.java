@@ -53,7 +53,7 @@ public interface Action {
      *
      * Will include a placeholder for the table, as "{table}".
      *
-     * @return the action in sql form
+     * @param builder the statement builder
      */
     void appendSql(PreparedStatementBuilder builder);
 

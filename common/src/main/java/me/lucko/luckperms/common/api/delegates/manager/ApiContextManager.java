@@ -34,10 +34,10 @@ import me.lucko.luckperms.common.api.delegates.model.ApiUser;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Objects;
 import java.util.Optional;
-
-import javax.annotation.Nonnull;
 
 @SuppressWarnings("unchecked")
 public class ApiContextManager implements me.lucko.luckperms.api.context.ContextManager {
@@ -56,75 +56,67 @@ public class ApiContextManager implements me.lucko.luckperms.api.context.Context
         return subject;
     }
 
-    @Nonnull
     @Override
-    public ImmutableContextSet getApplicableContext(@Nonnull Object subject) {
+    public @NonNull ImmutableContextSet getApplicableContext(@NonNull Object subject) {
         Objects.requireNonNull(subject, "subject");
         return this.handle.getApplicableContext(checkType(subject));
     }
 
-    @Nonnull
     @Override
-    public Contexts getApplicableContexts(@Nonnull Object subject) {
+    public @NonNull Contexts getApplicableContexts(@NonNull Object subject) {
         Objects.requireNonNull(subject, "subject");
         return this.handle.getApplicableContexts(checkType(subject));
     }
 
-    @Nonnull
     @Override
-    public Optional<ImmutableContextSet> lookupApplicableContext(@Nonnull User user) {
+    public @NonNull Optional<ImmutableContextSet> lookupApplicableContext(@NonNull User user) {
         Objects.requireNonNull(user, "user");
         return this.plugin.getContextForUser(ApiUser.cast(user)).map(c -> c.getContexts().makeImmutable());
     }
 
-    @Nonnull
     @Override
-    public Optional<Contexts> lookupApplicableContexts(@Nonnull User user) {
+    public @NonNull Optional<Contexts> lookupApplicableContexts(@NonNull User user) {
         Objects.requireNonNull(user, "user");
         return this.plugin.getContextForUser(ApiUser.cast(user));
     }
 
-    @Nonnull
     @Override
-    public ImmutableContextSet getStaticContext() {
+    public @NonNull ImmutableContextSet getStaticContext() {
         return this.handle.getStaticContext();
     }
 
-    @Nonnull
     @Override
-    public Contexts getStaticContexts() {
+    public @NonNull Contexts getStaticContexts() {
         return this.handle.getStaticContexts();
     }
 
-    @Nonnull
     @Override
-    public Contexts formContexts(@Nonnull Object subject, @Nonnull ImmutableContextSet contextSet) {
+    public @NonNull Contexts formContexts(@NonNull Object subject, @NonNull ImmutableContextSet contextSet) {
         Objects.requireNonNull(subject, "subject");
         Objects.requireNonNull(contextSet, "contextSet");
         return this.handle.formContexts(checkType(subject), contextSet);
     }
 
-    @Nonnull
     @Override
-    public Contexts formContexts(@Nonnull ImmutableContextSet contextSet) {
+    public @NonNull Contexts formContexts(@NonNull ImmutableContextSet contextSet) {
         Objects.requireNonNull(contextSet, "contextSet");
         return this.handle.formContexts(contextSet);
     }
 
     @Override
-    public void registerCalculator(@Nonnull ContextCalculator<?> calculator) {
+    public void registerCalculator(@NonNull ContextCalculator<?> calculator) {
         Objects.requireNonNull(calculator, "calculator");
         this.handle.registerCalculator(calculator);
     }
 
     @Override
-    public void registerStaticCalculator(@Nonnull StaticContextCalculator calculator) {
+    public void registerStaticCalculator(@NonNull StaticContextCalculator calculator) {
         Objects.requireNonNull(calculator, "calculator");
         this.handle.registerStaticCalculator(calculator);
     }
 
     @Override
-    public void invalidateCache(@Nonnull Object subject) {
+    public void invalidateCache(@NonNull Object subject) {
         Objects.requireNonNull(subject, "subject");
         this.handle.invalidateCache(checkType(subject));
     }

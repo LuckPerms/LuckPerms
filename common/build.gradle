@@ -1,7 +1,7 @@
 dependencies {
     compile project(':api')
 
-    compile  'com.google.code.findbugs:jsr305:3.0.2'
+    compile 'org.checkerframework:checker-qual:2.5.5'
     compile('net.kyori:text:1.11-1.6.4') {
         exclude(module: 'checker-qual')
         exclude(module: 'guava')

@@ -32,6 +32,7 @@ import me.lucko.luckperms.api.messenger.Messenger;
 import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.network.ChannelBinding;
@@ -41,8 +42,6 @@ import org.spongepowered.api.network.RemoteConnection;
 
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Nonnull;
 
 /**
  * An implementation of {@link Messenger} using the plugin messaging channels.
@@ -73,7 +72,7 @@ public class PluginMessageMessenger implements Messenger, RawDataListener {
     }
 
     @Override
-    public void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage) {
+    public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
         this.plugin.getBootstrap().getSpongeScheduler().createTaskBuilder().interval(10, TimeUnit.SECONDS).execute(task -> {
             if (!this.plugin.getBootstrap().getGame().isServerAvailable()) {
                 return;
@@ -91,7 +90,7 @@ public class PluginMessageMessenger implements Messenger, RawDataListener {
     }
 
     @Override
-    public void handlePayload(@Nonnull ChannelBuf buf, @Nonnull RemoteConnection connection, @Nonnull Platform.Type type) {
+    public void handlePayload(@NonNull ChannelBuf buf, @NonNull RemoteConnection connection, Platform.@NonNull Type type) {
         String msg = buf.readUTF();
         this.consumer.consumeIncomingMessageAsString(msg);
     }

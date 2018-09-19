@@ -34,10 +34,10 @@ import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Objects;
 import java.util.UUID;
-
-import javax.annotation.Nonnull;
 
 public final class ApiUser extends ApiPermissionHolder implements me.lucko.luckperms.api.User {
     public static User cast(me.lucko.luckperms.api.User u) {
@@ -57,9 +57,8 @@ public final class ApiUser extends ApiPermissionHolder implements me.lucko.luckp
         return this.handle;
     }
 
-    @Nonnull
     @Override
-    public UUID getUuid() {
+    public @NonNull UUID getUuid() {
         return this.handle.getUuid();
     }
 
@@ -68,15 +67,13 @@ public final class ApiUser extends ApiPermissionHolder implements me.lucko.luckp
         return this.handle.getName().orElse(null);
     }
 
-    @Nonnull
     @Override
-    public String getPrimaryGroup() {
+    public @NonNull String getPrimaryGroup() {
         return this.handle.getPrimaryGroup().getValue();
     }
 
-    @Nonnull
     @Override
-    public DataMutateResult setPrimaryGroup(@Nonnull String group) {
+    public @NonNull DataMutateResult setPrimaryGroup(@NonNull String group) {
         Objects.requireNonNull(group, "group");
         if (getPrimaryGroup().equalsIgnoreCase(group)) {
             return DataMutateResult.ALREADY_HAS;
@@ -90,9 +87,8 @@ public final class ApiUser extends ApiPermissionHolder implements me.lucko.luckp
         return DataMutateResult.SUCCESS;
     }
 
-    @Nonnull
     @Override
-    public UserData getCachedData() {
+    public @NonNull UserData getCachedData() {
         return this.handle.getCachedData();
     }
 

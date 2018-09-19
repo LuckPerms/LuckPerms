@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.api.context;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Extension of {@link ContextCalculator} which provides the same context
@@ -43,8 +43,8 @@ public interface StaticContextCalculator extends ContextCalculator<Object> {
      * @param accumulator a map of contexts to add to
      * @return the map
      */
-    @Nonnull
-    MutableContextSet giveApplicableContext(@Nonnull MutableContextSet accumulator);
+    @NonNull
+    MutableContextSet giveApplicableContext(@NonNull MutableContextSet accumulator);
 
     /**
      * Gives the subject all of the applicable contexts they meet
@@ -53,10 +53,9 @@ public interface StaticContextCalculator extends ContextCalculator<Object> {
      * @param accumulator a map of contexts to add to
      * @return the map
      */
-    @Nonnull
-    @Override
     @Deprecated
-    default MutableContextSet giveApplicableContext(@Nullable Object subject, @Nonnull MutableContextSet accumulator) {
+    @Override
+    default @NonNull MutableContextSet giveApplicableContext(@Nullable Object subject, @NonNull MutableContextSet accumulator) {
         return giveApplicableContext(accumulator);
     }
 

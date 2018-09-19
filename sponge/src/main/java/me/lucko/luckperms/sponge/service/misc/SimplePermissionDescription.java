@@ -32,6 +32,7 @@ import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 import me.lucko.luckperms.sponge.service.proxy.ProxyFactory;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.text.Text;
@@ -41,14 +42,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import javax.annotation.Nullable;
-
 public final class SimplePermissionDescription implements LPPermissionDescription {
     private final LPPermissionService service;
 
     private final String id;
-    @Nullable private final Text description;
-    @Nullable private final PluginContainer owner;
+    private final @Nullable Text description;
+    private final @Nullable PluginContainer owner;
 
     private PermissionDescription spongeProxy = null;
 

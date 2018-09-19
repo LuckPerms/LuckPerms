@@ -38,10 +38,9 @@ import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
-
-import javax.annotation.Nonnull;
 
 /**
  * An implementation of {@link Messenger} using the plugin messaging channels.
@@ -69,7 +68,7 @@ public class PluginMessageMessenger implements Messenger, PluginMessageListener 
     }
 
     @Override
-    public void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage) {
+    public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
         new BukkitRunnable() {
             @Override
             public void run() {

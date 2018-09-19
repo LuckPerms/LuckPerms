@@ -29,6 +29,8 @@ import com.google.common.collect.Sets;
 
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import cn.nukkit.Player;
 import cn.nukkit.permission.Permissible;
 import cn.nukkit.plugin.PluginManager;
@@ -221,7 +223,7 @@ public final class LPSubscriptionMap extends HashMap<String, Set<Permissible>> {
         }
 
         @Override
-        public <T> T[] toArray(T[] a) {
+        public <T> T[] toArray(@NonNull T[] a) {
             return getContentView().toArray(a);
         }
 
@@ -236,7 +238,7 @@ public final class LPSubscriptionMap extends HashMap<String, Set<Permissible>> {
         }
 
         @Override
-        public boolean addAll(Collection<? extends Permissible> c) {
+        public boolean addAll(@NonNull Collection<? extends Permissible> c) {
             return this.backing.addAll(c);
         }
 
@@ -246,17 +248,17 @@ public final class LPSubscriptionMap extends HashMap<String, Set<Permissible>> {
         }
 
         @Override
-        public boolean containsAll(Collection<?> c) {
+        public boolean containsAll(@NonNull Collection<?> c) {
             return getContentView().containsAll(c);
         }
 
         @Override
-        public boolean retainAll(Collection<?> c) {
+        public boolean retainAll(@NonNull Collection<?> c) {
             return this.backing.retainAll(c);
         }
 
         @Override
-        public boolean removeAll(Collection<?> c) {
+        public boolean removeAll(@NonNull Collection<?> c) {
             return this.backing.removeAll(c);
         }
 

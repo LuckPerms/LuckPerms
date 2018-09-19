@@ -27,10 +27,10 @@ package me.lucko.luckperms.common.api;
 
 import me.lucko.luckperms.api.DemotionResult;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Objects;
 import java.util.Optional;
-
-import javax.annotation.Nonnull;
 
 /**
  * Utility class for creating instances of {@link DemotionResult}.
@@ -76,21 +76,18 @@ public final class DemotionResults {
             this(status, null, null);
         }
 
-        @Nonnull
         @Override
-        public Status getStatus() {
+        public @NonNull Status getStatus() {
             return this.status;
         }
 
-        @Nonnull
         @Override
-        public Optional<String> getGroupFrom() {
+        public @NonNull Optional<String> getGroupFrom() {
             return Optional.ofNullable(this.groupFrom);
         }
 
-        @Nonnull
         @Override
-        public Optional<String> getGroupTo() {
+        public @NonNull Optional<String> getGroupTo() {
             return Optional.ofNullable(this.groupTo);
         }
 

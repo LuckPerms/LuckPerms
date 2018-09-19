@@ -27,7 +27,7 @@ package me.lucko.luckperms.api.caching;
 
 import me.lucko.luckperms.api.Contexts;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Holds cached lookup data in a specific set of contexts.
@@ -41,7 +41,7 @@ public interface CachedDataContainer {
      *
      * @return the contexts this container is caching
      */
-    @Nonnull
+    @NonNull
     Contexts getContexts();
 
 }

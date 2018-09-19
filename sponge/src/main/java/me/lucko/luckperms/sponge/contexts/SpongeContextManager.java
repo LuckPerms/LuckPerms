@@ -55,7 +55,7 @@ public class SpongeContextManager extends ContextManager<Subject> {
             throw new NullPointerException("subject");
         }
 
-        return subjectCaches.get(subject);
+        return this.subjectCaches.get(subject);
     }
 
     @Override

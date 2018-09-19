@@ -28,11 +28,11 @@ package me.lucko.luckperms.api.caching;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.PermissionHolder;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-
-import javax.annotation.Nonnull;
 
 /**
  * Holds cached permission and meta lookup data for a {@link PermissionHolder}.
@@ -57,8 +57,8 @@ public interface CachedData {
      * @return a permission data instance
      * @throws NullPointerException if contexts is null
      */
-    @Nonnull
-    PermissionData getPermissionData(@Nonnull Contexts contexts);
+    @NonNull
+    PermissionData getPermissionData(@NonNull Contexts contexts);
 
     /**
      * Gets MetaData from the cache, given a specified context.
@@ -68,8 +68,8 @@ public interface CachedData {
      * @throws NullPointerException if contexts is null
      * @since 3.2
      */
-    @Nonnull
-    MetaData getMetaData(@Nonnull MetaContexts contexts);
+    @NonNull
+    MetaData getMetaData(@NonNull MetaContexts contexts);
 
     /**
      * Gets MetaData from the cache, given a specified context.
@@ -78,8 +78,8 @@ public interface CachedData {
      * @return a meta data instance
      * @throws NullPointerException if contexts is null
      */
-    @Nonnull
-    MetaData getMetaData(@Nonnull Contexts contexts);
+    @NonNull
+    MetaData getMetaData(@NonNull Contexts contexts);
 
     /**
      * Calculates permission data, bypassing the cache.
@@ -96,8 +96,8 @@ public interface CachedData {
      * @return a permission data instance
      * @throws NullPointerException if contexts is null
      */
-    @Nonnull
-    PermissionData calculatePermissions(@Nonnull Contexts contexts);
+    @NonNull
+    PermissionData calculatePermissions(@NonNull Contexts contexts);
 
     /**
      * Calculates meta data, bypassing the cache.
@@ -115,8 +115,8 @@ public interface CachedData {
      * @throws NullPointerException if contexts is null
      * @since 3.2
      */
-    @Nonnull
-    MetaData calculateMeta(@Nonnull MetaContexts contexts);
+    @NonNull
+    MetaData calculateMeta(@NonNull MetaContexts contexts);
 
     /**
      * Calculates meta data, bypassing the cache.
@@ -133,8 +133,8 @@ public interface CachedData {
      * @return a meta data instance
      * @throws NullPointerException if contexts is null
      */
-    @Nonnull
-    MetaData calculateMeta(@Nonnull Contexts contexts);
+    @NonNull
+    MetaData calculateMeta(@NonNull Contexts contexts);
 
     /**
      * (Re)calculates permission data for a given context.
@@ -152,7 +152,7 @@ public interface CachedData {
      * @param contexts the contexts to recalculate in.
      * @throws NullPointerException if contexts is null
      */
-    void recalculatePermissions(@Nonnull Contexts contexts);
+    void recalculatePermissions(@NonNull Contexts contexts);
 
     /**
      * (Re)calculates meta data for a given context.
@@ -171,7 +171,7 @@ public interface CachedData {
      * @throws NullPointerException if contexts is null
      * @since 3.2
      */
-    void recalculateMeta(@Nonnull MetaContexts contexts);
+    void recalculateMeta(@NonNull MetaContexts contexts);
 
     /**
      * (Re)calculates meta data for a given context.
@@ -189,7 +189,7 @@ public interface CachedData {
      * @param contexts the contexts to recalculate in.
      * @throws NullPointerException if contexts is null
      */
-    void recalculateMeta(@Nonnull Contexts contexts);
+    void recalculateMeta(@NonNull Contexts contexts);
 
     /**
      * (Re)loads permission data for a given context.
@@ -216,8 +216,8 @@ public interface CachedData {
      * @return a future
      * @since 4.0
      */
-    @Nonnull
-    CompletableFuture<? extends PermissionData> reloadPermissions(@Nonnull Contexts contexts);
+    @NonNull
+    CompletableFuture<? extends PermissionData> reloadPermissions(@NonNull Contexts contexts);
 
     /**
      * (Re)loads meta data for a given context.
@@ -244,8 +244,8 @@ public interface CachedData {
      * @return a future
      * @since 4.0
      */
-    @Nonnull
-    CompletableFuture<? extends MetaData> reloadMeta(@Nonnull MetaContexts contexts);
+    @NonNull
+    CompletableFuture<? extends MetaData> reloadMeta(@NonNull MetaContexts contexts);
 
     /**
      * (Re)loads meta data for a given context.
@@ -272,8 +272,8 @@ public interface CachedData {
      * @return a future
      * @since 4.0
      */
-    @Nonnull
-    CompletableFuture<? extends MetaData> reloadMeta(@Nonnull Contexts contexts);
+    @NonNull
+    CompletableFuture<? extends MetaData> reloadMeta(@NonNull Contexts contexts);
 
     /**
      * Recalculates permission data for all known contexts.
@@ -318,7 +318,7 @@ public interface CachedData {
      * @return a future
      * @since 4.0
      */
-    @Nonnull
+    @NonNull
     CompletableFuture<Void> reloadPermissions();
 
     /**
@@ -342,7 +342,7 @@ public interface CachedData {
      * @return a future
      * @since 4.0
      */
-    @Nonnull
+    @NonNull
     CompletableFuture<Void> reloadMeta();
 
     /**
@@ -357,7 +357,7 @@ public interface CachedData {
      * @param contexts a set of contexts
      * @throws NullPointerException if contexts is null
      */
-    default void preCalculate(@Nonnull Set<Contexts> contexts) {
+    default void preCalculate(@NonNull Set<Contexts> contexts) {
         contexts.forEach(this::preCalculate);
     }
 
@@ -373,7 +373,7 @@ public interface CachedData {
      * @param contexts the contexts to pre-calculate for
      * @throws NullPointerException if contexts is null
      */
-    default void preCalculate(@Nonnull Contexts contexts) {
+    default void preCalculate(@NonNull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
 
         // pre-calculate just by requesting the data from this cache.
@@ -389,7 +389,7 @@ public interface CachedData {
      * @param contexts the contexts to invalidate for
      * @since 4.0
      */
-    void invalidatePermissions(@Nonnull Contexts contexts);
+    void invalidatePermissions(@NonNull Contexts contexts);
 
     /**
      * Invalidates any cached {@link MetaData} instances mapped to the given
@@ -398,7 +398,7 @@ public interface CachedData {
      * @param contexts the contexts to invalidate for
      * @since 4.0
      */
-    void invalidateMeta(@Nonnull MetaContexts contexts);
+    void invalidateMeta(@NonNull MetaContexts contexts);
 
     /**
      * Invalidates any cached {@link MetaData} instances mapped to the given
@@ -407,7 +407,7 @@ public interface CachedData {
      * @param contexts the contexts to invalidate for
      * @since 4.0
      */
-    void invalidateMeta(@Nonnull Contexts contexts);
+    void invalidateMeta(@NonNull Contexts contexts);
 
     /**
      * Invalidates all cached {@link PermissionData} instances.

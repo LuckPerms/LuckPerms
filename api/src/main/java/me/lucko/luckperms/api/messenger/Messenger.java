@@ -28,7 +28,7 @@ package me.lucko.luckperms.api.messenger;
 import me.lucko.luckperms.api.messenger.message.Message;
 import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents an object which dispatches {@link OutgoingMessage}s.
@@ -52,7 +52,7 @@ public interface Messenger extends AutoCloseable {
      *
      * @param outgoingMessage the outgoing message
      */
-    void sendOutgoingMessage(@Nonnull OutgoingMessage outgoingMessage);
+    void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage);
 
     /**
      * Performs the necessary action to gracefully shutdown the messenger.

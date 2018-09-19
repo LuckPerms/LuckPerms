@@ -31,7 +31,7 @@ import me.lucko.luckperms.api.caching.CachedData;
 import me.lucko.luckperms.api.caching.MetaContexts;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * A special instance of {@link Contexts}, which when passed to:
@@ -54,8 +54,7 @@ public final class FullySatisfiedContexts extends Contexts {
     // singleton
     private static final FullySatisfiedContexts INSTANCE = new FullySatisfiedContexts();
 
-    @Nonnull
-    public static Contexts getInstance() {
+    public static @NonNull Contexts getInstance() {
         return INSTANCE;
     }
 
@@ -63,9 +62,8 @@ public final class FullySatisfiedContexts extends Contexts {
         super(ImmutableContextSet.empty(), ImmutableSet.copyOf(Contexts.global().getSettings()));
     }
 
-    @Nonnull
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         return "FullySatisfiedContexts()";
     }
 

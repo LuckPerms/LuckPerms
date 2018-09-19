@@ -25,12 +25,12 @@
 
 package me.lucko.luckperms.nukkit.model;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import cn.nukkit.permission.Permission;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.annotation.Nullable;
 
 /**
  * Represents the possible default values for permissions
@@ -83,13 +83,11 @@ public enum PermissionDefault {
      * @param name Name of the default
      * @return Specified value, or null if not found
      */
-    @Nullable
-    public static PermissionDefault getByName(String name) {
+    public static @Nullable PermissionDefault getByName(String name) {
         return LOOKUP.get(name.toLowerCase().replaceAll("[^a-z!]", ""));
     }
 
-    @Nullable
-    public static PermissionDefault fromPermission(@Nullable Permission permission) {
+    public static @Nullable PermissionDefault fromPermission(@Nullable Permission permission) {
         if (permission == null) {
             return null;
         }

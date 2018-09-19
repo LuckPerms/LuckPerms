@@ -28,7 +28,7 @@ package me.lucko.luckperms.api.messenger.message.type;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.messenger.message.Message;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents an "log" message.
@@ -44,7 +44,7 @@ public interface LogMessage extends Message {
      *
      * @return the log entry
      */
-    @Nonnull
+    @NonNull
     LogEntry getLogEntry();
 
 }

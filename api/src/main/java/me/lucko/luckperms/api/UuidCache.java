@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.api;
 
-import java.util.UUID;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.UUID;
 
 /**
  * A UUID cache for online users, between external Mojang UUIDs, and internal
@@ -50,9 +50,9 @@ public interface UuidCache {
      *                   <code>ProxiedPlayer#getUniqueId</code>
      * @return the corresponding internal UUID
      */
-    @Nonnull
+    @NonNull
     @Deprecated
-    UUID getUUID(@Nonnull UUID mojangUuid);
+    UUID getUUID(@NonNull UUID mojangUuid);
 
     /**
      * Gets a users "external", server assigned unique id, from the internal
@@ -62,8 +62,8 @@ public interface UuidCache {
      *                     <code>User#getUuid</code>
      * @return the corresponding external UUID
      */
-    @Nonnull
+    @NonNull
     @Deprecated
-    UUID getExternalUUID(@Nonnull UUID internalUuid);
+    UUID getExternalUUID(@NonNull UUID internalUuid);
 
 }

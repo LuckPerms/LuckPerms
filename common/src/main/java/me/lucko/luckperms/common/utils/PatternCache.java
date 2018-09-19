@@ -28,11 +28,11 @@ package me.lucko.luckperms.common.utils;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-
-import javax.annotation.Nullable;
 
 public final class PatternCache {
 
@@ -86,13 +86,11 @@ public final class PatternCache {
             this.ex = ex;
         }
 
-        @Nullable
-        public Pattern getPattern() {
+        public @Nullable Pattern getPattern() {
             return this.instance;
         }
 
-        @Nullable
-        public PatternSyntaxException getException() {
+        public @Nullable PatternSyntaxException getException() {
             return this.ex;
         }
     }

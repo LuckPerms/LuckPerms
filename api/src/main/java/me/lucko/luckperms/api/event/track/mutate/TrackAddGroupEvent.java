@@ -27,7 +27,7 @@ package me.lucko.luckperms.api.event.track.mutate;
 
 import me.lucko.luckperms.api.event.Param;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a group is added to a track
@@ -39,7 +39,7 @@ public interface TrackAddGroupEvent extends TrackMutateEvent {
      *
      * @return the group that was added
      */
-    @Nonnull
+    @NonNull
     @Param(3)
     String getGroup();
 

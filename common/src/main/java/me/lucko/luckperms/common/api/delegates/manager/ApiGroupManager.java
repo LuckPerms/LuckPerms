@@ -38,13 +38,13 @@ import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-
-import javax.annotation.Nonnull;
 
 public class ApiGroupManager extends ApiAbstractManager<Group, me.lucko.luckperms.api.Group, GroupManager<?>> implements me.lucko.luckperms.api.manager.GroupManager {
     public ApiGroupManager(LuckPermsPlugin plugin, GroupManager<?> handle) {
@@ -60,31 +60,27 @@ public class ApiGroupManager extends ApiAbstractManager<Group, me.lucko.luckperm
         return internal.getApiDelegate();
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<me.lucko.luckperms.api.Group> createAndLoadGroup(@Nonnull String name) {
+    public @NonNull CompletableFuture<me.lucko.luckperms.api.Group> createAndLoadGroup(@NonNull String name) {
         name = ApiUtils.checkName(Objects.requireNonNull(name, "name"));
         return this.plugin.getStorage().createAndLoadGroup(name, CreationCause.API)
                 .thenApply(this::getDelegateFor);
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<Optional<me.lucko.luckperms.api.Group>> loadGroup(@Nonnull String name) {
+    public @NonNull CompletableFuture<Optional<me.lucko.luckperms.api.Group>> loadGroup(@NonNull String name) {
         name = ApiUtils.checkName(Objects.requireNonNull(name, "name"));
         return this.plugin.getStorage().loadGroup(name).thenApply(opt -> opt.map(this::getDelegateFor));
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<Void> saveGroup(@Nonnull me.lucko.luckperms.api.Group group) {
+    public @NonNull CompletableFuture<Void> saveGroup(me.lucko.luckperms.api.@NonNull Group group) {
         Objects.requireNonNull(group, "group");
         return this.plugin.getStorage().saveGroup(ApiGroup.cast(group));
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<Void> deleteGroup(@Nonnull me.lucko.luckperms.api.Group group) {
+    public @NonNull CompletableFuture<Void> deleteGroup(me.lucko.luckperms.api.@NonNull Group group) {
         Objects.requireNonNull(group, "group");
         if (group.getName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
             throw new IllegalArgumentException("Cannot delete the default group.");
@@ -92,35 +88,32 @@ public class ApiGroupManager extends ApiAbstractManager<Group, me.lucko.luckperm
         return this.plugin.getStorage().deleteGroup(ApiGroup.cast(group), DeletionCause.API);
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<Void> loadAllGroups() {
+    public @NonNull CompletableFuture<Void> loadAllGroups() {
         return this.plugin.getStorage().loadAllGroups();
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<List<HeldPermission<String>>> getWithPermission(@Nonnull String permission) {
+    public @NonNull CompletableFuture<List<HeldPermission<String>>> getWithPermission(@NonNull String permission) {
         Objects.requireNonNull(permission, "permission");
         return this.plugin.getStorage().getGroupsWithPermission(Constraint.of(StandardComparison.EQUAL, permission));
     }
 
     @Override
-    public me.lucko.luckperms.api.Group getGroup(@Nonnull String name) {
+    public me.lucko.luckperms.api.Group getGroup(@NonNull String name) {
         Objects.requireNonNull(name, "name");
         return getDelegateFor(this.handle.getIfLoaded(name));
     }
 
-    @Nonnull
     @Override
-    public Set<me.lucko.luckperms.api.Group> getLoadedGroups() {
+    public @NonNull Set<me.lucko.luckperms.api.Group> getLoadedGroups() {
         return this.handle.getAll().values().stream()
                 .map(this::getDelegateFor)
                 .collect(ImmutableCollectors.toSet());
     }
 
     @Override
-    public boolean isLoaded(@Nonnull String name) {
+    public boolean isLoaded(@NonNull String name) {
         Objects.requireNonNull(name, "name");
         return this.handle.isLoaded(name);
     }

@@ -27,7 +27,7 @@ package me.lucko.luckperms.api.event.source;
 
 import me.lucko.luckperms.api.Entity;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents an {@link Entity} which was the {@link Source} of something.
@@ -41,7 +41,7 @@ public interface EntitySource extends Source {
      *
      * @return the entity
      */
-    @Nonnull
+    @NonNull
     Entity getEntity();
 
 }

@@ -27,7 +27,7 @@ package me.lucko.luckperms.api.event;
 
 import me.lucko.luckperms.api.event.source.Source;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents an event with a {@link Source}.
@@ -44,7 +44,7 @@ public interface Sourced {
      *
      * @return the source
      */
-    @Nonnull
+    @NonNull
     @Param(-1)
     Source getSource();
 

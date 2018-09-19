@@ -27,9 +27,9 @@ package me.lucko.luckperms.api.messenger.message;
 
 import me.lucko.luckperms.api.messenger.Messenger;
 
-import java.util.UUID;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.UUID;
 
 /**
  * Represents a message sent received via a {@link Messenger}.
@@ -46,7 +46,7 @@ public interface Message {
      *
      * @return the id of the message
      */
-    @Nonnull
+    @NonNull
     UUID getId();
 
 }

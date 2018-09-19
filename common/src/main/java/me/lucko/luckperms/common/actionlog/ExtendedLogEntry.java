@@ -37,6 +37,8 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -45,8 +47,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
 
 /**
  * An implementation of {@link LogEntry} and {@link LogEntry.Builder},
@@ -96,15 +96,13 @@ public class ExtendedLogEntry implements LogEntry {
         return this.timestamp;
     }
 
-    @Nonnull
     @Override
-    public UUID getActor() {
+    public @NonNull UUID getActor() {
         return this.actor;
     }
 
-    @Nonnull
     @Override
-    public String getActorName() {
+    public @NonNull String getActorName() {
         return this.actorName;
     }
 
@@ -115,21 +113,18 @@ public class ExtendedLogEntry implements LogEntry {
         return this.actorName;
     }
 
-    @Nonnull
     @Override
-    public Type getType() {
+    public @NonNull Type getType() {
         return this.type;
     }
 
-    @Nonnull
     @Override
-    public Optional<UUID> getActed() {
+    public @NonNull Optional<UUID> getActed() {
         return Optional.ofNullable(this.acted);
     }
 
-    @Nonnull
     @Override
-    public String getActedName() {
+    public @NonNull String getActedName() {
         return this.actedName;
     }
 
@@ -142,14 +137,13 @@ public class ExtendedLogEntry implements LogEntry {
         return String.valueOf(this.actedName);
     }
 
-    @Nonnull
     @Override
-    public String getAction() {
+    public @NonNull String getAction() {
         return this.action;
     }
 
     @Override
-    public int compareTo(@Nonnull LogEntry other) {
+    public int compareTo(@NonNull LogEntry other) {
         Objects.requireNonNull(other, "other");
         return COMPARATOR.compare(this, other);
     }
@@ -216,51 +210,44 @@ public class ExtendedLogEntry implements LogEntry {
         private String actedName = null;
         private String action = null;
 
-        @Nonnull
         @Override
-        public Builder setTimestamp(long timestamp) {
+        public @NonNull Builder setTimestamp(long timestamp) {
             this.timestamp = timestamp;
             return this;
         }
 
-        @Nonnull
         @Override
-        public Builder setActor(@Nonnull UUID actor) {
+        public @NonNull Builder setActor(@NonNull UUID actor) {
             this.actor = Objects.requireNonNull(actor, "actor");
             return this;
         }
 
-        @Nonnull
         @Override
-        public Builder setActorName(@Nonnull String actorName) {
+        public @NonNull Builder setActorName(@NonNull String actorName) {
             this.actorName = Objects.requireNonNull(actorName, "actorName");
             return this;
         }
 
-        @Nonnull
         @Override
-        public Builder setType(@Nonnull Type type) {
+        public @NonNull Builder setType(@NonNull Type type) {
             this.type = Objects.requireNonNull(type, "type");
             return this;
         }
 
-        @Nonnull
         @Override
-        public Builder setActed(UUID acted) {
+        public @NonNull Builder setActed(UUID acted) {
             this.acted = acted; // nullable
             return this;
         }
 
-        @Nonnull
         @Override
-        public Builder setActedName(@Nonnull String actedName) {
+        public @NonNull Builder setActedName(@NonNull String actedName) {
             this.actedName = Objects.requireNonNull(actedName, "actedName");
             return this;
         }
 
-        @Nonnull
         @Override
-        public Builder setAction(@Nonnull String action) {
+        public @NonNull Builder setAction(@NonNull String action) {
             this.action = Objects.requireNonNull(action, "action");
             return this;
         }
@@ -348,9 +335,8 @@ public class ExtendedLogEntry implements LogEntry {
             return this;
         }
 
-        @Nonnull
         @Override
-        public ExtendedLogEntry build() {
+        public @NonNull ExtendedLogEntry build() {
             if (this.timestamp == 0L) {
                 timestamp(System.currentTimeMillis() / 1000L);
             }

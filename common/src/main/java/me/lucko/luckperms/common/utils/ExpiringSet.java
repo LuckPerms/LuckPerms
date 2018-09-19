@@ -29,11 +29,11 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.ForwardingSet;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Nonnull;
 
 /**
  * A simple expiring set implementation using Caffeine caches
@@ -50,7 +50,7 @@ public class ExpiringSet<E> extends ForwardingSet<E> {
     }
 
     @Override
-    public boolean add(E element) {
+    public boolean add(@NonNull E element) {
         this.cache.put(element, Boolean.TRUE);
 
         // we don't care about the return value
@@ -58,7 +58,7 @@ public class ExpiringSet<E> extends ForwardingSet<E> {
     }
 
     @Override
-    public boolean addAll(@Nonnull Collection<? extends E> collection) {
+    public boolean addAll(@NonNull Collection<? extends E> collection) {
         for (E element : collection) {
             add(element);
         }
@@ -68,7 +68,7 @@ public class ExpiringSet<E> extends ForwardingSet<E> {
     }
 
     @Override
-    public boolean remove(Object key) {
+    public boolean remove(@NonNull Object key) {
         this.cache.invalidate(key);
 
         // we don't care about the return value
@@ -76,7 +76,7 @@ public class ExpiringSet<E> extends ForwardingSet<E> {
     }
 
     @Override
-    public boolean removeAll(@Nonnull Collection<?> keys) {
+    public boolean removeAll(@NonNull Collection<?> keys) {
         this.cache.invalidateAll(keys);
 
         // we don't care about the return value

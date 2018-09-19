@@ -38,7 +38,7 @@ import me.lucko.luckperms.common.storage.dao.sql.SqlDao;
 import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.MariaDbConnectionFactory;
 import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.MySqlConnectionFactory;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class MessagingFactory<P extends LuckPermsPlugin> {
     private final P plugin;
@@ -103,15 +103,13 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
 
     private class RedisMessengerProvider implements MessengerProvider {
 
-        @Nonnull
         @Override
-        public String getName() {
+        public @NonNull String getName() {
             return "Redis";
         }
 
-        @Nonnull
         @Override
-        public Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer) {
+        public @NonNull Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer) {
             RedisMessenger redis = new RedisMessenger(getPlugin(), incomingMessageConsumer);
             redis.init(getPlugin().getConfiguration().get(ConfigKeys.REDIS_ADDRESS), getPlugin().getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
             return redis;
@@ -120,15 +118,13 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
 
     private class SqlMessengerProvider implements MessengerProvider {
 
-        @Nonnull
         @Override
-        public String getName() {
+        public @NonNull String getName() {
             return "Sql";
         }
 
-        @Nonnull
         @Override
-        public Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer) {
+        public @NonNull Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer) {
             SqlDao dao = (SqlDao) getPlugin().getStorage().getDao();
             Preconditions.checkState(dao.getProvider() instanceof MySqlConnectionFactory || dao.getProvider() instanceof MariaDbConnectionFactory, "not a supported sql type");
 

@@ -57,7 +57,7 @@ public class TabCompleter {
      * @return this
      */
     public TabCompleter at(int position, CompletionSupplier supplier) {
-        Preconditions.checkState(position < from);
+        Preconditions.checkState(position < this.from);
         this.suppliers.put(position, supplier);
         return this;
     }

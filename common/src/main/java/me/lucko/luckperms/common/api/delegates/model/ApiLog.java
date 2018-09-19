@@ -28,11 +28,11 @@ package me.lucko.luckperms.common.api.delegates.model;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.UUID;
-
-import javax.annotation.Nonnull;
 
 import static me.lucko.luckperms.common.api.ApiUtils.checkName;
 
@@ -44,36 +44,31 @@ public class ApiLog implements me.lucko.luckperms.api.Log {
         this.handle = handle;
     }
 
-    @Nonnull
     @Override
-    public SortedSet<LogEntry> getContent() {
+    public @NonNull SortedSet<LogEntry> getContent() {
         return (SortedSet) this.handle.getContent();
     }
 
-    @Nonnull
     @Override
-    public SortedSet<LogEntry> getContent(@Nonnull UUID actor) {
+    public @NonNull SortedSet<LogEntry> getContent(@NonNull UUID actor) {
         Objects.requireNonNull(actor, "actor");
         return (SortedSet) this.handle.getContent(actor);
     }
 
-    @Nonnull
     @Override
-    public SortedSet<LogEntry> getUserHistory(@Nonnull UUID uuid) {
+    public @NonNull SortedSet<LogEntry> getUserHistory(@NonNull UUID uuid) {
         Objects.requireNonNull(uuid, "uuid");
         return (SortedSet) this.handle.getUserHistory(uuid);
     }
 
-    @Nonnull
     @Override
-    public SortedSet<LogEntry> getGroupHistory(@Nonnull String name) {
+    public @NonNull SortedSet<LogEntry> getGroupHistory(@NonNull String name) {
         Objects.requireNonNull(name, "name");
         return (SortedSet) this.handle.getGroupHistory(checkName(name));
     }
 
-    @Nonnull
     @Override
-    public SortedSet<LogEntry> getTrackHistory(@Nonnull String name) {
+    public @NonNull SortedSet<LogEntry> getTrackHistory(@NonNull String name) {
         Objects.requireNonNull(name, "name");
         return (SortedSet) this.handle.getTrackHistory(checkName(name));
     }

@@ -40,14 +40,14 @@ import me.lucko.luckperms.common.node.factory.NodeBuilder;
 import me.lucko.luckperms.common.node.utils.ShorthandParser;
 import me.lucko.luckperms.common.processors.WildcardProcessor;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -73,10 +73,8 @@ public final class ImmutableNode implements Node {
     private final boolean value;
     private boolean override;
 
-    @Nullable
-    private final String server;
-    @Nullable
-    private final String world;
+    private final @Nullable String server;
+    private final @Nullable String world;
 
     private final long expireAt; // 0L for no expiry
     private final ImmutableContextSet contexts;
@@ -153,9 +151,8 @@ public final class ImmutableNode implements Node {
         return new NodeBuilder(this);
     }
 
-    @Nonnull
     @Override
-    public String getPermission() {
+    public @NonNull String getPermission() {
         return this.permission;
     }
 
@@ -169,15 +166,13 @@ public final class ImmutableNode implements Node {
         return this.override;
     }
 
-    @Nonnull
     @Override
-    public Optional<String> getServer() {
+    public @NonNull Optional<String> getServer() {
         return this.optServer;
     }
 
-    @Nonnull
     @Override
-    public Optional<String> getWorld() {
+    public @NonNull Optional<String> getWorld() {
         return this.optWorld;
     }
 
@@ -191,15 +186,13 @@ public final class ImmutableNode implements Node {
         return this.world != null;
     }
 
-    @Nonnull
     @Override
-    public ImmutableContextSet getContexts() {
+    public @NonNull ImmutableContextSet getContexts() {
         return this.contexts;
     }
 
-    @Nonnull
     @Override
-    public ImmutableContextSet getFullContexts() {
+    public @NonNull ImmutableContextSet getFullContexts() {
         return this.fullContexts;
     }
 
@@ -214,7 +207,7 @@ public final class ImmutableNode implements Node {
     }
 
     @Override
-    public boolean shouldApplyWithContext(@Nonnull ContextSet contextSet) {
+    public boolean shouldApplyWithContext(@NonNull ContextSet contextSet) {
         return getFullContexts().isSatisfiedBy(contextSet);
     }
 
@@ -229,9 +222,8 @@ public final class ImmutableNode implements Node {
         return this.expireAt;
     }
 
-    @Nonnull
     @Override
-    public Date getExpiry() {
+    public @NonNull Date getExpiry() {
         checkState(isTemporary(), "Node does not have an expiry time.");
         return new Date(this.expireAt * 1000L);
     }
@@ -272,9 +264,8 @@ public final class ImmutableNode implements Node {
         return Optional.ofNullable(result);
     }
 
-    @Nonnull
     @Override
-    public List<String> resolveShorthand() {
+    public @NonNull List<String> resolveShorthand() {
         return this.resolvedShorthand;
     }
 
@@ -337,7 +328,7 @@ public final class ImmutableNode implements Node {
     private enum Equality {
         EXACT {
             @Override
-            public boolean areEqual(@Nonnull ImmutableNode o1, @Nonnull ImmutableNode o2) {
+            public boolean areEqual(@NonNull ImmutableNode o1, @NonNull ImmutableNode o2) {
                 return o1 == o2 ||
                         o1.permission == o2.permission &&
                         o1.value == o2.value &&
@@ -350,7 +341,7 @@ public final class ImmutableNode implements Node {
         },
         IGNORE_VALUE {
             @Override
-            public boolean areEqual(@Nonnull ImmutableNode o1, @Nonnull ImmutableNode o2) {
+            public boolean areEqual(@NonNull ImmutableNode o1, @NonNull ImmutableNode o2) {
                 return o1 == o2 ||
                         o1.permission == o2.permission &&
                         o1.override == o2.override &&
@@ -362,7 +353,7 @@ public final class ImmutableNode implements Node {
         },
         IGNORE_EXPIRY_TIME {
             @Override
-            public boolean areEqual(@Nonnull ImmutableNode o1, @Nonnull ImmutableNode o2) {
+            public boolean areEqual(@NonNull ImmutableNode o1, @NonNull ImmutableNode o2) {
                 return o1 == o2 ||
                         o1.permission == o2.permission &&
                         o1.value == o2.value &&
@@ -375,7 +366,7 @@ public final class ImmutableNode implements Node {
         },
         IGNORE_EXPIRY_TIME_AND_VALUE {
             @Override
-            public boolean areEqual(@Nonnull ImmutableNode o1, @Nonnull ImmutableNode o2) {
+            public boolean areEqual(@NonNull ImmutableNode o1, @NonNull ImmutableNode o2) {
                 return o1 == o2 ||
                         o1.permission == o2.permission &&
                         o1.override == o2.override &&
@@ -387,7 +378,7 @@ public final class ImmutableNode implements Node {
         },
         IGNORE_VALUE_OR_IF_TEMPORARY {
             @Override
-            public boolean areEqual(@Nonnull ImmutableNode o1, @Nonnull ImmutableNode o2) {
+            public boolean areEqual(@NonNull ImmutableNode o1, @NonNull ImmutableNode o2) {
                 return o1 == o2 ||
                         o1.permission == o2.permission &&
                         o1.override == o2.override &&
@@ -397,7 +388,7 @@ public final class ImmutableNode implements Node {
             }
         };
 
-        public abstract boolean areEqual(@Nonnull ImmutableNode o1, @Nonnull ImmutableNode o2);
+        public abstract boolean areEqual(@NonNull ImmutableNode o1, @NonNull ImmutableNode o2);
     }
 
     private static String internString(String s) {

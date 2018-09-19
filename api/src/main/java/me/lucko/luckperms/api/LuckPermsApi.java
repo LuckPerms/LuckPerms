@@ -37,13 +37,13 @@ import me.lucko.luckperms.api.messenger.MessengerProvider;
 import me.lucko.luckperms.api.metastacking.MetaStackFactory;
 import me.lucko.luckperms.api.platform.PlatformInfo;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * The LuckPerms API.
@@ -62,7 +62,7 @@ public interface LuckPermsApi {
      * @return the platform info
      * @since 4.0
      */
-    @Nonnull
+    @NonNull
     PlatformInfo getPlatformInfo();
 
     /**
@@ -78,7 +78,7 @@ public interface LuckPermsApi {
      * @return the user manager
      * @since 4.0
      */
-    @Nonnull
+    @NonNull
     UserManager getUserManager();
 
     /**
@@ -94,7 +94,7 @@ public interface LuckPermsApi {
      * @return the group manager
      * @since 4.0
      */
-    @Nonnull
+    @NonNull
     GroupManager getGroupManager();
 
     /**
@@ -110,7 +110,7 @@ public interface LuckPermsApi {
      * @return the track manager
      * @since 4.0
      */
-    @Nonnull
+    @NonNull
     TrackManager getTrackManager();
 
     /**
@@ -125,7 +125,7 @@ public interface LuckPermsApi {
      * @return a future
      * @since 4.0
      */
-    @Nonnull
+    @NonNull
     CompletableFuture<Void> runUpdateTask();
 
     /**
@@ -135,7 +135,7 @@ public interface LuckPermsApi {
      * @return the event bus
      * @since 3.0
      */
-    @Nonnull
+    @NonNull
     EventBus getEventBus();
 
     /**
@@ -143,7 +143,7 @@ public interface LuckPermsApi {
      *
      * @return the configuration
      */
-    @Nonnull
+    @NonNull
     LPConfiguration getConfiguration();
 
     /**
@@ -155,7 +155,7 @@ public interface LuckPermsApi {
      * @return a storage instance
      * @since 2.14
      */
-    @Nonnull
+    @NonNull
     Storage getStorage();
 
     /**
@@ -170,7 +170,7 @@ public interface LuckPermsApi {
      *
      * @return the messaging service instance, if present.
      */
-    @Nonnull
+    @NonNull
     Optional<MessagingService> getMessagingService();
 
     /**
@@ -182,7 +182,7 @@ public interface LuckPermsApi {
      * @param messengerProvider the messenger provider.
      * @since 4.1
      */
-    void registerMessengerProvider(@Nonnull MessengerProvider messengerProvider);
+    void registerMessengerProvider(@NonNull MessengerProvider messengerProvider);
 
     /**
      * Gets the {@link ActionLogger}.
@@ -193,7 +193,7 @@ public interface LuckPermsApi {
      * @return the action logger
      * @since 4.1
      */
-    @Nonnull
+    @NonNull
     ActionLogger getActionLogger();
 
     /**
@@ -206,7 +206,7 @@ public interface LuckPermsApi {
      * @deprecated this feature is now handled internally - and the API returns a
      *             No-op implementation of this class.
      */
-    @Nonnull
+    @NonNull
     @Deprecated
     UuidCache getUuidCache();
 
@@ -219,7 +219,7 @@ public interface LuckPermsApi {
      * @return the context manager
      * @since 4.0
      */
-    @Nonnull
+    @NonNull
     ContextManager getContextManager();
 
     /**
@@ -229,7 +229,7 @@ public interface LuckPermsApi {
      *
      * @return the node factory
      */
-    @Nonnull
+    @NonNull
     NodeFactory getNodeFactory();
 
     /**
@@ -242,7 +242,7 @@ public interface LuckPermsApi {
      * @return the meta stack factory
      * @since 3.2
      */
-    @Nonnull
+    @NonNull
     MetaStackFactory getMetaStackFactory();
 
 
@@ -265,8 +265,7 @@ public interface LuckPermsApi {
      * @return a {@link User} object, if one matching the uuid is loaded, or null if not
      * @throws NullPointerException if the uuid is null
      */
-    @Nullable
-    default User getUser(@Nonnull UUID uuid) {
+    default @Nullable User getUser(@NonNull UUID uuid) {
         return getUserManager().getUser(uuid);
     }
 
@@ -277,8 +276,7 @@ public interface LuckPermsApi {
      * @return an optional {@link User} object
      * @throws NullPointerException if the uuid is null
      */
-    @Nonnull
-    default Optional<User> getUserSafe(@Nonnull UUID uuid) {
+    default @NonNull Optional<User> getUserSafe(@NonNull UUID uuid) {
         return getUserManager().getUserOpt(uuid);
     }
 
@@ -289,8 +287,7 @@ public interface LuckPermsApi {
      * @return a {@link User} object, if one matching the uuid is loaded, or null if not
      * @throws NullPointerException if the name is null
      */
-    @Nullable
-    default User getUser(@Nonnull String name) {
+    default @Nullable User getUser(@NonNull String name) {
         return getUserManager().getUser(name);
     }
 
@@ -301,8 +298,7 @@ public interface LuckPermsApi {
      * @return an optional {@link User} object
      * @throws NullPointerException if the name is null
      */
-    @Nonnull
-    default Optional<User> getUserSafe(@Nonnull String name) {
+    default @NonNull Optional<User> getUserSafe(@NonNull String name) {
         return getUserManager().getUserOpt(name);
     }
 
@@ -311,8 +307,7 @@ public interface LuckPermsApi {
      *
      * @return a {@link Set} of {@link User} objects
      */
-    @Nonnull
-    default Set<User> getUsers() {
+    default @NonNull Set<User> getUsers() {
         return getUserManager().getLoadedUsers();
     }
 
@@ -323,7 +318,7 @@ public interface LuckPermsApi {
      * @return true if the user is loaded
      * @throws NullPointerException if the uuid is null
      */
-    default boolean isUserLoaded(@Nonnull UUID uuid) {
+    default boolean isUserLoaded(@NonNull UUID uuid) {
         return getUserManager().isLoaded(uuid);
     }
 
@@ -333,7 +328,7 @@ public interface LuckPermsApi {
      * @param user the user to unload
      * @throws NullPointerException if the user is null
      */
-    default void cleanupUser(@Nonnull User user) {
+    default void cleanupUser(@NonNull User user) {
         getUserManager().cleanupUser(user);
     }
 
@@ -344,8 +339,7 @@ public interface LuckPermsApi {
      * @return a {@link Group} object, if one matching the name exists, or null if not
      * @throws NullPointerException if the name is null
      */
-    @Nullable
-    default Group getGroup(@Nonnull String name) {
+    default @Nullable Group getGroup(@NonNull String name) {
         return getGroupManager().getGroup(name);
     }
 
@@ -358,8 +352,7 @@ public interface LuckPermsApi {
      * @return an optional {@link Group} object
      * @throws NullPointerException if the name is null
      */
-    @Nonnull
-    default Optional<Group> getGroupSafe(@Nonnull String name) {
+    default @NonNull Optional<Group> getGroupSafe(@NonNull String name) {
         return getGroupManager().getGroupOpt(name);
     }
 
@@ -368,8 +361,7 @@ public interface LuckPermsApi {
      *
      * @return a {@link Set} of {@link Group} objects
      */
-    @Nonnull
-    default Set<Group> getGroups() {
+    default @NonNull Set<Group> getGroups() {
         return getGroupManager().getLoadedGroups();
     }
 
@@ -380,7 +372,7 @@ public interface LuckPermsApi {
      * @return true if the group is loaded
      * @throws NullPointerException if the name is null
      */
-    default boolean isGroupLoaded(@Nonnull String name) {
+    default boolean isGroupLoaded(@NonNull String name) {
         return getGroupManager().isLoaded(name);
     }
 
@@ -392,8 +384,7 @@ public interface LuckPermsApi {
      * if not
      * @throws NullPointerException if the name is null
      */
-    @Nullable
-    default Track getTrack(@Nonnull String name) {
+    default @Nullable Track getTrack(@NonNull String name) {
         return getTrackManager().getTrack(name);
     }
 
@@ -406,8 +397,7 @@ public interface LuckPermsApi {
      * @return an optional {@link Track} object
      * @throws NullPointerException if the name is null
      */
-    @Nonnull
-    default Optional<Track> getTrackSafe(@Nonnull String name) {
+    default @NonNull Optional<Track> getTrackSafe(@NonNull String name) {
         return getTrackManager().getTrackOpt(name);
     }
 
@@ -416,8 +406,7 @@ public interface LuckPermsApi {
      *
      * @return a {@link Set} of {@link Track} objects
      */
-    @Nonnull
-    default Set<Track> getTracks() {
+    default @NonNull Set<Track> getTracks() {
         return getTrackManager().getLoadedTracks();
     }
 
@@ -428,7 +417,7 @@ public interface LuckPermsApi {
      * @return true if the track is loaded
      * @throws NullPointerException if the name is null
      */
-    default boolean isTrackLoaded(@Nonnull String name) {
+    default boolean isTrackLoaded(@NonNull String name) {
         return getTrackManager().isLoaded(name);
     }
 
@@ -438,8 +427,7 @@ public interface LuckPermsApi {
      * @return a new builder
      * @since 4.0
      */
-    @Nonnull
-    default LogEntry.Builder newLogEntryBuilder() {
+    default LogEntry.@NonNull Builder newLogEntryBuilder() {
         return getActionLogger().newEntryBuilder();
     }
 
@@ -452,8 +440,7 @@ public interface LuckPermsApi {
      * @throws NullPointerException     if the permission is null
      * @since 2.6
      */
-    @Nonnull
-    default Node.Builder buildNode(@Nonnull String permission) throws IllegalArgumentException {
+    default Node.@NonNull Builder buildNode(@NonNull String permission) throws IllegalArgumentException {
         return getNodeFactory().newBuilder(permission);
     }
 
@@ -463,7 +450,7 @@ public interface LuckPermsApi {
      * @param calculator the context calculator to register. The type MUST be the player class of the platform.
      * @throws ClassCastException if the type is not the player class of the platform.
      */
-    default void registerContextCalculator(@Nonnull ContextCalculator<?> calculator) {
+    default void registerContextCalculator(@NonNull ContextCalculator<?> calculator) {
         getContextManager().registerCalculator(calculator);
     }
 
@@ -475,8 +462,7 @@ public interface LuckPermsApi {
      * @param user the user to get contexts for
      * @return an optional containing contexts. Will return empty if the user is not online.
      */
-    @Nonnull
-    default Optional<Contexts> getContextForUser(@Nonnull User user) {
+    default @NonNull Optional<Contexts> getContextForUser(@NonNull User user) {
         return getContextManager().lookupApplicableContexts(user);
     }
 
@@ -487,8 +473,7 @@ public interface LuckPermsApi {
      * @return a set of contexts.
      * @since 2.17
      */
-    @Nonnull
-    default ContextSet getContextForPlayer(@Nonnull Object player) {
+    default @NonNull ContextSet getContextForPlayer(@NonNull Object player) {
         return getContextManager().getApplicableContext(player);
     }
 
@@ -499,8 +484,7 @@ public interface LuckPermsApi {
      * @return a set of contexts.
      * @since 3.3
      */
-    @Nonnull
-    default Contexts getContextsForPlayer(@Nonnull Object player) {
+    default @NonNull Contexts getContextsForPlayer(@NonNull Object player) {
         return getContextManager().getApplicableContexts(player);
     }
 

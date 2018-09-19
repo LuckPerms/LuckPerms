@@ -27,9 +27,9 @@ package me.lucko.luckperms.api.caching;
 
 import me.lucko.luckperms.api.Tristate;
 
-import java.util.Map;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.Map;
 
 /**
  * Holds cached permission lookup data for a specific set of contexts.
@@ -45,8 +45,8 @@ public interface PermissionData extends CachedDataContainer {
      * @return a tristate result
      * @throws NullPointerException if permission is null
      */
-    @Nonnull
-    Tristate getPermissionValue(@Nonnull String permission);
+    @NonNull
+    Tristate getPermissionValue(@NonNull String permission);
 
     /**
      * Invalidates the underlying permission calculator cache.
@@ -60,7 +60,7 @@ public interface PermissionData extends CachedDataContainer {
      *
      * @return an immutable set of permissions
      */
-    @Nonnull
+    @NonNull
     Map<String, Boolean> getImmutableBacking();
 
 }

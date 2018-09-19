@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.api.event;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Set;
 import java.util.function.Consumer;
-
-import javax.annotation.Nonnull;
 
 /**
  * The LuckPerms event bus.
@@ -51,8 +51,8 @@ public interface EventBus {
      * @param <T>        the event class
      * @return an event handler instance representing this subscription
      */
-    @Nonnull
-    <T extends LuckPermsEvent> EventHandler<T> subscribe(@Nonnull Class<T> eventClass, @Nonnull Consumer<? super T> handler);
+    @NonNull
+    <T extends LuckPermsEvent> EventHandler<T> subscribe(@NonNull Class<T> eventClass, @NonNull Consumer<? super T> handler);
 
     /**
      * Registers a new subscription to the given event.
@@ -72,8 +72,8 @@ public interface EventBus {
      * @param handler    the event handler
      * @return an event handler instance representing this subscription
      */
-    @Nonnull
-    <T extends LuckPermsEvent> EventHandler<T> subscribe(Object plugin, @Nonnull Class<T> eventClass, @Nonnull Consumer<? super T> handler);
+    @NonNull
+    <T extends LuckPermsEvent> EventHandler<T> subscribe(Object plugin, @NonNull Class<T> eventClass, @NonNull Consumer<? super T> handler);
 
     /**
      * Gets a set of all registered handlers for a given event.
@@ -82,7 +82,7 @@ public interface EventBus {
      * @param <T>        the event class
      * @return an immutable set of event handlers
      */
-    @Nonnull
-    <T extends LuckPermsEvent> Set<EventHandler<T>> getHandlers(@Nonnull Class<T> eventClass);
+    @NonNull
+    <T extends LuckPermsEvent> Set<EventHandler<T>> getHandlers(@NonNull Class<T> eventClass);
 
 }

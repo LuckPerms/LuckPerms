@@ -29,9 +29,9 @@ import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
 
-import java.util.UUID;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.UUID;
 
 /**
  * Called when LuckPerms has finished processing a certain Player's connection.
@@ -52,7 +52,7 @@ public interface UserLoginProcessEvent extends LuckPermsEvent {
      *
      * @return the uuid of the connection which was processed
      */
-    @Nonnull
+    @NonNull
     @Param(0)
     UUID getUuid();
 
@@ -61,7 +61,7 @@ public interface UserLoginProcessEvent extends LuckPermsEvent {
      *
      * @return the username of the connection which was processed
      */
-    @Nonnull
+    @NonNull
     @Param(1)
     String getUsername();
 
@@ -70,7 +70,7 @@ public interface UserLoginProcessEvent extends LuckPermsEvent {
      *
      * @return the user instance
      */
-    @Nonnull
+    @NonNull
     @Param(2)
     User getUser();
 

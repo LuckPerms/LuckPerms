@@ -32,11 +32,11 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Nonnull;
 
 /**
  * Abstract implementation of {@link PrimaryGroupHolder} which caches all lookups.
@@ -52,8 +52,7 @@ public abstract class ContextualHolder extends StoredHolder {
         super(user);
     }
 
-    @Nonnull
-    protected abstract Optional<String> calculateValue(Contexts contexts);
+    protected abstract @NonNull Optional<String> calculateValue(Contexts contexts);
 
     public void invalidateCache() {
         this.cache.invalidateAll();

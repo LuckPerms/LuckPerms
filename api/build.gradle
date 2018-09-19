@@ -2,7 +2,7 @@ project.version = '4.2'
 
 dependencies {
     compileOnly 'com.google.guava:guava:19.0'
-    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+    compileOnly 'org.checkerframework:checker-qual:2.5.5'
 }
 
 if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {

@@ -28,7 +28,7 @@ package me.lucko.luckperms.api.messenger;
 import me.lucko.luckperms.api.messenger.message.Message;
 import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Encapsulates the LuckPerms system which accepts incoming {@link Message}s
@@ -52,7 +52,7 @@ public interface IncomingMessageConsumer {
      * @param message the message
      * @return true if the message was accepted by the plugin
      */
-    boolean consumeIncomingMessage(@Nonnull Message message);
+    boolean consumeIncomingMessage(@NonNull Message message);
 
     /**
      * Consumes a message in an encoded string format.
@@ -73,6 +73,6 @@ public interface IncomingMessageConsumer {
      * @param encodedString the encoded string
      * @return true if the message was accepted by the plugin
      */
-    boolean consumeIncomingMessageAsString(@Nonnull String encodedString);
+    boolean consumeIncomingMessageAsString(@NonNull String encodedString);
 
 }

@@ -30,12 +30,12 @@ import me.lucko.luckperms.api.event.LuckPermsEvent;
 
 import net.kyori.event.EventSubscriber;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Simple implementation of {@link EventHandler}.
@@ -62,8 +62,7 @@ public class LuckPermsEventHandler<T extends LuckPermsEvent> implements EventHan
     /**
      * The plugin which "owns" this handler
      */
-    @Nullable
-    private final Object plugin;
+    private final @Nullable Object plugin;
 
     /**
      * If this handler is active
@@ -104,7 +103,7 @@ public class LuckPermsEventHandler<T extends LuckPermsEvent> implements EventHan
     }
 
     @Override
-    public void invoke(T event) throws Throwable {
+    public void invoke(@NonNull T event) throws Throwable {
         try {
             this.consumer.accept(event);
             this.callCount.incrementAndGet();
@@ -114,20 +113,17 @@ public class LuckPermsEventHandler<T extends LuckPermsEvent> implements EventHan
         }
     }
 
-    @Nonnull
     @Override
-    public Class<T> getEventClass() {
+    public @NonNull Class<T> getEventClass() {
         return this.eventClass;
     }
 
-    @Nonnull
     @Override
-    public Consumer<? super T> getConsumer() {
+    public @NonNull Consumer<? super T> getConsumer() {
         return this.consumer;
     }
 
-    @Nullable
-    public Object getPlugin() {
+    public @Nullable Object getPlugin() {
         return this.plugin;
     }
 }

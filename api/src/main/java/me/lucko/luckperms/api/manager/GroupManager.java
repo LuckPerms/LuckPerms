@@ -29,15 +29,15 @@ import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Storage;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Represents the object responsible for managing {@link Group} instances.
@@ -74,8 +74,8 @@ public interface GroupManager {
      * @throws NullPointerException if the name is null
      * @since 4.1
      */
-    @Nonnull
-    CompletableFuture<Group> createAndLoadGroup(@Nonnull String name);
+    @NonNull
+    CompletableFuture<Group> createAndLoadGroup(@NonNull String name);
 
     /**
      * Loads a group from the plugin's storage provider into memory.
@@ -95,8 +95,8 @@ public interface GroupManager {
      * @throws NullPointerException if the name is null
      * @since 4.1
      */
-    @Nonnull
-    CompletableFuture<Optional<Group>> loadGroup(@Nonnull String name);
+    @NonNull
+    CompletableFuture<Optional<Group>> loadGroup(@NonNull String name);
 
     /**
      * Saves a group's data back to the plugin's storage provider.
@@ -115,8 +115,8 @@ public interface GroupManager {
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      * @since 4.1
      */
-    @Nonnull
-    CompletableFuture<Void> saveGroup(@Nonnull Group group);
+    @NonNull
+    CompletableFuture<Void> saveGroup(@NonNull Group group);
 
     /**
      * Permanently deletes a group from the plugin's storage provider.
@@ -134,8 +134,8 @@ public interface GroupManager {
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      * @since 4.1
      */
-    @Nonnull
-    CompletableFuture<Void> deleteGroup(@Nonnull Group group);
+    @NonNull
+    CompletableFuture<Void> deleteGroup(@NonNull Group group);
 
     /**
      * Loads all groups into memory.
@@ -149,7 +149,7 @@ public interface GroupManager {
      * @return a future to encapsulate the operation.
      * @since 4.1
      */
-    @Nonnull
+    @NonNull
     CompletableFuture<Void> loadAllGroups();
 
     /**
@@ -160,8 +160,8 @@ public interface GroupManager {
      * @throws NullPointerException if the permission is null
      * @since 4.2
      */
-    @Nonnull
-    CompletableFuture<List<HeldPermission<String>>> getWithPermission(@Nonnull String permission);
+    @NonNull
+    CompletableFuture<List<HeldPermission<String>>> getWithPermission(@NonNull String permission);
 
     /**
      * Gets a loaded group.
@@ -171,7 +171,7 @@ public interface GroupManager {
      * @throws NullPointerException if the name is null
      */
     @Nullable
-    Group getGroup(@Nonnull String name);
+    Group getGroup(@NonNull String name);
 
     /**
      * Gets a loaded group.
@@ -182,8 +182,7 @@ public interface GroupManager {
      * @return an optional {@link Group} object
      * @throws NullPointerException if the name is null
      */
-    @Nonnull
-    default Optional<Group> getGroupOpt(@Nonnull String name) {
+    default @NonNull Optional<Group> getGroupOpt(@NonNull String name) {
         return Optional.ofNullable(getGroup(name));
     }
 
@@ -192,7 +191,7 @@ public interface GroupManager {
      *
      * @return a {@link Set} of {@link Group} objects
      */
-    @Nonnull
+    @NonNull
     Set<Group> getLoadedGroups();
 
     /**
@@ -202,6 +201,6 @@ public interface GroupManager {
      * @return true if the group is loaded
      * @throws NullPointerException if the name is null
      */
-    boolean isLoaded(@Nonnull String name);
+    boolean isLoaded(@NonNull String name);
 
 }

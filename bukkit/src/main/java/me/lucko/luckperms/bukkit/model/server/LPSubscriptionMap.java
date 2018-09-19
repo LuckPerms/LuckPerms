@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.plugin.PluginManager;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -42,8 +43,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
 
 /**
  * A replacement map for the 'permSubs' instance in Bukkit's SimplePluginManager.
@@ -217,9 +216,8 @@ public final class LPSubscriptionMap extends HashMap<String, Map<Permissible, Bo
             return get(key) != null;
         }
 
-        @Nonnull
         @Override
-        public Set<Permissible> keySet() {
+        public @NonNull Set<Permissible> keySet() {
             // gather players (LPPermissibles)
             Set<Permissible> players = LPSubscriptionMap.this.plugin.getBootstrap().getServer().getOnlinePlayers().stream()
                     .filter(player -> player.isPermissionSet(this.permission))
@@ -229,9 +227,8 @@ public final class LPSubscriptionMap extends HashMap<String, Map<Permissible, Bo
             return Sets.union(players, this.backing.keySet());
         }
 
-        @Nonnull
         @Override
-        public Set<Entry<Permissible, Boolean>> entrySet() {
+        public @NonNull Set<Entry<Permissible, Boolean>> entrySet() {
             return keySet().stream()
                     .map(p -> {
                         Boolean ret = get(p);
@@ -266,7 +263,7 @@ public final class LPSubscriptionMap extends HashMap<String, Map<Permissible, Bo
         }
 
         @Override
-        public void putAll(@Nonnull Map<? extends Permissible, ? extends Boolean> m) {
+        public void putAll(@NonNull Map<? extends Permissible, ? extends Boolean> m) {
             this.backing.putAll(m);
         }
 
@@ -275,9 +272,8 @@ public final class LPSubscriptionMap extends HashMap<String, Map<Permissible, Bo
             this.backing.clear();
         }
 
-        @Nonnull
         @Override
-        public Collection<Boolean> values() {
+        public @NonNull Collection<Boolean> values() {
             return this.backing.values();
         }
     }

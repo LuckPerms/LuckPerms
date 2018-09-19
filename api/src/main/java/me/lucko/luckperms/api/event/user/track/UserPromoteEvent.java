@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.api.event.user.track;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a user is promoted up a track.
@@ -34,9 +34,8 @@ import javax.annotation.Nonnull;
  */
 public interface UserPromoteEvent extends UserTrackEvent {
 
-    @Nonnull
     @Override
-    default TrackAction getAction() {
+    default @NonNull TrackAction getAction() {
         return TrackAction.PROMOTION;
     }
 }

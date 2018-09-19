@@ -31,7 +31,7 @@ import me.lucko.luckperms.api.event.Cancellable;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a log entry is about to be sent to specific notifiable object on
@@ -50,7 +50,7 @@ public interface LogNotifyEvent extends LuckPermsEvent, Cancellable {
      *
      * @return the log entry to be sent
      */
-    @Nonnull
+    @NonNull
     @Param(0)
     LogEntry getEntry();
 
@@ -59,7 +59,7 @@ public interface LogNotifyEvent extends LuckPermsEvent, Cancellable {
      *
      * @return the origin of the log
      */
-    @Nonnull
+    @NonNull
     @Param(1)
     Origin getOrigin();
 
@@ -68,7 +68,7 @@ public interface LogNotifyEvent extends LuckPermsEvent, Cancellable {
      *
      * @return the object to notify
      */
-    @Nonnull
+    @NonNull
     @Param(2)
     Entity getNotifiable();
 

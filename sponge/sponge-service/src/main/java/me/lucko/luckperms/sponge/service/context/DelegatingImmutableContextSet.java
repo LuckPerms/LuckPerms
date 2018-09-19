@@ -27,13 +27,12 @@ package me.lucko.luckperms.sponge.service.context;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.context.Context;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
-import javax.annotation.Nonnull;
 
 /**
  * Implements a {@link Set} of {@link Context}s, delegating all calls to a {@link ImmutableContextSet}.
@@ -50,9 +49,8 @@ public class DelegatingImmutableContextSet extends AbstractDelegatingContextSet 
         return this.delegate;
     }
 
-    @Nonnull
     @Override
-    public Iterator<Context> iterator() {
+    public @NonNull Iterator<Context> iterator() {
         return new ContextSetIterator();
     }
 

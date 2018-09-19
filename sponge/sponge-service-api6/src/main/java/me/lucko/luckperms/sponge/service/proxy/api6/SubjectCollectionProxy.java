@@ -31,6 +31,7 @@ import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -38,8 +39,6 @@ import org.spongepowered.api.service.permission.SubjectCollection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.annotation.Nonnull;
 
 @SuppressWarnings("unchecked")
 public final class SubjectCollectionProxy implements SubjectCollection {
@@ -51,28 +50,25 @@ public final class SubjectCollectionProxy implements SubjectCollection {
         this.handle = handle;
     }
 
-    @Nonnull
     @Override
-    public String getIdentifier() {
+    public @NonNull String getIdentifier() {
         return this.handle.getIdentifier();
     }
 
-    @Nonnull
     @Override
-    public Subject get(@Nonnull String s) {
+    public @NonNull Subject get(@NonNull String s) {
         // force load the subject.
         // after this call, users will expect that the subject is loaded in memory.
         return this.handle.loadSubject(s).thenApply(LPSubject::sponge).join();
     }
 
     @Override
-    public boolean hasRegistered(@Nonnull String s) {
+    public boolean hasRegistered(@NonNull String s) {
         return this.handle.hasRegistered(s).join();
     }
 
-    @Nonnull
     @Override
-    public Iterable<Subject> getAllSubjects() {
+    public @NonNull Iterable<Subject> getAllSubjects() {
         // this will lazily load all subjects. it will initially just get the identifiers of each subject, and will initialize dummy
         // providers for those identifiers. when any methods against the dummy are called, the actual data will be loaded.
         // this behaviour should be replaced when CompletableFutures are added to Sponge
@@ -83,9 +79,8 @@ public final class SubjectCollectionProxy implements SubjectCollection {
                 ).join();
     }
 
-    @Nonnull
     @Override
-    public Map<Subject, Boolean> getAllWithPermission(@Nonnull String s) {
+    public @NonNull Map<Subject, Boolean> getAllWithPermission(@NonNull String s) {
         // again, these methods will lazily load subjects.
         return (Map) this.handle.getAllWithPermission(s)
                 .thenApply(map -> map.entrySet().stream()
@@ -96,9 +91,8 @@ public final class SubjectCollectionProxy implements SubjectCollection {
                 ).join();
     }
 
-    @Nonnull
     @Override
-    public Map<Subject, Boolean> getAllWithPermission(@Nonnull Set<Context> set, @Nonnull String s) {
+    public @NonNull Map<Subject, Boolean> getAllWithPermission(@NonNull Set<Context> set, @NonNull String s) {
         return (Map) this.handle.getAllWithPermission(CompatibilityUtil.convertContexts(set), s)
                 .thenApply(map -> map.entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
@@ -108,9 +102,8 @@ public final class SubjectCollectionProxy implements SubjectCollection {
                 ).join();
     }
 
-    @Nonnull
     @Override
-    public Subject getDefaults() {
+    public @NonNull Subject getDefaults() {
         return this.handle.getDefaults().sponge();
     }
 

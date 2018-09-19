@@ -31,7 +31,7 @@ import me.lucko.luckperms.api.context.StaticContextCalculator;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class LPStaticContextsCalculator implements StaticContextCalculator {
     private final LuckPermsConfiguration config;
@@ -40,9 +40,8 @@ public class LPStaticContextsCalculator implements StaticContextCalculator {
         this.config = config;
     }
 
-    @Nonnull
     @Override
-    public MutableContextSet giveApplicableContext(@Nonnull MutableContextSet accumulator) {
+    public @NonNull MutableContextSet giveApplicableContext(@NonNull MutableContextSet accumulator) {
         String server = this.config.get(ConfigKeys.SERVER);
         if (!server.equals("global")) {
             accumulator.add(Contexts.SERVER_KEY, server);

@@ -34,12 +34,12 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import net.kyori.event.EventSubscriber;
 import net.kyori.event.SimpleEventBus;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
 
 public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
 
@@ -88,17 +88,15 @@ public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
         return this.bus.hasSubscribers(eventClass);
     }
 
-    @Nonnull
     @Override
-    public <T extends LuckPermsEvent> EventHandler<T> subscribe(@Nonnull Class<T> eventClass, @Nonnull Consumer<? super T> handler) {
+    public @NonNull <T extends LuckPermsEvent> EventHandler<T> subscribe(@NonNull Class<T> eventClass, @NonNull Consumer<? super T> handler) {
         Objects.requireNonNull(eventClass, "eventClass");
         Objects.requireNonNull(handler, "handler");
         return registerSubscription(eventClass, handler, null);
     }
 
-    @Nonnull
     @Override
-    public <T extends LuckPermsEvent> EventHandler<T> subscribe(Object plugin, @Nonnull Class<T> eventClass, @Nonnull Consumer<? super T> handler) {
+    public @NonNull <T extends LuckPermsEvent> EventHandler<T> subscribe(Object plugin, @NonNull Class<T> eventClass, @NonNull Consumer<? super T> handler) {
         Objects.requireNonNull(plugin, "plugin");
         Objects.requireNonNull(eventClass, "eventClass");
         Objects.requireNonNull(handler, "handler");
@@ -119,9 +117,8 @@ public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
         return eventHandler;
     }
 
-    @Nonnull
     @Override
-    public <T extends LuckPermsEvent> Set<EventHandler<T>> getHandlers(@Nonnull Class<T> eventClass) {
+    public @NonNull <T extends LuckPermsEvent> Set<EventHandler<T>> getHandlers(@NonNull Class<T> eventClass) {
         return this.bus.getHandlers(eventClass);
     }
 
@@ -154,7 +151,7 @@ public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
         }
 
         @Override
-        protected boolean shouldPost(LuckPermsEvent event, EventSubscriber<?> subscriber) {
+        protected boolean shouldPost(@NonNull LuckPermsEvent event, @NonNull EventSubscriber<?> subscriber) {
             return true;
         }
 

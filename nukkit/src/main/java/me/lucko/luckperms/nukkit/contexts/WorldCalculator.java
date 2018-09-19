@@ -31,9 +31,9 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import cn.nukkit.Player;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import cn.nukkit.Player;
 
 public class WorldCalculator implements ContextCalculator<Player> {
     private final LuckPermsPlugin plugin;
@@ -42,9 +42,8 @@ public class WorldCalculator implements ContextCalculator<Player> {
         this.plugin = plugin;
     }
 
-    @Nonnull
     @Override
-    public MutableContextSet giveApplicableContext(@Nonnull Player subject, @Nonnull MutableContextSet accumulator) {
+    public @NonNull MutableContextSet giveApplicableContext(@NonNull Player subject, @NonNull MutableContextSet accumulator) {
         String world = subject.getLevel().getName().toLowerCase();
         while (!accumulator.has(Contexts.WORLD_KEY, world)) {
             accumulator.add(Contexts.WORLD_KEY, world);

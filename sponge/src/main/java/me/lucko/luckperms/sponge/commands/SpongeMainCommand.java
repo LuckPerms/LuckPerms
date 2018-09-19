@@ -46,14 +46,14 @@ import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
 
 public class SpongeMainCommand extends Command<Void, LPSubjectData> {
     private final LPSpongePlugin plugin;
@@ -227,9 +227,8 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
         return this.subCommands.values().stream().flatMap(List::stream).collect(ImmutableCollectors.toList());
     }
 
-    @Nonnull
     @Override
-    public Optional<List<Command<LPSubjectData, ?>>> getChildren() {
+    public @NonNull Optional<List<Command<LPSubjectData, ?>>> getChildren() {
         return Optional.of(getSubCommands());
     }
 }

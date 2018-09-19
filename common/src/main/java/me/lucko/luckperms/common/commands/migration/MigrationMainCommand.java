@@ -38,14 +38,14 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
-
-import javax.annotation.Nonnull;
 
 public class MigrationMainCommand extends MainCommand<Object, Object> {
     private static final Map<String, String> PLUGINS = ImmutableBiMap.<String, String>builder()
@@ -68,9 +68,8 @@ public class MigrationMainCommand extends MainCommand<Object, Object> {
         super(CommandSpec.MIGRATION.localize(locale), "Migration", 1, null);
     }
 
-    @Nonnull
     @Override
-    public synchronized Optional<List<Command<Object, ?>>> getChildren() {
+    public synchronized @NonNull Optional<List<Command<Object, ?>>> getChildren() {
         if (this.commands == null) {
             this.commands = getAvailableCommands(getSpec().getLocaleManager());
 

@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.api.platform;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Set;
 import java.util.UUID;
-
-import javax.annotation.Nonnull;
 
 /**
  * Provides information about the platform LuckPerms is running on.
@@ -42,7 +42,7 @@ public interface PlatformInfo {
      *
      * @return the version of the plugin running on the platform
      */
-    @Nonnull
+    @NonNull
     String getVersion();
 
     /**
@@ -57,7 +57,7 @@ public interface PlatformInfo {
      *
      * @return the type of platform LuckPerms is running on
      */
-    @Nonnull
+    @NonNull
     PlatformType getType();
 
     /**
@@ -65,7 +65,7 @@ public interface PlatformInfo {
      *
      * @return the unique connections
      */
-    @Nonnull
+    @NonNull
     Set<UUID> getUniqueConnections();
 
     /**

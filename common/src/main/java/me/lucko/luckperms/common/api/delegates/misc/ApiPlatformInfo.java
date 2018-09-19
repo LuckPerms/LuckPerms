@@ -29,11 +29,11 @@ import me.lucko.luckperms.api.platform.PlatformInfo;
 import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.annotation.Nonnull;
 
 public class ApiPlatformInfo implements PlatformInfo {
     private final LuckPermsPlugin plugin;
@@ -42,9 +42,8 @@ public class ApiPlatformInfo implements PlatformInfo {
         this.plugin = plugin;
     }
 
-    @Nonnull
     @Override
-    public String getVersion() {
+    public @NonNull String getVersion() {
         return this.plugin.getBootstrap().getVersion();
     }
 
@@ -53,15 +52,13 @@ public class ApiPlatformInfo implements PlatformInfo {
         return 4.2;
     }
 
-    @Nonnull
     @Override
-    public PlatformType getType() {
+    public @NonNull PlatformType getType() {
         return this.plugin.getBootstrap().getType();
     }
 
-    @Nonnull
     @Override
-    public Set<UUID> getUniqueConnections() {
+    public @NonNull Set<UUID> getUniqueConnections() {
         return Collections.unmodifiableSet(this.plugin.getConnectionListener().getUniqueConnections());
     }
 

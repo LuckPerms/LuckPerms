@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.api;
 
-import java.util.Optional;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.Optional;
 
 /**
  * Encapsulates the result of {@link User}s promotion along a {@link Track}.
@@ -41,7 +41,7 @@ public interface PromotionResult extends MutateResult {
      *
      * @return the status
      */
-    @Nonnull
+    @NonNull
     Status getStatus();
 
     @Override
@@ -57,7 +57,7 @@ public interface PromotionResult extends MutateResult {
      *
      * @return the group the user was promoted from.
      */
-    @Nonnull
+    @NonNull
     Optional<String> getGroupFrom();
 
     /**
@@ -71,7 +71,7 @@ public interface PromotionResult extends MutateResult {
      *
      * @return the group the user was promoted to.
      */
-    @Nonnull
+    @NonNull
     Optional<String> getGroupTo();
 
     /**

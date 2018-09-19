@@ -30,10 +30,10 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.api.metastacking.MetaStackElement;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.List;
 import java.util.Objects;
-
-import javax.annotation.Nonnull;
 
 public final class SimpleMetaStackDefinition implements MetaStackDefinition {
 
@@ -53,27 +53,23 @@ public final class SimpleMetaStackDefinition implements MetaStackDefinition {
         this.hashCode = calculateHashCode();
     }
 
-    @Nonnull
     @Override
-    public List<MetaStackElement> getElements() {
+    public @NonNull List<MetaStackElement> getElements() {
         return this.elements;
     }
 
-    @Nonnull
     @Override
-    public String getStartSpacer() {
+    public @NonNull String getStartSpacer() {
         return this.startSpacer;
     }
 
-    @Nonnull
     @Override
-    public String getMiddleSpacer() {
+    public @NonNull String getMiddleSpacer() {
         return this.middleSpacer;
     }
 
-    @Nonnull
     @Override
-    public String getEndSpacer() {
+    public @NonNull String getEndSpacer() {
         return this.endSpacer;
     }
 

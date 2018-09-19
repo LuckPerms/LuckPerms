@@ -107,7 +107,7 @@ public abstract class BufferedRequest<T> {
         private final long delay;
         private final TimeUnit unit;
 
-        private SchedulerAdapter schedulerAdapter;
+        private final SchedulerAdapter schedulerAdapter;
         private SchedulerTask task;
 
         private final Object[] mutex = new Object[0];

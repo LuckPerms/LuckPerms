@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.api.event;
 
-import java.util.function.Consumer;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.function.Consumer;
 
 /**
  * Represents a subscription to a {@link LuckPermsEvent}.
@@ -41,7 +41,7 @@ public interface EventHandler<T extends LuckPermsEvent> extends AutoCloseable {
      *
      * @return the event class
      */
-    @Nonnull
+    @NonNull
     Class<T> getEventClass();
 
     /**
@@ -63,7 +63,7 @@ public interface EventHandler<T extends LuckPermsEvent> extends AutoCloseable {
      *
      * @return the event consumer
      */
-    @Nonnull
+    @NonNull
     Consumer<? super T> getConsumer();
 
     /**

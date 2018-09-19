@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.api;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Extension of {@link DataMutateResult} for temporary set operations.
@@ -39,7 +39,7 @@ public interface TemporaryDataMutateResult {
      *
      * @return the result
      */
-    @Nonnull
+    @NonNull
     DataMutateResult getResult();
 
     /**
@@ -51,7 +51,7 @@ public interface TemporaryDataMutateResult {
      *
      * @return the resultant node
      */
-    @Nonnull
+    @NonNull
     Node getMergedNode();
 
 }

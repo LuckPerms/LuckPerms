@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.common.locale.command;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Map;
 import java.util.Objects;
-
-import javax.annotation.Nullable;
 
 /**
  * The localized data for a {@link CommandSpec}.
@@ -44,18 +44,15 @@ public final class CommandSpecData {
         this.args = args;
     }
 
-    @Nullable
-    public String getDescription() {
+    public @Nullable String getDescription() {
         return this.description;
     }
 
-    @Nullable
-    public String getUsage() {
+    public @Nullable String getUsage() {
         return this.usage;
     }
 
-    @Nullable
-    public Map<String, String> getArgs() {
+    public @Nullable Map<String, String> getArgs() {
         return this.args;
     }
 

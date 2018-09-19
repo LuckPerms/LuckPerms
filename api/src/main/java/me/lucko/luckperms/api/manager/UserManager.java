@@ -30,6 +30,9 @@ import me.lucko.luckperms.api.PlayerSaveResult;
 import me.lucko.luckperms.api.Storage;
 import me.lucko.luckperms.api.User;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -37,9 +40,6 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Represents the object responsible for managing {@link User} instances.
@@ -77,8 +77,8 @@ public interface UserManager {
      * @throws NullPointerException if the uuid is null
      * @since 4.1
      */
-    @Nonnull
-    CompletableFuture<User> loadUser(@Nonnull UUID uuid, @Nullable String username);
+    @NonNull
+    CompletableFuture<User> loadUser(@NonNull UUID uuid, @Nullable String username);
 
     /**
      * Loads a user from the plugin's storage provider into memory.
@@ -95,8 +95,7 @@ public interface UserManager {
      * @throws NullPointerException if the uuid is null
      * @since 4.1
      */
-    @Nonnull
-    default CompletableFuture<User> loadUser(@Nonnull UUID uuid) {
+    default @NonNull CompletableFuture<User> loadUser(@NonNull UUID uuid) {
         return loadUser(uuid, null);
     }
 
@@ -111,8 +110,8 @@ public interface UserManager {
      * @throws IllegalArgumentException if the username is invalid
      * @since 4.2
      */
-    @Nonnull
-    CompletableFuture<UUID> lookupUuid(@Nonnull String username);
+    @NonNull
+    CompletableFuture<UUID> lookupUuid(@NonNull String username);
 
     /**
      * Uses the LuckPerms cache to find a username for the given uuid.
@@ -123,8 +122,8 @@ public interface UserManager {
      * @throws IllegalArgumentException if the username is invalid
      * @since 4.2
      */
-    @Nonnull
-    CompletableFuture<String> lookupUsername(@Nonnull UUID uuid);
+    @NonNull
+    CompletableFuture<String> lookupUsername(@NonNull UUID uuid);
 
     /**
      * Saves a user's data back to the plugin's storage provider.
@@ -143,8 +142,8 @@ public interface UserManager {
      * @throws IllegalStateException if the user instance was not obtained from LuckPerms.
      * @since 4.1
      */
-    @Nonnull
-    CompletableFuture<Void> saveUser(@Nonnull User user);
+    @NonNull
+    CompletableFuture<Void> saveUser(@NonNull User user);
 
     /**
      * Saves data about a player to the uuid caching system.
@@ -156,8 +155,8 @@ public interface UserManager {
      * @throws IllegalArgumentException if the username is invalid
      * @since 4.2
      */
-    @Nonnull
-    CompletableFuture<PlayerSaveResult> savePlayerData(@Nonnull UUID uuid, @Nonnull String username);
+    @NonNull
+    CompletableFuture<PlayerSaveResult> savePlayerData(@NonNull UUID uuid, @NonNull String username);
 
     /**
      * Gets a set all "unique" user UUIDs.
@@ -167,7 +166,7 @@ public interface UserManager {
      * @return a set of uuids
      * @since 4.2
      */
-    @Nonnull
+    @NonNull
     CompletableFuture<Set<UUID>> getUniqueUsers();
 
     /**
@@ -178,8 +177,8 @@ public interface UserManager {
      * @throws NullPointerException if the permission is null
      * @since 4.2
      */
-    @Nonnull
-    CompletableFuture<List<HeldPermission<UUID>>> getWithPermission(@Nonnull String permission);
+    @NonNull
+    CompletableFuture<List<HeldPermission<UUID>>> getWithPermission(@NonNull String permission);
 
     /**
      * Gets a loaded user.
@@ -189,7 +188,7 @@ public interface UserManager {
      * @throws NullPointerException if the uuid is null
      */
     @Nullable
-    User getUser(@Nonnull UUID uuid);
+    User getUser(@NonNull UUID uuid);
 
     /**
      * Gets a loaded user.
@@ -198,8 +197,7 @@ public interface UserManager {
      * @return an optional {@link User} object
      * @throws NullPointerException if the uuid is null
      */
-    @Nonnull
-    default Optional<User> getUserOpt(@Nonnull UUID uuid) {
+    default @NonNull Optional<User> getUserOpt(@NonNull UUID uuid) {
         return Optional.ofNullable(getUser(uuid));
     }
 
@@ -211,7 +209,7 @@ public interface UserManager {
      * @throws NullPointerException if the name is null
      */
     @Nullable
-    User getUser(@Nonnull String name);
+    User getUser(@NonNull String name);
 
     /**
      * Gets a loaded user.
@@ -220,8 +218,7 @@ public interface UserManager {
      * @return an optional {@link User} object
      * @throws NullPointerException if the name is null
      */
-    @Nonnull
-    default Optional<User> getUserOpt(@Nonnull String name) {
+    default @NonNull Optional<User> getUserOpt(@NonNull String name) {
         return Optional.ofNullable(getUser(name));
     }
 
@@ -230,7 +227,7 @@ public interface UserManager {
      *
      * @return a {@link Set} of {@link User} objects
      */
-    @Nonnull
+    @NonNull
     Set<User> getLoadedUsers();
 
     /**
@@ -240,7 +237,7 @@ public interface UserManager {
      * @return true if the user is loaded
      * @throws NullPointerException if the uuid is null
      */
-    boolean isLoaded(@Nonnull UUID uuid);
+    boolean isLoaded(@NonNull UUID uuid);
 
     /**
      * Unload a user from the internal storage, if they're not currently online.
@@ -248,6 +245,6 @@ public interface UserManager {
      * @param user the user to unload
      * @throws NullPointerException if the user is null
      */
-    void cleanupUser(@Nonnull User user);
+    void cleanupUser(@NonNull User user);
 
 }

@@ -37,6 +37,8 @@ import me.lucko.luckperms.common.buffers.ExpiringCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,8 +46,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
 
 /**
  * Base implementation of {@link ContextManager} which caches content lookups.
@@ -271,9 +271,8 @@ public abstract class ContextManager<T> {
             super(50L, TimeUnit.MILLISECONDS);
         }
 
-        @Nonnull
         @Override
-        public Contexts supply() {
+        public @NonNull Contexts supply() {
             return calculateStatic();
         }
     }

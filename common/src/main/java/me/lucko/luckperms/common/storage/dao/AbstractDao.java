@@ -36,14 +36,14 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 public abstract class AbstractDao {
 
@@ -109,10 +109,8 @@ public abstract class AbstractDao {
 
     public abstract PlayerSaveResult savePlayerData(UUID uuid, String username) throws Exception;
 
-    @Nullable
-    public abstract UUID getPlayerUuid(String username) throws Exception;
+    public abstract @Nullable UUID getPlayerUuid(String username) throws Exception;
 
-    @Nullable
-    public abstract String getPlayerName(UUID uuid) throws Exception;
+    public abstract @Nullable String getPlayerName(UUID uuid) throws Exception;
 
 }

@@ -34,11 +34,11 @@ import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
-import javax.annotation.Nonnull;
 
 public class ApiMetaStackFactory implements MetaStackFactory {
     public final LuckPermsPlugin plugin;
@@ -47,16 +47,14 @@ public class ApiMetaStackFactory implements MetaStackFactory {
         this.plugin = plugin;
     }
 
-    @Nonnull
     @Override
-    public Optional<MetaStackElement> fromString(@Nonnull String definition) {
+    public @NonNull Optional<MetaStackElement> fromString(@NonNull String definition) {
         Objects.requireNonNull(definition, "definition");
         return Optional.ofNullable(StandardStackElements.parseFromString(this.plugin, definition));
     }
 
-    @Nonnull
     @Override
-    public List<MetaStackElement> fromStrings(@Nonnull List<String> definitions) {
+    public @NonNull List<MetaStackElement> fromStrings(@NonNull List<String> definitions) {
         Objects.requireNonNull(definitions, "definitions");
         if (definitions.isEmpty()) {
             return ImmutableList.of();
@@ -64,9 +62,8 @@ public class ApiMetaStackFactory implements MetaStackFactory {
         return StandardStackElements.parseList(this.plugin, definitions);
     }
 
-    @Nonnull
     @Override
-    public MetaStackDefinition createDefinition(@Nonnull List<MetaStackElement> elements, @Nonnull String startSpacer, @Nonnull String middleSpacer, @Nonnull String endSpacer) {
+    public @NonNull MetaStackDefinition createDefinition(@NonNull List<MetaStackElement> elements, @NonNull String startSpacer, @NonNull String middleSpacer, @NonNull String endSpacer) {
         return new SimpleMetaStackDefinition(elements, startSpacer, middleSpacer, endSpacer);
     }
 }

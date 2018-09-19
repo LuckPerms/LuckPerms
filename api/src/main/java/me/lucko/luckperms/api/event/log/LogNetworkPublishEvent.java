@@ -30,9 +30,9 @@ import me.lucko.luckperms.api.event.Cancellable;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
 
-import java.util.UUID;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.UUID;
 
 /**
  * Called when a log is about to be published to the network via the MessagingService
@@ -46,7 +46,7 @@ public interface LogNetworkPublishEvent extends LuckPermsEvent, Cancellable {
      *
      * @return the id of the log entry being published
      */
-    @Nonnull
+    @NonNull
     @Param(0)
     UUID getLogId();
 
@@ -55,7 +55,7 @@ public interface LogNetworkPublishEvent extends LuckPermsEvent, Cancellable {
      *
      * @return the log entry to be published
      */
-    @Nonnull
+    @NonNull
     @Param(1)
     LogEntry getEntry();
 

@@ -37,6 +37,9 @@ import me.lucko.luckperms.api.nodetype.types.PrefixType;
 import me.lucko.luckperms.api.nodetype.types.SuffixType;
 import me.lucko.luckperms.api.nodetype.types.WeightType;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -45,10 +48,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
 
 /**
  * Represents a LuckPerms "node".
@@ -104,7 +103,6 @@ import javax.annotation.concurrent.Immutable;
  * @see NodeFactory for obtaining and constructing instances.
  * @since 2.6
  */
-@Immutable
 public interface Node {
 
     /**
@@ -115,7 +113,7 @@ public interface Node {
      *
      * @return the actual permission node
      */
-    @Nonnull
+    @NonNull
     String getPermission();
 
     /**
@@ -132,8 +130,7 @@ public interface Node {
      *
      * @return the value of this node as a Tristate
      */
-    @Nonnull
-    default Tristate getTristate() {
+    default @NonNull Tristate getTristate() {
         return Tristate.fromBoolean(getValue());
     }
 
@@ -163,7 +160,7 @@ public interface Node {
      *
      * @return an {@link Optional} containing the server, if one is defined
      */
-    @Nonnull
+    @NonNull
     Optional<String> getServer();
 
     /**
@@ -171,7 +168,7 @@ public interface Node {
      *
      * @return an {@link Optional} containing the world, if one is defined
      */
-    @Nonnull
+    @NonNull
     Optional<String> getWorld();
 
     /**
@@ -211,7 +208,7 @@ public interface Node {
      * @return true if the node should apply
      * @since 2.13
      */
-    boolean shouldApplyWithContext(@Nonnull ContextSet contextSet);
+    boolean shouldApplyWithContext(@NonNull ContextSet contextSet);
 
     /**
      * Resolves any shorthand parts of this node and returns the full list of
@@ -221,7 +218,7 @@ public interface Node {
      *
      * @return a list of full nodes
      */
-    @Nonnull
+    @NonNull
     List<String> resolveShorthand();
 
     /**
@@ -254,7 +251,7 @@ public interface Node {
      * @return the {@link Date} when this node will expire
      * @throws IllegalStateException if the node is not temporary
      */
-    @Nonnull
+    @NonNull
     Date getExpiry() throws IllegalStateException;
 
     /**
@@ -282,7 +279,7 @@ public interface Node {
      * @return the extra contexts required for this node to apply
      * @since 2.13
      */
-    @Nonnull
+    @NonNull
     ContextSet getContexts();
 
     /**
@@ -294,7 +291,7 @@ public interface Node {
      * @see Contexts#SERVER_KEY
      * @see Contexts#WORLD_KEY
      */
-    @Nonnull
+    @NonNull
     ContextSet getFullContexts();
 
     /**
@@ -369,8 +366,7 @@ public interface Node {
      * @return the name of the group
      * @throws IllegalStateException if this node doesn't have {@link InheritanceType} data
      */
-    @Nonnull
-    default String getGroupName() throws IllegalStateException {
+    default @NonNull String getGroupName() throws IllegalStateException {
         return typeData(InheritanceType.KEY).getGroupName();
     }
 
@@ -390,8 +386,7 @@ public interface Node {
      * @return the meta entry
      * @throws IllegalStateException if this node doesn't have {@link MetaType} data
      */
-    @Nonnull
-    default Map.Entry<String, String> getMeta() throws IllegalStateException {
+    default Map.@NonNull Entry<String, String> getMeta() throws IllegalStateException {
         return typeData(MetaType.KEY);
     }
 
@@ -411,8 +406,7 @@ public interface Node {
      * @return the meta entry
      * @throws IllegalStateException if this node doesn't have {@link PrefixType} data
      */
-    @Nonnull
-    default Map.Entry<Integer, String> getPrefix() throws IllegalStateException {
+    default Map.@NonNull Entry<Integer, String> getPrefix() throws IllegalStateException {
         return typeData(PrefixType.KEY).getAsEntry();
     }
 
@@ -432,8 +426,7 @@ public interface Node {
      * @return the meta entry
      * @throws IllegalStateException if this node doesn't have {@link SuffixType} data
      */
-    @Nonnull
-    default Map.Entry<Integer, String> getSuffix() throws IllegalStateException {
+    default Map.@NonNull Entry<Integer, String> getSuffix() throws IllegalStateException {
         return typeData(SuffixType.KEY).getAsEntry();
     }
 
@@ -481,7 +474,7 @@ public interface Node {
      * @see StandardNodeEquality#IGNORE_VALUE
      */
     @Deprecated
-    default boolean equalsIgnoringValue(@Nonnull Node other) {
+    default boolean equalsIgnoringValue(@NonNull Node other) {
         return equals(other, StandardNodeEquality.IGNORE_VALUE);
     }
 
@@ -495,7 +488,7 @@ public interface Node {
      * @see StandardNodeEquality#IGNORE_EXPIRY_TIME_AND_VALUE
      */
     @Deprecated
-    default boolean almostEquals(@Nonnull Node other) {
+    default boolean almostEquals(@NonNull Node other) {
         return equals(other, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
     }
 
@@ -510,7 +503,7 @@ public interface Node {
      * @see StandardNodeEquality#IGNORE_VALUE_OR_IF_TEMPORARY
      */
     @Deprecated
-    default boolean equalsIgnoringValueOrTemp(@Nonnull Node other) {
+    default boolean equalsIgnoringValueOrTemp(@NonNull Node other) {
         return equals(other, StandardNodeEquality.IGNORE_VALUE_OR_IF_TEMPORARY);
     }
 
@@ -539,7 +532,7 @@ public interface Node {
          * @return the builder
          * @since 4.2
          */
-        Builder copyFrom(@Nonnull Node node);
+        Builder copyFrom(@NonNull Node node);
 
         /**
          * Sets the value of negated for the node.
@@ -548,7 +541,7 @@ public interface Node {
          * @return the builder
          * @see Node#isNegated()
          */
-        @Nonnull
+        @NonNull
         Builder setNegated(boolean negated);
 
         /**
@@ -558,7 +551,7 @@ public interface Node {
          * @return the builder
          * @see Node#getValue()
          */
-        @Nonnull
+        @NonNull
         Builder setValue(boolean value);
 
         /**
@@ -571,7 +564,7 @@ public interface Node {
          * @return the builder
          * @see Node#isOverride()
          */
-        @Nonnull
+        @NonNull
         Builder setOverride(boolean override);
 
         /**
@@ -584,7 +577,7 @@ public interface Node {
          * @return the builder
          * @see Node#getExpiryUnixTime()
          */
-        @Nonnull
+        @NonNull
         Builder setExpiry(long expiryUnixTimestamp);
 
         /**
@@ -598,8 +591,7 @@ public interface Node {
          * @return the builder
          * @since 4.2
          */
-        @Nonnull
-        default Builder setExpiry(long duration, TimeUnit unit) {
+        default @NonNull Builder setExpiry(long duration, TimeUnit unit) {
             Preconditions.checkArgument(duration > 0, "duration must be positive");
             long seconds = Objects.requireNonNull(unit, "unit").toSeconds(duration);
             long timeNow = System.currentTimeMillis() / 1000L;
@@ -612,7 +604,7 @@ public interface Node {
          * @return the builder
          * @since 4.2
          */
-        @Nonnull
+        @NonNull
         Builder clearExpiry();
 
         /**
@@ -622,7 +614,7 @@ public interface Node {
          * @return the builder
          * @see Node#getWorld()
          */
-        @Nonnull
+        @NonNull
         Builder setWorld(@Nullable String world);
 
         /**
@@ -632,7 +624,7 @@ public interface Node {
          * @return the builder
          * @see Node#getServer()
          */
-        @Nonnull
+        @NonNull
         Builder setServer(@Nullable String server);
 
         /**
@@ -644,8 +636,8 @@ public interface Node {
          * @see ContextSet
          * @see Node#getContexts()
          */
-        @Nonnull
-        Builder withExtraContext(@Nonnull String key, @Nonnull String value);
+        @NonNull
+        Builder withExtraContext(@NonNull String key, @NonNull String value);
 
         /**
          * Appends extra contexts onto the node.
@@ -655,8 +647,8 @@ public interface Node {
          * @see ContextSet
          * @see Node#getContexts()
          */
-        @Nonnull
-        Builder withExtraContext(@Nonnull Map<String, String> map);
+        @NonNull
+        Builder withExtraContext(@NonNull Map<String, String> map);
 
         /**
          * Appends extra contexts onto the node.
@@ -666,8 +658,8 @@ public interface Node {
          * @see ContextSet
          * @see Node#getContexts()
          */
-        @Nonnull
-        Builder withExtraContext(@Nonnull Set<Map.Entry<String, String>> context);
+        @NonNull
+        Builder withExtraContext(@NonNull Set<Map.Entry<String, String>> context);
 
         /**
          * Appends an extra context onto the node.
@@ -677,8 +669,8 @@ public interface Node {
          * @see ContextSet
          * @see Node#getContexts()
          */
-        @Nonnull
-        Builder withExtraContext(@Nonnull Map.Entry<String, String> entry);
+        @NonNull
+        Builder withExtraContext(Map.@NonNull Entry<String, String> entry);
 
         /**
          * Appends extra contexts onto the node.
@@ -688,8 +680,8 @@ public interface Node {
          * @see ContextSet
          * @see Node#getContexts()
          */
-        @Nonnull
-        Builder withExtraContext(@Nonnull ContextSet contextSet);
+        @NonNull
+        Builder withExtraContext(@NonNull ContextSet contextSet);
 
         /**
          * Sets the extra contexts for the node.
@@ -700,15 +692,15 @@ public interface Node {
          * @see Node#getContexts()
          * @since 4.2
          */
-        @Nonnull
-        Builder setExtraContext(@Nonnull ContextSet contextSet);
+        @NonNull
+        Builder setExtraContext(@NonNull ContextSet contextSet);
 
         /**
          * Creates a {@link Node} instance from the builder.
          *
          * @return a new node instance
          */
-        @Nonnull
+        @NonNull
         Node build();
     }
 

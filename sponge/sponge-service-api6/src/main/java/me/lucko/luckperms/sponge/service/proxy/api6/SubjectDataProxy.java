@@ -32,6 +32,7 @@ import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectData;
@@ -41,8 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-
-import javax.annotation.Nonnull;
 
 @SuppressWarnings("unchecked")
 public final class SubjectDataProxy implements SubjectData {
@@ -62,9 +61,8 @@ public final class SubjectDataProxy implements SubjectData {
                 this.ref.resolveLp().thenApply(LPSubject::getTransientSubjectData);
     }
 
-    @Nonnull
     @Override
-    public Map<Set<Context>, Map<String, Boolean>> getAllPermissions() {
+    public @NonNull Map<Set<Context>, Map<String, Boolean>> getAllPermissions() {
         return (Map) handle().thenApply(handle -> handle.getAllPermissions().entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         e -> CompatibilityUtil.convertContexts(e.getKey()),
@@ -72,14 +70,13 @@ public final class SubjectDataProxy implements SubjectData {
                 ))).join();
     }
 
-    @Nonnull
     @Override
-    public Map<String, Boolean> getPermissions(@Nonnull Set<Context> contexts) {
+    public @NonNull Map<String, Boolean> getPermissions(@NonNull Set<Context> contexts) {
         return handle().thenApply(handle -> handle.getPermissions(CompatibilityUtil.convertContexts(contexts))).join();
     }
 
     @Override
-    public boolean setPermission(@Nonnull Set<Context> contexts, @Nonnull String permission, @Nonnull Tristate value) {
+    public boolean setPermission(@NonNull Set<Context> contexts, @NonNull String permission, @NonNull Tristate value) {
         handle().thenCompose(handle -> handle.setPermission(
                 CompatibilityUtil.convertContexts(contexts),
                 permission,
@@ -95,14 +92,13 @@ public final class SubjectDataProxy implements SubjectData {
     }
 
     @Override
-    public boolean clearPermissions(@Nonnull Set<Context> contexts) {
+    public boolean clearPermissions(@NonNull Set<Context> contexts) {
         handle().thenCompose(handle -> handle.clearPermissions(CompatibilityUtil.convertContexts(contexts)));
         return true;
     }
 
-    @Nonnull
     @Override
-    public Map<Set<Context>, List<Subject>> getAllParents() {
+    public @NonNull Map<Set<Context>, List<Subject>> getAllParents() {
         return (Map) handle().thenApply(handle -> handle.getAllParents().entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         e -> CompatibilityUtil.convertContexts(e.getKey()),
@@ -113,16 +109,15 @@ public final class SubjectDataProxy implements SubjectData {
                 )).join();
     }
 
-    @Nonnull
     @Override
-    public List<Subject> getParents(@Nonnull Set<Context> contexts) {
+    public @NonNull List<Subject> getParents(@NonNull Set<Context> contexts) {
         return (List) handle().thenApply(handle -> handle.getParents(CompatibilityUtil.convertContexts(contexts)).stream()
                 .map(s -> new SubjectProxy(this.service, s))
                 .collect(ImmutableCollectors.toList())).join();
     }
 
     @Override
-    public boolean addParent(@Nonnull Set<Context> contexts, @Nonnull Subject parent) {
+    public boolean addParent(@NonNull Set<Context> contexts, @NonNull Subject parent) {
         handle().thenCompose(handle -> handle.addParent(
                 CompatibilityUtil.convertContexts(contexts),
                 this.service.getReferenceFactory().obtain(parent)
@@ -131,7 +126,7 @@ public final class SubjectDataProxy implements SubjectData {
     }
 
     @Override
-    public boolean removeParent(@Nonnull Set<Context> contexts, @Nonnull Subject parent) {
+    public boolean removeParent(@NonNull Set<Context> contexts, @NonNull Subject parent) {
         handle().thenCompose(handle -> handle.removeParent(
                 CompatibilityUtil.convertContexts(contexts),
                 this.service.getReferenceFactory().obtain(parent)
@@ -146,14 +141,13 @@ public final class SubjectDataProxy implements SubjectData {
     }
 
     @Override
-    public boolean clearParents(@Nonnull Set<Context> contexts) {
+    public boolean clearParents(@NonNull Set<Context> contexts) {
         handle().thenCompose(handle -> handle.clearParents(CompatibilityUtil.convertContexts(contexts)));
         return true;
     }
 
-    @Nonnull
     @Override
-    public Map<Set<Context>, Map<String, String>> getAllOptions() {
+    public @NonNull Map<Set<Context>, Map<String, String>> getAllOptions() {
         return (Map) handle().thenApply(handle -> handle.getAllOptions().entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         e -> CompatibilityUtil.convertContexts(e.getKey()),
@@ -161,14 +155,13 @@ public final class SubjectDataProxy implements SubjectData {
                 ))).join();
     }
 
-    @Nonnull
     @Override
-    public Map<String, String> getOptions(@Nonnull Set<Context> contexts) {
+    public @NonNull Map<String, String> getOptions(@NonNull Set<Context> contexts) {
         return handle().thenApply(handle -> handle.getOptions(CompatibilityUtil.convertContexts(contexts))).join();
     }
 
     @Override
-    public boolean setOption(@Nonnull Set<Context> contexts, @Nonnull String key, String value) {
+    public boolean setOption(@NonNull Set<Context> contexts, @NonNull String key, String value) {
         if (value == null) {
             handle().thenCompose(handle -> handle.unsetOption(CompatibilityUtil.convertContexts(contexts), key));
             return true;
@@ -179,7 +172,7 @@ public final class SubjectDataProxy implements SubjectData {
     }
 
     @Override
-    public boolean clearOptions(@Nonnull Set<Context> contexts) {
+    public boolean clearOptions(@NonNull Set<Context> contexts) {
         handle().thenCompose(handle -> handle.clearOptions(CompatibilityUtil.convertContexts(contexts)));
         return true;
     }

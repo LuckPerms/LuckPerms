@@ -31,10 +31,10 @@ import me.lucko.luckperms.api.messenger.message.type.UserUpdateMessage;
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import me.lucko.luckperms.common.utils.gson.JObject;
 
-import java.util.UUID;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.UUID;
 
 public class UserUpdateMessageImpl extends AbstractMessage implements UserUpdateMessage {
     public static final String TYPE = "userupdate";
@@ -61,17 +61,15 @@ public class UserUpdateMessageImpl extends AbstractMessage implements UserUpdate
         this.userUuid = userUuid;
     }
 
-    @Nonnull
     @Override
-    public UUID getUser() {
+    public @NonNull UUID getUser() {
         return this.userUuid;
     }
 
-    @Nonnull
     @Override
-    public String asEncodedString() {
+    public @NonNull String asEncodedString() {
         return LuckPermsMessagingService.encodeMessageAsString(
-                TYPE, getId(), new JObject().add("userUuid", userUuid.toString()).toJson()
+                TYPE, getId(), new JObject().add("userUuid", this.userUuid.toString()).toJson()
         );
     }
 }

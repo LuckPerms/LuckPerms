@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class SpongeMessagingFactory extends MessagingFactory<LPSpongePlugin> {
     public SpongeMessagingFactory(LPSpongePlugin plugin) {
@@ -55,15 +55,13 @@ public class SpongeMessagingFactory extends MessagingFactory<LPSpongePlugin> {
 
     private class PluginMessageMessengerProvider implements MessengerProvider {
 
-        @Nonnull
         @Override
-        public String getName() {
+        public @NonNull String getName() {
             return "PluginMessage";
         }
 
-        @Nonnull
         @Override
-        public Messenger obtain(@Nonnull IncomingMessageConsumer incomingMessageConsumer) {
+        public @NonNull Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer) {
             PluginMessageMessenger messenger = new PluginMessageMessenger(getPlugin(), incomingMessageConsumer);
             messenger.init();
             return messenger;

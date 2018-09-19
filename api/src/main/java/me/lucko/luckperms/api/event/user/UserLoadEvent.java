@@ -29,7 +29,7 @@ import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a user is loaded into memory from the storage.
@@ -41,7 +41,7 @@ public interface UserLoadEvent extends LuckPermsEvent {
      *
      * @return the user that was loaded
      */
-    @Nonnull
+    @NonNull
     @Param(0)
     User getUser();
 

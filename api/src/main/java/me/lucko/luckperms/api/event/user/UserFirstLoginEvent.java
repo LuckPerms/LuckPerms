@@ -28,9 +28,9 @@ package me.lucko.luckperms.api.event.user;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
 
-import java.util.UUID;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.UUID;
 
 /**
  * Called when the user logs into the network for the first time.
@@ -50,7 +50,7 @@ public interface UserFirstLoginEvent extends LuckPermsEvent {
      *
      * @return the uuid of the user
      */
-    @Nonnull
+    @NonNull
     @Param(0)
     UUID getUuid();
 
@@ -59,7 +59,7 @@ public interface UserFirstLoginEvent extends LuckPermsEvent {
      *
      * @return the username of the user
      */
-    @Nonnull
+    @NonNull
     @Param(1)
     String getUsername();
 

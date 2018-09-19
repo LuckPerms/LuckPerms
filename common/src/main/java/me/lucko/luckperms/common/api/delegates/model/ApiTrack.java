@@ -36,10 +36,10 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.utils.Predicates;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.List;
 import java.util.Objects;
-
-import javax.annotation.Nonnull;
 
 public final class ApiTrack implements me.lucko.luckperms.api.Track {
     public static Track cast(me.lucko.luckperms.api.Track track) {
@@ -58,15 +58,13 @@ public final class ApiTrack implements me.lucko.luckperms.api.Track {
         return this.handle;
     }
 
-    @Nonnull
     @Override
-    public String getName() {
+    public @NonNull String getName() {
         return this.handle.getName();
     }
 
-    @Nonnull
     @Override
-    public List<String> getGroups() {
+    public @NonNull List<String> getGroups() {
         return this.handle.getGroups();
     }
 
@@ -76,7 +74,7 @@ public final class ApiTrack implements me.lucko.luckperms.api.Track {
     }
 
     @Override
-    public String getNext(@Nonnull Group current) {
+    public String getNext(@NonNull Group current) {
         Objects.requireNonNull(current, "current");
         try {
             return this.handle.getNext(ApiGroup.cast(current));
@@ -86,7 +84,7 @@ public final class ApiTrack implements me.lucko.luckperms.api.Track {
     }
 
     @Override
-    public String getPrevious(@Nonnull Group current) {
+    public String getPrevious(@NonNull Group current) {
         Objects.requireNonNull(current, "current");
         try {
             return this.handle.getPrevious(ApiGroup.cast(current));
@@ -95,54 +93,48 @@ public final class ApiTrack implements me.lucko.luckperms.api.Track {
         }
     }
 
-    @Nonnull
     @Override
-    public PromotionResult promote(@Nonnull User user, @Nonnull ContextSet contextSet) {
+    public @NonNull PromotionResult promote(@NonNull User user, @NonNull ContextSet contextSet) {
         return this.handle.promote(ApiUser.cast(user), contextSet, Predicates.alwaysTrue(), null, true);
     }
 
-    @Nonnull
     @Override
-    public DemotionResult demote(@Nonnull User user, @Nonnull ContextSet contextSet) {
+    public @NonNull DemotionResult demote(@NonNull User user, @NonNull ContextSet contextSet) {
         return this.handle.demote(ApiUser.cast(user), contextSet, Predicates.alwaysTrue(), null, true);
     }
 
-    @Nonnull
     @Override
-    public DataMutateResult appendGroup(@Nonnull Group group) {
+    public @NonNull DataMutateResult appendGroup(@NonNull Group group) {
         Objects.requireNonNull(group, "group");
         return this.handle.appendGroup(ApiGroup.cast(group));
     }
 
-    @Nonnull
     @Override
-    public DataMutateResult insertGroup(@Nonnull Group group, int position) throws IndexOutOfBoundsException {
+    public @NonNull DataMutateResult insertGroup(@NonNull Group group, int position) throws IndexOutOfBoundsException {
         Objects.requireNonNull(group, "group");
         return this.handle.insertGroup(ApiGroup.cast(group), position);
     }
 
-    @Nonnull
     @Override
-    public DataMutateResult removeGroup(@Nonnull Group group) {
+    public @NonNull DataMutateResult removeGroup(@NonNull Group group) {
         Objects.requireNonNull(group, "group");
         return this.handle.removeGroup(ApiGroup.cast(group));
     }
 
-    @Nonnull
     @Override
-    public DataMutateResult removeGroup(@Nonnull String group) {
+    public @NonNull DataMutateResult removeGroup(@NonNull String group) {
         Objects.requireNonNull(group, "group");
         return this.handle.removeGroup(group);
     }
 
     @Override
-    public boolean containsGroup(@Nonnull Group group) {
+    public boolean containsGroup(@NonNull Group group) {
         Objects.requireNonNull(group, "group");
         return this.handle.containsGroup(ApiGroup.cast(group));
     }
 
     @Override
-    public boolean containsGroup(@Nonnull String group) {
+    public boolean containsGroup(@NonNull String group) {
         Objects.requireNonNull(group, "group");
         return this.handle.containsGroup(group);
     }

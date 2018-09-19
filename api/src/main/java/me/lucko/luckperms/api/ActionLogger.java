@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.api;
 
-import java.util.concurrent.CompletableFuture;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Represents the object responsible for handling action logging.
@@ -41,8 +41,7 @@ public interface ActionLogger {
      *
      * @return a new builder
      */
-    @Nonnull
-    LogEntry.Builder newEntryBuilder();
+    LogEntry.@NonNull Builder newEntryBuilder();
 
     /**
      * Gets a {@link Log} instance from the plugin storage.
@@ -50,7 +49,7 @@ public interface ActionLogger {
      * @return a log instance
      * @see Storage#getLog()
      */
-    @Nonnull
+    @NonNull
     CompletableFuture<Log> getLog();
 
     /**
@@ -69,8 +68,8 @@ public interface ActionLogger {
      * @param entry the entry to submit
      * @return a future which will complete when the action is done
      */
-    @Nonnull
-    CompletableFuture<Void> submit(@Nonnull LogEntry entry);
+    @NonNull
+    CompletableFuture<Void> submit(@NonNull LogEntry entry);
 
     /**
      * Submits a log entry to the plugins storage handler.
@@ -80,8 +79,8 @@ public interface ActionLogger {
      * @param entry the entry to submit
      * @return a future which will complete when the action is done
      */
-    @Nonnull
-    CompletableFuture<Void> submitToStorage(@Nonnull LogEntry entry);
+    @NonNull
+    CompletableFuture<Void> submitToStorage(@NonNull LogEntry entry);
 
     /**
      * Submits a log entry to the plugins log broadcasting handler.
@@ -92,7 +91,7 @@ public interface ActionLogger {
      * @param entry the entry to submit
      * @return a future which will complete when the action is done
      */
-    @Nonnull
-    CompletableFuture<Void> broadcastAction(@Nonnull LogEntry entry);
+    @NonNull
+    CompletableFuture<Void> broadcastAction(@NonNull LogEntry entry);
 
 }

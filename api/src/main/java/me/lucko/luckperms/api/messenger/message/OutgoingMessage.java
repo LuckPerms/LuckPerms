@@ -27,7 +27,7 @@ package me.lucko.luckperms.api.messenger.message;
 
 import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents an outgoing {@link Message}.
@@ -56,7 +56,7 @@ public interface OutgoingMessage extends Message {
      *
      * @return an encoded string form of the message
      */
-    @Nonnull
+    @NonNull
     String asEncodedString();
 
 }

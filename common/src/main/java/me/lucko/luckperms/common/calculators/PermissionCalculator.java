@@ -35,10 +35,10 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.List;
 import java.util.Map;
-
-import javax.annotation.Nonnull;
 
 /**
  * Calculates and caches permissions
@@ -96,7 +96,7 @@ public class PermissionCalculator implements CacheLoader<String, Tristate> {
     }
 
     @Override
-    public Tristate load(@Nonnull String permission) {
+    public Tristate load(@NonNull String permission) {
         // offer the permission to the permission vault
         // we only need to do this once per permission, so it doesn't matter
         // that this call is behind the cache.

@@ -32,18 +32,17 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 
-import java.util.Optional;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.Optional;
 
 public class AllParentsByWeightHolder extends ContextualHolder {
     public AllParentsByWeightHolder(User user) {
         super(user);
     }
 
-    @Nonnull
     @Override
-    protected Optional<String> calculateValue(Contexts contexts) {
+    protected @NonNull Optional<String> calculateValue(Contexts contexts) {
         InheritanceGraph graph = this.user.getPlugin().getInheritanceHandler().getGraph(contexts);
 
         // fully traverse the graph, obtain a list of permission holders the user inherits from

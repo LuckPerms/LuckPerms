@@ -30,9 +30,9 @@ import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.common.api.delegates.model.ApiUser;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 
-import java.util.Objects;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public class ApiMessagingService implements MessagingService {
     private final InternalMessagingService handle;
@@ -52,7 +52,7 @@ public class ApiMessagingService implements MessagingService {
     }
 
     @Override
-    public void pushUserUpdate(@Nonnull User user) {
+    public void pushUserUpdate(@NonNull User user) {
         Objects.requireNonNull(user, "user");
         this.handle.pushUserUpdate(ApiUser.cast(user));
     }

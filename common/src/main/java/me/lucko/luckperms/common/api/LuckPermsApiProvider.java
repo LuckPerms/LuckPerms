@@ -54,10 +54,10 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-
-import javax.annotation.Nonnull;
 
 /**
  * Implements the LuckPerms API using the plugin instance
@@ -86,93 +86,81 @@ public class LuckPermsApiProvider implements LuckPermsApi {
         this.metaStackFactory = new ApiMetaStackFactory(plugin);
     }
 
-    @Nonnull
     @Override
-    public PlatformInfo getPlatformInfo() {
+    public @NonNull PlatformInfo getPlatformInfo() {
         return this.platformInfo;
     }
 
-    @Nonnull
     @Override
-    public UserManager getUserManager() {
+    public @NonNull UserManager getUserManager() {
         return this.userManager;
     }
 
-    @Nonnull
     @Override
-    public GroupManager getGroupManager() {
+    public @NonNull GroupManager getGroupManager() {
         return this.groupManager;
     }
 
-    @Nonnull
     @Override
-    public TrackManager getTrackManager() {
+    public @NonNull TrackManager getTrackManager() {
         return this.trackManager;
     }
 
-    @Nonnull
     @Override
-    public CompletableFuture<Void> runUpdateTask() {
+    public @NonNull CompletableFuture<Void> runUpdateTask() {
         return this.plugin.getSyncTaskBuffer().request();
     }
 
-    @Nonnull
     @Override
-    public EventBus getEventBus() {
+    public @NonNull EventBus getEventBus() {
         return this.plugin.getEventFactory().getEventBus();
     }
 
-    @Nonnull
     @Override
-    public LPConfiguration getConfiguration() {
+    public @NonNull LPConfiguration getConfiguration() {
         return this.plugin.getConfiguration().getDelegate();
     }
 
-    @Nonnull
     @Override
-    public Storage getStorage() {
+    public @NonNull Storage getStorage() {
         return this.plugin.getStorage().getApiDelegate();
     }
 
-    @Nonnull
     @Override
-    public Optional<MessagingService> getMessagingService() {
+    public @NonNull Optional<MessagingService> getMessagingService() {
         return this.plugin.getMessagingService().map(ApiMessagingService::new);
     }
 
     @Override
-    public void registerMessengerProvider(@Nonnull MessengerProvider messengerProvider) {
+    public void registerMessengerProvider(@NonNull MessengerProvider messengerProvider) {
         if (this.plugin.getConfiguration().get(ConfigKeys.MESSAGING_SERVICE).equals("custom")) {
             this.plugin.setMessagingService(new LuckPermsMessagingService(this.plugin, messengerProvider));
         }
     }
 
     @Override
-    public ActionLogger getActionLogger() {
+    public @NonNull ActionLogger getActionLogger() {
         return this.actionLogger;
     }
 
-    @Nonnull
-    @Override
     @Deprecated
-    public UuidCache getUuidCache() {
+    @Override
+    public @NonNull UuidCache getUuidCache() {
         return NoopUuidCache.INSTANCE;
     }
 
     @Override
-    public ContextManager getContextManager() {
+    public @NonNull ContextManager getContextManager() {
         return this.contextManager;
     }
 
-    @Nonnull
     @Override
-    public NodeFactory getNodeFactory() {
+    public @NonNull NodeFactory getNodeFactory() {
         return ApiNodeFactory.INSTANCE;
     }
 
-    @Nonnull
     @Override
-    public MetaStackFactory getMetaStackFactory() {
+    public @NonNull MetaStackFactory getMetaStackFactory() {
         return this.metaStackFactory;
     }
 

@@ -33,12 +33,12 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.nodetype.NodeType;
 import me.lucko.luckperms.api.nodetype.NodeTypeKey;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import javax.annotation.Nonnull;
 
 public abstract class ForwardingNode implements Node {
 
@@ -54,9 +54,8 @@ public abstract class ForwardingNode implements Node {
         return this == obj || delegate().equals(obj);
     }
 
-    @Nonnull
     @Override
-    public String getPermission() {
+    public @NonNull String getPermission() {
         return delegate().getPermission();
     }
 
@@ -65,9 +64,8 @@ public abstract class ForwardingNode implements Node {
         return delegate().getValue();
     }
 
-    @Nonnull
     @Override
-    public Tristate getTristate() {
+    public @NonNull Tristate getTristate() {
         return delegate().getTristate();
     }
 
@@ -81,15 +79,13 @@ public abstract class ForwardingNode implements Node {
         return delegate().isOverride();
     }
 
-    @Nonnull
     @Override
-    public Optional<String> getServer() {
+    public @NonNull Optional<String> getServer() {
         return delegate().getServer();
     }
 
-    @Nonnull
     @Override
-    public Optional<String> getWorld() {
+    public @NonNull Optional<String> getWorld() {
         return delegate().getWorld();
     }
 
@@ -114,13 +110,12 @@ public abstract class ForwardingNode implements Node {
     }
 
     @Override
-    public boolean shouldApplyWithContext(@Nonnull ContextSet contextSet) {
+    public boolean shouldApplyWithContext(@NonNull ContextSet contextSet) {
         return delegate().shouldApplyWithContext(contextSet);
     }
 
-    @Nonnull
     @Override
-    public List<String> resolveShorthand() {
+    public @NonNull List<String> resolveShorthand() {
         return delegate().resolveShorthand();
     }
 
@@ -139,9 +134,8 @@ public abstract class ForwardingNode implements Node {
         return delegate().getExpiryUnixTime();
     }
 
-    @Nonnull
     @Override
-    public Date getExpiry() throws IllegalStateException {
+    public @NonNull Date getExpiry() throws IllegalStateException {
         return delegate().getExpiry();
     }
 
@@ -155,15 +149,13 @@ public abstract class ForwardingNode implements Node {
         return delegate().hasExpired();
     }
 
-    @Nonnull
     @Override
-    public ContextSet getContexts() {
+    public @NonNull ContextSet getContexts() {
         return delegate().getContexts();
     }
 
-    @Nonnull
     @Override
-    public ContextSet getFullContexts() {
+    public @NonNull ContextSet getFullContexts() {
         return delegate().getFullContexts();
     }
 
@@ -172,9 +164,8 @@ public abstract class ForwardingNode implements Node {
         return delegate().isGroupNode();
     }
 
-    @Nonnull
     @Override
-    public String getGroupName() throws IllegalStateException {
+    public @NonNull String getGroupName() throws IllegalStateException {
         return delegate().getGroupName();
     }
 
@@ -208,9 +199,8 @@ public abstract class ForwardingNode implements Node {
         return delegate().isMeta();
     }
 
-    @Nonnull
     @Override
-    public Map.Entry<String, String> getMeta() throws IllegalStateException {
+    public Map.@NonNull Entry<String, String> getMeta() throws IllegalStateException {
         return delegate().getMeta();
     }
 
@@ -219,9 +209,8 @@ public abstract class ForwardingNode implements Node {
         return delegate().isPrefix();
     }
 
-    @Nonnull
     @Override
-    public Map.Entry<Integer, String> getPrefix() throws IllegalStateException {
+    public Map.@NonNull Entry<Integer, String> getPrefix() throws IllegalStateException {
         return delegate().getPrefix();
     }
 
@@ -230,9 +219,8 @@ public abstract class ForwardingNode implements Node {
         return delegate().isSuffix();
     }
 
-    @Nonnull
     @Override
-    public Map.Entry<Integer, String> getSuffix() throws IllegalStateException {
+    public Map.@NonNull Entry<Integer, String> getSuffix() throws IllegalStateException {
         return delegate().getSuffix();
     }
 

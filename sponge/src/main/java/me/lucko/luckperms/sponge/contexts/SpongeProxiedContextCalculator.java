@@ -29,13 +29,12 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.contexts.ProxiedContextCalculator;
 import me.lucko.luckperms.sponge.service.context.DelegatingMutableContextSet;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.Subject;
 
 import java.util.Set;
-
-import javax.annotation.Nonnull;
 
 public class SpongeProxiedContextCalculator implements ProxiedContextCalculator<Subject> {
     private final ContextCalculator<Subject> delegate;
@@ -44,9 +43,8 @@ public class SpongeProxiedContextCalculator implements ProxiedContextCalculator<
         this.delegate = delegate;
     }
 
-    @Nonnull
     @Override
-    public MutableContextSet giveApplicableContext(@Nonnull Subject subject, @Nonnull MutableContextSet accumulator) {
+    public @NonNull MutableContextSet giveApplicableContext(@NonNull Subject subject, @NonNull MutableContextSet accumulator) {
         Set<Context> contexts = new DelegatingMutableContextSet(accumulator);
         this.delegate.accumulateContexts(subject, contexts);
         return accumulator;

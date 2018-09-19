@@ -32,9 +32,9 @@ import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
 
-import java.util.Set;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
+import java.util.Set;
 
 /**
  * Called when a node is added to/removed from a user/group
@@ -46,7 +46,7 @@ public interface NodeMutateEvent extends LuckPermsEvent {
      *
      * @return the event target
      */
-    @Nonnull
+    @NonNull
     @Param(0)
     PermissionHolder getTarget();
 
@@ -55,7 +55,7 @@ public interface NodeMutateEvent extends LuckPermsEvent {
      *
      * @return the data before the change
      */
-    @Nonnull
+    @NonNull
     @Param(1)
     Set<Node> getDataBefore();
 
@@ -64,7 +64,7 @@ public interface NodeMutateEvent extends LuckPermsEvent {
      *
      * @return the data after the change
      */
-    @Nonnull
+    @NonNull
     @Param(2)
     Set<Node> getDataAfter();
 

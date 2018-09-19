@@ -174,7 +174,7 @@ public class CommandManager {
             if (this.mainCommands.stream().anyMatch(c -> c.shouldDisplay() && c.isAuthorized(sender))) {
                 Message.VIEW_AVAILABLE_COMMANDS_PROMPT.send(sender, label);
             } else {
-                Collection<? extends Group> groups = plugin.getGroupManager().getAll().values();
+                Collection<? extends Group> groups = this.plugin.getGroupManager().getAll().values();
                 if (groups.size() <= 1 && groups.stream().allMatch(g -> g.getOwnNodes().isEmpty())) {
                     Message.FIRST_TIME_SETUP.send(sender, label, sender.getName());
                 } else {

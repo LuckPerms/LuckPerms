@@ -33,11 +33,11 @@ import me.lucko.luckperms.common.calculators.PermissionCalculator;
 import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.verbose.CheckOrigin;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.Nonnull;
 
 /**
  * Holds cached permissions data for a given context
@@ -97,15 +97,13 @@ public class PermissionCache implements PermissionData {
         return this.calculator;
     }
 
-    @Nonnull
     @Override
-    public Map<String, Boolean> getImmutableBacking() {
+    public @NonNull Map<String, Boolean> getImmutableBacking() {
         return this.permissionsUnmodifiable;
     }
 
-    @Nonnull
     @Override
-    public Tristate getPermissionValue(@Nonnull String permission) {
+    public @NonNull Tristate getPermissionValue(@NonNull String permission) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
@@ -119,9 +117,8 @@ public class PermissionCache implements PermissionData {
         return this.calculator.getPermissionValue(permission, origin);
     }
 
-    @Nonnull
     @Override
-    public Contexts getContexts() {
+    public @NonNull Contexts getContexts() {
         return this.contexts;
     }
 }

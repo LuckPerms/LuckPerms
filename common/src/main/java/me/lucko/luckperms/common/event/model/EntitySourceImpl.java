@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.event.model;
 import me.lucko.luckperms.api.Entity;
 import me.lucko.luckperms.api.event.source.EntitySource;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EntitySourceImpl implements EntitySource {
     private final Entity entity;
@@ -37,15 +37,13 @@ public class EntitySourceImpl implements EntitySource {
         this.entity = entity;
     }
 
-    @Nonnull
     @Override
-    public Entity getEntity() {
+    public @NonNull Entity getEntity() {
         return this.entity;
     }
 
-    @Nonnull
     @Override
-    public Type getType() {
+    public @NonNull Type getType() {
         return Type.ENTITY;
     }
 

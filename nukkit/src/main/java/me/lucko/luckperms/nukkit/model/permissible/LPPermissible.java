@@ -36,6 +36,8 @@ import me.lucko.luckperms.common.verbose.CheckOrigin;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import me.lucko.luckperms.nukkit.model.PermissionDefault;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import cn.nukkit.Player;
 import cn.nukkit.permission.PermissibleBase;
 import cn.nukkit.permission.Permission;
@@ -51,8 +53,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.Nonnull;
 
 /**
  * PermissibleBase for LuckPerms.
@@ -347,7 +347,7 @@ public class LPPermissible extends PermissibleBase {
         }
 
         @Override
-        public boolean addAll(@Nonnull Collection<? extends PermissionAttachment> c) {
+        public boolean addAll(@NonNull Collection<? extends PermissionAttachment> c) {
             boolean modified = false;
             for (PermissionAttachment e : c) {
                 if (add(e)) {
@@ -368,22 +368,20 @@ public class LPPermissible extends PermissibleBase {
             return ImmutableList.<PermissionAttachment>copyOf(LPPermissible.this.lpAttachments).iterator();
         }
 
-        @Nonnull
         @Override
-        public Object[] toArray() {
+        public @NonNull Object[] toArray() {
             return ImmutableList.<PermissionAttachment>copyOf(LPPermissible.this.lpAttachments).toArray();
         }
 
-        @Nonnull
         @Override
-        public <T> T[] toArray(@Nonnull T[] a) {
+        public @NonNull <T> T[] toArray(@NonNull T[] a) {
             return ImmutableList.<PermissionAttachment>copyOf(LPPermissible.this.lpAttachments).toArray(a);
         }
 
         @Override public int size() { throw new UnsupportedOperationException(); }
         @Override public boolean isEmpty() { throw new UnsupportedOperationException(); }
-        @Override public boolean containsAll(@Nonnull Collection<?> c) { throw new UnsupportedOperationException(); }
-        @Override public boolean removeAll(@Nonnull Collection<?> c) { throw new UnsupportedOperationException(); }
-        @Override public boolean retainAll(@Nonnull Collection<?> c) { throw new UnsupportedOperationException(); }
+        @Override public boolean containsAll(@NonNull Collection<?> c) { throw new UnsupportedOperationException(); }
+        @Override public boolean removeAll(@NonNull Collection<?> c) { throw new UnsupportedOperationException(); }
+        @Override public boolean retainAll(@NonNull Collection<?> c) { throw new UnsupportedOperationException(); }
     }
 }
