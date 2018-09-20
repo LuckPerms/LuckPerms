@@ -95,15 +95,15 @@ public class VaultPermissionHook extends AbstractVaultPermission {
         }
 
         // are we on the main thread?
-        if (Bukkit.isPrimaryThread() && !this.plugin.getConfiguration().get(ConfigKeys.VAULT_UNSAFE_LOOKUPS)) {
+        if (!plugin.getBootstrap().isServerStarting() && Bukkit.isPrimaryThread() && !this.plugin.getConfiguration().get(ConfigKeys.VAULT_UNSAFE_LOOKUPS)) {
             throw new RuntimeException(
-                    "Unable to lookup a UUID for '" + player + "'. \n" +
-                    "This request was made on the main server thread. \n" +
-                    "It is not safe to execute a request to load username data from the database in this context. \n" +
+                    "The operation to lookup a UUID for '" + player + "' was cancelled by LuckPerms. This is NOT a bug. \n" +
+                    "The lookup request was made on the main server thread. It is not safe to execute a request to \n" +
+                    "load username data from the database in this context. \n" +
                     "If you are a plugin author, please either make your request asynchronously, \n" +
                     "or provide an 'OfflinePlayer' object with the UUID already populated. \n" +
-                    "Server admins can disable this catch by setting 'vault-unsafe-lookups' to true in the LP config, \n" +
-                    "but should consider the consequences (lag) before doing so."
+                    "Alternatively, server admins can disable this catch by setting 'vault-unsafe-lookups' to true \n" +
+                    "in the LP config, but should consider the consequences (lag) before doing so."
             );
         }
 
@@ -131,14 +131,14 @@ public class VaultPermissionHook extends AbstractVaultPermission {
         }
 
         // are we on the main thread?
-        if (Bukkit.isPrimaryThread() && !this.plugin.getConfiguration().get(ConfigKeys.VAULT_UNSAFE_LOOKUPS)) {
+        if (!plugin.getBootstrap().isServerStarting() && Bukkit.isPrimaryThread() && !this.plugin.getConfiguration().get(ConfigKeys.VAULT_UNSAFE_LOOKUPS)) {
             throw new RuntimeException(
-                    "Unable to obtain user data for '" + uuid + "'. \n" +
-                    "This request was made on the main server thread. \n" +
-                    "It is not safe to execute a request to load user data from the database in this context. \n" +
+                    "The operation to load user data for '" + uuid + "' was cancelled by LuckPerms. This is NOT a bug. \n" +
+                    "The lookup request was made on the main server thread. It is not safe to execute a request to \n" +
+                    "load username data from the database in this context. \n" +
                     "If you are a plugin author, please consider making your request asynchronously. \n" +
-                    "Server admins can disable this catch by setting 'vault-unsafe-lookups' to true in the LP config, \n" +
-                    "but should consider the consequences (lag) before doing so."
+                    "Alternatively, server admins can disable this catch by setting 'vault-unsafe-lookups' to true \n" +
+                    "in the LP config, but should consider the consequences (lag) before doing so."
             );
         }
 

@@ -85,6 +85,7 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     // load/enable latches
     private final CountDownLatch loadLatch = new CountDownLatch(1);
     private final CountDownLatch enableLatch = new CountDownLatch(1);
+    private boolean serverStarting = true;
 
     // if the plugin has been loaded on an incompatible version
     private boolean incompatibleVersion = false;
@@ -150,6 +151,9 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
         this.startTime = System.currentTimeMillis();
         try {
             this.plugin.enable();
+
+            // schedule a task to update the 'serverStarting' flag
+            getServer().getScheduler().runTask(this, () -> this.serverStarting = false);
         } finally {
             this.enableLatch.countDown();
         }
@@ -162,6 +166,7 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
         }
 
         this.plugin.disable();
+        this.serverStarting = true;
     }
 
     @Override
@@ -172,6 +177,10 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     @Override
     public CountDownLatch getLoadLatch() {
         return this.loadLatch;
+    }
+
+    public boolean isServerStarting() {
+        return this.serverStarting;
     }
 
     // provide information about the plugin
