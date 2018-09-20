@@ -40,7 +40,6 @@ import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerAsyncPreLoginEvent;
 import cn.nukkit.event.player.PlayerLoginEvent;
 import cn.nukkit.event.player.PlayerQuitEvent;
-import cn.nukkit.scheduler.Task;
 
 import java.util.Collections;
 import java.util.HashSet;
