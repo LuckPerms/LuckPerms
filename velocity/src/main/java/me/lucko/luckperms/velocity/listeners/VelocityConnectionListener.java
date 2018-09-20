@@ -151,19 +151,7 @@ public class VelocityConnectionListener extends AbstractConnectionListener {
     // Wait until the last priority to unload, so plugins can still perform permission checks on this event
     @Subscribe(order = PostOrder.LAST)
     public void onPlayerQuit(DisconnectEvent e) {
-        Player player = e.getPlayer();
-
-        // Register with the housekeeper, so the User's instance will stick
-        // around for a bit after they disconnect
-        this.plugin.getUserManager().getHouseKeeper().registerUsage(player.getUniqueId());
-
-        // force a clear of transient nodes
-        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
-            User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
-            if (user != null) {
-                user.clearTransientNodes();
-            }
-        });
+        handleDisconnect(e.getPlayer().getUniqueId());
     }
 
 }

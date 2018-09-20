@@ -186,33 +186,26 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent e) {
         final Player player = e.getPlayer();
+        handleDisconnect(player.getUniqueId());
 
-        // Remove the custom permissible
-        try {
-            PermissibleInjector.unInject(player, true);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        // Handle auto op
-        if (this.plugin.getConfiguration().get(ConfigKeys.AUTO_OP)) {
-            player.setOp(false);
-        }
-
-        // Register with the housekeeper, so the User's instance will stick
-        // around for a bit after they disconnect
-        this.plugin.getUserManager().getHouseKeeper().registerUsage(player.getUniqueId());
-
-        // force a clear of transient nodes
-        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
-            User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
-            if (user != null) {
-                user.clearTransientNodes();
+        // perform unhooking from bukkit objects 1 tick later.
+        // this allows plugins listening after us on MONITOR to still have intact permissions data
+        this.plugin.getBootstrap().getServer().getScheduler().runTaskLaterAsynchronously(this.plugin.getBootstrap(), () -> {
+            // Remove the custom permissible
+            try {
+                PermissibleInjector.unInject(player, true);
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
-        });
 
-        // remove their contexts cache
-        this.plugin.getContextManager().onPlayerQuit(player);
+            // Handle auto op
+            if (this.plugin.getConfiguration().get(ConfigKeys.AUTO_OP)) {
+                player.setOp(false);
+            }
+
+            // remove their contexts cache
+            this.plugin.getContextManager().onPlayerQuit(player);
+        }, 1L);
     }
 
 }

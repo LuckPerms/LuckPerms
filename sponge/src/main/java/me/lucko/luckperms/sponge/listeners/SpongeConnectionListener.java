@@ -166,19 +166,7 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
 
     @Listener(order = Order.POST)
     public void onClientLeave(ClientConnectionEvent.Disconnect e) {
-        Player player = e.getTargetEntity();
-
-        // Register with the housekeeper, so the User's instance will stick
-        // around for a bit after they disconnect
-        this.plugin.getUserManager().getHouseKeeper().registerUsage(player.getUniqueId());
-
-        // force a clear of transient nodes
-        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
-            User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
-            if (user != null) {
-                user.clearTransientNodes();
-            }
-        });
+        handleDisconnect(e.getTargetEntity().getUniqueId());
     }
 
 }

@@ -124,4 +124,18 @@ public abstract class AbstractConnectionListener {
         return user;
     }
 
+    public void handleDisconnect(UUID uuid) {
+        // Register with the housekeeper, so the User's instance will stick
+        // around for a bit after they disconnect
+        this.plugin.getUserManager().getHouseKeeper().registerUsage(uuid);
+
+        // force a clear of transient nodes
+        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
+            User user = this.plugin.getUserManager().getIfLoaded(uuid);
+            if (user != null) {
+                user.clearTransientNodes();
+            }
+        });
+    }
+
 }
