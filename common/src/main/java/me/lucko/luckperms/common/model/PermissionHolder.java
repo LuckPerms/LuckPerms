@@ -539,7 +539,7 @@ public abstract class PermissionHolder {
     }
 
     public DataMutateResult setPermission(Node node, boolean callEvent) {
-        if (hasPermission(NodeMapType.ENDURING, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE) != Tristate.UNDEFINED) {
+        if (hasPermission(NodeMapType.ENDURING, node, StandardNodeEquality.IGNORE_EXPIRY_TIME) != Tristate.UNDEFINED) {
             return DataMutateResult.ALREADY_HAS;
         }
 
@@ -565,7 +565,7 @@ public abstract class PermissionHolder {
     }
 
     public DataMutateResult setTransientPermission(Node node) {
-        if (hasPermission(NodeMapType.TRANSIENT, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE) != Tristate.UNDEFINED) {
+        if (hasPermission(NodeMapType.TRANSIENT, node, StandardNodeEquality.IGNORE_EXPIRY_TIME) != Tristate.UNDEFINED) {
             return DataMutateResult.ALREADY_HAS;
         }
 

@@ -181,9 +181,16 @@ public final class NodeMap {
         ImmutableContextSet context = node.getFullContexts().makeImmutable();
         LocalizedNode n = localise(node);
 
-        this.map.put(context, n);
-        if (node.isGroupNode() && node.getValue()) {
-            this.inheritanceMap.put(context, n);
+        SortedSet<LocalizedNode> nodesInContext = this.map.get(context);
+        nodesInContext.removeIf(e -> e.equals(node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE));
+        nodesInContext.add(n);
+
+        if (node.isGroupNode()) {
+            SortedSet<LocalizedNode> groupNodesInContext = this.inheritanceMap.get(context);
+            groupNodesInContext.removeIf(e -> e.equals(node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE));
+            if (node.getValue()) {
+                groupNodesInContext.add(n);
+            }
         }
     }
 
