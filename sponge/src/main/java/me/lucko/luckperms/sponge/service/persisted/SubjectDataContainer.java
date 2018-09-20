@@ -93,15 +93,20 @@ public class SubjectDataContainer {
         }
         this.parents = parentsBuilder.build();
     }
+
+    private static JsonArray getArray(JsonObject root, String key) {
+        JsonElement element = root.get(key);
+        if (element == null) {
+            return new JsonArray();
+        }
+        Preconditions.checkArgument(element instanceof JsonArray);
+        return ((JsonArray) element);
+    }
     
     private SubjectDataContainer(LPPermissionService service, JsonObject root) {
-        Preconditions.checkArgument(root.get("permissions").isJsonArray());
-        Preconditions.checkArgument(root.get("options").isJsonArray());
-        Preconditions.checkArgument(root.get("parents").isJsonArray());
-
-        JsonArray permissions = root.get("permissions").getAsJsonArray();
-        JsonArray options = root.get("options").getAsJsonArray();
-        JsonArray parents = root.get("parents").getAsJsonArray();
+        JsonArray permissions = getArray(root, "permissions");
+        JsonArray options = getArray(root, "options");
+        JsonArray parents = getArray(root, "parents");
 
         ImmutableMap.Builder<ImmutableContextSet, Map<String, Boolean>> permissionsBuilder = ImmutableMap.builder();
         for (JsonElement e : permissions) {

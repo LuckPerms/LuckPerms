@@ -204,6 +204,8 @@ public class SubjectStorage {
             JsonObject data = this.gson.fromJson(reader, JsonObject.class);
             SubjectDataContainer model = SubjectDataContainer.deserialize(this.service, data);
             return new LoadedSubject(subjectName, model);
+        } catch (Exception e) {
+            throw new IOException("Exception occurred whilst loading from " + file.toString(), e);
         }
     }
 
