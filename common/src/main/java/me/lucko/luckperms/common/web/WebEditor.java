@@ -130,7 +130,7 @@ public final class WebEditor {
             return holder;
         } else if (who.startsWith(USER_ID_PATTERN)) {
             String user = who.substring(USER_ID_PATTERN.length());
-            UUID uuid = Uuids.parseNullable(user);
+            UUID uuid = Uuids.parse(user);
             if (uuid == null) {
                 Message.APPLY_EDITS_TARGET_USER_NOT_UUID.send(sender, user);
                 return null;

@@ -165,7 +165,7 @@ public class SeparatedConfigurateDao extends AbstractConfigurateDao {
                 }
 
                 String user = s.substring(0, s.length() - this.fileExtension.length());
-                UUID uuid = Uuids.parseNullable(user);
+                UUID uuid = Uuids.parse(user);
                 if (uuid == null) {
                     return;
                 }

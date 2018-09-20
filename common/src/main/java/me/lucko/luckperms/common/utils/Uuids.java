@@ -27,18 +27,14 @@ package me.lucko.luckperms.common.utils;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 /**
  * Utilities for working with {@link UUID}s.
  */
 public final class Uuids {
-    private static final Pattern UUID_PATTERN = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
-
-    public static final Predicate<String> PREDICATE = s -> parseNullable(s) != null;
+    public static final Predicate<String> PREDICATE = s -> parse(s) != null;
 
     public static @Nullable UUID fromString(String s) {
         try {
@@ -48,16 +44,19 @@ public final class Uuids {
         }
     }
 
-    public static @Nullable UUID parseNullable(String s) {
+    public static @Nullable UUID parse(String s) {
         UUID uuid = fromString(s);
-        if (uuid == null) {
-            uuid = fromString(UUID_PATTERN.matcher(s).replaceAll("$1-$2-$3-$4-$5"));
+        if (uuid == null && s.length() == 32) {
+            try {
+                uuid = new UUID(
+                        Long.parseUnsignedLong(s.substring(0, 16), 16),
+                        Long.parseUnsignedLong(s.substring(16), 16)
+                );
+            } catch (NumberFormatException e) {
+                // ignore
+            }
         }
         return uuid;
-    }
-
-    public static Optional<UUID> parse(String s) {
-        return Optional.ofNullable(parseNullable(s));
     }
 
     private Uuids() {}

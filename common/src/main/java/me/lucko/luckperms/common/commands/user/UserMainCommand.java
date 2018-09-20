@@ -81,7 +81,7 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
     }
 
     public static UUID parseTargetUuid(String target, LuckPermsPlugin plugin, Sender sender) {
-        UUID uuid = Uuids.parseNullable(target);
+        UUID uuid = Uuids.parse(target);
         if (uuid == null) {
             if (!plugin.getConfiguration().get(ConfigKeys.ALLOW_INVALID_USERNAMES)) {
                 if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {

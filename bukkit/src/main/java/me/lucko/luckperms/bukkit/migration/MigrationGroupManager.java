@@ -170,7 +170,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 }
 
                 String lastName = user.getLastName();
-                if (lastName != null && Uuids.parse(lastName).isPresent()) {
+                if (lastName != null && Uuids.parse(lastName) != null) {
                     lastName = null;
                 }
 

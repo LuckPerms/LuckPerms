@@ -35,7 +35,7 @@ import java.util.UUID;
 public final class BukkitUuids {
 
     public static UUID lookupUuid(ProgressLogger log, String s) {
-        UUID uuid = Uuids.parseNullable(s);
+        UUID uuid = Uuids.parse(s);
         if (uuid == null) {
             try {
                 //noinspection deprecation

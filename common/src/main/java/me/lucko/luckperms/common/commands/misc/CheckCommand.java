@@ -58,7 +58,7 @@ public class CheckCommand extends SingleCommand {
         String permission = args.get(1);
 
         User user;
-        UUID u = Uuids.parseNullable(target);
+        UUID u = Uuids.parse(target);
         if (u != null) {
             user = plugin.getUserManager().getIfLoaded(u);
         } else {

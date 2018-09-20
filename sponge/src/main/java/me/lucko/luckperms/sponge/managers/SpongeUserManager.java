@@ -137,7 +137,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
 
     @Override
     public CompletableFuture<LPSubject> loadSubject(String identifier) {
-        UUID uuid = Uuids.parseNullable(identifier);
+        UUID uuid = Uuids.parse(identifier);
         if (uuid == null) {
             throw new IllegalArgumentException("Identifier is not a UUID: " + identifier);
         }
@@ -152,7 +152,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
 
     @Override
     public Optional<LPSubject> getSubject(String identifier) {
-        UUID uuid = Uuids.parseNullable(identifier);
+        UUID uuid = Uuids.parse(identifier);
         if (uuid == null) {
             return Optional.empty();
         }
@@ -161,7 +161,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
 
     @Override
     public CompletableFuture<Boolean> hasRegistered(String identifier) {
-        UUID uuid = Uuids.parseNullable(identifier);
+        UUID uuid = Uuids.parse(identifier);
         if (uuid == null) {
             return CompletableFuture.completedFuture(false);
         }
@@ -178,7 +178,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
         return CompletableFuture.supplyAsync(() -> {
             ImmutableSet.Builder<LPSubject> ret = ImmutableSet.builder();
             for (String id : identifiers) {
-                UUID uuid = Uuids.parseNullable(id);
+                UUID uuid = Uuids.parse(id);
                 if (uuid == null) {
                     continue;
                 }
