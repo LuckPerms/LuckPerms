@@ -77,7 +77,7 @@ public class DependencyRegistry {
         }
 
         // don't load slf4j if it's already present
-        if (dependencies.contains(Dependency.SLF4J_API) || dependencies.contains(Dependency.SLF4J_SIMPLE) && slf4jPresent()) {
+        if ((dependencies.contains(Dependency.SLF4J_API) || dependencies.contains(Dependency.SLF4J_SIMPLE)) && slf4jPresent()) {
             dependencies.remove(Dependency.SLF4J_API);
             dependencies.remove(Dependency.SLF4J_SIMPLE);
         }
