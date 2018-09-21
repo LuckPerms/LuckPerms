@@ -82,8 +82,8 @@ public class MonitoringPermissionCheckListener {
         }
 
         @Override
-        public com.velocitypowered.api.permission.@NonNull Tristate getPermissionSetting(@NonNull String permission) {
-            com.velocitypowered.api.permission.Tristate setting = this.delegate.getPermissionSetting(permission);
+        public com.velocitypowered.api.permission.@NonNull Tristate getPermissionValue(@NonNull String permission) {
+            com.velocitypowered.api.permission.Tristate setting = this.delegate.getPermissionValue(permission);
 
             // report result
             Tristate result = CompatibilityUtil.convertTristate(setting);
