@@ -132,7 +132,7 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
 
             if (!getUniqueConnections().contains(profile.getUniqueId())) {
                 this.plugin.getLogger().warn("User " + profile.getUniqueId() + " - " + profile.getName() +
-                        " doesn't have data pre-loaded, they have never need processed during pre-login in this session." +
+                        " doesn't have data pre-loaded, they have never been processed during pre-login in this session." +
                         " - denying login.");
             } else {
                 this.plugin.getLogger().warn("User " + profile.getUniqueId() + " - " + profile.getName() +

@@ -126,7 +126,7 @@ public class VelocityConnectionListener extends AbstractConnectionListener {
         if (user == null) {
             if (!getUniqueConnections().contains(player.getUniqueId())) {
                 this.plugin.getLogger().warn("User " + player.getUniqueId() + " - " + player.getUsername() +
-                        " doesn't have data pre-loaded, they have never need processed during pre-login in this session.");
+                        " doesn't have data pre-loaded, they have never been processed during pre-login in this session.");
             } else {
                 this.plugin.getLogger().warn("User " + player.getUniqueId() + " - " + player.getUsername() +
                         " doesn't currently have data pre-loaded, but they have been processed before in this session.");
