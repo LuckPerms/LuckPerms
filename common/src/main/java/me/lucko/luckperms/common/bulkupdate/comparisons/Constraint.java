@@ -33,15 +33,15 @@ public class Constraint {
         return new Constraint(comparison, expression);
     }
 
-    // the comparison type being used in this query
     private final Comparison comparison;
+    private final String expressionValue;
+    private final Comparison.CompiledExpression compiledExpression;
 
-    // the expression being compared against
-    private final String expression;
 
     private Constraint(Comparison comparison, String expression) {
         this.comparison = comparison;
-        this.expression = expression;
+        this.expressionValue = expression;
+        this.compiledExpression = this.comparison.compile(this.expressionValue);
     }
 
     /**
@@ -51,7 +51,7 @@ public class Constraint {
      * @return true if satisfied
      */
     public boolean eval(String value) {
-        return this.comparison.matches(value, this.expression);
+        return this.compiledExpression.test(value);
     }
 
     public void appendSql(PreparedStatementBuilder builder, String field) {
@@ -59,19 +59,11 @@ public class Constraint {
         builder.append(field + " ");
         this.comparison.appendSql(builder);
         builder.append(" ?");
-        builder.variable(this.expression);
-    }
-
-    public Comparison getComparison() {
-        return this.comparison;
-    }
-
-    public String getExpression() {
-        return this.expression;
+        builder.variable(this.expressionValue);
     }
 
     @Override
     public String toString() {
-        return this.comparison + " " + this.expression;
+        return this.comparison + " " + this.expressionValue;
     }
 }

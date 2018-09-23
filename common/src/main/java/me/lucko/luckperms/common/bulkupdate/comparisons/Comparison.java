@@ -40,18 +40,31 @@ public interface Comparison {
     String getSymbol();
 
     /**
-     * Compares two strings according to this comparisons
-     * behaviour, and returns if they match.
+     * Creates a {@link CompiledExpression} for the given expression
      *
-     * @param str the string
-     * @param expr the expression
-     * @return if the string matches the expression
+     * @param expression the expression
+     * @return the compiled expression
      */
-    boolean matches(String str, String expr);
+    CompiledExpression compile(String expression);
 
     /**
      * Returns the comparison operator in SQL form
      */
     void appendSql(PreparedStatementBuilder builder);
+
+    /**
+     * An instance of {@link Comparison} which is bound to an expression.
+     */
+    interface CompiledExpression {
+
+        /**
+         * Tests the expression against a given string, according to the
+         * rules of the parent {@link Comparison}.
+         *
+         * @param string the string
+         * @return if there was a match
+         */
+        boolean test(String string);
+    }
 
 }

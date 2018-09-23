@@ -27,6 +27,8 @@ package me.lucko.luckperms.common.bulkupdate.comparisons;
 
 import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
 
+import java.util.regex.Pattern;
+
 /**
  * An enumeration of standard {@link Comparison}s.
  */
@@ -34,45 +36,31 @@ public enum StandardComparison implements Comparison {
 
     EQUAL("==", "=") {
         @Override
-        public boolean matches(String str, String expr) {
-            return str.equalsIgnoreCase(expr);
+        public CompiledExpression compile(String expression) {
+            return expression::equalsIgnoreCase;
         }
     },
 
     NOT_EQUAL("!=", "!=") {
         @Override
-        public boolean matches(String str, String expr) {
-            return !str.equalsIgnoreCase(expr);
+        public CompiledExpression compile(String expression) {
+            return string -> !expression.equalsIgnoreCase(string);
         }
     },
 
     SIMILAR("~~", "LIKE") {
         @Override
-        public boolean matches(String str, String expr) {
-            // form expression
-            expr = expr.toLowerCase();
-            expr = expr.replace(".", "\\.");
-
-            // convert from SQL LIKE syntax to regex
-            expr = expr.replace("_", ".");
-            expr = expr.replace("%", ".*");
-
-            return str.toLowerCase().matches(expr);
+        public CompiledExpression compile(String expression) {
+            Pattern pattern = StandardComparison.compilePatternForLikeSyntax(expression);
+            return string -> pattern.matcher(string).matches();
         }
     },
 
     NOT_SIMILAR("!~", "NOT LIKE") {
         @Override
-        public boolean matches(String str, String expr) {
-            // form expression
-            expr = expr.toLowerCase();
-            expr = expr.replace(".", "\\.");
-
-            // convert from SQL LIKE syntax to regex
-            expr = expr.replace("_", ".");
-            expr = expr.replace("%", ".*");
-
-            return !str.toLowerCase().matches(expr);
+        public CompiledExpression compile(String expression) {
+            Pattern pattern = StandardComparison.compilePatternForLikeSyntax(expression);
+            return string -> !pattern.matcher(string).matches();
         }
     };
 
@@ -106,6 +94,17 @@ public enum StandardComparison implements Comparison {
             }
         }
         return null;
+    }
+
+    static Pattern compilePatternForLikeSyntax(String expression) {
+        expression = expression.toLowerCase();
+        expression = expression.replace(".", "\\.");
+
+        // convert from SQL LIKE syntax to regex
+        expression = expression.replace("_", ".");
+        expression = expression.replace("%", ".*");
+
+        return Pattern.compile(expression);
     }
 
 }
