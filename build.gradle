@@ -18,21 +18,17 @@ subprojects {
 
     def determinePatchVersion = {
         // get the name of the last tag
-        def lastTag = new ByteArrayOutputStream()
+        def tagInfo = new ByteArrayOutputStream()
         exec {
-            commandLine 'git', 'describe', '--tags', '--abbrev=0', '@^'
-            standardOutput = lastTag
+            commandLine 'git', 'describe', '--tags'
+            standardOutput = tagInfo
         }
+        tagInfo = tagInfo.toString()
 
-        // get a list of the commits since the last tag
-        def commitsSinceLastTag = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'log', '--oneline', lastTag.toString().trim() + '..@'
-            standardOutput = commitsSinceLastTag
+        if (!tagInfo.contains('-')) {
+            return 0
         }
-
-        // calculate what the patch version should be
-        return Integer.toString(commitsSinceLastTag.toString().split("\n").length)
+        return tagInfo.split("-")[1]
     }
 
     project.ext.majorVersion = '4'
