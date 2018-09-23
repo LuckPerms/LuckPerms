@@ -6,12 +6,21 @@ dependencies {
 }
 
 if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
-
     apply plugin: 'signing'
 
-    task javadocJar(type: Jar) {
+    javadoc {
+        options.encoding = 'UTF-8'
+        options.charSet = 'UTF-8'
+        options.links(
+                'https://google.github.io/guava/releases/21.0/api/docs/',
+                'https://docs.oracle.com/javase/8/docs/api/'
+        )
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
         classifier 'javadoc'
-        from javadoc
+        from javadoc.destinationDir
     }
 
     task sourcesJar(type: Jar) {
@@ -25,7 +34,7 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
     }
 
     signing {
-        required = false
+        useGpgCmd()
         sign configurations.archives
     }
 
@@ -41,7 +50,7 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
                 pom {
                     project {
                         name 'LuckPerms API'
-                        description 'An advanced permissions plugin for Bukkit/Spigot, BungeeCord and Sponge.'
+                        description 'An advanced permissions plugin for Bukkit/Spigot, BungeeCord, Sponge, Nukkit and Velocity.'
                         url 'https://github.com/lucko/LuckPerms'
 
                         licenses {

@@ -1,5 +1,5 @@
 dependencies {
-    compile project(':api')
+    compile project(':luckperms-api')
 
     compile 'org.checkerframework:checker-qual:2.5.5'
     compile('net.kyori:text:1.11-1.6.4') {
