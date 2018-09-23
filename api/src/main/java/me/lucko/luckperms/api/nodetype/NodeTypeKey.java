@@ -27,9 +27,6 @@ package me.lucko.luckperms.api.nodetype;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-
 /**
  * Marks an instance used as a key for a {@link NodeType}.
  *
@@ -47,9 +44,8 @@ public interface NodeTypeKey<N extends NodeType> {
      * @return the name of the represented type
      */
     default @NonNull String getTypeName() {
-        ParameterizedType thisType = (ParameterizedType) getClass().getGenericSuperclass();
-        Type nodeType = thisType.getActualTypeArguments()[0];
-        return ((Class) nodeType).getSimpleName();
+        String name = getClass().getName();
+        return name.substring(name.lastIndexOf('.') + 1, name.length() - 2);
     }
 
 }

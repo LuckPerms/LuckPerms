@@ -41,8 +41,7 @@ public interface DisplayNameType extends NodeType {
     /**
      * The key for this type.
      */
-    NodeTypeKey<DisplayNameType> KEY = new NodeTypeKey<DisplayNameType>() {
-    };
+    NodeTypeKey<DisplayNameType> KEY = new NodeTypeKey<DisplayNameType>(){};
 
     /**
      * Gets the display name.

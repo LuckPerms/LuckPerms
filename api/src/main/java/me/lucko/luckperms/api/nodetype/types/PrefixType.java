@@ -43,8 +43,7 @@ public interface PrefixType extends NodeType {
     /**
      * The key for this type.
      */
-    NodeTypeKey<PrefixType> KEY = new NodeTypeKey<PrefixType>() {
-    };
+    NodeTypeKey<PrefixType> KEY = new NodeTypeKey<PrefixType>(){};
 
     /**
      * Gets the priority of the prefix assignment.

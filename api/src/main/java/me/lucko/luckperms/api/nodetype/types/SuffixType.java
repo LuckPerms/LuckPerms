@@ -43,8 +43,7 @@ public interface SuffixType extends NodeType {
     /**
      * The key for this type.
      */
-    NodeTypeKey<SuffixType> KEY = new NodeTypeKey<SuffixType>() {
-    };
+    NodeTypeKey<SuffixType> KEY = new NodeTypeKey<SuffixType>(){};
 
     /**
      * Gets the priority of the suffix assignment.

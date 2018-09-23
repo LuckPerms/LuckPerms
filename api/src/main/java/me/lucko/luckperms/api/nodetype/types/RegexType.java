@@ -44,8 +44,7 @@ public interface RegexType extends NodeType {
     /**
      * The key for this type.
      */
-    NodeTypeKey<RegexType> KEY = new NodeTypeKey<RegexType>() {
-    };
+    NodeTypeKey<RegexType> KEY = new NodeTypeKey<RegexType>(){};
 
     /**
      * Gets the non-compiled pattern string.
