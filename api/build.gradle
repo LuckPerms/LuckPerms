@@ -5,7 +5,8 @@ dependencies {
     compileOnly 'org.checkerframework:checker-qual:2.5.5'
 }
 
-if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
+// disabled by default
+if (false && project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
     apply plugin: 'signing'
 
     javadoc {

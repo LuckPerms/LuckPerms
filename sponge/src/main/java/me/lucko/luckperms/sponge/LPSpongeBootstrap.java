@@ -46,6 +46,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
+import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.profile.GameProfile;
@@ -71,7 +72,11 @@ import java.util.stream.Stream;
         version = "@version@",
         authors = "Luck",
         description = "A permissions plugin",
-        url = "https://github.com/lucko/LuckPerms"
+        url = "https://github.com/lucko/LuckPerms",
+        dependencies = {
+                // explicit dependency on spongeapi with no defined API version
+                @Dependency(id = "spongeapi")
+        }
 )
 public class LPSpongeBootstrap implements LuckPermsBootstrap {
 
