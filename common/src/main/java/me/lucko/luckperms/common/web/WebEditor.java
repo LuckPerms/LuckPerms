@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.web;
 
 import com.google.common.base.Preconditions;
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -41,6 +40,7 @@ import me.lucko.luckperms.common.node.model.NodeDataContainer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Uuids;
+import me.lucko.luckperms.common.utils.gson.GsonProvider;
 import me.lucko.luckperms.common.utils.gson.JArray;
 import me.lucko.luckperms.common.utils.gson.JObject;
 
@@ -63,8 +63,6 @@ import java.util.stream.Stream;
  * Utility methods for interacting with the LuckPerms web permission editor.
  */
 public final class WebEditor {
-    private static final Gson GSON = new Gson();
-
     private static final String USER_ID_PATTERN = "user/";
     private static final String GROUP_ID_PATTERN = "group/";
 
@@ -159,7 +157,7 @@ public final class WebEditor {
 
                 try (InputStream inputStream = responseBody.byteStream()) {
                     try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-                        return GSON.fromJson(reader, JsonObject.class);
+                        return GsonProvider.normal().fromJson(reader, JsonObject.class);
                     }
                 }
             }

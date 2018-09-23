@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LookupSetting;
 import me.lucko.luckperms.api.caching.MetaContexts;
@@ -50,6 +47,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.gson.GsonProvider;
 import me.lucko.luckperms.common.utils.gson.JArray;
 import me.lucko.luckperms.common.utils.gson.JObject;
 import me.lucko.luckperms.common.web.Pastebin;
@@ -70,8 +68,6 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class DebugCommand extends SingleCommand {
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-
     public DebugCommand(LocaleManager locale) {
         super(CommandSpec.DEBUG.localize(locale), "Debug", CommandPermission.DEBUG, Predicates.alwaysFalse());
     }
@@ -85,7 +81,7 @@ public class DebugCommand extends SingleCommand {
 
         BiConsumer<String, JObject> builder = (name, content) -> {
             sb.append("-- ").append(name).append(" --\n");
-            sb.append(GSON.toJson(content.toJson()));
+            sb.append(GsonProvider.prettyPrinting().toJson(content.toJson()));
             sb.append("\n\n");
         };
 
@@ -124,7 +120,7 @@ public class DebugCommand extends SingleCommand {
         return new JObject()
                 .add("storage", new JObject()
                         .add("name", plugin.getStorage().getName())
-                        .add("type", plugin.getStorage().getDao().getClass().getName())
+                        .add("type", plugin.getStorage().getImplementation().getClass().getName())
                         .add("meta", () -> {
                             JObject metaObject = new JObject();
                             Map<String, String> meta = plugin.getStorage().getMeta();

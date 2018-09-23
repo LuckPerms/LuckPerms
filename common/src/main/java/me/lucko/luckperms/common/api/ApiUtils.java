@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.api;
 
 import com.google.common.base.Preconditions;
 
-import me.lucko.luckperms.common.storage.DataConstraints;
+import me.lucko.luckperms.common.storage.misc.DataConstraints;
 
 public final class ApiUtils {
 

@@ -30,22 +30,23 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.storage.dao.AbstractDao;
-import me.lucko.luckperms.common.storage.dao.SplitStorageDao;
-import me.lucko.luckperms.common.storage.dao.file.CombinedConfigurateDao;
-import me.lucko.luckperms.common.storage.dao.file.SeparatedConfigurateDao;
-import me.lucko.luckperms.common.storage.dao.file.loader.HoconLoader;
-import me.lucko.luckperms.common.storage.dao.file.loader.JsonLoader;
-import me.lucko.luckperms.common.storage.dao.file.loader.TomlLoader;
-import me.lucko.luckperms.common.storage.dao.file.loader.YamlLoader;
-import me.lucko.luckperms.common.storage.dao.mongodb.MongoDao;
-import me.lucko.luckperms.common.storage.dao.sql.SqlDao;
-import me.lucko.luckperms.common.storage.dao.sql.connection.file.H2ConnectionFactory;
-import me.lucko.luckperms.common.storage.dao.sql.connection.file.SQLiteConnectionFactory;
-import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.MariaDbConnectionFactory;
-import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.MySqlConnectionFactory;
-import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.PostgreConnectionFactory;
-import me.lucko.luckperms.common.storage.provider.StorageProviders;
+import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
+import me.lucko.luckperms.common.storage.implementation.custom.CustomStorageProviders;
+import me.lucko.luckperms.common.storage.implementation.file.CombinedConfigurateStorage;
+import me.lucko.luckperms.common.storage.implementation.file.SeparatedConfigurateStorage;
+import me.lucko.luckperms.common.storage.implementation.file.loader.HoconLoader;
+import me.lucko.luckperms.common.storage.implementation.file.loader.JsonLoader;
+import me.lucko.luckperms.common.storage.implementation.file.loader.TomlLoader;
+import me.lucko.luckperms.common.storage.implementation.file.loader.YamlLoader;
+import me.lucko.luckperms.common.storage.implementation.mongodb.MongoStorage;
+import me.lucko.luckperms.common.storage.implementation.split.SplitStorage;
+import me.lucko.luckperms.common.storage.implementation.split.SplitStorageType;
+import me.lucko.luckperms.common.storage.implementation.sql.SqlStorage;
+import me.lucko.luckperms.common.storage.implementation.sql.connection.file.H2ConnectionFactory;
+import me.lucko.luckperms.common.storage.implementation.sql.connection.file.SQLiteConnectionFactory;
+import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MariaDbConnectionFactory;
+import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MySqlConnectionFactory;
+import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.PostgreConnectionFactory;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -97,11 +98,12 @@ public class StorageFactory {
                     })
                     .collect(ImmutableCollectors.toEnumMap(SplitStorageType.class, Map.Entry::getKey, Map.Entry::getValue));
 
-            Map<StorageType, AbstractDao> backing = mappedTypes.values().stream()
+            Map<StorageType, StorageImplementation> backing = mappedTypes.values().stream()
                     .distinct()
-                    .collect(ImmutableCollectors.toEnumMap(StorageType.class, e -> e, this::makeDao));
+                    .collect(ImmutableCollectors.toEnumMap(StorageType.class, e -> e, this::createNewImplementation));
 
-            storage = AbstractStorage.create(this.plugin, new SplitStorageDao(this.plugin, backing, mappedTypes));
+            // make a base implementation
+            storage = new Storage(this.plugin, new SplitStorage(this.plugin, backing, mappedTypes));
 
         } else {
             String method = this.plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);
@@ -119,66 +121,67 @@ public class StorageFactory {
     }
 
     private Storage makeInstance(StorageType type) {
-        return AbstractStorage.create(this.plugin, makeDao(type));
+        // make a base implementation
+        return new Storage(this.plugin, createNewImplementation(type));
     }
 
-    private AbstractDao makeDao(StorageType method) {
+    private StorageImplementation createNewImplementation(StorageType method) {
         switch (method) {
             case CUSTOM:
-                return StorageProviders.getProvider().provide(this.plugin);
+                return CustomStorageProviders.getProvider().provide(this.plugin);
             case MARIADB:
-                return new SqlDao(
+                return new SqlStorage(
                         this.plugin,
                         new MariaDbConnectionFactory(this.plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
                         this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case MYSQL:
-                return new SqlDao(
+                return new SqlStorage(
                         this.plugin,
                         new MySqlConnectionFactory(this.plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
                         this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case SQLITE:
-                return new SqlDao(
+                return new SqlStorage(
                         this.plugin,
                         new SQLiteConnectionFactory(this.plugin, this.plugin.getBootstrap().getDataDirectory().resolve("luckperms-sqlite.db")),
                         this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case H2:
-                return new SqlDao(
+                return new SqlStorage(
                         this.plugin,
                         new H2ConnectionFactory(this.plugin, this.plugin.getBootstrap().getDataDirectory().resolve("luckperms-h2")),
                         this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case POSTGRESQL:
-                return new SqlDao(
+                return new SqlStorage(
                         this.plugin,
                         new PostgreConnectionFactory(this.plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
                         this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case MONGODB:
-                return new MongoDao(
+                return new MongoStorage(
                         this.plugin,
                         this.plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES),
                         this.plugin.getConfiguration().get(ConfigKeys.MONGODB_COLLECTION_PREFIX),
                         this.plugin.getConfiguration().get(ConfigKeys.MONGODB_CONNECTION_URI)
                 );
             case YAML:
-                return new SeparatedConfigurateDao(this.plugin, new YamlLoader(), "YAML", ".yml", "yaml-storage");
+                return new SeparatedConfigurateStorage(this.plugin, "YAML", new YamlLoader(), ".yml", "yaml-storage");
             case JSON:
-                return new SeparatedConfigurateDao(this.plugin, new JsonLoader(), "JSON", ".json", "json-storage");
+                return new SeparatedConfigurateStorage(this.plugin, "JSON", new JsonLoader(), ".json", "json-storage");
             case HOCON:
-                return new SeparatedConfigurateDao(this.plugin, new HoconLoader(), "HOCON", ".conf", "hocon-storage");
+                return new SeparatedConfigurateStorage(this.plugin, "HOCON", new HoconLoader(), ".conf", "hocon-storage");
             case TOML:
-                return new SeparatedConfigurateDao(this.plugin, new TomlLoader(), "TOML", ".toml", "toml-storage");
+                return new SeparatedConfigurateStorage(this.plugin, "TOML", new TomlLoader(), ".toml", "toml-storage");
             case YAML_COMBINED:
-                return new CombinedConfigurateDao(this.plugin, new YamlLoader(), "YAML Combined", ".yml", "yaml-storage");
+                return new CombinedConfigurateStorage(this.plugin, "YAML Combined", new YamlLoader(), ".yml", "yaml-storage");
             case JSON_COMBINED:
-                return new CombinedConfigurateDao(this.plugin, new JsonLoader(), "JSON Combined", ".json", "json-storage");
+                return new CombinedConfigurateStorage(this.plugin, "JSON Combined", new JsonLoader(), ".json", "json-storage");
             case HOCON_COMBINED:
-                return new CombinedConfigurateDao(this.plugin, new HoconLoader(), "HOCON Combined", ".conf", "hocon-storage");
+                return new CombinedConfigurateStorage(this.plugin, "HOCON Combined", new HoconLoader(), ".conf", "hocon-storage");
             case TOML_COMBINED:
-                return new CombinedConfigurateDao(this.plugin, new TomlLoader(), "TOML Combined", ".toml", "toml-storage");
+                return new CombinedConfigurateStorage(this.plugin, "TOML Combined", new TomlLoader(), ".toml", "toml-storage");
             default:
                 throw new RuntimeException("Unknown method: " + method);
         }

@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.common.web;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
+import me.lucko.luckperms.common.utils.gson.GsonProvider;
 
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -60,7 +60,7 @@ public enum StandardPastebin implements Pastebin {
 
         @Override
         protected String parseIdFromResult(BufferedReader reader) {
-            JsonObject object = GSON.fromJson(reader, JsonObject.class);
+            JsonObject object = GsonProvider.prettyPrinting().fromJson(reader, JsonObject.class);
             return object.get("key").getAsString();
         }
 
@@ -82,7 +82,7 @@ public enum StandardPastebin implements Pastebin {
 
         @Override
         protected String parseIdFromResult(BufferedReader reader) {
-            JsonObject object = GSON.fromJson(reader, JsonObject.class);
+            JsonObject object = GsonProvider.prettyPrinting().fromJson(reader, JsonObject.class);
             return object.get("key").getAsString();
         }
 
@@ -92,7 +92,6 @@ public enum StandardPastebin implements Pastebin {
         }
     };
 
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     private static final MediaType JSON_TYPE = MediaType.parse("application/json; charset=utf-8");
     private static final MediaType PLAIN_TYPE = MediaType.parse("text/plain; charset=utf-8");
 
@@ -115,7 +114,7 @@ public enum StandardPastebin implements Pastebin {
         }
 
         try (Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
-            GSON.toJson(content, writer);
+            GsonProvider.prettyPrinting().toJson(content, writer);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

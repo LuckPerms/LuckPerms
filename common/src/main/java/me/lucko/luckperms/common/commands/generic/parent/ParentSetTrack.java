@@ -46,7 +46,7 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.storage.DataConstraints;
+import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;

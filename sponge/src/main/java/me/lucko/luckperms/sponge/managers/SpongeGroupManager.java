@@ -39,7 +39,7 @@ import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
 import me.lucko.luckperms.common.bulkupdate.comparisons.StandardComparison;
 import me.lucko.luckperms.common.managers.group.AbstractGroupManager;
-import me.lucko.luckperms.common.storage.DataConstraints;
+import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.model.SpongeGroup;

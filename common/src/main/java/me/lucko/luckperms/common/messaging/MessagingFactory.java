@@ -34,9 +34,9 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.messaging.redis.RedisMessenger;
 import me.lucko.luckperms.common.messaging.sql.SqlMessenger;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.storage.dao.sql.SqlDao;
-import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.MariaDbConnectionFactory;
-import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.MySqlConnectionFactory;
+import me.lucko.luckperms.common.storage.implementation.sql.SqlStorage;
+import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MariaDbConnectionFactory;
+import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MySqlConnectionFactory;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -57,9 +57,9 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
             messagingType = "redis";
         }
 
-        if (messagingType.equals("none") && this.plugin.getStorage().getDao() instanceof SqlDao) {
-            SqlDao dao = (SqlDao) this.plugin.getStorage().getDao();
-            if (dao.getProvider() instanceof MySqlConnectionFactory || dao.getProvider() instanceof MariaDbConnectionFactory) {
+        if (messagingType.equals("none") && this.plugin.getStorage().getImplementation() instanceof SqlStorage) {
+            SqlStorage dao = (SqlStorage) this.plugin.getStorage().getImplementation();
+            if (dao.getConnectionFactory() instanceof MySqlConnectionFactory || dao.getConnectionFactory() instanceof MariaDbConnectionFactory) {
                 messagingType = "sql";
             }
         }
@@ -125,8 +125,8 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
 
         @Override
         public @NonNull Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer) {
-            SqlDao dao = (SqlDao) getPlugin().getStorage().getDao();
-            Preconditions.checkState(dao.getProvider() instanceof MySqlConnectionFactory || dao.getProvider() instanceof MariaDbConnectionFactory, "not a supported sql type");
+            SqlStorage dao = (SqlStorage) getPlugin().getStorage().getImplementation();
+            Preconditions.checkState(dao.getConnectionFactory() instanceof MySqlConnectionFactory || dao.getConnectionFactory() instanceof MariaDbConnectionFactory, "not a supported sql type");
 
             SqlMessenger sql = new SqlMessenger(getPlugin(), dao, incomingMessageConsumer);
             sql.init();

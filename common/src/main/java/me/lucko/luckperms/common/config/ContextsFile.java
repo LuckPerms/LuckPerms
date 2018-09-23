@@ -25,12 +25,12 @@
 
 package me.lucko.luckperms.common.config;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
+import me.lucko.luckperms.common.utils.gson.GsonProvider;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -70,7 +70,7 @@ public class ContextsFile {
 
         boolean save = false;
         try (BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
-            JsonObject data = new Gson().fromJson(reader, JsonObject.class);
+            JsonObject data = GsonProvider.normal().fromJson(reader, JsonObject.class);
 
             if (data.has("context")) {
                 this.staticContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("context").getAsJsonObject()).makeImmutable();

@@ -29,7 +29,7 @@ import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
-import me.lucko.luckperms.common.storage.dao.sql.SqlDao;
+import me.lucko.luckperms.common.storage.implementation.sql.SqlStorage;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -37,15 +37,15 @@ import java.util.concurrent.TimeUnit;
 
 public class SqlMessenger extends AbstractSqlMessenger {
     private final LuckPermsPlugin plugin;
-    private final SqlDao sqlDao;
+    private final SqlStorage sqlStorage;
 
     private SchedulerTask pollTask;
     private SchedulerTask housekeepingTask;
 
-    public SqlMessenger(LuckPermsPlugin plugin, SqlDao sqlDao, IncomingMessageConsumer consumer) {
+    public SqlMessenger(LuckPermsPlugin plugin, SqlStorage sqlStorage, IncomingMessageConsumer consumer) {
         super(consumer);
         this.plugin = plugin;
-        this.sqlDao = sqlDao;
+        this.sqlStorage = sqlStorage;
     }
 
     @Override
@@ -81,11 +81,11 @@ public class SqlMessenger extends AbstractSqlMessenger {
 
     @Override
     protected Connection getConnection() throws SQLException {
-        return this.sqlDao.getProvider().getConnection();
+        return this.sqlStorage.getConnectionFactory().getConnection();
     }
 
     @Override
     protected String getTableName() {
-        return this.sqlDao.getStatementProcessor().apply("{prefix}messenger");
+        return this.sqlStorage.getStatementProcessor().apply("{prefix}messenger");
     }
 }

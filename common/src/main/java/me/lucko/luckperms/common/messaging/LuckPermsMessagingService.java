@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.messaging;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -46,6 +44,7 @@ import me.lucko.luckperms.common.messaging.message.UpdateMessageImpl;
 import me.lucko.luckperms.common.messaging.message.UserUpdateMessageImpl;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.gson.GsonProvider;
 import me.lucko.luckperms.common.utils.gson.JObject;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -59,8 +58,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class LuckPermsMessagingService implements InternalMessagingService, IncomingMessageConsumer {
-    private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
-    
     private final LuckPermsPlugin plugin;
     private final Set<UUID> receivedMessages;
     private final PushUpdateBuffer updateBuffer;
@@ -169,7 +166,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
     @Override
     public boolean consumeIncomingMessageAsString(@NonNull String encodedString) {
         Objects.requireNonNull(encodedString, "encodedString");
-        JsonObject decodedObject = GSON.fromJson(encodedString, JsonObject.class).getAsJsonObject();
+        JsonObject decodedObject = GsonProvider.normal().fromJson(encodedString, JsonObject.class).getAsJsonObject();
 
         // extract id
         JsonElement idElement = decodedObject.get("id");
@@ -226,7 +223,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
                 })
                 .toJson();
 
-        return GSON.toJson(json);
+        return GsonProvider.normal().toJson(json);
     }
 
     private void processIncomingMessage(Message message) {

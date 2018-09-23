@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.storage;
 
+import com.google.common.collect.ImmutableList;
+
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.PlayerSaveResult;
@@ -37,71 +39,231 @@ import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.storage.dao.AbstractDao;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
+import me.lucko.luckperms.common.utils.ThrowingRunnable;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 /**
- * Main interface for all Storage providers.
+ * Provides a {@link CompletableFuture} based API for interacting with a {@link StorageImplementation}.
  */
-public interface Storage {
+public class Storage {
+    private final LuckPermsPlugin plugin;
+    private final StorageImplementation implementation;
 
-    ApiStorage getApiDelegate();
+    private final ApiStorage apiDelegate;
 
-    AbstractDao getDao();
+    public Storage(LuckPermsPlugin plugin, StorageImplementation implementation) {
+        this.plugin = plugin;
+        this.implementation = implementation;
+        this.apiDelegate = new ApiStorage(plugin, this);
+    }
 
-    String getName();
+    public StorageImplementation getImplementation() {
+        return this.implementation;
+    }
 
-    void init();
+    public ApiStorage getApiDelegate() {
+        return this.apiDelegate;
+    }
 
-    void shutdown();
+    private <T> CompletableFuture<T> makeFuture(Callable<T> supplier) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return supplier.call();
+            } catch (Exception e) {
+                if (e instanceof RuntimeException) {
+                    throw (RuntimeException) e;
+                }
+                throw new CompletionException(e);
+            }
+        }, this.plugin.getBootstrap().getScheduler().async());
+    }
 
-    Map<String, String> getMeta();
+    private CompletableFuture<Void> makeFuture(ThrowingRunnable runnable) {
+        return CompletableFuture.runAsync(() -> {
+            try {
+                runnable.run();
+            } catch (Exception e) {
+                if (e instanceof RuntimeException) {
+                    throw (RuntimeException) e;
+                }
+                throw new CompletionException(e);
+            }
+        }, this.plugin.getBootstrap().getScheduler().async());
+    }
 
-    CompletableFuture<Void> logAction(LogEntry entry);
+    public String getName() {
+        return this.implementation.getImplementationName();
+    }
 
-    CompletableFuture<Log> getLog();
+    public void init() {
+        try {
+            this.implementation.init();
+        } catch (Exception e) {
+            this.plugin.getLogger().severe("Failed to init storage dao");
+            e.printStackTrace();
+        }
+    }
 
-    CompletableFuture<Void> applyBulkUpdate(BulkUpdate bulkUpdate);
+    public void shutdown() {
+        try {
+            this.implementation.shutdown();
+        } catch (Exception e) {
+            this.plugin.getLogger().severe("Failed to shutdown storage dao");
+            e.printStackTrace();
+        }
+    }
 
-    CompletableFuture<User> loadUser(UUID uuid, String username);
+    public Map<String, String> getMeta() {
+        return this.implementation.getMeta();
+    }
 
-    CompletableFuture<Void> saveUser(User user);
+    public CompletableFuture<Void> logAction(LogEntry entry) {
+        return makeFuture(() -> this.implementation.logAction(entry));
+    }
 
-    CompletableFuture<Set<UUID>> getUniqueUsers();
+    public CompletableFuture<Log> getLog() {
+        return makeFuture(this.implementation::getLog);
+    }
 
-    CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(Constraint constraint);
+    public CompletableFuture<Void> applyBulkUpdate(BulkUpdate bulkUpdate) {
+        return makeFuture(() -> this.implementation.applyBulkUpdate(bulkUpdate));
+    }
 
-    CompletableFuture<Group> createAndLoadGroup(String name, CreationCause cause);
+    public CompletableFuture<User> loadUser(UUID uuid, String username) {
+        return makeFuture(() -> {
+            User user = this.implementation.loadUser(uuid, username);
+            if (user != null) {
+                this.plugin.getEventFactory().handleUserLoad(user);
+            }
+            return user;
+        });
+    }
 
-    CompletableFuture<Optional<Group>> loadGroup(String name);
+    public CompletableFuture<Void> saveUser(User user) {
+        return makeFuture(() -> this.implementation.saveUser(user));
+    }
 
-    CompletableFuture<Void> loadAllGroups();
+    public CompletableFuture<Set<UUID>> getUniqueUsers() {
+        return makeFuture(this.implementation::getUniqueUsers);
+    }
 
-    CompletableFuture<Void> saveGroup(Group group);
+    public CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(Constraint constraint) {
+        return makeFuture(() -> {
+            List<HeldPermission<UUID>> result = this.implementation.getUsersWithPermission(constraint);
+            result.removeIf(entry -> entry.asNode().hasExpired());
+            return ImmutableList.copyOf(result);
+        });
+    }
 
-    CompletableFuture<Void> deleteGroup(Group group, DeletionCause cause);
+    public CompletableFuture<Group> createAndLoadGroup(String name, CreationCause cause) {
+        return makeFuture(() -> {
+            Group group = this.implementation.createAndLoadGroup(name);
+            if (group != null) {
+                this.plugin.getEventFactory().handleGroupCreate(group, cause);
+            }
+            return group;
+        });
+    }
 
-    CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(Constraint constraint);
+    public CompletableFuture<Optional<Group>> loadGroup(String name) {
+        return makeFuture(() -> {
+            Optional<Group> group = this.implementation.loadGroup(name);
+            if (group.isPresent()) {
+                this.plugin.getEventFactory().handleGroupLoad(group.get());
+            }
+            return group;
+        });
+    }
 
-    CompletableFuture<Track> createAndLoadTrack(String name, CreationCause cause);
+    public CompletableFuture<Void> loadAllGroups() {
+        return makeFuture(() -> {
+            this.implementation.loadAllGroups();
+            this.plugin.getEventFactory().handleGroupLoadAll();
+        });
+    }
 
-    CompletableFuture<Optional<Track>> loadTrack(String name);
+    public CompletableFuture<Void> saveGroup(Group group) {
+        return makeFuture(() -> this.implementation.saveGroup(group));
+    }
 
-    CompletableFuture<Void> loadAllTracks();
+    public CompletableFuture<Void> deleteGroup(Group group, DeletionCause cause) {
+        return makeFuture(() -> {
+            this.implementation.deleteGroup(group);
+            this.plugin.getEventFactory().handleGroupDelete(group, cause);
+        });
+    }
 
-    CompletableFuture<Void> saveTrack(Track track);
+    public CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(Constraint constraint) {
+        return makeFuture(() -> {
+            List<HeldPermission<String>> result = this.implementation.getGroupsWithPermission(constraint);
+            result.removeIf(entry -> entry.asNode().hasExpired());
+            return ImmutableList.copyOf(result);
+        });
+    }
 
-    CompletableFuture<Void> deleteTrack(Track track, DeletionCause cause);
+    public CompletableFuture<Track> createAndLoadTrack(String name, CreationCause cause) {
+        return makeFuture(() -> {
+            Track track = this.implementation.createAndLoadTrack(name);
+            if (track != null) {
+                this.plugin.getEventFactory().handleTrackCreate(track, cause);
+            }
+            return track;
+        });
+    }
 
-    CompletableFuture<PlayerSaveResult> savePlayerData(UUID uuid, String username);
+    public CompletableFuture<Optional<Track>> loadTrack(String name) {
+        return makeFuture(() -> {
+            Optional<Track> track = this.implementation.loadTrack(name);
+            if (track.isPresent()) {
+                this.plugin.getEventFactory().handleTrackLoad(track.get());
+            }
+            return track;
+        });
+    }
 
-    CompletableFuture<UUID> getPlayerUuid(String username);
+    public CompletableFuture<Void> loadAllTracks() {
+        return makeFuture(() -> {
+            this.implementation.loadAllTracks();
+            this.plugin.getEventFactory().handleTrackLoadAll();
+        });
+    }
 
-    CompletableFuture<String> getPlayerName(UUID uuid);
+    public CompletableFuture<Void> saveTrack(Track track) {
+        return makeFuture(() -> this.implementation.saveTrack(track));
+    }
+
+    public CompletableFuture<Void> deleteTrack(Track track, DeletionCause cause) {
+        return makeFuture(() -> {
+            this.implementation.deleteTrack(track);
+            this.plugin.getEventFactory().handleTrackDelete(track, cause);
+         });
+    }
+
+    public CompletableFuture<PlayerSaveResult> savePlayerData(UUID uuid, String username) {
+        return makeFuture(() -> {
+            PlayerSaveResult result = this.implementation.savePlayerData(uuid, username);
+            if (result != null) {
+                this.plugin.getEventFactory().handlePlayerDataSave(uuid, username, result);
+            }
+            return result;
+        });
+    }
+
+    public CompletableFuture<UUID> getPlayerUuid(String username) {
+        return makeFuture(() -> this.implementation.getPlayerUuid(username));
+    }
+
+    public CompletableFuture<String> getPlayerName(UUID uuid) {
+        return makeFuture(() -> this.implementation.getPlayerName(uuid));
+    }
 }

@@ -45,7 +45,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.storage.DataConstraints;
+import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.utils.Uuids;
 
 import java.util.List;

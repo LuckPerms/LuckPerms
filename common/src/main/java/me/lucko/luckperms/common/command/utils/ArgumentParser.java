@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.commands.user.UserMainCommand;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.storage.DataConstraints;
+import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.utils.DateParser;
 
 import java.util.ArrayList;

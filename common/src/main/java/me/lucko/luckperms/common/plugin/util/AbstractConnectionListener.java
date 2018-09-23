@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.assignments.AssignmentRule;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.storage.PlayerSaveResultImpl;
+import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
 
 import java.util.Set;
 import java.util.UUID;

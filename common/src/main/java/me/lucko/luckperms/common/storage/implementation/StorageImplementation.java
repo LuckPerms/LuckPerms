@@ -1,0 +1,102 @@
+/*
+ * This file is part of luckperms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
+
+package me.lucko.luckperms.common.storage.implementation;
+
+import me.lucko.luckperms.api.HeldPermission;
+import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.PlayerSaveResult;
+import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+public interface StorageImplementation {
+    LuckPermsPlugin getPlugin();
+
+    String getImplementationName();
+
+    void init() throws Exception;
+
+    void shutdown();
+
+    default Map<String, String> getMeta() {
+        return Collections.emptyMap();
+    }
+
+    void logAction(LogEntry entry) throws Exception;
+
+    Log getLog() throws Exception;
+
+    void applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception;
+
+    User loadUser(UUID uuid, String username) throws Exception;
+
+    void saveUser(User user) throws Exception;
+
+    Set<UUID> getUniqueUsers() throws Exception;
+
+    List<HeldPermission<UUID>> getUsersWithPermission(Constraint constraint) throws Exception;
+
+    Group createAndLoadGroup(String name) throws Exception;
+
+    Optional<Group> loadGroup(String name) throws Exception;
+
+    void loadAllGroups() throws Exception;
+
+    void saveGroup(Group group) throws Exception;
+
+    void deleteGroup(Group group) throws Exception;
+
+    List<HeldPermission<String>> getGroupsWithPermission(Constraint constraint) throws Exception;
+
+    Track createAndLoadTrack(String name) throws Exception;
+
+    Optional<Track> loadTrack(String name) throws Exception;
+
+    void loadAllTracks() throws Exception;
+
+    void saveTrack(Track track) throws Exception;
+
+    void deleteTrack(Track track) throws Exception;
+
+    PlayerSaveResult savePlayerData(UUID uuid, String username) throws Exception;
+
+    @Nullable UUID getPlayerUuid(String username) throws Exception;
+
+    @Nullable String getPlayerName(UUID uuid) throws Exception;
+}

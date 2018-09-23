@@ -43,8 +43,8 @@ import me.lucko.luckperms.common.primarygroup.AllParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.ParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
 import me.lucko.luckperms.common.primarygroup.StoredHolder;
-import me.lucko.luckperms.common.storage.SplitStorageType;
-import me.lucko.luckperms.common.storage.StorageCredentials;
+import me.lucko.luckperms.common.storage.implementation.split.SplitStorageType;
+import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.lang.reflect.Field;

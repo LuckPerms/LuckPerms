@@ -26,12 +26,11 @@
 package me.lucko.luckperms.sponge.service.persisted;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.common.utils.MoreFiles;
+import me.lucko.luckperms.common.utils.gson.GsonProvider;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 
 import java.io.BufferedReader;
@@ -57,18 +56,12 @@ public class SubjectStorage {
     private final LPPermissionService service;
 
     /**
-     * Gson instance
-     */
-    private final Gson gson;
-
-    /**
      * The root directory used to store files
      */
     private final Path container;
 
     public SubjectStorage(LPPermissionService service, Path container) {
         this.service = service;
-        this.gson = new GsonBuilder().setPrettyPrinting().create();
         this.container = container;
     }
 
@@ -131,7 +124,7 @@ public class SubjectStorage {
     public void saveToFile(SubjectDataContainer container, Path file) throws IOException {
         MoreFiles.createDirectoriesIfNotExists(file.getParent());
         try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
-            this.gson.toJson(container.serialize(), writer);
+            GsonProvider.prettyPrinting().toJson(container.serialize(), writer);
             writer.flush();
         }
     }
@@ -201,7 +194,7 @@ public class SubjectStorage {
         String subjectName = fileName.substring(0, fileName.length() - ".json".length());
 
         try (BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
-            JsonObject data = this.gson.fromJson(reader, JsonObject.class);
+            JsonObject data = GsonProvider.prettyPrinting().fromJson(reader, JsonObject.class);
             SubjectDataContainer model = SubjectDataContainer.deserialize(this.service, data);
             return new LoadedSubject(subjectName, model);
         } catch (Exception e) {
