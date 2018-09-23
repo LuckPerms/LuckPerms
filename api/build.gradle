@@ -1,4 +1,4 @@
-project.version = '4.2'
+project.version = '4.3'
 
 dependencies {
     compileOnly 'com.google.guava:guava:19.0'
