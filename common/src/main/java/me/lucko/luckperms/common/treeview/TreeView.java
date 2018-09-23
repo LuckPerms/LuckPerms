@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.caching.type.PermissionCache;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.gson.JObject;
+import me.lucko.luckperms.common.verbose.CheckOrigin;
 import me.lucko.luckperms.common.web.StandardPastebin;
 
 import java.text.SimpleDateFormat;
@@ -149,7 +150,7 @@ public class TreeView {
             checks = new JObject();
             for (Map.Entry<Integer, String> node : this.view.getNodeEndings()) {
                 String permission = prefix + node.getValue();
-                checks.add(permission, checker.getPermissionValue(permission).name().toLowerCase());
+                checks.add(permission, checker.getPermissionValue(permission, CheckOrigin.INTERNAL).name().toLowerCase());
             }
         } else {
             checks = null;
