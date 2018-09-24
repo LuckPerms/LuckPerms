@@ -1,6 +1,21 @@
+buildscript {
+    repositories {
+        maven {
+            url 'https://plugins.gradle.org/m2'
+        }
+    }
+
+    dependencies {
+        classpath 'gradle.plugin.net.minecrell:licenser:0.4.1'
+    }
+}
+
+defaultTasks 'licenseFormat', 'build'
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'maven'
+    apply plugin: 'net.minecrell.licenser'
 
     group = 'me.lucko.luckperms'
     version = '4.3-SNAPSHOT'
@@ -35,6 +50,12 @@ subprojects {
     project.ext.minorVersion = '3'
     project.ext.patchVersion = determinePatchVersion()
     project.ext.fullVersion = project.ext.majorVersion + '.' + project.ext.minorVersion + '.' + project.ext.patchVersion
+
+    license {
+        header = rootProject.file('LICENSE_HEADER.txt')
+        include '**/*.java'
+        newLine = true
+    }
 
     repositories {
         //mavenLocal()
