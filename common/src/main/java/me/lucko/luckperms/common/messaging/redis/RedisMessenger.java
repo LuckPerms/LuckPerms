@@ -47,7 +47,7 @@ public class RedisMessenger implements Messenger {
     private final IncomingMessageConsumer consumer;
 
     private JedisPool jedisPool;
-    private LPSub sub;
+    private Subscription sub;
 
     public RedisMessenger(LuckPermsPlugin plugin, IncomingMessageConsumer consumer) {
         this.plugin = plugin;
@@ -66,7 +66,7 @@ public class RedisMessenger implements Messenger {
         }
 
         this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
-            this.sub = new LPSub(this);
+            this.sub = new Subscription(this);
             try (Jedis jedis = this.jedisPool.getResource()) {
                 jedis.subscribe(this.sub, CHANNEL);
             } catch (Exception e) {
@@ -90,10 +90,10 @@ public class RedisMessenger implements Messenger {
         this.jedisPool.destroy();
     }
 
-    private static class LPSub extends JedisPubSub {
+    private static class Subscription extends JedisPubSub {
         private final RedisMessenger parent;
 
-        public LPSub(RedisMessenger parent) {
+        private Subscription(RedisMessenger parent) {
             this.parent = parent;
         }
 

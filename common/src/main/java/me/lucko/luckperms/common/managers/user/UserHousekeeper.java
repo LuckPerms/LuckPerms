@@ -92,7 +92,7 @@ public class UserHousekeeper implements Runnable {
         private final long duration;
         private final TimeUnit unit;
 
-        private TimeoutSettings(long duration, TimeUnit unit) {
+        TimeoutSettings(long duration, TimeUnit unit) {
             this.duration = duration;
             this.unit = unit;
         }

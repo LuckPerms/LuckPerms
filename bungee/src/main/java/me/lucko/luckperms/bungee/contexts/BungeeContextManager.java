@@ -90,10 +90,5 @@ public class BungeeContextManager extends ContextManager<ProxiedPlayer> {
         public Contexts getContexts() {
             return this.contextsCache.get(this.key);
         }
-
-        @Override
-        public ImmutableContextSet getContextSet() {
-            return getContexts().getContexts().makeImmutable();
-        }
     }
 }

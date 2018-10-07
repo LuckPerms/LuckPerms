@@ -44,16 +44,16 @@ public final class ContextSetConfigurateSerializer {
         ConfigurationNode data = SimpleConfigurationNode.root();
         Map<String, Collection<String>> map = contextSet.toMultimap().asMap();
 
-        map.forEach((k, v) -> {
-            List<String> values = new ArrayList<>(v);
+        for (Map.Entry<String, Collection<String>> entry : map.entrySet()) {
+            List<String> values = new ArrayList<>(entry.getValue());
             int size = values.size();
 
             if (size == 1) {
-                data.getNode(k).setValue(values.get(0));
+                data.getNode(entry.getKey()).setValue(values.get(0));
             } else if (size > 1) {
-                data.getNode(k).setValue(values);
+                data.getNode(entry.getKey()).setValue(values);
             }
-        });
+        }
 
         return data;
     }

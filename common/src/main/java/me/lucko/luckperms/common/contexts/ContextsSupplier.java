@@ -35,6 +35,8 @@ public interface ContextsSupplier {
 
     Contexts getContexts();
 
-    ImmutableContextSet getContextSet();
+    default ImmutableContextSet getContextSet() {
+        return getContexts().getContexts().makeImmutable();
+    }
 
 }

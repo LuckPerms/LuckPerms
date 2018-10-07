@@ -47,20 +47,20 @@ public final class ContextSetJsonSerializer {
         JsonObject data = new JsonObject();
         Map<String, Collection<String>> map = contextSet.toMultimap().asMap();
 
-        map.forEach((k, v) -> {
-            List<String> values = new ArrayList<>(v);
+        for (Map.Entry<String, Collection<String>> entry : map.entrySet()) {
+            List<String> values = new ArrayList<>(entry.getValue());
             int size = values.size();
 
             if (size == 1) {
-                data.addProperty(k, values.get(0));
+                data.addProperty(entry.getKey(), values.get(0));
             } else if (size > 1) {
                 JsonArray arr = new JsonArray();
                 for (String s : values) {
                     arr.add(new JsonPrimitive(s));
                 }
-                data.add(k, arr);
+                data.add(entry.getKey(), arr);
             }
-        });
+        }
 
         return data;
     }
