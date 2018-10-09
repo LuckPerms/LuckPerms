@@ -165,7 +165,7 @@ public class Importer implements Runnable {
         executor.shutdown();
 
         long endTime = System.currentTimeMillis();
-        double seconds = (endTime - startTime) / 1000;
+        double seconds = (endTime - startTime) / 1000.0;
 
         int errors = (int) this.commands.stream().filter(v -> v.getResult().wasFailure()).count();
 
@@ -184,13 +184,11 @@ public class Importer implements Runnable {
         AtomicInteger errIndex = new AtomicInteger(1);
         for (ImportCommand e : this.commands) {
             if (e.getResult() != null && e.getResult().wasFailure()) {
-                this.notify.forEach(s -> {
+                for (Sender s : notify) {
                     Message.IMPORT_END_ERROR_HEADER.send(s, errIndex.get(), e.getId(), e.getCommand(), e.getResult().toString());
-                    for (String out : e.getOutput()) {
-                        Message.IMPORT_END_ERROR_CONTENT.send(s, out);
-                    }
+                    e.getOutput().forEach(out -> Message.IMPORT_END_ERROR_CONTENT.send(s, out));
                     Message.IMPORT_END_ERROR_FOOTER.send(s);
-                });
+                }
 
                 errIndex.incrementAndGet();
             }

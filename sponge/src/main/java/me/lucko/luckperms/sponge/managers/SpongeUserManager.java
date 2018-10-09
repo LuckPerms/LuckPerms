@@ -67,7 +67,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
     private final LPSpongePlugin plugin;
     private SubjectCollection spongeProxy = null;
 
-    private final LoadingCache<UUID, LPSubject> subjectLoadingCache = Caffeine.<UUID, LPSubject>newBuilder()
+    private final LoadingCache<UUID, LPSubject> subjectLoadingCache = Caffeine.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)
             .build(u -> {
                 // clock in with the housekeeper

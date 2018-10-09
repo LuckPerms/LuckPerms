@@ -116,10 +116,10 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 return CommandResult.FAILURE;
             }
             AtomicInteger userLoadCount = new AtomicInteger(0);
-            users.forEach(s -> {
-                world.loadOne(s, CalculableType.USER);
+            for (String user : users) {
+                world.loadOne(user, CalculableType.USER);
                 log.logProgress("Forcefully loaded {} users so far.", userLoadCount.incrementAndGet());
-            });
+            }
         }
         log.log("Forcefully loaded all users.");
 

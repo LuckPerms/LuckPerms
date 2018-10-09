@@ -142,7 +142,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         if (weak && this.name != null) {
 
             // try to update casing if they're equalIgnoreCase
-            if (name != null && this.name.equalsIgnoreCase(name)) {
+            if (this.name.equalsIgnoreCase(name)) {
                 this.name = name;
             }
 

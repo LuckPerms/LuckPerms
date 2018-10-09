@@ -73,7 +73,7 @@ public class VerboseCommand extends SingleCommand {
                 filters.addAll(args.subList(1, args.size()));
             }
 
-            String filter = filters.isEmpty() ? "" : filters.stream().collect(Collectors.joining(" "));
+            String filter = filters.isEmpty() ? "" : String.join(" ", filters);
 
             VerboseFilter parsedFilter;
             try {

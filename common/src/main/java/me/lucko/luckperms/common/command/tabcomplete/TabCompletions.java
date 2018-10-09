@@ -94,7 +94,7 @@ public final class TabCompletions {
 
             return root.getChildren().get().keySet().stream()
                     .filter(TabCompleter.startsWithIgnoreCase(incomplete))
-                    .map(s -> parts.stream().collect(Collectors.joining(".")) + "." + s)
+                    .map(s -> String.join(".", parts) + "." + s)
                     .collect(Collectors.toList());
         };
     }

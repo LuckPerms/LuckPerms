@@ -46,7 +46,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * An implementation of {@link LogEntry} and {@link LogEntry.Builder},
@@ -331,7 +330,7 @@ public class ExtendedLogEntry implements LogEntry {
                 }
             }
 
-            action(parts.stream().collect(Collectors.joining(" ")));
+            action(String.join(" ", parts));
             return this;
         }
 
