@@ -178,7 +178,9 @@ public class Storage {
     public CompletableFuture<Optional<Group>> loadGroup(String name) {
         return makeFuture(() -> {
             Optional<Group> group = this.implementation.loadGroup(name);
-            group.ifPresent(g -> this.plugin.getEventFactory().handleGroupLoad(g));
+            if (group.isPresent()) {
+                this.plugin.getEventFactory().handleGroupLoad(group.get());
+            }
             return group;
         });
     }
@@ -222,7 +224,9 @@ public class Storage {
     public CompletableFuture<Optional<Track>> loadTrack(String name) {
         return makeFuture(() -> {
             Optional<Track> track = this.implementation.loadTrack(name);
-            track.ifPresent(t -> this.plugin.getEventFactory().handleTrackLoad(track.get()));
+            if (track.isPresent()) {
+                this.plugin.getEventFactory().handleTrackLoad(track.get());
+            }
             return track;
         });
     }

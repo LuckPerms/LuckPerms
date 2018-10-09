@@ -173,7 +173,9 @@ public class MongoStorage implements StorageImplementation {
                 .append("actedName", entry.getActedName())
                 .append("action", entry.getAction());
 
-        entry.getActed().ifPresent(a -> doc.append("acted", a));
+        if (entry.getActed().isPresent()) {
+            doc.append("acted", entry.getActed().get());
+        }
 
         c.insertOne(doc);
     }

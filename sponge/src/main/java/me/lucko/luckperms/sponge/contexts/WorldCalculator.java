@@ -46,7 +46,7 @@ public class WorldCalculator implements ContextCalculator<Subject> {
     @Override
     public @NonNull MutableContextSet giveApplicableContext(@NonNull Subject subject, @NonNull MutableContextSet accumulator) {
         CommandSource source = subject.getCommandSource().orElse(null);
-        if (!(source instanceof Player)) {
+        if (source == null || !(source instanceof Player)) {
             return accumulator;
         }
 

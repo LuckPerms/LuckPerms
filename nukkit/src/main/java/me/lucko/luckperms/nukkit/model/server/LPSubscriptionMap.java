@@ -86,7 +86,7 @@ public final class LPSubscriptionMap extends HashMap<String, Set<Permissible>> {
      */
     @Override
     public Set<Permissible> get(Object key) {
-        if (!(key instanceof String)) {
+        if (key == null || !(key instanceof String)) {
             return null;
         }
 
@@ -119,10 +119,10 @@ public final class LPSubscriptionMap extends HashMap<String, Set<Permissible>> {
         return super.put(key, value);
     }
 
-    // if the key is a string, #get will always return a value for it
+    // if the key isn't null and is a string, #get will always return a value for it
     @Override
     public boolean containsKey(Object key) {
-        return key instanceof String;
+        return key != null && key instanceof String;
     }
 
     /**
