@@ -42,7 +42,6 @@ import me.lucko.luckperms.common.utils.Predicates;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.stream.Collectors;
 
 public class LogSearch extends SubCommand<Log> {
     private static final int ENTRIES_PER_PAGE = 10;
@@ -63,7 +62,7 @@ public class LogSearch extends SubCommand<Log> {
             }
         }
 
-        final String query = args.stream().collect(Collectors.joining(" "));
+        final String query = String.join(" ", args);
         Paginated<ExtendedLogEntry> content = new Paginated<>(log.getSearch(query));
 
         if (page != Integer.MIN_VALUE) {

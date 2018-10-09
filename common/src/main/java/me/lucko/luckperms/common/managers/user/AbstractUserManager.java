@@ -54,9 +54,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
     @Override
     public T getOrMake(UserIdentifier id) {
         T ret = super.getOrMake(id);
-        if (id.getUsername().isPresent()) {
-            ret.setName(id.getUsername().get(), false);
-        }
+        id.getUsername().ifPresent(name -> ret.setName(name, false));
         return ret;
     }
 

@@ -41,9 +41,7 @@ public final class LogEntryJsonSerializer {
         data.add("actor", new JsonPrimitive(logEntry.getActor().toString()));
         data.add("actorName", new JsonPrimitive(logEntry.getActorName()));
         data.add("type", new JsonPrimitive(logEntry.getType().name()));
-        if (logEntry.getActed().isPresent()) {
-            data.add("acted", new JsonPrimitive(logEntry.getActed().get().toString()));
-        }
+        logEntry.getActed().ifPresent(acted -> data.add("acted", new JsonPrimitive(acted.toString())));
         data.add("actedName", new JsonPrimitive(logEntry.getActedName()));
         data.add("action", new JsonPrimitive(logEntry.getAction()));
 
