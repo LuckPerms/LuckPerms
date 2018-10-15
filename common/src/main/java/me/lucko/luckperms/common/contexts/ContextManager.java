@@ -228,7 +228,7 @@ public abstract class ContextManager<T> {
                     throw new IllegalStateException(calculator.getClass() + " returned a null context set");
                 }
                 accumulator = ret;
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 ContextManager.this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating the context of subject " + subject);
                 e.printStackTrace();
             }
@@ -248,7 +248,7 @@ public abstract class ContextManager<T> {
                     throw new IllegalStateException(calculator.getClass() + " returned a null context set");
                 }
                 accumulator = ret;
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating static contexts");
                 e.printStackTrace();
             }
