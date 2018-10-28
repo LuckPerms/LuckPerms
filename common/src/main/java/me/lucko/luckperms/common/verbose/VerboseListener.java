@@ -63,7 +63,7 @@ public class VerboseListener {
     // how many lines should we include in each stack trace send as a chat message
     private static final int STACK_TRUNCATION_CHAT = 15;
     // how many lines should we include in each stack trace in the web output
-    private static final int STACK_TRUNCATION_WEB = 30;
+    private static final int STACK_TRUNCATION_WEB = 40;
 
     private static final StackTracePrinter FILTERING_PRINTER = StackTracePrinter.builder()
             .ignoreClassStartingWith("me.lucko.luckperms.")
