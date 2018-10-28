@@ -142,7 +142,7 @@ public class VerboseListener {
             // just send as a raw message
             if (event instanceof PermissionCheckEvent) {
                 PermissionCheckEvent permissionEvent = (PermissionCheckEvent) event;
-                Message.VERBOSE_LOG.send(this.notifiedSender,
+                Message.VERBOSE_LOG_PERMISSION.send(this.notifiedSender,
                         permissionEvent.getCheckTarget(),
                         permissionEvent.getPermission(),
                         getTristateColor(permissionEvent.getResult()),
@@ -150,10 +150,9 @@ public class VerboseListener {
                 );
             } else if (event instanceof MetaCheckEvent) {
                 MetaCheckEvent metaEvent = (MetaCheckEvent) event;
-                Message.VERBOSE_LOG.send(this.notifiedSender,
+                Message.VERBOSE_LOG_META.send(this.notifiedSender,
                         metaEvent.getCheckTarget(),
-                        metaEvent.getKey() + " (meta)",
-                        "&7",
+                        metaEvent.getKey(),
                         metaEvent.getResult()
                 );
             } else {
@@ -167,7 +166,7 @@ public class VerboseListener {
 
         if (event instanceof PermissionCheckEvent) {
             PermissionCheckEvent permissionEvent = (PermissionCheckEvent) event;
-            textComponent = Message.VERBOSE_LOG.asComponent(this.notifiedSender.getPlugin().getLocaleManager(),
+            textComponent = Message.VERBOSE_LOG_PERMISSION.asComponent(this.notifiedSender.getPlugin().getLocaleManager(),
                     permissionEvent.getCheckTarget(),
                     permissionEvent.getPermission(),
                     getTristateColor(permissionEvent.getResult()),
@@ -175,10 +174,9 @@ public class VerboseListener {
             );
         } else if (event instanceof MetaCheckEvent) {
             MetaCheckEvent metaEvent = (MetaCheckEvent) event;
-            textComponent = Message.VERBOSE_LOG.asComponent(this.notifiedSender.getPlugin().getLocaleManager(),
+            textComponent = Message.VERBOSE_LOG_META.asComponent(this.notifiedSender.getPlugin().getLocaleManager(),
                     metaEvent.getCheckTarget(),
-                    metaEvent.getKey() + " (meta)",
-                    "&7",
+                    metaEvent.getKey(),
                     metaEvent.getResult()
             );
         } else {
@@ -190,10 +188,12 @@ public class VerboseListener {
 
         if (event instanceof PermissionCheckEvent) {
             PermissionCheckEvent permissionEvent = (PermissionCheckEvent) event;
+            hover.add("&aType: &2permission");
             hover.add("&bOrigin: &2" + permissionEvent.getOrigin().name());
         }
         if (event instanceof MetaCheckEvent) {
             MetaCheckEvent metaEvent = (MetaCheckEvent) event;
+            hover.add("&aType: &2meta");
             hover.add("&bOrigin: &2" + metaEvent.getOrigin().name());
         }
 

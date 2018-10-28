@@ -78,7 +78,8 @@ public enum Message {
             "{PREFIX}&3LOG &3&l> &f{}",
             false
     ),
-    VERBOSE_LOG("&3VB &3&l> &a{}&7 - &a{}&7 - {}{}", true),
+    VERBOSE_LOG_PERMISSION("&3VB &3&l> &a{}&7 - &a{}&7 - {}{}", true),
+    VERBOSE_LOG_META("&3VB &3&l> &a{}&7 - &bmeta: &a{}&7 - &7{}", true),
     EXPORT_LOG("&3EXPORT &3&l> &f{}", true),
     EXPORT_LOG_PROGRESS("&3EXPORT &3&l> &7{}", true),
     MIGRATION_LOG("&3MIGRATION &7[&3{}&7] &3&l> &f{}", true),
