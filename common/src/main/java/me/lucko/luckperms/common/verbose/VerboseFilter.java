@@ -275,7 +275,8 @@ public final class VerboseFilter {
             if (event instanceof PermissionCheckEvent) {
                 PermissionCheckEvent permissionEvent = (PermissionCheckEvent) event;
                 return Boolean.toString(
-                        permissionEvent.getCheckTarget().equalsIgnoreCase(this.value) ||
+                        this.value.equals("permission") ||
+                                permissionEvent.getCheckTarget().equalsIgnoreCase(this.value) ||
                                 permissionEvent.getPermission().toLowerCase().startsWith(this.value.toLowerCase()) ||
                                 permissionEvent.getResult().name().equalsIgnoreCase(this.value)
                 );
@@ -284,7 +285,8 @@ public final class VerboseFilter {
             if (event instanceof MetaCheckEvent) {
                 MetaCheckEvent metaEvent = (MetaCheckEvent) event;
                 return Boolean.toString(
-                        metaEvent.getCheckTarget().equalsIgnoreCase(this.value) ||
+                        this.value.equals("meta") ||
+                                metaEvent.getCheckTarget().equalsIgnoreCase(this.value) ||
                                 metaEvent.getKey().toLowerCase().startsWith(this.value.toLowerCase()) ||
                                 metaEvent.getResult().equalsIgnoreCase(this.value)
                 );
