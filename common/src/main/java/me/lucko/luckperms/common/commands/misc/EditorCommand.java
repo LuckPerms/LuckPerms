@@ -114,7 +114,7 @@ public class EditorCommand extends SingleCommand {
         }
 
         // form a url for the editor
-        String url = plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + "?" + pasteId;
+        String url = plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + "#" + pasteId;
 
         Message.EDITOR_URL.send(sender);
 
