@@ -28,10 +28,10 @@ package me.lucko.luckperms.common.caching.type;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.PermissionData;
+import me.lucko.luckperms.common.caching.CacheMetadata;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
-import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
-import me.lucko.luckperms.common.verbose.CheckOrigin;
+import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -66,7 +66,7 @@ public class PermissionCache implements PermissionData {
      */
     private final PermissionCalculator calculator;
 
-    public PermissionCache(Contexts contexts, PermissionCalculatorMetadata metadata, CalculatorFactory calculatorFactory) {
+    public PermissionCache(Contexts contexts, CacheMetadata metadata, CalculatorFactory calculatorFactory) {
         this.contexts = contexts;
         this.permissions = new ConcurrentHashMap<>();
         this.permissionsUnmodifiable = Collections.unmodifiableMap(this.permissions);
@@ -107,10 +107,10 @@ public class PermissionCache implements PermissionData {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
-        return this.calculator.getPermissionValue(permission, CheckOrigin.API);
+        return this.calculator.getPermissionValue(permission, PermissionCheckEvent.Origin.LUCKPERMS_API);
     }
 
-    public Tristate getPermissionValue(String permission, CheckOrigin origin) {
+    public Tristate getPermissionValue(String permission, PermissionCheckEvent.Origin origin) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
@@ -121,4 +121,5 @@ public class PermissionCache implements PermissionData {
     public @NonNull Contexts getContexts() {
         return this.contexts;
     }
+
 }

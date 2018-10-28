@@ -50,6 +50,7 @@ import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.gson.GsonProvider;
 import me.lucko.luckperms.common.utils.gson.JArray;
 import me.lucko.luckperms.common.utils.gson.JObject;
+import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.web.Pastebin;
 import me.lucko.luckperms.common.web.StandardPastebin;
 
@@ -239,8 +240,8 @@ public class DebugCommand extends SingleCommand {
 
     private static JObject serializeMetaData(MetaCache metaData) {
         return new JObject()
-                .add("prefix", metaData.getPrefix())
-                .add("suffix", metaData.getSuffix())
+                .add("prefix", metaData.getPrefix(MetaCheckEvent.Origin.INTERNAL))
+                .add("suffix", metaData.getSuffix(MetaCheckEvent.Origin.INTERNAL))
                 .add("prefixes", () -> {
                     JArray prefixes = new JArray();
                     for (Map.Entry<Integer, String> entry : metaData.getPrefixes().entrySet()) {

@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.calculators;
 
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.common.caching.CacheMetadata;
 
 /**
  * Creates a calculator instance given a set of contexts
@@ -39,6 +40,6 @@ public interface CalculatorFactory {
      * @param metadata the calculator metadata
      * @return a permission calculator instance
      */
-    PermissionCalculator build(Contexts contexts, PermissionCalculatorMetadata metadata);
+    PermissionCalculator build(Contexts contexts, CacheMetadata metadata);
 
 }

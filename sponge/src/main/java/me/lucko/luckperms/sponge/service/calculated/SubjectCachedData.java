@@ -31,10 +31,10 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.caching.MetaContexts;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.common.caching.AbstractCachedData;
+import me.lucko.luckperms.common.caching.CacheMetadata;
 import me.lucko.luckperms.common.caching.type.MetaAccumulator;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
-import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -60,8 +60,8 @@ public class SubjectCachedData extends AbstractCachedData implements CalculatorF
     }
 
     @Override
-    protected PermissionCalculatorMetadata getMetadataForContexts(Contexts contexts) {
-        return PermissionCalculatorMetadata.of(null, this.subject.getParentCollection().getIdentifier() + "/" + this.subject.getIdentifier(), contexts.getContexts());
+    protected CacheMetadata getMetadataForContexts(Contexts contexts) {
+        return new CacheMetadata(this, null, this.subject.getParentCollection().getIdentifier() + "/" + this.subject.getIdentifier(), contexts.getContexts());
     }
 
     @Override
@@ -95,7 +95,7 @@ public class SubjectCachedData extends AbstractCachedData implements CalculatorF
     }
 
     @Override
-    public PermissionCalculator build(Contexts contexts, PermissionCalculatorMetadata metadata) {
+    public PermissionCalculator build(Contexts contexts, CacheMetadata metadata) {
         ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
         processors.add(new MapProcessor());
         processors.add(new SpongeWildcardProcessor());
@@ -105,6 +105,6 @@ public class SubjectCachedData extends AbstractCachedData implements CalculatorF
             processors.add(new FixedDefaultsProcessor(this.subject.getService(), contexts.getContexts().makeImmutable(), this.subject.getDefaults()));
         }
 
-        return new PermissionCalculator(this.plugin, metadata, processors.build());
+        return new PermissionCalculator(getPlugin(), metadata, processors.build());
     }
 }

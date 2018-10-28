@@ -39,7 +39,6 @@ import me.lucko.luckperms.common.caching.type.MetaCache;
 import me.lucko.luckperms.common.caching.type.PermissionCache;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
-import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStack;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -60,7 +59,7 @@ public abstract class AbstractCachedData implements CachedData {
     /**
      * The plugin instance
      */
-    protected final LuckPermsPlugin plugin;
+    private final LuckPermsPlugin plugin;
     
     /**
      * The cache used for {@link PermissionCache} instances.
@@ -80,13 +79,17 @@ public abstract class AbstractCachedData implements CachedData {
         this.plugin = plugin;
     }
 
+    public LuckPermsPlugin getPlugin() {
+        return this.plugin;
+    }
+
     /**
-     * Returns a {@link PermissionCalculatorMetadata} instance for the given {@link Contexts}.
+     * Returns a {@link CacheMetadata} instance for the given {@link Contexts}.
      * 
-     * @param contexts the contexts the permission calculator is for
+     * @param contexts the contexts the cache is for
      * @return the metadata instance
      */
-    protected abstract PermissionCalculatorMetadata getMetadataForContexts(Contexts contexts);
+    protected abstract CacheMetadata getMetadataForContexts(Contexts contexts);
 
     /**
      * Gets the {@link CalculatorFactory} used to build {@link PermissionCalculator}s.
@@ -146,7 +149,7 @@ public abstract class AbstractCachedData implements CachedData {
         Objects.requireNonNull(contexts, "contexts");
 
         if (data == null) {
-            PermissionCalculatorMetadata metadata = getMetadataForContexts(contexts);
+            CacheMetadata metadata = getMetadataForContexts(contexts);
             data = new PermissionCache(contexts, metadata, getCalculatorFactory());
         }
 
@@ -170,7 +173,8 @@ public abstract class AbstractCachedData implements CachedData {
         Objects.requireNonNull(contexts, "contexts");
 
         if (data == null) {
-            data = new MetaCache(contexts);
+            CacheMetadata metadata = getMetadataForContexts(contexts.getContexts());
+            data = new MetaCache(contexts, metadata);
         }
 
         MetaAccumulator accumulator = newAccumulator(contexts);

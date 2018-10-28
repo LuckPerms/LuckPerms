@@ -29,8 +29,8 @@ import com.google.common.collect.ListMultimap;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.caching.type.MetaCache;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -44,6 +44,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.DurationFormatter;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 
 import java.util.List;
 import java.util.Set;
@@ -110,12 +111,14 @@ public class UserInfo extends SubCommand<User> {
                         .collect(Collectors.joining(" "));
             }
 
-            MetaData data = user.getCachedData().getMetaData(contexts);
-            if (data.getPrefix() != null) {
-                prefix = "&f\"" + data.getPrefix() + "&f\"";
+            MetaCache data = user.getCachedData().getMetaData(contexts);
+            String prefixValue = data.getPrefix(MetaCheckEvent.Origin.INTERNAL);
+            if (prefixValue != null) {
+                prefix = "&f\"" + prefixValue + "&f\"";
             }
-            if (data.getSuffix() != null) {
-                suffix = "&f\"" + data.getSuffix() + "&f\"";
+            String sussexValue = data.getSuffix(MetaCheckEvent.Origin.INTERNAL);
+            if (sussexValue != null) {
+                suffix = "&f\"" + sussexValue + "&f\"";
             }
 
             ListMultimap<String, String> metaMap = data.getMetaMultimap();

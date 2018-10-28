@@ -23,11 +23,10 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.verbose;
+package me.lucko.luckperms.common.verbose.event;
 
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.utils.StackTracePrinter;
 import me.lucko.luckperms.common.utils.gson.JArray;
@@ -36,14 +35,9 @@ import me.lucko.luckperms.common.utils.gson.JObject;
 import java.util.Map;
 
 /**
- * Holds the data from a permission check
+ * Represents a verbose event.
  */
-public class CheckData {
-
-    /**
-     * The origin of the check
-     */
-    private final CheckOrigin checkOrigin;
+public abstract class VerboseEvent {
 
     /**
      * The name of the entity which was checked
@@ -60,27 +54,10 @@ public class CheckData {
      */
     private final StackTraceElement[] checkTrace;
 
-    /**
-     * The permission which was checked for
-     */
-    private final String permission;
-
-    /**
-     * The result of the permission check
-     */
-    private final Tristate result;
-
-    public CheckData(CheckOrigin checkOrigin, String checkTarget, ImmutableContextSet checkContext, StackTraceElement[] checkTrace, String permission, Tristate result) {
-        this.checkOrigin = checkOrigin;
+    protected VerboseEvent(String checkTarget, ImmutableContextSet checkContext, StackTraceElement[] checkTrace) {
         this.checkTarget = checkTarget;
         this.checkContext = checkContext;
         this.checkTrace = checkTrace;
-        this.permission = permission;
-        this.result = result;
-    }
-
-    public CheckOrigin getCheckOrigin() {
-        return this.checkOrigin;
     }
 
     public String getCheckTarget() {
@@ -95,29 +72,21 @@ public class CheckData {
         return this.checkTrace;
     }
 
-    public String getPermission() {
-        return this.permission;
-    }
-
-    public Tristate getResult() {
-        return this.result;
-    }
+    protected abstract void serializeTo(JObject object);
 
     private JObject formBaseJson() {
         return new JObject()
                 .add("who", new JObject()
                         .add("identifier", this.checkTarget)
                 )
-                .add("permission", this.permission)
-                .add("result", this.result.name().toLowerCase())
-                .add("origin", this.checkOrigin.name().toLowerCase())
                 .add("context", new JArray()
                         .consume(arr -> {
                             for (Map.Entry<String, String> contextPair : this.checkContext.toSet()) {
                                 arr.add(new JObject().add("key", contextPair.getKey()).add("value", contextPair.getValue()));
                             }
                         })
-                );
+                )
+                .consume(this::serializeTo);
     }
 
     public JsonObject toJson() {

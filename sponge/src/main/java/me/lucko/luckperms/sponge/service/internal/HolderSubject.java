@@ -29,8 +29,8 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.caching.type.MetaCache;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.inheritance.InheritanceGraph;
 import me.lucko.luckperms.common.model.Group;
@@ -38,7 +38,8 @@ import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.node.model.NodeTypes;
-import me.lucko.luckperms.common.verbose.CheckOrigin;
+import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
+import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.model.SpongeGroup;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -110,7 +111,7 @@ public abstract class HolderSubject<T extends PermissionHolder> implements LPSub
     @Override
     public Tristate getPermissionValue(ImmutableContextSet contexts, String permission) {
         Contexts lookupContexts = this.plugin.getContextManager().formContexts(contexts);
-        return this.parent.getCachedData().getPermissionData(lookupContexts).getPermissionValue(permission, CheckOrigin.PLATFORM_LOOKUP_CHECK);
+        return this.parent.getCachedData().getPermissionData(lookupContexts).getPermissionValue(permission, PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK);
     }
 
     @Override
@@ -137,20 +138,22 @@ public abstract class HolderSubject<T extends PermissionHolder> implements LPSub
 
     @Override
     public Optional<String> getOption(ImmutableContextSet contexts, String s) {
-        MetaData data = this.parent.getCachedData().getMetaData(this.plugin.getContextManager().formContexts(contexts));
+        MetaCache data = this.parent.getCachedData().getMetaData(this.plugin.getContextManager().formContexts(contexts));
         if (s.equalsIgnoreCase(NodeTypes.PREFIX_KEY)) {
-            if (data.getPrefix() != null) {
-                return Optional.of(data.getPrefix());
+            String prefix = data.getPrefix(MetaCheckEvent.Origin.PLATFORM_API);
+            if (prefix != null) {
+                return Optional.of(prefix);
             }
         }
 
         if (s.equalsIgnoreCase(NodeTypes.SUFFIX_KEY)) {
-            if (data.getSuffix() != null) {
-                return Optional.of(data.getSuffix());
+            String suffix = data.getSuffix(MetaCheckEvent.Origin.PLATFORM_API);
+            if (suffix != null) {
+                return Optional.of(suffix);
             }
         }
 
-        String val = data.getMeta().get(s);
+        String val = data.getMetaValue(s, MetaCheckEvent.Origin.PLATFORM_API);
         if (val != null) {
             return Optional.of(val);
         }

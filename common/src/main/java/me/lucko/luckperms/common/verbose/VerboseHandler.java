@@ -30,6 +30,9 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.RepeatingTask;
+import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
+import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+import me.lucko.luckperms.common.verbose.event.VerboseEvent;
 
 import java.util.Map;
 import java.util.Queue;
@@ -39,15 +42,15 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Accepts {@link CheckData} and passes it onto registered {@link VerboseListener}s.
+ * Accepts {@link VerboseEvent}s and passes them onto registered {@link VerboseListener}s.
  */
 public class VerboseHandler extends RepeatingTask {
 
     // the listeners currently registered
     private final Map<UUID, VerboseListener> listeners;
 
-    // a queue of check data
-    private final Queue<CheckData> queue;
+    // a queue of events
+    private final Queue<VerboseEvent> queue;
 
     // if there are any listeners currently registered
     private boolean listening = false;
@@ -59,18 +62,18 @@ public class VerboseHandler extends RepeatingTask {
     }
 
     /**
-     * Offers check data to the handler, to be eventually passed onto listeners.
+     * Offers permission check data to the handler, to be eventually passed onto listeners.
      *
      * <p>The check data is added to a queue to be processed later, to avoid blocking
      * the main thread each time a permission check is made.</p>
      *
-     * @param checkOrigin the origin of the check
+     * @param origin the origin of the check
      * @param checkTarget the target of the permission check
      * @param checkContext the contexts where the check occurred
      * @param permission the permission which was checked for
      * @param result the result of the permission check
      */
-    public void offerCheckData(CheckOrigin checkOrigin, String checkTarget, ContextSet checkContext, String permission, Tristate result) {
+    public void offerPermissionCheckEvent(PermissionCheckEvent.Origin origin, String checkTarget, ContextSet checkContext, String permission, Tristate result) {
         // don't bother even processing the check if there are no listeners registered
         if (!this.listening) {
             return;
@@ -80,7 +83,32 @@ public class VerboseHandler extends RepeatingTask {
         StackTraceElement[] trace = new Exception().getStackTrace();
 
         // add the check data to a queue to be processed later.
-        this.queue.offer(new CheckData(checkOrigin, checkTarget, checkContext.makeImmutable(), trace, permission, result));
+        this.queue.offer(new PermissionCheckEvent(origin, checkTarget, checkContext.makeImmutable(), trace, permission, result));
+    }
+
+    /**
+     * Offers meta check data to the handler, to be eventually passed onto listeners.
+     *
+     * <p>The check data is added to a queue to be processed later, to avoid blocking
+     * the main thread each time a meta check is made.</p>
+     *
+     * @param origin the origin of the check
+     * @param checkTarget the target of the meta check
+     * @param checkContext the contexts where the check occurred
+     * @param key the meta key which was checked for
+     * @param result the result of the meta check
+     */
+    public void offerMetaCheckEvent(MetaCheckEvent.Origin origin, String checkTarget, ContextSet checkContext, String key, String result) {
+        // don't bother even processing the check if there are no listeners registered
+        if (!this.listening) {
+            return;
+        }
+
+        //noinspection ThrowableNotThrown
+        StackTraceElement[] trace = new Exception().getStackTrace();
+
+        // add the check data to a queue to be processed later.
+        this.queue.offer(new MetaCheckEvent(origin, checkTarget, checkContext.makeImmutable(), trace, key, result));
     }
 
     /**
@@ -113,7 +141,7 @@ public class VerboseHandler extends RepeatingTask {
         // remove listeners where the sender is no longer valid
         this.listeners.values().removeIf(l -> !l.getNotifiedSender().isValid());
 
-        // handle all checks in the queue
+        // handle all events in the queue
         flush();
 
         // update listening state
@@ -121,12 +149,12 @@ public class VerboseHandler extends RepeatingTask {
     }
 
     /**
-     * Flushes the current check data to the listeners.
+     * Flushes the pending events to listeners.
      */
     public synchronized void flush() {
-        for (CheckData e; (e = this.queue.poll()) != null; ) {
+        for (VerboseEvent e; (e = this.queue.poll()) != null; ) {
             for (VerboseListener listener : this.listeners.values()) {
-                listener.acceptData(e);
+                listener.acceptEvent(e);
             }
         }
     }

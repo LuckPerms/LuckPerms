@@ -51,22 +51,22 @@ public abstract class HolderCachedData<T extends PermissionHolder> extends Abstr
 
     @Override
     protected CalculatorFactory getCalculatorFactory() {
-        return this.plugin.getCalculatorFactory();
+        return getPlugin().getCalculatorFactory();
     }
 
     @Override
     protected MetaContexts getDefaultMetaContexts(Contexts contexts) {
-        return this.plugin.getContextManager().formMetaContexts(contexts);
+        return getPlugin().getContextManager().formMetaContexts(contexts);
     }
 
     @Override
     protected Map<String, Boolean> resolvePermissions() {
-        return this.holder.exportPermissions(true, this.plugin.getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND));
+        return this.holder.exportPermissions(true, getPlugin().getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND));
     }
 
     @Override
     protected Map<String, Boolean> resolvePermissions(Contexts contexts) {
-        return this.holder.exportPermissions(contexts, true, this.plugin.getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND));
+        return this.holder.exportPermissions(contexts, true, getPlugin().getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND));
     }
 
     @Override

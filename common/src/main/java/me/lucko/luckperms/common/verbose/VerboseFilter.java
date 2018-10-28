@@ -28,6 +28,9 @@ package me.lucko.luckperms.common.verbose;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.utils.Scripting;
+import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
+import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+import me.lucko.luckperms.common.verbose.event.VerboseEvent;
 
 import java.util.List;
 import java.util.StringTokenizer;
@@ -137,7 +140,7 @@ public final class VerboseFilter {
      * @param data the check data
      * @return if the check data passes the filter
      */
-    public boolean evaluate(CheckData data) {
+    public boolean evaluate(VerboseEvent data) {
         if (this.expression.isEmpty()) {
             return true;
         }
@@ -201,10 +204,10 @@ public final class VerboseFilter {
         /**
          * Returns the value of this token when part of an evaluated expression
          *
-         * @param data the data which an expression is being formed for
+         * @param event the data which an expression is being formed for
          * @return the value to be used as part of the evaluated expression
          */
-        String forExpression(CheckData data);
+        String forExpression(VerboseEvent event);
 
         /**
          * Returns a 'dummy' value for this token in order to build a test
@@ -235,7 +238,7 @@ public final class VerboseFilter {
         }
 
         @Override
-        public String forExpression(CheckData data) {
+        public String forExpression(VerboseEvent event) {
             return this.string;
         }
 
@@ -257,7 +260,7 @@ public final class VerboseFilter {
      *
      * The check data will be deemed a "match" if:
      * - the target of the check is equal to the value of the token
-     * - the permission being checked for starts with the value of the token
+     * - the permission/meta key being checked for starts with the value of the token
      * - the result of the check is equal to the value of the token
      */
     private static final class VariableToken implements Token {
@@ -268,12 +271,27 @@ public final class VerboseFilter {
         }
 
         @Override
-        public String forExpression(CheckData data) {
-            return Boolean.toString(
-                    data.getCheckTarget().equalsIgnoreCase(this.value) ||
-                    data.getPermission().toLowerCase().startsWith(this.value.toLowerCase()) ||
-                    data.getResult().name().equalsIgnoreCase(this.value)
-            );
+        public String forExpression(VerboseEvent event) {
+            if (event instanceof PermissionCheckEvent) {
+                PermissionCheckEvent permissionEvent = (PermissionCheckEvent) event;
+                return Boolean.toString(
+                        permissionEvent.getCheckTarget().equalsIgnoreCase(this.value) ||
+                                permissionEvent.getPermission().toLowerCase().startsWith(this.value.toLowerCase()) ||
+                                permissionEvent.getResult().name().equalsIgnoreCase(this.value)
+                );
+            }
+
+            if (event instanceof MetaCheckEvent) {
+                MetaCheckEvent metaEvent = (MetaCheckEvent) event;
+                return Boolean.toString(
+                        metaEvent.getCheckTarget().equalsIgnoreCase(this.value) ||
+                                metaEvent.getKey().toLowerCase().startsWith(this.value.toLowerCase()) ||
+                                metaEvent.getResult().equalsIgnoreCase(this.value)
+                );
+            }
+
+            throw new IllegalArgumentException("Unknown event type: " + event);
+
         }
 
         @Override

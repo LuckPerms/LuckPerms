@@ -32,9 +32,9 @@ import me.lucko.luckperms.api.LookupSetting;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.bukkit.processors.ChildProcessor;
 import me.lucko.luckperms.bukkit.processors.DefaultsProcessor;
+import me.lucko.luckperms.common.caching.CacheMetadata;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
-import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.processors.MapProcessor;
@@ -50,7 +50,7 @@ public class BukkitCalculatorFactory implements CalculatorFactory {
     }
 
     @Override
-    public PermissionCalculator build(Contexts contexts, PermissionCalculatorMetadata metadata) {
+    public PermissionCalculator build(Contexts contexts, CacheMetadata metadata) {
         ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
 
         processors.add(new MapProcessor());

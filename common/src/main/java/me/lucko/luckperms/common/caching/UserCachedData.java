@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.caching;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.caching.UserData;
-import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.User;
 
@@ -41,7 +40,7 @@ public class UserCachedData extends HolderCachedData<User> implements UserData {
     }
 
     @Override
-    protected PermissionCalculatorMetadata getMetadataForContexts(Contexts contexts) {
-        return PermissionCalculatorMetadata.of(HolderType.USER, this.holder.getPlainDisplayName(), contexts.getContexts());
+    protected CacheMetadata getMetadataForContexts(Contexts contexts) {
+        return new CacheMetadata(this, HolderType.USER, this.holder.getPlainDisplayName(), contexts.getContexts());
     }
 }

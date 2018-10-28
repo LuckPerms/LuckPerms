@@ -37,6 +37,9 @@ import me.lucko.luckperms.common.utils.StackTracePrinter;
 import me.lucko.luckperms.common.utils.TextUtils;
 import me.lucko.luckperms.common.utils.gson.JArray;
 import me.lucko.luckperms.common.utils.gson.JObject;
+import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
+import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+import me.lucko.luckperms.common.verbose.event.VerboseEvent;
 import me.lucko.luckperms.common.web.StandardPastebin;
 
 import net.kyori.text.TextComponent;
@@ -50,7 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
- * Accepts and processes {@link CheckData}, passed from the {@link VerboseHandler}.
+ * Accepts and processes {@link VerboseEvent}, passed from the {@link VerboseHandler}.
  */
 public class VerboseListener {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
@@ -64,7 +67,6 @@ public class VerboseListener {
 
     private static final StackTracePrinter FILTERING_PRINTER = StackTracePrinter.builder()
             .ignoreClassStartingWith("me.lucko.luckperms.")
-            .ignoreClassStartingWith("com.github.benmanes.caffeine")
             .ignoreClass("java.util.concurrent.CompletableFuture")
             .ignoreClass("java.util.concurrent.ConcurrentHashMap")
             .build();
@@ -93,13 +95,13 @@ public class VerboseListener {
     private final VerboseFilter filter;
     // if we should notify the sender
     private final boolean notify;
-    // the number of checks we have processed
+    // the number of events we have processed
     private final AtomicInteger counter = new AtomicInteger(0);
-    // the number of checks we have processed and accepted, based on the filter rules for this
+    // the number of events we have processed and accepted, based on the filter rules for this
     // listener
     private final AtomicInteger matchedCounter = new AtomicInteger(0);
-    // the checks which passed the filter, up to a max size of #DATA_TRUNCATION
-    private final List<CheckData> results = new ArrayList<>(DATA_TRUNCATION / 10);
+    // the events which passed the filter, up to a max size of #DATA_TRUNCATION
+    private final List<VerboseEvent> results = new ArrayList<>(DATA_TRUNCATION / 10);
 
     public VerboseListener(Sender notifiedSender, VerboseFilter filter, boolean notify) {
         this.notifiedSender = notifiedSender;
@@ -108,16 +110,16 @@ public class VerboseListener {
     }
 
     /**
-     * Accepts and processes check data.
+     * Accepts and processes verbose events.
      *
-     * @param data the data to process
+     * @param event the event to process
      */
-    public void acceptData(CheckData data) {
+    public void acceptEvent(VerboseEvent event) {
         // increment handled counter
         this.counter.incrementAndGet();
 
         // check if the data passes our filter
-        if (!this.filter.evaluate(data)) {
+        if (!this.filter.evaluate(event)) {
             return;
         }
 
@@ -126,47 +128,84 @@ public class VerboseListener {
 
         // record the check, if we have space for it
         if (this.results.size() < DATA_TRUNCATION) {
-            this.results.add(data);
+            this.results.add(event);
         }
 
         // handle notifications
         if (this.notify) {
-            sendNotification(data);
+            sendNotification(event);
         }
     }
 
-    private void sendNotification(CheckData data) {
+    private void sendNotification(VerboseEvent event) {
         if (this.notifiedSender.isConsole()) {
             // just send as a raw message
-            Message.VERBOSE_LOG.send(this.notifiedSender,
-                    data.getCheckTarget(),
-                    data.getPermission(),
-                    getTristateColor(data.getResult()),
-                    data.getResult().name().toLowerCase()
-            );
+            if (event instanceof PermissionCheckEvent) {
+                PermissionCheckEvent permissionEvent = (PermissionCheckEvent) event;
+                Message.VERBOSE_LOG.send(this.notifiedSender,
+                        permissionEvent.getCheckTarget(),
+                        permissionEvent.getPermission(),
+                        getTristateColor(permissionEvent.getResult()),
+                        permissionEvent.getResult().name().toLowerCase()
+                );
+            } else if (event instanceof MetaCheckEvent) {
+                MetaCheckEvent metaEvent = (MetaCheckEvent) event;
+                Message.VERBOSE_LOG.send(this.notifiedSender,
+                        metaEvent.getCheckTarget(),
+                        metaEvent.getKey() + " (meta)",
+                        "&7",
+                        metaEvent.getResult()
+                );
+            } else {
+                throw new IllegalArgumentException("Unknown event type: " + event);
+            }
             return;
         }
 
-        // form a hoverevent from the check trace
-        TextComponent textComponent = Message.VERBOSE_LOG.asComponent(this.notifiedSender.getPlugin().getLocaleManager(),
-                data.getCheckTarget(),
-                data.getPermission(),
-                getTristateColor(data.getResult()),
-                data.getResult().name().toLowerCase()
-        );
+        // form a text component from the check trace
+        TextComponent textComponent;
 
-        // build the text
+        if (event instanceof PermissionCheckEvent) {
+            PermissionCheckEvent permissionEvent = (PermissionCheckEvent) event;
+            textComponent = Message.VERBOSE_LOG.asComponent(this.notifiedSender.getPlugin().getLocaleManager(),
+                    permissionEvent.getCheckTarget(),
+                    permissionEvent.getPermission(),
+                    getTristateColor(permissionEvent.getResult()),
+                    permissionEvent.getResult().name().toLowerCase()
+            );
+        } else if (event instanceof MetaCheckEvent) {
+            MetaCheckEvent metaEvent = (MetaCheckEvent) event;
+            textComponent = Message.VERBOSE_LOG.asComponent(this.notifiedSender.getPlugin().getLocaleManager(),
+                    metaEvent.getCheckTarget(),
+                    metaEvent.getKey() + " (meta)",
+                    "&7",
+                    metaEvent.getResult()
+            );
+        } else {
+            throw new IllegalArgumentException("Unknown event type: " + event);
+        }
+
+        // build the hover text
         List<String> hover = new ArrayList<>();
-        hover.add("&bOrigin: &2" + data.getCheckOrigin().name());
-        hover.add("&bContext: &r" + MessageUtils.contextSetToString(this.notifiedSender.getPlugin().getLocaleManager(), data.getCheckContext()));
+
+        if (event instanceof PermissionCheckEvent) {
+            PermissionCheckEvent permissionEvent = (PermissionCheckEvent) event;
+            hover.add("&bOrigin: &2" + permissionEvent.getOrigin().name());
+        }
+        if (event instanceof MetaCheckEvent) {
+            MetaCheckEvent metaEvent = (MetaCheckEvent) event;
+            hover.add("&bOrigin: &2" + metaEvent.getOrigin().name());
+        }
+
+        hover.add("&bContext: &r" + MessageUtils.contextSetToString(this.notifiedSender.getPlugin().getLocaleManager(), event.getCheckContext()));
         hover.add("&bTrace: &r");
 
         Consumer<StackTraceElement> printer = StackTracePrinter.elementToString(str -> hover.add("&7" + str));
         int overflow;
-        if (data.getCheckOrigin() == CheckOrigin.API || data.getCheckOrigin() == CheckOrigin.INTERNAL) {
-            overflow = CHAT_UNFILTERED_PRINTER.process(data.getCheckTrace(), printer);
+        if (shouldFilterStackTrace(event)) {
+            overflow = CHAT_FILTERED_PRINTER.process(event.getCheckTrace(), printer);
         } else {
-            overflow = CHAT_FILTERED_PRINTER.process(data.getCheckTrace(), printer);
+            overflow = CHAT_UNFILTERED_PRINTER.process(event.getCheckTrace(), printer);
         }
         if (overflow != 0) {
             hover.add("&f... and " + overflow + " more");
@@ -176,6 +215,15 @@ public class VerboseListener {
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(hover.stream()), CommandManager.AMPERSAND_CHAR));
         TextComponent text = textComponent.toBuilder().applyDeep(comp -> comp.hoverEvent(hoverEvent)).build();
         this.notifiedSender.sendMessage(text);
+    }
+
+    private static boolean shouldFilterStackTrace(VerboseEvent event) {
+        if (event instanceof PermissionCheckEvent) {
+            PermissionCheckEvent permissionEvent = (PermissionCheckEvent) event;
+            return permissionEvent.getOrigin() == PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK ||
+                    permissionEvent.getOrigin() == PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK;
+        }
+        return false;
     }
 
     /**
@@ -217,12 +265,8 @@ public class VerboseListener {
                 .add("truncated", truncated);
 
         JArray data = new JArray();
-        for (CheckData c : this.results) {
-            if (c.getCheckOrigin() == CheckOrigin.API || c.getCheckOrigin() == CheckOrigin.INTERNAL) {
-                data.add(c.toJson(WEB_UNFILTERED_PRINTER));
-            } else {
-                data.add(c.toJson(WEB_FILTERED_PRINTER));
-            }
+        for (VerboseEvent events : this.results) {
+            data.add(events.toJson(shouldFilterStackTrace(events) ? WEB_FILTERED_PRINTER : WEB_UNFILTERED_PRINTER));
         }
         this.results.clear();
 

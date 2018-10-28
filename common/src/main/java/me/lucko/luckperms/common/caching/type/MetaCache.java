@@ -34,7 +34,11 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.caching.MetaContexts;
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
+import me.lucko.luckperms.common.caching.CacheMetadata;
 import me.lucko.luckperms.common.metastacking.MetaStack;
+import me.lucko.luckperms.common.node.model.NodeTypes;
+import me.lucko.luckperms.common.verbose.VerboseHandler;
+import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -52,6 +56,11 @@ public class MetaCache implements MetaData {
      */
     private final MetaContexts metaContexts;
 
+    /**
+     * The metadata for this cache
+     */
+    private final CacheMetadata metadata;
+
     private ListMultimap<String, String> metaMultimap = ImmutableListMultimap.of();
     private Map<String, String> meta = ImmutableMap.of();
     private SortedMap<Integer, String> prefixes = ImmutableSortedMap.of();
@@ -59,8 +68,9 @@ public class MetaCache implements MetaData {
     private MetaStack prefixStack = null;
     private MetaStack suffixStack = null;
 
-    public MetaCache(MetaContexts metaContexts) {
+    public MetaCache(MetaContexts metaContexts, CacheMetadata metadata) {
         this.metaContexts = metaContexts;
+        this.metadata = metadata;
     }
 
     public void loadMeta(MetaAccumulator meta) {
@@ -90,14 +100,34 @@ public class MetaCache implements MetaData {
 
     @Override
     public String getPrefix() {
+        return getPrefix(MetaCheckEvent.Origin.LUCKPERMS_API);
+    }
+
+    public String getPrefix(MetaCheckEvent.Origin origin) {
         MetaStack prefixStack = this.prefixStack;
-        return prefixStack == null ? null : prefixStack.toFormattedString();
+        String value = prefixStack == null ? null : prefixStack.toFormattedString();
+
+        // log this meta lookup to the verbose handler
+        VerboseHandler verboseHandler = this.metadata.getParentContainer().getPlugin().getVerboseHandler();
+        verboseHandler.offerMetaCheckEvent(origin, this.metadata.getObjectName(), this.metadata.getContext(), NodeTypes.PREFIX_KEY, String.valueOf(value));
+
+        return value;
     }
 
     @Override
     public String getSuffix() {
+        return getSuffix(MetaCheckEvent.Origin.LUCKPERMS_API);
+    }
+
+    public String getSuffix(MetaCheckEvent.Origin origin) {
         MetaStack suffixStack = this.suffixStack;
-        return suffixStack == null ? null : suffixStack.toFormattedString();
+        String value = suffixStack == null ? null : suffixStack.toFormattedString();
+
+        // log this meta lookup to the verbose handler
+        VerboseHandler verboseHandler = this.metadata.getParentContainer().getPlugin().getVerboseHandler();
+        verboseHandler.offerMetaCheckEvent(origin, this.metadata.getObjectName(), this.metadata.getContext(), NodeTypes.SUFFIX_KEY, String.valueOf(value));
+
+        return value;
     }
 
     @Override
@@ -128,6 +158,16 @@ public class MetaCache implements MetaData {
     @Override
     public @NonNull Map<String, String> getMeta() {
         return this.meta;
+    }
+
+    public String getMetaValue(String key, MetaCheckEvent.Origin origin) {
+        String value = this.meta.get(key);
+
+        // log this meta lookup to the verbose handler
+        VerboseHandler verboseHandler = this.metadata.getParentContainer().getPlugin().getVerboseHandler();
+        verboseHandler.offerMetaCheckEvent(origin, this.metadata.getObjectName(), this.metadata.getContext(), key, String.valueOf(value));
+
+        return value;
     }
 
     @Override

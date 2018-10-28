@@ -31,9 +31,10 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.common.caching.CacheMetadata;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
-import me.lucko.luckperms.common.verbose.CheckOrigin;
+import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -53,7 +54,7 @@ public class PermissionCalculator implements CacheLoader<String, Tristate> {
     /**
      * Info about the nature of this calculator.
      */
-    private final PermissionCalculatorMetadata metadata;
+    private final CacheMetadata metadata;
 
     /**
      * The processors which back this calculator
@@ -65,7 +66,7 @@ public class PermissionCalculator implements CacheLoader<String, Tristate> {
      */
     private final LoadingCache<String, Tristate> lookupCache = Caffeine.newBuilder().build(this);
 
-    public PermissionCalculator(LuckPermsPlugin plugin, PermissionCalculatorMetadata metadata, ImmutableList<PermissionProcessor> processors) {
+    public PermissionCalculator(LuckPermsPlugin plugin, CacheMetadata metadata, ImmutableList<PermissionProcessor> processors) {
         this.plugin = plugin;
         this.metadata = metadata;
         this.processors = processors;
@@ -80,7 +81,7 @@ public class PermissionCalculator implements CacheLoader<String, Tristate> {
      * @param origin marks where this check originated from
      * @return the result
      */
-    public Tristate getPermissionValue(String permission, CheckOrigin origin) {
+    public Tristate getPermissionValue(String permission, PermissionCheckEvent.Origin origin) {
         // convert the permission to lowercase, as all values in the backing map are also lowercase.
         // this allows fast case insensitive lookups
         permission = permission.toLowerCase();
@@ -89,7 +90,7 @@ public class PermissionCalculator implements CacheLoader<String, Tristate> {
         Tristate result = this.lookupCache.get(permission);
 
         // log this permission lookup to the verbose handler
-        this.plugin.getVerboseHandler().offerCheckData(origin, this.metadata.getObjectName(), this.metadata.getContext(), permission, result);
+        this.plugin.getVerboseHandler().offerPermissionCheckEvent(origin, this.metadata.getObjectName(), this.metadata.getContext(), permission, result);
 
         // return the result
         return result;

@@ -40,7 +40,8 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
-import me.lucko.luckperms.common.verbose.CheckOrigin;
+import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
+import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
 import net.milkbowl.vault.permission.Permission;
 
@@ -162,7 +163,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
         Contexts contexts = contextForLookup(user, world);
         PermissionCache permissionData = user.getCachedData().getPermissionData(contexts);
 
-        Tristate result = permissionData.getPermissionValue(permission, CheckOrigin.INTERNAL);
+        Tristate result = permissionData.getPermissionValue(permission, PermissionCheckEvent.Origin.THIRD_PARTY_API);
         if (log()) {
             logMsg("#userHasPermission: %s - %s - %s - %s", user.getPlainDisplayName(), contexts.getContexts().toMultimap(), permission, result);
         }
@@ -245,6 +246,8 @@ public class VaultPermissionHook extends AbstractVaultPermission {
             value = group.getPlainDisplayName();
         }
 
+        this.plugin.getVerboseHandler().offerMetaCheckEvent(MetaCheckEvent.Origin.THIRD_PARTY_API, user.getPlainDisplayName(), ContextSet.empty(), "primarygroup", value);
+
         if (log()) {
             logMsg("#userGetPrimaryGroup: %s - %s - %s", user.getPlainDisplayName(), world, value);
         }
@@ -265,7 +268,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
         Contexts contexts = contextForLookup(null, world);
         PermissionCache permissionData = group.getCachedData().getPermissionData(contexts);
 
-        Tristate result = permissionData.getPermissionValue(permission, CheckOrigin.INTERNAL);
+        Tristate result = permissionData.getPermissionValue(permission, PermissionCheckEvent.Origin.THIRD_PARTY_API);
         if (log()) {
             logMsg("#groupHasPermission: %s - %s - %s - %s", group.getName(), contexts.getContexts().toMultimap(), permission, result);
         }

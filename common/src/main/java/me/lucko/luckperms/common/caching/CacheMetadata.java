@@ -23,31 +23,57 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.verbose;
+package me.lucko.luckperms.common.caching;
+
+import me.lucko.luckperms.api.caching.CachedDataContainer;
+import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.model.HolderType;
 
 /**
- * Represents the origin of a permission check
+ * Metadata about a given {@link CachedDataContainer}.
  */
-public enum CheckOrigin {
+public class CacheMetadata {
 
     /**
-     * Indicates the check was caused by a 'hasPermission' check on the platform
+     * The cached data instance which creates this container
      */
-    PLATFORM_PERMISSION_CHECK,
+    private final AbstractCachedData parentContainer;
 
     /**
-     * Indicates the check was caused by a 'hasPermissionSet' type check on the platform
+     * The type of the object which owns the cache
      */
-    PLATFORM_LOOKUP_CHECK,
+    private final HolderType holderType;
 
     /**
-     * Indicates the check was caused by an API call
+     * The name of the object which owns the cache
      */
-    API,
+    private final String objectName;
 
     /**
-     * Indicates the check was caused by a LuckPerms internal
+     * The context the permission calculator works with
      */
-    INTERNAL
+    private final ContextSet context;
 
+    public CacheMetadata(AbstractCachedData parentContainer, HolderType holderType, String objectName, ContextSet context) {
+        this.parentContainer = parentContainer;
+        this.holderType = holderType;
+        this.objectName = objectName;
+        this.context = context;
+    }
+
+    public AbstractCachedData getParentContainer() {
+        return this.parentContainer;
+    }
+
+    public HolderType getHolderType() {
+        return this.holderType;
+    }
+
+    public String getObjectName() {
+        return this.objectName;
+    }
+
+    public ContextSet getContext() {
+        return this.context;
+    }
 }

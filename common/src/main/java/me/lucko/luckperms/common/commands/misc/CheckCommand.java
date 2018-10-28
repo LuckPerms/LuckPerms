@@ -41,7 +41,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.Uuids;
-import me.lucko.luckperms.common.verbose.CheckOrigin;
+import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
 import java.util.List;
 import java.util.UUID;
@@ -70,7 +70,7 @@ public class CheckCommand extends SingleCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        Tristate tristate = user.getCachedData().getPermissionData(plugin.getContextForUser(user).orElse(plugin.getContextManager().getStaticContexts())).getPermissionValue(permission, CheckOrigin.INTERNAL);
+        Tristate tristate = user.getCachedData().getPermissionData(plugin.getContextForUser(user).orElse(plugin.getContextManager().getStaticContexts())).getPermissionValue(permission, PermissionCheckEvent.Origin.INTERNAL);
         Message.CHECK_RESULT.send(sender, user.getFormattedDisplayName(), permission, MessageUtils.formatTristate(tristate));
         return CommandResult.SUCCESS;
     }

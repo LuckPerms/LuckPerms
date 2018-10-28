@@ -29,9 +29,9 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.bungee.LPBungeePlugin;
+import me.lucko.luckperms.common.caching.CacheMetadata;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
-import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.processors.MapProcessor;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
@@ -46,7 +46,7 @@ public class BungeeCalculatorFactory implements CalculatorFactory {
     }
 
     @Override
-    public PermissionCalculator build(Contexts contexts, PermissionCalculatorMetadata metadata) {
+    public PermissionCalculator build(Contexts contexts, CacheMetadata metadata) {
         ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
 
         processors.add(new MapProcessor());

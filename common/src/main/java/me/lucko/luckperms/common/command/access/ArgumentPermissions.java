@@ -37,7 +37,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.verbose.CheckOrigin;
+import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -299,7 +299,7 @@ public final class ArgumentPermissions {
         }
 
         PermissionCache permissionData = user.getCachedData().getPermissionData(Contexts.of(contextSet, Contexts.global().getSettings()));
-        return !permissionData.getPermissionValue(NodeFactory.groupNode(targetGroupName), CheckOrigin.INTERNAL).asBoolean();
+        return !permissionData.getPermissionValue(NodeFactory.groupNode(targetGroupName), PermissionCheckEvent.Origin.INTERNAL).asBoolean();
     }
 
     private ArgumentPermissions() {}

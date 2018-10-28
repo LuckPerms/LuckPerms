@@ -33,7 +33,8 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.caching.type.MetaAccumulator;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
-import me.lucko.luckperms.common.verbose.CheckOrigin;
+import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
+import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.inheritance.SubjectInheritanceGraph;
 import me.lucko.luckperms.sponge.service.inheritance.SubjectInheritanceGraphs;
@@ -294,7 +295,7 @@ public abstract class CalculatedSubject implements LPSubject {
     @Override
     public Tristate getPermissionValue(ImmutableContextSet contexts, String permission) {
         Contexts lookupContexts = Contexts.of(contexts, Contexts.global().getSettings());
-        return this.cachedData.getPermissionData(lookupContexts).getPermissionValue(permission, CheckOrigin.INTERNAL);
+        return this.cachedData.getPermissionData(lookupContexts).getPermissionValue(permission, PermissionCheckEvent.Origin.INTERNAL);
     }
 
     @Override
@@ -310,8 +311,7 @@ public abstract class CalculatedSubject implements LPSubject {
     @Override
     public Optional<String> getOption(ImmutableContextSet contexts, String key) {
         Contexts lookupContexts = Contexts.of(contexts, Contexts.global().getSettings());
-        Map<String, String> meta = this.cachedData.getMetaData(lookupContexts).getMeta();
-        return Optional.ofNullable(meta.get(key));
+        return Optional.ofNullable(this.cachedData.getMetaData(lookupContexts).getMetaValue(key, MetaCheckEvent.Origin.PLATFORM_API));
     }
 
     @Override
