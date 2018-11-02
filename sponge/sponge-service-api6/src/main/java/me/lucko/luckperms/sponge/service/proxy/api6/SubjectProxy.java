@@ -105,7 +105,7 @@ public final class SubjectProxy implements Subject, ProxiedSubject {
 
     @Override
     public boolean hasPermission(@NonNull String permission) {
-        return handle().thenApply(handle -> handle.getPermissionValue(ImmutableContextSet.empty(), permission).asBoolean()).join();
+        return handle().thenApply(handle -> handle.getPermissionValue(getActiveContextSet(), permission).asBoolean()).join();
     }
 
     @Override
@@ -116,7 +116,7 @@ public final class SubjectProxy implements Subject, ProxiedSubject {
     @Override
     public boolean isChildOf(@NonNull Subject parent) {
         return handle().thenApply(handle -> handle.isChildOf(
-                ImmutableContextSet.empty(),
+                getActiveContextSet(),
                 this.service.getReferenceFactory().obtain(parent)
         )).join();
     }
@@ -131,7 +131,7 @@ public final class SubjectProxy implements Subject, ProxiedSubject {
 
     @Override
     public @NonNull List<Subject> getParents() {
-        return (List) handle().thenApply(handle -> handle.getParents(ImmutableContextSet.empty()).stream()
+        return (List) handle().thenApply(handle -> handle.getParents(getActiveContextSet()).stream()
                 .map(s -> new SubjectProxy(this.service, s))
                 .collect(ImmutableCollectors.toList())).join();
     }
@@ -150,7 +150,7 @@ public final class SubjectProxy implements Subject, ProxiedSubject {
 
     @Override
     public @NonNull Optional<String> getOption(@NonNull String key) {
-        return handle().thenApply(handle -> handle.getOption(ImmutableContextSet.empty(), key)).join();
+        return handle().thenApply(handle -> handle.getOption(getActiveContextSet(), key)).join();
     }
 
     @Override
