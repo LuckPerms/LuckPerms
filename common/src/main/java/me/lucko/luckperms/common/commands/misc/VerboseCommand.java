@@ -79,7 +79,6 @@ public class VerboseCommand extends SingleCommand {
             try {
                 parsedFilter = VerboseFilter.parse(filter);
             } catch (InvalidFilterException e) {
-                e.printStackTrace();
                 Message.VERBOSE_INVALID_FILTER.send(sender, filter);
                 return CommandResult.FAILURE;
             }
