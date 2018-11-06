@@ -77,6 +77,7 @@ public interface MetaStackFactory {
      * @param middleSpacer             the spacer to be included between stack elements
      * @param endSpacer                the spacer to be included at the end of the stacks output
      * @return the new stack definition instance
+     * @since 4.4
      */
     @NonNull MetaStackDefinition createDefinition(@NonNull List<MetaStackElement> elements, @NonNull DuplicateRemovalFunction duplicateRemovalFunction, @NonNull String startSpacer, @NonNull String middleSpacer, @NonNull String endSpacer);
 
