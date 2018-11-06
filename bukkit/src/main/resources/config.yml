@@ -300,6 +300,8 @@ log-notify: true
 # - It is explained and documented in more detail on the wiki under "Prefix & Suffix Stacking".
 #
 # - The options are divided into separate sections for prefixes and suffixes.
+# - The 'duplicates' setting refers to how duplicate elements are handled. Can be 'retain-all',
+#   'first-only' or 'last-only'.
 # - The value of 'start-spacer' is included at the start of the resultant prefix/suffix.
 # - The value of 'end-spacer' is included at the end of the resultant prefix/suffix.
 # - The value of 'middle-spacer' is included between each element in the resultant prefix/suffix.
@@ -333,12 +335,14 @@ meta-formatting:
   prefix:
     format:
       - "highest"
+    duplicates: first-only
     start-spacer: ""
     middle-spacer: " "
     end-spacer: ""
   suffix:
     format:
       - "highest"
+    duplicates: first-only
     start-spacer: ""
     middle-spacer: " "
     end-spacer: ""

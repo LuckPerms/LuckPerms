@@ -29,16 +29,17 @@ import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.metastacking.MetaStackElement;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Map;
 import java.util.Optional;
 
 final class SimpleMetaStackEntry implements MetaStackEntry {
-
     private final MetaStack parentStack;
     private final MetaStackElement element;
     private final ChatMetaType type;
 
-    private Map.Entry<Integer, String> current = null;
+    private Map.@Nullable Entry<Integer, String> current = null;
 
     public SimpleMetaStackEntry(MetaStack parentStack, MetaStackElement element, ChatMetaType type) {
         this.parentStack = parentStack;
@@ -72,31 +73,5 @@ final class SimpleMetaStackEntry implements MetaStackEntry {
 
     public ChatMetaType getType() {
         return this.type;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) return true;
-        if (!(o instanceof SimpleMetaStackEntry)) return false;
-        final SimpleMetaStackEntry that = (SimpleMetaStackEntry) o;
-
-        return this.getElement().equals(that.getElement()) &&
-                this.getType() == that.getType() &&
-                this.current.equals(that.current);
-    }
-
-    @Override
-    public int hashCode() {
-        final int PRIME = 59;
-        int result = 1;
-        result = result * PRIME + this.getElement().hashCode();
-        result = result * PRIME + this.getType().hashCode();
-        result = result * PRIME + this.current.hashCode();
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "SimpleMetaStackEntry(parentStack=" + this.getParentStack() + ", element=" + this.getElement() + ", type=" + this.getType() + ", current=" + this.current + ")";
     }
 }

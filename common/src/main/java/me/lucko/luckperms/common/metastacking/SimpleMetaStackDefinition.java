@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.metastacking;
 
 import com.google.common.collect.ImmutableList;
 
+import me.lucko.luckperms.api.metastacking.DuplicateRemovalFunction;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.api.metastacking.MetaStackElement;
 
@@ -38,6 +39,7 @@ import java.util.Objects;
 public final class SimpleMetaStackDefinition implements MetaStackDefinition {
 
     private final List<MetaStackElement> elements;
+    private final DuplicateRemovalFunction duplicateRemovalFunction;
     private final String startSpacer;
     private final String middleSpacer;
     private final String endSpacer;
@@ -45,8 +47,9 @@ public final class SimpleMetaStackDefinition implements MetaStackDefinition {
     // cache hashcode - this class is immutable, and used an index in MetaContexts
     private final int hashCode;
 
-    public SimpleMetaStackDefinition(List<MetaStackElement> elements, String startSpacer, String middleSpacer, String endSpacer) {
+    public SimpleMetaStackDefinition(List<MetaStackElement> elements, DuplicateRemovalFunction duplicateRemovalFunction, String startSpacer, String middleSpacer, String endSpacer) {
         this.elements = ImmutableList.copyOf(Objects.requireNonNull(elements, "elements"));
+        this.duplicateRemovalFunction = Objects.requireNonNull(duplicateRemovalFunction, "duplicateRemovalFunction");
         this.startSpacer = Objects.requireNonNull(startSpacer, "startSpacer");
         this.middleSpacer = Objects.requireNonNull(middleSpacer, "middleSpacer");
         this.endSpacer = Objects.requireNonNull(endSpacer, "endSpacer");
@@ -56,6 +59,11 @@ public final class SimpleMetaStackDefinition implements MetaStackDefinition {
     @Override
     public @NonNull List<MetaStackElement> getElements() {
         return this.elements;
+    }
+
+    @Override
+    public @NonNull DuplicateRemovalFunction getDuplicateRemovalFunction() {
+        return this.duplicateRemovalFunction;
     }
 
     @Override
@@ -83,14 +91,15 @@ public final class SimpleMetaStackDefinition implements MetaStackDefinition {
         if (!(o instanceof SimpleMetaStackDefinition)) return false;
         final SimpleMetaStackDefinition that = (SimpleMetaStackDefinition) o;
 
-        return this.getElements().equals(that.getElements()) &&
-                this.getStartSpacer().equals(that.getStartSpacer()) &&
-                this.getMiddleSpacer().equals(that.getMiddleSpacer()) &&
-                this.getEndSpacer().equals(that.getEndSpacer());
+        return this.elements.equals(that.elements) &&
+                this.duplicateRemovalFunction.equals(that.duplicateRemovalFunction) &&
+                this.startSpacer.equals(that.startSpacer) &&
+                this.middleSpacer.equals(that.middleSpacer) &&
+                this.endSpacer.equals(that.endSpacer);
     }
 
     private int calculateHashCode() {
-        return Objects.hash(getElements(), getStartSpacer(), getMiddleSpacer(), getEndSpacer());
+        return Objects.hash(this.elements, this.duplicateRemovalFunction, this.startSpacer, this.middleSpacer, this.elements);
     }
 
     @Override
@@ -100,6 +109,11 @@ public final class SimpleMetaStackDefinition implements MetaStackDefinition {
 
     @Override
     public String toString() {
-        return "SimpleMetaStackDefinition(elements=" + this.getElements() + ", startSpacer=" + this.getStartSpacer() + ", middleSpacer=" + this.getMiddleSpacer() + ", endSpacer=" + this.getEndSpacer() + ", hashCode=" + this.getHashCode() + ")";
+        return "SimpleMetaStackDefinition(" +
+                "elements=" + this.elements + ", " +
+                "duplicateRemovalFunction=" + this.duplicateRemovalFunction + ", " +
+                "startSpacer=" + this.startSpacer + ", " +
+                "middleSpacer=" + this.middleSpacer + ", " +
+                "endSpacer=" + this.endSpacer + ")";
     }
 }

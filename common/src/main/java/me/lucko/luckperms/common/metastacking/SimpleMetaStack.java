@@ -30,8 +30,11 @@ import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class SimpleMetaStack implements MetaStack {
 
@@ -50,22 +53,26 @@ public final class SimpleMetaStack implements MetaStack {
 
     @Override
     public String toFormattedString() {
-        List<MetaStackEntry> ret = new ArrayList<>(this.entries);
-        ret.removeIf(m -> !m.getCurrentValue().isPresent());
+        List<String> elements = this.entries.stream()
+                .map(MetaStackEntry::getCurrentValue)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toCollection(LinkedList::new));
 
-        if (ret.isEmpty()) {
+        if (elements.isEmpty()) {
             return null;
         }
 
+        this.definition.getDuplicateRemovalFunction().processDuplicates(elements);
+
         StringBuilder sb = new StringBuilder();
         sb.append(this.definition.getStartSpacer());
-        for (int i = 0; i < ret.size(); i++) {
+        for (int i = 0; i < elements.size(); i++) {
             if (i != 0) {
                 sb.append(this.definition.getMiddleSpacer());
             }
-
-            MetaStackEntry e = ret.get(i);
-            sb.append(e.getCurrentValue().get().getValue());
+            sb.append(elements.get(i));
         }
         sb.append(this.definition.getEndSpacer());
 

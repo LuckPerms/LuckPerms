@@ -32,6 +32,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LookupSetting;
 import me.lucko.luckperms.api.TemporaryMergeBehaviour;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.metastacking.DuplicateRemovalFunction;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.common.assignments.AssignmentRule;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
@@ -291,8 +292,20 @@ public final class ConfigKeys {
         String startSpacer = l.getString("meta-formatting.prefix.start-spacer", "");
         String middleSpacer = l.getString("meta-formatting.prefix.middle-spacer", " ");
         String endSpacer = l.getString("meta-formatting.prefix.end-spacer", "");
+        DuplicateRemovalFunction duplicateRemovalFunction;
+        switch (l.getString("meta-formatting.prefix.duplicates", "").toLowerCase()) {
+            case "first-only":
+                duplicateRemovalFunction = DuplicateRemovalFunction.FIRST_ONLY;
+                break;
+            case "last-only":
+                duplicateRemovalFunction = DuplicateRemovalFunction.LAST_ONLY;
+                break;
+            default:
+                duplicateRemovalFunction = DuplicateRemovalFunction.RETAIN_ALL;
+                break;
+        }
 
-        return new SimpleMetaStackDefinition(StandardStackElements.parseList(l.getPlugin(), format), startSpacer, middleSpacer, endSpacer);
+        return new SimpleMetaStackDefinition(StandardStackElements.parseList(l.getPlugin(), format), duplicateRemovalFunction, startSpacer, middleSpacer, endSpacer);
     });
 
     /**
@@ -306,8 +319,20 @@ public final class ConfigKeys {
         String startSpacer = l.getString("meta-formatting.suffix.start-spacer", "");
         String middleSpacer = l.getString("meta-formatting.suffix.middle-spacer", " ");
         String endSpacer = l.getString("meta-formatting.suffix.end-spacer", "");
+        DuplicateRemovalFunction duplicateRemovalFunction;
+        switch (l.getString("meta-formatting.prefix.duplicates", "").toLowerCase()) {
+            case "first-only":
+                duplicateRemovalFunction = DuplicateRemovalFunction.FIRST_ONLY;
+                break;
+            case "last-only":
+                duplicateRemovalFunction = DuplicateRemovalFunction.LAST_ONLY;
+                break;
+            default:
+                duplicateRemovalFunction = DuplicateRemovalFunction.RETAIN_ALL;
+                break;
+        }
 
-        return new SimpleMetaStackDefinition(StandardStackElements.parseList(l.getPlugin(), format), startSpacer, middleSpacer, endSpacer);
+        return new SimpleMetaStackDefinition(StandardStackElements.parseList(l.getPlugin(), format), duplicateRemovalFunction, startSpacer, middleSpacer, endSpacer);
     });
 
     /**

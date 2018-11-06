@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.api.delegates.misc;
 
 import com.google.common.collect.ImmutableList;
 
+import me.lucko.luckperms.api.metastacking.DuplicateRemovalFunction;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.api.metastacking.MetaStackElement;
 import me.lucko.luckperms.api.metastacking.MetaStackFactory;
@@ -63,7 +64,7 @@ public class ApiMetaStackFactory implements MetaStackFactory {
     }
 
     @Override
-    public @NonNull MetaStackDefinition createDefinition(@NonNull List<MetaStackElement> elements, @NonNull String startSpacer, @NonNull String middleSpacer, @NonNull String endSpacer) {
-        return new SimpleMetaStackDefinition(elements, startSpacer, middleSpacer, endSpacer);
+    public @NonNull MetaStackDefinition createDefinition(@NonNull List<MetaStackElement> elements, @NonNull DuplicateRemovalFunction duplicateRemovalFunction, @NonNull String startSpacer, @NonNull String middleSpacer, @NonNull String endSpacer) {
+        return new SimpleMetaStackDefinition(elements, duplicateRemovalFunction, startSpacer, middleSpacer, endSpacer);
     }
 }

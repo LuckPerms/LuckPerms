@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.caching.MetaContexts;
+import me.lucko.luckperms.api.metastacking.DuplicateRemovalFunction;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.common.caching.AbstractCachedData;
 import me.lucko.luckperms.common.caching.CacheMetadata;
@@ -49,6 +50,7 @@ import java.util.Map;
 public class SubjectCachedData extends AbstractCachedData implements CalculatorFactory {
     private static final MetaStackDefinition DEFAULT_META_STACK = new SimpleMetaStackDefinition(
             ImmutableList.of(StandardStackElements.HIGHEST),
+            DuplicateRemovalFunction.RETAIN_ALL,
             "", "", ""
     );
 

@@ -50,6 +50,15 @@ public interface MetaStackDefinition {
     @NonNull List<MetaStackElement> getElements();
 
     /**
+     * Gets the duplicate removal function, applied to the entries before
+     * formatting takes place.
+     *
+     * @return the duplicate removal function
+     * @since 4.4
+     */
+    @NonNull DuplicateRemovalFunction getDuplicateRemovalFunction();
+
+    /**
      * Gets the spacer string added before any stack elements
      *
      * @return the start spacer
