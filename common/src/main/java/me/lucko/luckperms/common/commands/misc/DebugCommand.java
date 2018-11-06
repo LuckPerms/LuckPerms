@@ -264,14 +264,14 @@ public class DebugCommand extends SingleCommand {
                 })
                 .add("meta", () -> {
                     JObject metaMap = new JObject();
-                    for (Map.Entry<String, String> entry : metaData.getMeta().entrySet()) {
+                    for (Map.Entry<String, String> entry : metaData.getMeta(MetaCheckEvent.Origin.INTERNAL).entrySet()) {
                         metaMap.add(entry.getKey(), entry.getValue());
                     }
                     return metaMap;
                 })
                 .add("metaMap", () -> {
                     JObject metaMultimap = new JObject();
-                    for (Map.Entry<String, Collection<String>> entry : metaData.getMetaMultimap().asMap().entrySet()) {
+                    for (Map.Entry<String, Collection<String>> entry : metaData.getMetaMultimap(MetaCheckEvent.Origin.INTERNAL).asMap().entrySet()) {
                         JArray values = new JArray();
                         for (String v : entry.getValue()) {
                             values.add(v);

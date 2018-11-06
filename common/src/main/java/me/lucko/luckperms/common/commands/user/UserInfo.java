@@ -121,7 +121,7 @@ public class UserInfo extends SubCommand<User> {
                 suffix = "&f\"" + sussexValue + "&f\"";
             }
 
-            ListMultimap<String, String> metaMap = data.getMetaMultimap();
+            ListMultimap<String, String> metaMap = data.getMetaMultimap(MetaCheckEvent.Origin.INTERNAL);
             if (!metaMap.isEmpty()) {
                 meta = metaMap.entries().stream()
                         .map(e -> MessageUtils.contextToString(plugin.getLocaleManager(), e.getKey(), e.getValue()))

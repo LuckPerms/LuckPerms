@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.caching.type;
 
+import com.google.common.collect.ForwardingListMultimap;
+import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
@@ -152,22 +154,20 @@ public class MetaCache implements MetaData {
 
     @Override
     public @NonNull ListMultimap<String, String> getMetaMultimap() {
-        return this.metaMultimap;
+        return getMetaMultimap(MetaCheckEvent.Origin.LUCKPERMS_API);
+    }
+
+    public ListMultimap<String, String> getMetaMultimap(MetaCheckEvent.Origin origin) {
+        return new VerboseLoggedMetaMultimap(origin);
     }
 
     @Override
     public @NonNull Map<String, String> getMeta() {
-        return this.meta;
+        return getMeta(MetaCheckEvent.Origin.LUCKPERMS_API);
     }
 
-    public String getMetaValue(String key, MetaCheckEvent.Origin origin) {
-        String value = this.meta.get(key);
-
-        // log this meta lookup to the verbose handler
-        VerboseHandler verboseHandler = this.metadata.getParentContainer().getPlugin().getVerboseHandler();
-        verboseHandler.offerMetaCheckEvent(origin, this.metadata.getObjectName(), this.metadata.getContext(), key, String.valueOf(value));
-
-        return value;
+    public Map<String, String> getMeta(MetaCheckEvent.Origin origin) {
+        return new VerboseLoggedMetaMap(origin);
     }
 
     @Override
@@ -178,6 +178,56 @@ public class MetaCache implements MetaData {
     @Override
     public @NonNull SortedMap<Integer, String> getSuffixes() {
         return this.suffixes;
+    }
+
+    private final class VerboseLoggedMetaMap extends ForwardingMap<String, String> {
+        private final MetaCheckEvent.Origin origin;
+
+        private VerboseLoggedMetaMap(MetaCheckEvent.Origin origin) {
+            this.origin = origin;
+        }
+
+        @Override
+        protected Map<String, String> delegate() {
+            return MetaCache.this.meta;
+        }
+
+        @Override
+        public String get(Object key) {
+            String value = super.get(key);
+
+            // log this meta lookup to the verbose handler
+            VerboseHandler verboseHandler = MetaCache.this.metadata.getParentContainer().getPlugin().getVerboseHandler();
+            verboseHandler.offerMetaCheckEvent(this.origin, MetaCache.this.metadata.getObjectName(), MetaCache.this.metadata.getContext(), (String) key, String.valueOf(value));
+
+            return value;
+        }
+    }
+
+    private final class VerboseLoggedMetaMultimap extends ForwardingListMultimap<String, String> {
+        private final MetaCheckEvent.Origin origin;
+
+        private VerboseLoggedMetaMultimap(MetaCheckEvent.Origin origin) {
+            this.origin = origin;
+        }
+
+        @Override
+        protected ListMultimap<String, String> delegate() {
+            return MetaCache.this.metaMultimap;
+        }
+
+        @Override
+        public List<String> get(String key) {
+            List<String> values = super.get(key);
+
+            // log this meta lookup to the verbose handler
+            VerboseHandler verboseHandler = MetaCache.this.metadata.getParentContainer().getPlugin().getVerboseHandler();
+            for (String value : values) {
+                verboseHandler.offerMetaCheckEvent(this.origin, MetaCache.this.metadata.getObjectName(), MetaCache.this.metadata.getContext(), key, String.valueOf(value));
+            }
+
+            return values;
+        }
     }
 
 }

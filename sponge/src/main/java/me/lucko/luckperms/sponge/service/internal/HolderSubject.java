@@ -153,7 +153,7 @@ public abstract class HolderSubject<T extends PermissionHolder> implements LPSub
             }
         }
 
-        String val = data.getMetaValue(s, MetaCheckEvent.Origin.PLATFORM_API);
+        String val = data.getMeta(MetaCheckEvent.Origin.PLATFORM_API).get(s);
         if (val != null) {
             return Optional.of(val);
         }

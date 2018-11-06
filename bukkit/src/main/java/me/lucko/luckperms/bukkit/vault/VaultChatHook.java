@@ -133,7 +133,7 @@ public class VaultChatHook extends AbstractVaultChat {
         User user = this.permissionHook.lookupUser(uuid);
         Contexts contexts = this.permissionHook.contextForLookup(user, world);
         MetaCache metaData = user.getCachedData().getMetaData(contexts);
-        String ret = metaData.getMetaValue(key, MetaCheckEvent.Origin.THIRD_PARTY_API);
+        String ret = metaData.getMeta(MetaCheckEvent.Origin.THIRD_PARTY_API).get(key);
         if (log()) {
             logMsg("#getUserMeta: %s - %s - %s - %s", user.getPlainDisplayName(), contexts.getContexts().toMultimap(), key, ret);
         }
@@ -211,7 +211,7 @@ public class VaultChatHook extends AbstractVaultChat {
         }
         Contexts contexts = this.permissionHook.contextForLookup(null, world);
         MetaCache metaData = group.getCachedData().getMetaData(contexts);
-        String ret = metaData.getMetaValue(key, MetaCheckEvent.Origin.THIRD_PARTY_API);
+        String ret = metaData.getMeta(MetaCheckEvent.Origin.THIRD_PARTY_API).get(key);
         if (log()) {
             logMsg("#getGroupMeta: %s - %s - %s - %s", group.getName(), contexts.getContexts().toMultimap(), key, ret);
         }

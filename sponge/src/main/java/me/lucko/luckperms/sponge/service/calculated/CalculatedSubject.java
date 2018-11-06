@@ -311,7 +311,7 @@ public abstract class CalculatedSubject implements LPSubject {
     @Override
     public Optional<String> getOption(ImmutableContextSet contexts, String key) {
         Contexts lookupContexts = Contexts.of(contexts, Contexts.global().getSettings());
-        return Optional.ofNullable(this.cachedData.getMetaData(lookupContexts).getMetaValue(key, MetaCheckEvent.Origin.PLATFORM_API));
+        return Optional.ofNullable(this.cachedData.getMetaData(lookupContexts).getMeta(MetaCheckEvent.Origin.PLATFORM_API).get(key));
     }
 
     @Override
