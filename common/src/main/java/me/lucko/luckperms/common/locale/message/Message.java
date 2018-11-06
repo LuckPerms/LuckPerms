@@ -128,7 +128,7 @@ public enum Message {
     /*
      * Commands
      */
-    VERBOSE_INVALID_FILTER("&4{}&c is not a valid verbose filter.", true),
+    VERBOSE_INVALID_FILTER("&4{}&c is not a valid verbose filter. &7({})", true),
     VERBOSE_ON("&bVerbose logging &aenabled &bfor checks matching &aANY&b.", true),
     VERBOSE_ON_QUERY("&bVerbose logging &aenabled &bfor checks matching &a{}&b.", true),
     VERBOSE_OFF("&bVerbose logging &cdisabled&b.", true),
