@@ -3,7 +3,7 @@
 [![Build Status](https://ci.lucko.me/job/LuckPerms/badge/icon)](https://ci.lucko.me/job/LuckPerms/)
 [![Javadocs](https://javadoc.io/badge/me.lucko.luckperms/luckperms-api.svg)](https://javadoc.io/doc/me.lucko.luckperms/luckperms-api)
 [![Maven Central](https://img.shields.io/maven-metadata/v/https/repo1.maven.org/maven2/me/lucko/luckperms/luckperms-api/maven-metadata.xml.svg?label=maven%20central&colorB=brightgreen)](https://search.maven.org/artifact/me.lucko.luckperms/luckperms-api)
-[![Discord](https://img.shields.io/discord/241667244927483904.svg?logo=discord&label=)](https://discord.gg/W3FzxHA)
+[![Discord](https://img.shields.io/discord/241667244927483904.svg?logo=discord&label=)](https://discord.gg/luckperms)
 
 LuckPerms is an advanced permissions implementation aiming to be a fast, reliable and flexible alternative to existing permission plugins. The project's main goals are centered around high performance and a wide feature set, filling the gaps of functionality and building upon existing features found in other plugins.
 
