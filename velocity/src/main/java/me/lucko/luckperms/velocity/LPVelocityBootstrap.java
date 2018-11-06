@@ -185,12 +185,12 @@ public class LPVelocityBootstrap implements LuckPermsBootstrap {
 
     @Override
     public String getServerBrand() {
-        return "Velocity";
+        return this.proxy.getVersion().getName();
     }
 
     @Override
     public String getServerVersion() {
-        return ProxyServer.class.getPackage().getImplementationVersion();
+        return this.proxy.getVersion().getVersion();
     }
 
     @Override
