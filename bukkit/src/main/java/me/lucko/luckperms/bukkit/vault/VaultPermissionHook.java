@@ -40,6 +40,7 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.utils.Uuids;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
@@ -95,6 +96,12 @@ public class VaultPermissionHook extends AbstractVaultPermission {
             return onlinePlayer.getUniqueId();
         }
 
+        // account for plugins that for some reason think it's valid to pass the uuid as a string.
+        UUID uuid = Uuids.parse(player);
+        if (uuid != null) {
+            return uuid;
+        }
+
         // are we on the main thread?
         if (!this.plugin.getBootstrap().isServerStarting() && Bukkit.isPrimaryThread() && !this.plugin.getConfiguration().get(ConfigKeys.VAULT_UNSAFE_LOOKUPS)) {
             throw new RuntimeException(
@@ -109,7 +116,7 @@ public class VaultPermissionHook extends AbstractVaultPermission {
         }
 
         // lookup a username from the database
-        UUID uuid = this.plugin.getStorage().getPlayerUuid(player.toLowerCase()).join();
+        uuid = this.plugin.getStorage().getPlayerUuid(player.toLowerCase()).join();
         if (uuid == null) {
             uuid = this.plugin.getBootstrap().lookupUuid(player).orElse(null);
         }
