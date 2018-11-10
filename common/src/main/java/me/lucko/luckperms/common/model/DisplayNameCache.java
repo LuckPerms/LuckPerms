@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.model;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.nodetype.types.DisplayNameType;
-import me.lucko.luckperms.common.buffers.Cache;
+import me.lucko.luckperms.common.buffer.Cache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 
 import org.checkerframework.checker.nullness.qual.NonNull;

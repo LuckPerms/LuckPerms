@@ -26,7 +26,7 @@
 package me.lucko.luckperms.sponge.service.inheritance;
 
 import me.lucko.luckperms.common.graph.Graph;
-import me.lucko.luckperms.sponge.service.calculated.CalculatedSubject;
+import me.lucko.luckperms.sponge.service.model.calculated.CalculatedSubject;
 
 /**
  * A {@link Graph} which represents an "inheritance tree" for subjects.

@@ -28,9 +28,9 @@ package me.lucko.luckperms.common.model;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.nodetype.types.DisplayNameType;
-import me.lucko.luckperms.common.api.delegates.model.ApiGroup;
-import me.lucko.luckperms.common.buffers.Cache;
-import me.lucko.luckperms.common.caching.GroupCachedData;
+import me.lucko.luckperms.common.api.implementation.ApiGroup;
+import me.lucko.luckperms.common.buffer.Cache;
+import me.lucko.luckperms.common.cacheddata.GroupCachedData;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Optional;

@@ -36,15 +36,15 @@ import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
-import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
-import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
-import me.lucko.luckperms.common.managers.group.GroupManager;
-import me.lucko.luckperms.common.managers.track.TrackManager;
+import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
+import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.UserIdentifier;
+import me.lucko.luckperms.common.model.manager.group.GroupManager;
+import me.lucko.luckperms.common.model.manager.track.TrackManager;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.node.model.NodeDataContainer;
 import me.lucko.luckperms.common.node.model.NodeHeldPermission;
@@ -54,7 +54,7 @@ import me.lucko.luckperms.common.storage.implementation.sql.connection.Connectio
 import me.lucko.luckperms.common.storage.implementation.sql.connection.file.SQLiteConnectionFactory;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.PostgreConnectionFactory;
 import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
-import me.lucko.luckperms.common.utils.gson.GsonProvider;
+import me.lucko.luckperms.common.util.gson.GsonProvider;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

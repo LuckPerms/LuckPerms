@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
-import me.lucko.luckperms.common.utils.ProgressLogger;
-import me.lucko.luckperms.common.utils.Uuids;
+import me.lucko.luckperms.common.util.ProgressLogger;
+import me.lucko.luckperms.common.util.Uuids;
 
 import org.bukkit.Bukkit;
 

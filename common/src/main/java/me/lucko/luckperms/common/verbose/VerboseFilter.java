@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.verbose;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.common.utils.Scripting;
+import me.lucko.luckperms.common.util.Scripting;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.common.verbose.event.VerboseEvent;

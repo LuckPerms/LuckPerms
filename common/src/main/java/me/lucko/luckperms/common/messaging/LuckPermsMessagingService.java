@@ -37,15 +37,15 @@ import me.lucko.luckperms.api.messenger.message.type.LogMessage;
 import me.lucko.luckperms.api.messenger.message.type.UpdateMessage;
 import me.lucko.luckperms.api.messenger.message.type.UserUpdateMessage;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
-import me.lucko.luckperms.common.buffers.BufferedRequest;
+import me.lucko.luckperms.common.buffer.BufferedRequest;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.messaging.message.LogMessageImpl;
 import me.lucko.luckperms.common.messaging.message.UpdateMessageImpl;
 import me.lucko.luckperms.common.messaging.message.UserUpdateMessageImpl;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.gson.GsonProvider;
-import me.lucko.luckperms.common.utils.gson.JObject;
+import me.lucko.luckperms.common.util.gson.GsonProvider;
+import me.lucko.luckperms.common.util.gson.JObject;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;

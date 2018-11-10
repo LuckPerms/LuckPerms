@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.actionlog;
 import com.google.common.collect.ImmutableSortedSet;
 
 import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.common.utils.ImmutableCollectors;
+import me.lucko.luckperms.common.util.ImmutableCollectors;
 
 import java.util.Comparator;
 import java.util.SortedSet;

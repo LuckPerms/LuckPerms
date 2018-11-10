@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.storage.implementation.file;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.Iterators;
+import me.lucko.luckperms.common.util.Iterators;
 
 import java.io.IOException;
 import java.nio.file.Path;

@@ -36,7 +36,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.util.Predicates;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

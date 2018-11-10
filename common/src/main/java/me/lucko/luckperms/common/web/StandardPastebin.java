@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.web;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.common.utils.gson.GsonProvider;
+import me.lucko.luckperms.common.util.gson.GsonProvider;
 
 import okhttp3.MediaType;
 import okhttp3.Request;

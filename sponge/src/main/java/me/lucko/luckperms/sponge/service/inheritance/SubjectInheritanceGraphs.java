@@ -26,7 +26,7 @@
 package me.lucko.luckperms.sponge.service.inheritance;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.sponge.service.calculated.CalculatedSubject;
+import me.lucko.luckperms.sponge.service.model.calculated.CalculatedSubject;
 
 import java.util.stream.Collectors;
 

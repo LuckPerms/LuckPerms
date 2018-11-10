@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.config;
 
-import me.lucko.luckperms.common.api.delegates.misc.ApiConfiguration;
+import me.lucko.luckperms.common.api.implementation.ApiConfiguration;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 

@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.bulkupdate.query;
 
 import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
-import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
+import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.node.model.NodeDataContainer;
 
 /**

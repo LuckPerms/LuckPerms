@@ -26,8 +26,8 @@
 package me.lucko.luckperms.sponge.service.proxy.api7;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.contexts.ContextManager;
-import me.lucko.luckperms.common.contexts.ContextsSupplier;
+import me.lucko.luckperms.common.context.ContextManager;
+import me.lucko.luckperms.common.context.ContextsSupplier;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;

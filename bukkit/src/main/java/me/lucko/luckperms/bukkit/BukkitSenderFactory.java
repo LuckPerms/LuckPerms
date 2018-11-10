@@ -32,7 +32,7 @@ import me.lucko.luckperms.bukkit.compat.SpigotJsonMessageHandler;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.SenderFactory;
-import me.lucko.luckperms.common.utils.TextUtils;
+import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.Component;
 import net.kyori.text.serializer.ComponentSerializers;

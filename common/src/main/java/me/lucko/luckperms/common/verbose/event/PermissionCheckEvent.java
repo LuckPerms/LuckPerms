@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.verbose.event;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.utils.gson.JObject;
+import me.lucko.luckperms.common.util.gson.JObject;
 
 public class PermissionCheckEvent extends VerboseEvent {
 

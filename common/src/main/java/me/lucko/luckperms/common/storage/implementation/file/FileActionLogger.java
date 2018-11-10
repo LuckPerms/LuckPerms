@@ -33,9 +33,9 @@ import com.google.gson.stream.JsonWriter;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LogEntryJsonSerializer;
-import me.lucko.luckperms.common.buffers.BufferedRequest;
+import me.lucko.luckperms.common.buffer.BufferedRequest;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.gson.GsonProvider;
+import me.lucko.luckperms.common.util.gson.GsonProvider;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

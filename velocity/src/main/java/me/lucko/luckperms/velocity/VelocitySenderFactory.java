@@ -32,7 +32,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.SenderFactory;
-import me.lucko.luckperms.common.utils.TextUtils;
+import me.lucko.luckperms.common.util.TextUtils;
 import me.lucko.luckperms.velocity.service.CompatibilityUtil;
 
 import net.kyori.text.Component;

@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.sponge.service.proxy.api7;
 
-import me.lucko.luckperms.common.utils.ImmutableCollectors;
+import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 

@@ -36,9 +36,9 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.api.nodetype.NodeType;
 import me.lucko.luckperms.api.nodetype.NodeTypeKey;
 import me.lucko.luckperms.api.nodetype.types.RegexType;
+import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.node.factory.NodeBuilder;
 import me.lucko.luckperms.common.node.utils.ShorthandParser;
-import me.lucko.luckperms.common.processors.WildcardProcessor;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;

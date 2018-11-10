@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.metastacking;
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
-import me.lucko.luckperms.common.utils.ImmutableCollectors;
+import me.lucko.luckperms.common.util.ImmutableCollectors;
 
 import java.util.LinkedList;
 import java.util.List;

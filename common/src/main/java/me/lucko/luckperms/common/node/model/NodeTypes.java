@@ -37,9 +37,9 @@ import me.lucko.luckperms.api.nodetype.types.PrefixType;
 import me.lucko.luckperms.api.nodetype.types.RegexType;
 import me.lucko.luckperms.api.nodetype.types.SuffixType;
 import me.lucko.luckperms.api.nodetype.types.WeightType;
-import me.lucko.luckperms.common.buffers.Cache;
+import me.lucko.luckperms.common.buffer.Cache;
 import me.lucko.luckperms.common.node.factory.LegacyNodeFactory;
-import me.lucko.luckperms.common.utils.PatternCache;
+import me.lucko.luckperms.common.util.PatternCache;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;

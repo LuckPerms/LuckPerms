@@ -41,10 +41,10 @@ import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.node.model.NodeTypes;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.utils.Iterators;
-import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.ProgressLogger;
-import me.lucko.luckperms.common.utils.Uuids;
+import me.lucko.luckperms.common.util.Iterators;
+import me.lucko.luckperms.common.util.Predicates;
+import me.lucko.luckperms.common.util.ProgressLogger;
+import me.lucko.luckperms.common.util.Uuids;
 
 import org.anjocaido.groupmanager.GlobalGroups;
 import org.anjocaido.groupmanager.GroupManager;

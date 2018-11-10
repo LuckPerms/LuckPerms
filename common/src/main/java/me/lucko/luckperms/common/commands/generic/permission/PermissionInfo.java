@@ -44,10 +44,10 @@ import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.utils.DurationFormatter;
-import me.lucko.luckperms.common.utils.Iterators;
-import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.TextUtils;
+import me.lucko.luckperms.common.util.DurationFormatter;
+import me.lucko.luckperms.common.util.Iterators;
+import me.lucko.luckperms.common.util.Predicates;
+import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.BuildableComponent;
 import net.kyori.text.TextComponent;

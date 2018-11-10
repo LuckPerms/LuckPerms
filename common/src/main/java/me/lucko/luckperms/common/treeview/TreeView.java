@@ -28,10 +28,10 @@ package me.lucko.luckperms.common.treeview;
 import com.google.common.base.Splitter;
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.common.caching.type.PermissionCache;
+import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.utils.gson.JObject;
+import me.lucko.luckperms.common.util.gson.JObject;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.common.web.StandardPastebin;
 

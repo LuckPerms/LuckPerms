@@ -26,8 +26,8 @@
 package me.lucko.luckperms.bukkit.listeners;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.bukkit.model.permissible.LPPermissible;
-import me.lucko.luckperms.bukkit.model.permissible.PermissibleInjector;
+import me.lucko.luckperms.bukkit.inject.permissible.LPPermissible;
+import me.lucko.luckperms.bukkit.inject.permissible.PermissibleInjector;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.User;

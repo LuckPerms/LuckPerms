@@ -27,7 +27,7 @@ package me.lucko.luckperms.sponge.model;
 
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
-import me.lucko.luckperms.sponge.service.internal.GroupSubject;
+import me.lucko.luckperms.sponge.service.model.permissionholder.GroupSubject;
 
 public class SpongeGroup extends Group implements SpongePermissionHolder {
     private final GroupSubject spongeData;

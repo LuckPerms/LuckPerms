@@ -33,15 +33,15 @@ import me.lucko.luckperms.api.PlayerSaveResult;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.actionlog.Log;
-import me.lucko.luckperms.common.api.delegates.model.ApiStorage;
+import me.lucko.luckperms.common.api.implementation.ApiStorage;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.bulkupdate.comparisons.Constraint;
+import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
-import me.lucko.luckperms.common.utils.ThrowingRunnable;
+import me.lucko.luckperms.common.util.ThrowingRunnable;
 
 import java.util.List;
 import java.util.Map;

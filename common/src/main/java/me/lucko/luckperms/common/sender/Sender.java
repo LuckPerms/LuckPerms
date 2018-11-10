@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.sender;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.text.Component;

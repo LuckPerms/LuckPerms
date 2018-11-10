@@ -30,8 +30,8 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
-import me.lucko.luckperms.nukkit.model.permissible.LPPermissible;
-import me.lucko.luckperms.nukkit.model.permissible.PermissibleInjector;
+import me.lucko.luckperms.nukkit.inject.permissible.LPPermissible;
+import me.lucko.luckperms.nukkit.inject.permissible.PermissibleInjector;
 
 import cn.nukkit.Player;
 import cn.nukkit.event.EventHandler;

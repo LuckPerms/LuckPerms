@@ -32,7 +32,7 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
-import me.lucko.luckperms.common.utils.ImmutableCollectors;
+import me.lucko.luckperms.common.util.ImmutableCollectors;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationHandler;

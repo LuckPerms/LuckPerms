@@ -47,7 +47,7 @@ import me.lucko.luckperms.common.storage.implementation.sql.connection.file.SQLi
 import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MariaDbConnectionFactory;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MySqlConnectionFactory;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.PostgreConnectionFactory;
-import me.lucko.luckperms.common.utils.ImmutableCollectors;
+import me.lucko.luckperms.common.util.ImmutableCollectors;
 
 import java.util.Map;
 import java.util.Set;

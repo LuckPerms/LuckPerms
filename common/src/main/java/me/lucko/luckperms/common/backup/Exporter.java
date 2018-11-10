@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.Storage;
-import me.lucko.luckperms.common.utils.ProgressLogger;
+import me.lucko.luckperms.common.util.ProgressLogger;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

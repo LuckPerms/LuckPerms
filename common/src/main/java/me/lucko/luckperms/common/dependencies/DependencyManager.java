@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.dependencies.relocation.Relocation;
 import me.lucko.luckperms.common.dependencies.relocation.RelocationHandler;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
-import me.lucko.luckperms.common.utils.MoreFiles;
+import me.lucko.luckperms.common.util.MoreFiles;
 
 import java.io.IOException;
 import java.io.InputStream;

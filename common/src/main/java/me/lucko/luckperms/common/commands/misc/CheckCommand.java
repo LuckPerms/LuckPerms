@@ -39,8 +39,8 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.Uuids;
+import me.lucko.luckperms.common.util.Predicates;
+import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
 import java.util.List;

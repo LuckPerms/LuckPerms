@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.model;
 
-import me.lucko.luckperms.common.api.delegates.model.ApiUser;
-import me.lucko.luckperms.common.caching.UserCachedData;
+import me.lucko.luckperms.common.api.implementation.ApiUser;
+import me.lucko.luckperms.common.cacheddata.UserCachedData;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.primarygroup.ContextualHolder;

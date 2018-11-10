@@ -27,8 +27,8 @@ package me.lucko.luckperms.sponge.model;
 
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
-import me.lucko.luckperms.sponge.service.internal.UserSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
+import me.lucko.luckperms.sponge.service.model.permissionholder.UserSubject;
 
 import java.util.UUID;
 

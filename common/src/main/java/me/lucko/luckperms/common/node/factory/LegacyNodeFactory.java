@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.node.factory;
 import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.utils.PatternCache;
+import me.lucko.luckperms.common.util.PatternCache;
 
 import java.util.Iterator;
 import java.util.List;

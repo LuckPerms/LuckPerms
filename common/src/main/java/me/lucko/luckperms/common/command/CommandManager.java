@@ -63,7 +63,7 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.utils.TextUtils;
+import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;

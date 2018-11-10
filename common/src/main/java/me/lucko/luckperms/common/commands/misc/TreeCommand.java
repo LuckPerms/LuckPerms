@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import me.lucko.luckperms.common.caching.type.PermissionCache;
+import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -37,8 +37,8 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.treeview.TreeView;
-import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.Uuids;
+import me.lucko.luckperms.common.util.Predicates;
+import me.lucko.luckperms.common.util.Uuids;
 
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;

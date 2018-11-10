@@ -34,8 +34,8 @@ import me.lucko.luckperms.api.TemporaryMergeBehaviour;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.metastacking.DuplicateRemovalFunction;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
-import me.lucko.luckperms.common.assignments.AssignmentRule;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.defaultassignments.AssignmentRule;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
@@ -46,7 +46,7 @@ import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
 import me.lucko.luckperms.common.primarygroup.StoredHolder;
 import me.lucko.luckperms.common.storage.implementation.split.SplitStorageType;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
-import me.lucko.luckperms.common.utils.ImmutableCollectors;
+import me.lucko.luckperms.common.util.ImmutableCollectors;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

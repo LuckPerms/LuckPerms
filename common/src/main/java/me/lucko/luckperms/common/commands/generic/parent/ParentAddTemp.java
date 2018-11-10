@@ -48,8 +48,8 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.utils.DurationFormatter;
-import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.util.DurationFormatter;
+import me.lucko.luckperms.common.util.Predicates;
 
 import java.util.List;
 

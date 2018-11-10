@@ -28,9 +28,9 @@ package me.lucko.luckperms.common.verbose.event;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.utils.StackTracePrinter;
-import me.lucko.luckperms.common.utils.gson.JArray;
-import me.lucko.luckperms.common.utils.gson.JObject;
+import me.lucko.luckperms.common.util.StackTracePrinter;
+import me.lucko.luckperms.common.util.gson.JArray;
+import me.lucko.luckperms.common.util.gson.JObject;
 
 import java.util.Map;
 

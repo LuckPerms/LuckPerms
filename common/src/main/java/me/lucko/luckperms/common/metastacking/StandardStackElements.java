@@ -30,8 +30,8 @@ import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.metastacking.MetaStackElement;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.ImmutableCollectors;
-import me.lucko.luckperms.common.utils.Uuids;
+import me.lucko.luckperms.common.util.ImmutableCollectors;
+import me.lucko.luckperms.common.util.Uuids;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
