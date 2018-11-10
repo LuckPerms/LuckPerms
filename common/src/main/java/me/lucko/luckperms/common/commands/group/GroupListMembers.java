@@ -85,8 +85,13 @@ public class GroupListMembers extends SubCommand<Group> {
 
         Message.SEARCH_SEARCHING_MEMBERS.send(sender, group.getName());
 
-        List<HeldPermission<UUID>> matchedUsers = plugin.getStorage().getUsersWithPermission(constraint).join();
-        List<HeldPermission<String>> matchedGroups = plugin.getStorage().getGroupsWithPermission(constraint).join();
+        List<HeldPermission<UUID>> matchedUsers = plugin.getStorage().getUsersWithPermission(constraint).join().stream()
+                .filter(HeldPermission::getValue)
+                .collect(Collectors.toList());
+
+        List<HeldPermission<String>> matchedGroups = plugin.getStorage().getGroupsWithPermission(constraint).join().stream()
+                .filter(HeldPermission::getValue)
+                .collect(Collectors.toList());
 
         int users = matchedUsers.size();
         int groups = matchedGroups.size();

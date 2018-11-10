@@ -47,7 +47,6 @@ import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class UserInfo extends SubCommand<User> {
@@ -73,15 +72,17 @@ public class UserInfo extends SubCommand<User> {
                 user.getPrimaryGroup().getValue()
         );
 
-        Set<Node> parents = user.enduringData().asSet().stream()
+        List<Node> parents = user.enduringData().asSortedSet().stream()
                 .filter(Node::isGroupNode)
+                .filter(Node::getValue)
                 .filter(Node::isPermanent)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
 
-        Set<Node> tempParents = user.enduringData().asSet().stream()
+        List<Node> tempParents = user.enduringData().asSortedSet().stream()
                 .filter(Node::isGroupNode)
+                .filter(Node::getValue)
                 .filter(Node::isTemporary)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
 
         if (!parents.isEmpty()) {
             Message.INFO_PARENT_HEADER.send(sender);
