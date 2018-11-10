@@ -52,7 +52,7 @@ subprojects {
     project.ext.fullVersion = project.ext.majorVersion + '.' + project.ext.minorVersion + '.' + project.ext.patchVersion
 
     license {
-        header = rootProject.file('LICENSE_HEADER.txt')
+        header = rootProject.file('HEADER.txt')
         include '**/*.java'
         newLine = true
     }

@@ -184,7 +184,7 @@ public class Importer implements Runnable {
         AtomicInteger errIndex = new AtomicInteger(1);
         for (ImportCommand e : this.commands) {
             if (e.getResult() != null && e.getResult().wasFailure()) {
-                for (Sender s : notify) {
+                for (Sender s : this.notify) {
                     Message.IMPORT_END_ERROR_HEADER.send(s, errIndex.get(), e.getId(), e.getCommand(), e.getResult().toString());
                     e.getOutput().forEach(out -> Message.IMPORT_END_ERROR_CONTENT.send(s, out));
                     Message.IMPORT_END_ERROR_FOOTER.send(s);

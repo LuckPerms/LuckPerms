@@ -103,7 +103,7 @@ public final class EventFactory {
         return this.eventBus;
     }
 
-    private boolean shouldPost(Class<? extends LuckPermsEvent> eventClass){
+    private boolean shouldPost(Class<? extends LuckPermsEvent> eventClass) {
         return this.eventBus.shouldPost(eventClass);
     }
 
