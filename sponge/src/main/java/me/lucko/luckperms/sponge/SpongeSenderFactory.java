@@ -26,8 +26,8 @@
 package me.lucko.luckperms.sponge;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 
@@ -50,7 +50,7 @@ public class SpongeSenderFactory extends SenderFactory<CommandSource> {
         if (source instanceof Player) {
             return source.getName();
         }
-        return CommandManager.CONSOLE_NAME;
+        return Sender.CONSOLE_NAME;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class SpongeSenderFactory extends SenderFactory<CommandSource> {
         if (source instanceof Player) {
             return ((Player) source).getUniqueId();
         }
-        return CommandManager.CONSOLE_UUID;
+        return Sender.CONSOLE_UUID;
     }
 
     @Override

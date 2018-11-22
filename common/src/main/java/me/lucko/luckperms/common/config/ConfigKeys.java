@@ -56,7 +56,6 @@ import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import static me.lucko.luckperms.common.config.ConfigKeyTypes.booleanKey;
@@ -535,12 +534,14 @@ public final class ConfigKeys {
      */
     public static final ConfigKey<String> TREE_VIEWER_URL_PATTERN = stringKey("tree-viewer-url", "https://luckperms.github.io/treeview/");
 
-    private static final AtomicInteger ORDINAL_COUNTER = new AtomicInteger(0);
     private static final Map<String, ConfigKey<?>> KEYS;
+    private static final int SIZE;
 
     static {
         Map<String, ConfigKey<?>> keys = new LinkedHashMap<>();
         Field[] values = ConfigKeys.class.getFields();
+        int i = 0;
+
         for (Field f : values) {
             // ignore non-static fields
             if (!Modifier.isStatic(f.getModifiers())) {
@@ -556,14 +557,16 @@ public final class ConfigKeys {
                 // get the key instance
                 ConfigKeyTypes.BaseConfigKey<?> key = (ConfigKeyTypes.BaseConfigKey<?>) f.get(null);
                 // set the ordinal value of the key.
-                key.ordinal = ORDINAL_COUNTER.getAndIncrement();
+                key.ordinal = i++;
                 // add the key to the return map
                 keys.put(f.getName(), key);
-            } catch (IllegalAccessException e) {
+            } catch (Exception e) {
                 throw new RuntimeException("Exception processing field: " + f, e);
             }
         }
+
         KEYS = ImmutableMap.copyOf(keys);
+        SIZE = i;
     }
 
     /**
@@ -584,7 +587,7 @@ public final class ConfigKeys {
      * @return how many keys are defined in this class
      */
     public static int size() {
-        return ORDINAL_COUNTER.get();
+        return SIZE;
     }
 
     private ConfigKeys() {}

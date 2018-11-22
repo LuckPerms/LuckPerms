@@ -29,6 +29,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.context.ContextManager;
+import me.lucko.luckperms.common.context.ContextSetFormatter;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.text.Component;
@@ -39,6 +40,15 @@ import java.util.UUID;
  * Wrapper interface to represent a CommandSender/CommandSource within the common command implementations.
  */
 public interface Sender {
+
+    /** The uuid used by the console sender. */
+    UUID CONSOLE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    /** The name used by the console sender. */
+    String CONSOLE_NAME = "Console";
+    /** The uuid used by the 'import' sender. */
+    UUID IMPORT_UUID = UUID.fromString("11111111-1111-1111-1111-111111111111");
+    /** The name used by the 'import' sender. */
+    String IMPORT_NAME = "Import";
 
     /**
      * Gets the plugin instance the sender is from.
@@ -68,8 +78,7 @@ public interface Sender {
             return name;
         }
 
-
-        String location = contextManager.getStaticContextString().orElse(null);
+        String location = ContextSetFormatter.toMinimalString(contextManager.getStaticContext()).orElse(null);
         if (location == null) {
             return name;
         }
@@ -82,16 +91,20 @@ public interface Sender {
     }
 
     /**
-     * Gets the sender's unique id. See {@link CommandManager#CONSOLE_UUID} for the console's UUID representation.
+     * Gets the sender's unique id.
+     *
+     * <p>See {@link #CONSOLE_UUID} for the console's UUID representation.</p>
      *
      * @return the sender's uuid
      */
     UUID getUuid();
 
     /**
-     * Send a message back to the Sender
+     * Send a message to the Sender.
      *
-     * @param message the message to send. Supports '§' for message formatting.
+     * <p>Supports {@link CommandManager#SECTION_CHAR} for message formatting.</p>
+     *
+     * @param message the message to send.
      */
     void sendMessage(String message);
 
@@ -134,7 +147,7 @@ public interface Sender {
      * @return if the sender is the console
      */
     default boolean isConsole() {
-        return CommandManager.CONSOLE_UUID.equals(getUuid()) || CommandManager.IMPORT_UUID.equals(getUuid());
+        return CONSOLE_UUID.equals(getUuid()) || IMPORT_UUID.equals(getUuid());
     }
 
     /**
@@ -143,7 +156,7 @@ public interface Sender {
      * @return if the sender is an import process
      */
     default boolean isImport() {
-        return CommandManager.IMPORT_UUID.equals(getUuid());
+        return IMPORT_UUID.equals(getUuid());
     }
 
     /**

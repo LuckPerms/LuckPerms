@@ -26,8 +26,8 @@
 package me.lucko.luckperms.nukkit;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.common.util.TextUtils;
 
@@ -49,7 +49,7 @@ public class NukkitSenderFactory extends SenderFactory<CommandSender> {
         if (sender instanceof Player) {
             return sender.getName();
         }
-        return CommandManager.CONSOLE_NAME;
+        return Sender.CONSOLE_NAME;
     }
 
     @Override
@@ -57,7 +57,7 @@ public class NukkitSenderFactory extends SenderFactory<CommandSender> {
         if (sender instanceof Player) {
             return ((Player) sender).getUniqueId();
         }
-        return CommandManager.CONSOLE_UUID;
+        return Sender.CONSOLE_UUID;
     }
 
     @Override

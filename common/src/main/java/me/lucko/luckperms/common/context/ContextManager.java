@@ -40,12 +40,8 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * Base implementation of {@link ContextManager} which caches content lookups.
@@ -141,29 +137,6 @@ public abstract class ContextManager<T> {
      */
     public Contexts getStaticContexts() {
         return this.staticLookupCache.get();
-    }
-
-    /**
-     * Returns a string form of the managers static context
-     *
-     * <p>Returns an empty optional if the set is empty.</p>
-     *
-     * @return a string representation of {@link #getStaticContext()}
-     */
-    public Optional<String> getStaticContextString() {
-        Set<Map.Entry<String, String>> entries = getStaticContext().toSet();
-        if (entries.isEmpty()) {
-            return Optional.empty();
-        }
-
-        // effectively: if entries contains any non-server keys
-        if (entries.stream().anyMatch(pair -> !pair.getKey().equals(Contexts.SERVER_KEY))) {
-            // return all entries in 'key=value' form
-            return Optional.of(entries.stream().map(pair -> pair.getKey() + "=" + pair.getValue()).collect(Collectors.joining(";")));
-        } else {
-            // just return the server ids, without the 'server='
-            return Optional.of(entries.stream().map(Map.Entry::getValue).collect(Collectors.joining(";")));
-        }
     }
 
     /**

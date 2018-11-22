@@ -75,7 +75,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -85,12 +84,6 @@ import java.util.stream.Collectors;
 
 public class CommandManager {
     public static final Pattern COMMAND_SEPARATOR_PATTERN = Pattern.compile(" (?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
-
-    public static final UUID CONSOLE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
-    public static final String CONSOLE_NAME = "Console";
-
-    public static final UUID IMPORT_UUID = UUID.fromString("11111111-1111-1111-1111-111111111111");
-    public static final String IMPORT_NAME = "Import";
 
     public static final char SECTION_CHAR = '\u00A7'; // §
     public static final char AMPERSAND_CHAR = '&';

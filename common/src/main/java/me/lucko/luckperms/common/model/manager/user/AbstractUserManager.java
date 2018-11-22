@@ -25,6 +25,9 @@
 
 package me.lucko.luckperms.common.model.manager.user;
 
+import com.google.common.collect.ImmutableCollection;
+
+import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -167,25 +170,25 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
      */
     @Override
     public boolean shouldSave(User user) {
-        if (user.enduringData().immutable().size() != 1) {
+        ImmutableCollection<LocalizedNode> nodes = user.enduringData().immutable().values();
+        if (nodes.size() != 1) {
             return true;
         }
 
-        for (Node node : user.enduringData().immutable().values()) {
-            // There's only one.
-            if (!node.isGroupNode()) {
-                return true;
-            }
-
-            if (node.isTemporary() || node.isServerSpecific() || node.isWorldSpecific()) {
-                return true;
-            }
-
-            if (!node.getGroupName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
-                // The user's only node is not the default group one.
-                return true;
-            }
+        LocalizedNode onlyNode = nodes.iterator().next();
+        if (!onlyNode.isGroupNode()) {
+            return true;
         }
+
+        if (onlyNode.isTemporary() || onlyNode.isServerSpecific() || onlyNode.isWorldSpecific()) {
+            return true;
+        }
+
+        if (!onlyNode.getGroupName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
+            // The user's only node is not the default group one.
+            return true;
+        }
+
 
         // Not in the default primary group
         return !user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME);

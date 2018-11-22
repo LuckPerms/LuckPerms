@@ -29,7 +29,6 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
-import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
@@ -257,7 +256,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     @Override
     public Sender getConsoleSender() {
         if (!this.bootstrap.getGame().isServerAvailable()) {
-            return new DummySender(this, CommandManager.CONSOLE_UUID, CommandManager.CONSOLE_NAME) {
+            return new DummySender(this, Sender.CONSOLE_UUID, Sender.CONSOLE_NAME) {
                 @Override
                 protected void consumeMessage(String s) {
                     LPSpongePlugin.this.bootstrap.getPluginLogger().info(s);

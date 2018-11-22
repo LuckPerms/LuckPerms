@@ -23,20 +23,33 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.plugin.logging;
+package me.lucko.luckperms.common.context;
 
-/**
- * Represents the logger instance being used by LuckPerms on the platform.
- *
- * <p>Messages sent using the logger are sent prefixed with the LuckPerms tag,
- * and on some implementations will be colored depending on the message type.</p>
- */
-public interface PluginLogger {
+import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.context.ContextSet;
 
-    void info(String s);
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-    void warn(String s);
+public final class ContextSetFormatter {
+    private ContextSetFormatter() {}
 
-    void severe(String s);
+    public static Optional<String> toMinimalString(ContextSet contextSet) {
+        Set<Map.Entry<String, String>> entries = contextSet.toSet();
+        if (entries.isEmpty()) {
+            return Optional.empty();
+        }
+
+        // effectively: if entries contains any non-server keys
+        if (entries.stream().anyMatch(pair -> !pair.getKey().equals(Contexts.SERVER_KEY))) {
+            // return all entries in 'key=value' form
+            return Optional.of(entries.stream().map(pair -> pair.getKey() + "=" + pair.getValue()).collect(Collectors.joining(";")));
+        } else {
+            // just return the server ids, without the 'server='
+            return Optional.of(entries.stream().map(Map.Entry::getValue).collect(Collectors.joining(";")));
+        }
+    }
 
 }

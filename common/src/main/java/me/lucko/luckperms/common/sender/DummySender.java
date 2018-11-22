@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.sender;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.TextUtils;
 
@@ -47,7 +46,7 @@ public abstract class DummySender implements Sender {
     }
 
     public DummySender(LuckPermsPlugin plugin) {
-        this(plugin, CommandManager.IMPORT_UUID, CommandManager.IMPORT_NAME);
+        this(plugin, Sender.IMPORT_UUID, Sender.IMPORT_NAME);
     }
 
     protected abstract void consumeMessage(String s);
