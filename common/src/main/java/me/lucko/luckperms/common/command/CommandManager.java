@@ -156,6 +156,10 @@ public class CommandManager {
         }, executor);
     }
 
+    public boolean hasPermissionForAny(Sender sender) {
+        return this.mainCommands.stream().anyMatch(c -> c.shouldDisplay() && c.isAuthorized(sender));
+    }
+
     @SuppressWarnings("unchecked")
     private CommandResult execute(Sender sender, String label, List<String> args) {
         List<String> arguments = new ArrayList<>(args);
@@ -164,8 +168,9 @@ public class CommandManager {
         // Handle no arguments
         if (arguments.isEmpty() || (arguments.size() == 1 && arguments.get(0).trim().isEmpty())) {
             MessageUtils.sendPluginMessage(sender, "&2Running &bLuckPerms v" + this.plugin.getBootstrap().getVersion() + "&2.");
-            if (this.mainCommands.stream().anyMatch(c -> c.shouldDisplay() && c.isAuthorized(sender))) {
+            if (hasPermissionForAny(sender)) {
                 Message.VIEW_AVAILABLE_COMMANDS_PROMPT.send(sender, label);
+                return CommandResult.SUCCESS;
             } else {
                 Collection<? extends Group> groups = this.plugin.getGroupManager().getAll().values();
                 if (groups.size() <= 1 && groups.stream().allMatch(g -> g.getOwnNodes().isEmpty())) {
@@ -173,8 +178,8 @@ public class CommandManager {
                 } else {
                     Message.NO_PERMISSION_FOR_SUBCOMMANDS.send(sender);
                 }
+                return CommandResult.NO_PERMISSION;
             }
-            return CommandResult.INVALID_ARGS;
         }
 
         // Look for the main command.

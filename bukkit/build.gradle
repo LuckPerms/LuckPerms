@@ -12,7 +12,7 @@ repositories {
 dependencies {
     compile project(':common')
 
-    compileOnly 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
+    compileOnly 'org.spigotmc:spigot-api:1.13.2-R0.1-SNAPSHOT'
     compileOnly 'me.lucko:commodore:1.0'
     compileOnly('net.milkbowl.vault:VaultAPI:1.6') {
         exclude(module: 'bukkit')

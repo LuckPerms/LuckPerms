@@ -40,8 +40,13 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import me.lucko.commodore.Commodore;
 import me.lucko.commodore.CommodoreProvider;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
+import me.lucko.luckperms.common.sender.Sender;
 
 import org.bukkit.command.Command;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandSendEvent;
+import org.bukkit.plugin.PluginManager;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -53,6 +58,7 @@ import java.util.zip.GZIPInputStream;
 public class LuckPermsBrigadier {
 
     public static void register(LPBukkitPlugin plugin, Command pluginCommand) throws Exception {
+        // register completions with commodore
         Commodore commodore = CommodoreProvider.getCommodore(plugin.getBootstrap());
         try (InputStream is = plugin.getBootstrap().getResourceStream("luckperms-brigadier.json.gz")) {
             if (is == null) {
@@ -63,6 +69,30 @@ public class LuckPermsBrigadier {
                 JsonObject data = new JsonParser().parse(reader).getAsJsonObject();
                 LiteralArgumentBuilder command = deserializeLiteral(data);
                 commodore.register(pluginCommand, command);
+            }
+        }
+
+        // add event listener to prevent completions from being send to players without permission
+        // to use any LP commands.
+        PluginManager pluginManager = plugin.getBootstrap().getServer().getPluginManager();
+        pluginManager.registerEvents(new PermissionListener(plugin, pluginCommand), plugin.getBootstrap());
+    }
+
+    private static final class PermissionListener implements Listener {
+        private final LPBukkitPlugin plugin;
+        private final Command pluginCommand;
+
+        private PermissionListener(LPBukkitPlugin plugin, Command pluginCommand) {
+            this.plugin = plugin;
+            this.pluginCommand = pluginCommand;
+        }
+
+        @EventHandler
+        public void onCommandSend(PlayerCommandSendEvent e) {
+            Sender playerAsSender = this.plugin.getSenderFactory().wrap(e.getPlayer());
+            if (!this.plugin.getCommandManager().hasPermissionForAny(playerAsSender)) {
+                e.getCommands().remove(this.pluginCommand.getLabel());
+                e.getCommands().removeAll(this.pluginCommand.getAliases());
             }
         }
     }
