@@ -53,7 +53,7 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
                     project {
                         name 'LuckPerms API'
                         description 'An advanced permissions plugin for Bukkit/Spigot, BungeeCord, Sponge, Nukkit and Velocity.'
-                        url 'https://github.com/lucko/LuckPerms'
+                        url 'https://luckperms.github.io'
 
                         licenses {
                             license {
@@ -74,7 +74,6 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
                             connection 'scm:git:https://github.com/lucko/LuckPerms.git'
                             developerConnection 'scm:git:git@github.com:lucko/LuckPerms.git'
                             url 'https://github.com/lucko/LuckPerms'
-
                         }
 
                         ciManagement {
