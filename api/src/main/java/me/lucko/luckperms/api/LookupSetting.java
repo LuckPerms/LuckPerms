@@ -25,6 +25,9 @@
 
 package me.lucko.luckperms.api;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 /**
  * The various lookup setting flags for {@link Contexts}.
  *
@@ -60,5 +63,62 @@ public enum LookupSetting {
     /**
      * If global or non-world-specific group memberships should be applied
      */
-    APPLY_PARENTS_SET_WITHOUT_WORLD
+    APPLY_PARENTS_SET_WITHOUT_WORLD;
+
+
+
+    /* bitwise utility methods */
+
+    static boolean isSet(byte b, LookupSetting setting) {
+        return ((b >> setting.ordinal()) & 1) == 1;
+    }
+
+    static byte createFlag(LookupSetting... settings) {
+        byte b = 0;
+        for (LookupSetting setting : settings) {
+            b |= (1 << setting.ordinal());
+        }
+        return b;
+    }
+
+    static byte createFlag(Set<LookupSetting> settings) {
+        byte b = 0;
+        for (LookupSetting setting : settings) {
+            b |= (1 << setting.ordinal());
+        }
+        return b;
+    }
+
+    static Set<LookupSetting> createSetFromFlag(byte b) {
+        EnumSet<LookupSetting> settings = EnumSet.noneOf(LookupSetting.class);
+        for (LookupSetting setting : LookupSetting.values()) {
+            if (((b >> setting.ordinal()) & 1) == 1) {
+                settings.add(setting);
+            }
+        }
+        return settings;
+    }
+
+    static byte createFlag(boolean includeNodesSetWithoutServer, boolean includeNodesSetWithoutWorld, boolean resolveInheritance, boolean applyParentsWithoutServer, boolean applyParentsWithoutWorld, boolean isOp) {
+        byte b = 0;
+        if (includeNodesSetWithoutServer) {
+            b |= (1 << LookupSetting.INCLUDE_NODES_SET_WITHOUT_SERVER.ordinal());
+        }
+        if (includeNodesSetWithoutWorld) {
+            b |= (1 << LookupSetting.INCLUDE_NODES_SET_WITHOUT_WORLD.ordinal());
+        }
+        if (resolveInheritance) {
+            b |= (1 << LookupSetting.RESOLVE_INHERITANCE.ordinal());
+        }
+        if (applyParentsWithoutServer) {
+            b |= (1 << LookupSetting.APPLY_PARENTS_SET_WITHOUT_SERVER.ordinal());
+        }
+        if (applyParentsWithoutWorld) {
+            b |= (1 << LookupSetting.APPLY_PARENTS_SET_WITHOUT_WORLD.ordinal());
+        }
+        if (isOp) {
+            b |= (1 << LookupSetting.IS_OP.ordinal());
+        }
+        return b;
+    }
 }

@@ -25,14 +25,11 @@
 
 package me.lucko.luckperms.api;
 
-import com.google.common.collect.ImmutableSet;
-
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -57,9 +54,9 @@ public class Contexts {
     public static final String WORLD_KEY = "world";
 
     /**
-     * The default {@link LookupSetting}s.
+     * The default {@link LookupSetting}s as a flag.
      */
-    private static final EnumSet<LookupSetting> DEFAULT_SETTINGS = EnumSet.of(
+    private static final byte DEFAULT_SETTINGS_FLAG = LookupSetting.createFlag(
             LookupSetting.INCLUDE_NODES_SET_WITHOUT_SERVER,
             LookupSetting.INCLUDE_NODES_SET_WITHOUT_WORLD,
             LookupSetting.RESOLVE_INHERITANCE,
@@ -73,7 +70,7 @@ public class Contexts {
      * <p>Formed of an empty {@link ContextSet} and all inclusion and
      * inheritance {@link LookupSetting}s applied.</p>
      */
-    private static final Contexts GLOBAL = new Contexts(ImmutableContextSet.empty(), ImmutableSet.copyOf(DEFAULT_SETTINGS));
+    private static final Contexts GLOBAL = new Contexts(ImmutableContextSet.empty(), DEFAULT_SETTINGS_FLAG);
 
     /**
      * Gets the {@link FullySatisfiedContexts} instance.
@@ -111,7 +108,7 @@ public class Contexts {
      */
     public static @NonNull Contexts of(@NonNull ContextSet contextSet, boolean includeNodesSetWithoutServer, boolean includeNodesSetWithoutWorld, boolean resolveInheritance, boolean applyParentsWithoutServer, boolean applyParentsWithoutWorld, boolean isOp) {
         Objects.requireNonNull(contextSet, "contextSet");
-        EnumSet<LookupSetting> settings = formSettings(
+        byte settingsFlag = LookupSetting.createFlag(
                 includeNodesSetWithoutServer,
                 includeNodesSetWithoutWorld,
                 resolveInheritance,
@@ -119,18 +116,10 @@ public class Contexts {
                 applyParentsWithoutWorld,
                 isOp
         );
-        if (contextSet.isEmpty() && DEFAULT_SETTINGS.equals(settings)) {
+        if (contextSet.isEmpty() && DEFAULT_SETTINGS_FLAG == settingsFlag) {
             return GLOBAL;
         }
-        return new Contexts(contextSet.makeImmutable(), ImmutableSet.copyOf(settings));
-    }
-
-    private static EnumSet<LookupSetting> asEnumSet(Set<LookupSetting> settings) {
-        if (settings instanceof EnumSet<?>) {
-            return ((EnumSet<LookupSetting>) settings);
-        } else {
-            return EnumSet.copyOf(settings);
-        }
+        return new Contexts(contextSet.makeImmutable(), settingsFlag);
     }
 
     /**
@@ -144,12 +133,12 @@ public class Contexts {
         Objects.requireNonNull(contextSet, "contextSet");
         Objects.requireNonNull(settings, "settings");
 
-        EnumSet<LookupSetting> settingsCopy = asEnumSet(settings);
-        if (contextSet.isEmpty() && DEFAULT_SETTINGS.equals(settingsCopy)) {
+        byte settingsFlag = LookupSetting.createFlag(settings);
+        if (contextSet.isEmpty() && DEFAULT_SETTINGS_FLAG == settingsFlag) {
             return GLOBAL;
         }
 
-        return new Contexts(contextSet.makeImmutable(), ImmutableSet.copyOf(settingsCopy));
+        return new Contexts(contextSet.makeImmutable(), settingsFlag);
     }
 
     /**
@@ -160,7 +149,7 @@ public class Contexts {
     /**
      * The settings for this lookup
      */
-    private final ImmutableSet<LookupSetting> settings;
+    private final byte settingsFlag;
 
     // cache hashcode - this class is immutable, and is used as an index in the permission cache.
     private final int hashCode;
@@ -180,20 +169,20 @@ public class Contexts {
     @Deprecated
     public Contexts(@NonNull ContextSet contextSet, boolean includeNodesSetWithoutServer, boolean includeNodesSetWithoutWorld, boolean resolveInheritance, boolean applyParentsWithoutServer, boolean applyParentsWithoutWorld, boolean isOp) {
         this.contextSet = Objects.requireNonNull(contextSet, "contextSet").makeImmutable();
-        this.settings = ImmutableSet.copyOf(formSettings(
+        this.settingsFlag = LookupSetting.createFlag(
                 includeNodesSetWithoutServer,
                 includeNodesSetWithoutWorld,
                 resolveInheritance,
                 applyParentsWithoutServer,
                 applyParentsWithoutWorld,
                 isOp
-        ));
+        );
         this.hashCode = calculateHashCode();
     }
 
-    protected Contexts(@NonNull ImmutableContextSet contextSet, @NonNull ImmutableSet<LookupSetting> settings) {
+    protected Contexts(@NonNull ImmutableContextSet contextSet, byte settingsFlag) {
         this.contextSet = contextSet;
-        this.settings = settings;
+        this.settingsFlag = settingsFlag;
         this.hashCode = calculateHashCode();
     }
 
@@ -214,7 +203,7 @@ public class Contexts {
      * @since 4.2
      */
     public @NonNull Set<LookupSetting> getSettings() {
-        return this.settings;
+        return LookupSetting.createSetFromFlag(this.settingsFlag);
     }
 
     /**
@@ -225,7 +214,7 @@ public class Contexts {
      * @since 4.2
      */
     public boolean hasSetting(@NonNull LookupSetting setting) {
-        return this.settings.contains(setting);
+        return LookupSetting.isSet(this.settingsFlag, setting);
     }
 
     /**
@@ -302,7 +291,7 @@ public class Contexts {
 
     @Override
     public @NonNull String toString() {
-        return "Contexts(contextSet=" + this.contextSet + ", settings=" + this.settings + ")";
+        return "Contexts(contextSet=" + this.contextSet + ", settings=" + LookupSetting.createSetFromFlag(this.settingsFlag) + ")";
     }
 
     @Override
@@ -311,43 +300,20 @@ public class Contexts {
         if (o == allowAll()) return false;
         if (!(o instanceof Contexts)) return false;
         final Contexts that = (Contexts) o;
-        return this.contextSet.equals(that.contextSet) && this.settings.equals(that.settings);
+        return this.contextSet.equals(that.contextSet) && this.settingsFlag == that.settingsFlag;
     }
 
     private int calculateHashCode() {
         final int PRIME = 59;
         int result = 1;
         result = result * PRIME + this.contextSet.hashCode();
-        result = result * PRIME + this.settings.hashCode();
+        result = result * PRIME + this.settingsFlag;
         return result;
     }
 
     @Override
     public int hashCode() {
         return this.hashCode;
-    }
-
-    private static EnumSet<LookupSetting> formSettings(boolean includeNodesSetWithoutServer, boolean includeNodesSetWithoutWorld, boolean resolveInheritance, boolean applyParentsWithoutServer, boolean applyParentsWithoutWorld, boolean isOp) {
-        EnumSet<LookupSetting> settings = EnumSet.noneOf(LookupSetting.class);
-        if (includeNodesSetWithoutServer) {
-            settings.add(LookupSetting.INCLUDE_NODES_SET_WITHOUT_SERVER);
-        }
-        if (includeNodesSetWithoutWorld) {
-            settings.add(LookupSetting.INCLUDE_NODES_SET_WITHOUT_WORLD);
-        }
-        if (resolveInheritance) {
-            settings.add(LookupSetting.RESOLVE_INHERITANCE);
-        }
-        if (applyParentsWithoutServer) {
-            settings.add(LookupSetting.APPLY_PARENTS_SET_WITHOUT_SERVER);
-        }
-        if (applyParentsWithoutWorld) {
-            settings.add(LookupSetting.APPLY_PARENTS_SET_WITHOUT_WORLD);
-        }
-        if (isOp) {
-            settings.add(LookupSetting.IS_OP);
-        }
-        return settings;
     }
 
 }
