@@ -75,6 +75,10 @@ public abstract class AbstractCachedData implements CachedData {
             .expireAfterAccess(2, TimeUnit.MINUTES)
             .buildAsync(new MetaCacheLoader());
 
+    // cache the most recent lookup.
+    private RecentPermissionData recentPermissionData = null;
+    private RecentMetaData recentMetaData = null;
+
     public AbstractCachedData(LuckPermsPlugin plugin) {
         this.plugin = plugin;
     }
@@ -192,16 +196,32 @@ public abstract class AbstractCachedData implements CachedData {
     public final @NonNull PermissionCache getPermissionData(@NonNull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
 
+        RecentPermissionData recent = this.recentPermissionData;
+        if (recent != null && contexts.equals(recent.contexts)) {
+            return recent.permissionData;
+        }
+
+        PermissionCache data = this.permission.synchronous().get(contexts);
+        this.recentPermissionData = new RecentPermissionData(contexts, data);
+
         //noinspection ConstantConditions
-        return this.permission.synchronous().get(contexts);
+        return data;
     }
 
     @Override
     public final @NonNull MetaCache getMetaData(@NonNull MetaContexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
 
+        RecentMetaData recent = this.recentMetaData;
+        if (recent != null && contexts.equals(recent.contexts)) {
+            return recent.metaData;
+        }
+
+        MetaCache data = this.meta.synchronous().get(contexts);
+        this.recentMetaData = new RecentMetaData(contexts, data);
+
         //noinspection ConstantConditions
-        return this.meta.synchronous().get(contexts);
+        return data;
     }
 
     @Override
@@ -232,12 +252,14 @@ public abstract class AbstractCachedData implements CachedData {
     public final void recalculatePermissions(@NonNull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
         this.permission.synchronous().refresh(contexts);
+        this.recentPermissionData = null;
     }
 
     @Override
     public final void recalculateMeta(@NonNull MetaContexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
         this.meta.synchronous().refresh(contexts);
+        this.recentMetaData = null;
     }
 
     @Override
@@ -255,6 +277,7 @@ public abstract class AbstractCachedData implements CachedData {
 
         // invalidate any previous setting
         this.permission.synchronous().invalidate(contexts);
+        this.recentPermissionData = null;
 
         // if the previous value is already calculated, use it when recalculating.
         PermissionCache value = getIfReady(previous);
@@ -275,6 +298,7 @@ public abstract class AbstractCachedData implements CachedData {
 
         // invalidate any previous setting
         this.meta.synchronous().invalidate(contexts);
+        this.recentMetaData = null;
 
         // if the previous value is already calculated, use it when recalculating.
         MetaCache value = getIfReady(previous);
@@ -320,28 +344,33 @@ public abstract class AbstractCachedData implements CachedData {
     public final void invalidatePermissions(@NonNull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
         this.permission.synchronous().invalidate(contexts);
+        this.recentPermissionData = null;
     }
 
     @Override
     public final void invalidateMeta(@NonNull MetaContexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
         this.meta.synchronous().invalidate(contexts);
+        this.recentMetaData = null;
     }
 
     @Override
     public final void invalidateMeta(@NonNull Contexts contexts) {
         Objects.requireNonNull(contexts, "contexts");
         this.meta.synchronous().invalidate(getDefaultMetaContexts(contexts));
+        this.recentMetaData = null;
     }
 
     @Override
     public final void invalidatePermissions() {
         this.permission.synchronous().invalidateAll();
+        this.recentPermissionData = null;
     }
 
     @Override
     public final void invalidateMeta() {
         this.meta.synchronous().invalidateAll();
+        this.recentMetaData = null;
     }
 
     @Override
@@ -399,6 +428,26 @@ public abstract class AbstractCachedData implements CachedData {
                 new SimpleMetaStack(contexts.getPrefixStackDefinition(), ChatMetaType.PREFIX),
                 new SimpleMetaStack(contexts.getSuffixStackDefinition(), ChatMetaType.SUFFIX)
         );
+    }
+
+    private static final class RecentPermissionData {
+        final Contexts contexts;
+        final PermissionCache permissionData;
+
+        RecentPermissionData(Contexts contexts, PermissionCache permissionData) {
+            this.contexts = contexts;
+            this.permissionData = permissionData;
+        }
+    }
+
+    private static final class RecentMetaData {
+        final MetaContexts contexts;
+        final MetaCache metaData;
+
+        RecentMetaData(MetaContexts contexts, MetaCache metaData) {
+            this.contexts = contexts;
+            this.metaData = metaData;
+        }
     }
 
 }
