@@ -25,26 +25,25 @@
 
 package me.lucko.luckperms.common.calculator;
 
-import com.github.benmanes.caffeine.cache.CacheLoader;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.util.LoadingMap;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * Calculates and caches permissions
  */
-public class PermissionCalculator implements CacheLoader<String, Tristate> {
+public class PermissionCalculator implements Function<String, Tristate> {
 
     /**
      * The plugin instance
@@ -64,7 +63,7 @@ public class PermissionCalculator implements CacheLoader<String, Tristate> {
     /**
      * Loading cache for permission checks
      */
-    private final LoadingCache<String, Tristate> lookupCache = Caffeine.newBuilder().build(this);
+    private final LoadingMap<String, Tristate> lookupCache = LoadingMap.of(this);
 
     public PermissionCalculator(LuckPermsPlugin plugin, CacheMetadata metadata, ImmutableList<PermissionProcessor> processors) {
         this.plugin = plugin;
@@ -97,7 +96,7 @@ public class PermissionCalculator implements CacheLoader<String, Tristate> {
     }
 
     @Override
-    public Tristate load(@NonNull String permission) {
+    public Tristate apply(@NonNull String permission) {
         // offer the permission to the permission vault
         // we only need to do this once per permission, so it doesn't matter
         // that this call is behind the cache.
@@ -131,6 +130,6 @@ public class PermissionCalculator implements CacheLoader<String, Tristate> {
     }
 
     public void invalidateCache() {
-        this.lookupCache.invalidateAll();
+        this.lookupCache.clear();
     }
 }
