@@ -81,10 +81,6 @@ public class PermissionCalculator implements Function<String, Tristate> {
      * @return the result
      */
     public Tristate getPermissionValue(String permission, PermissionCheckEvent.Origin origin) {
-        // convert the permission to lowercase, as all values in the backing map are also lowercase.
-        // this allows fast case insensitive lookups
-        permission = permission.toLowerCase();
-
         // get the result
         Tristate result = this.lookupCache.get(permission);
 
@@ -97,6 +93,10 @@ public class PermissionCalculator implements Function<String, Tristate> {
 
     @Override
     public Tristate apply(@NonNull String permission) {
+        // convert the permission to lowercase, as all values in the backing map are also lowercase.
+        // this allows fast case insensitive lookups
+        permission = permission.toLowerCase();
+
         // offer the permission to the permission vault
         // we only need to do this once per permission, so it doesn't matter
         // that this call is behind the cache.

@@ -47,6 +47,8 @@ import java.util.Optional;
  * <li>{@code org.bukkit.entity.Player}</li>
  * <li>{@code net.md_5.bungee.api.connection.ProxiedPlayer}</li>
  * <li>{@code org.spongepowered.api.service.permission.Subject}</li>
+ * <li>{@code cn.nukkit.Player}</li>
+ * <li>{@code com.velocitypowered.api.proxy.Player}</li>
  * </ul>
  *
  * @since 4.0
