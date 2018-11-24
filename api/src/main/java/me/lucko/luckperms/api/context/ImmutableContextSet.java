@@ -214,6 +214,28 @@ public final class ImmutableContextSet extends AbstractContextSet implements Con
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof ContextSet)) return false;
+        final ContextSet that = (ContextSet) o;
+
+        // fast(er) path for ImmutableContextSet comparisons
+        if (that instanceof ImmutableContextSet) {
+            ImmutableContextSet immutableThat = (ImmutableContextSet) that;
+            if (this.hashCode != immutableThat.hashCode) return false;
+        }
+
+        final Multimap<String, String> thatBacking;
+        if (that instanceof AbstractContextSet) {
+            thatBacking = ((AbstractContextSet) that).backing();
+        } else {
+            thatBacking = that.toMultimap();
+        }
+
+        return backing().equals(thatBacking);
+    }
+
+    @Override
     public int hashCode() {
         return this.hashCode;
     }

@@ -346,6 +346,22 @@ public final class MutableContextSet extends AbstractContextSet implements Conte
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof ContextSet)) return false;
+        final ContextSet that = (ContextSet) o;
+
+        final Multimap<String, String> thatBacking;
+        if (that instanceof AbstractContextSet) {
+            thatBacking = ((AbstractContextSet) that).backing();
+        } else {
+            thatBacking = that.toMultimap();
+        }
+
+        return backing().equals(thatBacking);
+    }
+
+    @Override
     public String toString() {
         return "MutableContextSet(contexts=" + this.map + ")";
     }

@@ -26,7 +26,6 @@
 package me.lucko.luckperms.api.context;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -65,23 +64,6 @@ abstract class AbstractContextSet implements ContextSet {
     @Override
     public int size() {
         return backing().size();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) return true;
-        if (!(o instanceof ContextSet)) return false;
-        final ContextSet that = (ContextSet) o;
-
-        final Multimap<String, String> otherContexts;
-
-        if (that instanceof AbstractContextSet) {
-            otherContexts = ((AbstractContextSet) that).backing();
-        } else {
-            otherContexts = that.toMultimap();
-        }
-
-        return backing().equals(otherContexts);
     }
 
     @Override
