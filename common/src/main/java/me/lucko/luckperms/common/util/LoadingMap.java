@@ -25,49 +25,32 @@
 
 package me.lucko.luckperms.common.util;
 
-import java.util.Collection;
+import com.google.common.collect.ForwardingMap;
+
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-public interface LoadingMap<K, V> extends Map<K, V> {
-    static <K, V> LoadingMap<K, V> of(Map<K, V> map, Function<K, V> function) {
-        return new LoadingMapImpl<>(map, function);
+public class LoadingMap<K, V> extends ForwardingMap<K, V> implements Map<K, V> {
+    public static <K, V> LoadingMap<K, V> of(Map<K, V> map, Function<K, V> function) {
+        return new LoadingMap<>(map, function);
     }
 
-    static <K, V> LoadingMap<K, V> of(Function<K, V> function) {
+    public static <K, V> LoadingMap<K, V> of(Function<K, V> function) {
         return of(new ConcurrentHashMap<>(), function);
     }
-}
 
-final class LoadingMapImpl<K, V> implements LoadingMap<K, V> {
     private final Map<K, V> map;
     private final Function<K, V> function;
 
-    LoadingMapImpl(Map<K, V> map, Function<K, V> function) {
+    private LoadingMap(Map<K, V> map, Function<K, V> function) {
         this.map = map;
         this.function = function;
     }
 
     @Override
-    public int size() {
-        return this.map.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return this.map.isEmpty();
-    }
-
-    @Override
-    public boolean containsKey(Object key) {
-        return this.map.containsKey(key);
-    }
-
-    @Override
-    public boolean containsValue(Object value) {
-        return this.map.containsValue(value);
+    protected Map<K, V> delegate() {
+        return this.map;
     }
 
     @Override
@@ -77,40 +60,5 @@ final class LoadingMapImpl<K, V> implements LoadingMap<K, V> {
             return value;
         }
         return this.map.computeIfAbsent((K) key, this.function);
-    }
-
-    @Override
-    public V put(K key, V value) {
-        return this.map.put(key, value);
-    }
-
-    @Override
-    public V remove(Object key) {
-        return this.map.remove(key);
-    }
-
-    @Override
-    public void putAll(Map<? extends K, ? extends V> that) {
-        this.map.putAll(that);
-    }
-
-    @Override
-    public void clear() {
-        this.map.clear();
-    }
-
-    @Override
-    public Set<K> keySet() {
-        return this.map.keySet();
-    }
-
-    @Override
-    public Collection<V> values() {
-        return this.map.values();
-    }
-
-    @Override
-    public Set<Entry<K, V>> entrySet() {
-        return this.map.entrySet();
     }
 }
