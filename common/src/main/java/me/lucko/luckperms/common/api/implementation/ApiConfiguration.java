@@ -52,22 +52,22 @@ public class ApiConfiguration implements LPConfiguration {
 
     @Override
     public boolean getIncludeGlobalPerms() {
-        return this.handle.get(ConfigKeys.LOOKUP_SETTINGS).contains(LookupSetting.INCLUDE_NODES_SET_WITHOUT_SERVER);
+        return this.handle.get(ConfigKeys.GLOBAL_CONTEXTS).hasSetting(LookupSetting.INCLUDE_NODES_SET_WITHOUT_SERVER);
     }
 
     @Override
     public boolean getIncludeGlobalWorldPerms() {
-        return this.handle.get(ConfigKeys.LOOKUP_SETTINGS).contains(LookupSetting.INCLUDE_NODES_SET_WITHOUT_WORLD);
+        return this.handle.get(ConfigKeys.GLOBAL_CONTEXTS).hasSetting(LookupSetting.INCLUDE_NODES_SET_WITHOUT_WORLD);
     }
 
     @Override
     public boolean getApplyGlobalGroups() {
-        return this.handle.get(ConfigKeys.LOOKUP_SETTINGS).contains(LookupSetting.APPLY_PARENTS_SET_WITHOUT_SERVER);
+        return this.handle.get(ConfigKeys.GLOBAL_CONTEXTS).hasSetting(LookupSetting.APPLY_PARENTS_SET_WITHOUT_SERVER);
     }
 
     @Override
     public boolean getApplyGlobalWorldGroups() {
-        return this.handle.get(ConfigKeys.LOOKUP_SETTINGS).contains(LookupSetting.APPLY_PARENTS_SET_WITHOUT_WORLD);
+        return this.handle.get(ConfigKeys.GLOBAL_CONTEXTS).hasSetting(LookupSetting.APPLY_PARENTS_SET_WITHOUT_WORLD);
     }
 
     @Override

@@ -146,7 +146,7 @@ public abstract class ContextManager<T> {
      * @return a contexts instance
      */
     public Contexts formContexts(ImmutableContextSet contextSet) {
-        return Contexts.of(contextSet, this.plugin.getConfiguration().get(ConfigKeys.LOOKUP_SETTINGS));
+        return this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_CONTEXTS).setContexts(contextSet);
     }
 
     /**

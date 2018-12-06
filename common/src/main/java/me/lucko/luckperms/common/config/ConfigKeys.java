@@ -29,7 +29,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.LookupSetting;
 import me.lucko.luckperms.api.TemporaryMergeBehaviour;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.metastacking.DuplicateRemovalFunction;
@@ -52,7 +51,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,10 +97,10 @@ public final class ConfigKeys {
     }));
 
     /**
-     * The lookup settings for contexts (care should be taken to not mutate this method)
+     * The default global contexts instance
      */
-    public static final ConfigKey<EnumSet<LookupSetting>> LOOKUP_SETTINGS = customKey(c -> {
-        return EnumSet.copyOf(Contexts.of(
+    public static final ConfigKey<Contexts> GLOBAL_CONTEXTS = customKey(c -> {
+        return Contexts.of(
                 ContextSet.empty(),
                 c.getBoolean("include-global", true),
                 c.getBoolean("include-global-world", true),
@@ -110,7 +108,7 @@ public final class ConfigKeys {
                 c.getBoolean("apply-global-groups", true),
                 c.getBoolean("apply-global-world-groups", true),
                 false
-        ).getSettings());
+        );
     });
 
     /**

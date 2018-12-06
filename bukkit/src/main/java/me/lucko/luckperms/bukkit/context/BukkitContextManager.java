@@ -99,12 +99,13 @@ public class BukkitContextManager extends ContextManager<Player> {
 
     @Override
     public Contexts formContexts(Player subject, ImmutableContextSet contextSet) {
-        EnumSet<LookupSetting> settings = this.plugin.getConfiguration().get(ConfigKeys.LOOKUP_SETTINGS);
+        Contexts contexts = this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_CONTEXTS);
         if (subject.isOp()) {
-            settings = EnumSet.copyOf(settings);
+            EnumSet<LookupSetting> settings = EnumSet.copyOf(contexts.getSettings());
             settings.add(LookupSetting.IS_OP);
+            contexts = contexts.setSettings(settings);
         }
 
-        return Contexts.of(contextSet, settings);
+        return contexts.setContexts(contextSet);
     }
 }

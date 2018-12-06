@@ -187,7 +187,7 @@ public class Contexts {
     }
 
     /**
-     * Gets the {@link ContextSet} which represent these {@link Contexts}.
+     * Gets the {@link ContextSet set of context pairs} for this {@link Contexts} instance.
      *
      * @return an immutable context from this instance
      * @since 2.13
@@ -197,13 +197,51 @@ public class Contexts {
     }
 
     /**
-     * Gets the set of {@link LookupSetting}s which represent these {@link Contexts}.
+     * Gets the set of {@link LookupSetting}s for this {@link Contexts} instance.
      *
      * @return the settings
      * @since 4.2
      */
     public @NonNull Set<LookupSetting> getSettings() {
         return LookupSetting.createSetFromFlag(this.settingsFlag);
+    }
+
+    /**
+     * Creates a copy of this {@link Contexts} instance, but with the
+     * {@link ContextSet set of context pairs} replaced by the given set.
+     *
+     * @param contextSet the context set
+     * @return a new contexts instance representing the new settings
+     * @since 4.4
+     */
+    public @NonNull Contexts setContexts(@NonNull ContextSet contextSet) {
+        ImmutableContextSet cs = Objects.requireNonNull(contextSet, "contextSet").makeImmutable();
+        if (this.contextSet.equals(cs)) {
+            return this;
+        }
+        return new Contexts(Objects.requireNonNull(contextSet, "contextSet").makeImmutable(), this.settingsFlag);
+    }
+
+    /**
+     * Creates a copy of this {@link Contexts} instance, but with the
+     * {@link LookupSetting}s replaced by the given settings.
+     *
+     * @param settings the lookup settings
+     * @return a new contexts instance representing the new settings
+     * @since 4.4
+     */
+    public @NonNull Contexts setSettings(@NonNull Set<LookupSetting> settings) {
+        Objects.requireNonNull(settings, "settings");
+
+        byte settingsFlag = LookupSetting.createFlag(settings);
+        if (this.settingsFlag == settingsFlag) {
+            return this;
+        }
+        if (this.contextSet.isEmpty() && DEFAULT_SETTINGS_FLAG == settingsFlag) {
+            return GLOBAL;
+        }
+
+        return new Contexts(this.contextSet, settingsFlag);
     }
 
     /**
