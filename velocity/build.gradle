@@ -13,7 +13,7 @@ repositories {
 dependencies {
     compile project(':common')
 
-    compileOnly 'com.velocitypowered:velocity-api:1.0-SNAPSHOT'
+    compileOnly 'com.velocitypowered:velocity-api:1.0-20181206.010534-227'
 }
 
 blossom {
