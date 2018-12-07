@@ -80,14 +80,14 @@ public interface HeldPermission<T> {
      *
      * @return the expiry time
      */
-    OptionalLong getExpiry();
+    @NonNull OptionalLong getExpiry();
 
     /**
      * Gets the extra context for the permission.
      *
      * @return the extra context
      */
-    ContextSet getContexts();
+    @NonNull ContextSet getContexts();
 
     /**
      * Converts this permission into a Node
