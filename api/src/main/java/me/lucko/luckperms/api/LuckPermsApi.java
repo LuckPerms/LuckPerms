@@ -40,6 +40,9 @@ import me.lucko.luckperms.api.platform.PlatformInfo;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import javafx.print.Collation;
+
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -209,6 +212,14 @@ public interface LuckPermsApi {
      * @since 4.0
      */
     @NonNull ContextManager getContextManager();
+
+    /**
+     * Gets a {@link Collection} of all known permission strings.
+     *
+     * @return a collection of the known permissions
+     * @since 4.4
+     */
+    @NonNull Collection<String> getKnownPermissions();
 
     /**
      * Gets the {@link NodeFactory}.

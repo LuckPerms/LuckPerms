@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.treeview;
 import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.common.util.RepeatingTask;
 
 import java.util.List;
@@ -82,7 +83,7 @@ public class PermissionRegistry extends RepeatingTask {
     }
 
     public List<String> rootAsList() {
-        return this.rootNode.makeImmutableCopy().getNodeEndings().stream().map(Map.Entry::getValue).collect(Collectors.toList());
+        return this.rootNode.makeImmutableCopy().getNodeEndings().stream().map(Map.Entry::getValue).collect(ImmutableCollectors.toList());
     }
 
     public int getSize() {

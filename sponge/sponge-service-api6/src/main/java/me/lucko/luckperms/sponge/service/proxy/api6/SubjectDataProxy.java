@@ -31,6 +31,7 @@ import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.model.ProxiedServiceObject;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.context.Context;
@@ -44,7 +45,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("unchecked")
-public final class SubjectDataProxy implements SubjectData {
+public final class SubjectDataProxy implements SubjectData, ProxiedServiceObject {
     private final LPPermissionService service;
     private final LPSubjectReference ref;
     private final boolean enduring;

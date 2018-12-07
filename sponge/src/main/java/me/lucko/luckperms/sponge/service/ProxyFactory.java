@@ -84,6 +84,12 @@ public final class ProxyFactory {
                 new me.lucko.luckperms.sponge.service.proxy.api6.PermissionDescriptionProxy(luckPerms.getService(), luckPerms);
     }
 
+    public static LPPermissionDescription registerDescription(LPPermissionService service, PermissionDescription description) {
+        return IS_API_7 ?
+                me.lucko.luckperms.sponge.service.proxy.api7.DescriptionBuilder.registerDescription(service, description) :
+                me.lucko.luckperms.sponge.service.proxy.api6.DescriptionBuilder.registerDescription(service, description);
+    }
+
     private ProxyFactory() {}
 
 }

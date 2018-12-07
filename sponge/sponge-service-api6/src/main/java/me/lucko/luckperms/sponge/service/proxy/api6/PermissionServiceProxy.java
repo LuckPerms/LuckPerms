@@ -28,6 +28,7 @@ package me.lucko.luckperms.sponge.service.proxy.api6;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
+import me.lucko.luckperms.sponge.service.model.ProxiedServiceObject;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Sponge;
@@ -42,7 +43,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-public final class PermissionServiceProxy implements PermissionService {
+public final class PermissionServiceProxy implements PermissionService, ProxiedServiceObject {
     private final LPPermissionService handle;
 
     public PermissionServiceProxy(LPPermissionService handle) {

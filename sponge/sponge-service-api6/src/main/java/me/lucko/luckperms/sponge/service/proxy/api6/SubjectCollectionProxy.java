@@ -30,6 +30,7 @@ import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.model.ProxiedServiceObject;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.context.Context;
@@ -41,7 +42,7 @@ import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("unchecked")
-public final class SubjectCollectionProxy implements SubjectCollection {
+public final class SubjectCollectionProxy implements SubjectCollection, ProxiedServiceObject {
     private final LPPermissionService service;
     private final LPSubjectCollection handle;
 

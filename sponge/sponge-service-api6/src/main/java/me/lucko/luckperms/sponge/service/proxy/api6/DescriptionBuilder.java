@@ -31,6 +31,7 @@ import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.model.ProxiedServiceObject;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -43,7 +44,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public final class DescriptionBuilder implements PermissionDescription.Builder {
+public final class DescriptionBuilder implements PermissionDescription.Builder, ProxiedServiceObject {
+
+    public static LPPermissionDescription registerDescription(LPPermissionService service, PermissionDescription description) {
+        //noinspection ConstantConditions
+        if (description.getOwner() == null) {
+            return null;
+        }
+        return service.registerPermissionDescription(description.getId(), description.getDescription(), description.getOwner());
+    }
+
     private final @NonNull LPPermissionService service;
     private final @NonNull PluginContainer container;
     private final @NonNull Map<String, Tristate> roles = new HashMap<>();

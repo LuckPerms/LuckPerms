@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.model.ProxiedServiceObject;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.context.Context;
@@ -45,7 +46,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 @SuppressWarnings("unchecked")
-public final class SubjectCollectionProxy implements SubjectCollection {
+public final class SubjectCollectionProxy implements SubjectCollection, ProxiedServiceObject {
     private final LPSubjectCollection handle;
 
     public SubjectCollectionProxy(LPSubjectCollection handle) {

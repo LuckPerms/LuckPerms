@@ -55,9 +55,11 @@ import me.lucko.luckperms.sponge.messaging.SpongeMessagingFactory;
 import me.lucko.luckperms.sponge.model.manager.SpongeGroupManager;
 import me.lucko.luckperms.sponge.model.manager.SpongeUserManager;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.events.UpdateEventHandler;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.model.ProxiedServiceObject;
 import me.lucko.luckperms.sponge.service.model.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.tasks.ServiceCacheHousekeepingTask;
 
@@ -69,6 +71,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -162,10 +165,18 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
         this.updateEventHandler = UpdateEventHandler.obtain(this);
         this.service = new LuckPermsService(this);
 
-        // before registering our permission service, copy any existing permission descriptions
-        PermissionRegistry permissionRegistry = getPermissionRegistry();
-        this.bootstrap.getGame().getServiceManager().provide(PermissionService.class)
-                .ifPresent(ps -> ps.getDescriptions().stream().map(PermissionDescription::getId).forEach(permissionRegistry::insert));
+        PermissionService oldService = this.bootstrap.getGame().getServiceManager().provide(PermissionService.class).orElse(null);
+        if (oldService != null && !(oldService instanceof ProxiedServiceObject)) {
+
+            // before registering our permission service, copy any existing permission descriptions
+            Collection<PermissionDescription> permissionDescriptions = oldService.getDescriptions();
+            for (PermissionDescription description : permissionDescriptions) {
+                if (description instanceof ProxiedServiceObject) {
+                    continue;
+                }
+                ProxyFactory.registerDescription(this.service, description);
+            }
+        }
 
         if (this.bootstrap.getGame().getPluginManager().getPlugin("permissionsex").isPresent()) {
             getLogger().warn("Detected PermissionsEx - assuming it's loaded for migration.");

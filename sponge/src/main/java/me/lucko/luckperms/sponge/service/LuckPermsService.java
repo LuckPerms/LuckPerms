@@ -196,6 +196,7 @@ public class LuckPermsService implements LPPermissionService {
 
     @Override
     public LPPermissionDescription registerPermissionDescription(String id, Text description, PluginContainer owner) {
+        Objects.requireNonNull(id, "id");
         SimplePermissionDescription desc = new SimplePermissionDescription(this, id, description, owner);
         this.permissionDescriptions.put(id, desc);
         this.plugin.getPermissionRegistry().insert(id);
