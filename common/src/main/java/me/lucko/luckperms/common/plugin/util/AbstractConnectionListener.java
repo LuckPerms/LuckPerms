@@ -31,7 +31,6 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.defaultassignments.AssignmentRule;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
 
 import java.util.Set;
 import java.util.UUID;
@@ -71,7 +70,7 @@ public abstract class AbstractConnectionListener {
         PlayerSaveResult saveResult = this.plugin.getStorage().savePlayerData(uuid, username).join();
 
         // fire UserFirstLogin event
-        if (saveResult.includes(PlayerSaveResultImpl.Status.CLEAN_INSERT)) {
+        if (saveResult.includes(PlayerSaveResult.Status.CLEAN_INSERT)) {
             this.plugin.getEventFactory().handleUserFirstLogin(uuid, username);
         }
 
@@ -86,13 +85,15 @@ public abstract class AbstractConnectionListener {
             if (uuid.version() == 4) {
                 if (this.plugin.getBootstrap().getType() == PlatformType.BUNGEE) {
                     this.plugin.getLogger().warn("The UUID the player is connecting with now is Mojang-assigned (type 4). This implies that BungeeCord's IP-Forwarding has not been setup correctly on one (or more) of the backend servers.");
+                } if (this.plugin.getBootstrap().getType() == PlatformType.VELOCITY) {
+                    this.plugin.getLogger().warn("The UUID the player is connecting with now is Mojang-assigned (type 4). This implies that Velocity's IP-Forwarding has not been setup correctly on one (or more) of the backend servers.");
                 } else {
                     this.plugin.getLogger().warn("The UUID the player is connecting with now is Mojang-assigned (type 4). This implies that one of the other servers in your network is not authenticating correctly.");
-                    this.plugin.getLogger().warn("If you're using BungeeCord, please ensure that IP-Forwarding is setup correctly on all of your backend servers!");
+                    this.plugin.getLogger().warn("If you're using BungeeCord/Velocity, please ensure that IP-Forwarding is setup correctly on all of your backend servers!");
                 }
             } else {
                 this.plugin.getLogger().warn("The UUID the player is connecting with now is NOT Mojang-assigned (type " + uuid.version() + "). This implies that THIS server is not authenticating correctly, but one (or more) of the other servers/proxies in the network are.");
-                this.plugin.getLogger().warn("If you're using BungeeCord, please ensure that IP-Forwarding is setup correctly on all of your backend servers!");
+                this.plugin.getLogger().warn("If you're using BungeeCord/Velocity, please ensure that IP-Forwarding is setup correctly on all of your backend servers!");
             }
 
             this.plugin.getLogger().warn("See here for more info: https://github.com/lucko/LuckPerms/wiki/Network-Installation#pre-setup");
@@ -104,15 +105,15 @@ public abstract class AbstractConnectionListener {
         }
 
         // Setup defaults for the user
-        boolean save = false;
+        boolean saveRequired = false;
         for (AssignmentRule rule : this.plugin.getConfiguration().get(ConfigKeys.DEFAULT_ASSIGNMENTS)) {
             if (rule.apply(user)) {
-                save = true;
+                saveRequired = true;
             }
         }
 
         // If they were given a default, persist the new assignments back to the storage.
-        if (save) {
+        if (saveRequired) {
             this.plugin.getStorage().saveUser(user).join();
         }
 
