@@ -30,6 +30,7 @@ import me.lucko.luckperms.api.manager.UserManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -56,10 +57,16 @@ public interface PlayerSaveResult {
      * @param status the status to check for
      * @return if the result includes the status
      */
-    boolean includes(@NonNull Status status);
+    default boolean includes(@NonNull Status status) {
+        Objects.requireNonNull(status, "status");
+        return getStatus().contains(status);
+    }
 
     /**
-     * Gets the old username involved in the result
+     * Gets the old username involved in the result.
+     *
+     * <p>Returns null when the result doesn't {@link #includes(Status) include} the
+     * {@link Status#USERNAME_UPDATED} status.</p>
      *
      * @return the old username
      * @see Status#USERNAME_UPDATED
@@ -67,7 +74,10 @@ public interface PlayerSaveResult {
     @Nullable String getOldUsername();
 
     /**
-     * Gets the other uuids involved in the result
+     * Gets the other uuids involved in the result.
+     *
+     * <p>Returns null when the result doesn't {@link #includes(Status) include} the
+     * {@link Status#OTHER_UUIDS_PRESENT_FOR_USERNAME} status.</p>
      *
      * @return the other uuids
      * @see Status#OTHER_UUIDS_PRESENT_FOR_USERNAME

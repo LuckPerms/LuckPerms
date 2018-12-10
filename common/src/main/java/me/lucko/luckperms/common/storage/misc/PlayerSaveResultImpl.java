@@ -101,11 +101,6 @@ public final class PlayerSaveResultImpl implements PlayerSaveResult {
     }
 
     @Override
-    public boolean includes(@NonNull Status status) {
-        return this.status.contains(status);
-    }
-
-    @Override
     public @Nullable String getOldUsername() {
         return this.oldUsername;
     }
