@@ -75,8 +75,8 @@ public class NukkitPlatformListener implements Listener {
             s = s.substring(1);
         }
 
-        if (s.startsWith("minecraft:")) {
-            s = s.substring("minecraft:".length());
+        if (s.contains(":")) {
+            s = s.substring(s.indexOf(':') + 1);
         }
 
         if (s.equals("op") || s.startsWith("op ") || s.equals("deop") || s.startsWith("deop ")) {
