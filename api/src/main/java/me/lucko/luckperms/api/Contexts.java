@@ -219,7 +219,7 @@ public class Contexts {
         if (this.contextSet.equals(cs)) {
             return this;
         }
-        return new Contexts(Objects.requireNonNull(contextSet, "contextSet").makeImmutable(), this.settingsFlag);
+        return new Contexts(cs, this.settingsFlag);
     }
 
     /**
@@ -237,7 +237,7 @@ public class Contexts {
         if (this.settingsFlag == settingsFlag) {
             return this;
         }
-        if (this.contextSet.isEmpty() && DEFAULT_SETTINGS_FLAG == settingsFlag) {
+        if (DEFAULT_SETTINGS_FLAG == settingsFlag && this.contextSet.isEmpty()) {
             return GLOBAL;
         }
 
