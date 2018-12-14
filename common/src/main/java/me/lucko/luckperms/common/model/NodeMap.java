@@ -166,10 +166,12 @@ public final class NodeMap {
     }
 
     private LocalizedNode localise(Node node) {
-        if (node instanceof LocalizedNode) {
+        while (node instanceof LocalizedNode) {
             LocalizedNode localizedNode = (LocalizedNode) node;
             if (this.holder.getObjectName().equals(localizedNode.getLocation())) {
                 return localizedNode;
+            } else {
+                node = localizedNode.getNode();
             }
         }
 

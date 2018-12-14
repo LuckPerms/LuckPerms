@@ -432,17 +432,6 @@ public interface Node {
 
     /**
      * Gets if this Node is equal to another node as defined by the given
-     * {@link StandardNodeEquality} predicate.
-     *
-     * @param other             the other node
-     * @param equalityPredicate the predicate
-     * @return true if this node is considered equal
-     * @since 4.1
-     */
-    boolean standardEquals(Node other, StandardNodeEquality equalityPredicate);
-
-    /**
-     * Gets if this Node is equal to another node as defined by the given
      * {@link NodeEqualityPredicate}.
      *
      * @param other             the other node
@@ -450,9 +439,7 @@ public interface Node {
      * @return true if this node is considered equal
      * @since 4.1
      */
-    default boolean equals(Node other, NodeEqualityPredicate equalityPredicate) {
-        return equalityPredicate.areEqual(this, other);
-    }
+    boolean equals(Node other, NodeEqualityPredicate equalityPredicate);
 
     /**
      * Similar to {@link Node#equals(Object)}, except doesn't take note of the

@@ -73,6 +73,6 @@ public enum StandardNodeEquality implements NodeEqualityPredicate {
 
     @Override
     public boolean areEqual(@NonNull Node o1, @NonNull Node o2) {
-        return o1.standardEquals(o2, this);
+        return o1.equals(o2, this);
     }
 }

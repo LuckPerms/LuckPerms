@@ -42,6 +42,16 @@ import java.util.Optional;
 
 public abstract class ForwardingNode implements Node {
 
+    static ImmutableNode unwrapForwarding(Node node) {
+        while (node instanceof ForwardingNode) {
+            node = ((ForwardingNode) node).delegate();
+        }
+        if (!(node instanceof ImmutableNode)) {
+            throw new IllegalArgumentException("Node type cannot be casted to ImmutableNode: " + node.getClass());
+        }
+        return ((ImmutableNode) node);
+    }
+
     public abstract Node delegate();
 
     @Override
@@ -222,11 +232,6 @@ public abstract class ForwardingNode implements Node {
     @Override
     public Map.@NonNull Entry<Integer, String> getSuffix() throws IllegalStateException {
         return delegate().getSuffix();
-    }
-
-    @Override
-    public boolean standardEquals(Node other, StandardNodeEquality equalityPredicate) {
-        return delegate().standardEquals(other, equalityPredicate);
     }
 
     @Override

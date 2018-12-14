@@ -41,7 +41,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public interface NodeEqualityPredicate {
 
     /**
-     * Returns if the two nodes are equal
+     * Returns if the two nodes are equal.
+     *
+     * <p>This method should avoid making calls to {@link Node#equals(Node, NodeEqualityPredicate)}
+     * with {@code this} as the second argument, directly or otherwise.</p>
      *
      * @param o1 the first node
      * @param o2 the second node

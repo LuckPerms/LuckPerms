@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.NodeEqualityPredicate;
 import me.lucko.luckperms.api.StandardNodeEquality;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
@@ -273,37 +274,31 @@ public final class ImmutableNode implements Node {
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof Node)) return false;
-
-        Node other = (Node) o;
-        while (other instanceof ForwardingNode) {
-            other = ((ForwardingNode) other).delegate();
-        }
-        return other instanceof ImmutableNode && Equality.EXACT.areEqual(this, (ImmutableNode) other);
+        return Equality.EXACT.areEqual(this, ForwardingNode.unwrapForwarding((Node) o));
     }
 
     @Override
-    public boolean standardEquals(Node o, StandardNodeEquality equalityPredicate) {
-        while (o instanceof ForwardingNode) {
-            o = ((ForwardingNode) o).delegate();
+    public boolean equals(Node o, NodeEqualityPredicate equalityPredicate) {
+        if (equalityPredicate instanceof StandardNodeEquality) {
+            StandardNodeEquality stdEqualityPredicate = (StandardNodeEquality) equalityPredicate;
+            ImmutableNode other = ForwardingNode.unwrapForwarding(o);
+            switch (stdEqualityPredicate) {
+                case EXACT:
+                    return Equality.EXACT.areEqual(this, other);
+                case IGNORE_VALUE:
+                    return Equality.IGNORE_VALUE.areEqual(this, other);
+                case IGNORE_EXPIRY_TIME:
+                    return Equality.IGNORE_EXPIRY_TIME.areEqual(this, other);
+                case IGNORE_EXPIRY_TIME_AND_VALUE:
+                    return Equality.IGNORE_EXPIRY_TIME_AND_VALUE.areEqual(this, other);
+                case IGNORE_VALUE_OR_IF_TEMPORARY:
+                    return Equality.IGNORE_VALUE_OR_IF_TEMPORARY.areEqual(this, other);
+                default:
+                    throw new AssertionError();
+            }
         }
-        if (!(o instanceof ImmutableNode)) {
-            return false;
-        }
-        ImmutableNode other = (ImmutableNode) o;
-        switch (equalityPredicate) {
-            case EXACT:
-                return Equality.EXACT.areEqual(this, other);
-            case IGNORE_VALUE:
-                return Equality.IGNORE_VALUE.areEqual(this, other);
-            case IGNORE_EXPIRY_TIME:
-                return Equality.IGNORE_EXPIRY_TIME.areEqual(this, other);
-            case IGNORE_EXPIRY_TIME_AND_VALUE:
-                return Equality.IGNORE_EXPIRY_TIME_AND_VALUE.areEqual(this, other);
-            case IGNORE_VALUE_OR_IF_TEMPORARY:
-                return Equality.IGNORE_VALUE_OR_IF_TEMPORARY.areEqual(this, other);
-            default:
-                throw new AssertionError();
-        }
+
+        return equalityPredicate.areEqual(this, o);
     }
 
     @Override
