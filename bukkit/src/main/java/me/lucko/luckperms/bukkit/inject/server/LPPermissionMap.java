@@ -25,14 +25,12 @@
 
 package me.lucko.luckperms.bukkit.inject.server;
 
-import com.github.benmanes.caffeine.cache.CacheLoader;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
+import me.lucko.luckperms.common.util.LoadingMap;
 
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginManager;
@@ -44,6 +42,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 /**
  * A replacement map for the 'permissions' instance in Bukkit's SimplePluginManager.
@@ -62,11 +61,8 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
     private final Map<String, Permission> delegate = new ConcurrentHashMap<>();
 
     // cache from permission --> children
-    private final LoadingCache<String, Map<String, Boolean>> trueChildPermissions = Caffeine.newBuilder()
-            .build(new ChildPermissionResolver(true));
-
-    private final LoadingCache<String, Map<String, Boolean>> falseChildPermissions = Caffeine.newBuilder()
-            .build(new ChildPermissionResolver(false));
+    private final Map<String, Map<String, Boolean>> trueChildPermissions = LoadingMap.of(new ChildPermissionResolver(true));
+    private final Map<String, Map<String, Boolean>> falseChildPermissions = LoadingMap.of(new ChildPermissionResolver(false));
 
     /**
      * The plugin instance
@@ -83,8 +79,8 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
     }
 
     private void update() {
-        this.trueChildPermissions.invalidateAll();
-        this.falseChildPermissions.invalidateAll();
+        this.trueChildPermissions.clear();
+        this.falseChildPermissions.clear();
     }
 
     @Override
@@ -154,7 +150,7 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
         return super.get(key);
     }
 
-    private final class ChildPermissionResolver implements CacheLoader<String, Map<String, Boolean>> {
+    private final class ChildPermissionResolver implements Function<String, Map<String, Boolean>> {
         private final boolean value;
 
         private ChildPermissionResolver(boolean value) {
@@ -162,7 +158,7 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
         }
 
         @Override
-        public Map<String, Boolean> load(@NonNull String key) {
+        public Map<String, Boolean> apply(@NonNull String key) {
             Map<String, Boolean> children = new HashMap<>();
             resolveChildren(children, Collections.singletonMap(key, this.value), false);
             children.remove(key, this.value);

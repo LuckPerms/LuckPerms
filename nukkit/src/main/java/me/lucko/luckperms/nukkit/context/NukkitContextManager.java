@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.context.ContextsCache;
 import me.lucko.luckperms.common.context.ContextsSupplier;
+import me.lucko.luckperms.common.util.LoadingMap;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
 import cn.nukkit.Player;
@@ -45,8 +46,7 @@ import java.util.concurrent.TimeUnit;
 public class NukkitContextManager extends ContextManager<Player> {
 
     // cache the creation of ContextsCache instances for online players with no expiry
-    private final LoadingCache<Player, ContextsCache<Player>> onlineSubjectCaches = Caffeine.newBuilder()
-            .build(key -> new ContextsCache<>(key, this));
+    private final LoadingMap<Player, ContextsCache<Player>> onlineSubjectCaches = LoadingMap.of(key -> new ContextsCache<>(key, this));
 
     // cache the creation of ContextsCache instances for offline players with a 1m expiry
     private final LoadingCache<Player, ContextsCache<Player>> offlineSubjectCaches = Caffeine.newBuilder()
@@ -64,7 +64,7 @@ public class NukkitContextManager extends ContextManager<Player> {
     }
 
     public void onPlayerQuit(Player player) {
-        this.onlineSubjectCaches.invalidate(player);
+        this.onlineSubjectCaches.remove(player);
     }
 
     @Override

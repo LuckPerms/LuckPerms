@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.commands.group;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.HeldPermission;
@@ -52,6 +50,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Iterators;
+import me.lucko.luckperms.common.util.LoadingMap;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.TextUtils;
 
@@ -99,22 +98,21 @@ public class GroupListMembers extends SubCommand<Group> {
         Message.SEARCH_RESULT.send(sender, users + groups, users, groups);
 
         if (!matchedUsers.isEmpty()) {
-            LoadingCache<UUID, String> uuidLookups = Caffeine.newBuilder()
-                    .build(u -> {
-                        String s = plugin.getStorage().getPlayerName(u).join();
-                        if (s != null && !s.isEmpty() && !s.equals("null")) {
-                            return s;
-                        }
+            Map<UUID, String> uuidLookups = LoadingMap.of(u -> {
+                String s = plugin.getStorage().getPlayerName(u).join();
+                if (s != null && !s.isEmpty() && !s.equals("null")) {
+                    return s;
+                }
 
-                        if (plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
-                            s = plugin.getBootstrap().lookupUsername(u).orElse(null);
-                            if (s != null) {
-                                return s;
-                            }
-                        }
+                if (plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
+                    s = plugin.getBootstrap().lookupUsername(u).orElse(null);
+                    if (s != null) {
+                        return s;
+                    }
+                }
 
-                        return u.toString();
-                    });
+                return u.toString();
+            });
             sendResult(sender, matchedUsers, uuidLookups::get, Message.SEARCH_SHOWING_USERS, HolderType.USER, label, page);
         }
 

@@ -25,14 +25,10 @@
 
 package me.lucko.luckperms.common.model.manager;
 
-import com.github.benmanes.caffeine.cache.CacheLoader;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.model.Identifiable;
-
-import org.checkerframework.checker.nullness.qual.NonNull;
+import me.lucko.luckperms.common.util.LoadingMap;
 
 import java.util.Map;
 
@@ -45,22 +41,11 @@ import java.util.Map;
  */
 public abstract class AbstractManager<I, C extends Identifiable<I>, T extends C> implements Manager<I, C, T> {
 
-    private final LoadingCache<I, T> objects = Caffeine.newBuilder()
-            .build(new CacheLoader<I, T>() {
-                @Override
-                public T load(@NonNull I i) {
-                    return apply(i);
-                }
-
-                @Override
-                public T reload(@NonNull I i, @NonNull T t) {
-                    return t; // Never needs to be refreshed.
-                }
-            });
+    private final LoadingMap<I, T> objects = LoadingMap.of(this);
 
     @Override
     public Map<I, T> getAll() {
-        return ImmutableMap.copyOf(this.objects.asMap());
+        return ImmutableMap.copyOf(this.objects);
     }
 
     @Override
@@ -75,13 +60,13 @@ public abstract class AbstractManager<I, C extends Identifiable<I>, T extends C>
 
     @Override
     public boolean isLoaded(I id) {
-        return this.objects.asMap().containsKey(sanitizeIdentifier(id));
+        return this.objects.containsKey(sanitizeIdentifier(id));
     }
 
     @Override
     public void unload(I id) {
         if (id != null) {
-            this.objects.invalidate(sanitizeIdentifier(id));
+            this.objects.remove(sanitizeIdentifier(id));
         }
     }
 
@@ -94,7 +79,7 @@ public abstract class AbstractManager<I, C extends Identifiable<I>, T extends C>
 
     @Override
     public void unloadAll() {
-        this.objects.invalidateAll();
+        this.objects.clear();
     }
 
     protected I sanitizeIdentifier(I i) {

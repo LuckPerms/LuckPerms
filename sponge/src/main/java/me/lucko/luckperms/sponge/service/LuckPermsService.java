@@ -25,12 +25,11 @@
 
 package me.lucko.luckperms.sponge.service;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.common.context.ContextManager;
+import me.lucko.luckperms.common.util.LoadingMap;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.context.SpongeProxiedContextCalculator;
@@ -98,8 +97,7 @@ public class LuckPermsService implements LPPermissionService {
     /**
      * The loaded collections in this service
      */
-    private final LoadingCache<String, LPSubjectCollection> collections = Caffeine.newBuilder()
-            .build(s -> new PersistedCollection(this, s));
+    private final Map<String, LPSubjectCollection> collections = LoadingMap.of(s -> new PersistedCollection(this, s));
 
     public LuckPermsService(LPSpongePlugin plugin) {
         this.plugin = plugin;
@@ -121,7 +119,7 @@ public class LuckPermsService implements LPPermissionService {
 
         // load known collections
         for (String identifier : this.storage.getSavedCollections()) {
-            if (this.collections.asMap().containsKey(identifier.toLowerCase())) {
+            if (this.collections.containsKey(identifier.toLowerCase())) {
                 continue;
             }
 
@@ -191,7 +189,7 @@ public class LuckPermsService implements LPPermissionService {
 
     @Override
     public ImmutableMap<String, LPSubjectCollection> getLoadedCollections() {
-        return ImmutableMap.copyOf(this.collections.asMap());
+        return ImmutableMap.copyOf(this.collections);
     }
 
     @Override
@@ -232,7 +230,7 @@ public class LuckPermsService implements LPPermissionService {
 
     @Override
     public void invalidateAllCaches() {
-        for (LPSubjectCollection collection : this.collections.asMap().values()) {
+        for (LPSubjectCollection collection : this.collections.values()) {
             for (LPSubject subject : collection.getLoadedSubjects()) {
                 subject.invalidateCaches();
             }

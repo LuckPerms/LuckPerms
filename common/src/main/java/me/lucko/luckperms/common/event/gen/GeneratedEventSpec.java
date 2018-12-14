@@ -25,14 +25,13 @@
 
 package me.lucko.luckperms.common.event.gen;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
+import me.lucko.luckperms.common.util.LoadingMap;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationHandler;
@@ -42,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents the generated specification for an instance of a given {@link LuckPermsEvent}.
@@ -63,8 +63,7 @@ public class GeneratedEventSpec {
         }
     }
 
-    private static final LoadingCache<Class<? extends LuckPermsEvent>, GeneratedEventSpec> CACHE = Caffeine.newBuilder()
-            .build(GeneratedEventSpec::new);
+    private static final Map<Class<? extends LuckPermsEvent>, GeneratedEventSpec> CACHE = LoadingMap.of(GeneratedEventSpec::new);
 
     public static GeneratedEventSpec lookup(Class<? extends LuckPermsEvent> event) {
         return CACHE.get(event);

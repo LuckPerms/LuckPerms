@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.sponge.service.model.persisted;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -35,6 +33,7 @@ import com.google.common.collect.ImmutableSet;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
+import me.lucko.luckperms.common.util.LoadingMap;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
@@ -75,8 +74,7 @@ public class PersistedCollection implements LPSubjectCollection {
     /**
      * The contained subjects
      */
-    private final LoadingCache<String, PersistedSubject> subjects = Caffeine.newBuilder()
-            .build(s -> new PersistedSubject(getService(), this, s));
+    private final Map<String, PersistedSubject> subjects = LoadingMap.of(s -> new PersistedSubject(getService(), this, s));
 
     public PersistedCollection(LuckPermsService service, String identifier) {
         this.service = service;
@@ -138,7 +136,7 @@ public class PersistedCollection implements LPSubjectCollection {
 
     @Override
     public CompletableFuture<Boolean> hasRegistered(String identifier) {
-        return CompletableFuture.completedFuture(this.subjects.asMap().containsKey(identifier.toLowerCase()));
+        return CompletableFuture.completedFuture(this.subjects.containsKey(identifier.toLowerCase()));
     }
 
     @Override
@@ -152,12 +150,12 @@ public class PersistedCollection implements LPSubjectCollection {
 
     @Override
     public ImmutableCollection<LPSubject> getLoadedSubjects() {
-        return ImmutableList.copyOf(this.subjects.asMap().values());
+        return ImmutableList.copyOf(this.subjects.values());
     }
 
     @Override
     public CompletableFuture<ImmutableSet<String>> getAllIdentifiers() {
-        return CompletableFuture.completedFuture(ImmutableSet.copyOf(this.subjects.asMap().keySet()));
+        return CompletableFuture.completedFuture(ImmutableSet.copyOf(this.subjects.keySet()));
     }
 
     @Override
@@ -175,7 +173,7 @@ public class PersistedCollection implements LPSubjectCollection {
     @Override
     public ImmutableMap<LPSubject, Boolean> getLoadedWithPermission(String permission) {
         ImmutableMap.Builder<LPSubject, Boolean> m = ImmutableMap.builder();
-        for (LPSubject subject : this.subjects.asMap().values()) {
+        for (LPSubject subject : this.subjects.values()) {
             Tristate ts = subject.getPermissionValue(ImmutableContextSet.empty(), permission);
             if (ts != Tristate.UNDEFINED) {
                 m.put(subject, ts.asBoolean());
@@ -188,7 +186,7 @@ public class PersistedCollection implements LPSubjectCollection {
     @Override
     public ImmutableMap<LPSubject, Boolean> getLoadedWithPermission(ImmutableContextSet contexts, String permission) {
         ImmutableMap.Builder<LPSubject, Boolean> m = ImmutableMap.builder();
-        for (LPSubject subject : this.subjects.asMap().values()) {
+        for (LPSubject subject : this.subjects.values()) {
             Tristate ts = subject.getPermissionValue(contexts, permission);
             if (ts != Tristate.UNDEFINED) {
                 m.put(subject, ts.asBoolean());

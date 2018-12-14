@@ -40,8 +40,6 @@ import me.lucko.luckperms.api.platform.PlatformInfo;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javafx.print.Collation;
-
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;

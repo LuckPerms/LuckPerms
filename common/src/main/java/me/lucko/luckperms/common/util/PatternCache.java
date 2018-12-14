@@ -25,25 +25,22 @@
 
 package me.lucko.luckperms.common.util;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public final class PatternCache {
 
-    private static final LoadingCache<String, CachedPattern> CACHE = Caffeine.newBuilder()
-            .build(s -> {
-                try {
-                    return new CachedPattern(Pattern.compile(s));
-                } catch (PatternSyntaxException e) {
-                    return new CachedPattern(e);
-                }
-            });
+    private static final Map<String, CachedPattern> CACHE = LoadingMap.of(s -> {
+        try {
+            return new CachedPattern(Pattern.compile(s));
+        } catch (PatternSyntaxException e) {
+            return new CachedPattern(e);
+        }
+    });
 
     public static CachedPattern lookup(String regex) {
         CachedPattern pattern = CACHE.get(regex);

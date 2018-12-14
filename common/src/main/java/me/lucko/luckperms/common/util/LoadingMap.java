@@ -53,6 +53,10 @@ public class LoadingMap<K, V> extends ForwardingMap<K, V> implements Map<K, V> {
         return this.map;
     }
 
+    public V getIfPresent(K key) {
+        return this.map.get(key);
+    }
+
     @Override
     public V get(Object key) {
         V value = this.map.get(key);
