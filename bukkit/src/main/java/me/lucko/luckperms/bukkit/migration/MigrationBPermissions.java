@@ -35,6 +35,7 @@ import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.commands.migration.MigrationUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
@@ -59,8 +60,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static me.lucko.luckperms.common.command.access.CommandPermission.MIGRATION;
-
 public class MigrationBPermissions extends SubCommand<Object> {
     private static final Field UCONFIG_FIELD;
     static {
@@ -73,7 +72,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
     }
 
     public MigrationBPermissions(LocaleManager locale) {
-        super(CommandSpec.MIGRATION_COMMAND.localize(locale), "bpermissions", MIGRATION, Predicates.alwaysFalse());
+        super(CommandSpec.MIGRATION_COMMAND.localize(locale), "bpermissions", CommandPermission.MIGRATION, Predicates.alwaysFalse());
     }
 
     @Override

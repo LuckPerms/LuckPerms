@@ -37,6 +37,7 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.commands.migration.MigrationUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -68,12 +69,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static me.lucko.luckperms.common.command.access.CommandPermission.MIGRATION;
-
 // Only supports the latest versions of the PP API. (it seems to change randomly almost every release)
 public class MigrationPowerfulPerms extends SubCommand<Object> {
     public MigrationPowerfulPerms(LocaleManager locale) {
-        super(CommandSpec.MIGRATION_POWERFULPERMS.localize(locale), "powerfulperms", MIGRATION, Predicates.not(5));
+        super(CommandSpec.MIGRATION_POWERFULPERMS.localize(locale), "powerfulperms", CommandPermission.MIGRATION, Predicates.not(5));
     }
 
     @Override

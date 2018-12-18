@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.node.model;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Contexts;
@@ -49,8 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * An immutable implementation of {@link Node}.
@@ -219,19 +218,19 @@ public final class ImmutableNode implements Node {
 
     @Override
     public long getExpiryUnixTime() {
-        checkState(isTemporary(), "Node does not have an expiry time.");
+        Preconditions.checkState(isTemporary(), "Node does not have an expiry time.");
         return this.expireAt;
     }
 
     @Override
     public @NonNull Date getExpiry() {
-        checkState(isTemporary(), "Node does not have an expiry time.");
+        Preconditions.checkState(isTemporary(), "Node does not have an expiry time.");
         return new Date(this.expireAt * 1000L);
     }
 
     @Override
     public long getSecondsTilExpiry() {
-        checkState(isTemporary(), "Node does not have an expiry time.");
+        Preconditions.checkState(isTemporary(), "Node does not have an expiry time.");
         return this.expireAt - System.currentTimeMillis() / 1000L;
     }
 
@@ -247,7 +246,7 @@ public final class ImmutableNode implements Node {
 
     @Override
     public int getWildcardLevel() {
-        checkState(isWildcard(), "Node is not a wildcard");
+        Preconditions.checkState(isWildcard(), "Node is not a wildcard");
         return this.wildcardLevel;
     }
 
