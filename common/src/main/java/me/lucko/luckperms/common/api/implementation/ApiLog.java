@@ -27,14 +27,13 @@ package me.lucko.luckperms.common.api.implementation;
 
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.api.ApiUtils;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.UUID;
-
-import static me.lucko.luckperms.common.api.ApiUtils.checkName;
 
 @SuppressWarnings("unchecked")
 public class ApiLog implements me.lucko.luckperms.api.Log {
@@ -64,12 +63,12 @@ public class ApiLog implements me.lucko.luckperms.api.Log {
     @Override
     public @NonNull SortedSet<LogEntry> getGroupHistory(@NonNull String name) {
         Objects.requireNonNull(name, "name");
-        return (SortedSet) this.handle.getGroupHistory(checkName(name));
+        return (SortedSet) this.handle.getGroupHistory(ApiUtils.checkName(name));
     }
 
     @Override
     public @NonNull SortedSet<LogEntry> getTrackHistory(@NonNull String name) {
         Objects.requireNonNull(name, "name");
-        return (SortedSet) this.handle.getTrackHistory(checkName(name));
+        return (SortedSet) this.handle.getTrackHistory(ApiUtils.checkName(name));
     }
 }

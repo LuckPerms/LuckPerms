@@ -27,19 +27,24 @@ package me.lucko.luckperms.common.api;
 
 import com.google.common.base.Preconditions;
 
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
+
+import java.util.function.Predicate;
 
 public final class ApiUtils {
 
-    public static String checkUsername(String s) {
+    public static String checkUsername(String s, LuckPermsPlugin plugin) {
         if (s == null) {
             return null;
         }
 
-        Preconditions.checkArgument(
-                DataConstraints.PLAYER_USERNAME_TEST.test(s),
-                "Invalid username entry '" + s + "'. Usernames must be less than 16 chars and only contain 'a-z A-Z 1-9 _'."
-        );
+        Predicate<String> test = plugin.getConfiguration().get(ConfigKeys.ALLOW_INVALID_USERNAMES) ?
+                DataConstraints.PLAYER_USERNAME_TEST_LENIENT :
+                DataConstraints.PLAYER_USERNAME_TEST;
+
+        Preconditions.checkArgument(test.test(s), "Invalid username entry: " + s);
         return s;
     }
 
@@ -48,10 +53,7 @@ public final class ApiUtils {
             return null;
         }
 
-        Preconditions.checkArgument(
-                DataConstraints.GROUP_NAME_TEST.test(s),
-                "Invalid name entry '" + s + "'. Names must be less than 37 chars and only contain 'a-z A-Z 1-9'."
-        );
+        Preconditions.checkArgument(DataConstraints.GROUP_NAME_TEST.test(s), "Invalid name entry: " + s);
         return s.toLowerCase();
     }
 

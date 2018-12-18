@@ -33,6 +33,7 @@ import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
+import me.lucko.luckperms.common.api.ApiUtils;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
@@ -49,9 +50,6 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
-
-import static me.lucko.luckperms.common.api.ApiUtils.checkName;
-import static me.lucko.luckperms.common.api.ApiUtils.checkUsername;
 
 public class ApiStorage implements me.lucko.luckperms.api.Storage {
     private static final Function<Throwable, Boolean> CONSUME_EXCEPTION = throwable -> {
@@ -114,7 +112,7 @@ public class ApiStorage implements me.lucko.luckperms.api.Storage {
     @Override
     public @NonNull CompletableFuture<Boolean> loadUser(@NonNull UUID uuid, String username) {
         Objects.requireNonNull(uuid, "uuid");
-        username = checkUsername(username);
+        username = ApiUtils.checkUsername(username, this.plugin);
 
         if (this.plugin.getUserManager().getIfLoaded(uuid) == null) {
             this.plugin.getUserManager().getHouseKeeper().registerApiUsage(uuid);
@@ -147,7 +145,7 @@ public class ApiStorage implements me.lucko.luckperms.api.Storage {
     @Override
     public @NonNull CompletableFuture<Boolean> createAndLoadGroup(@NonNull String name) {
         Objects.requireNonNull(name, "name");
-        return this.handle.createAndLoadGroup(checkName(name), CreationCause.API)
+        return this.handle.createAndLoadGroup(ApiUtils.checkName(name), CreationCause.API)
                 .thenApply(r -> true)
                 .exceptionally(consumeExceptionToFalse());
     }
@@ -155,7 +153,7 @@ public class ApiStorage implements me.lucko.luckperms.api.Storage {
     @Override
     public @NonNull CompletableFuture<Boolean> loadGroup(@NonNull String name) {
         Objects.requireNonNull(name, "name");
-        return this.handle.loadGroup(checkName(name))
+        return this.handle.loadGroup(ApiUtils.checkName(name))
                 .thenApply(Optional::isPresent)
                 .exceptionally(consumeExceptionToFalse());
     }
@@ -195,7 +193,7 @@ public class ApiStorage implements me.lucko.luckperms.api.Storage {
     @Override
     public @NonNull CompletableFuture<Boolean> createAndLoadTrack(@NonNull String name) {
         Objects.requireNonNull(name, "name");
-        return this.handle.createAndLoadTrack(checkName(name), CreationCause.API)
+        return this.handle.createAndLoadTrack(ApiUtils.checkName(name), CreationCause.API)
                 .thenApply(r -> true)
                 .exceptionally(consumeExceptionToFalse());
     }
@@ -203,7 +201,7 @@ public class ApiStorage implements me.lucko.luckperms.api.Storage {
     @Override
     public @NonNull CompletableFuture<Boolean> loadTrack(@NonNull String name) {
         Objects.requireNonNull(name, "name");
-        return this.handle.loadTrack(checkName(name))
+        return this.handle.loadTrack(ApiUtils.checkName(name))
                 .thenApply(Optional::isPresent)
                 .exceptionally(consumeExceptionToFalse());
     }
@@ -235,7 +233,7 @@ public class ApiStorage implements me.lucko.luckperms.api.Storage {
     public @NonNull CompletableFuture<Boolean> saveUUIDData(@NonNull String username, @NonNull UUID uuid) {
         Objects.requireNonNull(username, "username");
         Objects.requireNonNull(uuid, "uuid");
-        return this.handle.savePlayerData(uuid, checkUsername(username))
+        return this.handle.savePlayerData(uuid, ApiUtils.checkUsername(username, this.plugin))
                 .thenApply(r -> true)
                 .exceptionally(consumeExceptionToFalse());
     }
@@ -243,7 +241,7 @@ public class ApiStorage implements me.lucko.luckperms.api.Storage {
     @Override
     public @NonNull CompletableFuture<UUID> getUUID(@NonNull String username) {
         Objects.requireNonNull(username, "username");
-        return this.handle.getPlayerUuid(checkUsername(username));
+        return this.handle.getPlayerUuid(ApiUtils.checkUsername(username, this.plugin));
     }
 
     @Override

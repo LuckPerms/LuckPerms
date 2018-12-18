@@ -61,7 +61,7 @@ public class ApiUserManager extends ApiAbstractManager<User, me.lucko.luckperms.
     @Override
     public @NonNull CompletableFuture<me.lucko.luckperms.api.User> loadUser(@NonNull UUID uuid, @Nullable String username) {
         Objects.requireNonNull(uuid, "uuid");
-        ApiUtils.checkUsername(username);
+        ApiUtils.checkUsername(username, this.plugin);
 
         if (this.plugin.getUserManager().getIfLoaded(uuid) == null) {
             this.plugin.getUserManager().getHouseKeeper().registerApiUsage(uuid);
