@@ -10,7 +10,7 @@ CREATE TABLE `{prefix}user_permissions` (
   `expiry`     INT(11)            NOT NULL,
   `contexts`   VARCHAR(200)       NOT NULL,
   PRIMARY KEY (`id`)
-) DEFAULT CHARSET = utf8;
+) DEFAULT CHARSET = utf8mb4;
 CREATE INDEX `{prefix}user_permissions_uuid` ON `{prefix}user_permissions` (`uuid`);
 CREATE INDEX `{prefix}user_permissions_permission` ON `{prefix}user_permissions` (`permission`);
 
@@ -24,7 +24,7 @@ CREATE TABLE `{prefix}group_permissions` (
   `expiry`     INT(11)            NOT NULL,
   `contexts`   VARCHAR(200)       NOT NULL,
   PRIMARY KEY (`id`)
-) DEFAULT CHARSET = utf8;
+) DEFAULT CHARSET = utf8mb4;
 CREATE INDEX `{prefix}group_permissions_name` ON `{prefix}group_permissions` (`name`);
 CREATE INDEX `{prefix}group_permissions_permission` ON `{prefix}group_permissions` (`permission`);
 
@@ -33,13 +33,13 @@ CREATE TABLE `{prefix}players` (
   `username`      VARCHAR(16) NOT NULL,
   `primary_group` VARCHAR(36) NOT NULL,
   PRIMARY KEY (`uuid`)
-) DEFAULT CHARSET = utf8;
+) DEFAULT CHARSET = utf8mb4;
 CREATE INDEX `{prefix}players_username` ON `{prefix}players` (`username`);
 
 CREATE TABLE `{prefix}groups` (
   `name` VARCHAR(36) NOT NULL,
   PRIMARY KEY (`name`)
-) DEFAULT CHARSET = utf8;
+) DEFAULT CHARSET = utf8mb4;
 
 CREATE TABLE `{prefix}actions` (
   `id`         INT AUTO_INCREMENT NOT NULL,
@@ -51,10 +51,10 @@ CREATE TABLE `{prefix}actions` (
   `acted_name` VARCHAR(36)        NOT NULL,
   `action`     VARCHAR(300)       NOT NULL,
   PRIMARY KEY (`id`)
-) DEFAULT CHARSET = utf8;
+) DEFAULT CHARSET = utf8mb4;
 
 CREATE TABLE `{prefix}tracks` (
   `name`   VARCHAR(36) NOT NULL,
   `groups` TEXT        NOT NULL,
   PRIMARY KEY (`name`)
-) DEFAULT CHARSET = utf8;
+) DEFAULT CHARSET = utf8mb4;
