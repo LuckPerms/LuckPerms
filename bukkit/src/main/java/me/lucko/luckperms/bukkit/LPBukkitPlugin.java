@@ -123,7 +123,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected Set<Dependency> getGlobalDependencies() {
-        EnumSet<Dependency> dependencies = EnumSet.of(Dependency.TEXT, Dependency.CAFFEINE, Dependency.OKIO, Dependency.OKHTTP, Dependency.EVENT);
+        EnumSet<Dependency> dependencies = EnumSet.of(Dependency.TEXT, Dependency.TEXT_ADAPTER_BUKKIT, Dependency.CAFFEINE, Dependency.OKIO, Dependency.OKHTTP, Dependency.EVENT);
         if (isBrigadierSupported()) {
             dependencies.add(Dependency.COMMODORE);
         }

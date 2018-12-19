@@ -66,6 +66,13 @@ public enum Dependency {
             "V821j+n8AWhAvLhHjfXQ+/4284Gn4oXTYYfLkLjvs8o=",
             Relocation.of("text", "net{}kyori{}text")
     ),
+    TEXT_ADAPTER_BUKKIT(
+            "net{}kyori",
+            "text-adapter-bukkit",
+            "1.0.0",
+            "V821j+n8AWhAvLhHjfXQ+/4284Gn4oXTYYfLkLjvs8o=",
+            Relocation.of("text", "net{}kyori{}text")
+    ),
     EVENT(
             "net{}kyori",
             "event-api",

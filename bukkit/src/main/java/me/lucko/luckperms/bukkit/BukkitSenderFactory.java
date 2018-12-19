@@ -26,16 +26,14 @@
 package me.lucko.luckperms.bukkit;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.bukkit.compat.BukkitJsonMessageHandler;
 import me.lucko.luckperms.bukkit.compat.CraftBukkitUtil;
-import me.lucko.luckperms.bukkit.compat.SpigotJsonMessageHandler;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.Component;
-import net.kyori.text.serializer.ComponentSerializers;
+import net.kyori.text.adapter.bukkit.TextAdapter;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -45,13 +43,9 @@ import org.bukkit.entity.Player;
 import java.util.UUID;
 
 public class BukkitSenderFactory extends SenderFactory<CommandSender> {
-    private final BukkitJsonMessageHandler bukkitHandler;
-    private final SpigotJsonMessageHandler spigotHandler;
 
     public BukkitSenderFactory(LuckPermsPlugin plugin) {
         super(plugin);
-        this.bukkitHandler = new BukkitJsonMessageHandler();
-        this.spigotHandler = isSpigot() ? new SpigotJsonMessageHandler() : null;
     }
 
     @Override
@@ -85,22 +79,11 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
     @Override
     protected void sendMessage(CommandSender sender, Component message) {
         if (CraftBukkitUtil.isChatCompatible() && sender instanceof Player) {
-            Player player = (Player) sender;
-            String json = ComponentSerializers.JSON.serialize(message);
-
-            // Try Bukkit.
-            if (this.bukkitHandler.sendJsonMessage(player, json)) {
-                return;
-            }
-
-            // Try Spigot.
-            if (this.spigotHandler != null && this.spigotHandler.sendJsonMessage(player, json)) {
-                return;
-            }
+            TextAdapter.sendComponent(sender, message);
+        } else {
+            // Fallback to legacy format
+            sendMessage(sender, TextUtils.toLegacy(message));
         }
-
-        // Fallback to legacy format
-        sendMessage(sender, TextUtils.toLegacy(message));
     }
 
     @Override
@@ -114,15 +97,6 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
     @Override
     protected boolean hasPermission(CommandSender sender, String node) {
         return sender.hasPermission(node);
-    }
-
-    private static boolean isSpigot() {
-        try {
-            Class.forName("net.md_5.bungee.chat.ComponentSerializer");
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
     }
 
     private static final class SyncMessengerAgent implements Runnable {
