@@ -32,59 +32,58 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ProgressLogger {
-    private static final int NOTIFY_FREQUENCY = 500;
+    public static final int DEFAULT_NOTIFY_FREQUENCY = 500;
 
-    private final String pluginName;
     private final Message logMessage;
     private final Message logProgressMessage;
+    private final String logPrefixParam;
 
     private final Set<Sender> listeners = new HashSet<>();
 
-    public ProgressLogger(String pluginName) {
-        this(pluginName, Message.MIGRATION_LOG, Message.MIGRATION_LOG_PROGRESS);
-    }
-
-    public ProgressLogger(String pluginName, Message logMessage, Message logProgressMessage) {
-        this.pluginName = pluginName;
+    public ProgressLogger(Message logMessage, Message logProgressMessage, String logPrefixParam) {
         this.logMessage = logMessage;
         this.logProgressMessage = logProgressMessage;
+        this.logPrefixParam = logPrefixParam;
     }
 
     public void addListener(Sender sender) {
         this.listeners.add(sender);
     }
 
+    public Set<Sender> getListeners() {
+        return this.listeners;
+    }
+
     public void log(String msg) {
-        if (this.pluginName == null) {
-            this.listeners.forEach(s -> this.logMessage.send(s, msg));
-        } else {
-            this.listeners.forEach(s -> this.logMessage.send(s, this.pluginName, msg));
-        }
+        dispatchMessage(this.logMessage, msg);
     }
 
     public void logError(String msg) {
-        if (this.pluginName == null) {
-            this.listeners.forEach(s -> this.logMessage.send(s, "Error -> " + msg));
-        } else {
-            this.listeners.forEach(s -> this.logMessage.send(s, this.pluginName, "Error -> " + msg));
-        }
+        dispatchMessage(this.logMessage, "Error -> " + msg);
     }
 
     public void logAllProgress(String msg, int amount) {
-        if (this.pluginName == null) {
-            this.listeners.forEach(s -> this.logProgressMessage.send(s, msg.replace("{}", Integer.toString(amount))));
-        } else {
-            this.listeners.forEach(s -> this.logProgressMessage.send(s, this.pluginName, msg.replace("{}", Integer.toString(amount))));
-        }
+        dispatchMessage(this.logProgressMessage, msg.replace("{}", Integer.toString(amount)));
     }
 
-    public void logProgress(String msg, int amount) {
-        if (amount % NOTIFY_FREQUENCY == 0) {
+    public void logProgress(String msg, int amount, int notifyFrequency) {
+        if (amount % notifyFrequency == 0) {
             logAllProgress(msg, amount);
         }
     }
 
-    public Set<Sender> getListeners() {
-        return this.listeners;
+    private Object[] formParams(String content) {
+        if (this.logPrefixParam != null) {
+            return new Object[]{this.logPrefixParam, content};
+        } else {
+            return new Object[]{content};
+        }
+    }
+
+    private void dispatchMessage(Message messageType, String content) {
+        Object[] params = formParams(content);
+        for (Sender s : this.listeners) {
+            messageType.send(s, params);
+        }
     }
 }

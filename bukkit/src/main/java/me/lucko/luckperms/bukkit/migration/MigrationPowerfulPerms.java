@@ -42,6 +42,7 @@ import me.lucko.luckperms.common.commands.migration.MigrationUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
+import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
@@ -77,7 +78,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) {
-        ProgressLogger log = new ProgressLogger("PowerfulPerms");
+        ProgressLogger log = new ProgressLogger(Message.MIGRATION_LOG, Message.MIGRATION_LOG_PROGRESS, "PowerfulPerms");
         log.addListener(plugin.getConsoleSender());
         log.addListener(sender);
 
@@ -264,7 +265,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
             plugin.getUserManager().cleanup(user);
             plugin.getStorage().saveUser(user);
-            log.logProgress("Migrated {} users so far.", userCount.incrementAndGet());
+            log.logProgress("Migrated {} users so far.", userCount.incrementAndGet(), ProgressLogger.DEFAULT_NOTIFY_FREQUENCY);
         });
 
         log.log("Migrated " + userCount.get() + " users.");

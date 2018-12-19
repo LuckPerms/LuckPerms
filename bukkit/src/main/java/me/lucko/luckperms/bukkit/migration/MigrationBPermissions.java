@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.commands.migration.MigrationUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
+import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
@@ -77,7 +78,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) {
-        ProgressLogger log = new ProgressLogger("bPermissions");
+        ProgressLogger log = new ProgressLogger(Message.MIGRATION_LOG, Message.MIGRATION_LOG_PROGRESS, "bPermissions");
         log.addListener(plugin.getConsoleSender());
         log.addListener(sender);
 
@@ -117,7 +118,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
             AtomicInteger userLoadCount = new AtomicInteger(0);
             for (String user : users) {
                 world.loadOne(user, CalculableType.USER);
-                log.logProgress("Forcefully loaded {} users so far.", userLoadCount.incrementAndGet());
+                log.logProgress("Forcefully loaded {} users so far.", userLoadCount.incrementAndGet(), ProgressLogger.DEFAULT_NOTIFY_FREQUENCY);
             }
         }
         log.log("Forcefully loaded all users.");
@@ -168,7 +169,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 plugin.getStorage().saveUser(lpUser);
                 plugin.getUserManager().cleanup(lpUser);
 
-                log.logProgress("Migrated {} users so far.", userCount.incrementAndGet());
+                log.logProgress("Migrated {} users so far.", userCount.incrementAndGet(), ProgressLogger.DEFAULT_NOTIFY_FREQUENCY);
             });
 
             log.log("Migrated " + userCount.get() + " users in world " + world.getName() + ".");

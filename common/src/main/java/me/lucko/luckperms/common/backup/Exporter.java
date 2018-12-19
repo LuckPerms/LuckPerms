@@ -88,7 +88,7 @@ public class Exporter implements Runnable {
         this.filePath = filePath;
         this.includeUsers = includeUsers;
 
-        this.log = new ProgressLogger(null, Message.EXPORT_LOG, Message.EXPORT_LOG_PROGRESS);
+        this.log = new ProgressLogger(Message.EXPORT_LOG, Message.EXPORT_LOG_PROGRESS, null);
         this.log.addListener(plugin.getConsoleSender());
         this.log.addListener(executor);
     }
