@@ -70,7 +70,7 @@ public enum Dependency {
             "net{}kyori",
             "text-adapter-bukkit",
             "1.0.0",
-            "V821j+n8AWhAvLhHjfXQ+/4284Gn4oXTYYfLkLjvs8o=",
+            "2Ph9vLzuofbE4iMaTMOTaR+v0M1Dxn503ia9rwfn7x8=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     EVENT(
