@@ -266,7 +266,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
             getApiProvider().getEventBus().subscribe(UserDataRecalculateEvent.class, event -> {
                 User user = ApiUser.cast(event.getUser());
                 Optional<Player> player = getBootstrap().getPlayer(user.getUuid());
-                player.ifPresent(this::refreshAutoOp);
+                player.ifPresent(p -> refreshAutoOp(p, false));
             });
         }
 
@@ -324,16 +324,25 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
         }
     }
 
-    public void refreshAutoOp(Player player) {
+    public void refreshAutoOp(Player player, boolean callerIsSync) {
         if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
             User user = getUserManager().getIfLoaded(player.getUniqueId());
             if (user == null) {
-                player.setOp(false);
+                if (callerIsSync) {
+                    player.setOp(false);
+                } else {
+                    this.bootstrap.getScheduler().executeSync(() -> player.setOp(false));
+                }
                 return;
             }
 
             Map<String, Boolean> permData = user.getCachedData().getPermissionData(this.contextManager.getApplicableContexts(player)).getImmutableBacking();
-            player.setOp(permData.getOrDefault("luckperms.autoop", false));
+            boolean value = permData.getOrDefault("luckperms.autoop", false);
+            if (callerIsSync) {
+                player.setOp(value);
+            } else {
+                this.bootstrap.getScheduler().executeSync(() -> player.setOp(value));
+            }
         }
     }
 

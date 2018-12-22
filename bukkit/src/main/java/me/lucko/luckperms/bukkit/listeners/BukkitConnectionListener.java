@@ -164,7 +164,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
             return;
         }
 
-        this.plugin.refreshAutoOp(player);
+        this.plugin.refreshAutoOp(player, true);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
