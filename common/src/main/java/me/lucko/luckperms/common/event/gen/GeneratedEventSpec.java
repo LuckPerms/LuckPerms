@@ -52,12 +52,14 @@ public class GeneratedEventSpec {
     private static final Method EQUALS_METHOD;
     private static final Method HASHCODE_METHOD;
     private static final Method GET_API_METHOD;
+    private static final Method GET_EVENT_TYPE_METHOD;
     static {
         try {
             TO_STRING_METHOD = Object.class.getMethod("toString");
             EQUALS_METHOD = Object.class.getMethod("equals", Object.class);
             HASHCODE_METHOD = Object.class.getMethod("hashCode");
             GET_API_METHOD = LuckPermsEvent.class.getMethod("getApi");
+            GET_EVENT_TYPE_METHOD = LuckPermsEvent.class.getMethod("getEventType");
         } catch (NoSuchMethodException e) {
             throw new ExceptionInInitializerError(e);
         }
@@ -81,7 +83,7 @@ public class GeneratedEventSpec {
             if (method.isDefault()) {
                 continue;
             }
-            if (GET_API_METHOD.equals(method)) {
+            if (GET_API_METHOD.equals(method) || GET_EVENT_TYPE_METHOD.equals(method)) {
                 continue;
             }
 
@@ -140,6 +142,9 @@ public class GeneratedEventSpec {
             }
             if (GET_API_METHOD.equals(method)) {
                 return this.api;
+            }
+            if (GET_EVENT_TYPE_METHOD.equals(method)) {
+                return GeneratedEventSpec.this.eventClass;
             }
 
             if (method.getDeclaringClass() == Object.class || method.isDefault()) {

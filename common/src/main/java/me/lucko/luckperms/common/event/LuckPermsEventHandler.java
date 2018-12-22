@@ -108,7 +108,7 @@ public class LuckPermsEventHandler<T extends LuckPermsEvent> implements EventHan
             this.consumer.accept(event);
             this.callCount.incrementAndGet();
         } catch (Throwable t) {
-            this.eventBus.getPlugin().getLogger().warn("Unable to pass event " + event.getClass().getSimpleName() + " to handler " + this.consumer.getClass().getName());
+            this.eventBus.getPlugin().getLogger().warn("Unable to pass event " + event.getEventType().getSimpleName() + " to handler " + this.consumer.getClass().getName());
             t.printStackTrace();
         }
     }

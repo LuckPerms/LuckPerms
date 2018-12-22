@@ -43,4 +43,12 @@ public interface LuckPermsEvent {
      */
     @NonNull LuckPermsApi getApi();
 
+    /**
+     * Gets the type of the event.
+     *
+     * @return the type of the event
+     * @since 4.4
+     */
+    @NonNull Class<? extends LuckPermsEvent> getEventType();
+
 }
