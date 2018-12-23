@@ -12,7 +12,6 @@ CREATE TABLE `{prefix}user_permissions` (
   PRIMARY KEY (`id`)
 );
 CREATE INDEX ON `{prefix}user_permissions` (`uuid`);
-CREATE INDEX ON `{prefix}user_permissions` (`permission`);
 
 CREATE TABLE `{prefix}group_permissions` (
   `id`         INT AUTO_INCREMENT NOT NULL,
@@ -26,7 +25,6 @@ CREATE TABLE `{prefix}group_permissions` (
   PRIMARY KEY (`id`)
 );
 CREATE INDEX ON `{prefix}group_permissions` (`name`);
-CREATE INDEX ON `{prefix}group_permissions` (`permission`);
 
 CREATE TABLE `{prefix}players` (
   `uuid`          VARCHAR(36) NOT NULL,

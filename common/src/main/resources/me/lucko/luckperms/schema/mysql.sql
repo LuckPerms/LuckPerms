@@ -12,7 +12,6 @@ CREATE TABLE `{prefix}user_permissions` (
   PRIMARY KEY (`id`)
 ) DEFAULT CHARSET = utf8mb4;
 CREATE INDEX `{prefix}user_permissions_uuid` ON `{prefix}user_permissions` (`uuid`);
-CREATE INDEX `{prefix}user_permissions_permission` ON `{prefix}user_permissions` (`permission`);
 
 CREATE TABLE `{prefix}group_permissions` (
   `id`         INT AUTO_INCREMENT NOT NULL,
@@ -26,7 +25,6 @@ CREATE TABLE `{prefix}group_permissions` (
   PRIMARY KEY (`id`)
 ) DEFAULT CHARSET = utf8mb4;
 CREATE INDEX `{prefix}group_permissions_name` ON `{prefix}group_permissions` (`name`);
-CREATE INDEX `{prefix}group_permissions_permission` ON `{prefix}group_permissions` (`permission`);
 
 CREATE TABLE `{prefix}players` (
   `uuid`          VARCHAR(36) NOT NULL,
