@@ -76,8 +76,8 @@ public enum Dependency {
     TEXT_ADAPTER_BUNGEECORD(
             "net{}kyori",
             "text-adapter-bungeecord",
-            "1.0.1",
-            "A5JCRyp8Y/TIuQEtdOslo28am36DQHsgeK6FLa8aJCU=",
+            "1.0.2",
+            "hj7z8v8AceARfwTPzLzJwZdTqqERN9fPJPhZQAqD1Rc=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     EVENT(
