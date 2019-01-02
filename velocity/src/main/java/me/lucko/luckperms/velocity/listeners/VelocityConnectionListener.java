@@ -86,11 +86,9 @@ public class VelocityConnectionListener extends AbstractConnectionListener {
            - setting up cached data. */
         try {
             User user = loadUser(p.getUniqueId(), p.getUsername());
-            this.plugin.getEventFactory().handleUserLoginProcess(p.getUniqueId(), p.getUsername(), user);
             recordConnection(p.getUniqueId());
-
-            // set permission provider
             e.setProvider(new PlayerPermissionProvider(p, user, this.plugin.getContextManager().getCacheFor(p)));
+            this.plugin.getEventFactory().handlePlayerLoginProcess(p.getUniqueId(), p.getUsername(), user);
         } catch (Exception ex) {
             this.plugin.getLogger().severe("Exception occurred whilst loading data for " + p.getUniqueId() + " - " + p.getUsername());
             ex.printStackTrace();
@@ -100,6 +98,7 @@ public class VelocityConnectionListener extends AbstractConnectionListener {
                 // cancel the login attempt
                 this.deniedLogin.add(p.getUniqueId());
             }
+            this.plugin.getEventFactory().handlePlayerLoginProcess(p.getUniqueId(), p.getUsername(), null);
         }
     }
 

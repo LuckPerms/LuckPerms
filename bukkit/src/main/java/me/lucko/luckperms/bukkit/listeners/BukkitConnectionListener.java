@@ -86,8 +86,8 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
            - setting up cached data. */
         try {
             User user = loadUser(e.getUniqueId(), e.getName());
-            this.plugin.getEventFactory().handleUserLoginProcess(e.getUniqueId(), e.getName(), user);
             recordConnection(e.getUniqueId());
+            this.plugin.getEventFactory().handlePlayerLoginProcess(e.getUniqueId(), e.getName(), user);
         } catch (Exception ex) {
             this.plugin.getLogger().severe("Exception occurred whilst loading data for " + e.getUniqueId() + " - " + e.getName());
             ex.printStackTrace();
@@ -95,6 +95,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
             // deny the connection
             this.deniedAsyncLogin.add(e.getUniqueId());
             e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Message.LOADING_DATABASE_ERROR.asString(this.plugin.getLocaleManager()));
+            this.plugin.getEventFactory().handlePlayerLoginProcess(e.getUniqueId(), e.getName(), null);
         }
     }
 

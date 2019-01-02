@@ -23,29 +23,36 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.event.user;
+package me.lucko.luckperms.api.event.player;
 
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.UUID;
 
 /**
- * Called when LuckPerms has finished processing a certain Player's connection.
+ * Called when LuckPerms has finished processing a Player's initial connection.
  *
- * <p>This event will always execute during the platforms async login/auth event.
- * All handlers will be called instantly.</p>
+ * <p>This event will always execute during the platforms async connection
+ * event. The LuckPerms platform listener processing the connection will block
+ * while this event is posted.</p>
  *
- * <p>This, among other things, allows you to wait until permission data is loaded
- * for a User during the BungeeCord 'LoginEvent', as event priorities are ignored
- * by the current implementation.</p>
+ * <p>This, among other things, allows you to wait until permission data is
+ * loaded for a User during the BungeeCord 'LoginEvent', as event priorities are
+ * ignored by the current implementation.</p>
  *
- * @since 3.4
+ * <p>The implementation will make an attempt to ensure this event is called
+ * for all connections, even if the operation to load User data was not
+ * successful. Note that LuckPerms will usually cancel the platform connection
+ * event if data could not be loaded.</p>
+ *
+ * @since 4.4
  */
-public interface UserLoginProcessEvent extends LuckPermsEvent {
+public interface PlayerLoginProcessEvent extends LuckPermsEvent {
 
     /**
      * Gets the UUID of the connection which was processed
@@ -62,10 +69,22 @@ public interface UserLoginProcessEvent extends LuckPermsEvent {
     @NonNull @Param(1) String getUsername();
 
     /**
+     * Gets if the login was processed successfully.
+     *
+     * @return true if the login was successful
+     */
+    default boolean wasSuccessful() {
+        return getUser() != null;
+    }
+
+    /**
      * Gets the resultant User instance which was loaded.
+     *
+     * <p>Returns {@code null} if the login was not processed
+     * {@link #wasSuccessful() successfully.}</p>
      *
      * @return the user instance
      */
-    @NonNull @Param(2) User getUser();
+    @Nullable @Param(2) User getUser();
 
 }

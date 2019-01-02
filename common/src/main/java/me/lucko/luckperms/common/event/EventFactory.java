@@ -52,6 +52,7 @@ import me.lucko.luckperms.api.event.node.NodeAddEvent;
 import me.lucko.luckperms.api.event.node.NodeClearEvent;
 import me.lucko.luckperms.api.event.node.NodeRemoveEvent;
 import me.lucko.luckperms.api.event.player.PlayerDataSaveEvent;
+import me.lucko.luckperms.api.event.player.PlayerLoginProcessEvent;
 import me.lucko.luckperms.api.event.source.Source;
 import me.lucko.luckperms.api.event.sync.ConfigReloadEvent;
 import me.lucko.luckperms.api.event.sync.PostSyncEvent;
@@ -68,7 +69,6 @@ import me.lucko.luckperms.api.event.user.UserCacheLoadEvent;
 import me.lucko.luckperms.api.event.user.UserDataRecalculateEvent;
 import me.lucko.luckperms.api.event.user.UserFirstLoginEvent;
 import me.lucko.luckperms.api.event.user.UserLoadEvent;
-import me.lucko.luckperms.api.event.user.UserLoginProcessEvent;
 import me.lucko.luckperms.api.event.user.track.UserDemoteEvent;
 import me.lucko.luckperms.api.event.user.track.UserPromoteEvent;
 import me.lucko.luckperms.common.api.implementation.ApiPermissionHolder;
@@ -121,7 +121,7 @@ public final class EventFactory {
                 return;
             }
             T event = supplier.get();
-            this.eventBus.post(event);
+            post(event);
         });
     }
     
@@ -280,16 +280,20 @@ public final class EventFactory {
         post(UserFirstLoginEvent.class, () -> generate(UserFirstLoginEvent.class, uuid, username));
     }
 
+    public void handlePlayerLoginProcess(UUID uuid, String username, User user) {
+        if (!shouldPost(PlayerLoginProcessEvent.class)) {
+            return;
+        }
+
+        post(generate(PlayerLoginProcessEvent.class, uuid, username, new ApiUser(user)));
+    }
+
     public void handlePlayerDataSave(UUID uuid, String username, PlayerSaveResult result) {
         post(PlayerDataSaveEvent.class, () -> generate(PlayerDataSaveEvent.class, uuid, username, result));
     }
 
     public void handleUserLoad(User user) {
         post(UserLoadEvent.class, () -> generate(UserLoadEvent.class, new ApiUser(user)));
-    }
-
-    public void handleUserLoginProcess(UUID uuid, String username, User user) {
-        post(UserLoginProcessEvent.class, () -> generate(UserLoginProcessEvent.class, uuid, username, new ApiUser(user)));
     }
 
     public void handleUserDemote(User user, Track track, String from, String to, @Nullable Sender source) {
