@@ -169,6 +169,7 @@ public abstract class BufferedRequest<T> {
                     R result = Processor.this.supplier.get();
                     Processor.this.future.complete(result);
                 } catch (Exception e) {
+                    new RuntimeException("Processor " + Processor.this.supplier + " threw an exception whilst computing a result", e).printStackTrace();
                     Processor.this.future.completeExceptionally(e);
                 }
 
