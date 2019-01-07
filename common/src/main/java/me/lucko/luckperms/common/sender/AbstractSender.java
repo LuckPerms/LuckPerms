@@ -91,7 +91,6 @@ public final class AbstractSender<T> implements Sender {
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void sendMessage(Component message) {
         if (isConsole()) {

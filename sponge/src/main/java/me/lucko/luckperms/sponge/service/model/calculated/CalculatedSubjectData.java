@@ -240,11 +240,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         // flatten
         Set<LPSubjectReference> result = new LinkedHashSet<>();
         for (Set<LPSubjectReference> set : sorted.values()) {
-            for (LPSubjectReference e : set) {
-                if (!result.contains(e)) {
-                    result.add(e);
-                }
-            }
+            result.addAll(set);
         }
         return result;
     }

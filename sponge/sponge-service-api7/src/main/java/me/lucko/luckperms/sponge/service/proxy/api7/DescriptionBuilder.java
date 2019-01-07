@@ -114,8 +114,8 @@ public final class DescriptionBuilder implements PermissionDescription.Builder, 
 
         return this.container.equals(other.container) &&
                 this.roles.equals(other.roles) &&
-                (this.id == null ? other.id == null : this.id.equals(other.id)) &&
-                (this.description == null ? other.description == null : this.description.equals(other.description));
+                Objects.equals(this.id, other.id) &&
+                Objects.equals(this.description, other.description);
     }
 
     @Override

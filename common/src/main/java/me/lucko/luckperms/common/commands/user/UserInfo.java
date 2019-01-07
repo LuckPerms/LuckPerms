@@ -54,7 +54,6 @@ public class UserInfo extends SubCommand<User> {
         super(CommandSpec.USER_INFO.localize(locale), "info", CommandPermission.USER_INFO, Predicates.alwaysFalse());
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), user)) {

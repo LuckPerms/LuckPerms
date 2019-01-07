@@ -56,7 +56,6 @@ public abstract class DummySender implements Sender {
         consumeMessage(message);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void sendMessage(Component message) {
         consumeMessage(TextUtils.toLegacy(message));

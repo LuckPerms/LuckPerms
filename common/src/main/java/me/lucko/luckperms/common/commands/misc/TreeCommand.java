@@ -97,7 +97,7 @@ public class TreeCommand extends SingleCommand {
         Message.TREE_URL.send(sender);
 
         Component message = TextComponent.builder(url).color(TextColor.AQUA)
-                .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, String.valueOf(url)))
+                .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url))
                 .hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to open the tree view.").color(TextColor.GRAY)))
                 .build();
 

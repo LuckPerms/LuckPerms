@@ -91,7 +91,6 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         super(CommandSpec.MIGRATION_COMMAND.localize(locale), "permissionsex", CommandPermission.MIGRATION, Predicates.alwaysFalse());
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) {
         ProgressLogger log = new ProgressLogger(Message.MIGRATION_LOG, Message.MIGRATION_LOG_PROGRESS, "PermissionsEx");
@@ -187,7 +186,6 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
     private static Map<String, List<String>> getPermanentPermissions(PermissionEntity entity) {
         try {
-            //noinspection unchecked
             PermissionsData data = (PermissionsData) GET_DATA_METHOD.invoke(entity);
             return data.getPermissionsMap();
         } catch (IllegalAccessException | InvocationTargetException e) {

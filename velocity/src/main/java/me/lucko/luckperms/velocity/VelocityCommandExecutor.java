@@ -51,7 +51,7 @@ public class VelocityCommandExecutor implements Command {
     }
 
     @Override
-    public void execute(@NonNull CommandSource source, String[] args) {
+    public void execute(@NonNull CommandSource source, @NonNull String[] args) {
         Sender lpSender = this.plugin.getSenderFactory().wrap(source);
         List<String> arguments = CommandManager.stripQuotes(ARGUMENT_SPLITTER.splitToList(ARGUMENT_JOINER.join(args)));
 
@@ -59,7 +59,7 @@ public class VelocityCommandExecutor implements Command {
     }
 
     @Override
-    public List<String> suggest(@NonNull CommandSource source, String[] args) {
+    public List<String> suggest(@NonNull CommandSource source, @NonNull String[] args) {
         Sender lpSender = this.plugin.getSenderFactory().wrap(source);
         List<String> arguments = CommandManager.stripQuotes(TAB_COMPLETE_ARGUMENT_SPLITTER.splitToList(ARGUMENT_JOINER.join(args)));
 

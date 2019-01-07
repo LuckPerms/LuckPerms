@@ -63,6 +63,7 @@ public class LoadingMap<K, V> extends ForwardingMap<K, V> implements Map<K, V> {
         if (value != null) {
             return value;
         }
+        //noinspection unchecked
         return this.map.computeIfAbsent((K) key, this.function);
     }
 }

@@ -65,6 +65,8 @@ public class MetaAccumulator {
     private enum State {
         /** Marks that the accumulator is still gaining (accumulating) new data. */
         ACCUMULATING,
+        /** Marks that this accumulator is being completed. */
+        COMPLETING,
         /** Marks that the process of gaining (accumulating) new data is complete. */
         COMPLETE
     }
@@ -102,7 +104,7 @@ public class MetaAccumulator {
      * data is read.
      */
     public void complete() {
-        if (!this.state.compareAndSet(State.ACCUMULATING, State.COMPLETE)) {
+        if (!this.state.compareAndSet(State.ACCUMULATING, State.COMPLETING)) {
             return;
         }
 
@@ -110,6 +112,8 @@ public class MetaAccumulator {
         if (!this.meta.containsKey(NodeTypes.WEIGHT_KEY) && this.weight != 0) {
             this.meta.put(NodeTypes.WEIGHT_KEY, String.valueOf(this.weight));
         }
+
+        this.state.set(State.COMPLETE);
     }
 
     // accumulate methods

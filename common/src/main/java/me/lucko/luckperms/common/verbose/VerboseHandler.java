@@ -79,7 +79,6 @@ public class VerboseHandler extends RepeatingTask {
             return;
         }
 
-        //noinspection ThrowableNotThrown
         StackTraceElement[] trace = new Exception().getStackTrace();
 
         // add the check data to a queue to be processed later.
@@ -104,7 +103,6 @@ public class VerboseHandler extends RepeatingTask {
             return;
         }
 
-        //noinspection ThrowableNotThrown
         StackTraceElement[] trace = new Exception().getStackTrace();
 
         // add the check data to a queue to be processed later.

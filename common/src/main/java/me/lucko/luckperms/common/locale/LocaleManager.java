@@ -75,7 +75,7 @@ public class LocaleManager {
             EnumMap<Message, String> messages = new EnumMap<>(Message.class);
             EnumMap<CommandSpec, CommandSpecData> commands = new EnumMap<>(CommandSpec.class);
 
-            Map<String, Object> data = (Map<String, Object>) new Yaml().load(reader);
+            Map<String, Object> data = new Yaml().load(reader);
             for (Map.Entry<String, Object> entry : data.entrySet()) {
                 if (entry.getKey() == null || entry.getKey().isEmpty() || entry.getValue() == null) {
                     continue;

@@ -63,7 +63,6 @@ public final class ImmutableCollectors {
     }
 
     public static <T extends Enum<T>> Collector<T, EnumSet<T>, ImmutableSet<T>> toEnumSet(Class<T> clazz) {
-        //noinspection unchecked
         return Collector.of(
                 () -> EnumSet.noneOf(clazz),
                 EnumSet::add,

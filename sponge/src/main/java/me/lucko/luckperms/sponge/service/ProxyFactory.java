@@ -45,7 +45,6 @@ public final class ProxyFactory {
     private static final boolean IS_API_7 = isApi7();
     private static boolean isApi7() {
         try {
-            //noinspection JavaReflectionMemberAccess
             Subject.class.getDeclaredMethod("asSubjectReference");
             return true;
         } catch (NoSuchMethodException e) {

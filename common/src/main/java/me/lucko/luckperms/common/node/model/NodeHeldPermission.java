@@ -71,15 +71,13 @@ public final class NodeHeldPermission<T extends Comparable<T>> implements HeldPe
         return this.node.getWorld();
     }
 
-    @NonNull
     @Override
-    public OptionalLong getExpiry() {
+    public @NonNull OptionalLong getExpiry() {
         return this.node.isTemporary() ? OptionalLong.of(this.node.getExpiryUnixTime()) : OptionalLong.empty();
     }
 
-    @NonNull
     @Override
-    public ContextSet getContexts() {
+    public @NonNull ContextSet getContexts() {
         return this.node.getContexts();
     }
 

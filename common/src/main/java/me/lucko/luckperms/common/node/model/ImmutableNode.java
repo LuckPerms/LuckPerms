@@ -327,8 +327,8 @@ public final class ImmutableNode implements Node {
                         o1.permission == o2.permission &&
                         o1.value == o2.value &&
                         o1.override == o2.override &&
-                        (o1.server == null ? o2.server == null : o1.server.equals(o2.server)) &&
-                        (o1.world == null ? o2.world == null : o1.world.equals(o2.world)) &&
+                        Objects.equals(o1.server, o2.server) &&
+                        Objects.equals(o1.world, o2.world) &&
                         o1.expireAt == o2.expireAt &&
                         o1.getContexts().equals(o2.getContexts());
             }
@@ -339,8 +339,8 @@ public final class ImmutableNode implements Node {
                 return o1 == o2 ||
                         o1.permission == o2.permission &&
                         o1.override == o2.override &&
-                        (o1.server == null ? o2.server == null : o1.server.equals(o2.server)) &&
-                        (o1.world == null ? o2.world == null : o1.world.equals(o2.world)) &&
+                        Objects.equals(o1.server, o2.server) &&
+                        Objects.equals(o1.world, o2.world) &&
                         o1.expireAt == o2.expireAt &&
                         o1.getContexts().equals(o2.getContexts());
             }
@@ -352,8 +352,8 @@ public final class ImmutableNode implements Node {
                         o1.permission == o2.permission &&
                         o1.value == o2.value &&
                         o1.override == o2.override &&
-                        (o1.server == null ? o2.server == null : o1.server.equals(o2.server)) &&
-                        (o1.world == null ? o2.world == null : o1.world.equals(o2.world)) &&
+                        Objects.equals(o1.server, o2.server) &&
+                        Objects.equals(o1.world, o2.world) &&
                         o1.isTemporary() == o2.isTemporary() &&
                         o1.getContexts().equals(o2.getContexts());
             }
@@ -364,8 +364,8 @@ public final class ImmutableNode implements Node {
                 return o1 == o2 ||
                         o1.permission == o2.permission &&
                         o1.override == o2.override &&
-                        (o1.server == null ? o2.server == null : o1.server.equals(o2.server)) &&
-                        (o1.world == null ? o2.world == null : o1.world.equals(o2.world)) &&
+                        Objects.equals(o1.server, o2.server) &&
+                        Objects.equals(o1.world, o2.world) &&
                         o1.isTemporary() == o2.isTemporary() &&
                         o1.getContexts().equals(o2.getContexts());
             }
@@ -376,8 +376,8 @@ public final class ImmutableNode implements Node {
                 return o1 == o2 ||
                         o1.permission == o2.permission &&
                         o1.override == o2.override &&
-                        (o1.server == null ? o2.server == null : o1.server.equals(o2.server)) &&
-                        (o1.world == null ? o2.world == null : o1.world.equals(o2.world)) &&
+                        Objects.equals(o1.server, o2.server) &&
+                        Objects.equals(o1.world, o2.world) &&
                         o1.getContexts().equals(o2.getContexts());
             }
         };

@@ -196,7 +196,6 @@ public abstract class ContextManager<T> {
         for (ContextCalculator<? super T> calculator : ContextManager.this.calculators) {
             try {
                 MutableContextSet ret = calculator.giveApplicableContext(subject, accumulator);
-                //noinspection ConstantConditions
                 if (ret == null) {
                     throw new IllegalStateException(calculator.getClass() + " returned a null context set");
                 }
@@ -216,7 +215,6 @@ public abstract class ContextManager<T> {
         for (StaticContextCalculator calculator : this.staticCalculators) {
             try {
                 MutableContextSet ret = calculator.giveApplicableContext(accumulator);
-                //noinspection ConstantConditions
                 if (ret == null) {
                     throw new IllegalStateException(calculator.getClass() + " returned a null context set");
                 }
