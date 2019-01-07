@@ -61,19 +61,19 @@ import java.util.UUID;
  * which they simply cannot be, as LP utilises databases for data storage. Server admins
  * willing to take the risk of lagging their server can disable these exceptions in the config file.
  */
-public class VaultChatHook extends AbstractVaultChat {
+public class LuckPermsVaultChat extends AbstractVaultChat {
 
     // the plugin instance
     private final LPBukkitPlugin plugin;
 
     // the vault permission implementation
-    private final VaultPermissionHook permissionHook;
+    private final LuckPermsVaultPermission vaultPermission;
 
-    VaultChatHook(LPBukkitPlugin plugin, VaultPermissionHook permissionHook) {
-        super(permissionHook);
+    LuckPermsVaultChat(LPBukkitPlugin plugin, LuckPermsVaultPermission vaultPermission) {
+        super(vaultPermission);
         this.plugin = plugin;
-        this.permissionHook = permissionHook;
-        this.worldMappingFunction = world -> permissionHook.isIgnoreWorld() ? null : world;
+        this.vaultPermission = vaultPermission;
+        this.worldMappingFunction = world -> vaultPermission.isIgnoreWorld() ? null : world;
     }
 
     @Override
@@ -85,8 +85,8 @@ public class VaultChatHook extends AbstractVaultChat {
     public String getUserChatPrefix(String world, UUID uuid) {
         Objects.requireNonNull(uuid, "uuid");
 
-        User user = this.permissionHook.lookupUser(uuid);
-        Contexts contexts = this.permissionHook.contextForLookup(user, world);
+        User user = this.vaultPermission.lookupUser(uuid);
+        Contexts contexts = this.vaultPermission.contextForLookup(user, world);
         MetaCache metaData = user.getCachedData().getMetaData(contexts);
         String ret = metaData.getPrefix(MetaCheckEvent.Origin.THIRD_PARTY_API);
         if (log()) {
@@ -99,8 +99,8 @@ public class VaultChatHook extends AbstractVaultChat {
     public String getUserChatSuffix(String world, UUID uuid) {
         Objects.requireNonNull(uuid, "uuid");
 
-        User user = this.permissionHook.lookupUser(uuid);
-        Contexts contexts = this.permissionHook.contextForLookup(user, world);
+        User user = this.vaultPermission.lookupUser(uuid);
+        Contexts contexts = this.vaultPermission.contextForLookup(user, world);
         MetaCache metaData = user.getCachedData().getMetaData(contexts);
         String ret = metaData.getSuffix(MetaCheckEvent.Origin.THIRD_PARTY_API);
         if (log()) {
@@ -113,7 +113,7 @@ public class VaultChatHook extends AbstractVaultChat {
     public void setUserChatPrefix(String world, UUID uuid, String prefix) {
         Objects.requireNonNull(uuid, "uuid");
 
-        User user = this.permissionHook.lookupUser(uuid);
+        User user = this.vaultPermission.lookupUser(uuid);
         setChatMeta(user, ChatMetaType.PREFIX, prefix, world);
     }
 
@@ -121,7 +121,7 @@ public class VaultChatHook extends AbstractVaultChat {
     public void setUserChatSuffix(String world, UUID uuid, String suffix) {
         Objects.requireNonNull(uuid, "uuid");
 
-        User user = this.permissionHook.lookupUser(uuid);
+        User user = this.vaultPermission.lookupUser(uuid);
         setChatMeta(user, ChatMetaType.SUFFIX, suffix, world);
     }
 
@@ -130,8 +130,8 @@ public class VaultChatHook extends AbstractVaultChat {
         Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(key, "key");
 
-        User user = this.permissionHook.lookupUser(uuid);
-        Contexts contexts = this.permissionHook.contextForLookup(user, world);
+        User user = this.vaultPermission.lookupUser(uuid);
+        Contexts contexts = this.vaultPermission.contextForLookup(user, world);
         MetaCache metaData = user.getCachedData().getMetaData(contexts);
         String ret = metaData.getMeta(MetaCheckEvent.Origin.THIRD_PARTY_API).get(key);
         if (log()) {
@@ -145,7 +145,7 @@ public class VaultChatHook extends AbstractVaultChat {
         Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(key, "key");
 
-        User user = this.permissionHook.lookupUser(uuid);
+        User user = this.vaultPermission.lookupUser(uuid);
         setMeta(user, key, value, world);
     }
 
@@ -156,7 +156,7 @@ public class VaultChatHook extends AbstractVaultChat {
         if (group == null) {
             return null;
         }
-        Contexts contexts = this.permissionHook.contextForLookup(null, world);
+        Contexts contexts = this.vaultPermission.contextForLookup(null, world);
         MetaCache metaData = group.getCachedData().getMetaData(contexts);
         String ret = metaData.getPrefix(MetaCheckEvent.Origin.THIRD_PARTY_API);
         if (log()) {
@@ -172,7 +172,7 @@ public class VaultChatHook extends AbstractVaultChat {
         if (group == null) {
             return null;
         }
-        Contexts contexts = this.permissionHook.contextForLookup(null, world);
+        Contexts contexts = this.vaultPermission.contextForLookup(null, world);
         MetaCache metaData = group.getCachedData().getMetaData(contexts);
         String ret = metaData.getSuffix(MetaCheckEvent.Origin.THIRD_PARTY_API);
         if (log()) {
@@ -209,7 +209,7 @@ public class VaultChatHook extends AbstractVaultChat {
         if (group == null) {
             return null;
         }
-        Contexts contexts = this.permissionHook.contextForLookup(null, world);
+        Contexts contexts = this.vaultPermission.contextForLookup(null, world);
         MetaCache metaData = group.getCachedData().getMetaData(contexts);
         String ret = metaData.getMeta(MetaCheckEvent.Origin.THIRD_PARTY_API).get(key);
         if (log()) {
@@ -255,7 +255,7 @@ public class VaultChatHook extends AbstractVaultChat {
         holder.removeIf(type::matches);
 
         if (value == null) {
-            this.permissionHook.holderSave(holder);
+            this.vaultPermission.holderSave(holder);
             return;
         }
 
@@ -265,11 +265,11 @@ public class VaultChatHook extends AbstractVaultChat {
         int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0) + 10;
 
         Node.Builder chatMetaNode = NodeFactory.buildChatMetaNode(type, priority, value);
-        chatMetaNode.setServer(this.permissionHook.getVaultServer());
+        chatMetaNode.setServer(this.vaultPermission.getVaultServer());
         chatMetaNode.setWorld(world);
 
         holder.setPermission(chatMetaNode.build()); // assume success
-        this.permissionHook.holderSave(holder);
+        this.vaultPermission.holderSave(holder);
     }
 
     private void setMeta(PermissionHolder holder, String key, Object value, String world) {
@@ -280,7 +280,7 @@ public class VaultChatHook extends AbstractVaultChat {
         holder.removeIf(n -> n.isMeta() && n.getMeta().getKey().equals(key));
 
         if (value == null) {
-            this.permissionHook.holderSave(holder);
+            this.vaultPermission.holderSave(holder);
             return;
         }
 
@@ -291,11 +291,11 @@ public class VaultChatHook extends AbstractVaultChat {
             metaNode = NodeFactory.buildMetaNode(key, value.toString());
         }
 
-        metaNode.setServer(this.permissionHook.getVaultServer());
+        metaNode.setServer(this.vaultPermission.getVaultServer());
         metaNode.setWorld(world);
 
         holder.setPermission(metaNode.build()); // assume success
-        this.permissionHook.holderSave(holder);
+        this.vaultPermission.holderSave(holder);
     }
 
     private Contexts createContextForWorldSet(String world) {
@@ -303,7 +303,7 @@ public class VaultChatHook extends AbstractVaultChat {
         if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
             context.add(Contexts.WORLD_KEY, world.toLowerCase());
         }
-        context.add(Contexts.SERVER_KEY, this.permissionHook.getVaultServer());
-        return Contexts.of(context.build(), this.permissionHook.isIncludeGlobal(), true, true, true, true, false);
+        context.add(Contexts.SERVER_KEY, this.vaultPermission.getVaultServer());
+        return Contexts.of(context.build(), this.vaultPermission.isIncludeGlobal(), true, true, true, true, false);
     }
 }

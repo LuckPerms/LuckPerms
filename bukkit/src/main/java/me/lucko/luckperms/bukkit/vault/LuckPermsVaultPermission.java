@@ -67,12 +67,12 @@ import java.util.UUID;
  * which they simply cannot be, as LP utilises databases for data storage. Server admins
  * willing to take the risk of lagging their server can disable these exceptions in the config file.
  */
-public class VaultPermissionHook extends AbstractVaultPermission {
+public class LuckPermsVaultPermission extends AbstractVaultPermission {
 
     // the plugin instance
     private final LPBukkitPlugin plugin;
 
-    public VaultPermissionHook(LPBukkitPlugin plugin) {
+    public LuckPermsVaultPermission(LPBukkitPlugin plugin) {
         this.plugin = plugin;
         this.worldMappingFunction = world -> isIgnoreWorld() ? null : world;
     }
