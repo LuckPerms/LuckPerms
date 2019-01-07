@@ -194,7 +194,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
         this.plugin.getBootstrap().getServer().getScheduler().runTaskLaterAsynchronously(this.plugin.getBootstrap(), () -> {
             // Remove the custom permissible
             try {
-                PermissibleInjector.unInject(player, true);
+                PermissibleInjector.uninject(player, true);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

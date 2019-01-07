@@ -246,7 +246,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
         // uninject from players
         for (Player player : this.bootstrap.getServer().getOnlinePlayers().values()) {
             try {
-                PermissibleInjector.unInject(player, false);
+                PermissibleInjector.uninject(player, false);
             } catch (Exception e) {
                 e.printStackTrace();
             }
