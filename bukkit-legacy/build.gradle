@@ -2,13 +2,6 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '2.0.4'
 }
 
-repositories {
-    maven {
-        name 'spigot-repo'
-        url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
-    }
-}
-
 dependencies {
     compile project(path: ':bukkit', configuration: 'shadow')
     compile 'com.google.code.gson:gson:2.7'

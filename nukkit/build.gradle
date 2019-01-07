@@ -3,10 +3,7 @@ plugins {
 }
 
 repositories {
-    maven {
-        name 'nukkit-repo'
-        url 'https://repo.potestas.xyz/main/'
-    }
+    maven { url 'https://repo.potestas.xyz/main/' }
 }
 
 dependencies {

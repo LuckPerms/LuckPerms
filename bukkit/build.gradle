@@ -3,10 +3,7 @@ plugins {
 }
 
 repositories {
-    maven {
-        name 'spigot-repo'
-        url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
-    }
+    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
 }
 
 dependencies {

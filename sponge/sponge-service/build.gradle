@@ -1,3 +1,7 @@
+repositories {
+    maven { url 'https://repo.spongepowered.org/maven' }
+}
+
 dependencies {
     compile project(':common')
 
@@ -10,9 +14,3 @@ dependencies {
     compileOnly 'com.google.guava:guava:21.0'
 }
 
-repositories {
-    maven {
-        name 'sponge-repo'
-        url 'https://repo.spongepowered.org/maven'
-    }
-}

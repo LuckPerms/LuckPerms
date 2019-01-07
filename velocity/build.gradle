@@ -4,10 +4,7 @@ plugins {
 }
 
 repositories {
-    maven {
-        name 'velocity-repo'
-        url 'https://repo.velocitypowered.com/snapshots/'
-    }
+    maven { url 'https://repo.velocitypowered.com/snapshots/' }
 }
 
 dependencies {

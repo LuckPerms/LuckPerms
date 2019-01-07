@@ -1,8 +1,6 @@
 buildscript {
     repositories {
-        maven {
-            url 'https://plugins.gradle.org/m2'
-        }
+        maven { url 'https://plugins.gradle.org/m2' }
     }
 
     dependencies {
@@ -60,10 +58,6 @@ subprojects {
     repositories {
         //mavenLocal()
         mavenCentral()
-
-        maven {
-            name 'luck-repo'
-            url 'https://repo.lucko.me/'
-        }
+        maven { url 'https://repo.lucko.me/' }
     }
 }

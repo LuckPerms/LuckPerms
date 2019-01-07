@@ -4,10 +4,7 @@ plugins {
 }
 
 repositories {
-    maven {
-        name 'sponge-repo'
-        url 'https://repo.spongepowered.org/maven'
-    }
+    maven { url 'https://repo.spongepowered.org/maven' }
 }
 
 dependencies {

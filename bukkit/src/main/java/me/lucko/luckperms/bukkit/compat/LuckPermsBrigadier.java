@@ -91,8 +91,7 @@ public class LuckPermsBrigadier {
         public void onCommandSend(PlayerCommandSendEvent e) {
             Sender playerAsSender = this.plugin.getSenderFactory().wrap(e.getPlayer());
             if (!this.plugin.getCommandManager().hasPermissionForAny(playerAsSender)) {
-                e.getCommands().remove(this.pluginCommand.getLabel());
-                e.getCommands().removeAll(this.pluginCommand.getAliases());
+                e.getCommands().removeAll(Commodore.getAliases(this.pluginCommand));
             }
         }
     }

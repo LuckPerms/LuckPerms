@@ -1,3 +1,7 @@
+repositories {
+    maven { url 'https://repo.spongepowered.org/maven' }
+}
+
 dependencies {
     compile project(':common')
     compile project(':sponge:sponge-service')
@@ -7,12 +11,5 @@ dependencies {
         exclude(module: 'configurate-hocon')
         exclude(module: 'configurate-gson')
         exclude(module: 'configurate-yaml')
-    }
-}
-
-repositories {
-    maven {
-        name 'sponge-repo'
-        url 'https://repo.spongepowered.org/maven'
     }
 }
