@@ -25,11 +25,11 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
-import me.lucko.luckperms.common.context.ContextSetFormatter;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -61,9 +61,10 @@ public class InfoCommand extends SingleCommand {
             Message.INFO_STORAGE_META.send(sender, e.getKey(), formatValue(e.getValue()));
         }
 
+        ImmutableContextSet staticContext = plugin.getContextManager().getStaticContext();
         Message.INFO_MIDDLE.send(sender,
                 plugin.getMessagingService().map(InternalMessagingService::getName).orElse("None"),
-                ContextSetFormatter.toMinimalString(plugin.getContextManager().getStaticContext()).orElse("None"),
+                staticContext.isEmpty() ? "None" : MessageUtils.contextSetToString(plugin.getLocaleManager(), staticContext),
                 plugin.getBootstrap().getPlayerCount(),
                 plugin.getConnectionListener().getUniqueConnections().size(),
                 DurationFormatter.CONCISE_LOW_ACCURACY.format((System.currentTimeMillis() - plugin.getBootstrap().getStartupTime()) / 1000L),
