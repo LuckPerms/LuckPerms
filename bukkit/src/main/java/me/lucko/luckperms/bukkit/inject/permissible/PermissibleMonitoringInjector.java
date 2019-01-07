@@ -43,8 +43,15 @@ import java.util.Objects;
 public class PermissibleMonitoringInjector implements Runnable {
     private final LPBukkitPlugin plugin;
 
-    public PermissibleMonitoringInjector(LPBukkitPlugin plugin) {
+    public enum Mode {
+        INJECT, UNINJECT
+    }
+
+    private final Mode mode;
+
+    public PermissibleMonitoringInjector(LPBukkitPlugin plugin, Mode mode) {
         this.plugin = plugin;
+        this.mode = mode;
     }
 
     @Override
@@ -68,12 +75,22 @@ public class PermissibleMonitoringInjector implements Runnable {
         }
     }
 
-    private MonitoredPermissibleBase wrap(PermissibleBase permBase, String name) {
+    private PermissibleBase transform(PermissibleBase permBase, String name) {
         Objects.requireNonNull(permBase, "permBase");
+
+        // don't bother injecting if already setup.
+        if (this.mode == Mode.INJECT && permBase instanceof MonitoredPermissibleBase && ((MonitoredPermissibleBase) permBase).plugin == this.plugin) {
+            return null;
+        }
 
         // unwrap any previous injection
         if (permBase instanceof MonitoredPermissibleBase) {
             permBase = ((MonitoredPermissibleBase) permBase).getDelegate();
+        }
+
+        // if the mode is uninject, just return the unwrapped PermissibleBase
+        if (this.mode == Mode.UNINJECT) {
+            return permBase;
         }
 
         // create a monitored instance which delegates to the previous PermissibleBase
@@ -93,10 +110,13 @@ public class PermissibleMonitoringInjector implements Runnable {
         // get the PermissibleBase instance
         PermissibleBase permBase = (PermissibleBase) permField.get(consoleSender);
 
-        // create a monitored instance which delegates to the previous PermissibleBase
-        MonitoredPermissibleBase newPermBase = wrap(permBase, "internal/console");
+        // create a new instance which delegates to the previous PermissibleBase
+        PermissibleBase newPermBase = transform(permBase, "internal/console");
+        if (newPermBase == null) {
+            return;
+        }
 
-        // inject the monitored instance
+        // inject the new instance
         permField.set(consoleSender, newPermBase);
     }
 
@@ -117,10 +137,13 @@ public class PermissibleMonitoringInjector implements Runnable {
             permBase = new PermissibleBase(new CommandBlockServerOperator());
         }
 
-        // create a monitored instance which delegates to the previous PermissibleBase
-        MonitoredPermissibleBase newPermBase = wrap(permBase, "internal/commandblock");
+        // create a new instance which delegates to the previous PermissibleBase
+        PermissibleBase newPermBase = transform(permBase, "internal/commandblock");
+        if (newPermBase == null) {
+            return;
+        }
 
-        // inject the monitored instance
+        // inject the new instance
         permField.set(null, newPermBase);
     }
 
@@ -140,10 +163,13 @@ public class PermissibleMonitoringInjector implements Runnable {
         Field permField = entityClass.getDeclaredField("perm");
         permField.setAccessible(true);
 
-        // create a monitored instance which delegates to the previous PermissibleBase
-        MonitoredPermissibleBase newPermBase = wrap(permBase, "internal/entity");
+        // create a new instance which delegates to the previous PermissibleBase
+        PermissibleBase newPermBase = transform(permBase, "internal/entity");
+        if (newPermBase == null) {
+            return;
+        }
 
-        // inject the monitored instance
+        // inject the new instance
         permField.set(null, newPermBase);
     }
 

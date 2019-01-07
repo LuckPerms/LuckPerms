@@ -47,7 +47,7 @@ import java.util.Map;
  * Method calls are forwarded to the delegate permissible.
  */
 public class MonitoredPermissibleBase extends PermissibleBase {
-    private final LuckPermsPlugin plugin;
+    final LuckPermsPlugin plugin;
     private final PermissibleBase delegate;
     private final String name;
 
@@ -64,10 +64,6 @@ public class MonitoredPermissibleBase extends PermissibleBase {
         this.delegate = delegate;
         this.name = name;
         this.initialised = true;
-
-        // since we effectively cancel the execution of this call in the super
-        // constructor we need to call it again.
-        recalculatePermissions();
     }
 
     private void logCheck(PermissionCheckEvent.Origin origin, String permission, boolean result) {

@@ -162,7 +162,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
                 new InjectorSubscriptionMap(this),
                 new InjectorPermissionMap(this),
                 new InjectorDefaultsMap(this),
-                new PermissibleMonitoringInjector(this)
+                new PermissibleMonitoringInjector(this, PermissibleMonitoringInjector.Mode.INJECT)
         };
 
         for (Runnable injector : injectors) {
@@ -266,6 +266,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
         InjectorSubscriptionMap.uninject();
         InjectorPermissionMap.uninject();
         InjectorDefaultsMap.uninject();
+        new PermissibleMonitoringInjector(this, PermissibleMonitoringInjector.Mode.UNINJECT).run();
     }
 
     public void refreshAutoOp(Player player) {
