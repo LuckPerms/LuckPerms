@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
@@ -51,6 +52,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Responsible for loading runtime dependencies.
@@ -209,35 +211,68 @@ public class DependencyManager {
             return file;
         }
 
-        URL url = new URL(dependency.getUrl());
-        try (InputStream in = url.openStream()) {
+        boolean success = false;
+        Exception lastError = null;
 
-            // download the jar content
-            byte[] bytes = ByteStreams.toByteArray(in);
-            if (bytes.length == 0) {
-                throw new RuntimeException("Empty stream");
+        // getUrls returns two possible sources of the dependency.
+        // [0] is a mirror of Maven Central, used to reduce load on central. apparently they don't like being used as a CDN
+        // [1] is Maven Central itself
+
+        // side note: the relative "security" of the mirror is less than central, but it actually doesn't matter.
+        // we compare the downloaded file against a checksum here, so even if the mirror became compromised, RCE wouldn't be possible.
+        // if the mirror download doesn't match the checksum, we just try maven central instead.
+
+        List<URL> urls = dependency.getUrls();
+        for (int i = 0; i < urls.size() && !success; i++) {
+            URL url = urls.get(i);
+
+            try {
+                URLConnection connection = url.openConnection();
+
+                // i == 0 when we're trying to use the mirror repo.
+                // set some timeout properties so when/if this repository goes offline, we quickly fallback to central.
+                if (i == 0) {
+                    connection.setRequestProperty("User-Agent", "luckperms");
+                    connection.setConnectTimeout((int) TimeUnit.SECONDS.toMillis(5));
+                    connection.setReadTimeout((int) TimeUnit.SECONDS.toMillis(10));
+                }
+
+                try (InputStream in = connection.getInputStream()) {
+                    // download the jar content
+                    byte[] bytes = ByteStreams.toByteArray(in);
+                    if (bytes.length == 0) {
+                        throw new RuntimeException("Empty stream");
+                    }
+
+
+                    // compute a hash for the downloaded file
+                    byte[] hash = this.digest.digest(bytes);
+
+                    // ensure the hash matches the expected checksum
+                    if (!Arrays.equals(hash, dependency.getChecksum())) {
+                        throw new RuntimeException("Downloaded file had an invalid hash. " +
+                                "Expected: " + Base64.getEncoder().encodeToString(dependency.getChecksum()) + " " +
+                                "Actual: " + Base64.getEncoder().encodeToString(hash));
+                    }
+
+                    this.plugin.getLogger().info("Successfully downloaded '" + fileName + "' with matching checksum: " + Base64.getEncoder().encodeToString(hash));
+
+                    // if the checksum matches, save the content to disk
+                    Files.write(file, bytes);
+                    success = true;
+                }
+            } catch (Exception e) {
+                lastError = e;
             }
+        }
 
-
-            // compute a hash for the downloaded file
-            byte[] hash = this.digest.digest(bytes);
-
-            // ensure the hash matches the expected checksum
-            if (!Arrays.equals(hash, dependency.getChecksum())) {
-                throw new RuntimeException("Downloaded file had an invalid hash. " +
-                        "Expected: " + Base64.getEncoder().encodeToString(dependency.getChecksum()) + " " +
-                        "Actual: " + Base64.getEncoder().encodeToString(hash));
-            }
-
-            this.plugin.getLogger().info("Successfully downloaded '" + fileName + "' with matching checksum: " + Base64.getEncoder().encodeToString(hash));
-
-            // if the checksum matches, save the content to disk
-            Files.write(file, bytes);
+        if (!success) {
+            throw new RuntimeException("Unable to download", lastError);
         }
 
         // ensure the file saved correctly
         if (!Files.exists(file)) {
-            throw new IllegalStateException("File not present. - " + file.toString());
+            throw new IllegalStateException("File not present: " + file.toString());
         } else {
             return file;
         }

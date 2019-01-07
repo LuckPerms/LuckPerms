@@ -32,8 +32,11 @@ import me.lucko.luckperms.common.dependencies.relocation.Relocation;
 import me.lucko.luckperms.common.dependencies.relocation.RelocationHelper;
 
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
@@ -265,12 +268,14 @@ public enum Dependency {
             Relocation.of("toml4j", "com{}moandjiezana{}toml")
     );
 
-    private final String url;
+    private final List<URL> urls;
     private final String version;
     private final byte[] checksum;
     private final List<Relocation> relocations;
 
-    private static final String MAVEN_CENTRAL_FORMAT = "https://repo1.maven.org/maven2/%s/%s/%s/%s-%s.jar";
+    private static final String MAVEN_CENTRAL_REPO = "https://repo1.maven.org/maven2/";
+    private static final String LUCK_MIRROR_REPO = "https://nexus.lucko.me/repository/maven-central/";
+    private static final String MAVEN_FORMAT = "%s/%s/%s/%s-%s.jar";
 
     Dependency(String groupId, String artifactId, String version, String checksum) {
         this(groupId, artifactId, version, checksum, ImmutableList.of());
@@ -281,20 +286,21 @@ public enum Dependency {
     }
 
     Dependency(String groupId, String artifactId, String version, String checksum, List<Relocation> relocations) {
-        this(
-                String.format(MAVEN_CENTRAL_FORMAT,
-                        rewriteEscaping(groupId).replace(".", "/"),
-                        rewriteEscaping(artifactId),
-                        version,
-                        rewriteEscaping(artifactId),
-                        version
-                ),
-                version, checksum, relocations
+        String path = String.format(MAVEN_FORMAT,
+                rewriteEscaping(groupId).replace(".", "/"),
+                rewriteEscaping(artifactId),
+                version,
+                rewriteEscaping(artifactId),
+                version
         );
-    }
-
-    Dependency(String url, String version, String checksum, List<Relocation> relocations) {
-        this.url = url;
+        try {
+            this.urls = ImmutableList.of(
+                    new URL(LUCK_MIRROR_REPO + path),
+                    new URL(MAVEN_CENTRAL_REPO + path)
+            );
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e); // propagate
+        }
         this.version = version;
         this.checksum = Base64.getDecoder().decode(checksum);
         this.relocations = ImmutableList.copyOf(relocations);
@@ -308,26 +314,32 @@ public enum Dependency {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
         for (Dependency dependency : values()) {
-            URL url = new URL(dependency.getUrl());
-            try (InputStream in = url.openStream()) {
-                byte[] bytes = ByteStreams.toByteArray(in);
-                if (bytes.length == 0) {
-                    throw new RuntimeException("Empty stream");
+            List<byte[]> hashes = new ArrayList<>();
+            for (URL url : dependency.getUrls()) {
+                URLConnection connection = url.openConnection();
+                connection.setRequestProperty("User-Agent", "luckperms");
+
+                try (InputStream in = connection.getInputStream()) {
+                    byte[] bytes = ByteStreams.toByteArray(in);
+                    if (bytes.length == 0) {
+                        throw new RuntimeException("Empty stream");
+                    }
+
+                    hashes.add(digest.digest(bytes));
                 }
+            }
 
-                byte[] hash = digest.digest(bytes);
-
-                if (Arrays.equals(hash, dependency.getChecksum())) {
-                    System.out.println("MATCH    " + dependency.name() + ": " + Base64.getEncoder().encodeToString(hash));
-                } else {
-                    System.out.println("NO MATCH " + dependency.name() + ": " + Base64.getEncoder().encodeToString(hash));
+            for (int i = 0; i < hashes.size(); i++) {
+                byte[] hash = hashes.get(i);
+                if (!Arrays.equals(hash, dependency.getChecksum())) {
+                    System.out.println("NO MATCH - REPO " + i + " - " + dependency.name() + ": " + Base64.getEncoder().encodeToString(hash));
                 }
             }
         }
     }
 
-    public String getUrl() {
-        return this.url;
+    public List<URL> getUrls() {
+        return this.urls;
     }
 
     public String getVersion() {
