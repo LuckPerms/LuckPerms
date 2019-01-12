@@ -19,6 +19,12 @@ dependencies {
         exclude(module: 'configurate-gson')
         exclude(module: 'configurate-yaml')
     }
+    annotationProcessor('org.spongepowered:spongeapi:8.0.0-SNAPSHOT') {
+        exclude(module: 'configurate-core')
+        exclude(module: 'configurate-hocon')
+        exclude(module: 'configurate-gson')
+        exclude(module: 'configurate-yaml')
+    }
 }
 
 blossom {
