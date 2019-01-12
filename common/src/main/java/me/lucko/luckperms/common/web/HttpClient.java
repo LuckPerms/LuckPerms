@@ -36,21 +36,16 @@ import java.io.IOException;
 /**
  * Utilities for the OkHttp client
  */
-public class HttpClient {
+public final class HttpClient {
 
-    private static OkHttpClient client = null;
+    private HttpClient() {}
 
-    private static synchronized OkHttpClient getClient() {
-        if (client == null) {
-            client = new OkHttpClient.Builder()
-                    .addInterceptor(new LuckPermsUserAgentInterceptor())
-                    .build();
-        }
-        return client;
-    }
+    private static final OkHttpClient CLIENT = new OkHttpClient.Builder()
+            .addInterceptor(new LuckPermsUserAgentInterceptor())
+            .build();
 
     public static Response makeCall(Request request) throws IOException {
-        Response response = getClient().newCall(request).execute();
+        Response response = CLIENT.newCall(request).execute();
         if (!response.isSuccessful()) {
             throw exceptionForUnsuccessfulResponse(response);
         }
@@ -80,7 +75,5 @@ public class HttpClient {
             return chain.proceed(modified);
         }
     }
-
-    private HttpClient() {}
 
 }

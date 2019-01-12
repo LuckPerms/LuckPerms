@@ -40,7 +40,6 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
-import me.lucko.luckperms.common.web.StandardPastebin;
 import me.lucko.luckperms.common.web.WebEditor;
 
 import net.kyori.text.Component;
@@ -107,7 +106,7 @@ public class EditorCommand extends SingleCommand {
         JsonObject payload = WebEditor.formPayload(holders, sender, label, plugin);
 
         // upload the payload data to gist
-        String pasteId = StandardPastebin.BYTEBIN.postJson(payload, true).id();
+        String pasteId = plugin.getBytebin().postJson(payload, true).id();
         if (pasteId == null) {
             Message.EDITOR_UPLOAD_FAILURE.send(sender);
             return CommandResult.STATE_ERROR;

@@ -70,7 +70,7 @@ public class ApplyEditsCommand extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        JsonObject data = WebEditor.getDataFromGist(code);
+        JsonObject data = WebEditor.readDataFromBytebin(plugin.getBytebin(), code);
         if (data == null) {
             Message.APPLY_EDITS_UNABLE_TO_READ.send(sender, code);
             return CommandResult.FAILURE;

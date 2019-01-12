@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.gson.JObject;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
-import me.lucko.luckperms.common.web.StandardPastebin;
+import me.lucko.luckperms.common.web.Bytebin;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -116,12 +116,13 @@ public class TreeView {
     /**
      * Uploads the data contained in this TreeView and returns the id.
      *
+     * @param bytebin the bytebin instance to upload to
      * @param sender the sender
      * @param user the reference user, or null
      * @param checker the permission data instance to check against, or null
      * @return the id, or null
      */
-    public String uploadPasteData(Sender sender, User user, PermissionCache checker) {
+    public String uploadPasteData(Bytebin bytebin, Sender sender, User user, PermissionCache checker) {
         // only paste if there is actually data here
         if (!hasData()) {
             throw new IllegalStateException();
@@ -168,7 +169,7 @@ public class TreeView {
                 )
                 .toJson();
 
-        return StandardPastebin.BYTEBIN.postJson(payload, true).id();
+        return bytebin.postJson(payload, true).id();
     }
 
 }

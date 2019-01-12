@@ -40,7 +40,7 @@ import me.lucko.luckperms.common.util.gson.JObject;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.common.verbose.event.VerboseEvent;
-import me.lucko.luckperms.common.web.StandardPastebin;
+import me.lucko.luckperms.common.web.Bytebin;
 
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
@@ -229,10 +229,10 @@ public class VerboseListener {
     /**
      * Uploads the captured data in this listener to a paste and returns the url
      *
+     * @param bytebin the bytebin instance to upload with
      * @return the url
      */
-    public String uploadPasteData() {
-
+    public String uploadPasteData(Bytebin bytebin) {
         // retrieve variables
         long now = System.currentTimeMillis();
         String startDate = DATE_FORMAT.format(new Date(this.startTime));
@@ -275,7 +275,7 @@ public class VerboseListener {
                 .add("data", data)
                 .toJson();
 
-        return StandardPastebin.BYTEBIN.postJson(payload, true).id();
+        return bytebin.postJson(payload, true).id();
     }
 
     private static String getTristateColor(Tristate tristate) {

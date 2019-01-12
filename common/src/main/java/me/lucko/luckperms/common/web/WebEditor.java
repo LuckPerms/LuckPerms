@@ -144,9 +144,9 @@ public final class WebEditor {
         }
     }
 
-    public static JsonObject getDataFromGist(String id) {
+    public static JsonObject readDataFromBytebin(Bytebin bytebin, String id) {
         Request request = new Request.Builder()
-                .url(StandardPastebin.BYTEBIN.getRawUrl(id))
+                .url(bytebin.getPasteUrl(id))
                 .build();
 
         try (Response response = HttpClient.makeCall(request)) {

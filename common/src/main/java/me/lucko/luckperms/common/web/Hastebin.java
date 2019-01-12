@@ -25,56 +25,39 @@
 
 package me.lucko.luckperms.common.web;
 
-import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
-/**
- * Represents a pastebin service
- */
-public interface Pastebin {
+import me.lucko.luckperms.common.util.gson.GsonProvider;
 
-    /**
-     * Posts the given json to the pastebin
-     *
-     * @param element the json element to post
-     * @param compress whether to compress and post the data using gzip
-     * @return a paste
-     */
-    Paste postJson(JsonElement element, boolean compress);
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
-    /**
-     * Posts "plain" content to the pastebin
-     *
-     * @param content the content
-     * @return a paste
-     */
-    Paste postPlain(String content);
+import java.io.BufferedReader;
 
-    /**
-     * Gets the raw url of a paste's data from an id
-     *
-     * @param id the id
-     * @return a url
-     */
-    String getRawUrl(String id);
+public class Hastebin extends AbstractPastebin {
+    public static final Hastebin INSTANCE = new Hastebin();
 
-    /**
-     * Encapsulates the properties of a specific "paste" entry
-     */
-    interface Paste {
+    private static final String URL = "https://hastebin.com/";
+    private static final String RAW_URL = URL + "raw/";
+    private static final String POST_URL = URL + "documents";
 
-        /**
-         * Gets the url of the paste
-         *
-         * @return the url
-         */
-        String url();
+    private Hastebin() {
 
-        /**
-         * Gets the unique id of the paste
-         *
-         * @return the id
-         */
-        String id();
     }
 
+    @Override
+    protected String getPostUrl() {
+        return POST_URL;
+    }
+
+    @Override
+    protected String parseIdFromResult(Response response, ResponseBody responseBody, BufferedReader responseBodyReader) {
+        JsonObject object = GsonProvider.prettyPrinting().fromJson(responseBodyReader, JsonObject.class);
+        return object.get("key").getAsString();
+    }
+
+    @Override
+    public String getPasteUrl(String id) {
+        return RAW_URL + id;
+    }
 }

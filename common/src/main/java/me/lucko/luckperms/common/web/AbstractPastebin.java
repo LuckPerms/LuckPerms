@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.web;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 
@@ -47,59 +46,47 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPOutputStream;
 
-public enum StandardPastebin implements Pastebin {
-
-    BYTEBIN {
-        public static final String URL = "https://bytebin.lucko.me/";
-        private static final String POST_URL = URL + "post";
-
-        @Override
-        public String getPostUrl() {
-            return POST_URL;
-        }
-
-        @Override
-        protected String parseIdFromResult(BufferedReader reader) {
-            JsonObject object = GsonProvider.prettyPrinting().fromJson(reader, JsonObject.class);
-            return object.get("key").getAsString();
-        }
-
-        @Override
-        public String getRawUrl(String id) {
-            return URL + id;
-        }
-    },
-
-    HASTEBIN {
-        private static final String URL = "https://hastebin.com/";
-        private static final String RAW_URL = URL + "raw/";
-        private static final String POST_URL = URL + "documents";
-
-        @Override
-        public String getPostUrl() {
-            return POST_URL;
-        }
-
-        @Override
-        protected String parseIdFromResult(BufferedReader reader) {
-            JsonObject object = GsonProvider.prettyPrinting().fromJson(reader, JsonObject.class);
-            return object.get("key").getAsString();
-        }
-
-        @Override
-        public String getRawUrl(String id) {
-            return RAW_URL + id;
-        }
-    };
+/**
+ * Represents a pastebin service
+ */
+public abstract class AbstractPastebin {
 
     private static final MediaType JSON_TYPE = MediaType.parse("application/json; charset=utf-8");
     private static final MediaType PLAIN_TYPE = MediaType.parse("text/plain; charset=utf-8");
 
+    /**
+     * Gets the URL that post requests should be made to.
+     *
+     * @return the post URL
+     */
     protected abstract String getPostUrl();
-    protected abstract String parseIdFromResult(BufferedReader reader);
 
-    @Override
-    public Pastebin.Paste postJson(JsonElement content, boolean compress) {
+    /**
+     * Gets the id of the resultant post from the response of an upload request
+     *
+     * @param response the response
+     * @param responseBody the response body
+     * @param responseBodyReader the response body content
+     * @return
+     */
+    protected abstract String parseIdFromResult(Response response, ResponseBody responseBody, BufferedReader responseBodyReader);
+
+    /**
+     * Gets the raw url of a paste's data from an id
+     *
+     * @param id the id
+     * @return a url
+     */
+    public abstract String getPasteUrl(String id);
+
+    /**
+     * Posts the given json to the pastebin
+     *
+     * @param content the json element to post
+     * @param compress whether to compress and post the data using gzip
+     * @return a paste
+     */
+    public Paste postJson(JsonElement content, boolean compress) {
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 
         OutputStream outputStream;
@@ -122,12 +109,17 @@ public enum StandardPastebin implements Pastebin {
         return post(RequestBody.create(JSON_TYPE, byteOut.toByteArray()), compress);
     }
 
-    @Override
-    public Pastebin.Paste postPlain(String content) {
+    /**
+     * Posts "plain" content to the pastebin
+     *
+     * @param content the content
+     * @return a paste
+     */
+    public Paste postPlain(String content) {
         return post(RequestBody.create(PLAIN_TYPE, content), false);
     }
 
-    private Pastebin.Paste post(RequestBody body, boolean compressed) {
+    private Paste post(RequestBody body, boolean compressed) {
         Request.Builder requestBuilder = new Request.Builder()
                 .url(getPostUrl())
                 .post(body);
@@ -145,8 +137,8 @@ public enum StandardPastebin implements Pastebin {
 
                 try (InputStream inputStream = responseBody.byteStream()) {
                     try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-                        String id = parseIdFromResult(reader);
-                        String url = getRawUrl(id);
+                        String id = parseIdFromResult(response, responseBody, reader);
+                        String url = getPasteUrl(id);
                         return new Paste(url, id);
                     }
                 }
@@ -156,23 +148,35 @@ public enum StandardPastebin implements Pastebin {
         }
     }
 
-    private static final class Paste implements Pastebin.Paste {
+    /**
+     * Encapsulates the properties of a specific "paste" entry
+     */
+    public static final class Paste {
         private final String url;
         private final String id;
 
-        private Paste(String url, String id) {
+        Paste(String url, String id) {
             this.url = url;
             this.id = id;
         }
 
-        @Override
+        /**
+         * Gets the url of the paste
+         *
+         * @return the url
+         */
         public String url() {
             return this.url;
         }
 
-        @Override
+        /**
+         * Gets the unique id of the paste
+         *
+         * @return the id
+         */
         public String id() {
             return this.id;
         }
     }
+
 }

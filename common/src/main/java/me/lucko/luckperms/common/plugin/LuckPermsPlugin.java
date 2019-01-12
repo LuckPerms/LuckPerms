@@ -53,6 +53,7 @@ import me.lucko.luckperms.common.storage.implementation.file.FileWatcher;
 import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
+import me.lucko.luckperms.common.web.Bytebin;
 
 import java.util.Collections;
 import java.util.List;
@@ -221,6 +222,13 @@ public interface LuckPermsPlugin {
      * @return the file watcher
      */
     Optional<FileWatcher> getFileWatcher();
+
+    /**
+     * Gets the bytebin instance in use by platform.
+     *
+     * @return the bytebin instance
+     */
+    Bytebin getBytebin();
 
     /**
      * Gets a calculated context instance for the user using the rules of the platform.

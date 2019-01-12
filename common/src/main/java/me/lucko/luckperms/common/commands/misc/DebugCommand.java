@@ -51,8 +51,7 @@ import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
-import me.lucko.luckperms.common.web.Pastebin;
-import me.lucko.luckperms.common.web.StandardPastebin;
+import me.lucko.luckperms.common.web.Hastebin;
 
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
@@ -91,12 +90,12 @@ public class DebugCommand extends SingleCommand {
         builder.accept("context.json", getContextData(plugin));
         builder.accept("players.json", getPlayersData(plugin));
 
-        Pastebin.Paste paste = StandardPastebin.HASTEBIN.postPlain(sb.toString());
+        String pasteUrl = Hastebin.INSTANCE.postPlain(sb.toString()).url();
 
         Message.DEBUG_URL.send(sender);
 
-        Component message = TextComponent.builder(paste.url()).color(TextColor.AQUA)
-                .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, String.valueOf(paste.url())))
+        Component message = TextComponent.builder(pasteUrl).color(TextColor.AQUA)
+                .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, pasteUrl))
                 .hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to open the debugging data.").color(TextColor.GRAY)))
                 .build();
 

@@ -518,6 +518,11 @@ public final class ConfigKeys {
     public static final ConfigKey<String> REDIS_PASSWORD = enduringKey(stringKey("redis.password", ""));
 
     /**
+     * The URL of the bytebin instance used to upload data
+     */
+    public static final ConfigKey<String> BYTEBIN_URL = stringKey("bytebin-url", "https://bytebin.lucko.me/");
+
+    /**
      * The URL of the web editor
      */
     public static final ConfigKey<String> WEB_EDITOR_URL_PATTERN = stringKey("web-editor-url", "https://luckperms.github.io/editor/");
