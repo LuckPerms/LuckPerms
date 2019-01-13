@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.model.manager.user;
 
+import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.model.manager.Manager;
@@ -88,5 +89,10 @@ public interface UserManager<T extends User> extends Manager<UserIdentifier, Use
      * Invalidates the cached data for *loaded* users.
      */
     void invalidateAllUserCaches();
+
+    /**
+     * Invalidates the {@link PermissionCalculator}s for *loaded* users.
+     */
+    void invalidateAllPermissionCalculators();
 
 }

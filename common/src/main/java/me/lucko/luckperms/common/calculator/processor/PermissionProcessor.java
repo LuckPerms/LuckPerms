@@ -62,4 +62,11 @@ public interface PermissionProcessor {
 
     }
 
+    /**
+     * Called after the parent calculator has been invalidated
+     */
+    default void invalidate() {
+
+    }
+
 }

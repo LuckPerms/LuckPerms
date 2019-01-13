@@ -61,4 +61,9 @@ public class ChildProcessor extends AbstractPermissionProcessor implements Permi
         }
         this.childPermissions = builder;
     }
+
+    @Override
+    public void invalidate() {
+        refresh();
+    }
 }

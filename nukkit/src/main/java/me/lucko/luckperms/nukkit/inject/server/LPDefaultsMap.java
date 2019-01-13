@@ -88,6 +88,8 @@ public final class LPDefaultsMap {
 
     private void invalidate(boolean op) {
         getCache(op).invalidate();
+        this.plugin.getUserManager().invalidateAllPermissionCalculators();
+        this.plugin.getGroupManager().invalidateAllPermissionCalculators();
     }
 
     /**
@@ -135,6 +137,13 @@ public final class LPDefaultsMap {
         public void putAll(@NonNull Map<? extends String, ? extends Permission> map) {
             super.putAll(map);
             invalidate(this.op);
+        }
+
+        @Override
+        public Permission remove(@NonNull Object object) {
+            Permission ret = super.remove(object);
+            invalidate(this.op);
+            return ret;
         }
     }
 

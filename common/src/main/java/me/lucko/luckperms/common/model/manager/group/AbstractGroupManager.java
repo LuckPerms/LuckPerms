@@ -69,4 +69,9 @@ public abstract class AbstractGroupManager<T extends Group> extends AbstractMana
     public void invalidateAllGroupCaches() {
         getAll().values().forEach(PermissionHolder::invalidateCachedData);
     }
+
+    @Override
+    public void invalidateAllPermissionCalculators() {
+        getAll().values().forEach(p -> p.getCachedData().invalidatePermissionCalculators());
+    }
 }

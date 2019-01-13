@@ -33,13 +33,16 @@ import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.util.LoadingMap;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import cn.nukkit.permission.Permission;
 import cn.nukkit.plugin.PluginManager;
 
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -55,6 +58,17 @@ import java.util.function.Function;
  * Injected by {@link InjectorPermissionMap}.
  */
 public final class LPPermissionMap extends ForwardingMap<String, Permission> {
+
+    private static final Field PERMISSION_CHILDREN_FIELD;
+
+    static {
+        try {
+            PERMISSION_CHILDREN_FIELD = Permission.class.getDeclaredField("children");
+            PERMISSION_CHILDREN_FIELD.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
     // Uses perm.getName().toLowerCase(java.util.Locale.ENGLISH); to determine the key
     private final Map<String, Permission> delegate = new ConcurrentHashMap<>();
@@ -80,6 +94,8 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
     private void update() {
         this.trueChildPermissions.clear();
         this.falseChildPermissions.clear();
+        this.plugin.getUserManager().invalidateAllPermissionCalculators();
+        this.plugin.getGroupManager().invalidateAllPermissionCalculators();
     }
 
     @Override
@@ -89,8 +105,11 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
 
     @Override
     public Permission put(@NonNull String key, @NonNull Permission value) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(value, "value");
+
         this.plugin.getPermissionRegistry().insert(key);
-        Permission ret = super.put(key, value);
+        Permission ret = super.put(key, inject(value));
         update();
         return ret;
     }
@@ -103,11 +122,36 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
     }
 
     @Override
-    public Permission putIfAbsent(String key, Permission value) {
-        this.plugin.getPermissionRegistry().insert(key);
-        Permission ret = super.putIfAbsent(key, value);
-        update();
-        return ret;
+    public Permission remove(@Nullable Object object) {
+        if (object == null) {
+            return null;
+        }
+        return uninject(super.remove(object));
+    }
+
+    @Override
+    public boolean remove(Object key, Object value) {
+        return key != null && value != null && super.remove(key, uninject(((Permission) value)));
+    }
+
+    // check for null
+
+    @Override
+    public boolean containsKey(@Nullable Object key) {
+        return key != null && super.containsKey(key);
+    }
+
+    @Override
+    public boolean containsValue(@Nullable Object value) {
+        return value != null && super.containsValue(value);
+    }
+
+    @Override
+    public Permission get(@Nullable Object key) {
+        if (key == null) {
+            return null;
+        }
+        return super.get(key);
     }
 
     private final class ChildPermissionResolver implements Function<String, Map<String, Boolean>> {
@@ -143,6 +187,83 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
             if (perm != null) {
                 resolveChildren(accumulator, perm.getChildren(), !value);
             }
+        }
+    }
+
+    private Permission inject(Permission permission) {
+        if (permission == null) {
+            return null;
+        }
+
+        try {
+            //noinspection unchecked
+            Map<String, Boolean> children = (Map<String, Boolean>) PERMISSION_CHILDREN_FIELD.get(permission);
+            while (children instanceof PermissionNotifyingChildrenMap) {
+                children = ((PermissionNotifyingChildrenMap) children).delegate;
+            }
+
+            PermissionNotifyingChildrenMap notifyingChildren = new PermissionNotifyingChildrenMap(children);
+            PERMISSION_CHILDREN_FIELD.set(permission, notifyingChildren);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return permission;
+    }
+
+    private Permission uninject(Permission permission) {
+        if (permission == null) {
+            return null;
+        }
+
+        try {
+            //noinspection unchecked
+            Map<String, Boolean> children = (Map<String, Boolean>) PERMISSION_CHILDREN_FIELD.get(permission);
+            while (children instanceof PermissionNotifyingChildrenMap) {
+                children = ((PermissionNotifyingChildrenMap) children).delegate;
+            }
+            PERMISSION_CHILDREN_FIELD.set(permission, children);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return permission;
+    }
+
+    private final class PermissionNotifyingChildrenMap extends ForwardingMap<String, Boolean> {
+        private final Map<String, Boolean> delegate;
+
+        PermissionNotifyingChildrenMap(Map<String, Boolean> delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        protected Map<String, Boolean> delegate() {
+            return this.delegate;
+        }
+
+        @Override
+        public Boolean put(@NonNull String key, @NonNull Boolean value) {
+            Boolean ret = super.put(key, value);
+            LPPermissionMap.this.update();
+            return ret;
+        }
+
+        @Override
+        public void putAll(@NonNull Map<? extends String, ? extends Boolean> map) {
+            super.putAll(map);
+            LPPermissionMap.this.update();
+        }
+
+        @Override
+        public Boolean remove(@NonNull Object object) {
+            Boolean ret = super.remove(object);
+            LPPermissionMap.this.update();
+            return ret;
+        }
+
+        @Override
+        public void clear() {
+            super.clear();
+            LPPermissionMap.this.update();
         }
     }
 

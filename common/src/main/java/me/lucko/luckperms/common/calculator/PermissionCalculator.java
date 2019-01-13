@@ -130,6 +130,9 @@ public class PermissionCalculator implements Function<String, Tristate> {
     }
 
     public void invalidateCache() {
+        for (PermissionProcessor processor : this.processors) {
+            processor.invalidate();
+        }
         this.lookupCache.clear();
     }
 }

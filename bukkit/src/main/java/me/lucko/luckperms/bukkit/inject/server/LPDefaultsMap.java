@@ -95,6 +95,8 @@ public final class LPDefaultsMap implements Map<Boolean, Set<Permission>> {
 
     private void invalidate(boolean op) {
         getCache(op).invalidate();
+        this.plugin.getUserManager().invalidateAllPermissionCalculators();
+        this.plugin.getGroupManager().invalidateAllPermissionCalculators();
     }
 
     /**
@@ -173,6 +175,13 @@ public final class LPDefaultsMap implements Map<Boolean, Set<Permission>> {
         @Override
         public boolean addAll(@NonNull Collection<? extends Permission> collection) {
             boolean ret = super.addAll(collection);
+            invalidate(this.op);
+            return ret;
+        }
+
+        @Override
+        public boolean remove(@NonNull Object object) {
+            boolean ret = super.remove(object);
             invalidate(this.op);
             return ret;
         }

@@ -162,6 +162,11 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
         getAll().values().forEach(PermissionHolder::invalidateCachedData);
     }
 
+    @Override
+    public void invalidateAllPermissionCalculators() {
+        getAll().values().forEach(p -> p.getCachedData().invalidatePermissionCalculators());
+    }
+
     /**
      * Check whether the user's state indicates that they should be persisted to storage.
      *
