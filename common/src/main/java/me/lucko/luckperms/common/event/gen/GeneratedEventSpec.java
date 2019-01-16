@@ -32,6 +32,7 @@ import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.common.util.LoadingMap;
+import me.lucko.luckperms.common.util.PrivateMethodHandles;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationHandler;
@@ -148,8 +149,7 @@ public class GeneratedEventSpec {
             }
 
             if (method.getDeclaringClass() == Object.class || method.isDefault()) {
-                return MethodHandles.lookup()
-                        .in(method.getDeclaringClass())
+                return PrivateMethodHandles.privateLookup(method.getDeclaringClass())
                         .unreflectSpecial(method, method.getDeclaringClass())
                         .bindTo(proxy)
                         .invokeWithArguments(args);
