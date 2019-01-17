@@ -248,7 +248,7 @@ redis:
 # If LuckPerms should ensure all players have permission data when they connect to the server.
 #
 # - When set to true, LuckPerms will cancel login attempts if it is unable to load permissions data
-#   for a user, of if the storage provider is unavailable.
+#   for a user, or if the storage provider is unavailable.
 # - When set to false, LuckPerms will allow a player to connect regardless of whether their
 #   permissions data could be loaded.
 # - This option does not exist on other platforms, and effectively defaults to true - however,
