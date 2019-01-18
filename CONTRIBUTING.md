@@ -19,8 +19,8 @@ LuckPerms loosely follows the [Google Java Style Guide](https://google.github.io
 If you're considering submitting a substantial pull request, please open an issue so we can discuss the change before starting work on the contribution. Most pull requests are happily accepted, but larger changes may have an inpact on the maintainability of the project, and require more consideration. 
 
 #### Project Layout
-The project is split up into 5 seperate modules.
+The project is split up into a few seperate modules.
 
 * **API** - The public, semantically versioned API used by other plugins wishing to integrate with and retrieve data from LuckPerms. This module (for the most part) does not contain any implementation itself, and is provided by the plugin.
 * **Common** - The common module contains most of the code which implements the respective LuckPerms plugins. This abstract module reduces duplicated code throughout the project.
-* **Bukkit, BungeeCord & Sponge** - Each use the common module to implement plugins on the respective server platforms.
+* **Bukkit, BungeeCord, Sponge, Nukkit & Velocity** - Each use the common module to implement plugins on the respective server platforms.
