@@ -143,7 +143,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
             throw new RuntimeException(
                     "The operation to load user data for '" + uuid + "' was cancelled by LuckPerms. This is NOT a bug. \n" +
                     "The lookup request was made on the main server thread. It is not safe to execute a request to \n" +
-                    "load username data from the database in this context. \n" +
+                    "load data for offline players from the database in this context. \n" +
                     "If you are a plugin author, please consider making your request asynchronously. \n" +
                     "Alternatively, server admins can disable this catch by setting 'vault-unsafe-lookups' to true \n" +
                     "in the LP config, but should consider the consequences (lag) before doing so."
