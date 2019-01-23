@@ -69,6 +69,10 @@ public class PluginMessageMessenger implements Messenger, PluginMessageListener 
 
     @Override
     public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
+        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+        out.writeUTF(outgoingMessage.asEncodedString());
+        byte[] data = out.toByteArray();
+
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -77,11 +81,6 @@ public class PluginMessageMessenger implements Messenger, PluginMessageListener 
                 if (p == null) {
                     return;
                 }
-
-                ByteArrayDataOutput out = ByteStreams.newDataOutput();
-                out.writeUTF(outgoingMessage.asEncodedString());
-
-                byte[] data = out.toByteArray();
 
                 p.sendPluginMessage(PluginMessageMessenger.this.plugin.getBootstrap(), CHANNEL, data);
                 cancel();
