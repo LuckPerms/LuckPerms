@@ -65,15 +65,15 @@ public enum Dependency {
     TEXT(
             "net{}kyori",
             "text",
-            "1.11-1.6.4",
-            "V821j+n8AWhAvLhHjfXQ+/4284Gn4oXTYYfLkLjvs8o=",
+            "1.12-1.6.5",
+            "gcY9BvK2YbqrLR9EZE81UCyRT+c+ZWT5xDqBo6bhVXU=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_ADAPTER_BUKKIT(
             "net{}kyori",
             "text-adapter-bukkit",
-            "1.0.1",
-            "WZp7wCp2+EJC+Q/hxGLh/FJJCrn5Zdi2A1z2hX67jAM=",
+            "1.0.2",
+            "jZx0BgSlfyeamadYiE52wlJbQOwSyB4fffPoE526hOk=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_ADAPTER_BUNGEECORD(
@@ -100,15 +100,15 @@ public enum Dependency {
     OKIO(
             "com{}squareup{}" + RelocationHelper.OKIO_STRING,
             RelocationHelper.OKIO_STRING,
-            "1.16.0",
-            "7ASE/xkDZA44RcKxCruZ7/LTIwj/40WeX5IwmkUbnH4=",
+            "1.17.2",
+            "+AzkLS/6xHrUxH4db5gNYE0kfOsaiGcFz0WBqwyf4rg=",
             Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
     ),
     OKHTTP(
             "com{}squareup{}" + RelocationHelper.OKHTTP3_STRING,
             "okhttp",
-            "3.12.0",
-            "cXh/LFmeBEHHpEE5g7/dk9QLVuG63F4EE9akxIW6PzU=",
+            "3.12.1",
+            "B8PYLKfq9HIvALLagH3Hhg9haa5gz+3PXUAhj5CICkY=",
             Relocation.allOf(
                     Relocation.of(RelocationHelper.OKHTTP3_STRING, RelocationHelper.OKHTTP3_STRING),
                     Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
@@ -124,8 +124,8 @@ public enum Dependency {
     MARIADB_DRIVER(
             "org{}mariadb{}jdbc",
             "mariadb-java-client",
-            "2.2.6",
-            "TSj72P1Oojmw75SC9Wznfi7xl6YNUjqO48hOuYT8dv4=",
+            "2.3.0",
+            "JvxnswIqboUyO3brtMJplOwaaxHsc0RIMkTE5Q/3nOA=",
             Relocation.of("mariadb", "org{}mariadb{}jdbc")
     ),
     MYSQL_DRIVER(
@@ -153,16 +153,16 @@ public enum Dependency {
     SQLITE_DRIVER(
             "org.xerial",
             "sqlite-jdbc",
-            "3.23.1",
-            "1XCvY2or6Z4gvpUQ+2FaqBmyBZhXst1iWuy/93R2YzE="
+            "3.25.2",
+            "pF2mGr7WFWilM/3s4SUJMYCCjt6w1Lb21XLgz0V0ZfY="
             // we don't apply relocations to sqlite - it gets loaded via
             // an isolated classloader
     ),
     HIKARI(
             "com{}zaxxer",
             "HikariCP",
-            "3.2.0",
-            "sAjeaLvYWBH0tujwhg0JZsastPLnX6vUbsIJRWnL7+s=",
+            "3.3.0",
+            "hpK1CDgTul4n8ICT0y12qDIFwT6uzzu9xr8+vrbGrco=",
             Relocation.of("hikari", "com{}zaxxer{}hikari")
     ),
     SLF4J_SIMPLE(
@@ -180,8 +180,8 @@ public enum Dependency {
     MONGODB_DRIVER(
             "org.mongodb",
             "mongo-java-driver",
-            "3.8.1",
-            "gIIEEA9QdRUVcI+CVh+w/py0NlLOD+TBNQ/cjNav1p4=",
+            "3.9.1",
+            "mxKxkvmYluxV+Hdn57uyt+MjjSQUsFjxFw9tjhx0bm4=",
             Relocation.allOf(
                     Relocation.of("mongodb", "com{}mongodb"),
                     Relocation.of("bson", "org{}bson")
@@ -190,8 +190,8 @@ public enum Dependency {
     JEDIS(
             "redis.clients",
             "jedis",
-            "2.9.0",
-            "HqqWy45QVeTVF0Z/DzsrPLvGKn2dHotqI8YX7GDThvo=",
+            "2.10.1",
+            "Pp7msE2yJk5QRF9ASqM/6glX95xsnrwkm9BfN37vLI4=",
             Relocation.allOf(
                     Relocation.of("jedis", "redis{}clients{}jedis"),
                     Relocation.of("jedisutil", "redis{}clients{}util"),
@@ -229,8 +229,8 @@ public enum Dependency {
     SNAKEYAML(
             "org.yaml",
             "snakeyaml",
-            "1.22",
-            "2rQd+SF15BNbBI4lyB5s//a+4Fv0wo8gAEhYfDKcNJ8=",
+            "1.23",
+            "EwCfte3jzyvlqNDxYCFVrqoM5e9fk2aJK9JY2NPU0rE=",
             Relocation.of("yaml", "org{}yaml{}snakeyaml")
     ),
     CONFIGURATE_HOCON(

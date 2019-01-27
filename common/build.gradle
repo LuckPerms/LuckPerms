@@ -2,7 +2,7 @@ dependencies {
     compile project(':luckperms-api')
 
     compile 'org.checkerframework:checker-qual:2.5.5'
-    compile('net.kyori:text:1.11-1.6.4') {
+    compile('net.kyori:text:1.12-1.6.5') {
         exclude(module: 'checker-qual')
         exclude(module: 'guava')
         exclude(module: 'gson')
@@ -14,8 +14,8 @@ dependencies {
     compile 'com.google.code.gson:gson:2.7'
     compile 'com.google.guava:guava:19.0'
     compile 'com.github.ben-manes.caffeine:caffeine:2.6.2'
-    compile 'com.squareup.okhttp3:okhttp:3.12.0'
-    compile 'com.squareup.okio:okio:1.16.0'
+    compile 'com.squareup.okhttp3:okhttp:3.12.1'
+    compile 'com.squareup.okio:okio:1.17.2'
     compile('me.lucko.configurate:configurate-core:3.5') {
         exclude(module: 'guava')
     }
@@ -29,8 +29,8 @@ dependencies {
     compile('me.lucko.configurate:configurate-toml:3.5') {
         exclude(module: 'toml4j')
     }
-    compile 'com.zaxxer:HikariCP:3.2.0'
-    compile 'redis.clients:jedis:2.9.0'
-    compile 'org.mongodb:mongo-java-driver:3.8.1'
-    compile 'org.yaml:snakeyaml:1.22'
+    compile 'com.zaxxer:HikariCP:3.3.0'
+    compile 'redis.clients:jedis:2.10.1'
+    compile 'org.mongodb:mongo-java-driver:3.9.1'
+    compile 'org.yaml:snakeyaml:1.23'
 }
