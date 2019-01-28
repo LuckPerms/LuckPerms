@@ -65,8 +65,8 @@ public enum Dependency {
     TEXT(
             "net{}kyori",
             "text",
-            "1.12-1.6.5",
-            "gcY9BvK2YbqrLR9EZE81UCyRT+c+ZWT5xDqBo6bhVXU=",
+            "1.11-1.6.5",
+            "I5D0U+Gsd5G3XO+W+4ZyO7Fyc8g7lt/up8oNpetq1W8=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_ADAPTER_BUKKIT(
