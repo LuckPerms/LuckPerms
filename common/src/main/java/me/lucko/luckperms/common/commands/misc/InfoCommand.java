@@ -49,6 +49,8 @@ public class InfoCommand extends SingleCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+        Map<String, String> storageMeta = plugin.getStorage().getMeta();
+
         Message.INFO_TOP.send(sender,
                 plugin.getBootstrap().getVersion(),
                 plugin.getBootstrap().getType().getFriendlyName(),
@@ -57,7 +59,7 @@ public class InfoCommand extends SingleCommand {
         );
 
         Message.INFO_STORAGE.send(sender, plugin.getStorage().getName());
-        for (Map.Entry<String, String> e : plugin.getStorage().getMeta().entrySet()) {
+        for (Map.Entry<String, String> e : storageMeta.entrySet()) {
             Message.INFO_STORAGE_META.send(sender, e.getKey(), formatValue(e.getValue()));
         }
 

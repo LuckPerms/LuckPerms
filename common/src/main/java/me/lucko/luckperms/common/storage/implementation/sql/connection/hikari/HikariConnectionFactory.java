@@ -36,6 +36,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public abstract class HikariConnectionFactory implements ConnectionFactory {
 
@@ -103,7 +104,7 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
         boolean success = true;
 
         long start = System.currentTimeMillis();
-        try (Connection c = this.hikari.getConnection()) {
+        try (Connection c = getConnection()) {
             try (Statement s = c.createStatement()) {
                 s.execute("/* ping */ SELECT 1");
             }
@@ -124,9 +125,12 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
 
     @Override
     public Connection getConnection() throws SQLException {
+        if (this.hikari == null) {
+            throw new SQLException("Unable to get a connection from the pool. (hikari is null)");
+        }
         Connection connection = this.hikari.getConnection();
         if (connection == null) {
-            throw new SQLException("Unable to get a connection from the pool.");
+            throw new SQLException("Unable to get a connection from the pool. (getConnection returned null)");
         }
         return connection;
     }
