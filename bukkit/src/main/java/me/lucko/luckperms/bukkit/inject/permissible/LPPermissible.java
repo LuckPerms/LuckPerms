@@ -29,6 +29,8 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
+import me.lucko.luckperms.bukkit.calculator.DefaultsProcessor;
+import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ContextsSupplier;
 import me.lucko.luckperms.common.model.User;
@@ -136,8 +138,17 @@ public class LPPermissible extends PermissibleBase {
             throw new NullPointerException("permission");
         }
 
-        Tristate ts = this.user.getCachedData().getPermissionData(this.contextsSupplier.getContexts()).getPermissionValue(permission, PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK).result();
-        return ts != Tristate.UNDEFINED || Permission.DEFAULT_PERMISSION.getValue(isOp());
+        TristateResult result = this.user.getCachedData().getPermissionData(this.contextsSupplier.getContexts()).getPermissionValue(permission, PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK);
+        if (result.result() == Tristate.UNDEFINED) {
+            return false;
+        }
+
+        // ignore matches made from looking up in the permission map (replicate bukkit behaviour)
+        if (result.processorClass() == DefaultsProcessor.class && "permission map".equals(result.cause())) {
+            return false;
+        }
+
+        return true;
     }
 
     @Override
@@ -146,16 +157,7 @@ public class LPPermissible extends PermissibleBase {
             throw new NullPointerException("permission");
         }
 
-        Tristate ts = this.user.getCachedData().getPermissionData(this.contextsSupplier.getContexts()).getPermissionValue(permission.getName(), PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK).result();
-        if (ts != Tristate.UNDEFINED) {
-            return true;
-        }
-
-        if (!this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
-            return Permission.DEFAULT_PERMISSION.getValue(isOp());
-        } else {
-            return permission.getDefault().getValue(isOp());
-        }
+        return isPermissionSet(permission.getName());
     }
 
     @Override
@@ -179,10 +181,10 @@ public class LPPermissible extends PermissibleBase {
             return ts.asBoolean();
         }
 
-        if (!this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
-            return Permission.DEFAULT_PERMISSION.getValue(isOp());
-        } else {
+        if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
             return permission.getDefault().getValue(isOp());
+        } else {
+            return Permission.DEFAULT_PERMISSION.getValue(isOp());
         }
     }
 

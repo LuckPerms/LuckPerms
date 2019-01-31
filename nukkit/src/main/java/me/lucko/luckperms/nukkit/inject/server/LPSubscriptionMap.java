@@ -176,7 +176,7 @@ public final class LPSubscriptionMap extends HashMap<String, Set<Permissible>> {
         private Sets.SetView<Permissible> getContentView() {
             // gather players (LPPermissibles)
             Set<Permissible> players = LPSubscriptionMap.this.plugin.getBootstrap().getServer().getOnlinePlayers().values().stream()
-                    .filter(player -> player.isPermissionSet(this.permission))
+                    .filter(player -> player.hasPermission(this.permission) || player.isPermissionSet(this.permission))
                     .collect(Collectors.toSet());
 
             return Sets.union(players, this.backing);
@@ -192,7 +192,7 @@ public final class LPSubscriptionMap extends HashMap<String, Set<Permissible>> {
             // then try the permissible
             if (key instanceof Permissible) {
                 Permissible p = (Permissible) key;
-                return p.isPermissionSet(this.permission);
+                return p.hasPermission(this.permission);
             }
 
             // no result

@@ -177,8 +177,8 @@ public final class LPSubscriptionMap extends HashMap<String, Map<Permissible, Bo
             // if the key is a player, check their LPPermissible first
             if (isPlayer) {
                 Permissible p = (Permissible) key;
-                if (p.isPermissionSet(this.permission)) {
-                    return p.hasPermission(this.permission);
+                if (p.hasPermission(this.permission)) {
+                    return true;
                 }
             }
 
@@ -191,8 +191,8 @@ public final class LPSubscriptionMap extends HashMap<String, Map<Permissible, Bo
             // then try the permissible, if we haven't already
             if (!isPlayer && key instanceof Permissible) {
                 Permissible p = (Permissible) key;
-                if (p.isPermissionSet(this.permission)) {
-                    return p.hasPermission(this.permission);
+                if (p.hasPermission(this.permission)) {
+                    return true;
                 }
             }
 
@@ -220,7 +220,7 @@ public final class LPSubscriptionMap extends HashMap<String, Map<Permissible, Bo
         public @NonNull Set<Permissible> keySet() {
             // gather players (LPPermissibles)
             Set<Permissible> players = LPSubscriptionMap.this.plugin.getBootstrap().getServer().getOnlinePlayers().stream()
-                    .filter(player -> player.isPermissionSet(this.permission))
+                    .filter(player -> player.hasPermission(this.permission) || player.isPermissionSet(this.permission))
                     .collect(Collectors.toSet());
 
             // then combine the players with the backing map
