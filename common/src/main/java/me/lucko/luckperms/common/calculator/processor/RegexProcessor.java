@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.calculator.processor;
 
 import com.google.common.collect.ImmutableMap;
+
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.nodetype.types.RegexType;
 import me.lucko.luckperms.common.calculator.result.TristateResult;

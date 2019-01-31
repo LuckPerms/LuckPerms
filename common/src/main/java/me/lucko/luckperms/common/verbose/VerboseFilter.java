@@ -26,16 +26,18 @@
 package me.lucko.luckperms.common.verbose;
 
 import com.google.common.collect.ImmutableList;
+
 import me.lucko.luckperms.common.util.Scripting;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.common.verbose.event.VerboseEvent;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 
 /**
  * Represents a verbose filter expression.

@@ -26,6 +26,7 @@
 package me.lucko.luckperms.bukkit.vault;
 
 import com.google.common.base.Preconditions;
+
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
@@ -42,7 +43,9 @@ import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+
 import net.milkbowl.vault.permission.Permission;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 

@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.treeview;
 
 import com.google.common.base.Splitter;
 import com.google.gson.JsonObject;
+
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.sender.Sender;

@@ -26,6 +26,7 @@
 package me.lucko.luckperms.sponge.service.model.permissionholder;
 
 import com.google.common.collect.ImmutableList;
+
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
@@ -45,6 +46,7 @@ import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
+
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 

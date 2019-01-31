@@ -34,7 +34,6 @@ import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.common.util.LoadingMap;
 import me.lucko.luckperms.common.util.PrivateMethodHandles;
 
-import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;

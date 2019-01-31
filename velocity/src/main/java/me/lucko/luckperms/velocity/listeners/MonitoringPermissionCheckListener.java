@@ -32,12 +32,14 @@ import com.velocitypowered.api.permission.PermissionFunction;
 import com.velocitypowered.api.permission.PermissionProvider;
 import com.velocitypowered.api.permission.PermissionSubject;
 import com.velocitypowered.api.proxy.Player;
+
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.velocity.LPVelocityPlugin;
 import me.lucko.luckperms.velocity.service.CompatibilityUtil;
+
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class MonitoringPermissionCheckListener {

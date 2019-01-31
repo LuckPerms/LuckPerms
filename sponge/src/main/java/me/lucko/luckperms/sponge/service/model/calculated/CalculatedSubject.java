@@ -26,6 +26,7 @@
 package me.lucko.luckperms.sponge.service.model.calculated;
 
 import com.google.common.collect.ImmutableList;
+
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;

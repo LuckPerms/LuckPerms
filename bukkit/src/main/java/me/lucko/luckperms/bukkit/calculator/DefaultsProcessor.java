@@ -29,6 +29,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
+
 import org.bukkit.permissions.Permission;
 
 /**

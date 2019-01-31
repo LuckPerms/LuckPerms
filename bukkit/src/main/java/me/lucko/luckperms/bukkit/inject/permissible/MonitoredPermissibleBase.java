@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+
 import org.bukkit.permissions.PermissibleBase;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;

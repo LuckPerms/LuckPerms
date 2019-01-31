@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collections;
