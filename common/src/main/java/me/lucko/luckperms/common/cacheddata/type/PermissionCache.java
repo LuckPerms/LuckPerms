@@ -31,8 +31,8 @@ import me.lucko.luckperms.api.caching.PermissionData;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
+import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collections;
@@ -102,19 +102,16 @@ public class PermissionCache implements PermissionData {
         return this.permissionsUnmodifiable;
     }
 
-    @Override
-    public @NonNull Tristate getPermissionValue(@NonNull String permission) {
-        if (permission == null) {
-            throw new NullPointerException("permission");
-        }
-        return this.calculator.getPermissionValue(permission, PermissionCheckEvent.Origin.LUCKPERMS_API);
-    }
-
-    public Tristate getPermissionValue(String permission, PermissionCheckEvent.Origin origin) {
+    public TristateResult getPermissionValue(String permission, PermissionCheckEvent.Origin origin) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
         return this.calculator.getPermissionValue(permission, origin);
+    }
+
+    @Override
+    public @NonNull Tristate getPermissionValue(@NonNull String permission) {
+        return getPermissionValue(permission, PermissionCheckEvent.Origin.LUCKPERMS_API).result();
     }
 
     @Override

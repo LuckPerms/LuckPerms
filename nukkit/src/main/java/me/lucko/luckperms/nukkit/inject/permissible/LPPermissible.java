@@ -25,8 +25,13 @@
 
 package me.lucko.luckperms.nukkit.inject.permissible;
 
+import cn.nukkit.Player;
+import cn.nukkit.permission.PermissibleBase;
+import cn.nukkit.permission.Permission;
+import cn.nukkit.permission.PermissionAttachment;
+import cn.nukkit.permission.PermissionAttachmentInfo;
+import cn.nukkit.plugin.Plugin;
 import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ContextsSupplier;
@@ -35,15 +40,7 @@ import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import me.lucko.luckperms.nukkit.inject.PermissionDefault;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
-
-import cn.nukkit.Player;
-import cn.nukkit.permission.PermissibleBase;
-import cn.nukkit.permission.Permission;
-import cn.nukkit.permission.PermissionAttachment;
-import cn.nukkit.permission.PermissionAttachmentInfo;
-import cn.nukkit.plugin.Plugin;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -137,7 +134,7 @@ public class LPPermissible extends PermissibleBase {
             throw new NullPointerException("permission");
         }
 
-        Tristate ts = this.user.getCachedData().getPermissionData(this.contextsSupplier.getContexts()).getPermissionValue(permission, PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK);
+        Tristate ts = this.user.getCachedData().getPermissionData(this.contextsSupplier.getContexts()).getPermissionValue(permission, PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK).result();
         return ts != Tristate.UNDEFINED || PermissionDefault.OP.getValue(isOp());
     }
 
@@ -147,7 +144,7 @@ public class LPPermissible extends PermissibleBase {
             throw new NullPointerException("permission");
         }
 
-        Tristate ts = this.user.getCachedData().getPermissionData(this.contextsSupplier.getContexts()).getPermissionValue(permission.getName(), PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK);
+        Tristate ts = this.user.getCachedData().getPermissionData(this.contextsSupplier.getContexts()).getPermissionValue(permission.getName(), PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK).result();
         if (ts != Tristate.UNDEFINED) {
             return true;
         }
@@ -166,7 +163,7 @@ public class LPPermissible extends PermissibleBase {
             throw new NullPointerException("permission");
         }
 
-        Tristate ts = this.user.getCachedData().getPermissionData(this.contextsSupplier.getContexts()).getPermissionValue(permission, PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK);
+        Tristate ts = this.user.getCachedData().getPermissionData(this.contextsSupplier.getContexts()).getPermissionValue(permission, PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK).result();
         return ts != Tristate.UNDEFINED ? ts.asBoolean() : PermissionDefault.OP.getValue(isOp());
     }
 
@@ -176,7 +173,7 @@ public class LPPermissible extends PermissibleBase {
             throw new NullPointerException("permission");
         }
 
-        Tristate ts = this.user.getCachedData().getPermissionData(this.contextsSupplier.getContexts()).getPermissionValue(permission.getName(), PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK);
+        Tristate ts = this.user.getCachedData().getPermissionData(this.contextsSupplier.getContexts()).getPermissionValue(permission.getName(), PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK).result();
         if (ts != Tristate.UNDEFINED) {
             return ts.asBoolean();
         }

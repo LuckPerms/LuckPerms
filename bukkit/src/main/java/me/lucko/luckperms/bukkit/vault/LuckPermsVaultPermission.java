@@ -26,7 +26,6 @@
 package me.lucko.luckperms.bukkit.vault;
 
 import com.google.common.base.Preconditions;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
@@ -43,9 +42,7 @@ import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
-
 import net.milkbowl.vault.permission.Permission;
-
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -170,7 +167,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         Contexts contexts = contextForLookup(user, world);
         PermissionCache permissionData = user.getCachedData().getPermissionData(contexts);
 
-        Tristate result = permissionData.getPermissionValue(permission, PermissionCheckEvent.Origin.THIRD_PARTY_API);
+        Tristate result = permissionData.getPermissionValue(permission, PermissionCheckEvent.Origin.THIRD_PARTY_API).result();
         if (log()) {
             logMsg("#userHasPermission: %s - %s - %s - %s", user.getPlainDisplayName(), contexts.getContexts().toMultimap(), permission, result);
         }
@@ -275,7 +272,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         Contexts contexts = contextForLookup(null, world);
         PermissionCache permissionData = group.getCachedData().getPermissionData(contexts);
 
-        Tristate result = permissionData.getPermissionValue(permission, PermissionCheckEvent.Origin.THIRD_PARTY_API);
+        Tristate result = permissionData.getPermissionValue(permission, PermissionCheckEvent.Origin.THIRD_PARTY_API).result();
         if (log()) {
             logMsg("#groupHasPermission: %s - %s - %s - %s", group.getName(), contexts.getContexts().toMultimap(), permission, result);
         }

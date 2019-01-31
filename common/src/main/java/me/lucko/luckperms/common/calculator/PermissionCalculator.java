@@ -26,14 +26,13 @@
 package me.lucko.luckperms.common.calculator;
 
 import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
+import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.LoadingMap;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
@@ -43,7 +42,7 @@ import java.util.function.Function;
 /**
  * Calculates and caches permissions
  */
-public class PermissionCalculator implements Function<String, Tristate> {
+public class PermissionCalculator implements Function<String, TristateResult> {
 
     /**
      * The plugin instance
@@ -63,7 +62,7 @@ public class PermissionCalculator implements Function<String, Tristate> {
     /**
      * Loading cache for permission checks
      */
-    private final LoadingMap<String, Tristate> lookupCache = LoadingMap.of(this);
+    private final LoadingMap<String, TristateResult> lookupCache = LoadingMap.of(this);
 
     public PermissionCalculator(LuckPermsPlugin plugin, CacheMetadata metadata, ImmutableList<PermissionProcessor> processors) {
         this.plugin = plugin;
@@ -80,9 +79,9 @@ public class PermissionCalculator implements Function<String, Tristate> {
      * @param origin marks where this check originated from
      * @return the result
      */
-    public Tristate getPermissionValue(String permission, PermissionCheckEvent.Origin origin) {
+    public TristateResult getPermissionValue(String permission, PermissionCheckEvent.Origin origin) {
         // get the result
-        Tristate result = this.lookupCache.get(permission);
+        TristateResult result = this.lookupCache.get(permission);
 
         // log this permission lookup to the verbose handler
         this.plugin.getVerboseHandler().offerPermissionCheckEvent(origin, this.metadata.getObjectName(), this.metadata.getContext(), permission, result);
@@ -92,7 +91,7 @@ public class PermissionCalculator implements Function<String, Tristate> {
     }
 
     @Override
-    public Tristate apply(@NonNull String permission) {
+    public TristateResult apply(@NonNull String permission) {
         // convert the permission to lowercase, as all values in the backing map are also lowercase.
         // this allows fast case insensitive lookups
         permission = permission.toLowerCase();
@@ -103,13 +102,13 @@ public class PermissionCalculator implements Function<String, Tristate> {
         this.plugin.getPermissionRegistry().offer(permission);
 
         for (PermissionProcessor processor : this.processors) {
-            Tristate result = processor.hasPermission(permission);
-            if (result != Tristate.UNDEFINED) {
+            TristateResult result = processor.hasPermission(permission);
+            if (result.result() != Tristate.UNDEFINED) {
                 return result;
             }
         }
 
-        return Tristate.UNDEFINED;
+        return TristateResult.UNDEFINED;
     }
 
     /**

@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.verbose;
 
 import com.google.gson.JsonObject;
-
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
@@ -41,7 +40,6 @@ import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.common.verbose.event.VerboseEvent;
 import me.lucko.luckperms.common.web.Bytebin;
-
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
 
@@ -145,8 +143,8 @@ public class VerboseListener {
                 Message.VERBOSE_LOG_PERMISSION.send(this.notifiedSender,
                         permissionEvent.getCheckTarget(),
                         permissionEvent.getPermission(),
-                        getTristateColor(permissionEvent.getResult()),
-                        permissionEvent.getResult().name().toLowerCase()
+                        getTristateColor(permissionEvent.getResult().result()),
+                        permissionEvent.getResult().result().name().toLowerCase()
                 );
             } else if (event instanceof MetaCheckEvent) {
                 MetaCheckEvent metaEvent = (MetaCheckEvent) event;
@@ -169,8 +167,8 @@ public class VerboseListener {
             textComponent = Message.VERBOSE_LOG_PERMISSION.asComponent(this.notifiedSender.getPlugin().getLocaleManager(),
                     permissionEvent.getCheckTarget(),
                     permissionEvent.getPermission(),
-                    getTristateColor(permissionEvent.getResult()),
-                    permissionEvent.getResult().name().toLowerCase()
+                    getTristateColor(permissionEvent.getResult().result()),
+                    permissionEvent.getResult().result().name().toLowerCase()
             );
         } else if (event instanceof MetaCheckEvent) {
             MetaCheckEvent metaEvent = (MetaCheckEvent) event;

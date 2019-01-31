@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.verbose.event;
 
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.util.gson.JObject;
 
 public class PermissionCheckEvent extends VerboseEvent {
@@ -44,9 +44,9 @@ public class PermissionCheckEvent extends VerboseEvent {
     /**
      * The result of the permission check
      */
-    private final Tristate result;
+    private final TristateResult result;
 
-    public PermissionCheckEvent(Origin origin, String checkTarget, ImmutableContextSet checkContext, StackTraceElement[] checkTrace, String permission, Tristate result) {
+    public PermissionCheckEvent(Origin origin, String checkTarget, ImmutableContextSet checkContext, StackTraceElement[] checkTrace, String permission, TristateResult result) {
         super(checkTarget, checkContext, checkTrace);
         this.origin = origin;
         this.permission = permission;
@@ -61,16 +61,28 @@ public class PermissionCheckEvent extends VerboseEvent {
         return this.permission;
     }
 
-    public Tristate getResult() {
+    public TristateResult getResult() {
         return this.result;
     }
 
     @Override
     protected void serializeTo(JObject object) {
-        object.add("type", "permission")
-                .add("permission", this.permission)
-                .add("result", this.result.name().toLowerCase())
-                .add("origin", this.origin.name().toLowerCase());
+        object.add("type", "permission");
+        object.add("permission", this.permission);
+
+        object.add("result", this.result.result().name().toLowerCase());
+        if (this.result.processorClass() != null || this.result.cause() != null) {
+            JObject resultInfo = new JObject();
+            if (this.result.processorClass() != null) {
+                resultInfo.add("processorClass", this.result.processorClass().getName());
+            }
+            if (this.result.cause() != null) {
+                resultInfo.add("cause", this.result.cause());
+            }
+            object.add("resultInfo", resultInfo);
+        }
+
+        object.add("origin", this.origin.name().toLowerCase());
     }
 
     /**

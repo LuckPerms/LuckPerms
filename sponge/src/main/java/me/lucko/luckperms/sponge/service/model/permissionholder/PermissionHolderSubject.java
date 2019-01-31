@@ -26,7 +26,6 @@
 package me.lucko.luckperms.sponge.service.model.permissionholder;
 
 import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
@@ -46,7 +45,6 @@ import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
-
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 
@@ -111,7 +109,7 @@ public abstract class PermissionHolderSubject<T extends PermissionHolder> implem
     @Override
     public Tristate getPermissionValue(ImmutableContextSet contexts, String permission) {
         Contexts lookupContexts = this.plugin.getContextManager().formContexts(contexts);
-        return this.parent.getCachedData().getPermissionData(lookupContexts).getPermissionValue(permission, PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK);
+        return this.parent.getCachedData().getPermissionData(lookupContexts).getPermissionValue(permission, PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK).result();
     }
 
     @Override

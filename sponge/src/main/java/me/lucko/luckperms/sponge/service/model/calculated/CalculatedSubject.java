@@ -26,7 +26,6 @@
 package me.lucko.luckperms.sponge.service.model.calculated;
 
 import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
@@ -295,7 +294,7 @@ public abstract class CalculatedSubject implements LPSubject {
     @Override
     public Tristate getPermissionValue(ImmutableContextSet contexts, String permission) {
         Contexts lookupContexts = Contexts.of(contexts, Contexts.global().getSettings());
-        return this.cachedData.getPermissionData(lookupContexts).getPermissionValue(permission, PermissionCheckEvent.Origin.INTERNAL);
+        return this.cachedData.getPermissionData(lookupContexts).getPermissionValue(permission, PermissionCheckEvent.Origin.INTERNAL).result();
     }
 
     @Override

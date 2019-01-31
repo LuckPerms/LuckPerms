@@ -26,9 +26,9 @@
 package me.lucko.luckperms.common.calculator.processor;
 
 import com.google.common.collect.ImmutableMap;
-
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.nodetype.types.RegexType;
+import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.node.model.NodeTypes;
 
 import java.util.Collections;
@@ -36,17 +36,19 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class RegexProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
+    private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(RegexProcessor.class);
+
     private Map<Pattern, Boolean> regexPermissions = Collections.emptyMap();
 
     @Override
-    public Tristate hasPermission(String permission) {
+    public TristateResult hasPermission(String permission) {
         for (Map.Entry<Pattern, Boolean> e : this.regexPermissions.entrySet()) {
             if (e.getKey().matcher(permission).matches()) {
-                return Tristate.fromBoolean(e.getValue());
+                return RESULT_FACTORY.result(Tristate.fromBoolean(e.getValue()), "pattern: " + e.getKey().pattern());
             }
         }
 
-        return Tristate.UNDEFINED;
+        return TristateResult.UNDEFINED;
     }
 
     @Override

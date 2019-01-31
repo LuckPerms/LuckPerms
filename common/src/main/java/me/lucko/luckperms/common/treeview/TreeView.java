@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.treeview;
 
 import com.google.common.base.Splitter;
 import com.google.gson.JsonObject;
-
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.sender.Sender;
@@ -151,7 +150,7 @@ public class TreeView {
             checks = new JObject();
             for (Map.Entry<Integer, String> node : this.view.getNodeEndings()) {
                 String permission = prefix + node.getValue();
-                checks.add(permission, checker.getPermissionValue(permission, PermissionCheckEvent.Origin.INTERNAL).name().toLowerCase());
+                checks.add(permission, checker.getPermissionValue(permission, PermissionCheckEvent.Origin.INTERNAL).result().name().toLowerCase());
             }
         } else {
             checks = null;

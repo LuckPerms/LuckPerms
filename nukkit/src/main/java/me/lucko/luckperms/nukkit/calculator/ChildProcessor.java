@@ -28,6 +28,7 @@ package me.lucko.luckperms.nukkit.calculator;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
+import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
 import java.util.Collections;
@@ -38,6 +39,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Permission Processor for Nukkits "child" permission system.
  */
 public class ChildProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
+    private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(ChildProcessor.class);
+
     private final LPNukkitPlugin plugin;
     private Map<String, Boolean> childPermissions = Collections.emptyMap();
 
@@ -46,8 +49,8 @@ public class ChildProcessor extends AbstractPermissionProcessor implements Permi
     }
 
     @Override
-    public Tristate hasPermission(String permission) {
-        return Tristate.fromNullableBoolean(this.childPermissions.get(permission));
+    public TristateResult hasPermission(String permission) {
+        return RESULT_FACTORY.result(Tristate.fromNullableBoolean(this.childPermissions.get(permission)));
     }
 
     @Override

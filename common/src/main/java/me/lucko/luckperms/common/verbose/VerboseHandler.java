@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.verbose;
 
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.RepeatingTask;
@@ -73,7 +73,7 @@ public class VerboseHandler extends RepeatingTask {
      * @param permission the permission which was checked for
      * @param result the result of the permission check
      */
-    public void offerPermissionCheckEvent(PermissionCheckEvent.Origin origin, String checkTarget, ContextSet checkContext, String permission, Tristate result) {
+    public void offerPermissionCheckEvent(PermissionCheckEvent.Origin origin, String checkTarget, ContextSet checkContext, String permission, TristateResult result) {
         // don't bother even processing the check if there are no listeners registered
         if (!this.listening) {
             return;

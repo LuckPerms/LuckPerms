@@ -26,12 +26,14 @@
 package me.lucko.luckperms.common.calculator.processor;
 
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.common.calculator.result.TristateResult;
 
 public class MapProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
+    private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(MapProcessor.class);
 
     @Override
-    public Tristate hasPermission(String permission) {
-        return Tristate.fromNullableBoolean(this.sourceMap.get(permission));
+    public TristateResult hasPermission(String permission) {
+        return RESULT_FACTORY.result(Tristate.fromNullableBoolean(this.sourceMap.get(permission)));
     }
 
 }

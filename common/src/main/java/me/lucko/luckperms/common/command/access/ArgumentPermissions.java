@@ -299,7 +299,7 @@ public final class ArgumentPermissions {
         }
 
         PermissionCache permissionData = user.getCachedData().getPermissionData(Contexts.of(contextSet, Contexts.global().getSettings()));
-        return !permissionData.getPermissionValue(NodeFactory.groupNode(targetGroupName), PermissionCheckEvent.Origin.INTERNAL).asBoolean();
+        return !permissionData.getPermissionValue(NodeFactory.groupNode(targetGroupName), PermissionCheckEvent.Origin.INTERNAL).result().asBoolean();
     }
 
     private ArgumentPermissions() {}
