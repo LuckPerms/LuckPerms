@@ -25,11 +25,10 @@
 
 package me.lucko.luckperms.common.model;
 
-import com.google.common.base.Supplier;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import com.google.common.collect.SortedSetMultimap;
 
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
@@ -45,17 +44,22 @@ import me.lucko.luckperms.common.node.model.ImmutableLocalizedNode;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -68,8 +72,7 @@ import java.util.function.Predicate;
  * <p>Each holder has two of these maps, one for enduring and transient nodes.</p>
  */
 public final class NodeMap {
-    @SuppressWarnings("Guava")
-    private static final Supplier<SortedSet<LocalizedNode>> VALUE_SET_SUPPLIER = () -> new ConcurrentSkipListSet<>(NodeComparator.reverse());
+    private static final Function<ImmutableContextSet, SortedSet<LocalizedNode>> VALUE_SET_SUPPLIER = k -> new ConcurrentSkipListSet<>(NodeComparator.reverse());
 
     /**
      * The holder which this map is for
@@ -84,23 +87,13 @@ public final class NodeMap {
      * key, and finally by the overall size of the set. Nodes are ordered according to the priority rules
      * defined in {@link NodeComparator}.</p>
      */
-    private final SortedSetMultimap<ImmutableContextSet, LocalizedNode> map = Multimaps.synchronizedSortedSetMultimap(
-            Multimaps.newSortedSetMultimap(
-                    new ConcurrentSkipListMap<>(ContextSetComparator.reverse()),
-                    VALUE_SET_SUPPLIER
-            )
-    );
+    private final SortedMap<ImmutableContextSet, SortedSet<LocalizedNode>> map = new ConcurrentSkipListMap<>(ContextSetComparator.reverse());
 
     /**
      * Copy of {@link #map} which only contains group nodes
      * @see Node#isGroupNode()
      */
-    private final SortedSetMultimap<ImmutableContextSet, LocalizedNode> inheritanceMap = Multimaps.synchronizedSortedSetMultimap(
-            Multimaps.newSortedSetMultimap(
-                    new ConcurrentSkipListMap<>(ContextSetComparator.reverse()),
-                    VALUE_SET_SUPPLIER
-            )
-    );
+    private final SortedMap<ImmutableContextSet, SortedSet<LocalizedNode>> inheritanceMap = new ConcurrentSkipListMap<>(ContextSetComparator.reverse());
 
     /**
      * A cache which holds an immutable copy of the backing map
@@ -112,11 +105,15 @@ public final class NodeMap {
     }
 
     public List<LocalizedNode> asList() {
-        return new ArrayList<>(this.map.values());
+        List<LocalizedNode> list = new ArrayList<>();
+        copyTo(list);
+        return list;
     }
 
     public LinkedHashSet<LocalizedNode> asSet() {
-        return new LinkedHashSet<>(this.map.values());
+        LinkedHashSet<LocalizedNode> set = new LinkedHashSet<>();
+        copyTo(set);
+        return set;
     }
 
     public SortedSet<LocalizedNode> asSortedSet() {
@@ -126,11 +123,13 @@ public final class NodeMap {
     }
 
     public void copyTo(Collection<? super LocalizedNode> collection) {
-        collection.addAll(this.map.values());
+        for (SortedSet<LocalizedNode> nodes : this.map.values()) {
+            collection.addAll(nodes);
+        }
     }
 
     public void copyTo(Collection<? super LocalizedNode> collection, ContextSet filter) {
-        for (Map.Entry<ImmutableContextSet, Collection<LocalizedNode>> e : this.map.asMap().entrySet()) {
+        for (Map.Entry<ImmutableContextSet, SortedSet<LocalizedNode>> e : this.map.entrySet()) {
             if (e.getKey().isSatisfiedBy(filter)) {
                 collection.addAll(e.getValue());
             }
@@ -138,11 +137,13 @@ public final class NodeMap {
     }
 
     public void copyGroupNodesTo(Collection<? super LocalizedNode> collection) {
-        collection.addAll(this.inheritanceMap.values());
+        for (SortedSet<LocalizedNode> nodes : this.inheritanceMap.values()) {
+            collection.addAll(nodes);
+        }
     }
 
     public void copyGroupNodesTo(Collection<? super LocalizedNode> collection, ContextSet filter) {
-        for (Map.Entry<ImmutableContextSet, Collection<LocalizedNode>> e : this.inheritanceMap.asMap().entrySet()) {
+        for (Map.Entry<ImmutableContextSet, SortedSet<LocalizedNode>> e : this.inheritanceMap.entrySet()) {
             if (e.getKey().isSatisfiedBy(filter)) {
                 collection.addAll(e.getValue());
             }
@@ -183,12 +184,12 @@ public final class NodeMap {
         ImmutableContextSet context = node.getFullContexts().makeImmutable();
         LocalizedNode n = localise(node);
 
-        SortedSet<LocalizedNode> nodesInContext = this.map.get(context);
+        SortedSet<LocalizedNode> nodesInContext = this.map.computeIfAbsent(context, VALUE_SET_SUPPLIER);
         nodesInContext.removeIf(e -> e.equals(node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE));
         nodesInContext.add(n);
 
         if (node.isGroupNode()) {
-            SortedSet<LocalizedNode> groupNodesInContext = this.inheritanceMap.get(context);
+            SortedSet<LocalizedNode> groupNodesInContext = this.inheritanceMap.computeIfAbsent(context, VALUE_SET_SUPPLIER);
             groupNodesInContext.removeIf(e -> e.equals(node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE));
             if (node.getValue()) {
                 groupNodesInContext.add(n);
@@ -198,17 +199,33 @@ public final class NodeMap {
 
     void remove(Node node) {
         ImmutableContextSet context = node.getFullContexts().makeImmutable();
-        this.map.get(context).removeIf(e -> e.equals(node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE));
+        SortedSet<LocalizedNode> nodesInContext = this.map.get(context);
+        if (nodesInContext != null) {
+            nodesInContext.removeIf(e -> e.equals(node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE));
+        }
+
         if (node.isGroupNode()) {
-            this.inheritanceMap.get(context).removeIf(e -> e.equals(node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE));
+            SortedSet<LocalizedNode> groupNodesInContext = this.inheritanceMap.get(context);
+            if (groupNodesInContext != null) {
+                groupNodesInContext.removeIf(e -> e.equals(node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE));
+            }
         }
     }
 
     private void removeExact(Node node) {
         ImmutableContextSet context = node.getFullContexts().makeImmutable();
-        this.map.remove(context, node);
+        SortedSet<LocalizedNode> nodesInContext = this.map.get(context);
+        if (nodesInContext != null) {
+            //noinspection SuspiciousMethodCalls
+            nodesInContext.remove(node);
+        }
+
         if (node.isGroupNode() && node.getValue()) {
-            this.inheritanceMap.remove(context, node);
+            SortedSet<LocalizedNode> groupNodesInContext = this.inheritanceMap.get(context);
+            if (groupNodesInContext != null) {
+                //noinspection SuspiciousMethodCalls
+                groupNodesInContext.remove(node);
+            }
         }
     }
 
@@ -224,8 +241,8 @@ public final class NodeMap {
 
     void clear(ContextSet contextSet) {
         ImmutableContextSet context = contextSet.makeImmutable();
-        this.map.removeAll(context);
-        this.inheritanceMap.removeAll(context);
+        this.map.remove(context);
+        this.inheritanceMap.remove(context);
     }
 
     void setContent(Collection<? extends Node> set) {
@@ -241,34 +258,59 @@ public final class NodeMap {
     }
 
     boolean removeIf(Predicate<? super LocalizedNode> predicate) {
-        boolean ret = this.map.values().removeIf(predicate);
-        this.inheritanceMap.values().removeIf(predicate);
+        boolean ret = false;
+        for (SortedSet<LocalizedNode> valueSet : this.map.values()) {
+            if (valueSet.removeIf(predicate)) {
+                ret = true;
+            }
+        }
+        for (SortedSet<LocalizedNode> valueSet : this.inheritanceMap.values()) {
+            valueSet.removeIf(predicate);
+        }
         return ret;
     }
 
     boolean removeIf(ContextSet contextSet, Predicate<? super LocalizedNode> predicate) {
         ImmutableContextSet context = contextSet.makeImmutable();
-        SortedSet<LocalizedNode> nodes = this.map.get(context);
-        boolean ret = nodes.removeIf(predicate);
-        this.inheritanceMap.get(context).removeIf(predicate);
+
+        boolean ret = false;
+
+        SortedSet<LocalizedNode> nodesInContext = this.map.get(context);
+        if (nodesInContext != null) {
+            ret = nodesInContext.removeIf(predicate);
+        }
+
+        SortedSet<LocalizedNode> groupNodesInContext = this.inheritanceMap.get(context);
+        if (groupNodesInContext != null) {
+            groupNodesInContext.removeIf(predicate);
+        }
+
         return ret;
     }
 
     boolean auditTemporaryNodes(@Nullable Set<? super LocalizedNode> removed) {
         boolean work = false;
 
-        Iterator<? extends LocalizedNode> it = this.map.values().iterator();
-        while (it.hasNext()) {
-            LocalizedNode entry = it.next();
-            if (entry.hasExpired()) {
+        for (SortedSet<LocalizedNode> valueSet : this.map.values()) {
+            Iterator<LocalizedNode> it = valueSet.iterator();
+            while (it.hasNext()) {
+                LocalizedNode entry = it.next();
+                if (!entry.hasExpired()) {
+                    continue;
+                }
+
+                // remove
                 if (removed != null) {
                     removed.add(entry);
                 }
                 if (entry.isGroupNode() && entry.getValue()) {
-                    this.inheritanceMap.remove(entry.getFullContexts().makeImmutable(), entry);
+                    SortedSet<LocalizedNode> groupNodesInContext = this.inheritanceMap.get(entry.getFullContexts().makeImmutable());
+                    if (groupNodesInContext != null) {
+                        groupNodesInContext.remove(entry);
+                    }
                 }
-                work = true;
                 it.remove();
+                work = true;
             }
         }
 
@@ -276,6 +318,16 @@ public final class NodeMap {
     }
 
     private static final class NodeMapCache extends Cache<ImmutableSetMultimap<ImmutableContextSet, LocalizedNode>> {
+        private static final Constructor<ImmutableSetMultimap> IMMUTABLE_SET_MULTIMAP_CONSTRUCTOR;
+        static {
+            try {
+                IMMUTABLE_SET_MULTIMAP_CONSTRUCTOR = ImmutableSetMultimap.class.getDeclaredConstructor(ImmutableMap.class, int.class, Comparator.class);
+                IMMUTABLE_SET_MULTIMAP_CONSTRUCTOR.setAccessible(true);
+            } catch (NoSuchMethodException e) {
+                throw new ExceptionInInitializerError(e);
+            }
+        }
+
         private final NodeMap handle;
 
         private NodeMapCache(NodeMap handle) {
@@ -284,7 +336,24 @@ public final class NodeMap {
 
         @Override
         protected @NonNull ImmutableSetMultimap<ImmutableContextSet, LocalizedNode> supply() {
-            return ImmutableSetMultimap.copyOf(this.handle.map);
+            ImmutableMap.Builder<ImmutableContextSet, ImmutableSet<LocalizedNode>> builder = ImmutableMap.builder();
+            int size = 0;
+
+            for (Map.Entry<ImmutableContextSet, SortedSet<LocalizedNode>> entry : this.handle.map.entrySet()) {
+                ImmutableContextSet key = entry.getKey();
+                ImmutableSet<LocalizedNode> values = ImmutableSet.copyOf(entry.getValue());
+                if (!values.isEmpty()) {
+                    builder.put(key, values);
+                    size += values.size();
+                }
+            }
+
+            try {
+                //noinspection unchecked
+                return IMMUTABLE_SET_MULTIMAP_CONSTRUCTOR.newInstance(builder.build(), size, null);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
