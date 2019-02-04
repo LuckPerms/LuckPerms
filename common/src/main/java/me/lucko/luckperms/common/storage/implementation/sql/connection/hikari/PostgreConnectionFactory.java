@@ -29,6 +29,7 @@ import com.zaxxer.hikari.HikariConfig;
 
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
+import java.util.Map;
 import java.util.function.Function;
 
 public class PostgreConnectionFactory extends HikariConnectionFactory {
@@ -39,6 +40,15 @@ public class PostgreConnectionFactory extends HikariConnectionFactory {
     @Override
     public String getImplementationName() {
         return "PostgreSQL";
+    }
+
+    @Override
+    protected void appendProperties(HikariConfig config, Map<String, String> properties) {
+        // remove the default config properties which don't exist for PostgreSQL
+        properties.remove("useUnicode");
+        properties.remove("characterEncoding");
+
+        super.appendProperties(config, properties);
     }
 
     @Override

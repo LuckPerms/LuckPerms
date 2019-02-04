@@ -29,6 +29,7 @@ import com.zaxxer.hikari.HikariConfig;
 
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
+import java.util.Map;
 import java.util.function.Function;
 
 public class MySqlConnectionFactory extends HikariConnectionFactory {
@@ -47,20 +48,20 @@ public class MySqlConnectionFactory extends HikariConnectionFactory {
     }
 
     @Override
-    protected void appendProperties(HikariConfig config, StorageCredentials credentials) {
-        config.addDataSourceProperty("cachePrepStmts", "true");
-        config.addDataSourceProperty("alwaysSendSetIsolation", "false");
-        config.addDataSourceProperty("cacheServerConfiguration", "true");
-        config.addDataSourceProperty("elideSetAutoCommits", "true");
-        config.addDataSourceProperty("useLocalSessionState", "true");
+    protected void appendProperties(HikariConfig config, Map<String, String> properties) {
+        properties.putIfAbsent("cachePrepStmts", "true");
+        properties.putIfAbsent("alwaysSendSetIsolation", "false");
+        properties.putIfAbsent("cacheServerConfiguration", "true");
+        properties.putIfAbsent("elideSetAutoCommits", "true");
+        properties.putIfAbsent("useLocalSessionState", "true");
 
-        config.addDataSourceProperty("useServerPrepStmts", "true");
-        config.addDataSourceProperty("prepStmtCacheSize", "250");
-        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-        config.addDataSourceProperty("cacheCallableStmts", "true");
+        properties.putIfAbsent("useServerPrepStmts", "true");
+        properties.putIfAbsent("prepStmtCacheSize", "250");
+        properties.putIfAbsent("prepStmtCacheSqlLimit", "2048");
+        properties.putIfAbsent("cacheCallableStmts", "true");
 
         // append configurable properties
-        super.appendProperties(config, credentials);
+        super.appendProperties(config, properties);
     }
 
     @Override

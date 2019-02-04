@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -50,8 +51,8 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
         return null;
     }
 
-    protected void appendProperties(HikariConfig config, StorageCredentials credentials) {
-        for (Map.Entry<String, String> property : credentials.getProperties().entrySet()) {
+    protected void appendProperties(HikariConfig config, Map<String, String> properties) {
+        for (Map.Entry<String, String> property : properties.entrySet()) {
             config.addDataSourceProperty(property.getKey(), property.getValue());
         }
     }
@@ -76,7 +77,7 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
         config.setPoolName("luckperms-hikari");
 
         appendConfigurationInfo(config);
-        appendProperties(config, this.configuration);
+        appendProperties(config, new HashMap<>(this.configuration.getProperties()));
 
         config.setMaximumPoolSize(this.configuration.getMaxPoolSize());
         config.setMinimumIdle(this.configuration.getMinIdleConnections());

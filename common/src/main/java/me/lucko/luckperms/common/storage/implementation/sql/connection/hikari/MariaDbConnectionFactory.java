@@ -30,7 +30,6 @@ import com.zaxxer.hikari.HikariConfig;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -50,13 +49,12 @@ public class MariaDbConnectionFactory extends HikariConnectionFactory {
     }
 
     @Override
-    protected void appendProperties(HikariConfig config, StorageCredentials credentials) {
-        Set<Map.Entry<String, String>> properties = credentials.getProperties().entrySet();
+    protected void appendProperties(HikariConfig config, Map<String, String> properties) {
         if (properties.isEmpty()) {
             return;
         }
 
-        String propertiesString = properties.stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining(";"));
+        String propertiesString = properties.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining(";"));
 
         // kinda hacky. this will call #setProperties on the datasource, which will append these options
         // onto the connections.
