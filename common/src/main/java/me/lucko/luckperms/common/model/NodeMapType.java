@@ -29,26 +29,34 @@ import java.util.function.Supplier;
 
 public enum NodeMapType {
 
-    ENDURING,
-    TRANSIENT;
+    ENDURING {
+        @Override
+        public void run(Runnable enduringTask, Runnable transientTask) {
+            enduringTask.run();
+        }
+
+        @Override
+        public <T> T supply(Supplier<T> enduringSupplier, Supplier<T> transientSupplier) {
+            return enduringSupplier.get();
+        }
+    },
+    TRANSIENT {
+        @Override
+        public void run(Runnable enduringTask, Runnable transientTask) {
+            transientTask.run();
+        }
+
+        @Override
+        public <T> T supply(Supplier<T> enduringSupplier, Supplier<T> transientSupplier) {
+            return transientSupplier.get();
+        }
+    };
 
     // useful methods for fluent/conditional execution
 
-    public void run(Runnable ifEnduring, Runnable ifTransient) {
-        if (this == ENDURING) {
-            ifEnduring.run();
-        } else {
-            ifTransient.run();
-        }
-    }
+    public abstract void run(Runnable enduringTask, Runnable transientTask);
 
-    public <T> T supply(Supplier<T> ifEnduring, Supplier<T> ifTransient) {
-        if (this == ENDURING) {
-            return ifEnduring.get();
-        } else {
-            return ifTransient.get();
-        }
-    }
+    public abstract <T> T supply(Supplier<T> enduringSupplier, Supplier<T> transientSupplier);
 
 
 }

@@ -294,8 +294,7 @@ public abstract class CalculatedSubject implements LPSubject {
 
     @Override
     public Tristate getPermissionValue(ImmutableContextSet contexts, String permission) {
-        Contexts lookupContexts = Contexts.of(contexts, Contexts.global().getSettings());
-        return this.cachedData.getPermissionData(lookupContexts).getPermissionValue(permission, PermissionCheckEvent.Origin.INTERNAL).result();
+        return this.cachedData.getPermissionData(Contexts.global().setContexts(contexts)).getPermissionValue(permission, PermissionCheckEvent.Origin.INTERNAL).result();
     }
 
     @Override
@@ -310,8 +309,7 @@ public abstract class CalculatedSubject implements LPSubject {
 
     @Override
     public Optional<String> getOption(ImmutableContextSet contexts, String key) {
-        Contexts lookupContexts = Contexts.of(contexts, Contexts.global().getSettings());
-        return Optional.ofNullable(this.cachedData.getMetaData(lookupContexts).getMeta(MetaCheckEvent.Origin.PLATFORM_API).get(key));
+        return Optional.ofNullable(this.cachedData.getMetaData(Contexts.global().setContexts(contexts)).getMeta(MetaCheckEvent.Origin.PLATFORM_API).get(key));
     }
 
     @Override

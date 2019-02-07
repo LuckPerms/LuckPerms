@@ -27,6 +27,7 @@ package me.lucko.luckperms.sponge.service.model.calculated;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
@@ -120,6 +121,11 @@ public class CalculatedSubjectData implements LPSubjectData {
         return map.build();
     }
 
+    @Override
+    public ImmutableMap<String, Boolean> getPermissions(ImmutableContextSet contexts) {
+        return ImmutableMap.copyOf(this.permissions.getOrDefault(contexts, ImmutableMap.of()));
+    }
+
     public Map<String, Boolean> resolvePermissions(ContextSet filter) {
         // get relevant entries
         SortedMap<ImmutableContextSet, Map<String, Boolean>> sorted = new TreeMap<>(ContextSetComparator.reverse());
@@ -211,6 +217,11 @@ public class CalculatedSubjectData implements LPSubjectData {
         return map.build();
     }
 
+    @Override
+    public ImmutableList<LPSubjectReference> getParents(ImmutableContextSet contexts) {
+        return ImmutableList.copyOf(this.parents.getOrDefault(contexts, ImmutableSet.of()));
+    }
+
     public Set<LPSubjectReference> resolveParents(ContextSet filter) {
         // get relevant entries
         SortedMap<ImmutableContextSet, Set<LPSubjectReference>> sorted = new TreeMap<>(ContextSetComparator.reverse());
@@ -295,6 +306,11 @@ public class CalculatedSubjectData implements LPSubjectData {
             map.put(e.getKey(), ImmutableMap.copyOf(e.getValue()));
         }
         return map.build();
+    }
+
+    @Override
+    public ImmutableMap<String, String> getOptions(ImmutableContextSet contexts) {
+        return ImmutableMap.copyOf(this.options.getOrDefault(contexts, ImmutableMap.of()));
     }
 
     public Map<String, String> resolveOptions(ContextSet filter) {

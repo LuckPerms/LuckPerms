@@ -26,7 +26,6 @@
 package me.lucko.luckperms.sponge.service.proxy.api6;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.context.ContextsSupplier;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
@@ -68,8 +67,7 @@ public final class SubjectProxy implements Subject, ProxiedSubject, ProxiedServi
     // lazy init
     private ContextsSupplier getContextsCache() {
         if (this.contextsSupplier == null) {
-            ContextManager<Subject> contextManager = (ContextManager<Subject>) this.service.getPlugin().getContextManager();
-            this.contextsSupplier = contextManager.getCacheFor(this);
+            this.contextsSupplier = this.service.getContextManager().getCacheFor(this);
         }
         return this.contextsSupplier;
     }

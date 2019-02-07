@@ -51,9 +51,7 @@ public interface LPSubjectData {
 
     ImmutableMap<ImmutableContextSet, ImmutableMap<String, Boolean>> getAllPermissions();
 
-    default ImmutableMap<String, Boolean> getPermissions(ImmutableContextSet contexts) {
-        return ImmutableMap.copyOf(getAllPermissions().getOrDefault(contexts, ImmutableMap.of()));
-    }
+    ImmutableMap<String, Boolean> getPermissions(ImmutableContextSet contexts);
 
     CompletableFuture<Boolean> setPermission(ImmutableContextSet contexts, String permission, Tristate value);
 
@@ -65,9 +63,7 @@ public interface LPSubjectData {
 
     ImmutableMap<ImmutableContextSet, ImmutableList<LPSubjectReference>> getAllParents();
 
-    default ImmutableList<LPSubjectReference> getParents(ImmutableContextSet contexts) {
-        return ImmutableList.copyOf(getAllParents().getOrDefault(contexts, ImmutableList.of()));
-    }
+    ImmutableList<LPSubjectReference> getParents(ImmutableContextSet contexts);
 
     CompletableFuture<Boolean> addParent(ImmutableContextSet contexts, LPSubjectReference parent);
 

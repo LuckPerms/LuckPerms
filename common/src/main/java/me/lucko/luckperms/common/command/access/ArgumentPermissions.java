@@ -298,7 +298,7 @@ public final class ArgumentPermissions {
             throw new IllegalStateException("Unable to get a User for " + sender.getUuid() + " - " + sender.getName());
         }
 
-        PermissionCache permissionData = user.getCachedData().getPermissionData(Contexts.of(contextSet, Contexts.global().getSettings()));
+        PermissionCache permissionData = user.getCachedData().getPermissionData(Contexts.global().setContexts(contextSet));
         return !permissionData.getPermissionValue(NodeFactory.groupNode(targetGroupName), PermissionCheckEvent.Origin.INTERNAL).result().asBoolean();
     }
 

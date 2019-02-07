@@ -107,7 +107,7 @@ public class MetaSetChatMeta extends SharedSubCommand {
 
         // determine the priority to set at
         if (priority == Integer.MIN_VALUE) {
-            MetaAccumulator metaAccumulator = holder.accumulateMeta(null, Contexts.of(context, Contexts.global().getSettings()));
+            MetaAccumulator metaAccumulator = holder.accumulateMeta(null, Contexts.global().setContexts(context));
             metaAccumulator.complete();
             priority = metaAccumulator.getChatMeta(this.type).keySet().stream().mapToInt(e -> e).max().orElse(0) + 1;
 
