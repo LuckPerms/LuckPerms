@@ -195,6 +195,12 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         // remove any hooks into the platform
         removePlatformHooks();
 
+        // close messaging service
+        if (this.messagingService != null) {
+            getLogger().info("Closing messaging service...");
+            this.messagingService.close();
+        }
+
         // close storage
         getLogger().info("Closing storage...");
         this.storage.shutdown();
@@ -202,12 +208,6 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         // close file watcher
         if (this.fileWatcher != null) {
             this.fileWatcher.close();
-        }
-
-        // close messaging service
-        if (this.messagingService != null) {
-            getLogger().info("Closing messaging service...");
-            this.messagingService.close();
         }
 
         // unregister api
