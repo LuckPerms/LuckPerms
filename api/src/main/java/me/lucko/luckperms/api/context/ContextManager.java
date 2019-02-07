@@ -150,13 +150,12 @@ public interface ContextManager {
     void registerCalculator(@NonNull ContextCalculator<?> calculator);
 
     /**
-     * Registers a static context calculator with the manager.
-     *
-     * <p>Static calculators provide the same context for all subjects.</p>
+     * Unregisters a context calculator with the manager.
      *
      * @param calculator the calculator
+     * @since 4.4
      */
-    void registerStaticCalculator(@NonNull StaticContextCalculator calculator);
+    void unregisterCalculator(@NonNull ContextCalculator<?> calculator);
 
     /**
      * Invalidates the lookup cache for a given subject

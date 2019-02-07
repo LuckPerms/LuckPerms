@@ -163,24 +163,21 @@ public abstract class ContextManager<T> {
         );
     }
 
-    /**
-     * Registers a context calculator with the manager.
-     *
-     * @param calculator the calculator
-     */
     public void registerCalculator(ContextCalculator<? super T> calculator) {
         // calculators registered first should have priority (and be checked last.)
         this.calculators.add(0, calculator);
+
+        if (calculator instanceof StaticContextCalculator) {
+            StaticContextCalculator staticCalculator = (StaticContextCalculator) calculator;
+            this.staticCalculators.add(0, staticCalculator);
+        }
     }
 
-    /**
-     * Registers a static context calculator with the manager.
-     *
-     * @param calculator the calculator
-     */
-    public void registerStaticCalculator(StaticContextCalculator calculator) {
-        registerCalculator(calculator);
-        this.staticCalculators.add(0, calculator);
+    public void unregisterCalculator(ContextCalculator<? super T> calculator) {
+        this.calculators.remove(calculator);
+        if (calculator instanceof StaticContextCalculator) {
+            this.staticCalculators.remove(calculator);
+        }
     }
 
     /**

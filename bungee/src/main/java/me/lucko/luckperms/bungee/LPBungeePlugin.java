@@ -141,7 +141,7 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
         this.contextManager.registerCalculator(new BackendServerCalculator(this));
 
         if (this.bootstrap.getProxy().getPluginManager().getPlugin("RedisBungee") != null) {
-            this.contextManager.registerStaticCalculator(new RedisBungeeCalculator());
+            this.contextManager.registerCalculator(new RedisBungeeCalculator());
         }
     }
 

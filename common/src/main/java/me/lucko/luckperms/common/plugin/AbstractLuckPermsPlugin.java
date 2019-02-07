@@ -153,7 +153,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // setup contextmanager & register common calculators
         setupContextManager();
-        getContextManager().registerStaticCalculator(new LPStaticContextsCalculator(getConfiguration()));
+        getContextManager().registerCalculator(new LPStaticContextsCalculator(getConfiguration()));
 
         // setup platform hooks
         setupPlatformHooks();

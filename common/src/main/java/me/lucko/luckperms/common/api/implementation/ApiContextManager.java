@@ -29,7 +29,6 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.context.StaticContextCalculator;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -109,9 +108,9 @@ public class ApiContextManager implements me.lucko.luckperms.api.context.Context
     }
 
     @Override
-    public void registerStaticCalculator(@NonNull StaticContextCalculator calculator) {
+    public void unregisterCalculator(@NonNull ContextCalculator<?> calculator) {
         Objects.requireNonNull(calculator, "calculator");
-        this.handle.registerStaticCalculator(calculator);
+
     }
 
     @Override
