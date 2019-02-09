@@ -110,7 +110,7 @@ public class ApiContextManager implements me.lucko.luckperms.api.context.Context
     @Override
     public void unregisterCalculator(@NonNull ContextCalculator<?> calculator) {
         Objects.requireNonNull(calculator, "calculator");
-
+        this.handle.unregisterCalculator(calculator);
     }
 
     @Override

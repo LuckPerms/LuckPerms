@@ -190,7 +190,7 @@ public abstract class ContextManager<T> {
     protected Contexts calculate(T subject) {
         MutableContextSet accumulator = MutableContextSet.create();
 
-        for (ContextCalculator<? super T> calculator : ContextManager.this.calculators) {
+        for (ContextCalculator<? super T> calculator : this.calculators) {
             try {
                 MutableContextSet ret = calculator.giveApplicableContext(subject, accumulator);
                 if (ret == null) {
