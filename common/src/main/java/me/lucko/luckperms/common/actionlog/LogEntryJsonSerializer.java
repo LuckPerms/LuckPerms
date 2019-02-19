@@ -58,7 +58,7 @@ public final class LogEntryJsonSerializer {
 
         builder.actor(UUID.fromString(data.get("actor").getAsString()));
         builder.actorName(data.get("actorName").getAsString());
-        builder.type(LogEntry.Type.valueOf(data.get("type").getAsString()));
+        builder.type(LogEntry.Type.parse(data.get("type").getAsString()));
         if (data.has("acted")) {
             builder.actor(UUID.fromString(data.get("acted").getAsString()));
         }

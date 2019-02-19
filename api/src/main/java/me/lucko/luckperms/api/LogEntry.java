@@ -102,6 +102,35 @@ public interface LogEntry extends Comparable<LogEntry> {
     enum Type {
         USER('U'), GROUP('G'), TRACK('T');
 
+        /**
+         * Parses a {@link Type} from a string.
+         *
+         * @param type the string
+         * @return a type
+         * @throws IllegalArgumentException if a type could not be parsed
+         * @since 4.4
+         */
+        public static @NonNull Type parse(String type) {
+            try {
+                return valueOf(type);
+            } catch (IllegalArgumentException e) {
+                // ignore
+            }
+            try {
+                return valueOf(type.charAt(0));
+            } catch (IllegalArgumentException e) {
+                // ignore
+            }
+            throw new IllegalArgumentException("Unknown type: " + type);
+        }
+
+        /**
+         * Returns a {@link Type} by its code.
+         *
+         * @param code the code - see {@link Type#getCode()}.
+         * @return a type
+         * @throws IllegalArgumentException if a type could not be resolved
+         */
         public static @NonNull Type valueOf(char code) {
             switch (code) {
                 case 'U':
