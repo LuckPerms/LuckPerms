@@ -66,7 +66,7 @@ public interface DuplicateRemovalFunction {
     };
 
     /**
-     * A {@link DuplicateRemovalFunction} that retains only the first duplicate.
+     * A {@link DuplicateRemovalFunction} that retains only the first occurrence.
      */
     DuplicateRemovalFunction FIRST_ONLY = new DuplicateRemovalFunction() {
         @SuppressWarnings("Java8CollectionRemoveIf")
@@ -88,7 +88,7 @@ public interface DuplicateRemovalFunction {
     };
 
     /**
-     * A {@link DuplicateRemovalFunction} that retains only the first duplicate.
+     * A {@link DuplicateRemovalFunction} that retains only the last occurrence.
      */
     DuplicateRemovalFunction LAST_ONLY = new DuplicateRemovalFunction() {
         @Override
