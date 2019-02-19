@@ -46,6 +46,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedMap;
 
 /**
@@ -194,6 +195,7 @@ public class MetaCache implements MetaData {
 
         @Override
         public String get(Object key) {
+            Objects.requireNonNull(key, "key");
             String value = super.get(key);
 
             // log this meta lookup to the verbose handler
@@ -218,12 +220,17 @@ public class MetaCache implements MetaData {
 
         @Override
         public List<String> get(String key) {
+            Objects.requireNonNull(key, "key");
             List<String> values = super.get(key);
 
             // log this meta lookup to the verbose handler
             VerboseHandler verboseHandler = MetaCache.this.metadata.getParentContainer().getPlugin().getVerboseHandler();
-            for (String value : values) {
-                verboseHandler.offerMetaCheckEvent(this.origin, MetaCache.this.metadata.getObjectName(), MetaCache.this.metadata.getContext(), key, String.valueOf(value));
+            if (!values.isEmpty()) {
+                for (String value : values) {
+                    verboseHandler.offerMetaCheckEvent(this.origin, MetaCache.this.metadata.getObjectName(), MetaCache.this.metadata.getContext(), key, String.valueOf(value));
+                }
+            } else {
+                verboseHandler.offerMetaCheckEvent(this.origin, MetaCache.this.metadata.getObjectName(), MetaCache.this.metadata.getContext(), key, "null");
             }
 
             return values;

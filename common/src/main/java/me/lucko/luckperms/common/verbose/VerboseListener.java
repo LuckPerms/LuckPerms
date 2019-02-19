@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.verbose;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -190,6 +191,14 @@ public class VerboseListener {
             PermissionCheckEvent permissionEvent = (PermissionCheckEvent) event;
             hover.add("&aType: &2permission");
             hover.add("&bOrigin: &2" + permissionEvent.getOrigin().name());
+
+            TristateResult result = permissionEvent.getResult();
+            if (result.processorClass() != null) {
+                hover.add("&bProcessor: &2" + result.processorClass().getName());
+            }
+            if (result.cause() != null) {
+                hover.add("&bCause: &2" + result.cause());
+            }
         }
         if (event instanceof MetaCheckEvent) {
             MetaCheckEvent metaEvent = (MetaCheckEvent) event;
