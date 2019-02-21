@@ -133,7 +133,9 @@ data:
     properties:
       useUnicode: true
       characterEncoding: utf8
-
+      useSSL: false
+      verifyServerCertificate: false
+      
   # The prefix for all LuckPerms SQL tables.
   # - Change this is you want to use different tables for different servers.
   table_prefix: 'luckperms_'
