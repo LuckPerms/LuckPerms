@@ -41,7 +41,7 @@ public class WildcardProcessor extends AbstractPermissionProcessor implements Pe
     private static final String ROOT_WILDCARD = "*";
     private static final String ROOT_WILDCARD_WITH_QUOTES = "'*'";
 
-    private Map<String, Boolean> wildcardPermissions = Collections.emptyMap();
+    private Map<String, TristateResult> wildcardPermissions = Collections.emptyMap();
     private TristateResult rootWildcardState = TristateResult.UNDEFINED;
 
     @Override
@@ -56,9 +56,9 @@ public class WildcardProcessor extends AbstractPermissionProcessor implements Pe
 
             node = node.substring(0, endIndex);
             if (!node.isEmpty()) {
-                Tristate t = Tristate.fromNullableBoolean(this.wildcardPermissions.get(node));
-                if (t != Tristate.UNDEFINED) {
-                    return RESULT_FACTORY.result(t, "match: " + node);
+                TristateResult match = this.wildcardPermissions.get(node);
+                if (match != null && match.result() != Tristate.UNDEFINED) {
+                    return match;
                 }
             }
         }
@@ -68,14 +68,16 @@ public class WildcardProcessor extends AbstractPermissionProcessor implements Pe
 
     @Override
     public void refresh() {
-        ImmutableMap.Builder<String, Boolean> builder = ImmutableMap.builder();
+        ImmutableMap.Builder<String, TristateResult> builder = ImmutableMap.builder();
         for (Map.Entry<String, Boolean> e : this.sourceMap.entrySet()) {
             String key = e.getKey();
             if (!key.endsWith(WILDCARD_SUFFIX) || key.length() <= 2) {
                 continue;
             }
+            key = key.substring(0, key.length() - 2);
 
-            builder.put(key.substring(0, key.length() - 2), e.getValue());
+            TristateResult value = RESULT_FACTORY.result(Tristate.fromBoolean(e.getValue()), "match: " + key);
+            builder.put(key, value);
         }
         this.wildcardPermissions = builder.build();
 
@@ -83,7 +85,6 @@ public class WildcardProcessor extends AbstractPermissionProcessor implements Pe
         if (state == Tristate.UNDEFINED) {
             state = Tristate.fromNullableBoolean(this.sourceMap.get(ROOT_WILDCARD_WITH_QUOTES));
         }
-
         this.rootWildcardState = RESULT_FACTORY.result(state, "root");
     }
 }
