@@ -109,10 +109,8 @@ public enum Dependency {
             "okhttp",
             "3.12.1",
             "B8PYLKfq9HIvALLagH3Hhg9haa5gz+3PXUAhj5CICkY=",
-            Relocation.allOf(
-                    Relocation.of(RelocationHelper.OKHTTP3_STRING, RelocationHelper.OKHTTP3_STRING),
-                    Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
-            )
+            Relocation.of(RelocationHelper.OKHTTP3_STRING, RelocationHelper.OKHTTP3_STRING),
+            Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
     ),
     COMMODORE(
             "me{}lucko",
@@ -182,21 +180,17 @@ public enum Dependency {
             "mongo-java-driver",
             "3.9.1",
             "mxKxkvmYluxV+Hdn57uyt+MjjSQUsFjxFw9tjhx0bm4=",
-            Relocation.allOf(
-                    Relocation.of("mongodb", "com{}mongodb"),
-                    Relocation.of("bson", "org{}bson")
-            )
+            Relocation.of("mongodb", "com{}mongodb"),
+            Relocation.of("bson", "org{}bson")
     ),
     JEDIS(
             "redis.clients",
             "jedis",
             "2.10.1",
             "Pp7msE2yJk5QRF9ASqM/6glX95xsnrwkm9BfN37vLI4=",
-            Relocation.allOf(
-                    Relocation.of("jedis", "redis{}clients{}jedis"),
-                    Relocation.of("jedisutil", "redis{}clients{}util"),
-                    Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
-            )
+            Relocation.of("jedis", "redis{}clients{}jedis"),
+            Relocation.of("jedisutil", "redis{}clients{}util"),
+            Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
     ),
     COMMONS_POOL_2(
             "org.apache.commons",
@@ -238,10 +232,8 @@ public enum Dependency {
             "configurate-hocon",
             "3.5",
             "sOym1KPmQylGSfk90ZFqobuvoZfEWb7XMmMBwbHuxFw=",
-            Relocation.allOf(
-                    Relocation.of("configurate", "ninja{}leaping{}configurate"),
-                    Relocation.of("hocon", "com{}typesafe{}config")
-            )
+            Relocation.of("configurate", "ninja{}leaping{}configurate"),
+            Relocation.of("hocon", "com{}typesafe{}config")
     ),
     HOCON_CONFIG(
             "com{}typesafe",
@@ -255,10 +247,8 @@ public enum Dependency {
             "configurate-toml",
             "3.5",
             "U8p0XSTaNT/uebvLpO/vb6AhVGQDYiZsauSGB9zolPU=",
-            Relocation.allOf(
-                    Relocation.of("configurate", "ninja{}leaping{}configurate"),
-                    Relocation.of("toml4j", "com{}moandjiezana{}toml")
-            )
+            Relocation.of("configurate", "ninja{}leaping{}configurate"),
+            Relocation.of("toml4j", "com{}moandjiezana{}toml")
     ),
     TOML4J(
             "com{}moandjiezana{}toml",
@@ -278,14 +268,10 @@ public enum Dependency {
     private static final String MAVEN_FORMAT = "%s/%s/%s/%s-%s.jar";
 
     Dependency(String groupId, String artifactId, String version, String checksum) {
-        this(groupId, artifactId, version, checksum, ImmutableList.of());
+        this(groupId, artifactId, version, checksum, new Relocation[0]);
     }
 
-    Dependency(String groupId, String artifactId, String version, String checksum, Relocation relocation) {
-        this(groupId, artifactId, version, checksum, ImmutableList.of(relocation));
-    }
-
-    Dependency(String groupId, String artifactId, String version, String checksum, List<Relocation> relocations) {
+    Dependency(String groupId, String artifactId, String version, String checksum, Relocation... relocations) {
         String path = String.format(MAVEN_FORMAT,
                 rewriteEscaping(groupId).replace(".", "/"),
                 rewriteEscaping(artifactId),

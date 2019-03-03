@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.dependencies.relocation;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 public final class Relocation {
@@ -34,10 +32,6 @@ public final class Relocation {
 
     public static Relocation of(String id, String pattern) {
         return new Relocation(pattern.replace("{}", "."), RELOCATION_PREFIX + id);
-    }
-
-    public static List<Relocation> allOf(Relocation... relocations) {
-        return Arrays.asList(relocations);
     }
 
     private final String pattern;
