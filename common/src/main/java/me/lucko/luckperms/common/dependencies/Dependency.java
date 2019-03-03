@@ -161,8 +161,8 @@ public enum Dependency {
     HIKARI(
             "com{}zaxxer",
             "HikariCP",
-            "3.3.0",
-            "hpK1CDgTul4n8ICT0y12qDIFwT6uzzu9xr8+vrbGrco=",
+            "3.3.1",
+            "SIaA1yzGHOZNpZNoIt903f5ScJrIB3u8CT2cNkaLcy0=",
             Relocation.of("hikari", "com{}zaxxer{}hikari")
     ),
     SLF4J_SIMPLE(

@@ -29,7 +29,7 @@ dependencies {
     compile('me.lucko.configurate:configurate-toml:3.5') {
         exclude(module: 'toml4j')
     }
-    compile 'com.zaxxer:HikariCP:3.3.0'
+    compile 'com.zaxxer:HikariCP:3.3.1'
     compile 'redis.clients:jedis:2.10.1'
     compile 'org.mongodb:mongo-java-driver:3.9.1'
     compile 'org.yaml:snakeyaml:1.23'
