@@ -39,6 +39,8 @@ import java.util.stream.Stream;
  * see: https://github.com/drtshock/Essentials/blob/2.x/Essentials/src/com/earth2me/essentials/utils/DateUtil.java
  */
 public final class DateParser {
+    private DateParser() {}
+
     private static final Pattern TIME_PATTERN = Pattern.compile(Stream.of("y", "mo", "w", "d", "h", "m").map(i -> "(?:([0-9]+)\\s*" + i + "[a-z]*[,\\s]*)?").collect(Collectors.joining()) + "(?:([0-9]+)\\s*(?:s[a-z]*)?)?", Pattern.CASE_INSENSITIVE);
     private static final int MAX_YEARS = 100000;
 
@@ -129,7 +131,5 @@ public final class DateParser {
         }
         return (c.getTimeInMillis() / 1000) + 1;
     }
-
-    private DateParser() {}
 
 }

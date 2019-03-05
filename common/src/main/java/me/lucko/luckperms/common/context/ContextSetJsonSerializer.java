@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public final class ContextSetJsonSerializer {
+    private ContextSetJsonSerializer() {}
 
     public static JsonObject serializeContextSet(ContextSet contextSet) {
         JsonObject data = new JsonObject();
@@ -103,7 +104,5 @@ public final class ContextSetJsonSerializer {
 
         return map;
     }
-
-    private ContextSetJsonSerializer() {}
 
 }

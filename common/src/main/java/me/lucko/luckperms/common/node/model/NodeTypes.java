@@ -52,6 +52,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 public final class NodeTypes {
+    private NodeTypes() {}
 
     public static final String PREFIX_KEY = "prefix";
     public static final String SUFFIX_KEY = "suffix";
@@ -508,7 +509,5 @@ public final class NodeTypes {
             return "Regex{pattern=" + this.patternString + '}';
         }
     }
-
-    private NodeTypes() {}
 
 }

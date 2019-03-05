@@ -30,7 +30,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 public final class PrivateMethodHandles {
-
     private PrivateMethodHandles() {}
 
     private static final Constructor<MethodHandles.Lookup> LOOKUP_CONSTRUCTOR;

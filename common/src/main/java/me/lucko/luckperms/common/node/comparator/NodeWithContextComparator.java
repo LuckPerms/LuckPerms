@@ -34,6 +34,7 @@ import java.util.Comparator;
  * Compares permission nodes based upon their supposed "priority".
  */
 public class NodeWithContextComparator implements Comparator<Node> {
+    private NodeWithContextComparator() {}
 
     private static final Comparator<? super Node> INSTANCE = new NodeWithContextComparator();
     private static final Comparator<? super Node> REVERSE = INSTANCE.reversed();
@@ -45,8 +46,6 @@ public class NodeWithContextComparator implements Comparator<Node> {
     public static Comparator<? super Node> reverse() {
         return REVERSE;
     }
-
-    private NodeWithContextComparator() {}
 
     @Override
     public int compare(Node o1, Node o2) {

@@ -36,6 +36,7 @@ import java.util.Optional;
  * Utility class for creating instances of {@link DemotionResult}.
  */
 public final class DemotionResults {
+    private DemotionResults() {}
 
     public static DemotionResult success(String groupFrom, String groupTo) {
         return new Impl(DemotionResult.Status.SUCCESS, groupFrom, groupTo);
@@ -114,8 +115,5 @@ public final class DemotionResults {
                     "groupTo='" + this.groupTo + "')";
         }
     }
-
-
-    private DemotionResults() {}
 
 }

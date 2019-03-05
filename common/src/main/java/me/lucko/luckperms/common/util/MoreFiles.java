@@ -30,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class MoreFiles {
+    private MoreFiles() {}
 
     public static Path createFileIfNotExists(Path path) throws IOException {
         if (!Files.exists(path)) {
@@ -56,5 +57,4 @@ public final class MoreFiles {
         return path;
     }
 
-    private MoreFiles() {}
 }

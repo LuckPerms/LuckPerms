@@ -33,6 +33,7 @@ import java.util.Objects;
  * Utility class for converting between Velocity and LuckPerms tristate classes
  */
 public final class CompatibilityUtil {
+    private CompatibilityUtil() {}
 
     public static com.velocitypowered.api.permission.Tristate convertTristate(Tristate tristate) {
         Objects.requireNonNull(tristate, "tristate");
@@ -57,7 +58,5 @@ public final class CompatibilityUtil {
                 return Tristate.UNDEFINED;
         }
     }
-
-    private CompatibilityUtil() {}
 
 }

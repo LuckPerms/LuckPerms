@@ -42,6 +42,7 @@ import java.util.List;
  * checks made by plugins.
  */
 public final class PermissibleInjector {
+    private PermissibleInjector() {}
 
     /**
      * All permission checks made on standard Bukkit objects are effectively proxied to a
@@ -150,7 +151,5 @@ public final class PermissibleInjector {
             }
         }
     }
-
-    private PermissibleInjector() {}
 
 }

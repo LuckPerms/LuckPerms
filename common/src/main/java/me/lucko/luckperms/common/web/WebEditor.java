@@ -63,6 +63,8 @@ import java.util.stream.Stream;
  * Utility methods for interacting with the LuckPerms web permission editor.
  */
 public final class WebEditor {
+    private WebEditor() {}
+
     private static final String USER_ID_PATTERN = "user/";
     private static final String GROUP_ID_PATTERN = "group/";
 
@@ -234,7 +236,5 @@ public final class WebEditor {
 
         return nodes;
     }
-
-    private WebEditor() {}
 
 }

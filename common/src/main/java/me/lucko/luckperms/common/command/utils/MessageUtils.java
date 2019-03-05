@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class MessageUtils {
+    private MessageUtils() {}
 
     /**
      * Sends a message to the sender, formatted with the plugin prefix and color scheme
@@ -176,7 +177,5 @@ public final class MessageUtils {
 
         return sb.delete(sb.length() - Message.CONTEXT_PAIR_SEP.asString(localeManager).length(), sb.length()).toString();
     }
-
-    private MessageUtils() {}
 
 }

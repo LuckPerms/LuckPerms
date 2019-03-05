@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 public final class NodeTools {
+    private NodeTools() {}
 
     public static <T extends Node> void removeEqual(Iterator<T> it, NodeEqualityPredicate equalityPredicate) {
         List<T> alreadyIn = new ArrayList<>();
@@ -78,5 +79,4 @@ public final class NodeTools {
         return localizedNode -> delegate.test(localizedNode.getNode());
     }
 
-    private NodeTools() {}
 }

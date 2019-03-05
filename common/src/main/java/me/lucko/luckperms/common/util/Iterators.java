@@ -32,6 +32,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public final class Iterators {
+    private Iterators() {}
 
     public static <I> void iterate(Iterable<I> iterable, Consumer<I> action) {
         for (I i : iterable) {
@@ -85,7 +86,5 @@ public final class Iterators {
         }
         return lists;
     }
-
-    private Iterators() {}
 
 }

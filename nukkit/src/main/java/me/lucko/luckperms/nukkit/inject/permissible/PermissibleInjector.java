@@ -41,6 +41,7 @@ import java.util.Set;
  * checks made by plugins.
  */
 public final class PermissibleInjector {
+    private PermissibleInjector() {}
 
     /**
      * All permission checks made on standard Nukkit objects are effectively proxied to a
@@ -140,7 +141,5 @@ public final class PermissibleInjector {
             }
         }
     }
-
-    private PermissibleInjector() {}
 
 }

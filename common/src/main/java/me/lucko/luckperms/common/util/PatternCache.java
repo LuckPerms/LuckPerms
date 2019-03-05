@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public final class PatternCache {
+    private PatternCache() {}
 
     private static final Map<String, CachedPattern> CACHE = LoadingMap.of(s -> {
         try {
@@ -91,7 +92,5 @@ public final class PatternCache {
             return this.ex;
         }
     }
-
-    private PatternCache() {}
 
 }

@@ -35,6 +35,7 @@ import me.lucko.luckperms.api.LogEntry;
 import java.util.UUID;
 
 public final class LogEntryJsonSerializer {
+    private LogEntryJsonSerializer() {}
 
     public static JsonObject serialize(LogEntry logEntry) {
         JsonObject data = new JsonObject();
@@ -68,5 +69,4 @@ public final class LogEntryJsonSerializer {
         return builder.build();
     }
 
-    private LogEntryJsonSerializer() {}
 }

@@ -57,6 +57,7 @@ import java.util.Set;
  * @author Jens Nyman
  */
 public final class GraphTraversers {
+    private GraphTraversers() {}
 
     /**
      * Returns an unmodifiable {@code Iterable} over the nodes reachable from
@@ -209,7 +210,5 @@ public final class GraphTraversers {
         PRE_ORDER,
         POST_ORDER
     }
-
-    private GraphTraversers() {}
 
 }

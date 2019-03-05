@@ -37,7 +37,6 @@ import java.io.IOException;
  * Utilities for the OkHttp client
  */
 public final class HttpClient {
-
     private HttpClient() {}
 
     private static final OkHttpClient CLIENT = new OkHttpClient.Builder()

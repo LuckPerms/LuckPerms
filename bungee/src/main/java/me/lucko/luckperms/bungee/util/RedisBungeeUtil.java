@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public final class RedisBungeeUtil {
+    private RedisBungeeUtil() {}
 
     /**
      * Looks up a UUID from username via RedisBungee's uuid cache.
@@ -45,7 +46,5 @@ public final class RedisBungeeUtil {
     public static Optional<String> lookupUsername(UUID uuid) {
         return Optional.ofNullable(RedisBungee.getApi()).map(a -> a.getNameFromUuid(uuid, true));
     }
-
-    private RedisBungeeUtil() {}
 
 }

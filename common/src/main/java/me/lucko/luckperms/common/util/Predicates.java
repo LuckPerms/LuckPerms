@@ -33,6 +33,8 @@ import java.util.function.Predicate;
  * A collection of predicate utilities used mostly in command classes
  */
 public final class Predicates {
+    private Predicates() {}
+
     private static final Predicate FALSE = new Predicate() {
         @Override public boolean test(Object o) { return false; }
         @Override public Predicate and(Predicate other) { return this; }
@@ -74,5 +76,4 @@ public final class Predicates {
         return t::equals;
     }
 
-    private Predicates() {}
 }

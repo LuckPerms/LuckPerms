@@ -44,6 +44,7 @@ import java.util.Objects;
  * Contains the standard {@link MetaStackElement}s provided by LuckPerms.
  */
 public final class StandardStackElements {
+    private StandardStackElements() {}
 
     public static MetaStackElement parseFromString(LuckPermsPlugin plugin, String s) {
         s = s.toLowerCase();
@@ -316,7 +317,5 @@ public final class StandardStackElements {
             return this.groupName.hashCode();
         }
     }
-
-    private StandardStackElements() {}
 
 }

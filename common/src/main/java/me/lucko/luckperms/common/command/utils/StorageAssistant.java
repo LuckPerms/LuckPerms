@@ -41,6 +41,7 @@ import java.util.Optional;
  * Utility methods for saving users, groups and tracks.
  */
 public final class StorageAssistant {
+    private StorageAssistant() {}
 
     public static Group loadGroup(String target, Sender sender, LuckPermsPlugin plugin, boolean auditTemporary) {
         // special handling for the importer
@@ -176,5 +177,4 @@ public final class StorageAssistant {
         }
     }
 
-    private StorageAssistant() {}
 }

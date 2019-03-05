@@ -70,6 +70,7 @@ import static me.lucko.luckperms.common.config.ConfigKeyTypes.stringKey;
  * to function a bit like an enum, but with generics.</p>
  */
 public final class ConfigKeys {
+    private ConfigKeys() {}
 
     /**
      * The name of the server
@@ -592,7 +593,5 @@ public final class ConfigKeys {
     public static int size() {
         return SIZE;
     }
-
-    private ConfigKeys() {}
 
 }

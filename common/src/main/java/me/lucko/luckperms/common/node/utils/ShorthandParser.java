@@ -38,6 +38,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public final class ShorthandParser {
+    private ShorthandParser() {}
+
     private static final List<Function<String, Iterable<String>>> PARSERS = ImmutableList.<Function<String, Iterable<String>>>builder()
             .add(new ListParser())
             .add(new CharacterRangeParser())
@@ -168,7 +170,5 @@ public final class ShorthandParser {
             return getCharRange(before.charAt(0), after.charAt(0));
         }
     }
-
-    private ShorthandParser() {}
 
 }

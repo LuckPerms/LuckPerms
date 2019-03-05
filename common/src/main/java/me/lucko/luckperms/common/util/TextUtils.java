@@ -35,6 +35,7 @@ import java.util.stream.Stream;
 
 @SuppressWarnings("deprecation")
 public final class TextUtils {
+    private TextUtils() {}
 
     public static String joinNewline(String... strings) {
         return joinNewline(Arrays.stream(strings));
@@ -67,7 +68,5 @@ public final class TextUtils {
         }
         return input;
     }
-
-    private TextUtils() {}
 
 }

@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public final class LegacyNodeFactory {
+    private LegacyNodeFactory() {}
 
     /**
      * The characters which are delimited when serializing a context set
@@ -200,7 +201,5 @@ public final class LegacyNodeFactory {
 
         }
     }
-
-    private LegacyNodeFactory() {}
 
 }

@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 
 public final class MigrationUtils {
+    private MigrationUtils() {}
 
     public static Node.Builder parseNode(String permission, boolean value) {
         if (permission.startsWith("-") || permission.startsWith("!")) {
@@ -60,7 +61,5 @@ public final class MigrationUtils {
     public static String standardizeName(String string) {
         return string.trim().replace(':', '-').replace(' ', '-').replace('.', '-').toLowerCase();
     }
-
-    private MigrationUtils() {}
 
 }

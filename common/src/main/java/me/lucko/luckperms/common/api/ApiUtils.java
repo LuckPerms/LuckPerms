@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import java.util.function.Predicate;
 
 public final class ApiUtils {
+    private ApiUtils() {}
 
     public static String checkUsername(String s, LuckPermsPlugin plugin) {
         if (s == null) {
@@ -56,7 +57,5 @@ public final class ApiUtils {
         Preconditions.checkArgument(DataConstraints.GROUP_NAME_TEST.test(s), "Invalid name entry: " + s);
         return s.toLowerCase();
     }
-
-    private ApiUtils() {}
 
 }

@@ -31,8 +31,9 @@ import me.lucko.luckperms.sponge.service.model.calculated.CalculatedSubject;
 import java.util.stream.Collectors;
 
 public final class SubjectInheritanceGraphs {
-    private static final SubjectInheritanceGraph NON_CONTEXTUAL = new NonContextual();
+    private SubjectInheritanceGraphs() {}
 
+    private static final SubjectInheritanceGraph NON_CONTEXTUAL = new NonContextual();
 
     public static SubjectInheritanceGraph getGraph() {
         return NON_CONTEXTUAL;
@@ -73,6 +74,4 @@ public final class SubjectInheritanceGraphs {
                     .collect(Collectors.toList());
         }
     }
-
-    private SubjectInheritanceGraphs() {}
 }

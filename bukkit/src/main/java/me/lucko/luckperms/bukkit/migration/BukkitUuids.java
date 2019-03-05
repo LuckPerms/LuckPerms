@@ -33,6 +33,7 @@ import org.bukkit.Bukkit;
 import java.util.UUID;
 
 public final class BukkitUuids {
+    private BukkitUuids() {}
 
     public static UUID lookupUuid(ProgressLogger log, String s) {
         UUID uuid = Uuids.parse(s);
@@ -49,7 +50,5 @@ public final class BukkitUuids {
         }
         return uuid;
     }
-
-    private BukkitUuids() {}
 
 }

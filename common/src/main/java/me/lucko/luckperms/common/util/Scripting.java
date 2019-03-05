@@ -32,6 +32,8 @@ import javax.script.ScriptEngineManager;
  * Provides a nashorn script engine (lazily)
  */
 public final class Scripting {
+    private Scripting() {}
+
     private static ScriptEngine engine = null;
 
     // Lazily load
@@ -41,7 +43,5 @@ public final class Scripting {
         }
         return engine;
     }
-
-    private Scripting() {}
 
 }

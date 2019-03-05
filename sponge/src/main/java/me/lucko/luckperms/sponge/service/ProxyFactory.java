@@ -42,6 +42,8 @@ import org.spongepowered.api.service.permission.SubjectData;
  * Provides proxy instances which implement the SpongeAPI using the LuckPerms model.
  */
 public final class ProxyFactory {
+    private ProxyFactory() {}
+
     private static final boolean IS_API_7 = isApi7();
     private static boolean isApi7() {
         try {
@@ -88,7 +90,5 @@ public final class ProxyFactory {
                 me.lucko.luckperms.sponge.service.proxy.api7.DescriptionBuilder.registerDescription(service, description) :
                 me.lucko.luckperms.sponge.service.proxy.api6.DescriptionBuilder.registerDescription(service, description);
     }
-
-    private ProxyFactory() {}
 
 }

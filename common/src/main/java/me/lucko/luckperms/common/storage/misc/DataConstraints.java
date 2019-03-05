@@ -29,6 +29,7 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public final class DataConstraints {
+    private DataConstraints() {}
 
     public static final int MAX_PERMISSION_LENGTH = 200;
 
@@ -58,7 +59,5 @@ public final class DataConstraints {
     public static final Predicate<String> SERVER_NAME_TEST = s -> !s.isEmpty() && s.length() <= MAX_SERVER_LENGTH && !s.contains(" ");
 
     public static final Predicate<String> WORLD_NAME_TEST = s -> !s.isEmpty() && s.length() <= MAX_WORLD_LENGTH;
-
-    private DataConstraints() {}
 
 }

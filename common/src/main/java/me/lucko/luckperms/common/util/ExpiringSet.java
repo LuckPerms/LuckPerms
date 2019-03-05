@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.util;
 
 import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.ForwardingSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -45,7 +44,7 @@ public class ExpiringSet<E> extends ForwardingSet<E> {
     private final Set<E> setView;
 
     public ExpiringSet(long duration, TimeUnit unit) {
-        this.cache = Caffeine.newBuilder().expireAfterAccess(duration, unit).build();
+        this.cache = CaffeineFactory.newBuilder().expireAfterAccess(duration, unit).build();
         this.setView = this.cache.asMap().keySet();
     }
 

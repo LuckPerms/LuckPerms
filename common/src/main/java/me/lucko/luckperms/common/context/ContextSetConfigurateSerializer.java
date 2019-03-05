@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class ContextSetConfigurateSerializer {
+    private ContextSetConfigurateSerializer() {}
 
     public static ConfigurationNode serializeContextSet(ContextSet contextSet) {
         ConfigurationNode data = SimpleConfigurationNode.root();
@@ -83,7 +84,5 @@ public final class ContextSetConfigurateSerializer {
 
         return map;
     }
-
-    private ContextSetConfigurateSerializer() {}
 
 }

@@ -47,6 +47,8 @@ import java.util.function.Function;
  * Implements argument based permission checks for use in command implementations.
  */
 public final class ArgumentPermissions {
+    private ArgumentPermissions() {}
+
     private static final String USER_MODIFY_SELF = CommandPermission.ROOT + "modify.user.self";
     private static final String USER_MODIFY_OTHERS = CommandPermission.ROOT + "modify.user.others";
     private static final Function<String, String> GROUP_MODIFY = s -> CommandPermission.ROOT + "modify.group." + s;
@@ -301,7 +303,5 @@ public final class ArgumentPermissions {
         PermissionCache permissionData = user.getCachedData().getPermissionData(Contexts.global().setContexts(contextSet));
         return !permissionData.getPermissionValue(NodeFactory.groupNode(targetGroupName), PermissionCheckEvent.Origin.INTERNAL).result().asBoolean();
     }
-
-    private ArgumentPermissions() {}
     
 }

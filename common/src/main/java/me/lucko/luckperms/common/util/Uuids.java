@@ -34,6 +34,8 @@ import java.util.function.Predicate;
  * Utilities for working with {@link UUID}s.
  */
 public final class Uuids {
+    private Uuids() {}
+
     public static final Predicate<String> PREDICATE = s -> parse(s) != null;
 
     public static @Nullable UUID fromString(String s) {
@@ -58,7 +60,5 @@ public final class Uuids {
         }
         return uuid;
     }
-
-    private Uuids() {}
 
 }

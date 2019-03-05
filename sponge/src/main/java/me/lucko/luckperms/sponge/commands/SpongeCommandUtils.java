@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class SpongeCommandUtils {
+    private SpongeCommandUtils() {}
 
     public static Tristate parseTristate(int index, List<String> args) throws ArgumentParser.ArgumentException {
         String s = args.get(index).toLowerCase();
@@ -89,7 +90,5 @@ public final class SpongeCommandUtils {
     public static String contextToString(ContextSet set, LocaleManager localeManager) {
         return MessageUtils.contextSetToString(localeManager, set);
     }
-
-    private SpongeCommandUtils() {}
 
 }

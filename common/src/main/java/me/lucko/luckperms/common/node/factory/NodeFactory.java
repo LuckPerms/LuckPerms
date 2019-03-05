@@ -38,6 +38,8 @@ import java.util.Map;
  * Utility class to make Node(Builder) instances from strings or existing Nodes
  */
 public final class NodeFactory {
+    private NodeFactory() {}
+
     public static final String DEFAULT_GROUP_NAME = "default";
 
     public static Node.Builder builder(String s) {
@@ -343,7 +345,5 @@ public final class NodeFactory {
 
         return sb;
     }
-
-    private NodeFactory() {}
 
 }

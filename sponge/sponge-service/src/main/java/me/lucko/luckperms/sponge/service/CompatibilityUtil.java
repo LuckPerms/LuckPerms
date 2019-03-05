@@ -42,6 +42,8 @@ import java.util.Set;
  * Utility class for converting between Sponge and LuckPerms context and tristate classes
  */
 public final class CompatibilityUtil {
+    private CompatibilityUtil() {}
+
     private static final Set<Context> EMPTY = ImmutableSet.of();
 
     public static ImmutableContextSet convertContexts(Set<Context> contexts) {
@@ -91,7 +93,5 @@ public final class CompatibilityUtil {
                 return Tristate.UNDEFINED;
         }
     }
-
-    private CompatibilityUtil() {}
 
 }
