@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.bukkit.context;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import me.lucko.luckperms.api.Contexts;
@@ -36,6 +35,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.context.ContextsCache;
 import me.lucko.luckperms.common.context.ContextsSupplier;
+import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.common.util.LoadingMap;
 
 import org.bukkit.entity.Player;
@@ -49,7 +49,7 @@ public class BukkitContextManager extends ContextManager<Player> {
     private final LoadingMap<Player, ContextsCache<Player>> onlineSubjectCaches = LoadingMap.of(key -> new ContextsCache<>(key, this));
 
     // cache the creation of ContextsCache instances for offline players with a 1m expiry
-    private final LoadingCache<Player, ContextsCache<Player>> offlineSubjectCaches = Caffeine.newBuilder()
+    private final LoadingCache<Player, ContextsCache<Player>> offlineSubjectCaches = CaffeineFactory.newBuilder()
             .expireAfterAccess(1, TimeUnit.MINUTES)
             .build(key -> {
                 ContextsCache<Player> cache = this.onlineSubjectCaches.getIfPresent(key);

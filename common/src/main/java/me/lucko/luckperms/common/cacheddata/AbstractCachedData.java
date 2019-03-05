@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.cacheddata;
 
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.CacheLoader;
-import com.github.benmanes.caffeine.cache.Caffeine;
 
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Contexts;
@@ -41,6 +40,7 @@ import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStack;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.util.CaffeineFactory;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -64,14 +64,14 @@ public abstract class AbstractCachedData implements CachedData {
     /**
      * The cache used for {@link PermissionCache} instances.
      */
-    private final AsyncLoadingCache<Contexts, PermissionCache> permission = Caffeine.newBuilder()
+    private final AsyncLoadingCache<Contexts, PermissionCache> permission = CaffeineFactory.newBuilder()
             .expireAfterAccess(2, TimeUnit.MINUTES)
             .buildAsync(new PermissionCacheLoader());
 
     /**
      * The cache used for {@link MetaCache} instances.
      */
-    private final AsyncLoadingCache<MetaContexts, MetaCache> meta = Caffeine.newBuilder()
+    private final AsyncLoadingCache<MetaContexts, MetaCache> meta = CaffeineFactory.newBuilder()
             .expireAfterAccess(2, TimeUnit.MINUTES)
             .buildAsync(new MetaCacheLoader());
 

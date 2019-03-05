@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.user;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 
@@ -46,6 +45,7 @@ import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
+import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.common.util.Uuids;
 
 import java.util.List;
@@ -60,7 +60,7 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
     // this helps prevent race conditions where commands are being executed concurrently
     // and overriding each other.
     // it's not a great solution, but it mostly works.
-    private final LoadingCache<UUID, ReentrantLock> locks = Caffeine.newBuilder()
+    private final LoadingCache<UUID, ReentrantLock> locks = CaffeineFactory.newBuilder()
             .expireAfterAccess(1, TimeUnit.HOURS)
             .build(key -> new ReentrantLock());
 

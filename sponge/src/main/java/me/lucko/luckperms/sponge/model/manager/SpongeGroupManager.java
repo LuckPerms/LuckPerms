@@ -63,35 +63,37 @@ import java.util.function.Predicate;
 
 public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implements LPSubjectCollection {
     private final LPSpongePlugin plugin;
+    private final LoadingCache<String, LPSubject> subjectLoadingCache;
+
     private SubjectCollection spongeProxy = null;
-
-    private final LoadingCache<String, LPSubject> subjectLoadingCache = Caffeine.newBuilder()
-            .expireAfterWrite(1, TimeUnit.MINUTES)
-            .build(s -> {
-                SpongeGroup group = getIfLoaded(s);
-                if (group != null) {
-                    // they're already loaded, but the data might not actually be there yet
-                    // if stuff is being loaded, then the user's i/o lock will be locked by the storage impl
-                    group.getIoLock().lock();
-                    group.getIoLock().unlock();
-
-                    return group.sponge();
-                }
-
-                // Request load
-                getPlugin().getStorage().createAndLoadGroup(s, CreationCause.INTERNAL).join();
-
-                group = getIfLoaded(s);
-                if (group == null) {
-                    getPlugin().getLogger().severe("Error whilst loading group '" + s + "'.");
-                    throw new RuntimeException();
-                }
-
-                return group.sponge();
-            });
 
     public SpongeGroupManager(LPSpongePlugin plugin) {
         this.plugin = plugin;
+        this.subjectLoadingCache = Caffeine.newBuilder()
+                .executor(plugin.getBootstrap().getScheduler().async())
+                .expireAfterWrite(1, TimeUnit.MINUTES)
+                .build(s -> {
+                    SpongeGroup group = getIfLoaded(s);
+                    if (group != null) {
+                        // they're already loaded, but the data might not actually be there yet
+                        // if stuff is being loaded, then the user's i/o lock will be locked by the storage impl
+                        group.getIoLock().lock();
+                        group.getIoLock().unlock();
+
+                        return group.sponge();
+                    }
+
+                    // Request load
+                    getPlugin().getStorage().createAndLoadGroup(s, CreationCause.INTERNAL).join();
+
+                    group = getIfLoaded(s);
+                    if (group == null) {
+                        getPlugin().getLogger().severe("Error whilst loading group '" + s + "'.");
+                        throw new RuntimeException();
+                    }
+
+                    return group.sponge();
+                });
     }
 
     @Override

@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.sponge.context;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import me.lucko.luckperms.api.Contexts;
@@ -33,6 +32,7 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.context.ContextsCache;
 import me.lucko.luckperms.common.context.ContextsSupplier;
+import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 
 import org.spongepowered.api.service.permission.Subject;
@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 
 public class SpongeContextManager extends ContextManager<Subject> {
 
-    private final LoadingCache<Subject, ContextsCache<Subject>> subjectCaches = Caffeine.newBuilder()
+    private final LoadingCache<Subject, ContextsCache<Subject>> subjectCaches = CaffeineFactory.newBuilder()
             .expireAfterAccess(1, TimeUnit.MINUTES)
             .build(key -> new ContextsCache<>(key, this));
 

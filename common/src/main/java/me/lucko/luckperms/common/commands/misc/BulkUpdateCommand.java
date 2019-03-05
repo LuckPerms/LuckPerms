@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.misc;
 
 import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdateBuilder;
@@ -48,6 +47,7 @@ import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.common.util.Predicates;
 
 import java.util.List;
@@ -55,7 +55,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 public class BulkUpdateCommand extends SingleCommand {
-    private final Cache<String, BulkUpdate> pendingOperations = Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS).build();
+    private final Cache<String, BulkUpdate> pendingOperations = CaffeineFactory.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS).build();
 
     public BulkUpdateCommand(LocaleManager locale) {
         super(CommandSpec.BULK_UPDATE.localize(locale), "BulkUpdate", CommandPermission.BULK_UPDATE, Predicates.alwaysFalse());

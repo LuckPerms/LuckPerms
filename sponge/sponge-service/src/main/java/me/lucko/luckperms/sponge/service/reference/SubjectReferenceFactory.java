@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.sponge.service.reference;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.base.Splitter;
 
+import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
@@ -64,7 +64,7 @@ public final class SubjectReferenceFactory {
 
     public SubjectReferenceFactory(LPPermissionService service) {
         this.service = service;
-        this.referenceCache = Caffeine.newBuilder()
+        this.referenceCache = CaffeineFactory.newBuilder()
                 .expireAfterAccess(1, TimeUnit.HOURS)
                 .build(a -> new CachedSubjectReference(this.service, a.collectionId, a.id));
     }

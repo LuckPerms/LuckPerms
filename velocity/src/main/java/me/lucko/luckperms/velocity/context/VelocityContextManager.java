@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.velocity.context;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.velocitypowered.api.proxy.Player;
 
@@ -34,13 +33,14 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.context.ContextsCache;
 import me.lucko.luckperms.common.context.ContextsSupplier;
+import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.velocity.LPVelocityPlugin;
 
 import java.util.concurrent.TimeUnit;
 
 public class VelocityContextManager extends ContextManager<Player> {
 
-    private final LoadingCache<Player, ContextsCache<Player>> subjectCaches = Caffeine.newBuilder()
+    private final LoadingCache<Player, ContextsCache<Player>> subjectCaches = CaffeineFactory.newBuilder()
             .expireAfterAccess(1, TimeUnit.MINUTES)
             .build(key -> new ContextsCache<>(key, this));
 

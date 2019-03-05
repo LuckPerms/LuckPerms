@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.track;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 
@@ -37,6 +36,7 @@ import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.util.CaffeineFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +49,7 @@ public class TrackMainCommand extends MainCommand<Track, String> {
     // this helps prevent race conditions where commands are being executed concurrently
     // and overriding each other.
     // it's not a great solution, but it mostly works.
-    private final LoadingCache<String, ReentrantLock> locks = Caffeine.newBuilder()
+    private final LoadingCache<String, ReentrantLock> locks = CaffeineFactory.newBuilder()
             .expireAfterAccess(1, TimeUnit.HOURS)
             .build(key -> new ReentrantLock());
 

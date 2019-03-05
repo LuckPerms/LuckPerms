@@ -25,12 +25,12 @@
 
 package me.lucko.luckperms.common.primarygroup;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.util.CaffeineFactory;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class ContextualHolder extends StoredHolder {
 
     // cache lookups
-    private final LoadingCache<Contexts, Optional<String>> cache = Caffeine.newBuilder()
+    private final LoadingCache<Contexts, Optional<String>> cache = CaffeineFactory.newBuilder()
             .expireAfterAccess(1, TimeUnit.MINUTES)
             .build(this::calculateValue);
 

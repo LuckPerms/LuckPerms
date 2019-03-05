@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.bungee.context;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import me.lucko.luckperms.api.Contexts;
@@ -33,6 +32,7 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.context.ContextsSupplier;
+import me.lucko.luckperms.common.util.CaffeineFactory;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 public class BungeeContextManager extends ContextManager<ProxiedPlayer> {
 
-    private final LoadingCache<ProxiedPlayer, Contexts> contextsCache = Caffeine.newBuilder()
+    private final LoadingCache<ProxiedPlayer, Contexts> contextsCache = CaffeineFactory.newBuilder()
             .expireAfterWrite(50, TimeUnit.MILLISECONDS)
             .build(this::calculate);
 

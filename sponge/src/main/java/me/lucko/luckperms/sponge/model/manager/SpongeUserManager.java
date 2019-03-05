@@ -65,39 +65,41 @@ import java.util.function.Predicate;
 
 public class SpongeUserManager extends AbstractUserManager<SpongeUser> implements LPSubjectCollection {
     private final LPSpongePlugin plugin;
+    private final LoadingCache<UUID, LPSubject> subjectLoadingCache;
+
     private SubjectCollection spongeProxy = null;
-
-    private final LoadingCache<UUID, LPSubject> subjectLoadingCache = Caffeine.newBuilder()
-            .expireAfterWrite(1, TimeUnit.MINUTES)
-            .build(u -> {
-                // clock in with the housekeeper
-                getHouseKeeper().registerUsage(u);
-
-                // check if the user instance is already loaded.
-                SpongeUser user = getIfLoaded(u);
-                if (user != null) {
-                    // they're already loaded, but the data might not actually be there yet
-                    // if stuff is being loaded, then the user's i/o lock will be locked by the storage impl
-                    user.getIoLock().lock();
-                    user.getIoLock().unlock();
-
-                    return user.sponge();
-                }
-
-                // Request load
-                getPlugin().getStorage().loadUser(u, null).join();
-                user = getIfLoaded(u);
-                if (user == null) {
-                    getPlugin().getLogger().severe("Error whilst loading user '" + u + "'.");
-                    throw new RuntimeException();
-                }
-
-                return user.sponge();
-            });
 
     public SpongeUserManager(LPSpongePlugin plugin) {
         super(plugin, UserHousekeeper.timeoutSettings(10, TimeUnit.MINUTES));
         this.plugin = plugin;
+        this.subjectLoadingCache = Caffeine.newBuilder()
+                .executor(this.plugin.getBootstrap().getScheduler().async())
+                .expireAfterWrite(1, TimeUnit.MINUTES)
+                .build(u -> {
+                    // clock in with the housekeeper
+                    getHouseKeeper().registerUsage(u);
+
+                    // check if the user instance is already loaded.
+                    SpongeUser user = getIfLoaded(u);
+                    if (user != null) {
+                        // they're already loaded, but the data might not actually be there yet
+                        // if stuff is being loaded, then the user's i/o lock will be locked by the storage impl
+                        user.getIoLock().lock();
+                        user.getIoLock().unlock();
+
+                        return user.sponge();
+                    }
+
+                    // Request load
+                    getPlugin().getStorage().loadUser(u, null).join();
+                    user = getIfLoaded(u);
+                    if (user == null) {
+                        getPlugin().getLogger().severe("Error whilst loading user '" + u + "'.");
+                        throw new RuntimeException();
+                    }
+
+                    return user.sponge();
+                });
     }
 
     @Override
