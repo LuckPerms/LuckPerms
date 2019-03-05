@@ -27,49 +27,76 @@ package me.lucko.luckperms.common.plugin.scheduler;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Abstract implementation of {@link SchedulerAdapter} using a {@link ScheduledExecutorService}.
  */
 public abstract class AbstractJavaScheduler implements SchedulerAdapter {
-    private final ScheduledExecutorService asyncExecutor = new AsyncExecutor();
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
+            .setDaemon(true)
+            .setNameFormat("luckperms-scheduler")
+            .build()
+    );
+
+    private final ErrorReportingExecutor workerPool = new ErrorReportingExecutor(Executors.newCachedThreadPool(new ThreadFactoryBuilder()
+            .setDaemon(true)
+            .setNameFormat("luckperms-worker-%d")
+            .build()
+    ));
 
     @Override
     public Executor async() {
-        return this.asyncExecutor;
+        return this.workerPool;
     }
 
     @Override
     public SchedulerTask asyncLater(Runnable task, long delay, TimeUnit unit) {
-        ScheduledFuture<?> future = this.asyncExecutor.schedule(new WrappedRunnable(task), delay, unit);
+        ScheduledFuture<?> future = this.scheduler.schedule(() -> this.workerPool.execute(task), delay, unit);
         return () -> future.cancel(false);
     }
 
     @Override
     public SchedulerTask asyncRepeating(Runnable task, long interval, TimeUnit unit) {
-        ScheduledFuture<?> future = this.asyncExecutor.scheduleAtFixedRate(new WrappedRunnable(task), interval, interval, unit);
+        ScheduledFuture<?> future = this.scheduler.scheduleAtFixedRate(() -> this.workerPool.execute(task), interval, interval, unit);
         return () -> future.cancel(false);
     }
 
     @Override
     public void shutdown() {
-        this.asyncExecutor.shutdown();
+        this.scheduler.shutdown();
+        this.workerPool.delegate.shutdown();
         try {
-            this.asyncExecutor.awaitTermination(1, TimeUnit.MINUTES);
+            this.workerPool.delegate.awaitTermination(1, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    private static final class WrappedRunnable implements Runnable {
+    private static final class ErrorReportingExecutor implements Executor {
+        private final ExecutorService delegate;
+
+        private ErrorReportingExecutor(ExecutorService delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void execute(@NonNull Runnable command) {
+            this.delegate.execute(new ErrorReportingRunnable(command));
+        }
+    }
+
+    private static final class ErrorReportingRunnable implements Runnable {
         private final Runnable delegate;
 
-        WrappedRunnable(Runnable delegate) {
+        private ErrorReportingRunnable(Runnable delegate) {
             this.delegate = delegate;
         }
 
@@ -80,17 +107,6 @@ public abstract class AbstractJavaScheduler implements SchedulerAdapter {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    private static final class AsyncExecutor extends ScheduledThreadPoolExecutor {
-        AsyncExecutor() {
-            super(4, new ThreadFactoryBuilder().setNameFormat("luckperms-%d").build());
-        }
-
-        @Override
-        public void execute(Runnable command) {
-            super.execute(new WrappedRunnable(command));
         }
     }
 }
