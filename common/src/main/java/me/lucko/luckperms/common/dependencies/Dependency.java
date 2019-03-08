@@ -93,8 +93,8 @@ public enum Dependency {
     CAFFEINE(
             "com{}github{}ben-manes{}caffeine",
             "caffeine",
-            "2.6.2",
-            "53pEV3NfB1FY29Ahx2YXl91IVpX8Ttkt/d401HFNl1A=",
+            "2.7.0",
+            "Fw8phtcHwN+UIo9X1SV7fxH4hv1CtTthMWp0mKx+B/8=",
             Relocation.of("caffeine", "com{}github{}benmanes{}caffeine")
     ),
     OKIO(
@@ -107,8 +107,8 @@ public enum Dependency {
     OKHTTP(
             "com{}squareup{}" + RelocationHelper.OKHTTP3_STRING,
             "okhttp",
-            "3.12.1",
-            "B8PYLKfq9HIvALLagH3Hhg9haa5gz+3PXUAhj5CICkY=",
+            "3.13.1",
+            "CrQacT4qY478H0YQ7zTAf+85j517nXmm9UBrd5sAEaU=",
             Relocation.of(RelocationHelper.OKHTTP3_STRING, RelocationHelper.OKHTTP3_STRING),
             Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
     ),
@@ -122,8 +122,8 @@ public enum Dependency {
     MARIADB_DRIVER(
             "org{}mariadb{}jdbc",
             "mariadb-java-client",
-            "2.3.0",
-            "JvxnswIqboUyO3brtMJplOwaaxHsc0RIMkTE5Q/3nOA=",
+            "2.4.0",
+            "G346tblA35aJS8q1a3dQVZdU7Q7isGMzhwftoz6MZqU=",
             Relocation.of("mariadb", "org{}mariadb{}jdbc")
     ),
     MYSQL_DRIVER(
@@ -143,8 +143,8 @@ public enum Dependency {
     H2_DRIVER(
             "com.h2database",
             "h2",
-            "1.4.197",
-            "N/UhbhSvJ3KTDf+bhzQ1PwqA6Juj8z4GVEHeZTfF6EI="
+            "1.4.198",
+            "Mt1rFJy3IqpMLdTUCnSpzUHjKsWaTnVaZuV1NmDWHUY="
             // we don't apply relocations to h2 - it gets loaded via
             // an isolated classloader
     ),
@@ -178,16 +178,16 @@ public enum Dependency {
     MONGODB_DRIVER(
             "org.mongodb",
             "mongo-java-driver",
-            "3.9.1",
-            "mxKxkvmYluxV+Hdn57uyt+MjjSQUsFjxFw9tjhx0bm4=",
+            "3.10.1",
+            "IGjdjTH4VjqnqGUdVe8u+dKfzKkpCG1NR11TE8ieCdU=",
             Relocation.of("mongodb", "com{}mongodb"),
             Relocation.of("bson", "org{}bson")
     ),
     JEDIS(
             "redis.clients",
             "jedis",
-            "2.10.1",
-            "Pp7msE2yJk5QRF9ASqM/6glX95xsnrwkm9BfN37vLI4=",
+            "2.10.2",
+            "06PKnEnk08yYpdI2IUAZYxJjp0d6lDp0nGQkWw3CWsU=",
             Relocation.of("jedis", "redis{}clients{}jedis"),
             Relocation.of("jedisutil", "redis{}clients{}util"),
             Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
@@ -195,8 +195,8 @@ public enum Dependency {
     COMMONS_POOL_2(
             "org.apache.commons",
             "commons-pool2",
-            "2.6.0",
-            "kpPYiPvZCVFrhwCkvZHpglS4sf4Vr7bD1jVsnWckut4=",
+            "2.6.1",
+            "4tb0CE+KGA3mbHcAND/orToKqE8ssFYe20F/4f1BqhU=",
             Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
     ),
     CONFIGURATE_CORE(
