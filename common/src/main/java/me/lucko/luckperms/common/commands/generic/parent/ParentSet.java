@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
@@ -80,7 +81,7 @@ public class ParentSet extends SharedSubCommand {
 
         holder.clearParents(context, false);
         holder.setPermission(NodeFactory.buildGroupNode(group.getName()).withExtraContext(context).build());
-        if (holder.getType().isUser()) {
+        if (holder.getType() == HolderType.USER) {
             ((User) holder).getPrimaryGroup().setStoredValue(group.getName());
         }
 

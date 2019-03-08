@@ -31,6 +31,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -286,11 +287,11 @@ public class ExtendedLogEntry implements LogEntry {
         }
 
         public Builder acted(PermissionHolder acted) {
-            if (acted.getType().isUser()) {
+            if (acted.getType() == HolderType.USER) {
                 actedName(((User) acted).getName().orElse("null"));
                 acted(((User) acted).getUuid());
                 type(Type.USER);
-            } else if (acted.getType().isGroup()) {
+            } else if (acted.getType() == HolderType.GROUP) {
                 actedName(((Group) acted).getName());
                 type(Type.GROUP);
             }

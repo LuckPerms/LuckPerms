@@ -42,6 +42,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
@@ -74,7 +75,7 @@ public class ParentRemove extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        if (holder.getType().isUser()) {
+        if (holder.getType() == HolderType.USER) {
             User user = (User) holder;
 
             boolean shouldPrevent = plugin.getConfiguration().get(ConfigKeys.PREVENT_PRIMARY_GROUP_REMOVAL) &&
@@ -96,7 +97,7 @@ public class ParentRemove extends SharedSubCommand {
                     .action("parent", "remove", groupName, context)
                     .build().submit(plugin, sender);
 
-            if (holder.getType().isUser()) {
+            if (holder.getType() == HolderType.USER) {
                 plugin.getUserManager().giveDefaultIfNeeded(((User) holder), false);
             }
 

@@ -44,6 +44,7 @@ import me.lucko.luckperms.api.caching.CachedData;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
@@ -217,7 +218,7 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.PermissionHol
         Objects.requireNonNull(group, "group");
 
         Group g = ApiGroup.cast(group);
-        if (this.handle.getType().isGroup() && g.getName().equals(this.handle.getObjectName())) {
+        if (this.handle.getType() == HolderType.GROUP && g.getName().equals(this.handle.getObjectName())) {
             return true;
         }
 
@@ -230,7 +231,7 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.PermissionHol
         Objects.requireNonNull(contextSet, "contextSet");
 
         Group g = ApiGroup.cast(group);
-        if (this.handle.getType().isGroup() && g.getName().equals(this.handle.getObjectName())) {
+        if (this.handle.getType() == HolderType.GROUP && g.getName().equals(this.handle.getObjectName())) {
             return true;
         }
 
@@ -279,7 +280,7 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.PermissionHol
     public void clearMatching(@NonNull Predicate<Node> test) {
         Objects.requireNonNull(test, "test");
         this.handle.removeIf(test);
-        if (this.handle.getType().isUser()) {
+        if (this.handle.getType() == HolderType.USER) {
             this.handle.getPlugin().getUserManager().giveDefaultIfNeeded((User) this.handle, false);
         }
     }

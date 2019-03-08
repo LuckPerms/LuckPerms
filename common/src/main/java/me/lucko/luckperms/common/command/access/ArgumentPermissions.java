@@ -31,6 +31,7 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -271,7 +272,7 @@ public final class ArgumentPermissions {
      * @return true if the sender should NOT be allowed to act, true if they should
      */
     public static boolean checkGroup(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, ContextSet contextSet) {
-        if (holder.getType().isGroup()) {
+        if (holder.getType() == HolderType.GROUP) {
             return checkGroup(plugin, sender, ((Group) holder).getName(), contextSet);
         }
         return false;

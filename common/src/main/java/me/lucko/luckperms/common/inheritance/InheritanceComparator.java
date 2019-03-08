@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.inheritance;
 
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
@@ -39,7 +40,7 @@ public class InheritanceComparator implements Comparator<Group> {
     private static final Comparator<Group> NULL_ORIGIN = new InheritanceComparator(null);
 
     public static Comparator<Group> getFor(PermissionHolder origin) {
-        if (origin.getType().isUser()) {
+        if (origin.getType() == HolderType.USER) {
             return new InheritanceComparator(((User) origin));
         }
         return NULL_ORIGIN;

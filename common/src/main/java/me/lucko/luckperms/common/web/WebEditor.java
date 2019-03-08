@@ -34,6 +34,7 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.model.NodeDataContainer;
@@ -74,7 +75,7 @@ public final class WebEditor {
                         .add("id", getHolderIdentifier(holder))
                         .add("friendly", holder.getPlainDisplayName())
                         .consume(obj -> {
-                            if (holder.getType().isUser()) {
+                            if (holder.getType() == HolderType.USER) {
                                 obj.add("uuid", ((User) holder).getUuid().toString());
                             }
                         }))
@@ -111,7 +112,7 @@ public final class WebEditor {
     }
 
     private static String getHolderIdentifier(PermissionHolder holder) {
-        if (holder.getType().isUser()) {
+        if (holder.getType() == HolderType.USER) {
             User user = ((User) holder);
             return USER_ID_PATTERN + user.getUuid().toString();
         } else {

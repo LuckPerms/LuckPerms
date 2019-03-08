@@ -36,6 +36,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
@@ -157,7 +158,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             return CompletableFuture.completedFuture(false);
         }
 
-        if (this.holder.getType().isUser()) {
+        if (this.holder.getType() == HolderType.USER) {
             this.service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) this.holder), false);
         }
 
@@ -183,7 +184,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             return CompletableFuture.completedFuture(false);
         }
 
-        if (this.holder.getType().isUser()) {
+        if (this.holder.getType() == HolderType.USER) {
             this.service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) this.holder), false);
         }
 
@@ -471,7 +472,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
 
     private CompletableFuture<Void> save(PermissionHolder t) {
         // if the holder is a group, invalidate caches.
-        if (t.getType().isGroup()) {
+        if (t.getType() == HolderType.GROUP) {
             this.service.getPlugin().getGroupManager().invalidateAllGroupCaches();
             this.service.getPlugin().getUserManager().invalidateAllUserCaches();
             return CompletableFuture.completedFuture(null);
@@ -482,7 +483,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             return CompletableFuture.completedFuture(null);
         }
 
-        if (t.getType().isUser()) {
+        if (t.getType() == HolderType.USER) {
             User user = ((User) t);
             return this.service.getPlugin().getStorage().saveUser(user);
         } else {

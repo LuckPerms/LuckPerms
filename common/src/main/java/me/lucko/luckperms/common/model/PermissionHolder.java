@@ -506,7 +506,7 @@ public abstract class PermissionHolder {
      * @return a tristate, returns undefined if no match
      */
     public Tristate hasPermission(NodeMapType type, Node node, NodeEqualityPredicate equalityPredicate) {
-        if (this.getType().isGroup() && node.isGroupNode() && node.getGroupName().equalsIgnoreCase(getObjectName())) {
+        if (this.getType() == HolderType.GROUP && node.isGroupNode() && node.getGroupName().equalsIgnoreCase(getObjectName())) {
             return Tristate.TRUE;
         }
 
@@ -713,7 +713,7 @@ public abstract class PermissionHolder {
 
     public boolean clearParents(boolean giveDefault) {
         return removeIf(Node::isGroupNode, () -> {
-            if (this.getType().isUser() && giveDefault) {
+            if (this.getType() == HolderType.USER && giveDefault) {
                 this.plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
             }
         });
@@ -721,7 +721,7 @@ public abstract class PermissionHolder {
 
     public boolean clearParents(ContextSet contextSet, boolean giveDefault) {
         return removeIf(contextSet, Node::isGroupNode, () -> {
-            if (this.getType().isUser() && giveDefault) {
+            if (this.getType() == HolderType.USER && giveDefault) {
                 this.plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
             }
         });

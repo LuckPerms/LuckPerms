@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -71,7 +72,7 @@ public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> 
 
         List<Map.Entry<Track, String>> lines = new ArrayList<>();
 
-        if (holder.getType().isUser()) {
+        if (holder.getType() == HolderType.USER) {
             // if the holder is a user, we want to query parent groups for tracks
             Set<Node> nodes = holder.enduringData().immutable().values().stream()
                     .filter(Node::isGroupNode)

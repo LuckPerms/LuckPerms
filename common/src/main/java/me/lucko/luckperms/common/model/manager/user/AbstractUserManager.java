@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.model.manager.user;
 
 import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.Streams;
 
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
@@ -42,6 +43,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 public abstract class AbstractUserManager<T extends User> extends AbstractManager<UserIdentifier, User, T> implements UserManager<T> {
 
@@ -152,7 +154,12 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
     @Override
     public CompletableFuture<Void> updateAllUsers() {
         return CompletableFuture.runAsync(
-                () -> this.plugin.getBootstrap().getOnlinePlayers().forEach(u -> this.plugin.getStorage().loadUser(u, null).join()),
+                () -> {
+                    Stream.concat(
+                        getAll().keySet().stream().map(UserIdentifier::getUuid),
+                        this.plugin.getBootstrap().getOnlinePlayers()
+                    ).forEach(u -> this.plugin.getStorage().loadUser(u, null).join());
+                },
                 this.plugin.getBootstrap().getScheduler().async()
         );
     }

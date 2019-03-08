@@ -78,6 +78,7 @@ import me.lucko.luckperms.common.event.model.EntitySourceImpl;
 import me.lucko.luckperms.common.event.model.SenderEntity;
 import me.lucko.luckperms.common.event.model.UnknownSource;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -267,7 +268,7 @@ public final class EventFactory {
     }
 
     public void handleDataRecalculate(PermissionHolder holder) {
-        if (holder.getType().isUser()) {
+        if (holder.getType() == HolderType.USER) {
             User user = (User) holder;
             post(UserDataRecalculateEvent.class, () -> generate(UserDataRecalculateEvent.class, user.getApiDelegate(), user.getCachedData()));
         } else {

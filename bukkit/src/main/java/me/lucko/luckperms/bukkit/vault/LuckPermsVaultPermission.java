@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
@@ -404,13 +405,13 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
     }
 
     boolean holderSave(PermissionHolder holder) {
-        if (holder.getType().isUser()) {
+        if (holder.getType() == HolderType.USER) {
             User u = (User) holder;
 
             // we don't need to join this call - the save operation
             // can happen in the background.
             this.plugin.getStorage().saveUser(u);
-        } else if (holder.getType().isGroup()) {
+        } else if (holder.getType() == HolderType.GROUP) {
             Group g = (Group) holder;
 
             // invalidate caches - they have potentially been affected by

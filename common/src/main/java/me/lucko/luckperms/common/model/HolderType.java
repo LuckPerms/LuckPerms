@@ -26,32 +26,11 @@
 package me.lucko.luckperms.common.model;
 
 public enum HolderType {
-
-    USER(true, false),
-    GROUP(false, true);
-
-    private final boolean user;
-    private final boolean group;
-
-    HolderType(boolean user, boolean group) {
-        this.user = user;
-        this.group = group;
-    }
-
-    public boolean matches(PermissionHolder holder) {
-        return holder.getType() == this;
-    }
+    USER,
+    GROUP;
 
     @Override
     public String toString() {
         return name().toLowerCase();
-    }
-
-    public boolean isUser() {
-        return this.user;
-    }
-
-    public boolean isGroup() {
-        return this.group;
     }
 }
