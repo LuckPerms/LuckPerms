@@ -127,7 +127,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
                     () -> this.holder.unsetPermission(node),
                     () -> this.holder.unsetTransientPermission(node)
             );
-            return objectSave(this.holder).thenApply(v -> true);
+            return save(this.holder).thenApply(v -> true);
         }
 
         Node node = NodeFactory.builder(permission).setValue(tristate.asBoolean()).withExtraContext(contexts).build();
@@ -143,7 +143,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
                     this.holder.setTransientPermission(node);
                 }
         );
-        return objectSave(this.holder).thenApply(v -> true);
+        return save(this.holder).thenApply(v -> true);
     }
 
     @Override
@@ -161,7 +161,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             this.service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) this.holder), false);
         }
 
-        return objectSave(this.holder).thenApply(v -> true);
+        return save(this.holder).thenApply(v -> true);
     }
 
     @Override
@@ -187,7 +187,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             this.service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) this.holder), false);
         }
 
-        return objectSave(this.holder).thenApply(v -> true);
+        return save(this.holder).thenApply(v -> true);
     }
 
     @Override
@@ -238,7 +238,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             return CompletableFuture.completedFuture(false);
         }
 
-        return objectSave(this.holder).thenApply(v -> true);
+        return save(this.holder).thenApply(v -> true);
     }
 
     @Override
@@ -263,7 +263,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             return CompletableFuture.completedFuture(false);
         }
 
-        return objectSave(this.holder).thenApply(v -> true);
+        return save(this.holder).thenApply(v -> true);
     }
 
     @Override
@@ -284,7 +284,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             return CompletableFuture.completedFuture(false);
         }
 
-        return objectSave(this.holder).thenApply(v -> true);
+        return save(this.holder).thenApply(v -> true);
     }
 
     @Override
@@ -307,7 +307,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             return CompletableFuture.completedFuture(false);
         }
 
-        return objectSave(this.holder).thenApply(v -> true);
+        return save(this.holder).thenApply(v -> true);
     }
 
     @Override
@@ -403,7 +403,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
                 () -> this.holder.setPermission(node),
                 () -> this.holder.setTransientPermission(node)
         );
-        return objectSave(this.holder).thenApply(v -> true);
+        return save(this.holder).thenApply(v -> true);
     }
 
     @Override
@@ -427,7 +427,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
                         () -> this.holder.unsetTransientPermission(node)
                 ));
 
-        return objectSave(this.holder).thenApply(v -> true);
+        return save(this.holder).thenApply(v -> true);
     }
 
     @Override
@@ -448,7 +448,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             return CompletableFuture.completedFuture(false);
         }
 
-        return objectSave(this.holder).thenApply(v -> true);
+        return save(this.holder).thenApply(v -> true);
     }
 
     @Override
@@ -466,21 +466,22 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             return CompletableFuture.completedFuture(false);
         }
 
-        return objectSave(this.holder).thenApply(v -> true);
+        return save(this.holder).thenApply(v -> true);
     }
 
-    private CompletableFuture<Void> objectSave(PermissionHolder t) {
-        // handle transient first
-        if (this.type == NodeMapType.TRANSIENT) {
-            // don't bother saving to primary storage. just refresh
-            if (t.getType().isGroup()) {
-                this.service.getPlugin().getGroupManager().invalidateAllGroupCaches();
-                this.service.getPlugin().getUserManager().invalidateAllUserCaches();
-                return CompletableFuture.completedFuture(null);
-            }
+    private CompletableFuture<Void> save(PermissionHolder t) {
+        // if the holder is a group, invalidate caches.
+        if (t.getType().isGroup()) {
+            this.service.getPlugin().getGroupManager().invalidateAllGroupCaches();
+            this.service.getPlugin().getUserManager().invalidateAllUserCaches();
+            return CompletableFuture.completedFuture(null);
         }
 
-        // handle enduring
+        // no further action required for transient types
+        if (this.type == NodeMapType.TRANSIENT) {
+            return CompletableFuture.completedFuture(null);
+        }
+
         if (t.getType().isUser()) {
             User user = ((User) t);
             return this.service.getPlugin().getStorage().saveUser(user);
