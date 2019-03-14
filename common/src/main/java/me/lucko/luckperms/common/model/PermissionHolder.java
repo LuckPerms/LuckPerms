@@ -46,6 +46,7 @@ import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.inheritance.InheritanceComparator;
 import me.lucko.luckperms.common.inheritance.InheritanceGraph;
+import me.lucko.luckperms.common.inheritance.ResolvedGroup;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.node.utils.InheritanceInfo;
 import me.lucko.luckperms.common.node.utils.MetaType;
@@ -129,7 +130,7 @@ public abstract class PermissionHolder {
     /**
      * Comparator used to ordering groups when calculating inheritance
      */
-    private final Comparator<Group> inheritanceComparator = InheritanceComparator.getFor(this);
+    private final Comparator<ResolvedGroup> inheritanceComparator = InheritanceComparator.getFor(this);
 
     /**
      * Creates a new instance
@@ -150,7 +151,7 @@ public abstract class PermissionHolder {
         return this.ioLock;
     }
 
-    public Comparator<Group> getInheritanceComparator() {
+    public Comparator<ResolvedGroup> getInheritanceComparator() {
         return this.inheritanceComparator;
     }
 

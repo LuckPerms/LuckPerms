@@ -23,34 +23,38 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.graph;
+package me.lucko.luckperms.common.inheritance;
 
-/**
- * A minimal functional interface for graph-structured data.
- *
- * @param <N> the node parameter type
- */
-@FunctionalInterface
-public interface Graph<N> {
+import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.model.Group;
 
-    /**
-     * Returns all nodes in this graph directly adjacent to {@code node} which
-     * can be reached by traversing {@code node}'s outgoing edges.
-     *
-     * @throws IllegalArgumentException if {@code node} is not an element of this graph
-     */
-    Iterable<? extends N> successors(N node);
+public final class ResolvedGroup {
+    private final Node node;
+    private final Group group;
 
-    /**
-     * Returns an iterable which will traverse this graph using the specified algorithm starting
-     * at the given node.
-     *
-     * @param algorithm the algorithm to use when traversing
-     * @param startNode the start node in the inheritance graph
-     * @return an iterable
-     */
-    default Iterable<N> traverse(TraversalAlgorithm algorithm, N startNode) {
-        return algorithm.traverse(this, startNode);
+    ResolvedGroup(Node node, Group group) {
+        this.node = node;
+        this.group = group;
     }
 
+    Node node() {
+        return this.node;
+    }
+
+    Group group() {
+        return this.group;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ResolvedGroup that = (ResolvedGroup) o;
+        return this.group.equals(that.group);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.group.hashCode();
+    }
 }

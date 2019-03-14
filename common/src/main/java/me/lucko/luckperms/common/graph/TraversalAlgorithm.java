@@ -23,8 +23,39 @@
  *  SOFTWARE.
  */
 
+/*
+ * Copyright (C) 2017 The Guava Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package me.lucko.luckperms.common.graph;
 
+import com.google.common.collect.AbstractIterator;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.Set;
+
+/**
+ * A set of traversal algorithm implementations for {@link Graph}s.
+ *
+ * @author Jens Nyman (Guava)
+ */
 public enum TraversalAlgorithm {
 
     /**
@@ -34,7 +65,14 @@ public enum TraversalAlgorithm {
      *
      * <p>See <a href="https://en.wikipedia.org/wiki/Breadth-first_search">Wikipedia</a> for more info.</p>
      */
-    BREADTH_FIRST,
+    BREADTH_FIRST {
+        @Override
+        public <N> Iterable<N> traverse(Graph<N> graph, N startNode) {
+            Objects.requireNonNull(graph, "graph");
+            Objects.requireNonNull(startNode, "startNode");
+            return () -> new BreadthFirstIterator<>(graph, startNode);
+        }
+    },
 
     /**
      * Traverses in depth-first pre-order.
@@ -44,7 +82,14 @@ public enum TraversalAlgorithm {
      *
      * <p>See <a href="https://en.wikipedia.org/wiki/Depth-first_search">Wikipedia</a> for more info.</p>
      */
-    DEPTH_FIRST_PRE_ORDER,
+    DEPTH_FIRST_PRE_ORDER {
+        @Override
+        public <N> Iterable<N> traverse(Graph<N> graph, N startNode) {
+            Objects.requireNonNull(graph, "graph");
+            Objects.requireNonNull(startNode, "startNode");
+            return () -> new DepthFirstIterator<>(graph, startNode, DepthFirstIterator.Order.PRE_ORDER);
+        }
+    },
 
     /**
      * Traverses in depth-first post-order.
@@ -54,6 +99,118 @@ public enum TraversalAlgorithm {
      *
      * <p>See <a href="https://en.wikipedia.org/wiki/Depth-first_search">Wikipedia</a> for more info.</p>
      */
-    DEPTH_FIRST_POST_ORDER
+    DEPTH_FIRST_POST_ORDER {
+        @Override
+        public <N> Iterable<N> traverse(Graph<N> graph, N startNode) {
+            Objects.requireNonNull(graph, "graph");
+            Objects.requireNonNull(startNode, "startNode");
+            return () -> new DepthFirstIterator<>(graph, startNode, DepthFirstIterator.Order.POST_ORDER);
+        }
+    };
+
+    /**
+     * Returns an unmodifiable {@code Iterable} over the nodes reachable from
+     * {@code startNode}, in the order defined by the {@code algorithm}.
+     *
+     * @param graph the graph
+     * @param startNode the start node
+     * @param <N> the node type
+     * @return the traversal
+     */
+    public abstract <N> Iterable<N> traverse(Graph<N> graph, N startNode);
+
+    private static final class BreadthFirstIterator<N> implements Iterator<N> {
+        private final Graph<N> graph;
+
+        private final Queue<N> queue = new ArrayDeque<>();
+        private final Set<N> visited = new HashSet<>();
+
+        BreadthFirstIterator(Graph<N> graph, N root) {
+            this.graph = graph;
+            this.queue.add(root);
+            this.visited.add(root);
+        }
+
+        @Override
+        public boolean hasNext() {
+            return !this.queue.isEmpty();
+        }
+
+        @Override
+        public N next() {
+            N current = this.queue.remove();
+            for (N neighbor : this.graph.successors(current)) {
+                if (this.visited.add(neighbor)) {
+                    this.queue.add(neighbor);
+                }
+            }
+            return current;
+        }
+    }
+
+    private static final class DepthFirstIterator<N> extends AbstractIterator<N> {
+        private final Graph<N> graph;
+
+        private final Deque<NodeAndSuccessors> stack = new ArrayDeque<>();
+        private final Set<N> visited = new HashSet<>();
+        private final Order order;
+
+        DepthFirstIterator(Graph<N> graph, N root, Order order) {
+            this.graph = graph;
+
+            // our invariant is that in computeNext we call next on the iterator at the top first, so we
+            // need to start with one additional item on that iterator
+            this.stack.push(withSuccessors(root));
+            this.order = order;
+        }
+
+        @Override
+        protected N computeNext() {
+            while (true) {
+                if (this.stack.isEmpty()) {
+                    return endOfData();
+                }
+                NodeAndSuccessors node = this.stack.getFirst();
+                boolean firstVisit = this.visited.add(node.node);
+                boolean lastVisit = !node.successorIterator.hasNext();
+                boolean produceNode = (firstVisit && this.order == Order.PRE_ORDER) || (lastVisit && this.order == Order.POST_ORDER);
+                if (lastVisit) {
+                    this.stack.pop();
+                } else {
+                    // we need to push a neighbor, but only if we haven't already seen it
+                    N successor = node.successorIterator.next();
+                    if (!this.visited.contains(successor)) {
+                        this.stack.push(withSuccessors(successor));
+                    }
+                }
+                if (produceNode) {
+                    return node.node;
+                }
+            }
+        }
+
+        NodeAndSuccessors withSuccessors(N node) {
+            return new NodeAndSuccessors(node, this.graph.successors(node));
+        }
+
+        /**
+         * A simple tuple of a node and a partially iterated {@link Iterator} of
+         * its successors
+         */
+        private final class NodeAndSuccessors {
+            final N node;
+            final Iterator<? extends N> successorIterator;
+
+            NodeAndSuccessors(N node, Iterable<? extends N> successors) {
+                this.node = node;
+                this.successorIterator = successors.iterator();
+            }
+        }
+
+        private enum Order {
+            PRE_ORDER,
+            POST_ORDER
+        }
+    }
 
 }

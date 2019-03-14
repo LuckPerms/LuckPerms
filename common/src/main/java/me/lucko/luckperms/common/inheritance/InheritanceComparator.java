@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.common.inheritance;
 
-import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 
 import java.util.Comparator;
@@ -36,12 +36,12 @@ import java.util.Comparator;
 /**
  * Determines the order of group inheritance in {@link PermissionHolder}.
  */
-public class InheritanceComparator implements Comparator<Group> {
-    private static final Comparator<Group> NULL_ORIGIN = new InheritanceComparator(null);
+public class InheritanceComparator implements Comparator<ResolvedGroup> {
+    private static final Comparator<ResolvedGroup> NULL_ORIGIN = new InheritanceComparator(null).reversed();
 
-    public static Comparator<Group> getFor(PermissionHolder origin) {
+    public static Comparator<ResolvedGroup> getFor(PermissionHolder origin) {
         if (origin.getType() == HolderType.USER) {
-            return new InheritanceComparator(((User) origin));
+            return new InheritanceComparator(((User) origin)).reversed();
         }
         return NULL_ORIGIN;
     }
@@ -53,19 +53,17 @@ public class InheritanceComparator implements Comparator<Group> {
     }
 
     @Override
-    public int compare(Group o1, Group o2) {
-        int result = Integer.compare(o1.getWeight().orElse(0), o2.getWeight().orElse(0));
+    public int compare(ResolvedGroup o1, ResolvedGroup o2) {
+        int result = Integer.compare(o1.group().getWeight().orElse(0), o2.group().getWeight().orElse(0));
         if (result != 0) {
-            // note negated value - we want higher weights first!
-            return -result;
+            return result;
         }
 
         // failing differing group weights, check if one of the groups is a primary group
         if (this.origin != null) {
-            // note negative
-            result = -Boolean.compare(
-                    o1.getName().equalsIgnoreCase(this.origin.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME)),
-                    o2.getName().equalsIgnoreCase(this.origin.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME))
+            result = Boolean.compare(
+                    o1.group().getName().equalsIgnoreCase(this.origin.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME)),
+                    o2.group().getName().equalsIgnoreCase(this.origin.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME))
             );
 
             if (result != 0) {
@@ -73,7 +71,7 @@ public class InheritanceComparator implements Comparator<Group> {
             }
         }
 
-        // fallback to string based comparison
-        return o1.getName().compareTo(o2.getName());
+        // failing weight checks, fallback to which group applies in more specific context
+        return NodeWithContextComparator.normal().compare(o1.node(), o2.node());
     }
 }

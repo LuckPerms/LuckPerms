@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -82,15 +83,15 @@ public class InheritanceHandler {
 
         @Override
         public Iterable<? extends PermissionHolder> successors(PermissionHolder holder) {
-            Set<Group> successors = new TreeSet<>(holder.getInheritanceComparator());
+            Set<ResolvedGroup> successors = new TreeSet<>(holder.getInheritanceComparator());
             List<? extends Node> nodes = holder.getOwnGroupNodes();
             for (Node n : nodes) {
                 Group g = this.plugin.getGroupManager().getIfLoaded(n.getGroupName());
                 if (g != null) {
-                    successors.add(g);
+                    successors.add(new ResolvedGroup(n, g));
                 }
             }
-            return successors;
+            return composeSuccessors(successors);
         }
     }
 
@@ -109,7 +110,7 @@ public class InheritanceHandler {
 
         @Override
         public Iterable<? extends PermissionHolder> successors(PermissionHolder holder) {
-            Set<Group> successors = new TreeSet<>(holder.getInheritanceComparator());
+            Set<ResolvedGroup> successors = new TreeSet<>(holder.getInheritanceComparator());
             List<? extends Node> nodes = holder.getOwnGroupNodes(this.context.getContexts());
             for (Node n : nodes) {
                 // effectively: if not (we're applying global groups or it's specific anyways)
@@ -119,11 +120,19 @@ public class InheritanceHandler {
 
                 Group g = this.plugin.getGroupManager().getIfLoaded(n.getGroupName());
                 if (g != null) {
-                    successors.add(g);
+                    successors.add(new ResolvedGroup(n, g));
                 }
             }
-            return successors;
+            return composeSuccessors(successors);
         }
+    }
+
+    private static Iterable<PermissionHolder> composeSuccessors(Set<ResolvedGroup> successors) {
+        List<PermissionHolder> holders = new ArrayList<>(successors.size());
+        for (ResolvedGroup resolvedGroup : successors) {
+            holders.add(resolvedGroup.group());
+        }
+        return holders;
     }
 
 }
