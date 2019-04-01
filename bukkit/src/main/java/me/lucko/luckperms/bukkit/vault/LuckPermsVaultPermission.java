@@ -52,7 +52,6 @@ import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -130,13 +129,28 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         return uuid;
     }
 
-    public User lookupUser(UUID uuid) {
+    public PermissionHolder lookupUser(UUID uuid) {
         Objects.requireNonNull(uuid, "uuid");
 
         // loaded already?
         User user = this.plugin.getUserManager().getIfLoaded(uuid);
         if (user != null) {
             return user;
+        }
+
+        // if the uuid is version 2, assume it is an NPC
+        // see: https://github.com/lucko/LuckPerms/issues/1470
+        // and https://github.com/lucko/LuckPerms/issues/1470#issuecomment-475403162
+        if (uuid.version() == 2) {
+            String npcGroupName = this.plugin.getConfiguration().get(ConfigKeys.VAULT_NPC_GROUP);
+            Group npcGroup = this.plugin.getGroupManager().getIfLoaded(npcGroupName);
+            if (npcGroup == null) {
+                npcGroup = this.plugin.getGroupManager().getIfLoaded(NodeFactory.DEFAULT_GROUP_NAME);
+                if (npcGroup == null) {
+                    throw new IllegalStateException("unable to get default group");
+                }
+            }
+            return npcGroup;
         }
 
         // are we on the main thread?
@@ -167,8 +181,8 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(permission, "permission");
 
-        User user = lookupUser(uuid);
-        Contexts contexts = contextForLookup(user, world);
+        PermissionHolder user = lookupUser(uuid);
+        Contexts contexts = contextForLookup(uuid, world);
         PermissionCache permissionData = user.getCachedData().getPermissionData(contexts);
 
         Tristate result = permissionData.getPermissionValue(permission, PermissionCheckEvent.Origin.THIRD_PARTY_API).result();
@@ -183,7 +197,10 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(permission, "permission");
 
-        User user = lookupUser(uuid);
+        PermissionHolder user = lookupUser(uuid);
+        if (user instanceof Group) {
+            throw new UnsupportedOperationException("Unable to modify the permissions of NPC players");
+        }
         return holderAddPermission(user, permission, world);
     }
 
@@ -192,7 +209,10 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(permission, "permission");
 
-        User user = lookupUser(uuid);
+        PermissionHolder user = lookupUser(uuid);
+        if (user instanceof Group) {
+            throw new UnsupportedOperationException("Unable to modify the permissions of NPC players");
+        }
         return holderRemovePermission(user, permission, world);
     }
 
@@ -221,8 +241,8 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
     public String[] userGetGroups(String world, UUID uuid) {
         Objects.requireNonNull(uuid, "uuid");
 
-        User user = lookupUser(uuid);
-        ContextSet contexts = contextForLookup(user, world).getContexts();
+        PermissionHolder user = lookupUser(uuid);
+        ContextSet contexts = contextForLookup(uuid, world).getContexts();
 
         String[] ret = user.enduringData().immutable().values().stream()
                 .filter(Node::isGroupNode)
@@ -247,8 +267,11 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
     public String userGetPrimaryGroup(String world, UUID uuid) {
         Objects.requireNonNull(uuid, "uuid");
 
-        User user = lookupUser(uuid);
-        String value = user.getPrimaryGroup().getValue();
+        PermissionHolder user = lookupUser(uuid);
+        if (user instanceof Group) { // npc
+            return this.plugin.getConfiguration().get(ConfigKeys.VAULT_NPC_GROUP);
+        }
+        String value = ((User) user).getPrimaryGroup().getValue();
         Group group = getGroup(value);
         if (group != null) {
             value = group.getPlainDisplayName();
@@ -339,10 +362,10 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
     }
 
     // utility method for getting a contexts instance for a given vault lookup.
-    Contexts contextForLookup(User user, String world) {
+    Contexts contextForLookup(UUID uuid, String world) {
         MutableContextSet context;
 
-        Player player = Optional.ofNullable(user).flatMap(u -> this.plugin.getBootstrap().getPlayer(u.getUuid())).orElse(null);
+        Player player = this.plugin.getBootstrap().getPlayer(uuid).orElse(null);
         if (player != null) {
             context = this.plugin.getContextManager().getApplicableContext(player).mutableCopy();
         } else {
@@ -371,7 +394,14 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
             }
         }
 
-        return Contexts.of(context, isIncludeGlobal(), true, true, true, true, false);
+        boolean op = false;
+        if (player != null) {
+            op = player.isOp();
+        } else if (uuid.version() == 2) { // npc
+            op = this.plugin.getConfiguration().get(ConfigKeys.VAULT_NPC_OP_STATUS);
+        }
+
+        return Contexts.of(context, isIncludeGlobal(), true, true, true, true, op);
     }
 
     // utility methods for modifying the state of PermissionHolders

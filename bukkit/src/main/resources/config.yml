@@ -501,6 +501,19 @@ commands-allow-op: true
 # option to 'true.
 vault-unsafe-lookups: false
 
+# Controls which group LuckPerms should use for NPC players when handling Vault requests.
+#
+# - As NPCs aren't actually real players, LuckPerms does not load any user data for them. This
+#   becomes an issue when plugins want to check for their permissions using Vault.
+# - As a solution, Vault checks for NPCs fallback to a group, which is defined below.
+vault-npc-group: default
+
+# Controls how LuckPerms should consider the OP status of NPC players when handing Vault requests.
+#
+# - If you want NPCs to have the same permissions as "normal" players, set this option to false.
+# - If you want NPCs to have OP status, set this option to true.
+vault-npc-op-status: false
+
 # If the vault-server option below should be used.
 #
 # - When this option is set to false, the server value defined above under "server" is used.

@@ -359,6 +359,16 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> VAULT_UNSAFE_LOOKUPS = booleanKey("vault-unsafe-lookups", false);
 
     /**
+     * Controls which group LuckPerms should use for NPC players when handling Vault requests
+     */
+    public static final ConfigKey<String> VAULT_NPC_GROUP = stringKey("vault-npc-group", "default");
+
+    /**
+     * Controls how LuckPerms should consider the OP status of NPC players when handing Vault requests
+     */
+    public static final ConfigKey<Boolean> VAULT_NPC_OP_STATUS = booleanKey("vault-npc-op-status", false);
+
+    /**
      * If the vault server option should be used
      */
     public static final ConfigKey<Boolean> USE_VAULT_SERVER = booleanKey("use-vault-server", true);

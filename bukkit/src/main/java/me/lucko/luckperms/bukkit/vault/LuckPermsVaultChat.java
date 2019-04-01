@@ -38,7 +38,6 @@ import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.node.model.NodeTypes;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
@@ -85,8 +84,8 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
     public String getUserChatPrefix(String world, UUID uuid) {
         Objects.requireNonNull(uuid, "uuid");
 
-        User user = this.vaultPermission.lookupUser(uuid);
-        Contexts contexts = this.vaultPermission.contextForLookup(user, world);
+        PermissionHolder user = this.vaultPermission.lookupUser(uuid);
+        Contexts contexts = this.vaultPermission.contextForLookup(uuid, world);
         MetaCache metaData = user.getCachedData().getMetaData(contexts);
         String ret = metaData.getPrefix(MetaCheckEvent.Origin.THIRD_PARTY_API);
         if (log()) {
@@ -99,8 +98,8 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
     public String getUserChatSuffix(String world, UUID uuid) {
         Objects.requireNonNull(uuid, "uuid");
 
-        User user = this.vaultPermission.lookupUser(uuid);
-        Contexts contexts = this.vaultPermission.contextForLookup(user, world);
+        PermissionHolder user = this.vaultPermission.lookupUser(uuid);
+        Contexts contexts = this.vaultPermission.contextForLookup(uuid, world);
         MetaCache metaData = user.getCachedData().getMetaData(contexts);
         String ret = metaData.getSuffix(MetaCheckEvent.Origin.THIRD_PARTY_API);
         if (log()) {
@@ -113,7 +112,10 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
     public void setUserChatPrefix(String world, UUID uuid, String prefix) {
         Objects.requireNonNull(uuid, "uuid");
 
-        User user = this.vaultPermission.lookupUser(uuid);
+        PermissionHolder user = this.vaultPermission.lookupUser(uuid);
+        if (user instanceof Group) {
+            throw new UnsupportedOperationException("Unable to modify the permissions of NPC players");
+        }
         setChatMeta(user, ChatMetaType.PREFIX, prefix, world);
     }
 
@@ -121,7 +123,10 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
     public void setUserChatSuffix(String world, UUID uuid, String suffix) {
         Objects.requireNonNull(uuid, "uuid");
 
-        User user = this.vaultPermission.lookupUser(uuid);
+        PermissionHolder user = this.vaultPermission.lookupUser(uuid);
+        if (user instanceof Group) {
+            throw new UnsupportedOperationException("Unable to modify the permissions of NPC players");
+        }
         setChatMeta(user, ChatMetaType.SUFFIX, suffix, world);
     }
 
@@ -130,8 +135,8 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(key, "key");
 
-        User user = this.vaultPermission.lookupUser(uuid);
-        Contexts contexts = this.vaultPermission.contextForLookup(user, world);
+        PermissionHolder user = this.vaultPermission.lookupUser(uuid);
+        Contexts contexts = this.vaultPermission.contextForLookup(uuid, world);
         MetaCache metaData = user.getCachedData().getMetaData(contexts);
         String ret = metaData.getMeta(MetaCheckEvent.Origin.THIRD_PARTY_API).get(key);
         if (log()) {
@@ -145,7 +150,10 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(key, "key");
 
-        User user = this.vaultPermission.lookupUser(uuid);
+        PermissionHolder user = this.vaultPermission.lookupUser(uuid);
+        if (user instanceof Group) {
+            throw new UnsupportedOperationException("Unable to modify the permissions of NPC players");
+        }
         setMeta(user, key, value, world);
     }
 
