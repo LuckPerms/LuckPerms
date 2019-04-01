@@ -49,6 +49,10 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
                     authentication(userName: sonatypeUsername, password: sonatypePassword)
                 }
 
+                snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
+                    authentication(userName: sonatypeUsername, password: sonatypePassword)
+                }
+
                 pom {
                     project {
                         name 'LuckPerms API'
