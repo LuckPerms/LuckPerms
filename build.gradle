@@ -16,7 +16,7 @@ subprojects {
     apply plugin: 'net.minecrell.licenser'
 
     group = 'me.lucko.luckperms'
-    version = '4.3-SNAPSHOT'
+    version = '4.4-SNAPSHOT'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
@@ -45,7 +45,7 @@ subprojects {
     }
 
     project.ext.majorVersion = '4'
-    project.ext.minorVersion = '3'
+    project.ext.minorVersion = '4'
     project.ext.patchVersion = determinePatchVersion()
     project.ext.fullVersion = project.ext.majorVersion + '.' + project.ext.minorVersion + '.' + project.ext.patchVersion
 
