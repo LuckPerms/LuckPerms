@@ -28,12 +28,15 @@ package me.lucko.luckperms.bukkit.vault;
 import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.LookupSetting;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
+import me.lucko.luckperms.common.calculator.processor.MapProcessor;
+import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.Group;
@@ -191,7 +194,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         if (log()) {
             logMsg("#userHasPermission: %s - %s - %s - %s", user.getPlainDisplayName(), contexts.getContexts().toMultimap(), permission, result);
         }
-        return result.asBoolean();
+        return result != Tristate.UNDEFINED ? result.asBoolean() : org.bukkit.permissions.Permission.DEFAULT_PERMISSION.getValue(contexts.hasSetting(LookupSetting.IS_OP));
     }
 
     @Override
@@ -222,7 +225,16 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
     public boolean userInGroup(String world, UUID uuid, String group) {
         Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(group, "group");
-        return userHasPermission(world, uuid, NodeFactory.groupNode(rewriteGroupName(group)));
+
+        PermissionHolder user = lookupUser(uuid);
+        Contexts contexts = contextForLookup(uuid, world);
+        PermissionCache permissionData = user.getCachedData().getPermissionData(contexts);
+
+        TristateResult result = permissionData.getPermissionValue(NodeFactory.groupNode(rewriteGroupName(group)), PermissionCheckEvent.Origin.THIRD_PARTY_API);
+        if (log()) {
+            logMsg("#userInGroup: %s - %s - %s - %s", user.getPlainDisplayName(), contexts.getContexts().toMultimap(), group, result);
+        }
+        return result.processorClass() == MapProcessor.class && result.result().asBoolean();
     }
 
     @Override

@@ -73,6 +73,14 @@ public final class TristateResult {
         return this.cause;
     }
 
+    @Override
+    public String toString() {
+        return "TristateResult(" +
+                "result=" + this.result + ", " +
+                "processorClass=" + this.processorClass + ", " +
+                "cause=" + this.cause + ')';
+    }
+
     public static final class Factory {
         private final Class<? extends PermissionProcessor> processorClass;
 
