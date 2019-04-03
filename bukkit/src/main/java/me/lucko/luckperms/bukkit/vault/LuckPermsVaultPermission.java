@@ -49,9 +49,11 @@ import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -362,10 +364,10 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
     }
 
     // utility method for getting a contexts instance for a given vault lookup.
-    Contexts contextForLookup(UUID uuid, String world) {
+    Contexts contextForLookup(@Nullable UUID uuid, @Nullable String world) {
         MutableContextSet context;
 
-        Player player = this.plugin.getBootstrap().getPlayer(uuid).orElse(null);
+        Player player = Optional.ofNullable(uuid).flatMap(u -> this.plugin.getBootstrap().getPlayer(u)).orElse(null);
         if (player != null) {
             context = this.plugin.getContextManager().getApplicableContext(player).mutableCopy();
         } else {
@@ -397,7 +399,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         boolean op = false;
         if (player != null) {
             op = player.isOp();
-        } else if (uuid.version() == 2) { // npc
+        } else if (uuid != null && uuid.version() == 2) { // npc
             op = this.plugin.getConfiguration().get(ConfigKeys.VAULT_NPC_OP_STATUS);
         }
 
