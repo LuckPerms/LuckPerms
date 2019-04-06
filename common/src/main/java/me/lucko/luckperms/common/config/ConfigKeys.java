@@ -264,7 +264,8 @@ public final class ConfigKeys {
     });
 
     /**
-     *
+     * If a final sort according to "inheritance rules" should be performed after the traversal algorithm
+     * has resolved the inheritance tree
      */
     public static final ConfigKey<Boolean> POST_TRAVERSAL_INHERITANCE_SORT = booleanKey("post-traversal-inheritance-sort", false);
 
