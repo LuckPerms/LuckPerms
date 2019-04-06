@@ -264,6 +264,11 @@ public final class ConfigKeys {
     });
 
     /**
+     *
+     */
+    public static final ConfigKey<Boolean> POST_TRAVERSAL_INHERITANCE_SORT = booleanKey("post-traversal-inheritance-sort", false);
+
+    /**
      * The configured group weightings
      */
     public static final ConfigKey<Map<String, Integer>> GROUP_WEIGHTS = customKey(c -> {

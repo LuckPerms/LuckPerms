@@ -45,25 +45,15 @@ public class AllParentsByWeightHolder extends ContextualHolder {
     protected @NonNull Optional<String> calculateValue(Contexts contexts) {
         InheritanceGraph graph = this.user.getPlugin().getInheritanceHandler().getGraph(contexts);
 
-        // fully traverse the graph, obtain a list of permission holders the user inherits from
-        Iterable<PermissionHolder> traversal = graph.traverse(this.user.getPlugin().getConfiguration().get(ConfigKeys.INHERITANCE_TRAVERSAL_ALGORITHM), this.user);
+        // fully traverse the graph, obtain a list of permission holders the user inherits from in weight order.
+        Iterable<PermissionHolder> traversal = graph.traverse(this.user.getPlugin().getConfiguration().get(ConfigKeys.INHERITANCE_TRAVERSAL_ALGORITHM), true, this.user);
 
-        Group bestGroup = null;
-
-        int best = 0;
+        // return the name of the first found group
         for (PermissionHolder holder : traversal) {
-            if (!(holder instanceof Group)) {
-                continue;
-            }
-            Group g = ((Group) holder);
-
-            int weight = g.getWeight().orElse(0);
-            if (bestGroup == null || g.getWeight().orElse(0) > best) {
-                bestGroup = g;
-                best = weight;
+            if (holder instanceof Group) {
+                return Optional.of(((Group) holder).getName());
             }
         }
-
-        return bestGroup == null ? Optional.empty() : Optional.of(bestGroup.getName());
+        return Optional.empty();
     }
 }

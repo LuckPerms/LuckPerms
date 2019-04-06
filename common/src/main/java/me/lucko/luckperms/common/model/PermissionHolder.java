@@ -43,10 +43,8 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.cacheddata.HolderCachedData;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
-import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.inheritance.InheritanceComparator;
 import me.lucko.luckperms.common.inheritance.InheritanceGraph;
-import me.lucko.luckperms.common.inheritance.ResolvedGroup;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.node.utils.InheritanceInfo;
 import me.lucko.luckperms.common.node.utils.MetaType;
@@ -130,7 +128,7 @@ public abstract class PermissionHolder {
     /**
      * Comparator used to ordering groups when calculating inheritance
      */
-    private final Comparator<ResolvedGroup> inheritanceComparator = InheritanceComparator.getFor(this);
+    private final Comparator<? super PermissionHolder> inheritanceComparator = InheritanceComparator.getFor(this);
 
     /**
      * Creates a new instance
@@ -151,7 +149,7 @@ public abstract class PermissionHolder {
         return this.ioLock;
     }
 
-    public Comparator<ResolvedGroup> getInheritanceComparator() {
+    public Comparator<? super PermissionHolder> getInheritanceComparator() {
         return this.inheritanceComparator;
     }
 
@@ -321,7 +319,7 @@ public abstract class PermissionHolder {
 
     public void accumulateInheritancesTo(List<? super LocalizedNode> accumulator, Contexts context) {
         InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph(context);
-        Iterable<PermissionHolder> traversal = graph.traverse(this.plugin.getConfiguration().get(ConfigKeys.INHERITANCE_TRAVERSAL_ALGORITHM), this);
+        Iterable<PermissionHolder> traversal = graph.traverse(this.plugin.getConfiguration(), this);
         for (PermissionHolder holder : traversal) {
             List<? extends LocalizedNode> nodes = holder.getOwnNodes(context.getContexts());
             accumulator.addAll(nodes);
@@ -336,7 +334,7 @@ public abstract class PermissionHolder {
 
     public void accumulateInheritancesTo(List<? super LocalizedNode> accumulator) {
         InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph();
-        Iterable<PermissionHolder> traversal = graph.traverse(this.plugin.getConfiguration().get(ConfigKeys.INHERITANCE_TRAVERSAL_ALGORITHM), this);
+        Iterable<PermissionHolder> traversal = graph.traverse(this.plugin.getConfiguration(), this);
         for (PermissionHolder holder : traversal) {
             List<? extends LocalizedNode> nodes = holder.getOwnNodes();
             accumulator.addAll(nodes);
@@ -409,7 +407,7 @@ public abstract class PermissionHolder {
         }
 
         InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph(context);
-        Iterable<PermissionHolder> traversal = graph.traverse(this.plugin.getConfiguration().get(ConfigKeys.INHERITANCE_TRAVERSAL_ALGORITHM), this);
+        Iterable<PermissionHolder> traversal = graph.traverse(this.plugin.getConfiguration(), this);
         for (PermissionHolder holder : traversal) {
             List<? extends LocalizedNode> nodes = holder.getOwnNodes(context.getContexts());
             for (LocalizedNode node : nodes) {
@@ -438,7 +436,7 @@ public abstract class PermissionHolder {
         }
 
         InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph();
-        Iterable<PermissionHolder> traversal = graph.traverse(this.plugin.getConfiguration().get(ConfigKeys.INHERITANCE_TRAVERSAL_ALGORITHM), this);
+        Iterable<PermissionHolder> traversal = graph.traverse(this.plugin.getConfiguration(), this);
         for (PermissionHolder holder : traversal) {
             List<? extends LocalizedNode> nodes = holder.getOwnNodes();
             for (LocalizedNode node : nodes) {

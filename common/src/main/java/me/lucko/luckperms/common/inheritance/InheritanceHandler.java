@@ -33,9 +33,9 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Provides {@link InheritanceGraph}s.
@@ -48,14 +48,12 @@ public class InheritanceHandler {
      */
     private final InheritanceGraph nonContextualGraph;
 
-    // some cached contextual graphs for common Contexts
-    private final InheritanceGraph allowAllContextualGraph;
+    // cached contextual graphs for common Contexts
     private final InheritanceGraph globalContextualGraph;
 
     public InheritanceHandler(LuckPermsPlugin plugin) {
         this.plugin = plugin;
         this.nonContextualGraph = new NonContextualGraph(plugin);
-        this.allowAllContextualGraph = new ContextualGraph(plugin, Contexts.allowAll());
         this.globalContextualGraph = new ContextualGraph(plugin, Contexts.global());
     }
 
@@ -65,13 +63,14 @@ public class InheritanceHandler {
 
     public InheritanceGraph getGraph(Contexts contexts) {
         if (contexts == Contexts.allowAll()) {
-            return this.allowAllContextualGraph;
-        }
-        if (contexts == Contexts.global()) {
-            return this.globalContextualGraph;
+            throw new IllegalArgumentException("Contexts#allowAll passed to contextual #getGraph method");
         }
 
-        return new ContextualGraph(this.plugin, contexts);
+        if (contexts == Contexts.global()) {
+            return this.globalContextualGraph;
+        } else {
+            return new ContextualGraph(this.plugin, contexts);
+        }
     }
 
     private static final class NonContextualGraph implements InheritanceGraph {
@@ -83,15 +82,17 @@ public class InheritanceHandler {
 
         @Override
         public Iterable<? extends PermissionHolder> successors(PermissionHolder holder) {
-            Set<ResolvedGroup> successors = new TreeSet<>(holder.getInheritanceComparator());
-            List<? extends Node> nodes = holder.getOwnGroupNodes();
-            for (Node n : nodes) {
+            Set<Group> successors = new LinkedHashSet<>();
+            for (Node n : holder.getOwnGroupNodes()) {
                 Group g = this.plugin.getGroupManager().getIfLoaded(n.getGroupName());
                 if (g != null) {
-                    successors.add(new ResolvedGroup(n, g));
+                    successors.add(g);
                 }
             }
-            return composeSuccessors(successors);
+
+            List<Group> successorsSorted = new ArrayList<>(successors);
+            successorsSorted.sort(holder.getInheritanceComparator());
+            return successorsSorted;
         }
     }
 
@@ -110,9 +111,8 @@ public class InheritanceHandler {
 
         @Override
         public Iterable<? extends PermissionHolder> successors(PermissionHolder holder) {
-            Set<ResolvedGroup> successors = new TreeSet<>(holder.getInheritanceComparator());
-            List<? extends Node> nodes = holder.getOwnGroupNodes(this.context.getContexts());
-            for (Node n : nodes) {
+            Set<Group> successors = new LinkedHashSet<>();
+            for (Node n : holder.getOwnGroupNodes(this.context.getContexts())) {
                 // effectively: if not (we're applying global groups or it's specific anyways)
                 if (!((this.context.hasSetting(LookupSetting.APPLY_PARENTS_SET_WITHOUT_SERVER) || n.isServerSpecific()) && (this.context.hasSetting(LookupSetting.APPLY_PARENTS_SET_WITHOUT_WORLD) || n.isWorldSpecific()))) {
                     continue;
@@ -120,19 +120,14 @@ public class InheritanceHandler {
 
                 Group g = this.plugin.getGroupManager().getIfLoaded(n.getGroupName());
                 if (g != null) {
-                    successors.add(new ResolvedGroup(n, g));
+                    successors.add(g);
                 }
             }
-            return composeSuccessors(successors);
-        }
-    }
 
-    private static Iterable<PermissionHolder> composeSuccessors(Set<ResolvedGroup> successors) {
-        List<PermissionHolder> holders = new ArrayList<>(successors.size());
-        for (ResolvedGroup resolvedGroup : successors) {
-            holders.add(resolvedGroup.group());
+            List<Group> successorsSorted = new ArrayList<>(successors);
+            successorsSorted.sort(holder.getInheritanceComparator());
+            return successorsSorted;
         }
-        return holders;
     }
 
 }

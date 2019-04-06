@@ -25,12 +25,60 @@
 
 package me.lucko.luckperms.common.inheritance;
 
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.graph.Graph;
+import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.model.PermissionHolder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A {@link Graph} which represents an "inheritance tree".
  */
 public interface InheritanceGraph extends Graph<PermissionHolder> {
+
+    /**
+     * Returns an iterable which will traverse this inheritance graph using the specified
+     * algorithm starting at the given permission holder start node.
+     *
+     * @param algorithm the algorithm to use when traversing
+     * @param postTraversalSort if a final sort according to inheritance (weight, primary group) rules
+     *                          should be performed after the traversal algorithm has completed
+     * @param startNode the start node in the inheritance graph
+     * @return an iterable
+     */
+    default Iterable<PermissionHolder> traverse(TraversalAlgorithm algorithm, boolean postTraversalSort, PermissionHolder startNode) {
+        Iterable<PermissionHolder> traversal = traverse(algorithm, startNode);
+
+        // perform post traversal sort if needed
+        if (postTraversalSort) {
+            List<PermissionHolder> resolvedTraversal = new ArrayList<>();
+            for (PermissionHolder node : traversal) {
+                resolvedTraversal.add(node);
+            }
+
+            resolvedTraversal.sort(startNode.getInheritanceComparator());
+            traversal = resolvedTraversal;
+        }
+
+        return traversal;
+    }
+
+    /**
+     * Perform a traversal according to the rules defined in the configuration.
+     *
+     * @param configuration the configuration object
+     * @param startNode the start node in the inheritance graph
+     * @return an iterable
+     */
+    default Iterable<PermissionHolder> traverse(LuckPermsConfiguration configuration, PermissionHolder startNode) {
+        return traverse(
+                configuration.get(ConfigKeys.INHERITANCE_TRAVERSAL_ALGORITHM),
+                configuration.get(ConfigKeys.POST_TRAVERSAL_INHERITANCE_SORT),
+                startNode
+        );
+    }
 
 }
