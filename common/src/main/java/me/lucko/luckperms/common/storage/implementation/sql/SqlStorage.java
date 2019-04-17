@@ -61,6 +61,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -68,6 +69,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -173,27 +175,58 @@ public class SqlStorage implements StorageImplementation {
                 }
 
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+                    List<String> queries = new LinkedList<>();
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        if (line.startsWith("--") || line.startsWith("#")) {
+                            continue;
+                        }
+
+                        sb.append(line);
+
+                        // check for end of declaration
+                        if (line.endsWith(";")) {
+                            sb.deleteCharAt(sb.length() - 1);
+
+                            String result = this.statementProcessor.apply(sb.toString().trim());
+                            if (!result.isEmpty()) {
+                                queries.add(result);
+                            }
+
+                            // reset
+                            sb = new StringBuilder();
+                        }
+                    }
+
                     try (Connection connection = this.connectionFactory.getConnection()) {
+                        boolean utf8mb4Unsupported = false;
+
                         try (Statement s = connection.createStatement()) {
-                            StringBuilder sb = new StringBuilder();
-                            String line;
-                            while ((line = reader.readLine()) != null) {
-                                if (line.startsWith("--") || line.startsWith("#")) continue;
+                            for (String query : queries) {
+                                s.addBatch(query);
+                            }
 
-                                sb.append(line);
-
-                                // check for end of declaration
-                                if (line.endsWith(";")) {
-                                    sb.deleteCharAt(sb.length() - 1);
-
-                                    String result = this.statementProcessor.apply(sb.toString().trim());
-                                    if (!result.isEmpty()) s.addBatch(result);
-
-                                    // reset
-                                    sb = new StringBuilder();
+                            try {
+                                s.executeBatch();
+                            } catch (BatchUpdateException e) {
+                                if (e.getMessage().contains("Unknown character set")) {
+                                    utf8mb4Unsupported = true;
+                                } else {
+                                    throw e;
                                 }
                             }
-                            s.executeBatch();
+                        }
+
+                        // try again
+                        if (utf8mb4Unsupported) {
+                            try (Statement s = connection.createStatement()) {
+                                for (String query : queries) {
+                                    s.addBatch(query.replace("utf8mb4", "utf8"));
+                                }
+
+                                s.executeBatch();
+                            }
                         }
                     }
                 }
