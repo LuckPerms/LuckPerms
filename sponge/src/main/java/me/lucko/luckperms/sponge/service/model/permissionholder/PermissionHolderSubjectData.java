@@ -475,7 +475,6 @@ public class PermissionHolderSubjectData implements LPSubjectData {
         if (t.getType() == HolderType.GROUP) {
             this.service.getPlugin().getGroupManager().invalidateAllGroupCaches();
             this.service.getPlugin().getUserManager().invalidateAllUserCaches();
-            return CompletableFuture.completedFuture(null);
         }
 
         // no further action required for transient types
@@ -488,8 +487,6 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             return this.service.getPlugin().getStorage().saveUser(user);
         } else {
             Group group = ((Group) t);
-            this.service.getPlugin().getGroupManager().invalidateAllGroupCaches();
-            this.service.getPlugin().getUserManager().invalidateAllUserCaches();
             return this.service.getPlugin().getStorage().saveGroup(group);
         }
     }
