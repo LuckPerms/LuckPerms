@@ -456,8 +456,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
         return this.uuidCache.lookupUsername(uuid);
     }
 
-    private static NodeDataContainer readAttributes(ConfigurationNode attributes, Function<ConfigurationNode, String> permissionFunction) {
-        boolean value = attributes.getNode("value").getBoolean(true);
+    private static NodeDataContainer readMetaAttributes(ConfigurationNode attributes, Function<ConfigurationNode, String> permissionFunction) {
         String server = attributes.getNode("server").getString("global");
         String world = attributes.getNode("world").getString("global");
         long expiry = attributes.getNode("expiry").getLong(0L);
@@ -468,7 +467,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
             context = ContextSetConfigurateSerializer.deserializeContextSet(contextMap).makeImmutable();
         }
 
-        return NodeDataContainer.of(permissionFunction.apply(attributes), value, server, world, expiry, context);
+        return NodeDataContainer.of(permissionFunction.apply(attributes), true, server, world, expiry, context);
     }
 
     private static Collection<NodeDataContainer> readAttributes(ConfigurationNode attributes, String permission) {
@@ -561,7 +560,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 if (entry == null) {
                     continue;
                 }
-                nodes.add(readAttributes(entry.getValue(), c -> NodeFactory.groupNode(entry.getKey())));
+                nodes.add(readMetaAttributes(entry.getValue(), c -> NodeFactory.groupNode(entry.getKey())));
             }
         }
 
@@ -574,7 +573,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                     if (entry == null) {
                         continue;
                     }
-                    nodes.add(readAttributes(entry.getValue(), c -> NodeFactory.chatMetaNode(chatMetaType, c.getNode("priority").getInt(0), entry.getKey())));
+                    nodes.add(readMetaAttributes(entry.getValue(), c -> NodeFactory.chatMetaNode(chatMetaType, c.getNode("priority").getInt(0), entry.getKey())));
                 }
             }
         }
@@ -586,7 +585,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 if (entry == null) {
                     continue;
                 }
-                nodes.add(readAttributes(entry.getValue(), c -> NodeFactory.metaNode(entry.getKey(), c.getNode("value").getString("null"))));
+                nodes.add(readMetaAttributes(entry.getValue(), c -> NodeFactory.metaNode(entry.getKey(), c.getNode("value").getString("null"))));
             }
         }
 
