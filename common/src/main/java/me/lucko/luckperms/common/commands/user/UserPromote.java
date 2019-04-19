@@ -130,7 +130,7 @@ public class UserPromote extends SubCommand<User> {
 
                 Message.USER_PROMOTE_SUCCESS.send(sender, user.getFormattedDisplayName(), track.getName(), groupFrom, groupTo, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
                 if (!silent) {
-                    Message.EMPTY.send(sender, MessageUtils.listToArrowSep(track.getGroups(), groupFrom, groupTo, false));
+                    Message.BLANK.send(sender, MessageUtils.listToArrowSep(track.getGroups(), groupFrom, groupTo, false));
                 }
 
                 ExtendedLogEntry.build().actor(sender).acted(user)

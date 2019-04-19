@@ -130,7 +130,7 @@ public class UserDemote extends SubCommand<User> {
 
                 Message.USER_DEMOTE_SUCCESS.send(sender, user.getFormattedDisplayName(), track.getName(), groupFrom, groupTo, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
                 if (!silent) {
-                    Message.EMPTY.send(sender, MessageUtils.listToArrowSep(track.getGroups(), groupTo, groupFrom, true));
+                    Message.BLANK.send(sender, MessageUtils.listToArrowSep(track.getGroups(), groupTo, groupFrom, true));
                 }
 
                 ExtendedLogEntry.build().actor(sender).acted(user)

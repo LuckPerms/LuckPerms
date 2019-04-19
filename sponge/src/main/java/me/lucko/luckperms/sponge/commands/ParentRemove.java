@@ -30,9 +30,9 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
+import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -58,21 +58,21 @@ public class ParentRemove extends SubCommand<LPSubjectData> {
 
         LPPermissionService service = Sponge.getServiceManager().provideUnchecked(LPPermissionService.class);
         if (service.getLoadedCollections().keySet().stream().map(String::toLowerCase).noneMatch(s -> s.equalsIgnoreCase(collection))) {
-            MessageUtils.sendPluginMessage(sender, "Warning: SubjectCollection '&4" + collection + "&c' doesn't exist.");
+            Message.BLANK.send(sender, "Warning: SubjectCollection '&4" + collection + "&c' doesn't exist.");
         }
 
         LPSubjectCollection c = service.getCollection(collection);
         if (!c.hasRegistered(name).join()) {
-            MessageUtils.sendPluginMessage(sender, "Warning: Subject '&4" + name + "&c' doesn't exist.");
+            Message.BLANK.send(sender, "Warning: Subject '&4" + name + "&c' doesn't exist.");
         }
 
         LPSubject subject = c.loadSubject(name).join();
 
         if (subjectData.removeParent(contextSet, subject.toReference()).join()) {
-            MessageUtils.sendPluginMessage(sender, "&aRemoved parent &b" + subject.getParentCollection().getIdentifier() +
-                    "&a/&b" + subject.getIdentifier() + "&a in context " + SpongeCommandUtils.contextToString(contextSet, plugin.getLocaleManager()));
+            Message.BLANK.send(sender, "&aRemoved parent &b" + subject.getParentCollection().getIdentifier() +
+                        "&a/&b" + subject.getIdentifier() + "&a in context " + SpongeCommandUtils.contextToString(contextSet, plugin.getLocaleManager()));
         } else {
-            MessageUtils.sendPluginMessage(sender, "Unable to remove parent. Are you sure the Subject has it added?");
+            Message.BLANK.send(sender, "Unable to remove parent. Are you sure the Subject has it added?");
         }
         return CommandResult.SUCCESS;
     }

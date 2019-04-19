@@ -63,7 +63,7 @@ public class TrackRemove extends SubCommand<Track> {
         if (result.asBoolean()) {
             Message.TRACK_REMOVE_SUCCESS.send(sender, groupName, track.getName());
             if (track.getGroups().size() > 1) {
-                Message.EMPTY.send(sender, MessageUtils.listToArrowSep(track.getGroups()));
+                Message.BLANK.send(sender, MessageUtils.listToArrowSep(track.getGroups()));
             }
 
             ExtendedLogEntry.build().actor(sender).acted(track)

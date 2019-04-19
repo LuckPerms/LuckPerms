@@ -40,17 +40,6 @@ import java.util.Map;
 public final class MessageUtils {
     private MessageUtils() {}
 
-    /**
-     * Sends a message to the sender, formatted with the plugin prefix and color scheme
-     *
-     * @param sender the sender to send the message to
-     * @param message the message content
-     */
-    public static void sendPluginMessage(Sender sender, String message) {
-        String prefix = Message.PREFIX.asString(sender.getPlugin().getLocaleManager());
-        sender.sendMessage(Message.colorize(prefix + message));
-    }
-
     public static String toCommaSep(Collection<String> strings) {
         if (strings.isEmpty()) {
             return "&bNone";

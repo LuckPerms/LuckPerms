@@ -32,7 +32,6 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.commands.group.CreateGroup;
 import me.lucko.luckperms.common.commands.group.DeleteGroup;
 import me.lucko.luckperms.common.commands.group.GroupMainCommand;
@@ -167,7 +166,7 @@ public class CommandManager {
 
         // Handle no arguments
         if (arguments.isEmpty() || (arguments.size() == 1 && arguments.get(0).trim().isEmpty())) {
-            MessageUtils.sendPluginMessage(sender, "&2Running &bLuckPerms v" + this.plugin.getBootstrap().getVersion() + "&2.");
+            Message.BLANK.send(sender, "&2Running &bLuckPerms v" + this.plugin.getBootstrap().getVersion() + "&2.");
             if (hasPermissionForAny(sender)) {
                 Message.VIEW_AVAILABLE_COMMANDS_PROMPT.send(sender, label);
                 return CommandResult.SUCCESS;
@@ -271,7 +270,7 @@ public class CommandManager {
     }
 
     private void sendCommandUsage(Sender sender, String label) {
-        MessageUtils.sendPluginMessage(sender, "&2Running &bLuckPerms v" + this.plugin.getBootstrap().getVersion() + "&2.");
+        Message.BLANK.send(sender, "&2Running &bLuckPerms v" + this.plugin.getBootstrap().getVersion() + "&2.");
         this.mainCommands.stream()
                 .filter(Command::shouldDisplay)
                 .filter(c -> c.isAuthorized(sender))

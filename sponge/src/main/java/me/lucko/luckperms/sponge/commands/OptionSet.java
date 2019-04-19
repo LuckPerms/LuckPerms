@@ -30,9 +30,9 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
+import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -52,9 +52,9 @@ public class OptionSet extends SubCommand<LPSubjectData> {
         ImmutableContextSet contextSet = ArgumentParser.parseContextSponge(2, args);
 
         if (subjectData.setOption(contextSet, key, value).join()) {
-            MessageUtils.sendPluginMessage(sender, "&aSet &f\"" + key + "&f\"&a to &f\"" + value + "&f\"&a in context " + SpongeCommandUtils.contextToString(contextSet, plugin.getLocaleManager()));
+            Message.BLANK.send(sender, "&aSet &f\"" + key + "&f\"&a to &f\"" + value + "&f\"&a in context " + SpongeCommandUtils.contextToString(contextSet, plugin.getLocaleManager()));
         } else {
-            MessageUtils.sendPluginMessage(sender, "Unable to set option. Does the Subject already have it set?");
+            Message.BLANK.send(sender, "Unable to set option. Does the Subject already have it set?");
         }
 
         return CommandResult.SUCCESS;

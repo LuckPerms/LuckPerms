@@ -60,7 +60,7 @@ public enum Message {
             false
     ),
 
-    EMPTY("{}", true),
+    BLANK("{}", true),
     PLAYER_ONLINE("&aOnline", false),
     PLAYER_OFFLINE("&cOffline", false),
     LOADING_DATABASE_ERROR("&cA database error occurred whilst loading permissions data. Please try again later.", true),
