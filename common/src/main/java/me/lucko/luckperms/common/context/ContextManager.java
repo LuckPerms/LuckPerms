@@ -33,7 +33,7 @@ import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.api.context.StaticContextCalculator;
-import me.lucko.luckperms.common.buffer.ExpiringCache;
+import me.lucko.luckperms.common.cache.ExpiringCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 

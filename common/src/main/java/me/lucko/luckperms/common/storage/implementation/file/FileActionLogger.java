@@ -33,7 +33,7 @@ import com.google.gson.stream.JsonWriter;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LogEntryJsonSerializer;
-import me.lucko.luckperms.common.buffer.BufferedRequest;
+import me.lucko.luckperms.common.cache.BufferedRequest;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 

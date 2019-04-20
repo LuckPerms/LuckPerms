@@ -30,12 +30,12 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LookupSetting;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.context.ContextsCache;
 import me.lucko.luckperms.common.context.ContextsSupplier;
 import me.lucko.luckperms.common.util.CaffeineFactory;
-import me.lucko.luckperms.common.util.LoadingMap;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
 import cn.nukkit.Player;

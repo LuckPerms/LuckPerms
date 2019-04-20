@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.buffer;
+package me.lucko.luckperms.common.cache;
 
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;

@@ -37,7 +37,7 @@ import me.lucko.luckperms.api.messenger.message.type.LogMessage;
 import me.lucko.luckperms.api.messenger.message.type.UpdateMessage;
 import me.lucko.luckperms.api.messenger.message.type.UserUpdateMessage;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
-import me.lucko.luckperms.common.buffer.BufferedRequest;
+import me.lucko.luckperms.common.cache.BufferedRequest;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.messaging.message.LogMessageImpl;
 import me.lucko.luckperms.common.messaging.message.UpdateMessageImpl;

@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.buffer;
+package me.lucko.luckperms.common.cache;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

@@ -29,7 +29,7 @@ import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.buffer.Cache;
+import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
 import org.checkerframework.checker.nullness.qual.NonNull;

@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.sponge.service.model.persisted;
 
-import me.lucko.luckperms.common.buffer.BufferedRequest;
+import me.lucko.luckperms.common.cache.BufferedRequest;
 import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;

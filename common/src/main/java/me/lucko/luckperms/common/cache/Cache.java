@@ -23,47 +23,44 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.util;
+package me.lucko.luckperms.common.cache;
 
-import com.google.common.collect.ForwardingMap;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
+import java.util.Optional;
 
-public class LoadingMap<K, V> extends ForwardingMap<K, V> implements Map<K, V> {
-    public static <K, V> LoadingMap<K, V> of(Map<K, V> map, Function<K, V> function) {
-        return new LoadingMap<>(map, function);
-    }
+/**
+ * Simple one element cache implementation.
+ *
+ * @param <T> the type being stored
+ */
+public abstract class Cache<T> {
+    private volatile T value = null;
 
-    public static <K, V> LoadingMap<K, V> of(Function<K, V> function) {
-        return of(new ConcurrentHashMap<>(), function);
-    }
+    protected abstract @NonNull T supply();
 
-    private final Map<K, V> map;
-    private final Function<K, V> function;
+    public final T get() {
+        T val = this.value;
 
-    private LoadingMap(Map<K, V> map, Function<K, V> function) {
-        this.map = map;
-        this.function = function;
-    }
-
-    @Override
-    protected Map<K, V> delegate() {
-        return this.map;
-    }
-
-    public V getIfPresent(K key) {
-        return this.map.get(key);
-    }
-
-    @Override
-    public V get(Object key) {
-        V value = this.map.get(key);
-        if (value != null) {
-            return value;
+        // double checked locking
+        if (val == null) {
+            synchronized (this) {
+                val = this.value;
+                if (val == null) {
+                    val = supply();
+                    this.value = val;
+                }
+            }
         }
-        //noinspection unchecked
-        return this.map.computeIfAbsent((K) key, this.function);
+
+        return val;
+    }
+
+    public final Optional<T> getIfPresent() {
+        return Optional.ofNullable(this.value);
+    }
+
+    public final void invalidate() {
+        this.value = null;
     }
 }

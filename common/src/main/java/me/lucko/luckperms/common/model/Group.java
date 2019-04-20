@@ -29,7 +29,7 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.nodetype.types.DisplayNameType;
 import me.lucko.luckperms.common.api.implementation.ApiGroup;
-import me.lucko.luckperms.common.buffer.Cache;
+import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.common.cacheddata.GroupCachedData;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 

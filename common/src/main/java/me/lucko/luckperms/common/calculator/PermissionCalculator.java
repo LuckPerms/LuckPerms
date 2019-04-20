@@ -28,11 +28,11 @@ package me.lucko.luckperms.common.calculator;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.util.LoadingMap;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
 import org.checkerframework.checker.nullness.qual.NonNull;

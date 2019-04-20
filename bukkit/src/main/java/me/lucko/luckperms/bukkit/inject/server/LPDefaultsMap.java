@@ -33,7 +33,7 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.common.buffer.Cache;
+import me.lucko.luckperms.common.cache.Cache;
 
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginManager;

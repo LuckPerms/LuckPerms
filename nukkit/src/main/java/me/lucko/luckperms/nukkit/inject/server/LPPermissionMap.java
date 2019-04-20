@@ -28,9 +28,9 @@ package me.lucko.luckperms.nukkit.inject.server;
 import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.ImmutableMap;
 
+import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
-import me.lucko.luckperms.common.util.LoadingMap;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
