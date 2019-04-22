@@ -159,7 +159,9 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
             try {
                 LuckPermsBrigadier.register(this, cmd);
             } catch (Exception e) {
-                e.printStackTrace();
+                if (!(e instanceof RuntimeException && e.getMessage().contains("not supported by the server"))) {
+                    e.printStackTrace();
+                }
             }
         }
     }
