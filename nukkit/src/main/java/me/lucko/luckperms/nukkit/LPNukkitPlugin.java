@@ -270,16 +270,21 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
     }
 
     public void refreshAutoOp(Player player) {
-        if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
-            User user = getUserManager().getIfLoaded(player.getUniqueId());
-            if (user == null) {
-                player.setOp(false);
-                return;
-            }
-
-            Map<String, Boolean> permData = user.getCachedData().getPermissionData(this.contextManager.getApplicableContexts(player)).getImmutableBacking();
-            player.setOp(permData.getOrDefault("luckperms.autoop", false));
+        if (!getConfiguration().get(ConfigKeys.AUTO_OP)) {
+            return;
         }
+
+        User user = getUserManager().getIfLoaded(player.getUniqueId());
+        boolean value;
+
+        if (user != null) {
+            Map<String, Boolean> permData = user.getCachedData().getPermissionData(this.contextManager.getApplicableContexts(player)).getImmutableBacking();
+            value = permData.getOrDefault("luckperms.autoop", false);
+        } else {
+            value = false;
+        }
+
+        player.setOp(value);
     }
 
     private File resolveConfig() {

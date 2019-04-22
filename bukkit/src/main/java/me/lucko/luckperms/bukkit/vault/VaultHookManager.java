@@ -37,16 +37,20 @@ import org.bukkit.plugin.ServicesManager;
  * Handles hooking with the Vault API
  */
 public class VaultHookManager {
+    private final LPBukkitPlugin plugin;
+
     private LuckPermsVaultChat chat = null;
     private LuckPermsVaultPermission permission = null;
+
+    public VaultHookManager(LPBukkitPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     /**
      * Registers the LuckPerms implementation of {@link Permission} and {@link Chat} with
      * the service manager.
-     *
-     * @param plugin the plugin
      */
-    public void hook(LPBukkitPlugin plugin) {
+    public void hook() {
         try {
             if (this.permission == null) {
                 this.permission = new LuckPermsVaultPermission(plugin);
@@ -67,10 +71,8 @@ public class VaultHookManager {
 
     /**
      * Unregisters the LuckPerms Vault hooks, if present.
-     *
-     * @param plugin the plugin
      */
-    public void unhook(LPBukkitPlugin plugin) {
+    public void unhook() {
         final ServicesManager sm = plugin.getBootstrap().getServer().getServicesManager();
 
         if (this.permission != null) {

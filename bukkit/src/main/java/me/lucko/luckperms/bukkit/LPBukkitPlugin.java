@@ -218,8 +218,8 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
         try {
             if (force || this.bootstrap.getServer().getPluginManager().isPluginEnabled("Vault")) {
-                this.vaultHookManager = new VaultHookManager();
-                this.vaultHookManager.hook(this);
+                this.vaultHookManager = new VaultHookManager(this);
+                this.vaultHookManager.hook();
                 getLogger().info("Registered Vault permission & chat hook.");
             }
         } catch (Exception e) {
@@ -323,29 +323,29 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
         // unhook vault
         if (this.vaultHookManager != null) {
-            this.vaultHookManager.unhook(this);
+            this.vaultHookManager.unhook();
         }
     }
 
     public void refreshAutoOp(Player player, boolean callerIsSync) {
-        if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
-            User user = getUserManager().getIfLoaded(player.getUniqueId());
-            if (user == null) {
-                if (callerIsSync) {
-                    player.setOp(false);
-                } else {
-                    this.bootstrap.getScheduler().executeSync(() -> player.setOp(false));
-                }
-                return;
-            }
+        if (!getConfiguration().get(ConfigKeys.AUTO_OP)) {
+            return;
+        }
 
+        User user = getUserManager().getIfLoaded(player.getUniqueId());
+        boolean value;
+
+        if (user != null) {
             Map<String, Boolean> permData = user.getCachedData().getPermissionData(this.contextManager.getApplicableContexts(player)).getImmutableBacking();
-            boolean value = permData.getOrDefault("luckperms.autoop", false);
-            if (callerIsSync) {
-                player.setOp(value);
-            } else {
-                this.bootstrap.getScheduler().executeSync(() -> player.setOp(value));
-            }
+            value = permData.getOrDefault("luckperms.autoop", false);
+        } else {
+            value = false;
+        }
+
+        if (callerIsSync) {
+            player.setOp(value);
+        } else {
+            this.bootstrap.getScheduler().executeSync(() -> player.setOp(value));
         }
     }
 
