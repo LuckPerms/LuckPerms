@@ -115,7 +115,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // now the configuration is loaded, we can create a storage factory and load initial dependencies
         StorageFactory storageFactory = new StorageFactory(this);
-        Set<StorageType> storageTypes = storageFactory.getRequiredTypes(StorageType.H2);
+        Set<StorageType> storageTypes = storageFactory.getRequiredTypes();
         this.dependencyManager.loadStorageDependencies(storageTypes);
 
         // register listeners
@@ -132,7 +132,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         }
 
         // initialise storage
-        this.storage = storageFactory.getInstance(StorageType.H2);
+        this.storage = storageFactory.getInstance();
         this.messagingService = provideMessagingFactory().getInstance();
 
         // setup the update task buffer

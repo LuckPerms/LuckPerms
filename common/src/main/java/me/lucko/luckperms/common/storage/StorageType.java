@@ -63,7 +63,7 @@ public enum StorageType {
         this.identifiers = ImmutableList.copyOf(identifiers);
     }
 
-    public static StorageType parse(String name) {
+    public static StorageType parse(String name, StorageType def) {
         for (StorageType t : values()) {
             for (String id : t.getIdentifiers()) {
                 if (id.equalsIgnoreCase(name)) {
@@ -71,7 +71,7 @@ public enum StorageType {
                 }
             }
         }
-        return null;
+        return def;
     }
 
     public String getName() {

@@ -43,6 +43,7 @@ import me.lucko.luckperms.common.primarygroup.AllParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.ParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
 import me.lucko.luckperms.common.primarygroup.StoredHolder;
+import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.storage.implementation.split.SplitStorageType;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
@@ -474,7 +475,9 @@ public final class ConfigKeys {
     /**
      * The name of the storage method being used
      */
-    public static final ConfigKey<String> STORAGE_METHOD = enduringKey(lowercaseStringKey("storage-method", "h2"));
+    public static final ConfigKey<StorageType> STORAGE_METHOD = enduringKey(customKey(c -> {
+        return StorageType.parse(c.getString("storage-method", "h2"), StorageType.H2);
+    }));
 
     /**
      * If storage files should be monitored for changes
@@ -489,13 +492,13 @@ public final class ConfigKeys {
     /**
      * The options for split storage
      */
-    public static final ConfigKey<Map<SplitStorageType, String>> SPLIT_STORAGE_OPTIONS = enduringKey(customKey(c -> {
-        EnumMap<SplitStorageType, String> map = new EnumMap<>(SplitStorageType.class);
-        map.put(SplitStorageType.USER, c.getString("split-storage.methods.user", "h2").toLowerCase());
-        map.put(SplitStorageType.GROUP, c.getString("split-storage.methods.group", "h2").toLowerCase());
-        map.put(SplitStorageType.TRACK, c.getString("split-storage.methods.track", "h2").toLowerCase());
-        map.put(SplitStorageType.UUID, c.getString("split-storage.methods.uuid", "h2").toLowerCase());
-        map.put(SplitStorageType.LOG, c.getString("split-storage.methods.log", "h2").toLowerCase());
+    public static final ConfigKey<Map<SplitStorageType, StorageType>> SPLIT_STORAGE_OPTIONS = enduringKey(customKey(c -> {
+        EnumMap<SplitStorageType, StorageType> map = new EnumMap<>(SplitStorageType.class);
+        map.put(SplitStorageType.USER, StorageType.parse(c.getString("split-storage.methods.user", "h2"), StorageType.H2));
+        map.put(SplitStorageType.GROUP, StorageType.parse(c.getString("split-storage.methods.group", "h2"), StorageType.H2));
+        map.put(SplitStorageType.TRACK, StorageType.parse(c.getString("split-storage.methods.track", "h2"), StorageType.H2));
+        map.put(SplitStorageType.UUID, StorageType.parse(c.getString("split-storage.methods.uuid", "h2"), StorageType.H2));
+        map.put(SplitStorageType.LOG, StorageType.parse(c.getString("split-storage.methods.log", "h2"), StorageType.H2));
         return ImmutableMap.copyOf(map);
     }));
 

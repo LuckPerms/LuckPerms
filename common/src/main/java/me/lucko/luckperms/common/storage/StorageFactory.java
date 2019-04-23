@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.storage;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -59,45 +58,20 @@ public class StorageFactory {
         this.plugin = plugin;
     }
 
-    public Set<StorageType> getRequiredTypes(StorageType defaultMethod) {
+    public Set<StorageType> getRequiredTypes() {
         if (this.plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE)) {
-            return this.plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS).entrySet().stream()
-                    .map(e -> {
-                        StorageType type = StorageType.parse(e.getValue());
-                        if (type == null) {
-                            this.plugin.getLogger().severe("Storage method for " + e.getKey() + " - " + e.getValue() + " not recognised. " +
-                                    "Using the default instead.");
-                            type = defaultMethod;
-                        }
-                        return type;
-                    })
-                    .collect(ImmutableCollectors.toEnumSet(StorageType.class));
+            return ImmutableSet.copyOf(this.plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS).values());
         } else {
-            String method = this.plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);
-            StorageType type = StorageType.parse(method);
-            if (type == null) {
-                this.plugin.getLogger().severe("Storage method '" + method + "' not recognised. Using the default instead.");
-                type = defaultMethod;
-            }
-            return ImmutableSet.of(type);
+            return ImmutableSet.of(this.plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD));
         }
     }
 
-    public Storage getInstance(StorageType defaultMethod) {
+    public Storage getInstance() {
         Storage storage;
         if (this.plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE)) {
             this.plugin.getLogger().info("Loading storage provider... [SPLIT STORAGE]");
 
-            Map<SplitStorageType, StorageType> mappedTypes = this.plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS).entrySet().stream()
-                    .map(e -> {
-                        StorageType type = StorageType.parse(e.getValue());
-                        if (type == null) {
-                            type = defaultMethod;
-                        }
-                        return Maps.immutableEntry(e.getKey(), type);
-                    })
-                    .collect(ImmutableCollectors.toEnumMap(SplitStorageType.class, Map.Entry::getKey, Map.Entry::getValue));
-
+            Map<SplitStorageType, StorageType> mappedTypes = this.plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS);
             Map<StorageType, StorageImplementation> backing = mappedTypes.values().stream()
                     .distinct()
                     .collect(ImmutableCollectors.toEnumMap(StorageType.class, e -> e, this::createNewImplementation));
@@ -106,12 +80,7 @@ public class StorageFactory {
             storage = new Storage(this.plugin, new SplitStorage(this.plugin, backing, mappedTypes));
 
         } else {
-            String method = this.plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);
-            StorageType type = StorageType.parse(method);
-            if (type == null) {
-                type = defaultMethod;
-            }
-
+            StorageType type = this.plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);
             this.plugin.getLogger().info("Loading storage provider... [" + type.name() + "]");
             storage = makeInstance(type);
         }

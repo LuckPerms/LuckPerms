@@ -89,10 +89,8 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             return CommandResult.STATE_ERROR;
         }
 
-        String method = plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);
-        StorageType type = StorageType.parse(method);
-
-        if (type == null || type != StorageType.MYSQL) {
+        StorageType type = plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);
+        if (type != StorageType.MYSQL) {
             // We need to load the Hikari/MySQL stuff.
             plugin.getDependencyManager().loadStorageDependencies(ImmutableSet.of(StorageType.MYSQL));
         }

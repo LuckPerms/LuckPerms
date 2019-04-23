@@ -72,7 +72,7 @@ public class ApiConfiguration implements LPConfiguration {
 
     @Override
     public @NonNull String getStorageMethod() {
-        return this.handle.get(ConfigKeys.STORAGE_METHOD);
+        return this.handle.get(ConfigKeys.STORAGE_METHOD).getName();
     }
 
     @Override
@@ -83,7 +83,7 @@ public class ApiConfiguration implements LPConfiguration {
     @Override
     public @NonNull Map<String, String> getSplitStorageOptions() {
         return this.handle.get(ConfigKeys.SPLIT_STORAGE_OPTIONS).entrySet().stream()
-                .collect(ImmutableCollectors.toMap(e -> e.getKey().name().toLowerCase(), Map.Entry::getValue));
+                .collect(ImmutableCollectors.toMap(e -> e.getKey().name().toLowerCase(), e -> e.getValue().getName()));
     }
 
     @Override
