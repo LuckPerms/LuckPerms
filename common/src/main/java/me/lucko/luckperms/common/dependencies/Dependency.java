@@ -100,15 +100,15 @@ public enum Dependency {
     OKIO(
             "com{}squareup{}" + RelocationHelper.OKIO_STRING,
             RelocationHelper.OKIO_STRING,
-            "1.17.2",
-            "+AzkLS/6xHrUxH4db5gNYE0kfOsaiGcFz0WBqwyf4rg=",
+            "1.17.3",
+            "yxja86IIrjirnYJUP/uT4fGF6GPIoOUsw3L/46WPVUk=",
             Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
     ),
     OKHTTP(
             "com{}squareup{}" + RelocationHelper.OKHTTP3_STRING,
             "okhttp",
-            "3.13.1",
-            "CrQacT4qY478H0YQ7zTAf+85j517nXmm9UBrd5sAEaU=",
+            "3.14.1",
+            "WmvmkWUwdqpk3NNh0uRF5AYLS13IgrH2uknnnd/D5WM=",
             Relocation.of(RelocationHelper.OKHTTP3_STRING, RelocationHelper.OKHTTP3_STRING),
             Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
     ),
