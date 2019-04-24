@@ -29,6 +29,8 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
+import me.lucko.luckperms.common.calculator.processor.MapProcessor;
+import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
@@ -302,7 +304,8 @@ public final class ArgumentPermissions {
         }
 
         PermissionCache permissionData = user.getCachedData().getPermissionData(Contexts.global().setContexts(contextSet));
-        return !permissionData.getPermissionValue(NodeFactory.groupNode(targetGroupName), PermissionCheckEvent.Origin.INTERNAL).result().asBoolean();
+        TristateResult result = permissionData.getPermissionValue(NodeFactory.groupNode(targetGroupName), PermissionCheckEvent.Origin.INTERNAL);
+        return result.result() != Tristate.TRUE || result.processorClass() != MapProcessor.class;
     }
     
 }
