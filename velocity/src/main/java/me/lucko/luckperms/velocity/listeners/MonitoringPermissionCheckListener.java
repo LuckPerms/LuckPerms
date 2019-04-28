@@ -79,7 +79,7 @@ public class MonitoringPermissionCheckListener {
 
         MonitoredPermissionFunction(PermissionSubject subject, PermissionFunction delegate) {
             this.delegate = delegate;
-            this.name = determineName(subject);
+            this.name = "internal/" + determineName(subject);
         }
 
         @Override
@@ -88,9 +88,8 @@ public class MonitoringPermissionCheckListener {
 
             // report result
             Tristate result = CompatibilityUtil.convertTristate(setting);
-            String name = "internal/" + this.name;
 
-            MonitoringPermissionCheckListener.this.plugin.getVerboseHandler().offerPermissionCheckEvent(PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK, name, ContextSet.empty(), permission, TristateResult.of(result));
+            MonitoringPermissionCheckListener.this.plugin.getVerboseHandler().offerPermissionCheckEvent(PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK, this.name, ContextSet.empty(), permission, TristateResult.of(result));
             MonitoringPermissionCheckListener.this.plugin.getPermissionRegistry().offer(permission);
 
             return setting;

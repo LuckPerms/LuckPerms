@@ -36,7 +36,8 @@ import org.bukkit.permissions.Permission;
  * Permission Processor for Bukkits "default" permission system.
  */
 public class DefaultsProcessor implements PermissionProcessor {
-    private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(DefaultsProcessor.class);
+    private static final TristateResult.Factory DEFAULT_PERMISSION_MAP_RESULT_FACTORY = new TristateResult.Factory(DefaultsProcessor.class, "default permission map");
+    private static final TristateResult.Factory PERMISSION_MAP_RESULT_FACTORY = new TristateResult.Factory(DefaultsProcessor.class, "permission map");
 
     private final LPBukkitPlugin plugin;
     private final boolean isOp;
@@ -50,13 +51,13 @@ public class DefaultsProcessor implements PermissionProcessor {
     public TristateResult hasPermission(String permission) {
         Tristate t = this.plugin.getDefaultPermissionMap().lookupDefaultPermission(permission, this.isOp);
         if (t != Tristate.UNDEFINED) {
-            return RESULT_FACTORY.result(t, "default permission map");
+            return DEFAULT_PERMISSION_MAP_RESULT_FACTORY.result(t);
         }
 
         Permission defPerm = this.plugin.getPermissionMap().get(permission);
         if (defPerm == null) {
             return TristateResult.UNDEFINED;
         }
-        return RESULT_FACTORY.result(Tristate.fromBoolean(defPerm.getDefault().getValue(this.isOp)), "permission map");
+        return PERMISSION_MAP_RESULT_FACTORY.result(Tristate.fromBoolean(defPerm.getDefault().getValue(this.isOp)));
     }
 }

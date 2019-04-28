@@ -34,21 +34,11 @@ import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
  */
 public final class TristateResult {
 
+    private static final Factory NULL_FACTORY = new Factory(null, null);
     public static final TristateResult UNDEFINED = new TristateResult(Tristate.UNDEFINED, null, null);
 
-    public static TristateResult of(Tristate result, Class<? extends PermissionProcessor> processorClass, String cause) {
-        if (result == Tristate.UNDEFINED) {
-            return UNDEFINED;
-        }
-        return new TristateResult(result, processorClass, cause);
-    }
-
-    public static TristateResult of(Tristate result, Class<? extends PermissionProcessor> processorClass) {
-        return of(result, processorClass, null);
-    }
-
     public static TristateResult of(Tristate result) {
-        return of(result, null, null);
+        return NULL_FACTORY.result(result);
     }
     
     private final Tristate result;
@@ -87,11 +77,15 @@ public final class TristateResult {
         private final TristateResult trueResult;
         private final TristateResult falseResult;
 
-        public Factory(Class<? extends PermissionProcessor> processorClass) {
+        public Factory(Class<? extends PermissionProcessor> processorClass, String defaultCause) {
             this.processorClass = processorClass;
 
-            this.trueResult = of(Tristate.TRUE, processorClass);
-            this.falseResult = of(Tristate.FALSE, processorClass);
+            this.trueResult = new TristateResult(Tristate.TRUE, processorClass, defaultCause);
+            this.falseResult = new TristateResult(Tristate.FALSE, processorClass, defaultCause);
+        }
+
+        public Factory(Class<? extends PermissionProcessor> processorClass) {
+            this(processorClass, null);
         }
 
         public TristateResult result(Tristate result) {
@@ -108,10 +102,10 @@ public final class TristateResult {
         }
 
         public TristateResult result(Tristate result, String cause) {
-            if (cause == null) {
-                return result(result);
+            if (result == Tristate.UNDEFINED) {
+                return UNDEFINED;
             }
-            return of(result, this.processorClass, cause);
+            return new TristateResult(result, this.processorClass, cause);
         }
     }
 }
