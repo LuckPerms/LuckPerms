@@ -58,7 +58,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -94,7 +93,9 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected Set<Dependency> getGlobalDependencies() {
-        return EnumSet.of(Dependency.TEXT, Dependency.TEXT_ADAPTER_BUNGEECORD, Dependency.CAFFEINE, Dependency.OKIO, Dependency.OKHTTP, Dependency.EVENT);
+        Set<Dependency> dependencies = super.getGlobalDependencies();
+        dependencies.add(Dependency.TEXT_ADAPTER_BUNGEECORD);
+        return dependencies;
     }
 
     @Override

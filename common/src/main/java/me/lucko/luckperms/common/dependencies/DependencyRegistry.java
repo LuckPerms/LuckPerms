@@ -94,11 +94,6 @@ public class DependencyRegistry {
             relocations.add(Relocation.of("gson", "com{}google{}gson"));
         }
 
-        // don't relocate text when running on Velocity
-        if (dependency == Dependency.TEXT && type == PlatformType.VELOCITY) {
-            relocations.remove(Relocation.of("text", "net{}kyori{}text"));
-        }
-
         // relocate yaml within configurate when running velocity
         if (dependency == Dependency.CONFIGURATE_YAML && type == PlatformType.VELOCITY) {
             relocations.add(Relocation.of("yaml", "org{}yaml{}snakeyaml"));

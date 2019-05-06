@@ -2,9 +2,14 @@ dependencies {
     compile project(':luckperms-api')
 
     compile 'org.checkerframework:checker-qual:2.5.5'
-    compile('net.kyori:text:1.11-1.6.5') {
+    compile('net.kyori:text-api:3.0.0') {
         exclude(module: 'checker-qual')
-        exclude(module: 'guava')
+    }
+    compile('net.kyori:text-serializer-legacy:3.0.0') {
+        exclude(module: 'text-api')
+    }
+    compile('net.kyori:text-serializer-gson:3.0.0') {
+        exclude(module: 'text-api')
         exclude(module: 'gson')
     }
     compile('net.kyori:event-api:3.0.0') {

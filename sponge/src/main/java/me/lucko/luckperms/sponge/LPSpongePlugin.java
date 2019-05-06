@@ -72,7 +72,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -113,8 +112,12 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected Set<Dependency> getGlobalDependencies() {
-        return EnumSet.of(Dependency.TEXT, Dependency.CAFFEINE, Dependency.OKIO, Dependency.OKHTTP, Dependency.EVENT,
-                Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_HOCON, Dependency.HOCON_CONFIG);
+        Set<Dependency> dependencies = super.getGlobalDependencies();
+        dependencies.add(Dependency.TEXT_ADAPTER_SPONGEAPI);
+        dependencies.add(Dependency.CONFIGURATE_CORE);
+        dependencies.add(Dependency.CONFIGURATE_HOCON);
+        dependencies.add(Dependency.HOCON_CONFIG);
+        return dependencies;
     }
 
     @Override

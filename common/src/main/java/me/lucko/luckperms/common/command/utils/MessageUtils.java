@@ -31,7 +31,6 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.message.Message;
-import me.lucko.luckperms.common.sender.Sender;
 
 import java.util.Collection;
 import java.util.List;

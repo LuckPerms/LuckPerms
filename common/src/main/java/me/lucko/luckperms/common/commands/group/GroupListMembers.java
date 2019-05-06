@@ -54,7 +54,7 @@ import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.TextUtils;
 
-import net.kyori.text.BuildableComponent;
+import net.kyori.text.ComponentBuilder;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
@@ -159,15 +159,15 @@ public class GroupListMembers extends SubCommand<Group> {
         return " &8(&7expires in " + DurationFormatter.LONG.formatDateDiff(node.getExpiryUnixTime()) + "&8)";
     }
 
-    private static Consumer<BuildableComponent.Builder<? ,?>> makeFancy(String holderName, HolderType holderType, String label, HeldPermission<?> perm, LuckPermsPlugin plugin) {
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
+    private static Consumer<ComponentBuilder<? ,?>> makeFancy(String holderName, HolderType holderType, String label, HeldPermission<?> perm, LuckPermsPlugin plugin) {
+        HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
                 "&3> &b" + perm.asNode().getGroupName(),
                 " ",
                 "&7Click to remove this parent from " + holderName
         ), CommandManager.AMPERSAND_CHAR));
 
         String command = "/" + label + " " + NodeFactory.nodeAsCommand(perm.asNode(), holderName, holderType, false, !plugin.getConfiguration().getContextsFile().getDefaultContexts().isEmpty());
-        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
+        ClickEvent clickEvent = ClickEvent.suggestCommand(command);
 
         return component -> {
             component.hoverEvent(hoverEvent);

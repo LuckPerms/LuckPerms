@@ -34,7 +34,6 @@ import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
-import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 import me.lucko.luckperms.common.model.User;
@@ -70,10 +69,8 @@ import cn.nukkit.plugin.service.ServicePriority;
 import cn.nukkit.utils.Config;
 
 import java.io.File;
-import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -106,11 +103,6 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void setupSenderFactory() {
         this.senderFactory = new NukkitSenderFactory(this);
-    }
-
-    @Override
-    protected Set<Dependency> getGlobalDependencies() {
-        return EnumSet.of(Dependency.TEXT, Dependency.CAFFEINE, Dependency.OKIO, Dependency.OKHTTP, Dependency.EVENT);
     }
 
     @Override

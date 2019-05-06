@@ -92,7 +92,7 @@ public class MetaSetTemp extends SharedSubCommand {
         duration = holder.setPermission(n, modifier).getMergedNode().getExpiryUnixTime();
 
         TextComponent.Builder builder = Message.SET_META_TEMP_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, holder.getFormattedDisplayName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
-        HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
+        HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(
                 TextUtils.joinNewline("¥3Raw key: ¥r" + key, "¥3Raw value: ¥r" + value),
                 '¥'
         ));

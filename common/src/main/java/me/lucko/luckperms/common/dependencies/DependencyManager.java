@@ -175,7 +175,6 @@ public class DependencyManager {
                 RelocationHandler relocationHandler = getRelocationHandler();
 
                 // attempt to remap the jar.
-                this.plugin.getLogger().info("Attempting to apply relocations to " + input.getFileName().toString() + "...");
                 relocationHandler.remap(input, output, relocations);
 
                 remappedJars.add(new Source(source.dependency, output));
@@ -254,8 +253,6 @@ public class DependencyManager {
                                 "Expected: " + Base64.getEncoder().encodeToString(dependency.getChecksum()) + " " +
                                 "Actual: " + Base64.getEncoder().encodeToString(hash));
                     }
-
-                    this.plugin.getLogger().info("Successfully downloaded '" + fileName + "' with matching checksum: " + Base64.getEncoder().encodeToString(hash));
 
                     // if the checksum matches, save the content to disk
                     Files.write(file, bytes);

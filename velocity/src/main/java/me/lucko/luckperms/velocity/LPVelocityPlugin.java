@@ -58,7 +58,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -94,8 +93,11 @@ public class LPVelocityPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected Set<Dependency> getGlobalDependencies() {
-        return EnumSet.of(Dependency.CAFFEINE, Dependency.OKIO, Dependency.OKHTTP, Dependency.EVENT,
-                Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_YAML, Dependency.SNAKEYAML);
+        Set<Dependency> dependencies = super.getGlobalDependencies();
+        dependencies.add(Dependency.CONFIGURATE_CORE);
+        dependencies.add(Dependency.CONFIGURATE_YAML);
+        dependencies.add(Dependency.SNAKEYAML);
+        return dependencies;
     }
 
     @Override

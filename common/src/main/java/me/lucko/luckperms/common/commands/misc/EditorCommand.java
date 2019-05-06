@@ -118,8 +118,8 @@ public class EditorCommand extends SingleCommand {
         Message.EDITOR_URL.send(sender);
 
         Component message = TextComponent.builder(url).color(TextColor.AQUA)
-                .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url))
-                .hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to open the editor.").color(TextColor.GRAY)))
+                .clickEvent(ClickEvent.openUrl(url))
+                .hoverEvent(HoverEvent.showText(TextComponent.of("Click to open the editor.").color(TextColor.GRAY)))
                 .build();
 
         sender.sendMessage(message);

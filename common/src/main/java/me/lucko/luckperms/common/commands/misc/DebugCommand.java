@@ -95,8 +95,8 @@ public class DebugCommand extends SingleCommand {
         Message.DEBUG_URL.send(sender);
 
         Component message = TextComponent.builder(pasteUrl).color(TextColor.AQUA)
-                .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, pasteUrl))
-                .hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to open the debugging data.").color(TextColor.GRAY)))
+                .clickEvent(ClickEvent.openUrl(pasteUrl))
+                .hoverEvent(HoverEvent.showText(TextComponent.of("Click to open the debugging data.").color(TextColor.GRAY)))
                 .build();
 
         sender.sendMessage(message);

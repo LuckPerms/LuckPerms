@@ -85,8 +85,8 @@ public class ListGroups extends SingleCommand {
                     }
 
                     component = component.toBuilder().applyDeep(c -> {
-                        c.clickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + label + " group " + group.getName() + " info"));
-                        c.hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to view more info about " + group.getName() + ".").color(TextColor.GRAY)));
+                        c.clickEvent(ClickEvent.runCommand("/" + label + " group " + group.getName() + " info"));
+                        c.hoverEvent(HoverEvent.showText(TextComponent.of("Click to view more info about " + group.getName() + ".").color(TextColor.GRAY)));
                     }).build();
 
                     sender.sendMessage(component);

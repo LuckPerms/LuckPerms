@@ -86,7 +86,7 @@ public class MetaAddChatMeta extends SharedSubCommand {
         DataMutateResult result = holder.setPermission(NodeFactory.buildChatMetaNode(this.type, priority, meta).withExtraContext(context).build());
         if (result.asBoolean()) {
             TextComponent.Builder builder = Message.ADD_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
-            HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
+            HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(
                     "¥3Raw " + this.type.name().toLowerCase() + ": ¥r" + meta,
                     '¥'
             ));

@@ -134,7 +134,7 @@ public class MetaSetTempChatMeta extends SharedSubCommand {
             duration = ret.getMergedNode().getExpiryUnixTime();
 
             TextComponent.Builder builder = Message.ADD_TEMP_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
-            HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
+            HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(
                     "¥3Raw " + this.type.name().toLowerCase() + ": ¥r" + meta,
                     '¥'
             ));

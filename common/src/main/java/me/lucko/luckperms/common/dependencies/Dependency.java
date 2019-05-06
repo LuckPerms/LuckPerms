@@ -64,23 +64,44 @@ public enum Dependency {
 
     TEXT(
             "net{}kyori",
-            "text",
-            "1.11-1.6.5",
-            "I5D0U+Gsd5G3XO+W+4ZyO7Fyc8g7lt/up8oNpetq1W8=",
+            "text-api",
+            "3.0.0",
+            "/d7o/eZkZx/naJE+pMg1KqIzL8TWxWjA4yxjv8/10Cg=",
+            Relocation.of("text", "net{}kyori{}text")
+    ),
+    TEXT_SERIALIZER_GSON(
+            "net{}kyori",
+            "text-serializer-gson",
+            "3.0.0",
+            "zc1ePBBRCjSoNQiNqsBL+6TYRmaUPyEZtj1LhCtViv0=",
+            Relocation.of("text", "net{}kyori{}text")
+    ),
+    TEXT_SERIALIZER_LEGACY(
+            "net{}kyori",
+            "text-serializer-legacy",
+            "3.0.0",
+            "Zns1sKvALAt3Sn0Px+vENv1XQ9y80E1cSzzDN46C9rQ=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_ADAPTER_BUKKIT(
             "net{}kyori",
             "text-adapter-bukkit",
-            "1.0.2",
-            "jZx0BgSlfyeamadYiE52wlJbQOwSyB4fffPoE526hOk=",
+            "3.0.1",
+            "y/3ObS+Gwguy1/e1/bJRCbaWoMigFju6VypliQKFa5M=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_ADAPTER_BUNGEECORD(
             "net{}kyori",
             "text-adapter-bungeecord",
-            "1.0.2",
-            "hj7z8v8AceARfwTPzLzJwZdTqqERN9fPJPhZQAqD1Rc=",
+            "3.0.1",
+            "Q+cj+8MGgaAVOAjekG4oaE1TOijsezbbEXB41NP1mEA=",
+            Relocation.of("text", "net{}kyori{}text")
+    ),
+    TEXT_ADAPTER_SPONGEAPI(
+            "net{}kyori",
+            "text-adapter-spongeapi",
+            "3.0.1",
+            "Yedf+fTvFwjdZ74EoQ8TTrmDvT0hszCu1RoRs5hweWc=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     EVENT(

@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 
 import net.kyori.text.Component;
-import net.kyori.text.serializer.ComponentSerializers;
+import net.kyori.text.adapter.spongeapi.TextAdapter;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
@@ -69,7 +69,7 @@ public class SpongeSenderFactory extends SenderFactory<CommandSource> {
 
     @Override
     protected void sendMessage(CommandSource source, Component message) {
-        source.sendMessage(TextSerializers.JSON.deserialize(ComponentSerializers.JSON.serialize(message)));
+        TextAdapter.sendComponent(source, message);
     }
 
     @Override

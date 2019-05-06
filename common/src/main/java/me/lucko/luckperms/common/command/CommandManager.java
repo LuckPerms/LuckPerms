@@ -279,7 +279,7 @@ public class CommandManager {
 
                     TextComponent component = TextUtils.fromLegacy("&3> &a" + String.format(c.getUsage(), label), AMPERSAND_CHAR)
                             .toBuilder().applyDeep(comp -> {
-                                comp.hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
+                                comp.hoverEvent(HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
                                         "&bCommand: &2" + c.getName(),
                                         "&bDescription: &2" + c.getDescription(),
                                         "&bUsage: &2" + String.format(c.getUsage(), label),
@@ -287,7 +287,7 @@ public class CommandManager {
                                         " ",
                                         "&7Click to auto-complete."
                                 ), AMPERSAND_CHAR)));
-                                comp.clickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format(c.getUsage(), label)));
+                                comp.clickEvent(ClickEvent.suggestCommand(String.format(c.getUsage(), label)));
                             }).build();
                     sender.sendMessage(component);
                 });

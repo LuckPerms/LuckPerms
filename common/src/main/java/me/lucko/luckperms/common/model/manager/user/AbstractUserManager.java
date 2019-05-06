@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.model.manager.user;
 
 import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.Streams;
 
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;

@@ -25,6 +25,7 @@ dependencies {
         exclude(module: 'configurate-gson')
         exclude(module: 'configurate-yaml')
     }
+    compileOnly 'net.kyori:text-adapter-spongeapi:3.0.1'
 }
 
 blossom {

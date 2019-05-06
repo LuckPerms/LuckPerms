@@ -56,6 +56,7 @@ import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.common.web.Bytebin;
 
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -220,8 +221,19 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         getLogger().info("Goodbye!");
     }
 
+    protected Set<Dependency> getGlobalDependencies() {
+        return EnumSet.of(
+                Dependency.TEXT,
+                Dependency.TEXT_SERIALIZER_GSON,
+                Dependency.TEXT_SERIALIZER_LEGACY,
+                Dependency.CAFFEINE,
+                Dependency.OKIO,
+                Dependency.OKHTTP,
+                Dependency.EVENT
+        );
+    }
+
     protected abstract void setupSenderFactory();
-    protected abstract Set<Dependency> getGlobalDependencies();
     protected abstract ConfigurationAdapter provideConfigurationAdapter();
     protected abstract void registerPlatformListeners();
     protected abstract MessagingFactory<?> provideMessagingFactory();

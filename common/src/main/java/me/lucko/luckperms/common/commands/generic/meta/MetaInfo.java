@@ -47,7 +47,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.TextUtils;
 
-import net.kyori.text.BuildableComponent;
+import net.kyori.text.ComponentBuilder;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
@@ -152,7 +152,7 @@ public class MetaInfo extends SharedSubCommand {
         }
     }
 
-    private static Consumer<BuildableComponent.Builder<?, ?>> makeFancy(ChatMetaType type, PermissionHolder holder, String label, LocalizedNode node) {
+    private static Consumer<ComponentBuilder<?, ?>> makeFancy(ChatMetaType type, PermissionHolder holder, String label, LocalizedNode node) {
         if (!node.getLocation().equals(holder.getObjectName())) {
             // inherited.
             Group group = holder.getPlugin().getGroupManager().getIfLoaded(node.getLocation());
@@ -161,14 +161,14 @@ public class MetaInfo extends SharedSubCommand {
             }
         }
 
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
+        HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
                 "¥3> ¥a" + type.getEntry(node).getKey() + " ¥7- ¥r" + type.getEntry(node).getValue(),
                 " ",
                 "¥7Click to remove this " + type.name().toLowerCase() + " from " + holder.getFormattedDisplayName()
         ), '¥'));
 
         String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getFormattedDisplayName(), holder.getType(), false, !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty());
-        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
+        ClickEvent clickEvent = ClickEvent.suggestCommand(command);
 
         return component -> {
             component.hoverEvent(hoverEvent);
@@ -176,7 +176,7 @@ public class MetaInfo extends SharedSubCommand {
         };
     }
 
-    private static Consumer<BuildableComponent.Builder<?, ?>> makeFancy(PermissionHolder holder, String label, LocalizedNode node) {
+    private static Consumer<ComponentBuilder<?, ?>> makeFancy(PermissionHolder holder, String label, LocalizedNode node) {
         if (!node.getLocation().equals(holder.getObjectName())) {
             // inherited.
             Group group = holder.getPlugin().getGroupManager().getIfLoaded(node.getLocation());
@@ -185,14 +185,14 @@ public class MetaInfo extends SharedSubCommand {
             }
         }
 
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
+        HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
                 "¥3> ¥r" + node.getMeta().getKey() + " ¥7- ¥r" + node.getMeta().getValue(),
                 " ",
                 "¥7Click to remove this meta pair from " + holder.getFormattedDisplayName()
         ), '¥'));
 
         String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getFormattedDisplayName(), holder.getType(), false, !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty());
-        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
+        ClickEvent clickEvent = ClickEvent.suggestCommand(command);
 
         return component -> {
             component.hoverEvent(hoverEvent);

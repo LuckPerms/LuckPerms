@@ -105,7 +105,7 @@ public class MetaRemoveTempChatMeta extends SharedSubCommand {
 
         if (result.asBoolean()) {
             TextComponent.Builder builder = Message.REMOVE_TEMP_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
-            HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
+            HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(
                     "¥3Raw " + this.type.name().toLowerCase() + ": ¥r" + meta,
                     '¥'
             ));

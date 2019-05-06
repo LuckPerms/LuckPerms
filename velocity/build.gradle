@@ -10,8 +10,12 @@ repositories {
 dependencies {
     compile project(':common')
 
-    compileOnly 'com.velocitypowered:velocity-api:1.0-SNAPSHOT'
-    annotationProcessor 'com.velocitypowered:velocity-api:1.0-SNAPSHOT'
+    compileOnly('com.velocitypowered:velocity-api:1.0-SNAPSHOT') {
+        exclude(module: 'text')
+    }
+    annotationProcessor('com.velocitypowered:velocity-api:1.0-SNAPSHOT') {
+        exclude(module: 'text')
+    }
 }
 
 blossom {
@@ -26,7 +30,7 @@ shadowJar {
         include(dependency('me.lucko.luckperms:.*'))
     }
 
-    // relocate 'net.kyori.text', 'me.lucko.luckperms.lib.text'   (included in velocity!)
+    relocate 'net.kyori.text', 'me.lucko.luckperms.lib.text'
     relocate 'net.kyori.event', 'me.lucko.luckperms.lib.eventbus'
     relocate 'com.github.benmanes.caffeine', 'me.lucko.luckperms.lib.caffeine'
     relocate 'okio', 'me.lucko.luckperms.lib.okio'

@@ -50,7 +50,7 @@ import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.TextUtils;
 
-import net.kyori.text.BuildableComponent;
+import net.kyori.text.ComponentBuilder;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
@@ -137,15 +137,15 @@ public class PermissionInfo extends SharedSubCommand {
         return NodeWithContextComparator.reverse().compare(o1, o2);
     };
 
-    private static Consumer<BuildableComponent.Builder<?, ?>> makeFancy(PermissionHolder holder, String label, Node node) {
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
+    private static Consumer<ComponentBuilder<?, ?>> makeFancy(PermissionHolder holder, String label, Node node) {
+        HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
                 "¥3> " + (node.getValue() ? "¥a" : "¥c") + node.getPermission(),
                 " ",
                 "¥7Click to remove this node from " + holder.getFormattedDisplayName()
         ), '¥'));
 
         String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getFormattedDisplayName(), holder.getType(), false, !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty());
-        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
+        ClickEvent clickEvent = ClickEvent.suggestCommand(command);
 
         return component -> {
             component.hoverEvent(hoverEvent);

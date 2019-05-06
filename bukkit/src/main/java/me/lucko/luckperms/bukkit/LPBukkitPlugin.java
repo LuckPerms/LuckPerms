@@ -73,7 +73,6 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 
 import java.io.File;
-import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -123,7 +122,8 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected Set<Dependency> getGlobalDependencies() {
-        EnumSet<Dependency> dependencies = EnumSet.of(Dependency.TEXT, Dependency.TEXT_ADAPTER_BUKKIT, Dependency.CAFFEINE, Dependency.OKIO, Dependency.OKHTTP, Dependency.EVENT);
+        Set<Dependency> dependencies = super.getGlobalDependencies();
+        dependencies.add(Dependency.TEXT_ADAPTER_BUKKIT);
         if (isBrigadierSupported()) {
             dependencies.add(Dependency.COMMODORE);
         }

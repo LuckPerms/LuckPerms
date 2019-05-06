@@ -67,7 +67,7 @@ public class VelocitySenderFactory extends SenderFactory<CommandSource> {
 
     @Override
     protected void sendMessage(CommandSource source, Component message) {
-        source.sendMessage(message);
+        VelocityComponentUtils.sendMessage(source, message);
     }
 
     @Override
