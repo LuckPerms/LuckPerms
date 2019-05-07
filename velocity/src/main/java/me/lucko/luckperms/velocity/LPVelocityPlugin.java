@@ -94,9 +94,15 @@ public class LPVelocityPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected Set<Dependency> getGlobalDependencies() {
         Set<Dependency> dependencies = super.getGlobalDependencies();
+        // required for loading the LP config
         dependencies.add(Dependency.CONFIGURATE_CORE);
         dependencies.add(Dependency.CONFIGURATE_YAML);
         dependencies.add(Dependency.SNAKEYAML);
+
+        // already included in the proxy
+        dependencies.remove(Dependency.TEXT);
+        dependencies.remove(Dependency.TEXT_SERIALIZER_GSON);
+        dependencies.remove(Dependency.TEXT_SERIALIZER_LEGACY);
         return dependencies;
     }
 
