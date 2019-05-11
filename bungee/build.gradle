@@ -5,8 +5,8 @@ plugins {
 dependencies {
     compile project(':common')
 
-    compileOnly 'net.md-5:bungeecord-api:1.13-SNAPSHOT'
-    compileOnly 'net.kyori:text-adapter-bungeecord:3.0.1'
+    compileOnly 'net.md-5:bungeecord-api:1.14-SNAPSHOT'
+    compileOnly 'net.kyori:text-adapter-bungeecord:3.0.2'
     compileOnly 'com.imaginarycode.minecraft:RedisBungee:0.4'
 
     // migration plugins

@@ -10,8 +10,8 @@ repositories {
 dependencies {
     compile project(':common')
 
-    compileOnly 'org.spigotmc:spigot-api:1.13.2-R0.1-SNAPSHOT'
-    compileOnly 'net.kyori:text-adapter-bukkit:3.0.1'
+    compileOnly 'org.spigotmc:spigot-api:1.14-R0.1-SNAPSHOT'
+    compileOnly 'net.kyori:text-adapter-bukkit:3.0.2'
     compileOnly 'me.lucko:commodore:1.3'
     compileOnly('net.milkbowl.vault:VaultAPI:1.6') {
         exclude(module: 'bukkit')

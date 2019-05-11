@@ -86,22 +86,22 @@ public enum Dependency {
     TEXT_ADAPTER_BUKKIT(
             "net{}kyori",
             "text-adapter-bukkit",
-            "3.0.1",
-            "y/3ObS+Gwguy1/e1/bJRCbaWoMigFju6VypliQKFa5M=",
+            "3.0.2",
+            "VnbfELmOHV6DVidHJql6gmsCjfhABEnF6q9LTezUrQg=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_ADAPTER_BUNGEECORD(
             "net{}kyori",
             "text-adapter-bungeecord",
-            "3.0.1",
-            "Q+cj+8MGgaAVOAjekG4oaE1TOijsezbbEXB41NP1mEA=",
+            "3.0.2",
+            "ZmCmc67danKpZru8rJsDppJZ+f8joquULZI8y/YX4ks=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_ADAPTER_SPONGEAPI(
             "net{}kyori",
             "text-adapter-spongeapi",
-            "3.0.1",
-            "Yedf+fTvFwjdZ74EoQ8TTrmDvT0hszCu1RoRs5hweWc=",
+            "3.0.2",
+            "WPWFw1g8niEGgymV9PdyLADMSL6+UQ7FKdtxnJb79JE=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     EVENT(
