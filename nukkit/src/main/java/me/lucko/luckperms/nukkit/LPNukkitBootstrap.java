@@ -169,11 +169,6 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     }
 
     @Override
-    public String getServerName() {
-        return getServer().getServerUniqueId().toString();
-    }
-
-    @Override
     public Path getDataDirectory() {
         return getDataFolder().toPath().toAbsolutePath();
     }

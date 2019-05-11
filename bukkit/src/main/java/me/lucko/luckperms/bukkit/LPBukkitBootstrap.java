@@ -213,11 +213,6 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     }
 
     @Override
-    public String getServerName() {
-        return getServer().getServerName();
-    }
-
-    @Override
     public Path getDataDirectory() {
         return getDataFolder().toPath().toAbsolutePath();
     }

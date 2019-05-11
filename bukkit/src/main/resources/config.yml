@@ -556,10 +556,6 @@ vault-debug: false
 # - Useful if you're having issues with UUID forwarding or data not being loaded.
 debug-logins: false
 
-# If LuckPerms should use the "server-name" property from the "server.properties" file as the
-# "server" option within LuckPerms.
-use-server-properties-name: false
-
 # If LuckPerms should allow usernames with non alphanumeric characters.
 #
 # - Note that due to the design of the storage implementation, usernames must still be 16 characters
