@@ -25,16 +25,19 @@
 
 package me.lucko.luckperms.common.sender;
 
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.context.ContextManager;
-import me.lucko.luckperms.common.context.ContextSetFormatter;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.text.Component;
 
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Wrapper interface to represent a CommandSender/CommandSource within the common command implementations.
@@ -78,16 +81,23 @@ public interface Sender {
             return name;
         }
 
-        String location = ContextSetFormatter.toMinimalString(contextManager.getStaticContext()).orElse(null);
-        if (location == null) {
+        ImmutableContextSet staticContext = contextManager.getStaticContext();
+
+        String location;
+        if (staticContext.isEmpty()) {
             return name;
+        } else if (staticContext.size() == 1) {
+            location = staticContext.iterator().next().getValue();
+        } else {
+            Set<String> servers = staticContext.getValues(Contexts.SERVER_KEY);
+            if (servers.size() == 1) {
+                location = servers.iterator().next();
+            } else {
+                location = staticContext.toSet().stream().map(pair -> pair.getKey() + "=" + pair.getValue()).collect(Collectors.joining(";"));
+            }
         }
 
-        if (isConsole()) {
-            return name.toLowerCase() + "@" + location;
-        } else {
-            return name + "@" + location;
-        }
+        return name + "@" + location;
     }
 
     /**
