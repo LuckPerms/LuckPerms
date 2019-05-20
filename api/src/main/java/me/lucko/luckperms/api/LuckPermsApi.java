@@ -199,19 +199,6 @@ public interface LuckPermsApi {
     @NonNull ActionLogger getActionLogger();
 
     /**
-     * Gets a {@link UuidCache}.
-     *
-     * <p>The uuid cache provides read access to the internal LuckPerms uuid
-     * mapping system.</p>
-     *
-     * @return the uuid cache
-     * @deprecated this feature is now handled internally - and the API returns a
-     * No-op implementation of this class.
-     */
-    @Deprecated
-    @NonNull UuidCache getUuidCache();
-
-    /**
      * Gets the {@link ContextManager}.
      *
      * <p>The context manager manages {@link ContextCalculator}s, and calculates

@@ -31,7 +31,6 @@ import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.MessagingService;
 import me.lucko.luckperms.api.NodeFactory;
 import me.lucko.luckperms.api.Storage;
-import me.lucko.luckperms.api.UuidCache;
 import me.lucko.luckperms.api.context.ContextManager;
 import me.lucko.luckperms.api.event.EventBus;
 import me.lucko.luckperms.api.manager.CachedDataManager;
@@ -51,7 +50,6 @@ import me.lucko.luckperms.common.api.implementation.ApiNodeFactory;
 import me.lucko.luckperms.common.api.implementation.ApiPlatformInfo;
 import me.lucko.luckperms.common.api.implementation.ApiTrackManager;
 import me.lucko.luckperms.common.api.implementation.ApiUserManager;
-import me.lucko.luckperms.common.api.implementation.NoopUuidCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -151,12 +149,6 @@ public class LuckPermsApiProvider implements LuckPermsApi {
     @Override
     public @NonNull ActionLogger getActionLogger() {
         return this.actionLogger;
-    }
-
-    @Deprecated
-    @Override
-    public @NonNull UuidCache getUuidCache() {
-        return NoopUuidCache.INSTANCE;
     }
 
     @Override
