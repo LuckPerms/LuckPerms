@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.commands.track;
 
-import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.actionlog.Action;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
@@ -74,7 +74,7 @@ public class CreateTrack extends SingleCommand {
 
         Message.CREATE_SUCCESS.send(sender, trackName);
 
-        ExtendedLogEntry.build().actor(sender).actedName(trackName).type(LogEntry.Type.TRACK)
+        ExtendedLogEntry.build().actor(sender).actedName(trackName).type(Action.Type.TRACK)
                 .action("create").build()
                 .submit(plugin, sender);
 

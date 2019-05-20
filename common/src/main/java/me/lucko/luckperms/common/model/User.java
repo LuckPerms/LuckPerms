@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.model;
 
 import me.lucko.luckperms.common.api.implementation.ApiUser;
-import me.lucko.luckperms.common.cacheddata.UserCachedData;
+import me.lucko.luckperms.common.cacheddata.UserCachedDataManager;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.primarygroup.ContextualHolder;
@@ -58,7 +58,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     /**
      * The users data cache instance
      */
-    private final UserCachedData cachedData;
+    private final UserCachedDataManager cachedData;
 
     public User(UUID uuid, String name, LuckPermsPlugin plugin) {
         super(plugin);
@@ -67,7 +67,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
 
         this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
 
-        this.cachedData = new UserCachedData(this);
+        this.cachedData = new UserCachedDataManager(this);
         getPlugin().getEventFactory().handleUserCacheLoad(this, this.cachedData);
     }
 
@@ -118,7 +118,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     }
 
     @Override
-    public UserCachedData getCachedData() {
+    public UserCachedDataManager getCachedData() {
         return this.cachedData;
     }
 
@@ -184,8 +184,8 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      * Clear all of the users permission nodes
      */
     @Override
-    public boolean clearNodes() {
-        boolean ret = super.clearNodes();
+    public boolean clearEnduringNodes() {
+        boolean ret = super.clearEnduringNodes();
         if (!ret) {
             return false;
         }

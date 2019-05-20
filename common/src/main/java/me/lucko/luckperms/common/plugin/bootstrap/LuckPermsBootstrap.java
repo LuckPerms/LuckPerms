@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.plugin.bootstrap;
 
-import me.lucko.luckperms.api.platform.PlatformType;
+import me.lucko.luckperms.api.platform.Platform;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
@@ -105,7 +105,7 @@ public interface LuckPermsBootstrap {
      *
      * @return the platform type
      */
-    PlatformType getType();
+    Platform.Type getType();
 
     /**
      * Gets the name or "brand" of the running platform

@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.api.messenger;
 
-import me.lucko.luckperms.api.LuckPermsApi;
+import me.lucko.luckperms.api.LuckPerms;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -35,8 +35,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * <p>Users wishing to provide their own implementation for the plugins
  * "Messaging Service" should implement and register this interface.</p>
  *
- * @see LuckPermsApi#registerMessengerProvider(MessengerProvider)
- * @since 4.1
+ * @see LuckPerms#registerMessengerProvider(MessengerProvider)
  */
 public interface MessengerProvider {
 

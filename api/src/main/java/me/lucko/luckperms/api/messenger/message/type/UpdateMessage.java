@@ -31,8 +31,6 @@ import me.lucko.luckperms.api.messenger.message.Message;
  * Represents an "update" message.
  *
  * <p>Used to notify other servers of general changes.</p>
- *
- * @since 4.1
  */
 public interface UpdateMessage extends Message {
 

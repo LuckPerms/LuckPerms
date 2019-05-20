@@ -27,9 +27,9 @@ package me.lucko.luckperms.common.calculator.processor;
 
 import com.google.common.collect.ImmutableMap;
 
-import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
-import me.lucko.luckperms.common.node.model.ImmutableNode;
+import me.lucko.luckperms.common.node.AbstractNode;
 
 import java.util.Collections;
 import java.util.Map;
@@ -49,7 +49,7 @@ public class WildcardProcessor extends AbstractPermissionProcessor implements Pe
         String node = permission;
 
         while (true) {
-            int endIndex = node.lastIndexOf(ImmutableNode.NODE_SEPARATOR);
+            int endIndex = node.lastIndexOf(AbstractNode.NODE_SEPARATOR);
             if (endIndex == -1) {
                 break;
             }
@@ -76,14 +76,14 @@ public class WildcardProcessor extends AbstractPermissionProcessor implements Pe
             }
             key = key.substring(0, key.length() - 2);
 
-            TristateResult value = RESULT_FACTORY.result(Tristate.fromBoolean(e.getValue()), "match: " + key);
+            TristateResult value = RESULT_FACTORY.result(Tristate.of(e.getValue()), "match: " + key);
             builder.put(key, value);
         }
         this.wildcardPermissions = builder.build();
 
-        Tristate state = Tristate.fromNullableBoolean(this.sourceMap.get(ROOT_WILDCARD));
+        Tristate state = Tristate.of(this.sourceMap.get(ROOT_WILDCARD));
         if (state == Tristate.UNDEFINED) {
-            state = Tristate.fromNullableBoolean(this.sourceMap.get(ROOT_WILDCARD_WITH_QUOTES));
+            state = Tristate.of(this.sourceMap.get(ROOT_WILDCARD_WITH_QUOTES));
         }
         this.rootWildcardState = RESULT_FACTORY.result(state, "root");
     }

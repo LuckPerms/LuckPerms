@@ -27,11 +27,11 @@ package me.lucko.luckperms.common.storage;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.HeldPermission;
-import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.api.PlayerSaveResult;
+import me.lucko.luckperms.api.actionlog.Action;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
+import me.lucko.luckperms.api.model.PlayerSaveResult;
+import me.lucko.luckperms.api.node.HeldNode;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
@@ -119,7 +119,7 @@ public class Storage {
         return this.implementation.getMeta();
     }
 
-    public CompletableFuture<Void> logAction(LogEntry entry) {
+    public CompletableFuture<Void> logAction(Action entry) {
         return makeFuture(() -> this.implementation.logAction(entry));
     }
 
@@ -149,10 +149,10 @@ public class Storage {
         return makeFuture(this.implementation::getUniqueUsers);
     }
 
-    public CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(Constraint constraint) {
+    public CompletableFuture<List<HeldNode<UUID>>> getUsersWithPermission(Constraint constraint) {
         return makeFuture(() -> {
-            List<HeldPermission<UUID>> result = this.implementation.getUsersWithPermission(constraint);
-            result.removeIf(entry -> entry.asNode().hasExpired());
+            List<HeldNode<UUID>> result = this.implementation.getUsersWithPermission(constraint);
+            result.removeIf(entry -> entry.getNode().hasExpired());
             return ImmutableList.copyOf(result);
         });
     }
@@ -195,10 +195,10 @@ public class Storage {
         });
     }
 
-    public CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(Constraint constraint) {
+    public CompletableFuture<List<HeldNode<String>>> getGroupsWithPermission(Constraint constraint) {
         return makeFuture(() -> {
-            List<HeldPermission<String>> result = this.implementation.getGroupsWithPermission(constraint);
-            result.removeIf(entry -> entry.asNode().hasExpired());
+            List<HeldNode<String>> result = this.implementation.getGroupsWithPermission(constraint);
+            result.removeIf(entry -> entry.getNode().hasExpired());
             return ImmutableList.copyOf(result);
         });
     }

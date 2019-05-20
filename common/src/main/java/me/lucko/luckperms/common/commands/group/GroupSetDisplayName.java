@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.commands.group;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.api.nodetype.types.DisplayNameType;
+import me.lucko.luckperms.api.node.types.DisplayNameNode;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
@@ -80,7 +80,7 @@ public class GroupSetDisplayName extends SubCommand<Group> {
             return CommandResult.STATE_ERROR;
         }
 
-        group.removeIf(context, n -> n.getTypeData(DisplayNameType.KEY).isPresent());
+        group.removeIfEnduring(context, n -> n instanceof DisplayNameNode);
 
         if (name.equals(group.getName())) {
             Message.GROUP_SET_DISPLAY_NAME_REMOVED.send(sender, group.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
@@ -93,7 +93,7 @@ public class GroupSetDisplayName extends SubCommand<Group> {
             return CommandResult.SUCCESS;
         }
 
-        group.setPermission(NodeFactory.builder("displayname." + name).withExtraContext(context).build());
+        group.setPermission(NodeFactory.builder(NodeFactory.displayName(name)).withContext(context).build());
 
         Message.GROUP_SET_DISPLAY_NAME.send(sender, name, group.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 

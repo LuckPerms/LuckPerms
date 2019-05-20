@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.api.event.source;
 
-import me.lucko.luckperms.api.Entity;
+import me.lucko.luckperms.api.platform.PlatformEntity;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -33,8 +33,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * Represents the source of an event.
  *
  * <p>Could also be described as the "thing" that caused an event to occur.</p>
- *
- * @since 4.1
  */
 public interface Source {
 
@@ -51,7 +49,7 @@ public interface Source {
     enum Type {
 
         /**
-         * Represents an {@link Entity} source
+         * Represents an {@link PlatformEntity} source
          *
          * @see EntitySource
          */

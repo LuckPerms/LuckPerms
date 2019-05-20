@@ -28,18 +28,18 @@ package me.lucko.luckperms.common.messaging;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.actionlog.Action;
 import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
 import me.lucko.luckperms.api.messenger.Messenger;
 import me.lucko.luckperms.api.messenger.MessengerProvider;
 import me.lucko.luckperms.api.messenger.message.Message;
-import me.lucko.luckperms.api.messenger.message.type.LogMessage;
+import me.lucko.luckperms.api.messenger.message.type.ActionLogMessage;
 import me.lucko.luckperms.api.messenger.message.type.UpdateMessage;
 import me.lucko.luckperms.api.messenger.message.type.UserUpdateMessage;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.cache.BufferedRequest;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.messaging.message.LogMessageImpl;
+import me.lucko.luckperms.common.messaging.message.ActionLogMessageImpl;
 import me.lucko.luckperms.common.messaging.message.UpdateMessageImpl;
 import me.lucko.luckperms.common.messaging.message.UserUpdateMessageImpl;
 import me.lucko.luckperms.common.model.User;
@@ -126,7 +126,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
     }
 
     @Override
-    public void pushLog(LogEntry logEntry) {
+    public void pushLog(Action logEntry) {
         this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
             UUID requestId = generatePingId();
 
@@ -135,7 +135,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
             }
 
             this.plugin.getLogger().info("[Messaging] Sending log with id: " + requestId);
-            this.messenger.sendOutgoingMessage(new LogMessageImpl(requestId, logEntry));
+            this.messenger.sendOutgoingMessage(new ActionLogMessageImpl(requestId, logEntry));
         });
     }
 
@@ -150,7 +150,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
         // determine if the message can be handled by us
         boolean valid = message instanceof UpdateMessage ||
                 message instanceof UserUpdateMessage ||
-                message instanceof LogMessage;
+                message instanceof ActionLogMessage;
 
         // instead of throwing an exception here, just return false
         // it means an instance of LP can gracefully handle messages it doesn't
@@ -199,8 +199,8 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
             case UserUpdateMessageImpl.TYPE:
                 decoded = UserUpdateMessageImpl.decode(content, id);
                 break;
-            case LogMessageImpl.TYPE:
-                decoded = LogMessageImpl.decode(content, id);
+            case ActionLogMessageImpl.TYPE:
+                decoded = ActionLogMessageImpl.decode(content, id);
                 break;
             default:
                 // gracefully return if we just don't recognise the type
@@ -240,7 +240,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
         } else if (message instanceof UserUpdateMessage) {
             UserUpdateMessage msg = (UserUpdateMessage) message;
 
-            User user = this.plugin.getUserManager().getIfLoaded(msg.getUser());
+            User user = this.plugin.getUserManager().getIfLoaded(msg.getUserUniqueId());
             if (user == null) {
                 return;
             }
@@ -252,11 +252,11 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
             }
 
             this.plugin.getStorage().loadUser(user.getUuid(), null);
-        } else if (message instanceof LogMessage) {
-            LogMessage msg = (LogMessage) message;
+        } else if (message instanceof ActionLogMessage) {
+            ActionLogMessage msg = (ActionLogMessage) message;
 
-            this.plugin.getEventFactory().handleLogReceive(msg.getId(), msg.getLogEntry());
-            this.plugin.getLogDispatcher().dispatchFromRemote((ExtendedLogEntry) msg.getLogEntry());
+            this.plugin.getEventFactory().handleLogReceive(msg.getId(), msg.getAction());
+            this.plugin.getLogDispatcher().dispatchFromRemote((ExtendedLogEntry) msg.getAction());
         } else {
             throw new IllegalArgumentException("Unknown message type: " + message.getClass().getName());
         }

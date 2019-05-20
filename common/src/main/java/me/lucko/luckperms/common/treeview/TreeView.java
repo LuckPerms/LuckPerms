@@ -151,7 +151,7 @@ public class TreeView {
             checks = new JObject();
             for (Map.Entry<Integer, String> node : this.view.getNodeEndings()) {
                 String permission = prefix + node.getValue();
-                checks.add(permission, checker.getPermissionValue(permission, PermissionCheckEvent.Origin.INTERNAL).result().name().toLowerCase());
+                checks.add(permission, checker.checkPermission(permission, PermissionCheckEvent.Origin.INTERNAL).result().name().toLowerCase());
             }
         } else {
             checks = null;

@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.commands.track;
 
-import me.lucko.luckperms.api.DataMutateResult;
+import me.lucko.luckperms.api.model.DataMutateResult;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
@@ -60,7 +60,7 @@ public class TrackRemove extends SubCommand<Track> {
 
         DataMutateResult result = track.removeGroup(groupName);
 
-        if (result.asBoolean()) {
+        if (result.wasSuccessful()) {
             Message.TRACK_REMOVE_SUCCESS.send(sender, groupName, track.getName());
             if (track.getGroups().size() > 1) {
                 Message.BLANK.send(sender, MessageUtils.listToArrowSep(track.getGroups()));

@@ -27,12 +27,10 @@ package me.lucko.luckperms.common.context;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.caching.MetaContexts;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.api.context.StaticContextCalculator;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cache.ExpiringCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -64,104 +62,43 @@ public abstract class ContextManager<T> {
         this.subjectClass = subjectClass;
     }
 
-    /**
-     * Gets the calculators registered on the platform
-     *
-     * @return the registered calculators
-     */
     public List<ContextCalculator<? super T>> getCalculators() {
         return ImmutableList.copyOf(this.calculators);
     }
 
-    /**
-     * Gets the static calculators registered on the platform
-     *
-     * @return the registered static calculators
-     */
     public List<StaticContextCalculator> getStaticCalculators() {
         return ImmutableList.copyOf(this.staticCalculators);
     }
 
-    /**
-     * Gets the class of the subject handled by this instance
-     *
-     * @return the subject class
-     */
     public Class<T> getSubjectClass() {
         return this.subjectClass;
     }
 
-    /**
-     * Queries the ContextManager for current context values for the subject.
-     *
-     * @param subject the subject
-     * @return the applicable context for the subject
-     */
-    public ImmutableContextSet getApplicableContext(T subject) {
+    public abstract QueryOptionsSupplier getCacheFor(T subject);
+
+    public QueryOptions getQueryOptions(T subject) {
+        return getCacheFor(subject).getQueryOptions();
+    }
+
+    public ImmutableContextSet getContext(T subject) {
         return getCacheFor(subject).getContextSet();
     }
 
-    /**
-      * Queries the ContextManager for current context values for the subject.
-      *
-      * @param subject the subject
-      * @return the applicable context for the subject
-      */
-    public Contexts getApplicableContexts(T subject) {
-        return getCacheFor(subject).getContexts();
-    }
-
-    /**
-     * Gets the cache instance for the given subject.
-     *
-     * @param subject the subject
-     * @return the cache
-     */
-    public abstract ContextsSupplier getCacheFor(T subject);
-
-    /**
-     * Gets the contexts from the static calculators in this manager.
-     *
-     * @return the current active static contexts
-     */
-    public ImmutableContextSet getStaticContext() {
-        // this is actually already immutable, but the Contexts method signature returns the interface.
-        // using the makeImmutable method is faster than casting
-        return getStaticContexts().getContexts().makeImmutable();
-    }
-
-    /**
-     * Gets the contexts from the static calculators in this manager.
-     *
-     * @return the current active static contexts
-     */
-    public Contexts getStaticContexts() {
+    public QueryOptions getStaticQueryOptions() {
         return this.staticLookupCache.get();
     }
 
-    /**
-     * Forms a {@link Contexts} instance from an {@link ImmutableContextSet}.
-     *
-     * @param contextSet the context set
-     * @return a contexts instance
-     */
-    public Contexts formContexts(ImmutableContextSet contextSet) {
-        return this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_CONTEXTS).setContexts(contextSet);
+    public ImmutableContextSet getStaticContext() {
+        return getStaticQueryOptions().context();
     }
 
-    /**
-     * Forms a "default" {@link MetaContexts} instance from {@link Contexts}.
-     *
-     * @param contexts the contexts
-     * @return a contexts instance
-     */
-    public MetaContexts formMetaContexts(Contexts contexts) {
-        return new MetaContexts(
-                contexts,
-                this.plugin.getConfiguration().get(ConfigKeys.PREFIX_FORMATTING_OPTIONS),
-                this.plugin.getConfiguration().get(ConfigKeys.SUFFIX_FORMATTING_OPTIONS)
-        );
+    public QueryOptions formQueryOptions(ImmutableContextSet contextSet) {
+        return this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_CONTEXTS).toBuilder().context(contextSet).build();
     }
+
+    public abstract QueryOptions formQueryOptions(T subject, ImmutableContextSet contextSet);
+
+    public abstract void invalidateCache(T subject);
 
     public void registerCalculator(ContextCalculator<? super T> calculator) {
         // calculators registered first should have priority (and be checked last.)
@@ -180,67 +117,43 @@ public abstract class ContextManager<T> {
         }
     }
 
-    /**
-     * Invalidates the lookup cache for a given subject
-     *
-     * @param subject the subject
-     */
-    public abstract void invalidateCache(T subject);
-
-    protected Contexts calculate(T subject) {
-        MutableContextSet accumulator = MutableContextSet.create();
+    protected QueryOptions calculate(T subject) {
+        ImmutableContextSet.Builder accumulator = ImmutableContextSet.builder();
 
         for (ContextCalculator<? super T> calculator : this.calculators) {
             try {
-                MutableContextSet ret = calculator.giveApplicableContext(subject, accumulator);
-                if (ret == null) {
-                    throw new IllegalStateException(calculator.getClass() + " returned a null context set");
-                }
-                accumulator = ret;
+                calculator.giveApplicableContext(subject, accumulator::add);
             } catch (Throwable e) {
                 ContextManager.this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating the context of subject " + subject);
                 e.printStackTrace();
             }
         }
 
-        return formContexts(subject, accumulator.makeImmutable());
+        return formQueryOptions(subject, accumulator.build());
     }
 
-    Contexts calculateStatic() {
-        MutableContextSet accumulator = MutableContextSet.create();
+    QueryOptions calculateStatic() {
+        ImmutableContextSet.Builder accumulator = ImmutableContextSet.builder();
 
         for (StaticContextCalculator calculator : this.staticCalculators) {
             try {
-                MutableContextSet ret = calculator.giveApplicableContext(accumulator);
-                if (ret == null) {
-                    throw new IllegalStateException(calculator.getClass() + " returned a null context set");
-                }
-                accumulator = ret;
+                calculator.giveApplicableContext(accumulator::add);
             } catch (Throwable e) {
                 this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating static contexts");
                 e.printStackTrace();
             }
         }
 
-        return formContexts(accumulator.makeImmutable());
+        return formQueryOptions(accumulator.build());
     }
 
-    /**
-     * Forms a {@link Contexts} instance from an {@link ImmutableContextSet}.
-     *
-     * @param subject the subject
-     * @param contextSet the context set
-     * @return a contexts instance
-     */
-    public abstract Contexts formContexts(T subject, ImmutableContextSet contextSet);
-
-    private final class StaticLookupCache extends ExpiringCache<Contexts> {
+    private final class StaticLookupCache extends ExpiringCache<QueryOptions> {
         StaticLookupCache() {
             super(50L, TimeUnit.MILLISECONDS);
         }
 
         @Override
-        public @NonNull Contexts supply() {
+        public @NonNull QueryOptions supply() {
             return calculateStatic();
         }
     }

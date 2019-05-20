@@ -25,12 +25,12 @@
 
 package me.lucko.luckperms.api.event.node;
 
-import me.lucko.luckperms.api.Group;
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.PermissionHolder;
-import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
+import me.lucko.luckperms.api.model.PermissionHolder;
+import me.lucko.luckperms.api.model.group.Group;
+import me.lucko.luckperms.api.model.user.User;
+import me.lucko.luckperms.api.node.Node;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -46,24 +46,27 @@ public interface NodeMutateEvent extends LuckPermsEvent {
      *
      * @return the event target
      */
-    @NonNull @Param(0) PermissionHolder getTarget();
+    @Param(0)
+    @NonNull PermissionHolder getTarget();
 
     /**
      * Gets an immutable copy of the holders data before the change
      *
      * @return the data before the change
      */
-    @NonNull @Param(1) Set<Node> getDataBefore();
+    @Param(1)
+    @NonNull Set<Node> getDataBefore();
 
     /**
      * Gets an immutable copy of the holders data after the change
      *
      * @return the data after the change
      */
-    @NonNull @Param(2) Set<Node> getDataAfter();
+    @Param(2)
+    @NonNull Set<Node> getDataAfter();
 
     /**
-     * Gets whether the target of this event is a {@link me.lucko.luckperms.api.User}
+     * Gets whether the target of this event is a {@link User}
      *
      * <p>This is equivalent to checking if getTarget() instanceof User</p>
      *
@@ -74,7 +77,7 @@ public interface NodeMutateEvent extends LuckPermsEvent {
     }
 
     /**
-     * Gets whether the target of this event is a {@link me.lucko.luckperms.api.Group}
+     * Gets whether the target of this event is a {@link Group}
      *
      * <p>This is equivalent to checking if getTarget() instanceof Group</p>
      *

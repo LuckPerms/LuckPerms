@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.nukkit;
 
-import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
@@ -83,7 +83,7 @@ public class NukkitSenderFactory extends SenderFactory<CommandSender> {
         boolean isSet = sender.isPermissionSet(node);
         boolean val = sender.hasPermission(node);
 
-        return !isSet ? val ? Tristate.TRUE : Tristate.UNDEFINED : Tristate.fromBoolean(val);
+        return !isSet ? val ? Tristate.TRUE : Tristate.UNDEFINED : Tristate.of(val);
     }
 
     @Override

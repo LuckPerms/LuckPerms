@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.bungee;
 
-import me.lucko.luckperms.api.platform.PlatformType;
+import me.lucko.luckperms.api.platform.Platform;
 import me.lucko.luckperms.bungee.util.RedisBungeeUtil;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
@@ -157,8 +157,8 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     // provide information about the platform
 
     @Override
-    public PlatformType getType() {
-        return PlatformType.BUNGEE;
+    public Platform.Type getType() {
+        return Platform.Type.BUNGEECORD;
     }
 
     @Override

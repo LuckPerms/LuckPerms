@@ -27,8 +27,8 @@ package me.lucko.luckperms.common.api.implementation;
 
 import com.google.common.base.Preconditions;
 
-import me.lucko.luckperms.api.caching.GroupData;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.cacheddata.GroupCachedDataManager;
 import me.lucko.luckperms.common.model.Group;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -37,8 +37,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Objects;
 import java.util.OptionalInt;
 
-public class ApiGroup extends ApiPermissionHolder implements me.lucko.luckperms.api.Group {
-    public static Group cast(me.lucko.luckperms.api.Group group) {
+public class ApiGroup extends ApiPermissionHolder implements me.lucko.luckperms.api.model.group.Group {
+    public static Group cast(me.lucko.luckperms.api.model.group.Group group) {
         Objects.requireNonNull(group, "group");
         Preconditions.checkState(group instanceof ApiGroup, "Illegal instance " + group.getClass() + " cannot be handled by this implementation.");
         return ((ApiGroup) group).getHandle();
@@ -76,8 +76,9 @@ public class ApiGroup extends ApiPermissionHolder implements me.lucko.luckperms.
         return this.handle.getWeight();
     }
 
+    @NonNull
     @Override
-    public @NonNull GroupData getCachedData() {
+    public GroupCachedDataManager getCachedData() {
         return this.handle.getCachedData();
     }
 

@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.api.metastacking;
 
+import me.lucko.luckperms.api.query.OptionKey;
+
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
@@ -37,10 +39,18 @@ import java.util.List;
  *
  * <p>Definitions can be passed to a users UserData instance using MetaContexts, and the result of this stack can be
  * retrieved from the returned MetaData instance.</p>
- *
- * @since 2.3
  */
 public interface MetaStackDefinition {
+
+    /**
+     * The {@link OptionKey} for the prefix {@link MetaStackDefinition}.
+     */
+    OptionKey<MetaStackDefinition> PREFIX_STACK_KEY = new OptionKey<MetaStackDefinition>(){};
+
+    /**
+     * The {@link OptionKey} for the suffix {@link MetaStackDefinition}.
+     */
+    OptionKey<MetaStackDefinition> SUFFIX_STACK_KEY = new OptionKey<MetaStackDefinition>(){};
 
     /**
      * Gets an immutable list of the elements in this stack definition
@@ -54,7 +64,6 @@ public interface MetaStackDefinition {
      * formatting takes place.
      *
      * @return the duplicate removal function
-     * @since 4.4
      */
     @NonNull DuplicateRemovalFunction getDuplicateRemovalFunction();
 

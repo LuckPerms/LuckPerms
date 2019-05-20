@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.common.command.access;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.node.Tristate;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.calculator.processor.MapProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
@@ -303,8 +303,8 @@ public final class ArgumentPermissions {
             throw new IllegalStateException("Unable to get a User for " + sender.getUuid() + " - " + sender.getName());
         }
 
-        PermissionCache permissionData = user.getCachedData().getPermissionData(Contexts.global().setContexts(contextSet));
-        TristateResult result = permissionData.getPermissionValue(NodeFactory.groupNode(targetGroupName), PermissionCheckEvent.Origin.INTERNAL);
+        PermissionCache permissionData = user.getCachedData().getPermissionData(QueryOptions.defaultContextualOptions().toBuilder().context(contextSet).build());
+        TristateResult result = permissionData.checkPermission(NodeFactory.groupNode(targetGroupName), PermissionCheckEvent.Origin.INTERNAL);
         return result.result() != Tristate.TRUE || result.processorClass() != MapProcessor.class;
     }
     

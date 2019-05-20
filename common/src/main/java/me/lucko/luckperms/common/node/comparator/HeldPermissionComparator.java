@@ -25,23 +25,23 @@
 
 package me.lucko.luckperms.common.node.comparator;
 
-import me.lucko.luckperms.api.HeldPermission;
+import me.lucko.luckperms.api.node.HeldNode;
 
 import java.util.Comparator;
 
-public class HeldPermissionComparator<T extends Comparable<T>> implements Comparator<HeldPermission<T>> {
+public class HeldPermissionComparator<T extends Comparable<T>> implements Comparator<HeldNode<T>> {
 
-    public static <T extends Comparable<T>> Comparator<? super HeldPermission<T>> normal() {
+    public static <T extends Comparable<T>> Comparator<? super HeldNode<T>> normal() {
         return new HeldPermissionComparator<>();
     }
 
-    public static <T extends Comparable<T>> Comparator<? super HeldPermission<T>> reverse() {
+    public static <T extends Comparable<T>> Comparator<? super HeldNode<T>> reverse() {
         return HeldPermissionComparator.<T>normal().reversed();
     }
 
     @Override
-    public int compare(HeldPermission<T> o1, HeldPermission<T> o2) {
-        int i = NodeWithContextComparator.normal().compare(o1.asNode(), o2.asNode());
+    public int compare(HeldNode<T> o1, HeldNode<T> o2) {
+        int i = NodeWithContextComparator.normal().compare(o1.getNode(), o2.getNode());
         if (i != 0) {
             return i;
         }

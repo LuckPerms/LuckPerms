@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.nukkit;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.LuckPermsApi;
+import me.lucko.luckperms.api.LuckPerms;
 import me.lucko.luckperms.api.event.user.UserDataRecalculateEvent;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.api.implementation.ApiUser;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
@@ -172,8 +172,8 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected void registerApiOnPlatform(LuckPermsApi api) {
-        this.bootstrap.getServer().getServiceManager().register(LuckPermsApi.class, api, this.bootstrap, ServicePriority.NORMAL);
+    protected void registerApiOnPlatform(LuckPerms api) {
+        this.bootstrap.getServer().getServiceManager().register(LuckPerms.class, api, this.bootstrap, ServicePriority.NORMAL);
     }
 
     @Override
@@ -270,7 +270,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
         boolean value;
 
         if (user != null) {
-            Map<String, Boolean> permData = user.getCachedData().getPermissionData(this.contextManager.getApplicableContexts(player)).getImmutableBacking();
+            Map<String, Boolean> permData = user.getCachedData().getPermissionData(this.contextManager.getQueryOptions(player)).getPermissionMap();
             value = permData.getOrDefault("luckperms.autoop", false);
         } else {
             value = false;
@@ -289,8 +289,8 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    public Optional<Contexts> getContextForUser(User user) {
-        return this.bootstrap.getPlayer(user.getUuid()).map(player -> this.contextManager.getApplicableContexts(player));
+    public Optional<QueryOptions> getQueryOptionsForUser(User user) {
+        return this.bootstrap.getPlayer(user.getUuid()).map(player -> this.contextManager.getQueryOptions(player));
     }
 
     @Override

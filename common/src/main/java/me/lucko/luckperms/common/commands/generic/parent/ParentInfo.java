@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.commands.generic.parent;
 
-import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.node.types.InheritanceNode;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
@@ -55,9 +55,9 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -77,10 +77,11 @@ public class ParentInfo extends SharedSubCommand {
         SortMode sortMode = SortMode.determine(args);
 
         // get the holders nodes
-        List<LocalizedNode> nodes = new ArrayList<>(holder.enduringData().asSortedSet());
+        List<InheritanceNode> nodes = new LinkedList<>();
+        holder.enduringData().copyInheritanceNodesTo(nodes, QueryOptions.nonContextual());
 
         // remove irrelevant types (these are displayed in the other info commands)
-        nodes.removeIf(node -> !node.isGroupNode() || !node.getValue());
+        nodes.removeIf(node -> !node.getValue());
 
         // handle empty
         if (nodes.isEmpty()) {
@@ -99,23 +100,23 @@ public class ParentInfo extends SharedSubCommand {
         }
 
         int pageIndex = page - 1;
-        List<List<LocalizedNode>> pages = Iterators.divideIterable(nodes, 19);
+        List<List<InheritanceNode>> pages = Iterators.divideIterable(nodes, 19);
 
         if (pageIndex < 0 || pageIndex >= pages.size()) {
             page = 1;
             pageIndex = 0;
         }
 
-        List<LocalizedNode> content = pages.get(pageIndex);
+        List<InheritanceNode> content = pages.get(pageIndex);
 
         // send header
         Message.PARENT_INFO.send(sender, holder.getFormattedDisplayName(), page, pages.size(), nodes.size());
 
         // send content
-        for (LocalizedNode node : content) {
+        for (InheritanceNode node : content) {
             String s = "&3> &a" + node.getGroupName() + MessageUtils.getAppendableNodeContextString(plugin.getLocaleManager(), node);
-            if (node.isTemporary()) {
-                s += "\n&2  expires in " + DurationFormatter.LONG.formatDateDiff(node.getExpiryUnixTime());
+            if (node.hasExpiry()) {
+                s += "\n&2  expires in " + DurationFormatter.LONG.formatDateDiff(node.getExpiry().getEpochSecond());
             }
 
             TextComponent message = TextUtils.fromLegacy(s, CommandManager.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build();
@@ -125,7 +126,7 @@ public class ParentInfo extends SharedSubCommand {
         return CommandResult.SUCCESS;
     }
 
-    private static final Comparator<LocalizedNode> ALPHABETICAL_NODE_COMPARATOR = (o1, o2) -> {
+    private static final Comparator<InheritanceNode> ALPHABETICAL_NODE_COMPARATOR = (o1, o2) -> {
         int i = o1.getGroupName().compareTo(o2.getGroupName());
         if (i != 0) {
             return i;
@@ -135,7 +136,7 @@ public class ParentInfo extends SharedSubCommand {
         return NodeWithContextComparator.reverse().compare(o1, o2);
     };
 
-    private static Consumer<ComponentBuilder<? ,?>> makeFancy(PermissionHolder holder, String label, Node node) {
+    private static Consumer<ComponentBuilder<? ,?>> makeFancy(PermissionHolder holder, String label, InheritanceNode node) {
         HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
                 "&3> &f" + node.getGroupName(),
                 " ",

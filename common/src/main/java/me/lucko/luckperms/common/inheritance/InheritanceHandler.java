@@ -25,17 +25,8 @@
 
 package me.lucko.luckperms.common.inheritance;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.LookupSetting;
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Provides {@link InheritanceGraph}s.
@@ -43,91 +34,25 @@ import java.util.Set;
 public class InheritanceHandler {
     private final LuckPermsPlugin plugin;
 
-    /**
-     * An inheritance graph which doesn't consider contexts
-     */
     private final InheritanceGraph nonContextualGraph;
-
-    // cached contextual graphs for common Contexts
-    private final InheritanceGraph globalContextualGraph;
+    private final InheritanceGraph defaultContextualGraph;
 
     public InheritanceHandler(LuckPermsPlugin plugin) {
         this.plugin = plugin;
-        this.nonContextualGraph = new NonContextualGraph(plugin);
-        this.globalContextualGraph = new ContextualGraph(plugin, Contexts.global());
+        this.nonContextualGraph = new InheritanceGraph(plugin, QueryOptions.nonContextual());
+        this.defaultContextualGraph = new InheritanceGraph(plugin, QueryOptions.defaultContextualOptions());
     }
 
-    public InheritanceGraph getGraph() {
-        return this.nonContextualGraph;
-    }
-
-    public InheritanceGraph getGraph(Contexts contexts) {
-        if (contexts == Contexts.allowAll()) {
-            throw new IllegalArgumentException("Contexts#allowAll passed to contextual #getGraph method");
-        }
-
-        if (contexts == Contexts.global()) {
-            return this.globalContextualGraph;
+    public InheritanceGraph getGraph(QueryOptions queryOptions) {
+        if (queryOptions == QueryOptions.nonContextual()) {
+            return this.nonContextualGraph;
+        } else if (queryOptions == QueryOptions.defaultContextualOptions()) {
+            return this.defaultContextualGraph;
         } else {
-            return new ContextualGraph(this.plugin, contexts);
+            return new InheritanceGraph(plugin, queryOptions);
         }
     }
 
-    private static final class NonContextualGraph implements InheritanceGraph {
-        private final LuckPermsPlugin plugin;
 
-        NonContextualGraph(LuckPermsPlugin plugin) {
-            this.plugin = plugin;
-        }
-
-        @Override
-        public Iterable<? extends PermissionHolder> successors(PermissionHolder holder) {
-            Set<Group> successors = new LinkedHashSet<>();
-            for (Node n : holder.getOwnGroupNodes()) {
-                Group g = this.plugin.getGroupManager().getIfLoaded(n.getGroupName());
-                if (g != null) {
-                    successors.add(g);
-                }
-            }
-
-            List<Group> successorsSorted = new ArrayList<>(successors);
-            successorsSorted.sort(holder.getInheritanceComparator());
-            return successorsSorted;
-        }
-    }
-
-    private static final class ContextualGraph implements InheritanceGraph {
-        private final LuckPermsPlugin plugin;
-
-        /**
-         * The contexts to resolve inheritance in.
-         */
-        private final Contexts context;
-
-        ContextualGraph(LuckPermsPlugin plugin, Contexts context) {
-            this.plugin = plugin;
-            this.context = context;
-        }
-
-        @Override
-        public Iterable<? extends PermissionHolder> successors(PermissionHolder holder) {
-            Set<Group> successors = new LinkedHashSet<>();
-            for (Node n : holder.getOwnGroupNodes(this.context.getContexts())) {
-                // effectively: if not (we're applying global groups or it's specific anyways)
-                if (!((this.context.hasSetting(LookupSetting.APPLY_PARENTS_SET_WITHOUT_SERVER) || n.isServerSpecific()) && (this.context.hasSetting(LookupSetting.APPLY_PARENTS_SET_WITHOUT_WORLD) || n.isWorldSpecific()))) {
-                    continue;
-                }
-
-                Group g = this.plugin.getGroupManager().getIfLoaded(n.getGroupName());
-                if (g != null) {
-                    successors.add(g);
-                }
-            }
-
-            List<Group> successorsSorted = new ArrayList<>(successors);
-            successorsSorted.sort(holder.getInheritanceComparator());
-            return successorsSorted;
-        }
-    }
 
 }

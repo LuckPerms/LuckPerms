@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.model;
 
-import me.lucko.luckperms.api.DemotionResult;
+import me.lucko.luckperms.api.track.DemotionResult;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

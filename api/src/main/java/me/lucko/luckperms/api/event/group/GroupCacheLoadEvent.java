@@ -25,17 +25,15 @@
 
 package me.lucko.luckperms.api.event.group;
 
-import me.lucko.luckperms.api.Group;
-import me.lucko.luckperms.api.caching.GroupData;
+import me.lucko.luckperms.api.cacheddata.CachedDataManager;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
+import me.lucko.luckperms.api.model.group.Group;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
- * Called when a groups {@link GroupData} is loaded.
- *
- * @since 4.0
+ * Called when a groups {@link CachedDataManager} is loaded.
  */
 public interface GroupCacheLoadEvent extends LuckPermsEvent {
 
@@ -44,13 +42,15 @@ public interface GroupCacheLoadEvent extends LuckPermsEvent {
      *
      * @return the group
      */
-    @NonNull @Param(0) Group getGroup();
+    @Param(0)
+    @NonNull Group getGroup();
 
     /**
      * Gets the data that was loaded
      *
      * @return the loaded data
      */
-    @NonNull @Param(1) GroupData getLoadedData();
+    @Param(1)
+    @NonNull CachedDataManager getLoadedData();
 
 }

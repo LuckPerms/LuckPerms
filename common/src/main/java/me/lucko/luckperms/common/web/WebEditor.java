@@ -229,7 +229,7 @@ public final class WebEditor {
 
             if (data.has("context") && data.get("context").isJsonObject()) {
                 JsonObject contexts = data.get("context").getAsJsonObject();
-                context = ContextSetJsonSerializer.deserializeContextSet(contexts).makeImmutable();
+                context = ContextSetJsonSerializer.deserializeContextSet(contexts).immutableCopy();
             }
 
             nodes.add(NodeDataContainer.of(permission, value, server, world, expiry, context));

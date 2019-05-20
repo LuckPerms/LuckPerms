@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.bukkit;
 
-import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.bukkit.compat.CraftBukkitUtil;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -91,7 +91,7 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
         boolean isSet = sender.isPermissionSet(node);
         boolean val = sender.hasPermission(node);
 
-        return !isSet ? val ? Tristate.TRUE : Tristate.UNDEFINED : Tristate.fromBoolean(val);
+        return !isSet ? val ? Tristate.TRUE : Tristate.UNDEFINED : Tristate.of(val);
     }
 
     @Override

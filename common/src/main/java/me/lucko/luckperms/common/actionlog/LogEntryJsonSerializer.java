@@ -30,14 +30,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.actionlog.Action;
 
 import java.util.UUID;
 
 public final class LogEntryJsonSerializer {
     private LogEntryJsonSerializer() {}
 
-    public static JsonObject serialize(LogEntry logEntry) {
+    public static JsonObject serialize(Action logEntry) {
         JsonObject data = new JsonObject();
         data.add("actor", new JsonPrimitive(logEntry.getActor().toString()));
         data.add("actorName", new JsonPrimitive(logEntry.getActorName()));
@@ -59,7 +59,7 @@ public final class LogEntryJsonSerializer {
 
         builder.actor(UUID.fromString(data.get("actor").getAsString()));
         builder.actorName(data.get("actorName").getAsString());
-        builder.type(LogEntry.Type.parse(data.get("type").getAsString()));
+        builder.type(Action.Type.parse(data.get("type").getAsString()));
         if (data.has("acted")) {
             builder.actor(UUID.fromString(data.get("acted").getAsString()));
         }

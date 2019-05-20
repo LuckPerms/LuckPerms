@@ -25,9 +25,10 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
-import me.lucko.luckperms.api.ChatMetaType;
-import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.api.event.cause.CreationCause;
+import me.lucko.luckperms.api.node.ChatMetaType;
+import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -39,7 +40,7 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
-import me.lucko.luckperms.common.node.model.NodeTypes;
+import me.lucko.luckperms.common.node.factory.NodeTypes;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Iterators;
@@ -137,7 +138,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
                 for (String node : group.getPermissionList()) {
                     if (node.isEmpty()) continue;
-                    groups.get(groupName).add(MigrationUtils.parseNode(node, true).setWorld(worldMappingFunc.apply(world)).build());
+                    groups.get(groupName).add(MigrationUtils.parseNode(node, true).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
                 }
                 for (String s : group.getInherits()) {
                     if (s.isEmpty()) continue;
@@ -153,9 +154,9 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
                     if (key.equals(NodeTypes.PREFIX_KEY) || key.equals(NodeTypes.SUFFIX_KEY)) {
                         ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
-                        groups.get(groupName).add(NodeFactory.buildChatMetaNode(type, 50, value).setWorld(worldMappingFunc.apply(world)).build());
+                        groups.get(groupName).add(NodeFactory.buildChatMetaNode(type, 50, value).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
                     } else {
-                        groups.get(groupName).add(NodeFactory.buildMetaNode(key, value).setWorld(worldMappingFunc.apply(world)).build());
+                        groups.get(groupName).add(NodeFactory.buildMetaNode(key, value).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
                     }
                 }
 
@@ -181,7 +182,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
                 for (String node : user.getPermissionList()) {
                     if (node.isEmpty()) continue;
-                    users.get(id).add(MigrationUtils.parseNode(node, true).setWorld(worldMappingFunc.apply(world)).build());
+                    users.get(id).add(MigrationUtils.parseNode(node, true).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
                 }
 
                 // Collect sub groups
@@ -205,9 +206,9 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
                     if (key.equals(NodeTypes.PREFIX_KEY) || key.equals(NodeTypes.SUFFIX_KEY)) {
                         ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
-                        users.get(id).add(NodeFactory.buildChatMetaNode(type, 100, value).setWorld(worldMappingFunc.apply(world)).build());
+                        users.get(id).add(NodeFactory.buildChatMetaNode(type, 100, value).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
                     } else {
-                        users.get(id).add(NodeFactory.buildMetaNode(key, value).setWorld(worldMappingFunc.apply(world)).build());
+                        users.get(id).add(NodeFactory.buildMetaNode(key, value).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
                     }
                 }
 

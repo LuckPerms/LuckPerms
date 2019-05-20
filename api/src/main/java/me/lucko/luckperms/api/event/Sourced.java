@@ -31,8 +31,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents an event with a {@link Source}.
- *
- * @since 4.1
  */
 public interface Sourced {
 

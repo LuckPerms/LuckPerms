@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.bukkit;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.LuckPermsApi;
+import me.lucko.luckperms.api.LuckPerms;
 import me.lucko.luckperms.api.event.user.UserDataRecalculateEvent;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.bukkit.calculator.BukkitCalculatorFactory;
 import me.lucko.luckperms.bukkit.compat.LuckPermsBrigadier;
 import me.lucko.luckperms.bukkit.context.BukkitContextManager;
@@ -230,8 +230,8 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected void registerApiOnPlatform(LuckPermsApi api) {
-        this.bootstrap.getServer().getServicesManager().register(LuckPermsApi.class, api, this.bootstrap, ServicePriority.Normal);
+    protected void registerApiOnPlatform(LuckPerms api) {
+        this.bootstrap.getServer().getServicesManager().register(LuckPerms.class, api, this.bootstrap, ServicePriority.Normal);
     }
 
     @Override
@@ -336,7 +336,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
         boolean value;
 
         if (user != null) {
-            Map<String, Boolean> permData = user.getCachedData().getPermissionData(this.contextManager.getApplicableContexts(player)).getImmutableBacking();
+            Map<String, Boolean> permData = user.getCachedData().getPermissionData(this.contextManager.getQueryOptions(player)).getPermissionMap();
             value = permData.getOrDefault("luckperms.autoop", false);
         } else {
             value = false;
@@ -359,8 +359,8 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    public Optional<Contexts> getContextForUser(User user) {
-        return this.bootstrap.getPlayer(user.getUuid()).map(player -> this.contextManager.getApplicableContexts(player));
+    public Optional<QueryOptions> getQueryOptionsForUser(User user) {
+        return this.bootstrap.getPlayer(user.getUuid()).map(player -> this.contextManager.getQueryOptions(player));
     }
 
     @Override

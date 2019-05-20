@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.bukkit;
 
-import me.lucko.luckperms.api.platform.PlatformType;
+import me.lucko.luckperms.api.platform.Platform;
 import me.lucko.luckperms.bukkit.compat.NullSafeConsoleCommandSender;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
@@ -198,8 +198,8 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     // provide information about the platform
 
     @Override
-    public PlatformType getType() {
-        return PlatformType.BUKKIT;
+    public Platform.Type getType() {
+        return Platform.Type.BUKKIT;
     }
 
     @Override

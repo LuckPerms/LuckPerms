@@ -27,9 +27,9 @@ package me.lucko.luckperms.common.api.implementation;
 
 import com.google.common.base.Preconditions;
 
-import me.lucko.luckperms.api.DataMutateResult;
-import me.lucko.luckperms.api.StandardNodeEquality;
-import me.lucko.luckperms.api.caching.UserData;
+import me.lucko.luckperms.api.model.DataMutateResult;
+import me.lucko.luckperms.api.node.NodeEqualityPredicate;
+import me.lucko.luckperms.common.cacheddata.UserCachedDataManager;
 import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
@@ -39,8 +39,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.Objects;
 import java.util.UUID;
 
-public class ApiUser extends ApiPermissionHolder implements me.lucko.luckperms.api.User {
-    public static User cast(me.lucko.luckperms.api.User u) {
+public class ApiUser extends ApiPermissionHolder implements me.lucko.luckperms.api.model.user.User {
+    public static User cast(me.lucko.luckperms.api.model.user.User u) {
         Preconditions.checkState(u instanceof ApiUser, "Illegal instance " + u.getClass() + " cannot be handled by this implementation.");
         return ((ApiUser) u).getHandle();
     }
@@ -58,12 +58,12 @@ public class ApiUser extends ApiPermissionHolder implements me.lucko.luckperms.a
     }
 
     @Override
-    public @NonNull UUID getUuid() {
+    public @NonNull UUID getUniqueId() {
         return this.handle.getUuid();
     }
 
     @Override
-    public String getName() {
+    public String getUsername() {
         return this.handle.getName().orElse(null);
     }
 
@@ -79,7 +79,7 @@ public class ApiUser extends ApiPermissionHolder implements me.lucko.luckperms.a
             return DataMutateResult.ALREADY_HAS;
         }
 
-        if (!this.handle.hasPermission(NodeMapType.ENDURING, NodeFactory.buildGroupNode(group.toLowerCase()).build(), StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
+        if (!this.handle.hasPermission(NodeMapType.ENDURING, NodeFactory.buildGroupNode(group.toLowerCase()).build(), NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
             return DataMutateResult.FAIL;
         }
 
@@ -87,21 +87,10 @@ public class ApiUser extends ApiPermissionHolder implements me.lucko.luckperms.a
         return DataMutateResult.SUCCESS;
     }
 
+    @NonNull
     @Override
-    public @NonNull UserData getCachedData() {
+    public UserCachedDataManager getCachedData() {
         return this.handle.getCachedData();
-    }
-
-    @Override
-    @Deprecated
-    public void refreshPermissions() {
-
-    }
-
-    @Override
-    @Deprecated
-    public void setupDataCache() {
-
     }
 
     @Override

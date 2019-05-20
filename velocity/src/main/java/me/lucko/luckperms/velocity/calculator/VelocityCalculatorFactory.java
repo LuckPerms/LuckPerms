@@ -27,7 +27,7 @@ package me.lucko.luckperms.velocity.calculator;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
@@ -46,7 +46,7 @@ public class VelocityCalculatorFactory implements CalculatorFactory {
     }
 
     @Override
-    public PermissionCalculator build(Contexts contexts, CacheMetadata metadata) {
+    public PermissionCalculator build(QueryOptions queryOptions, CacheMetadata metadata) {
         ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
 
         processors.add(new MapProcessor());

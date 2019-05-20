@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.actionlog;
 
 import com.google.common.collect.ImmutableSortedSet;
 
-import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.actionlog.Action;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 
 import java.util.Comparator;
@@ -68,21 +68,21 @@ public class Log {
 
     public SortedSet<ExtendedLogEntry> getUserHistory(UUID uuid) {
         return this.content.stream()
-                .filter(e -> e.getType() == LogEntry.Type.USER)
+                .filter(e -> e.getType() == Action.Type.USER)
                 .filter(e -> e.getActed().isPresent() && e.getActed().get().equals(uuid))
                 .collect(ImmutableCollectors.toSortedSet(Comparator.naturalOrder()));
     }
 
     public SortedSet<ExtendedLogEntry> getGroupHistory(String name) {
         return this.content.stream()
-                .filter(e -> e.getType() == LogEntry.Type.GROUP)
+                .filter(e -> e.getType() == Action.Type.GROUP)
                 .filter(e -> e.getActedName().equals(name))
                 .collect(ImmutableCollectors.toSortedSet(Comparator.naturalOrder()));
     }
 
     public SortedSet<ExtendedLogEntry> getTrackHistory(String name) {
         return this.content.stream()
-                .filter(e -> e.getType() == LogEntry.Type.TRACK)
+                .filter(e -> e.getType() == Action.Type.TRACK)
                 .filter(e -> e.getActedName().equals(name))
                 .collect(ImmutableCollectors.toSortedSet(Comparator.naturalOrder()));
     }

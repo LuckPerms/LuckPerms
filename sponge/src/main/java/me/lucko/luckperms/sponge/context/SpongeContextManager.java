@@ -27,11 +27,11 @@ package me.lucko.luckperms.sponge.context;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
-import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.context.ContextManager;
-import me.lucko.luckperms.common.context.ContextsCache;
-import me.lucko.luckperms.common.context.ContextsSupplier;
+import me.lucko.luckperms.common.context.QueryOptionsCache;
+import me.lucko.luckperms.common.context.QueryOptionsSupplier;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 
@@ -41,16 +41,16 @@ import java.util.concurrent.TimeUnit;
 
 public class SpongeContextManager extends ContextManager<Subject> {
 
-    private final LoadingCache<Subject, ContextsCache<Subject>> subjectCaches = CaffeineFactory.newBuilder()
+    private final LoadingCache<Subject, QueryOptionsCache<Subject>> subjectCaches = CaffeineFactory.newBuilder()
             .expireAfterAccess(1, TimeUnit.MINUTES)
-            .build(key -> new ContextsCache<>(key, this));
+            .build(key -> new QueryOptionsCache<>(key, this));
 
     public SpongeContextManager(LPSpongePlugin plugin) {
         super(plugin, Subject.class);
     }
 
     @Override
-    public ContextsSupplier getCacheFor(Subject subject) {
+    public QueryOptionsSupplier getCacheFor(Subject subject) {
         if (subject == null) {
             throw new NullPointerException("subject");
         }
@@ -64,14 +64,14 @@ public class SpongeContextManager extends ContextManager<Subject> {
             throw new NullPointerException("subject");
         }
 
-        ContextsCache<Subject> cache = this.subjectCaches.getIfPresent(subject);
+        QueryOptionsCache<Subject> cache = this.subjectCaches.getIfPresent(subject);
         if (cache != null) {
             cache.invalidate();
         }
     }
 
     @Override
-    public Contexts formContexts(Subject subject, ImmutableContextSet contextSet) {
-        return formContexts(contextSet);
+    public QueryOptions formQueryOptions(Subject subject, ImmutableContextSet contextSet) {
+        return formQueryOptions(contextSet);
     }
 }

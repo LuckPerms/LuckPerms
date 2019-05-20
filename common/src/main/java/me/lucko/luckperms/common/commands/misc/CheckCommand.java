@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -70,7 +70,7 @@ public class CheckCommand extends SingleCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        Tristate tristate = user.getCachedData().getPermissionData(plugin.getContextForUser(user).orElse(plugin.getContextManager().getStaticContexts())).getPermissionValue(permission, PermissionCheckEvent.Origin.INTERNAL).result();
+        Tristate tristate = user.getCachedData().getPermissionData(plugin.getQueryOptionsForUser(user).orElse(plugin.getContextManager().getStaticQueryOptions())).checkPermission(permission, PermissionCheckEvent.Origin.INTERNAL).result();
         Message.CHECK_RESULT.send(sender, user.getFormattedDisplayName(), permission, MessageUtils.formatTristate(tristate));
         return CommandResult.SUCCESS;
     }

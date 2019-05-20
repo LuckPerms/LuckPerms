@@ -27,10 +27,13 @@ package me.lucko.luckperms.bukkit.vault;
 
 import com.google.common.base.Strings;
 
-import me.lucko.luckperms.api.ChatMetaType;
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.node.ChatMetaType;
+import me.lucko.luckperms.api.node.NodeBuilder;
+import me.lucko.luckperms.api.node.types.MetaNode;
+import me.lucko.luckperms.api.query.Flag;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
@@ -39,7 +42,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
-import me.lucko.luckperms.common.node.model.NodeTypes;
+import me.lucko.luckperms.common.node.factory.NodeTypes;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 
 import net.milkbowl.vault.chat.Chat;
@@ -85,11 +88,11 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         Objects.requireNonNull(uuid, "uuid");
 
         PermissionHolder user = this.vaultPermission.lookupUser(uuid);
-        Contexts contexts = this.vaultPermission.contextForLookup(uuid, world);
-        MetaCache metaData = user.getCachedData().getMetaData(contexts);
+        QueryOptions queryOptions = this.vaultPermission.getQueryOptions(uuid, world);
+        MetaCache metaData = user.getCachedData().getMetaData(queryOptions);
         String ret = metaData.getPrefix(MetaCheckEvent.Origin.THIRD_PARTY_API);
         if (log()) {
-            logMsg("#getUserChatPrefix: %s - %s - %s", user.getPlainDisplayName(), contexts.getContexts().toMultimap(), ret);
+            logMsg("#getUserChatPrefix: %s - %s - %s", user.getPlainDisplayName(), queryOptions.context(), ret);
         }
         return Strings.nullToEmpty(ret);
     }
@@ -99,11 +102,11 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         Objects.requireNonNull(uuid, "uuid");
 
         PermissionHolder user = this.vaultPermission.lookupUser(uuid);
-        Contexts contexts = this.vaultPermission.contextForLookup(uuid, world);
-        MetaCache metaData = user.getCachedData().getMetaData(contexts);
+        QueryOptions queryOptions = this.vaultPermission.getQueryOptions(uuid, world);
+        MetaCache metaData = user.getCachedData().getMetaData(queryOptions);
         String ret = metaData.getSuffix(MetaCheckEvent.Origin.THIRD_PARTY_API);
         if (log()) {
-            logMsg("#getUserChatSuffix: %s - %s - %s", user.getPlainDisplayName(), contexts.getContexts().toMultimap(), ret);
+            logMsg("#getUserChatSuffix: %s - %s - %s", user.getPlainDisplayName(), queryOptions.context(), ret);
         }
         return Strings.nullToEmpty(ret);
     }
@@ -136,11 +139,11 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         Objects.requireNonNull(key, "key");
 
         PermissionHolder user = this.vaultPermission.lookupUser(uuid);
-        Contexts contexts = this.vaultPermission.contextForLookup(uuid, world);
-        MetaCache metaData = user.getCachedData().getMetaData(contexts);
-        String ret = metaData.getMeta(MetaCheckEvent.Origin.THIRD_PARTY_API).get(key);
+        QueryOptions queryOptions = this.vaultPermission.getQueryOptions(uuid, world);
+        MetaCache metaData = user.getCachedData().getMetaData(queryOptions);
+        String ret = metaData.getMetaValue(key, MetaCheckEvent.Origin.THIRD_PARTY_API);
         if (log()) {
-            logMsg("#getUserMeta: %s - %s - %s - %s", user.getPlainDisplayName(), contexts.getContexts().toMultimap(), key, ret);
+            logMsg("#getUserMeta: %s - %s - %s - %s", user.getPlainDisplayName(), queryOptions.context(), key, ret);
         }
         return ret;
     }
@@ -164,11 +167,11 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         if (group == null) {
             return null;
         }
-        Contexts contexts = this.vaultPermission.contextForLookup(null, world);
-        MetaCache metaData = group.getCachedData().getMetaData(contexts);
+        QueryOptions queryOptions = this.vaultPermission.getQueryOptions(null, world);
+        MetaCache metaData = group.getCachedData().getMetaData(queryOptions);
         String ret = metaData.getPrefix(MetaCheckEvent.Origin.THIRD_PARTY_API);
         if (log()) {
-            logMsg("#getGroupPrefix: %s - %s - %s", group.getName(), contexts.getContexts().toMultimap(), ret);
+            logMsg("#getGroupPrefix: %s - %s - %s", group.getName(), queryOptions.context(), ret);
         }
         return Strings.nullToEmpty(ret);
     }
@@ -180,11 +183,11 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         if (group == null) {
             return null;
         }
-        Contexts contexts = this.vaultPermission.contextForLookup(null, world);
-        MetaCache metaData = group.getCachedData().getMetaData(contexts);
+        QueryOptions queryOptions = this.vaultPermission.getQueryOptions(null, world);
+        MetaCache metaData = group.getCachedData().getMetaData(queryOptions);
         String ret = metaData.getSuffix(MetaCheckEvent.Origin.THIRD_PARTY_API);
         if (log()) {
-            logMsg("#getGroupSuffix: %s - %s - %s", group.getName(), contexts.getContexts().toMultimap(), ret);
+            logMsg("#getGroupSuffix: %s - %s - %s", group.getName(), queryOptions.context(), ret);
         }
         return Strings.nullToEmpty(ret);
     }
@@ -217,11 +220,11 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         if (group == null) {
             return null;
         }
-        Contexts contexts = this.vaultPermission.contextForLookup(null, world);
-        MetaCache metaData = group.getCachedData().getMetaData(contexts);
-        String ret = metaData.getMeta(MetaCheckEvent.Origin.THIRD_PARTY_API).get(key);
+        QueryOptions queryOptions = this.vaultPermission.getQueryOptions(null, world);
+        MetaCache metaData = group.getCachedData().getMetaData(queryOptions);
+        String ret = metaData.getMetaValue(key, MetaCheckEvent.Origin.THIRD_PARTY_API);
         if (log()) {
-            logMsg("#getGroupMeta: %s - %s - %s - %s", group.getName(), contexts.getContexts().toMultimap(), key, ret);
+            logMsg("#getGroupMeta: %s - %s - %s - %s", group.getName(), queryOptions.context(), key, ret);
         }
         return ret;
     }
@@ -260,7 +263,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         }
 
         // remove all prefixes/suffixes directly set on the user/group
-        holder.removeIf(type::matches);
+        holder.removeIfEnduring(node -> type.nodeType().matches(node));
 
         if (value == null) {
             this.vaultPermission.holderSave(holder);
@@ -268,13 +271,13 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         }
 
         // find the max inherited priority & add 10
-        MetaAccumulator metaAccumulator = holder.accumulateMeta(null, createContextForWorldSet(world));
+        MetaAccumulator metaAccumulator = holder.accumulateMeta(null, createQueryOptionsForWorldSet(world));
         metaAccumulator.complete();
         int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0) + 10;
 
-        Node.Builder chatMetaNode = NodeFactory.buildChatMetaNode(type, priority, value);
-        chatMetaNode.setServer(this.vaultPermission.getVaultServer());
-        chatMetaNode.setWorld(world);
+        NodeBuilder chatMetaNode = NodeFactory.buildChatMetaNode(type, priority, value);
+        chatMetaNode.withContext(DefaultContextKeys.SERVER_KEY, this.vaultPermission.getVaultServer());
+        chatMetaNode.withContext(DefaultContextKeys.WORLD_KEY, world);
 
         holder.setPermission(chatMetaNode.build()); // assume success
         this.vaultPermission.holderSave(holder);
@@ -285,33 +288,37 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
             logMsg("#setMeta: %s - %s - %s - %s", holder.getPlainDisplayName(), key, value, world);
         }
 
-        holder.removeIf(n -> n.isMeta() && n.getMeta().getKey().equals(key));
+        holder.removeIfEnduring(n -> n instanceof MetaNode && ((MetaNode) n).getMetaKey().equals(key));
 
         if (value == null) {
             this.vaultPermission.holderSave(holder);
             return;
         }
 
-        Node.Builder metaNode;
+        NodeBuilder metaNode;
         if (key.equalsIgnoreCase(NodeTypes.PREFIX_KEY) || key.equalsIgnoreCase(NodeTypes.SUFFIX_KEY)) {
             metaNode = NodeFactory.buildChatMetaNode(ChatMetaType.valueOf(key.toUpperCase()), 100, value.toString());
         } else {
             metaNode = NodeFactory.buildMetaNode(key, value.toString());
         }
 
-        metaNode.setServer(this.vaultPermission.getVaultServer());
-        metaNode.setWorld(world);
+        metaNode.withContext(DefaultContextKeys.SERVER_KEY, this.vaultPermission.getVaultServer());
+        metaNode.withContext(DefaultContextKeys.WORLD_KEY, world);
 
         holder.setPermission(metaNode.build()); // assume success
         this.vaultPermission.holderSave(holder);
     }
 
-    private Contexts createContextForWorldSet(String world) {
+    private QueryOptions createQueryOptionsForWorldSet(String world) {
         ImmutableContextSet.Builder context = ImmutableContextSet.builder();
         if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
-            context.add(Contexts.WORLD_KEY, world.toLowerCase());
+            context.add(DefaultContextKeys.WORLD_KEY, world.toLowerCase());
         }
-        context.add(Contexts.SERVER_KEY, this.vaultPermission.getVaultServer());
-        return Contexts.of(context.build(), this.vaultPermission.isIncludeGlobal(), true, true, true, true, false);
+        context.add(DefaultContextKeys.SERVER_KEY, this.vaultPermission.getVaultServer());
+
+        QueryOptions.Builder builder = QueryOptions.defaultContextualOptions().toBuilder();
+        builder.context(context.build());
+        builder.flag(Flag.INCLUDE_NODES_WITHOUT_SERVER_CONTEXT, this.vaultPermission.isIncludeGlobal());
+        return builder.build();
     }
 }

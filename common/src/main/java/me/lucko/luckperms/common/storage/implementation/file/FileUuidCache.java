@@ -30,7 +30,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 
-import me.lucko.luckperms.api.PlayerSaveResult;
+import me.lucko.luckperms.api.model.PlayerSaveResult;
 import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.util.Uuids;
 

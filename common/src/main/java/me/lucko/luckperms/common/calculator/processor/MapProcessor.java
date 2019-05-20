@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.calculator.processor;
 
-import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 
 public class MapProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
@@ -33,7 +33,7 @@ public class MapProcessor extends AbstractPermissionProcessor implements Permiss
 
     @Override
     public TristateResult hasPermission(String permission) {
-        return RESULT_FACTORY.result(Tristate.fromNullableBoolean(this.sourceMap.get(permission)));
+        return RESULT_FACTORY.result(Tristate.of(this.sourceMap.get(permission)));
     }
 
 }

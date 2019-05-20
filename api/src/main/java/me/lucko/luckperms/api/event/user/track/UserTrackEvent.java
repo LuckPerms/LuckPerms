@@ -25,11 +25,11 @@
 
 package me.lucko.luckperms.api.event.user.track;
 
-import me.lucko.luckperms.api.Track;
-import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
 import me.lucko.luckperms.api.event.Sourced;
+import me.lucko.luckperms.api.model.user.User;
+import me.lucko.luckperms.api.track.Track;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -45,14 +45,16 @@ public interface UserTrackEvent extends LuckPermsEvent, Sourced {
      *
      * @return the track involved in the event
      */
-    @NonNull @Param(0) Track getTrack();
+    @Param(0)
+    @NonNull Track getTrack();
 
     /**
      * Gets the user who was promoted or demoted
      *
      * @return the user involved in the event
      */
-    @NonNull @Param(1) User getUser();
+    @Param(1)
+    @NonNull User getUser();
 
     /**
      * Gets the action performed
@@ -68,13 +70,15 @@ public interface UserTrackEvent extends LuckPermsEvent, Sourced {
      *
      * @return the group the user was promoted/demoted from
      */
-    @NonNull @Param(2) Optional<String> getGroupFrom();
+    @Param(2)
+    @NonNull Optional<String> getGroupFrom();
 
     /**
      * Gets the group the user was promoted/demoted to
      *
      * @return the group the user was promoted/demoted to
      */
-    @NonNull @Param(3) Optional<String> getGroupTo();
+    @Param(3)
+    @NonNull Optional<String> getGroupTo();
 
 }

@@ -1,7 +1,6 @@
-project.version = '4.4'
+project.version = '5.0'
 
 dependencies {
-    compileOnly 'com.google.guava:guava:19.0'
     compileOnly 'org.checkerframework:checker-qual:2.5.5'
 }
 
@@ -14,7 +13,6 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
         options.encoding = 'UTF-8'
         options.charSet = 'UTF-8'
         options.links(
-                'https://google.github.io/guava/releases/21.0/api/docs/',
                 'https://docs.oracle.com/javase/8/docs/api/'
         )
         options.addStringOption('Xdoclint:none', '-quiet')

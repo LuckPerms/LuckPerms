@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.plugin;
 
-import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
@@ -236,7 +236,7 @@ public interface LuckPermsPlugin {
      * @param user the user instance
      * @return a contexts object, or null if one couldn't be generated
      */
-    Optional<Contexts> getContextForUser(User user);
+    Optional<QueryOptions> getQueryOptionsForUser(User user);
 
     /**
      * Gets a list of online Senders on the platform

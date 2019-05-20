@@ -27,11 +27,11 @@ package me.lucko.luckperms.bungee.context;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
-import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.context.ContextManager;
-import me.lucko.luckperms.common.context.ContextsSupplier;
+import me.lucko.luckperms.common.context.QueryOptionsSupplier;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 public class BungeeContextManager extends ContextManager<ProxiedPlayer> {
 
-    private final LoadingCache<ProxiedPlayer, Contexts> contextsCache = CaffeineFactory.newBuilder()
+    private final LoadingCache<ProxiedPlayer, QueryOptions> contextsCache = CaffeineFactory.newBuilder()
             .expireAfterWrite(50, TimeUnit.MILLISECONDS)
             .build(this::calculate);
 
@@ -49,21 +49,21 @@ public class BungeeContextManager extends ContextManager<ProxiedPlayer> {
     }
 
     @Override
-    public ContextsSupplier getCacheFor(ProxiedPlayer subject) {
+    public QueryOptionsSupplier getCacheFor(ProxiedPlayer subject) {
         if (subject == null) {
             throw new NullPointerException("subject");
         }
 
-        return new InlineContextsSupplier(subject, this.contextsCache);
+        return new InlineQueryOptionsSupplier(subject, this.contextsCache);
     }
 
     @Override
-    public ImmutableContextSet getApplicableContext(ProxiedPlayer subject) {
-        return getApplicableContexts(subject).getContexts().makeImmutable();
+    public ImmutableContextSet getContext(ProxiedPlayer subject) {
+        return getQueryOptions(subject).context();
     }
 
     @Override
-    public Contexts getApplicableContexts(ProxiedPlayer subject) {
+    public QueryOptions getQueryOptions(ProxiedPlayer subject) {
         return this.contextsCache.get(subject);
     }
 
@@ -73,22 +73,22 @@ public class BungeeContextManager extends ContextManager<ProxiedPlayer> {
     }
 
     @Override
-    public Contexts formContexts(ProxiedPlayer subject, ImmutableContextSet contextSet) {
-        return formContexts(contextSet);
+    public QueryOptions formQueryOptions(ProxiedPlayer subject, ImmutableContextSet contextSet) {
+        return formQueryOptions(contextSet);
     }
 
-    private static final class InlineContextsSupplier implements ContextsSupplier {
+    private static final class InlineQueryOptionsSupplier implements QueryOptionsSupplier {
         private final ProxiedPlayer key;
-        private final LoadingCache<ProxiedPlayer, Contexts> contextsCache;
+        private final LoadingCache<ProxiedPlayer, QueryOptions> cache;
 
-        private InlineContextsSupplier(ProxiedPlayer key, LoadingCache<ProxiedPlayer, Contexts> contextsCache) {
+        private InlineQueryOptionsSupplier(ProxiedPlayer key, LoadingCache<ProxiedPlayer, QueryOptions> cache) {
             this.key = key;
-            this.contextsCache = contextsCache;
+            this.cache = cache;
         }
 
         @Override
-        public Contexts getContexts() {
-            return this.contextsCache.get(this.key);
+        public QueryOptions getQueryOptions() {
+            return this.cache.get(this.key);
         }
     }
 }

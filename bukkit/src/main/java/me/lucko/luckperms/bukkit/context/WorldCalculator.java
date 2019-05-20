@@ -25,14 +25,17 @@
 
 package me.lucko.luckperms.bukkit.context;
 
-import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ContextCalculator;
-import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.context.ContextConsumer;
+import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class WorldCalculator implements ContextCalculator<Player> {
     private final LuckPermsPlugin plugin;
@@ -42,13 +45,12 @@ public class WorldCalculator implements ContextCalculator<Player> {
     }
 
     @Override
-    public @NonNull MutableContextSet giveApplicableContext(@NonNull Player subject, @NonNull MutableContextSet accumulator) {
+    public void giveApplicableContext(@NonNull Player subject, @NonNull ContextConsumer consumer) {
+        Set<String> seen = new HashSet<>();
         String world = subject.getWorld().getName().toLowerCase();
-        while (!accumulator.has(Contexts.WORLD_KEY, world)) {
-            accumulator.add(Contexts.WORLD_KEY, world);
+        while (seen.add(world)) {
+            consumer.accept(DefaultContextKeys.WORLD_KEY, world);
             world = this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(world, world).toLowerCase();
         }
-
-        return accumulator;
     }
 }

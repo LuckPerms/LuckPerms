@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.common.defaultassignments;
 
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.node.Node;
+import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.factory.LegacyNodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 
 import java.util.List;
@@ -46,8 +46,8 @@ public class AssignmentRule {
         this.hasTrueExpression = AssignmentExpression.compile(hasTrueExpression);
         this.hasFalseExpression = AssignmentExpression.compile(hasFalseExpression);
         this.lacksExpression = AssignmentExpression.compile(lacksExpression);
-        this.toGive = toGive.stream().map(s -> LegacyNodeFactory.fromLegacyString(s, true)).collect(ImmutableCollectors.toList());
-        this.toTake = toTake.stream().map(s -> LegacyNodeFactory.fromLegacyString(s, true)).collect(ImmutableCollectors.toList());
+        this.toGive = toGive.stream().map(s -> NodeFactory.make(s, true)).collect(ImmutableCollectors.toList());
+        this.toTake = toTake.stream().map(s -> NodeFactory.make(s, true)).collect(ImmutableCollectors.toList());
         this.setPrimaryGroup = setPrimaryGroup;
     }
 

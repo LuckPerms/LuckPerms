@@ -28,15 +28,15 @@ package me.lucko.luckperms.common.cacheddata.type;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
-import me.lucko.luckperms.api.ChatMetaType;
-import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.api.nodetype.types.MetaType;
-import me.lucko.luckperms.api.nodetype.types.PrefixType;
-import me.lucko.luckperms.api.nodetype.types.SuffixType;
+import me.lucko.luckperms.api.node.ChatMetaType;
+import me.lucko.luckperms.api.node.Node;
+import me.lucko.luckperms.api.node.types.MetaNode;
+import me.lucko.luckperms.api.node.types.PrefixNode;
+import me.lucko.luckperms.api.node.types.SuffixNode;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.metastacking.MetaStack;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStack;
-import me.lucko.luckperms.common.node.model.NodeTypes;
+import me.lucko.luckperms.common.node.factory.NodeTypes;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Comparator;
@@ -118,22 +118,25 @@ public class MetaAccumulator {
 
     // accumulate methods
 
-    public void accumulateNode(LocalizedNode n) {
+    public void accumulateNode(Node n) {
         ensureState(State.ACCUMULATING);
+        
+        if (n instanceof MetaNode) {
+            MetaNode mn = (MetaNode) n;
+            this.meta.put(mn.getMetaKey(), mn.getMetaValue());
+        }
 
-        n.getTypeData(MetaType.KEY).ifPresent(metaType ->
-                this.meta.put(metaType.getKey(), metaType.getValue())
-        );
-
-        n.getTypeData(PrefixType.KEY).ifPresent(prefix -> {
-            this.prefixes.putIfAbsent(prefix.getPriority(), prefix.getPrefix());
-            this.prefixStack.accumulateToAll(n);
-        });
-
-        n.getTypeData(SuffixType.KEY).ifPresent(suffix -> {
-            this.suffixes.putIfAbsent(suffix.getPriority(), suffix.getSuffix());
-            this.suffixStack.accumulateToAll(n);
-        });
+        if (n instanceof PrefixNode) {
+            PrefixNode pn = (PrefixNode) n;
+            this.prefixes.putIfAbsent(pn.getPriority(), pn.getMetaValue());
+            this.prefixStack.accumulateToAll(pn);
+        }
+        
+        if (n instanceof SuffixNode) {
+            SuffixNode pn = (SuffixNode) n;
+            this.suffixes.putIfAbsent(pn.getPriority(), pn.getMetaValue());
+            this.suffixStack.accumulateToAll(pn);
+        }
     }
 
     public void accumulateMeta(String key, String value) {

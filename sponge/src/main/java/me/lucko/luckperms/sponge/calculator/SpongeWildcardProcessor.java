@@ -25,11 +25,11 @@
 
 package me.lucko.luckperms.sponge.calculator;
 
-import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
-import me.lucko.luckperms.common.node.model.ImmutableNode;
+import me.lucko.luckperms.common.node.AbstractNode;
 
 public class SpongeWildcardProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
     private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(SpongeWildcardProcessor.class);
@@ -39,14 +39,14 @@ public class SpongeWildcardProcessor extends AbstractPermissionProcessor impleme
         String node = permission;
 
         while (true) {
-            int endIndex = node.lastIndexOf(ImmutableNode.NODE_SEPARATOR);
+            int endIndex = node.lastIndexOf(AbstractNode.NODE_SEPARATOR);
             if (endIndex == -1) {
                 break;
             }
 
             node = node.substring(0, endIndex);
             if (!node.isEmpty()) {
-                Tristate t = Tristate.fromNullableBoolean(this.sourceMap.get(node));
+                Tristate t = Tristate.of(this.sourceMap.get(node));
                 if (t != Tristate.UNDEFINED) {
                     return RESULT_FACTORY.result(t, "match: " + node);
                 }

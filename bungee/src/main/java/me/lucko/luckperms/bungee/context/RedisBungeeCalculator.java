@@ -28,7 +28,7 @@ package me.lucko.luckperms.bungee.context;
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
 
-import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.context.ContextConsumer;
 import me.lucko.luckperms.api.context.StaticContextCalculator;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -37,11 +37,10 @@ public class RedisBungeeCalculator implements StaticContextCalculator {
     private static final String PROXY_KEY = "proxy";
 
     @Override
-    public @NonNull MutableContextSet giveApplicableContext(@NonNull MutableContextSet accumulator) {
+    public void giveApplicableContext(@NonNull ContextConsumer consumer) {
         RedisBungeeAPI redisBungee = RedisBungee.getApi();
         if (redisBungee != null) {
-            accumulator.add(PROXY_KEY, redisBungee.getServerId());
+            consumer.accept(PROXY_KEY, redisBungee.getServerId());
         }
-        return accumulator;
     }
 }

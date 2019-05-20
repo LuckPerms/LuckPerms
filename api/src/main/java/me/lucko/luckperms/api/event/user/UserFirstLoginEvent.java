@@ -50,13 +50,15 @@ public interface UserFirstLoginEvent extends LuckPermsEvent {
      *
      * @return the uuid of the user
      */
-    @NonNull @Param(0) UUID getUuid();
+    @Param(0)
+    @NonNull UUID getUniqueId();
 
     /**
      * Gets the username of the user
      *
      * @return the username of the user
      */
-    @NonNull @Param(1) String getUsername();
+    @Param(1)
+    @NonNull String getUsername();
 
 }

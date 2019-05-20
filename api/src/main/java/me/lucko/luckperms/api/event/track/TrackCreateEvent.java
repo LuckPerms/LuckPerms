@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.api.event.track;
 
-import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
 import me.lucko.luckperms.api.event.cause.CreationCause;
+import me.lucko.luckperms.api.track.Track;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -42,13 +42,15 @@ public interface TrackCreateEvent extends LuckPermsEvent {
      *
      * @return the new track
      */
-    @NonNull @Param(0) Track getTrack();
+    @Param(0)
+    @NonNull Track getTrack();
 
     /**
      * Gets the cause of the creation
      *
      * @return the cause of the creation
      */
-    @NonNull @Param(1) CreationCause getCause();
+    @Param(1)
+    @NonNull CreationCause getCause();
 
 }

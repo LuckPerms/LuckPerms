@@ -27,7 +27,8 @@ package me.lucko.luckperms.common.verbose;
 
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.node.Tristate;
+import me.lucko.luckperms.api.query.QueryMode;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
@@ -206,7 +207,9 @@ public class VerboseListener {
             hover.add("&bOrigin: &2" + metaEvent.getOrigin().name());
         }
 
-        hover.add("&bContext: &r" + MessageUtils.contextSetToString(this.notifiedSender.getPlugin().getLocaleManager(), event.getCheckContext()));
+        if (event.getCheckQueryOptions().mode() == QueryMode.CONTEXTUAL) {
+            hover.add("&bContext: &r" + MessageUtils.contextSetToString(this.notifiedSender.getPlugin().getLocaleManager(), event.getCheckQueryOptions().context()));
+        }
         hover.add("&bTrace: &r");
 
         Consumer<StackTraceElement> printer = StackTracePrinter.elementToString(str -> hover.add("&7" + str));

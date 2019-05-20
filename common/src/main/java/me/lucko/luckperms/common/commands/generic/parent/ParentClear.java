@@ -67,9 +67,9 @@ public class ParentClear extends SharedSubCommand {
         }
 
         if (context.isEmpty()) {
-            holder.clearParents(true);
+            holder.clearEnduringParents(true);
         } else {
-            holder.clearParents(context, true);
+            holder.clearEnduringParents(context, true);
         }
 
         int changed = before - holder.enduringData().immutable().size();

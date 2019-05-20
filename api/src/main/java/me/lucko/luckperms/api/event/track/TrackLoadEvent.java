@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.api.event.track;
 
-import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
+import me.lucko.luckperms.api.track.Track;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -43,6 +43,7 @@ public interface TrackLoadEvent extends LuckPermsEvent {
      *
      * @return the track that was loaded
      */
-    @NonNull @Param(0) Track getTrack();
+    @Param(0)
+    @NonNull Track getTrack();
 
 }

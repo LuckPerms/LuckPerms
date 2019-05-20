@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.commands.generic.permission;
 
-import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.node.Node;
+import me.lucko.luckperms.api.node.NodeType;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
@@ -77,12 +77,11 @@ public class PermissionInfo extends SharedSubCommand {
         SortMode sortMode = SortMode.determine(args);
 
         // get the holders nodes
-        List<LocalizedNode> nodes = new ArrayList<>(holder.enduringData().asSortedSet());
+        List<Node> nodes = new ArrayList<>(holder.enduringData().asSortedSet());
 
         // remove irrelevant types (these are displayed in the other info commands)
-        nodes.removeIf(node -> (node.isGroupNode() && node.getValue() && plugin.getGroupManager().isLoaded(node.getGroupName())) ||
-        // remove if the node is a meta node
-        node.isPrefix() || node.isSuffix() || node.isMeta());
+        nodes.removeIf(NodeType.INHERITANCE.predicate(n -> n.getValue() && plugin.getGroupManager().isLoaded(n.getGroupName()))
+                .or(NodeType.META_OR_CHAT_META.predicate()));
 
         // handle empty
         if (nodes.isEmpty()) {
@@ -101,23 +100,23 @@ public class PermissionInfo extends SharedSubCommand {
         }
 
         int pageIndex = page - 1;
-        List<List<LocalizedNode>> pages = Iterators.divideIterable(nodes, 19);
+        List<List<Node>> pages = Iterators.divideIterable(nodes, 19);
 
         if (pageIndex < 0 || pageIndex >= pages.size()) {
             page = 1;
             pageIndex = 0;
         }
 
-        List<LocalizedNode> content = pages.get(pageIndex);
+        List<Node> content = pages.get(pageIndex);
 
         // send header
         Message.PERMISSION_INFO.send(sender, holder.getFormattedDisplayName(), page, pages.size(), nodes.size());
 
         // send content
-        for (LocalizedNode node : content) {
-            String s = "&3> " + (node.getValue() ? "&a" : "&c") + node.getPermission() + (sender.isConsole() ? " &7(" + node.getValue() + "&7)" : "") + MessageUtils.getAppendableNodeContextString(plugin.getLocaleManager(), node);
-            if (node.isTemporary()) {
-                s += "\n&2-    expires in " + DurationFormatter.LONG.formatDateDiff(node.getExpiryUnixTime());
+        for (Node node : content) {
+            String s = "&3> " + (node.getValue() ? "&a" : "&c") + node.getKey() + (sender.isConsole() ? " &7(" + node.getValue() + "&7)" : "") + MessageUtils.getAppendableNodeContextString(plugin.getLocaleManager(), node);
+            if (node.hasExpiry()) {
+                s += "\n&2-    expires in " + DurationFormatter.LONG.formatDateDiff(node.getExpiry().getEpochSecond());
             }
 
             TextComponent message = TextUtils.fromLegacy(s, CommandManager.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build();
@@ -127,8 +126,8 @@ public class PermissionInfo extends SharedSubCommand {
         return CommandResult.SUCCESS;
     }
 
-    private static final Comparator<LocalizedNode> ALPHABETICAL_NODE_COMPARATOR = (o1, o2) -> {
-        int i = o1.getPermission().compareTo(o2.getPermission());
+    private static final Comparator<Node> ALPHABETICAL_NODE_COMPARATOR = (o1, o2) -> {
+        int i = o1.getKey().compareTo(o2.getKey());
         if (i != 0) {
             return i;
         }
@@ -139,7 +138,7 @@ public class PermissionInfo extends SharedSubCommand {
 
     private static Consumer<ComponentBuilder<?, ?>> makeFancy(PermissionHolder holder, String label, Node node) {
         HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
-                "¥3> " + (node.getValue() ? "¥a" : "¥c") + node.getPermission(),
+                "¥3> " + (node.getValue() ? "¥a" : "¥c") + node.getKey(),
                 " ",
                 "¥7Click to remove this node from " + holder.getFormattedDisplayName()
         ), '¥'));

@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.primarygroup;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
-import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.util.CaffeineFactory;
@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class ContextualHolder extends StoredHolder {
 
     // cache lookups
-    private final LoadingCache<Contexts, Optional<String>> cache = CaffeineFactory.newBuilder()
+    private final LoadingCache<QueryOptions, Optional<String>> cache = CaffeineFactory.newBuilder()
             .expireAfterAccess(1, TimeUnit.MINUTES)
             .build(this::calculateValue);
 
@@ -52,7 +52,7 @@ public abstract class ContextualHolder extends StoredHolder {
         super(user);
     }
 
-    protected abstract @NonNull Optional<String> calculateValue(Contexts contexts);
+    protected abstract @NonNull Optional<String> calculateValue(QueryOptions queryOptions);
 
     public void invalidateCache() {
         this.cache.invalidateAll();
@@ -60,12 +60,12 @@ public abstract class ContextualHolder extends StoredHolder {
 
     @Override
     public final String getValue() {
-        Contexts contexts = this.user.getPlugin().getContextForUser(this.user).orElse(null);
-        if (contexts == null) {
-            contexts = this.user.getPlugin().getContextManager().getStaticContexts();
+        QueryOptions queryOptions = this.user.getPlugin().getQueryOptionsForUser(this.user).orElse(null);
+        if (queryOptions == null) {
+            queryOptions = this.user.getPlugin().getContextManager().getStaticQueryOptions();
         }
 
-        return Objects.requireNonNull(this.cache.get(contexts))
+        return Objects.requireNonNull(this.cache.get(queryOptions))
                 .orElseGet(() -> getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
     }
 

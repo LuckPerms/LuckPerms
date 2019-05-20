@@ -25,11 +25,11 @@
 
 package me.lucko.luckperms.api.event.log;
 
-import me.lucko.luckperms.api.Entity;
-import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.actionlog.Action;
 import me.lucko.luckperms.api.event.Cancellable;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
+import me.lucko.luckperms.api.platform.PlatformEntity;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -40,8 +40,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * <p>This event is not called for players without the notify permission,
  * but is called for objects which are ignoring log notifications (called with
  * the cancelled flag set to true).</p>
- *
- * @since 4.1
  */
 public interface LogNotifyEvent extends LuckPermsEvent, Cancellable {
 
@@ -50,21 +48,24 @@ public interface LogNotifyEvent extends LuckPermsEvent, Cancellable {
      *
      * @return the log entry to be sent
      */
-    @NonNull @Param(0) LogEntry getEntry();
+    @Param(0)
+    @NonNull Action getEntry();
 
     /**
      * Gets where the log entry originated from.
      *
      * @return the origin of the log
      */
-    @NonNull @Param(1) Origin getOrigin();
+    @Param(1)
+    @NonNull Origin getOrigin();
 
     /**
      * Gets the object to be notified.
      *
      * @return the object to notify
      */
-    @NonNull @Param(2) Entity getNotifiable();
+    @Param(2)
+    @NonNull PlatformEntity getNotifiable();
 
     /**
      * Represents where a log entry is from

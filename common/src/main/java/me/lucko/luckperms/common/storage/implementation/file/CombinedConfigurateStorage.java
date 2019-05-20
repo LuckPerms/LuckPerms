@@ -25,13 +25,13 @@
 
 package me.lucko.luckperms.common.storage.implementation.file;
 
-import me.lucko.luckperms.api.HeldPermission;
+import me.lucko.luckperms.api.node.HeldNode;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.model.manager.track.TrackManager;
+import me.lucko.luckperms.common.node.model.HeldNodeImpl;
 import me.lucko.luckperms.common.node.model.NodeDataContainer;
-import me.lucko.luckperms.common.node.model.NodeHeldPermission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.file.loader.ConfigurateLoader;
 
@@ -262,8 +262,8 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
     }
 
     @Override
-    public List<HeldPermission<UUID>> getUsersWithPermission(Constraint constraint) throws Exception {
-        List<HeldPermission<UUID>> held = new ArrayList<>();
+    public List<HeldNode<UUID>> getUsersWithPermission(Constraint constraint) throws Exception {
+        List<HeldNode<UUID>> held = new ArrayList<>();
         this.usersLoader.apply(false, true, root -> {
             for (Map.Entry<Object, ? extends ConfigurationNode> entry : root.getChildrenMap().entrySet()) {
                 try {
@@ -275,7 +275,7 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
                         if (!constraint.eval(e.getPermission())) {
                             continue;
                         }
-                        held.add(NodeHeldPermission.of(holder, e));
+                        held.add(HeldNodeImpl.of(holder, e.toNode()));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -316,8 +316,8 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
     }
 
     @Override
-    public List<HeldPermission<String>> getGroupsWithPermission(Constraint constraint) throws Exception {
-        List<HeldPermission<String>> held = new ArrayList<>();
+    public List<HeldNode<String>> getGroupsWithPermission(Constraint constraint) throws Exception {
+        List<HeldNode<String>> held = new ArrayList<>();
         this.groupsLoader.apply(false, true, root -> {
             for (Map.Entry<Object, ? extends ConfigurationNode> entry : root.getChildrenMap().entrySet()) {
                 try {
@@ -329,7 +329,7 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
                         if (!constraint.eval(e.getPermission())) {
                             continue;
                         }
-                        held.add(NodeHeldPermission.of(holder, e));
+                        held.add(HeldNodeImpl.of(holder, e.toNode()));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.commands.group;
 
-import me.lucko.luckperms.api.nodetype.types.WeightType;
+import me.lucko.luckperms.api.node.types.WeightNode;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
@@ -59,7 +59,7 @@ public class GroupSetWeight extends SubCommand<Group> {
 
         int weight = ArgumentParser.parsePriority(0, args);
 
-        group.removeIf(n -> n.getTypeData(WeightType.KEY).isPresent());
+        group.removeIfEnduring(n -> n instanceof WeightNode);
         group.setPermission(NodeFactory.buildWeightNode(weight).build());
 
         Message.GROUP_SET_WEIGHT.send(sender, weight, group.getFormattedDisplayName());

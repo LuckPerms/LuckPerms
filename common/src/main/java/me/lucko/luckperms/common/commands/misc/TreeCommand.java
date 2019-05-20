@@ -90,7 +90,7 @@ public class TreeCommand extends SingleCommand {
         }
 
         Message.TREE_UPLOAD_START.send(sender);
-        PermissionCache permissionData = user == null ? null : user.getCachedData().getPermissionData(plugin.getContextForUser(user).orElse(plugin.getContextManager().getStaticContexts()));
+        PermissionCache permissionData = user == null ? null : user.getCachedData().getPermissionData(plugin.getQueryOptionsForUser(user).orElse(plugin.getContextManager().getStaticQueryOptions()));
         String id = view.uploadPasteData(plugin.getBytebin(), sender, user, permissionData);
         String url = plugin.getConfiguration().get(ConfigKeys.TREE_VIEWER_URL_PATTERN) + "#" + id;
 

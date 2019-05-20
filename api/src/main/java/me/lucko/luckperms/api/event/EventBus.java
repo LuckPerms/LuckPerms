@@ -34,15 +34,13 @@ import java.util.function.Consumer;
  * The LuckPerms event bus.
  *
  * <p>Used to subscribe (or "listen") to LuckPerms events.</p>
- *
- * @since 3.0
  */
 public interface EventBus {
 
     /**
      * Registers a new subscription to the given event.
      *
-     * <p>The returned {@link EventHandler} instance encapsulates the subscription state. It has
+     * <p>The returned {@link EventSubscription} instance encapsulates the subscription state. It has
      * methods which can be used to terminate the subscription, or view stats about the nature of
      * the subscription.</p>
      *
@@ -51,18 +49,18 @@ public interface EventBus {
      * @param <T>        the event class
      * @return an event handler instance representing this subscription
      */
-    @NonNull <T extends LuckPermsEvent> EventHandler<T> subscribe(@NonNull Class<T> eventClass, @NonNull Consumer<? super T> handler);
+    @NonNull <T extends LuckPermsEvent> EventSubscription<T> subscribe(@NonNull Class<T> eventClass, @NonNull Consumer<? super T> handler);
 
     /**
      * Registers a new subscription to the given event.
      *
-     * <p>The returned {@link EventHandler} instance encapsulates the subscription state. It has
+     * <p>The returned {@link EventSubscription} instance encapsulates the subscription state. It has
      * methods which can be used to terminate the subscription, or view stats about the nature of
      * the subscription.</p>
      *
      * <p>Unlike {@link #subscribe(Class, Consumer)}, this method accepts an additional parameter
      * for {@code plugin}. This object must be a "plugin" instance on the platform, and is used to
-     * automatically {@link EventHandler#unregister() unregister} the subscription when the
+     * automatically {@link EventSubscription#close() unregister} the subscription when the
      * corresponding plugin is disabled.</p>
      *
      * @param <T>        the event class
@@ -71,7 +69,7 @@ public interface EventBus {
      * @param handler    the event handler
      * @return an event handler instance representing this subscription
      */
-    @NonNull <T extends LuckPermsEvent> EventHandler<T> subscribe(Object plugin, @NonNull Class<T> eventClass, @NonNull Consumer<? super T> handler);
+    @NonNull <T extends LuckPermsEvent> EventSubscription<T> subscribe(Object plugin, @NonNull Class<T> eventClass, @NonNull Consumer<? super T> handler);
 
     /**
      * Gets a set of all registered handlers for a given event.
@@ -80,6 +78,6 @@ public interface EventBus {
      * @param <T>        the event class
      * @return an immutable set of event handlers
      */
-    @NonNull <T extends LuckPermsEvent> Set<EventHandler<T>> getHandlers(@NonNull Class<T> eventClass);
+    @NonNull <T extends LuckPermsEvent> Set<EventSubscription<T>> getSubscriptions(@NonNull Class<T> eventClass);
 
 }

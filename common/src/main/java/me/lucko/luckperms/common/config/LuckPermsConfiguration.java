@@ -25,20 +25,12 @@
 
 package me.lucko.luckperms.common.config;
 
-import me.lucko.luckperms.common.api.implementation.ApiConfiguration;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 /**
  * The master configuration used by LuckPerms.
  */
 public interface LuckPermsConfiguration {
-
-    /**
-     * Gets the API delegate for this class.
-     *
-     * @return the api delegate
-     */
-    ApiConfiguration getDelegate();
 
     /**
      * Gets the main plugin instance.

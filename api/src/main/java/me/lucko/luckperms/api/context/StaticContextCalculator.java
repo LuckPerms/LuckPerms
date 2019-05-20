@@ -26,36 +26,50 @@
 package me.lucko.luckperms.api.context;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * Extension of {@link ContextCalculator} which provides the same context
  * regardless of the subject.
- *
- * @since 4.0
  */
 @FunctionalInterface
 public interface StaticContextCalculator extends ContextCalculator<Object> {
 
     /**
-     * Adds this calculators context to the given accumulator.
+     * Creates a new {@link StaticContextCalculator} that provides a single context.
      *
-     * @param accumulator a map of contexts to add to
-     * @return the map
+     * @param key the key of the context provided by the calculator
+     * @param valueFunction the function used to compute the corresponding value
+     *                      for each query. A context will not be "accumulated"
+     *                      if the value returned is null.
+     * @return the resultant calculator
      */
-    @NonNull MutableContextSet giveApplicableContext(@NonNull MutableContextSet accumulator);
-
-    /**
-     * Gives the subject all of the applicable contexts they meet
-     *
-     * @param subject     the subject to add contexts to
-     * @param accumulator a map of contexts to add to
-     * @return the map
-     */
-    @Deprecated
-    @Override
-    default @NonNull MutableContextSet giveApplicableContext(@Nullable Object subject, @NonNull MutableContextSet accumulator) {
-        return giveApplicableContext(accumulator);
+    static StaticContextCalculator forSingleContext(String key, Supplier<String> valueFunction) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(valueFunction, "valueFunction");
+        return consumer -> {
+            String value = valueFunction.get();
+            if (value != null) {
+                consumer.accept(key, value);
+            }
+        };
     }
 
+    /**
+     * Submits any contexts this calculator determines to be applicable.
+     *
+     * <p>Care should be taken to ensure implementations of this method meet the
+     * general requirements for {@link ContextCalculator}, defined in the class
+     * doc.</p>
+     *
+     * @param consumer the {@link ContextConsumer} to submit contexts to
+     */
+    void giveApplicableContext(@NonNull ContextConsumer consumer);
+
+    @Override
+    default void giveApplicableContext(@NonNull Object target, @NonNull ContextConsumer consumer) {
+        giveApplicableContext(consumer);
+    }
 }

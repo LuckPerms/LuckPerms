@@ -25,36 +25,36 @@
 
 package me.lucko.luckperms.common.commands.migration;
 
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.nodetype.types.WeightType;
+import me.lucko.luckperms.api.node.NodeBuilder;
+import me.lucko.luckperms.api.node.NodeType;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 
 public final class MigrationUtils {
     private MigrationUtils() {}
 
-    public static Node.Builder parseNode(String permission, boolean value) {
+    public static NodeBuilder parseNode(String permission, boolean value) {
         if (permission.startsWith("-") || permission.startsWith("!")) {
             if (permission.length() == 1) {
-                return NodeFactory.builder(permission).setValue(value);
+                return NodeFactory.builder(permission).value(value);
             }
 
             permission = permission.substring(1);
             value = false;
         } else if (permission.startsWith("+")) {
             if (permission.length() == 1) {
-                return NodeFactory.builder(permission).setValue(value);
+                return NodeFactory.builder(permission).value(value);
             }
 
             permission = permission.substring(1);
             value = true;
         }
 
-        return NodeFactory.builder(permission).setValue(value);
+        return NodeFactory.builder(permission).value(value);
     }
 
     public static void setGroupWeight(Group group, int weight) {
-        group.removeIf(n -> n.getTypeData(WeightType.KEY).isPresent());
+        group.removeIfEnduring(NodeType.WEIGHT::matches);
         group.setPermission(NodeFactory.buildWeightNode(weight).build());
     }
 

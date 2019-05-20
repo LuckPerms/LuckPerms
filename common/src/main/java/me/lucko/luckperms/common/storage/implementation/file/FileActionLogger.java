@@ -30,7 +30,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.actionlog.Action;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LogEntryJsonSerializer;
 import me.lucko.luckperms.common.cache.BufferedRequest;
@@ -61,7 +61,7 @@ public class FileActionLogger {
     /**
      * The queue of entries pending save to the file
      */
-    private final Queue<LogEntry> entryQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<Action> entryQueue = new ConcurrentLinkedQueue<>();
 
     private final SaveBuffer saveBuffer;
 
@@ -73,7 +73,7 @@ public class FileActionLogger {
         this.contentFile = contentFile;
     }
 
-    public void logAction(LogEntry entry) {
+    public void logAction(Action entry) {
         this.entryQueue.add(entry);
         this.saveBuffer.request();
     }
@@ -102,7 +102,7 @@ public class FileActionLogger {
                 }
 
                 // poll the queue for new entries
-                for (LogEntry e; (e = this.entryQueue.poll()) != null; ) {
+                for (Action e; (e = this.entryQueue.poll()) != null; ) {
                     array.add(LogEntryJsonSerializer.serialize(e));
                 }
 

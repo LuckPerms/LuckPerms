@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.commands.user;
 
-import me.lucko.luckperms.api.DemotionResult;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.track.DemotionResult;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;

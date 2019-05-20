@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.sponge.context;
 
-import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ContextCalculator;
-import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.context.ContextConsumer;
+import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -35,6 +35,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.permission.Subject;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class WorldCalculator implements ContextCalculator<Subject> {
     private final LuckPermsPlugin plugin;
@@ -44,20 +47,21 @@ public class WorldCalculator implements ContextCalculator<Subject> {
     }
 
     @Override
-    public @NonNull MutableContextSet giveApplicableContext(@NonNull Subject subject, @NonNull MutableContextSet accumulator) {
+    public void giveApplicableContext(@NonNull Subject subject, @NonNull ContextConsumer consumer) {
         CommandSource source = subject.getCommandSource().orElse(null);
         if (source == null || !(source instanceof Player)) {
-            return accumulator;
+            return;
         }
 
         Player p = ((Player) source);
+
+        Set<String> seen = new HashSet<>();
         String world = p.getWorld().getName().toLowerCase();
-        while (!accumulator.has(Contexts.WORLD_KEY, world)) {
-            accumulator.add(Contexts.WORLD_KEY, world);
+        while (seen.add(world)) {
+            consumer.accept(DefaultContextKeys.WORLD_KEY, world);
             world = this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(world, world).toLowerCase();
         }
 
-        return accumulator;
     }
 
 }

@@ -25,14 +25,12 @@
 
 package me.lucko.luckperms.api.event;
 
-import me.lucko.luckperms.api.LuckPermsApi;
+import me.lucko.luckperms.api.LuckPerms;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * A superinterface for all LuckPerms events.
- *
- * @since 3.0
  */
 public interface LuckPermsEvent {
 
@@ -41,13 +39,12 @@ public interface LuckPermsEvent {
      *
      * @return the api instance
      */
-    @NonNull LuckPermsApi getApi();
+    @NonNull LuckPerms getLuckPerms();
 
     /**
      * Gets the type of the event.
      *
      * @return the type of the event
-     * @since 4.4
      */
     @NonNull Class<? extends LuckPermsEvent> getEventType();
 

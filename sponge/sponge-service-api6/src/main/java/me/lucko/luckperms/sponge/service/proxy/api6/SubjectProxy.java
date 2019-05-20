@@ -26,7 +26,7 @@
 package me.lucko.luckperms.sponge.service.proxy.api6;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.context.ContextsSupplier;
+import me.lucko.luckperms.common.context.QueryOptionsSupplier;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
@@ -53,7 +53,7 @@ public final class SubjectProxy implements Subject, ProxiedSubject, ProxiedServi
     private final LPPermissionService service;
     private final LPSubjectReference ref;
 
-    private ContextsSupplier contextsSupplier = null;
+    private QueryOptionsSupplier queryOptionsSupplier = null;
 
     public SubjectProxy(LPPermissionService service, LPSubjectReference ref) {
         this.service = service;
@@ -65,11 +65,11 @@ public final class SubjectProxy implements Subject, ProxiedSubject, ProxiedServi
     }
 
     // lazy init
-    private ContextsSupplier getContextsCache() {
-        if (this.contextsSupplier == null) {
-            this.contextsSupplier = this.service.getContextManager().getCacheFor(this);
+    private QueryOptionsSupplier getContextsCache() {
+        if (this.queryOptionsSupplier == null) {
+            this.queryOptionsSupplier = this.service.getContextManager().getCacheFor(this);
         }
-        return this.contextsSupplier;
+        return this.queryOptionsSupplier;
     }
 
     @Override

@@ -50,6 +50,7 @@ public class NullSafeConsoleCommandSender implements ConsoleCommandSender {
     }
 
     private Optional<ConsoleCommandSender> get() {
+        //noinspection ConstantConditions
         return Optional.ofNullable(this.server.getConsoleSender());
     }
 

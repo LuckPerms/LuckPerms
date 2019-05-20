@@ -25,10 +25,9 @@
 
 package me.lucko.luckperms.common.command.utils;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.node.Node;
+import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.message.Message;
 
@@ -125,16 +124,9 @@ public final class MessageUtils {
      */
     public static String getAppendableNodeContextString(LocaleManager localeManager, Node node) {
         StringBuilder sb = new StringBuilder();
-        if (node.isServerSpecific()) {
-            sb.append(" ").append(contextToString(localeManager, Contexts.SERVER_KEY, node.getServer().get()));
-        }
-        if (node.isWorldSpecific()) {
-            sb.append(" ").append(contextToString(localeManager, Contexts.WORLD_KEY, node.getWorld().get()));
-        }
         for (Map.Entry<String, String> c : node.getContexts().toSet()) {
             sb.append(" ").append(contextToString(localeManager, c.getKey(), c.getValue()));
         }
-
         return sb.toString();
     }
 

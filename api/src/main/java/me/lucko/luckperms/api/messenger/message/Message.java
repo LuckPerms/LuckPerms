@@ -33,8 +33,6 @@ import java.util.UUID;
 
 /**
  * Represents a message sent received via a {@link Messenger}.
- *
- * @since 4.1
  */
 public interface Message {
 

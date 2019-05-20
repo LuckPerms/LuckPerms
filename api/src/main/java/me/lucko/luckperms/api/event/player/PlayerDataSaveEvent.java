@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.api.event.player;
 
-import me.lucko.luckperms.api.PlayerSaveResult;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
-import me.lucko.luckperms.api.manager.UserManager;
+import me.lucko.luckperms.api.model.PlayerSaveResult;
+import me.lucko.luckperms.api.model.user.UserManager;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -38,8 +38,6 @@ import java.util.UUID;
  * Called when player data is saved to the storage.
  *
  * <p>Data can be saved using {@link UserManager#savePlayerData(UUID, String)}.</p>
- *
- * @since 4.3
  */
 public interface PlayerDataSaveEvent extends LuckPermsEvent {
 
@@ -48,20 +46,23 @@ public interface PlayerDataSaveEvent extends LuckPermsEvent {
      *
      * @return the uuid
      */
-    @NonNull @Param(0) UUID getUuid();
+    @Param(0)
+    @NonNull UUID getUniqueId();
 
     /**
      * Gets the username that was saved.
      *
      * @return the username
      */
-    @NonNull @Param(1) String getUsername();
+    @Param(1)
+    @NonNull String getUsername();
 
     /**
      * Gets the result of the operation.
      *
      * @return the result
      */
-    @NonNull @Param(2) PlayerSaveResult getResult();
+    @Param(2)
+    @NonNull PlayerSaveResult getResult();
 
 }

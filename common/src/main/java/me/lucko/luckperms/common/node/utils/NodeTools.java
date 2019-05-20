@@ -25,16 +25,14 @@
 
 package me.lucko.luckperms.common.node.utils;
 
-import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.NodeEqualityPredicate;
+import me.lucko.luckperms.api.node.Node;
+import me.lucko.luckperms.api.node.NodeEqualityPredicate;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 
 public final class NodeTools {
     private NodeTools() {}
@@ -61,22 +59,10 @@ public final class NodeTools {
         Set<String> alreadyIn = new HashSet<>();
         while (it.hasNext()) {
             T next = it.next();
-            if (!alreadyIn.add(next.getPermission())) {
+            if (!alreadyIn.add(next.getKey())) {
                 it.remove();
             }
         }
-    }
-
-    /**
-     * Returns a predicate which unwraps the localised node parameter before delegating
-     * the handling to the provided predicate.
-     *
-     * @param delegate the delegate predicate.
-     * @return the composed predicate
-     * @since 4.3
-     */
-    public static Predicate<? super LocalizedNode> localizedNodeComposedPredicate(Predicate<Node> delegate) {
-        return localizedNode -> delegate.test(localizedNode.getNode());
     }
 
 }

@@ -39,6 +39,7 @@ public interface TrackAddGroupEvent extends TrackMutateEvent {
      *
      * @return the group that was added
      */
-    @NonNull @Param(3) String getGroup();
+    @Param(3)
+    @NonNull String getGroup();
 
 }

@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.common.cacheddata.type;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.caching.PermissionData;
+import me.lucko.luckperms.api.cacheddata.CachedPermissionData;
+import me.lucko.luckperms.api.node.Tristate;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
@@ -43,12 +43,12 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Holds cached permissions data for a given context
  */
-public class PermissionCache implements PermissionData {
+public class PermissionCache implements CachedPermissionData {
 
     /**
-     * The contexts this container is holding data for
+     * The query options this container is holding data for
      */
-    private final Contexts contexts;
+    private final QueryOptions queryOptions;
 
     /**
      * The raw set of permission strings.
@@ -67,12 +67,12 @@ public class PermissionCache implements PermissionData {
      */
     private final PermissionCalculator calculator;
 
-    public PermissionCache(Contexts contexts, CacheMetadata metadata, CalculatorFactory calculatorFactory) {
-        this.contexts = contexts;
+    public PermissionCache(QueryOptions queryOptions, CacheMetadata metadata, CalculatorFactory calculatorFactory) {
+        this.queryOptions = queryOptions;
         this.permissions = new ConcurrentHashMap<>();
         this.permissionsUnmodifiable = Collections.unmodifiableMap(this.permissions);
 
-        this.calculator = calculatorFactory.build(contexts, metadata);
+        this.calculator = calculatorFactory.build(queryOptions, metadata);
         this.calculator.setSourcePermissions(this.permissions); // Initial setup.
     }
 
@@ -99,25 +99,25 @@ public class PermissionCache implements PermissionData {
     }
 
     @Override
-    public @NonNull Map<String, Boolean> getImmutableBacking() {
+    public @NonNull Map<String, Boolean> getPermissionMap() {
         return this.permissionsUnmodifiable;
     }
 
-    public TristateResult getPermissionValue(String permission, PermissionCheckEvent.Origin origin) {
+    public TristateResult checkPermission(String permission, PermissionCheckEvent.Origin origin) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
-        return this.calculator.getPermissionValue(permission, origin);
+        return this.calculator.checkPermission(permission, origin);
     }
 
     @Override
-    public @NonNull Tristate getPermissionValue(@NonNull String permission) {
-        return getPermissionValue(permission, PermissionCheckEvent.Origin.LUCKPERMS_API).result();
+    public @NonNull Tristate checkPermission(@NonNull String permission) {
+        return checkPermission(permission, PermissionCheckEvent.Origin.LUCKPERMS_API).result();
     }
 
     @Override
-    public @NonNull Contexts getContexts() {
-        return this.contexts;
+    public @NonNull QueryOptions getQueryOptions() {
+        return this.queryOptions;
     }
 
 }

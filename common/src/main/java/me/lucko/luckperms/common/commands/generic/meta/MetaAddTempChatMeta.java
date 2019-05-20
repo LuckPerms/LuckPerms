@@ -25,10 +25,11 @@
 
 package me.lucko.luckperms.common.commands.generic.meta;
 
-import me.lucko.luckperms.api.ChatMetaType;
-import me.lucko.luckperms.api.TemporaryDataMutateResult;
-import me.lucko.luckperms.api.TemporaryMergeBehaviour;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.model.TemporaryDataMutateResult;
+import me.lucko.luckperms.api.model.TemporaryMergeBehaviour;
+import me.lucko.luckperms.api.node.ChatMetaType;
+import me.lucko.luckperms.api.util.Result;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
@@ -88,10 +89,10 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        TemporaryDataMutateResult ret = holder.setPermission(NodeFactory.buildChatMetaNode(this.type, priority, meta).setExpiry(duration).withExtraContext(context).build(), modifier);
+        TemporaryDataMutateResult ret = holder.setPermission(NodeFactory.buildChatMetaNode(this.type, priority, meta).expiry(duration).withContext(context).build(), modifier);
 
-        if (ret.getResult().asBoolean()) {
-            duration = ret.getMergedNode().getExpiryUnixTime();
+        if (((Result) ret.getResult()).wasSuccessful()) {
+            duration = ret.getMergedNode().getExpiry().getEpochSecond();
 
             TextComponent.Builder builder = Message.ADD_TEMP_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
             HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(

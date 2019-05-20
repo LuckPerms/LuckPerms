@@ -73,16 +73,16 @@ public class ContextsFile {
             JsonObject data = GsonProvider.normal().fromJson(reader, JsonObject.class);
 
             if (data.has("context")) {
-                this.staticContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("context").getAsJsonObject()).makeImmutable();
+                this.staticContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("context").getAsJsonObject()).immutableCopy();
                 save = true;
             }
 
             if (data.has("static-contexts")) {
-                this.staticContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("static-contexts").getAsJsonObject()).makeImmutable();
+                this.staticContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("static-contexts").getAsJsonObject()).immutableCopy();
             }
 
             if (data.has("default-contexts")) {
-                this.defaultContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("default-contexts").getAsJsonObject()).makeImmutable();
+                this.defaultContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("default-contexts").getAsJsonObject()).immutableCopy();
             }
 
         } catch (IOException e) {

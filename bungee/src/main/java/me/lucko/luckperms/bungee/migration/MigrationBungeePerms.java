@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.bungee.migration;
 
+import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
@@ -138,14 +139,14 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         for (Map.Entry<String, Server> e : entity.getServers().entrySet()) {
             for (String perm : e.getValue().getPerms()) {
                 if (perm.isEmpty()) continue;
-                holder.setPermission(MigrationUtils.parseNode(perm, true).setServer(e.getKey()).build());
+                holder.setPermission(MigrationUtils.parseNode(perm, true).withContext(DefaultContextKeys.SERVER_KEY, e.getKey()).build());
             }
 
             // Migrate per-world perms
             for (Map.Entry<String, World> we : e.getValue().getWorlds().entrySet()) {
                 for (String perm : we.getValue().getPerms()) {
                     if (perm.isEmpty()) continue;
-                    holder.setPermission(MigrationUtils.parseNode(perm, true).setServer(e.getKey()).setWorld(we.getKey()).build());
+                    holder.setPermission(MigrationUtils.parseNode(perm, true).withContext(DefaultContextKeys.SERVER_KEY, e.getKey()).withContext(DefaultContextKeys.WORLD_KEY, we.getKey()).build());
                 }
             }
         }

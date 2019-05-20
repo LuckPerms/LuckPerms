@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.common.commands.generic.parent;
 
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.StandardNodeEquality;
-import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.node.Node;
+import me.lucko.luckperms.api.node.NodeEqualityPredicate;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
@@ -79,9 +79,9 @@ public class UserSwitchPrimaryGroup extends SharedSubCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (ArgumentPermissions.checkContext(plugin, sender, permission, ContextSet.empty()) ||
-                ArgumentPermissions.checkGroup(plugin, sender, holder, ContextSet.empty()) ||
-                ArgumentPermissions.checkGroup(plugin, sender, group, ContextSet.empty()) ||
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, ImmutableContextSet.empty()) ||
+                ArgumentPermissions.checkGroup(plugin, sender, holder, ImmutableContextSet.empty()) ||
+                ArgumentPermissions.checkGroup(plugin, sender, group, ImmutableContextSet.empty()) ||
                 ArgumentPermissions.checkArguments(plugin, sender, permission, group.getName())) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
@@ -93,7 +93,7 @@ public class UserSwitchPrimaryGroup extends SharedSubCommand {
         }
 
         Node node = NodeFactory.buildGroupNode(group.getName()).build();
-        if (!user.hasPermission(NodeMapType.ENDURING, node, StandardNodeEquality.IGNORE_VALUE).asBoolean()) {
+        if (!user.hasPermission(NodeMapType.ENDURING, node, NodeEqualityPredicate.IGNORE_VALUE).asBoolean()) {
             Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, user.getFormattedDisplayName(), group.getName());
             user.setPermission(node);
         }

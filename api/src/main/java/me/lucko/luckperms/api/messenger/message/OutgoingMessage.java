@@ -38,8 +38,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * <p>Note that all implementations of this interface are guaranteed to be an
  * instance of one of the interfaces extending {@link Message} in the
  * 'api.messenger.message.type' package.</p>
- *
- * @since 4.1
  */
 public interface OutgoingMessage extends Message {
 

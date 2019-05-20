@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.sponge.calculator;
 
-import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.node.Tristate;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
@@ -37,23 +37,23 @@ public abstract class DefaultsProcessor implements PermissionProcessor {
     private static final TristateResult.Factory ROOT_DEFAULTS_RESULT_FACTORY = new TristateResult.Factory(DefaultsProcessor.class, "root defaults");
 
     protected final LPPermissionService service;
-    private final ImmutableContextSet contexts;
+    private final QueryOptions queryOptions;
 
-    public DefaultsProcessor(LPPermissionService service, ImmutableContextSet contexts) {
+    public DefaultsProcessor(LPPermissionService service, QueryOptions queryOptions) {
         this.service = service;
-        this.contexts = contexts;
+        this.queryOptions = queryOptions;
     }
 
     protected abstract LPSubject getTypeDefaults();
 
     @Override
     public TristateResult hasPermission(String permission) {
-        Tristate t = getTypeDefaults().getPermissionValue(this.contexts, permission);
+        Tristate t = getTypeDefaults().getPermissionValue(this.queryOptions, permission);
         if (t != Tristate.UNDEFINED) {
             return TYPE_DEFAULTS_RESULT_FACTORY.result(t);
         }
 
-        t = this.service.getRootDefaults().getPermissionValue(this.contexts, permission);
+        t = this.service.getRootDefaults().getPermissionValue(this.queryOptions, permission);
         if (t != Tristate.UNDEFINED) {
             return ROOT_DEFAULTS_RESULT_FACTORY.result(t);
         }

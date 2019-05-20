@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.verbose;
 
-import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.sender.Sender;
@@ -69,11 +69,11 @@ public class VerboseHandler extends RepeatingTask {
      *
      * @param origin the origin of the check
      * @param checkTarget the target of the permission check
-     * @param checkContext the contexts where the check occurred
+     * @param checkQueryOptions the query options used for the check
      * @param permission the permission which was checked for
      * @param result the result of the permission check
      */
-    public void offerPermissionCheckEvent(PermissionCheckEvent.Origin origin, String checkTarget, ContextSet checkContext, String permission, TristateResult result) {
+    public void offerPermissionCheckEvent(PermissionCheckEvent.Origin origin, String checkTarget, QueryOptions checkQueryOptions, String permission, TristateResult result) {
         // don't bother even processing the check if there are no listeners registered
         if (!this.listening) {
             return;
@@ -82,7 +82,7 @@ public class VerboseHandler extends RepeatingTask {
         StackTraceElement[] trace = new Exception().getStackTrace();
 
         // add the check data to a queue to be processed later.
-        this.queue.offer(new PermissionCheckEvent(origin, checkTarget, checkContext.makeImmutable(), trace, permission, result));
+        this.queue.offer(new PermissionCheckEvent(origin, checkTarget, checkQueryOptions, trace, permission, result));
     }
 
     /**
@@ -93,11 +93,11 @@ public class VerboseHandler extends RepeatingTask {
      *
      * @param origin the origin of the check
      * @param checkTarget the target of the meta check
-     * @param checkContext the contexts where the check occurred
+     * @param checkQueryOptions the query options used for the check
      * @param key the meta key which was checked for
      * @param result the result of the meta check
      */
-    public void offerMetaCheckEvent(MetaCheckEvent.Origin origin, String checkTarget, ContextSet checkContext, String key, String result) {
+    public void offerMetaCheckEvent(MetaCheckEvent.Origin origin, String checkTarget, QueryOptions checkQueryOptions, String key, String result) {
         // don't bother even processing the check if there are no listeners registered
         if (!this.listening) {
             return;
@@ -106,7 +106,7 @@ public class VerboseHandler extends RepeatingTask {
         StackTraceElement[] trace = new Exception().getStackTrace();
 
         // add the check data to a queue to be processed later.
-        this.queue.offer(new MetaCheckEvent(origin, checkTarget, checkContext.makeImmutable(), trace, key, result));
+        this.queue.offer(new MetaCheckEvent(origin, checkTarget, checkQueryOptions, trace, key, result));
     }
 
     /**

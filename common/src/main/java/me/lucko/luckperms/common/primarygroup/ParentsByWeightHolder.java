@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.primarygroup;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.node.types.InheritanceNode;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 
@@ -42,9 +42,9 @@ public class ParentsByWeightHolder extends ContextualHolder {
     }
 
     @Override
-    protected @NonNull Optional<String> calculateValue(Contexts contexts) {
+    protected @NonNull Optional<String> calculateValue(QueryOptions queryOptions) {
         Set<Group> groups = new LinkedHashSet<>();
-        for (Node node : this.user.getOwnGroupNodes(contexts.getContexts())) {
+        for (InheritanceNode node : this.user.getOwnGroupNodes(queryOptions)) {
             Group group = this.user.getPlugin().getGroupManager().getIfLoaded(node.getGroupName());
             if (group != null) {
                 groups.add(group);

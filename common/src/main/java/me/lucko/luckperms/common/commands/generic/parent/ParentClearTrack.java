@@ -25,7 +25,8 @@
 
 package me.lucko.luckperms.common.commands.generic.parent;
 
-import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.node.NodeType;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
@@ -81,7 +82,7 @@ public class ParentClearTrack extends SharedSubCommand {
 
         int before = holder.enduringData().immutable().size();
 
-        MutableContextSet context = ArgumentParser.parseContext(1, args, plugin);
+        ImmutableContextSet context = ArgumentParser.parseContext(1, args, plugin).immutableCopy();
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
                 ArgumentPermissions.checkGroup(plugin, sender, holder, context) ||
@@ -91,9 +92,9 @@ public class ParentClearTrack extends SharedSubCommand {
         }
 
         if (context.isEmpty()) {
-            holder.removeIf(node -> node.isGroupNode() && track.containsGroup(node.getGroupName()));
+            holder.removeIfEnduring(NodeType.INHERITANCE.predicate(n -> track.containsGroup(n.getGroupName())));
         } else {
-            holder.removeIf(node -> node.isGroupNode() && node.getFullContexts().equals(context) && track.containsGroup(node.getGroupName()));
+            holder.removeIfEnduring(NodeType.INHERITANCE.predicate(n -> n.getContexts().equals(context) && track.containsGroup(n.getGroupName())));
         }
 
         if (holder.getType() == HolderType.USER) {

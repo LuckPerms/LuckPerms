@@ -27,12 +27,12 @@ package me.lucko.luckperms.common.defaultassignments;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.StandardNodeEquality;
-import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.node.Node;
+import me.lucko.luckperms.api.node.NodeEqualityPredicate;
+import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.factory.LegacyNodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.util.Scripting;
 
 import java.util.List;
@@ -62,7 +62,7 @@ public class AssignmentExpression {
             throw new NullPointerException("script engine");
         }
 
-        Predicate<Node> checker = node -> holder.hasPermission(NodeMapType.ENDURING, node, StandardNodeEquality.IGNORE_VALUE_OR_IF_TEMPORARY) == tristate;
+        Predicate<Node> checker = node -> holder.hasPermission(NodeMapType.ENDURING, node, NodeEqualityPredicate.IGNORE_VALUE_OR_IF_TEMPORARY) == tristate;
 
         String exp = this.expression.stream().map(t -> t.forExpression(checker)).collect(Collectors.joining())
                 .replace("&", "&&").replace("|", "||");
@@ -140,7 +140,7 @@ public class AssignmentExpression {
 
         private PermissionToken(String permission) {
             this.permission = permission;
-            this.node = LegacyNodeFactory.fromLegacyString(permission, true);
+            this.node = NodeFactory.make(permission);
         }
 
         @Override

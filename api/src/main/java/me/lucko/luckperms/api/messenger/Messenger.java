@@ -32,8 +32,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents an object which dispatches {@link OutgoingMessage}s.
- *
- * @since 4.1
  */
 public interface Messenger extends AutoCloseable {
 

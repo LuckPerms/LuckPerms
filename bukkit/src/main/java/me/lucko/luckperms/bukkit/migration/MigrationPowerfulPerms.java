@@ -33,8 +33,9 @@ import com.github.gustav9797.PowerfulPermsAPI.PowerfulPermsPlugin;
 import com.google.common.collect.ImmutableSet;
 import com.zaxxer.hikari.HikariDataSource;
 
-import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.api.event.cause.CreationCause;
+import me.lucko.luckperms.api.node.NodeBuilder;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -183,7 +184,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 }
 
                 if (server != null) {
-                    group.setPermission(NodeFactory.buildPrefixNode(g.getRank(), prefix.getValue()).setServer(server).build());
+                    group.setPermission(NodeFactory.buildPrefixNode(g.getRank(), prefix.getValue()).withContext(DefaultContextKeys.SERVER_KEY, server).build());
                 } else {
                     group.setPermission(NodeFactory.buildPrefixNode(g.getRank(), prefix.getValue()).build());
                 }
@@ -198,7 +199,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 }
 
                 if (server != null) {
-                    group.setPermission(NodeFactory.buildSuffixNode(g.getRank(), suffix.getValue()).setServer(server).build());
+                    group.setPermission(NodeFactory.buildSuffixNode(g.getRank(), suffix.getValue()).withContext(DefaultContextKeys.SERVER_KEY, server).build());
                 } else {
                     group.setPermission(NodeFactory.buildSuffixNode(g.getRank(), suffix.getValue()).build());
                 }
@@ -302,10 +303,10 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             server = "global";
         }
 
-        Node.Builder nb = NodeFactory.builder(node).setValue(value);
-        if (expireAt != 0) nb.setExpiry(expireAt);
-        if (server != null) nb.setServer(server);
-        if (world != null) nb.setWorld(world);
+        NodeBuilder nb = NodeFactory.builder(node).value(value);
+        if (expireAt != 0) nb.expiry(expireAt);
+        if (server != null) nb.withContext(DefaultContextKeys.SERVER_KEY, server);
+        if (world != null) nb.withContext(DefaultContextKeys.WORLD_KEY, world);
 
         holder.setPermission(nb.build());
     }
@@ -319,14 +320,14 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             expireAt = g.getExpirationDate().getTime() / 1000L;
         }
 
-        Node.Builder nb = NodeFactory.builder(node);
+        NodeBuilder nb = NodeFactory.builder(node);
 
         if (expireAt != 0) {
-            nb.setExpiry(expireAt);
+            nb.expiry(expireAt);
         }
 
         if (server != null) {
-            nb.setServer(server);
+            nb.withContext(DefaultContextKeys.SERVER_KEY, server);
         }
 
         holder.setPermission(nb.build());

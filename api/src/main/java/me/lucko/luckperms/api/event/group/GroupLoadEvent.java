@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.api.event.group;
 
-import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
+import me.lucko.luckperms.api.model.group.Group;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -43,6 +43,7 @@ public interface GroupLoadEvent extends LuckPermsEvent {
      *
      * @return the group that was loaded
      */
-    @NonNull @Param(0) Group getGroup();
+    @Param(0)
+    @NonNull Group getGroup();
 
 }

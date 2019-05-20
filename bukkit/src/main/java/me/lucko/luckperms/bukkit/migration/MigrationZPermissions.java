@@ -25,9 +25,10 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
-import me.lucko.luckperms.api.ChatMetaType;
-import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.api.event.cause.CreationCause;
+import me.lucko.luckperms.api.node.ChatMetaType;
+import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -40,7 +41,7 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
-import me.lucko.luckperms.common.node.model.NodeTypes;
+import me.lucko.luckperms.common.node.factory.NodeTypes;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Iterators;
@@ -128,7 +129,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
                     nodes.add(NodeFactory.buildGroupNode(groupName).build());
                 } else {
                     long expiry = membership.getExpiration().toInstant().getEpochSecond();
-                    nodes.add(NodeFactory.buildGroupNode(groupName).setExpiry(expiry).build());
+                    nodes.add(NodeFactory.buildGroupNode(groupName).expiry(expiry).build());
                 }
             }
 
@@ -196,9 +197,9 @@ public class MigrationZPermissions extends SubCommand<Object> {
             if (e.getPermission().isEmpty()) continue;
 
             if (e.getWorld() != null && !e.getWorld().getName().equals("")) {
-                holder.setPermission(NodeFactory.builder(e.getPermission()).setValue(e.isValue()).setWorld(e.getWorld().getName()).build());
+                holder.setPermission(NodeFactory.builder(e.getPermission()).value(e.isValue()).withContext(DefaultContextKeys.WORLD_KEY, e.getWorld().getName()).build());
             } else {
-                holder.setPermission(NodeFactory.builder(e.getPermission()).setValue(e.isValue()).build());
+                holder.setPermission(NodeFactory.builder(e.getPermission()).value(e.isValue()).build());
             }
         }
 

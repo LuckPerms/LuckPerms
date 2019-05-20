@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.context;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.context.ContextConsumer;
+import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.api.context.StaticContextCalculator;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
@@ -41,15 +41,12 @@ public class LPStaticContextsCalculator implements StaticContextCalculator {
     }
 
     @Override
-    public @NonNull MutableContextSet giveApplicableContext(@NonNull MutableContextSet accumulator) {
+    public void giveApplicableContext(@NonNull ContextConsumer consumer) {
         String server = this.config.get(ConfigKeys.SERVER);
         if (!server.equals("global")) {
-            accumulator.add(Contexts.SERVER_KEY, server);
+            consumer.accept(DefaultContextKeys.SERVER_KEY, server);
         }
-
-        accumulator.addAll(this.config.getContextsFile().getStaticContexts());
-
-        return accumulator;
+        consumer.accept(this.config.getContextsFile().getStaticContexts());
     }
 
 }

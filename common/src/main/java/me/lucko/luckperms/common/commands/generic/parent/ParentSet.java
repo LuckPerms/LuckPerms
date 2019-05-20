@@ -79,8 +79,8 @@ public class ParentSet extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        holder.clearParents(context, false);
-        holder.setPermission(NodeFactory.buildGroupNode(group.getName()).withExtraContext(context).build());
+        holder.clearEnduringParents(context, false);
+        holder.setPermission(NodeFactory.buildGroupNode(group.getName()).withContext(context).build());
         if (holder.getType() == HolderType.USER) {
             ((User) holder).getPrimaryGroup().setStoredValue(group.getName());
         }

@@ -29,11 +29,15 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
-import me.lucko.luckperms.api.ChatMetaType;
-import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.PlayerSaveResult;
+import me.lucko.luckperms.api.actionlog.Action;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.model.PlayerSaveResult;
+import me.lucko.luckperms.api.node.ChatMetaType;
+import me.lucko.luckperms.api.node.Node;
+import me.lucko.luckperms.api.node.NodeType;
+import me.lucko.luckperms.api.node.types.ChatMetaNode;
+import me.lucko.luckperms.api.node.types.InheritanceNode;
+import me.lucko.luckperms.api.node.types.MetaNode;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.context.ContextSetConfigurateSerializer;
@@ -44,7 +48,6 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.node.model.NodeDataContainer;
-import me.lucko.luckperms.common.node.utils.MetaType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.file.loader.ConfigurateLoader;
@@ -161,7 +164,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
     }
 
     @Override
-    public void logAction(LogEntry entry) {
+    public void logAction(Action entry) {
         this.actionLogger.logAction(entry);
     }
 
@@ -209,7 +212,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 }
             } else {
                 if (this.plugin.getUserManager().shouldSave(user)) {
-                    user.clearNodes();
+                    user.clearEnduringNodes();
                     user.getPrimaryGroup().setStoredValue(null);
                     this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
                 }
@@ -461,7 +464,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
         ImmutableContextSet context = ImmutableContextSet.empty();
         ConfigurationNode contextMap = attributes.getNode("context");
         if (!contextMap.isVirtual() && contextMap.hasMapChildren()) {
-            context = ContextSetConfigurateSerializer.deserializeContextSet(contextMap).makeImmutable();
+            context = ContextSetConfigurateSerializer.deserializeContextSet(contextMap).immutableCopy();
         }
 
         return NodeDataContainer.of(permissionFunction.apply(attributes), true, server, world, expiry, context);
@@ -476,7 +479,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
         ImmutableContextSet context = ImmutableContextSet.empty();
         ConfigurationNode contextMap = attributes.getNode("context");
         if (!contextMap.isVirtual() && contextMap.hasMapChildren()) {
-            context = ContextSetConfigurateSerializer.deserializeContextSet(contextMap).makeImmutable();
+            context = ContextSetConfigurateSerializer.deserializeContextSet(contextMap).immutableCopy();
         }
 
         ConfigurationNode batchAttribute = attributes.getNode("permissions");
@@ -644,56 +647,57 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
 
             // just add a string to the list.
             if (this.loader instanceof YamlLoader && isPlain(node)) {
-                if (n.isGroupNode()) {
-                    parentsSection.getAppendedNode().setValue(n.getGroupName());
+                if (n instanceof InheritanceNode) {
+                    parentsSection.getAppendedNode().setValue(((InheritanceNode) n).getGroupName());
                     continue;
                 }
-                if (!MetaType.ANY.matches(n)) {
+                if (!NodeType.META_OR_CHAT_META.matches(n)) {
                     permissionsSection.getAppendedNode().setValue(node.getPermission());
                     continue;
                 }
             }
 
-            ChatMetaType chatMetaType = ChatMetaType.ofNode(n).orElse(null);
-            if (chatMetaType != null && n.getValue()) {
+            if (n instanceof ChatMetaNode<?, ?> && n.getValue()) {
                 // handle prefixes / suffixes
-                Map.Entry<Integer, String> entry = chatMetaType.getEntry(n);
+                ChatMetaNode<?, ?> chatMeta = (ChatMetaNode<?, ?>) n;
 
                 ConfigurationNode attributes = SimpleConfigurationNode.root();
-                attributes.getNode("priority").setValue(entry.getKey());
+                attributes.getNode("priority").setValue(chatMeta.getPriority());
                 writeAttributesTo(attributes, node, false);
 
-                switch (chatMetaType) {
+                switch (chatMeta.getType()) {
                     case PREFIX:
-                        appendNode(prefixesSection, entry.getValue(), attributes, "prefix");
+                        appendNode(prefixesSection, chatMeta.getMetaValue(), attributes, "prefix");
                         break;
                     case SUFFIX:
-                        appendNode(suffixesSection, entry.getValue(), attributes, "suffix");
+                        appendNode(suffixesSection, chatMeta.getMetaValue(), attributes, "suffix");
                         break;
                     default:
                         throw new AssertionError();
                 }
-            } else if (n.isMeta() && n.getValue()) {
+            } else if (n instanceof MetaNode && n.getValue()) {
                 // handle meta nodes
-                Map.Entry<String, String> meta = n.getMeta();
+                MetaNode meta = (MetaNode) n;
 
                 ConfigurationNode attributes = SimpleConfigurationNode.root();
-                attributes.getNode("value").setValue(meta.getValue());
+                attributes.getNode("value").setValue(meta.getMetaValue());
                 writeAttributesTo(attributes, node, false);
 
-                appendNode(metaSection, meta.getKey(), attributes, "key");
-            } else if (n.isGroupNode() && n.getValue()) {
+                appendNode(metaSection, meta.getMetaKey(), attributes, "key");
+            } else if (n instanceof InheritanceNode && n.getValue()) {
                 // handle group nodes
+                InheritanceNode inheritance = (InheritanceNode) n;
+
                 ConfigurationNode attributes = SimpleConfigurationNode.root();
                 writeAttributesTo(attributes, node, false);
 
-                appendNode(parentsSection, n.getGroupName(), attributes, "group");
+                appendNode(parentsSection, inheritance.getGroupName(), attributes, "group");
             } else {
                 // handle regular permissions and negated meta+prefixes+suffixes
                 ConfigurationNode attributes = SimpleConfigurationNode.root();
                 writeAttributesTo(attributes, node, true);
 
-                appendNode(permissionsSection, n.getPermission(), attributes, "permission");
+                appendNode(permissionsSection, n.getKey(), attributes, "permission");
             }
         }
 

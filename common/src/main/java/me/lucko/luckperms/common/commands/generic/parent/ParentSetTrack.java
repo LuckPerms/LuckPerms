@@ -25,7 +25,8 @@
 
 package me.lucko.luckperms.common.commands.generic.parent;
 
-import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.node.NodeType;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
@@ -96,7 +97,7 @@ public class ParentSetTrack extends SharedSubCommand {
             }
         }
 
-        MutableContextSet context = ArgumentParser.parseContext(2, args, plugin);
+        ImmutableContextSet context = ArgumentParser.parseContext(2, args, plugin).immutableCopy();
 
         Group group = StorageAssistant.loadGroup(groupName, sender, plugin, false);
         if (group == null) {
@@ -111,8 +112,8 @@ public class ParentSetTrack extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        holder.removeIf(node -> node.isGroupNode() && node.getFullContexts().equals(context) && track.containsGroup(node.getGroupName()));
-        holder.setPermission(NodeFactory.buildGroupNode(group.getName()).withExtraContext(context).build());
+        holder.removeIfEnduring(NodeType.INHERITANCE.predicate(n -> n.getContexts().equals(context) && track.containsGroup(n.getGroupName())));
+        holder.setPermission(NodeFactory.buildGroupNode(group.getName()).withContext(context).build());
 
         Message.SET_TRACK_PARENT_SUCCESS.send(sender, holder.getFormattedDisplayName(), track.getName(), group.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 

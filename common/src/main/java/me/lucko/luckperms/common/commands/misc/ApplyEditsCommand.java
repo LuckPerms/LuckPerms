@@ -30,7 +30,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
@@ -134,12 +134,12 @@ public class ApplyEditsCommand extends SingleCommand {
 
         for (Node n : diffAdded) {
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("webeditor", "add", n.getPermission(), n.getValue(), n.getFullContexts())
+                    .action("webeditor", "add", n.getKey(), n.getValue(), n.getContexts())
                     .build().submit(plugin, sender);
         }
         for (Node n : diffRemoved) {
             ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("webeditor", "remove", n.getPermission(), n.getValue(), n.getFullContexts())
+                    .action("webeditor", "remove", n.getKey(), n.getValue(), n.getContexts())
                     .build().submit(plugin, sender);
         }
 
@@ -159,8 +159,8 @@ public class ApplyEditsCommand extends SingleCommand {
     }
 
     private static String formatNode(LocaleManager localeManager, Node n) {
-        return n.getPermission() + " &7(" + (n.getValue() ? "&a" : "&c") + n.getValue() + "&7)" + MessageUtils.getAppendableNodeContextString(localeManager, n) +
-                (n.isTemporary() ? " &7(" + DurationFormatter.CONCISE.formatDateDiff(n.getExpiryUnixTime()) + ")" : "");
+        return n.getKey() + " &7(" + (n.getValue() ? "&a" : "&c") + n.getValue() + "&7)" + MessageUtils.getAppendableNodeContextString(localeManager, n) +
+                (n.hasExpiry() ? " &7(" + DurationFormatter.CONCISE.formatDateDiff(n.getExpiry().getEpochSecond()) + ")" : "");
     }
 
     private static Map.Entry<Set<Node>, Set<Node>> diff(Set<Node> before, Set<Node> after) {

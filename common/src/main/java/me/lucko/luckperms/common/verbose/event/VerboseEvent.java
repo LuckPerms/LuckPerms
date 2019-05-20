@@ -27,12 +27,14 @@ package me.lucko.luckperms.common.verbose.event;
 
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.query.QueryMode;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.util.StackTracePrinter;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Represents a verbose event.
@@ -45,18 +47,18 @@ public abstract class VerboseEvent {
     private final String checkTarget;
 
     /**
-     * The contexts where the check took place
+     * The query options used for the check
      */
-    private final ImmutableContextSet checkContext;
+    private final QueryOptions checkQueryOptions;
 
     /**
      * The stack trace when the check took place
      */
     private final StackTraceElement[] checkTrace;
 
-    protected VerboseEvent(String checkTarget, ImmutableContextSet checkContext, StackTraceElement[] checkTrace) {
+    protected VerboseEvent(String checkTarget, QueryOptions checkQueryOptions, StackTraceElement[] checkTrace) {
         this.checkTarget = checkTarget;
-        this.checkContext = checkContext;
+        this.checkQueryOptions = checkQueryOptions;
         this.checkTrace = checkTrace;
     }
 
@@ -64,8 +66,8 @@ public abstract class VerboseEvent {
         return this.checkTarget;
     }
 
-    public ImmutableContextSet getCheckContext() {
-        return this.checkContext;
+    public QueryOptions getCheckQueryOptions() {
+        return this.checkQueryOptions;
     }
 
     public StackTraceElement[] getCheckTrace() {
@@ -79,13 +81,18 @@ public abstract class VerboseEvent {
                 .add("who", new JObject()
                         .add("identifier", this.checkTarget)
                 )
-                .add("context", new JArray()
-                        .consume(arr -> {
-                            for (Map.Entry<String, String> contextPair : this.checkContext.toSet()) {
-                                arr.add(new JObject().add("key", contextPair.getKey()).add("value", contextPair.getValue()));
-                            }
-                        })
-                )
+                .add("queryMode", this.checkQueryOptions.mode().name().toLowerCase())
+                .consume(obj -> {
+                    if (this.checkQueryOptions.mode() == QueryMode.CONTEXTUAL) {
+                        obj.add("context", new JArray()
+                                .consume(arr -> {
+                                    for (Map.Entry<String, String> contextPair : Objects.requireNonNull(this.checkQueryOptions.context())) {
+                                        arr.add(new JObject().add("key", contextPair.getKey()).add("value", contextPair.getValue()));
+                                    }
+                                })
+                        );
+                    }
+                })
                 .consume(this::serializeTo);
     }
 

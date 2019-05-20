@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.api.event.log;
 
-import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.actionlog.Action;
 import me.lucko.luckperms.api.event.Cancellable;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
@@ -36,8 +36,6 @@ import java.util.UUID;
 
 /**
  * Called when a log is about to be published to the network via the MessagingService
- *
- * @since 3.3
  */
 public interface LogNetworkPublishEvent extends LuckPermsEvent, Cancellable {
 
@@ -46,13 +44,15 @@ public interface LogNetworkPublishEvent extends LuckPermsEvent, Cancellable {
      *
      * @return the id of the log entry being published
      */
-    @NonNull @Param(0) UUID getLogId();
+    @Param(0)
+    @NonNull UUID getLogId();
 
     /**
      * Gets the log entry to be published
      *
      * @return the log entry to be published
      */
-    @NonNull @Param(1) LogEntry getEntry();
+    @Param(1)
+    @NonNull Action getEntry();
 
 }

@@ -28,7 +28,7 @@ package me.lucko.luckperms.nukkit.inject.server;
 import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.ImmutableMap;
 
-import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
@@ -101,7 +101,7 @@ public final class LPDefaultsMap {
      */
     public Tristate lookupDefaultPermission(String permission, boolean isOp) {
         Map<String, Boolean> map = getCache(isOp).get();
-        return Tristate.fromNullableBoolean(map.get(permission));
+        return Tristate.of(map.get(permission));
     }
 
     final class DefaultPermissionSet extends ForwardingMap<String, Permission> {

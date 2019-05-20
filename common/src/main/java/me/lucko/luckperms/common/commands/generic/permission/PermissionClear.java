@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.node.types.PermissionNode;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
@@ -68,9 +69,9 @@ public class PermissionClear extends SharedSubCommand {
         }
 
         if (context.isEmpty()) {
-            holder.clearPermissions();
+            holder.removeIfEnduring(node -> node instanceof PermissionNode);
         } else {
-            holder.clearPermissions(context);
+            holder.removeIfEnduring(context, node -> node instanceof PermissionNode);
         }
 
         int changed = before - holder.enduringData().immutable().size();

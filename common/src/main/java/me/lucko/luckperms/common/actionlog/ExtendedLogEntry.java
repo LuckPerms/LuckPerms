@@ -27,9 +27,9 @@ package me.lucko.luckperms.common.actionlog;
 
 import com.google.common.base.Strings;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.actionlog.Action;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -49,20 +49,20 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * An implementation of {@link LogEntry} and {@link LogEntry.Builder},
+ * An implementation of {@link Action} and {@link Action.Builder},
  * with helper methods for populating and using the entry using internal
  * LuckPerms classes.
  */
-public class ExtendedLogEntry implements LogEntry {
+public class ExtendedLogEntry implements Action {
 
-    private static final Comparator<LogEntry> COMPARATOR = Comparator
-            .comparingLong(LogEntry::getTimestamp)
-            .thenComparing(LogEntry::getActor)
-            .thenComparing(LogEntry::getActorName, String.CASE_INSENSITIVE_ORDER)
-            .thenComparing(LogEntry::getType)
+    private static final Comparator<Action> COMPARATOR = Comparator
+            .comparingLong(Action::getTimestamp)
+            .thenComparing(Action::getActor)
+            .thenComparing(Action::getActorName, String.CASE_INSENSITIVE_ORDER)
+            .thenComparing(Action::getType)
             .thenComparing(e -> e.getActed().map(UUID::toString).orElse(""))
-            .thenComparing(LogEntry::getActedName, String.CASE_INSENSITIVE_ORDER)
-            .thenComparing(LogEntry::getAction);
+            .thenComparing(Action::getActedName, String.CASE_INSENSITIVE_ORDER)
+            .thenComparing(Action::getAction);
 
     /**
      * Creates a new log entry builder
@@ -143,7 +143,7 @@ public class ExtendedLogEntry implements LogEntry {
     }
 
     @Override
-    public int compareTo(@NonNull LogEntry other) {
+    public int compareTo(@NonNull Action other) {
         Objects.requireNonNull(other, "other");
         return COMPARATOR.compare(this, other);
     }
@@ -174,8 +174,8 @@ public class ExtendedLogEntry implements LogEntry {
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
-        if (!(o instanceof LogEntry)) return false;
-        final LogEntry that = (LogEntry) o;
+        if (!(o instanceof Action)) return false;
+        final Action that = (Action) o;
 
         return this.getTimestamp() == that.getTimestamp() &&
                 this.getActor().equals(that.getActor()) &&
@@ -200,7 +200,7 @@ public class ExtendedLogEntry implements LogEntry {
         return result;
     }
 
-    public static class Builder implements LogEntry.Builder {
+    public static class Builder implements Action.Builder {
 
         private long timestamp = 0L;
         private UUID actor = null;
@@ -210,74 +210,39 @@ public class ExtendedLogEntry implements LogEntry {
         private String actedName = null;
         private String action = null;
 
-        @Override
-        public @NonNull Builder setTimestamp(long timestamp) {
+        public @NonNull Builder timestamp(long timestamp) {
             this.timestamp = timestamp;
             return this;
         }
 
-        @Override
-        public @NonNull Builder setActor(@NonNull UUID actor) {
+        public @NonNull Builder actor(@NonNull UUID actor) {
             this.actor = Objects.requireNonNull(actor, "actor");
             return this;
         }
 
-        @Override
-        public @NonNull Builder setActorName(@NonNull String actorName) {
+        public @NonNull Builder actorName(@NonNull String actorName) {
             this.actorName = Objects.requireNonNull(actorName, "actorName");
             return this;
         }
 
-        @Override
-        public @NonNull Builder setType(@NonNull Type type) {
+        public @NonNull Builder type(@NonNull Type type) {
             this.type = Objects.requireNonNull(type, "type");
             return this;
         }
 
-        @Override
-        public @NonNull Builder setActed(UUID acted) {
+        public @NonNull Builder acted(UUID acted) {
             this.acted = acted; // nullable
             return this;
         }
 
-        @Override
-        public @NonNull Builder setActedName(@NonNull String actedName) {
+        public @NonNull Builder actedName(@NonNull String actedName) {
             this.actedName = Objects.requireNonNull(actedName, "actedName");
             return this;
         }
 
-        @Override
-        public @NonNull Builder setAction(@NonNull String action) {
+        public @NonNull Builder action(@NonNull String action) {
             this.action = Objects.requireNonNull(action, "action");
             return this;
-        }
-
-        public Builder timestamp(long timestamp) {
-            return setTimestamp(timestamp);
-        }
-
-        public Builder actor(UUID actor) {
-            return setActor(actor);
-        }
-
-        public Builder actorName(String actorName) {
-            return setActorName(actorName);
-        }
-
-        public Builder type(Type type) {
-            return setType(type);
-        }
-
-        public Builder acted(UUID acted) {
-            return setActed(acted);
-        }
-
-        public Builder actedName(String actedName) {
-            return setActedName(actedName);
-        }
-
-        public Builder action(String action) {
-            return setAction(action);
         }
 
         public Builder actor(Sender actor) {
@@ -313,15 +278,15 @@ public class ExtendedLogEntry implements LogEntry {
                 if (o instanceof ContextSet) {
                     ContextSet set = (ContextSet) o;
 
-                    for (String value : set.getValues(Contexts.SERVER_KEY)) {
+                    for (String value : set.getValues(DefaultContextKeys.SERVER_KEY)) {
                         parts.add("server=" + value);
                     }
-                    for (String value : set.getValues(Contexts.WORLD_KEY)) {
+                    for (String value : set.getValues(DefaultContextKeys.WORLD_KEY)) {
                         parts.add("world=" + value);
                     }
 
                     for (Map.Entry<String, String> context : set.toSet()) {
-                        if (context.getKey().equals(Contexts.SERVER_KEY) || context.getKey().equals(Contexts.WORLD_KEY)) {
+                        if (context.getKey().equals(DefaultContextKeys.SERVER_KEY) || context.getKey().equals(DefaultContextKeys.WORLD_KEY)) {
                             continue;
                         }
                         parts.add(context.getKey() + "=" + context.getValue());

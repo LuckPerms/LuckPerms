@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.api.implementation;
 
-import me.lucko.luckperms.api.HeldPermission;
-import me.lucko.luckperms.api.PlayerSaveResult;
+import me.lucko.luckperms.api.model.PlayerSaveResult;
+import me.lucko.luckperms.api.node.HeldNode;
 import me.lucko.luckperms.common.api.ApiUtils;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
@@ -45,13 +45,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class ApiUserManager extends ApiAbstractManager<User, me.lucko.luckperms.api.User, UserManager<?>> implements me.lucko.luckperms.api.manager.UserManager {
+public class ApiUserManager extends ApiAbstractManager<User, me.lucko.luckperms.api.model.user.User, UserManager<?>> implements me.lucko.luckperms.api.model.user.UserManager {
     public ApiUserManager(LuckPermsPlugin plugin, UserManager<?> handle) {
         super(plugin, handle);
     }
 
     @Override
-    protected me.lucko.luckperms.api.User getDelegateFor(User internal) {
+    protected me.lucko.luckperms.api.model.user.User getDelegateFor(User internal) {
         if (internal == null) {
             return null;
         }
@@ -59,7 +59,7 @@ public class ApiUserManager extends ApiAbstractManager<User, me.lucko.luckperms.
     }
 
     @Override
-    public @NonNull CompletableFuture<me.lucko.luckperms.api.User> loadUser(@NonNull UUID uuid, @Nullable String username) {
+    public @NonNull CompletableFuture<me.lucko.luckperms.api.model.user.User> loadUser(@NonNull UUID uuid, @Nullable String username) {
         Objects.requireNonNull(uuid, "uuid");
         ApiUtils.checkUsername(username, this.plugin);
 
@@ -72,7 +72,7 @@ public class ApiUserManager extends ApiAbstractManager<User, me.lucko.luckperms.
     }
 
     @Override
-    public @NonNull CompletableFuture<UUID> lookupUuid(@NonNull String username) {
+    public @NonNull CompletableFuture<UUID> lookupUniqueId(@NonNull String username) {
         Objects.requireNonNull(username, "username");
         return this.plugin.getStorage().getPlayerUuid(username);
     }
@@ -84,7 +84,7 @@ public class ApiUserManager extends ApiAbstractManager<User, me.lucko.luckperms.
     }
 
     @Override
-    public @NonNull CompletableFuture<Void> saveUser(me.lucko.luckperms.api.@NonNull User user) {
+    public @NonNull CompletableFuture<Void> saveUser(me.lucko.luckperms.api.model.user.User user) {
         Objects.requireNonNull(user, "user");
         return this.plugin.getStorage().saveUser(ApiUser.cast(user));
     }
@@ -102,25 +102,25 @@ public class ApiUserManager extends ApiAbstractManager<User, me.lucko.luckperms.
     }
 
     @Override
-    public @NonNull CompletableFuture<List<HeldPermission<UUID>>> getWithPermission(@NonNull String permission) {
+    public @NonNull CompletableFuture<List<HeldNode<UUID>>> getWithPermission(@NonNull String permission) {
         Objects.requireNonNull(permission, "permission");
         return this.plugin.getStorage().getUsersWithPermission(Constraint.of(StandardComparison.EQUAL, permission));
     }
 
     @Override
-    public me.lucko.luckperms.api.User getUser(@NonNull UUID uuid) {
+    public me.lucko.luckperms.api.model.user.User getUser(@NonNull UUID uuid) {
         Objects.requireNonNull(uuid, "uuid");
         return getDelegateFor(this.handle.getIfLoaded(uuid));
     }
 
     @Override
-    public me.lucko.luckperms.api.User getUser(@NonNull String name) {
+    public me.lucko.luckperms.api.model.user.User getUser(@NonNull String name) {
         Objects.requireNonNull(name, "name");
         return getDelegateFor(this.handle.getByUsername(name));
     }
 
     @Override
-    public @NonNull Set<me.lucko.luckperms.api.User> getLoadedUsers() {
+    public @NonNull Set<me.lucko.luckperms.api.model.user.User> getLoadedUsers() {
         return this.handle.getAll().values().stream()
                 .map(this::getDelegateFor)
                 .collect(ImmutableCollectors.toSet());
@@ -133,7 +133,7 @@ public class ApiUserManager extends ApiAbstractManager<User, me.lucko.luckperms.
     }
 
     @Override
-    public void cleanupUser(me.lucko.luckperms.api.@NonNull User user) {
+    public void cleanupUser(me.lucko.luckperms.api.model.user.User user) {
         Objects.requireNonNull(user, "user");
         this.handle.getHouseKeeper().clearApiUsage(ApiUser.cast(user).getUuid());
     }

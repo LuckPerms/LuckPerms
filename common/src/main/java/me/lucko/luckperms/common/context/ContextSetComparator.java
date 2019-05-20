@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.context;
 
-import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 
 import java.util.ArrayList;
@@ -53,12 +53,12 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
             return 0;
         }
 
-        int result = Boolean.compare(o1.containsKey(Contexts.SERVER_KEY), o2.containsKey(Contexts.SERVER_KEY));
+        int result = Boolean.compare(o1.containsKey(DefaultContextKeys.SERVER_KEY), o2.containsKey(DefaultContextKeys.SERVER_KEY));
         if (result != 0) {
             return result;
         }
 
-        result = Boolean.compare(o1.containsKey(Contexts.WORLD_KEY), o2.containsKey(Contexts.WORLD_KEY));
+        result = Boolean.compare(o1.containsKey(DefaultContextKeys.WORLD_KEY), o2.containsKey(DefaultContextKeys.WORLD_KEY));
         if (result != 0) {
             return result;
         }

@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.plugin;
 
-import me.lucko.luckperms.api.LuckPermsApi;
+import me.lucko.luckperms.api.LuckPerms;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.ApiRegistrationUtil;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
@@ -243,7 +243,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     protected abstract void setupContextManager();
     protected abstract void setupPlatformHooks();
     protected abstract AbstractEventBus provideEventBus(LuckPermsApiProvider apiProvider);
-    protected abstract void registerApiOnPlatform(LuckPermsApi api);
+    protected abstract void registerApiOnPlatform(LuckPerms api);
     protected abstract void registerHousekeepingTasks();
     protected abstract void performFinalSetup();
 

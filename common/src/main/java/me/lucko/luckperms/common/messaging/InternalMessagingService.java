@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.messaging;
 
-import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.actionlog.Action;
 import me.lucko.luckperms.api.messenger.Messenger;
 import me.lucko.luckperms.api.messenger.MessengerProvider;
 import me.lucko.luckperms.common.cache.BufferedRequest;
@@ -74,6 +74,6 @@ public interface InternalMessagingService {
      *
      * @param logEntry the log entry
      */
-    void pushLog(LogEntry logEntry);
+    void pushLog(Action logEntry);
 
 }

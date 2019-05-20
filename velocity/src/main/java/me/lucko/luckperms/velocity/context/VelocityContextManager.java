@@ -28,11 +28,11 @@ package me.lucko.luckperms.velocity.context;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.velocitypowered.api.proxy.Player;
 
-import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.context.ContextManager;
-import me.lucko.luckperms.common.context.ContextsCache;
-import me.lucko.luckperms.common.context.ContextsSupplier;
+import me.lucko.luckperms.common.context.QueryOptionsCache;
+import me.lucko.luckperms.common.context.QueryOptionsSupplier;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.velocity.LPVelocityPlugin;
 
@@ -40,16 +40,16 @@ import java.util.concurrent.TimeUnit;
 
 public class VelocityContextManager extends ContextManager<Player> {
 
-    private final LoadingCache<Player, ContextsCache<Player>> subjectCaches = CaffeineFactory.newBuilder()
+    private final LoadingCache<Player, QueryOptionsCache<Player>> subjectCaches = CaffeineFactory.newBuilder()
             .expireAfterAccess(1, TimeUnit.MINUTES)
-            .build(key -> new ContextsCache<>(key, this));
+            .build(key -> new QueryOptionsCache<>(key, this));
 
     public VelocityContextManager(LPVelocityPlugin plugin) {
         super(plugin, Player.class);
     }
 
     @Override
-    public ContextsSupplier getCacheFor(Player subject) {
+    public QueryOptionsSupplier getCacheFor(Player subject) {
         if (subject == null) {
             throw new NullPointerException("subject");
         }
@@ -63,14 +63,14 @@ public class VelocityContextManager extends ContextManager<Player> {
             throw new NullPointerException("subject");
         }
 
-        ContextsCache<Player> cache = this.subjectCaches.getIfPresent(subject);
+        QueryOptionsCache<Player> cache = this.subjectCaches.getIfPresent(subject);
         if (cache != null) {
             cache.invalidate();
         }
     }
 
     @Override
-    public Contexts formContexts(Player subject, ImmutableContextSet contextSet) {
-        return formContexts(contextSet);
+    public QueryOptions formQueryOptions(Player subject, ImmutableContextSet contextSet) {
+        return formQueryOptions(contextSet);
     }
 }

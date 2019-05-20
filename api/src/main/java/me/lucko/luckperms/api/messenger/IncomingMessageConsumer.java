@@ -33,8 +33,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 /**
  * Encapsulates the LuckPerms system which accepts incoming {@link Message}s
  * from implementations of {@link Messenger}.
- *
- * @since 4.1
  */
 public interface IncomingMessageConsumer {
 

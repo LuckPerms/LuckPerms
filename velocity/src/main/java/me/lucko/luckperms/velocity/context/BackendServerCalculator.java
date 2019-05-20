@@ -27,13 +27,16 @@ package me.lucko.luckperms.velocity.context;
 
 import com.velocitypowered.api.proxy.Player;
 
-import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ContextCalculator;
-import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.context.ContextConsumer;
+import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class BackendServerCalculator implements ContextCalculator<Player> {
 
@@ -48,13 +51,12 @@ public class BackendServerCalculator implements ContextCalculator<Player> {
     }
 
     @Override
-    public @NonNull MutableContextSet giveApplicableContext(@NonNull Player subject, @NonNull MutableContextSet accumulator) {
+    public void giveApplicableContext(@NonNull Player subject, @NonNull ContextConsumer consumer) {
+        Set<String> seen = new HashSet<>();
         String server = getServer(subject);
-        while (server != null && !accumulator.has(Contexts.WORLD_KEY, server)) {
-            accumulator.add(Contexts.WORLD_KEY, server);
+        while (server != null && seen.add(server)) {
+            consumer.accept(DefaultContextKeys.WORLD_KEY, server);
             server = this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(server, server).toLowerCase();
         }
-
-        return accumulator;
     }
 }

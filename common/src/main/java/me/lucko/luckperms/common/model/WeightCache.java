@@ -25,16 +25,15 @@
 
 package me.lucko.luckperms.common.model;
 
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.nodetype.types.WeightType;
+import me.lucko.luckperms.api.node.Node;
+import me.lucko.luckperms.api.node.types.WeightNode;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.OptionalInt;
 
 /**
@@ -51,19 +50,18 @@ public class WeightCache extends Cache<OptionalInt> {
     protected @NonNull OptionalInt supply() {
         boolean seen = false;
         int best = 0;
-        for (Node n : this.group.getOwnNodes(ImmutableContextSet.empty())) {
-            Optional<WeightType> weight = n.getTypeData(WeightType.KEY);
-            if (!weight.isPresent()) {
-                continue;
-            }
+        for (Node n : this.group.getOwnNodes(QueryOptions.nonContextual())) {
+            if (n instanceof WeightNode) {
+                WeightNode weightNode = (WeightNode) n;
+                int value = weightNode.getWeight();
 
-            int value = weight.get().getWeight();
-
-            if (!seen || value > best) {
-                seen = true;
-                best = value;
+                if (!seen || value > best) {
+                    seen = true;
+                    best = value;
+                }
             }
         }
+
         OptionalInt weight = seen ? OptionalInt.of(best) : OptionalInt.empty();
 
         if (!weight.isPresent()) {

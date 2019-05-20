@@ -25,19 +25,58 @@
 
 package me.lucko.luckperms.common.inheritance;
 
+import me.lucko.luckperms.api.context.DefaultContextKeys;
+import me.lucko.luckperms.api.node.types.InheritanceNode;
+import me.lucko.luckperms.api.query.Flag;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.graph.Graph;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A {@link Graph} which represents an "inheritance tree".
  */
-public interface InheritanceGraph extends Graph<PermissionHolder> {
+public class InheritanceGraph implements Graph<PermissionHolder> {
+    private final LuckPermsPlugin plugin;
+
+    /**
+     * The contexts to resolve inheritance in.
+     */
+    private final QueryOptions queryOptions;
+
+    public InheritanceGraph(LuckPermsPlugin plugin, QueryOptions queryOptions) {
+        this.plugin = plugin;
+        this.queryOptions = queryOptions;
+    }
+
+    @Override
+    public Iterable<? extends PermissionHolder> successors(PermissionHolder holder) {
+        Set<Group> successors = new LinkedHashSet<>();
+        for (InheritanceNode n : holder.getOwnGroupNodes(this.queryOptions)) {
+            // effectively: if not (we're applying global groups or it's specific anyways)
+            if (!((this.queryOptions.flag(Flag.APPLY_INHERITANCE_NODES_WITHOUT_SERVER_CONTEXT) || n.getContexts().containsKey(DefaultContextKeys.SERVER_KEY)) &&
+                    (this.queryOptions.flag(Flag.APPLY_INHERITANCE_NODES_WITHOUT_WORLD_CONTEXT) || n.getContexts().containsKey(DefaultContextKeys.WORLD_KEY)))) {
+                continue;
+            }
+
+            Group g = this.plugin.getGroupManager().getIfLoaded(n.getGroupName());
+            if (g != null) {
+                successors.add(g);
+            }
+        }
+
+        List<Group> successorsSorted = new ArrayList<>(successors);
+        successorsSorted.sort(holder.getInheritanceComparator());
+        return successorsSorted;
+    }
 
     /**
      * Returns an iterable which will traverse this inheritance graph using the specified
@@ -49,7 +88,7 @@ public interface InheritanceGraph extends Graph<PermissionHolder> {
      * @param startNode the start node in the inheritance graph
      * @return an iterable
      */
-    default Iterable<PermissionHolder> traverse(TraversalAlgorithm algorithm, boolean postTraversalSort, PermissionHolder startNode) {
+    public Iterable<PermissionHolder> traverse(TraversalAlgorithm algorithm, boolean postTraversalSort, PermissionHolder startNode) {
         Iterable<PermissionHolder> traversal = traverse(algorithm, startNode);
 
         // perform post traversal sort if needed
@@ -69,14 +108,13 @@ public interface InheritanceGraph extends Graph<PermissionHolder> {
     /**
      * Perform a traversal according to the rules defined in the configuration.
      *
-     * @param configuration the configuration object
      * @param startNode the start node in the inheritance graph
      * @return an iterable
      */
-    default Iterable<PermissionHolder> traverse(LuckPermsConfiguration configuration, PermissionHolder startNode) {
+    public Iterable<PermissionHolder> traverse(PermissionHolder startNode) {
         return traverse(
-                configuration.get(ConfigKeys.INHERITANCE_TRAVERSAL_ALGORITHM),
-                configuration.get(ConfigKeys.POST_TRAVERSAL_INHERITANCE_SORT),
+                this.plugin.getConfiguration().get(ConfigKeys.INHERITANCE_TRAVERSAL_ALGORITHM),
+                this.plugin.getConfiguration().get(ConfigKeys.POST_TRAVERSAL_INHERITANCE_SORT),
                 startNode
         );
     }

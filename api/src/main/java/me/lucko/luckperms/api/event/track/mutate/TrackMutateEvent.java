@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.api.event.track.mutate;
 
-import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
+import me.lucko.luckperms.api.track.Track;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -43,20 +43,23 @@ public interface TrackMutateEvent extends LuckPermsEvent {
      *
      * @return the track that was mutated
      */
-    @NonNull @Param(0) Track getTrack();
+    @Param(0)
+    @NonNull Track getTrack();
 
     /**
      * Gets an immutable copy of the tracks data before the change
      *
      * @return the data before the change
      */
-    @NonNull @Param(1) List<String> getDataBefore();
+    @Param(1)
+    @NonNull List<String> getDataBefore();
 
     /**
      * Gets an immutable copy of the tracks data after the change
      *
      * @return the data after the change
      */
-    @NonNull @Param(2) List<String> getDataAfter();
+    @Param(2)
+    @NonNull List<String> getDataAfter();
 
 }

@@ -25,12 +25,33 @@
 
 package me.lucko.luckperms.sponge.service.inheritance;
 
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.graph.Graph;
 import me.lucko.luckperms.sponge.service.model.calculated.CalculatedSubject;
+
+import java.util.stream.Collectors;
 
 /**
  * A {@link Graph} which represents an "inheritance tree" for subjects.
  */
-public interface SubjectInheritanceGraph extends Graph<CalculatedSubject> {
+public class SubjectInheritanceGraph implements Graph<CalculatedSubject> {
+
+    /**
+     * The contexts to resolve inheritance in.
+     */
+    private final QueryOptions queryOptions;
+
+    public SubjectInheritanceGraph(QueryOptions queryOptions) {
+        this.queryOptions = queryOptions;
+    }
+
+    @Override
+    public Iterable<? extends CalculatedSubject> successors(CalculatedSubject subject) {
+        return subject.getCombinedParents(this.queryOptions).stream()
+                .map(ref -> ref.resolveLp().join())
+                .filter(p -> p instanceof CalculatedSubject)
+                .map(p -> ((CalculatedSubject) p))
+                .collect(Collectors.toList());
+    }
 
 }

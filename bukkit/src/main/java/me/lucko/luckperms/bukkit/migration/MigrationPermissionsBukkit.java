@@ -27,6 +27,7 @@ package me.lucko.luckperms.bukkit.migration;
 
 import com.platymuus.bukkit.permissions.PermissionsPlugin;
 
+import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
@@ -140,7 +141,7 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
                     ConfigurationSection permsSection = worldSection.getConfigurationSection(world);
                     for (String perm : permsSection.getKeys(false)) {
                         boolean value = permsSection.getBoolean(perm);
-                        holder.setPermission(MigrationUtils.parseNode(perm, value).setWorld(world).build());
+                        holder.setPermission(MigrationUtils.parseNode(perm, value).withContext(DefaultContextKeys.WORLD_KEY, world).build());
                     }
                 }
             }

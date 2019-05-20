@@ -27,7 +27,6 @@ package me.lucko.luckperms.sponge;
 
 import com.google.inject.Inject;
 
-import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
@@ -226,8 +225,8 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     // provide information about the platform
 
     @Override
-    public PlatformType getType() {
-        return PlatformType.SPONGE;
+    public me.lucko.luckperms.api.platform.Platform.Type getType() {
+        return me.lucko.luckperms.api.platform.Platform.Type.SPONGE;
     }
 
     @Override

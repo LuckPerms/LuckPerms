@@ -63,7 +63,7 @@ public class DelegatingMutableContextSet extends AbstractDelegatingContextSet {
             return false;
         }
 
-        boolean has = this.delegate.has(context);
+        boolean has = this.delegate.contains(context);
         this.delegate.add(context);
         return !has;
     }
@@ -75,7 +75,7 @@ public class DelegatingMutableContextSet extends AbstractDelegatingContextSet {
             if (context.getKey().isEmpty() || context.getValue().isEmpty()) {
                 return false;
             }
-            boolean had = this.delegate.has(context);
+            boolean had = this.delegate.contains(context);
             this.delegate.remove(context.getKey(), context.getValue());
             return had;
         }

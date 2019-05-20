@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.node.NodeType;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
@@ -39,8 +40,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.model.NodeTypes;
-import me.lucko.luckperms.common.node.utils.MetaType;
+import me.lucko.luckperms.common.node.factory.NodeTypes;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -59,23 +59,23 @@ public class MetaClear extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        MetaType type = null;
+        NodeType type = null;
         if (!args.isEmpty()) {
             String typeId = args.get(0).toLowerCase();
             if (typeId.equals("any") || typeId.equals("all") || typeId.equals("*")) {
-                type = MetaType.ANY;
+                type = NodeType.META_OR_CHAT_META;
             }
             if (typeId.equals("chat") || typeId.equals("chatmeta")) {
-                type = MetaType.CHAT;
+                type = NodeType.CHAT_META;
             }
             if (typeId.equals(NodeTypes.META_KEY)) {
-                type = MetaType.META;
+                type = NodeType.META;
             }
             if (typeId.equals(NodeTypes.PREFIX_KEY) || typeId.equals("prefixes")) {
-                type = MetaType.PREFIX;
+                type = NodeType.PREFIX;
             }
             if (typeId.equals(NodeTypes.SUFFIX_KEY) || typeId.equals("suffixes")) {
-                type = MetaType.SUFFIX;
+                type = NodeType.SUFFIX;
             }
 
             if (type != null) {
@@ -84,7 +84,7 @@ public class MetaClear extends SharedSubCommand {
         }
 
         if (type == null) {
-            type = MetaType.ANY;
+            type = NodeType.META_OR_CHAT_META;
         }
 
         int before = holder.enduringData().immutable().size();

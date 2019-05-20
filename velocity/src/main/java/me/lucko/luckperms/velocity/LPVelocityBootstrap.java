@@ -35,7 +35,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 
-import me.lucko.luckperms.api.platform.PlatformType;
+import me.lucko.luckperms.api.platform.Platform;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
@@ -179,8 +179,8 @@ public class LPVelocityBootstrap implements LuckPermsBootstrap {
     // provide information about the platform
 
     @Override
-    public PlatformType getType() {
-        return PlatformType.VELOCITY;
+    public Platform.Type getType() {
+        return Platform.Type.VELOCITY;
     }
 
     @Override

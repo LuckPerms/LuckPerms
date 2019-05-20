@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.common.storage.implementation;
 
-import me.lucko.luckperms.api.HeldPermission;
-import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.api.PlayerSaveResult;
+import me.lucko.luckperms.api.actionlog.Action;
+import me.lucko.luckperms.api.model.PlayerSaveResult;
+import me.lucko.luckperms.api.node.HeldNode;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
@@ -58,7 +58,7 @@ public interface StorageImplementation {
         return Collections.emptyMap();
     }
 
-    void logAction(LogEntry entry) throws Exception;
+    void logAction(Action entry) throws Exception;
 
     Log getLog() throws Exception;
 
@@ -70,7 +70,7 @@ public interface StorageImplementation {
 
     Set<UUID> getUniqueUsers() throws Exception;
 
-    List<HeldPermission<UUID>> getUsersWithPermission(Constraint constraint) throws Exception;
+    List<HeldNode<UUID>> getUsersWithPermission(Constraint constraint) throws Exception;
 
     Group createAndLoadGroup(String name) throws Exception;
 
@@ -82,7 +82,7 @@ public interface StorageImplementation {
 
     void deleteGroup(Group group) throws Exception;
 
-    List<HeldPermission<String>> getGroupsWithPermission(Constraint constraint) throws Exception;
+    List<HeldNode<String>> getGroupsWithPermission(Constraint constraint) throws Exception;
 
     Track createAndLoadTrack(String name) throws Exception;
 

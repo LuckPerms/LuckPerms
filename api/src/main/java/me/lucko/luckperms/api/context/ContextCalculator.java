@@ -27,23 +27,71 @@ package me.lucko.luckperms.api.context;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Objects;
+import java.util.function.Function;
+
 /**
- * Calculates whether contexts are applicable to a {@link T subject}.
+ * Calculates the contexts applicable for a contextual subject.
  *
- * @param <T> the subject type. Is ALWAYS the player class of the platform.
- * @since 2.13
+ * <p>Implementations of this interface should satisfy the following
+ * requirements:</p>
+ * <ul>
+ *     <li>Context lookups should be <i>fast</i>: lookup methods are likely to
+ *     be invoked frequently, and should therefore be fast to execute. If
+ *     determining the current contexts involves a particularly time consuming
+ *     lookup (database queries, network requests, etc), then such results
+ *     should be cached ahead of time.</li>
+ *
+ *     <li>Context lookups should be <i>thread-safe</i>: lookups will sometimes
+ *     be performed from "async" threads, and therefore should not access any
+ *     part of the server only safe for access from a sync context. If
+ *     necessary, such results should be determined ahead of time and stored in
+ *     a thread-safe collection for retrieval later.</li>
+ *
+ *     <li>Context lookups should <i>not query active contexts</i>: doing so is
+ *     likely to result in a stack overflow, or thread deadlock. Care should be
+ *     taken to avoid (indirect) calls to the same calculator.</li>
+ * </ul>
+ * <p></p>
+ *
+ * <p>Calculators should be registered using
+ * {@link ContextManager#registerCalculator(ContextCalculator)}.</p>
  */
 @FunctionalInterface
 public interface ContextCalculator<T> {
 
     /**
-     * Gives the subject all of the applicable contexts they meet
+     * Creates a new {@link ContextCalculator} that provides a single context.
      *
-     * @param subject     the subject to add contexts to
-     * @param accumulator a map of contexts to add to
-     * @return the map
-     * @since 2.13
+     * @param key the key of the context provided by the calculator
+     * @param valueFunction the function used to compute the corresponding value
+     *                      for each query. A context will not be "accumulated"
+     *                      if the value returned is null.
+     * @param <T> the contextual type
+     * @return the resultant calculator
      */
-    @NonNull MutableContextSet giveApplicableContext(@NonNull T subject, @NonNull MutableContextSet accumulator);
+    static <T> @NonNull ContextCalculator<T> forSingleContext(@NonNull String key, @NonNull Function<T, String> valueFunction) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(valueFunction, "valueFunction");
+        return (target, consumer) -> {
+            String value = valueFunction.apply(target);
+            if (value != null) {
+                consumer.accept(key, value);
+            }
+        };
+    }
+
+    /**
+     * Submits any contexts this calculator determines to be applicable to
+     * the {@code target} contextual subject.
+     *
+     * <p>Care should be taken to ensure implementations of this method meet the
+     * general requirements for {@link ContextCalculator}, defined in the class
+     * doc.</p>
+     *
+     * @param target the target contextual subject for this operation
+     * @param consumer the {@link ContextConsumer} to submit contexts to
+     */
+    void giveApplicableContext(@NonNull T target, @NonNull ContextConsumer consumer);
 
 }

@@ -25,13 +25,12 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.LookupSetting;
-import me.lucko.luckperms.api.caching.MetaContexts;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.StaticContextCalculator;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.api.metastacking.MetaStackElement;
+import me.lucko.luckperms.api.query.Flag;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
@@ -59,9 +58,9 @@ import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
 import net.kyori.text.format.TextColor;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiConsumer;
@@ -107,7 +106,7 @@ public class DebugCommand extends SingleCommand {
         return new JObject()
                 .add("type", plugin.getBootstrap().getType().name())
                 .add("version", new JObject()
-                        .add("api", String.valueOf(plugin.getApiProvider().getPlatformInfo().getApiVersion()))
+                        .add("api", String.valueOf(plugin.getApiProvider().getPlatform().getApiVersion()))
                         .add("plugin", plugin.getBootstrap().getVersion())
                 )
                 .add("server", new JObject()
@@ -193,16 +192,15 @@ public class DebugCommand extends SingleCommand {
                     )
                     .add("activeContext", () -> {
                         JObject obj = new JObject();
-                        Contexts contexts = plugin.getContextForUser(user).orElse(null);
-                        if (contexts != null) {
-                            MetaContexts metaContexts = plugin.getContextManager().formMetaContexts(contexts);
+                        QueryOptions queryOptions = plugin.getQueryOptionsForUser(user).orElse(null);
+                        if (queryOptions != null) {
                             obj.add("data", new JObject()
-                                            .add("permissions", serializePermissionsData(user.getCachedData().getPermissionData(contexts)))
-                                            .add("meta", serializeMetaData(user.getCachedData().getMetaData(metaContexts)))
+                                            .add("permissions", serializePermissionsData(user.getCachedData().getPermissionData(queryOptions)))
+                                            .add("meta", serializeMetaData(user.getCachedData().getMetaData(queryOptions)))
                                     )
-                                    .add("contextSet", ContextSetJsonSerializer.serializeContextSet(contexts.getContexts()))
-                                    .add("settings", serializeContextsSettings(contexts))
-                                    .add("metaSettings", serializeMetaContextsSettings(metaContexts));
+                                    .add("contextSet", ContextSetJsonSerializer.serializeContextSet(queryOptions.context()))
+                                    .add("queryOptions", serializeQueryOptions(queryOptions))
+                                    .add("metaSettings", serializeMetaContextsSettings(queryOptions));
                         }
                         return obj;
                     })
@@ -212,18 +210,24 @@ public class DebugCommand extends SingleCommand {
         return ret;
     }
 
-    private static JArray serializeContextsSettings(Contexts contexts) {
+    private static JArray serializeQueryOptions(QueryOptions queryOptions) {
         JArray array = new JArray();
-        for (LookupSetting setting : contexts.getSettings()) {
+        for (Flag setting : queryOptions.flags()) {
             array.add(setting.name());
         }
         return array;
     }
 
-    private static JObject serializeMetaContextsSettings(MetaContexts metaContexts) {
+    private static JObject serializeMetaContextsSettings(QueryOptions queryOptions) {
         return new JObject()
-                .add("prefixStack", serializeMetaStackData(metaContexts.getPrefixStackDefinition()))
-                .add("suffixStack", serializeMetaStackData(metaContexts.getSuffixStackDefinition()));
+                .consume(obj -> {
+                    Optional<MetaStackDefinition> prefixStack = queryOptions.option(MetaStackDefinition.PREFIX_STACK_KEY);
+                    prefixStack.ifPresent(metaStackDefinition -> obj.add("prefixStack", serializeMetaStackData(metaStackDefinition)));
+                })
+                .consume(obj -> {
+                    Optional<MetaStackDefinition> suffixStack = queryOptions.option(MetaStackDefinition.SUFFIX_STACK_KEY);
+                    suffixStack.ifPresent(metaStackDefinition -> obj.add("suffixStack", serializeMetaStackData(metaStackDefinition)));
+                });
     }
 
     private static JObject serializePermissionsData(PermissionCache permissionData) {
@@ -262,15 +266,8 @@ public class DebugCommand extends SingleCommand {
                     return suffixes;
                 })
                 .add("meta", () -> {
-                    JObject metaMap = new JObject();
-                    for (Map.Entry<String, String> entry : metaData.getMeta(MetaCheckEvent.Origin.INTERNAL).entrySet()) {
-                        metaMap.add(entry.getKey(), entry.getValue());
-                    }
-                    return metaMap;
-                })
-                .add("metaMap", () -> {
                     JObject metaMultimap = new JObject();
-                    for (Map.Entry<String, Collection<String>> entry : metaData.getMetaMultimap(MetaCheckEvent.Origin.INTERNAL).asMap().entrySet()) {
+                    for (Map.Entry<String, List<String>> entry : metaData.getMeta().entrySet()) {
                         JArray values = new JArray();
                         for (String v : entry.getValue()) {
                             values.add(v);

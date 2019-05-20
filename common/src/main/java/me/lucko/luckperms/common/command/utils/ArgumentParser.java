@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.common.command.utils;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.TemporaryMergeBehaviour;
+import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.model.TemporaryMergeBehaviour;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.commands.user.UserMainCommand;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -160,7 +160,7 @@ public class ArgumentParser {
 
                 // one of the first two values, and doesn't have a key
                 if (i <= 1 && !pair.contains("=")) {
-                    String key = i == 0 ? Contexts.SERVER_KEY : Contexts.WORLD_KEY;
+                    String key = i == 0 ? DefaultContextKeys.SERVER_KEY : DefaultContextKeys.WORLD_KEY;
                     set.add(key, pair);
                     continue;
                 }
@@ -191,28 +191,28 @@ public class ArgumentParser {
 
     private static MutableContextSet sanitizeContexts(MutableContextSet set) throws ArgumentException {
         // remove any potential "global" context mappings
-        set.remove(Contexts.SERVER_KEY, "global");
-        set.remove(Contexts.WORLD_KEY, "global");
-        set.remove(Contexts.SERVER_KEY, "null");
-        set.remove(Contexts.WORLD_KEY, "null");
-        set.remove(Contexts.SERVER_KEY, "*");
-        set.remove(Contexts.WORLD_KEY, "*");
+        set.remove(DefaultContextKeys.SERVER_KEY, "global");
+        set.remove(DefaultContextKeys.WORLD_KEY, "global");
+        set.remove(DefaultContextKeys.SERVER_KEY, "null");
+        set.remove(DefaultContextKeys.WORLD_KEY, "null");
+        set.remove(DefaultContextKeys.SERVER_KEY, "*");
+        set.remove(DefaultContextKeys.WORLD_KEY, "*");
 
         // remove excess entries from the set.
         // (it can only have one server and one world.)
-        List<String> servers = new ArrayList<>(set.getValues(Contexts.SERVER_KEY));
+        List<String> servers = new ArrayList<>(set.getValues(DefaultContextKeys.SERVER_KEY));
         if (servers.size() > 1) {
             // start iterating at index 1
             for (int i = 1; i < servers.size(); i++) {
-                set.remove(Contexts.SERVER_KEY, servers.get(i));
+                set.remove(DefaultContextKeys.SERVER_KEY, servers.get(i));
             }
         }
 
-        List<String> worlds = new ArrayList<>(set.getValues(Contexts.WORLD_KEY));
+        List<String> worlds = new ArrayList<>(set.getValues(DefaultContextKeys.WORLD_KEY));
         if (worlds.size() > 1) {
             // start iterating at index 1
             for (int i = 1; i < worlds.size(); i++) {
-                set.remove(Contexts.WORLD_KEY, worlds.get(i));
+                set.remove(DefaultContextKeys.WORLD_KEY, worlds.get(i));
             }
         }
 
@@ -265,7 +265,7 @@ public class ArgumentParser {
             }
         }
 
-        return contextSet.makeImmutable();
+        return contextSet.immutableCopy();
     }
 
     public static UUID parseUserTarget(int index, List<String> args, LuckPermsPlugin plugin, Sender sender) {

@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.api.context;
 
-import com.google.common.collect.Multimap;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Iterator;
@@ -58,93 +56,8 @@ import java.util.Set;
  * <p>Two default ContextSet implementations are provided.
  * {@link MutableContextSet} allows the addition and removal of context keys
  * after construction, and {@link ImmutableContextSet} does not.</p>
- *
- * @since 2.13
  */
 public interface ContextSet extends Iterable<Map.Entry<String, String>> {
-
-    /**
-     * Creates an {@link ImmutableContextSet} from a context pair.
-     *
-     * @param key   the key
-     * @param value the value
-     * @return a new ImmutableContextSet containing one context pair
-     * @throws NullPointerException if key or value is null
-     */
-    static @NonNull ImmutableContextSet singleton(@NonNull String key, @NonNull String value) {
-        return ImmutableContextSet.singleton(key, value);
-    }
-
-    /**
-     * Creates an {@link ImmutableContextSet} from two context pairs.
-     *
-     * @param key1   the first key
-     * @param value1 the first value
-     * @param key2   the second key
-     * @param value2 the second value
-     * @return a new ImmutableContextSet containing the two pairs
-     * @throws NullPointerException if any of the keys or values are null
-     * @since 3.1
-     */
-    static @NonNull ImmutableContextSet of(@NonNull String key1, @NonNull String value1, @NonNull String key2, @NonNull String value2) {
-        return ImmutableContextSet.of(key1, value1, key2, value2);
-    }
-
-    /**
-     * Creates an {@link ImmutableContextSet} from an existing {@link Iterable} of {@link Map.Entry}s.
-     *
-     * @param iterable the iterable to copy from
-     * @return a new ImmutableContextSet representing the pairs in the iterable
-     * @throws NullPointerException if the iterable is null
-     */
-    static @NonNull ImmutableContextSet fromEntries(@NonNull Iterable<? extends Map.Entry<String, String>> iterable) {
-        return ImmutableContextSet.fromEntries(iterable);
-    }
-
-    /**
-     * Creates an {@link ImmutableContextSet} from an existing {@link Map}.
-     *
-     * @param map the map to copy from
-     * @return a new ImmutableContextSet representing the pairs from the map
-     * @throws NullPointerException if the map is null
-     */
-    static @NonNull ImmutableContextSet fromMap(@NonNull Map<String, String> map) {
-        return ImmutableContextSet.fromMap(map);
-    }
-
-    /**
-     * Creates an {@link ImmutableContextSet} from an existing {@link Multimap}.
-     *
-     * @param multimap the multimap to copy from
-     * @return a new ImmutableContextSet representing the pairs in the multimap
-     * @throws NullPointerException if the multimap is null
-     * @since 2.16
-     */
-    static @NonNull ImmutableContextSet fromMultimap(@NonNull Multimap<String, String> multimap) {
-        return ImmutableContextSet.fromMultimap(multimap);
-    }
-
-    /**
-     * Creates an new {@link ImmutableContextSet} from an existing {@link Set}.
-     *
-     * <p>Only really useful for converting between mutable and immutable types.</p>
-     *
-     * @param contextSet the context set to copy from
-     * @return a new ImmutableContextSet with the same content and the one provided
-     * @throws NullPointerException if contextSet is null
-     */
-    static @NonNull ImmutableContextSet fromSet(@NonNull ContextSet contextSet) {
-        return ImmutableContextSet.fromSet(contextSet);
-    }
-
-    /**
-     * Returns an empty {@link ImmutableContextSet}.
-     *
-     * @return an empty ImmutableContextSet
-     */
-    static @NonNull ImmutableContextSet empty() {
-        return ImmutableContextSet.empty();
-    }
 
     /**
      * Gets if this {@link ContextSet} is immutable.
@@ -163,7 +76,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      *
      * @return an immutable representation of this set
      */
-    @NonNull ImmutableContextSet makeImmutable();
+    @NonNull ImmutableContextSet immutableCopy();
 
     /**
      * Creates a mutable copy of this {@link ContextSet}.
@@ -172,7 +85,6 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * {@link #isImmutable() mutability} of this set.</p>
      *
      * @return a mutable ContextSet
-     * @since 2.16
      */
     @NonNull MutableContextSet mutableCopy();
 
@@ -188,6 +100,17 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
     @NonNull Set<Map.Entry<String, String>> toSet();
 
     /**
+     * Returns a {@link Map} representing the current state of this
+     * {@link ContextSet}.
+     *
+     * <p>The returned set is immutable, and is a copy of the current set.
+     * (will not update live)</p>
+     *
+     * @return a map
+     */
+    @NonNull Map<String, Set<String>> toMap();
+
+    /**
      * Returns a {@link Map} <b>loosely</b> representing the current state of
      * this {@link ContextSet}.
      *
@@ -197,27 +120,11 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * <p>As a single context key can be mapped to multiple values, this method
      * may not be a true representation of the set.</p>
      *
-     * <p>If you need a representation of the set in a Java collection instance,
-     * use {@link #toSet()} or {@link #toMultimap()} followed by
-     * {@link Multimap#asMap()}.</p>
-     *
      * @return an immutable map
      * @deprecated because the resultant map may not contain all data in the ContextSet
      */
     @Deprecated
-    @NonNull Map<String, String> toMap();
-
-    /**
-     * Returns a {@link Multimap} representing the current state of this
-     * {@link ContextSet}.
-     *
-     * <p>The returned multimap is immutable, and is a copy of the current set.
-     * (will not update live)</p>
-     *
-     * @return a multimap
-     * @since 2.16
-     */
-    @NonNull Multimap<String, String> toMultimap();
+    @NonNull Map<String, String> toFlattenedMap();
 
     /**
      * Returns an {@link Iterator} over each of the context pairs in this set.
@@ -262,7 +169,6 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      *
      * @param key the key to find values for
      * @return an optional containing any match
-     * @since 3.1
      */
     default @NonNull Optional<String> getAnyValue(@NonNull String key) {
         return getValues(key).stream().findAny();
@@ -276,7 +182,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return true if the set contains the context pair
      * @throws NullPointerException if the key or value is null
      */
-    boolean has(@NonNull String key, @NonNull String value);
+    boolean contains(@NonNull String key, @NonNull String value);
 
     /**
      * Returns if the {@link ContextSet} contains a given context pairing.
@@ -285,9 +191,9 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return true if the set contains the context pair
      * @throws NullPointerException if the key or value is null
      */
-    default boolean has(Map.@NonNull Entry<String, String> entry) {
+    default boolean contains(Map.@NonNull Entry<String, String> entry) {
         Objects.requireNonNull(entry, "entry");
-        return has(entry.getKey(), entry.getValue());
+        return contains(entry.getKey(), entry.getValue());
     }
 
     /**
@@ -300,7 +206,6 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      *
      * @param other the other set to check
      * @return true if all entries in this set are also in the other set
-     * @since 3.1
      */
     default boolean isSatisfiedBy(@NonNull ContextSet other) {
         if (this == other) {
@@ -320,7 +225,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
         } else {
             // neither are empty, we need to compare the individual entries
             for (Map.Entry<String, String> context : toSet()) {
-                if (!other.has(context)) {
+                if (!other.contains(context)) {
                     return false;
                 }
             }

@@ -27,9 +27,10 @@ package me.lucko.luckperms.common.model.manager.user;
 
 import com.google.common.collect.ImmutableCollection;
 
-import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.node.Node;
+import me.lucko.luckperms.api.node.NodeType;
+import me.lucko.luckperms.api.node.types.InheritanceNode;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.UserIdentifier;
@@ -89,7 +90,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
             boolean has = false;
 
             for (Node node : user.enduringData().immutable().get(ImmutableContextSet.empty())) {
-                if (node.isGroupNode() && node.getGroupName().equalsIgnoreCase(pg)) {
+                if (node instanceof InheritanceNode && ((InheritanceNode) node).getGroupName().equalsIgnoreCase(pg)) {
                     has = true;
                     break;
                 }
@@ -98,9 +99,10 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
             // need to find a new primary group for the user.
             if (!has) {
                 String group = user.enduringData().immutable().get(ImmutableContextSet.empty()).stream()
-                        .filter(Node::isGroupNode)
+                        .filter(NodeType.INHERITANCE::matches)
+                        .map(NodeType.INHERITANCE::cast)
                         .findFirst()
-                        .map(Node::getGroupName)
+                        .map(InheritanceNode::getGroupName)
                         .orElse(null);
 
                 // if the group is null, it'll be resolved in the next step
@@ -115,11 +117,11 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
         boolean hasGroup = false;
         if (user.getPrimaryGroup().getStoredValue().isPresent()) {
             for (Node node : user.enduringData().immutable().values()) {
-                if (node.hasSpecificContext()) {
+                if (!node.getContexts().isEmpty()) {
                     continue;
                 }
 
-                if (node.isGroupNode()) {
+                if (node instanceof InheritanceNode) {
                     hasGroup = true;
                     break;
                 }
@@ -180,21 +182,21 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
      */
     @Override
     public boolean shouldSave(User user) {
-        ImmutableCollection<LocalizedNode> nodes = user.enduringData().immutable().values();
+        ImmutableCollection<Node> nodes = user.enduringData().immutable().values();
         if (nodes.size() != 1) {
             return true;
         }
 
-        LocalizedNode onlyNode = nodes.iterator().next();
-        if (!onlyNode.isGroupNode()) {
+        Node onlyNode = nodes.iterator().next();
+        if (!(onlyNode instanceof InheritanceNode)) {
             return true;
         }
 
-        if (onlyNode.isTemporary() || onlyNode.isServerSpecific() || onlyNode.isWorldSpecific()) {
+        if (onlyNode.hasExpiry() || !onlyNode.getContexts().isEmpty()) {
             return true;
         }
 
-        if (!onlyNode.getGroupName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
+        if (!((InheritanceNode) onlyNode).getGroupName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
             // The user's only node is not the default group one.
             return true;
         }

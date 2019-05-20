@@ -62,7 +62,7 @@ public class UserUpdateMessageImpl extends AbstractMessage implements UserUpdate
     }
 
     @Override
-    public @NonNull UUID getUser() {
+    public @NonNull UUID getUserUniqueId() {
         return this.userUuid;
     }
 

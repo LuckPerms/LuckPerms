@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.plugin.util;
 
-import me.lucko.luckperms.api.PlayerSaveResult;
-import me.lucko.luckperms.api.platform.PlatformType;
+import me.lucko.luckperms.api.model.PlayerSaveResult;
+import me.lucko.luckperms.api.platform.Platform;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.defaultassignments.AssignmentRule;
 import me.lucko.luckperms.common.model.User;
@@ -70,22 +70,22 @@ public abstract class AbstractConnectionListener {
         PlayerSaveResult saveResult = this.plugin.getStorage().savePlayerData(uuid, username).join();
 
         // fire UserFirstLogin event
-        if (saveResult.includes(PlayerSaveResult.Status.CLEAN_INSERT)) {
+        if (saveResult.includes(PlayerSaveResult.Outcome.CLEAN_INSERT)) {
             this.plugin.getEventFactory().handleUserFirstLogin(uuid, username);
         }
 
         // most likely because ip forwarding is not setup correctly
         // print a warning to the console
-        if (saveResult.includes(PlayerSaveResult.Status.OTHER_UUIDS_PRESENT_FOR_USERNAME)) {
-            Set<UUID> otherUuids = saveResult.getOtherUuids();
+        if (saveResult.includes(PlayerSaveResult.Outcome.OTHER_UNIQUE_IDS_PRESENT_FOR_USERNAME)) {
+            Set<UUID> otherUuids = saveResult.getOtherUniqueIds();
 
             this.plugin.getLogger().warn("LuckPerms already has data for player '" + username + "' - but this data is stored under a different UUID.");
             this.plugin.getLogger().warn("'" + username + "' has previously used the unique ids " + otherUuids + " but is now connecting with '" + uuid + "'");
 
             if (uuid.version() == 4) {
-                if (this.plugin.getBootstrap().getType() == PlatformType.BUNGEE) {
+                if (this.plugin.getBootstrap().getType() == Platform.Type.BUNGEECORD) {
                     this.plugin.getLogger().warn("The UUID the player is connecting with now is Mojang-assigned (type 4). This implies that BungeeCord's IP-Forwarding has not been setup correctly on one (or more) of the backend servers.");
-                } if (this.plugin.getBootstrap().getType() == PlatformType.VELOCITY) {
+                } if (this.plugin.getBootstrap().getType() == Platform.Type.VELOCITY) {
                     this.plugin.getLogger().warn("The UUID the player is connecting with now is Mojang-assigned (type 4). This implies that Velocity's IP-Forwarding has not been setup correctly on one (or more) of the backend servers.");
                 } else {
                     this.plugin.getLogger().warn("The UUID the player is connecting with now is Mojang-assigned (type 4). This implies that one of the other servers in your network is not authenticating correctly.");

@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.commands.generic.other;
 
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -58,7 +58,7 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T holder, List<String> args, String label) {
-        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), holder) || ArgumentPermissions.checkGroup(plugin, sender, holder, ContextSet.empty())) {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), holder) || ArgumentPermissions.checkGroup(plugin, sender, holder, ImmutableContextSet.empty())) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }

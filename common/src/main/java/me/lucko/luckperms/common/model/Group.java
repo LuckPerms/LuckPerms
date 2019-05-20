@@ -25,12 +25,12 @@
 
 package me.lucko.luckperms.common.model;
 
-import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.nodetype.types.DisplayNameType;
+import me.lucko.luckperms.api.node.Node;
+import me.lucko.luckperms.api.node.types.DisplayNameNode;
 import me.lucko.luckperms.common.api.implementation.ApiGroup;
 import me.lucko.luckperms.common.cache.Cache;
-import me.lucko.luckperms.common.cacheddata.GroupCachedData;
+import me.lucko.luckperms.common.cacheddata.GroupCachedDataManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Optional;
@@ -57,13 +57,13 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     /**
      * The groups data cache instance
      */
-    private final GroupCachedData cachedData;
+    private final GroupCachedDataManager cachedData;
 
     public Group(String name, LuckPermsPlugin plugin) {
         super(plugin);
         this.name = name.toLowerCase();
 
-        this.cachedData = new GroupCachedData(this);
+        this.cachedData = new GroupCachedDataManager(this);
         getPlugin().getEventFactory().handleGroupCacheLoad(this, this.cachedData);
     }
 
@@ -115,10 +115,9 @@ public class Group extends PermissionHolder implements Identifiable<String> {
      * @return the display name
      */
     public Optional<String> getDisplayName(ContextSet contextSet) {
-        for (Node n : getData(NodeMapType.ENDURING).immutable().get(contextSet.makeImmutable())) {
-            Optional<DisplayNameType> displayName = n.getTypeData(DisplayNameType.KEY);
-            if (displayName.isPresent()) {
-                return Optional.of(displayName.get().getDisplayName());
+        for (Node n : getData(NodeMapType.ENDURING).immutable().get(contextSet.immutableCopy())) {
+            if (n instanceof DisplayNameNode) {
+                return Optional.of(((DisplayNameNode) n).getDisplayName());
             }
         }
         return Optional.empty();
@@ -129,7 +128,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     }
 
     @Override
-    public GroupCachedData getCachedData() {
+    public GroupCachedDataManager getCachedData() {
         return this.cachedData;
     }
 

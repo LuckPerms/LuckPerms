@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.common.api.implementation;
 
-import me.lucko.luckperms.api.ActionLogger;
-import me.lucko.luckperms.api.Log;
-import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.actionlog.Action;
+import me.lucko.luckperms.api.actionlog.ActionLog;
+import me.lucko.luckperms.api.actionlog.ActionLogger;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -43,27 +43,27 @@ public class ApiActionLogger implements ActionLogger {
     }
 
     @Override
-    public LogEntry.@NonNull Builder newEntryBuilder() {
+    public Action.@NonNull Builder actionBuilder() {
         return ExtendedLogEntry.build();
     }
 
     @Override
-    public @NonNull CompletableFuture<Log> getLog() {
-        return this.plugin.getStorage().getLog().thenApply(ApiLog::new);
+    public @NonNull CompletableFuture<ActionLog> getLog() {
+        return this.plugin.getStorage().getLog().thenApply(ApiActionLog::new);
     }
 
     @Override
-    public @NonNull CompletableFuture<Void> submit(@NonNull LogEntry entry) {
+    public @NonNull CompletableFuture<Void> submit(@NonNull Action entry) {
         return CompletableFuture.runAsync(() -> this.plugin.getLogDispatcher().dispatchFromApi((ExtendedLogEntry) entry), this.plugin.getBootstrap().getScheduler().async());
     }
 
     @Override
-    public @NonNull CompletableFuture<Void> submitToStorage(@NonNull LogEntry entry) {
+    public @NonNull CompletableFuture<Void> submitToStorage(@NonNull Action entry) {
         return this.plugin.getStorage().logAction(entry);
     }
 
     @Override
-    public @NonNull CompletableFuture<Void> broadcastAction(@NonNull LogEntry entry) {
+    public @NonNull CompletableFuture<Void> broadcastAction(@NonNull Action entry) {
         return CompletableFuture.runAsync(() -> this.plugin.getLogDispatcher().broadcastFromApi((ExtendedLogEntry) entry), this.plugin.getBootstrap().getScheduler().async());
     }
 }

@@ -28,11 +28,12 @@ package me.lucko.luckperms.common.config;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.TemporaryMergeBehaviour;
-import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.metastacking.DuplicateRemovalFunction;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
+import me.lucko.luckperms.api.model.TemporaryMergeBehaviour;
+import me.lucko.luckperms.api.query.Flag;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.defaultassignments.AssignmentRule;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
@@ -52,9 +53,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import static me.lucko.luckperms.common.config.ConfigKeyTypes.booleanKey;
@@ -92,16 +95,21 @@ public final class ConfigKeys {
     /**
      * The default global contexts instance
      */
-    public static final ConfigKey<Contexts> GLOBAL_CONTEXTS = customKey(c -> {
-        return Contexts.of(
-                ContextSet.empty(),
-                c.getBoolean("include-global", true),
-                c.getBoolean("include-global-world", true),
-                true,
-                c.getBoolean("apply-global-groups", true),
-                c.getBoolean("apply-global-world-groups", true),
-                false
-        );
+    public static final ConfigKey<QueryOptions> GLOBAL_CONTEXTS = customKey(c -> {
+        Set<Flag> flags = EnumSet.of(Flag.RESOLVE_INHERITANCE);
+        if (c.getBoolean("include-global", true)) {
+            flags.add(Flag.INCLUDE_NODES_WITHOUT_SERVER_CONTEXT);
+        }
+        if (c.getBoolean("include-global-world", true)) {
+            flags.add(Flag.INCLUDE_NODES_WITHOUT_WORLD_CONTEXT);
+        }
+        if (c.getBoolean("apply-global-groups", true)) {
+            flags.add(Flag.APPLY_INHERITANCE_NODES_WITHOUT_SERVER_CONTEXT);
+        }
+        if (c.getBoolean("apply-global-world-groups", true)) {
+            flags.add(Flag.APPLY_INHERITANCE_NODES_WITHOUT_WORLD_CONTEXT);
+        }
+        return QueryOptions.contextual(ImmutableContextSet.empty(), flags);
     });
 
     /**

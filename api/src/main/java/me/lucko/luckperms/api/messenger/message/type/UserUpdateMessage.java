@@ -35,8 +35,6 @@ import java.util.UUID;
  * Represents an "user update" message.
  *
  * <p>Used to notify other servers of a change to a specific user.</p>
- *
- * @since 4.1
  */
 public interface UserUpdateMessage extends Message {
 
@@ -45,6 +43,6 @@ public interface UserUpdateMessage extends Message {
      *
      * @return the user
      */
-    @NonNull UUID getUser();
+    @NonNull UUID getUserUniqueId();
 
 }

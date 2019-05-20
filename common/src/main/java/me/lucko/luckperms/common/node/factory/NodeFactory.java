@@ -25,12 +25,16 @@
 
 package me.lucko.luckperms.common.node.factory;
 
-import me.lucko.luckperms.api.ChatMetaType;
-import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.DefaultContextKeys;
+import me.lucko.luckperms.api.node.ChatMetaType;
+import me.lucko.luckperms.api.node.Node;
+import me.lucko.luckperms.api.node.NodeBuilder;
+import me.lucko.luckperms.api.node.types.ChatMetaNode;
+import me.lucko.luckperms.api.node.types.InheritanceNode;
+import me.lucko.luckperms.api.node.types.MetaNode;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
-import me.lucko.luckperms.common.node.model.NodeTypes;
 
 import java.util.Map;
 
@@ -42,40 +46,44 @@ public final class NodeFactory {
 
     public static final String DEFAULT_GROUP_NAME = "default";
 
-    public static Node.Builder builder(String s) {
-        return new NodeBuilder(s);
+    public static NodeBuilder<?, ?> builder(String s) {
+        return NodeTypes.newBuilder(s);
     }
 
-    public static Node.Builder buildGroupNode(String groupName) {
-        return new NodeBuilder(groupNode(groupName));
+    public static NodeBuilder<?, ?> buildGroupNode(String groupName) {
+        return builder(groupNode(groupName));
     }
 
-    public static Node.Builder buildGroupNode(Group group) {
-        return new NodeBuilder(groupNode(group.getName()));
+    public static NodeBuilder<?, ?> buildGroupNode(Group group) {
+        return builder(groupNode(group.getName()));
     }
 
-    public static Node.Builder buildMetaNode(String key, String value) {
-        return new NodeBuilder(metaNode(key, value));
+    public static NodeBuilder<?, ?> buildMetaNode(String key, String value) {
+        return builder(metaNode(key, value));
     }
 
-    public static Node.Builder buildChatMetaNode(ChatMetaType type, int priority, String s) {
+    public static NodeBuilder<?, ?> buildChatMetaNode(ChatMetaType type, int priority, String s) {
         return type == ChatMetaType.PREFIX ? buildPrefixNode(priority, s) : buildSuffixNode(priority, s);
     }
 
-    public static Node.Builder buildPrefixNode(int priority, String prefix) {
-        return new NodeBuilder(prefixNode(priority, prefix));
+    public static NodeBuilder<?, ?> buildPrefixNode(int priority, String prefix) {
+        return builder(prefixNode(priority, prefix));
     }
 
-    public static Node.Builder buildSuffixNode(int priority, String suffix) {
-        return new NodeBuilder(suffixNode(priority, suffix));
+    public static NodeBuilder<?, ?> buildSuffixNode(int priority, String suffix) {
+        return builder(suffixNode(priority, suffix));
     }
 
-    public static Node.Builder buildWeightNode(int weight) {
-        return new NodeBuilder(weightNode(weight));
+    public static NodeBuilder<?, ?> buildWeightNode(int weight) {
+        return builder(weightNode(weight));
     }
 
     public static String groupNode(String groupName) {
         return NodeTypes.GROUP_NODE_MARKER + groupName;
+    }
+
+    public static String displayName(String displayName) {
+        return NodeTypes.DISPLAY_NAME_NODE_MARKER + displayName;
     }
 
     public static String chatMetaNode(ChatMetaType type, int priority, String value) {
@@ -83,19 +91,23 @@ public final class NodeFactory {
     }
 
     public static String prefixNode(int priority, String prefix) {
-        return NodeTypes.PREFIX_NODE_MARKER + priority + "." + LegacyNodeFactory.escapeCharacters(prefix);
+        return NodeTypes.PREFIX_NODE_MARKER + priority + "." + Delimiters.escapeCharacters(prefix);
     }
 
     public static String suffixNode(int priority, String suffix) {
-        return NodeTypes.SUFFIX_NODE_MARKER + priority + "." + LegacyNodeFactory.escapeCharacters(suffix);
+        return NodeTypes.SUFFIX_NODE_MARKER + priority + "." + Delimiters.escapeCharacters(suffix);
     }
 
     public static String metaNode(String key, String value) {
-        return NodeTypes.META_NODE_MARKER + LegacyNodeFactory.escapeCharacters(key) + "." + LegacyNodeFactory.escapeCharacters(value);
+        return NodeTypes.META_NODE_MARKER + Delimiters.escapeCharacters(key) + "." + Delimiters.escapeCharacters(value);
     }
 
     public static String weightNode(int weight) {
         return NodeTypes.WEIGHT_NODE_MARKER + weight;
+    }
+
+    public static String regexNode(String pattern) {
+        return NodeTypes.REGEX_MARKER_1 + pattern;
     }
 
     public static Node make(String node) {
@@ -103,55 +115,55 @@ public final class NodeFactory {
     }
 
     public static Node make(String node, boolean value) {
-        return builder(node).setValue(value).build();
+        return builder(node).value(value).build();
     }
 
     public static Node make(String node, boolean value, String server) {
-        return builder(node).setValue(value).setServer(server).build();
+        return builder(node).value(value).withContext(DefaultContextKeys.SERVER_KEY, server).build();
     }
 
     public static Node make(String node, boolean value, String server, String world) {
-        return builder(node).setValue(value).setServer(server).setWorld(world).build();
+        return builder(node).value(value).withContext(DefaultContextKeys.SERVER_KEY, server).withContext(DefaultContextKeys.WORLD_KEY, world).build();
     }
 
     public static Node make(String node, String server) {
-        return builder(node).setServer(server).build();
+        return builder(node).withContext(DefaultContextKeys.SERVER_KEY, server).build();
     }
 
     public static Node make(String node, String server, String world) {
-        return builder(node).setServer(server).setWorld(world).build();
+        return builder(node).withContext(DefaultContextKeys.SERVER_KEY, server).withContext(DefaultContextKeys.WORLD_KEY, world).build();
     }
 
     public static Node make(String node, boolean value, boolean temporary) {
-        return builder(node).setValue(value).setExpiry(temporary ? 10L : 0L).build();
+        return builder(node).value(value).expiry(temporary ? 10L : 0L).build();
     }
 
     public static Node make(String node, boolean value, String server, boolean temporary) {
-        return builder(node).setValue(value).setServer(server).setExpiry(temporary ? 10L : 0L).build();
+        return builder(node).value(value).withContext(DefaultContextKeys.SERVER_KEY, server).expiry(temporary ? 10L : 0L).build();
     }
 
     public static Node make(String node, boolean value, String server, String world, boolean temporary) {
-        return builder(node).setValue(value).setServer(server).setWorld(world).setExpiry(temporary ? 10L : 0L).build();
+        return builder(node).value(value).withContext(DefaultContextKeys.SERVER_KEY, server).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(temporary ? 10L : 0L).build();
     }
 
     public static Node make(String node, String server, boolean temporary) {
-        return builder(node).setServer(server).setExpiry(temporary ? 10L : 0L).build();
+        return builder(node).withContext(DefaultContextKeys.SERVER_KEY, server).expiry(temporary ? 10L : 0L).build();
     }
 
     public static Node make(String node, String server, String world, boolean temporary) {
-        return builder(node).setServer(server).setWorld(world).setExpiry(temporary ? 10L : 0L).build();
+        return builder(node).withContext(DefaultContextKeys.SERVER_KEY, server).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(temporary ? 10L : 0L).build();
     }
 
     public static Node make(String node, boolean value, long expireAt) {
-        return builder(node).setValue(value).setExpiry(expireAt).build();
+        return builder(node).value(value).expiry(expireAt).build();
     }
 
     public static Node make(String node, boolean value, String server, long expireAt) {
-        return builder(node).setValue(value).setServer(server).setExpiry(expireAt).build();
+        return builder(node).value(value).withContext(DefaultContextKeys.SERVER_KEY, server).expiry(expireAt).build();
     }
 
     public static Node make(String node, boolean value, String server, String world, long expireAt) {
-        return builder(node).setValue(value).setServer(server).setWorld(world).setExpiry(expireAt).build();
+        return builder(node).value(value).withContext(DefaultContextKeys.SERVER_KEY, server).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(expireAt).build();
     }
 
     public static Node make(Group group, long expireAt) {
@@ -194,7 +206,7 @@ public final class NodeFactory {
         StringBuilder sb = new StringBuilder(32);
         sb.append(type.toString()).append(" ").append(id).append(" ");
 
-        if (node.isGroupNode()) {
+        if (node instanceof InheritanceNode) {
             sb.append("parent ");
 
             if (set) {
@@ -203,21 +215,21 @@ public final class NodeFactory {
                 sb.append("remove");
             }
 
-            if (node.isTemporary()) {
+            if (node.hasExpiry()) {
                 sb.append("temp");
             }
 
-            sb.append(" ").append(node.getGroupName());
+            sb.append(" ").append(((InheritanceNode) node).getGroupName());
 
-            if (node.isTemporary() && set) {
-                sb.append(" ").append(node.getExpiryUnixTime());
+            if (node.hasExpiry() && set) {
+                sb.append(" ").append(node.getExpiry().getEpochSecond());
             }
 
             return appendContextToCommand(sb, node, explicitGlobalContext).toString();
         }
 
-        if (node.getValue() && (node.isPrefix() || node.isSuffix())) {
-            ChatMetaType chatMetaType = node.isPrefix() ? ChatMetaType.PREFIX : ChatMetaType.SUFFIX;
+        if (node.getValue() && (node instanceof ChatMetaNode<?, ?>)) {
+            ChatMetaNode<?, ?> cmNode = (ChatMetaNode<?, ?>) node;
 
             sb.append("meta ");
 
@@ -227,16 +239,16 @@ public final class NodeFactory {
                 sb.append("remove");
             }
 
-            if (node.isTemporary()) {
+            if (node.hasExpiry()) {
                 sb.append("temp");
             }
 
-            sb.append(chatMetaType)
+            sb.append(cmNode.getType().toString())
                     .append(" ")
-                    .append(chatMetaType.getEntry(node).getKey()) // weight
+                    .append(cmNode.getPriority()) // weight
                     .append(" ");
 
-            String value = chatMetaType.getEntry(node).getValue();
+            String value = cmNode.getMetaValue();
             if (value.contains(" ")) {
                 // wrap value in quotes
                 sb.append("\"").append(value).append("\"");
@@ -244,14 +256,14 @@ public final class NodeFactory {
                 sb.append(value);
             }
 
-            if (set && node.isTemporary()) {
-                sb.append(" ").append(node.getExpiryUnixTime());
+            if (set && node.hasExpiry()) {
+                sb.append(" ").append(node.getExpiry().getEpochSecond());
             }
 
             return appendContextToCommand(sb, node, explicitGlobalContext).toString();
         }
 
-        if (node.getValue() && node.isMeta()) {
+        if (node.getValue() && node instanceof MetaNode) {
             sb.append("meta ");
 
             if (set) {
@@ -260,14 +272,15 @@ public final class NodeFactory {
                 sb.append("unset");
             }
 
-            if (node.isTemporary()) {
+            if (node.hasExpiry()) {
                 sb.append("temp");
             }
 
             sb.append(" ");
 
 
-            String key = node.getMeta().getKey();
+            MetaNode metaNode = (MetaNode) node;
+            String key = metaNode.getMetaKey();
             if (key.contains(" ")) {
                 sb.append("\"").append(key).append("\"");
             } else {
@@ -277,15 +290,15 @@ public final class NodeFactory {
             if (set) {
                 sb.append(" ");
 
-                String value = node.getMeta().getValue();
+                String value = metaNode.getMetaValue();
                 if (value.contains(" ")) {
                     sb.append("\"").append(value).append("\"");
                 } else {
                     sb.append(value);
                 }
 
-                if (node.isTemporary()) {
-                    sb.append(" ").append(node.getExpiryUnixTime());
+                if (node.hasExpiry()) {
+                    sb.append(" ").append(node.getExpiry().getEpochSecond());
                 }
             }
 
@@ -300,13 +313,13 @@ public final class NodeFactory {
             sb.append("unset");
         }
 
-        if (node.isTemporary()) {
+        if (node.hasExpiry()) {
             sb.append("temp");
         }
 
         sb.append(" ");
 
-        String perm = node.getPermission();
+        String perm = node.getKey();
         if (perm.contains(" ")) {
             sb.append("\"").append(perm).append("\"");
         } else {
@@ -315,8 +328,8 @@ public final class NodeFactory {
         if (set) {
             sb.append(" ").append(node.getValue());
 
-            if (node.isTemporary()) {
-                sb.append(" ").append(node.getExpiryUnixTime());
+            if (node.hasExpiry()) {
+                sb.append(" ").append(node.getExpiry().getEpochSecond());
             }
         }
 
@@ -324,22 +337,15 @@ public final class NodeFactory {
     }
 
     private static StringBuilder appendContextToCommand(StringBuilder sb, Node node, boolean explicitGlobalContext) {
-        if (node.getFullContexts().isEmpty()) {
+        if (node.getContexts().isEmpty()) {
             if (explicitGlobalContext) {
                 sb.append(" global");
             }
             return sb;
         }
 
-        if (node.getServer().isPresent()) {
-            sb.append(" server=").append(node.getServer().get());
-        }
-        if (node.getWorld().isPresent()) {
-            sb.append(" world=").append(node.getWorld().get());
-        }
-
         ContextSet contexts = node.getContexts();
-        for (Map.Entry<String, String> context : contexts.toSet()) {
+        for (Map.Entry<String, String> context : contexts) {
             sb.append(" ").append(context.getKey()).append("=").append(context.getValue());
         }
 

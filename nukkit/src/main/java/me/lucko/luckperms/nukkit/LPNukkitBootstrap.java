@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.nukkit;
 
-import me.lucko.luckperms.api.platform.PlatformType;
+import me.lucko.luckperms.api.platform.Platform;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
@@ -154,8 +154,8 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     // provide information about the platform
 
     @Override
-    public PlatformType getType() {
-        return PlatformType.NUKKIT;
+    public Platform.Type getType() {
+        return Platform.Type.NUKKIT;
     }
 
     @Override

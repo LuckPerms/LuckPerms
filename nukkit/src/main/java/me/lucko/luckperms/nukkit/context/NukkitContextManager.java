@@ -27,36 +27,37 @@ package me.lucko.luckperms.nukkit.context;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.LookupSetting;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.query.OptionKey;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ContextManager;
-import me.lucko.luckperms.common.context.ContextsCache;
-import me.lucko.luckperms.common.context.ContextsSupplier;
+import me.lucko.luckperms.common.context.QueryOptionsCache;
+import me.lucko.luckperms.common.context.QueryOptionsSupplier;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
 import cn.nukkit.Player;
 
-import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 
 public class NukkitContextManager extends ContextManager<Player> {
 
+    public static final OptionKey<Boolean> OP_OPTION = new OptionKey<Boolean>(){};
+
     // cache the creation of ContextsCache instances for online players with no expiry
-    private final LoadingMap<Player, ContextsCache<Player>> onlineSubjectCaches = LoadingMap.of(key -> new ContextsCache<>(key, this));
+    private final LoadingMap<Player, QueryOptionsCache<Player>> onlineSubjectCaches = LoadingMap.of(key -> new QueryOptionsCache<>(key, this));
 
     // cache the creation of ContextsCache instances for offline players with a 1m expiry
-    private final LoadingCache<Player, ContextsCache<Player>> offlineSubjectCaches = CaffeineFactory.newBuilder()
+    private final LoadingCache<Player, QueryOptionsCache<Player>> offlineSubjectCaches = CaffeineFactory.newBuilder()
             .expireAfterAccess(1, TimeUnit.MINUTES)
             .build(key -> {
-                ContextsCache<Player> cache = this.onlineSubjectCaches.getIfPresent(key);
+                QueryOptionsCache<Player> cache = this.onlineSubjectCaches.getIfPresent(key);
                 if (cache != null) {
                     return cache;
                 }
-                return new ContextsCache<>(key, this);
+                return new QueryOptionsCache<>(key, this);
             });
 
     public NukkitContextManager(LPNukkitPlugin plugin) {
@@ -68,7 +69,7 @@ public class NukkitContextManager extends ContextManager<Player> {
     }
 
     @Override
-    public ContextsSupplier getCacheFor(Player subject) {
+    public QueryOptionsSupplier getCacheFor(Player subject) {
         if (subject == null) {
             throw new NullPointerException("subject");
         }
@@ -86,7 +87,7 @@ public class NukkitContextManager extends ContextManager<Player> {
             throw new NullPointerException("subject");
         }
 
-        ContextsCache<Player> cache = this.onlineSubjectCaches.getIfPresent(subject);
+        QueryOptionsCache<Player> cache = this.onlineSubjectCaches.getIfPresent(subject);
         if (cache != null) {
             cache.invalidate();
         }
@@ -98,14 +99,12 @@ public class NukkitContextManager extends ContextManager<Player> {
     }
 
     @Override
-    public Contexts formContexts(Player subject, ImmutableContextSet contextSet) {
-        Contexts contexts = this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_CONTEXTS);
+    public QueryOptions formQueryOptions(Player subject, ImmutableContextSet contextSet) {
+        QueryOptions.Builder queryOptions = this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_CONTEXTS).toBuilder();
         if (subject.isOp()) {
-            EnumSet<LookupSetting> settings = EnumSet.copyOf(contexts.getSettings());
-            settings.add(LookupSetting.IS_OP);
-            contexts = contexts.setSettings(settings);
+            queryOptions.option(OP_OPTION, true);
         }
 
-        return contexts.setContexts(contextSet);
+        return queryOptions.context(contextSet).build();
     }
 }

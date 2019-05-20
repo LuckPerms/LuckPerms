@@ -27,9 +27,9 @@ package me.lucko.luckperms.common.storage.implementation.split;
 
 import com.google.common.collect.ImmutableMap;
 
-import me.lucko.luckperms.api.HeldPermission;
-import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.api.PlayerSaveResult;
+import me.lucko.luckperms.api.actionlog.Action;
+import me.lucko.luckperms.api.model.PlayerSaveResult;
+import me.lucko.luckperms.api.node.HeldNode;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
@@ -106,7 +106,7 @@ public class SplitStorage implements StorageImplementation {
     }
 
     @Override
-    public void logAction(LogEntry entry) throws Exception {
+    public void logAction(Action entry) throws Exception {
         this.backing.get(this.types.get(SplitStorageType.LOG)).logAction(entry);
     }
 
@@ -144,7 +144,7 @@ public class SplitStorage implements StorageImplementation {
     }
 
     @Override
-    public List<HeldPermission<UUID>> getUsersWithPermission(Constraint constraint) throws Exception {
+    public List<HeldNode<UUID>> getUsersWithPermission(Constraint constraint) throws Exception {
         return this.backing.get(this.types.get(SplitStorageType.USER)).getUsersWithPermission(constraint);
     }
 
@@ -174,7 +174,7 @@ public class SplitStorage implements StorageImplementation {
     }
 
     @Override
-    public List<HeldPermission<String>> getGroupsWithPermission(Constraint constraint) throws Exception {
+    public List<HeldNode<String>> getGroupsWithPermission(Constraint constraint) throws Exception {
         return this.backing.get(this.types.get(SplitStorageType.GROUP)).getGroupsWithPermission(constraint);
     }
 

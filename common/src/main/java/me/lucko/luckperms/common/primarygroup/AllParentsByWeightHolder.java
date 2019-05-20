@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.primarygroup;
 
-import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.inheritance.InheritanceGraph;
 import me.lucko.luckperms.common.model.Group;
@@ -42,8 +42,8 @@ public class AllParentsByWeightHolder extends ContextualHolder {
     }
 
     @Override
-    protected @NonNull Optional<String> calculateValue(Contexts contexts) {
-        InheritanceGraph graph = this.user.getPlugin().getInheritanceHandler().getGraph(contexts);
+    protected @NonNull Optional<String> calculateValue(QueryOptions queryOptions) {
+        InheritanceGraph graph = this.user.getPlugin().getInheritanceHandler().getGraph(queryOptions);
 
         // fully traverse the graph, obtain a list of permission holders the user inherits from in weight order.
         Iterable<PermissionHolder> traversal = graph.traverse(this.user.getPlugin().getConfiguration().get(ConfigKeys.INHERITANCE_TRAVERSAL_ALGORITHM), true, this.user);

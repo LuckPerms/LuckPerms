@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.model;
 
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.nodetype.types.DisplayNameType;
+import me.lucko.luckperms.api.node.Node;
+import me.lucko.luckperms.api.node.types.DisplayNameNode;
 import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 
@@ -47,10 +47,10 @@ public class DisplayNameCache extends Cache<Optional<String>> {
     @Override
     protected @NonNull Optional<String> supply() {
         // query for a displayname node
-        for (Node n : this.group.getOwnNodes(this.group.getPlugin().getContextManager().getStaticContext())) {
-            Optional<DisplayNameType> displayName = n.getTypeData(DisplayNameType.KEY);
-            if (displayName.isPresent()) {
-                return Optional.of(displayName.get().getDisplayName());
+        for (Node n : this.group.getOwnNodes(this.group.getPlugin().getContextManager().getStaticQueryOptions())) {
+            if (n instanceof DisplayNameNode) {
+                DisplayNameNode displayNameNode = (DisplayNameNode) n;
+                return Optional.of(displayNameNode.getDisplayName());
             }
         }
 

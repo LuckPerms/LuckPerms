@@ -25,8 +25,11 @@
 
 package me.lucko.luckperms.common.node.comparator;
 
-import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.node.Node;
+import me.lucko.luckperms.api.node.types.PermissionNode;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 
 public class NodeComparator implements Comparator<Node> {
@@ -48,38 +51,36 @@ public class NodeComparator implements Comparator<Node> {
             return 0;
         }
 
-        int result = Boolean.compare(o1.isOverride(), o2.isOverride());
+        int result = Boolean.compare(o1.hasExpiry(), o2.hasExpiry());
         if (result != 0) {
             return result;
         }
 
-        result = Boolean.compare(o1.isTemporary(), o2.isTemporary());
+        result = Boolean.compare(
+                o1 instanceof PermissionNode && ((PermissionNode) o1).isWildcard(),
+                o2 instanceof PermissionNode && ((PermissionNode) o2).isWildcard()
+        );
         if (result != 0) {
             return result;
         }
 
-        result = Boolean.compare(o1.isWildcard(), o2.isWildcard());
-        if (result != 0) {
-            return result;
-        }
-
-        if (o1.isTemporary()) {
+        if (o1.hasExpiry()) {
             // note vvv
-            result = -Long.compare(o1.getSecondsTilExpiry(), o2.getSecondsTilExpiry());
+            result = -Long.compare(ChronoUnit.MILLIS.between(Instant.now(), o1.getExpiry()), ChronoUnit.MILLIS.between(Instant.now(), o2.getExpiry()));
             if (result != 0) {
                 return result;
             }
         }
 
-        if (o1.isWildcard()) {
-            result = Integer.compare(o1.getWildcardLevel(), o2.getWildcardLevel());
+        if (o1 instanceof PermissionNode && ((PermissionNode) o1).isWildcard()) {
+            result = Integer.compare(((PermissionNode) o1).getWildcardLevel().getAsInt(), ((PermissionNode) o2).getWildcardLevel().getAsInt());
             if (result != 0) {
                 return result;
             }
         }
 
         // note vvv
-        result = -o1.getPermission().compareTo(o2.getPermission());
+        result = -o1.getKey().compareTo(o2.getKey());
         if (result != 0) {
             return result;
         }

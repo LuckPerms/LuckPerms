@@ -25,10 +25,12 @@
 
 package me.lucko.luckperms.common.commands.generic.permission;
 
-import me.lucko.luckperms.api.TemporaryDataMutateResult;
-import me.lucko.luckperms.api.TemporaryMergeBehaviour;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.api.nodetype.types.InheritanceType;
+import me.lucko.luckperms.api.model.TemporaryDataMutateResult;
+import me.lucko.luckperms.api.model.TemporaryMergeBehaviour;
+import me.lucko.luckperms.api.node.Node;
+import me.lucko.luckperms.api.node.types.InheritanceNode;
+import me.lucko.luckperms.api.util.Result;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
@@ -46,7 +48,6 @@ import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
-import me.lucko.luckperms.common.node.model.NodeTypes;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
@@ -79,18 +80,19 @@ public class PermissionSetTemp extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        InheritanceType inheritanceType = NodeTypes.parseInheritanceType(node);
-        if (inheritanceType != null) {
-            if (ArgumentPermissions.checkGroup(plugin, sender, inheritanceType.getGroupName(), context)) {
+        Node builtNode = NodeFactory.builder(node).value(value).withContext(context).expiry(duration).build();
+
+        if (builtNode instanceof InheritanceNode) {
+            if (ArgumentPermissions.checkGroup(plugin, sender, ((InheritanceNode) builtNode).getGroupName(), context)) {
                 Message.COMMAND_NO_PERMISSION.send(sender);
                 return CommandResult.NO_PERMISSION;
             }
         }
 
-        TemporaryDataMutateResult result = holder.setPermission(NodeFactory.builder(node).setValue(value).withExtraContext(context).setExpiry(duration).build(), modifier);
+        TemporaryDataMutateResult result = holder.setPermission(builtNode, modifier);
 
-        if (result.getResult().asBoolean()) {
-            duration = result.getMergedNode().getExpiryUnixTime();
+        if (((Result) result.getResult()).wasSuccessful()) {
+            duration = result.getMergedNode().getExpiry().getEpochSecond();
             Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, value, holder.getFormattedDisplayName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
