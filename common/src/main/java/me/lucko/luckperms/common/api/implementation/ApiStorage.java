@@ -31,7 +31,6 @@ import me.lucko.luckperms.api.Log;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
-import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.Storage;
 
@@ -63,12 +62,10 @@ public class ApiStorage implements me.lucko.luckperms.api.Storage {
     }
     
     private final LuckPermsPlugin plugin;
-    private final LuckPermsApiProvider apiProvider;
     private final Storage handle;
     
-    public ApiStorage(LuckPermsPlugin plugin, LuckPermsApiProvider apiProvider, Storage handle) {
+    public ApiStorage(LuckPermsPlugin plugin, Storage handle) {
         this.plugin = plugin;
-        this.apiProvider = apiProvider;
         this.handle = handle;
     }
 
@@ -94,130 +91,130 @@ public class ApiStorage implements me.lucko.luckperms.api.Storage {
 
     @Override
     public @NonNull CompletableFuture<Boolean> logAction(@NonNull LogEntry entry) {
-        return this.apiProvider.getActionLogger().submitToStorage(entry)
+        return this.plugin.getApiProvider().getActionLogger().submitToStorage(entry)
                 .thenApply(r -> true)
                 .exceptionally(consumeExceptionToFalse());
     }
 
     @Override
     public @NonNull CompletableFuture<Log> getLog() {
-        return this.apiProvider.getActionLogger().getLog().exceptionally(consumeExceptionToNull());
+        return this.plugin.getApiProvider().getActionLogger().getLog().exceptionally(consumeExceptionToNull());
     }
 
     @Override
     public @NonNull CompletableFuture<Boolean> loadUser(@NonNull UUID uuid, String username) {
-        return this.apiProvider.getUserManager().loadUser(uuid, username)
+        return this.plugin.getApiProvider().getUserManager().loadUser(uuid, username)
                 .thenApply(r -> true)
                 .exceptionally(consumeExceptionToFalse());
     }
 
     @Override
     public @NonNull CompletableFuture<Boolean> saveUser(@NonNull User user) {
-        return this.apiProvider.getUserManager().saveUser(user)
+        return this.plugin.getApiProvider().getUserManager().saveUser(user)
                 .thenApply(r -> true)
                 .exceptionally(consumeExceptionToFalse());
     }
 
     @Override
     public @NonNull CompletableFuture<Set<UUID>> getUniqueUsers() {
-        return this.apiProvider.getUserManager().getUniqueUsers().exceptionally(consumeExceptionToNull());
+        return this.plugin.getApiProvider().getUserManager().getUniqueUsers().exceptionally(consumeExceptionToNull());
     }
 
     @Override
     public @NonNull CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(@NonNull String permission) {
-        return this.apiProvider.getUserManager().getWithPermission(permission).exceptionally(consumeExceptionToNull());
+        return this.plugin.getApiProvider().getUserManager().getWithPermission(permission).exceptionally(consumeExceptionToNull());
     }
 
     @Override
     public @NonNull CompletableFuture<Boolean> createAndLoadGroup(@NonNull String name) {
-        return this.apiProvider.getGroupManager().createAndLoadGroup(name)
+        return this.plugin.getApiProvider().getGroupManager().createAndLoadGroup(name)
                 .thenApply(r -> true)
                 .exceptionally(consumeExceptionToFalse());
     }
 
     @Override
     public @NonNull CompletableFuture<Boolean> loadGroup(@NonNull String name) {
-        return this.apiProvider.getGroupManager().loadGroup(name)
+        return this.plugin.getApiProvider().getGroupManager().loadGroup(name)
                 .thenApply(Optional::isPresent)
                 .exceptionally(consumeExceptionToFalse());
     }
 
     @Override
     public @NonNull CompletableFuture<Boolean> loadAllGroups() {
-        return this.apiProvider.getGroupManager().loadAllGroups()
+        return this.plugin.getApiProvider().getGroupManager().loadAllGroups()
                 .thenApply(r -> true)
                 .exceptionally(consumeExceptionToFalse());
     }
 
     @Override
     public @NonNull CompletableFuture<Boolean> saveGroup(@NonNull Group group) {
-        return this.apiProvider.getGroupManager().saveGroup(group)
+        return this.plugin.getApiProvider().getGroupManager().saveGroup(group)
                 .thenApply(r -> true)
                 .exceptionally(consumeExceptionToFalse());
     }
 
     @Override
     public @NonNull CompletableFuture<Boolean> deleteGroup(@NonNull Group group) {
-        return this.apiProvider.getGroupManager().deleteGroup(group)
+        return this.plugin.getApiProvider().getGroupManager().deleteGroup(group)
                 .thenApply(r -> true)
                 .exceptionally(consumeExceptionToFalse());
     }
 
     @Override
     public @NonNull CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(@NonNull String permission) {
-        return this.apiProvider.getGroupManager().getWithPermission(permission)
+        return this.plugin.getApiProvider().getGroupManager().getWithPermission(permission)
                 .exceptionally(consumeExceptionToNull());
     }
 
     @Override
     public @NonNull CompletableFuture<Boolean> createAndLoadTrack(@NonNull String name) {
-        return this.apiProvider.getTrackManager().createAndLoadTrack(name)
+        return this.plugin.getApiProvider().getTrackManager().createAndLoadTrack(name)
                 .thenApply(r -> true)
                 .exceptionally(consumeExceptionToFalse());
     }
 
     @Override
     public @NonNull CompletableFuture<Boolean> loadTrack(@NonNull String name) {
-        return this.apiProvider.getTrackManager().loadTrack(name)
+        return this.plugin.getApiProvider().getTrackManager().loadTrack(name)
                 .thenApply(Optional::isPresent)
                 .exceptionally(consumeExceptionToFalse());
     }
 
     @Override
     public @NonNull CompletableFuture<Boolean> loadAllTracks() {
-        return this.apiProvider.getTrackManager().loadAllTracks()
+        return this.plugin.getApiProvider().getTrackManager().loadAllTracks()
                 .thenApply(r -> true)
                 .exceptionally(consumeExceptionToFalse());
     }
 
     @Override
     public @NonNull CompletableFuture<Boolean> saveTrack(@NonNull Track track) {
-        return this.apiProvider.getTrackManager().saveTrack(track)
+        return this.plugin.getApiProvider().getTrackManager().saveTrack(track)
                 .thenApply(r -> true)
                 .exceptionally(consumeExceptionToFalse());
     }
 
     @Override
     public @NonNull CompletableFuture<Boolean> deleteTrack(@NonNull Track track) {
-        return this.apiProvider.getTrackManager().deleteTrack(track)
+        return this.plugin.getApiProvider().getTrackManager().deleteTrack(track)
                 .thenApply(r -> true)
                 .exceptionally(consumeExceptionToFalse());
     }
 
     @Override
     public @NonNull CompletableFuture<Boolean> saveUUIDData(@NonNull String username, @NonNull UUID uuid) {
-        return this.apiProvider.getUserManager().savePlayerData(uuid, username)
+        return this.plugin.getApiProvider().getUserManager().savePlayerData(uuid, username)
                 .thenApply(r -> true)
                 .exceptionally(consumeExceptionToFalse());
     }
 
     @Override
     public @NonNull CompletableFuture<UUID> getUUID(@NonNull String username) {
-        return this.apiProvider.getUserManager().lookupUuid(username).exceptionally(consumeExceptionToNull());
+        return this.plugin.getApiProvider().getUserManager().lookupUuid(username).exceptionally(consumeExceptionToNull());
     }
 
     @Override
     public @NonNull CompletableFuture<String> getName(@NonNull UUID uuid) {
-        return this.apiProvider.getUserManager().lookupUsername(uuid).exceptionally(consumeExceptionToNull());
+        return this.plugin.getApiProvider().getUserManager().lookupUsername(uuid).exceptionally(consumeExceptionToNull());
     }
 }
