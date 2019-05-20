@@ -33,7 +33,6 @@ import me.lucko.luckperms.api.PlayerSaveResult;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.actionlog.Log;
-import me.lucko.luckperms.common.api.implementation.ApiStorage;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.model.Group;
@@ -59,20 +58,13 @@ public class Storage {
     private final LuckPermsPlugin plugin;
     private final StorageImplementation implementation;
 
-    private final ApiStorage apiDelegate;
-
     public Storage(LuckPermsPlugin plugin, StorageImplementation implementation) {
         this.plugin = plugin;
         this.implementation = implementation;
-        this.apiDelegate = new ApiStorage(plugin, this);
     }
 
     public StorageImplementation getImplementation() {
         return this.implementation;
-    }
-
-    public ApiStorage getApiDelegate() {
-        return this.apiDelegate;
     }
 
     private <T> CompletableFuture<T> makeFuture(Callable<T> supplier) {

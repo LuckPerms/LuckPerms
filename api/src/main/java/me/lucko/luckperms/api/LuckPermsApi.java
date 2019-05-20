@@ -152,17 +152,6 @@ public interface LuckPermsApi {
     @NonNull LPConfiguration getConfiguration();
 
     /**
-     * Gets an object representing the plugins primary {@link Storage} backend.
-     *
-     * <p>The instance propagates calls to the internal DAO (Data Access Object),
-     * and applies any changes to the storage provider.</p>
-     *
-     * @return a storage instance
-     * @since 2.14
-     */
-    @NonNull Storage getStorage();
-
-    /**
      * Gets the {@link MessagingService}, if present.
      *
      * <p>The MessagingService is used to dispatch updates throughout a network

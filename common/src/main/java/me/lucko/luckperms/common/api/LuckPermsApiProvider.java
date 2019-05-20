@@ -30,7 +30,6 @@ import me.lucko.luckperms.api.LPConfiguration;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.MessagingService;
 import me.lucko.luckperms.api.NodeFactory;
-import me.lucko.luckperms.api.Storage;
 import me.lucko.luckperms.api.context.ContextManager;
 import me.lucko.luckperms.api.event.EventBus;
 import me.lucko.luckperms.api.manager.CachedDataManager;
@@ -127,11 +126,6 @@ public class LuckPermsApiProvider implements LuckPermsApi {
     @Override
     public @NonNull LPConfiguration getConfiguration() {
         return this.plugin.getConfiguration().getDelegate();
-    }
-
-    @Override
-    public @NonNull Storage getStorage() {
-        return this.plugin.getStorage().getApiDelegate();
     }
 
     @Override
