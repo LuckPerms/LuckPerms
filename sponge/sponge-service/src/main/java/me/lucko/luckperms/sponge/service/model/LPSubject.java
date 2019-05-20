@@ -74,9 +74,7 @@ public interface LPSubject {
 
     Optional<String> getOption(ImmutableContextSet contexts, String key);
 
-    default void performCleanup() {
-
-    }
+    void performCacheCleanup();
 
     void invalidateCaches();
 

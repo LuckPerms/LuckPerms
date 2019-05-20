@@ -40,7 +40,7 @@ public class ServiceCacheHousekeepingTask implements Runnable {
     public void run() {
         for (LPSubjectCollection collection : this.service.getLoadedCollections().values()) {
             for (LPSubject subject : collection.getLoadedSubjects()) {
-                subject.performCleanup();
+                subject.performCacheCleanup();
             }
         }
     }

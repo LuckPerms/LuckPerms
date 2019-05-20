@@ -167,9 +167,14 @@ public abstract class PermissionHolderSubject<T extends PermissionHolder> implem
     }
 
     @Override
+    public void performCacheCleanup() {
+        // do nothing, permission holders are "cleaned up" by a different task
+    }
+
+    @Override
     public void invalidateCaches() {
         // invalidate for all changes
-        this.parent.invalidateCachedData();
+        this.parent.getCachedData().invalidate();
     }
 
 }

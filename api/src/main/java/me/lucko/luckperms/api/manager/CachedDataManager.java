@@ -1,5 +1,5 @@
 /*
- * This file is part of LuckPerms, licensed under the MIT License.
+ * This file is part of luckperms, licensed under the MIT License.
  *
  *  Copyright (c) lucko (Luck) <luck@lucko.me>
  *  Copyright (c) contributors
@@ -23,26 +23,31 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.tasks;
+package me.lucko.luckperms.api.manager;
 
-import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.api.Group;
+import me.lucko.luckperms.api.User;
+import me.lucko.luckperms.api.caching.CachedData;
 
-public class CacheHousekeepingTask implements Runnable {
-    private final LuckPermsPlugin plugin;
+/**
+ * Represents an object responsible for managing {@link CachedData} instances.
+ *
+ * @since 4.5
+ */
+public interface CachedDataManager {
 
-    public CacheHousekeepingTask(LuckPermsPlugin plugin) {
-        this.plugin = plugin;
-    }
+    /**
+     * Invalidate the {@link CachedData} instances for all loaded {@link User}s.
+     *
+     * @see CachedData#invalidate()
+     */
+    void invalidateAllUserCaches();
 
-    @Override
-    public void run() {
-        for (User user : this.plugin.getUserManager().getAll().values()) {
-            user.getCachedData().performCacheCleanup();
-        }
-        for (Group group : this.plugin.getGroupManager().getAll().values()) {
-            group.getCachedData().performCacheCleanup();
-        }
-    }
+    /**
+     * Invalidate the {@link CachedData} instances for all loaded {@link Group}s.
+     *
+     * @see CachedData#invalidate()
+     */
+    void invalidateAllGroupCaches();
+
 }

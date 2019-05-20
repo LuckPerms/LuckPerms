@@ -1,5 +1,5 @@
 /*
- * This file is part of LuckPerms, licensed under the MIT License.
+ * This file is part of luckperms, licensed under the MIT License.
  *
  *  Copyright (c) lucko (Luck) <luck@lucko.me>
  *  Copyright (c) contributors
@@ -23,26 +23,29 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.tasks;
+package me.lucko.luckperms.common.api.implementation;
 
-import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.api.manager.CachedDataManager;
+import me.lucko.luckperms.common.model.manager.group.GroupManager;
+import me.lucko.luckperms.common.model.manager.user.UserManager;
 
-public class CacheHousekeepingTask implements Runnable {
-    private final LuckPermsPlugin plugin;
+public class ApiCachedDataManager implements CachedDataManager {
+    private final UserManager<?> userManager;
+    private final GroupManager<?> groupManager;
 
-    public CacheHousekeepingTask(LuckPermsPlugin plugin) {
-        this.plugin = plugin;
+    public ApiCachedDataManager(UserManager<?> userManager, GroupManager<?> groupManager) {
+        this.userManager = userManager;
+        this.groupManager = groupManager;
+    }
+
+
+    @Override
+    public void invalidateAllUserCaches() {
+        this.userManager.invalidateAllUserCaches();
     }
 
     @Override
-    public void run() {
-        for (User user : this.plugin.getUserManager().getAll().values()) {
-            user.getCachedData().performCacheCleanup();
-        }
-        for (Group group : this.plugin.getGroupManager().getAll().values()) {
-            group.getCachedData().performCacheCleanup();
-        }
+    public void invalidateAllGroupCaches() {
+        this.groupManager.invalidateAllGroupCaches();
     }
 }

@@ -297,7 +297,6 @@ public class MongoStorage implements StorageImplementation {
                 }
             }
         } finally {
-            user.invalidateCachedData();
             user.getIoLock().unlock();
         }
         return user;
@@ -368,7 +367,6 @@ public class MongoStorage implements StorageImplementation {
                 }
             }
         } finally {
-            group.invalidateCachedData();
             group.getIoLock().unlock();
         }
         return group;
@@ -398,7 +396,6 @@ public class MongoStorage implements StorageImplementation {
             }
         } finally {
             if (group != null) {
-                group.invalidateCachedData();
                 group.getIoLock().unlock();
             }
         }

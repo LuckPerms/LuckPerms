@@ -26,10 +26,12 @@
 package me.lucko.luckperms.api;
 
 import me.lucko.luckperms.LuckPerms;
+import me.lucko.luckperms.api.caching.CachedData;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ContextManager;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.event.EventBus;
+import me.lucko.luckperms.api.manager.CachedDataManager;
 import me.lucko.luckperms.api.manager.GroupManager;
 import me.lucko.luckperms.api.manager.TrackManager;
 import me.lucko.luckperms.api.manager.UserManager;
@@ -109,6 +111,15 @@ public interface LuckPermsApi {
      * @since 4.0
      */
     @NonNull TrackManager getTrackManager();
+
+    /**
+     * Gets the {@link CachedDataManager}, responsible for managing
+     * {@link CachedData} instances.
+     *
+     * @return the cached data manager
+     * @since 4.5
+     */
+    @NonNull CachedDataManager getCachedDataManager();
 
     /**
      * Schedules the execution of an update task, and returns an encapsulation

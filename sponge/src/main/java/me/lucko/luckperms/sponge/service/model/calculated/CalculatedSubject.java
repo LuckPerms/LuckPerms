@@ -313,8 +313,8 @@ public abstract class CalculatedSubject implements LPSubject {
     }
 
     @Override
-    public void performCleanup() {
-        this.cachedData.doCacheCleanup();
+    public void performCacheCleanup() {
+        this.cachedData.performCacheCleanup();
     }
 
     @Override

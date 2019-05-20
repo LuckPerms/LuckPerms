@@ -394,7 +394,6 @@ public class SqlStorage implements StorageImplementation {
                 }
             }
         } finally {
-            user.invalidateCachedData();
             user.getIoLock().unlock();
         }
         return user;
@@ -636,7 +635,6 @@ public class SqlStorage implements StorageImplementation {
                 group.clearNodes();
             }
         } finally {
-            group.invalidateCachedData();
             group.getIoLock().unlock();
         }
         return Optional.of(group);

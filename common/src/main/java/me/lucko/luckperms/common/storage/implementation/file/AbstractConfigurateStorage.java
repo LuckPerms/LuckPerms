@@ -217,7 +217,6 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
         } catch (Exception e) {
             throw reportException(uuid.toString(), e);
         } finally {
-            user.invalidateCachedData();
             user.getIoLock().unlock();
         }
         return user;
@@ -273,7 +272,6 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
         } catch (Exception e) {
             throw reportException(name, e);
         } finally {
-            group.invalidateCachedData();
             group.getIoLock().unlock();
         }
         return group;
@@ -306,7 +304,6 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
             throw reportException(name, e);
         } finally {
             if (group != null) {
-                group.invalidateCachedData();
                 group.getIoLock().unlock();
             }
         }

@@ -75,7 +75,12 @@ public class ApiGroupManager extends ApiAbstractManager<Group, me.lucko.luckperm
     @Override
     public @NonNull CompletableFuture<Void> saveGroup(me.lucko.luckperms.api.@NonNull Group group) {
         Objects.requireNonNull(group, "group");
-        return this.plugin.getStorage().saveGroup(ApiGroup.cast(group));
+        return this.plugin.getStorage().saveGroup(ApiGroup.cast(group)).thenRun(() -> {
+            // invalidate caches - they have potentially been affected by
+            // this change.
+            this.plugin.getGroupManager().invalidateAllGroupCaches();
+            this.plugin.getUserManager().invalidateAllUserCaches();
+        });
     }
 
     @Override
@@ -84,7 +89,13 @@ public class ApiGroupManager extends ApiAbstractManager<Group, me.lucko.luckperm
         if (group.getName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
             throw new IllegalArgumentException("Cannot delete the default group.");
         }
-        return this.plugin.getStorage().deleteGroup(ApiGroup.cast(group), DeletionCause.API);
+
+        return this.plugin.getStorage().deleteGroup(ApiGroup.cast(group), DeletionCause.API).thenRun(() -> {
+            // invalidate caches - they have potentially been affected by
+            // this change.
+            this.plugin.getGroupManager().invalidateAllGroupCaches();
+            this.plugin.getUserManager().invalidateAllUserCaches();
+        });
     }
 
     @Override

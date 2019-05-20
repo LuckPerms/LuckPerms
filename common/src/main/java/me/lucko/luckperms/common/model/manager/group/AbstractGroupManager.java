@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.model.manager.group;
 
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.manager.AbstractManager;
 
 import java.util.Optional;
@@ -67,11 +66,11 @@ public abstract class AbstractGroupManager<T extends Group> extends AbstractMana
 
     @Override
     public void invalidateAllGroupCaches() {
-        getAll().values().forEach(PermissionHolder::invalidateCachedData);
+        getAll().values().forEach(g -> g.getCachedData().invalidate());
     }
 
     @Override
     public void invalidateAllPermissionCalculators() {
-        getAll().values().forEach(p -> p.getCachedData().invalidatePermissionCalculators());
+        getAll().values().forEach(g -> g.getCachedData().invalidatePermissionCalculators());
     }
 }

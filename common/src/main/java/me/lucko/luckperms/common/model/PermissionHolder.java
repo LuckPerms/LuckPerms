@@ -211,18 +211,11 @@ public abstract class PermissionHolder {
      */
     public abstract HolderType getType();
 
-    /**
-     * Invalidates the holder's cached data.
-     */
-    public void invalidateCachedData() {
-        getCachedData().invalidate();
-    }
-
     protected void invalidateCache() {
         this.enduringNodes.invalidate();
         this.transientNodes.invalidate();
 
-        invalidateCachedData();
+        getCachedData().invalidate();
         getPlugin().getEventFactory().handleDataRecalculate(this);
     }
 

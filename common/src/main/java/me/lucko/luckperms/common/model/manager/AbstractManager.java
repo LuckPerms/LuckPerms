@@ -77,11 +77,6 @@ public abstract class AbstractManager<I, C extends Identifiable<I>, T extends C>
         }
     }
 
-    @Override
-    public void unloadAll() {
-        this.objects.clear();
-    }
-
     protected I sanitizeIdentifier(I i) {
         return i;
     }

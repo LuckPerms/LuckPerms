@@ -31,7 +31,6 @@ import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.model.manager.AbstractManager;
@@ -165,12 +164,12 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
 
     @Override
     public void invalidateAllUserCaches() {
-        getAll().values().forEach(PermissionHolder::invalidateCachedData);
+        getAll().values().forEach(u -> u.getCachedData().invalidate());
     }
 
     @Override
     public void invalidateAllPermissionCalculators() {
-        getAll().values().forEach(p -> p.getCachedData().invalidatePermissionCalculators());
+        getAll().values().forEach(u -> u.getCachedData().invalidatePermissionCalculators());
     }
 
     /**

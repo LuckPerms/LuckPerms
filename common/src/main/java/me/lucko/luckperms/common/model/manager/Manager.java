@@ -86,9 +86,4 @@ public interface Manager<I, C extends Identifiable<I>, T extends C> extends Func
      */
     void unload(C object);
 
-    /**
-     * Unloads all objects from the manager
-     */
-    void unloadAll();
-
 }
