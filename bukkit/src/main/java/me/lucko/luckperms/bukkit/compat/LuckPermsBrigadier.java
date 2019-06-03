@@ -52,7 +52,10 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 public class LuckPermsBrigadier {
@@ -80,18 +83,20 @@ public class LuckPermsBrigadier {
 
     private static final class PermissionListener implements Listener {
         private final LPBukkitPlugin plugin;
-        private final Command pluginCommand;
+        private final List<String> aliases;
 
         private PermissionListener(LPBukkitPlugin plugin, Command pluginCommand) {
             this.plugin = plugin;
-            this.pluginCommand = pluginCommand;
+            this.aliases = Commodore.getAliases(pluginCommand).stream()
+                    .flatMap(alias -> Stream.of(alias, "minecraft:" + alias))
+                    .collect(Collectors.toList());
         }
 
         @EventHandler
         public void onCommandSend(PlayerCommandSendEvent e) {
             Sender playerAsSender = this.plugin.getSenderFactory().wrap(e.getPlayer());
             if (!this.plugin.getCommandManager().hasPermissionForAny(playerAsSender)) {
-                e.getCommands().removeAll(Commodore.getAliases(this.pluginCommand));
+                e.getCommands().removeAll(this.aliases);
             }
         }
     }
