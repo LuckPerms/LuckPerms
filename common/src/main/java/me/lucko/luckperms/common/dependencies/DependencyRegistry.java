@@ -74,6 +74,8 @@ public class DependencyRegistry {
         if (this.plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
             dependencies.add(Dependency.COMMONS_POOL_2);
             dependencies.add(Dependency.JEDIS);
+            dependencies.add(Dependency.SLF4J_API);
+            dependencies.add(Dependency.SLF4J_SIMPLE);
         }
 
         // don't load slf4j if it's already present
