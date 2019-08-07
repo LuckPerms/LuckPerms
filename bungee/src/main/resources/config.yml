@@ -212,6 +212,10 @@ watch-files: true
 #   => redisbungee   Uses Redis pub-sub to push changes, using the RedisBungee API. You need to have
 #                    the RedisBungee plugin installed.
 #   => none          Disables the service.
+#                    Exception is when you're using a SQL storage. In this case will this option default
+#                    to 'sql'. Use 'notsql' to disable this completely.
+#   => notsql        Disable the default 'sql' messaging-service. This is only useful if you're using
+#                    a SQL storage and don't want to have a messaging-service set.
 messaging-service: none
 
 # If LuckPerms should automatically push updates after a change has been made with a command.
