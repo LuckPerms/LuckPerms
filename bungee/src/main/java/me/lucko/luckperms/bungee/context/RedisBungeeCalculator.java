@@ -37,7 +37,7 @@ public class RedisBungeeCalculator implements StaticContextCalculator {
     private static final String PROXY_KEY = "proxy";
 
     @Override
-    public void giveApplicableContext(@NonNull ContextConsumer consumer) {
+    public void calculate(@NonNull ContextConsumer consumer) {
         RedisBungeeAPI redisBungee = RedisBungee.getApi();
         if (redisBungee != null) {
             consumer.accept(PROXY_KEY, redisBungee.getServerId());

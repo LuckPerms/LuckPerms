@@ -29,7 +29,7 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.api.node.NodeEqualityPredicate;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -101,8 +101,8 @@ public class UserSwitchPrimaryGroup extends SharedSubCommand {
         user.getPrimaryGroup().setStoredValue(group.getName());
         Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user.getFormattedDisplayName(), group.getFormattedDisplayName());
 
-        ExtendedLogEntry.build().actor(sender).acted(user)
-                .action("parent", "switchprimarygroup", group.getName())
+        LoggedAction.build().source(sender).target(user)
+                .description("parent", "switchprimarygroup", group.getName())
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(user, sender, plugin);

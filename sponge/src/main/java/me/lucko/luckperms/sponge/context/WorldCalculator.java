@@ -47,7 +47,7 @@ public class WorldCalculator implements ContextCalculator<Subject> {
     }
 
     @Override
-    public void giveApplicableContext(@NonNull Subject subject, @NonNull ContextConsumer consumer) {
+    public void calculate(@NonNull Subject subject, @NonNull ContextConsumer consumer) {
         CommandSource source = subject.getCommandSource().orElse(null);
         if (source == null || !(source instanceof Player)) {
             return;

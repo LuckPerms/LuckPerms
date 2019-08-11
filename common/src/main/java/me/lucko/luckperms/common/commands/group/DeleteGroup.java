@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.commands.group;
 
 import me.lucko.luckperms.api.actionlog.Action;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -79,8 +79,8 @@ public class DeleteGroup extends SingleCommand {
 
         Message.DELETE_SUCCESS.send(sender, group.getFormattedDisplayName());
 
-        ExtendedLogEntry.build().actor(sender).actedName(groupName).type(Action.Type.GROUP)
-                .action("delete")
+        LoggedAction.build().source(sender).targetName(groupName).targetType(Action.Target.Type.GROUP)
+                .description("delete")
                 .build().submit(plugin, sender);
 
         plugin.getSyncTaskBuffer().request();

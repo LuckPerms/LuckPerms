@@ -36,7 +36,7 @@ import me.lucko.luckperms.api.messenger.message.Message;
 import me.lucko.luckperms.api.messenger.message.type.ActionLogMessage;
 import me.lucko.luckperms.api.messenger.message.type.UpdateMessage;
 import me.lucko.luckperms.api.messenger.message.type.UserUpdateMessage;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.cache.BufferedRequest;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.messaging.message.ActionLogMessageImpl;
@@ -256,7 +256,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
             ActionLogMessage msg = (ActionLogMessage) message;
 
             this.plugin.getEventFactory().handleLogReceive(msg.getId(), msg.getAction());
-            this.plugin.getLogDispatcher().dispatchFromRemote((ExtendedLogEntry) msg.getAction());
+            this.plugin.getLogDispatcher().dispatchFromRemote((LoggedAction) msg.getAction());
         } else {
             throw new IllegalArgumentException("Unknown message type: " + message.getClass().getName());
         }

@@ -92,6 +92,6 @@ public interface ContextCalculator<T> {
      * @param target the target contextual subject for this operation
      * @param consumer the {@link ContextConsumer} to submit contexts to
      */
-    void giveApplicableContext(@NonNull T target, @NonNull ContextConsumer consumer);
+    void calculate(@NonNull T target, @NonNull ContextConsumer consumer);
 
 }

@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.commands.generic.meta;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.NodeType;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
@@ -111,8 +111,8 @@ public class MetaClear extends SharedSubCommand {
             Message.META_CLEAR_SUCCESS.send(sender, holder.getFormattedDisplayName(), type.name().toLowerCase(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         }
 
-        ExtendedLogEntry.build().actor(sender).acted(holder)
-                .action("meta", "clear", context)
+        LoggedAction.build().source(sender).target(holder)
+                .description("meta", "clear", context)
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(holder, sender, plugin);

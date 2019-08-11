@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.commands.track;
 
 import me.lucko.luckperms.api.model.DataMutateResult;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -66,8 +66,8 @@ public class TrackRemove extends SubCommand<Track> {
                 Message.BLANK.send(sender, MessageUtils.listToArrowSep(track.getGroups()));
             }
 
-            ExtendedLogEntry.build().actor(sender).acted(track)
-                    .action("remove", groupName)
+            LoggedAction.build().source(sender).target(track)
+                    .description("remove", groupName)
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(track, sender, plugin);

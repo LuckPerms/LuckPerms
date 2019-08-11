@@ -38,6 +38,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 
 import me.lucko.luckperms.api.actionlog.Action;
+import me.lucko.luckperms.api.context.Context;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
@@ -45,8 +46,8 @@ import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.model.PlayerSaveResult;
 import me.lucko.luckperms.api.node.HeldNode;
 import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.model.Group;
@@ -65,6 +66,7 @@ import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
 import org.bson.Document;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -165,15 +167,15 @@ public class MongoStorage implements StorageImplementation {
     public void logAction(Action entry) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "action");
         Document doc = new Document()
-                .append("timestamp", entry.getTimestamp())
-                .append("actor", entry.getActor())
-                .append("actorName", entry.getActorName())
-                .append("type", Character.toString(entry.getType().getCode()))
-                .append("actedName", entry.getActedName())
-                .append("action", entry.getAction());
+                .append("timestamp", entry.getTimestamp().getEpochSecond())
+                .append("actor", entry.getSource().getUniqueId())
+                .append("actorName", entry.getSource().getName())
+                .append("type", Character.toString(LoggedAction.getTypeCharacter(entry.getTarget().getType())))
+                .append("actedName", entry.getTarget().getName())
+                .append("action", entry.getDescription());
 
-        if (entry.getActed().isPresent()) {
-            doc.append("acted", entry.getActed().get());
+        if (entry.getTarget().getUniqueId().isPresent()) {
+            doc.append("acted", entry.getTarget().getUniqueId().get());
         }
 
         c.insertOne(doc);
@@ -192,14 +194,14 @@ public class MongoStorage implements StorageImplementation {
                     actedUuid = d.get("acted", UUID.class);
                 }
 
-                ExtendedLogEntry e = ExtendedLogEntry.build()
-                        .timestamp(d.getLong("timestamp"))
-                        .actor(d.get("actor", UUID.class))
-                        .actorName(d.getString("actorName"))
-                        .type(Action.Type.valueOf(d.getString("type").charAt(0)))
-                        .acted(actedUuid)
-                        .actedName(d.getString("actedName"))
-                        .action(d.getString("action"))
+                LoggedAction e = LoggedAction.build()
+                        .timestamp(Instant.ofEpochSecond(d.getLong("timestamp")))
+                        .source(d.get("actor", UUID.class))
+                        .sourceName(d.getString("actorName"))
+                        .targetType(LoggedAction.parseTypeCharacter(d.getString("type").charAt(0)))
+                        .target(actedUuid)
+                        .targetName(d.getString("actedName"))
+                        .description(d.getString("action"))
                         .build();
 
                 log.add(e);
@@ -725,8 +727,8 @@ public class MongoStorage implements StorageImplementation {
     }
 
     private static List<Document> contextSetToDocs(ContextSet contextSet) {
-        List<Document> contexts = new ArrayList<>();
-        for (Map.Entry<String, String> e : contextSet.toSet()) {
+        List<Document> contexts = new ArrayList<>(contextSet.size());
+        for (Context e : contextSet) {
             contexts.add(new Document().append("key", e.getKey()).append("value", e.getValue()));
         }
         return contexts;

@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.commands.group;
 
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -77,8 +77,8 @@ public class GroupClone extends SubCommand<Group> {
 
         Message.CLONE_SUCCESS.send(sender, group.getName(), newGroup.getName());
 
-        ExtendedLogEntry.build().actor(sender).acted(newGroup)
-                .action("clone", group.getName())
+        LoggedAction.build().source(sender).target(newGroup)
+                .description("clone", group.getName())
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(newGroup, sender, plugin);

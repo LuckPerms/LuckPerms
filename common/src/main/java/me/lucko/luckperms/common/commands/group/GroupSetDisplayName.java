@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.commands.group;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.types.DisplayNameNode;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
@@ -86,8 +86,8 @@ public class GroupSetDisplayName extends SubCommand<Group> {
         if (name.equals(group.getName())) {
             Message.GROUP_SET_DISPLAY_NAME_REMOVED.send(sender, group.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-            ExtendedLogEntry.build().actor(sender).acted(group)
-                    .action("setdisplayname", name, context)
+            LoggedAction.build().source(sender).target(group)
+                    .description("setdisplayname", name, context)
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(group, sender, plugin);
@@ -98,8 +98,8 @@ public class GroupSetDisplayName extends SubCommand<Group> {
 
         Message.GROUP_SET_DISPLAY_NAME.send(sender, name, group.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-        ExtendedLogEntry.build().actor(sender).acted(group)
-                .action("setdisplayname", name, context)
+        LoggedAction.build().source(sender).target(group)
+                .description("setdisplayname", name, context)
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(group, sender, plugin);

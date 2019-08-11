@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.commands.track;
 
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -50,8 +50,8 @@ public class TrackClear extends SubCommand<Track> {
         track.clearGroups();
         Message.TRACK_CLEAR.send(sender, track.getName());
 
-        ExtendedLogEntry.build().actor(sender).acted(track)
-                .action("clear")
+        LoggedAction.build().source(sender).target(track)
+                .description("clear")
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(track, sender, plugin);

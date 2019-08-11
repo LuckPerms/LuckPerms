@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.commands.group;
 
 import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.types.WeightNode;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
@@ -65,8 +65,8 @@ public class GroupSetWeight extends SubCommand<Group> {
 
         Message.GROUP_SET_WEIGHT.send(sender, weight, group.getFormattedDisplayName());
 
-        ExtendedLogEntry.build().actor(sender).acted(group)
-                .action("setweight", weight)
+        LoggedAction.build().source(sender).target(group)
+                .description("setweight", weight)
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(group, sender, plugin);

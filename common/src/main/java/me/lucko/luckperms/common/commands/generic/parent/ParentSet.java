@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.commands.generic.parent;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
@@ -88,8 +88,8 @@ public class ParentSet extends SharedSubCommand {
 
         Message.SET_PARENT_SUCCESS.send(sender, holder.getFormattedDisplayName(), group.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-        ExtendedLogEntry.build().actor(sender).acted(holder)
-                .action("parent", "set", group.getName(), context)
+        LoggedAction.build().source(sender).target(holder)
+                .description("parent", "set", group.getName(), context)
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(holder, sender, plugin);

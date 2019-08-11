@@ -453,7 +453,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
             logMsg("#holderRemovePermission: %s - %s - %s", holder.getPlainDisplayName(), permission, world);
         }
 
-        if (((Result) holder.unsetPermission(DataType.NORMAL, NodeFactory.make(permission, getVaultServer(), world))).wasSuccessful()) {
+        if (holder.unsetPermission(DataType.NORMAL, NodeFactory.builder(permission).withContext(DefaultContextKeys.SERVER_KEY, getVaultServer()).withContext(DefaultContextKeys.WORLD_KEY, world).build()).wasSuccessful()) {
             return holderSave(holder);
         }
         return false;

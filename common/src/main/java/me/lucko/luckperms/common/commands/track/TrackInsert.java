@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.commands.track;
 
 import me.lucko.luckperms.api.model.DataMutateResult;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -81,8 +81,8 @@ public class TrackInsert extends SubCommand<Track> {
                     Message.BLANK.send(sender, MessageUtils.listToArrowSep(track.getGroups(), group.getName()));
                 }
 
-                ExtendedLogEntry.build().actor(sender).acted(track)
-                        .action("insert", group.getName(), pos)
+                LoggedAction.build().source(sender).target(track)
+                        .description("insert", group.getName(), pos)
                         .build().submit(plugin, sender);
 
                 StorageAssistant.save(track, sender, plugin);

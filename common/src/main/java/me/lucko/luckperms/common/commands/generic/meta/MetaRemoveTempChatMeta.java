@@ -29,7 +29,7 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.model.DataMutateResult;
 import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.ChatMetaType;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
@@ -92,8 +92,8 @@ public class MetaRemoveTempChatMeta extends SharedSubCommand {
                     n.getContexts().equals(context), null);
             Message.BULK_REMOVE_TEMP_CHATMETA_SUCCESS.send(sender, holder.getFormattedDisplayName(), this.type.name().toLowerCase(), priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-            ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("meta" , "removetemp" + this.type.name().toLowerCase(), priority, "*", context)
+            LoggedAction.build().source(sender).target(holder)
+                    .description("meta" , "removetemp" + this.type.name().toLowerCase(), priority, "*", context)
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(holder, sender, plugin);
@@ -111,8 +111,8 @@ public class MetaRemoveTempChatMeta extends SharedSubCommand {
             builder.applyDeep(c -> c.hoverEvent(event));
             sender.sendMessage(builder.build());
 
-            ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("meta" , "removetemp" + this.type.name().toLowerCase(), priority, meta, context)
+            LoggedAction.build().source(sender).target(holder)
+                    .description("meta" , "removetemp" + this.type.name().toLowerCase(), priority, meta, context)
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(holder, sender, plugin);

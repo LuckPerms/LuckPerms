@@ -23,60 +23,38 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.context;
+package me.lucko.luckperms.common.context.contextset;
 
-import org.spongepowered.api.service.context.Context;
+import me.lucko.luckperms.api.context.Context;
 
-import java.util.AbstractSet;
-import java.util.Set;
+public final class ContextImpl implements Context {
+    private final String key;
+    private final String value;
 
-abstract class AbstractDelegatingContextSet extends AbstractSet<Context> implements DelegatingContextSet {
-
-    @Override
-    public int size() {
-        return getDelegate().size();
+    public ContextImpl(String key, String value) {
+        this.key = key;
+        this.value = value;
     }
 
     @Override
-    public boolean isEmpty() {
-        return getDelegate().isEmpty();
+    public String getKey() {
+        return this.key;
     }
 
     @Override
-    public boolean contains(Object o) {
-        if (o instanceof Context) {
-            Context context = (Context) o;
-            return !context.getKey().isEmpty() && !context.getValue().isEmpty() && getDelegate().contains(context.getKey(), context.getValue());
-        }
-        return false;
+    public String getValue() {
+        return this.value;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Context)) return false;
+        Context that = (Context) obj;
+        return this.key.equals(that.getKey()) && this.value.equals(that.getValue());
     }
 
     @Override
     public int hashCode() {
-        return getDelegate().hashCode();
+        return this.key.hashCode() ^ this.value.hashCode();
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-
-        if (o instanceof DelegatingContextSet) {
-            return getDelegate().equals(((DelegatingContextSet) o).getDelegate());
-        }
-
-        if (o instanceof Set) {
-            Set<?> set = (Set<?>) o;
-
-            try {
-                return size() == set.size() && containsAll(set);
-            } catch (NullPointerException | ClassCastException ignored) {
-                return false;
-            }
-        }
-
-        return false;
-    }
-
 }

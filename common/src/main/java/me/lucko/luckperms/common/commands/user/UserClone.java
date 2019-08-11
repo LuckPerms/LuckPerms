@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.commands.user;
 
 import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -76,8 +76,8 @@ public class UserClone extends SubCommand<User> {
 
         Message.CLONE_SUCCESS.send(sender, user.getFormattedDisplayName(), otherUser.getFormattedDisplayName());
 
-        ExtendedLogEntry.build().actor(sender).acted(otherUser)
-                .action("clone", user.getName())
+        LoggedAction.build().source(sender).target(otherUser)
+                .description("clone", user.getName())
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(otherUser, sender, plugin);

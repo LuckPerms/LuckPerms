@@ -25,12 +25,15 @@
 
 package me.lucko.luckperms.common.context.contextset;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 
+import me.lucko.luckperms.api.context.Context;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
@@ -48,15 +51,6 @@ public final class ImmutableContextSetImpl extends AbstractContextSet implements
 
     public static ImmutableContextSet of(String key, String value) {
         return new ImmutableContextSetImpl(ImmutableSetMultimap.of(sanitizeKey(key), sanitizeValue(value)));
-    }
-
-    public static ImmutableContextSet of(String key1, String value1, String key2, String value2) {
-        return new ImmutableContextSetImpl(ImmutableSetMultimap.of(
-                sanitizeKey(key1),
-                sanitizeValue(value1),
-                sanitizeKey(key2),
-                sanitizeValue(value2)
-        ));
     }
 
     private final ImmutableSetMultimap<String, String> map;
@@ -94,8 +88,13 @@ public final class ImmutableContextSetImpl extends AbstractContextSet implements
     }
 
     @Override
-    public @NonNull Set<Map.Entry<String, String>> toSet() {
-        return this.map.entries();
+    public @NonNull Set<Context> toSet() {
+        ImmutableSet.Builder<Context> builder = ImmutableSet.builder();
+        Set<Map.Entry<String, String>> entries = this.map.entries();
+        for (Map.Entry<String, String> e : entries) {
+            builder.add(new ContextImpl(e.getKey(), e.getValue()));
+        }
+        return builder.build();
     }
 
     @Override
@@ -113,14 +112,52 @@ public final class ImmutableContextSetImpl extends AbstractContextSet implements
         return m.build();
     }
 
-    @Override
-    public @NonNull Iterator<Map.Entry<String, String>> iterator() {
-        return this.map.entries().iterator();
+    private ImmutableList<Context> toList() {
+        Set<Map.Entry<String, String>> entries = this.map.entries();
+        Context[] array = new Context[entries.size()];
+        int i = 0;
+        for (Map.Entry<String, String> e : entries) {
+            array[i++] = new ContextImpl(e.getKey(), e.getValue());
+        }
+        return ImmutableList.copyOf(array);
     }
 
     @Override
-    public Spliterator<Map.Entry<String, String>> spliterator() {
-        return this.map.entries().spliterator();
+    public @NonNull Iterator<Context> iterator() {
+        return toList().iterator();
+    }
+
+    @Override
+    public Spliterator<Context> spliterator() {
+        return toList().spliterator();
+    }
+
+    @Override
+    public boolean isSatisfiedBy(@NonNull ContextSet other) {
+        if (this == other) {
+            return true;
+        }
+
+        Objects.requireNonNull(other, "other");
+        if (this.isEmpty()) {
+            // this is empty, so is therefore always satisfied.
+            return true;
+        } else if (other.isEmpty()) {
+            // this set isn't empty, but the other one is
+            return false;
+        } else if (this.size() > other.size()) {
+            // this set has more unique entries than the other set, so there's no way this can be satisfied.
+            return false;
+        } else {
+            // neither are empty, we need to compare the individual entries
+            Set<Map.Entry<String, String>> entries = this.map.entries();
+            for (Map.Entry<String, String> e : entries) {
+                if (!other.contains(e.getKey(), e.getValue())) {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 
     @Override
@@ -139,7 +176,12 @@ public final class ImmutableContextSetImpl extends AbstractContextSet implements
         if (that instanceof AbstractContextSet) {
             thatBacking = ((AbstractContextSet) that).backing();
         } else {
-            thatBacking = ImmutableSetMultimap.copyOf(that.toSet());
+            Map<String, Set<String>> thatMap = that.toMap();
+            ImmutableSetMultimap.Builder<String, String> thatBuilder = ImmutableSetMultimap.builder();
+            for (Map.Entry<String, Set<String>> e : thatMap.entrySet()) {
+                thatBuilder.putAll(e.getKey(), e.getValue());
+            }
+            thatBacking = thatBuilder.build();
         }
 
         return backing().equals(thatBacking);

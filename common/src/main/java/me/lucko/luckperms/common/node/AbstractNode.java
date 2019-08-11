@@ -180,7 +180,7 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
             @Override
             public boolean areEqual(@NonNull AbstractNode o1, @NonNull AbstractNode o2) {
                 return o1 == o2 ||
-                        o1.key == o2.key &&
+                        o1.key.equals(o2.key) &&
                         o1.value == o2.value &&
                         o1.expireAt == o2.expireAt &&
                         o1.getContexts().equals(o2.getContexts());
@@ -190,7 +190,7 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
             @Override
             public boolean areEqual(@NonNull AbstractNode o1, @NonNull AbstractNode o2) {
                 return o1 == o2 ||
-                        o1.key == o2.key &&
+                        o1.key.equals(o2.key) &&
                         o1.expireAt == o2.expireAt &&
                         o1.getContexts().equals(o2.getContexts());
             }
@@ -199,7 +199,7 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
             @Override
             public boolean areEqual(@NonNull AbstractNode o1, @NonNull AbstractNode o2) {
                 return o1 == o2 ||
-                        o1.key == o2.key &&
+                        o1.key.equals(o2.key) &&
                         o1.value == o2.value &&
                         o1.hasExpiry() == o2.hasExpiry() &&
                         o1.getContexts().equals(o2.getContexts());
@@ -209,7 +209,7 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
             @Override
             public boolean areEqual(@NonNull AbstractNode o1, @NonNull AbstractNode o2) {
                 return o1 == o2 ||
-                        o1.key == o2.key &&
+                        o1.key.equals(o2.key) &&
                         o1.hasExpiry() == o2.hasExpiry() &&
                         o1.getContexts().equals(o2.getContexts());
             }
@@ -218,7 +218,7 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
             @Override
             public boolean areEqual(@NonNull AbstractNode o1, @NonNull AbstractNode o2) {
                 return o1 == o2 ||
-                        o1.key == o2.key &&
+                        o1.key.equals(o2.key) &&
                         o1.getContexts().equals(o2.getContexts());
             }
         };

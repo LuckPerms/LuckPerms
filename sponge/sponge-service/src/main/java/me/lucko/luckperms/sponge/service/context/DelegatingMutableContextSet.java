@@ -26,12 +26,12 @@
 package me.lucko.luckperms.sponge.service.context;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.context.contextset.ContextImpl;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.context.Context;
 
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -63,8 +63,8 @@ public class DelegatingMutableContextSet extends AbstractDelegatingContextSet {
             return false;
         }
 
-        boolean has = this.delegate.contains(context);
-        this.delegate.add(context);
+        boolean has = this.delegate.contains(context.getKey(), context.getValue());
+        this.delegate.add(new ContextImpl(context.getKey(), context.getValue()));
         return !has;
     }
 
@@ -75,7 +75,7 @@ public class DelegatingMutableContextSet extends AbstractDelegatingContextSet {
             if (context.getKey().isEmpty() || context.getValue().isEmpty()) {
                 return false;
             }
-            boolean had = this.delegate.contains(context);
+            boolean had = this.delegate.contains(context.getKey(), context.getValue());
             this.delegate.remove(context.getKey(), context.getValue());
             return had;
         }
@@ -94,7 +94,7 @@ public class DelegatingMutableContextSet extends AbstractDelegatingContextSet {
     }
 
     private final class ContextSetIterator implements Iterator<Context> {
-        private final Iterator<Map.Entry<String, String>> it = DelegatingMutableContextSet.this.delegate.iterator();
+        private final Iterator<me.lucko.luckperms.api.context.Context> it = DelegatingMutableContextSet.this.delegate.iterator();
         private Context current;
 
         @Override
@@ -104,7 +104,7 @@ public class DelegatingMutableContextSet extends AbstractDelegatingContextSet {
 
         @Override
         public Context next() {
-            Map.Entry<String, String> next = this.it.next();
+            me.lucko.luckperms.api.context.Context next = this.it.next();
 
             // track the iterators cursor to handle #remove calls
             this.current = new Context(next.getKey(), next.getValue());

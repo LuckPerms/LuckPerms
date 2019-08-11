@@ -32,7 +32,7 @@ import me.lucko.luckperms.api.model.TemporaryMergeBehaviour;
 import me.lucko.luckperms.api.node.ChatMetaType;
 import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.api.util.Result;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
@@ -143,8 +143,8 @@ public class MetaSetTempChatMeta extends SharedSubCommand {
             builder.applyDeep(c -> c.hoverEvent(event));
             sender.sendMessage(builder.build());
 
-            ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("meta" , "settemp" + this.type.name().toLowerCase(), priority, meta, duration, context)
+            LoggedAction.build().source(sender).target(holder)
+                    .description("meta" , "settemp" + this.type.name().toLowerCase(), priority, meta, duration, context)
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(holder, sender, plugin);

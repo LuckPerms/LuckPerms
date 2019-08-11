@@ -33,8 +33,8 @@ import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.model.PlayerSaveResult;
 import me.lucko.luckperms.api.node.HeldNode;
 import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
@@ -67,6 +67,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -266,13 +267,13 @@ public class SqlStorage implements StorageImplementation {
     public void logAction(Action entry) throws SQLException {
         try (Connection c = this.connectionFactory.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(ACTION_INSERT))) {
-                ps.setLong(1, entry.getTimestamp());
-                ps.setString(2, entry.getActor().toString());
-                ps.setString(3, entry.getActorName());
-                ps.setString(4, Character.toString(entry.getType().getCode()));
-                ps.setString(5, entry.getActed().map(UUID::toString).orElse("null"));
-                ps.setString(6, entry.getActedName());
-                ps.setString(7, entry.getAction());
+                ps.setLong(1, entry.getTimestamp().getEpochSecond());
+                ps.setString(2, entry.getSource().getUniqueId().toString());
+                ps.setString(3, entry.getSource().getName());
+                ps.setString(4, Character.toString(LoggedAction.getTypeCharacter(entry.getTarget().getType())));
+                ps.setString(5, entry.getTarget().getUniqueId().map(UUID::toString).orElse("null"));
+                ps.setString(6, entry.getTarget().getName());
+                ps.setString(7, entry.getDescription());
                 ps.execute();
             }
         }
@@ -286,14 +287,14 @@ public class SqlStorage implements StorageImplementation {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         final String actedUuid = rs.getString("acted_uuid");
-                        ExtendedLogEntry e = ExtendedLogEntry.build()
-                                .timestamp(rs.getLong("time"))
-                                .actor(UUID.fromString(rs.getString("actor_uuid")))
-                                .actorName(rs.getString("actor_name"))
-                                .type(Action.Type.valueOf(rs.getString("type").toCharArray()[0]))
-                                .acted(actedUuid.equals("null") ? null : UUID.fromString(actedUuid))
-                                .actedName(rs.getString("acted_name"))
-                                .action(rs.getString("action"))
+                        LoggedAction e = LoggedAction.build()
+                                .timestamp(Instant.ofEpochSecond(rs.getLong("time")))
+                                .source(UUID.fromString(rs.getString("actor_uuid")))
+                                .sourceName(rs.getString("actor_name"))
+                                .targetType(LoggedAction.parseTypeCharacter(rs.getString("type").toCharArray()[0]))
+                                .target(actedUuid.equals("null") ? null : UUID.fromString(actedUuid))
+                                .targetName(rs.getString("acted_name"))
+                                .description(rs.getString("action"))
                                 .build();
                         
                         log.add(e);

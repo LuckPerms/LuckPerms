@@ -66,10 +66,10 @@ public interface StaticContextCalculator extends ContextCalculator<Object> {
      *
      * @param consumer the {@link ContextConsumer} to submit contexts to
      */
-    void giveApplicableContext(@NonNull ContextConsumer consumer);
+    void calculate(@NonNull ContextConsumer consumer);
 
     @Override
-    default void giveApplicableContext(@NonNull Object target, @NonNull ContextConsumer consumer) {
-        giveApplicableContext(consumer);
+    default void calculate(@NonNull Object target, @NonNull ContextConsumer consumer) {
+        calculate(consumer);
     }
 }

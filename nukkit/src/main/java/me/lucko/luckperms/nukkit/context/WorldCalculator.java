@@ -46,7 +46,7 @@ public class WorldCalculator implements ContextCalculator<Player> {
     }
 
     @Override
-    public void giveApplicableContext(@NonNull Player subject, @NonNull ContextConsumer consumer) {
+    public void calculate(@NonNull Player subject, @NonNull ContextConsumer consumer) {
         Set<String> seen = new HashSet<>();
         String world = subject.getLevel().getName().toLowerCase();
         while (seen.add(world)) {

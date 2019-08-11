@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.commands.group;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -83,8 +83,8 @@ public class GroupRename extends SubCommand<Group> {
 
         Message.RENAME_SUCCESS.send(sender, group.getName(), newGroup.getName());
 
-        ExtendedLogEntry.build().actor(sender).acted(group)
-                .action("rename", newGroup.getName())
+        LoggedAction.build().source(sender).target(group)
+                .description("rename", newGroup.getName())
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(newGroup, sender, plugin);

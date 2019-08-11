@@ -45,7 +45,7 @@ public class SpongeProxiedContextCalculator implements ProxiedContextCalculator<
     }
 
     @Override
-    public void giveApplicableContext(@NonNull Subject subject, @NonNull ContextConsumer consumer) {
+    public void calculate(@NonNull Subject subject, @NonNull ContextConsumer consumer) {
         this.delegate.accumulateContexts(subject, new ProxiedContextSet(consumer));
     }
 

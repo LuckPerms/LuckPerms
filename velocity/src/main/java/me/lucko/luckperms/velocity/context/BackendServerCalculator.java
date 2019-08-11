@@ -51,7 +51,7 @@ public class BackendServerCalculator implements ContextCalculator<Player> {
     }
 
     @Override
-    public void giveApplicableContext(@NonNull Player subject, @NonNull ContextConsumer consumer) {
+    public void calculate(@NonNull Player subject, @NonNull ContextConsumer consumer) {
         Set<String> seen = new HashSet<>();
         String server = getServer(subject);
         while (server != null && seen.add(server)) {

@@ -32,7 +32,7 @@ import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -133,13 +133,13 @@ public class ApplyEditsCommand extends SingleCommand {
         holder.setNodes(DataType.NORMAL, after);
 
         for (Node n : diffAdded) {
-            ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("webeditor", "add", n.getKey(), n.getValue(), n.getContexts())
+            LoggedAction.build().source(sender).target(holder)
+                    .description("webeditor", "add", n.getKey(), n.getValue(), n.getContexts())
                     .build().submit(plugin, sender);
         }
         for (Node n : diffRemoved) {
-            ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("webeditor", "remove", n.getKey(), n.getValue(), n.getContexts())
+            LoggedAction.build().source(sender).target(holder)
+                    .description("webeditor", "remove", n.getKey(), n.getValue(), n.getContexts())
                     .build().submit(plugin, sender);
         }
 

@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.commands.user;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.api.track.DemotionResult;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
@@ -116,8 +116,8 @@ public class UserDemote extends SubCommand<User> {
 
                 Message.USER_DEMOTE_ENDOFTRACK.send(sender, track.getName(), user.getFormattedDisplayName(), result.getGroupFrom().get());
 
-                ExtendedLogEntry.build().actor(sender).acted(user)
-                        .action("demote", track.getName(), context)
+                LoggedAction.build().source(sender).target(user)
+                        .description("demote", track.getName(), context)
                         .build().submit(plugin, sender);
 
                 StorageAssistant.save(user, sender, plugin);
@@ -133,8 +133,8 @@ public class UserDemote extends SubCommand<User> {
                     Message.BLANK.send(sender, MessageUtils.listToArrowSep(track.getGroups(), groupTo, groupFrom, true));
                 }
 
-                ExtendedLogEntry.build().actor(sender).acted(user)
-                        .action("demote", track.getName(), context)
+                LoggedAction.build().source(sender).target(user)
+                        .description("demote", track.getName(), context)
                         .build().submit(plugin, sender);
 
                 StorageAssistant.save(user, sender, plugin);

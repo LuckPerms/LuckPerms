@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.command.access;
 
+import me.lucko.luckperms.api.context.Context;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.api.query.QueryOptions;
@@ -42,7 +43,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
-import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -246,7 +246,7 @@ public final class ArgumentPermissions {
             }
         }
 
-        for (Map.Entry<String, String> context : contextSet.toSet()) {
+        for (Context context : contextSet) {
             Tristate ret = sender.getPermissionValue(base.getPermission() + ".usecontext." + context.getKey() + "." + context.getValue());
             if (ret != Tristate.UNDEFINED) {
                 if (ret == Tristate.FALSE) {

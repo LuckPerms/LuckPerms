@@ -122,7 +122,7 @@ public abstract class ContextManager<T> {
 
         for (ContextCalculator<? super T> calculator : this.calculators) {
             try {
-                calculator.giveApplicableContext(subject, accumulator::add);
+                calculator.calculate(subject, accumulator::add);
             } catch (Throwable e) {
                 ContextManager.this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating the context of subject " + subject);
                 e.printStackTrace();
@@ -137,7 +137,7 @@ public abstract class ContextManager<T> {
 
         for (StaticContextCalculator calculator : this.staticCalculators) {
             try {
-                calculator.giveApplicableContext(accumulator::add);
+                calculator.calculate(accumulator::add);
             } catch (Throwable e) {
                 this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating static contexts");
                 e.printStackTrace();

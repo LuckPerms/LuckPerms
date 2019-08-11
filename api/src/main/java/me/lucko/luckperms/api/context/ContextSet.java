@@ -57,7 +57,7 @@ import java.util.Set;
  * {@link MutableContextSet} allows the addition and removal of context keys
  * after construction, and {@link ImmutableContextSet} does not.</p>
  */
-public interface ContextSet extends Iterable<Map.Entry<String, String>> {
+public interface ContextSet extends Iterable<Context> {
 
     /**
      * Gets if this {@link ContextSet} is immutable.
@@ -89,7 +89,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
     @NonNull MutableContextSet mutableCopy();
 
     /**
-     * Returns a {@link Set} of {@link Map.Entry}s representing the current
+     * Returns a {@link Set} of {@link Context}s representing the current
      * state of this {@link ContextSet}.
      *
      * <p>The returned set is immutable, and is a copy of the current set.
@@ -97,7 +97,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      *
      * @return an immutable set
      */
-    @NonNull Set<Map.Entry<String, String>> toSet();
+    @NonNull Set<Context> toSet();
 
     /**
      * Returns a {@link Map} representing the current state of this
@@ -137,7 +137,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return an iterator
      */
     @Override
-    @NonNull Iterator<Map.Entry<String, String>> iterator();
+    @NonNull Iterator<Context> iterator();
 
     /**
      * Returns if the {@link ContextSet} contains at least one value for the
@@ -191,7 +191,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @return true if the set contains the context pair
      * @throws NullPointerException if the key or value is null
      */
-    default boolean contains(Map.@NonNull Entry<String, String> entry) {
+    default boolean contains(@NonNull Context entry) {
         Objects.requireNonNull(entry, "entry");
         return contains(entry.getKey(), entry.getValue());
     }
@@ -207,31 +207,7 @@ public interface ContextSet extends Iterable<Map.Entry<String, String>> {
      * @param other the other set to check
      * @return true if all entries in this set are also in the other set
      */
-    default boolean isSatisfiedBy(@NonNull ContextSet other) {
-        if (this == other) {
-            return true;
-        }
-
-        Objects.requireNonNull(other, "other");
-        if (this.isEmpty()) {
-            // this is empty, so is therefore always satisfied.
-            return true;
-        } else if (other.isEmpty()) {
-            // this set isn't empty, but the other one is
-            return false;
-        } else if (this.size() > other.size()) {
-            // this set has more unique entries than the other set, so there's no way this can be satisfied.
-            return false;
-        } else {
-            // neither are empty, we need to compare the individual entries
-            for (Map.Entry<String, String> context : toSet()) {
-                if (!other.contains(context)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
+    boolean isSatisfiedBy(@NonNull ContextSet other);
 
     /**
      * Returns if the {@link ContextSet} is empty.

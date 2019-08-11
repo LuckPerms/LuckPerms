@@ -31,7 +31,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.context.Context;
 
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -75,7 +74,7 @@ public class DelegatingImmutableContextSet extends AbstractDelegatingContextSet 
     }
 
     private final class ContextSetIterator implements Iterator<Context> {
-        private final Iterator<Map.Entry<String, String>> it = DelegatingImmutableContextSet.this.delegate.iterator();
+        private final Iterator<me.lucko.luckperms.api.context.Context> it = DelegatingImmutableContextSet.this.delegate.iterator();
 
         @Override
         public boolean hasNext() {
@@ -84,7 +83,7 @@ public class DelegatingImmutableContextSet extends AbstractDelegatingContextSet 
 
         @Override
         public Context next() {
-            Map.Entry<String, String> next = this.it.next();
+            me.lucko.luckperms.api.context.Context next = this.it.next();
             return new Context(next.getKey(), next.getValue());
         }
 

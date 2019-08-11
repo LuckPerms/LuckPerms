@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.commands.track;
 
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -82,8 +82,8 @@ public class TrackRename extends SubCommand<Track> {
 
         Message.RENAME_SUCCESS.send(sender, track.getName(), newTrack.getName());
 
-        ExtendedLogEntry.build().actor(sender).acted(track)
-                .action("rename", newTrack.getName())
+        LoggedAction.build().source(sender).target(track)
+                .description("rename", newTrack.getName())
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(newTrack, sender, plugin);

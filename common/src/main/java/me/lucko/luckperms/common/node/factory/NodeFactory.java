@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.node.factory;
 
-import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.Context;
 import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.api.node.ChatMetaType;
 import me.lucko.luckperms.api.node.Node;
@@ -35,8 +35,6 @@ import me.lucko.luckperms.api.node.types.InheritanceNode;
 import me.lucko.luckperms.api.node.types.MetaNode;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
-
-import java.util.Map;
 
 /**
  * Utility class to make Node(Builder) instances from strings or existing Nodes
@@ -118,88 +116,8 @@ public final class NodeFactory {
         return builder(node).value(value).build();
     }
 
-    public static Node make(String node, boolean value, String server) {
-        return builder(node).value(value).withContext(DefaultContextKeys.SERVER_KEY, server).build();
-    }
-
     public static Node make(String node, boolean value, String server, String world) {
         return builder(node).value(value).withContext(DefaultContextKeys.SERVER_KEY, server).withContext(DefaultContextKeys.WORLD_KEY, world).build();
-    }
-
-    public static Node make(String node, String server) {
-        return builder(node).withContext(DefaultContextKeys.SERVER_KEY, server).build();
-    }
-
-    public static Node make(String node, String server, String world) {
-        return builder(node).withContext(DefaultContextKeys.SERVER_KEY, server).withContext(DefaultContextKeys.WORLD_KEY, world).build();
-    }
-
-    public static Node make(String node, boolean value, boolean temporary) {
-        return builder(node).value(value).expiry(temporary ? 10L : 0L).build();
-    }
-
-    public static Node make(String node, boolean value, String server, boolean temporary) {
-        return builder(node).value(value).withContext(DefaultContextKeys.SERVER_KEY, server).expiry(temporary ? 10L : 0L).build();
-    }
-
-    public static Node make(String node, boolean value, String server, String world, boolean temporary) {
-        return builder(node).value(value).withContext(DefaultContextKeys.SERVER_KEY, server).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(temporary ? 10L : 0L).build();
-    }
-
-    public static Node make(String node, String server, boolean temporary) {
-        return builder(node).withContext(DefaultContextKeys.SERVER_KEY, server).expiry(temporary ? 10L : 0L).build();
-    }
-
-    public static Node make(String node, String server, String world, boolean temporary) {
-        return builder(node).withContext(DefaultContextKeys.SERVER_KEY, server).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(temporary ? 10L : 0L).build();
-    }
-
-    public static Node make(String node, boolean value, long expireAt) {
-        return builder(node).value(value).expiry(expireAt).build();
-    }
-
-    public static Node make(String node, boolean value, String server, long expireAt) {
-        return builder(node).value(value).withContext(DefaultContextKeys.SERVER_KEY, server).expiry(expireAt).build();
-    }
-
-    public static Node make(String node, boolean value, String server, String world, long expireAt) {
-        return builder(node).value(value).withContext(DefaultContextKeys.SERVER_KEY, server).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(expireAt).build();
-    }
-
-    public static Node make(Group group, long expireAt) {
-        return NodeFactory.make(groupNode(group.getName()), true, expireAt);
-    }
-
-    public static Node make(Group group, String server, long expireAt) {
-        return NodeFactory.make(groupNode(group.getName()), true, server, expireAt);
-    }
-
-    public static Node make(Group group, String server, String world, long expireAt) {
-        return NodeFactory.make(groupNode(group.getName()), true, server, world, expireAt);
-    }
-
-    public static Node make(Group group) {
-        return make(groupNode(group.getName()));
-    }
-
-    public static Node make(Group group, boolean temporary) {
-        return make(groupNode(group.getName()), temporary);
-    }
-
-    public static Node make(Group group, String server) {
-        return make(groupNode(group.getName()), server);
-    }
-
-    public static Node make(Group group, String server, String world) {
-        return make(groupNode(group.getName()), server, world);
-    }
-
-    public static Node make(Group group, String server, boolean temporary) {
-        return make(groupNode(group.getName()), server, temporary);
-    }
-
-    public static Node make(Group group, String server, String world, boolean temporary) {
-        return make(groupNode(group.getName()), server, world, temporary);
     }
 
     public static String nodeAsCommand(Node node, String id, HolderType type, boolean set, boolean explicitGlobalContext) {
@@ -344,8 +262,7 @@ public final class NodeFactory {
             return sb;
         }
 
-        ContextSet contexts = node.getContexts();
-        for (Map.Entry<String, String> context : contexts) {
+        for (Context context : node.getContexts()) {
             sb.append(" ").append(context.getKey()).append("=").append(context.getValue());
         }
 

@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.commands.track;
 
 import me.lucko.luckperms.api.actionlog.Action;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -72,8 +72,8 @@ public class DeleteTrack extends SingleCommand {
 
         Message.DELETE_SUCCESS.send(sender, trackName);
 
-        ExtendedLogEntry.build().actor(sender).actedName(trackName).type(Action.Type.TRACK)
-                .action("delete")
+        LoggedAction.build().source(sender).targetName(trackName).targetType(Action.Target.Type.TRACK)
+                .description("delete")
                 .build().submit(plugin, sender);
 
         return CommandResult.SUCCESS;

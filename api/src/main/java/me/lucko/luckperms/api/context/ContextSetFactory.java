@@ -36,8 +36,6 @@ public interface ContextSetFactory {
 
     @NonNull ImmutableContextSet immutableOf(@NonNull String key, @NonNull String value);
 
-    @NonNull ImmutableContextSet immutableOf(@NonNull String key1, @NonNull String value1, @NonNull String key2, @NonNull String value2);
-
     @NonNull ImmutableContextSet immutableEmpty();
 
     @NonNull MutableContextSet mutable();

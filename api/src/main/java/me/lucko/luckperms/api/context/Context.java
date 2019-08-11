@@ -23,30 +23,27 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.context;
-
-import me.lucko.luckperms.api.context.ContextConsumer;
-import me.lucko.luckperms.api.context.DefaultContextKeys;
-import me.lucko.luckperms.api.context.StaticContextCalculator;
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.config.LuckPermsConfiguration;
+package me.lucko.luckperms.api.context;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class LPStaticContextsCalculator implements StaticContextCalculator {
-    private final LuckPermsConfiguration config;
+/**
+ * Represents an individual context pair.
+ */
+public interface Context {
 
-    public LPStaticContextsCalculator(LuckPermsConfiguration config) {
-        this.config = config;
-    }
+    /**
+     * Gets the context key.
+     *
+     * @return the key
+     */
+    @NonNull String getKey();
 
-    @Override
-    public void calculate(@NonNull ContextConsumer consumer) {
-        String server = this.config.get(ConfigKeys.SERVER);
-        if (!server.equals("global")) {
-            consumer.accept(DefaultContextKeys.SERVER_KEY, server);
-        }
-        consumer.accept(this.config.getContextsFile().getStaticContexts());
-    }
+    /**
+     * Gets the context value
+     *
+     * @return the value
+     */
+    @NonNull String getValue();
 
 }

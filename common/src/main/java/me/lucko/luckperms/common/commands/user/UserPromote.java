@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.commands.user;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.api.track.PromotionResult;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
@@ -116,8 +116,8 @@ public class UserPromote extends SubCommand<User> {
 
                 Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFormattedDisplayName(), result.getGroupTo().get(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-                ExtendedLogEntry.build().actor(sender).acted(user)
-                        .action("promote", track.getName(), context)
+                LoggedAction.build().source(sender).target(user)
+                        .description("promote", track.getName(), context)
                         .build().submit(plugin, sender);
 
                 StorageAssistant.save(user, sender, plugin);
@@ -133,8 +133,8 @@ public class UserPromote extends SubCommand<User> {
                     Message.BLANK.send(sender, MessageUtils.listToArrowSep(track.getGroups(), groupFrom, groupTo, false));
                 }
 
-                ExtendedLogEntry.build().actor(sender).acted(user)
-                        .action("promote", track.getName(), context)
+                LoggedAction.build().source(sender).target(user)
+                        .description("promote", track.getName(), context)
                         .build().submit(plugin, sender);
 
                 StorageAssistant.save(user, sender, plugin);

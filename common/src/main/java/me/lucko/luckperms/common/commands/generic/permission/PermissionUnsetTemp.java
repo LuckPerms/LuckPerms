@@ -30,7 +30,7 @@ import me.lucko.luckperms.api.model.DataMutateResult;
 import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.api.node.types.InheritanceNode;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
@@ -88,8 +88,8 @@ public class PermissionUnsetTemp extends SharedSubCommand {
         if (result.wasSuccessful()) {
             Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-            ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("permission", "unsettemp", node, context)
+            LoggedAction.build().source(sender).target(holder)
+                    .description("permission", "unsettemp", node, context)
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(holder, sender, plugin);

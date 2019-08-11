@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.commands.generic.other;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
@@ -81,8 +81,8 @@ public class HolderClear<T extends PermissionHolder> extends SubCommand<T> {
             Message.CLEAR_SUCCESS.send(sender, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         }
 
-        ExtendedLogEntry.build().actor(sender).acted(holder)
-                .action("clear", context)
+        LoggedAction.build().source(sender).target(holder)
+                .description("clear", context)
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(holder, sender, plugin);

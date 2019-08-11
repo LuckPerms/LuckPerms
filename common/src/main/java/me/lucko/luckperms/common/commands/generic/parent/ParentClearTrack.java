@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.commands.generic.parent;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.NodeType;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
@@ -110,8 +110,8 @@ public class ParentClearTrack extends SharedSubCommand {
             Message.PARENT_CLEAR_TRACK_SUCCESS.send(sender, holder.getFormattedDisplayName(), track.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         }
 
-        ExtendedLogEntry.build().actor(sender).acted(holder)
-                .action("parent", "cleartrack", track.getName(), context)
+        LoggedAction.build().source(sender).target(holder)
+                .description("parent", "cleartrack", track.getName(), context)
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(holder, sender, plugin);

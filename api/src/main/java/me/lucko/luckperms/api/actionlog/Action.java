@@ -30,6 +30,7 @@ import me.lucko.luckperms.api.LuckPermsProvider;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -48,50 +49,25 @@ public interface Action extends Comparable<Action> {
     }
 
     /**
-     * Gets the time in unix seconds when the action occurred.
+     * Gets the time when the action occurred.
      *
      * @return the timestamp
      */
-    long getTimestamp();
+    @NonNull Instant getTimestamp();
 
     /**
-     * Gets the id of the object which performed the action.
+     * Gets the source of the action.
      *
-     * <p>This is the players uuid in most cases.</p>
-     *
-     * @return the actor id
+     * @return the source
      */
-    @NonNull UUID getActor();
+    @NonNull Source getSource();
 
     /**
-     * Gets the name describing the actor.
+     * Gets the target of the action.
      *
-     * @return the name of the actor
+     * @return the target
      */
-    @NonNull String getActorName();
-
-    /**
-     * Gets the type of action.
-     *
-     * @return the action type
-     */
-    @NonNull Type getType();
-
-    /**
-     * Gets the uuid of the object which was acted upon.
-     *
-     * <p>Will only return a value for {@link Type#USER} entries.</p>
-     *
-     * @return the uuid of acted object
-     */
-    @NonNull Optional<UUID> getActed();
-
-    /**
-     * Gets the name describing the object which was acted upon
-     *
-     * @return the name of the acted object
-     */
-    @NonNull String getActedName();
+    @NonNull Target getTarget();
 
     /**
      * Returns a string describing the action which took place.
@@ -101,71 +77,65 @@ public interface Action extends Comparable<Action> {
      *
      * @return the action
      */
-    @NonNull String getAction();
+    @NonNull String getDescription();
 
     /**
-     * Represents the type of a {@link Action}.
+     * Represents the source of an action.
      */
-    enum Type {
-        USER('U'), GROUP('G'), TRACK('T');
+    interface Source {
 
         /**
-         * Parses a {@link Type} from a string.
+         * Gets the source unique id.
          *
-         * @param type the string
-         * @return a type
-         * @throws IllegalArgumentException if a type could not be parsed
+         * @return the source unique id
          */
-        public static @NonNull Type parse(String type) {
-            try {
-                return valueOf(type);
-            } catch (IllegalArgumentException e) {
-                // ignore
-            }
-            try {
-                return valueOf(type.charAt(0));
-            } catch (IllegalArgumentException e) {
-                // ignore
-            }
-            throw new IllegalArgumentException("Unknown type: " + type);
-        }
+        @NonNull UUID getUniqueId();
 
         /**
-         * Returns a {@link Type} by its code.
+         * Gets the source name.
          *
-         * @param code the code - see {@link Type#getCode()}.
-         * @return a type
-         * @throws IllegalArgumentException if a type could not be resolved
+         * @return the source name
          */
-        public static @NonNull Type valueOf(char code) {
-            switch (code) {
-                case 'U':
-                case 'u':
-                    return USER;
-                case 'G':
-                case 'g':
-                    return GROUP;
-                case 'T':
-                case 't':
-                    return TRACK;
-                default:
-                    throw new IllegalArgumentException("Unknown code: " + code);
-            }
-        }
+        @NonNull String getName();
 
-        private final char code;
+    }
 
-        Type(char code) {
-            this.code = code;
-        }
+    /**
+     * Represents the target of an action.
+     */
+    interface Target {
 
-        public char getCode() {
-            return this.code;
+        /**
+         * Gets the target unique id.
+         *
+         * @return the target unique id
+         */
+        @NonNull Optional<UUID> getUniqueId();
+
+        /**
+         * Gets the target name.
+         *
+         * @return the target name
+         */
+        @NonNull String getName();
+
+        /**
+         * Gets the target type.
+         *
+         * @return the target type
+         */
+        @NonNull Type getType();
+
+        /**
+         * Represents the type of a {@link Target}.
+         */
+        enum Type {
+            USER, GROUP, TRACK
         }
     }
 
     /**
-     * Builds a LogEntry instance
+     * Builds an {@link Action} instance
      */
     interface Builder {
 
@@ -176,61 +146,55 @@ public interface Action extends Comparable<Action> {
          * @return the builder
          * @see Action#getTimestamp()
          */
-        @NonNull Builder timestamp(long timestamp);
+        @NonNull Builder timestamp(@NonNull Instant timestamp);
 
         /**
          * Sets the actor of the entry.
          *
          * @param actor the actor
          * @return the builder
-         * @see Action#getActor()
          */
-        @NonNull Builder actor(@NonNull UUID actor);
+        @NonNull Builder source(@NonNull UUID actor);
 
         /**
          * Sets the actor name of the entry.
          *
          * @param actorName the actor name
          * @return the builder
-         * @see Action#getActorName()
          */
-        @NonNull Builder actorName(@NonNull String actorName);
+        @NonNull Builder sourceName(@NonNull String actorName);
 
         /**
          * Sets the type of the entry.
          *
          * @param type the type
          * @return the builder
-         * @see Action#getType()
          */
-        @NonNull Builder type(@NonNull Type type);
+        @NonNull Builder targetType(Action.Target.Type type);
 
         /**
          * Sets the acted object for the entry.
          *
          * @param acted the acted object
          * @return the builder
-         * @see Action#getActed()
          */
-        @NonNull Builder acted(@Nullable UUID acted);
+        @NonNull Builder target(@Nullable UUID acted);
 
         /**
          * Sets the acted name for the entry.
          *
          * @param actedName the acted name
          * @return the builder
-         * @see Action#getActedName()
          */
-        @NonNull Builder actedName(@NonNull String actedName);
+        @NonNull Builder targetName(@NonNull String actedName);
 
         /**
          * Sets the action of the entry.
          *
          * @param action the action
          * @return the builder
-         * @see Action#getAction()
          */
-        @NonNull Builder action(@NonNull String action);
+        @NonNull Builder description(@NonNull String action);
 
         /**
          * Creates a {@link Action} instance from the builder.

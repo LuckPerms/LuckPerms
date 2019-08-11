@@ -51,11 +51,6 @@ public class ApiContextSetFactory implements ContextSetFactory {
     }
 
     @Override
-    public @NonNull ImmutableContextSet immutableOf(@NonNull String key1, @NonNull String value1, @NonNull String key2, @NonNull String value2) {
-        return ImmutableContextSetImpl.of(key1, value1, key2, value2);
-    }
-
-    @Override
     public @NonNull ImmutableContextSet immutableEmpty() {
         return ImmutableContextSetImpl.EMPTY;
     }

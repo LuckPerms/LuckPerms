@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.api.implementation;
 import me.lucko.luckperms.api.actionlog.Action;
 import me.lucko.luckperms.api.actionlog.ActionLog;
 import me.lucko.luckperms.api.actionlog.ActionLogger;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -44,7 +44,7 @@ public class ApiActionLogger implements ActionLogger {
 
     @Override
     public Action.@NonNull Builder actionBuilder() {
-        return ExtendedLogEntry.build();
+        return LoggedAction.build();
     }
 
     @Override
@@ -54,7 +54,7 @@ public class ApiActionLogger implements ActionLogger {
 
     @Override
     public @NonNull CompletableFuture<Void> submit(@NonNull Action entry) {
-        return CompletableFuture.runAsync(() -> this.plugin.getLogDispatcher().dispatchFromApi((ExtendedLogEntry) entry), this.plugin.getBootstrap().getScheduler().async());
+        return CompletableFuture.runAsync(() -> this.plugin.getLogDispatcher().dispatchFromApi((LoggedAction) entry), this.plugin.getBootstrap().getScheduler().async());
     }
 
     @Override
@@ -64,6 +64,6 @@ public class ApiActionLogger implements ActionLogger {
 
     @Override
     public @NonNull CompletableFuture<Void> broadcastAction(@NonNull Action entry) {
-        return CompletableFuture.runAsync(() -> this.plugin.getLogDispatcher().broadcastFromApi((ExtendedLogEntry) entry), this.plugin.getBootstrap().getScheduler().async());
+        return CompletableFuture.runAsync(() -> this.plugin.getLogDispatcher().broadcastFromApi((LoggedAction) entry), this.plugin.getBootstrap().getScheduler().async());
     }
 }

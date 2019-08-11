@@ -30,11 +30,13 @@ import com.google.common.collect.ImmutableSet;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.node.Tristate;
+import me.lucko.luckperms.common.context.contextset.ContextImpl;
 import me.lucko.luckperms.sponge.service.context.DelegatingContextSet;
 import me.lucko.luckperms.sponge.service.context.DelegatingImmutableContextSet;
 
 import org.spongepowered.api.service.context.Context;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -57,7 +59,11 @@ public final class CompatibilityUtil {
             return ImmutableContextSet.empty();
         }
 
-        return ImmutableContextSet.fromEntries(contexts);
+        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        for (Map.Entry<String, String> entry : contexts) {
+            builder.add(new ContextImpl(entry.getKey(), entry.getValue()));
+        }
+        return builder.build();
     }
 
     public static Set<Context> convertContexts(ContextSet contexts) {

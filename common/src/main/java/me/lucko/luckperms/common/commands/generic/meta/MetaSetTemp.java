@@ -31,7 +31,7 @@ import me.lucko.luckperms.api.model.TemporaryMergeBehaviour;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.api.node.NodeEqualityPredicate;
 import me.lucko.luckperms.api.node.types.MetaNode;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
@@ -100,8 +100,8 @@ public class MetaSetTemp extends SharedSubCommand {
         builder.applyDeep(c -> c.hoverEvent(event));
         sender.sendMessage(builder.build());
 
-        ExtendedLogEntry.build().actor(sender).acted(holder)
-                .action("meta", "settemp", key, value, duration, context)
+        LoggedAction.build().source(sender).target(holder)
+                .description("meta", "settemp", key, value, duration, context)
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(holder, sender, plugin);

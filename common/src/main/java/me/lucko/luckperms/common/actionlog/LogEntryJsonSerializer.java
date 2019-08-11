@@ -32,6 +32,7 @@ import com.google.gson.JsonPrimitive;
 
 import me.lucko.luckperms.api.actionlog.Action;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public final class LogEntryJsonSerializer {
@@ -39,32 +40,37 @@ public final class LogEntryJsonSerializer {
 
     public static JsonObject serialize(Action logEntry) {
         JsonObject data = new JsonObject();
-        data.add("actor", new JsonPrimitive(logEntry.getActor().toString()));
-        data.add("actorName", new JsonPrimitive(logEntry.getActorName()));
-        data.add("type", new JsonPrimitive(logEntry.getType().name()));
-        if (logEntry.getActed().isPresent()) {
-            data.add("acted", new JsonPrimitive(logEntry.getActed().get().toString()));
+        data.add("timestamp", new JsonPrimitive(logEntry.getTimestamp().getEpochSecond()));
+        data.add("actor", new JsonPrimitive(logEntry.getSource().getUniqueId().toString()));
+        data.add("actorName", new JsonPrimitive(logEntry.getSource().getName()));
+        data.add("type", new JsonPrimitive(logEntry.getTarget().getType().name()));
+        if (logEntry.getTarget().getUniqueId().isPresent()) {
+            data.add("acted", new JsonPrimitive(logEntry.getTarget().getUniqueId().get().toString()));
         }
-        data.add("actedName", new JsonPrimitive(logEntry.getActedName()));
-        data.add("action", new JsonPrimitive(logEntry.getAction()));
+        data.add("actedName", new JsonPrimitive(logEntry.getTarget().getName()));
+        data.add("action", new JsonPrimitive(logEntry.getDescription()));
 
         return data;
     }
 
-    public static ExtendedLogEntry deserialize(JsonElement element) {
+    public static LoggedAction deserialize(JsonElement element) {
         Preconditions.checkArgument(element.isJsonObject());
         JsonObject data = element.getAsJsonObject();
 
-        ExtendedLogEntry.Builder builder = ExtendedLogEntry.build();
+        LoggedAction.Builder builder = LoggedAction.build();
 
-        builder.actor(UUID.fromString(data.get("actor").getAsString()));
-        builder.actorName(data.get("actorName").getAsString());
-        builder.type(Action.Type.parse(data.get("type").getAsString()));
-        if (data.has("acted")) {
-            builder.actor(UUID.fromString(data.get("acted").getAsString()));
+        if (data.has("timestamp")) { // sigh - this wasn't included in the first implementations
+            builder.timestamp(Instant.ofEpochSecond(data.get("timestamp").getAsLong()));
         }
-        builder.actedName(data.get("actedName").getAsString());
-        builder.action(data.get("action").getAsString());
+
+        builder.source(UUID.fromString(data.get("actor").getAsString()));
+        builder.sourceName(data.get("actorName").getAsString());
+        builder.targetType(LoggedAction.parseType(data.get("type").getAsString()));
+        if (data.has("acted")) {
+            builder.source(UUID.fromString(data.get("acted").getAsString()));
+        }
+        builder.targetName(data.get("actedName").getAsString());
+        builder.description(data.get("action").getAsString());
 
         return builder.build();
     }

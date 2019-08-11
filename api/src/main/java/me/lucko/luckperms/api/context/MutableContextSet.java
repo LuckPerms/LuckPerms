@@ -29,14 +29,21 @@ import me.lucko.luckperms.api.LuckPermsProvider;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * A mutable implementation of {@link ContextSet}.
  */
 public interface MutableContextSet extends ContextSet {
+
+    /**
+     * Creates a new empty MutableContextSet.
+     *
+     * @return a new MutableContextSet
+     */
+    static @NonNull MutableContextSet create() {
+        return LuckPermsProvider.get().getContextManager().getContextSetFactory().mutable();
+    }
 
     /**
      * Creates a {@link MutableContextSet} from a context pair.
@@ -55,63 +62,6 @@ public interface MutableContextSet extends ContextSet {
     }
 
     /**
-     * Creates a {@link MutableContextSet} from two context pairs.
-     *
-     * @param key1 the first key
-     * @param value1 the first value
-     * @param key2 the second key
-     * @param value2 the second value
-     * @return a new MutableContextSet containing the two pairs
-     * @throws NullPointerException if any of the keys or values are null
-     */
-    static @NonNull MutableContextSet of(@NonNull String key1, @NonNull String value1, @NonNull String key2, @NonNull String value2) {
-        Objects.requireNonNull(key1, "key1");
-        Objects.requireNonNull(value1, "value1");
-        Objects.requireNonNull(key2, "key2");
-        Objects.requireNonNull(value2, "value2");
-        MutableContextSet set = create();
-        set.add(key1, value1);
-        set.add(key2, value2);
-        return set;
-    }
-
-    /**
-     * Creates a {@link MutableContextSet} from an existing {@link Iterable} of {@link Map.Entry}s.
-     *
-     * @param iterable the iterable to copy from
-     * @return a new MutableContextSet representing the pairs in the iterable
-     * @throws NullPointerException if the iterable is null
-     */
-    static @NonNull MutableContextSet fromEntries(@NonNull Iterable<? extends Map.Entry<String, String>> iterable) {
-        Objects.requireNonNull(iterable, "iterable");
-        MutableContextSet set = create();
-        set.addAll(iterable);
-        return set;
-    }
-
-    /**
-     * Creates a new {@link MutableContextSet} from an existing {@link Set}.
-     *
-     * <p>Only really useful for converting between mutable and immutable types.</p>
-     *
-     * @param contextSet the context set to copy from
-     * @return a new MutableContextSet with the same content and the one provided
-     * @throws NullPointerException if contextSet is null
-     */
-    static @NonNull MutableContextSet fromSet(@NonNull ContextSet contextSet) {
-        return contextSet.mutableCopy();
-    }
-
-    /**
-     * Creates a new empty MutableContextSet.
-     *
-     * @return a new MutableContextSet
-     */
-    static @NonNull MutableContextSet create() {
-        return LuckPermsProvider.get().getContextManager().getContextSetFactory().mutable();
-    }
-
-    /**
      * Adds a context to this set.
      *
      * @param key   the key to add
@@ -126,7 +76,7 @@ public interface MutableContextSet extends ContextSet {
      * @param entry the entry to add
      * @throws NullPointerException if the entry is null
      */
-    default void add(Map.@NonNull Entry<String, String> entry) {
+    default void add(@NonNull Context entry) {
         Objects.requireNonNull(entry, "entry");
         add(entry.getKey(), entry.getValue());
     }
@@ -137,8 +87,8 @@ public interface MutableContextSet extends ContextSet {
      * @param iterable an iterable of key value context pairs
      * @throws NullPointerException if iterable is null
      */
-    default void addAll(@NonNull Iterable<? extends Map.Entry<String, String>> iterable) {
-        for (Map.Entry<String, String> e : Objects.requireNonNull(iterable, "iterable")) {
+    default void addAll(@NonNull Iterable<Context> iterable) {
+        for (Context e : Objects.requireNonNull(iterable, "iterable")) {
             add(e);
         }
     }

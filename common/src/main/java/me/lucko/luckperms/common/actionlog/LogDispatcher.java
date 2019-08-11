@@ -44,7 +44,7 @@ public class LogDispatcher {
         this.plugin = plugin;
     }
 
-    private void broadcast(ExtendedLogEntry entry, LogNotifyEvent.Origin origin, Sender sender) {
+    private void broadcast(LoggedAction entry, LogNotifyEvent.Origin origin, Sender sender) {
         this.plugin.getOnlineSenders()
                 .filter(CommandPermission.LOG_NOTIFY::isAuthorized)
                 .filter(s -> {
@@ -52,14 +52,14 @@ public class LogDispatcher {
                     return !this.plugin.getEventFactory().handleLogNotify(shouldCancel, entry, origin, s);
                 })
                 .forEach(s -> Message.LOG.send(s,
-                        entry.getActorFriendlyString(),
-                        Character.toString(entry.getType().getCode()),
-                        entry.getActedFriendlyString(),
-                        entry.getAction()
+                        entry.getSourceFriendlyString(),
+                        Character.toString(LoggedAction.getTypeCharacter(entry.getTarget().getType())),
+                        entry.getTargetFriendlyString(),
+                        entry.getDescription()
                 ));
     }
 
-    public void dispatch(ExtendedLogEntry entry, Sender sender) {
+    public void dispatch(LoggedAction entry, Sender sender) {
         // set the event to cancelled if the sender is import
         if (!this.plugin.getEventFactory().handleLogPublish(sender.isImport(), entry)) {
             this.plugin.getStorage().logAction(entry);
@@ -81,7 +81,7 @@ public class LogDispatcher {
         }
     }
 
-    public void dispatchFromApi(ExtendedLogEntry entry) {
+    public void dispatchFromApi(LoggedAction entry) {
         if (!this.plugin.getEventFactory().handleLogPublish(false, entry)) {
             try {
                 this.plugin.getStorage().logAction(entry).get();
@@ -93,7 +93,7 @@ public class LogDispatcher {
         broadcastFromApi(entry);
     }
 
-    public void broadcastFromApi(ExtendedLogEntry entry) {
+    public void broadcastFromApi(LoggedAction entry) {
         this.plugin.getMessagingService().ifPresent(extendedMessagingService -> extendedMessagingService.pushLog(entry));
 
         boolean shouldCancel = !this.plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
@@ -102,7 +102,7 @@ public class LogDispatcher {
         }
     }
 
-    public void dispatchFromRemote(ExtendedLogEntry entry) {
+    public void dispatchFromRemote(LoggedAction entry) {
         boolean shouldCancel = !this.plugin.getConfiguration().get(ConfigKeys.BROADCAST_RECEIVED_LOG_ENTRIES) || !this.plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
         if (!this.plugin.getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.REMOTE)) {
             broadcast(entry, LogNotifyEvent.Origin.REMOTE, null);
