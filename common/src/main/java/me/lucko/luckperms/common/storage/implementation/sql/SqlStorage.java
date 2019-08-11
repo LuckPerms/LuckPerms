@@ -29,6 +29,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.reflect.TypeToken;
 
 import me.lucko.luckperms.api.actionlog.Action;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.model.PlayerSaveResult;
 import me.lucko.luckperms.api.node.HeldNode;
 import me.lucko.luckperms.api.node.Node;
@@ -39,7 +40,6 @@ import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.UserIdentifier;
@@ -377,7 +377,7 @@ public class SqlStorage implements StorageImplementation {
             // If the user has any data in storage
             if (!data.isEmpty()) {
                 Set<Node> nodes = data.stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
-                user.setNodes(NodeMapType.ENDURING, nodes);
+                user.setNodes(DataType.NORMAL, nodes);
 
                 // Save back to the store if data they were given any defaults or had permissions expire
                 if (this.plugin.getUserManager().giveDefaultIfNeeded(user, false) | user.auditTemporaryPermissions()) {
@@ -439,7 +439,7 @@ public class SqlStorage implements StorageImplementation {
                 }
             }
 
-            Set<NodeDataContainer> local = user.enduringData().immutable().values().stream().map(NodeDataContainer::fromNode).collect(Collectors.toSet());
+            Set<NodeDataContainer> local = user.normalData().immutable().values().stream().map(NodeDataContainer::fromNode).collect(Collectors.toSet());
 
             Map.Entry<Set<NodeDataContainer>, Set<NodeDataContainer>> diff = compareSets(local, remote);
 
@@ -630,9 +630,9 @@ public class SqlStorage implements StorageImplementation {
 
             if (!data.isEmpty()) {
                 Set<Node> nodes = data.stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
-                group.setNodes(NodeMapType.ENDURING, nodes);
+                group.setNodes(DataType.NORMAL, nodes);
             } else {
-                group.clearEnduringNodes();
+                group.clearNodes(DataType.NORMAL, null);
             }
         } finally {
             group.getIoLock().unlock();
@@ -678,7 +678,7 @@ public class SqlStorage implements StorageImplementation {
         group.getIoLock().lock();
         try {
             // Empty data, just delete.
-            if (group.enduringData().immutable().isEmpty()) {
+            if (group.normalData().immutable().isEmpty()) {
                 try (Connection c = this.connectionFactory.getConnection()) {
                     try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_DELETE))) {
                         ps.setString(1, group.getName());
@@ -708,7 +708,7 @@ public class SqlStorage implements StorageImplementation {
                 }
             }
 
-            Set<NodeDataContainer> local = group.enduringData().immutable().values().stream().map(NodeDataContainer::fromNode).collect(Collectors.toSet());
+            Set<NodeDataContainer> local = group.normalData().immutable().values().stream().map(NodeDataContainer::fromNode).collect(Collectors.toSet());
 
             Map.Entry<Set<NodeDataContainer>, Set<NodeDataContainer>> diff = compareSets(local, remote);
 

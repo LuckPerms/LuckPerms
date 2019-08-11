@@ -67,6 +67,7 @@ import me.lucko.luckperms.api.event.user.UserFirstLoginEvent;
 import me.lucko.luckperms.api.event.user.UserLoadEvent;
 import me.lucko.luckperms.api.event.user.track.UserDemoteEvent;
 import me.lucko.luckperms.api.event.user.track.UserPromoteEvent;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.model.PlayerSaveResult;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.common.api.implementation.ApiPermissionHolder;
@@ -140,7 +141,7 @@ public final class EventFactory {
     }
 
     public void handleGroupDelete(Group group, DeletionCause cause) {
-        post(GroupDeleteEvent.class, () -> generate(GroupDeleteEvent.class, group.getName(), ImmutableSet.copyOf(group.enduringData().immutable().values()), cause));
+        post(GroupDeleteEvent.class, () -> generate(GroupDeleteEvent.class, group.getName(), ImmutableSet.copyOf(group.normalData().immutable().values()), cause));
     }
 
     public void handleGroupLoadAll() {
@@ -195,16 +196,16 @@ public final class EventFactory {
         post(LogReceiveEvent.class, () -> generate(LogReceiveEvent.class, id, entry));
     }
 
-    public void handleNodeAdd(Node node, PermissionHolder target, Collection<? extends Node> before, Collection<? extends Node> after) {
-        post(NodeAddEvent.class, () -> generate(NodeAddEvent.class, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node));
+    public void handleNodeAdd(Node node, PermissionHolder target, DataType dataType, Collection<? extends Node> before, Collection<? extends Node> after) {
+        post(NodeAddEvent.class, () -> generate(NodeAddEvent.class, getDelegate(target), dataType, ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node));
     }
 
-    public void handleNodeClear(PermissionHolder target, Collection<? extends Node> before, Collection<? extends Node> after) {
-        post(NodeClearEvent.class, () -> generate(NodeClearEvent.class, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after)));
+    public void handleNodeClear(PermissionHolder target, DataType dataType, Collection<? extends Node> before, Collection<? extends Node> after) {
+        post(NodeClearEvent.class, () -> generate(NodeClearEvent.class, getDelegate(target), dataType, ImmutableSet.copyOf(before), ImmutableSet.copyOf(after)));
     }
 
-    public void handleNodeRemove(Node node, PermissionHolder target, Collection<? extends Node> before, Collection<? extends Node> after) {
-        post(NodeRemoveEvent.class, () -> generate(NodeRemoveEvent.class, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node));
+    public void handleNodeRemove(Node node, PermissionHolder target, DataType dataType, Collection<? extends Node> before, Collection<? extends Node> after) {
+        post(NodeRemoveEvent.class, () -> generate(NodeRemoveEvent.class, getDelegate(target), dataType, ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node));
     }
 
     public void handleConfigReload() {

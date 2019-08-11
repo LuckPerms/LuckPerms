@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.api.model.DataMutateResult;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.ChatMetaType;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
@@ -83,7 +84,7 @@ public class MetaAddChatMeta extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        DataMutateResult result = holder.setPermission(NodeFactory.buildChatMetaNode(this.type, priority, meta).withContext(context).build());
+        DataMutateResult result = holder.setPermission(DataType.NORMAL, NodeFactory.buildChatMetaNode(this.type, priority, meta).withContext(context).build(), true);
         if (result.wasSuccessful()) {
             TextComponent.Builder builder = Message.ADD_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
             HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(

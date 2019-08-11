@@ -28,13 +28,13 @@ package me.lucko.luckperms.sponge.service.model.permissionholder;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.inheritance.InheritanceGraph;
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.node.factory.NodeTypes;
@@ -67,8 +67,8 @@ public abstract class PermissionHolderSubject<T extends PermissionHolder> implem
     PermissionHolderSubject(LPSpongePlugin plugin, T parent) {
         this.parent = parent;
         this.plugin = plugin;
-        this.subjectData = new PermissionHolderSubjectData(plugin.getService(), NodeMapType.ENDURING, parent, this);
-        this.transientSubjectData = new PermissionHolderSubjectData(plugin.getService(), NodeMapType.TRANSIENT, parent, this);
+        this.subjectData = new PermissionHolderSubjectData(plugin.getService(), DataType.NORMAL, parent, this);
+        this.transientSubjectData = new PermissionHolderSubjectData(plugin.getService(), DataType.TRANSIENT, parent, this);
     }
 
     public void fireUpdateEvent() {

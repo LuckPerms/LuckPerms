@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.generic.parent;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.NodeType;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
@@ -80,7 +81,7 @@ public class ParentClearTrack extends SharedSubCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        int before = holder.enduringData().immutable().size();
+        int before = holder.normalData().immutable().size();
 
         ImmutableContextSet context = ArgumentParser.parseContext(1, args, plugin).immutableCopy();
 
@@ -92,16 +93,16 @@ public class ParentClearTrack extends SharedSubCommand {
         }
 
         if (context.isEmpty()) {
-            holder.removeIfEnduring(NodeType.INHERITANCE.predicate(n -> track.containsGroup(n.getGroupName())));
+            holder.removeIf(DataType.NORMAL, null, NodeType.INHERITANCE.predicate(n -> track.containsGroup(n.getGroupName())), null);
         } else {
-            holder.removeIfEnduring(NodeType.INHERITANCE.predicate(n -> n.getContexts().equals(context) && track.containsGroup(n.getGroupName())));
+            holder.removeIf(DataType.NORMAL, null, NodeType.INHERITANCE.predicate(n -> n.getContexts().equals(context) && track.containsGroup(n.getGroupName())), null);
         }
 
         if (holder.getType() == HolderType.USER) {
             plugin.getUserManager().giveDefaultIfNeeded(((User) holder), false);
         }
 
-        int changed = before - holder.enduringData().immutable().size();
+        int changed = before - holder.normalData().immutable().size();
 
         if (changed == 1) {
             Message.PARENT_CLEAR_TRACK_SUCCESS_SINGULAR.send(sender, holder.getFormattedDisplayName(), track.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);

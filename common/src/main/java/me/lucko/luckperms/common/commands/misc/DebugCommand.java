@@ -106,7 +106,7 @@ public class DebugCommand extends SingleCommand {
         return new JObject()
                 .add("type", plugin.getBootstrap().getType().name())
                 .add("version", new JObject()
-                        .add("api", String.valueOf(plugin.getApiProvider().getPlatform().getApiVersion()))
+                        .add("api", plugin.getApiProvider().getPluginMetadata().getApiVersion())
                         .add("plugin", plugin.getBootstrap().getVersion())
                 )
                 .add("server", new JObject()

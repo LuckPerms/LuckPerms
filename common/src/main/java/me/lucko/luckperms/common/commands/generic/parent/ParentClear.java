@@ -57,7 +57,7 @@ public class ParentClear extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        int before = holder.enduringData().immutable().size();
+        int before = holder.normalData().immutable().size();
 
         MutableContextSet context = ArgumentParser.parseContext(0, args, plugin);
 
@@ -67,12 +67,12 @@ public class ParentClear extends SharedSubCommand {
         }
 
         if (context.isEmpty()) {
-            holder.clearEnduringParents(true);
+            holder.clearNormalParents(null, true);
         } else {
-            holder.clearEnduringParents(context, true);
+            holder.clearNormalParents(context, true);
         }
 
-        int changed = before - holder.enduringData().immutable().size();
+        int changed = before - holder.normalData().immutable().size();
         if (changed == 1) {
             Message.PARENT_CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         } else {

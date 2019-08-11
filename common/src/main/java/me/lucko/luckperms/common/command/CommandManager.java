@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.command;
 
 import com.google.common.collect.ImmutableList;
 
+import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -172,7 +173,7 @@ public class CommandManager {
                 return CommandResult.SUCCESS;
             } else {
                 Collection<? extends Group> groups = this.plugin.getGroupManager().getAll().values();
-                if (groups.size() <= 1 && groups.stream().allMatch(g -> g.getOwnNodes().isEmpty())) {
+                if (groups.size() <= 1 && groups.stream().allMatch(g -> g.getOwnNodes(QueryOptions.nonContextual()).isEmpty())) {
                     Message.FIRST_TIME_SETUP.send(sender, label, sender.getName());
                 } else {
                     Message.NO_PERMISSION_FOR_SUBCOMMANDS.send(sender);

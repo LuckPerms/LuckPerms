@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.model.manager.user;
 import com.google.common.collect.ImmutableCollection;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.api.node.NodeType;
 import me.lucko.luckperms.api.node.types.InheritanceNode;
@@ -89,7 +90,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
             String pg = user.getPrimaryGroup().getValue();
             boolean has = false;
 
-            for (Node node : user.enduringData().immutable().get(ImmutableContextSet.empty())) {
+            for (Node node : user.normalData().immutable().get(ImmutableContextSet.empty())) {
                 if (node instanceof InheritanceNode && ((InheritanceNode) node).getGroupName().equalsIgnoreCase(pg)) {
                     has = true;
                     break;
@@ -98,7 +99,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
 
             // need to find a new primary group for the user.
             if (!has) {
-                String group = user.enduringData().immutable().get(ImmutableContextSet.empty()).stream()
+                String group = user.normalData().immutable().get(ImmutableContextSet.empty()).stream()
                         .filter(NodeType.INHERITANCE::matches)
                         .map(NodeType.INHERITANCE::cast)
                         .findFirst()
@@ -116,7 +117,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
         // check that all users are member of at least one group
         boolean hasGroup = false;
         if (user.getPrimaryGroup().getStoredValue().isPresent()) {
-            for (Node node : user.enduringData().immutable().values()) {
+            for (Node node : user.normalData().immutable().values()) {
                 if (!node.getContexts().isEmpty()) {
                     continue;
                 }
@@ -130,7 +131,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
 
         if (!hasGroup) {
             user.getPrimaryGroup().setStoredValue(NodeFactory.DEFAULT_GROUP_NAME);
-            user.setPermission(NodeFactory.buildGroupNode(NodeFactory.DEFAULT_GROUP_NAME).build(), false);
+            user.setPermission(DataType.NORMAL, NodeFactory.buildGroupNode(NodeFactory.DEFAULT_GROUP_NAME).build(), false);
             work = true;
         }
 
@@ -182,7 +183,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
      */
     @Override
     public boolean shouldSave(User user) {
-        ImmutableCollection<Node> nodes = user.enduringData().immutable().values();
+        ImmutableCollection<Node> nodes = user.normalData().immutable().values();
         if (nodes.size() != 1) {
             return true;
         }

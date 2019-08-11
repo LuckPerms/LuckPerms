@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.plugin.util;
 
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.model.PlayerSaveResult;
 import me.lucko.luckperms.api.platform.Platform;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -134,7 +135,7 @@ public abstract class AbstractConnectionListener {
         this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
             User user = this.plugin.getUserManager().getIfLoaded(uuid);
             if (user != null) {
-                user.clearTransientNodes();
+                user.clearNodes(DataType.TRANSIENT, null);
             }
         });
     }

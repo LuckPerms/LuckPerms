@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.model.TemporaryDataMutateResult;
 import me.lucko.luckperms.api.model.TemporaryMergeBehaviour;
 import me.lucko.luckperms.api.node.ChatMetaType;
@@ -89,7 +90,7 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        TemporaryDataMutateResult ret = holder.setPermission(NodeFactory.buildChatMetaNode(this.type, priority, meta).expiry(duration).withContext(context).build(), modifier);
+        TemporaryDataMutateResult ret = holder.setPermission(DataType.NORMAL, NodeFactory.buildChatMetaNode(this.type, priority, meta).expiry(duration).withContext(context).build(), modifier);
 
         if (((Result) ret.getResult()).wasSuccessful()) {
             duration = ret.getMergedNode().getExpiry().getEpochSecond();

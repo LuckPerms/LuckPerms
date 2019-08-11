@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.model.DataMutateResult;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.ChatMetaType;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
@@ -85,11 +86,10 @@ public class MetaRemoveChatMeta extends SharedSubCommand {
 
         // Handle bulk removal
         if (meta.equalsIgnoreCase("null") || meta.equals("*")) {
-            holder.removeIfEnduring(n -> this.type.nodeType().matches(n) &&
+            holder.removeIf(DataType.NORMAL, null, n -> this.type.nodeType().matches(n) &&
                     this.type.nodeType().cast(n).getPriority() == priority &&
                     !n.hasExpiry() &&
-                    n.getContexts().equals(context)
-            );
+                    n.getContexts().equals(context), null);
             Message.BULK_REMOVE_CHATMETA_SUCCESS.send(sender, holder.getFormattedDisplayName(), this.type.name().toLowerCase(), priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)
@@ -100,7 +100,7 @@ public class MetaRemoveChatMeta extends SharedSubCommand {
             return CommandResult.SUCCESS;
         }
 
-        DataMutateResult result = holder.unsetPermission(NodeFactory.buildChatMetaNode(this.type, priority, meta).withContext(context).build());
+        DataMutateResult result = holder.unsetPermission(DataType.NORMAL, NodeFactory.buildChatMetaNode(this.type, priority, meta).withContext(context).build());
 
         if (result.wasSuccessful()) {
             TextComponent.Builder builder = Message.REMOVE_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();

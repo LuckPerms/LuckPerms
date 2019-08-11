@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.log;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.command.CommandResult;
@@ -57,7 +58,7 @@ public class LogNotify extends SubCommand<Log> {
             return false;
         }
 
-        Optional<? extends Node> ret = user.enduringData().immutable().get(ImmutableContextSet.empty()).stream()
+        Optional<? extends Node> ret = user.normalData().immutable().get(ImmutableContextSet.empty()).stream()
                 .filter(n -> n.getKey().equalsIgnoreCase(IGNORE_NODE))
                 .findFirst();
 
@@ -74,10 +75,10 @@ public class LogNotify extends SubCommand<Log> {
 
         if (state) {
             // add the perm
-            user.setPermission(NodeFactory.make(IGNORE_NODE));
+            user.setPermission(DataType.NORMAL, NodeFactory.make(IGNORE_NODE), true);
         } else {
             // remove the perm
-            user.removeIfEnduring(ImmutableContextSet.empty(), n -> n.getKey().equalsIgnoreCase(IGNORE_NODE));
+            user.removeIf(DataType.NORMAL, ImmutableContextSet.empty(), n -> n.getKey().equalsIgnoreCase(IGNORE_NODE), null);
         }
 
         plugin.getStorage().saveUser(user).join();

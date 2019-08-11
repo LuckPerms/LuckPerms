@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.NodeType;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
@@ -87,7 +88,7 @@ public class MetaClear extends SharedSubCommand {
             type = NodeType.META_OR_CHAT_META;
         }
 
-        int before = holder.enduringData().immutable().size();
+        int before = holder.normalData().immutable().size();
 
         MutableContextSet context = ArgumentParser.parseContext(0, args, plugin);
 
@@ -98,12 +99,12 @@ public class MetaClear extends SharedSubCommand {
         }
 
         if (context.isEmpty()) {
-            holder.clearMeta(type);
+            holder.removeIf(DataType.NORMAL, null, type::matches, null);
         } else {
-            holder.clearMeta(type, context);
+            holder.removeIf(DataType.NORMAL, context, type::matches, null);
         }
 
-        int changed = before - holder.enduringData().immutable().size();
+        int changed = before - holder.normalData().immutable().size();
         if (changed == 1) {
             Message.META_CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFormattedDisplayName(), type.name().toLowerCase(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         } else {

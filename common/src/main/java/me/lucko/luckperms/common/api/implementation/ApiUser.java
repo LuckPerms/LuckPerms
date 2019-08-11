@@ -28,9 +28,9 @@ package me.lucko.luckperms.common.api.implementation;
 import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.model.DataMutateResult;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.NodeEqualityPredicate;
 import me.lucko.luckperms.common.cacheddata.UserCachedDataManager;
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 
@@ -79,7 +79,7 @@ public class ApiUser extends ApiPermissionHolder implements me.lucko.luckperms.a
             return DataMutateResult.ALREADY_HAS;
         }
 
-        if (!this.handle.hasPermission(NodeMapType.ENDURING, NodeFactory.buildGroupNode(group.toLowerCase()).build(), NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
+        if (!this.handle.hasPermission(DataType.NORMAL, NodeFactory.buildGroupNode(group.toLowerCase()).build(), NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
             return DataMutateResult.FAIL;
         }
 

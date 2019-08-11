@@ -27,6 +27,7 @@ package me.lucko.luckperms.bungee.migration;
 
 import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.api.event.cause.CreationCause;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -132,21 +133,21 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         // Migrate global perms
         for (String perm : entity.getPerms()) {
             if (perm.isEmpty()) continue;
-            holder.setPermission(MigrationUtils.parseNode(perm, true).build());
+            holder.setPermission(DataType.NORMAL, MigrationUtils.parseNode(perm, true).build(), true);
         }
 
         // Migrate per-server perms
         for (Map.Entry<String, Server> e : entity.getServers().entrySet()) {
             for (String perm : e.getValue().getPerms()) {
                 if (perm.isEmpty()) continue;
-                holder.setPermission(MigrationUtils.parseNode(perm, true).withContext(DefaultContextKeys.SERVER_KEY, e.getKey()).build());
+                holder.setPermission(DataType.NORMAL, MigrationUtils.parseNode(perm, true).withContext(DefaultContextKeys.SERVER_KEY, e.getKey()).build(), true);
             }
 
             // Migrate per-world perms
             for (Map.Entry<String, World> we : e.getValue().getWorlds().entrySet()) {
                 for (String perm : we.getValue().getPerms()) {
                     if (perm.isEmpty()) continue;
-                    holder.setPermission(MigrationUtils.parseNode(perm, true).withContext(DefaultContextKeys.SERVER_KEY, e.getKey()).withContext(DefaultContextKeys.WORLD_KEY, we.getKey()).build());
+                    holder.setPermission(DataType.NORMAL, MigrationUtils.parseNode(perm, true).withContext(DefaultContextKeys.SERVER_KEY, e.getKey()).withContext(DefaultContextKeys.WORLD_KEY, we.getKey()).build(), true);
                 }
             }
         }
@@ -154,7 +155,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         // Migrate any parent groups
         for (String inherit : parents) {
             if (inherit.isEmpty()) continue;
-            holder.setPermission(NodeFactory.buildGroupNode(MigrationUtils.standardizeName(inherit)).build());
+            holder.setPermission(DataType.NORMAL, NodeFactory.buildGroupNode(MigrationUtils.standardizeName(inherit)).build(), true);
         }
 
         // Migrate prefix and suffix
@@ -162,10 +163,10 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         String suffix = entity.getSuffix();
 
         if (prefix != null && !prefix.isEmpty()) {
-            holder.setPermission(NodeFactory.buildPrefixNode(weight, prefix).build());
+            holder.setPermission(DataType.NORMAL, NodeFactory.buildPrefixNode(weight, prefix).build(), true);
         }
         if (suffix != null && !suffix.isEmpty()) {
-            holder.setPermission(NodeFactory.buildSuffixNode(weight, suffix).build());
+            holder.setPermission(DataType.NORMAL, NodeFactory.buildSuffixNode(weight, suffix).build(), true);
         }
     }
 }

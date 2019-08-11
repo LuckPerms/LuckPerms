@@ -27,6 +27,7 @@ package me.lucko.luckperms.bukkit.migration;
 
 import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.api.event.cause.CreationCause;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.ChatMetaType;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.common.command.CommandResult;
@@ -177,7 +178,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
             // migrate groups
             Set<Node> parents = userParents.get(u);
             if (parents != null) {
-                parents.forEach(user::setPermission);
+                parents.forEach(node -> user.setPermission(DataType.NORMAL, node, true));
             }
 
             user.getPrimaryGroup().setStoredValue(MigrationUtils.standardizeName(service.getPlayerPrimaryGroup(u)));
@@ -197,9 +198,9 @@ public class MigrationZPermissions extends SubCommand<Object> {
             if (e.getPermission().isEmpty()) continue;
 
             if (e.getWorld() != null && !e.getWorld().getName().equals("")) {
-                holder.setPermission(NodeFactory.builder(e.getPermission()).value(e.isValue()).withContext(DefaultContextKeys.WORLD_KEY, e.getWorld().getName()).build());
+                holder.setPermission(DataType.NORMAL, NodeFactory.builder(e.getPermission()).value(e.isValue()).withContext(DefaultContextKeys.WORLD_KEY, e.getWorld().getName()).build(), true);
             } else {
-                holder.setPermission(NodeFactory.builder(e.getPermission()).value(e.isValue()).build());
+                holder.setPermission(DataType.NORMAL, NodeFactory.builder(e.getPermission()).value(e.isValue()).build(), true);
             }
         }
 
@@ -207,7 +208,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         if (entity.isGroup()) {
             for (PermissionEntity inheritance : entity.getParents()) {
                 if (!inheritance.getDisplayName().equals(holder.getObjectName())) {
-                    holder.setPermission(NodeFactory.buildGroupNode(MigrationUtils.standardizeName(inheritance.getDisplayName())).build());
+                    holder.setPermission(DataType.NORMAL, NodeFactory.buildGroupNode(MigrationUtils.standardizeName(inheritance.getDisplayName())).build(), true);
                 }
             }
         }
@@ -223,9 +224,9 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
             if (key.equals(NodeTypes.PREFIX_KEY) || key.equals(NodeTypes.SUFFIX_KEY)) {
                 ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
-                holder.setPermission(NodeFactory.buildChatMetaNode(type, weight, valueString).build());
+                holder.setPermission(DataType.NORMAL, NodeFactory.buildChatMetaNode(type, weight, valueString).build(), true);
             } else {
-                holder.setPermission(NodeFactory.buildMetaNode(key, valueString).build());
+                holder.setPermission(DataType.NORMAL, NodeFactory.buildMetaNode(key, valueString).build(), true);
             }
         }
     }

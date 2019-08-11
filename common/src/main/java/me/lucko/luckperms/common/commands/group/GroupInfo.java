@@ -62,12 +62,12 @@ public class GroupInfo extends SubCommand<Group> {
                 group.getWeight().isPresent() ? group.getWeight().getAsInt() : "None"
         );
 
-        List<InheritanceNode> parents = group.enduringData().inheritanceAsSortedSet().stream()
+        List<InheritanceNode> parents = group.normalData().inheritanceAsSortedSet().stream()
                 .filter(Node::getValue)
                 .filter(n -> !n.hasExpiry())
                 .collect(Collectors.toList());
 
-        List<InheritanceNode> tempParents = group.enduringData().inheritanceAsSortedSet().stream()
+        List<InheritanceNode> tempParents = group.normalData().inheritanceAsSortedSet().stream()
                 .filter(Node::getValue)
                 .filter(Node::hasExpiry)
                 .collect(Collectors.toList());

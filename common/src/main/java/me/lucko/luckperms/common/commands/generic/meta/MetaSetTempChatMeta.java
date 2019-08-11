@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.model.TemporaryDataMutateResult;
 import me.lucko.luckperms.api.model.TemporaryMergeBehaviour;
 import me.lucko.luckperms.api.node.ChatMetaType;
@@ -113,7 +114,7 @@ public class MetaSetTempChatMeta extends SharedSubCommand {
         }
 
         // remove all other prefixes/suffixes set in these contexts
-        holder.removeIfEnduring(context, node -> this.type.nodeType().matches(node));
+        holder.removeIf(DataType.NORMAL, context, node -> this.type.nodeType().matches(node), null);
 
         // determine the priority to set at
         if (priority == Integer.MIN_VALUE) {
@@ -129,7 +130,7 @@ public class MetaSetTempChatMeta extends SharedSubCommand {
             }
         }
 
-        TemporaryDataMutateResult ret = holder.setPermission(NodeFactory.buildChatMetaNode(this.type, priority, meta).expiry(duration).withContext(context).build(), modifier);
+        TemporaryDataMutateResult ret = holder.setPermission(DataType.NORMAL, NodeFactory.buildChatMetaNode(this.type, priority, meta).expiry(duration).withContext(context).build(), modifier);
 
         if (((Result) ret.getResult()).wasSuccessful()) {
             duration = ret.getMergedNode().getExpiry().getEpochSecond();

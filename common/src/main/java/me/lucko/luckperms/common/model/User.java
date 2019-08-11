@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.model;
 
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.common.api.implementation.ApiUser;
 import me.lucko.luckperms.common.cacheddata.UserCachedDataManager;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -183,9 +184,8 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     /**
      * Clear all of the users permission nodes
      */
-    @Override
     public boolean clearEnduringNodes() {
-        boolean ret = super.clearEnduringNodes();
+        boolean ret = clearNodes(DataType.NORMAL, null);
         if (!ret) {
             return false;
         }

@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.types.PermissionNode;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
@@ -58,7 +59,7 @@ public class PermissionClear extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        int before = holder.enduringData().immutable().size();
+        int before = holder.normalData().immutable().size();
 
         MutableContextSet context = ArgumentParser.parseContext(0, args, plugin);
 
@@ -69,12 +70,12 @@ public class PermissionClear extends SharedSubCommand {
         }
 
         if (context.isEmpty()) {
-            holder.removeIfEnduring(node -> node instanceof PermissionNode);
+            holder.removeIf(DataType.NORMAL, null, node -> node instanceof PermissionNode, null);
         } else {
-            holder.removeIfEnduring(context, node -> node instanceof PermissionNode);
+            holder.removeIf(DataType.NORMAL, context, node -> node instanceof PermissionNode, null);
         }
 
-        int changed = before - holder.enduringData().immutable().size();
+        int changed = before - holder.normalData().immutable().size();
         if (changed == 1) {
             Message.PERMISSION_CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         } else {

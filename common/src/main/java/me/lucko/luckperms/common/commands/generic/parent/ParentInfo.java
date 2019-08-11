@@ -78,7 +78,7 @@ public class ParentInfo extends SharedSubCommand {
 
         // get the holders nodes
         List<InheritanceNode> nodes = new LinkedList<>();
-        holder.enduringData().copyInheritanceNodesTo(nodes, QueryOptions.nonContextual());
+        holder.normalData().copyInheritanceNodesTo(nodes, QueryOptions.nonContextual());
 
         // remove irrelevant types (these are displayed in the other info commands)
         nodes.removeIf(node -> !node.getValue());

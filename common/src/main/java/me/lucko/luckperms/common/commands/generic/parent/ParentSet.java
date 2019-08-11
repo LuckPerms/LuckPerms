@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.generic.parent;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
@@ -79,8 +80,8 @@ public class ParentSet extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        holder.clearEnduringParents(context, false);
-        holder.setPermission(NodeFactory.buildGroupNode(group.getName()).withContext(context).build());
+        holder.clearNormalParents(context, false);
+        holder.setPermission(DataType.NORMAL, NodeFactory.buildGroupNode(group.getName()).withContext(context).build(), true);
         if (holder.getType() == HolderType.USER) {
             ((User) holder).getPrimaryGroup().setStoredValue(group.getName());
         }

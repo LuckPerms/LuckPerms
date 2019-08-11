@@ -35,6 +35,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.api.event.cause.CreationCause;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.NodeBuilder;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
@@ -171,7 +172,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             }
 
             for (Group parent : g.getParents()) {
-                group.setPermission(NodeFactory.buildGroupNode(parent.getName().toLowerCase()).build());
+                group.setPermission(DataType.NORMAL, NodeFactory.buildGroupNode(parent.getName().toLowerCase()).build(), true);
             }
 
             // server --> prefix afaik
@@ -184,9 +185,9 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 }
 
                 if (server != null) {
-                    group.setPermission(NodeFactory.buildPrefixNode(g.getRank(), prefix.getValue()).withContext(DefaultContextKeys.SERVER_KEY, server).build());
+                    group.setPermission(DataType.NORMAL, NodeFactory.buildPrefixNode(g.getRank(), prefix.getValue()).withContext(DefaultContextKeys.SERVER_KEY, server).build(), true);
                 } else {
-                    group.setPermission(NodeFactory.buildPrefixNode(g.getRank(), prefix.getValue()).build());
+                    group.setPermission(DataType.NORMAL, NodeFactory.buildPrefixNode(g.getRank(), prefix.getValue()).build(), true);
                 }
             }
 
@@ -199,9 +200,9 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 }
 
                 if (server != null) {
-                    group.setPermission(NodeFactory.buildSuffixNode(g.getRank(), suffix.getValue()).withContext(DefaultContextKeys.SERVER_KEY, server).build());
+                    group.setPermission(DataType.NORMAL, NodeFactory.buildSuffixNode(g.getRank(), suffix.getValue()).withContext(DefaultContextKeys.SERVER_KEY, server).build(), true);
                 } else {
-                    group.setPermission(NodeFactory.buildSuffixNode(g.getRank(), suffix.getValue()).build());
+                    group.setPermission(DataType.NORMAL, NodeFactory.buildSuffixNode(g.getRank(), suffix.getValue()).build(), true);
                 }
             }
 
@@ -246,18 +247,18 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             String suffix = joinFuture(pm.getPlayerOwnSuffix(uuid));
 
             if (prefix != null && !prefix.isEmpty()) {
-                user.setPermission(NodeFactory.buildPrefixNode(maxWeight.get(), prefix).build());
+                user.setPermission(DataType.NORMAL, NodeFactory.buildPrefixNode(maxWeight.get(), prefix).build(), true);
             }
 
             if (suffix != null && !suffix.isEmpty()) {
-                user.setPermission(NodeFactory.buildSuffixNode(maxWeight.get(), suffix).build());
+                user.setPermission(DataType.NORMAL, NodeFactory.buildSuffixNode(maxWeight.get(), suffix).build(), true);
             }
 
             Group primaryGroup = joinFuture(pm.getPlayerPrimaryGroup(uuid));
             if (primaryGroup != null && primaryGroup.getName() != null) {
                 String primary = primaryGroup.getName().toLowerCase();
                 if (!primary.equals(NodeFactory.DEFAULT_GROUP_NAME)) {
-                    user.setPermission(NodeFactory.buildGroupNode(primary).build());
+                    user.setPermission(DataType.NORMAL, NodeFactory.buildGroupNode(primary).build(), true);
                     user.getPrimaryGroup().setStoredValue(primary);
                 }
             }
@@ -308,7 +309,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         if (server != null) nb.withContext(DefaultContextKeys.SERVER_KEY, server);
         if (world != null) nb.withContext(DefaultContextKeys.WORLD_KEY, world);
 
-        holder.setPermission(nb.build());
+        holder.setPermission(DataType.NORMAL, nb.build(), true);
     }
 
     private void applyGroup(PermissionManager pm, PermissionHolder holder, CachedGroup g, String server) {
@@ -330,7 +331,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             nb.withContext(DefaultContextKeys.SERVER_KEY, server);
         }
 
-        holder.setPermission(nb.build());
+        holder.setPermission(DataType.NORMAL, nb.build(), true);
     }
 
     private static <T> T joinFuture(Future<T> future) {

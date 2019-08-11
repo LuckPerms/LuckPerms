@@ -30,10 +30,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.context.ContextSetComparator;
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
@@ -58,14 +58,14 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CalculatedSubjectData implements LPSubjectData {
     private final LPSubject parentSubject;
-    private final NodeMapType type;
+    private final DataType type;
     private final LPPermissionService service;
 
     private final Map<ImmutableContextSet, Map<String, Boolean>> permissions = new ConcurrentHashMap<>();
     private final Map<ImmutableContextSet, Set<LPSubjectReference>> parents = new ConcurrentHashMap<>();
     private final Map<ImmutableContextSet, Map<String, String>> options = new ConcurrentHashMap<>();
 
-    public CalculatedSubjectData(LPSubject parentSubject, NodeMapType type, LPPermissionService service) {
+    public CalculatedSubjectData(LPSubject parentSubject, DataType type, LPPermissionService service) {
         this.parentSubject = parentSubject;
         this.type = type;
         this.service = service;
@@ -82,7 +82,7 @@ public class CalculatedSubjectData implements LPSubjectData {
     }
 
     @Override
-    public NodeMapType getType() {
+    public DataType getType() {
         return this.type;
     }
 

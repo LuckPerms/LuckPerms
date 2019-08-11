@@ -31,6 +31,7 @@ import me.lucko.luckperms.api.cacheddata.CachedDataManager;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.model.DataMutateResult;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.model.TemporaryDataMutateResult;
 import me.lucko.luckperms.api.model.TemporaryMergeBehaviour;
 import me.lucko.luckperms.api.node.Node;
@@ -38,7 +39,6 @@ import me.lucko.luckperms.api.node.NodeEqualityPredicate;
 import me.lucko.luckperms.api.node.NodeType;
 import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.api.query.QueryOptions;
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.node.utils.NodeTools;
@@ -58,12 +58,12 @@ import java.util.function.Predicate;
 public class ApiPermissionHolder implements me.lucko.luckperms.api.model.PermissionHolder {
     private final PermissionHolder handle;
 
-    private final Enduring enduringData;
+    private final Normal normalData;
     private final Transient transientData;
 
     ApiPermissionHolder(PermissionHolder handle) {
         this.handle = Objects.requireNonNull(handle, "handle");
-        this.enduringData = new Enduring();
+        this.normalData = new Normal();
         this.transientData = new Transient();
     }
 
@@ -95,7 +95,7 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.model.Permiss
     public Data getData(@NonNull DataType dataType) {
         switch (dataType) {
             case NORMAL:
-                return this.enduringData;
+                return this.normalData;
             case TRANSIENT:
                 return this.transientData;
             default:
@@ -105,7 +105,7 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.model.Permiss
 
     @Override
     public @NonNull Data data() {
-        return this.enduringData;
+        return this.normalData;
     }
 
     @Override
@@ -115,12 +115,12 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.model.Permiss
 
     @Override
     public @NonNull List<Node> getNodes() {
-        return this.handle.getOwnNodes();
+        return this.handle.getOwnNodes(QueryOptions.nonContextual());
     }
 
     @Override
     public @NonNull SortedSet<Node> getDistinctNodes() {
-        return this.handle.getOwnNodesSorted();
+        return this.handle.getOwnNodesSorted(QueryOptions.nonContextual());
     }
 
     @Override
@@ -149,137 +149,99 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.model.Permiss
         return this.handle.inheritsPermission(node, equalityPredicate);
     }
 
-    private final class Enduring implements Data {
+    private abstract class AbstractData implements Data {
+        private final DataType dataType;
+
+        private AbstractData(DataType dataType) {
+            this.dataType = dataType;
+        }
+
         @Override
         public @NonNull Map<ImmutableContextSet, Collection<Node>> getNodes() {
-            return ApiPermissionHolder.this.handle.enduringData().immutable().asMap();
+            return ApiPermissionHolder.this.handle.getData(this.dataType).immutable().asMap();
         }
 
         @Override
         public @NonNull Set<Node> getFlattenedNodes() {
-            return ApiPermissionHolder.this.handle.enduringData().asSet();
+            return ApiPermissionHolder.this.handle.getData(this.dataType).asSet();
         }
 
         @Override
         public @NonNull Tristate hasNode(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate) {
-            return ApiPermissionHolder.this.handle.hasPermission(NodeMapType.ENDURING, node, equalityPredicate);
+            return ApiPermissionHolder.this.handle.hasPermission(this.dataType, node, equalityPredicate);
         }
 
         @Override
         public @NonNull DataMutateResult addNode(@NonNull Node node) {
-            return ApiPermissionHolder.this.handle.setPermission(node);
+            return ApiPermissionHolder.this.handle.setPermission(this.dataType, node, true);
         }
 
         @Override
         public @NonNull TemporaryDataMutateResult addNode(@NonNull Node node, @NonNull TemporaryMergeBehaviour temporaryMergeBehaviour) {
-            return ApiPermissionHolder.this.handle.setPermission(node, temporaryMergeBehaviour);
+            return ApiPermissionHolder.this.handle.setPermission(this.dataType, node, temporaryMergeBehaviour);
         }
 
         @Override
         public @NonNull DataMutateResult removeNode(@NonNull Node node) {
-            return ApiPermissionHolder.this.handle.unsetPermission(node);
+            return ApiPermissionHolder.this.handle.unsetPermission(this.dataType, node);
         }
 
         @Override
         public void clearMatching(@NonNull Predicate<? super Node> test) {
-            ApiPermissionHolder.this.handle.removeIfEnduring(test);
+            ApiPermissionHolder.this.handle.removeIf(this.dataType, null, test, null);
         }
 
         @Override
         public void clearNodes() {
-            ApiPermissionHolder.this.handle.clearEnduringNodes();
+            ApiPermissionHolder.this.handle.clearNodes(this.dataType, null);
         }
 
         @Override
         public void clearNodes(@NonNull ContextSet contextSet) {
-            ApiPermissionHolder.this.handle.clearEnduringNodes(contextSet);
-        }
-
-        @Override
-        public void clearParents() {
-            ApiPermissionHolder.this.handle.clearEnduringParents(true);
-        }
-
-        @Override
-        public void clearParents(@NonNull ContextSet contextSet) {
-            ApiPermissionHolder.this.handle.clearEnduringParents(contextSet, true);
+            ApiPermissionHolder.this.handle.clearNodes(this.dataType, contextSet);
         }
 
         @Override
         public void clearMeta() {
-            ApiPermissionHolder.this.handle.removeIfEnduring(NodeType.META_OR_CHAT_META::matches);
+            ApiPermissionHolder.this.handle.removeIf(this.dataType, null, NodeType.META_OR_CHAT_META::matches, null);
         }
 
         @Override
         public void clearMeta(@NonNull ContextSet contextSet) {
-            ApiPermissionHolder.this.handle.removeIfEnduring(contextSet, NodeType.META_OR_CHAT_META::matches);
+            ApiPermissionHolder.this.handle.removeIf(this.dataType, contextSet, NodeType.META_OR_CHAT_META::matches, null);
         }
     }
 
-    private final class Transient implements Data {
-        @Override
-        public @NonNull Map<ImmutableContextSet, Collection<Node>> getNodes() {
-            return ApiPermissionHolder.this.handle.transientData().immutable().asMap();
-        }
-
-        @Override
-        public @NonNull Set<Node> getFlattenedNodes() {
-            return ApiPermissionHolder.this.handle.transientData().asSet();
-        }
-
-        @Override
-        public @NonNull Tristate hasNode(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate) {
-            return ApiPermissionHolder.this.handle.hasPermission(NodeMapType.TRANSIENT, node, equalityPredicate);
-        }
-
-        @Override
-        public @NonNull DataMutateResult addNode(@NonNull Node node) {
-            return ApiPermissionHolder.this.handle.setTransientPermission(node);
-        }
-
-        @Override
-        public @NonNull TemporaryDataMutateResult addNode(@NonNull Node node, @NonNull TemporaryMergeBehaviour temporaryMergeBehaviour) {
-            return ApiPermissionHolder.this.handle.setTransientPermission(node, temporaryMergeBehaviour);
-        }
-
-        @Override
-        public @NonNull DataMutateResult removeNode(@NonNull Node node) {
-            return ApiPermissionHolder.this.handle.unsetTransientPermission(node);
-        }
-
-        @Override
-        public void clearMatching(@NonNull Predicate<? super Node> test) {
-            ApiPermissionHolder.this.handle.removeIfTransient(test);
-        }
-
-        @Override
-        public void clearNodes() {
-            ApiPermissionHolder.this.handle.clearTransientNodes();
-        }
-
-        @Override
-        public void clearNodes(@NonNull ContextSet contextSet) {
-            ApiPermissionHolder.this.handle.clearTransientNodes(contextSet);
+    private final class Normal extends AbstractData implements Data {
+        private Normal() {
+            super(DataType.NORMAL);
         }
 
         @Override
         public void clearParents() {
-            ApiPermissionHolder.this.handle.removeIfTransient(NodeType.INHERITANCE::matches);
+            ApiPermissionHolder.this.handle.clearNormalParents(null, true);
         }
 
         @Override
         public void clearParents(@NonNull ContextSet contextSet) {
-            ApiPermissionHolder.this.handle.removeIfTransient(contextSet, NodeType.INHERITANCE::matches);
+            ApiPermissionHolder.this.handle.clearNormalParents(contextSet, true);
+        }
+
+    }
+
+    private final class Transient extends AbstractData implements Data {
+        private Transient() {
+            super(DataType.TRANSIENT);
         }
 
         @Override
-        public void clearMeta() {
-            ApiPermissionHolder.this.handle.removeIfTransient(NodeType.META_OR_CHAT_META::matches);
+        public void clearParents() {
+            ApiPermissionHolder.this.handle.removeIf(DataType.TRANSIENT, null, NodeType.INHERITANCE::matches, null);
         }
 
         @Override
-        public void clearMeta(@NonNull ContextSet contextSet) {
-            ApiPermissionHolder.this.handle.removeIfTransient(contextSet, NodeType.META_OR_CHAT_META::matches);
+        public void clearParents(@NonNull ContextSet contextSet) {
+            ApiPermissionHolder.this.handle.removeIf(DataType.TRANSIENT, contextSet, NodeType.INHERITANCE::matches, null);
         }
     }
 

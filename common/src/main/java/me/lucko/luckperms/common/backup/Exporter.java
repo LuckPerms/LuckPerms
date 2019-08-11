@@ -130,7 +130,7 @@ public class Exporter implements Runnable {
                 }
 
                 write(writer, "# Export group: " + group.getName());
-                for (Node node : group.enduringData().immutable().values()) {
+                for (Node node : group.normalData().immutable().values()) {
                     write(writer, "/lp " + NodeFactory.nodeAsCommand(node, group.getName(), HolderType.GROUP, true, false));
                 }
                 write(writer, "");
@@ -220,7 +220,7 @@ public class Exporter implements Runnable {
                         output.add("# Export user: " + user.getUuid().toString() + " - " + user.getName().orElse("unknown username"));
 
                         boolean inDefault = false;
-                        for (Node node : user.enduringData().immutable().values()) {
+                        for (Node node : user.normalData().immutable().values()) {
                             if (NodeType.INHERITANCE.tryCast(node).map(n -> n.getGroupName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)).orElse(false)) {
                                 inDefault = true;
                                 continue;

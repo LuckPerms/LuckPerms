@@ -23,40 +23,24 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.model;
+package me.lucko.luckperms.api.model;
 
-import java.util.function.Supplier;
+/**
+ * Represents a type of data.
+ */
+public enum DataType {
 
-public enum NodeMapType {
+    /**
+     * Normal data.
+     */
+    NORMAL,
 
-    ENDURING {
-        @Override
-        public void run(Runnable enduringTask, Runnable transientTask) {
-            enduringTask.run();
-        }
-
-        @Override
-        public <T> T supply(Supplier<T> enduringSupplier, Supplier<T> transientSupplier) {
-            return enduringSupplier.get();
-        }
-    },
-    TRANSIENT {
-        @Override
-        public void run(Runnable enduringTask, Runnable transientTask) {
-            transientTask.run();
-        }
-
-        @Override
-        public <T> T supply(Supplier<T> enduringSupplier, Supplier<T> transientSupplier) {
-            return transientSupplier.get();
-        }
-    };
-
-    // useful methods for fluent/conditional execution
-
-    public abstract void run(Runnable enduringTask, Runnable transientTask);
-
-    public abstract <T> T supply(Supplier<T> enduringSupplier, Supplier<T> transientSupplier);
-
+    /**
+     * Data which expires automatically at the end of a session.
+     * (when a user logs off)
+     *
+     * <p>This data is never saved to the backend storage provider.</p>
+     */
+    TRANSIENT
 
 }

@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.api.model.DataMutateResult;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.api.node.types.InheritanceNode;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
@@ -82,7 +83,7 @@ public class PermissionUnsetTemp extends SharedSubCommand {
             }
         }
 
-        DataMutateResult result = holder.unsetPermission(builtNode);
+        DataMutateResult result = holder.unsetPermission(DataType.NORMAL, builtNode);
 
         if (result.wasSuccessful()) {
             Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));

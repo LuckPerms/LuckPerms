@@ -29,6 +29,7 @@ import com.google.common.base.Strings;
 
 import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.ChatMetaType;
 import me.lucko.luckperms.api.node.NodeBuilder;
 import me.lucko.luckperms.api.node.types.MetaNode;
@@ -263,7 +264,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         }
 
         // remove all prefixes/suffixes directly set on the user/group
-        holder.removeIfEnduring(node -> type.nodeType().matches(node));
+        holder.removeIf(DataType.NORMAL, null, node -> type.nodeType().matches(node), null);
 
         if (value == null) {
             this.vaultPermission.holderSave(holder);
@@ -279,7 +280,8 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         chatMetaNode.withContext(DefaultContextKeys.SERVER_KEY, this.vaultPermission.getVaultServer());
         chatMetaNode.withContext(DefaultContextKeys.WORLD_KEY, world);
 
-        holder.setPermission(chatMetaNode.build()); // assume success
+        // assume success
+        holder.setPermission(DataType.NORMAL, chatMetaNode.build(), true);
         this.vaultPermission.holderSave(holder);
     }
 
@@ -288,7 +290,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
             logMsg("#setMeta: %s - %s - %s - %s", holder.getPlainDisplayName(), key, value, world);
         }
 
-        holder.removeIfEnduring(n -> n instanceof MetaNode && ((MetaNode) n).getMetaKey().equals(key));
+        holder.removeIf(DataType.NORMAL, null, n -> n instanceof MetaNode && ((MetaNode) n).getMetaKey().equals(key), null);
 
         if (value == null) {
             this.vaultPermission.holderSave(holder);
@@ -305,7 +307,8 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         metaNode.withContext(DefaultContextKeys.SERVER_KEY, this.vaultPermission.getVaultServer());
         metaNode.withContext(DefaultContextKeys.WORLD_KEY, world);
 
-        holder.setPermission(metaNode.build()); // assume success
+        // assume success
+        holder.setPermission(DataType.NORMAL, metaNode.build(), true);
         this.vaultPermission.holderSave(holder);
     }
 

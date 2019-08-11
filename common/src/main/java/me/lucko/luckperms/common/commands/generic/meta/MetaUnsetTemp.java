@@ -26,6 +26,8 @@
 package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.model.DataType;
+import me.lucko.luckperms.api.node.types.MetaNode;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
@@ -67,7 +69,7 @@ public class MetaUnsetTemp extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        if (holder.clearMetaKeys(key, context, true)) {
+        if (holder.removeIf(DataType.NORMAL, context, n -> n instanceof MetaNode && (n.hasExpiry() == true) && ((MetaNode) n).getMetaKey().equalsIgnoreCase(key), null)) {
             Message.UNSET_META_TEMP_SUCCESS.send(sender, key, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             ExtendedLogEntry.build().actor(sender).acted(holder)

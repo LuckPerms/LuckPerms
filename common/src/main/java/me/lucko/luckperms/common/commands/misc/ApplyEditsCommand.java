@@ -30,6 +30,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
@@ -41,7 +42,6 @@ import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.model.NodeDataContainer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -116,7 +116,7 @@ public class ApplyEditsCommand extends SingleCommand {
 
         Set<NodeDataContainer> nodes = WebEditor.deserializePermissions(data.getAsJsonArray("nodes"));
 
-        Set<Node> before = new HashSet<>(holder.enduringData().immutable().values());
+        Set<Node> before = new HashSet<>(holder.normalData().immutable().values());
         Set<Node> after = nodes.stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
 
         Map.Entry<Set<Node>, Set<Node>> diff = diff(before, after);
@@ -130,7 +130,7 @@ public class ApplyEditsCommand extends SingleCommand {
             return false;
         }
 
-        holder.setNodes(NodeMapType.ENDURING, after);
+        holder.setNodes(DataType.NORMAL, after);
 
         for (Node n : diffAdded) {
             ExtendedLogEntry.build().actor(sender).acted(holder)

@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.generic.parent;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.NodeType;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
@@ -112,8 +113,8 @@ public class ParentSetTrack extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        holder.removeIfEnduring(NodeType.INHERITANCE.predicate(n -> n.getContexts().equals(context) && track.containsGroup(n.getGroupName())));
-        holder.setPermission(NodeFactory.buildGroupNode(group.getName()).withContext(context).build());
+        holder.removeIf(DataType.NORMAL, null, NodeType.INHERITANCE.predicate(n -> n.getContexts().equals(context) && track.containsGroup(n.getGroupName())), null);
+        holder.setPermission(DataType.NORMAL, NodeFactory.buildGroupNode(group.getName()).withContext(context).build(), true);
 
         Message.SET_TRACK_PARENT_SUCCESS.send(sender, holder.getFormattedDisplayName(), track.getName(), group.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 

@@ -41,6 +41,7 @@ import me.lucko.luckperms.api.actionlog.Action;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.model.PlayerSaveResult;
 import me.lucko.luckperms.api.node.HeldNode;
 import me.lucko.luckperms.api.node.Node;
@@ -49,7 +50,6 @@ import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.UserIdentifier;
@@ -276,7 +276,7 @@ public class MongoStorage implements StorageImplementation {
                     user.getPrimaryGroup().setStoredValue(d.getString("primaryGroup"));
 
                     Set<Node> nodes = nodesFromDoc(d).stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
-                    user.setNodes(NodeMapType.ENDURING, nodes);
+                    user.setNodes(DataType.NORMAL, nodes);
                     user.setName(name, true);
 
                     boolean save = this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
@@ -360,7 +360,7 @@ public class MongoStorage implements StorageImplementation {
                 if (cursor.hasNext()) {
                     Document d = cursor.next();
                     Set<Node> nodes = nodesFromDoc(d).stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
-                    group.setNodes(NodeMapType.ENDURING, nodes);
+                    group.setNodes(DataType.NORMAL, nodes);
                 } else {
                     c.insertOne(groupToDoc(group));
                 }
@@ -391,7 +391,7 @@ public class MongoStorage implements StorageImplementation {
 
                 Document d = cursor.next();
                 Set<Node> nodes = nodesFromDoc(d).stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
-                group.setNodes(NodeMapType.ENDURING, nodes);
+                group.setNodes(DataType.NORMAL, nodes);
             }
         } finally {
             if (group != null) {
@@ -633,7 +633,7 @@ public class MongoStorage implements StorageImplementation {
     }
 
     private static Document userToDoc(User user) {
-        List<Document> nodes = user.enduringData().immutable().values().stream()
+        List<Document> nodes = user.normalData().immutable().values().stream()
                 .map(NodeDataContainer::fromNode)
                 .map(MongoStorage::nodeToDoc)
                 .collect(Collectors.toList());
@@ -657,7 +657,7 @@ public class MongoStorage implements StorageImplementation {
     }
 
     private static Document groupToDoc(Group group) {
-        List<Document> nodes = group.enduringData().immutable().values().stream()
+        List<Document> nodes = group.normalData().immutable().values().stream()
                 .map(NodeDataContainer::fromNode)
                 .map(MongoStorage::nodeToDoc)
                 .collect(Collectors.toList());

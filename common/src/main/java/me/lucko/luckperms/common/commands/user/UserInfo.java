@@ -73,12 +73,12 @@ public class UserInfo extends SubCommand<User> {
                 user.getPrimaryGroup().getValue()
         );
 
-        List<InheritanceNode> parents = user.enduringData().inheritanceAsSortedSet().stream()
+        List<InheritanceNode> parents = user.normalData().inheritanceAsSortedSet().stream()
                 .filter(Node::getValue)
                 .filter(n -> !n.hasExpiry())
                 .collect(Collectors.toList());
 
-        List<InheritanceNode> tempParents = user.enduringData().inheritanceAsSortedSet().stream()
+        List<InheritanceNode> tempParents = user.normalData().inheritanceAsSortedSet().stream()
                 .filter(Node::getValue)
                 .filter(Node::hasExpiry)
                 .collect(Collectors.toList());

@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.model.TemporaryDataMutateResult;
 import me.lucko.luckperms.api.model.TemporaryMergeBehaviour;
 import me.lucko.luckperms.api.node.Node;
@@ -89,7 +90,7 @@ public class PermissionSetTemp extends SharedSubCommand {
             }
         }
 
-        TemporaryDataMutateResult result = holder.setPermission(builtNode, modifier);
+        TemporaryDataMutateResult result = holder.setPermission(DataType.NORMAL, builtNode, modifier);
 
         if (((Result) result.getResult()).wasSuccessful()) {
             duration = result.getMergedNode().getExpiry().getEpochSecond();

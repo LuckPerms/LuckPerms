@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.model;
 
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.api.node.types.DisplayNameNode;
 import me.lucko.luckperms.common.api.implementation.ApiGroup;
@@ -115,7 +116,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
      * @return the display name
      */
     public Optional<String> getDisplayName(ContextSet contextSet) {
-        for (Node n : getData(NodeMapType.ENDURING).immutable().get(contextSet.immutableCopy())) {
+        for (Node n : getData(DataType.NORMAL).immutable().get(contextSet.immutableCopy())) {
             if (n instanceof DisplayNameNode) {
                 return Optional.of(((DisplayNameNode) n).getDisplayName());
             }

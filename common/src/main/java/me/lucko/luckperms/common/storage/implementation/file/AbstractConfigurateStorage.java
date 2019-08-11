@@ -31,6 +31,7 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.actionlog.Action;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.model.PlayerSaveResult;
 import me.lucko.luckperms.api.node.ChatMetaType;
 import me.lucko.luckperms.api.node.Node;
@@ -42,7 +43,6 @@ import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.context.ContextSetConfigurateSerializer;
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.UserIdentifier;
@@ -199,7 +199,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 user.getPrimaryGroup().setStoredValue(object.getNode(this.loader instanceof JsonLoader ? "primaryGroup" : "primary-group").getString());
 
                 Set<Node> nodes = readNodes(object).stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
-                user.setNodes(NodeMapType.ENDURING, nodes);
+                user.setNodes(DataType.NORMAL, nodes);
                 user.setName(name, true);
 
                 boolean save = this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
@@ -239,7 +239,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 data.getNode("name").setValue(user.getName().orElse("null"));
                 data.getNode(this.loader instanceof JsonLoader ? "primaryGroup" : "primary-group").setValue(user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
 
-                Set<NodeDataContainer> nodes = user.enduringData().immutable().values().stream().map(NodeDataContainer::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
+                Set<NodeDataContainer> nodes = user.normalData().immutable().values().stream().map(NodeDataContainer::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
                 writeNodes(data, nodes);
 
                 saveFile(StorageLocation.USER, user.getUuid().toString(), data);
@@ -260,14 +260,14 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
 
             if (object != null) {
                 Set<Node> nodes = readNodes(object).stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
-                group.setNodes(NodeMapType.ENDURING, nodes);
+                group.setNodes(DataType.NORMAL, nodes);
             } else {
                 ConfigurationNode data = SimpleConfigurationNode.root();
                 if (this instanceof SeparatedConfigurateStorage) {
                     data.getNode("name").setValue(group.getName());
                 }
 
-                Set<NodeDataContainer> nodes = group.enduringData().immutable().values().stream().map(NodeDataContainer::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
+                Set<NodeDataContainer> nodes = group.normalData().immutable().values().stream().map(NodeDataContainer::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
                 writeNodes(data, nodes);
 
                 saveFile(StorageLocation.GROUP, name, data);
@@ -301,7 +301,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
 
             Set<NodeDataContainer> data = readNodes(object);
             Set<Node> nodes = data.stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
-            group.setNodes(NodeMapType.ENDURING, nodes);
+            group.setNodes(DataType.NORMAL, nodes);
 
         } catch (Exception e) {
             throw reportException(name, e);
@@ -322,7 +322,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 data.getNode("name").setValue(group.getName());
             }
 
-            Set<NodeDataContainer> nodes = group.enduringData().immutable().values().stream().map(NodeDataContainer::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
+            Set<NodeDataContainer> nodes = group.normalData().immutable().values().stream().map(NodeDataContainer::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
             writeNodes(data, nodes);
 
             saveFile(StorageLocation.GROUP, group.getName(), data);

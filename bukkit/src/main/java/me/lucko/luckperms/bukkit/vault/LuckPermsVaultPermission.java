@@ -30,6 +30,7 @@ import com.google.common.base.Preconditions;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.NodeType;
 import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.api.query.Flag;
@@ -261,7 +262,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         PermissionHolder user = lookupUser(uuid);
         ContextSet contexts = getQueryOptions(uuid, world).context();
 
-        String[] ret = user.enduringData().immutable().values().stream()
+        String[] ret = user.normalData().immutable().values().stream()
                 .filter(NodeType.INHERITANCE::matches)
                 .map(NodeType.INHERITANCE::cast)
                 .filter(n -> n.shouldApplyWithContext(contexts))
@@ -438,7 +439,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
             logMsg("#holderAddPermission: %s - %s - %s", holder.getPlainDisplayName(), permission, world);
         }
 
-        if (((Result) holder.setPermission(NodeFactory.make(permission, true, getVaultServer(), world))).wasSuccessful()) {
+        if (((Result) holder.setPermission(DataType.NORMAL, NodeFactory.make(permission, true, getVaultServer(), world), true)).wasSuccessful()) {
             return holderSave(holder);
         }
         return false;
@@ -452,7 +453,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
             logMsg("#holderRemovePermission: %s - %s - %s", holder.getPlainDisplayName(), permission, world);
         }
 
-        if (((Result) holder.unsetPermission(NodeFactory.make(permission, getVaultServer(), world))).wasSuccessful()) {
+        if (((Result) holder.unsetPermission(DataType.NORMAL, NodeFactory.make(permission, getVaultServer(), world))).wasSuccessful()) {
             return holderSave(holder);
         }
         return false;

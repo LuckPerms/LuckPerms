@@ -50,7 +50,7 @@ public class ChildProcessor extends AbstractPermissionProcessor implements Permi
 
     @Override
     public TristateResult hasPermission(String permission) {
-        return this.childPermissions.getOrDefault(permission, TristateResult.UNDEFINED);;
+        return this.childPermissions.getOrDefault(permission, TristateResult.UNDEFINED);
     }
 
     @Override

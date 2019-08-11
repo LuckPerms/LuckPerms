@@ -27,6 +27,7 @@ package me.lucko.luckperms.api.event.node;
 
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.Param;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.model.PermissionHolder;
 import me.lucko.luckperms.api.model.group.Group;
 import me.lucko.luckperms.api.model.user.User;
@@ -50,11 +51,19 @@ public interface NodeMutateEvent extends LuckPermsEvent {
     @NonNull PermissionHolder getTarget();
 
     /**
+     * Gets the data type that was mutated.
+     *
+     * @return the data type
+     */
+    @Param(1)
+    @NonNull DataType getDataType();
+
+    /**
      * Gets an immutable copy of the holders data before the change
      *
      * @return the data before the change
      */
-    @Param(1)
+    @Param(2)
     @NonNull Set<Node> getDataBefore();
 
     /**
@@ -62,7 +71,7 @@ public interface NodeMutateEvent extends LuckPermsEvent {
      *
      * @return the data after the change
      */
-    @Param(2)
+    @Param(3)
     @NonNull Set<Node> getDataAfter();
 
     /**

@@ -26,8 +26,10 @@
 package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.api.node.NodeEqualityPredicate;
+import me.lucko.luckperms.api.node.types.MetaNode;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
@@ -40,7 +42,6 @@ import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -78,13 +79,13 @@ public class MetaSet extends SharedSubCommand {
 
         Node n = NodeFactory.buildMetaNode(key, value).withContext(context).build();
 
-        if (holder.hasPermission(NodeMapType.ENDURING, n, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
+        if (holder.hasPermission(DataType.NORMAL, n, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
             Message.ALREADY_HAS_META.send(sender, holder.getFormattedDisplayName(), key, value, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
 
-        holder.clearMetaKeys(key, context, false);
-        holder.setPermission(n);
+        holder.removeIf(DataType.NORMAL, context, n1 -> n1 instanceof MetaNode && (n1.hasExpiry() == false) && ((MetaNode) n1).getMetaKey().equalsIgnoreCase(key), null);
+        holder.setPermission(DataType.NORMAL, n, true);
 
         TextComponent.Builder builder = Message.SET_META_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
         HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(

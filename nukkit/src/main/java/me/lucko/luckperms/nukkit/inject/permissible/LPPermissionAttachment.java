@@ -27,6 +27,7 @@ package me.lucko.luckperms.nukkit.inject.permissible;
 
 import com.google.common.base.Preconditions;
 
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.api.node.metadata.NodeMetadata;
 import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
@@ -191,7 +192,7 @@ public class LPPermissionAttachment extends PermissionAttachment implements Node
 
         // set the transient node
         User user = this.permissible.getUser();
-        ((Result) user.setTransientPermission(node)).wasSuccessful();
+        ((Result) user.setPermission(DataType.TRANSIENT, node, true)).wasSuccessful();
     }
 
     private void unsetPermissionInternal(String name) {
@@ -201,13 +202,13 @@ public class LPPermissionAttachment extends PermissionAttachment implements Node
 
         // remove transient permissions from the holder which were added by this attachment & equal the permission
         User user = this.permissible.getUser();
-        user.removeIfTransient(n -> n.getMetadata(TRANSIENT_SOURCE_KEY).orElse(null) == this && n.getKey().equals(name));
+        user.removeIf(DataType.TRANSIENT, null, n -> n.getMetadata(TRANSIENT_SOURCE_KEY).orElse(null) == this && n.getKey().equals(name), (Runnable) null);
     }
 
     private void clearInternal() {
         // remove all transient permissions added by this attachment
         User user = this.permissible.getUser();
-        user.removeIfTransient(n -> n.getMetadata(TRANSIENT_SOURCE_KEY).orElse(null) == this);
+        user.removeIf(DataType.TRANSIENT, null, n -> n.getMetadata(TRANSIENT_SOURCE_KEY).orElse(null) == this, (Runnable) null);
     }
 
     @Override

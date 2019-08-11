@@ -29,6 +29,7 @@ import com.google.common.base.Strings;
 
 import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.api.event.cause.CreationCause;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -200,7 +201,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             String world = standardizeWorld(worldData.getKey());
             for (String node : worldData.getValue()) {
                 if (node.isEmpty()) continue;
-                holder.setPermission(MigrationUtils.parseNode(node, true).withContext(DefaultContextKeys.WORLD_KEY, world).build());
+                holder.setPermission(DataType.NORMAL, MigrationUtils.parseNode(node, true).withContext(DefaultContextKeys.WORLD_KEY, world).build(), true);
             }
         }
 
@@ -222,7 +223,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             for (String node : worldData.getValue()) {
                 if (node.isEmpty()) continue;
                 long expiry = timedPermissionsTime.getOrDefault(Strings.nullToEmpty(world) + ":" + node, 0L);
-                holder.setPermission(MigrationUtils.parseNode(node, true).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(expiry).build());
+                holder.setPermission(DataType.NORMAL, MigrationUtils.parseNode(node, true).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(expiry).build(), true);
             }
         }
 
@@ -250,7 +251,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                     }
                 }
 
-                holder.setPermission(NodeFactory.buildGroupNode(MigrationUtils.standardizeName(parentName)).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(expiry).build());
+                holder.setPermission(DataType.NORMAL, NodeFactory.buildGroupNode(MigrationUtils.standardizeName(parentName)).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(expiry).build(), true);
 
                 // migrate primary groups
                 if (world == null && holder instanceof User && expiry == 0) {
@@ -264,7 +265,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             if (primary != null && !primary.isEmpty() && !primary.equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
                 User user = ((User) holder);
                 user.getPrimaryGroup().setStoredValue(primary);
-                user.unsetPermission(NodeFactory.buildGroupNode(NodeFactory.DEFAULT_GROUP_NAME).build());
+                holder.unsetPermission(DataType.NORMAL, NodeFactory.buildGroupNode(NodeFactory.DEFAULT_GROUP_NAME).build());
             }
         }
 
@@ -273,11 +274,11 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         String suffix = entity.getOwnSuffix();
 
         if (prefix != null && !prefix.isEmpty()) {
-            holder.setPermission(NodeFactory.buildPrefixNode(weight, prefix).build());
+            holder.setPermission(DataType.NORMAL, NodeFactory.buildPrefixNode(weight, prefix).build(), true);
         }
 
         if (suffix != null && !suffix.isEmpty()) {
-            holder.setPermission(NodeFactory.buildSuffixNode(weight, suffix).build());
+            holder.setPermission(DataType.NORMAL, NodeFactory.buildSuffixNode(weight, suffix).build(), true);
         }
 
         // migrate options
@@ -302,7 +303,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                     continue;
                 }
 
-                holder.setPermission(NodeFactory.buildMetaNode(opt.getKey(), opt.getValue()).withContext(DefaultContextKeys.WORLD_KEY, world).build());
+                holder.setPermission(DataType.NORMAL, NodeFactory.buildMetaNode(opt.getKey(), opt.getValue()).withContext(DefaultContextKeys.WORLD_KEY, world).build(), true);
             }
         }
     }

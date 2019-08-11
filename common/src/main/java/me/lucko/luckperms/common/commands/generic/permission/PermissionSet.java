@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.api.model.DataMutateResult;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.api.node.types.InheritanceNode;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
@@ -83,7 +84,7 @@ public class PermissionSet extends SharedSubCommand {
             }
         }
 
-        DataMutateResult result = holder.setPermission(builtNode);
+        DataMutateResult result = holder.setPermission(DataType.NORMAL, builtNode, true);
 
         if (result.wasSuccessful()) {
             Message.SETPERMISSION_SUCCESS.send(sender, node, value, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));

@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.generic.parent;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.api.node.NodeEqualityPredicate;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
@@ -41,7 +42,6 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
@@ -93,9 +93,9 @@ public class UserSwitchPrimaryGroup extends SharedSubCommand {
         }
 
         Node node = NodeFactory.buildGroupNode(group.getName()).build();
-        if (!user.hasPermission(NodeMapType.ENDURING, node, NodeEqualityPredicate.IGNORE_VALUE).asBoolean()) {
+        if (!user.hasPermission(DataType.NORMAL, node, NodeEqualityPredicate.IGNORE_VALUE).asBoolean()) {
             Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, user.getFormattedDisplayName(), group.getName());
-            user.setPermission(node);
+            holder.setPermission(DataType.NORMAL, node, true);
         }
 
         user.getPrimaryGroup().setStoredValue(group.getName());

@@ -33,6 +33,7 @@ import de.bananaco.bpermissions.api.WorldManager;
 
 import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.api.event.cause.CreationCause;
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.ChatMetaType;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
@@ -186,7 +187,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
             if (p.name().isEmpty()) {
                 continue;
             }
-            holder.setPermission(NodeFactory.make(p.name(), p.isTrue(), "global", world.getName()));
+            holder.setPermission(DataType.NORMAL, NodeFactory.make(p.name(), p.isTrue(), "global", world.getName()), true);
 
             // Include any child permissions
             for (Map.Entry<String, Boolean> child : p.getChildren().entrySet()) {
@@ -194,7 +195,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                     continue;
                 }
 
-                holder.setPermission(NodeFactory.make(child.getKey(), child.getValue(), "global", world.getName()));
+                holder.setPermission(DataType.NORMAL, NodeFactory.make(child.getKey(), child.getValue(), "global", world.getName()), true);
             }
         }
 
@@ -205,7 +206,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 parentName = NodeFactory.DEFAULT_GROUP_NAME;
             }
 
-            holder.setPermission(NodeFactory.make(NodeFactory.groupNode(parentName), true, "global", world.getName()));
+            holder.setPermission(DataType.NORMAL, NodeFactory.make(NodeFactory.groupNode(parentName), true, "global", world.getName()), true);
         });
 
         // Migrate existing meta
@@ -216,11 +217,11 @@ public class MigrationBPermissions extends SubCommand<Object> {
 
             if (meta.getKey().equalsIgnoreCase(NodeTypes.PREFIX_KEY) || meta.getKey().equalsIgnoreCase(NodeTypes.SUFFIX_KEY)) {
                 ChatMetaType type = ChatMetaType.valueOf(meta.getKey().toUpperCase());
-                holder.setPermission(NodeFactory.buildChatMetaNode(type, c.getPriority(), meta.getValue()).withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build());
+                holder.setPermission(DataType.NORMAL, NodeFactory.buildChatMetaNode(type, c.getPriority(), meta.getValue()).withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
                 continue;
             }
 
-            holder.setPermission(NodeFactory.buildMetaNode(meta.getKey(), meta.getValue()).withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build());
+            holder.setPermission(DataType.NORMAL, NodeFactory.buildMetaNode(meta.getKey(), meta.getValue()).withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
         }
     }
 }

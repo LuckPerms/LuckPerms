@@ -40,7 +40,7 @@ public interface NodeAddEvent extends NodeMutateEvent {
      *
      * @return the node that was added
      */
-    @Param(3)
+    @Param(4)
     @NonNull Node getNode();
 
 }

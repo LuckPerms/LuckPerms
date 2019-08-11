@@ -140,25 +140,6 @@ public interface PermissionHolder {
      */
     @NonNull Data transientData();
 
-    /**
-     * Represents a type of data.
-     */
-    enum DataType {
-
-        /**
-         * Normal data.
-         */
-        NORMAL,
-
-        /**
-         * Data which expires automatically at the end of a session.
-         * (when a user logs off)
-         *
-         * <p>This data is never saved to the backend storage provider.</p>
-         */
-        TRANSIENT
-    }
-
     interface Data {
 
         /**

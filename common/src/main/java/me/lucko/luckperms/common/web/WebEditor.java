@@ -79,7 +79,7 @@ public final class WebEditor {
                                 obj.add("uuid", ((User) holder).getUuid().toString());
                             }
                         }))
-                .add("nodes", serializePermissions(holder.enduringData().immutable().values().stream().map(NodeDataContainer::fromNode)));
+                .add("nodes", serializePermissions(holder.normalData().immutable().values().stream().map(NodeDataContainer::fromNode)));
     }
 
     public static JsonObject formPayload(List<PermissionHolder> holders, Sender sender, String cmdLabel, LuckPermsPlugin plugin) {

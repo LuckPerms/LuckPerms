@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.commands.migration;
 
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.NodeBuilder;
 import me.lucko.luckperms.api.node.NodeType;
 import me.lucko.luckperms.common.model.Group;
@@ -54,8 +55,8 @@ public final class MigrationUtils {
     }
 
     public static void setGroupWeight(Group group, int weight) {
-        group.removeIfEnduring(NodeType.WEIGHT::matches);
-        group.setPermission(NodeFactory.buildWeightNode(weight).build());
+        group.removeIf(DataType.NORMAL, null, NodeType.WEIGHT::matches, null);
+        group.setPermission(DataType.NORMAL, NodeFactory.buildWeightNode(weight).build(), true);
     }
 
     public static String standardizeName(String string) {

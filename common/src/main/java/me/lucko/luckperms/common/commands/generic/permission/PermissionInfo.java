@@ -77,7 +77,7 @@ public class PermissionInfo extends SharedSubCommand {
         SortMode sortMode = SortMode.determine(args);
 
         // get the holders nodes
-        List<Node> nodes = new ArrayList<>(holder.enduringData().asSortedSet());
+        List<Node> nodes = new ArrayList<>(holder.normalData().asSortedSet());
 
         // remove irrelevant types (these are displayed in the other info commands)
         nodes.removeIf(NodeType.INHERITANCE.predicate(n -> n.getValue() && plugin.getGroupManager().isLoaded(n.getGroupName()))

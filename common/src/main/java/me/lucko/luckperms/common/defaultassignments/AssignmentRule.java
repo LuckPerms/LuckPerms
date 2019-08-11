@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.defaultassignments;
 
+import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.model.User;
@@ -96,11 +97,11 @@ public class AssignmentRule {
 
         // The holder meets all of the requirements of this rule.
         for (Node n : this.toTake) {
-            user.unsetPermission(n);
+            user.unsetPermission(DataType.NORMAL, n);
         }
 
         for (Node n : this.toGive) {
-            user.setPermission(n);
+            user.setPermission(DataType.NORMAL, n, true);
         }
 
         if (this.setPrimaryGroup != null) {
