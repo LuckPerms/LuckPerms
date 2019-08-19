@@ -11,9 +11,11 @@ assignees: ''
     Thank you for reaching out to us for support with LuckPerms.
     In order to provide the best support, please provide any requested information.
 
-    We recommend you to join our Discord to get faster responses. https://discord.gg/luckperms
+    We recommend you to join our Discord to get faster responses:
+    https://discord.gg/luckperms
 
-    If you have any errors or similar with LuckPerms, share them through a site like https://hasteb.in
+    If you have any errors or similar with LuckPerms, share them through a
+    site like https://hasteb.in
 -->
 [FAQ]: https://github.com/lucko/LuckPerms/wiki/FAQ
 [Storage system error]: https://github.com/lucko/LuckPerms/wiki/Storage-system-errors
