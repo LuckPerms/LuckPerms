@@ -6,17 +6,16 @@
 -->
 ## Type
 > What type of change is this Pull Request?  
-> Will it affect the end user (developer)?
+> Will it affect the end-user (developer)?
 
 <!-- Select one by changing the [ ] to [x] -->
-- [ ] Minor change: This won't affect the end user.
-- [ ] Major change: This will affect the end user.
+- [ ] Minor change: This won't affect the end-user.
+- [ ] Major change: This will affect the end-user.
 - [ ] Smaller correction: Only smaller correction of javadocs comments or similar.
 
 ## Changes
 > List all the changes you made to LuckPerms here.  
 > You can also provide examples of code when this helps.
->
-> Mention any related issues or pull requests (#\<issue or PR id>)
 <!-- Please write below this line to prevent formatting issues -->
+<!-- Mention any related PR or issue with #<ID of PR/issue> -->
 
