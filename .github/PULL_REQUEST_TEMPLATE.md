@@ -6,7 +6,7 @@
 -->
 ## Type
 > What type of change is this Pull Request?  
-> Will it affects the end-user (developer)?
+> Does this PR affect the end-user (developer)?
 
 <!-- Select one by changing the [ ] to [x] -->
 - [ ] Minor change: This won't affect the end-user.
