@@ -29,7 +29,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.model.DataMutateResult;
 import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.ChatMetaType;
 import me.lucko.luckperms.api.node.Node;
@@ -58,11 +57,9 @@ import org.spongepowered.api.service.permission.SubjectData;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PermissionHolderSubjectData implements LPSubjectData {
@@ -129,54 +126,20 @@ public class PermissionHolderSubjectData implements LPSubjectData {
         if (tristate == Tristate.UNDEFINED) {
             // Unset
             Node node = NodeFactory.builder(permission).withContext(contexts).build();
-            switch (this.type) {
-                case NORMAL:
-                    this.holder.unsetPermission(DataType.NORMAL, node);
-                    break;
-                case TRANSIENT:
-                    this.holder.unsetPermission(DataType.TRANSIENT, node);
-                    break;
-                default:
-                    throw new AssertionError();
-            }
+            this.holder.unsetPermission(this.type, node);
             return save(this.holder).thenApply(v -> true);
         }
 
         Node node = NodeFactory.builder(permission).value(tristate.asBoolean()).withContext(contexts).build();
         // unset the inverse, to allow false -> true, true -> false overrides.
-        // unset the inverse, to allow false -> true, true -> false overrides.
-        switch (this.type) {
-            case NORMAL:
-                // unset the inverse, to allow false -> true, true -> false overrides.
-                this.holder.unsetPermission(DataType.NORMAL, node);
-                this.holder.setPermission(DataType.NORMAL, node, true);
-                break;
-            case TRANSIENT:
-                // unset the inverse, to allow false -> true, true -> false overrides.
-                this.holder.unsetPermission(DataType.TRANSIENT, node);
-                this.holder.setPermission(DataType.TRANSIENT, node, true);
-                break;
-            default:
-                throw new AssertionError();
-        }
+        this.holder.unsetPermission(this.type, node);
+        this.holder.setPermission(this.type, node, true);
         return save(this.holder).thenApply(v -> true);
     }
 
     @Override
     public CompletableFuture<Boolean> clearPermissions() {
-        boolean ret;
-        switch (this.type) {
-            case NORMAL:
-                ret = this.holder.clearNodes(DataType.NORMAL, null);
-                break;
-            case TRANSIENT:
-                ret = this.holder.clearNodes(DataType.TRANSIENT, null);
-                break;
-            default:
-                throw new AssertionError();
-        }
-
-        if (!ret) {
+        if (!this.holder.clearNodes(this.type, null)) {
             return CompletableFuture.completedFuture(false);
         }
 
@@ -190,24 +153,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
     @Override
     public CompletableFuture<Boolean> clearPermissions(ImmutableContextSet contexts) {
         Objects.requireNonNull(contexts, "contexts");
-        boolean ret;
-        switch (this.type) {
-            case NORMAL:
-                ret = this.holder.clearNodes(DataType.NORMAL, contexts);
-                break;
-            case TRANSIENT:
-                List<Node> toRemove = streamNodes()
-                        .filter(n -> n.getContexts().equals(contexts))
-                        .collect(Collectors.toList());
-
-                toRemove.forEach(node -> this.holder.unsetPermission(DataType.TRANSIENT, node));
-                ret = !toRemove.isEmpty();
-                break;
-            default:
-                throw new AssertionError();
-        }
-
-        if (!ret) {
+        if (!this.holder.clearNodes(this.type, contexts)) {
             return CompletableFuture.completedFuture(false);
         }
 
@@ -257,19 +203,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
                 .withContext(contexts)
                 .build();
 
-        DataMutateResult result;
-        switch (this.type) {
-            case NORMAL:
-                result = this.holder.setPermission(DataType.NORMAL, node, true);
-                break;
-            case TRANSIENT:
-                result = this.holder.setPermission(DataType.TRANSIENT, node, true);
-                break;
-            default:
-                throw new AssertionError();
-        }
-
-        if (!result.wasSuccessful()) {
+        if (!this.holder.setPermission(this.type, node, true).wasSuccessful()) {
             return CompletableFuture.completedFuture(false);
         }
 
@@ -289,19 +223,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
                 .withContext(contexts)
                 .build();
 
-        DataMutateResult result;
-        switch (this.type) {
-            case NORMAL:
-                result = this.holder.unsetPermission(DataType.NORMAL, node);
-                break;
-            case TRANSIENT:
-                result = this.holder.unsetPermission(DataType.TRANSIENT, node);
-                break;
-            default:
-                throw new AssertionError();
-        }
-
-        if (!result.wasSuccessful()) {
+        if (!this.holder.unsetPermission(this.type, node).wasSuccessful()) {
             return CompletableFuture.completedFuture(false);
         }
 
@@ -316,12 +238,10 @@ public class PermissionHolderSubjectData implements LPSubjectData {
                 ret = this.holder.clearNormalParents(null, true);
                 break;
             case TRANSIENT:
-                List<Node> toRemove = streamNodes()
+                ret = streamNodes()
                         .filter(n -> n instanceof InheritanceNode)
-                        .collect(Collectors.toList());
-
-                toRemove.forEach(node -> this.holder.unsetPermission(DataType.TRANSIENT, node));
-                ret = !toRemove.isEmpty();
+                        .peek(n -> this.holder.unsetPermission(DataType.TRANSIENT, n))
+                        .findAny().isPresent();
                 break;
             default:
                 throw new AssertionError();
@@ -343,13 +263,11 @@ public class PermissionHolderSubjectData implements LPSubjectData {
                 ret = this.holder.clearNormalParents(contexts, true);
                 break;
             case TRANSIENT:
-                List<Node> toRemove = streamNodes()
+                ret = streamNodes()
                         .filter(n -> n instanceof InheritanceNode)
                         .filter(n -> n.getContexts().equals(contexts))
-                        .collect(Collectors.toList());
-
-                toRemove.forEach(node -> this.holder.unsetPermission(DataType.TRANSIENT, node));
-                ret = !toRemove.isEmpty();
+                        .peek(n -> this.holder.unsetPermission(DataType.TRANSIENT, n))
+                        .findAny().isPresent();
                 break;
             default:
                 throw new AssertionError();
@@ -425,20 +343,9 @@ public class PermissionHolderSubjectData implements LPSubjectData {
 
             // remove all prefixes/suffixes from the user
             streamNodes()
-                    .filter(node1 -> type.nodeType().matches(node1))
+                    .filter(n -> type.nodeType().matches(n))
                     .filter(n -> n.getContexts().equals(contexts))
-                    .forEach(n -> {
-                        switch (this.type) {
-                            case NORMAL:
-                                this.holder.unsetPermission(DataType.NORMAL, n);
-                                break;
-                            case TRANSIENT:
-                                this.holder.unsetPermission(DataType.TRANSIENT, n);
-                                break;
-                            default:
-                                throw new AssertionError();
-                        }
-                    });
+                    .forEach(n -> this.holder.unsetPermission(this.type, n));
 
             MetaAccumulator metaAccumulator = this.holder.accumulateMeta(null, QueryOptions.defaultContextualOptions().toBuilder().context(contexts).build());
             metaAccumulator.complete();
@@ -451,32 +358,12 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             streamNodes()
                     .filter(n -> n instanceof MetaNode && ((MetaNode) n).getMetaKey().equals(key))
                     .filter(n -> n.getContexts().equals(contexts))
-                    .forEach(n -> {
-                        switch (this.type) {
-                            case NORMAL:
-                                this.holder.unsetPermission(DataType.NORMAL, n);
-                                break;
-                            case TRANSIENT:
-                                this.holder.unsetPermission(DataType.TRANSIENT, n);
-                                break;
-                            default:
-                                throw new AssertionError();
-                        }
-                    });
+                    .forEach(n -> this.holder.unsetPermission(this.type, n));
 
             node = NodeFactory.buildMetaNode(key, value).withContext(contexts).build();
         }
 
-        switch (this.type) {
-            case NORMAL:
-                this.holder.setPermission(DataType.NORMAL, node, true);
-                break;
-            case TRANSIENT:
-                this.holder.setPermission(DataType.TRANSIENT, node, true);
-                break;
-            default:
-                throw new AssertionError();
-        }
+        this.holder.setPermission(this.type, node, true);
         return save(this.holder).thenApply(v -> true);
     }
 
@@ -496,18 +383,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
                     }
                 })
                 .filter(n -> n.getContexts().equals(contexts))
-                .forEach(node -> {
-                    switch (this.type) {
-                        case NORMAL:
-                            this.holder.unsetPermission(DataType.NORMAL, node);
-                            break;
-                        case TRANSIENT:
-                            this.holder.unsetPermission(DataType.TRANSIENT, node);
-                            break;
-                        default:
-                            throw new AssertionError();
-                    }
-                });
+                .forEach(n -> this.holder.unsetPermission(this.type, n));
 
         return save(this.holder).thenApply(v -> true);
     }
@@ -516,25 +392,13 @@ public class PermissionHolderSubjectData implements LPSubjectData {
     public CompletableFuture<Boolean> clearOptions(ImmutableContextSet contexts) {
         Objects.requireNonNull(contexts, "contexts");
 
-        List<Node> toRemove = streamNodes()
+        boolean success = streamNodes()
                 .filter(NodeType.META_OR_CHAT_META::matches)
                 .filter(n -> n.getContexts().equals(contexts))
-                .collect(Collectors.toList());
+                .peek(n -> this.holder.unsetPermission(this.type, n))
+                .findAny().isPresent();
 
-        toRemove.forEach(node -> {
-            switch (this.type) {
-                case NORMAL:
-                    this.holder.unsetPermission(DataType.NORMAL, node);
-                    break;
-                case TRANSIENT:
-                    this.holder.unsetPermission(DataType.TRANSIENT, node);
-                    break;
-                default:
-                    throw new AssertionError();
-            }
-        });
-
-        if (toRemove.isEmpty()) {
+        if (!success) {
             return CompletableFuture.completedFuture(false);
         }
 
@@ -543,24 +407,12 @@ public class PermissionHolderSubjectData implements LPSubjectData {
 
     @Override
     public CompletableFuture<Boolean> clearOptions() {
-        List<Node> toRemove = streamNodes()
+        boolean success = streamNodes()
                 .filter(NodeType.META_OR_CHAT_META::matches)
-                .collect(Collectors.toList());
+                .peek(n -> this.holder.unsetPermission(this.type, n))
+                .findAny().isPresent();
 
-        toRemove.forEach(node -> {
-            switch (this.type) {
-                case NORMAL:
-                    this.holder.unsetPermission(DataType.NORMAL, node);
-                    break;
-                case TRANSIENT:
-                    this.holder.unsetPermission(DataType.TRANSIENT, node);
-                    break;
-                default:
-                    throw new AssertionError();
-            }
-        });
-
-        if (toRemove.isEmpty()) {
+        if (!success) {
             return CompletableFuture.completedFuture(false);
         }
 

@@ -23,14 +23,49 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.node.metadata;
+package me.lucko.luckperms.common.model;
 
-import me.lucko.luckperms.api.node.Node;
+import me.lucko.luckperms.api.model.PermissionHolder.Identifier;
 
-/**
- * Generic interface for an {@link Object} which can be attached to a
- * {@link Node} as metadata.
- */
-public interface NodeMetadata {
+import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Objects;
+
+public final class PermissionHolderIdentifier implements Identifier {
+    private final String type;
+    private final String name;
+
+    public PermissionHolderIdentifier(String type, String name) {
+        this.type = type;
+        this.name = name;
+    }
+
+    public PermissionHolderIdentifier(HolderType type, String name) {
+        this.type = type == HolderType.USER ? Identifier.USER_TYPE : Identifier.GROUP_TYPE;
+        this.name = name;
+    }
+
+    @Override
+    public @NonNull String getName() {
+        return this.name;
+    }
+
+    @Override
+    public @NonNull String getType() {
+        return this.type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Identifier)) return false;
+        Identifier that = (Identifier) o;
+        return getType().equals(that.getType()) &&
+                getName().equals(that.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getType(), getName());
+    }
 }

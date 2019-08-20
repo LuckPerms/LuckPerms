@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.node.types;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.node.ChatMetaType;
-import me.lucko.luckperms.api.node.metadata.NodeMetadata;
 import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
 import me.lucko.luckperms.api.node.types.PrefixNode;
 import me.lucko.luckperms.common.node.AbstractNode;
@@ -43,7 +42,7 @@ public class Prefix extends AbstractNode<PrefixNode, PrefixNode.Builder> impleme
     private final String prefix;
     private final int priority;
 
-    public Prefix(String prefix, int priority, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, NodeMetadata> metadata) {
+    public Prefix(String prefix, int priority, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
         super(NodeFactory.prefixNode(priority, prefix), value, expireAt, contexts, metadata);
         this.prefix = prefix;
         this.priority = priority;
@@ -78,7 +77,7 @@ public class Prefix extends AbstractNode<PrefixNode, PrefixNode.Builder> impleme
             this.priority = null;
         }
 
-        public Builder(String prefix, int priority, boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, NodeMetadata> metadata) {
+        public Builder(String prefix, int priority, boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, Object> metadata) {
             super(value, expireAt, context, metadata);
             this.prefix = prefix;
             this.priority = priority;

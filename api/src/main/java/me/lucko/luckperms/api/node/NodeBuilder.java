@@ -26,7 +26,6 @@
 package me.lucko.luckperms.api.node;
 
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.node.metadata.NodeMetadata;
 import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -138,7 +137,7 @@ public interface NodeBuilder<N extends ScopedNode<N, B>, B extends NodeBuilder<N
      * @param <T> the metadata type
      * @return the builder
      */
-    @NonNull <T extends NodeMetadata> B withMetadata(@NonNull NodeMetadataKey<T> key, @Nullable T metadata);
+    @NonNull <T> B withMetadata(@NonNull NodeMetadataKey<T> key, @Nullable T metadata);
 
     /**
      * Creates a {@link Node} instance from the builder.

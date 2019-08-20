@@ -32,8 +32,10 @@ import java.util.EnumSet;
 /**
  * Some default {@link QueryOptions} instances.
  */
-enum DefaultQueryOptions {
-    ;
+final class DefaultQueryOptions {
+    private DefaultQueryOptions() {
+        throw new AssertionError();
+    }
 
     private static final EnumSet<Flag> DEFAULT_FLAGS = EnumSet.allOf(Flag.class);
 

@@ -27,7 +27,7 @@ package me.lucko.luckperms.api.node.metadata;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-final class SimpleNodeMetadataKey<T extends NodeMetadata> implements NodeMetadataKey<T> {
+final class SimpleNodeMetadataKey<T> implements NodeMetadataKey<T> {
     private final String name;
     private final Class<T> type;
 

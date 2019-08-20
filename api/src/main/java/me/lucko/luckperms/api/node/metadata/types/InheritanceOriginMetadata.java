@@ -27,15 +27,14 @@ package me.lucko.luckperms.api.node.metadata.types;
 
 import me.lucko.luckperms.api.model.PermissionHolder;
 import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.metadata.NodeMetadata;
 import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
- * {@link NodeMetadata} indicating where a node was inherited from.
+ * Node metadata indicating where a node was inherited from.
  */
-public interface InheritanceOriginMetadata extends NodeMetadata {
+public interface InheritanceOriginMetadata {
 
     /**
      * The {@link NodeMetadataKey} for {@link InheritanceOriginMetadata}.
@@ -45,10 +44,10 @@ public interface InheritanceOriginMetadata extends NodeMetadata {
     /**
      * Gets the location where the {@link Node} is inherited from.
      *
-     * <p>The resultant string is the {@link PermissionHolder#getObjectName() object name} of the
+     * <p>The resultant string is the {@link PermissionHolder.Identifier#getName() object name} of the
      * permission holder the node was inherited from.</p>
      *
-     * <p>If the node was not inherited, the {@link PermissionHolder#getObjectName() object name}
+     * <p>If the node was not inherited, the {@link PermissionHolder.Identifier#getName() object name}
      * of the permission holder itself (the one that defined the node) will be returned.</p>
      *
      * @return where the node was inherited from.

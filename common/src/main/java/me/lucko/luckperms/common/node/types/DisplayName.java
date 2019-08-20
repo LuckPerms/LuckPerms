@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.node.types;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.node.metadata.NodeMetadata;
 import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
 import me.lucko.luckperms.api.node.types.DisplayNameNode;
 import me.lucko.luckperms.common.node.AbstractNode;
@@ -41,7 +40,7 @@ import java.util.Objects;
 public class DisplayName extends AbstractNode<DisplayNameNode, DisplayNameNode.Builder> implements DisplayNameNode {
     private final String displayName;
 
-    public DisplayName(String displayName, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, NodeMetadata> metadata) {
+    public DisplayName(String displayName, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
         super(NodeFactory.displayName(displayName), value, expireAt, contexts, metadata);
         this.displayName = displayName;
     }
@@ -63,7 +62,7 @@ public class DisplayName extends AbstractNode<DisplayNameNode, DisplayNameNode.B
             this.displayName = null;
         }
 
-        public Builder(String displayName, boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, NodeMetadata> metadata) {
+        public Builder(String displayName, boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, Object> metadata) {
             super(value, expireAt, context, metadata);
             this.displayName = displayName;
         }

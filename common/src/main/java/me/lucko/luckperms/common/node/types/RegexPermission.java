@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.node.types;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.node.metadata.NodeMetadata;
 import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
 import me.lucko.luckperms.api.node.types.RegexPermissionNode;
 import me.lucko.luckperms.common.cache.Cache;
@@ -52,7 +51,7 @@ public class RegexPermission extends AbstractNode<RegexPermissionNode, RegexPerm
         }
     };
 
-    public RegexPermission(String pattern, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, NodeMetadata> metadata) {
+    public RegexPermission(String pattern, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
         super(NodeFactory.regexNode(pattern), value, expireAt, contexts, metadata);
         this.pattern = pattern;
     }
@@ -79,7 +78,7 @@ public class RegexPermission extends AbstractNode<RegexPermissionNode, RegexPerm
             this.pattern = null;
         }
 
-        public Builder(String pattern, boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, NodeMetadata> metadata) {
+        public Builder(String pattern, boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, Object> metadata) {
             super(value, expireAt, context, metadata);
             this.pattern = pattern;
         }

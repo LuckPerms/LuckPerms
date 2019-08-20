@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.node.types;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.node.NodeBuilder;
-import me.lucko.luckperms.api.node.metadata.NodeMetadata;
 import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
 import me.lucko.luckperms.api.node.types.PermissionNode;
 import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
@@ -44,7 +43,7 @@ import java.util.OptionalInt;
 public class Permission extends AbstractNode<PermissionNode, PermissionNode.Builder> implements PermissionNode {
     private final int wildcardLevel;
 
-    public Permission(String permission, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, NodeMetadata> metadata) {
+    public Permission(String permission, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
         super(permission, value, expireAt, contexts, metadata);
         this.wildcardLevel = permission.endsWith(WildcardProcessor.WILDCARD_SUFFIX) ? permission.chars().filter(num -> num == NODE_SEPARATOR_CODE).sum() : -1;
     }
@@ -76,7 +75,7 @@ public class Permission extends AbstractNode<PermissionNode, PermissionNode.Buil
             this.permission = null;
         }
 
-        public Builder(String permission, boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, NodeMetadata> metadata) {
+        public Builder(String permission, boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, Object> metadata) {
             super(value, expireAt, context, metadata);
             this.permission = permission;
         }

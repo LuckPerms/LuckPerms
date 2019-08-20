@@ -30,7 +30,6 @@ import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.node.NodeBuilder;
 import me.lucko.luckperms.api.node.ScopedNode;
-import me.lucko.luckperms.api.node.metadata.NodeMetadata;
 import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -44,7 +43,7 @@ public abstract class AbstractNodeBuilder<N extends ScopedNode<N, B>, B extends 
     protected boolean value;
     protected long expireAt;
     protected ImmutableContextSet.Builder context;
-    protected Map<NodeMetadataKey<?>, NodeMetadata> metadata;
+    protected Map<NodeMetadataKey<?>, Object> metadata;
 
     protected AbstractNodeBuilder() {
         this.value = true;
@@ -53,7 +52,7 @@ public abstract class AbstractNodeBuilder<N extends ScopedNode<N, B>, B extends 
         this.metadata = new IdentityHashMap<>();
     }
 
-    protected AbstractNodeBuilder(boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, NodeMetadata> metadata) {
+    protected AbstractNodeBuilder(boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, Object> metadata) {
         this.value = value;
         this.expireAt = expireAt;
         this.context = ImmutableContextSet.builder().addAll(context);
@@ -108,7 +107,7 @@ public abstract class AbstractNodeBuilder<N extends ScopedNode<N, B>, B extends 
     }
 
     @Override
-    public @NonNull <T extends NodeMetadata> B withMetadata(@NonNull NodeMetadataKey<T> key, @Nullable T metadata) {
+    public @NonNull <T> B withMetadata(@NonNull NodeMetadataKey<T> key, @Nullable T metadata) {
         Objects.requireNonNull(key, "key");
         if (metadata == null) {
             this.metadata.remove(key);

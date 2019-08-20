@@ -30,7 +30,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.Objects;
 
 /**
- * Represents a key for a specific type of {@link NodeMetadata}.
+ * Represents a key for a specific type of node metadata.
  *
  * <p>Metadata keys are compared using reference equality, the
  * {@link #equals(Object)} method should not be implemented.</p>
@@ -43,7 +43,7 @@ import java.util.Objects;
  *
  * @param <T> the metadata type
  */
-public interface NodeMetadataKey<T extends NodeMetadata> {
+public interface NodeMetadataKey<T> {
 
     /**
      * Creates a new {@link NodeMetadataKey} for the given name and type.
@@ -55,7 +55,7 @@ public interface NodeMetadataKey<T extends NodeMetadata> {
      * @param <T> the type parameter
      * @return the key
      */
-    static <T extends NodeMetadata> @NonNull NodeMetadataKey<T> of(@NonNull String name, @NonNull Class<T> type) {
+    static <T> @NonNull NodeMetadataKey<T> of(@NonNull String name, @NonNull Class<T> type) {
         Objects.requireNonNull(name, "name");
         Objects.requireNonNull(type, "type");
         return new SimpleNodeMetadataKey<>(name, type);

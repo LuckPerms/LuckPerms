@@ -72,8 +72,8 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.model.Permiss
     }
 
     @Override
-    public @NonNull String getObjectName() {
-        return this.handle.getObjectName();
+    public @NonNull Identifier getIdentifier() {
+        return this.handle.getIdentifier();
     }
 
     @Override

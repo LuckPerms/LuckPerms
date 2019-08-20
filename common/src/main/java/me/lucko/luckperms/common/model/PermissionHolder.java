@@ -43,6 +43,8 @@ import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.api.node.types.InheritanceNode;
 import me.lucko.luckperms.api.query.Flag;
 import me.lucko.luckperms.api.query.QueryOptions;
+import me.lucko.luckperms.api.query.dataorder.DataQueryOrder;
+import me.lucko.luckperms.api.query.dataorder.DataQueryOrderFunction;
 import me.lucko.luckperms.common.cacheddata.HolderCachedDataManager;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.inheritance.InheritanceComparator;
@@ -175,6 +177,10 @@ public abstract class PermissionHolder {
         return this.transientNodes;
     }
 
+    public PermissionHolderIdentifier getIdentifier() {
+        return new PermissionHolderIdentifier(getType(), getObjectName());
+    }
+
     /**
      * Gets the unique name of this holder object.
      *
@@ -234,22 +240,43 @@ public abstract class PermissionHolder {
 
     public List<Node> getOwnNodes(QueryOptions queryOptions) {
         List<Node> ret = new ArrayList<>();
-        this.transientNodes.copyTo(ret, queryOptions);
-        this.normalNodes.copyTo(ret, queryOptions);
+
+        Comparator<DataType> comparator = queryOptions.option(DataQueryOrderFunction.KEY)
+                .map(func -> func.getOrderComparator(getIdentifier()))
+                .orElse(DataQueryOrder.TRANSIENT_FIRST);
+
+        for (DataType dataType : DataQueryOrder.order(comparator)) {
+            getData(dataType).copyTo(ret, queryOptions);
+        }
+
         return ret;
     }
 
     public SortedSet<Node> getOwnNodesSorted(QueryOptions queryOptions) {
         SortedSet<Node> ret = new TreeSet<>(NodeWithContextComparator.reverse());
-        this.transientNodes.copyTo(ret, queryOptions);
-        this.normalNodes.copyTo(ret, queryOptions);
+
+        Comparator<DataType> comparator = queryOptions.option(DataQueryOrderFunction.KEY)
+                .map(func -> func.getOrderComparator(getIdentifier()))
+                .orElse(DataQueryOrder.TRANSIENT_FIRST);
+
+        for (DataType dataType : DataQueryOrder.order(comparator)) {
+            getData(dataType).copyTo(ret, queryOptions);
+        }
+
         return ret;
     }
 
     public List<InheritanceNode> getOwnGroupNodes(QueryOptions queryOptions) {
         List<InheritanceNode> ret = new ArrayList<>();
-        this.transientNodes.copyInheritanceNodesTo(ret, queryOptions);
-        this.normalNodes.copyInheritanceNodesTo(ret, queryOptions);
+
+        Comparator<DataType> comparator = queryOptions.option(DataQueryOrderFunction.KEY)
+                .map(func -> func.getOrderComparator(getIdentifier()))
+                .orElse(DataQueryOrder.TRANSIENT_FIRST);
+
+        for (DataType dataType : DataQueryOrder.order(comparator)) {
+            getData(dataType).copyInheritanceNodesTo(ret, queryOptions);
+        }
+
         return ret;
     }
 

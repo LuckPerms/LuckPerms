@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.node.types;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.model.group.Group;
-import me.lucko.luckperms.api.node.metadata.NodeMetadata;
 import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
 import me.lucko.luckperms.api.node.types.InheritanceNode;
 import me.lucko.luckperms.common.node.AbstractNode;
@@ -42,7 +41,7 @@ import java.util.Objects;
 public class Inheritance extends AbstractNode<InheritanceNode, InheritanceNode.Builder> implements InheritanceNode {
     private final String groupName;
 
-    public Inheritance(String groupName, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, NodeMetadata> metadata) {
+    public Inheritance(String groupName, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
         super(NodeFactory.groupNode(groupName), value, expireAt, contexts, metadata);
         this.groupName = groupName;
     }
@@ -64,7 +63,7 @@ public class Inheritance extends AbstractNode<InheritanceNode, InheritanceNode.B
             this.groupName = null;
         }
 
-        public Builder(String groupName, boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, NodeMetadata> metadata) {
+        public Builder(String groupName, boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, Object> metadata) {
             super(value, expireAt, context, metadata);
             this.groupName = groupName;
         }

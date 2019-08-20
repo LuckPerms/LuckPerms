@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.node.types;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.node.ChatMetaType;
-import me.lucko.luckperms.api.node.metadata.NodeMetadata;
 import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
 import me.lucko.luckperms.api.node.types.SuffixNode;
 import me.lucko.luckperms.common.node.AbstractNode;
@@ -43,7 +42,7 @@ public class Suffix extends AbstractNode<SuffixNode, SuffixNode.Builder> impleme
     private final String suffix;
     private final int priority;
 
-    public Suffix(String suffix, int priority, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, NodeMetadata> metadata) {
+    public Suffix(String suffix, int priority, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
         super(NodeFactory.suffixNode(priority, suffix), value, expireAt, contexts, metadata);
         this.suffix = suffix;
         this.priority = priority;
@@ -78,7 +77,7 @@ public class Suffix extends AbstractNode<SuffixNode, SuffixNode.Builder> impleme
             this.priority = null;
         }
 
-        public Builder(String suffix, int priority, boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, NodeMetadata> metadata) {
+        public Builder(String suffix, int priority, boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, Object> metadata) {
             super(value, expireAt, context, metadata);
             this.suffix = suffix;
             this.priority = priority;

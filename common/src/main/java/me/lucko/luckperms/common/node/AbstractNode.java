@@ -33,7 +33,6 @@ import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.api.node.NodeBuilder;
 import me.lucko.luckperms.api.node.NodeEqualityPredicate;
 import me.lucko.luckperms.api.node.ScopedNode;
-import me.lucko.luckperms.api.node.metadata.NodeMetadata;
 import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
 import me.lucko.luckperms.api.node.types.RegexPermissionNode;
 import me.lucko.luckperms.common.node.utils.ShorthandParser;
@@ -63,14 +62,14 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
     protected final boolean value;
     protected final long expireAt; // 0L for no expiry
     protected final ImmutableContextSet contexts;
-    protected final Map<NodeMetadataKey<?>, NodeMetadata> metadata;
+    protected final Map<NodeMetadataKey<?>, Object> metadata;
 
     private final List<String> resolvedShorthand;
 
     // this class is immutable, so we can cache the hashcode calculation
     private final int hashCode;
 
-    protected AbstractNode(String key, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, NodeMetadata> metadata) {
+    protected AbstractNode(String key, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
         this.key = key;
         this.value = value;
         this.expireAt = expireAt;
@@ -98,7 +97,7 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
     }
 
     @Override
-    public <T extends NodeMetadata> Optional<T> getMetadata(NodeMetadataKey<T> key) {
+    public <T> Optional<T> getMetadata(NodeMetadataKey<T> key) {
         //noinspection unchecked
         T value = (T) this.metadata.get(key);
         return Optional.ofNullable(value);

@@ -87,9 +87,8 @@ public class ApiUser extends ApiPermissionHolder implements me.lucko.luckperms.a
         return DataMutateResult.SUCCESS;
     }
 
-    @NonNull
     @Override
-    public UserCachedDataManager getCachedData() {
+    public @NonNull UserCachedDataManager getCachedData() {
         return this.handle.getCachedData();
     }
 

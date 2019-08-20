@@ -57,34 +57,64 @@ import java.util.function.Predicate;
 public interface PermissionHolder {
 
     /**
-     * Gets the objects generic name.
-     *
-     * <p>The result of this method is guaranteed to be a unique identifier for distinct instances
-     * of the same type of object.</p>
-     *
-     * <p>For {@link User}s, this method returns a {@link UUID#toString() string} representation of
-     * the users {@link User#getUniqueId() unique id}.</p>
-     *
-     * <p>For {@link Group}s, this method returns the {@link Group#getName() group name}.</p>
-     *
-     * <p>The {@link User#getUniqueId()}, {@link User#getUsername()} and {@link Group#getName()} methods
-     * define a "tighter" specification for obtaining object identifiers.</p>
-     *
-     * @return the identifier for this object. Either a uuid string or name.
+     * Represents a way to identify distinct {@link PermissionHolder}s.
      */
-    @NonNull String getObjectName();
+    interface Identifier {
+
+        /**
+         * The {@link #getType() type} of {@link User} permission holders.
+         */
+        String USER_TYPE = "user";
+
+        /**
+         * The {@link #getType() type} of {@link Group} permission holders.
+         */
+        String GROUP_TYPE = "group";
+
+        /**
+         * Gets the {@link PermissionHolder}s generic name.
+         *
+         * <p>The result of this method is guaranteed to be a unique identifier for distinct instances
+         * of the same type of object.</p>
+         *
+         * <p>For {@link User}s, this method returns a {@link UUID#toString() string} representation of
+         * the users {@link User#getUniqueId() unique id}.</p>
+         *
+         * <p>For {@link Group}s, this method returns the {@link Group#getName() group name}.</p>
+         *
+         * <p>The {@link User#getUniqueId()}, {@link User#getUsername()} and {@link Group#getName()} methods
+         * define a "tighter" specification for obtaining object identifiers.</p>
+         *
+         * @return the identifier for this object. Either a uuid string or name.
+         */
+        @NonNull String getName();
+
+        /**
+         * Gets the type of the {@link PermissionHolder}.
+         *
+         * @return the type
+         */
+        @NonNull String getType();
+    }
+
+    /**
+     * Gets the identifier of the holder.
+     *
+     * @return the identifier
+     */
+    @NonNull Identifier getIdentifier();
 
     /**
      * Gets a friendly name for this holder, to be displayed in command output, etc.
      *
      * <p>This will <strong>always</strong> return a value, eventually falling back to
-     * {@link #getObjectName()} if no other "friendlier" identifiers are present.</p>
+     * {@link Identifier#getName()} if no other "friendlier" identifiers are present.</p>
      *
      * <p>For {@link User}s, this method will attempt to return the {@link User#getUsername() username},
-     * before falling back to {@link #getObjectName()}.</p>
+     * before falling back to {@link Identifier#getName()}.</p>
      *
      * <p>For {@link Group}s, this method will attempt to return the groups display name, before
-     * falling back to {@link #getObjectName()}.</p>
+     * falling back to {@link Identifier#getName()}.</p>
      *
      * @return a friendly identifier for this holder
      */

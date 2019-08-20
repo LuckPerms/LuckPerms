@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.node.types;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.node.metadata.NodeMetadata;
 import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
 import me.lucko.luckperms.api.node.types.WeightNode;
 import me.lucko.luckperms.common.node.AbstractNode;
@@ -41,7 +40,7 @@ import java.util.Objects;
 public class Weight extends AbstractNode<WeightNode, WeightNode.Builder> implements WeightNode {
     private final int weight;
 
-    public Weight(int weight, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, NodeMetadata> metadata) {
+    public Weight(int weight, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
         super(NodeFactory.weightNode(weight), value, expireAt, contexts, metadata);
         this.weight = weight;
     }
@@ -63,7 +62,7 @@ public class Weight extends AbstractNode<WeightNode, WeightNode.Builder> impleme
             this.weight = null;
         }
 
-        public Builder(int weight, boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, NodeMetadata> metadata) {
+        public Builder(int weight, boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, Object> metadata) {
             super(value, expireAt, context, metadata);
             this.weight = weight;
         }

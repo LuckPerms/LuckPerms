@@ -28,7 +28,6 @@ package me.lucko.luckperms.api.node;
 import me.lucko.luckperms.api.LuckPermsProvider;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.node.metadata.NodeMetadata;
 import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
 import me.lucko.luckperms.api.node.types.DisplayNameNode;
 import me.lucko.luckperms.api.node.types.InheritanceNode;
@@ -188,21 +187,21 @@ public interface Node {
      * Gets the metadata corresponding to the given <code>key</code>, if present.
      *
      * @param key the key
-     * @param <T> the {@link NodeMetadata} type
+     * @param <T> the metadata type
      * @return the data, if present
      */
-    <T extends NodeMetadata> Optional<T> getMetadata(NodeMetadataKey<T> key);
+    <T> Optional<T> getMetadata(NodeMetadataKey<T> key);
 
     /**
      * Gets the metadata corresponding to the given <code>key</code>, throwing an exception
      * if no data is present.
      *
      * @param key the key
-     * @param <T> the {@link NodeMetadata} type
+     * @param <T> the metadata type
      * @return the data
      * @throws IllegalStateException if data isn't present
      */
-    default <T extends NodeMetadata> T metadata(NodeMetadataKey<T> key) throws IllegalStateException {
+    default <T> T metadata(NodeMetadataKey<T> key) throws IllegalStateException {
         return getMetadata(key).orElseThrow(() -> new IllegalStateException("Node '" + getKey() + "' does not have '" + key.name() + "' attached."));
     }
 

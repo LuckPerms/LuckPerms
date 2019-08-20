@@ -29,7 +29,6 @@ import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.metadata.NodeMetadata;
 import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
 import me.lucko.luckperms.bukkit.inject.dummy.DummyPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -53,7 +52,7 @@ import java.util.Set;
  *
  * Applies all permissions directly to the backing user instance via transient nodes.
  */
-public class LPPermissionAttachment extends PermissionAttachment implements NodeMetadata {
+public class LPPermissionAttachment extends PermissionAttachment {
 
     public static final NodeMetadataKey<LPPermissionAttachment> TRANSIENT_SOURCE_KEY = NodeMetadataKey.of("TransientSource", LPPermissionAttachment.class);
 

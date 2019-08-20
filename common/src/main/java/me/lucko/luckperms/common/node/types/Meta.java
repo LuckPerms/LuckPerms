@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.node.types;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.node.metadata.NodeMetadata;
 import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
 import me.lucko.luckperms.api.node.types.MetaNode;
 import me.lucko.luckperms.common.node.AbstractNode;
@@ -42,7 +41,7 @@ public class Meta extends AbstractNode<MetaNode, MetaNode.Builder> implements Me
     private final String metaKey;
     private final String metaValue;
 
-    public Meta(String metaKey, String metaValue, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, NodeMetadata> metadata) {
+    public Meta(String metaKey, String metaValue, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
         super(NodeFactory.metaNode(metaKey, metaValue), value, expireAt, contexts, metadata);
         this.metaKey = metaKey;
         this.metaValue = metaValue;
@@ -72,7 +71,7 @@ public class Meta extends AbstractNode<MetaNode, MetaNode.Builder> implements Me
             this.metaValue = null;
         }
 
-        public Builder(String metaKey, String metaValue, boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, NodeMetadata> metadata) {
+        public Builder(String metaKey, String metaValue, boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, Object> metadata) {
             super(value, expireAt, context, metadata);
             this.metaKey = metaKey;
             this.metaValue = metaValue;

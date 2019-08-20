@@ -28,8 +28,10 @@ package me.lucko.luckperms.api.context;
 /**
  * Some default context keys used by the plugin.
  */
-public enum DefaultContextKeys {
-    ;
+public final class DefaultContextKeys {
+    private DefaultContextKeys() {
+        throw new AssertionError();
+    }
 
     /**
      * The context key used to denote the subjects server.

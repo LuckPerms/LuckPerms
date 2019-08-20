@@ -76,9 +76,8 @@ public class ApiGroup extends ApiPermissionHolder implements me.lucko.luckperms.
         return this.handle.getWeight();
     }
 
-    @NonNull
     @Override
-    public GroupCachedDataManager getCachedData() {
+    public @NonNull GroupCachedDataManager getCachedData() {
         return this.handle.getCachedData();
     }
 

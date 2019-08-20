@@ -23,21 +23,34 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.model;
+package me.lucko.luckperms.api.query.dataorder;
+
+import me.lucko.luckperms.api.model.DataType;
+import me.lucko.luckperms.api.model.PermissionHolder;
+import me.lucko.luckperms.api.query.OptionKey;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.Comparator;
 
 /**
- * Defines in what order data should be resolved.
+ * A function that generates a {@link DataQueryOrder} comparator for
+ * {@link PermissionHolder}s as required during inheritance.
  */
-public enum ResolutionOrder {
+public interface DataQueryOrderFunction {
 
     /**
-     * Marks that transient data should be considered before enduring data
+     * The {@link OptionKey} for {@link DataQueryOrderFunction}.
      */
-    TRANSIENT_FIRST,
+    OptionKey<DataQueryOrderFunction> KEY = new OptionKey<DataQueryOrderFunction>(){};
 
     /**
-     * Marks that transient data should be considered after enduring data
+     * Gets the {@link DataQueryOrder} comparator for the given
+     * {@link PermissionHolder.Identifier holder identifier}.
+     *
+     * @param holderIdentifier the holder identifier
+     * @return the comparator to use
      */
-    TRANSIENT_LAST
+    @NonNull Comparator<DataType> getOrderComparator(PermissionHolder.@NonNull Identifier holderIdentifier);
 
 }
