@@ -86,21 +86,18 @@ public class LoggedAction implements Action {
         this.action = description;
     }
 
-    @NonNull
     @Override
-    public Instant getTimestamp() {
+    public @NonNull Instant getTimestamp() {
         return Instant.ofEpochSecond(this.timestamp);
     }
 
-    @NonNull
     @Override
-    public Source getSource() {
+    public @NonNull Source getSource() {
         return this.source;
     }
 
-    @NonNull
     @Override
-    public Target getTarget() {
+    public @NonNull Target getTarget() {
         return this.target;
     }
 

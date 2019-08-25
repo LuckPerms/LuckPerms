@@ -154,7 +154,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
         this.uuidDataFile = MoreFiles.createFileIfNotExists(this.dataDirectory.resolve("uuidcache.txt"));
         this.uuidCache.load(this.uuidDataFile);
 
-        this.actionLogger.init(this.dataDirectory.resolve("actions.json"));
+        this.actionLogger.init(this.dataDirectory.resolve("actions.txt"), this.dataDirectory.resolve("actions.json"));
     }
 
     @Override

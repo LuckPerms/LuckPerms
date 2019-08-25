@@ -166,17 +166,24 @@ public class MongoStorage implements StorageImplementation {
     @Override
     public void logAction(Action entry) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "action");
+
         Document doc = new Document()
                 .append("timestamp", entry.getTimestamp().getEpochSecond())
-                .append("actor", entry.getSource().getUniqueId())
-                .append("actorName", entry.getSource().getName())
-                .append("type", Character.toString(LoggedAction.getTypeCharacter(entry.getTarget().getType())))
-                .append("actedName", entry.getTarget().getName())
-                .append("action", entry.getDescription());
+                .append("source", new Document()
+                        .append("uniqueId", entry.getSource().getUniqueId())
+                        .append("name", entry.getSource().getName())
+                );
+
+        Document target = new Document()
+                .append("type", entry.getTarget().getType().name())
+                .append("name", entry.getTarget().getName());
 
         if (entry.getTarget().getUniqueId().isPresent()) {
-            doc.append("acted", entry.getTarget().getUniqueId().get());
+            target.append("uniqueId", entry.getTarget().getUniqueId().get());
         }
+
+        doc.append("target", target);
+        doc.append("description", entry.getDescription());
 
         c.insertOne(doc);
     }
@@ -189,22 +196,46 @@ public class MongoStorage implements StorageImplementation {
             while (cursor.hasNext()) {
                 Document d = cursor.next();
 
-                UUID actedUuid = null;
-                if (d.containsKey("acted")) {
-                    actedUuid = d.get("acted", UUID.class);
+                if (d.containsKey("source")) {
+                    // new format
+                    Document source = d.get("source", Document.class);
+                    Document target = d.get("target", Document.class);
+
+                    UUID targetUniqueId = null;
+                    if (target.containsKey("uniqueId")) {
+                        targetUniqueId = target.get("uniqueId", UUID.class);
+                    }
+
+                    LoggedAction e = LoggedAction.build()
+                            .timestamp(Instant.ofEpochSecond(d.getLong("timestamp")))
+                            .source(source.get("uniqueId", UUID.class))
+                            .sourceName(source.getString("name"))
+                            .targetType(LoggedAction.parseType(target.getString("type")))
+                            .target(targetUniqueId)
+                            .targetName(target.getString("name"))
+                            .description(d.getString("description"))
+                            .build();
+
+                    log.add(e);
+                } else {
+                    // old format
+                    UUID actedUuid = null;
+                    if (d.containsKey("acted")) {
+                        actedUuid = d.get("acted", UUID.class);
+                    }
+
+                    LoggedAction e = LoggedAction.build()
+                            .timestamp(Instant.ofEpochSecond(d.getLong("timestamp")))
+                            .source(d.get("actor", UUID.class))
+                            .sourceName(d.getString("actorName"))
+                            .targetType(LoggedAction.parseTypeCharacter(d.getString("type").charAt(0)))
+                            .target(actedUuid)
+                            .targetName(d.getString("actedName"))
+                            .description(d.getString("action"))
+                            .build();
+
+                    log.add(e);
                 }
-
-                LoggedAction e = LoggedAction.build()
-                        .timestamp(Instant.ofEpochSecond(d.getLong("timestamp")))
-                        .source(d.get("actor", UUID.class))
-                        .sourceName(d.getString("actorName"))
-                        .targetType(LoggedAction.parseTypeCharacter(d.getString("type").charAt(0)))
-                        .target(actedUuid)
-                        .targetName(d.getString("actedName"))
-                        .description(d.getString("action"))
-                        .build();
-
-                log.add(e);
             }
         }
         return log.build();

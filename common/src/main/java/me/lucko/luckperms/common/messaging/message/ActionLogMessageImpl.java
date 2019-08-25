@@ -29,7 +29,7 @@ import com.google.gson.JsonElement;
 
 import me.lucko.luckperms.api.actionlog.Action;
 import me.lucko.luckperms.api.messenger.message.type.ActionLogMessage;
-import me.lucko.luckperms.common.actionlog.LogEntryJsonSerializer;
+import me.lucko.luckperms.common.actionlog.ActionJsonSerializer;
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -45,7 +45,7 @@ public class ActionLogMessageImpl extends AbstractMessage implements ActionLogMe
             throw new IllegalStateException("Missing content");
         }
 
-        return new ActionLogMessageImpl(id, LogEntryJsonSerializer.deserialize(content));
+        return new ActionLogMessageImpl(id, ActionJsonSerializer.deserialize(content));
     }
 
     private final Action logEntry;
@@ -63,7 +63,7 @@ public class ActionLogMessageImpl extends AbstractMessage implements ActionLogMe
     @Override
     public @NonNull String asEncodedString() {
         return LuckPermsMessagingService.encodeMessageAsString(
-                TYPE, getId(), LogEntryJsonSerializer.serialize(this.logEntry)
+                TYPE, getId(), ActionJsonSerializer.serialize(this.logEntry)
         );
     }
 
