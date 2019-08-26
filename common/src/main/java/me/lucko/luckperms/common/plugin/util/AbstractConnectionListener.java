@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.plugin.util;
 
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.defaultassignments.AssignmentRule;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -104,19 +102,6 @@ public abstract class AbstractConnectionListener {
         User user = this.plugin.getStorage().loadUser(uuid, username).join();
         if (user == null) {
             throw new NullPointerException("User is null");
-        }
-
-        // Setup defaults for the user
-        boolean saveRequired = false;
-        for (AssignmentRule rule : this.plugin.getConfiguration().get(ConfigKeys.DEFAULT_ASSIGNMENTS)) {
-            if (rule.apply(user)) {
-                saveRequired = true;
-            }
-        }
-
-        // If they were given a default, persist the new assignments back to the storage.
-        if (saveRequired) {
-            this.plugin.getStorage().saveUser(user).join();
         }
 
         final long time = System.currentTimeMillis() - startTime;

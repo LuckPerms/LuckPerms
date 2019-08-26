@@ -25,11 +25,9 @@
 
 package me.lucko.luckperms.common.config;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
-import me.lucko.luckperms.common.defaultassignments.AssignmentRule;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
@@ -422,21 +420,6 @@ public final class ConfigKeys {
      * The group name rewrites map
      */
     public static final ConfigKey<Map<String, String>> GROUP_NAME_REWRITES = mapKey("group-name-rewrite");
-
-    /**
-     * The default assignments being applied by the plugin
-     */
-    public static final ConfigKey<List<AssignmentRule>> DEFAULT_ASSIGNMENTS = customKey(c -> {
-        return c.getKeys("default-assignments", ImmutableList.of()).stream().map(name -> {
-            String hasTrue = c.getString("default-assignments." + name + ".if.has-true", null);
-            String hasFalse = c.getString("default-assignments." + name + ".if.has-false", null);
-            String lacks = c.getString("default-assignments." + name + ".if.lacks", null);
-            List<String> give = ImmutableList.copyOf(c.getStringList("default-assignments." + name + ".give", ImmutableList.of()));
-            List<String> take = ImmutableList.copyOf(c.getStringList("default-assignments." + name + ".take", ImmutableList.of()));
-            String pg = c.getString("default-assignments." + name + ".set-primary-group", null);
-            return new AssignmentRule(hasTrue, hasFalse, lacks, give, take, pg);
-        }).collect(ImmutableCollectors.toList());
-    });
 
     /**
      * The database settings, username, password, etc for use by any database
