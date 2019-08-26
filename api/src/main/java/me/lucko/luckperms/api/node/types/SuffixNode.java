@@ -27,6 +27,7 @@ package me.lucko.luckperms.api.node.types;
 
 import me.lucko.luckperms.api.LuckPermsProvider;
 import me.lucko.luckperms.api.node.Node;
+import me.lucko.luckperms.api.node.NodeType;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -34,6 +35,11 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * A sub-type of {@link Node} used to store suffix assignments.
  */
 public interface SuffixNode extends ChatMetaNode<SuffixNode, SuffixNode.Builder> {
+
+    @Override
+    default @NonNull NodeType<SuffixNode> getType() {
+        return NodeType.SUFFIX;
+    }
 
     /**
      * Creates a {@link SuffixNode} builder.

@@ -101,6 +101,13 @@ public interface Node {
     }
 
     /**
+     * Gets the type of the node.
+     *
+     * @return the node type
+     */
+    @NonNull NodeType<?> getType();
+
+    /**
      * Gets the key ({@link String}) of the node.
      *
      * @return the key

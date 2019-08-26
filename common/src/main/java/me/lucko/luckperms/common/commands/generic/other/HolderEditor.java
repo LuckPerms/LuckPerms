@@ -66,7 +66,7 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
         Message.EDITOR_START.send(sender);
 
         // form the payload data
-        JsonObject payload = WebEditor.formPayload(Collections.singletonList(holder), sender, label, plugin);
+        JsonObject payload = WebEditor.formPayload(Collections.singletonList(holder), Collections.emptyList(), sender, label, plugin);
 
         // upload the payload data to gist
         String pasteId = plugin.getBytebin().postJson(payload, true).id();

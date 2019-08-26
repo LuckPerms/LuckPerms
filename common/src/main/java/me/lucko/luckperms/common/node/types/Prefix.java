@@ -59,7 +59,7 @@ public class Prefix extends AbstractNode<PrefixNode, PrefixNode.Builder> impleme
     }
 
     @Override
-    public @NonNull ChatMetaType getType() {
+    public @NonNull ChatMetaType getMetaType() {
         return ChatMetaType.PREFIX;
     }
 

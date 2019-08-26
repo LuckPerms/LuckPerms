@@ -59,7 +59,7 @@ public class Suffix extends AbstractNode<SuffixNode, SuffixNode.Builder> impleme
     }
 
     @Override
-    public @NonNull ChatMetaType getType() {
+    public @NonNull ChatMetaType getMetaType() {
         return ChatMetaType.SUFFIX;
     }
 

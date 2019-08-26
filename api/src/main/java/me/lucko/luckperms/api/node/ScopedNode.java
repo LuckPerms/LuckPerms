@@ -37,6 +37,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public interface ScopedNode<N extends ScopedNode<N, B>, B extends NodeBuilder<N, B>> extends Node {
 
     @Override
+    @NonNull NodeType<N> getType();
+
+    @Override
     @NonNull B toBuilder();
 
 }

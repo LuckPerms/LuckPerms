@@ -28,6 +28,7 @@ package me.lucko.luckperms.api.node.types;
 import me.lucko.luckperms.api.LuckPermsProvider;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.api.node.NodeBuilder;
+import me.lucko.luckperms.api.node.NodeType;
 import me.lucko.luckperms.api.node.ScopedNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -38,6 +39,11 @@ import java.util.OptionalInt;
  * A sub-type of {@link Node} representing basic permissions.
  */
 public interface PermissionNode extends ScopedNode<PermissionNode, PermissionNode.Builder> {
+
+    @Override
+    default @NonNull NodeType<PermissionNode> getType() {
+        return NodeType.PERMISSION;
+    }
 
     /**
      * Gets the permission string this node encapsulates.

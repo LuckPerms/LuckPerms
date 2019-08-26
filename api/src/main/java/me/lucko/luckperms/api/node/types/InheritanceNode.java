@@ -29,6 +29,7 @@ import me.lucko.luckperms.api.LuckPermsProvider;
 import me.lucko.luckperms.api.model.group.Group;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.api.node.NodeBuilder;
+import me.lucko.luckperms.api.node.NodeType;
 import me.lucko.luckperms.api.node.ScopedNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -38,6 +39,11 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * from another group.
  */
 public interface InheritanceNode extends ScopedNode<InheritanceNode, InheritanceNode.Builder> {
+
+    @Override
+    default @NonNull NodeType<InheritanceNode> getType() {
+        return NodeType.INHERITANCE;
+    }
 
     /**
      * Gets the name of the group to be inherited.

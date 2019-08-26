@@ -665,7 +665,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 attributes.getNode("priority").setValue(chatMeta.getPriority());
                 writeAttributesTo(attributes, node, false);
 
-                switch (chatMeta.getType()) {
+                switch (chatMeta.getMetaType()) {
                     case PREFIX:
                         appendNode(prefixesSection, chatMeta.getMetaValue(), attributes, "prefix");
                         break;

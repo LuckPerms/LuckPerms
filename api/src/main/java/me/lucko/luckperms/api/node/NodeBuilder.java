@@ -31,6 +31,7 @@ import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.time.temporal.TemporalAccessor;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -66,11 +67,20 @@ public interface NodeBuilder<N extends ScopedNode<N, B>, B extends NodeBuilder<N
      * <p>The parameter passed to this method must be the unix timestamp
      * (in seconds) when the node should expire.</p>
      *
-     * @param expiryUnixTimestamp the expiry timestamp (unix seconds)
+     * @param expiryEpochSeconds the expiry timestamp (unix seconds)
      * @return the builder
      * @see Node#getExpiry()
      */
-    @NonNull B expiry(long expiryUnixTimestamp);
+    @NonNull B expiry(long expiryEpochSeconds);
+
+    /**
+     * Sets the time when the node should expire.
+     *
+     * @param expiry the expiry time
+     * @return the builder
+     * @see Node#getExpiry()
+     */
+    @NonNull B expiry(@Nullable TemporalAccessor expiry);
 
     /**
      * Sets the time when the node should expire.

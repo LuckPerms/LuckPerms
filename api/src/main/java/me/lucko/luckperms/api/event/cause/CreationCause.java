@@ -36,6 +36,11 @@ public enum CreationCause {
     COMMAND,
 
     /**
+     * The creation was caused by the web editor
+     */
+    WEB_EDITOR,
+
+    /**
      * The creation was caused by an API call
      */
     API,

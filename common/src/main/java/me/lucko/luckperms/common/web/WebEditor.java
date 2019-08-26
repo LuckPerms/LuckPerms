@@ -30,17 +30,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.node.Node;
+import me.lucko.luckperms.api.node.NodeBuilder;
 import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
-import me.lucko.luckperms.common.locale.message.Message;
-import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.model.NodeDataContainer;
+import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
@@ -54,11 +51,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Stream;
 
 /**
  * Utility methods for interacting with the LuckPerms web permission editor.
@@ -66,39 +63,46 @@ import java.util.stream.Stream;
 public final class WebEditor {
     private WebEditor() {}
 
-    private static final String USER_ID_PATTERN = "user/";
-    private static final String GROUP_ID_PATTERN = "group/";
-
     private static JObject writeData(PermissionHolder holder) {
         return new JObject()
-                .add("who", new JObject()
-                        .add("id", getHolderIdentifier(holder))
-                        .add("friendly", holder.getPlainDisplayName())
-                        .consume(obj -> {
-                            if (holder.getType() == HolderType.USER) {
-                                obj.add("uuid", ((User) holder).getUuid().toString());
-                            }
-                        }))
-                .add("nodes", serializePermissions(holder.normalData().immutable().values().stream().map(NodeDataContainer::fromNode)));
+                .add("type", holder.getType().toString())
+                .add("id", holder.getObjectName())
+                .add("displayName", holder.getPlainDisplayName())
+                .add("nodes", serializePermissions(holder.normalData().immutable().values()));
     }
 
-    public static JsonObject formPayload(List<PermissionHolder> holders, Sender sender, String cmdLabel, LuckPermsPlugin plugin) {
+    private static JObject writeData(Track track) {
+        return new JObject()
+                .add("type", "track")
+                .add("id", track.getName())
+                .add("groups", new JArray().consume(a -> track.getGroups().forEach(a::add)));
+    }
+
+    public static JsonObject formPayload(List<PermissionHolder> holders, List<Track> tracks, Sender sender, String cmdLabel, LuckPermsPlugin plugin) {
         Preconditions.checkArgument(!holders.isEmpty(), "holders is empty");
 
         // form the payload data
         return new JObject()
                 .add("metadata", new JObject()
-                        .add("cmdAlias", cmdLabel)
+                        .add("commandAlias", cmdLabel)
                         .add("uploader", new JObject()
                                 .add("name", sender.getNameWithLocation())
                                 .add("uuid", sender.getUuid().toString())
                         )
                         .add("time", System.currentTimeMillis())
+                        .add("pluginVersion", plugin.getBootstrap().getVersion())
                 )
-                .add("sessions", new JArray()
+                .add("permissionHolders", new JArray()
                         .consume(arr -> {
                             for (PermissionHolder holder : holders) {
                                 arr.add(writeData(holder));
+                            }
+                        })
+                )
+                .add("tracks", new JArray()
+                        .consume(arr -> {
+                            for (Track track : tracks) {
+                                arr.add(writeData(track));
                             }
                         })
                 )
@@ -109,42 +113,6 @@ public final class WebEditor {
                             }
                         })
                 ).toJson();
-    }
-
-    private static String getHolderIdentifier(PermissionHolder holder) {
-        if (holder.getType() == HolderType.USER) {
-            User user = ((User) holder);
-            return USER_ID_PATTERN + user.getUuid().toString();
-        } else {
-            Group group = ((Group) holder);
-            return GROUP_ID_PATTERN + group.getName();
-        }
-    }
-
-    public static PermissionHolder getHolderFromIdentifier(LuckPermsPlugin plugin, Sender sender, String who) {
-        if (who.startsWith(GROUP_ID_PATTERN)) {
-            String group = who.substring(GROUP_ID_PATTERN.length());
-            Group holder = plugin.getStorage().loadGroup(group).join().orElse(null);
-            if (holder == null) {
-                Message.APPLY_EDITS_TARGET_GROUP_NOT_EXISTS.send(sender, group);
-            }
-            return holder;
-        } else if (who.startsWith(USER_ID_PATTERN)) {
-            String user = who.substring(USER_ID_PATTERN.length());
-            UUID uuid = Uuids.parse(user);
-            if (uuid == null) {
-                Message.APPLY_EDITS_TARGET_USER_NOT_UUID.send(sender, user);
-                return null;
-            }
-            User holder = plugin.getStorage().loadUser(uuid, null).join();
-            if (holder == null) {
-                Message.APPLY_EDITS_TARGET_USER_UNABLE_TO_LOAD.send(sender, uuid.toString());
-            }
-            return holder;
-        } else {
-            Message.APPLY_EDITS_TARGET_UNKNOWN.send(sender, who);
-            return null;
-        }
     }
 
     public static JsonObject readDataFromBytebin(Bytebin bytebin, String id) {
@@ -169,23 +137,18 @@ public final class WebEditor {
         }
     }
 
-    private static JsonArray serializePermissions(Stream<NodeDataContainer> nodes) {
+    private static JsonArray serializePermissions(Collection<Node> nodes) {
         JsonArray arr = new JsonArray();
-        nodes.forEach(node -> {
+        for (Node node : nodes) {
             JsonObject attributes = new JsonObject();
-            attributes.addProperty("permission", node.getPermission());
+
+            attributes.addProperty("type", node.getType().name().toLowerCase());
+            attributes.addProperty("key", node.getKey());
             attributes.addProperty("value", node.getValue());
 
-            if (!node.getServer().equals("global")) {
-                attributes.addProperty("server", node.getServer());
-            }
-
-            if (!node.getWorld().equals("global")) {
-                attributes.addProperty("world", node.getWorld());
-            }
-
-            if (node.getExpiry() != 0L) {
-                attributes.addProperty("expiry", node.getExpiry());
+            Instant expiry = node.getExpiry();
+            if (expiry != null) {
+                attributes.addProperty("expiry", expiry.getEpochSecond());
             }
 
             if (!node.getContexts().isEmpty()) {
@@ -193,48 +156,30 @@ public final class WebEditor {
             }
 
             arr.add(attributes);
-        });
+        }
         return arr;
     }
 
-    public static Set<NodeDataContainer> deserializePermissions(JsonArray permissionsSection) {
-        Set<NodeDataContainer> nodes = new HashSet<>();
+    public static Set<Node> deserializePermissions(JsonArray arr) {
+        Set<Node> nodes = new HashSet<>();
+        for (JsonElement ent : arr) {
+            JsonObject attributes = ent.getAsJsonObject();
 
-        for (JsonElement ent : permissionsSection) {
-            if (!ent.isJsonObject()) {
-                continue;
+            String key = attributes.get("key").getAsString();
+            boolean value = attributes.get("value").getAsBoolean();
+
+            NodeBuilder<?, ?> builder = NodeFactory.builder(key).value(value);
+
+            if (attributes.has("expiry")) {
+                builder.expiry(attributes.get("expiry").getAsLong());
             }
 
-            JsonObject data = ent.getAsJsonObject();
-
-            String permission = data.get("permission").getAsString();
-            boolean value = true;
-            String server = "global";
-            String world = "global";
-            long expiry = 0L;
-            ImmutableContextSet context = ImmutableContextSet.empty();
-
-            if (data.has("value")) {
-                value = data.get("value").getAsBoolean();
-            }
-            if (data.has("server")) {
-                server = data.get("server").getAsString();
-            }
-            if (data.has("world")) {
-                world = data.get("world").getAsString();
-            }
-            if (data.has("expiry")) {
-                expiry = data.get("expiry").getAsLong();
+            if (attributes.has("context")) {
+                builder.context(ContextSetJsonSerializer.deserializeContextSet(attributes.get("context")));
             }
 
-            if (data.has("context") && data.get("context").isJsonObject()) {
-                JsonObject contexts = data.get("context").getAsJsonObject();
-                context = ContextSetJsonSerializer.deserializeContextSet(contexts).immutableCopy();
-            }
-
-            nodes.add(NodeDataContainer.of(permission, value, server, world, expiry, context));
+            nodes.add(builder.build());
         }
-
         return nodes;
     }
 

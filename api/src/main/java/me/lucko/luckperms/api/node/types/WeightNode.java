@@ -28,6 +28,7 @@ package me.lucko.luckperms.api.node.types;
 import me.lucko.luckperms.api.LuckPermsProvider;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.api.node.NodeBuilder;
+import me.lucko.luckperms.api.node.NodeType;
 import me.lucko.luckperms.api.node.ScopedNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -36,6 +37,11 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * A sub-type of {@link Node} used to mark the weight of the node's holder.
  */
 public interface WeightNode extends ScopedNode<WeightNode, WeightNode.Builder> {
+
+    @Override
+    default @NonNull NodeType<WeightNode> getType() {
+        return NodeType.WEIGHT;
+    }
 
     /**
      * Gets the weight value.

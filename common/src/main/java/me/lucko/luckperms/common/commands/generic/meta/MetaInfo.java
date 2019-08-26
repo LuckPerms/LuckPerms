@@ -174,7 +174,7 @@ public class MetaInfo extends SharedSubCommand {
         HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
                 "¥3> ¥a" + node.getPriority() + " ¥7- ¥r" + node.getMetaValue(),
                 " ",
-                "¥7Click to remove this " + node.getType().name().toLowerCase() + " from " + holder.getFormattedDisplayName()
+                "¥7Click to remove this " + node.getMetaType().name().toLowerCase() + " from " + holder.getFormattedDisplayName()
         ), '¥'));
 
         String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getFormattedDisplayName(), holder.getType(), false, !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty());

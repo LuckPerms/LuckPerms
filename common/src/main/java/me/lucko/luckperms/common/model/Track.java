@@ -87,7 +87,7 @@ public final class Track implements Identifiable<String> {
 
     @Override
     public String getId() {
-        return this.name.toLowerCase();
+        return getName();
     }
 
     /**

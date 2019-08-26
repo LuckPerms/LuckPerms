@@ -58,7 +58,7 @@ public interface ChatMetaNode<N extends ChatMetaNode<N, B>, B extends ChatMetaNo
      *
      * @return the type
      */
-    @NonNull ChatMetaType getType();
+    @NonNull ChatMetaType getMetaType();
 
     /**
      * A {@link ChatMetaNode} builder.

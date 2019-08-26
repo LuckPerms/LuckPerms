@@ -28,6 +28,7 @@ package me.lucko.luckperms.api.node.types;
 import me.lucko.luckperms.api.LuckPermsProvider;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.api.node.NodeBuilder;
+import me.lucko.luckperms.api.node.NodeType;
 import me.lucko.luckperms.api.node.ScopedNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -39,6 +40,11 @@ import java.util.regex.Pattern;
  * A sub-type of {@link Node} used to store regex permissions.
  */
 public interface RegexPermissionNode extends ScopedNode<RegexPermissionNode, RegexPermissionNode.Builder> {
+
+    @Override
+    default @NonNull NodeType<RegexPermissionNode> getType() {
+        return NodeType.REGEX_PERMISSION;
+    }
 
     /**
      * Gets the non-compiled pattern string.

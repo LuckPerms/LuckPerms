@@ -28,6 +28,7 @@ package me.lucko.luckperms.api.node.types;
 import me.lucko.luckperms.api.LuckPermsProvider;
 import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.api.node.NodeBuilder;
+import me.lucko.luckperms.api.node.NodeType;
 import me.lucko.luckperms.api.node.ScopedNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -36,6 +37,11 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * A sub-type of {@link Node} used to mark the display name of the node's holder.
  */
 public interface DisplayNameNode extends ScopedNode<DisplayNameNode, DisplayNameNode.Builder> {
+
+    @Override
+    default @NonNull NodeType<DisplayNameNode> getType() {
+        return NodeType.DISPLAY_NAME;
+    }
 
     /**
      * Gets the display name.

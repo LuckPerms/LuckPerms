@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -72,6 +73,7 @@ public class EditorCommand extends SingleCommand {
 
         // collect holders
         List<PermissionHolder> holders = new ArrayList<>();
+        List<Track> tracks = new ArrayList<>();
         if (type.includingGroups) {
             plugin.getGroupManager().getAll().values().stream()
                     .sorted((o1, o2) -> {
@@ -79,6 +81,7 @@ public class EditorCommand extends SingleCommand {
                         return i != 0 ? i : o1.getName().compareToIgnoreCase(o2.getName());
                     })
                     .forEach(holders::add);
+            tracks = new ArrayList<>(plugin.getTrackManager().getAll().values());
         }
         if (type.includingUsers) {
             plugin.getUserManager().getAll().values().stream()
@@ -93,9 +96,10 @@ public class EditorCommand extends SingleCommand {
 
         // remove holders which the sender doesn't have perms to view
         holders.removeIf(holder -> ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), holder));
+        tracks.removeIf(track -> ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), track));
 
         // they don't have perms to view any of them
-        if (holders.isEmpty()) {
+        if (holders.isEmpty() && tracks.isEmpty()) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
@@ -103,7 +107,7 @@ public class EditorCommand extends SingleCommand {
         Message.EDITOR_START.send(sender);
 
         // form the payload data
-        JsonObject payload = WebEditor.formPayload(holders, sender, label, plugin);
+        JsonObject payload = WebEditor.formPayload(holders, tracks, sender, label, plugin);
 
         // upload the payload data to gist
         String pasteId = plugin.getBytebin().postJson(payload, true).id();

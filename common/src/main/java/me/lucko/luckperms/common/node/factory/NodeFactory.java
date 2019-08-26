@@ -161,7 +161,7 @@ public final class NodeFactory {
                 sb.append("temp");
             }
 
-            sb.append(cmNode.getType().toString())
+            sb.append(cmNode.getMetaType().toString())
                     .append(" ")
                     .append(cmNode.getPriority()) // weight
                     .append(" ");
