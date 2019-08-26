@@ -38,6 +38,7 @@ import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.event.EventFactory;
+import me.lucko.luckperms.common.extension.SimpleExtensionManager;
 import me.lucko.luckperms.common.inheritance.InheritanceHandler;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -82,6 +83,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private CalculatorFactory calculatorFactory;
     private LuckPermsApiProvider apiProvider;
     private EventFactory eventFactory;
+    private SimpleExtensionManager extensionManager;
 
     /**
      * Performs the initial actions to load the plugin
@@ -166,6 +168,10 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         ApiRegistrationUtil.registerProvider(this.apiProvider);
         registerApiOnPlatform(this.apiProvider);
 
+        // setup extension manager
+        this.extensionManager = new SimpleExtensionManager(this);
+        this.extensionManager.loadExtensions(getBootstrap().getConfigDirectory().resolve("extensions"));
+
         // schedule update tasks
         int mins = getConfiguration().get(ConfigKeys.SYNC_TIME);
         if (mins > 0) {
@@ -193,6 +199,9 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         // shutdown permission vault and verbose handler tasks
         this.permissionRegistry.stop();
         this.verboseHandler.stop();
+
+        // unload extensions
+        this.extensionManager.close();
 
         // remove any hooks into the platform
         removePlatformHooks();
@@ -330,6 +339,11 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     @Override
     public LuckPermsApiProvider getApiProvider() {
         return this.apiProvider;
+    }
+
+    @Override
+    public SimpleExtensionManager getExtensionManager() {
+        return this.extensionManager;
     }
 
     @Override

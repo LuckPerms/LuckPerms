@@ -48,6 +48,7 @@ import net.luckperms.api.event.Cancellable;
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
+import net.luckperms.api.event.extension.ExtensionLoadEvent;
 import net.luckperms.api.event.group.GroupCacheLoadEvent;
 import net.luckperms.api.event.group.GroupCreateEvent;
 import net.luckperms.api.event.group.GroupDataRecalculateEvent;
@@ -82,6 +83,7 @@ import net.luckperms.api.event.user.UserFirstLoginEvent;
 import net.luckperms.api.event.user.UserLoadEvent;
 import net.luckperms.api.event.user.track.UserDemoteEvent;
 import net.luckperms.api.event.user.track.UserPromoteEvent;
+import net.luckperms.api.extension.Extension;
 import net.luckperms.api.model.DataType;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.node.Node;
@@ -131,6 +133,10 @@ public final class EventFactory {
     @SuppressWarnings("unchecked")
     private <T extends LuckPermsEvent> T generate(Class<T> eventClass, Object... params) {
         return (T) GeneratedEventSpec.lookup(eventClass).newInstance(this.eventBus.getApiProvider(), params);
+    }
+
+    public void handleExtensionLoad(Extension extension) {
+        post(ExtensionLoadEvent.class, () -> generate(ExtensionLoadEvent.class, extension));
     }
 
     public void handleGroupCacheLoad(Group group, GroupCachedDataManager data) {

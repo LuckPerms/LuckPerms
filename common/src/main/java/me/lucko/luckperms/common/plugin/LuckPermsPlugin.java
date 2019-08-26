@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.event.EventFactory;
+import me.lucko.luckperms.common.extension.SimpleExtensionManager;
 import me.lucko.luckperms.common.inheritance.InheritanceHandler;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
@@ -145,6 +146,13 @@ public interface LuckPermsPlugin {
      * @return the api
      */
     LuckPermsApiProvider getApiProvider();
+
+    /**
+     * Gets the extension manager.
+     *
+     * @return the extension manager
+     */
+    SimpleExtensionManager getExtensionManager();
 
     /**
      * Gets the command manager
