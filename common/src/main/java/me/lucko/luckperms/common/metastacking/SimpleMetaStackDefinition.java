@@ -27,9 +27,9 @@ package me.lucko.luckperms.common.metastacking;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.metastacking.DuplicateRemovalFunction;
-import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
-import me.lucko.luckperms.api.metastacking.MetaStackElement;
+import net.luckperms.api.metastacking.DuplicateRemovalFunction;
+import net.luckperms.api.metastacking.MetaStackDefinition;
+import net.luckperms.api.metastacking.MetaStackElement;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

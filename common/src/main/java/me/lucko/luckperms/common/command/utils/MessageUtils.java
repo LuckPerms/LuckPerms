@@ -25,12 +25,13 @@
 
 package me.lucko.luckperms.common.command.utils;
 
-import me.lucko.luckperms.api.context.Context;
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.message.Message;
+
+import net.luckperms.api.context.Context;
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.Tristate;
 
 import java.util.Collection;
 import java.util.List;

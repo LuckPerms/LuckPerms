@@ -30,8 +30,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.NodeBuilder;
 import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
@@ -41,6 +39,9 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
+
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeBuilder;
 
 import okhttp3.Request;
 import okhttp3.Response;

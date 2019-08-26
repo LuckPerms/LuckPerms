@@ -27,10 +27,11 @@ package me.lucko.luckperms.sponge.messaging;
 
 import com.google.common.collect.Iterables;
 
-import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
-import me.lucko.luckperms.api.messenger.Messenger;
-import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
+
+import net.luckperms.api.messenger.IncomingMessageConsumer;
+import net.luckperms.api.messenger.Messenger;
+import net.luckperms.api.messenger.message.OutgoingMessage;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Platform;

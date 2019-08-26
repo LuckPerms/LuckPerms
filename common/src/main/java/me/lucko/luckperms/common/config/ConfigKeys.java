@@ -28,12 +28,6 @@ package me.lucko.luckperms.common.config;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.metastacking.DuplicateRemovalFunction;
-import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
-import me.lucko.luckperms.api.model.TemporaryMergeBehaviour;
-import me.lucko.luckperms.api.query.Flag;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.defaultassignments.AssignmentRule;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
@@ -48,6 +42,13 @@ import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.storage.implementation.split.SplitStorageType;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
+
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.metastacking.DuplicateRemovalFunction;
+import net.luckperms.api.metastacking.MetaStackDefinition;
+import net.luckperms.api.model.TemporaryMergeBehaviour;
+import net.luckperms.api.query.Flag;
+import net.luckperms.api.query.QueryOptions;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

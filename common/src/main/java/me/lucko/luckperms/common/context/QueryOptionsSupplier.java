@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.context;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.query.QueryOptions;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.query.QueryOptions;
 
 /**
  * Supplies contexts for a given subject.

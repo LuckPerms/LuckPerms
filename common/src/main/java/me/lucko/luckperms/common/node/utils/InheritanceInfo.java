@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.common.node.utils;
 
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.Tristate;
-import me.lucko.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.Tristate;
+import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
 
 import java.util.Objects;
 import java.util.Optional;

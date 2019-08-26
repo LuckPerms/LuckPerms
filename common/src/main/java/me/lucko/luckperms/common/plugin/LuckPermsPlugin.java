@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.plugin;
 
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
@@ -54,6 +53,8 @@ import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.common.web.Bytebin;
+
+import net.luckperms.api.query.QueryOptions;
 
 import java.util.Collections;
 import java.util.List;

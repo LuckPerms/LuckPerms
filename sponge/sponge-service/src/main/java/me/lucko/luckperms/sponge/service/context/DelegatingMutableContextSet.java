@@ -25,8 +25,9 @@
 
 package me.lucko.luckperms.sponge.service.context;
 
-import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.context.contextset.ContextImpl;
+
+import net.luckperms.api.context.MutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.context.Context;
@@ -94,7 +95,7 @@ public class DelegatingMutableContextSet extends AbstractDelegatingContextSet {
     }
 
     private final class ContextSetIterator implements Iterator<Context> {
-        private final Iterator<me.lucko.luckperms.api.context.Context> it = DelegatingMutableContextSet.this.delegate.iterator();
+        private final Iterator<net.luckperms.api.context.Context> it = DelegatingMutableContextSet.this.delegate.iterator();
         private Context current;
 
         @Override
@@ -104,7 +105,7 @@ public class DelegatingMutableContextSet extends AbstractDelegatingContextSet {
 
         @Override
         public Context next() {
-            me.lucko.luckperms.api.context.Context next = this.it.next();
+            net.luckperms.api.context.Context next = this.it.next();
 
             // track the iterators cursor to handle #remove calls
             this.current = new Context(next.getKey(), next.getValue());

@@ -27,10 +27,6 @@ package me.lucko.luckperms.sponge.service.model.calculated;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.metastacking.DuplicateRemovalFunction;
-import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
-import me.lucko.luckperms.api.node.ChatMetaType;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cacheddata.AbstractCachedDataManager;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
@@ -44,6 +40,11 @@ import me.lucko.luckperms.common.metastacking.StandardStackElements;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.sponge.calculator.FixedDefaultsProcessor;
 import me.lucko.luckperms.sponge.calculator.SpongeWildcardProcessor;
+
+import net.luckperms.api.metastacking.DuplicateRemovalFunction;
+import net.luckperms.api.metastacking.MetaStackDefinition;
+import net.luckperms.api.node.ChatMetaType;
+import net.luckperms.api.query.QueryOptions;
 
 import java.util.Map;
 

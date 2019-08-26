@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.query;
 
-import me.lucko.luckperms.api.query.Flag;
+import net.luckperms.api.query.Flag;
 
 import java.util.EnumSet;
 import java.util.Set;

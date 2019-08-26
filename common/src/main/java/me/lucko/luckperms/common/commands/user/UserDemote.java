@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.commands.user;
 
-import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.api.track.DemotionResult;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
@@ -47,6 +45,9 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.track.DemotionResult;
 
 import java.util.List;
 import java.util.function.Predicate;

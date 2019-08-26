@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.common.metastacking;
 
-import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
-import me.lucko.luckperms.api.node.ChatMetaType;
-import me.lucko.luckperms.api.node.types.ChatMetaNode;
+import net.luckperms.api.metastacking.MetaStackDefinition;
+import net.luckperms.api.node.ChatMetaType;
+import net.luckperms.api.node.types.ChatMetaNode;
 
 /**
  * A live stack of {@link MetaStackEntry} instances, formed from a

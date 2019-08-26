@@ -25,15 +25,15 @@
 
 package me.lucko.luckperms.common.sender;
 
-import me.lucko.luckperms.api.context.DefaultContextKeys;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.text.Component;
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.node.Tristate;
 
 import java.util.Set;
 import java.util.UUID;

@@ -27,12 +27,12 @@ package me.lucko.luckperms.common.query;
 
 import com.google.common.collect.ImmutableSet;
 
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.query.Flag;
-import me.lucko.luckperms.api.query.OptionKey;
-import me.lucko.luckperms.api.query.QueryMode;
-import me.lucko.luckperms.api.query.QueryOptions;
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.query.Flag;
+import net.luckperms.api.query.OptionKey;
+import net.luckperms.api.query.QueryMode;
+import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

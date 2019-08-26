@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.node.comparator;
 
-import me.lucko.luckperms.api.node.HeldNode;
+import net.luckperms.api.node.HeldNode;
 
 import java.util.Comparator;
 

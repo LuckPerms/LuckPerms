@@ -25,10 +25,6 @@
 
 package me.lucko.luckperms.common.command.access;
 
-import me.lucko.luckperms.api.context.Context;
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.node.Tristate;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.calculator.processor.MapProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
@@ -42,6 +38,11 @@ import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+
+import net.luckperms.api.context.Context;
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.node.Tristate;
+import net.luckperms.api.query.QueryOptions;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;

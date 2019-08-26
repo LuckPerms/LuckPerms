@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.verbose;
 
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.sender.Sender;
@@ -33,6 +32,8 @@ import me.lucko.luckperms.common.util.RepeatingTask;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.common.verbose.event.VerboseEvent;
+
+import net.luckperms.api.query.QueryOptions;
 
 import java.util.Map;
 import java.util.Queue;

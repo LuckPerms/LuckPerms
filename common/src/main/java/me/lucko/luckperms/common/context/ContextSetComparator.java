@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.common.context;
 
-import me.lucko.luckperms.api.context.Context;
-import me.lucko.luckperms.api.context.DefaultContextKeys;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.context.Context;
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.ImmutableContextSet;
 
 import java.util.ArrayList;
 import java.util.Comparator;

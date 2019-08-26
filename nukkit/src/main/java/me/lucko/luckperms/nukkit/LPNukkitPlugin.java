@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.nukkit;
 
-import me.lucko.luckperms.api.LuckPerms;
-import me.lucko.luckperms.api.event.user.UserDataRecalculateEvent;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.api.implementation.ApiUser;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
@@ -60,6 +57,10 @@ import me.lucko.luckperms.nukkit.inject.server.LPPermissionMap;
 import me.lucko.luckperms.nukkit.inject.server.LPSubscriptionMap;
 import me.lucko.luckperms.nukkit.listeners.NukkitConnectionListener;
 import me.lucko.luckperms.nukkit.listeners.NukkitPlatformListener;
+
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.event.user.UserDataRecalculateEvent;
+import net.luckperms.api.query.QueryOptions;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.PluginCommand;

@@ -27,7 +27,6 @@ package me.lucko.luckperms.nukkit.inject.permissible;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.QueryOptionsSupplier;
@@ -37,6 +36,8 @@ import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import me.lucko.luckperms.nukkit.calculator.DefaultsProcessor;
 import me.lucko.luckperms.nukkit.inject.PermissionDefault;
+
+import net.luckperms.api.node.Tristate;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

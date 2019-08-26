@@ -32,9 +32,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.context.MutableContextSet;
 
 import java.util.ArrayList;
 import java.util.List;

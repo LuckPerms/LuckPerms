@@ -25,9 +25,10 @@
 
 package me.lucko.luckperms.common.context;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cache.ExpiringCache;
+
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

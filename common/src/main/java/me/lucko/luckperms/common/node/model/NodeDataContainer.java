@@ -25,12 +25,13 @@
 
 package me.lucko.luckperms.common.node.model;
 
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.DefaultContextKeys;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
+
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.node.Node;
 
 import java.util.Objects;
 import java.util.Optional;

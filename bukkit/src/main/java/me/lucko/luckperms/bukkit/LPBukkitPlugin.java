@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.bukkit;
 
-import me.lucko.luckperms.api.LuckPerms;
-import me.lucko.luckperms.api.event.user.UserDataRecalculateEvent;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.bukkit.calculator.BukkitCalculatorFactory;
 import me.lucko.luckperms.bukkit.compat.LuckPermsBrigadier;
 import me.lucko.luckperms.bukkit.context.BukkitContextManager;
@@ -63,6 +60,10 @@ import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
+
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.event.user.UserDataRecalculateEvent;
+import net.luckperms.api.query.QueryOptions;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.PluginCommand;

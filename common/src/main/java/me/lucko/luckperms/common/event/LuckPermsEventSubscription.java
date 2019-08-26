@@ -25,10 +25,9 @@
 
 package me.lucko.luckperms.common.event;
 
-import me.lucko.luckperms.api.event.EventSubscription;
-import me.lucko.luckperms.api.event.LuckPermsEvent;
-
 import net.kyori.event.EventSubscriber;
+import net.luckperms.api.event.EventSubscription;
+import net.luckperms.api.event.LuckPermsEvent;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;

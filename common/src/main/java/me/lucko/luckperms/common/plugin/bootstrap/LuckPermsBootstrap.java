@@ -25,10 +25,11 @@
 
 package me.lucko.luckperms.common.plugin.bootstrap;
 
-import me.lucko.luckperms.api.platform.Platform;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+
+import net.luckperms.api.platform.Platform;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 

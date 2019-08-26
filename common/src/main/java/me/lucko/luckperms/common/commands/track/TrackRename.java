@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.commands.track;
 
-import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
@@ -40,6 +38,9 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.event.cause.CreationCause;
+import net.luckperms.api.event.cause.DeletionCause;
 
 import java.util.List;
 

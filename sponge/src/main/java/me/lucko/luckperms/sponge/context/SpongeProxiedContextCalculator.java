@@ -25,8 +25,9 @@
 
 package me.lucko.luckperms.sponge.context;
 
-import me.lucko.luckperms.api.context.ContextConsumer;
 import me.lucko.luckperms.common.context.ProxiedContextCalculator;
+
+import net.luckperms.api.context.ContextConsumer;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.context.Context;

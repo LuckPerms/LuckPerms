@@ -28,9 +28,10 @@ package me.lucko.luckperms.common.config;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
+
+import net.luckperms.api.context.ImmutableContextSet;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

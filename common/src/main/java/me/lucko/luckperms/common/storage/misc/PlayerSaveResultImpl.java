@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.storage.misc;
 
 import com.google.common.collect.ImmutableSet;
 
-import me.lucko.luckperms.api.model.PlayerSaveResult;
+import net.luckperms.api.model.PlayerSaveResult;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;

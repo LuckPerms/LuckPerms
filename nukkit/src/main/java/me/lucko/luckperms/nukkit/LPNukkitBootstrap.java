@@ -25,11 +25,12 @@
 
 package me.lucko.luckperms.nukkit;
 
-import me.lucko.luckperms.api.platform.Platform;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
+
+import net.luckperms.api.platform.Platform;
 
 import cn.nukkit.Player;
 import cn.nukkit.plugin.PluginBase;

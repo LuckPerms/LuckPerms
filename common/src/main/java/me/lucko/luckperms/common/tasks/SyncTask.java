@@ -25,10 +25,11 @@
 
 package me.lucko.luckperms.common.tasks;
 
-import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.cache.BufferedRequest;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+
+import net.luckperms.api.event.cause.CreationCause;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;

@@ -25,16 +25,17 @@
 
 package me.lucko.luckperms.common.node.factory;
 
-import me.lucko.luckperms.api.context.Context;
-import me.lucko.luckperms.api.context.DefaultContextKeys;
-import me.lucko.luckperms.api.node.ChatMetaType;
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.NodeBuilder;
-import me.lucko.luckperms.api.node.types.ChatMetaNode;
-import me.lucko.luckperms.api.node.types.InheritanceNode;
-import me.lucko.luckperms.api.node.types.MetaNode;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
+
+import net.luckperms.api.context.Context;
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.node.ChatMetaType;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeBuilder;
+import net.luckperms.api.node.types.ChatMetaNode;
+import net.luckperms.api.node.types.InheritanceNode;
+import net.luckperms.api.node.types.MetaNode;
 
 /**
  * Utility class to make Node(Builder) instances from strings or existing Nodes

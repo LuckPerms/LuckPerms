@@ -225,8 +225,8 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     // provide information about the platform
 
     @Override
-    public me.lucko.luckperms.api.platform.Platform.Type getType() {
-        return me.lucko.luckperms.api.platform.Platform.Type.SPONGE;
+    public net.luckperms.api.platform.Platform.Type getType() {
+        return net.luckperms.api.platform.Platform.Type.SPONGE;
     }
 
     @Override

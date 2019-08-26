@@ -25,16 +25,17 @@
 
 package me.lucko.luckperms.common.inheritance;
 
-import me.lucko.luckperms.api.context.DefaultContextKeys;
-import me.lucko.luckperms.api.node.types.InheritanceNode;
-import me.lucko.luckperms.api.query.Flag;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.graph.Graph;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.node.types.InheritanceNode;
+import net.luckperms.api.query.Flag;
+import net.luckperms.api.query.QueryOptions;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;

@@ -25,8 +25,9 @@
 
 package me.lucko.luckperms.common.calculator;
 
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
+
+import net.luckperms.api.query.QueryOptions;
 
 /**
  * Creates a calculator instance given a set of contexts

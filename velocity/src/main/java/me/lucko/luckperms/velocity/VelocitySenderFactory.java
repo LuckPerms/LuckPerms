@@ -28,7 +28,6 @@ package me.lucko.luckperms.velocity;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 
-import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
@@ -36,6 +35,7 @@ import me.lucko.luckperms.common.util.TextUtils;
 import me.lucko.luckperms.velocity.service.CompatibilityUtil;
 
 import net.kyori.text.Component;
+import net.luckperms.api.node.Tristate;
 
 import java.util.UUID;
 

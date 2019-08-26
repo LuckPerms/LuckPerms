@@ -27,13 +27,14 @@ package me.lucko.luckperms.sponge.context;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.context.QueryOptionsCache;
 import me.lucko.luckperms.common.context.QueryOptionsSupplier;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
+
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.query.QueryOptions;
 
 import org.spongepowered.api.service.permission.Subject;
 

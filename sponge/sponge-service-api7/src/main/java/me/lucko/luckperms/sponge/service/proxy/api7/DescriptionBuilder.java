@@ -25,13 +25,14 @@
 
 package me.lucko.luckperms.sponge.service.proxy.api7;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.ProxiedServiceObject;
+
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.node.Tristate;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;

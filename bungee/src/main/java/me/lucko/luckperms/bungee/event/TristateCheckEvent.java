@@ -25,8 +25,7 @@
 
 package me.lucko.luckperms.bungee.event;
 
-import me.lucko.luckperms.api.node.Tristate;
-
+import net.luckperms.api.node.Tristate;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;

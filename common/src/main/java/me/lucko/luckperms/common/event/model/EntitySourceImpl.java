@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.event.model;
 
-import me.lucko.luckperms.api.event.source.EntitySource;
-import me.lucko.luckperms.api.platform.PlatformEntity;
+import net.luckperms.api.event.source.EntitySource;
+import net.luckperms.api.platform.PlatformEntity;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

@@ -28,9 +28,9 @@ package me.lucko.luckperms.sponge.service.model;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.api.node.Tristate;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.DataType;
+import net.luckperms.api.node.Tristate;
 
 import org.spongepowered.api.service.permission.SubjectData;
 

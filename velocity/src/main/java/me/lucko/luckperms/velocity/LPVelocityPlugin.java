@@ -27,8 +27,6 @@ package me.lucko.luckperms.velocity;
 
 import com.velocitypowered.api.proxy.Player;
 
-import me.lucko.luckperms.api.LuckPerms;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.command.CommandManager;
@@ -53,6 +51,9 @@ import me.lucko.luckperms.velocity.context.VelocityContextManager;
 import me.lucko.luckperms.velocity.listeners.MonitoringPermissionCheckListener;
 import me.lucko.luckperms.velocity.listeners.VelocityConnectionListener;
 import me.lucko.luckperms.velocity.messaging.VelocityMessagingFactory;
+
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.query.QueryOptions;
 
 import java.io.IOException;
 import java.io.InputStream;

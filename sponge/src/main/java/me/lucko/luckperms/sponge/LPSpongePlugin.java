@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.sponge;
 
-import me.lucko.luckperms.api.LuckPerms;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.command.abstraction.Command;
@@ -60,6 +58,9 @@ import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.ProxiedServiceObject;
 import me.lucko.luckperms.sponge.service.model.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.tasks.ServiceCacheHousekeepingTask;
+
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.query.QueryOptions;
 
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;

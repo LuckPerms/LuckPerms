@@ -25,10 +25,11 @@
 
 package me.lucko.luckperms.common.cacheddata;
 
-import me.lucko.luckperms.api.cacheddata.CachedDataManager;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
+
+import net.luckperms.api.cacheddata.CachedDataManager;
+import net.luckperms.api.query.QueryOptions;
 
 /**
  * Holds an easily accessible cache of a groups's data in a number of contexts

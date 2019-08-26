@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.bungee;
 
-import me.lucko.luckperms.api.LuckPerms;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.bungee.calculator.BungeeCalculatorFactory;
 import me.lucko.luckperms.bungee.context.BackendServerCalculator;
 import me.lucko.luckperms.bungee.context.BungeeContextManager;
@@ -52,6 +50,8 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.query.QueryOptions;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.io.File;

@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.bungee;
 
-import me.lucko.luckperms.api.platform.Platform;
 import me.lucko.luckperms.bungee.util.RedisBungeeUtil;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
@@ -34,6 +33,7 @@ import me.lucko.luckperms.common.plugin.logging.JavaPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 
+import net.luckperms.api.platform.Platform;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 

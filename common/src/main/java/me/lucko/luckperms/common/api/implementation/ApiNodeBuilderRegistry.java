@@ -25,16 +25,6 @@
 
 package me.lucko.luckperms.common.api.implementation;
 
-import me.lucko.luckperms.api.node.NodeBuilder;
-import me.lucko.luckperms.api.node.NodeBuilderRegistry;
-import me.lucko.luckperms.api.node.types.DisplayNameNode;
-import me.lucko.luckperms.api.node.types.InheritanceNode;
-import me.lucko.luckperms.api.node.types.MetaNode;
-import me.lucko.luckperms.api.node.types.PermissionNode;
-import me.lucko.luckperms.api.node.types.PrefixNode;
-import me.lucko.luckperms.api.node.types.RegexPermissionNode;
-import me.lucko.luckperms.api.node.types.SuffixNode;
-import me.lucko.luckperms.api.node.types.WeightNode;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.node.types.DisplayName;
 import me.lucko.luckperms.common.node.types.Inheritance;
@@ -44,6 +34,17 @@ import me.lucko.luckperms.common.node.types.Prefix;
 import me.lucko.luckperms.common.node.types.RegexPermission;
 import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.node.types.Weight;
+
+import net.luckperms.api.node.NodeBuilder;
+import net.luckperms.api.node.NodeBuilderRegistry;
+import net.luckperms.api.node.types.DisplayNameNode;
+import net.luckperms.api.node.types.InheritanceNode;
+import net.luckperms.api.node.types.MetaNode;
+import net.luckperms.api.node.types.PermissionNode;
+import net.luckperms.api.node.types.PrefixNode;
+import net.luckperms.api.node.types.RegexPermissionNode;
+import net.luckperms.api.node.types.SuffixNode;
+import net.luckperms.api.node.types.WeightNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

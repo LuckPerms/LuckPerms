@@ -25,14 +25,14 @@
 
 package me.lucko.luckperms.bungee.listeners;
 
-import me.lucko.luckperms.api.node.Tristate;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.bungee.event.TristateCheckEvent;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 
+import net.luckperms.api.node.Tristate;
+import net.luckperms.api.query.QueryOptions;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PermissionCheckEvent;
 import net.md_5.bungee.api.plugin.Listener;

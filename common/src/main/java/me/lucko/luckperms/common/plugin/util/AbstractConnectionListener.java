@@ -25,13 +25,14 @@
 
 package me.lucko.luckperms.common.plugin.util;
 
-import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.api.model.PlayerSaveResult;
-import me.lucko.luckperms.api.platform.Platform;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.defaultassignments.AssignmentRule;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+
+import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.PlayerSaveResult;
+import net.luckperms.api.platform.Platform;
 
 import java.util.Set;
 import java.util.UUID;

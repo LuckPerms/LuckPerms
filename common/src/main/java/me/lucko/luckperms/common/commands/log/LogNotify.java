@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.commands.log;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
@@ -40,6 +37,10 @@ import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.DataType;
+import net.luckperms.api.node.Node;
 
 import java.util.List;
 import java.util.Optional;

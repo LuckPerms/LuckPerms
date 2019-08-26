@@ -27,13 +27,13 @@ package me.lucko.luckperms.bungee.context;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.context.QueryOptionsSupplier;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.query.QueryOptions;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.concurrent.TimeUnit;

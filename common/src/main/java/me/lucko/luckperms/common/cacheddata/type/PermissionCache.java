@@ -25,14 +25,15 @@
 
 package me.lucko.luckperms.common.cacheddata.type;
 
-import me.lucko.luckperms.api.cacheddata.CachedPermissionData;
-import me.lucko.luckperms.api.node.Tristate;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+
+import net.luckperms.api.cacheddata.CachedPermissionData;
+import net.luckperms.api.node.Tristate;
+import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

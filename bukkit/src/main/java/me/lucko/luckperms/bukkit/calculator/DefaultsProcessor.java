@@ -25,10 +25,11 @@
 
 package me.lucko.luckperms.bukkit.calculator;
 
-import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
+
+import net.luckperms.api.node.Tristate;
 
 import org.bukkit.permissions.Permission;
 

@@ -28,17 +28,6 @@ package me.lucko.luckperms.sponge.service.model.permissionholder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.api.node.ChatMetaType;
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.NodeType;
-import me.lucko.luckperms.api.node.Tristate;
-import me.lucko.luckperms.api.node.types.InheritanceNode;
-import me.lucko.luckperms.api.node.types.MetaNode;
-import me.lucko.luckperms.api.node.types.PrefixNode;
-import me.lucko.luckperms.api.node.types.SuffixNode;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
@@ -51,6 +40,18 @@ import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
+
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.DataType;
+import net.luckperms.api.node.ChatMetaType;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeType;
+import net.luckperms.api.node.Tristate;
+import net.luckperms.api.node.types.InheritanceNode;
+import net.luckperms.api.node.types.MetaNode;
+import net.luckperms.api.node.types.PrefixNode;
+import net.luckperms.api.node.types.SuffixNode;
+import net.luckperms.api.query.QueryOptions;
 
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectData;

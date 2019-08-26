@@ -37,10 +37,11 @@ import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 
-import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
-import me.lucko.luckperms.api.messenger.Messenger;
-import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
 import me.lucko.luckperms.velocity.LPVelocityPlugin;
+
+import net.luckperms.api.messenger.IncomingMessageConsumer;
+import net.luckperms.api.messenger.Messenger;
+import net.luckperms.api.messenger.message.OutgoingMessage;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

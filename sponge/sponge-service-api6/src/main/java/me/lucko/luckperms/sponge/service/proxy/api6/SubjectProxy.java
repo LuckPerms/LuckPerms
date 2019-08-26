@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.sponge.service.proxy.api6;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.context.QueryOptionsSupplier;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
@@ -34,6 +33,8 @@ import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 import me.lucko.luckperms.sponge.service.model.ProxiedServiceObject;
 import me.lucko.luckperms.sponge.service.model.ProxiedSubject;
+
+import net.luckperms.api.context.ImmutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.CommandSource;

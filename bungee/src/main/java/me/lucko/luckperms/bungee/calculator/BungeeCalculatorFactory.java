@@ -27,7 +27,6 @@ package me.lucko.luckperms.bungee.calculator;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
@@ -37,6 +36,8 @@ import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.processor.RegexProcessor;
 import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.config.ConfigKeys;
+
+import net.luckperms.api.query.QueryOptions;
 
 public class BungeeCalculatorFactory implements CalculatorFactory {
     private final LPBungeePlugin plugin;

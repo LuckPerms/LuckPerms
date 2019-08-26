@@ -25,13 +25,14 @@
 
 package me.lucko.luckperms.common.model;
 
-import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.common.api.implementation.ApiUser;
 import me.lucko.luckperms.common.cacheddata.UserCachedDataManager;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.primarygroup.ContextualHolder;
 import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
+
+import net.luckperms.api.model.DataType;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 

@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.bungee.migration;
 
-import me.lucko.luckperms.api.context.DefaultContextKeys;
-import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -48,6 +45,9 @@ import net.alpenblock.bungeeperms.Group;
 import net.alpenblock.bungeeperms.PermEntity;
 import net.alpenblock.bungeeperms.Server;
 import net.alpenblock.bungeeperms.World;
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.event.cause.CreationCause;
+import net.luckperms.api.model.DataType;
 
 import java.util.List;
 import java.util.Map;

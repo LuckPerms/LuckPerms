@@ -25,8 +25,9 @@
 
 package me.lucko.luckperms.common.inheritance;
 
-import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.common.model.Group;
+
+import net.luckperms.api.node.Node;
 
 public final class ResolvedGroup {
     private final Node node;

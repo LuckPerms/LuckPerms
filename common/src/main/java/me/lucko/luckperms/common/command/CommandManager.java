@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.command;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -68,6 +67,7 @@ import me.lucko.luckperms.common.util.TextUtils;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
+import net.luckperms.api.query.QueryOptions;
 
 import java.util.ArrayList;
 import java.util.Collection;

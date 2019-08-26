@@ -25,10 +25,11 @@
 
 package me.lucko.luckperms.common.metastacking;
 
-import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
-import me.lucko.luckperms.api.node.ChatMetaType;
-import me.lucko.luckperms.api.node.types.ChatMetaNode;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
+
+import net.luckperms.api.metastacking.MetaStackDefinition;
+import net.luckperms.api.node.ChatMetaType;
+import net.luckperms.api.node.types.ChatMetaNode;
 
 import java.util.LinkedList;
 import java.util.List;

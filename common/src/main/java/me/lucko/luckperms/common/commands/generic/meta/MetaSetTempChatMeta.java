@@ -25,13 +25,6 @@
 
 package me.lucko.luckperms.common.commands.generic.meta;
 
-import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.api.model.TemporaryDataMutateResult;
-import me.lucko.luckperms.api.model.TemporaryMergeBehaviour;
-import me.lucko.luckperms.api.node.ChatMetaType;
-import me.lucko.luckperms.api.query.QueryOptions;
-import me.lucko.luckperms.api.util.Result;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.command.CommandResult;
@@ -57,6 +50,13 @@ import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
+import net.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.TemporaryDataMutateResult;
+import net.luckperms.api.model.TemporaryMergeBehaviour;
+import net.luckperms.api.node.ChatMetaType;
+import net.luckperms.api.query.QueryOptions;
+import net.luckperms.api.util.Result;
 
 import java.util.List;
 import java.util.OptionalInt;

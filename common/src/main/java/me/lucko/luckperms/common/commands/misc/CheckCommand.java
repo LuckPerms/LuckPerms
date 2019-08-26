@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -42,6 +41,8 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+
+import net.luckperms.api.node.Tristate;
 
 import java.util.List;
 import java.util.UUID;

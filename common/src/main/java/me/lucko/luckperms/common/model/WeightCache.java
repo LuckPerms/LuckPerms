@@ -25,11 +25,12 @@
 
 package me.lucko.luckperms.common.model;
 
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.types.WeightNode;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.common.config.ConfigKeys;
+
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.types.WeightNode;
+import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

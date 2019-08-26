@@ -25,12 +25,13 @@
 
 package me.lucko.luckperms.sponge.service;
 
-import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
+
+import net.luckperms.api.model.DataType;
 
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;

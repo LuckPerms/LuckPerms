@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.sponge.service.model;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.context.ImmutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.permission.Subject;

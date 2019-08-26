@@ -27,10 +27,11 @@ package me.lucko.luckperms.common.primarygroup;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.util.CaffeineFactory;
+
+import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

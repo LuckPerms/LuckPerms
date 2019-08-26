@@ -27,7 +27,6 @@ package me.lucko.luckperms.sponge.calculator;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
@@ -38,6 +37,8 @@ import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
+
+import net.luckperms.api.query.QueryOptions;
 
 public class SpongeCalculatorFactory implements CalculatorFactory {
     private final LPSpongePlugin plugin;

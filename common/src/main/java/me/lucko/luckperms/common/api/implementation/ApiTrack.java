@@ -27,22 +27,23 @@ package me.lucko.luckperms.common.api.implementation;
 
 import com.google.common.base.Preconditions;
 
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.model.DataMutateResult;
-import me.lucko.luckperms.api.model.group.Group;
-import me.lucko.luckperms.api.model.user.User;
-import me.lucko.luckperms.api.track.DemotionResult;
-import me.lucko.luckperms.api.track.PromotionResult;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.model.DataMutateResult;
+import net.luckperms.api.model.group.Group;
+import net.luckperms.api.model.user.User;
+import net.luckperms.api.track.DemotionResult;
+import net.luckperms.api.track.PromotionResult;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
 import java.util.Objects;
 
-public class ApiTrack implements me.lucko.luckperms.api.track.Track {
-    public static Track cast(me.lucko.luckperms.api.track.Track track) {
+public class ApiTrack implements net.luckperms.api.track.Track {
+    public static Track cast(net.luckperms.api.track.Track track) {
         Objects.requireNonNull(track, "track");
         Preconditions.checkState(track instanceof ApiTrack, "Illegal instance " + track.getClass() + " cannot be handled by this implementation.");
         return ((ApiTrack) track).getHandle();

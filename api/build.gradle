@@ -1,3 +1,4 @@
+group = 'net.luckperms'
 project.version = '5.0'
 
 dependencies {

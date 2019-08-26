@@ -25,11 +25,12 @@
 
 package me.lucko.luckperms.common.commands.migration;
 
-import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.api.node.NodeBuilder;
-import me.lucko.luckperms.api.node.NodeType;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
+
+import net.luckperms.api.model.DataType;
+import net.luckperms.api.node.NodeBuilder;
+import net.luckperms.api.node.NodeType;
 
 public final class MigrationUtils {
     private MigrationUtils() {}

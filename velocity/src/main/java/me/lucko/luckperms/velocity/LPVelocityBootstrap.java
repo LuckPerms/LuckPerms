@@ -35,12 +35,13 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 
-import me.lucko.luckperms.api.platform.Platform;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.logging.Slf4jPluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+
+import net.luckperms.api.platform.Platform;
 
 import org.slf4j.Logger;
 

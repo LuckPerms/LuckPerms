@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.sponge.service.model.persisted;
 
-import me.lucko.luckperms.api.model.DataType;
 import me.lucko.luckperms.common.cache.BufferedRequest;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -35,6 +34,8 @@ import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import me.lucko.luckperms.sponge.service.model.calculated.CalculatedSubject;
 import me.lucko.luckperms.sponge.service.model.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.model.calculated.MonitoredSubjectData;
+
+import net.luckperms.api.model.DataType;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.Subject;

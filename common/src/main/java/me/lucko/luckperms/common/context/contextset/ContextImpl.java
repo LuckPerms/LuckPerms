@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.context.contextset;
 
-import me.lucko.luckperms.api.context.Context;
+import net.luckperms.api.context.Context;
 
 public final class ContextImpl implements Context {
     private final String key;

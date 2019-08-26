@@ -27,13 +27,14 @@ package me.lucko.luckperms.common.defaultassignments;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.NodeEqualityPredicate;
-import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.util.Scripting;
+
+import net.luckperms.api.model.DataType;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeEqualityPredicate;
+import net.luckperms.api.node.Tristate;
 
 import java.util.List;
 import java.util.function.Predicate;

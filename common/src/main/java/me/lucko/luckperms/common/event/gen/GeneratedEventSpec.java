@@ -27,12 +27,13 @@ package me.lucko.luckperms.common.event.gen;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.LuckPerms;
-import me.lucko.luckperms.api.event.LuckPermsEvent;
-import me.lucko.luckperms.api.event.Param;
 import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.common.util.PrivateMethodHandles;
+
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.event.LuckPermsEvent;
+import net.luckperms.api.event.Param;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

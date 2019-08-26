@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.sponge.service.context;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.context.ImmutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.context.Context;
@@ -74,7 +74,7 @@ public class DelegatingImmutableContextSet extends AbstractDelegatingContextSet 
     }
 
     private final class ContextSetIterator implements Iterator<Context> {
-        private final Iterator<me.lucko.luckperms.api.context.Context> it = DelegatingImmutableContextSet.this.delegate.iterator();
+        private final Iterator<net.luckperms.api.context.Context> it = DelegatingImmutableContextSet.this.delegate.iterator();
 
         @Override
         public boolean hasNext() {
@@ -83,7 +83,7 @@ public class DelegatingImmutableContextSet extends AbstractDelegatingContextSet 
 
         @Override
         public Context next() {
-            me.lucko.luckperms.api.context.Context next = this.it.next();
+            net.luckperms.api.context.Context next = this.it.next();
             return new Context(next.getKey(), next.getValue());
         }
 

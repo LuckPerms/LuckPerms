@@ -25,13 +25,14 @@
 
 package me.lucko.luckperms.velocity.messaging;
 
-import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
-import me.lucko.luckperms.api.messenger.Messenger;
-import me.lucko.luckperms.api.messenger.MessengerProvider;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 import me.lucko.luckperms.velocity.LPVelocityPlugin;
+
+import net.luckperms.api.messenger.IncomingMessageConsumer;
+import net.luckperms.api.messenger.Messenger;
+import net.luckperms.api.messenger.MessengerProvider;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

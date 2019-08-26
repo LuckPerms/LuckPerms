@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.commands.generic.permission;
 
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.NodeType;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
@@ -54,6 +52,8 @@ import net.kyori.text.ComponentBuilder;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeType;
 
 import java.util.ArrayList;
 import java.util.Collections;

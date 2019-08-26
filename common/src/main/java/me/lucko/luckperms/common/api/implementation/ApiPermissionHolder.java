@@ -27,21 +27,22 @@ package me.lucko.luckperms.common.api.implementation;
 
 import com.google.common.collect.ImmutableSortedSet;
 
-import me.lucko.luckperms.api.cacheddata.CachedDataManager;
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.model.DataMutateResult;
-import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.api.model.TemporaryDataMutateResult;
-import me.lucko.luckperms.api.model.TemporaryMergeBehaviour;
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.NodeEqualityPredicate;
-import me.lucko.luckperms.api.node.NodeType;
-import me.lucko.luckperms.api.node.Tristate;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.node.utils.NodeTools;
+
+import net.luckperms.api.cacheddata.CachedDataManager;
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.DataMutateResult;
+import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.TemporaryDataMutateResult;
+import net.luckperms.api.model.TemporaryMergeBehaviour;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeEqualityPredicate;
+import net.luckperms.api.node.NodeType;
+import net.luckperms.api.node.Tristate;
+import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -55,7 +56,7 @@ import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
-public class ApiPermissionHolder implements me.lucko.luckperms.api.model.PermissionHolder {
+public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHolder {
     private final PermissionHolder handle;
 
     private final Normal normalData;

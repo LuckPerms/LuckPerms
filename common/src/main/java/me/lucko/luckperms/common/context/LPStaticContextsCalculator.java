@@ -25,11 +25,12 @@
 
 package me.lucko.luckperms.common.context;
 
-import me.lucko.luckperms.api.context.ContextConsumer;
-import me.lucko.luckperms.api.context.DefaultContextKeys;
-import me.lucko.luckperms.api.context.StaticContextCalculator;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
+
+import net.luckperms.api.context.ContextConsumer;
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.StaticContextCalculator;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

@@ -27,9 +27,6 @@ package me.lucko.luckperms.nukkit.context;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.query.OptionKey;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ContextManager;
@@ -37,6 +34,10 @@ import me.lucko.luckperms.common.context.QueryOptionsCache;
 import me.lucko.luckperms.common.context.QueryOptionsSupplier;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
+
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.query.OptionKey;
+import net.luckperms.api.query.QueryOptions;
 
 import cn.nukkit.Player;
 

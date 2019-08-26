@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.storage.implementation.file;
 
-import me.lucko.luckperms.api.node.HeldNode;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
@@ -34,6 +33,8 @@ import me.lucko.luckperms.common.node.model.HeldNodeImpl;
 import me.lucko.luckperms.common.node.model.NodeDataContainer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.file.loader.ConfigurateLoader;
+
+import net.luckperms.api.node.HeldNode;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;

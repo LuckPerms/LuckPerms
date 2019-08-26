@@ -25,11 +25,12 @@
 
 package me.lucko.luckperms.nukkit.calculator;
 
-import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
+
+import net.luckperms.api.node.Tristate;
 
 import java.util.Collections;
 import java.util.Map;

@@ -31,14 +31,15 @@ import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 
-import me.lucko.luckperms.api.cacheddata.CachedMetaData;
-import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.metastacking.MetaStack;
 import me.lucko.luckperms.common.node.factory.NodeTypes;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
+
+import net.luckperms.api.cacheddata.CachedMetaData;
+import net.luckperms.api.metastacking.MetaStackDefinition;
+import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

@@ -25,11 +25,6 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
-import me.lucko.luckperms.api.context.DefaultContextKeys;
-import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.api.node.ChatMetaType;
-import me.lucko.luckperms.api.node.Node;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -48,6 +43,12 @@ import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.ProgressLogger;
 import me.lucko.luckperms.common.util.Uuids;
+
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.event.cause.CreationCause;
+import net.luckperms.api.model.DataType;
+import net.luckperms.api.node.ChatMetaType;
+import net.luckperms.api.node.Node;
 
 import org.anjocaido.groupmanager.GlobalGroups;
 import org.anjocaido.groupmanager.GroupManager;

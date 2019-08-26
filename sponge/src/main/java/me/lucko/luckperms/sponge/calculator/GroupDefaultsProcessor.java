@@ -25,10 +25,11 @@
 
 package me.lucko.luckperms.sponge.calculator;
 
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
+
+import net.luckperms.api.query.QueryOptions;
 
 public class GroupDefaultsProcessor extends DefaultsProcessor implements PermissionProcessor {
     public GroupDefaultsProcessor(LPPermissionService service, QueryOptions queryOptions) {

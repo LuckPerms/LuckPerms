@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.node.utils;
 
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.NodeEqualityPredicate;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeEqualityPredicate;
 
 import java.util.ArrayList;
 import java.util.HashSet;

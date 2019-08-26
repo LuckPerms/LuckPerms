@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.commands.generic.other;
 
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -47,6 +46,7 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
 import net.kyori.text.format.TextColor;
+import net.luckperms.api.context.ImmutableContextSet;
 
 import java.util.Collections;
 import java.util.List;

@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.node.model;
 
-import me.lucko.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
+import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

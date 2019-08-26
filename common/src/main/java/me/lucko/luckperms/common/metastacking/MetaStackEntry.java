@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.metastacking;
 
-import me.lucko.luckperms.api.metastacking.MetaStackElement;
-import me.lucko.luckperms.api.node.types.ChatMetaNode;
+import net.luckperms.api.metastacking.MetaStackElement;
+import net.luckperms.api.node.types.ChatMetaNode;
 
 import java.util.Optional;
 

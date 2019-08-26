@@ -25,8 +25,9 @@
 
 package me.lucko.luckperms.common.calculator.processor;
 
-import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
+
+import net.luckperms.api.node.Tristate;
 
 public class MapProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
     private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(MapProcessor.class);

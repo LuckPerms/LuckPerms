@@ -28,8 +28,8 @@ package me.lucko.luckperms.bungee.context;
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
 
-import me.lucko.luckperms.api.context.ContextConsumer;
-import me.lucko.luckperms.api.context.StaticContextCalculator;
+import net.luckperms.api.context.ContextConsumer;
+import net.luckperms.api.context.StaticContextCalculator;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

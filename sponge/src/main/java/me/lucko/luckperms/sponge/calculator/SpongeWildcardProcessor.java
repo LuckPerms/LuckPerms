@@ -25,11 +25,12 @@
 
 package me.lucko.luckperms.sponge.calculator;
 
-import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.node.AbstractNode;
+
+import net.luckperms.api.node.Tristate;
 
 public class SpongeWildcardProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
     private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(SpongeWildcardProcessor.class);

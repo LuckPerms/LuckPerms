@@ -28,12 +28,6 @@ package me.lucko.luckperms.common.cacheddata;
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 
-import me.lucko.luckperms.api.cacheddata.CachedDataManager;
-import me.lucko.luckperms.api.cacheddata.CachedMetaData;
-import me.lucko.luckperms.api.cacheddata.CachedPermissionData;
-import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
-import me.lucko.luckperms.api.node.ChatMetaType;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
@@ -42,6 +36,13 @@ import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStack;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.CaffeineFactory;
+
+import net.luckperms.api.cacheddata.CachedDataManager;
+import net.luckperms.api.cacheddata.CachedMetaData;
+import net.luckperms.api.cacheddata.CachedPermissionData;
+import net.luckperms.api.metastacking.MetaStackDefinition;
+import net.luckperms.api.node.ChatMetaType;
+import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;

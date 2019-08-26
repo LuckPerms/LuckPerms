@@ -25,13 +25,13 @@
 
 package me.lucko.luckperms.nukkit;
 
-import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.Component;
+import net.luckperms.api.node.Tristate;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;

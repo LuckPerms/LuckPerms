@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.commands.group;
 
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.types.InheritanceNode;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -40,6 +38,9 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.types.InheritanceNode;
 
 import java.util.List;
 import java.util.stream.Collectors;

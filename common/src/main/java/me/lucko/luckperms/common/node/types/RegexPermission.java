@@ -25,14 +25,15 @@
 
 package me.lucko.luckperms.common.node.types;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
-import me.lucko.luckperms.api.node.types.RegexPermissionNode;
 import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.common.cache.PatternCache;
 import me.lucko.luckperms.common.node.AbstractNode;
 import me.lucko.luckperms.common.node.AbstractNodeBuilder;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
+
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.node.metadata.NodeMetadataKey;
+import net.luckperms.api.node.types.RegexPermissionNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

@@ -25,11 +25,12 @@
 
 package me.lucko.luckperms.nukkit.calculator;
 
-import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import me.lucko.luckperms.nukkit.inject.PermissionDefault;
+
+import net.luckperms.api.node.Tristate;
 
 /**
  * Permission Processor for Nukkits "default" permission system.

@@ -27,18 +27,6 @@ package me.lucko.luckperms.common.node.factory;
 
 import com.google.common.base.Splitter;
 
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.DefaultContextKeys;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.NodeBuilder;
-import me.lucko.luckperms.api.node.types.DisplayNameNode;
-import me.lucko.luckperms.api.node.types.InheritanceNode;
-import me.lucko.luckperms.api.node.types.MetaNode;
-import me.lucko.luckperms.api.node.types.PrefixNode;
-import me.lucko.luckperms.api.node.types.RegexPermissionNode;
-import me.lucko.luckperms.api.node.types.SuffixNode;
-import me.lucko.luckperms.api.node.types.WeightNode;
 import me.lucko.luckperms.common.cache.PatternCache;
 import me.lucko.luckperms.common.node.types.DisplayName;
 import me.lucko.luckperms.common.node.types.Inheritance;
@@ -48,6 +36,19 @@ import me.lucko.luckperms.common.node.types.Prefix;
 import me.lucko.luckperms.common.node.types.RegexPermission;
 import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.node.types.Weight;
+
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeBuilder;
+import net.luckperms.api.node.types.DisplayNameNode;
+import net.luckperms.api.node.types.InheritanceNode;
+import net.luckperms.api.node.types.MetaNode;
+import net.luckperms.api.node.types.PrefixNode;
+import net.luckperms.api.node.types.RegexPermissionNode;
+import net.luckperms.api.node.types.SuffixNode;
+import net.luckperms.api.node.types.WeightNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;

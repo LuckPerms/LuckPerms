@@ -27,10 +27,11 @@ package me.lucko.luckperms.common.messaging.message;
 
 import com.google.gson.JsonElement;
 
-import me.lucko.luckperms.api.actionlog.Action;
-import me.lucko.luckperms.api.messenger.message.type.ActionLogMessage;
 import me.lucko.luckperms.common.actionlog.ActionJsonSerializer;
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
+
+import net.luckperms.api.actionlog.Action;
+import net.luckperms.api.messenger.message.type.ActionLogMessage;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;

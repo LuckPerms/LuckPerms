@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.commands.generic.parent;
 
-import me.lucko.luckperms.api.node.types.InheritanceNode;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
@@ -54,6 +52,8 @@ import net.kyori.text.ComponentBuilder;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
+import net.luckperms.api.node.types.InheritanceNode;
+import net.luckperms.api.query.QueryOptions;
 
 import java.util.Collections;
 import java.util.Comparator;

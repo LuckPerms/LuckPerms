@@ -25,12 +25,6 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import me.lucko.luckperms.api.context.ContextCalculator;
-import me.lucko.luckperms.api.context.StaticContextCalculator;
-import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
-import me.lucko.luckperms.api.metastacking.MetaStackElement;
-import me.lucko.luckperms.api.query.Flag;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
@@ -57,6 +51,12 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
 import net.kyori.text.format.TextColor;
+import net.luckperms.api.context.ContextCalculator;
+import net.luckperms.api.context.StaticContextCalculator;
+import net.luckperms.api.metastacking.MetaStackDefinition;
+import net.luckperms.api.metastacking.MetaStackElement;
+import net.luckperms.api.query.Flag;
+import net.luckperms.api.query.QueryOptions;
 
 import java.util.List;
 import java.util.Map;

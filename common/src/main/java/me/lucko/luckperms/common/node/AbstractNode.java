@@ -27,15 +27,16 @@ package me.lucko.luckperms.common.node;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.NodeBuilder;
-import me.lucko.luckperms.api.node.NodeEqualityPredicate;
-import me.lucko.luckperms.api.node.ScopedNode;
-import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
-import me.lucko.luckperms.api.node.types.RegexPermissionNode;
 import me.lucko.luckperms.common.node.utils.ShorthandParser;
+
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeBuilder;
+import net.luckperms.api.node.NodeEqualityPredicate;
+import net.luckperms.api.node.ScopedNode;
+import net.luckperms.api.node.metadata.NodeMetadataKey;
+import net.luckperms.api.node.types.RegexPermissionNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;

@@ -27,10 +27,6 @@ package me.lucko.luckperms.common.commands.user;
 
 import com.google.common.collect.Maps;
 
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.types.InheritanceNode;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
@@ -46,6 +42,11 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
+
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.types.InheritanceNode;
+import net.luckperms.api.query.QueryOptions;
 
 import java.util.List;
 import java.util.Map;

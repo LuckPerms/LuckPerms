@@ -30,18 +30,19 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
 
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.NodeEqualityPredicate;
-import me.lucko.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
-import me.lucko.luckperms.api.node.types.InheritanceNode;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.common.context.ContextSetComparator;
 import me.lucko.luckperms.common.node.comparator.NodeComparator;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.node.model.InheritanceOrigin;
+
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeEqualityPredicate;
+import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
+import net.luckperms.api.node.types.InheritanceNode;
+import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;

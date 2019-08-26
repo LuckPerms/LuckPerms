@@ -27,14 +27,6 @@ package me.lucko.luckperms.bukkit.vault;
 
 import com.google.common.base.Strings;
 
-import me.lucko.luckperms.api.context.DefaultContextKeys;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.api.node.ChatMetaType;
-import me.lucko.luckperms.api.node.NodeBuilder;
-import me.lucko.luckperms.api.node.types.MetaNode;
-import me.lucko.luckperms.api.query.Flag;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
@@ -46,6 +38,14 @@ import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.node.factory.NodeTypes;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.DataType;
+import net.luckperms.api.node.ChatMetaType;
+import net.luckperms.api.node.NodeBuilder;
+import net.luckperms.api.node.types.MetaNode;
+import net.luckperms.api.query.Flag;
+import net.luckperms.api.query.QueryOptions;
 import net.milkbowl.vault.chat.Chat;
 
 import java.util.Objects;

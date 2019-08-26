@@ -27,17 +27,18 @@ package me.lucko.luckperms.common.model.manager.user;
 
 import com.google.common.collect.ImmutableCollection;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.NodeType;
-import me.lucko.luckperms.api.node.types.InheritanceNode;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.model.manager.AbstractManager;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.DataType;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeType;
+import net.luckperms.api.node.types.InheritanceNode;
 
 import java.util.Optional;
 import java.util.UUID;

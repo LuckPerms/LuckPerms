@@ -25,12 +25,12 @@
 
 package me.lucko.luckperms.common.node;
 
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.DefaultContextKeys;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.node.NodeBuilder;
-import me.lucko.luckperms.api.node.ScopedNode;
-import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.node.NodeBuilder;
+import net.luckperms.api.node.ScopedNode;
+import net.luckperms.api.node.metadata.NodeMetadataKey;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;

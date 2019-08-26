@@ -27,13 +27,14 @@ package me.lucko.luckperms.common.api.implementation;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.metastacking.DuplicateRemovalFunction;
-import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
-import me.lucko.luckperms.api.metastacking.MetaStackElement;
-import me.lucko.luckperms.api.metastacking.MetaStackFactory;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+
+import net.luckperms.api.metastacking.DuplicateRemovalFunction;
+import net.luckperms.api.metastacking.MetaStackDefinition;
+import net.luckperms.api.metastacking.MetaStackElement;
+import net.luckperms.api.metastacking.MetaStackFactory;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

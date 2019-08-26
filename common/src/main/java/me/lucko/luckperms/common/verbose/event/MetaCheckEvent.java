@@ -25,8 +25,9 @@
 
 package me.lucko.luckperms.common.verbose.event;
 
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.util.gson.JObject;
+
+import net.luckperms.api.query.QueryOptions;
 
 public class MetaCheckEvent extends VerboseEvent {
 

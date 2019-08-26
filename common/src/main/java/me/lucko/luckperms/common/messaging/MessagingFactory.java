@@ -27,9 +27,6 @@ package me.lucko.luckperms.common.messaging;
 
 import com.google.common.base.Preconditions;
 
-import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
-import me.lucko.luckperms.api.messenger.Messenger;
-import me.lucko.luckperms.api.messenger.MessengerProvider;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.messaging.redis.RedisMessenger;
 import me.lucko.luckperms.common.messaging.sql.SqlMessenger;
@@ -37,6 +34,10 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.sql.SqlStorage;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MariaDbConnectionFactory;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MySqlConnectionFactory;
+
+import net.luckperms.api.messenger.IncomingMessageConsumer;
+import net.luckperms.api.messenger.Messenger;
+import net.luckperms.api.messenger.MessengerProvider;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

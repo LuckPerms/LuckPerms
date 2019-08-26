@@ -34,10 +34,10 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 
-import me.lucko.luckperms.api.context.Context;
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.context.Context;
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.context.MutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

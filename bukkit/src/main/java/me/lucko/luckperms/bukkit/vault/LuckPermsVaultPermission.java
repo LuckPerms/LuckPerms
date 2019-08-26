@@ -27,15 +27,6 @@ package me.lucko.luckperms.bukkit.vault;
 
 import com.google.common.base.Preconditions;
 
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.DefaultContextKeys;
-import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.api.node.NodeType;
-import me.lucko.luckperms.api.node.Tristate;
-import me.lucko.luckperms.api.query.Flag;
-import me.lucko.luckperms.api.query.QueryOptions;
-import me.lucko.luckperms.api.util.Result;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.bukkit.context.BukkitContextManager;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
@@ -52,6 +43,15 @@ import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.model.DataType;
+import net.luckperms.api.node.NodeType;
+import net.luckperms.api.node.Tristate;
+import net.luckperms.api.query.Flag;
+import net.luckperms.api.query.QueryOptions;
+import net.luckperms.api.util.Result;
 import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.Bukkit;

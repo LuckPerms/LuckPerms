@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.common.messaging.sql;
 
-import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
-import me.lucko.luckperms.api.messenger.Messenger;
-import me.lucko.luckperms.api.messenger.message.OutgoingMessage;
+import net.luckperms.api.messenger.IncomingMessageConsumer;
+import net.luckperms.api.messenger.Messenger;
+import net.luckperms.api.messenger.message.OutgoingMessage;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

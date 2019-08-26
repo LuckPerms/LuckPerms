@@ -27,14 +27,6 @@ package me.lucko.luckperms.common.commands.generic.meta;
 
 import com.google.common.collect.Maps;
 
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.NodeType;
-import me.lucko.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
-import me.lucko.luckperms.api.node.types.ChatMetaNode;
-import me.lucko.luckperms.api.node.types.MetaNode;
-import me.lucko.luckperms.api.node.types.PrefixNode;
-import me.lucko.luckperms.api.node.types.SuffixNode;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -57,6 +49,14 @@ import net.kyori.text.ComponentBuilder;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeType;
+import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
+import net.luckperms.api.node.types.ChatMetaNode;
+import net.luckperms.api.node.types.MetaNode;
+import net.luckperms.api.node.types.PrefixNode;
+import net.luckperms.api.node.types.SuffixNode;
+import net.luckperms.api.query.QueryOptions;
 
 import java.util.Comparator;
 import java.util.LinkedHashSet;

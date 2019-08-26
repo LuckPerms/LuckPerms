@@ -25,11 +25,12 @@
 
 package me.lucko.luckperms.bukkit.context;
 
-import me.lucko.luckperms.api.context.ContextCalculator;
-import me.lucko.luckperms.api.context.ContextConsumer;
-import me.lucko.luckperms.api.context.DefaultContextKeys;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+
+import net.luckperms.api.context.ContextCalculator;
+import net.luckperms.api.context.ContextConsumer;
+import net.luckperms.api.context.DefaultContextKeys;
 
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;

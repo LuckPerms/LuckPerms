@@ -27,9 +27,6 @@ package me.lucko.luckperms.common.commands.group;
 
 import com.google.common.collect.Maps;
 
-import me.lucko.luckperms.api.node.HeldNode;
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.types.InheritanceNode;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
 import me.lucko.luckperms.common.cache.LoadingMap;
@@ -59,6 +56,9 @@ import net.kyori.text.ComponentBuilder;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
+import net.luckperms.api.node.HeldNode;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.types.InheritanceNode;
 
 import java.util.ArrayList;
 import java.util.List;

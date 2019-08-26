@@ -25,9 +25,10 @@
 
 package me.lucko.luckperms.sponge.service.inheritance;
 
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.graph.Graph;
 import me.lucko.luckperms.sponge.service.model.calculated.CalculatedSubject;
+
+import net.luckperms.api.query.QueryOptions;
 
 import java.util.stream.Collectors;
 

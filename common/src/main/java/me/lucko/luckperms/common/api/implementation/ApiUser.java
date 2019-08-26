@@ -27,20 +27,21 @@ package me.lucko.luckperms.common.api.implementation;
 
 import com.google.common.base.Preconditions;
 
-import me.lucko.luckperms.api.model.DataMutateResult;
-import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.api.node.NodeEqualityPredicate;
 import me.lucko.luckperms.common.cacheddata.UserCachedDataManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
+
+import net.luckperms.api.model.DataMutateResult;
+import net.luckperms.api.model.DataType;
+import net.luckperms.api.node.NodeEqualityPredicate;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;
 import java.util.UUID;
 
-public class ApiUser extends ApiPermissionHolder implements me.lucko.luckperms.api.model.user.User {
-    public static User cast(me.lucko.luckperms.api.model.user.User u) {
+public class ApiUser extends ApiPermissionHolder implements net.luckperms.api.model.user.User {
+    public static User cast(net.luckperms.api.model.user.User u) {
         Preconditions.checkState(u instanceof ApiUser, "Illegal instance " + u.getClass() + " cannot be handled by this implementation.");
         return ((ApiUser) u).getHandle();
     }

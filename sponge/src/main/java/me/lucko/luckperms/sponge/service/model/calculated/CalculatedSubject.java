@@ -27,9 +27,6 @@ package me.lucko.luckperms.sponge.service.model.calculated;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.node.Tristate;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
@@ -38,6 +35,10 @@ import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.inheritance.SubjectInheritanceGraph;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
+
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.node.Tristate;
+import net.luckperms.api.query.QueryOptions;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;

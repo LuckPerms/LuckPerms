@@ -25,12 +25,13 @@
 
 package me.lucko.luckperms.common.primarygroup;
 
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.inheritance.InheritanceGraph;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
+
+import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

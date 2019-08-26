@@ -27,18 +27,19 @@ package me.lucko.luckperms.common.model;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.model.DataMutateResult;
-import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.NodeType;
-import me.lucko.luckperms.api.node.types.InheritanceNode;
-import me.lucko.luckperms.api.track.DemotionResult;
-import me.lucko.luckperms.api.track.PromotionResult;
 import me.lucko.luckperms.common.api.implementation.ApiTrack;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
+
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.model.DataMutateResult;
+import net.luckperms.api.model.DataType;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeType;
+import net.luckperms.api.node.types.InheritanceNode;
+import net.luckperms.api.track.DemotionResult;
+import net.luckperms.api.track.PromotionResult;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 

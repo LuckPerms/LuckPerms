@@ -25,10 +25,11 @@
 
 package me.lucko.luckperms.common.primarygroup;
 
-import me.lucko.luckperms.api.node.types.InheritanceNode;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
+
+import net.luckperms.api.node.types.InheritanceNode;
+import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

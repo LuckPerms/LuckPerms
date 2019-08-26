@@ -29,12 +29,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonReader;
 
-import me.lucko.luckperms.api.actionlog.Action;
 import me.lucko.luckperms.common.actionlog.ActionJsonSerializer;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.cache.BufferedRequest;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
+
+import net.luckperms.api.actionlog.Action;
 
 import java.io.BufferedReader;
 import java.io.IOException;

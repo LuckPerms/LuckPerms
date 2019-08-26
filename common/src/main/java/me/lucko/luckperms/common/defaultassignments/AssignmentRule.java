@@ -25,12 +25,13 @@
 
 package me.lucko.luckperms.common.defaultassignments;
 
-import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
+
+import net.luckperms.api.model.DataType;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.Tristate;
 
 import java.util.List;
 

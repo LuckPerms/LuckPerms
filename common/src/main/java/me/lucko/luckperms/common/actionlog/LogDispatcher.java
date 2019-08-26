@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.actionlog;
 
-import me.lucko.luckperms.api.event.log.LogBroadcastEvent;
-import me.lucko.luckperms.api.event.log.LogNotifyEvent;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.commands.log.LogNotify;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -34,6 +32,9 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
+
+import net.luckperms.api.event.log.LogBroadcastEvent;
+import net.luckperms.api.event.log.LogNotifyEvent;
 
 import java.util.Optional;
 

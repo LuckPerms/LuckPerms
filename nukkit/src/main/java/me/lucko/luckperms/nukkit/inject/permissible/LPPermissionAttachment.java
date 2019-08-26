@@ -27,14 +27,15 @@ package me.lucko.luckperms.nukkit.inject.permissible;
 
 import com.google.common.base.Preconditions;
 
-import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.metadata.NodeMetadataKey;
-import me.lucko.luckperms.api.util.Result;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.nukkit.inject.dummy.DummyPlugin;
+
+import net.luckperms.api.model.DataType;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.metadata.NodeMetadataKey;
+import net.luckperms.api.util.Result;
 
 import cn.nukkit.permission.Permission;
 import cn.nukkit.permission.PermissionAttachment;

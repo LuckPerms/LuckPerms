@@ -25,19 +25,6 @@
 
 package me.lucko.luckperms.common.api;
 
-import me.lucko.luckperms.api.LuckPerms;
-import me.lucko.luckperms.api.actionlog.ActionLogger;
-import me.lucko.luckperms.api.context.ContextManager;
-import me.lucko.luckperms.api.event.EventBus;
-import me.lucko.luckperms.api.messaging.MessagingService;
-import me.lucko.luckperms.api.messenger.MessengerProvider;
-import me.lucko.luckperms.api.metastacking.MetaStackFactory;
-import me.lucko.luckperms.api.model.group.GroupManager;
-import me.lucko.luckperms.api.model.user.UserManager;
-import me.lucko.luckperms.api.node.NodeBuilderRegistry;
-import me.lucko.luckperms.api.platform.Platform;
-import me.lucko.luckperms.api.platform.PluginMetadata;
-import me.lucko.luckperms.api.track.TrackManager;
 import me.lucko.luckperms.common.api.implementation.ApiActionLogger;
 import me.lucko.luckperms.common.api.implementation.ApiContextManager;
 import me.lucko.luckperms.common.api.implementation.ApiGroupManager;
@@ -50,6 +37,20 @@ import me.lucko.luckperms.common.api.implementation.ApiUserManager;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.actionlog.ActionLogger;
+import net.luckperms.api.context.ContextManager;
+import net.luckperms.api.event.EventBus;
+import net.luckperms.api.messaging.MessagingService;
+import net.luckperms.api.messenger.MessengerProvider;
+import net.luckperms.api.metastacking.MetaStackFactory;
+import net.luckperms.api.model.group.GroupManager;
+import net.luckperms.api.model.user.UserManager;
+import net.luckperms.api.node.NodeBuilderRegistry;
+import net.luckperms.api.platform.Platform;
+import net.luckperms.api.platform.PluginMetadata;
+import net.luckperms.api.track.TrackManager;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

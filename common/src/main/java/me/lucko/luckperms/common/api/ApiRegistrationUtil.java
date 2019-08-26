@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.api;
 
-import me.lucko.luckperms.api.LuckPerms;
-import me.lucko.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
 
 import java.lang.reflect.Method;
 

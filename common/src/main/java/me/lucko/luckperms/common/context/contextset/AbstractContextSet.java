@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.context.contextset;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
 
-import me.lucko.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.ContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

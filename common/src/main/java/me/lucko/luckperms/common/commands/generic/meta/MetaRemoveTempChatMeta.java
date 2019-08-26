@@ -25,10 +25,6 @@
 
 package me.lucko.luckperms.common.commands.generic.meta;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.model.DataMutateResult;
-import me.lucko.luckperms.api.model.DataType;
-import me.lucko.luckperms.api.node.ChatMetaType;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
@@ -50,6 +46,10 @@ import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.DataMutateResult;
+import net.luckperms.api.model.DataType;
+import net.luckperms.api.node.ChatMetaType;
 
 import java.util.List;
 

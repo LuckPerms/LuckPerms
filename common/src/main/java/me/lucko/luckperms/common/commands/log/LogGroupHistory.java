@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.log;
 
-import me.lucko.luckperms.api.actionlog.Action;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
@@ -43,6 +42,8 @@ import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Paginated;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.actionlog.Action;
 
 import java.util.List;
 import java.util.Map;

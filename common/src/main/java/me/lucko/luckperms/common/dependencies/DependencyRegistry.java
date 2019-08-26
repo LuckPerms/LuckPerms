@@ -29,12 +29,13 @@ import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.gson.JsonElement;
 
-import me.lucko.luckperms.api.platform.Platform;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.dependencies.relocation.Relocation;
 import me.lucko.luckperms.common.dependencies.relocation.RelocationHandler;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
+
+import net.luckperms.api.platform.Platform;
 
 import java.util.LinkedHashSet;
 import java.util.List;

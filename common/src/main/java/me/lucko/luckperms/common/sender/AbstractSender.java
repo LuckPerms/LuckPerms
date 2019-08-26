@@ -27,11 +27,11 @@ package me.lucko.luckperms.common.sender;
 
 import com.google.common.base.Splitter;
 
-import me.lucko.luckperms.api.node.Tristate;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.Component;
+import net.luckperms.api.node.Tristate;
 
 import java.lang.ref.WeakReference;
 import java.util.UUID;

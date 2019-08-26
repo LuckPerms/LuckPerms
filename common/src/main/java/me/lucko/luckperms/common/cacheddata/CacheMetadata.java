@@ -25,9 +25,10 @@
 
 package me.lucko.luckperms.common.cacheddata;
 
-import me.lucko.luckperms.api.cacheddata.CachedData;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.model.HolderType;
+
+import net.luckperms.api.cacheddata.CachedData;
+import net.luckperms.api.query.QueryOptions;
 
 /**
  * Metadata about a given {@link CachedData}.

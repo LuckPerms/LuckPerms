@@ -25,11 +25,12 @@
 
 package me.lucko.luckperms.common.api.implementation;
 
-import me.lucko.luckperms.api.context.ContextSetFactory;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
+
+import net.luckperms.api.context.ContextSetFactory;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.context.MutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

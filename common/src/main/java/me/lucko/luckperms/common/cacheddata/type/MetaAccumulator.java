@@ -28,16 +28,17 @@ package me.lucko.luckperms.common.cacheddata.type;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
-import me.lucko.luckperms.api.node.ChatMetaType;
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.types.MetaNode;
-import me.lucko.luckperms.api.node.types.PrefixNode;
-import me.lucko.luckperms.api.node.types.SuffixNode;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.metastacking.MetaStack;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStack;
 import me.lucko.luckperms.common.node.factory.NodeTypes;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+
+import net.luckperms.api.node.ChatMetaType;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.types.MetaNode;
+import net.luckperms.api.node.types.PrefixNode;
+import net.luckperms.api.node.types.SuffixNode;
 
 import java.util.Comparator;
 import java.util.Map;

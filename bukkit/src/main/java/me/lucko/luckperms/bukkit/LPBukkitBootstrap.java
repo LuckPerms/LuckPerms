@@ -25,13 +25,14 @@
 
 package me.lucko.luckperms.bukkit;
 
-import me.lucko.luckperms.api.platform.Platform;
 import me.lucko.luckperms.bukkit.compat.NullSafeConsoleCommandSender;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.logging.JavaPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
+
+import net.luckperms.api.platform.Platform;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;

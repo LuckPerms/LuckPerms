@@ -28,11 +28,12 @@ package me.lucko.luckperms.common.calculator.processor;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.Tristate;
-import me.lucko.luckperms.api.node.types.RegexPermissionNode;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.node.factory.NodeTypes;
+
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.Tristate;
+import net.luckperms.api.node.types.RegexPermissionNode;
 
 import java.util.Collections;
 import java.util.List;

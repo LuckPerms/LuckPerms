@@ -27,7 +27,6 @@ package me.lucko.luckperms.bukkit.calculator;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.bukkit.context.BukkitContextManager;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
@@ -39,6 +38,8 @@ import me.lucko.luckperms.common.calculator.processor.RegexProcessor;
 import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.HolderType;
+
+import net.luckperms.api.query.QueryOptions;
 
 public class BukkitCalculatorFactory implements CalculatorFactory {
     private final LPBukkitPlugin plugin;

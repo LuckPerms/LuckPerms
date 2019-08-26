@@ -25,13 +25,14 @@
 
 package me.lucko.luckperms.nukkit.inject.permissible;
 
-import me.lucko.luckperms.api.node.Tristate;
-import me.lucko.luckperms.api.query.QueryOptions;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.nukkit.inject.dummy.DummyPermissibleBase;
+
+import net.luckperms.api.node.Tristate;
+import net.luckperms.api.query.QueryOptions;
 
 import cn.nukkit.permission.PermissibleBase;
 import cn.nukkit.permission.Permission;

@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.node.comparator;
 
-import me.lucko.luckperms.api.node.Node;
-import me.lucko.luckperms.api.node.types.PermissionNode;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.types.PermissionNode;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
