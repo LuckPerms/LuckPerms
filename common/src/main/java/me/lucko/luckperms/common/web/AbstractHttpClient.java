@@ -25,39 +25,29 @@
 
 package me.lucko.luckperms.common.web;
 
-import com.google.gson.JsonObject;
-
-import me.lucko.luckperms.common.util.gson.GsonProvider;
-
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 
-import java.io.BufferedReader;
+import java.io.IOException;
 
-public class Hastebin extends AbstractPastebin {
-    public static final Hastebin INSTANCE = new Hastebin();
+public class AbstractHttpClient {
 
-    private static final String URL = "https://hastebin.com/";
-    private static final String RAW_URL = URL + "raw/";
-    private static final String POST_URL = URL + "documents";
+    public static final MediaType JSON_TYPE = MediaType.parse("application/json; charset=utf-8");
 
-    private Hastebin() {
+    /** The http client */
+    protected final OkHttpClient okHttp;
 
+    public AbstractHttpClient(OkHttpClient okHttp) {
+        this.okHttp = okHttp;
     }
 
-    @Override
-    protected String getPostUrl() {
-        return POST_URL;
-    }
-
-    @Override
-    protected String parseIdFromResult(Response response, ResponseBody responseBody, BufferedReader responseBodyReader) {
-        JsonObject object = GsonProvider.prettyPrinting().fromJson(responseBodyReader, JsonObject.class);
-        return object.get("key").getAsString();
-    }
-
-    @Override
-    public String getPasteUrl(String id) {
-        return RAW_URL + id;
+    protected Response makeHttpRequest(Request request) throws IOException {
+        Response response = this.okHttp.newCall(request).execute();
+        if (!response.isSuccessful()) {
+            throw new RuntimeException("Request was unsuccessful: " + response.code() + " - " + response.message());
+        }
+        return response;
     }
 }

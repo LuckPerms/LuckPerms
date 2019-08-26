@@ -116,12 +116,13 @@ public final class WebEditor {
                 ).toJson();
     }
 
-    public static JsonObject readDataFromBytebin(Bytebin bytebin, String id) {
+    public static JsonObject readDataFromBytebin(BytebinClient bytebin, String id) {
         Request request = new Request.Builder()
-                .url(bytebin.getPasteUrl(id))
+                .header("User-Agent", bytebin.getUserAgent())
+                .url(bytebin.getUrl() + id)
                 .build();
 
-        try (Response response = HttpClient.makeCall(request)) {
+        try (Response response = bytebin.makeHttpRequest(request)) {
             try (ResponseBody responseBody = response.body()) {
                 if (responseBody == null) {
                     throw new RuntimeException("No response");

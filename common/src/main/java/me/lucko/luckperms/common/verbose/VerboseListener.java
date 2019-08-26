@@ -35,24 +35,32 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.StackTracePrinter;
 import me.lucko.luckperms.common.util.TextUtils;
+import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.common.verbose.event.VerboseEvent;
-import me.lucko.luckperms.common.web.Bytebin;
+import me.lucko.luckperms.common.web.AbstractHttpClient;
+import me.lucko.luckperms.common.web.BytebinClient;
 
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
 import net.luckperms.api.node.Tristate;
 import net.luckperms.api.query.QueryMode;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Accepts and processes {@link VerboseEvent}, passed from the {@link VerboseHandler}.
@@ -244,7 +252,7 @@ public class VerboseListener {
      * @param bytebin the bytebin instance to upload with
      * @return the url
      */
-    public String uploadPasteData(Bytebin bytebin) {
+    public String uploadPasteData(BytebinClient bytebin) {
         // retrieve variables
         long now = System.currentTimeMillis();
         String startDate = DATE_FORMAT.format(new Date(this.startTime));
@@ -287,7 +295,19 @@ public class VerboseListener {
                 .add("data", data)
                 .toJson();
 
-        return bytebin.postJson(payload, true).id();
+        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+        try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(bytesOut), StandardCharsets.UTF_8)) {
+            GsonProvider.prettyPrinting().toJson(payload, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            return bytebin.postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE, false).key();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private static String getTristateColor(Tristate tristate) {

@@ -53,7 +53,7 @@ import me.lucko.luckperms.common.storage.implementation.file.FileWatcher;
 import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
-import me.lucko.luckperms.common.web.Bytebin;
+import me.lucko.luckperms.common.web.BytebinClient;
 
 import net.luckperms.api.query.QueryOptions;
 
@@ -237,7 +237,7 @@ public interface LuckPermsPlugin {
      *
      * @return the bytebin instance
      */
-    Bytebin getBytebin();
+    BytebinClient getBytebin();
 
     /**
      * Gets a calculated context instance for the user using the rules of the platform.

@@ -53,9 +53,11 @@ import me.lucko.luckperms.common.storage.implementation.file.FileWatcher;
 import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
-import me.lucko.luckperms.common.web.Bytebin;
+import me.lucko.luckperms.common.web.BytebinClient;
 
 import net.luckperms.api.LuckPerms;
+
+import okhttp3.OkHttpClient;
 
 import java.io.IOException;
 import java.util.EnumSet;
@@ -74,7 +76,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private LogDispatcher logDispatcher;
     private LuckPermsConfiguration configuration;
     private LocaleManager localeManager;
-    private Bytebin bytebin;
+    private BytebinClient bytebin;
     private FileWatcher fileWatcher = null;
     private Storage storage;
     private InternalMessagingService messagingService = null;
@@ -115,7 +117,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         this.localeManager.tryLoad(this, getBootstrap().getConfigDirectory().resolve("lang.yml"));
 
         // setup a bytebin instance
-        this.bytebin = new Bytebin(getConfiguration().get(ConfigKeys.BYTEBIN_URL));
+        this.bytebin = new BytebinClient(new OkHttpClient(), getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
 
         // now the configuration is loaded, we can create a storage factory and load initial dependencies
         StorageFactory storageFactory = new StorageFactory(this);
@@ -302,7 +304,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public Bytebin getBytebin() {
+    public BytebinClient getBytebin() {
         return this.bytebin;
     }
 

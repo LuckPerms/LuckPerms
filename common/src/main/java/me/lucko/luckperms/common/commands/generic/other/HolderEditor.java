@@ -39,6 +39,8 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
+import me.lucko.luckperms.common.util.gson.GsonProvider;
+import me.lucko.luckperms.common.web.AbstractHttpClient;
 import me.lucko.luckperms.common.web.WebEditor;
 
 import net.kyori.text.Component;
@@ -48,8 +50,14 @@ import net.kyori.text.event.HoverEvent;
 import net.kyori.text.format.TextColor;
 import net.luckperms.api.context.ImmutableContextSet;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 
 public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
     public HolderEditor(LocaleManager locale, boolean user) {
@@ -69,8 +77,17 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
         JsonObject payload = WebEditor.formPayload(Collections.singletonList(holder), Collections.emptyList(), sender, label, plugin);
 
         // upload the payload data to gist
-        String pasteId = plugin.getBytebin().postJson(payload, true).id();
-        if (pasteId == null) {
+        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+        try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(bytesOut), StandardCharsets.UTF_8)) {
+            GsonProvider.prettyPrinting().toJson(payload, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String pasteId;
+        try {
+            pasteId = plugin.getBytebin().postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE, false).key();
+        } catch (IOException e) {
             Message.EDITOR_UPLOAD_FAILURE.send(sender);
             return CommandResult.STATE_ERROR;
         }
