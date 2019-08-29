@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.node.factory;
 import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.cache.PatternCache;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.node.types.DisplayName;
 import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.node.types.Meta;
@@ -104,10 +105,10 @@ public final class NodeTypes {
 
     private static ImmutableContextSet formContextSet(ContextSet contexts, String server, String world) {
         if ((contexts == null || contexts.isEmpty()) && server == null && world == null) {
-            return ImmutableContextSet.empty();
+            return ImmutableContextSetImpl.EMPTY;
         }
 
-        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
 
         if (contexts != null) {
             builder.addAll(contexts);

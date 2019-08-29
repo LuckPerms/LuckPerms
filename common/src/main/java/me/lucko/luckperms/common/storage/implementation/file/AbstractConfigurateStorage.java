@@ -32,6 +32,7 @@ import com.google.common.collect.Maps;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.context.ContextSetConfigurateSerializer;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -462,7 +463,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
         String world = attributes.getNode("world").getString("global");
         long expiry = attributes.getNode("expiry").getLong(0L);
 
-        ImmutableContextSet context = ImmutableContextSet.empty();
+        ImmutableContextSet context = ImmutableContextSetImpl.EMPTY;
         ConfigurationNode contextMap = attributes.getNode("context");
         if (!contextMap.isVirtual() && contextMap.hasMapChildren()) {
             context = ContextSetConfigurateSerializer.deserializeContextSet(contextMap).immutableCopy();
@@ -477,7 +478,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
         String world = attributes.getNode("world").getString("global");
         long expiry = attributes.getNode("expiry").getLong(0L);
 
-        ImmutableContextSet context = ImmutableContextSet.empty();
+        ImmutableContextSet context = ImmutableContextSetImpl.EMPTY;
         ConfigurationNode contextMap = attributes.getNode("context");
         if (!contextMap.isVirtual() && contextMap.hasMapChildren()) {
             context = ContextSetConfigurateSerializer.deserializeContextSet(contextMap).immutableCopy();

@@ -41,6 +41,8 @@ import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -734,7 +736,7 @@ public class MongoStorage implements StorageImplementation {
         String server = "global";
         String world = "global";
         long expiry = 0L;
-        ImmutableContextSet context = ImmutableContextSet.empty();
+        ImmutableContextSet context = ImmutableContextSetImpl.EMPTY;
 
         if (document.containsKey("value")) {
             value = document.getBoolean("value");
@@ -767,7 +769,7 @@ public class MongoStorage implements StorageImplementation {
     }
 
     private static MutableContextSet docsToContextSet(List<Document> documents) {
-        MutableContextSet map = MutableContextSet.create();
+        MutableContextSet map = new MutableContextSetImpl();
         for (Document doc : documents) {
             map.add(doc.getString("key"), doc.getString("value"));
         }

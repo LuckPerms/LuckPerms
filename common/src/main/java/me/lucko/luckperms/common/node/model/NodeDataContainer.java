@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.node.model;
 
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 
 import net.luckperms.api.context.ContextSet;
@@ -85,7 +86,7 @@ public final class NodeDataContainer {
     }
 
     public static NodeDataContainer of(String permission) {
-        return of(permission, true, "global", "global", 0L, ImmutableContextSet.empty());
+        return of(permission, true, "global", "global", 0L, ImmutableContextSetImpl.EMPTY);
     }
 
     private final String permission;

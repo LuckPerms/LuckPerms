@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
@@ -313,7 +314,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
     }
 
     private QueryOptions createQueryOptionsForWorldSet(String world) {
-        ImmutableContextSet.Builder context = ImmutableContextSet.builder();
+        ImmutableContextSet.Builder context = new ImmutableContextSetImpl.BuilderImpl();
         if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
             context.add(DefaultContextKeys.WORLD_KEY, world.toLowerCase());
         }

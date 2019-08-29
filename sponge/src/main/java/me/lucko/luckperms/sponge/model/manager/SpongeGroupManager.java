@@ -34,6 +34,7 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.manager.group.AbstractGroupManager;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
@@ -194,7 +195,7 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
 
             List<HeldNode<String>> lookup = this.plugin.getStorage().getGroupsWithPermission(Constraint.of(StandardComparison.EQUAL, permission)).join();
             for (HeldNode<String> holder : lookup) {
-                if (holder.getNode().getContexts().equals(ImmutableContextSet.empty())) {
+                if (holder.getNode().getContexts().equals(ImmutableContextSetImpl.EMPTY)) {
                     ret.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder()), holder.getNode().getValue());
                 }
             }
@@ -223,7 +224,7 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
     public ImmutableMap<LPSubject, Boolean> getLoadedWithPermission(String permission) {
         return getAll().values().stream()
                 .map(SpongeGroup::sponge)
-                .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(ImmutableContextSet.empty(), permission)))
+                .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(ImmutableContextSetImpl.EMPTY, permission)))
                 .filter(pair -> pair.getValue() != Tristate.UNDEFINED)
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
     }

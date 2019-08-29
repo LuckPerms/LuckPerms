@@ -80,7 +80,7 @@ public final class MutableContextSetImpl extends AbstractContextSet implements M
     public @NonNull ImmutableContextSet immutableCopy() {
         // if the map is empty, don't create a new instance
         if (this.map.isEmpty()) {
-            return ImmutableContextSet.empty();
+            return ImmutableContextSetImpl.EMPTY;
         }
         synchronized (this.map) {
             return new ImmutableContextSetImpl(ImmutableSetMultimap.copyOf(this.map));

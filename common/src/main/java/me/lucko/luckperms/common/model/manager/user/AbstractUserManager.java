@@ -28,13 +28,13 @@ package me.lucko.luckperms.common.model.manager.user;
 import com.google.common.collect.ImmutableCollection;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.model.manager.AbstractManager;
 import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
@@ -91,7 +91,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
             String pg = user.getPrimaryGroup().getValue();
             boolean has = false;
 
-            for (Node node : user.normalData().immutable().get(ImmutableContextSet.empty())) {
+            for (Node node : user.normalData().immutable().get(ImmutableContextSetImpl.EMPTY)) {
                 if (node instanceof InheritanceNode && ((InheritanceNode) node).getGroupName().equalsIgnoreCase(pg)) {
                     has = true;
                     break;
@@ -100,7 +100,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
 
             // need to find a new primary group for the user.
             if (!has) {
-                String group = user.normalData().immutable().get(ImmutableContextSet.empty()).stream()
+                String group = user.normalData().immutable().get(ImmutableContextSetImpl.EMPTY).stream()
                         .filter(NodeType.INHERITANCE::matches)
                         .map(NodeType.INHERITANCE::cast)
                         .findFirst()

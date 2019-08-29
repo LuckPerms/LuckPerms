@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.plugin;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.ApiRegistrationUtil;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
+import me.lucko.luckperms.common.api.MinimalApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.config.AbstractConfiguration;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -102,6 +103,9 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     public final void enable() {
         // send the startup banner
         displayBanner(getConsoleSender());
+
+        // minimal api
+        ApiRegistrationUtil.registerProvider(MinimalApiProvider.INSTANCE);
 
         // load some utilities early
         this.verboseHandler = new VerboseHandler(getBootstrap().getScheduler());

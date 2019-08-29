@@ -27,6 +27,8 @@ package me.lucko.luckperms.common.command.utils;
 
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.commands.user.UserMainCommand;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
@@ -152,7 +154,7 @@ public class ArgumentParser {
 
     public static MutableContextSet parseContext(int fromIndex, List<String> args, LuckPermsPlugin plugin) throws CommandException {
         if (args.size() > fromIndex) {
-            MutableContextSet set = MutableContextSet.create();
+            MutableContextSet set = new MutableContextSetImpl();
 
             List<String> contexts = args.subList(fromIndex, args.size());
 
@@ -244,10 +246,10 @@ public class ArgumentParser {
 
     public static ImmutableContextSet parseContextSponge(int fromIndex, List<String> args) {
         if (args.size() <= fromIndex) {
-            return ImmutableContextSet.empty();
+            return ImmutableContextSetImpl.EMPTY;
         }
 
-        MutableContextSet contextSet = MutableContextSet.create();
+        MutableContextSet contextSet = new MutableContextSetImpl();
         List<String> toQuery = args.subList(fromIndex, args.size());
         for (String s : toQuery) {
             int index = s.indexOf('=');

@@ -29,6 +29,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 
 import net.luckperms.api.context.ImmutableContextSet;
@@ -46,8 +47,8 @@ import java.nio.file.Path;
 public class ContextsFile {
     private final LuckPermsConfiguration configuration;
 
-    private ImmutableContextSet staticContexts = ImmutableContextSet.empty();
-    private ImmutableContextSet defaultContexts = ImmutableContextSet.empty();
+    private ImmutableContextSet staticContexts = ImmutableContextSetImpl.EMPTY;
+    private ImmutableContextSet defaultContexts = ImmutableContextSetImpl.EMPTY;
 
     public ContextsFile(LuckPermsConfiguration configuration) {
         this.configuration = configuration;

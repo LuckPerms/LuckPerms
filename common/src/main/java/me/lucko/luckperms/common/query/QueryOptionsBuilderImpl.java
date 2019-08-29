@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.query;
 
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.Flag;
@@ -51,7 +53,7 @@ public class QueryOptionsBuilderImpl implements QueryOptions.Builder {
 
     public QueryOptionsBuilderImpl(QueryMode mode) {
         this.mode = mode;
-        this.context = mode == QueryMode.CONTEXTUAL ? ImmutableContextSet.empty() : null;
+        this.context = mode == QueryMode.CONTEXTUAL ? ImmutableContextSetImpl.EMPTY : null;
         this.flags = 0;
         this.flagsSet = null;
         this.options = null;
@@ -74,7 +76,7 @@ public class QueryOptionsBuilderImpl implements QueryOptions.Builder {
         }
 
         this.mode = mode;
-        this.context = this.mode == QueryMode.CONTEXTUAL ? ImmutableContextSet.empty() : null;
+        this.context = this.mode == QueryMode.CONTEXTUAL ? ImmutableContextSetImpl.EMPTY : null;
         return this;
     }
 
@@ -149,14 +151,16 @@ public class QueryOptionsBuilderImpl implements QueryOptions.Builder {
         if (this.options == null) {
             if (this.mode == QueryMode.NON_CONTEXTUAL) {
                 QueryOptionsImpl defaults = (QueryOptionsImpl) QueryOptions.nonContextual();
-                if (defaults.getFlagsByte() == flags) {
+                //noinspection ConstantConditions
+                if (defaults != null && defaults.getFlagsByte() == flags) {
                     // mode same, contexts null, flags same, options null
                     // so therefore, equal to default - return that instead!
                     return defaults;
                 }
             } else if (this.mode == QueryMode.CONTEXTUAL) {
                 QueryOptionsImpl defaults = (QueryOptionsImpl) QueryOptions.defaultContextualOptions();
-                if (defaults.getFlagsByte() == flags && this.context.isEmpty()) {
+                //noinspection ConstantConditions
+                if (defaults != null && defaults.getFlagsByte() == flags && this.context.isEmpty()) {
                     // mode same, contexts empty, flags same, options null
                     // so therefore, equal to default - return that instead!
                     return defaults;

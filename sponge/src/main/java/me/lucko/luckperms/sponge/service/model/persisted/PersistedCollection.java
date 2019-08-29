@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.common.cache.LoadingMap;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -175,7 +176,7 @@ public class PersistedCollection implements LPSubjectCollection {
     public ImmutableMap<LPSubject, Boolean> getLoadedWithPermission(String permission) {
         ImmutableMap.Builder<LPSubject, Boolean> m = ImmutableMap.builder();
         for (LPSubject subject : this.subjects.values()) {
-            Tristate ts = subject.getPermissionValue(ImmutableContextSet.empty(), permission);
+            Tristate ts = subject.getPermissionValue(ImmutableContextSetImpl.EMPTY, permission);
             if (ts != Tristate.UNDEFINED) {
                 m.put(subject, ts.asBoolean());
             }

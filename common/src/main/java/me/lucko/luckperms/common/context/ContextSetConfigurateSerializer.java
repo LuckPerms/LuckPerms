@@ -27,8 +27,10 @@ package me.lucko.luckperms.common.context;
 
 import com.google.common.base.Preconditions;
 
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
+
 import net.luckperms.api.context.ContextSet;
-import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.MutableContextSet;
 
 import ninja.leaping.configurate.ConfigurationNode;
@@ -65,10 +67,10 @@ public final class ContextSetConfigurateSerializer {
         Map<Object, ? extends ConfigurationNode> dataMap = data.getChildrenMap();
 
         if (dataMap.isEmpty()) {
-            return ImmutableContextSet.empty();
+            return ImmutableContextSetImpl.EMPTY;
         }
 
-        MutableContextSet map = MutableContextSet.create();
+        MutableContextSet map = new MutableContextSetImpl();
         for (Map.Entry<Object, ? extends ConfigurationNode> e : dataMap.entrySet()) {
             String k = e.getKey().toString();
             ConfigurationNode v = e.getValue();

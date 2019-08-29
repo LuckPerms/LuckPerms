@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -45,7 +46,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 
-import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
@@ -80,9 +80,9 @@ public class UserSwitchPrimaryGroup extends SharedSubCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (ArgumentPermissions.checkContext(plugin, sender, permission, ImmutableContextSet.empty()) ||
-                ArgumentPermissions.checkGroup(plugin, sender, holder, ImmutableContextSet.empty()) ||
-                ArgumentPermissions.checkGroup(plugin, sender, group, ImmutableContextSet.empty()) ||
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, ImmutableContextSetImpl.EMPTY) ||
+                ArgumentPermissions.checkGroup(plugin, sender, holder, ImmutableContextSetImpl.EMPTY) ||
+                ArgumentPermissions.checkGroup(plugin, sender, group, ImmutableContextSetImpl.EMPTY) ||
                 ArgumentPermissions.checkArguments(plugin, sender, permission, group.getName())) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;

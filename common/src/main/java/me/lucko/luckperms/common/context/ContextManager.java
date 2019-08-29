@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.cache.ExpiringCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.luckperms.api.context.ContextCalculator;
@@ -119,7 +120,7 @@ public abstract class ContextManager<T> {
     }
 
     protected QueryOptions calculate(T subject) {
-        ImmutableContextSet.Builder accumulator = ImmutableContextSet.builder();
+        ImmutableContextSet.Builder accumulator = new ImmutableContextSetImpl.BuilderImpl();
 
         for (ContextCalculator<? super T> calculator : this.calculators) {
             try {
@@ -134,7 +135,7 @@ public abstract class ContextManager<T> {
     }
 
     QueryOptions calculateStatic() {
-        ImmutableContextSet.Builder accumulator = ImmutableContextSet.builder();
+        ImmutableContextSet.Builder accumulator = new ImmutableContextSetImpl.BuilderImpl();
 
         for (StaticContextCalculator calculator : this.staticCalculators) {
             try {

@@ -37,9 +37,28 @@ final class DefaultQueryOptions {
         throw new AssertionError();
     }
 
+    private static boolean setup = false;
     private static final EnumSet<Flag> DEFAULT_FLAGS = EnumSet.allOf(Flag.class);
+    private static QueryOptions contextual;
+    private static QueryOptions nonContextual;
 
-    static final QueryOptions CONTEXTUAL = QueryOptions.contextual(ImmutableContextSet.empty(), DEFAULT_FLAGS);
-    static final QueryOptions NON_CONTEXTUAL = QueryOptions.nonContextual(DEFAULT_FLAGS);
+    private static void setup() {
+        if (setup) {
+            return;
+        }
+        setup = true;
+        contextual = QueryOptions.contextual(ImmutableContextSet.empty(), DEFAULT_FLAGS);
+        nonContextual = QueryOptions.nonContextual(DEFAULT_FLAGS);
+    }
+
+    static QueryOptions contextual() {
+        setup();
+        return contextual;
+    }
+
+    static QueryOptions nonContextual() {
+        setup();
+        return nonContextual;
+    }
 
 }

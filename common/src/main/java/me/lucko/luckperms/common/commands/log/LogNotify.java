@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -38,7 +39,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 
-import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.DataType;
 import net.luckperms.api.node.Node;
 
@@ -59,7 +59,7 @@ public class LogNotify extends SubCommand<Log> {
             return false;
         }
 
-        Optional<? extends Node> ret = user.normalData().immutable().get(ImmutableContextSet.empty()).stream()
+        Optional<? extends Node> ret = user.normalData().immutable().get(ImmutableContextSetImpl.EMPTY).stream()
                 .filter(n -> n.getKey().equalsIgnoreCase(IGNORE_NODE))
                 .findFirst();
 
@@ -79,7 +79,7 @@ public class LogNotify extends SubCommand<Log> {
             user.setPermission(DataType.NORMAL, NodeFactory.make(IGNORE_NODE), true);
         } else {
             // remove the perm
-            user.removeIf(DataType.NORMAL, ImmutableContextSet.empty(), n -> n.getKey().equalsIgnoreCase(IGNORE_NODE), null);
+            user.removeIf(DataType.NORMAL, ImmutableContextSetImpl.EMPTY, n -> n.getKey().equalsIgnoreCase(IGNORE_NODE), null);
         }
 
         plugin.getStorage().saveUser(user).join();

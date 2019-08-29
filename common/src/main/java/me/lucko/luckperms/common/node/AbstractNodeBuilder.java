@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.node;
 
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
@@ -50,14 +52,14 @@ public abstract class AbstractNodeBuilder<N extends ScopedNode<N, B>, B extends 
     protected AbstractNodeBuilder() {
         this.value = true;
         this.expireAt = 0L;
-        this.context = ImmutableContextSet.builder();
+        this.context = new ImmutableContextSetImpl.BuilderImpl();
         this.metadata = new IdentityHashMap<>();
     }
 
     protected AbstractNodeBuilder(boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, Object> metadata) {
         this.value = value;
         this.expireAt = expireAt;
-        this.context = ImmutableContextSet.builder().addAll(context);
+        this.context = new ImmutableContextSetImpl.BuilderImpl().addAll(context);
         this.metadata = new IdentityHashMap<>(metadata);
     }
 
@@ -98,7 +100,7 @@ public abstract class AbstractNodeBuilder<N extends ScopedNode<N, B>, B extends 
     @Override
     public @NonNull B context(@NonNull ContextSet contextSet) {
         Objects.requireNonNull(contextSet, "contextSet");
-        this.context = ImmutableContextSet.builder().addAll(contextSet);
+        this.context = new ImmutableContextSetImpl.BuilderImpl().addAll(contextSet);
         return (B) this;
     }
 

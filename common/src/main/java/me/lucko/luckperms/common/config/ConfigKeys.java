@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.config;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
@@ -41,7 +42,6 @@ import me.lucko.luckperms.common.storage.implementation.split.SplitStorageType;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 
-import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.metastacking.DuplicateRemovalFunction;
 import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.model.TemporaryMergeBehaviour;
@@ -108,7 +108,7 @@ public final class ConfigKeys {
         if (c.getBoolean("apply-global-world-groups", true)) {
             flags.add(Flag.APPLY_INHERITANCE_NODES_WITHOUT_WORLD_CONTEXT);
         }
-        return QueryOptions.contextual(ImmutableContextSet.empty(), flags);
+        return QueryOptions.contextual(ImmutableContextSetImpl.EMPTY, flags);
     });
 
     /**
