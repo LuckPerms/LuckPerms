@@ -38,15 +38,13 @@ public final class ContextImpl implements Context {
         this.value = value;
     }
 
-    @NonNull
     @Override
-    public String getKey() {
+    public @NonNull String getKey() {
         return this.key;
     }
 
-    @NonNull
     @Override
-    public String getValue() {
+    public @NonNull String getValue() {
         return this.value;
     }
 

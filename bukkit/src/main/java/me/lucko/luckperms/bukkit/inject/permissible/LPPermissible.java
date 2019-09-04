@@ -201,17 +201,15 @@ public class LPPermissible extends PermissibleBase {
         this.player.setOp(value);
     }
 
-    @NonNull
     @Override
-    public Set<PermissionAttachmentInfo> getEffectivePermissions() {
+    public @NonNull Set<PermissionAttachmentInfo> getEffectivePermissions() {
         return this.user.getCachedData().getPermissionData(this.queryOptionsSupplier.getQueryOptions()).getPermissionMap().entrySet().stream()
                 .map(entry -> new PermissionAttachmentInfo(this.player, entry.getKey(), null, entry.getValue()))
                 .collect(ImmutableCollectors.toSet());
     }
 
-    @NonNull
     @Override
-    public LPPermissionAttachment addAttachment(@NonNull Plugin plugin) {
+    public @NonNull LPPermissionAttachment addAttachment(@NonNull Plugin plugin) {
         if (plugin == null) {
             throw new NullPointerException("plugin");
         }
@@ -221,9 +219,8 @@ public class LPPermissible extends PermissibleBase {
         return ret;
     }
 
-    @NonNull
     @Override
-    public PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String permission, boolean value) {
+    public @NonNull PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String permission, boolean value) {
         if (plugin == null) {
             throw new NullPointerException("plugin");
         }

@@ -64,9 +64,8 @@ public class ApiPlatform implements Platform, PluginMetadata {
         return Collections.unmodifiableSet(this.plugin.getConnectionListener().getUniqueConnections());
     }
 
-    @NonNull
     @Override
-    public Instant getStartTime() {
+    public @NonNull Instant getStartTime() {
         return Instant.ofEpochMilli(this.plugin.getBootstrap().getStartupTime());
     }
 }

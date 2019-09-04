@@ -39,21 +39,21 @@ public final class Predicates {
 
     private static final Predicate FALSE = new Predicate() {
         @Override public boolean test(Object o) { return false; }
-        @NonNull
-        @Override public Predicate and(@NonNull Predicate other) { return this; }
-        @NonNull
-        @Override public Predicate or(@NonNull Predicate other) { return other; }
-        @NonNull
-        @Override public Predicate negate() { return TRUE; }
+        @Override
+        public @NonNull Predicate and(@NonNull Predicate other) { return this; }
+        @Override
+        public @NonNull Predicate or(@NonNull Predicate other) { return other; }
+        @Override
+        public @NonNull Predicate negate() { return TRUE; }
     };
     private static final Predicate TRUE = new Predicate() {
         @Override public boolean test(Object o) { return true; }
-        @NonNull
-        @Override public Predicate and(@NonNull Predicate other) { return other; }
-        @NonNull
-        @Override public Predicate or(@NonNull Predicate other) { return this; }
-        @NonNull
-        @Override public Predicate negate() { return FALSE; }
+        @Override
+        public @NonNull Predicate and(@NonNull Predicate other) { return other; }
+        @Override
+        public @NonNull Predicate or(@NonNull Predicate other) { return this; }
+        @Override
+        public @NonNull Predicate negate() { return FALSE; }
     };
 
     public static <T> Predicate<T> alwaysFalse() {

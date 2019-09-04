@@ -134,15 +134,12 @@ public class MonitoredPermissibleBase extends PermissibleBase {
     // just forward calls to the delegate permissible
     @Override public boolean isOp() { return this.delegate.isOp(); }
     @Override public void setOp(boolean value) { this.delegate.setOp(value); }
-    @NonNull
-    @Override public PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String name, boolean value) { return this.delegate.addAttachment(plugin, name, value); }
-    @NonNull
-    @Override public PermissionAttachment addAttachment(@NonNull Plugin plugin) { return this.delegate.addAttachment(plugin); }
+    @Override public @NonNull PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String name, boolean value) { return this.delegate.addAttachment(plugin, name, value); }
+    @Override public @NonNull PermissionAttachment addAttachment(@NonNull Plugin plugin) { return this.delegate.addAttachment(plugin); }
     @Override public void removeAttachment(@NonNull PermissionAttachment attachment) { this.delegate.removeAttachment(attachment); }
     @Override public void clearPermissions() { this.delegate.clearPermissions(); }
     @Override public PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String name, boolean value, int ticks) { return this.delegate.addAttachment(plugin, name, value, ticks); }
     @Override public PermissionAttachment addAttachment(@NonNull Plugin plugin, int ticks) { return this.delegate.addAttachment(plugin, ticks); }
-    @NonNull
-    @Override public Set<PermissionAttachmentInfo> getEffectivePermissions() { return this.delegate.getEffectivePermissions(); }
+    @Override public @NonNull Set<PermissionAttachmentInfo> getEffectivePermissions() { return this.delegate.getEffectivePermissions(); }
 
 }

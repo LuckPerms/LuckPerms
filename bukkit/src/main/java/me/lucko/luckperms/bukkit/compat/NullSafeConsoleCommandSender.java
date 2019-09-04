@@ -55,15 +55,13 @@ public class NullSafeConsoleCommandSender implements ConsoleCommandSender {
         return Optional.ofNullable(this.server.getConsoleSender());
     }
 
-    @NonNull
     @Override
-    public Server getServer() {
+    public @NonNull Server getServer() {
         return this.server;
     }
 
-    @NonNull
     @Override
-    public String getName() {
+    public @NonNull String getName() {
         return "CONSOLE";
     }
 
@@ -110,23 +108,19 @@ public class NullSafeConsoleCommandSender implements ConsoleCommandSender {
     }
 
     // just throw UnsupportedOperationException - we never use any of these methods
-    @NonNull
-    @Override public Spigot spigot() { throw new UnsupportedOperationException(); }
+    @Override public @NonNull Spigot spigot() { throw new UnsupportedOperationException(); }
     @Override public boolean isConversing() { throw new UnsupportedOperationException(); }
     @Override public void acceptConversationInput(@NonNull String s) { throw new UnsupportedOperationException(); }
     @Override public boolean beginConversation(@NonNull Conversation conversation) { throw new UnsupportedOperationException(); }
     @Override public void abandonConversation(@NonNull Conversation conversation) { throw new UnsupportedOperationException(); }
     @Override public void abandonConversation(@NonNull Conversation conversation, @NonNull ConversationAbandonedEvent conversationAbandonedEvent) { throw new UnsupportedOperationException(); }
     @Override public void sendRawMessage(@NonNull String s) { throw new UnsupportedOperationException(); }
-    @NonNull
-    @Override public PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String s, boolean b) { throw new UnsupportedOperationException(); }
-    @NonNull
-    @Override public PermissionAttachment addAttachment(@NonNull Plugin plugin) { throw new UnsupportedOperationException(); }
+    @Override public @NonNull PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String s, boolean b) { throw new UnsupportedOperationException(); }
+    @Override public @NonNull PermissionAttachment addAttachment(@NonNull Plugin plugin) { throw new UnsupportedOperationException(); }
     @Override public PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String s, boolean b, int i) { throw new UnsupportedOperationException(); }
     @Override public PermissionAttachment addAttachment(@NonNull Plugin plugin, int i) { throw new UnsupportedOperationException(); }
     @Override public void removeAttachment(@NonNull PermissionAttachment permissionAttachment) { throw new UnsupportedOperationException(); }
     @Override public void recalculatePermissions() { throw new UnsupportedOperationException(); }
-    @NonNull
-    @Override public Set<PermissionAttachmentInfo> getEffectivePermissions() { throw new UnsupportedOperationException(); }
+    @Override public @NonNull Set<PermissionAttachmentInfo> getEffectivePermissions() { throw new UnsupportedOperationException(); }
     @Override public void setOp(boolean b) { throw new UnsupportedOperationException(); }
 }

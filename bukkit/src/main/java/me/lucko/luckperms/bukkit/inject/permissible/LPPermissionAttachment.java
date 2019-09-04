@@ -143,9 +143,8 @@ public class LPPermissionAttachment extends PermissionAttachment {
         }
     }
 
-    @NonNull
     @Override
-    public LPPermissible getPermissible() {
+    public @NonNull LPPermissible getPermissible() {
         return this.permissible;
     }
 
@@ -277,15 +276,13 @@ public class LPPermissionAttachment extends PermissionAttachment {
         unsetPermissionInternal(permission);
     }
 
-    @NonNull
     @Override
-    public Map<String, Boolean> getPermissions() {
+    public @NonNull Map<String, Boolean> getPermissions() {
         return this.perms;
     }
 
-    @NonNull
     @Override
-    public Plugin getPlugin() {
+    public @NonNull Plugin getPlugin() {
         return this.owner != null ? this.owner : this.permissible.getPlugin().getBootstrap();
     }
 

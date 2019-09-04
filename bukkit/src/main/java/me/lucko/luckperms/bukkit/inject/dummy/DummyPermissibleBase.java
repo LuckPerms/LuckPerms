@@ -108,16 +108,13 @@ public class DummyPermissibleBase extends PermissibleBase {
     @Override public boolean isPermissionSet(@NonNull Permission perm) { return false; }
     @Override public boolean hasPermission(@NonNull String inName) { return false; }
     @Override public boolean hasPermission(@NonNull Permission perm) { return false; }
-    @NonNull
-    @Override public PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String name, boolean value) { return null; }
-    @NonNull
-    @Override public PermissionAttachment addAttachment(@NonNull Plugin plugin) { return null; }
+    @Override public @NonNull PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String name, boolean value) { return null; }
+    @Override public @NonNull PermissionAttachment addAttachment(@NonNull Plugin plugin) { return null; }
     @Override public void removeAttachment(@NonNull PermissionAttachment attachment) {}
     @Override public void recalculatePermissions() {}
     @Override public void clearPermissions() {}
     @Override public PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String name, boolean value, int ticks) { return null; }
     @Override public PermissionAttachment addAttachment(@NonNull Plugin plugin, int ticks) { return null; }
-    @NonNull
-    @Override public Set<PermissionAttachmentInfo> getEffectivePermissions() { return Collections.emptySet(); }
+    @Override public @NonNull Set<PermissionAttachmentInfo> getEffectivePermissions() { return Collections.emptySet(); }
 
 }
