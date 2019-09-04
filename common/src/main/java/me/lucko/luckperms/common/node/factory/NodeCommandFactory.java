@@ -25,103 +25,18 @@
 
 package me.lucko.luckperms.common.node.factory;
 
-import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
 
 import net.luckperms.api.context.Context;
-import net.luckperms.api.context.DefaultContextKeys;
-import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.Node;
-import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.types.ChatMetaNode;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.node.types.MetaNode;
 
-/**
- * Utility class to make Node(Builder) instances from strings or existing Nodes
- */
-public final class NodeFactory {
-    private NodeFactory() {}
+public final class NodeCommandFactory {
+    private NodeCommandFactory() {}
 
-    public static final String DEFAULT_GROUP_NAME = "default";
-
-    public static NodeBuilder<?, ?> builder(String s) {
-        return NodeTypes.newBuilder(s);
-    }
-
-    public static NodeBuilder<?, ?> buildGroupNode(String groupName) {
-        return builder(groupNode(groupName));
-    }
-
-    public static NodeBuilder<?, ?> buildGroupNode(Group group) {
-        return builder(groupNode(group.getName()));
-    }
-
-    public static NodeBuilder<?, ?> buildMetaNode(String key, String value) {
-        return builder(metaNode(key, value));
-    }
-
-    public static NodeBuilder<?, ?> buildChatMetaNode(ChatMetaType type, int priority, String s) {
-        return type == ChatMetaType.PREFIX ? buildPrefixNode(priority, s) : buildSuffixNode(priority, s);
-    }
-
-    public static NodeBuilder<?, ?> buildPrefixNode(int priority, String prefix) {
-        return builder(prefixNode(priority, prefix));
-    }
-
-    public static NodeBuilder<?, ?> buildSuffixNode(int priority, String suffix) {
-        return builder(suffixNode(priority, suffix));
-    }
-
-    public static NodeBuilder<?, ?> buildWeightNode(int weight) {
-        return builder(weightNode(weight));
-    }
-
-    public static String groupNode(String groupName) {
-        return NodeTypes.GROUP_NODE_MARKER + groupName;
-    }
-
-    public static String displayName(String displayName) {
-        return NodeTypes.DISPLAY_NAME_NODE_MARKER + displayName;
-    }
-
-    public static String chatMetaNode(ChatMetaType type, int priority, String value) {
-        return type == ChatMetaType.PREFIX ? prefixNode(priority, value) : suffixNode(priority, value);
-    }
-
-    public static String prefixNode(int priority, String prefix) {
-        return NodeTypes.PREFIX_NODE_MARKER + priority + "." + Delimiters.escapeCharacters(prefix);
-    }
-
-    public static String suffixNode(int priority, String suffix) {
-        return NodeTypes.SUFFIX_NODE_MARKER + priority + "." + Delimiters.escapeCharacters(suffix);
-    }
-
-    public static String metaNode(String key, String value) {
-        return NodeTypes.META_NODE_MARKER + Delimiters.escapeCharacters(key) + "." + Delimiters.escapeCharacters(value);
-    }
-
-    public static String weightNode(int weight) {
-        return NodeTypes.WEIGHT_NODE_MARKER + weight;
-    }
-
-    public static String regexNode(String pattern) {
-        return NodeTypes.REGEX_MARKER_1 + pattern;
-    }
-
-    public static Node make(String node) {
-        return builder(node).build();
-    }
-
-    public static Node make(String node, boolean value) {
-        return builder(node).value(value).build();
-    }
-
-    public static Node make(String node, boolean value, String server, String world) {
-        return builder(node).value(value).withContext(DefaultContextKeys.SERVER_KEY, server).withContext(DefaultContextKeys.WORLD_KEY, world).build();
-    }
-
-    public static String nodeAsCommand(Node node, String id, HolderType type, boolean set, boolean explicitGlobalContext) {
+    public static String generateCommand(Node node, String id, HolderType type, boolean set, boolean explicitGlobalContext) {
         StringBuilder sb = new StringBuilder(32);
         sb.append(type.toString()).append(" ").append(id).append(" ");
 
@@ -269,5 +184,4 @@ public final class NodeFactory {
 
         return sb;
     }
-
 }

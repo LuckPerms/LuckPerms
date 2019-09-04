@@ -28,7 +28,8 @@ package me.lucko.luckperms.common.model;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.api.implementation.ApiTrack;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.model.manager.group.GroupManager;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 
@@ -302,7 +303,7 @@ public final class Track implements Identifiable<String> {
                 return PromotionResults.undefinedFailure();
             }
 
-            user.setPermission(DataType.NORMAL, NodeFactory.buildGroupNode(nextGroup.getId()).withContext(context).build(), true);
+            user.setPermission(DataType.NORMAL, Inheritance.builder(nextGroup.getId()).withContext(context).build(), true);
             this.plugin.getEventFactory().handleUserPromote(user, this, null, first, sender);
             return PromotionResults.addedToFirst(first);
         }
@@ -329,9 +330,9 @@ public final class Track implements Identifiable<String> {
         }
 
         user.unsetPermission(DataType.NORMAL, oldNode);
-        user.setPermission(DataType.NORMAL, NodeFactory.buildGroupNode(nextGroup.getName()).withContext(context).build(), true);
+        user.setPermission(DataType.NORMAL, Inheritance.builder(nextGroup.getName()).withContext(context).build(), true);
 
-        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(old)) {
+        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME).equalsIgnoreCase(old)) {
             user.getPrimaryGroup().setStoredValue(nextGroup.getName());
         }
 
@@ -385,9 +386,9 @@ public final class Track implements Identifiable<String> {
         }
 
         user.unsetPermission(DataType.NORMAL, oldNode);
-        user.setPermission(DataType.NORMAL, NodeFactory.buildGroupNode(previousGroup.getName()).withContext(context).build(), true);
+        user.setPermission(DataType.NORMAL, Inheritance.builder(previousGroup.getName()).withContext(context).build(), true);
 
-        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(old)) {
+        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME).equalsIgnoreCase(old)) {
             user.getPrimaryGroup().setStoredValue(previousGroup.getName());
         }
 

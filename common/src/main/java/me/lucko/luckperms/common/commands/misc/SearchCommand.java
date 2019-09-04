@@ -45,7 +45,7 @@ import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.node.comparator.HeldPermissionComparator;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeCommandFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
@@ -176,7 +176,8 @@ public class SearchCommand extends SingleCommand {
                 "&7Click to remove this node from " + holderName
         ), CommandManager.AMPERSAND_CHAR));
 
-        String command = "/" + label + " " + NodeFactory.nodeAsCommand(perm.getNode(), holderName, holderType, false, !plugin.getConfiguration().getContextsFile().getDefaultContexts().isEmpty());
+        boolean explicitGlobalContext = !plugin.getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
+        String command = "/" + label + " " + NodeCommandFactory.generateCommand(perm.getNode(), holderName, holderType, false, explicitGlobalContext);
         ClickEvent clickEvent = ClickEvent.suggestCommand(command);
 
         return component -> {

@@ -30,7 +30,6 @@ import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 
@@ -74,7 +73,7 @@ public class ApiGroupManager extends ApiAbstractManager<Group, net.luckperms.api
     }
 
     @Override
-    public @NonNull CompletableFuture<Void> saveGroup(net.luckperms.api.model.group.Group group) {
+    public @NonNull CompletableFuture<Void> saveGroup(net.luckperms.api.model.group.@NonNull Group group) {
         Objects.requireNonNull(group, "group");
         return this.plugin.getStorage().saveGroup(ApiGroup.cast(group)).thenRun(() -> {
             // invalidate caches - they have potentially been affected by
@@ -85,9 +84,9 @@ public class ApiGroupManager extends ApiAbstractManager<Group, net.luckperms.api
     }
 
     @Override
-    public @NonNull CompletableFuture<Void> deleteGroup(net.luckperms.api.model.group.Group group) {
+    public @NonNull CompletableFuture<Void> deleteGroup(net.luckperms.api.model.group.@NonNull Group group) {
         Objects.requireNonNull(group, "group");
-        if (group.getName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
+        if (group.getName().equalsIgnoreCase(GroupManager.DEFAULT_GROUP_NAME)) {
             throw new IllegalArgumentException("Cannot delete the default group.");
         }
 

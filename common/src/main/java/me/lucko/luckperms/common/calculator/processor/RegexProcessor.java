@@ -29,7 +29,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.common.calculator.result.TristateResult;
-import me.lucko.luckperms.common.node.factory.NodeTypes;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
 
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.Tristate;
@@ -59,7 +59,7 @@ public class RegexProcessor extends AbstractPermissionProcessor implements Permi
     public void refresh() {
         ImmutableList.Builder<Map.Entry<Pattern, TristateResult>> builder = ImmutableList.builder();
         for (Map.Entry<String, Boolean> e : this.sourceMap.entrySet()) {
-            Node builtNode = NodeTypes.newBuilder(e.getKey()).build();
+            Node builtNode = NodeBuilders.determineMostApplicable(e.getKey()).build();
             if (!(builtNode instanceof RegexPermissionNode)) {
                 continue;
             }

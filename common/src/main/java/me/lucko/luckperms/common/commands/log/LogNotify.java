@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -76,7 +76,7 @@ public class LogNotify extends SubCommand<Log> {
 
         if (state) {
             // add the perm
-            user.setPermission(DataType.NORMAL, NodeFactory.make(IGNORE_NODE), true);
+            user.setPermission(DataType.NORMAL, NodeBuilders.determineMostApplicable(IGNORE_NODE).build(), true);
         } else {
             // remove the perm
             user.removeIf(DataType.NORMAL, ImmutableContextSetImpl.EMPTY, n -> n.getKey().equalsIgnoreCase(IGNORE_NODE), null);

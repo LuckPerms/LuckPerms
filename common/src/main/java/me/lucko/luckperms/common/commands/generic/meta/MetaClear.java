@@ -38,7 +38,6 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.factory.NodeTypes;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -70,13 +69,13 @@ public class MetaClear extends SharedSubCommand {
             if (typeId.equals("chat") || typeId.equals("chatmeta")) {
                 type = NodeType.CHAT_META;
             }
-            if (typeId.equals(NodeTypes.META_KEY)) {
+            if (typeId.equals("meta")) {
                 type = NodeType.META;
             }
-            if (typeId.equals(NodeTypes.PREFIX_KEY) || typeId.equals("prefixes")) {
+            if (typeId.equals("prefix") || typeId.equals("prefixes")) {
                 type = NodeType.PREFIX;
             }
-            if (typeId.equals(NodeTypes.SUFFIX_KEY) || typeId.equals("suffixes")) {
+            if (typeId.equals("suffix") || typeId.equals("suffixes")) {
                 type = NodeType.SUFFIX;
             }
 

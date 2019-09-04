@@ -38,7 +38,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.types.DisplayName;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -95,7 +95,7 @@ public class GroupSetDisplayName extends SubCommand<Group> {
             return CommandResult.SUCCESS;
         }
 
-        group.setPermission(DataType.NORMAL, NodeFactory.builder(NodeFactory.displayName(name)).withContext(context).build(), true);
+        group.setPermission(DataType.NORMAL, DisplayName.builder(name).withContext(context).build(), true);
 
         Message.GROUP_SET_DISPLAY_NAME.send(sender, name, group.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 

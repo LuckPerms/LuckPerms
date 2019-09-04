@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.primarygroup;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 
 import net.luckperms.api.query.QueryOptions;
@@ -67,7 +67,7 @@ public abstract class ContextualHolder extends StoredHolder {
         }
 
         return Objects.requireNonNull(this.cache.get(queryOptions))
-                .orElseGet(() -> getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
+                .orElseGet(() -> getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME));
     }
 
 }

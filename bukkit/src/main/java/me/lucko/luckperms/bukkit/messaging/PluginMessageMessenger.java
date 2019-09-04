@@ -90,7 +90,7 @@ public class PluginMessageMessenger implements Messenger, PluginMessageListener 
     }
 
     @Override
-    public void onPluginMessageReceived(String s, Player player, byte[] bytes) {
+    public void onPluginMessageReceived(String s, @NonNull Player player, @NonNull byte[] bytes) {
         if (!s.equals(CHANNEL)) {
             return;
         }

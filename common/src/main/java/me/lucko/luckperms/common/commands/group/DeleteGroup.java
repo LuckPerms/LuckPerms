@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -59,7 +59,7 @@ public class DeleteGroup extends SingleCommand {
 
         String groupName = args.get(0).toLowerCase();
 
-        if (groupName.equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
+        if (groupName.equalsIgnoreCase(GroupManager.DEFAULT_GROUP_NAME)) {
             Message.DELETE_GROUP_ERROR_DEFAULT.send(sender);
             return CommandResult.INVALID_ARGS;
         }

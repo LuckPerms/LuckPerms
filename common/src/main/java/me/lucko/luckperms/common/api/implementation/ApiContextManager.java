@@ -108,7 +108,7 @@ public class ApiContextManager implements net.luckperms.api.context.ContextManag
     @Override
     public @NonNull QueryOptions formQueryOptions(@NonNull ImmutableContextSet contextSet) {
         Objects.requireNonNull(contextSet, "contextSet");
-        return handle.formQueryOptions(contextSet);
+        return this.handle.formQueryOptions(contextSet);
     }
 
     @Override

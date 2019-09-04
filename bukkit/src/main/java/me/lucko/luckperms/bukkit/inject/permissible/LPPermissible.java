@@ -134,7 +134,7 @@ public class LPPermissible extends PermissibleBase {
     }
 
     @Override
-    public boolean isPermissionSet(String permission) {
+    public boolean isPermissionSet(@NonNull String permission) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
@@ -145,15 +145,11 @@ public class LPPermissible extends PermissibleBase {
         }
 
         // ignore matches made from looking up in the permission map (replicate bukkit behaviour)
-        if (result.processorClass() == DefaultsProcessor.class && "permission map".equals(result.cause())) {
-            return false;
-        }
-
-        return true;
+        return !(result.processorClass() == DefaultsProcessor.class && "permission map".equals(result.cause()));
     }
 
     @Override
-    public boolean isPermissionSet(Permission permission) {
+    public boolean isPermissionSet(@NonNull Permission permission) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
@@ -162,7 +158,7 @@ public class LPPermissible extends PermissibleBase {
     }
 
     @Override
-    public boolean hasPermission(String permission) {
+    public boolean hasPermission(@NonNull String permission) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
@@ -172,7 +168,7 @@ public class LPPermissible extends PermissibleBase {
     }
 
     @Override
-    public boolean hasPermission(Permission permission) {
+    public boolean hasPermission(@NonNull Permission permission) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
@@ -205,6 +201,7 @@ public class LPPermissible extends PermissibleBase {
         this.player.setOp(value);
     }
 
+    @NonNull
     @Override
     public Set<PermissionAttachmentInfo> getEffectivePermissions() {
         return this.user.getCachedData().getPermissionData(this.queryOptionsSupplier.getQueryOptions()).getPermissionMap().entrySet().stream()
@@ -212,8 +209,9 @@ public class LPPermissible extends PermissibleBase {
                 .collect(ImmutableCollectors.toSet());
     }
 
+    @NonNull
     @Override
-    public LPPermissionAttachment addAttachment(Plugin plugin) {
+    public LPPermissionAttachment addAttachment(@NonNull Plugin plugin) {
         if (plugin == null) {
             throw new NullPointerException("plugin");
         }
@@ -223,8 +221,9 @@ public class LPPermissible extends PermissibleBase {
         return ret;
     }
 
+    @NonNull
     @Override
-    public PermissionAttachment addAttachment(Plugin plugin, String permission, boolean value) {
+    public PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String permission, boolean value) {
         if (plugin == null) {
             throw new NullPointerException("plugin");
         }
@@ -238,7 +237,7 @@ public class LPPermissible extends PermissibleBase {
     }
 
     @Override
-    public LPPermissionAttachment addAttachment(Plugin plugin, int ticks) {
+    public LPPermissionAttachment addAttachment(@NonNull Plugin plugin, int ticks) {
         if (plugin == null) {
             throw new NullPointerException("plugin");
         }
@@ -256,7 +255,7 @@ public class LPPermissible extends PermissibleBase {
     }
 
     @Override
-    public LPPermissionAttachment addAttachment(Plugin plugin, String permission, boolean value, int ticks) {
+    public LPPermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String permission, boolean value, int ticks) {
         if (plugin == null) {
             throw new NullPointerException("plugin");
         }
@@ -270,7 +269,7 @@ public class LPPermissible extends PermissibleBase {
     }
 
     @Override
-    public void removeAttachment(PermissionAttachment attachment) {
+    public void removeAttachment(@NonNull PermissionAttachment attachment) {
         if (attachment == null) {
             throw new NullPointerException("attachment");
         }

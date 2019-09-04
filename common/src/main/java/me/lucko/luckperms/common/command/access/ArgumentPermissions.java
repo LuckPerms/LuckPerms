@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
@@ -305,7 +305,7 @@ public final class ArgumentPermissions {
         }
 
         PermissionCache permissionData = user.getCachedData().getPermissionData(QueryOptions.defaultContextualOptions().toBuilder().context(contextSet).build());
-        TristateResult result = permissionData.checkPermission(NodeFactory.groupNode(targetGroupName), PermissionCheckEvent.Origin.INTERNAL);
+        TristateResult result = permissionData.checkPermission(Inheritance.key(targetGroupName), PermissionCheckEvent.Origin.INTERNAL);
         return result.result() != Tristate.TRUE || result.processorClass() != MapProcessor.class;
     }
     

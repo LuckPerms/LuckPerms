@@ -41,7 +41,6 @@ import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
@@ -49,9 +48,8 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.model.manager.track.TrackManager;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.node.model.HeldNodeImpl;
-import me.lucko.luckperms.common.node.model.NodeDataContainer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
@@ -60,12 +58,13 @@ import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextSet;
-import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.DataType;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.node.HeldNode;
 import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeBuilder;
 
 import org.bson.Document;
 
@@ -253,8 +252,8 @@ public class MongoStorage implements StorageImplementation {
                     Document d = cursor.next();
 
                     UUID uuid = d.get("_id", UUID.class);
-                    Set<NodeDataContainer> nodes = new HashSet<>(nodesFromDoc(d));
-                    Set<NodeDataContainer> results = nodes.stream()
+                    Set<Node> nodes = new HashSet<>(nodesFromDoc(d));
+                    Set<Node> results = nodes.stream()
                             .map(bulkUpdate::apply)
                             .filter(Objects::nonNull)
                             .collect(Collectors.toSet());
@@ -278,8 +277,8 @@ public class MongoStorage implements StorageImplementation {
                     Document d = cursor.next();
 
                     String holder = d.getString("_id");
-                    Set<NodeDataContainer> nodes = new HashSet<>(nodesFromDoc(d));
-                    Set<NodeDataContainer> results = nodes.stream()
+                    Set<Node> nodes = new HashSet<>(nodesFromDoc(d));
+                    Set<Node> results = nodes.stream()
                             .map(bulkUpdate::apply)
                             .filter(Objects::nonNull)
                             .collect(Collectors.toSet());
@@ -310,9 +309,7 @@ public class MongoStorage implements StorageImplementation {
 
                     String name = d.getString("name");
                     user.getPrimaryGroup().setStoredValue(d.getString("primaryGroup"));
-
-                    Set<Node> nodes = nodesFromDoc(d).stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
-                    user.setNodes(DataType.NORMAL, nodes);
+                    user.setNodes(DataType.NORMAL, nodesFromDoc(d));
                     user.setName(name, true);
 
                     boolean save = this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
@@ -374,12 +371,12 @@ public class MongoStorage implements StorageImplementation {
                 Document d = cursor.next();
                 UUID holder = d.get("_id", UUID.class);
 
-                Set<NodeDataContainer> nodes = new HashSet<>(nodesFromDoc(d));
-                for (NodeDataContainer e : nodes) {
-                    if (!constraint.eval(e.getPermission())) {
+                Set<Node> nodes = new HashSet<>(nodesFromDoc(d));
+                for (Node e : nodes) {
+                    if (!constraint.eval(e.getKey())) {
                         continue;
                     }
-                    held.add(HeldNodeImpl.of(holder, e.toNode()));
+                    held.add(HeldNodeImpl.of(holder, e));
                 }
             }
         }
@@ -395,8 +392,7 @@ public class MongoStorage implements StorageImplementation {
             try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
                 if (cursor.hasNext()) {
                     Document d = cursor.next();
-                    Set<Node> nodes = nodesFromDoc(d).stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
-                    group.setNodes(DataType.NORMAL, nodes);
+                    group.setNodes(DataType.NORMAL, nodesFromDoc(d));
                 } else {
                     c.insertOne(groupToDoc(group));
                 }
@@ -426,8 +422,7 @@ public class MongoStorage implements StorageImplementation {
                 }
 
                 Document d = cursor.next();
-                Set<Node> nodes = nodesFromDoc(d).stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
-                group.setNodes(DataType.NORMAL, nodes);
+                group.setNodes(DataType.NORMAL, nodesFromDoc(d));
             }
         } finally {
             if (group != null) {
@@ -497,14 +492,14 @@ public class MongoStorage implements StorageImplementation {
         try (MongoCursor<Document> cursor = c.find().iterator()) {
             while (cursor.hasNext()) {
                 Document d = cursor.next();
-
                 String holder = d.getString("_id");
-                Set<NodeDataContainer> nodes = new HashSet<>(nodesFromDoc(d));
-                for (NodeDataContainer e : nodes) {
-                    if (!constraint.eval(e.getPermission())) {
+
+                Set<Node> nodes = new HashSet<>(nodesFromDoc(d));
+                for (Node e : nodes) {
+                    if (!constraint.eval(e.getKey())) {
                         continue;
                     }
-                    held.add(HeldNodeImpl.of(holder, e.toNode()));
+                    held.add(HeldNodeImpl.of(holder, e));
                 }
             }
         }
@@ -670,18 +665,17 @@ public class MongoStorage implements StorageImplementation {
 
     private static Document userToDoc(User user) {
         List<Document> nodes = user.normalData().immutable().values().stream()
-                .map(NodeDataContainer::fromNode)
                 .map(MongoStorage::nodeToDoc)
                 .collect(Collectors.toList());
 
         return new Document("_id", user.getUuid())
                 .append("name", user.getName().orElse("null"))
-                .append("primaryGroup", user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME))
+                .append("primaryGroup", user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME))
                 .append("permissions", nodes);
     }
 
-    private static List<NodeDataContainer> nodesFromDoc(Document document) {
-        List<NodeDataContainer> nodes = new ArrayList<>();
+    private static List<Node> nodesFromDoc(Document document) {
+        List<Node> nodes = new ArrayList<>();
         if (document.containsKey("permissions") && document.get("permissions") instanceof List) {
             //noinspection unchecked
             List<Document> permsList = (List<Document>) document.get("permissions");
@@ -694,7 +688,6 @@ public class MongoStorage implements StorageImplementation {
 
     private static Document groupToDoc(Group group) {
         List<Document> nodes = group.normalData().immutable().values().stream()
-                .map(NodeDataContainer::fromNode)
                 .map(MongoStorage::nodeToDoc)
                 .collect(Collectors.toList());
 
@@ -705,22 +698,15 @@ public class MongoStorage implements StorageImplementation {
         return new Document("_id", track.getName()).append("groups", track.getGroups());
     }
 
-    private static Document nodeToDoc(NodeDataContainer node) {
+    private static Document nodeToDoc(Node node) {
         Document document = new Document();
 
-        document.append("permission", node.getPermission());
+        document.append("key", node.getKey());
         document.append("value", node.getValue());
 
-        if (!node.getServer().equals("global")) {
-            document.append("server", node.getServer());
-        }
-
-        if (!node.getWorld().equals("global")) {
-            document.append("world", node.getWorld());
-        }
-
-        if (node.getExpiry() != 0L) {
-            document.append("expiry", node.getExpiry());
+        Instant expiry = node.getExpiry();
+        if (expiry != null) {
+            document.append("expiry", expiry.getEpochSecond());
         }
 
         if (!node.getContexts().isEmpty()) {
@@ -730,34 +716,31 @@ public class MongoStorage implements StorageImplementation {
         return document;
     }
 
-    private static NodeDataContainer nodeFromDoc(Document document) {
-        String permission = document.getString("permission");
-        boolean value = true;
-        String server = "global";
-        String world = "global";
-        long expiry = 0L;
-        ImmutableContextSet context = ImmutableContextSetImpl.EMPTY;
+    private static Node nodeFromDoc(Document document) {
+        String key = document.containsKey("permission") ? document.getString("permission") : document.getString("key");
 
-        if (document.containsKey("value")) {
-            value = document.getBoolean("value");
-        }
+        NodeBuilder<?, ?> builder = NodeBuilders.determineMostApplicable(key)
+                .value(document.getBoolean("value", true));
+
         if (document.containsKey("server")) {
-            server = document.getString("server");
+            builder.withContext(DefaultContextKeys.SERVER_KEY, document.getString("server"));
         }
+
         if (document.containsKey("world")) {
-            world = document.getString("world");
+            builder.withContext(DefaultContextKeys.WORLD_KEY, document.getString("world"));
         }
+
         if (document.containsKey("expiry")) {
-            expiry = document.getLong("expiry");
+            builder.expiry(document.getLong("expiry"));
         }
 
         if (document.containsKey("context") && document.get("context") instanceof List) {
             //noinspection unchecked
             List<Document> contexts = (List<Document>) document.get("context");
-            context = docsToContextSet(contexts).immutableCopy();
+            builder.withContext(docsToContextSet(contexts));
         }
 
-        return NodeDataContainer.of(permission, value, server, world, expiry, context);
+        return builder.build();
     }
 
     private static List<Document> contextSetToDocs(ContextSet contextSet) {

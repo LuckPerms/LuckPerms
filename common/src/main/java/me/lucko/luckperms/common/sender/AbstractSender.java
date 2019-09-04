@@ -46,7 +46,7 @@ public final class AbstractSender<T> implements Sender {
 
     private final LuckPermsPlugin platform;
     private final SenderFactory<T> factory;
-    private final WeakReference<T> reference;
+    private final WeakReference<T> sender;
 
     private final UUID uuid;
     private final String name;
@@ -54,7 +54,7 @@ public final class AbstractSender<T> implements Sender {
     AbstractSender(LuckPermsPlugin platform, SenderFactory<T> factory, T t) {
         this.platform = platform;
         this.factory = factory;
-        this.reference = new WeakReference<>(t);
+        this.sender = new WeakReference<>(t);
         this.uuid = factory.getUuid(t);
         this.name = factory.getName(t);
     }
@@ -76,17 +76,16 @@ public final class AbstractSender<T> implements Sender {
 
     @Override
     public void sendMessage(String message) {
-        final T t = this.reference.get();
-        if (t != null) {
-
-            if (!isConsole()) {
-                this.factory.sendMessage(t, message);
-                return;
-            }
+        final T sender = this.sender.get();
+        if (sender != null) {
 
             // if it is console, split up the lines and send individually.
-            for (String line : NEW_LINE_SPLITTER.split(message)) {
-                this.factory.sendMessage(t, line);
+            if (isConsole()) {
+                for (String line : NEW_LINE_SPLITTER.split(message)) {
+                    this.factory.sendMessage(sender, line);
+                }
+            } else {
+                this.factory.sendMessage(sender, message);
             }
         }
     }
@@ -98,17 +97,17 @@ public final class AbstractSender<T> implements Sender {
             return;
         }
 
-        final T t = this.reference.get();
-        if (t != null) {
-            this.factory.sendMessage(t, message);
+        final T sender = this.sender.get();
+        if (sender != null) {
+            this.factory.sendMessage(sender, message);
         }
     }
 
     @Override
     public Tristate getPermissionValue(String permission) {
-        T t = this.reference.get();
-        if (t != null) {
-            return this.factory.getPermissionValue(t, permission);
+        T sender = this.sender.get();
+        if (sender != null) {
+            return this.factory.getPermissionValue(sender, permission);
         }
 
         return isConsole() ? Tristate.TRUE : Tristate.UNDEFINED;
@@ -116,9 +115,9 @@ public final class AbstractSender<T> implements Sender {
 
     @Override
     public boolean hasPermission(String permission) {
-        T t = this.reference.get();
-        if (t != null) {
-            if (this.factory.hasPermission(t, permission)) {
+        T sender = this.sender.get();
+        if (sender != null) {
+            if (this.factory.hasPermission(sender, permission)) {
                 return true;
             }
         }
@@ -128,7 +127,7 @@ public final class AbstractSender<T> implements Sender {
 
     @Override
     public boolean isValid() {
-        return this.reference.get() != null;
+        return this.sender.get() != null;
     }
 
     @Override

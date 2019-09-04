@@ -118,9 +118,6 @@ public class FileWatcher {
         // the parent watcher
         private final FileWatcher watcher;
 
-        // the relative path to the directory being watched
-        private final Path relativePath;
-
         // the absolute path to the directory being watched
         private final Path absolutePath;
 
@@ -138,8 +135,7 @@ public class FileWatcher {
 
         private WatchedLocation(FileWatcher watcher, Path relativePath) {
             this.watcher = watcher;
-            this.relativePath = relativePath;
-            this.absolutePath = this.watcher.basePath.resolve(this.relativePath);
+            this.absolutePath = this.watcher.basePath.resolve(relativePath);
         }
 
         private synchronized void setup() throws IOException {
@@ -193,7 +189,7 @@ public class FileWatcher {
                 this.lastChange.put(fileName, System.currentTimeMillis());
 
                 // process the change
-                Iterators.iterate(this.callbacks, cb -> cb.accept(context));
+                Iterators.tryIterate(this.callbacks, cb -> cb.accept(context));
             }
 
             // reset the watch key.

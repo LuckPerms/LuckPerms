@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.node.types;
 import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.node.AbstractNode;
 import me.lucko.luckperms.common.node.AbstractNodeBuilder;
-import me.lucko.luckperms.common.node.factory.NodeTypes;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
 
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.NodeBuilder;
@@ -42,6 +42,10 @@ import java.util.Objects;
 import java.util.OptionalInt;
 
 public class Permission extends AbstractNode<PermissionNode, PermissionNode.Builder> implements PermissionNode {
+    public static Builder builder() {
+        return new Builder();
+    }
+
     private final int wildcardLevel;
 
     public Permission(String permission, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
@@ -72,7 +76,7 @@ public class Permission extends AbstractNode<PermissionNode, PermissionNode.Buil
     public static final class Builder extends AbstractNodeBuilder<PermissionNode, PermissionNode.Builder> implements PermissionNode.Builder {
         private String permission;
 
-        public Builder() {
+        private Builder() {
             this.permission = null;
         }
 
@@ -91,7 +95,7 @@ public class Permission extends AbstractNode<PermissionNode, PermissionNode.Buil
         public @NonNull Permission build() {
             Objects.requireNonNull(this.permission, "permission");
 
-            NodeBuilder<?, ?> testBuilder = NodeTypes.newBuilder(this.permission);
+            NodeBuilder<?, ?> testBuilder = NodeBuilders.determineMostApplicable(this.permission);
             if (!(testBuilder instanceof Builder)) {
                 throw new IllegalArgumentException("Attempting to build non-permission node with PermissionNode.Builder. permission = '" + this.permission + "', correct builder type = " + testBuilder.getClass().getName());
             }

@@ -27,6 +27,8 @@ package me.lucko.luckperms.common.util;
 
 import com.google.common.collect.Range;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.function.Predicate;
 
 /**
@@ -37,14 +39,20 @@ public final class Predicates {
 
     private static final Predicate FALSE = new Predicate() {
         @Override public boolean test(Object o) { return false; }
-        @Override public Predicate and(Predicate other) { return this; }
-        @Override public Predicate or(Predicate other) { return other; }
+        @NonNull
+        @Override public Predicate and(@NonNull Predicate other) { return this; }
+        @NonNull
+        @Override public Predicate or(@NonNull Predicate other) { return other; }
+        @NonNull
         @Override public Predicate negate() { return TRUE; }
     };
     private static final Predicate TRUE = new Predicate() {
         @Override public boolean test(Object o) { return true; }
-        @Override public Predicate and(Predicate other) { return other; }
-        @Override public Predicate or(Predicate other) { return this; }
+        @NonNull
+        @Override public Predicate and(@NonNull Predicate other) { return other; }
+        @NonNull
+        @Override public Predicate or(@NonNull Predicate other) { return this; }
+        @NonNull
         @Override public Predicate negate() { return FALSE; }
     };
 

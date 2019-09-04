@@ -53,15 +53,13 @@ public class ParentsByWeightHolder extends ContextualHolder {
         }
 
         Group bestGroup = null;
+        int best = 0;
 
-        if (!groups.isEmpty()) {
-            int best = 0;
-            for (Group g : groups) {
-                int weight = g.getWeight().orElse(0);
-                if (bestGroup == null || g.getWeight().orElse(0) > best) {
-                    bestGroup = g;
-                    best = weight;
-                }
+        for (Group g : groups) {
+            int weight = g.getWeight().orElse(0);
+            if (bestGroup == null || weight > best) {
+                bestGroup = g;
+                best = weight;
             }
         }
 

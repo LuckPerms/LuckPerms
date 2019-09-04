@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.node.types;
 
 import me.lucko.luckperms.common.node.AbstractNode;
 import me.lucko.luckperms.common.node.AbstractNodeBuilder;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
 
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.group.Group;
@@ -35,15 +34,31 @@ import net.luckperms.api.node.metadata.NodeMetadataKey;
 import net.luckperms.api.node.types.InheritanceNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
 
 public class Inheritance extends AbstractNode<InheritanceNode, InheritanceNode.Builder> implements InheritanceNode {
+    private static final String NODE_KEY = "group";
+    private static final String NODE_MARKER = NODE_KEY + ".";
+
+    public static String key(String groupName) {
+        return NODE_MARKER + groupName;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static Builder builder(String groupName) {
+        return builder().group(groupName);
+    }
+
     private final String groupName;
 
     public Inheritance(String groupName, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
-        super(NodeFactory.groupNode(groupName), value, expireAt, contexts, metadata);
+        super(key(groupName), value, expireAt, contexts, metadata);
         this.groupName = groupName;
     }
 
@@ -57,10 +72,20 @@ public class Inheritance extends AbstractNode<InheritanceNode, InheritanceNode.B
         return new Builder(this.groupName, this.value, this.expireAt, this.contexts, this.metadata);
     }
 
+    public static @Nullable Builder parse(String key) {
+        key = key.toLowerCase();
+        if (!key.startsWith(NODE_MARKER)) {
+            return null;
+        }
+
+        return builder()
+                .group(key.substring(NODE_MARKER.length()));
+    }
+
     public static final class Builder extends AbstractNodeBuilder<InheritanceNode, InheritanceNode.Builder> implements InheritanceNode.Builder {
         private String groupName;
 
-        public Builder() {
+        private Builder() {
             this.groupName = null;
         }
 

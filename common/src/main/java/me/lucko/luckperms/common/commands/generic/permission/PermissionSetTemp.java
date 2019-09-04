@@ -41,7 +41,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
@@ -82,7 +82,7 @@ public class PermissionSetTemp extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        Node builtNode = NodeFactory.builder(node).value(value).withContext(context).expiry(duration).build();
+        Node builtNode = NodeBuilders.determineMostApplicable(node).value(value).withContext(context).expiry(duration).build();
 
         if (builtNode instanceof InheritanceNode) {
             if (ArgumentPermissions.checkGroup(plugin, sender, ((InheritanceNode) builtNode).getGroupName(), context)) {

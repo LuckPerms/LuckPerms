@@ -39,7 +39,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.types.Meta;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
@@ -82,15 +82,15 @@ public class MetaSetTemp extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        Node n = NodeFactory.buildMetaNode(key, value).withContext(context).expiry(duration).build();
+        Node node = Meta.builder(key, value).withContext(context).expiry(duration).build();
 
-        if (holder.hasPermission(DataType.NORMAL, n, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
+        if (holder.hasPermission(DataType.NORMAL, node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
             Message.ALREADY_HAS_TEMP_META.send(sender, holder.getFormattedDisplayName(), key, value, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
 
-        holder.removeIf(DataType.NORMAL, context, n1 -> n1 instanceof MetaNode && (n1.hasExpiry() == true) && ((MetaNode) n1).getMetaKey().equalsIgnoreCase(key), null);
-        duration = holder.setPermission(DataType.NORMAL, n, modifier).getMergedNode().getExpiry().getEpochSecond();
+        holder.removeIf(DataType.NORMAL, context, n -> n instanceof MetaNode && n.hasExpiry() && ((MetaNode) n).getMetaKey().equalsIgnoreCase(key), null);
+        duration = holder.setPermission(DataType.NORMAL, node, modifier).getMergedNode().getExpiry().getEpochSecond();
 
         TextComponent.Builder builder = Message.SET_META_TEMP_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, holder.getFormattedDisplayName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
         HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(

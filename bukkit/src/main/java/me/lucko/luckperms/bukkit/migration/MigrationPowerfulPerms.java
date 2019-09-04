@@ -43,7 +43,11 @@ import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.model.manager.group.GroupManager;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
+import me.lucko.luckperms.common.node.types.Inheritance;
+import me.lucko.luckperms.common.node.types.Prefix;
+import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.StorageType;
@@ -160,7 +164,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         // Groups first.
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
-        Iterators.iterate(groups, g -> {
+        Iterators.tryIterate(groups, g -> {
             maxWeight.set(Math.max(maxWeight.get(), g.getRank()));
 
             String groupName = MigrationUtils.standardizeName(g.getName());
@@ -173,7 +177,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             }
 
             for (Group parent : g.getParents()) {
-                group.setPermission(DataType.NORMAL, NodeFactory.buildGroupNode(parent.getName().toLowerCase()).build(), true);
+                group.setPermission(DataType.NORMAL, Inheritance.builder(parent.getName().toLowerCase()).build(), true);
             }
 
             // server --> prefix afaik
@@ -186,9 +190,9 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 }
 
                 if (server != null) {
-                    group.setPermission(DataType.NORMAL, NodeFactory.buildPrefixNode(g.getRank(), prefix.getValue()).withContext(DefaultContextKeys.SERVER_KEY, server).build(), true);
+                    group.setPermission(DataType.NORMAL, Prefix.builder(g.getRank(), prefix.getValue()).withContext(DefaultContextKeys.SERVER_KEY, server).build(), true);
                 } else {
-                    group.setPermission(DataType.NORMAL, NodeFactory.buildPrefixNode(g.getRank(), prefix.getValue()).build(), true);
+                    group.setPermission(DataType.NORMAL, Prefix.builder(g.getRank(), prefix.getValue()).build(), true);
                 }
             }
 
@@ -201,9 +205,9 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 }
 
                 if (server != null) {
-                    group.setPermission(DataType.NORMAL, NodeFactory.buildSuffixNode(g.getRank(), suffix.getValue()).withContext(DefaultContextKeys.SERVER_KEY, server).build(), true);
+                    group.setPermission(DataType.NORMAL, Suffix.builder(g.getRank(), suffix.getValue()).withContext(DefaultContextKeys.SERVER_KEY, server).build(), true);
                 } else {
-                    group.setPermission(DataType.NORMAL, NodeFactory.buildSuffixNode(g.getRank(), suffix.getValue()).build(), true);
+                    group.setPermission(DataType.NORMAL, Suffix.builder(g.getRank(), suffix.getValue()).build(), true);
                 }
             }
 
@@ -220,7 +224,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         maxWeight.addAndGet(5);
 
         // Migrate all users and their groups
-        Iterators.iterate(uuids, uuid -> {
+        Iterators.tryIterate(uuids, uuid -> {
 
             // Create a LuckPerms user for the UUID
             User user = plugin.getStorage().loadUser(uuid, null).join();
@@ -248,18 +252,18 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             String suffix = joinFuture(pm.getPlayerOwnSuffix(uuid));
 
             if (prefix != null && !prefix.isEmpty()) {
-                user.setPermission(DataType.NORMAL, NodeFactory.buildPrefixNode(maxWeight.get(), prefix).build(), true);
+                user.setPermission(DataType.NORMAL, Prefix.builder(maxWeight.get(), prefix).build(), true);
             }
 
             if (suffix != null && !suffix.isEmpty()) {
-                user.setPermission(DataType.NORMAL, NodeFactory.buildSuffixNode(maxWeight.get(), suffix).build(), true);
+                user.setPermission(DataType.NORMAL, Suffix.builder(maxWeight.get(), suffix).build(), true);
             }
 
             Group primaryGroup = joinFuture(pm.getPlayerPrimaryGroup(uuid));
             if (primaryGroup != null && primaryGroup.getName() != null) {
                 String primary = primaryGroup.getName().toLowerCase();
-                if (!primary.equals(NodeFactory.DEFAULT_GROUP_NAME)) {
-                    user.setPermission(DataType.NORMAL, NodeFactory.buildGroupNode(primary).build(), true);
+                if (!primary.equals(GroupManager.DEFAULT_GROUP_NAME)) {
+                    user.setPermission(DataType.NORMAL, Inheritance.builder(primary).build(), true);
                     user.getPrimaryGroup().setStoredValue(primary);
                 }
             }
@@ -305,7 +309,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             server = "global";
         }
 
-        NodeBuilder nb = NodeFactory.builder(node).value(value);
+        NodeBuilder nb = NodeBuilders.determineMostApplicable(node).value(value);
         if (expireAt != 0) nb.expiry(expireAt);
         if (server != null) nb.withContext(DefaultContextKeys.SERVER_KEY, server);
         if (world != null) nb.withContext(DefaultContextKeys.WORLD_KEY, world);
@@ -315,14 +319,13 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
     private void applyGroup(PermissionManager pm, PermissionHolder holder, CachedGroup g, String server) {
         Group group = pm.getGroup(g.getGroupId());
-        String node = NodeFactory.groupNode(MigrationUtils.standardizeName(group.getName()));
 
         long expireAt = 0L;
         if (g.willExpire()) {
             expireAt = g.getExpirationDate().getTime() / 1000L;
         }
 
-        NodeBuilder nb = NodeFactory.builder(node);
+        NodeBuilder nb = Inheritance.builder(MigrationUtils.standardizeName(group.getName()));
 
         if (expireAt != 0) {
             nb.expiry(expireAt);

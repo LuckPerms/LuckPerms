@@ -31,7 +31,7 @@ import com.google.common.collect.ListMultimap;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.metastacking.MetaStack;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStack;
-import me.lucko.luckperms.common.node.factory.NodeTypes;
+import me.lucko.luckperms.common.node.types.Weight;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.luckperms.api.node.ChatMetaType;
@@ -110,8 +110,8 @@ public class MetaAccumulator {
         }
 
         // perform final changes
-        if (!this.meta.containsKey(NodeTypes.WEIGHT_KEY) && this.weight != 0) {
-            this.meta.put(NodeTypes.WEIGHT_KEY, String.valueOf(this.weight));
+        if (!this.meta.containsKey(Weight.NODE_KEY) && this.weight != 0) {
+            this.meta.put(Weight.NODE_KEY, String.valueOf(this.weight));
         }
 
         this.state.set(State.COMPLETE);

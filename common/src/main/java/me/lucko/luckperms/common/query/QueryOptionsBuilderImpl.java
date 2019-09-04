@@ -46,7 +46,7 @@ import java.util.Set;
 public class QueryOptionsBuilderImpl implements QueryOptions.Builder {
     private QueryMode mode;
     private ImmutableContextSet context;
-    private byte flags;
+    private final byte flags;
     private Set<Flag> flagsSet;
     private Map<OptionKey<?>, Object> options;
     private boolean copyOptions;

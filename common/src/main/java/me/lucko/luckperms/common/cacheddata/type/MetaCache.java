@@ -33,7 +33,8 @@ import com.google.common.collect.Multimaps;
 
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.metastacking.MetaStack;
-import me.lucko.luckperms.common.node.factory.NodeTypes;
+import me.lucko.luckperms.common.node.types.Prefix;
+import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 
@@ -122,7 +123,7 @@ public class MetaCache implements CachedMetaData {
 
         // log this meta lookup to the verbose handler
         VerboseHandler verboseHandler = this.metadata.getParentContainer().getPlugin().getVerboseHandler();
-        verboseHandler.offerMetaCheckEvent(origin, this.metadata.getObjectName(), this.metadata.getQueryOptions(), NodeTypes.PREFIX_KEY, String.valueOf(value));
+        verboseHandler.offerMetaCheckEvent(origin, this.metadata.getObjectName(), this.metadata.getQueryOptions(), Prefix.NODE_KEY, String.valueOf(value));
 
         return value;
     }
@@ -138,7 +139,7 @@ public class MetaCache implements CachedMetaData {
 
         // log this meta lookup to the verbose handler
         VerboseHandler verboseHandler = this.metadata.getParentContainer().getPlugin().getVerboseHandler();
-        verboseHandler.offerMetaCheckEvent(origin, this.metadata.getObjectName(), this.metadata.getQueryOptions(), NodeTypes.SUFFIX_KEY, String.valueOf(value));
+        verboseHandler.offerMetaCheckEvent(origin, this.metadata.getObjectName(), this.metadata.getQueryOptions(), Suffix.NODE_KEY, String.valueOf(value));
 
         return value;
     }

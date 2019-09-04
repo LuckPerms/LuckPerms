@@ -33,8 +33,11 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
-import me.lucko.luckperms.common.node.factory.NodeTypes;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
+import me.lucko.luckperms.common.node.types.Inheritance;
+import me.lucko.luckperms.common.node.types.Meta;
+import me.lucko.luckperms.common.node.types.Prefix;
+import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
@@ -47,6 +50,7 @@ import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.Tristate;
+import net.luckperms.api.node.types.ChatMetaNode;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.node.types.PrefixNode;
@@ -126,12 +130,12 @@ public class PermissionHolderSubjectData implements LPSubjectData {
 
         if (tristate == Tristate.UNDEFINED) {
             // Unset
-            Node node = NodeFactory.builder(permission).withContext(contexts).build();
+            Node node = NodeBuilders.determineMostApplicable(permission).withContext(contexts).build();
             this.holder.unsetPermission(this.type, node);
             return save(this.holder).thenApply(v -> true);
         }
 
-        Node node = NodeFactory.builder(permission).value(tristate.asBoolean()).withContext(contexts).build();
+        Node node = NodeBuilders.determineMostApplicable(permission).value(tristate.asBoolean()).withContext(contexts).build();
         // unset the inverse, to allow false -> true, true -> false overrides.
         this.holder.unsetPermission(this.type, node);
         this.holder.setPermission(this.type, node, true);
@@ -200,7 +204,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             return CompletableFuture.completedFuture(false);
         }
 
-        Node node = NodeFactory.buildGroupNode(subject.getSubjectIdentifier())
+        Node node = Inheritance.builder(subject.getSubjectIdentifier())
                 .withContext(contexts)
                 .build();
 
@@ -220,7 +224,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             return CompletableFuture.completedFuture(false);
         }
 
-        Node node = NodeFactory.buildGroupNode(subject.getSubjectIdentifier())
+        Node node = Inheritance.builder(subject.getSubjectIdentifier())
                 .withContext(contexts)
                 .build();
 
@@ -307,7 +311,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             if (n instanceof PrefixNode) {
                 PrefixNode pn = (PrefixNode) n;
                 if (pn.getPriority() > maxPrefixPriority) {
-                    builder.put(NodeTypes.PREFIX_KEY, pn.getMetaValue());
+                    builder.put(Prefix.NODE_KEY, pn.getMetaValue());
                     maxPrefixPriority = pn.getPriority();
                 }
                 continue;
@@ -316,7 +320,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             if (n instanceof SuffixNode) {
                 SuffixNode sn = (SuffixNode) n;
                 if (sn.getPriority() > maxSuffixPriority) {
-                    builder.put(NodeTypes.SUFFIX_KEY, sn.getMetaValue());
+                    builder.put(Suffix.NODE_KEY, sn.getMetaValue());
                     maxSuffixPriority = sn.getPriority();
                 }
                 continue;
@@ -338,7 +342,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
         Objects.requireNonNull(value, "value");
 
         Node node;
-        if (key.equalsIgnoreCase(NodeTypes.PREFIX_KEY) || key.equalsIgnoreCase(NodeTypes.SUFFIX_KEY)) {
+        if (key.equalsIgnoreCase(Prefix.NODE_KEY) || key.equalsIgnoreCase(Suffix.NODE_KEY)) {
             // special handling.
             ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
 
@@ -353,7 +357,8 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0);
             priority += 10;
 
-            node = NodeFactory.buildChatMetaNode(type, priority, value).withContext(contexts).build();
+            ChatMetaNode.Builder<?, ?> builder = type == ChatMetaType.PREFIX ? Prefix.builder(priority, value) : Suffix.builder(priority, value);
+            node = builder.withContext(contexts).build();
         } else {
             // standard remove
             streamNodes()
@@ -361,7 +366,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
                     .filter(n -> n.getContexts().equals(contexts))
                     .forEach(n -> this.holder.unsetPermission(this.type, n));
 
-            node = NodeFactory.buildMetaNode(key, value).withContext(contexts).build();
+            node = Meta.builder(key, value).withContext(contexts).build();
         }
 
         this.holder.setPermission(this.type, node, true);
@@ -375,9 +380,9 @@ public class PermissionHolderSubjectData implements LPSubjectData {
 
         streamNodes()
                 .filter(n -> {
-                    if (key.equalsIgnoreCase(NodeTypes.PREFIX_KEY)) {
+                    if (key.equalsIgnoreCase(Prefix.NODE_KEY)) {
                         return n instanceof PrefixNode;
-                    } else if (key.equalsIgnoreCase(NodeTypes.SUFFIX_KEY)) {
+                    } else if (key.equalsIgnoreCase(Suffix.NODE_KEY)) {
                         return n instanceof SuffixNode;
                     } else {
                         return n instanceof MetaNode && ((MetaNode) n).getMetaKey().equals(key);

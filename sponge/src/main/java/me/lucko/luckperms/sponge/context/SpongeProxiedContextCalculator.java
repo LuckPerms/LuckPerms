@@ -84,11 +84,11 @@ public class SpongeProxiedContextCalculator implements ProxiedContextCalculator<
         @Override public boolean contains(Object o) { throw new UnsupportedOperationException(); }
         @Override public @NonNull Iterator<Context> iterator() { throw new UnsupportedOperationException(); }
         @Override public @NonNull Object[] toArray() { throw new UnsupportedOperationException(); }
-        @Override public @NonNull <T> T[] toArray(T[] a) { throw new UnsupportedOperationException(); }
+        @Override public @NonNull <T> T[] toArray(@NonNull T[] a) { throw new UnsupportedOperationException(); }
         @Override public boolean remove(Object o) { throw new UnsupportedOperationException(); }
-        @Override public boolean containsAll(Collection<?> c) { throw new UnsupportedOperationException(); }
-        @Override public boolean retainAll(Collection<?> c) { throw new UnsupportedOperationException(); }
-        @Override public boolean removeAll(Collection<?> c) { throw new UnsupportedOperationException(); }
+        @Override public boolean containsAll(@NonNull Collection<?> c) { throw new UnsupportedOperationException(); }
+        @Override public boolean retainAll(@NonNull Collection<?> c) { throw new UnsupportedOperationException(); }
+        @Override public boolean removeAll(@NonNull Collection<?> c) { throw new UnsupportedOperationException(); }
         @Override public void clear() { throw new UnsupportedOperationException(); }
     }
 

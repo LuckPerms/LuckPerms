@@ -35,8 +35,9 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
-import me.lucko.luckperms.common.node.factory.NodeTypes;
+import me.lucko.luckperms.common.node.types.Meta;
+import me.lucko.luckperms.common.node.types.Prefix;
+import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 
 import net.luckperms.api.context.DefaultContextKeys;
@@ -277,7 +278,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         metaAccumulator.complete();
         int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0) + 10;
 
-        NodeBuilder chatMetaNode = NodeFactory.buildChatMetaNode(type, priority, value);
+        NodeBuilder chatMetaNode = type == ChatMetaType.PREFIX ? Prefix.builder(priority, value) : Suffix.builder(priority, value);
         chatMetaNode.withContext(DefaultContextKeys.SERVER_KEY, this.vaultPermission.getVaultServer());
         chatMetaNode.withContext(DefaultContextKeys.WORLD_KEY, world);
 
@@ -299,10 +300,12 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         }
 
         NodeBuilder metaNode;
-        if (key.equalsIgnoreCase(NodeTypes.PREFIX_KEY) || key.equalsIgnoreCase(NodeTypes.SUFFIX_KEY)) {
-            metaNode = NodeFactory.buildChatMetaNode(ChatMetaType.valueOf(key.toUpperCase()), 100, value.toString());
+        if (key.equalsIgnoreCase("prefix")) {
+            metaNode = Prefix.builder(100, value.toString());
+        } else if (key.equalsIgnoreCase("suffix")) {
+            metaNode = Suffix.builder(100, value.toString());
         } else {
-            metaNode = NodeFactory.buildMetaNode(key, value.toString());
+            metaNode = Meta.builder(key, value.toString());
         }
 
         metaNode.withContext(DefaultContextKeys.SERVER_KEY, this.vaultPermission.getVaultServer());

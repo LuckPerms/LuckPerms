@@ -31,13 +31,13 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.model.manager.track.TrackManager;
 import me.lucko.luckperms.common.node.model.HeldNodeImpl;
-import me.lucko.luckperms.common.node.model.NodeDataContainer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.file.loader.ConfigurateLoader;
 import me.lucko.luckperms.common.util.MoreFiles;
 import me.lucko.luckperms.common.util.Uuids;
 
 import net.luckperms.api.node.HeldNode;
+import net.luckperms.api.node.Node;
 
 import ninja.leaping.configurate.ConfigurationNode;
 
@@ -264,12 +264,12 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
                             registerFileAction(StorageLocation.USER, file);
                             ConfigurationNode object = readFile(file);
                             UUID holder = UUID.fromString(fileName.substring(0, fileName.length() - this.fileExtension.length()));
-                            Set<NodeDataContainer> nodes = readNodes(object);
-                            for (NodeDataContainer e : nodes) {
-                                if (!constraint.eval(e.getPermission())) {
+                            Set<Node> nodes = readNodes(object);
+                            for (Node e : nodes) {
+                                if (!constraint.eval(e.getKey())) {
                                     continue;
                                 }
-                                held.add(HeldNodeImpl.of(holder, e.toNode()));
+                                held.add(HeldNodeImpl.of(holder, e));
                             }
                         } catch (Exception e) {
                             throw reportException(file.getFileName().toString(), e);
@@ -320,12 +320,12 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
                             registerFileAction(StorageLocation.GROUP, file);
                             ConfigurationNode object = readFile(file);
                             String holder = fileName.substring(0, fileName.length() - this.fileExtension.length());
-                            Set<NodeDataContainer> nodes = readNodes(object);
-                            for (NodeDataContainer e : nodes) {
-                                if (!constraint.eval(e.getPermission())) {
+                            Set<Node> nodes = readNodes(object);
+                            for (Node e : nodes) {
+                                if (!constraint.eval(e.getKey())) {
                                     continue;
                                 }
-                                held.add(HeldNodeImpl.of(holder, e.toNode()));
+                                held.add(HeldNodeImpl.of(holder, e));
                             }
                         } catch (Exception e) {
                             throw reportException(file.getFileName().toString(), e);

@@ -38,7 +38,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.node.utils.InheritanceInfo;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -64,7 +64,7 @@ public class PermissionCheckInherits extends SharedSubCommand {
         String node = ArgumentParser.parseString(0, args);
         MutableContextSet context = ArgumentParser.parseContext(1, args, plugin);
 
-        InheritanceInfo result = holder.searchForInheritedMatch(NodeFactory.builder(node).withContext(context).build(), NodeEqualityPredicate.IGNORE_VALUE_OR_IF_TEMPORARY);
+        InheritanceInfo result = holder.searchForInheritedMatch(NodeBuilders.determineMostApplicable(node).withContext(context).build(), NodeEqualityPredicate.IGNORE_VALUE_OR_IF_TEMPORARY);
 
         String location = result.getLocation().orElse(null);
         if (location == null || location.equalsIgnoreCase(holder.getObjectName())) {

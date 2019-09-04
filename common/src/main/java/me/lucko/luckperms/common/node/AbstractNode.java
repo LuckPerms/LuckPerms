@@ -52,10 +52,7 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
      * The character which separates each part of a permission node
      */
     public static final char NODE_SEPARATOR = '.';
-
-    /**
-     * The numeric value of {@link #NODE_SEPARATOR}
-     */
+    public static final String NODE_SEPARATOR_STRING = String.valueOf(NODE_SEPARATOR);
     public static final int NODE_SEPARATOR_CODE = Character.getNumericValue(NODE_SEPARATOR);
 
     // node attributes
@@ -174,7 +171,6 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
         return result;
     }
 
-    @SuppressWarnings("StringEquality")
     private enum Equality {
         EXACT {
             @Override

@@ -26,7 +26,8 @@
 package me.lucko.luckperms.common.commands.migration;
 
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
+import me.lucko.luckperms.common.node.types.Weight;
 
 import net.luckperms.api.model.DataType;
 import net.luckperms.api.node.NodeBuilder;
@@ -38,26 +39,26 @@ public final class MigrationUtils {
     public static NodeBuilder parseNode(String permission, boolean value) {
         if (permission.startsWith("-") || permission.startsWith("!")) {
             if (permission.length() == 1) {
-                return NodeFactory.builder(permission).value(value);
+                return NodeBuilders.determineMostApplicable(permission).value(value);
             }
 
             permission = permission.substring(1);
             value = false;
         } else if (permission.startsWith("+")) {
             if (permission.length() == 1) {
-                return NodeFactory.builder(permission).value(value);
+                return NodeBuilders.determineMostApplicable(permission).value(value);
             }
 
             permission = permission.substring(1);
             value = true;
         }
 
-        return NodeFactory.builder(permission).value(value);
+        return NodeBuilders.determineMostApplicable(permission).value(value);
     }
 
     public static void setGroupWeight(Group group, int weight) {
         group.removeIf(DataType.NORMAL, null, NodeType.WEIGHT::matches, null);
-        group.setPermission(DataType.NORMAL, NodeFactory.buildWeightNode(weight).build(), true);
+        group.setPermission(DataType.NORMAL, Weight.builder(weight).build(), true);
     }
 
     public static String standardizeName(String string) {

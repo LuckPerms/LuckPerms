@@ -39,7 +39,7 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeCommandFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -177,7 +177,9 @@ public class MetaInfo extends SharedSubCommand {
                 "¥7Click to remove this " + node.getMetaType().name().toLowerCase() + " from " + holder.getFormattedDisplayName()
         ), '¥'));
 
-        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getFormattedDisplayName(), holder.getType(), false, !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty());
+        String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getFormattedDisplayName();
+        boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
+        String command = "/" + label + " " + NodeCommandFactory.generateCommand(node, id, holder.getType(), false, explicitGlobalContext);
         ClickEvent clickEvent = ClickEvent.suggestCommand(command);
 
         return component -> {
@@ -202,7 +204,9 @@ public class MetaInfo extends SharedSubCommand {
                 "¥7Click to remove this meta pair from " + holder.getFormattedDisplayName()
         ), '¥'));
 
-        String command = "/" + label + " " + NodeFactory.nodeAsCommand(node, holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getFormattedDisplayName(), holder.getType(), false, !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty());
+        String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getFormattedDisplayName();
+        boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
+        String command = "/" + label + " " + NodeCommandFactory.generateCommand(node, id, holder.getType(), false, explicitGlobalContext);
         ClickEvent clickEvent = ClickEvent.suggestCommand(command);
 
         return component -> {

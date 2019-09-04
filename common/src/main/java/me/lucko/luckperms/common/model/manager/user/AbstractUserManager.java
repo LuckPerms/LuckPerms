@@ -32,7 +32,8 @@ import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.model.manager.AbstractManager;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.model.manager.group.GroupManager;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.luckperms.api.model.DataType;
@@ -131,8 +132,8 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
         }
 
         if (!hasGroup) {
-            user.getPrimaryGroup().setStoredValue(NodeFactory.DEFAULT_GROUP_NAME);
-            user.setPermission(DataType.NORMAL, NodeFactory.buildGroupNode(NodeFactory.DEFAULT_GROUP_NAME).build(), false);
+            user.getPrimaryGroup().setStoredValue(GroupManager.DEFAULT_GROUP_NAME);
+            user.setPermission(DataType.NORMAL, Inheritance.builder(GroupManager.DEFAULT_GROUP_NAME).build(), false);
             work = true;
         }
 
@@ -198,13 +199,13 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
             return true;
         }
 
-        if (!((InheritanceNode) onlyNode).getGroupName().equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
+        if (!((InheritanceNode) onlyNode).getGroupName().equalsIgnoreCase(GroupManager.DEFAULT_GROUP_NAME)) {
             // The user's only node is not the default group one.
             return true;
         }
 
 
         // Not in the default primary group
-        return !user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME);
+        return !user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME).equalsIgnoreCase(GroupManager.DEFAULT_GROUP_NAME);
     }
 }

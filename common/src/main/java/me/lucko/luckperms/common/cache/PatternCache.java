@@ -58,18 +58,6 @@ public final class PatternCache {
         }
     }
 
-    /**
-     * Compiles delimiter pattern with the given escape sequence.
-     *
-     * @param delimiter the delimiter (the thing separating components)
-     * @param escape the string used to escape the delimiter where the pattern shouldn't match
-     * @return a pattern
-     */
-    public static Pattern compileDelimiterPattern(String delimiter, String escape) throws PatternSyntaxException {
-        String pattern = "(?<!" + Pattern.quote(escape) + ")" + Pattern.quote(delimiter);
-        return compile(pattern);
-    }
-
     public static final class CachedPattern {
         private final Pattern instance;
         private final PatternSyntaxException ex;

@@ -43,7 +43,7 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
@@ -257,7 +257,7 @@ public class ApplyEditsCommand extends SingleCommand {
     private boolean readGroupDeletion(JsonElement data, Sender sender, LuckPermsPlugin plugin) {
         String groupName = data.getAsString();
 
-        if (groupName.equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
+        if (groupName.equalsIgnoreCase(GroupManager.DEFAULT_GROUP_NAME)) {
             Message.DELETE_GROUP_ERROR_DEFAULT.send(sender);
             return true;
         }

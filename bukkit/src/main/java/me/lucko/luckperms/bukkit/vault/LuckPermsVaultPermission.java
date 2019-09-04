@@ -38,7 +38,9 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.model.manager.group.GroupManager;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
@@ -154,7 +156,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
             String npcGroupName = this.plugin.getConfiguration().get(ConfigKeys.VAULT_NPC_GROUP);
             Group npcGroup = this.plugin.getGroupManager().getIfLoaded(npcGroupName);
             if (npcGroup == null) {
-                npcGroup = this.plugin.getGroupManager().getIfLoaded(NodeFactory.DEFAULT_GROUP_NAME);
+                npcGroup = this.plugin.getGroupManager().getIfLoaded(GroupManager.DEFAULT_GROUP_NAME);
                 if (npcGroup == null) {
                     throw new IllegalStateException("unable to get default group");
                 }
@@ -234,7 +236,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         QueryOptions queryOptions = getQueryOptions(uuid, world);
         PermissionCache permissionData = user.getCachedData().getPermissionData(queryOptions);
 
-        TristateResult result = permissionData.checkPermission(NodeFactory.groupNode(rewriteGroupName(group)), PermissionCheckEvent.Origin.THIRD_PARTY_API);
+        TristateResult result = permissionData.checkPermission(Inheritance.key(rewriteGroupName(group)), PermissionCheckEvent.Origin.THIRD_PARTY_API);
         if (log()) {
             logMsg("#userInGroup: %s - %s - %s - %s", user.getPlainDisplayName(), queryOptions.context(), group, result);
         }
@@ -245,14 +247,14 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
     public boolean userAddGroup(String world, UUID uuid, String group) {
         Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(group, "group");
-        return checkGroupExists(group) && userAddPermission(world, uuid, NodeFactory.groupNode(rewriteGroupName(group)));
+        return checkGroupExists(group) && userAddPermission(world, uuid, Inheritance.key(rewriteGroupName(group)));
     }
 
     @Override
     public boolean userRemoveGroup(String world, UUID uuid, String group) {
         Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(group, "group");
-        return checkGroupExists(group) && userRemovePermission(world, uuid, NodeFactory.groupNode(rewriteGroupName(group)));
+        return checkGroupExists(group) && userRemovePermission(world, uuid, Inheritance.key(rewriteGroupName(group)));
     }
 
     @Override
@@ -439,7 +441,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
             logMsg("#holderAddPermission: %s - %s - %s", holder.getPlainDisplayName(), permission, world);
         }
 
-        if (((Result) holder.setPermission(DataType.NORMAL, NodeFactory.make(permission, true, getVaultServer(), world), true)).wasSuccessful()) {
+        if (((Result) holder.setPermission(DataType.NORMAL, NodeBuilders.determineMostApplicable(permission).value(true).withContext(DefaultContextKeys.SERVER_KEY, getVaultServer()).withContext(DefaultContextKeys.WORLD_KEY, world).build(), true)).wasSuccessful()) {
             return holderSave(holder);
         }
         return false;
@@ -453,7 +455,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
             logMsg("#holderRemovePermission: %s - %s - %s", holder.getPlainDisplayName(), permission, world);
         }
 
-        if (holder.unsetPermission(DataType.NORMAL, NodeFactory.builder(permission).withContext(DefaultContextKeys.SERVER_KEY, getVaultServer()).withContext(DefaultContextKeys.WORLD_KEY, world).build()).wasSuccessful()) {
+        if (holder.unsetPermission(DataType.NORMAL, NodeBuilders.determineMostApplicable(permission).withContext(DefaultContextKeys.SERVER_KEY, getVaultServer()).withContext(DefaultContextKeys.WORLD_KEY, world).build()).wasSuccessful()) {
             return holderSave(holder);
         }
         return false;

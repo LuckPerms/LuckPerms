@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.tasks;
 
 import me.lucko.luckperms.common.cache.BufferedRequest;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.luckperms.api.event.cause.CreationCause;
@@ -65,8 +65,8 @@ public class SyncTask implements Runnable {
 
         // Reload all groups
         this.plugin.getStorage().loadAllGroups().join();
-        if (!this.plugin.getGroupManager().isLoaded(NodeFactory.DEFAULT_GROUP_NAME)) {
-            this.plugin.getStorage().createAndLoadGroup(NodeFactory.DEFAULT_GROUP_NAME, CreationCause.INTERNAL).join();
+        if (!this.plugin.getGroupManager().isLoaded(GroupManager.DEFAULT_GROUP_NAME)) {
+            this.plugin.getStorage().createAndLoadGroup(GroupManager.DEFAULT_GROUP_NAME, CreationCause.INTERNAL).join();
         }
 
         // Reload all tracks

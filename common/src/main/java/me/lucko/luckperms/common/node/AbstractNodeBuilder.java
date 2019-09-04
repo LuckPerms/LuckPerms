@@ -43,11 +43,12 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Objects;
 
+@SuppressWarnings("unchecked")
 public abstract class AbstractNodeBuilder<N extends ScopedNode<N, B>, B extends NodeBuilder<N, B>> implements NodeBuilder<N, B> {
     protected boolean value;
     protected long expireAt;
     protected ImmutableContextSet.Builder context;
-    protected Map<NodeMetadataKey<?>, Object> metadata;
+    protected final Map<NodeMetadataKey<?>, Object> metadata;
 
     protected AbstractNodeBuilder() {
         this.value = true;

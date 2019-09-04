@@ -75,8 +75,8 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
         // elements and then comparing which set is greater.
         List<Context> o1Entries = new ArrayList<>(o1.toSet());
         List<Context> o2Entries = new ArrayList<>(o2.toSet());
-        o1Entries.sort(STRING_ENTRY_COMPARATOR);
-        o2Entries.sort(STRING_ENTRY_COMPARATOR);
+        o1Entries.sort(CONTEXT_COMPARATOR);
+        o2Entries.sort(CONTEXT_COMPARATOR);
 
         // size is definitely the same
         Iterator<Context> it1 = o1Entries.iterator();
@@ -86,7 +86,7 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
             Context ent1 = it1.next();
             Context ent2 = it2.next();
 
-            int ret = STRING_ENTRY_COMPARATOR.compare(ent1, ent2);
+            int ret = CONTEXT_COMPARATOR.compare(ent1, ent2);
             if (ret != 0) {
                 return ret;
             }
@@ -98,7 +98,7 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
     @SuppressWarnings("StringEquality")
     private static final Comparator<String> FAST_STRING_COMPARATOR = (o1, o2) -> o1 == o2 ? 0 : o1.compareTo(o2);
 
-    private static final Comparator<Context> STRING_ENTRY_COMPARATOR = (o1, o2) -> {
+    private static final Comparator<Context> CONTEXT_COMPARATOR = (o1, o2) -> {
         if (o1 == o2) {
             return 0;
         }

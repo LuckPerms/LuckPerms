@@ -27,6 +27,8 @@ package me.lucko.luckperms.common.context.contextset;
 
 import net.luckperms.api.context.Context;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 public final class ContextImpl implements Context {
     private final String key;
     private final String value;
@@ -36,11 +38,13 @@ public final class ContextImpl implements Context {
         this.value = value;
     }
 
+    @NonNull
     @Override
     public String getKey() {
         return this.key;
     }
 
+    @NonNull
     @Override
     public String getValue() {
         return this.value;

@@ -50,7 +50,7 @@ final class FlagUtils {
     static Set<Flag> createSetFromFlag(byte b) {
         EnumSet<Flag> settings = EnumSet.noneOf(Flag.class);
         for (Flag setting : Flag.values()) {
-            if (((b >> setting.ordinal()) & 1) == 1) {
+            if (read(b, setting)) {
                 settings.add(setting);
             }
         }

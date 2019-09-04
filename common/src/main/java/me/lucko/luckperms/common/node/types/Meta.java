@@ -27,23 +27,40 @@ package me.lucko.luckperms.common.node.types;
 
 import me.lucko.luckperms.common.node.AbstractNode;
 import me.lucko.luckperms.common.node.AbstractNodeBuilder;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.factory.Delimiters;
 
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
 import net.luckperms.api.node.types.MetaNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
 public class Meta extends AbstractNode<MetaNode, MetaNode.Builder> implements MetaNode {
+    private static final String NODE_KEY = "meta";
+    private static final String NODE_MARKER = NODE_KEY + ".";
+
+    public static String key(String key, String value) {
+        return NODE_MARKER + Delimiters.escapeCharacters(key) + AbstractNode.NODE_SEPARATOR + Delimiters.escapeCharacters(value);
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static Builder builder(String key, String value) {
+        return builder().key(key).value(value);
+    }
+
     private final String metaKey;
     private final String metaValue;
 
     public Meta(String metaKey, String metaValue, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
-        super(NodeFactory.metaNode(metaKey, metaValue), value, expireAt, contexts, metadata);
+        super(key(metaKey, metaValue), value, expireAt, contexts, metadata);
         this.metaKey = metaKey;
         this.metaValue = metaValue;
     }
@@ -63,11 +80,29 @@ public class Meta extends AbstractNode<MetaNode, MetaNode.Builder> implements Me
         return new Builder(this.metaKey, this.metaValue, this.value, this.expireAt, this.contexts, this.metadata);
     }
 
+    public static @Nullable Builder parse(String key) {
+        if (!key.toLowerCase().startsWith(NODE_MARKER)) {
+            return null;
+        }
+
+        Iterator<String> metaParts = Delimiters.SPLIT_BY_NODE_SEPARATOR_IN_TWO.split(key.substring(NODE_MARKER.length())).iterator();
+
+        if (!metaParts.hasNext()) return null;
+        String metaKey = metaParts.next();
+
+        if (!metaParts.hasNext()) return null;
+        String metaValue = metaParts.next();
+
+        return builder()
+                .key(Delimiters.unescapeCharacters(metaKey))
+                .value(Delimiters.unescapeCharacters(metaValue));
+    }
+
     public static final class Builder extends AbstractNodeBuilder<MetaNode, MetaNode.Builder> implements MetaNode.Builder {
         private String metaKey;
         private String metaValue;
 
-        public Builder() {
+        private Builder() {
             this.metaKey = null;
             this.metaValue = null;
         }
@@ -86,7 +121,7 @@ public class Meta extends AbstractNode<MetaNode, MetaNode.Builder> implements Me
 
         @Override
         public @NonNull Builder value(@NonNull String value) {
-            this.metaKey = Objects.requireNonNull(value, "value");
+            this.metaValue = Objects.requireNonNull(value, "value");
             return this;
         }
 

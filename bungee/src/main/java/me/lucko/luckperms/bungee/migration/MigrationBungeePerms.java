@@ -33,7 +33,9 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.types.Inheritance;
+import me.lucko.luckperms.common.node.types.Prefix;
+import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Iterators;
@@ -85,7 +87,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         // Migrate all groups.
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
-        Iterators.iterate(groups, g -> {
+        Iterators.tryIterate(groups, g -> {
             int groupWeight = maxWeight - g.getRank();
 
             // Make a LuckPerms group for the one being migrated
@@ -107,7 +109,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         // Increment the max weight from the group migrations. All user meta should override.
         int userWeight = maxWeight + 5;
 
-        Iterators.iterate(bp.getPermissionsManager().getBackEnd().loadUsers(), u -> {
+        Iterators.tryIterate(bp.getPermissionsManager().getBackEnd().loadUsers(), u -> {
             if (u.getUUID() == null) {
                 log.logError("Could not parse UUID for user: " + u.getName());
                 return;
@@ -155,7 +157,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         // Migrate any parent groups
         for (String inherit : parents) {
             if (inherit.isEmpty()) continue;
-            holder.setPermission(DataType.NORMAL, NodeFactory.buildGroupNode(MigrationUtils.standardizeName(inherit)).build(), true);
+            holder.setPermission(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(inherit)).build(), true);
         }
 
         // Migrate prefix and suffix
@@ -163,10 +165,10 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         String suffix = entity.getSuffix();
 
         if (prefix != null && !prefix.isEmpty()) {
-            holder.setPermission(DataType.NORMAL, NodeFactory.buildPrefixNode(weight, prefix).build(), true);
+            holder.setPermission(DataType.NORMAL, Prefix.builder(weight, prefix).build(), true);
         }
         if (suffix != null && !suffix.isEmpty()) {
-            holder.setPermission(DataType.NORMAL, NodeFactory.buildSuffixNode(weight, suffix).build(), true);
+            holder.setPermission(DataType.NORMAL, Suffix.builder(weight, suffix).build(), true);
         }
     }
 }

@@ -85,6 +85,7 @@ public class LuckPermsApiProvider implements LuckPerms {
         this.metaStackFactory = new ApiMetaStackFactory(plugin);
     }
 
+    @NonNull
     @Override
     public String getServerName() {
         return this.plugin.getConfiguration().get(ConfigKeys.SERVER);

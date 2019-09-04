@@ -27,22 +27,37 @@ package me.lucko.luckperms.common.node.types;
 
 import me.lucko.luckperms.common.node.AbstractNode;
 import me.lucko.luckperms.common.node.AbstractNodeBuilder;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
 
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
 import net.luckperms.api.node.types.DisplayNameNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
 
 public class DisplayName extends AbstractNode<DisplayNameNode, DisplayNameNode.Builder> implements DisplayNameNode {
+    private static final String NODE_KEY = "displayname";
+    private static final String NODE_MARKER = NODE_KEY + ".";
+
+    public static String key(String displayName) {
+        return NODE_MARKER + displayName;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static Builder builder(String displayName) {
+        return builder().displayName(displayName);
+    }
+
     private final String displayName;
 
     public DisplayName(String displayName, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
-        super(NodeFactory.displayName(displayName), value, expireAt, contexts, metadata);
+        super(key(displayName), value, expireAt, contexts, metadata);
         this.displayName = displayName;
     }
 
@@ -56,10 +71,19 @@ public class DisplayName extends AbstractNode<DisplayNameNode, DisplayNameNode.B
         return new Builder(this.displayName, this.value, this.expireAt, this.contexts, this.metadata);
     }
 
+    public static @Nullable Builder parse(String key) {
+        if (!key.toLowerCase().startsWith(NODE_MARKER)) {
+            return null;
+        }
+
+        return builder()
+                .displayName(key.substring(NODE_MARKER.length()));
+    }
+
     public static final class Builder extends AbstractNodeBuilder<DisplayNameNode, DisplayNameNode.Builder> implements DisplayNameNode.Builder {
         private String displayName;
 
-        public Builder() {
+        private Builder() {
             this.displayName = null;
         }
 

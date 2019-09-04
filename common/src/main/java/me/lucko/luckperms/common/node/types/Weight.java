@@ -27,22 +27,37 @@ package me.lucko.luckperms.common.node.types;
 
 import me.lucko.luckperms.common.node.AbstractNode;
 import me.lucko.luckperms.common.node.AbstractNodeBuilder;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
 
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
 import net.luckperms.api.node.types.WeightNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
 
 public class Weight extends AbstractNode<WeightNode, WeightNode.Builder> implements WeightNode {
+    public static final String NODE_KEY = "weight";
+    public static final String NODE_MARKER = NODE_KEY + ".";
+
+    public static String key(int weight) {
+        return NODE_MARKER + weight;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static Builder builder(int weight) {
+        return builder().weight(weight);
+    }
+
     private final int weight;
 
     public Weight(int weight, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
-        super(NodeFactory.weightNode(weight), value, expireAt, contexts, metadata);
+        super(key(weight), value, expireAt, contexts, metadata);
         this.weight = weight;
     }
 
@@ -56,10 +71,24 @@ public class Weight extends AbstractNode<WeightNode, WeightNode.Builder> impleme
         return new Builder(this.weight, this.value, this.expireAt, this.contexts, this.metadata);
     }
 
+    public static @Nullable Builder parse(String key) {
+        if (!key.toLowerCase().startsWith(NODE_MARKER)) {
+            return null;
+        }
+
+        try {
+            return builder()
+                    .weight(Integer.parseInt(key.substring(NODE_MARKER.length())));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
     public static final class Builder extends AbstractNodeBuilder<WeightNode, WeightNode.Builder> implements WeightNode.Builder {
+
         private Integer weight;
 
-        public Builder() {
+        private Builder() {
             this.weight = null;
         }
 

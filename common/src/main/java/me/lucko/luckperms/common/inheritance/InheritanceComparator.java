@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.model.manager.group.GroupManager;
 
 import java.util.Comparator;
 
@@ -77,8 +77,8 @@ public class InheritanceComparator implements Comparator<PermissionHolder> {
         // failing differing group weights, check if one of the groups is a primary group
         if (this.origin != null) {
             return Boolean.compare(
-                    o1Group.getName().equalsIgnoreCase(this.origin.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME)),
-                    o2Group.getName().equalsIgnoreCase(this.origin.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME))
+                    o1Group.getName().equalsIgnoreCase(this.origin.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME)),
+                    o2Group.getName().equalsIgnoreCase(this.origin.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME))
             );
         }
 

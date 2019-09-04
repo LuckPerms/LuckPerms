@@ -70,7 +70,7 @@ public class MetaUnset extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        if (holder.removeIf(DataType.NORMAL, context, n -> n instanceof MetaNode && (n.hasExpiry() == false) && ((MetaNode) n).getMetaKey().equalsIgnoreCase(key), null)) {
+        if (holder.removeIf(DataType.NORMAL, context, n -> n instanceof MetaNode && !n.hasExpiry() && ((MetaNode) n).getMetaKey().equalsIgnoreCase(key), null)) {
             Message.UNSET_META_SUCCESS.send(sender, key, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             LoggedAction.build().source(sender).target(holder)

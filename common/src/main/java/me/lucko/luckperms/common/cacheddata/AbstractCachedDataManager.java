@@ -66,7 +66,7 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
     private final Permission permissionDataManager;
     private final Meta metaDataManager;
 
-    public AbstractCachedDataManager(LuckPermsPlugin plugin) {
+    protected AbstractCachedDataManager(LuckPermsPlugin plugin) {
         this.plugin = plugin;
         this.permissionDataManager = new Permission();
         this.metaDataManager = new Meta();

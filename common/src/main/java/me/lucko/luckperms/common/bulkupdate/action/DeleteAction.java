@@ -26,7 +26,8 @@
 package me.lucko.luckperms.common.bulkupdate.action;
 
 import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
-import me.lucko.luckperms.common.node.model.NodeDataContainer;
+
+import net.luckperms.api.node.Node;
 
 public class DeleteAction implements Action {
 
@@ -43,7 +44,7 @@ public class DeleteAction implements Action {
     }
 
     @Override
-    public NodeDataContainer apply(NodeDataContainer from) {
+    public Node apply(Node from) {
         return null; // this action just deletes nodes, so return null
     }
 

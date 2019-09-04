@@ -30,7 +30,7 @@ import com.google.common.base.Preconditions;
 import me.lucko.luckperms.bukkit.inject.dummy.DummyPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
 
 import net.luckperms.api.model.DataType;
 import net.luckperms.api.node.Node;
@@ -39,6 +39,7 @@ import net.luckperms.api.node.metadata.NodeMetadataKey;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionRemovedExecutor;
 import org.bukkit.plugin.Plugin;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -142,6 +143,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
         }
     }
 
+    @NonNull
     @Override
     public LPPermissible getPermissible() {
         return this.permissible;
@@ -182,7 +184,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
         // construct a node for the permission being set
         // we use the servers static context to *try* to ensure that the node will apply
-        Node node = NodeFactory.builder(name)
+        Node node = NodeBuilders.determineMostApplicable(name)
                 .value(value)
                 .withContext(this.permissible.getPlugin().getContextManager().getStaticContext())
                 .withMetadata(TRANSIENT_SOURCE_KEY, this)
@@ -230,7 +232,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
     }
 
     @Override
-    public void setPermission(String name, boolean value) {
+    public void setPermission(@NonNull String name, boolean value) {
         Objects.requireNonNull(name, "name is null");
         Preconditions.checkArgument(!name.isEmpty(), "name is empty");
 
@@ -255,7 +257,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
     }
 
     @Override
-    public void unsetPermission(String name) {
+    public void unsetPermission(@NonNull String name) {
         Objects.requireNonNull(name, "name is null");
         Preconditions.checkArgument(!name.isEmpty(), "name is empty");
 
@@ -275,11 +277,13 @@ public class LPPermissionAttachment extends PermissionAttachment {
         unsetPermissionInternal(permission);
     }
 
+    @NonNull
     @Override
     public Map<String, Boolean> getPermissions() {
         return this.perms;
     }
 
+    @NonNull
     @Override
     public Plugin getPlugin() {
         return this.owner != null ? this.owner : this.permissible.getPlugin().getBootstrap();

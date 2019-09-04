@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.node.types;
 
 import me.lucko.luckperms.common.node.AbstractNode;
 import me.lucko.luckperms.common.node.AbstractNodeBuilder;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.factory.Delimiters;
 
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.ChatMetaType;
@@ -35,16 +35,33 @@ import net.luckperms.api.node.metadata.NodeMetadataKey;
 import net.luckperms.api.node.types.SuffixNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
 public class Suffix extends AbstractNode<SuffixNode, SuffixNode.Builder> implements SuffixNode {
+    public static final String NODE_KEY = "suffix";
+    public static final String NODE_MARKER = NODE_KEY + ".";
+
+    public static String key(int priority, String suffix) {
+        return NODE_MARKER + priority + AbstractNode.NODE_SEPARATOR + Delimiters.escapeCharacters(suffix);
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static Builder builder(int priority, String suffix) {
+        return builder().suffix(suffix).priority(priority);
+    }
+
     private final String suffix;
     private final int priority;
 
     public Suffix(String suffix, int priority, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
-        super(NodeFactory.suffixNode(priority, suffix), value, expireAt, contexts, metadata);
+        super(key(priority, suffix), value, expireAt, contexts, metadata);
         this.suffix = suffix;
         this.priority = priority;
     }
@@ -69,11 +86,34 @@ public class Suffix extends AbstractNode<SuffixNode, SuffixNode.Builder> impleme
         return new Builder(this.suffix, this.priority, this.value, this.expireAt, this.contexts, this.metadata);
     }
 
+    public static @Nullable Builder parse(String key) {
+        if (!key.toLowerCase().startsWith(NODE_MARKER)) {
+            return null;
+        }
+
+        Iterator<String> metaParts = Delimiters.SPLIT_BY_NODE_SEPARATOR_IN_TWO.split(key.substring(NODE_MARKER.length())).iterator();
+
+        if (!metaParts.hasNext()) return null;
+        String priority = metaParts.next();
+
+        if (!metaParts.hasNext()) return null;
+        String value = metaParts.next();
+
+        try {
+            return builder()
+                    .priority(Integer.parseInt(priority))
+                    .suffix(Delimiters.unescapeCharacters(value));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
     public static final class Builder extends AbstractNodeBuilder<SuffixNode, SuffixNode.Builder> implements SuffixNode.Builder {
+
         private String suffix;
         private Integer priority;
 
-        public Builder() {
+        private Builder() {
             this.suffix = null;
             this.priority = null;
         }

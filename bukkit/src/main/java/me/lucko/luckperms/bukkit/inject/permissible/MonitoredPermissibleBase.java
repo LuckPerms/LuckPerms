@@ -39,6 +39,7 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Set;
 
@@ -78,7 +79,7 @@ public class MonitoredPermissibleBase extends PermissibleBase {
     }
 
     @Override
-    public boolean isPermissionSet(String permission) {
+    public boolean isPermissionSet(@NonNull String permission) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
@@ -89,7 +90,7 @@ public class MonitoredPermissibleBase extends PermissibleBase {
     }
 
     @Override
-    public boolean isPermissionSet(Permission permission) {
+    public boolean isPermissionSet(@NonNull Permission permission) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
@@ -100,7 +101,7 @@ public class MonitoredPermissibleBase extends PermissibleBase {
     }
 
     @Override
-    public boolean hasPermission(String permission) {
+    public boolean hasPermission(@NonNull String permission) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
@@ -111,7 +112,7 @@ public class MonitoredPermissibleBase extends PermissibleBase {
     }
 
     @Override
-    public boolean hasPermission(Permission permission) {
+    public boolean hasPermission(@NonNull Permission permission) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
@@ -133,12 +134,15 @@ public class MonitoredPermissibleBase extends PermissibleBase {
     // just forward calls to the delegate permissible
     @Override public boolean isOp() { return this.delegate.isOp(); }
     @Override public void setOp(boolean value) { this.delegate.setOp(value); }
-    @Override public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value) { return this.delegate.addAttachment(plugin, name, value); }
-    @Override public PermissionAttachment addAttachment(Plugin plugin) { return this.delegate.addAttachment(plugin); }
-    @Override public void removeAttachment(PermissionAttachment attachment) { this.delegate.removeAttachment(attachment); }
+    @NonNull
+    @Override public PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String name, boolean value) { return this.delegate.addAttachment(plugin, name, value); }
+    @NonNull
+    @Override public PermissionAttachment addAttachment(@NonNull Plugin plugin) { return this.delegate.addAttachment(plugin); }
+    @Override public void removeAttachment(@NonNull PermissionAttachment attachment) { this.delegate.removeAttachment(attachment); }
     @Override public void clearPermissions() { this.delegate.clearPermissions(); }
-    @Override public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value, int ticks) { return this.delegate.addAttachment(plugin, name, value, ticks); }
-    @Override public PermissionAttachment addAttachment(Plugin plugin, int ticks) { return this.delegate.addAttachment(plugin, ticks); }
+    @Override public PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String name, boolean value, int ticks) { return this.delegate.addAttachment(plugin, name, value, ticks); }
+    @Override public PermissionAttachment addAttachment(@NonNull Plugin plugin, int ticks) { return this.delegate.addAttachment(plugin, ticks); }
+    @NonNull
     @Override public Set<PermissionAttachmentInfo> getEffectivePermissions() { return this.delegate.getEffectivePermissions(); }
 
 }

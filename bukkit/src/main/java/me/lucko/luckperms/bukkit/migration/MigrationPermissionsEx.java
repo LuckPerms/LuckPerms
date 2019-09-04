@@ -38,8 +38,11 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
-import me.lucko.luckperms.common.node.factory.NodeTypes;
+import me.lucko.luckperms.common.model.manager.group.GroupManager;
+import me.lucko.luckperms.common.node.types.Inheritance;
+import me.lucko.luckperms.common.node.types.Meta;
+import me.lucko.luckperms.common.node.types.Prefix;
+import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Iterators;
@@ -121,7 +124,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
         Set<String> ladders = new HashSet<>();
-        Iterators.iterate(manager.getGroupList(), group -> {
+        Iterators.tryIterate(manager.getGroupList(), group -> {
             int groupWeight = maxWeight - group.getRank();
 
             final String groupName = MigrationUtils.standardizeName(group.getName());
@@ -165,7 +168,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         // Increment the max weight from the group migrations. All user meta should override.
         int userWeight = maxWeight + 5;
 
-        Iterators.iterate(manager.getUsers(), user -> {
+        Iterators.tryIterate(manager.getUsers(), user -> {
             UUID u = BukkitUuids.lookupUuid(log, user.getIdentifier());
             if (u == null) {
                 return;
@@ -252,7 +255,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                     }
                 }
 
-                holder.setPermission(DataType.NORMAL, NodeFactory.buildGroupNode(MigrationUtils.standardizeName(parentName)).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(expiry).build(), true);
+                holder.setPermission(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(parentName)).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(expiry).build(), true);
 
                 // migrate primary groups
                 if (world == null && holder instanceof User && expiry == 0) {
@@ -263,10 +266,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 }
             }
 
-            if (primary != null && !primary.isEmpty() && !primary.equalsIgnoreCase(NodeFactory.DEFAULT_GROUP_NAME)) {
+            if (primary != null && !primary.isEmpty() && !primary.equalsIgnoreCase(GroupManager.DEFAULT_GROUP_NAME)) {
                 User user = ((User) holder);
                 user.getPrimaryGroup().setStoredValue(primary);
-                holder.unsetPermission(DataType.NORMAL, NodeFactory.buildGroupNode(NodeFactory.DEFAULT_GROUP_NAME).build());
+                holder.unsetPermission(DataType.NORMAL, Inheritance.builder(GroupManager.DEFAULT_GROUP_NAME).build());
             }
         }
 
@@ -275,11 +278,11 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         String suffix = entity.getOwnSuffix();
 
         if (prefix != null && !prefix.isEmpty()) {
-            holder.setPermission(DataType.NORMAL, NodeFactory.buildPrefixNode(weight, prefix).build(), true);
+            holder.setPermission(DataType.NORMAL, Prefix.builder(weight, prefix).build(), true);
         }
 
         if (suffix != null && !suffix.isEmpty()) {
-            holder.setPermission(DataType.NORMAL, NodeFactory.buildSuffixNode(weight, suffix).build(), true);
+            holder.setPermission(DataType.NORMAL, Suffix.builder(weight, suffix).build(), true);
         }
 
         // migrate options
@@ -291,9 +294,9 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 }
 
                 String key = opt.getKey().toLowerCase();
-                boolean ignore = key.equals(NodeTypes.PREFIX_KEY) ||
-                        key.equals(NodeTypes.SUFFIX_KEY) ||
-                        key.equals(NodeTypes.WEIGHT_KEY) ||
+                boolean ignore = key.equals("prefix") ||
+                        key.equals("suffix") ||
+                        key.equals("weight") ||
                         key.equals("rank") ||
                         key.equals("rank-ladder") ||
                         key.equals("name") ||
@@ -304,7 +307,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                     continue;
                 }
 
-                holder.setPermission(DataType.NORMAL, NodeFactory.buildMetaNode(opt.getKey(), opt.getValue()).withContext(DefaultContextKeys.WORLD_KEY, world).build(), true);
+                holder.setPermission(DataType.NORMAL, Meta.builder(opt.getKey(), opt.getValue()).withContext(DefaultContextKeys.WORLD_KEY, world).build(), true);
             }
         }
     }

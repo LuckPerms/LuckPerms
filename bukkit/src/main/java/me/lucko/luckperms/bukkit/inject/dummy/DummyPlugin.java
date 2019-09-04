@@ -33,6 +33,7 @@ import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.File;
 import java.io.InputStream;
@@ -54,25 +55,32 @@ public class DummyPlugin implements Plugin {
         return true;
     }
 
+    @NonNull
     @Override public File getDataFolder() { return null; }
+    @NonNull
     @Override public PluginDescriptionFile getDescription() { return null; }
+    @NonNull
     @Override public FileConfiguration getConfig() { return null; }
-    @Override public InputStream getResource(String s) { return null; }
+    @Override public InputStream getResource(@NonNull String s) { return null; }
     @Override public void saveConfig() {}
     @Override public void saveDefaultConfig() {}
-    @Override public void saveResource(String s, boolean b) {}
+    @Override public void saveResource(@NonNull String s, boolean b) {}
     @Override public void reloadConfig() {}
+    @NonNull
     @Override public PluginLoader getPluginLoader() { return null; }
+    @NonNull
     @Override public Server getServer() { return null; }
     @Override public void onDisable() {}
     @Override public void onLoad() {}
     @Override public void onEnable() {}
     @Override public boolean isNaggable() { return false; }
     @Override public void setNaggable(boolean b) {}
-    @Override public ChunkGenerator getDefaultWorldGenerator(String s, String s1) { return null; }
+    @Override public ChunkGenerator getDefaultWorldGenerator(@NonNull String s, String s1) { return null; }
+    @NonNull
     @Override public Logger getLogger() { return null; }
+    @NonNull
     @Override public String getName() { return null; }
-    @Override public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) { return false; }
-    @Override public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) { return null; }
+    @Override public boolean onCommand(@NonNull CommandSender commandSender, @NonNull Command command, @NonNull String s, @NonNull String[] strings) { return false; }
+    @Override public List<String> onTabComplete(@NonNull CommandSender commandSender, @NonNull Command command, @NonNull String s, @NonNull String[] strings) { return null; }
 
 }

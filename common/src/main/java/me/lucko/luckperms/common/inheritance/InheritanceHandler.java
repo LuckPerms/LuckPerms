@@ -50,7 +50,7 @@ public class InheritanceHandler {
         } else if (queryOptions == QueryOptions.defaultContextualOptions()) {
             return this.defaultContextualGraph;
         } else {
-            return new InheritanceGraph(plugin, queryOptions);
+            return new InheritanceGraph(this.plugin, queryOptions);
         }
     }
 

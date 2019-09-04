@@ -43,7 +43,8 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.model.manager.group.GroupManager;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -83,7 +84,7 @@ public class ParentRemove extends SharedSubCommand {
             boolean shouldPrevent = plugin.getConfiguration().get(ConfigKeys.PREVENT_PRIMARY_GROUP_REMOVAL) &&
                     context.isEmpty() &&
                     plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD).equals("stored") &&
-                    user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(groupName);
+                    user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME).equalsIgnoreCase(groupName);
 
             if (shouldPrevent) {
                 Message.USER_REMOVEGROUP_ERROR_PRIMARY.send(sender);
@@ -91,7 +92,7 @@ public class ParentRemove extends SharedSubCommand {
             }
         }
 
-        DataMutateResult result = holder.unsetPermission(DataType.NORMAL, NodeFactory.buildGroupNode(groupName).withContext(context).build());
+        DataMutateResult result = holder.unsetPermission(DataType.NORMAL, Inheritance.builder(groupName).withContext(context).build());
         if (result.wasSuccessful()) {
             Message.UNSET_INHERIT_SUCCESS.send(sender, holder.getFormattedDisplayName(), groupName, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 

@@ -40,7 +40,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -74,7 +74,7 @@ public class ParentRemoveTemp extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        DataMutateResult result = holder.unsetPermission(DataType.NORMAL, NodeFactory.buildGroupNode(groupName).expiry(10L).withContext(context).build());
+        DataMutateResult result = holder.unsetPermission(DataType.NORMAL, Inheritance.builder(groupName).expiry(10L).withContext(context).build());
 
         if (result.wasSuccessful()) {
             Message.UNSET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFormattedDisplayName(), groupName, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));

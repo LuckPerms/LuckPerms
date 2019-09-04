@@ -50,13 +50,17 @@ import java.util.UUID;
 
 public class SplitStorage implements StorageImplementation {
     private final LuckPermsPlugin plugin;
-    private final Map<StorageType, StorageImplementation> backing;
+    private final Map<StorageType, StorageImplementation> implementations;
     private final Map<SplitStorageType, StorageType> types;
     
-    public SplitStorage(LuckPermsPlugin plugin, Map<StorageType, StorageImplementation> backing, Map<SplitStorageType, StorageType> types) {
+    public SplitStorage(LuckPermsPlugin plugin, Map<StorageType, StorageImplementation> implementations, Map<SplitStorageType, StorageType> types) {
         this.plugin = plugin;
-        this.backing = ImmutableMap.copyOf(backing);
+        this.implementations = ImmutableMap.copyOf(implementations);
         this.types = ImmutableMap.copyOf(types);
+    }
+    
+    private StorageImplementation implFor(SplitStorageType type) {
+        return this.implementations.get(this.types.get(type));
     }
 
     @Override
@@ -72,7 +76,7 @@ public class SplitStorage implements StorageImplementation {
     @Override
     public void init() {
         boolean failed = false;
-        for (StorageImplementation ds : this.backing.values()) {
+        for (StorageImplementation ds : this.implementations.values()) {
             try {
                 ds.init();
             } catch (Exception ex) {
@@ -87,7 +91,7 @@ public class SplitStorage implements StorageImplementation {
 
     @Override
     public void shutdown() {
-        for (StorageImplementation ds : this.backing.values()) {
+        for (StorageImplementation ds : this.implementations.values()) {
             try {
                 ds.shutdown();
             } catch (Exception e) {
@@ -100,7 +104,7 @@ public class SplitStorage implements StorageImplementation {
     public Map<String, String> getMeta() {
         Map<String, String> ret = new LinkedHashMap<>();
         ret.put("Types", this.types.toString());
-        for (StorageImplementation backing : this.backing.values()) {
+        for (StorageImplementation backing : this.implementations.values()) {
             ret.putAll(backing.getMeta());
         }
         return ret;
@@ -108,12 +112,12 @@ public class SplitStorage implements StorageImplementation {
 
     @Override
     public void logAction(Action entry) throws Exception {
-        this.backing.get(this.types.get(SplitStorageType.LOG)).logAction(entry);
+        implFor(SplitStorageType.LOG).logAction(entry);
     }
 
     @Override
     public Log getLog() throws Exception {
-        return this.backing.get(this.types.get(SplitStorageType.LOG)).getLog();
+        return implFor(SplitStorageType.LOG).getLog();
     }
 
     @Override
@@ -121,101 +125,101 @@ public class SplitStorage implements StorageImplementation {
         StorageType userType = this.types.get(SplitStorageType.USER);
         StorageType groupType = this.types.get(SplitStorageType.GROUP);
 
-        this.backing.get(userType).applyBulkUpdate(bulkUpdate);
+        this.implementations.get(userType).applyBulkUpdate(bulkUpdate);
 
         // if differs
         if (userType != groupType) {
-            this.backing.get(groupType).applyBulkUpdate(bulkUpdate);
+            this.implementations.get(groupType).applyBulkUpdate(bulkUpdate);
         }
     }
 
     @Override
     public User loadUser(UUID uuid, String username) throws Exception {
-        return this.backing.get(this.types.get(SplitStorageType.USER)).loadUser(uuid, username);
+        return implFor(SplitStorageType.USER).loadUser(uuid, username);
     }
 
     @Override
     public void saveUser(User user) throws Exception {
-        this.backing.get(this.types.get(SplitStorageType.USER)).saveUser(user);
+        implFor(SplitStorageType.USER).saveUser(user);
     }
 
     @Override
     public Set<UUID> getUniqueUsers() throws Exception {
-        return this.backing.get(this.types.get(SplitStorageType.USER)).getUniqueUsers();
+        return implFor(SplitStorageType.USER).getUniqueUsers();
     }
 
     @Override
     public List<HeldNode<UUID>> getUsersWithPermission(Constraint constraint) throws Exception {
-        return this.backing.get(this.types.get(SplitStorageType.USER)).getUsersWithPermission(constraint);
+        return implFor(SplitStorageType.USER).getUsersWithPermission(constraint);
     }
 
     @Override
     public Group createAndLoadGroup(String name) throws Exception {
-        return this.backing.get(this.types.get(SplitStorageType.GROUP)).createAndLoadGroup(name);
+        return implFor(SplitStorageType.GROUP).createAndLoadGroup(name);
     }
 
     @Override
     public Optional<Group> loadGroup(String name) throws Exception {
-        return this.backing.get(this.types.get(SplitStorageType.GROUP)).loadGroup(name);
+        return implFor(SplitStorageType.GROUP).loadGroup(name);
     }
 
     @Override
     public void loadAllGroups() throws Exception {
-        this.backing.get(this.types.get(SplitStorageType.GROUP)).loadAllGroups();
+        implFor(SplitStorageType.GROUP).loadAllGroups();
     }
 
     @Override
     public void saveGroup(Group group) throws Exception {
-        this.backing.get(this.types.get(SplitStorageType.GROUP)).saveGroup(group);
+        implFor(SplitStorageType.GROUP).saveGroup(group);
     }
 
     @Override
     public void deleteGroup(Group group) throws Exception {
-        this.backing.get(this.types.get(SplitStorageType.GROUP)).deleteGroup(group);
+        implFor(SplitStorageType.GROUP).deleteGroup(group);
     }
 
     @Override
     public List<HeldNode<String>> getGroupsWithPermission(Constraint constraint) throws Exception {
-        return this.backing.get(this.types.get(SplitStorageType.GROUP)).getGroupsWithPermission(constraint);
+        return implFor(SplitStorageType.GROUP).getGroupsWithPermission(constraint);
     }
 
     @Override
     public Track createAndLoadTrack(String name) throws Exception {
-        return this.backing.get(this.types.get(SplitStorageType.TRACK)).createAndLoadTrack(name);
+        return implFor(SplitStorageType.TRACK).createAndLoadTrack(name);
     }
 
     @Override
     public Optional<Track> loadTrack(String name) throws Exception {
-        return this.backing.get(this.types.get(SplitStorageType.TRACK)).loadTrack(name);
+        return implFor(SplitStorageType.TRACK).loadTrack(name);
     }
 
     @Override
     public void loadAllTracks() throws Exception {
-        this.backing.get(this.types.get(SplitStorageType.TRACK)).loadAllTracks();
+        implFor(SplitStorageType.TRACK).loadAllTracks();
     }
 
     @Override
     public void saveTrack(Track track) throws Exception {
-        this.backing.get(this.types.get(SplitStorageType.TRACK)).saveTrack(track);
+        implFor(SplitStorageType.TRACK).saveTrack(track);
     }
 
     @Override
     public void deleteTrack(Track track) throws Exception {
-        this.backing.get(this.types.get(SplitStorageType.TRACK)).deleteTrack(track);
+        implFor(SplitStorageType.TRACK).deleteTrack(track);
     }
 
     @Override
     public PlayerSaveResult savePlayerData(UUID uuid, String username) throws Exception {
-        return this.backing.get(this.types.get(SplitStorageType.UUID)).savePlayerData(uuid, username);
+        return implFor(SplitStorageType.UUID).savePlayerData(uuid, username);
     }
 
     @Override
     public UUID getPlayerUuid(String username) throws Exception {
-        return this.backing.get(this.types.get(SplitStorageType.UUID)).getPlayerUuid(username);
+        return implFor(SplitStorageType.UUID).getPlayerUuid(username);
     }
 
     @Override
     public String getPlayerName(UUID uuid) throws Exception {
-        return this.backing.get(this.types.get(SplitStorageType.UUID)).getPlayerName(uuid);
+        return implFor(SplitStorageType.UUID).getPlayerName(uuid);
     }
 }

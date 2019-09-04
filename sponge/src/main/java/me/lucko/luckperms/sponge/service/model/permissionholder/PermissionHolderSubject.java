@@ -32,8 +32,9 @@ import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.inheritance.InheritanceGraph;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
-import me.lucko.luckperms.common.node.factory.NodeTypes;
+import me.lucko.luckperms.common.node.types.Inheritance;
+import me.lucko.luckperms.common.node.types.Prefix;
+import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
@@ -123,7 +124,7 @@ public abstract class PermissionHolderSubject<T extends PermissionHolder> implem
     @Override
     public boolean isChildOf(ImmutableContextSet contexts, LPSubjectReference parent) {
         return parent.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP) &&
-                getPermissionValue(contexts, NodeFactory.groupNode(parent.getSubjectIdentifier())).asBoolean();
+                getPermissionValue(contexts, Inheritance.key(parent.getSubjectIdentifier())).asBoolean();
     }
 
     @Override
@@ -145,14 +146,14 @@ public abstract class PermissionHolderSubject<T extends PermissionHolder> implem
     @Override
     public Optional<String> getOption(ImmutableContextSet contexts, String s) {
         MetaCache data = this.parent.getCachedData().getMetaData(this.plugin.getContextManager().formQueryOptions(contexts));
-        if (s.equalsIgnoreCase(NodeTypes.PREFIX_KEY)) {
+        if (s.equalsIgnoreCase(Prefix.NODE_KEY)) {
             String prefix = data.getPrefix(MetaCheckEvent.Origin.PLATFORM_API);
             if (prefix != null) {
                 return Optional.of(prefix);
             }
         }
 
-        if (s.equalsIgnoreCase(NodeTypes.SUFFIX_KEY)) {
+        if (s.equalsIgnoreCase(Suffix.NODE_KEY)) {
             String suffix = data.getSuffix(MetaCheckEvent.Origin.PLATFORM_API);
             if (suffix != null) {
                 return Optional.of(suffix);

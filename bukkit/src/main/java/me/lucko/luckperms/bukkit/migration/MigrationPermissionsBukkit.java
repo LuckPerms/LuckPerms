@@ -37,7 +37,7 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Iterators;
@@ -83,7 +83,7 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
 
         ConfigurationSection groupsSection = config.getConfigurationSection("groups");
 
-        Iterators.iterate(groupsSection.getKeys(false), key -> {
+        Iterators.tryIterate(groupsSection.getKeys(false), key -> {
             final String groupName = MigrationUtils.standardizeName(key);
             Group lpGroup = plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
 
@@ -103,7 +103,7 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
 
         ConfigurationSection usersSection = config.getConfigurationSection("users");
 
-        Iterators.iterate(usersSection.getKeys(false), key -> {
+        Iterators.tryIterate(usersSection.getKeys(false), key -> {
             UUID uuid = BukkitUuids.lookupUuid(log, key);
             if (uuid == null) {
                 return;
@@ -153,13 +153,13 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
         if (data.isList("groups")) {
             List<String> groups = data.getStringList("groups");
             for (String group : groups) {
-                holder.setPermission(DataType.NORMAL, NodeFactory.buildGroupNode(MigrationUtils.standardizeName(group)).build(), true);
+                holder.setPermission(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(group)).build(), true);
             }
         }
         if (data.isList("inheritance")) {
             List<String> groups = data.getStringList("inheritance");
             for (String group : groups) {
-                holder.setPermission(DataType.NORMAL, NodeFactory.buildGroupNode(MigrationUtils.standardizeName(group)).build(), true);
+                holder.setPermission(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(group)).build(), true);
             }
         }
     }

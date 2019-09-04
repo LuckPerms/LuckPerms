@@ -29,13 +29,13 @@ import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.common.cache.PatternCache;
 import me.lucko.luckperms.common.node.AbstractNode;
 import me.lucko.luckperms.common.node.AbstractNodeBuilder;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
 
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
 import net.luckperms.api.node.types.RegexPermissionNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
@@ -43,6 +43,17 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class RegexPermission extends AbstractNode<RegexPermissionNode, RegexPermissionNode.Builder> implements RegexPermissionNode {
+    public static final String MARKER_1 = "r=";
+    public static final String MARKER_2 = "R=";
+
+    public static String key(String pattern) {
+        return MARKER_1 + pattern;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
     private final String pattern;
 
     private final Cache<PatternCache.CachedPattern> cache = new Cache<PatternCache.CachedPattern>() {
@@ -53,7 +64,7 @@ public class RegexPermission extends AbstractNode<RegexPermissionNode, RegexPerm
     };
 
     public RegexPermission(String pattern, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
-        super(NodeFactory.regexNode(pattern), value, expireAt, contexts, metadata);
+        super(key(pattern), value, expireAt, contexts, metadata);
         this.pattern = pattern;
     }
 
@@ -72,10 +83,19 @@ public class RegexPermission extends AbstractNode<RegexPermissionNode, RegexPerm
         return new Builder(this.pattern, this.value, this.expireAt, this.contexts, this.metadata);
     }
 
+    public static @Nullable Builder parse(String key) {
+        if (!key.startsWith(MARKER_1) && !key.startsWith(MARKER_2)) {
+            return null;
+        }
+
+        return builder()
+                .pattern(key.substring(2));
+    }
+
     public static final class Builder extends AbstractNodeBuilder<RegexPermissionNode, RegexPermissionNode.Builder> implements RegexPermissionNode.Builder {
         private String pattern;
 
-        public Builder() {
+        private Builder() {
             this.pattern = null;
         }
 

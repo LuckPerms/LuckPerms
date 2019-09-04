@@ -36,8 +36,11 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
-import me.lucko.luckperms.common.node.factory.NodeTypes;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
+import me.lucko.luckperms.common.node.types.Inheritance;
+import me.lucko.luckperms.common.node.types.Meta;
+import me.lucko.luckperms.common.node.types.Prefix;
+import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Iterators;
@@ -47,7 +50,6 @@ import me.lucko.luckperms.common.util.ProgressLogger;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.model.DataType;
-import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.Node;
 
 import org.bukkit.Bukkit;
@@ -109,7 +111,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
         AtomicInteger groupCount = new AtomicInteger(0);
         AtomicInteger maxWeight = new AtomicInteger(0);
-        Iterators.iterate(internalService.getEntities(true), entity -> {
+        Iterators.tryIterate(internalService.getEntities(true), entity -> {
             String groupName = MigrationUtils.standardizeName(entity.getDisplayName());
             Group group = plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
 
@@ -128,10 +130,10 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
                 Set<Node> nodes = userParents.computeIfAbsent(uuid, u -> new HashSet<>());
                 if (membership.getExpiration() == null) {
-                    nodes.add(NodeFactory.buildGroupNode(groupName).build());
+                    nodes.add(Inheritance.builder(groupName).build());
                 } else {
                     long expiry = membership.getExpiration().toInstant().getEpochSecond();
-                    nodes.add(NodeFactory.buildGroupNode(groupName).expiry(expiry).build());
+                    nodes.add(Inheritance.builder(groupName).expiry(expiry).build());
                 }
             }
 
@@ -143,7 +145,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         // Migrate all tracks
         log.log("Starting track migration.");
         AtomicInteger trackCount = new AtomicInteger(0);
-        Iterators.iterate(service.getAllTracks(), t -> {
+        Iterators.tryIterate(service.getAllTracks(), t -> {
             String trackName = MigrationUtils.standardizeName(t);
             Track track = plugin.getStorage().createAndLoadTrack(trackName, CreationCause.INTERNAL).join();
             track.setGroups(service.getTrackGroups(t));
@@ -161,7 +163,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         Set<UUID> usersToMigrate = new HashSet<>(userParents.keySet());
         usersToMigrate.addAll(service.getAllPlayersUUID());
 
-        Iterators.iterate(usersToMigrate, u -> {
+        Iterators.tryIterate(usersToMigrate, u -> {
             PermissionEntity entity = internalService.getEntity(null, u, false);
 
             String username = null;
@@ -199,9 +201,9 @@ public class MigrationZPermissions extends SubCommand<Object> {
             if (e.getPermission().isEmpty()) continue;
 
             if (e.getWorld() != null && !e.getWorld().getName().equals("")) {
-                holder.setPermission(DataType.NORMAL, NodeFactory.builder(e.getPermission()).value(e.isValue()).withContext(DefaultContextKeys.WORLD_KEY, e.getWorld().getName()).build(), true);
+                holder.setPermission(DataType.NORMAL, NodeBuilders.determineMostApplicable(e.getPermission()).value(e.isValue()).withContext(DefaultContextKeys.WORLD_KEY, e.getWorld().getName()).build(), true);
             } else {
-                holder.setPermission(DataType.NORMAL, NodeFactory.builder(e.getPermission()).value(e.isValue()).build(), true);
+                holder.setPermission(DataType.NORMAL, NodeBuilders.determineMostApplicable(e.getPermission()).value(e.isValue()).build(), true);
             }
         }
 
@@ -209,7 +211,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         if (entity.isGroup()) {
             for (PermissionEntity inheritance : entity.getParents()) {
                 if (!inheritance.getDisplayName().equals(holder.getObjectName())) {
-                    holder.setPermission(DataType.NORMAL, NodeFactory.buildGroupNode(MigrationUtils.standardizeName(inheritance.getDisplayName())).build(), true);
+                    holder.setPermission(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(inheritance.getDisplayName())).build(), true);
                 }
             }
         }
@@ -223,11 +225,12 @@ public class MigrationZPermissions extends SubCommand<Object> {
             String valueString = value.toString();
             if (valueString.isEmpty()) continue;
 
-            if (key.equals(NodeTypes.PREFIX_KEY) || key.equals(NodeTypes.SUFFIX_KEY)) {
-                ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
-                holder.setPermission(DataType.NORMAL, NodeFactory.buildChatMetaNode(type, weight, valueString).build(), true);
+            if (key.equals("prefix")) {
+                holder.setPermission(DataType.NORMAL, Prefix.builder(weight, valueString).build(), true);
+            } else if (key.equals("suffix")) {
+                holder.setPermission(DataType.NORMAL, Suffix.builder(weight, valueString).build(), true);
             } else {
-                holder.setPermission(DataType.NORMAL, NodeFactory.buildMetaNode(key, valueString).build(), true);
+                holder.setPermission(DataType.NORMAL, Meta.builder(key, valueString).build(), true);
             }
         }
     }

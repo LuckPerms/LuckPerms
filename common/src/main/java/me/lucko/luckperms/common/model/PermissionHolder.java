@@ -61,6 +61,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -229,7 +230,7 @@ public abstract class PermissionHolder {
         getPlugin().getEventFactory().handleDataRecalculate(this);
     }
 
-    public void setNodes(DataType type, Set<? extends Node> set) {
+    public void setNodes(DataType type, Collection<? extends Node> set) {
         getData(type).setContent(set);
         invalidateCache();
     }
@@ -527,7 +528,7 @@ public abstract class PermissionHolder {
 
     public boolean removeIf(DataType dataType, @Nullable ContextSet contextSet, Predicate<? super Node> predicate, @Nullable Runnable taskIfSuccess) {
         NodeMap data = getData(dataType);
-        ImmutableCollection<? extends Node> before = data.immutable().values();;
+        ImmutableCollection<? extends Node> before = data.immutable().values();
 
         if (contextSet == null) {
             if (!data.removeIf(predicate)) {

@@ -69,13 +69,13 @@ public class ApiTrackManager extends ApiAbstractManager<Track, net.luckperms.api
     }
 
     @Override
-    public @NonNull CompletableFuture<Void> saveTrack(net.luckperms.api.track.Track track) {
+    public @NonNull CompletableFuture<Void> saveTrack(net.luckperms.api.track.@NonNull Track track) {
         Objects.requireNonNull(track, "track");
         return this.plugin.getStorage().saveTrack(ApiTrack.cast(track));
     }
 
     @Override
-    public @NonNull CompletableFuture<Void> deleteTrack(net.luckperms.api.track.Track track) {
+    public @NonNull CompletableFuture<Void> deleteTrack(net.luckperms.api.track.@NonNull Track track) {
         Objects.requireNonNull(track, "track");
         return this.plugin.getStorage().deleteTrack(ApiTrack.cast(track), DeletionCause.API);
     }

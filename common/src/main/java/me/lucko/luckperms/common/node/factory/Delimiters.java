@@ -25,20 +25,59 @@
 
 package me.lucko.luckperms.common.node.factory;
 
+import com.google.common.base.Splitter;
+
+import me.lucko.luckperms.common.cache.PatternCache;
+import me.lucko.luckperms.common.node.AbstractNode;
+
+import java.util.regex.Pattern;
+
+/**
+ * Used to add/remove a delimiter character for the {@link AbstractNode#NODE_SEPARATOR} character.
+ */
 public final class Delimiters {
     private Delimiters() {}
 
-    /**
-     * The characters which are delimited when serializing meta/prefix/suffix strings
-     */
-    private static final String[] GENERIC_DELIMITERS = new String[]{".", "/", "-", "$"};
+    public static final char DELIMITER = '\\';
 
-    static String escapeCharacters(String s) {
+    // used to split prefix/suffix/meta nodes
+    public static final Splitter SPLIT_BY_NODE_SEPARATOR_IN_TWO = Splitter.on(PatternCache.compile("(?<!" + Pattern.quote(String.valueOf(DELIMITER)) + ")" + Pattern.quote(AbstractNode.NODE_SEPARATOR_STRING))).limit(2);
+
+    private static boolean isDelimitedCharacter(char c) {
+        return c == AbstractNode.NODE_SEPARATOR;
+    }
+
+    private static boolean isLegacyDelimitedCharacter(char c) {
+        return c == AbstractNode.NODE_SEPARATOR || c == '/' || c == '-' || c == '$';
+    }
+
+    public static String escapeCharacters(String s) {
         if (s == null) {
             throw new NullPointerException();
         }
 
-        return escapeDelimiters(s, GENERIC_DELIMITERS);
+        char[] chars = s.toCharArray();
+
+        int count = 0;
+        for (char c : chars) {
+            if (isDelimitedCharacter(c)) {
+                count++;
+            }
+        }
+
+        if (count == 0) {
+            return s;
+        }
+
+        StringBuilder sb = new StringBuilder(chars.length + count);
+        for (char c : chars) {
+            if (isDelimitedCharacter(c)) {
+                sb.append(DELIMITER);
+            }
+            sb.append(c);
+        }
+
+        return sb.toString();
     }
 
     public static String unescapeCharacters(String s) {
@@ -46,29 +85,32 @@ public final class Delimiters {
             throw new NullPointerException();
         }
 
-        return unescapeDelimiters(s, GENERIC_DELIMITERS);
-    }
+        char[] chars = s.toCharArray();
 
-    private static String escapeDelimiters(String s, String... delimiters) {
-        if (s == null) {
-            return null;
+        int count = 0;
+        for (int i = 0, j = chars.length - 1; i < j; i++) {
+            if (chars[i] == DELIMITER && isLegacyDelimitedCharacter(chars[i + 1])) {
+                count++;
+            }
         }
 
-        for (String d : delimiters) {
-            s = s.replace(d, "\\" + d);
-        }
-        return s;
-    }
-
-    private static String unescapeDelimiters(String s, String... delimiters) {
-        if (s == null) {
-            return null;
+        if (count == 0) {
+            return s;
         }
 
-        for (String d : delimiters) {
-            s = s.replace("\\" + d, d);
+        StringBuilder sb = new StringBuilder(chars.length - count);
+        int i = 0;
+        while (i < chars.length) {
+            if (i < chars.length - 1 && chars[i] == DELIMITER && isLegacyDelimitedCharacter(chars[i + 1])) {
+                sb.append(chars[i + 1]);
+                i += 2;
+            } else {
+                sb.append(chars[i]);
+                i++;
+            }
         }
-        return s;
+
+        return sb.toString();
     }
 
 }

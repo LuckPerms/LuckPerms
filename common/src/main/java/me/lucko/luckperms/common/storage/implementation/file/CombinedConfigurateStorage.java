@@ -30,11 +30,11 @@ import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.model.manager.track.TrackManager;
 import me.lucko.luckperms.common.node.model.HeldNodeImpl;
-import me.lucko.luckperms.common.node.model.NodeDataContainer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.file.loader.ConfigurateLoader;
 
 import net.luckperms.api.node.HeldNode;
+import net.luckperms.api.node.Node;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -271,12 +271,12 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
                     UUID holder = UUID.fromString(entry.getKey().toString());
                     ConfigurationNode object = entry.getValue();
 
-                    Set<NodeDataContainer> nodes = readNodes(object);
-                    for (NodeDataContainer e : nodes) {
-                        if (!constraint.eval(e.getPermission())) {
+                    Set<Node> nodes = readNodes(object);
+                    for (Node e : nodes) {
+                        if (!constraint.eval(e.getKey())) {
                             continue;
                         }
-                        held.add(HeldNodeImpl.of(holder, e.toNode()));
+                        held.add(HeldNodeImpl.of(holder, e));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -325,12 +325,12 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
                     String holder = entry.getKey().toString();
                     ConfigurationNode object = entry.getValue();
 
-                    Set<NodeDataContainer> nodes = readNodes(object);
-                    for (NodeDataContainer e : nodes) {
-                        if (!constraint.eval(e.getPermission())) {
+                    Set<Node> nodes = readNodes(object);
+                    for (Node e : nodes) {
+                        if (!constraint.eval(e.getKey())) {
                             continue;
                         }
-                        held.add(HeldNodeImpl.of(holder, e.toNode()));
+                        held.add(HeldNodeImpl.of(holder, e));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

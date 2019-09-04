@@ -23,9 +23,8 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.implementation;
+package me.lucko.luckperms.common.node.factory;
 
-import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.node.types.DisplayName;
 import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.node.types.Meta;
@@ -36,67 +35,42 @@ import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.node.types.Weight;
 
 import net.luckperms.api.node.NodeBuilder;
-import net.luckperms.api.node.NodeBuilderRegistry;
 import net.luckperms.api.node.types.DisplayNameNode;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.node.types.MetaNode;
-import net.luckperms.api.node.types.PermissionNode;
 import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.RegexPermissionNode;
 import net.luckperms.api.node.types.SuffixNode;
 import net.luckperms.api.node.types.WeightNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class ApiNodeBuilderRegistry implements NodeBuilderRegistry {
-    public static final ApiNodeBuilderRegistry INSTANCE = new ApiNodeBuilderRegistry();
+public final class NodeBuilders {
+    private NodeBuilders() {}
 
-    private ApiNodeBuilderRegistry() {
+    private static final Parser<InheritanceNode.Builder> INHERITANCE = Inheritance::parse;
+    private static final Parser<PrefixNode.Builder> PREFIX = Prefix::parse;
+    private static final Parser<SuffixNode.Builder> SUFFIX = Suffix::parse;
+    private static final Parser<MetaNode.Builder> META = Meta::parse;
+    private static final Parser<WeightNode.Builder> WEIGHT = Weight::parse;
+    private static final Parser<DisplayNameNode.Builder> DISPLAY_NAME = DisplayName::parse;
+    private static final Parser<RegexPermissionNode.Builder> REGEX_PERMISSION = RegexPermission::parse;
 
+    private static final Parser<?>[] PARSERS = new Parser[]{INHERITANCE, PREFIX, SUFFIX, META, WEIGHT, DISPLAY_NAME, REGEX_PERMISSION};
+
+    public static @NonNull NodeBuilder<?, ?> determineMostApplicable(String key) {
+        for (Parser<?> parser : PARSERS) {
+            NodeBuilder<?, ?> builder = parser.parse(key);
+            if (builder != null) {
+                return builder;
+            }
+        }
+        return Permission.builder().permission(key);
     }
 
-    @Override
-    public @NonNull NodeBuilder<?, ?> forKey(String key) {
-        return NodeBuilders.determineMostApplicable(key);
+    private interface Parser<B extends NodeBuilder<?, B>> {
+        @Nullable B parse(String s);
     }
 
-    @Override
-    public PermissionNode.@NonNull Builder forPermission() {
-        return Permission.builder();
-    }
-
-    @Override
-    public RegexPermissionNode.@NonNull Builder forRegexPermission() {
-        return RegexPermission.builder();
-    }
-
-    @Override
-    public InheritanceNode.@NonNull Builder forInheritance() {
-        return Inheritance.builder();
-    }
-
-    @Override
-    public PrefixNode.@NonNull Builder forPrefix() {
-        return Prefix.builder();
-    }
-
-    @Override
-    public SuffixNode.@NonNull Builder forSuffix() {
-        return Suffix.builder();
-    }
-
-    @Override
-    public MetaNode.@NonNull Builder forMeta() {
-        return Meta.builder();
-    }
-
-    @Override
-    public WeightNode.@NonNull Builder forWeight() {
-        return Weight.builder();
-    }
-
-    @Override
-    public DisplayNameNode.@NonNull Builder forDisplayName() {
-        return DisplayName.builder();
-    }
 }

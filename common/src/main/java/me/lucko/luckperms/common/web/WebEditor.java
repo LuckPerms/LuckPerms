@@ -33,7 +33,7 @@ import com.google.gson.JsonObject;
 import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
@@ -170,7 +170,7 @@ public final class WebEditor {
             String key = attributes.get("key").getAsString();
             boolean value = attributes.get("value").getAsBoolean();
 
-            NodeBuilder<?, ?> builder = NodeFactory.builder(key).value(value);
+            NodeBuilder<?, ?> builder = NodeBuilders.determineMostApplicable(key).value(value);
 
             if (attributes.has("expiry")) {
                 builder.expiry(attributes.get("expiry").getAsLong());

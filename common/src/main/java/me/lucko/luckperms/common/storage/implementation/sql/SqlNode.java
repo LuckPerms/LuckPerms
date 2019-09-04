@@ -23,10 +23,9 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node.model;
+package me.lucko.luckperms.common.storage.implementation.sql;
 
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
 
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
@@ -39,14 +38,14 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * An stripped down version of {@link Node}, without methods and cached values
- * for handling permission lookups.
+ * A version of {@link Node}, more closely following the model used by the SQL
+ * datastore.
  *
  * All values are non-null.
  */
-public final class NodeDataContainer {
+public final class SqlNode {
 
-    public static NodeDataContainer fromNode(Node node) {
+    public static SqlNode fromNode(Node node) {
         ContextSet contexts = node.getContexts();
 
         Set<String> servers = contexts.getValues(DefaultContextKeys.SERVER_KEY);
@@ -74,19 +73,10 @@ public final class NodeDataContainer {
         } else {
             world = "global";
         }
-        
 
-        NodeDataContainer model = of(node.getKey(), node.getValue(), server, world, node.hasExpiry() ? node.getExpiry().getEpochSecond() : 0L, contexts.immutableCopy());
-        model.node = node;
-        return model;
-    }
 
-    public static NodeDataContainer of(String permission, boolean value, String server, String world, long expiry, ImmutableContextSet contexts) {
-        return new NodeDataContainer(permission, value, server, world, expiry, contexts);
-    }
-
-    public static NodeDataContainer of(String permission) {
-        return of(permission, true, "global", "global", 0L, ImmutableContextSetImpl.EMPTY);
+        long expiry = node.hasExpiry() ? node.getExpiry().getEpochSecond() : 0L;
+        return new SqlNode(node.getKey(), node.getValue(), server, world, expiry, contexts.immutableCopy());
     }
 
     private final String permission;
@@ -95,9 +85,8 @@ public final class NodeDataContainer {
     private final String world;
     private final long expiry;
     private final ImmutableContextSet contexts;
-    private Node node = null;
 
-    private NodeDataContainer(String permission, boolean value, String server, String world, long expiry, ImmutableContextSet contexts) {
+    public SqlNode(String permission, boolean value, String server, String world, long expiry, ImmutableContextSet contexts) {
         this.permission = Objects.requireNonNull(permission, "permission");
         this.value = value;
         this.server = Objects.requireNonNull(server, "server");
@@ -106,18 +95,14 @@ public final class NodeDataContainer {
         this.contexts = Objects.requireNonNull(contexts, "contexts");
     }
 
-    public synchronized Node toNode() {
-        if (this.node == null) {
-            this.node = NodeFactory.builder(this.permission)
-                    .value(this.value)
-                    .withContext(DefaultContextKeys.SERVER_KEY, this.server)
-                    .withContext(DefaultContextKeys.WORLD_KEY, this.world)
-                    .expiry(this.expiry)
-                    .withContext(this.contexts)
-                    .build();
-        }
-
-        return this.node;
+    public Node toNode() {
+        return NodeBuilders.determineMostApplicable(this.permission)
+                .value(this.value)
+                .withContext(DefaultContextKeys.SERVER_KEY, this.server)
+                .withContext(DefaultContextKeys.WORLD_KEY, this.world)
+                .expiry(this.expiry)
+                .withContext(this.contexts)
+                .build();
     }
 
     public String getPermission() {
@@ -144,35 +129,11 @@ public final class NodeDataContainer {
         return this.contexts;
     }
 
-    public NodeDataContainer setPermission(String permission) {
-        return of(permission, this.value, this.server, this.world, this.expiry, this.contexts);
-    }
-
-    public NodeDataContainer setValue(boolean value) {
-        return of(this.permission, value, this.server, this.world, this.expiry, this.contexts);
-    }
-
-    public NodeDataContainer setServer(String server) {
-        return of(this.permission, this.value, server, this.world, this.expiry, this.contexts);
-    }
-
-    public NodeDataContainer setWorld(String world) {
-        return of(this.permission, this.value, this.server, world, this.expiry, this.contexts);
-    }
-
-    public NodeDataContainer setExpiry(long expiry) {
-        return of(this.permission, this.value, this.server, this.world, expiry, this.contexts);
-    }
-
-    public NodeDataContainer setContexts(ImmutableContextSet contexts) {
-        return of(this.permission, this.value, this.server, this.world, this.expiry, contexts);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
-        if (!(o instanceof NodeDataContainer)) return false;
-        final NodeDataContainer other = (NodeDataContainer) o;
+        if (!(o instanceof SqlNode)) return false;
+        final SqlNode other = (SqlNode) o;
 
         return this.getPermission().equals(other.getPermission()) &&
                 this.getValue() == other.getValue() &&

@@ -85,7 +85,7 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
     }
 
     @Override
-    public @NonNull CompletableFuture<Void> saveUser(net.luckperms.api.model.user.User user) {
+    public @NonNull CompletableFuture<Void> saveUser(net.luckperms.api.model.user.@NonNull User user) {
         Objects.requireNonNull(user, "user");
         return this.plugin.getStorage().saveUser(ApiUser.cast(user));
     }
@@ -134,7 +134,7 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
     }
 
     @Override
-    public void cleanupUser(net.luckperms.api.model.user.User user) {
+    public void cleanupUser(net.luckperms.api.model.user.@NonNull User user) {
         Objects.requireNonNull(user, "user");
         this.handle.getHouseKeeper().clearApiUsage(ApiUser.cast(user).getUuid());
     }

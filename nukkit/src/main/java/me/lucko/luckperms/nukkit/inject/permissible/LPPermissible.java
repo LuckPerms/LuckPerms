@@ -146,11 +146,7 @@ public class LPPermissible extends PermissibleBase {
         }
 
         // ignore matches made from looking up in the permission map (replicate nukkit behaviour)
-        if (result.processorClass() == DefaultsProcessor.class && "permission map".equals(result.cause())) {
-            return false;
-        }
-
-        return true;
+        return !(result.processorClass() == DefaultsProcessor.class && "permission map".equals(result.cause()));
     }
 
     @Override
