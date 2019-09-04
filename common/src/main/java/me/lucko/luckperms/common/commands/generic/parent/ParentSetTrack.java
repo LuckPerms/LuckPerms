@@ -132,6 +132,7 @@ public class ParentSetTrack extends SharedSubCommand {
         return TabCompleter.create()
                 .at(0, TabCompletions.tracks(plugin))
                 .at(1, TabCompletions.groups(plugin))
+                .from(2, TabCompletions.contexts(plugin))
                 .complete(args);
     }
 }

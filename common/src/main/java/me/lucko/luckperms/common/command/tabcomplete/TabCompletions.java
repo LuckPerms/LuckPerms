@@ -31,10 +31,12 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.treeview.TreeNode;
 
+import net.luckperms.api.context.ImmutableContextSet;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -47,19 +49,13 @@ public final class TabCompletions {
     private final CompletionSupplier groups;
     private final CompletionSupplier tracks;
     private final CompletionSupplier permissions;
+    private final CompletionSupplier contexts;
 
     public TabCompletions(LuckPermsPlugin plugin) {
         this.groups = CompletionSupplier.startsWith(() -> plugin.getGroupManager().getAll().keySet());
         this.tracks = CompletionSupplier.startsWith(() -> plugin.getTrackManager().getAll().keySet());
         this.permissions = partial -> {
             PermissionRegistry cache = plugin.getPermissionRegistry();
-
-            if (partial.isEmpty()) {
-                return cache.getRootNode().getChildren()
-                        .map(Map::keySet)
-                        .<List<String>>map(ArrayList::new)
-                        .orElse(Collections.emptyList());
-            }
 
             String start = partial.toLowerCase();
             List<String> parts = new ArrayList<>(Splitter.on('.').splitToList(start));
@@ -70,7 +66,7 @@ public final class TabCompletions {
                     return Collections.emptyList();
                 }
 
-                return root.getChildren().get().keySet().stream().filter(TabCompleter.startsWithIgnoreCase(start)).collect(Collectors.toList());
+                return CompletionSupplier.startsWith(root.getChildren().get().keySet()).supplyCompletions(start);
             }
 
             String incomplete = parts.remove(parts.size() - 1);
@@ -97,6 +93,28 @@ public final class TabCompletions {
                     .map(s -> String.join(".", parts) + "." + s)
                     .collect(Collectors.toList());
         };
+        this.contexts = partial -> {
+            ImmutableContextSet potentialContexts = plugin.getContextManager().getPotentialContexts();
+
+            int index = partial.indexOf('=');
+            if (index == -1) {
+                // cursor is specifying the key
+                return CompletionSupplier.startsWith(potentialContexts.toMap().keySet()).supplyCompletions(partial);
+            }
+
+            // cursor is specifying the value
+            String key = partial.substring(0, index);
+            if (key.equals("") || key.trim().isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            String value = partial.substring(index + 1).trim();
+            Set<String> potentialValues = potentialContexts.getValues(key);
+            return potentialValues.stream()
+                    .filter(TabCompleter.startsWithIgnoreCase(value))
+                    .map(s -> key + "=" + s)
+                    .collect(Collectors.toList());
+        };
     }
 
     // bit of a weird pattern, but meh it kinda works, reduces the boilerplate
@@ -116,6 +134,10 @@ public final class TabCompletions {
 
     public static CompletionSupplier permissions(LuckPermsPlugin plugin) {
         return plugin.getCommandManager().getTabCompletions().permissions;
+    }
+
+    public static CompletionSupplier contexts(LuckPermsPlugin plugin) {
+        return plugin.getCommandManager().getTabCompletions().contexts;
     }
 
 }

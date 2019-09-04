@@ -123,6 +123,7 @@ public class ParentClearTrack extends SharedSubCommand {
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return TabCompleter.create()
                 .at(0, TabCompletions.tracks(plugin))
+                .from(1, TabCompletions.contexts(plugin))
                 .complete(args);
     }
 }

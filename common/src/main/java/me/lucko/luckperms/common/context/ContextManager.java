@@ -72,6 +72,14 @@ public abstract class ContextManager<T> {
         return ImmutableList.copyOf(this.staticCalculators);
     }
 
+    public ImmutableContextSet getPotentialContexts() {
+        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        for (ContextCalculator<? super T> calculator : this.calculators) {
+            builder.addAll(calculator.estimatePotentialContexts());
+        }
+        return builder.build();
+    }
+
     public Class<T> getSubjectClass() {
         return this.subjectClass;
     }

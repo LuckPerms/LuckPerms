@@ -25,16 +25,20 @@
 
 package me.lucko.luckperms.bungee.context;
 
+import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
+import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -44,9 +48,9 @@ public class BackendServerCalculator implements ContextCalculator<ProxiedPlayer>
         return player.getServer() == null ? null : (player.getServer().getInfo() == null ? null : player.getServer().getInfo().getName().toLowerCase());
     }
 
-    private final LuckPermsPlugin plugin;
+    private final LPBungeePlugin plugin;
 
-    public BackendServerCalculator(LuckPermsPlugin plugin) {
+    public BackendServerCalculator(LPBungeePlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -58,5 +62,15 @@ public class BackendServerCalculator implements ContextCalculator<ProxiedPlayer>
             consumer.accept(DefaultContextKeys.WORLD_KEY, server);
             server = this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(server, server).toLowerCase();
         }
+    }
+
+    @Override
+    public ContextSet estimatePotentialContexts() {
+        Collection<ServerInfo> servers = this.plugin.getBootstrap().getProxy().getServers().values();
+        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        for (ServerInfo server : servers) {
+            builder.add(DefaultContextKeys.WORLD_KEY, server.getName().toLowerCase());
+        }
+        return builder.build();
     }
 }

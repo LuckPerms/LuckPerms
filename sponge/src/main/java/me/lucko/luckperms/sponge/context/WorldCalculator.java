@@ -26,24 +26,29 @@
 package me.lucko.luckperms.sponge.context;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.sponge.LPSpongePlugin;
 
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
+import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.ImmutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.Game;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.world.World;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 public class WorldCalculator implements ContextCalculator<Subject> {
-    private final LuckPermsPlugin plugin;
+    private final LPSpongePlugin plugin;
 
-    public WorldCalculator(LuckPermsPlugin plugin) {
+    public WorldCalculator(LPSpongePlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -62,7 +67,20 @@ public class WorldCalculator implements ContextCalculator<Subject> {
             consumer.accept(DefaultContextKeys.WORLD_KEY, world);
             world = this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(world, world).toLowerCase();
         }
-
     }
 
+    @Override
+    public ContextSet estimatePotentialContexts() {
+        Game game = this.plugin.getBootstrap().getGame();
+        if (!game.isServerAvailable()) {
+            return ImmutableContextSet.empty();
+        }
+
+        Collection<World> worlds = game.getServer().getWorlds();
+        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        for (World world : worlds) {
+            builder.add(DefaultContextKeys.WORLD_KEY, world.getName().toLowerCase());
+        }
+        return builder.build();
+    }
 }

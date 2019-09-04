@@ -26,16 +26,20 @@
 package me.lucko.luckperms.velocity.context;
 
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.velocity.LPVelocityPlugin;
 
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
+import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.ImmutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -45,9 +49,9 @@ public class BackendServerCalculator implements ContextCalculator<Player> {
         return player.getCurrentServer().isPresent() ? player.getCurrentServer().get().getServerInfo().getName().toLowerCase() : null;
     }
 
-    private final LuckPermsPlugin plugin;
+    private final LPVelocityPlugin plugin;
 
-    public BackendServerCalculator(LuckPermsPlugin plugin) {
+    public BackendServerCalculator(LPVelocityPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -59,5 +63,15 @@ public class BackendServerCalculator implements ContextCalculator<Player> {
             consumer.accept(DefaultContextKeys.WORLD_KEY, server);
             server = this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(server, server).toLowerCase();
         }
+    }
+
+    @Override
+    public ContextSet estimatePotentialContexts() {
+        Collection<RegisteredServer> servers = this.plugin.getBootstrap().getProxy().getAllServers();
+        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        for (RegisteredServer server : servers) {
+            builder.add(DefaultContextKeys.WORLD_KEY, server.getServerInfo().getName().toLowerCase());
+        }
+        return builder.build();
     }
 }

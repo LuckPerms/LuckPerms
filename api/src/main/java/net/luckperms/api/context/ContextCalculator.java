@@ -94,4 +94,17 @@ public interface ContextCalculator<T> {
      */
     void calculate(@NonNull T target, @NonNull ContextConsumer consumer);
 
+    /**
+     * Gets a {@link ContextSet}, containing some/all of the contexts this
+     * calculator could potentially submit.
+     *
+     * <p>The result of this call is primarily intended on providing
+     * suggestions to end users when defining permissions.</p>
+     *
+     * @return a set of potential contexts
+     */
+    default ContextSet estimatePotentialContexts() {
+        return ImmutableContextSet.empty();
+    }
+
 }

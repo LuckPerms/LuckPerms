@@ -113,7 +113,11 @@ public final class WebEditor {
                                 arr.add(perm);
                             }
                         })
-                ).toJson();
+                )
+                .consume(o -> {
+                    o.add("potentialContexts", ContextSetJsonSerializer.serializeContextSet(plugin.getContextManager().getPotentialContexts()));
+                })
+                .toJson();
     }
 
     public static JsonObject readDataFromBytebin(BytebinClient bytebin, String id) {

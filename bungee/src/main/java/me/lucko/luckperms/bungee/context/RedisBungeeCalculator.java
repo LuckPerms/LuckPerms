@@ -29,6 +29,8 @@ import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
 
 import net.luckperms.api.context.ContextConsumer;
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.StaticContextCalculator;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -42,5 +44,19 @@ public class RedisBungeeCalculator implements StaticContextCalculator {
         if (redisBungee != null) {
             consumer.accept(PROXY_KEY, redisBungee.getServerId());
         }
+    }
+
+    @Override
+    public ContextSet estimatePotentialContexts() {
+        RedisBungeeAPI redisBungee = RedisBungee.getApi();
+        if (redisBungee == null) {
+            return ImmutableContextSet.empty();
+        }
+
+        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        for (String server : redisBungee.getAllServers()) {
+            builder.add(PROXY_KEY, server);
+        }
+        return builder.build();
     }
 }

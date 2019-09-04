@@ -26,23 +26,27 @@
 package me.lucko.luckperms.nukkit.context;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
+import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.ImmutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import cn.nukkit.Player;
+import cn.nukkit.level.Level;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 public class WorldCalculator implements ContextCalculator<Player> {
-    private final LuckPermsPlugin plugin;
+    private final LPNukkitPlugin plugin;
 
-    public WorldCalculator(LuckPermsPlugin plugin) {
+    public WorldCalculator(LPNukkitPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -54,5 +58,15 @@ public class WorldCalculator implements ContextCalculator<Player> {
             consumer.accept(DefaultContextKeys.WORLD_KEY, world);
             world = this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(world, world).toLowerCase();
         }
+    }
+
+    @Override
+    public ContextSet estimatePotentialContexts() {
+        Collection<Level> worlds = this.plugin.getBootstrap().getServer().getLevels().values();
+        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        for (Level world : worlds) {
+            builder.add(DefaultContextKeys.WORLD_KEY, world.getName().toLowerCase());
+        }
+        return builder.build();
     }
 }

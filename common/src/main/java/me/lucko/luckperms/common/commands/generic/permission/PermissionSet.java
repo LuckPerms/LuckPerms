@@ -107,6 +107,7 @@ public class PermissionSet extends SharedSubCommand {
         return TabCompleter.create()
                 .at(0, TabCompletions.permissions(plugin))
                 .at(1, TabCompletions.booleans())
+                .from(2, TabCompletions.contexts(plugin))
                 .complete(args);
     }
 }

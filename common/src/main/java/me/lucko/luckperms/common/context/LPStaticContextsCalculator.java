@@ -29,7 +29,9 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 
 import net.luckperms.api.context.ContextConsumer;
+import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.StaticContextCalculator;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -50,4 +52,10 @@ public class LPStaticContextsCalculator implements StaticContextCalculator {
         consumer.accept(this.config.getContextsFile().getStaticContexts());
     }
 
+    @Override
+    public ContextSet estimatePotentialContexts() {
+        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        calculate(builder::add);
+        return builder.build();
+    }
 }

@@ -101,6 +101,7 @@ public class ParentSet extends SharedSubCommand {
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return TabCompleter.create()
                 .at(0, TabCompletions.groups(plugin))
+                .from(1, TabCompletions.contexts(plugin))
                 .complete(args);
     }
 }
