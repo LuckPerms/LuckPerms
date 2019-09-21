@@ -34,12 +34,10 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.DateParser;
 
-import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.TemporaryMergeBehaviour;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -153,87 +151,30 @@ public class ArgumentParser {
     }
 
     public static MutableContextSet parseContext(int fromIndex, List<String> args, LuckPermsPlugin plugin) throws CommandException {
-        if (args.size() > fromIndex) {
-            MutableContextSet set = new MutableContextSetImpl();
+        if (args.size() <= fromIndex) {
+            return plugin.getConfiguration().getContextsFile().getDefaultContexts().mutableCopy();
+        }
 
-            List<String> contexts = args.subList(fromIndex, args.size());
-
-            for (int i = 0; i < contexts.size(); i++) {
-                String pair = contexts.get(i);
-
-                // one of the first two values, and doesn't have a key
-                if (i <= 1 && !pair.contains("=")) {
-                    String key = i == 0 ? DefaultContextKeys.SERVER_KEY : DefaultContextKeys.WORLD_KEY;
-                    set.add(key, pair);
-                    continue;
-                }
-
-                int index = pair.indexOf('=');
-                if (index == -1) {
-                    continue;
-                }
-
-                String key = pair.substring(0, index);
+        MutableContextSet contextSet = new MutableContextSetImpl();
+        List<String> toQuery = args.subList(fromIndex, args.size());
+        for (String s : toQuery) {
+            int index = s.indexOf('=');
+            if (index != -1) {
+                String key = s.substring(0, index);
                 if (key.equals("") || key.trim().isEmpty()) {
                     continue;
                 }
 
-                String value = pair.substring(index + 1);
+                String value = s.substring(index + 1);
                 if (value.equals("") || value.trim().isEmpty()) {
                     continue;
                 }
 
-                set.add(key, value);
-            }
-
-            return sanitizeContexts(set);
-        } else {
-            return sanitizeContexts(plugin.getConfiguration().getContextsFile().getDefaultContexts().mutableCopy());
-        }
-    }
-
-    private static MutableContextSet sanitizeContexts(MutableContextSet set) throws ArgumentException {
-        // remove any potential "global" context mappings
-        set.remove(DefaultContextKeys.SERVER_KEY, "global");
-        set.remove(DefaultContextKeys.WORLD_KEY, "global");
-        set.remove(DefaultContextKeys.SERVER_KEY, "null");
-        set.remove(DefaultContextKeys.WORLD_KEY, "null");
-        set.remove(DefaultContextKeys.SERVER_KEY, "*");
-        set.remove(DefaultContextKeys.WORLD_KEY, "*");
-
-        // remove excess entries from the set.
-        // (it can only have one server and one world.)
-        List<String> servers = new ArrayList<>(set.getValues(DefaultContextKeys.SERVER_KEY));
-        if (servers.size() > 1) {
-            // start iterating at index 1
-            for (int i = 1; i < servers.size(); i++) {
-                set.remove(DefaultContextKeys.SERVER_KEY, servers.get(i));
+                contextSet.add(key, value);
             }
         }
 
-        List<String> worlds = new ArrayList<>(set.getValues(DefaultContextKeys.WORLD_KEY));
-        if (worlds.size() > 1) {
-            // start iterating at index 1
-            for (int i = 1; i < worlds.size(); i++) {
-                set.remove(DefaultContextKeys.WORLD_KEY, worlds.get(i));
-            }
-        }
-
-        // there's either none or 1
-        for (String server : servers) {
-            if (!DataConstraints.SERVER_NAME_TEST.test(server)) {
-                throw new InvalidServerWorldException();
-            }
-        }
-
-        // there's either none or 1
-        for (String world : worlds) {
-            if (!DataConstraints.WORLD_NAME_TEST.test(world)) {
-                throw new InvalidServerWorldException();
-            }
-        }
-
-        return set;
+        return contextSet;
     }
 
     public static int parsePriority(int index, List<String> args) throws ArgumentException {
@@ -255,12 +196,12 @@ public class ArgumentParser {
             int index = s.indexOf('=');
             if (index != -1) {
                 String key = s.substring(0, index);
-                if (key.equals("")) {
+                if (key.equals("") || key.trim().isEmpty()) {
                     continue;
                 }
 
                 String value = s.substring(index + 1);
-                if (value.equals("")) {
+                if (value.equals("") || value.trim().isEmpty()) {
                     continue;
                 }
 
