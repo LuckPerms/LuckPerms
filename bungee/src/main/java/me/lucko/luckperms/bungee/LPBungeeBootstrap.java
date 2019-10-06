@@ -182,12 +182,12 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     }
 
     @Override
-    public Optional<ProxiedPlayer> getPlayer(UUID uuid) {
-        return Optional.ofNullable(getProxy().getPlayer(uuid));
+    public Optional<ProxiedPlayer> getPlayer(UUID uniqueId) {
+        return Optional.ofNullable(getProxy().getPlayer(uniqueId));
     }
 
     @Override
-    public Optional<UUID> lookupUuid(String username) {
+    public Optional<UUID> lookupUniqueId(String username) {
         if (getProxy().getPluginManager().getPlugin("RedisBungee") != null) {
             try {
                 return RedisBungeeUtil.lookupUuid(username);
@@ -200,10 +200,10 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     }
 
     @Override
-    public Optional<String> lookupUsername(UUID uuid) {
+    public Optional<String> lookupUsername(UUID uniqueId) {
         if (getProxy().getPluginManager().getPlugin("RedisBungee") != null) {
             try {
-                return RedisBungeeUtil.lookupUsername(uuid);
+                return RedisBungeeUtil.lookupUsername(uniqueId);
             } catch (Throwable t) {
                 t.printStackTrace();
             }
@@ -228,8 +228,8 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     }
 
     @Override
-    public boolean isPlayerOnline(UUID uuid) {
-        ProxiedPlayer player = getProxy().getPlayer(uuid);
+    public boolean isPlayerOnline(UUID uniqueId) {
+        ProxiedPlayer player = getProxy().getPlayer(uniqueId);
         return player != null && player.isConnected();
     }
 }

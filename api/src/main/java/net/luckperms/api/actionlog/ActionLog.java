@@ -60,10 +60,10 @@ public interface ActionLog {
     /**
      * Gets the log content for a given user
      *
-     * @param uuid the uuid to filter by
+     * @param uniqueId the uuid to filter by
      * @return all content in this log where the user = uuid
      */
-    @NonNull SortedSet<Action> getUserHistory(@NonNull UUID uuid);
+    @NonNull SortedSet<Action> getUserHistory(@NonNull UUID uniqueId);
 
     /**
      * Gets the log content for a given group

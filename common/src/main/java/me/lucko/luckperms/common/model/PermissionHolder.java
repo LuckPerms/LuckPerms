@@ -34,8 +34,6 @@ import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.inheritance.InheritanceComparator;
 import me.lucko.luckperms.common.inheritance.InheritanceGraph;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
-import me.lucko.luckperms.common.node.utils.InheritanceInfo;
-import me.lucko.luckperms.common.node.utils.NodeTools;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.luckperms.api.context.ContextSet;
@@ -86,10 +84,9 @@ import java.util.function.Predicate;
  * These lookup methods initially use Lists of nodes populated with the
  * inheritance tree. Nodes at the start of this list have priority over nodes at
  * the end. Nodes higher up the tree appear at the end of these lists. In order
- * to remove duplicate elements, the lists are flattened using the methods in
- * {@link NodeTools}. This is significantly faster than trying to prevent
- * duplicates throughout the process of accumulation, and reduces the need for
- * too much caching.</p>
+ * to remove duplicate elements, the lists are flattened. This is significantly
+ * faster than trying to prevent duplicates throughout the process of accumulation,
+ * and reduces the need for too much caching.</p>
  *
  * <p>Cached state is avoided in these instances to cut down on memory
  * footprint. The nodes are stored indexed to the contexts they apply in, so
@@ -268,7 +265,7 @@ public abstract class PermissionHolder {
         return ret;
     }
 
-    public List<InheritanceNode> getOwnGroupNodes(QueryOptions queryOptions) {
+    public List<InheritanceNode> getOwnInheritanceNodes(QueryOptions queryOptions) {
         List<InheritanceNode> ret = new ArrayList<>();
 
         Comparator<DataType> comparator = queryOptions.option(DataQueryOrderFunction.KEY)
@@ -382,14 +379,14 @@ public abstract class PermissionHolder {
      *
      * @return true if permissions had expired and were removed
      */
-    public boolean auditTemporaryPermissions() {
-        boolean transientWork = auditTemporaryPermissions(DataType.TRANSIENT);
-        boolean normalWork = auditTemporaryPermissions(DataType.NORMAL);
+    public boolean auditTemporaryNodes() {
+        boolean transientWork = auditTemporaryNodes(DataType.TRANSIENT);
+        boolean normalWork = auditTemporaryNodes(DataType.NORMAL);
 
         return transientWork || normalWork;
     }
 
-    private boolean auditTemporaryPermissions(DataType dataType) {
+    private boolean auditTemporaryNodes(DataType dataType) {
         ImmutableCollection<? extends Node> before = getData(dataType).immutable().values();
         Set<Node> removed = new HashSet<>();
 
@@ -407,15 +404,7 @@ public abstract class PermissionHolder {
         return work;
     }
 
-    /**
-     * Check if the holder has a permission node
-     *
-     * @param type which backing map to check
-     * @param node the Node to check
-     * @param equalityPredicate how to match
-     * @return a tristate, returns undefined if no match
-     */
-    public Tristate hasPermission(DataType type, Node node, NodeEqualityPredicate equalityPredicate) {
+    public Tristate hasNode(DataType type, Node node, NodeEqualityPredicate equalityPredicate) {
         if (this.getType() == HolderType.GROUP && node instanceof InheritanceNode && ((InheritanceNode) node).getGroupName().equalsIgnoreCase(getObjectName())) {
             return Tristate.TRUE;
         }
@@ -426,29 +415,8 @@ public abstract class PermissionHolder {
                 .map(n -> Tristate.of(n.getValue())).orElse(Tristate.UNDEFINED);
     }
 
-    /**
-     * Check if the holder inherits a node
-     *
-     * @param node the Node to check
-     * @param equalityPredicate how to match
-     * @return the result of the lookup
-     */
-    public InheritanceInfo searchForInheritedMatch(Node node, NodeEqualityPredicate equalityPredicate) {
-        for (Node n : resolveInheritances(QueryOptions.nonContextual())) {
-            if (n.equals(node, equalityPredicate)) {
-                return InheritanceInfo.of(n);
-            }
-        }
-
-        return InheritanceInfo.empty();
-    }
-
-    public Tristate inheritsPermission(Node node, NodeEqualityPredicate equalityPredicate) {
-        return searchForInheritedMatch(node, equalityPredicate).getResult();
-    }
-
-    public DataMutateResult setPermission(DataType dataType, Node node, boolean callEvent) {
-        if (hasPermission(dataType, node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME) != Tristate.UNDEFINED) {
+    public DataMutateResult setNode(DataType dataType, Node node, boolean callEvent) {
+        if (hasNode(dataType, node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME) != Tristate.UNDEFINED) {
             return DataMutateResult.ALREADY_HAS;
         }
 
@@ -467,7 +435,7 @@ public abstract class PermissionHolder {
         return DataMutateResult.SUCCESS;
     }
 
-    public TemporaryDataMutateResult setPermission(DataType dataType, Node node, TemporaryMergeBehaviour mergeBehaviour) {
+    public TemporaryDataMutateResult setNode(DataType dataType, Node node, TemporaryMergeBehaviour mergeBehaviour) {
         if (node.hasExpiry() && mergeBehaviour != TemporaryMergeBehaviour.FAIL_WITH_ALREADY_HAS) {
             Node otherMatch = getData(dataType).immutable().values().stream()
                     .filter(NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE.equalTo(node))
@@ -507,11 +475,11 @@ public abstract class PermissionHolder {
         }
 
         // Fallback to the normal handling.
-        return new TemporaryResult(setPermission(dataType, node, true), node);
+        return new TemporaryResult(setNode(dataType, node, true), node);
     }
 
-    public DataMutateResult unsetPermission(DataType dataType, Node node) {
-        if (hasPermission(dataType, node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE) == Tristate.UNDEFINED) {
+    public DataMutateResult unsetNode(DataType dataType, Node node) {
+        if (hasNode(dataType, node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE) == Tristate.UNDEFINED) {
             return DataMutateResult.LACKS;
         }
 
@@ -552,7 +520,7 @@ public abstract class PermissionHolder {
         return true;
     }
 
-    public boolean clearNodes(DataType dataType, ContextSet contextSet) {
+    public boolean clearNodes(DataType dataType, ContextSet contextSet, boolean giveDefault) {
         NodeMap data = getData(dataType);
         ImmutableCollection<? extends Node> before = data.immutable().values();
 
@@ -560,6 +528,10 @@ public abstract class PermissionHolder {
             data.clear();
         } else {
             data.clear(contextSet);
+        }
+
+        if (getType() == HolderType.USER && giveDefault) {
+            getPlugin().getUserManager().giveDefaultIfNeeded((User) this, false);
         }
 
         invalidateCache();

@@ -45,8 +45,9 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 
-import net.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.DataType;
+import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.DisplayNameNode;
 
 import java.util.List;
@@ -64,9 +65,14 @@ public class GroupSetDisplayName extends SubCommand<Group> {
         }
 
         String name = ArgumentParser.parseString(0, args);
-        MutableContextSet context = ArgumentParser.parseContext(1, args, plugin);
+        ImmutableContextSet context = ArgumentParser.parseContext(1, args, plugin).immutableCopy();
 
-        String previousName = group.getDisplayName(context).orElse(null);
+        String previousName = group.normalData().immutable().get(context).stream()
+                .filter(NodeType.DISPLAY_NAME::matches)
+                .map(NodeType.DISPLAY_NAME::cast)
+                .findFirst()
+                .map(DisplayNameNode::getDisplayName)
+                .orElse(null);
 
         if (previousName == null && name.equals(group.getName())) {
             Message.GROUP_SET_DISPLAY_NAME_DOESNT_HAVE.send(sender, group.getName());
@@ -97,7 +103,7 @@ public class GroupSetDisplayName extends SubCommand<Group> {
             return CommandResult.SUCCESS;
         }
 
-        group.setPermission(DataType.NORMAL, DisplayName.builder(name).withContext(context).build(), true);
+        group.setNode(DataType.NORMAL, DisplayName.builder(name).withContext(context).build(), true);
 
         Message.GROUP_SET_DISPLAY_NAME.send(sender, name, group.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 

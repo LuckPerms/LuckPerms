@@ -82,7 +82,7 @@ public class ParentSet extends SharedSubCommand {
         }
 
         holder.clearNormalParents(context, false);
-        holder.setPermission(DataType.NORMAL, Inheritance.builder(group.getName()).withContext(context).build(), true);
+        holder.setNode(DataType.NORMAL, Inheritance.builder(group.getName()).withContext(context).build(), true);
         if (holder.getType() == HolderType.USER) {
             ((User) holder).getPrimaryGroup().setStoredValue(group.getName());
         }

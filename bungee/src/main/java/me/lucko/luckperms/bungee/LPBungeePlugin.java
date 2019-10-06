@@ -189,7 +189,7 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
 
     @Override
     public Optional<QueryOptions> getQueryOptionsForUser(User user) {
-        return this.bootstrap.getPlayer(user.getUuid()).map(player -> this.contextManager.getQueryOptions(player));
+        return this.bootstrap.getPlayer(user.getUniqueId()).map(player -> this.contextManager.getQueryOptions(player));
     }
 
     @Override

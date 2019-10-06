@@ -44,7 +44,7 @@ public class ExpireTemporaryTask implements Runnable {
             if (shouldSkip(group)) {
                 continue;
             }
-            if (group.auditTemporaryPermissions()) {
+            if (group.auditTemporaryNodes()) {
                 this.plugin.getStorage().saveGroup(group);
                 groupChanges = true;
             }
@@ -54,7 +54,7 @@ public class ExpireTemporaryTask implements Runnable {
             if (shouldSkip(user)) {
                 continue;
             }
-            if (user.auditTemporaryPermissions()) {
+            if (user.auditTemporaryNodes()) {
                 this.plugin.getStorage().saveUser(user);
             }
         }

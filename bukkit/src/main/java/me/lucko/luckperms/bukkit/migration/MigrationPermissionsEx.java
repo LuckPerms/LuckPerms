@@ -205,7 +205,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             String world = standardizeWorld(worldData.getKey());
             for (String node : worldData.getValue()) {
                 if (node.isEmpty()) continue;
-                holder.setPermission(DataType.NORMAL, MigrationUtils.parseNode(node, true).withContext(DefaultContextKeys.WORLD_KEY, world).build(), true);
+                holder.setNode(DataType.NORMAL, MigrationUtils.parseNode(node, true).withContext(DefaultContextKeys.WORLD_KEY, world).build(), true);
             }
         }
 
@@ -227,7 +227,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             for (String node : worldData.getValue()) {
                 if (node.isEmpty()) continue;
                 long expiry = timedPermissionsTime.getOrDefault(Strings.nullToEmpty(world) + ":" + node, 0L);
-                holder.setPermission(DataType.NORMAL, MigrationUtils.parseNode(node, true).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(expiry).build(), true);
+                holder.setNode(DataType.NORMAL, MigrationUtils.parseNode(node, true).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(expiry).build(), true);
             }
         }
 
@@ -255,7 +255,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                     }
                 }
 
-                holder.setPermission(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(parentName)).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(expiry).build(), true);
+                holder.setNode(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(parentName)).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(expiry).build(), true);
 
                 // migrate primary groups
                 if (world == null && holder instanceof User && expiry == 0) {
@@ -269,7 +269,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             if (primary != null && !primary.isEmpty() && !primary.equalsIgnoreCase(GroupManager.DEFAULT_GROUP_NAME)) {
                 User user = ((User) holder);
                 user.getPrimaryGroup().setStoredValue(primary);
-                holder.unsetPermission(DataType.NORMAL, Inheritance.builder(GroupManager.DEFAULT_GROUP_NAME).build());
+                holder.unsetNode(DataType.NORMAL, Inheritance.builder(GroupManager.DEFAULT_GROUP_NAME).build());
             }
         }
 
@@ -278,11 +278,11 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         String suffix = entity.getOwnSuffix();
 
         if (prefix != null && !prefix.isEmpty()) {
-            holder.setPermission(DataType.NORMAL, Prefix.builder(weight, prefix).build(), true);
+            holder.setNode(DataType.NORMAL, Prefix.builder(weight, prefix).build(), true);
         }
 
         if (suffix != null && !suffix.isEmpty()) {
-            holder.setPermission(DataType.NORMAL, Suffix.builder(weight, suffix).build(), true);
+            holder.setNode(DataType.NORMAL, Suffix.builder(weight, suffix).build(), true);
         }
 
         // migrate options
@@ -307,7 +307,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                     continue;
                 }
 
-                holder.setPermission(DataType.NORMAL, Meta.builder(opt.getKey(), opt.getValue()).withContext(DefaultContextKeys.WORLD_KEY, world).build(), true);
+                holder.setNode(DataType.NORMAL, Meta.builder(opt.getKey(), opt.getValue()).withContext(DefaultContextKeys.WORLD_KEY, world).build(), true);
             }
         }
     }

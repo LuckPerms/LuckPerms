@@ -78,13 +78,13 @@ public class LoggedAction implements Action {
     private final long timestamp;
     private final SourceImpl source;
     private final TargetImpl target;
-    private final String action;
+    private final String description;
 
-    private LoggedAction(long timestamp, UUID sourceUniqueId, String sourceName, Target.Type targetType, UUID targetUniqueId, String targetName, String description) {
+    private LoggedAction(long timestamp, UUID sourceUniqueId, String sourceName, UUID targetUniqueId, String targetName, Target.Type targetType, String description) {
         this.timestamp = timestamp;
         this.source = new SourceImpl(sourceUniqueId, sourceName);
         this.target = new TargetImpl(targetUniqueId, targetName, targetType);
-        this.action = description;
+        this.description = description;
     }
 
     @Override
@@ -120,7 +120,7 @@ public class LoggedAction implements Action {
 
     @Override
     public @NonNull String getDescription() {
-        return this.action;
+        return this.description;
     }
 
     @Override
@@ -133,7 +133,7 @@ public class LoggedAction implements Action {
         query = Objects.requireNonNull(query, "query").toLowerCase();
         return this.source.name.toLowerCase().contains(query) ||
                 this.target.name.toLowerCase().contains(query) ||
-                this.action.toLowerCase().contains(query);
+                this.description.toLowerCase().contains(query);
     }
 
     public void submit(LuckPermsPlugin plugin, Sender sender) {
@@ -297,14 +297,14 @@ public class LoggedAction implements Action {
 
         public Builder source(Sender source) {
             sourceName(source.getNameWithLocation());
-            source(source.getUuid());
+            source(source.getUniqueId());
             return this;
         }
 
         public Builder target(PermissionHolder target) {
             if (target.getType() == HolderType.USER) {
-                targetName(((User) target).getName().orElse("null"));
-                target(((User) target).getUuid());
+                targetName(((User) target).getUsername().orElse("null"));
+                target(((User) target).getUniqueId());
                 targetType(Target.Type.USER);
             } else if (target.getType() == HolderType.GROUP) {
                 targetName(((Group) target).getName());
@@ -362,7 +362,7 @@ public class LoggedAction implements Action {
             Objects.requireNonNull(this.targetName, "targetName");
             Objects.requireNonNull(this.description, "description");
 
-            return new LoggedAction(this.timestamp, this.sourceUniqueId, this.sourceName, this.targetType, this.targetUniqueId, this.targetName, this.description);
+            return new LoggedAction(this.timestamp, this.sourceUniqueId, this.sourceName, this.targetUniqueId, this.targetName, this.targetType, this.description);
         }
     }
 

@@ -50,7 +50,7 @@ public abstract class SenderFactory<T> {
         return this.plugin;
     }
 
-    protected abstract UUID getUuid(T t);
+    protected abstract UUID getUniqueId(T t);
 
     protected abstract String getName(T t);
 

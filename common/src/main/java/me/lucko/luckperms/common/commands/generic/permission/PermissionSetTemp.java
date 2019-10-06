@@ -91,7 +91,7 @@ public class PermissionSetTemp extends SharedSubCommand {
             }
         }
 
-        TemporaryDataMutateResult result = holder.setPermission(DataType.NORMAL, builtNode, modifier);
+        TemporaryDataMutateResult result = holder.setNode(DataType.NORMAL, builtNode, modifier);
 
         if (((Result) result.getResult()).wasSuccessful()) {
             duration = result.getMergedNode().getExpiry().getEpochSecond();

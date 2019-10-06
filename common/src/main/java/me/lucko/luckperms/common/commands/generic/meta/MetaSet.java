@@ -81,13 +81,13 @@ public class MetaSet extends SharedSubCommand {
 
         Node node = Meta.builder(key, value).withContext(context).build();
 
-        if (holder.hasPermission(DataType.NORMAL, node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
+        if (holder.hasNode(DataType.NORMAL, node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
             Message.ALREADY_HAS_META.send(sender, holder.getFormattedDisplayName(), key, value, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
 
         holder.removeIf(DataType.NORMAL, context, n -> n instanceof MetaNode && !n.hasExpiry() && ((MetaNode) n).getMetaKey().equalsIgnoreCase(key), null);
-        holder.setPermission(DataType.NORMAL, node, true);
+        holder.setNode(DataType.NORMAL, node, true);
 
         TextComponent.Builder builder = Message.SET_META_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
         HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(

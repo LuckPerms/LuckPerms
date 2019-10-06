@@ -53,7 +53,7 @@ public class NukkitSenderFactory extends SenderFactory<CommandSender> {
     }
 
     @Override
-    protected UUID getUuid(CommandSender sender) {
+    protected UUID getUniqueId(CommandSender sender) {
         if (sender instanceof Player) {
             return ((Player) sender).getUniqueId();
         }

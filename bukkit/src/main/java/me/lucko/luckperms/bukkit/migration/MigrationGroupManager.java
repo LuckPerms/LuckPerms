@@ -107,11 +107,11 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
             for (String node : g.getPermissionList()) {
                 if (node.isEmpty()) continue;
-                group.setPermission(DataType.NORMAL, MigrationUtils.parseNode(node, true).build(), true);
+                group.setNode(DataType.NORMAL, MigrationUtils.parseNode(node, true).build(), true);
             }
             for (String s : g.getInherits()) {
                 if (s.isEmpty()) continue;
-                group.setPermission(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(s)).build(), true);
+                group.setNode(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(s)).build(), true);
             }
 
             plugin.getStorage().saveGroup(group);
@@ -231,7 +231,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
             Group group = plugin.getStorage().createAndLoadGroup(e.getKey(), CreationCause.INTERNAL).join();
 
             for (Node node : e.getValue()) {
-                group.setPermission(DataType.NORMAL, node, true);
+                group.setNode(DataType.NORMAL, node, true);
             }
 
             plugin.getStorage().saveGroup(group);
@@ -242,17 +242,17 @@ public class MigrationGroupManager extends SubCommand<Object> {
         log.log("Starting user migration.");
         AtomicInteger userCount = new AtomicInteger(0);
         Iterators.tryIterate(users.entrySet(), e -> {
-            User user = plugin.getStorage().loadUser(e.getKey().getUuid(), e.getKey().getUsername().orElse(null)).join();
+            User user = plugin.getStorage().loadUser(e.getKey().getUniqueId(), e.getKey().getUsername().orElse(null)).join();
 
             for (Node node : e.getValue()) {
-                user.setPermission(DataType.NORMAL, node, true);
+                user.setNode(DataType.NORMAL, node, true);
             }
 
-            String primaryGroup = primaryGroups.get(e.getKey().getUuid());
+            String primaryGroup = primaryGroups.get(e.getKey().getUniqueId());
             if (primaryGroup != null && !primaryGroup.isEmpty()) {
-                user.setPermission(DataType.NORMAL, Inheritance.builder(primaryGroup).build(), true);
+                user.setNode(DataType.NORMAL, Inheritance.builder(primaryGroup).build(), true);
                 user.getPrimaryGroup().setStoredValue(primaryGroup);
-                user.unsetPermission(DataType.NORMAL, Inheritance.builder(me.lucko.luckperms.common.model.manager.group.GroupManager.DEFAULT_GROUP_NAME).build());
+                user.unsetNode(DataType.NORMAL, Inheritance.builder(me.lucko.luckperms.common.model.manager.group.GroupManager.DEFAULT_GROUP_NAME).build());
             }
 
             plugin.getStorage().saveUser(user);

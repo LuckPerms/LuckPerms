@@ -36,12 +36,12 @@ import java.util.UUID;
 public abstract class DummySender implements Sender {
     private final LuckPermsPlugin platform;
 
-    private final UUID uuid;
+    private final UUID uniqueId;
     private final String name;
 
-    public DummySender(LuckPermsPlugin plugin, UUID uuid, String name) {
+    public DummySender(LuckPermsPlugin plugin, UUID uniqueId, String name) {
         this.platform = plugin;
-        this.uuid = uuid;
+        this.uniqueId = uniqueId;
         this.name = name;
     }
 
@@ -77,8 +77,8 @@ public abstract class DummySender implements Sender {
     }
 
     @Override
-    public UUID getUuid() {
-        return this.uuid;
+    public UUID getUniqueId() {
+        return this.uniqueId;
     }
 
     @Override

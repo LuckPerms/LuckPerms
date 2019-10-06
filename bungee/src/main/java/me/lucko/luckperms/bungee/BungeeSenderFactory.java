@@ -53,7 +53,7 @@ public class BungeeSenderFactory extends SenderFactory<CommandSender> {
     }
 
     @Override
-    protected UUID getUuid(CommandSender sender) {
+    protected UUID getUniqueId(CommandSender sender) {
         if (sender instanceof ProxiedPlayer) {
             return ((ProxiedPlayer) sender).getUniqueId();
         }

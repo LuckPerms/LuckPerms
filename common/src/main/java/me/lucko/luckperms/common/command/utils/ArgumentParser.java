@@ -214,7 +214,7 @@ public class ArgumentParser {
 
     public static UUID parseUserTarget(int index, List<String> args, LuckPermsPlugin plugin, Sender sender) {
         final String target = args.get(index);
-        return UserMainCommand.parseTargetUuid(target, plugin, sender);
+        return UserMainCommand.parseTargetUniqueId(target, plugin, sender);
     }
 
     public abstract static class ArgumentException extends CommandException {}

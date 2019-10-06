@@ -107,7 +107,7 @@ public interface Sender {
      *
      * @return the sender's uuid
      */
-    UUID getUuid();
+    UUID getUniqueId();
 
     /**
      * Send a message to the Sender.
@@ -157,7 +157,7 @@ public interface Sender {
      * @return if the sender is the console
      */
     default boolean isConsole() {
-        return CONSOLE_UUID.equals(getUuid()) || IMPORT_UUID.equals(getUuid());
+        return CONSOLE_UUID.equals(getUniqueId()) || IMPORT_UUID.equals(getUniqueId());
     }
 
     /**
@@ -166,7 +166,7 @@ public interface Sender {
      * @return if the sender is an import process
      */
     default boolean isImport() {
-        return IMPORT_UUID.equals(getUuid());
+        return IMPORT_UUID.equals(getUniqueId());
     }
 
     /**

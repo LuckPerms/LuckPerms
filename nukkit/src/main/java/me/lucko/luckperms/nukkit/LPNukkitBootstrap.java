@@ -180,17 +180,17 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     }
 
     @Override
-    public Optional<Player> getPlayer(UUID uuid) {
-        return Optional.ofNullable(getServer().getOnlinePlayers().get(uuid));
+    public Optional<Player> getPlayer(UUID uniqueId) {
+        return Optional.ofNullable(getServer().getOnlinePlayers().get(uniqueId));
     }
 
     @Override
-    public Optional<UUID> lookupUuid(String username) {
+    public Optional<UUID> lookupUniqueId(String username) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<String> lookupUsername(UUID uuid) {
+    public Optional<String> lookupUsername(UUID uniqueId) {
         return Optional.empty();
     }
 
@@ -210,8 +210,8 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     }
 
     @Override
-    public boolean isPlayerOnline(UUID uuid) {
-        Player player = getServer().getOnlinePlayers().get(uuid);
+    public boolean isPlayerOnline(UUID uniqueId) {
+        Player player = getServer().getOnlinePlayers().get(uniqueId);
         return player != null && player.isOnline();
     }
 }

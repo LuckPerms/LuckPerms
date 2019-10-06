@@ -219,7 +219,7 @@ public class Exporter implements Runnable {
                         List<String> output = new ArrayList<>();
 
                         User user = this.plugin.getStorage().loadUser(uuid, null).join();
-                        output.add("# Export user: " + user.getUuid().toString() + " - " + user.getName().orElse("unknown username"));
+                        output.add("# Export user: " + user.getUniqueId().toString() + " - " + user.getUsername().orElse("unknown username"));
 
                         boolean inDefault = false;
                         for (Node node : user.normalData().immutable().values()) {
@@ -228,15 +228,15 @@ public class Exporter implements Runnable {
                                 continue;
                             }
 
-                            output.add("/lp " + NodeCommandFactory.generateCommand(node, user.getUuid().toString(), HolderType.USER, true, false));
+                            output.add("/lp " + NodeCommandFactory.generateCommand(node, user.getUniqueId().toString(), HolderType.USER, true, false));
                         }
 
                         if (!user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME).equalsIgnoreCase(GroupManager.DEFAULT_GROUP_NAME)) {
-                            output.add("/lp user " + user.getUuid().toString() + " switchprimarygroup " + user.getPrimaryGroup().getStoredValue().get());
+                            output.add("/lp user " + user.getUniqueId().toString() + " switchprimarygroup " + user.getPrimaryGroup().getStoredValue().get());
                         }
 
                         if (!inDefault) {
-                            output.add("/lp user " + user.getUuid().toString() + " parent remove default");
+                            output.add("/lp user " + user.getUniqueId().toString() + " parent remove default");
                         }
 
                         this.plugin.getUserManager().cleanup(user);

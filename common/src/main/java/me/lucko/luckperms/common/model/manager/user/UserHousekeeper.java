@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.model.manager.user;
 
-import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.ExpiringSet;
 
@@ -67,21 +66,19 @@ public class UserHousekeeper implements Runnable {
 
     @Override
     public void run() {
-        for (UserIdentifier entry : this.userManager.getAll().keySet()) {
+        for (UUID entry : this.userManager.getAll().keySet()) {
             cleanup(entry);
         }
     }
 
-    public void cleanup(UserIdentifier identifier) {
-        UUID uuid = identifier.getUuid();
-
+    public void cleanup(UUID uuid) {
         // unload users which aren't online and who haven't been online (or tried to login) recently
         if (this.recentlyUsed.contains(uuid) || this.recentlyUsedApi.contains(uuid) || this.plugin.getBootstrap().isPlayerOnline(uuid)) {
             return;
         }
 
         // unload them
-        this.userManager.unload(identifier);
+        this.userManager.unload(uuid);
     }
 
     public static TimeoutSettings timeoutSettings(long duration, TimeUnit unit) {

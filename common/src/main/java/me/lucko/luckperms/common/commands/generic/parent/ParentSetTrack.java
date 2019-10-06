@@ -115,7 +115,7 @@ public class ParentSetTrack extends SharedSubCommand {
         }
 
         holder.removeIf(DataType.NORMAL, null, NodeType.INHERITANCE.predicate(n -> n.getContexts().equals(context) && track.containsGroup(n.getGroupName())), null);
-        holder.setPermission(DataType.NORMAL, Inheritance.builder(group.getName()).withContext(context).build(), true);
+        holder.setNode(DataType.NORMAL, Inheritance.builder(group.getName()).withContext(context).build(), true);
 
         Message.SET_TRACK_PARENT_SUCCESS.send(sender, holder.getFormattedDisplayName(), track.getName(), group.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 

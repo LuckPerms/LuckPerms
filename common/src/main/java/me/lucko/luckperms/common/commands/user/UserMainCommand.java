@@ -80,9 +80,9 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
         );
     }
 
-    public static UUID parseTargetUuid(String target, LuckPermsPlugin plugin, Sender sender) {
-        UUID uuid = Uuids.parse(target);
-        if (uuid == null) {
+    public static UUID parseTargetUniqueId(String target, LuckPermsPlugin plugin, Sender sender) {
+        UUID uniqueId = Uuids.parse(target);
+        if (uniqueId == null) {
             if (!plugin.getConfiguration().get(ConfigKeys.ALLOW_INVALID_USERNAMES)) {
                 if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {
                     Message.USER_INVALID_ENTRY.send(sender, target);
@@ -95,45 +95,45 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
                 }
             }
 
-            uuid = plugin.getStorage().getPlayerUuid(target.toLowerCase()).join();
-            if (uuid == null) {
+            uniqueId = plugin.getStorage().getPlayerUniqueId(target.toLowerCase()).join();
+            if (uniqueId == null) {
                 if (!plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
                     Message.USER_NOT_FOUND.send(sender, target);
                     return null;
                 }
 
-                uuid = plugin.getBootstrap().lookupUuid(target).orElse(null);
-                if (uuid == null) {
+                uniqueId = plugin.getBootstrap().lookupUniqueId(target).orElse(null);
+                if (uniqueId == null) {
                     Message.USER_NOT_FOUND.send(sender, target);
                     return null;
                 }
             }
         }
 
-        return uuid;
+        return uniqueId;
     }
 
     @Override
     protected UserIdentifier parseTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        UUID uuid = parseTargetUuid(target, plugin, sender);
-        if (uuid == null) {
+        UUID uniqueId = parseTargetUniqueId(target, plugin, sender);
+        if (uniqueId == null) {
             return null;
         }
 
-        String name = plugin.getStorage().getPlayerName(uuid).join();
-        return UserIdentifier.of(uuid, name);
+        String name = plugin.getStorage().getPlayerName(uniqueId).join();
+        return UserIdentifier.of(uniqueId, name);
     }
 
     @Override
     protected User getTarget(UserIdentifier target, LuckPermsPlugin plugin, Sender sender) {
-        User user = plugin.getStorage().loadUser(target.getUuid(), target.getUsername().orElse(null)).join();
-        user.auditTemporaryPermissions();
+        User user = plugin.getStorage().loadUser(target.getUniqueId(), target.getUsername().orElse(null)).join();
+        user.auditTemporaryNodes();
         return user;
     }
 
     @Override
     protected ReentrantLock getLockForTarget(UserIdentifier target) {
-        return this.locks.get(target.getUuid());
+        return this.locks.get(target.getUniqueId());
     }
 
     @Override

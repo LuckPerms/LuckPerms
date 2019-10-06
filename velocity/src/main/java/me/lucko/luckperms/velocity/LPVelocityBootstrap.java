@@ -205,17 +205,17 @@ public class LPVelocityBootstrap implements LuckPermsBootstrap {
     }
 
     @Override
-    public Optional<Player> getPlayer(UUID uuid) {
-        return this.proxy.getPlayer(uuid);
+    public Optional<Player> getPlayer(UUID uniqueId) {
+        return this.proxy.getPlayer(uniqueId);
     }
 
     @Override
-    public Optional<UUID> lookupUuid(String username) {
+    public Optional<UUID> lookupUniqueId(String username) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<String> lookupUsername(UUID uuid) {
+    public Optional<String> lookupUsername(UUID uniqueId) {
         return Optional.empty();
     }
 
@@ -235,8 +235,8 @@ public class LPVelocityBootstrap implements LuckPermsBootstrap {
     }
 
     @Override
-    public boolean isPlayerOnline(UUID uuid) {
-        Player player = this.proxy.getPlayer(uuid).orElse(null);
+    public boolean isPlayerOnline(UUID uniqueId) {
+        Player player = this.proxy.getPlayer(uniqueId).orElse(null);
         return player != null && player.isActive();
     }
 }

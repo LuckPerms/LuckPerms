@@ -58,7 +58,7 @@ public final class MigrationUtils {
 
     public static void setGroupWeight(Group group, int weight) {
         group.removeIf(DataType.NORMAL, null, NodeType.WEIGHT::matches, null);
-        group.setPermission(DataType.NORMAL, Weight.builder(weight).build(), true);
+        group.setNode(DataType.NORMAL, Weight.builder(weight).build(), true);
     }
 
     public static String standardizeName(String string) {

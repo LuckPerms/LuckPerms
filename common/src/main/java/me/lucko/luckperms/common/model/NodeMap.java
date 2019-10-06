@@ -76,6 +76,7 @@ import java.util.function.Predicate;
 public final class NodeMap {
     private static final Function<ImmutableContextSet, SortedSet<Node>> VALUE_SET_SUPPLIER = k -> new ConcurrentSkipListSet<>(NodeComparator.reverse());
     private static final Function<ImmutableContextSet, SortedSet<InheritanceNode>> INHERITANCE_VALUE_SET_SUPPLIER = k -> new ConcurrentSkipListSet<>(NodeComparator.reverse());
+
     /**
      * The holder which this map is for
      */
@@ -100,7 +101,8 @@ public final class NodeMap {
     /**
      * A cache which holds an immutable copy of the backing map
      */
-    private final NodeMapCache cache = new NodeMapCache(this);
+    private final ImmutableSetMultimapCache<ImmutableContextSet, Node> mapCache = new ImmutableSetMultimapCache<>(this.map);
+    private final ImmutableSetMultimapCache<ImmutableContextSet, InheritanceNode> inheritanceMapCache = new ImmutableSetMultimapCache<>(this.inheritanceMap);
 
     NodeMap(PermissionHolder holder) {
         this.holder = holder;
@@ -152,14 +154,19 @@ public final class NodeMap {
      * @return an immutable copy
      */
     public ImmutableSetMultimap<ImmutableContextSet, Node> immutable() {
-        return this.cache.get();
+        return this.mapCache.get();
+    }
+
+    public ImmutableSetMultimap<ImmutableContextSet, InheritanceNode> immutableInheritance() {
+        return this.inheritanceMapCache.get();
     }
 
     /**
      * Invalidates the cache
      */
     void invalidate() {
-        this.cache.invalidate();
+        this.mapCache.invalidate();
+        this.inheritanceMapCache.get();
     }
 
     private Node localise(Node node) {
@@ -180,10 +187,10 @@ public final class NodeMap {
         nodesInContext.add(n);
 
         if (n instanceof InheritanceNode) {
-            SortedSet<InheritanceNode> groupNodesInContext = this.inheritanceMap.computeIfAbsent(context, INHERITANCE_VALUE_SET_SUPPLIER);
-            groupNodesInContext.removeIf(e -> e.equals(node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE));
+            SortedSet<InheritanceNode> inheritanceNodesInContext = this.inheritanceMap.computeIfAbsent(context, INHERITANCE_VALUE_SET_SUPPLIER);
+            inheritanceNodesInContext.removeIf(e -> e.equals(node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE));
             if (n.getValue()) {
-                groupNodesInContext.add((InheritanceNode) n);
+                inheritanceNodesInContext.add((InheritanceNode) n);
             }
         }
     }
@@ -196,9 +203,9 @@ public final class NodeMap {
         }
 
         if (node instanceof InheritanceNode) {
-            SortedSet<InheritanceNode> groupNodesInContext = this.inheritanceMap.get(context);
-            if (groupNodesInContext != null) {
-                groupNodesInContext.removeIf(e -> e.equals(node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE));
+            SortedSet<InheritanceNode> inheritanceNodesInContext = this.inheritanceMap.get(context);
+            if (inheritanceNodesInContext != null) {
+                inheritanceNodesInContext.removeIf(e -> e.equals(node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE));
             }
         }
     }
@@ -211,9 +218,9 @@ public final class NodeMap {
         }
 
         if (node instanceof InheritanceNode && node.getValue()) {
-            SortedSet<InheritanceNode> groupNodesInContext = this.inheritanceMap.get(context);
-            if (groupNodesInContext != null) {
-                groupNodesInContext.remove(node);
+            SortedSet<InheritanceNode> inheritanceNodesInContext = this.inheritanceMap.get(context);
+            if (inheritanceNodesInContext != null) {
+                inheritanceNodesInContext.remove(node);
             }
         }
     }
@@ -269,9 +276,9 @@ public final class NodeMap {
             ret = nodesInContext.removeIf(predicate);
         }
 
-        SortedSet<InheritanceNode> groupNodesInContext = this.inheritanceMap.get(context);
-        if (groupNodesInContext != null) {
-            groupNodesInContext.removeIf(predicate);
+        SortedSet<InheritanceNode> inheritanceNodesInContext = this.inheritanceMap.get(context);
+        if (inheritanceNodesInContext != null) {
+            inheritanceNodesInContext.removeIf(predicate);
         }
 
         return ret;
@@ -293,9 +300,9 @@ public final class NodeMap {
                     removed.add(entry);
                 }
                 if (entry instanceof InheritanceNode && entry.getValue()) {
-                    SortedSet<InheritanceNode> groupNodesInContext = this.inheritanceMap.get(entry.getContexts());
-                    if (groupNodesInContext != null) {
-                        groupNodesInContext.remove(entry);
+                    SortedSet<InheritanceNode> inheritanceNodesInContext = this.inheritanceMap.get(entry.getContexts());
+                    if (inheritanceNodesInContext != null) {
+                        inheritanceNodesInContext.remove(entry);
                     }
                 }
                 it.remove();
@@ -306,7 +313,7 @@ public final class NodeMap {
         return work;
     }
 
-    private static final class NodeMapCache extends Cache<ImmutableSetMultimap<ImmutableContextSet, Node>> {
+    private static final class ImmutableSetMultimapCache<K, V> extends Cache<ImmutableSetMultimap<K, V>> {
         private static final Constructor<ImmutableSetMultimap> IMMUTABLE_SET_MULTIMAP_CONSTRUCTOR;
         static {
             try {
@@ -317,20 +324,20 @@ public final class NodeMap {
             }
         }
 
-        private final NodeMap handle;
+        private final Map<K, ? extends Collection<V>> handle;
 
-        private NodeMapCache(NodeMap handle) {
+        private ImmutableSetMultimapCache(Map<K, ? extends Collection<V>> handle) {
             this.handle = handle;
         }
 
         @Override
-        protected @NonNull ImmutableSetMultimap<ImmutableContextSet, Node> supply() {
-            ImmutableMap.Builder<ImmutableContextSet, ImmutableSet<Node>> builder = ImmutableMap.builder();
+        protected @NonNull ImmutableSetMultimap<K, V> supply() {
+            ImmutableMap.Builder<K, ImmutableSet<V>> builder = ImmutableMap.builder();
             int size = 0;
 
-            for (Map.Entry<ImmutableContextSet, SortedSet<Node>> entry : this.handle.map.entrySet()) {
-                ImmutableContextSet key = entry.getKey();
-                ImmutableSet<Node> values = ImmutableSet.copyOf(entry.getValue());
+            for (Map.Entry<K, ? extends Collection<V>> entry : this.handle.entrySet()) {
+                K key = entry.getKey();
+                ImmutableSet<V> values = ImmutableSet.copyOf(entry.getValue());
                 if (!values.isEmpty()) {
                     builder.put(key, values);
                     size += values.size();

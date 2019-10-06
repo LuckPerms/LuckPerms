@@ -88,7 +88,7 @@ public final class WebEditor {
                         .add("commandAlias", cmdLabel)
                         .add("uploader", new JObject()
                                 .add("name", sender.getNameWithLocation())
-                                .add("uuid", sender.getUuid().toString())
+                                .add("uuid", sender.getUniqueId().toString())
                         )
                         .add("time", System.currentTimeMillis())
                         .add("pluginVersion", plugin.getBootstrap().getVersion())

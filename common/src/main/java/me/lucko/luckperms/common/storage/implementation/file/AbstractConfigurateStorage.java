@@ -36,7 +36,6 @@ import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.node.types.Inheritance;
@@ -196,35 +195,35 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
     }
 
     @Override
-    public User loadUser(UUID uuid, String username) {
-        User user = this.plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
+    public User loadUser(UUID uniqueId, String username) {
+        User user = this.plugin.getUserManager().getOrMake(uniqueId, username);
         user.getIoLock().lock();
         try {
-            ConfigurationNode object = readFile(StorageLocation.USER, uuid.toString());
+            ConfigurationNode object = readFile(StorageLocation.USER, uniqueId.toString());
             if (object != null) {
                 String name = object.getNode("name").getString();
                 user.getPrimaryGroup().setStoredValue(object.getNode(this.loader instanceof JsonLoader ? "primaryGroup" : "primary-group").getString());
 
                 user.setNodes(DataType.NORMAL, readNodes(object));
-                user.setName(name, true);
+                user.setUsername(name, true);
 
                 boolean save = this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
-                if (user.getName().isPresent() && (name == null || !user.getName().get().equalsIgnoreCase(name))) {
+                if (user.getUsername().isPresent() && (name == null || !user.getUsername().get().equalsIgnoreCase(name))) {
                     save = true;
                 }
 
-                if (save | user.auditTemporaryPermissions()) {
+                if (save | user.auditTemporaryNodes()) {
                     saveUser(user);
                 }
             } else {
                 if (this.plugin.getUserManager().shouldSave(user)) {
-                    user.clearEnduringNodes();
+                    user.clearNodes(DataType.NORMAL, null, true);
                     user.getPrimaryGroup().setStoredValue(null);
                     this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
                 }
             }
         } catch (Exception e) {
-            throw reportException(uuid.toString(), e);
+            throw reportException(uniqueId.toString(), e);
         } finally {
             user.getIoLock().unlock();
         }
@@ -236,20 +235,20 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
         user.getIoLock().lock();
         try {
             if (!this.plugin.getUserManager().shouldSave(user)) {
-                saveFile(StorageLocation.USER, user.getUuid().toString(), null);
+                saveFile(StorageLocation.USER, user.getUniqueId().toString(), null);
             } else {
                 ConfigurationNode data = SimpleConfigurationNode.root();
                 if (this instanceof SeparatedConfigurateStorage) {
-                    data.getNode("uuid").setValue(user.getUuid().toString());
+                    data.getNode("uuid").setValue(user.getUniqueId().toString());
                 }
-                data.getNode("name").setValue(user.getName().orElse("null"));
+                data.getNode("name").setValue(user.getUsername().orElse("null"));
                 data.getNode(this.loader instanceof JsonLoader ? "primaryGroup" : "primary-group").setValue(user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME));
 
                 writeNodes(data, user.normalData().immutable().values());
-                saveFile(StorageLocation.USER, user.getUuid().toString(), data);
+                saveFile(StorageLocation.USER, user.getUniqueId().toString(), data);
             }
         } catch (Exception e) {
-            throw reportException(user.getUuid().toString(), e);
+            throw reportException(user.getUniqueId().toString(), e);
         } finally {
             user.getIoLock().unlock();
         }
@@ -340,7 +339,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
         } finally {
             group.getIoLock().unlock();
         }
-        this.plugin.getGroupManager().unload(group);
+        this.plugin.getGroupManager().unload(group.getName());
     }
 
     @Override
@@ -435,22 +434,22 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
         } finally {
             track.getIoLock().unlock();
         }
-        this.plugin.getTrackManager().unload(track);
+        this.plugin.getTrackManager().unload(track.getName());
     }
 
     @Override
-    public PlayerSaveResult savePlayerData(UUID uuid, String username) {
-        return this.uuidCache.addMapping(uuid, username);
+    public PlayerSaveResult savePlayerData(UUID uniqueId, String username) {
+        return this.uuidCache.addMapping(uniqueId, username);
     }
 
     @Override
-    public UUID getPlayerUuid(String username) {
+    public UUID getPlayerUniqueId(String username) {
         return this.uuidCache.lookupUuid(username);
     }
 
     @Override
-    public String getPlayerName(UUID uuid) {
-        return this.uuidCache.lookupUsername(uuid);
+    public String getPlayerName(UUID uniqueId) {
+        return this.uuidCache.lookupUsername(uniqueId);
     }
 
     private static ImmutableContextSet readContexts(ConfigurationNode attributes) {

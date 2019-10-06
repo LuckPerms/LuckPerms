@@ -65,7 +65,7 @@ public interface StorageImplementation {
 
     void applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception;
 
-    User loadUser(UUID uuid, String username) throws Exception;
+    User loadUser(UUID uniqueId, String username) throws Exception;
 
     void saveUser(User user) throws Exception;
 
@@ -95,9 +95,9 @@ public interface StorageImplementation {
 
     void deleteTrack(Track track) throws Exception;
 
-    PlayerSaveResult savePlayerData(UUID uuid, String username) throws Exception;
+    PlayerSaveResult savePlayerData(UUID uniqueId, String username) throws Exception;
 
-    @Nullable UUID getPlayerUuid(String username) throws Exception;
+    @Nullable UUID getPlayerUniqueId(String username) throws Exception;
 
-    @Nullable String getPlayerName(UUID uuid) throws Exception;
+    @Nullable String getPlayerName(UUID uniqueId) throws Exception;
 }

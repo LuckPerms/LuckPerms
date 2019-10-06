@@ -135,21 +135,21 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         // Migrate global perms
         for (String perm : entity.getPerms()) {
             if (perm.isEmpty()) continue;
-            holder.setPermission(DataType.NORMAL, MigrationUtils.parseNode(perm, true).build(), true);
+            holder.setNode(DataType.NORMAL, MigrationUtils.parseNode(perm, true).build(), true);
         }
 
         // Migrate per-server perms
         for (Map.Entry<String, Server> e : entity.getServers().entrySet()) {
             for (String perm : e.getValue().getPerms()) {
                 if (perm.isEmpty()) continue;
-                holder.setPermission(DataType.NORMAL, MigrationUtils.parseNode(perm, true).withContext(DefaultContextKeys.SERVER_KEY, e.getKey()).build(), true);
+                holder.setNode(DataType.NORMAL, MigrationUtils.parseNode(perm, true).withContext(DefaultContextKeys.SERVER_KEY, e.getKey()).build(), true);
             }
 
             // Migrate per-world perms
             for (Map.Entry<String, World> we : e.getValue().getWorlds().entrySet()) {
                 for (String perm : we.getValue().getPerms()) {
                     if (perm.isEmpty()) continue;
-                    holder.setPermission(DataType.NORMAL, MigrationUtils.parseNode(perm, true).withContext(DefaultContextKeys.SERVER_KEY, e.getKey()).withContext(DefaultContextKeys.WORLD_KEY, we.getKey()).build(), true);
+                    holder.setNode(DataType.NORMAL, MigrationUtils.parseNode(perm, true).withContext(DefaultContextKeys.SERVER_KEY, e.getKey()).withContext(DefaultContextKeys.WORLD_KEY, we.getKey()).build(), true);
                 }
             }
         }
@@ -157,7 +157,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         // Migrate any parent groups
         for (String inherit : parents) {
             if (inherit.isEmpty()) continue;
-            holder.setPermission(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(inherit)).build(), true);
+            holder.setNode(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(inherit)).build(), true);
         }
 
         // Migrate prefix and suffix
@@ -165,10 +165,10 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         String suffix = entity.getSuffix();
 
         if (prefix != null && !prefix.isEmpty()) {
-            holder.setPermission(DataType.NORMAL, Prefix.builder(weight, prefix).build(), true);
+            holder.setNode(DataType.NORMAL, Prefix.builder(weight, prefix).build(), true);
         }
         if (suffix != null && !suffix.isEmpty()) {
-            holder.setPermission(DataType.NORMAL, Suffix.builder(weight, suffix).build(), true);
+            holder.setNode(DataType.NORMAL, Suffix.builder(weight, suffix).build(), true);
         }
     }
 }

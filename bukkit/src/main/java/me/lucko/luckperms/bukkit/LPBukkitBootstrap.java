@@ -224,19 +224,19 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     }
 
     @Override
-    public Optional<Player> getPlayer(UUID uuid) {
-        return Optional.ofNullable(getServer().getPlayer(uuid));
+    public Optional<Player> getPlayer(UUID uniqueId) {
+        return Optional.ofNullable(getServer().getPlayer(uniqueId));
     }
 
     @Override
-    public Optional<UUID> lookupUuid(String username) {
+    public Optional<UUID> lookupUniqueId(String username) {
         //noinspection deprecation
         return Optional.ofNullable(getServer().getOfflinePlayer(username)).map(OfflinePlayer::getUniqueId);
     }
 
     @Override
-    public Optional<String> lookupUsername(UUID uuid) {
-        return Optional.ofNullable(getServer().getOfflinePlayer(uuid)).map(OfflinePlayer::getName);
+    public Optional<String> lookupUsername(UUID uniqueId) {
+        return Optional.ofNullable(getServer().getOfflinePlayer(uniqueId)).map(OfflinePlayer::getName);
     }
 
     @Override
@@ -255,8 +255,8 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     }
 
     @Override
-    public boolean isPlayerOnline(UUID uuid) {
-        Player player = getServer().getPlayer(uuid);
+    public boolean isPlayerOnline(UUID uniqueId) {
+        Player player = getServer().getPlayer(uniqueId);
         return player != null && player.isOnline();
     }
 

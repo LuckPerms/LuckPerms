@@ -60,12 +60,12 @@ public class ApiUser extends ApiPermissionHolder implements net.luckperms.api.mo
 
     @Override
     public @NonNull UUID getUniqueId() {
-        return this.handle.getUuid();
+        return this.handle.getUniqueId();
     }
 
     @Override
     public String getUsername() {
-        return this.handle.getName().orElse(null);
+        return this.handle.getUsername().orElse(null);
     }
 
     @Override
@@ -80,7 +80,7 @@ public class ApiUser extends ApiPermissionHolder implements net.luckperms.api.mo
             return DataMutateResult.ALREADY_HAS;
         }
 
-        if (!this.handle.hasPermission(DataType.NORMAL, Inheritance.builder(group.toLowerCase()).build(), NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
+        if (!this.handle.hasNode(DataType.NORMAL, Inheritance.builder(group.toLowerCase()).build(), NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
             return DataMutateResult.FAIL;
         }
 

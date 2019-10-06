@@ -49,7 +49,6 @@ import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.DataType;
-import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.Tristate;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
@@ -127,9 +126,9 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         }
 
         // lookup a username from the database
-        uuid = this.plugin.getStorage().getPlayerUuid(player.toLowerCase()).join();
+        uuid = this.plugin.getStorage().getPlayerUniqueId(player.toLowerCase()).join();
         if (uuid == null) {
-            uuid = this.plugin.getBootstrap().lookupUuid(player).orElse(null);
+            uuid = this.plugin.getBootstrap().lookupUniqueId(player).orElse(null);
         }
 
         // unable to find a user, throw an exception
@@ -264,9 +263,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         PermissionHolder user = lookupUser(uuid);
         ContextSet contexts = getQueryOptions(uuid, world).context();
 
-        String[] ret = user.normalData().immutable().values().stream()
-                .filter(NodeType.INHERITANCE::matches)
-                .map(NodeType.INHERITANCE::cast)
+        String[] ret = user.normalData().immutableInheritance().values().stream()
                 .filter(n -> n.shouldApplyWithContext(contexts))
                 .map(n -> {
                     Group group = this.plugin.getGroupManager().getIfLoaded(n.getGroupName());
@@ -441,7 +438,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
             logMsg("#holderAddPermission: %s - %s - %s", holder.getPlainDisplayName(), permission, world);
         }
 
-        if (((Result) holder.setPermission(DataType.NORMAL, NodeBuilders.determineMostApplicable(permission).value(true).withContext(DefaultContextKeys.SERVER_KEY, getVaultServer()).withContext(DefaultContextKeys.WORLD_KEY, world).build(), true)).wasSuccessful()) {
+        if (((Result) holder.setNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(permission).value(true).withContext(DefaultContextKeys.SERVER_KEY, getVaultServer()).withContext(DefaultContextKeys.WORLD_KEY, world).build(), true)).wasSuccessful()) {
             return holderSave(holder);
         }
         return false;
@@ -455,7 +452,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
             logMsg("#holderRemovePermission: %s - %s - %s", holder.getPlainDisplayName(), permission, world);
         }
 
-        if (holder.unsetPermission(DataType.NORMAL, NodeBuilders.determineMostApplicable(permission).withContext(DefaultContextKeys.SERVER_KEY, getVaultServer()).withContext(DefaultContextKeys.WORLD_KEY, world).build()).wasSuccessful()) {
+        if (holder.unsetNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(permission).withContext(DefaultContextKeys.SERVER_KEY, getVaultServer()).withContext(DefaultContextKeys.WORLD_KEY, world).build()).wasSuccessful()) {
             return holderSave(holder);
         }
         return false;

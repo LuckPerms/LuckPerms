@@ -27,6 +27,8 @@ package me.lucko.luckperms.common.storage.implementation.file;
 
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.model.manager.track.TrackManager;
@@ -305,7 +307,8 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
 
         GroupManager<?> gm = this.plugin.getGroupManager();
         gm.getAll().values().stream()
-                .filter(g -> !groups.contains(g.getName()))
+                .map(Group::getName)
+                .filter(g -> !groups.contains(g))
                 .forEach(gm::unload);
     }
 
@@ -361,7 +364,8 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
 
         TrackManager<?> tm = this.plugin.getTrackManager();
         tm.getAll().values().stream()
-                .filter(t -> !tracks.contains(t.getName()))
+                .map(Track::getName)
+                .filter(t -> !tracks.contains(t))
                 .forEach(tm::unload);
     }
 

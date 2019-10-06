@@ -78,7 +78,7 @@ public class UserClone extends SubCommand<User> {
         Message.CLONE_SUCCESS.send(sender, user.getFormattedDisplayName(), otherUser.getFormattedDisplayName());
 
         LoggedAction.build().source(sender).target(otherUser)
-                .description("clone", user.getName())
+                .description("clone", user.getUsername())
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(otherUser, sender, plugin);

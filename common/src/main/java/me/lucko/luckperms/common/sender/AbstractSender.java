@@ -48,14 +48,14 @@ public final class AbstractSender<T> implements Sender {
     private final SenderFactory<T> factory;
     private final WeakReference<T> sender;
 
-    private final UUID uuid;
+    private final UUID uniqueId;
     private final String name;
 
     AbstractSender(LuckPermsPlugin platform, SenderFactory<T> factory, T t) {
         this.platform = platform;
         this.factory = factory;
         this.sender = new WeakReference<>(t);
-        this.uuid = factory.getUuid(t);
+        this.uniqueId = factory.getUniqueId(t);
         this.name = factory.getName(t);
     }
 
@@ -65,8 +65,8 @@ public final class AbstractSender<T> implements Sender {
     }
 
     @Override
-    public UUID getUuid() {
-        return this.uuid;
+    public UUID getUniqueId() {
+        return this.uniqueId;
     }
 
     @Override
@@ -135,11 +135,11 @@ public final class AbstractSender<T> implements Sender {
         if (o == this) return true;
         if (!(o instanceof AbstractSender)) return false;
         final AbstractSender that = (AbstractSender) o;
-        return this.getUuid().equals(that.getUuid());
+        return this.getUniqueId().equals(that.getUniqueId());
     }
 
     @Override
     public int hashCode() {
-        return this.uuid.hashCode();
+        return this.uniqueId.hashCode();
     }
 }

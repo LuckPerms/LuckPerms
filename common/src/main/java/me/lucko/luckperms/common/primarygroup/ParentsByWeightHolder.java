@@ -45,7 +45,7 @@ public class ParentsByWeightHolder extends ContextualHolder {
     @Override
     protected @NonNull Optional<String> calculateValue(QueryOptions queryOptions) {
         Set<Group> groups = new LinkedHashSet<>();
-        for (InheritanceNode node : this.user.getOwnGroupNodes(queryOptions)) {
+        for (InheritanceNode node : this.user.getOwnInheritanceNodes(queryOptions)) {
             Group group = this.user.getPlugin().getGroupManager().getIfLoaded(node.getGroupName());
             if (group != null) {
                 groups.add(group);

@@ -283,7 +283,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         chatMetaNode.withContext(DefaultContextKeys.WORLD_KEY, world);
 
         // assume success
-        holder.setPermission(DataType.NORMAL, chatMetaNode.build(), true);
+        holder.setNode(DataType.NORMAL, chatMetaNode.build(), true);
         this.vaultPermission.holderSave(holder);
     }
 
@@ -312,7 +312,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         metaNode.withContext(DefaultContextKeys.WORLD_KEY, world);
 
         // assume success
-        holder.setPermission(DataType.NORMAL, metaNode.build(), true);
+        holder.setNode(DataType.NORMAL, metaNode.build(), true);
         this.vaultPermission.holderSave(holder);
     }
 

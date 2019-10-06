@@ -134,8 +134,8 @@ public class SplitStorage implements StorageImplementation {
     }
 
     @Override
-    public User loadUser(UUID uuid, String username) throws Exception {
-        return implFor(SplitStorageType.USER).loadUser(uuid, username);
+    public User loadUser(UUID uniqueId, String username) throws Exception {
+        return implFor(SplitStorageType.USER).loadUser(uniqueId, username);
     }
 
     @Override
@@ -209,17 +209,17 @@ public class SplitStorage implements StorageImplementation {
     }
 
     @Override
-    public PlayerSaveResult savePlayerData(UUID uuid, String username) throws Exception {
-        return implFor(SplitStorageType.UUID).savePlayerData(uuid, username);
+    public PlayerSaveResult savePlayerData(UUID uniqueId, String username) throws Exception {
+        return implFor(SplitStorageType.UUID).savePlayerData(uniqueId, username);
     }
 
     @Override
-    public UUID getPlayerUuid(String username) throws Exception {
-        return implFor(SplitStorageType.UUID).getPlayerUuid(username);
+    public UUID getPlayerUniqueId(String username) throws Exception {
+        return implFor(SplitStorageType.UUID).getPlayerUniqueId(username);
     }
 
     @Override
-    public String getPlayerName(UUID uuid) throws Exception {
-        return implFor(SplitStorageType.UUID).getPlayerName(uuid);
+    public String getPlayerName(UUID uniqueId) throws Exception {
+        return implFor(SplitStorageType.UUID).getPlayerName(uniqueId);
     }
 }

@@ -118,7 +118,7 @@ public class VerboseHandler extends RepeatingTask {
      * @param notify if the sender should be notified in chat on each check
      */
     public void registerListener(Sender sender, VerboseFilter filter, boolean notify) {
-        this.listeners.put(sender.getUuid(), new VerboseListener(sender, filter, notify));
+        this.listeners.put(sender.getUniqueId(), new VerboseListener(sender, filter, notify));
         this.listening = true;
     }
 

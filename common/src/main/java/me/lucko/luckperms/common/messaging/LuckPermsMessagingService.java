@@ -122,7 +122,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
         this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
             UUID requestId = generatePingId();
             this.plugin.getLogger().info("[Messaging] Sending user ping for '" + user.getPlainDisplayName() + "' with id: " + requestId);
-            this.messenger.sendOutgoingMessage(new UserUpdateMessageImpl(requestId, user.getUuid()));
+            this.messenger.sendOutgoingMessage(new UserUpdateMessageImpl(requestId, user.getUniqueId()));
         });
     }
 
@@ -252,7 +252,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
                 return;
             }
 
-            this.plugin.getStorage().loadUser(user.getUuid(), null);
+            this.plugin.getStorage().loadUser(user.getUniqueId(), null);
         } else if (message instanceof ActionLogMessage) {
             ActionLogMessage msg = (ActionLogMessage) message;
 

@@ -177,7 +177,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             }
 
             for (Group parent : g.getParents()) {
-                group.setPermission(DataType.NORMAL, Inheritance.builder(parent.getName().toLowerCase()).build(), true);
+                group.setNode(DataType.NORMAL, Inheritance.builder(parent.getName().toLowerCase()).build(), true);
             }
 
             // server --> prefix afaik
@@ -190,9 +190,9 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 }
 
                 if (server != null) {
-                    group.setPermission(DataType.NORMAL, Prefix.builder(g.getRank(), prefix.getValue()).withContext(DefaultContextKeys.SERVER_KEY, server).build(), true);
+                    group.setNode(DataType.NORMAL, Prefix.builder(g.getRank(), prefix.getValue()).withContext(DefaultContextKeys.SERVER_KEY, server).build(), true);
                 } else {
-                    group.setPermission(DataType.NORMAL, Prefix.builder(g.getRank(), prefix.getValue()).build(), true);
+                    group.setNode(DataType.NORMAL, Prefix.builder(g.getRank(), prefix.getValue()).build(), true);
                 }
             }
 
@@ -205,9 +205,9 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 }
 
                 if (server != null) {
-                    group.setPermission(DataType.NORMAL, Suffix.builder(g.getRank(), suffix.getValue()).withContext(DefaultContextKeys.SERVER_KEY, server).build(), true);
+                    group.setNode(DataType.NORMAL, Suffix.builder(g.getRank(), suffix.getValue()).withContext(DefaultContextKeys.SERVER_KEY, server).build(), true);
                 } else {
-                    group.setPermission(DataType.NORMAL, Suffix.builder(g.getRank(), suffix.getValue()).build(), true);
+                    group.setNode(DataType.NORMAL, Suffix.builder(g.getRank(), suffix.getValue()).build(), true);
                 }
             }
 
@@ -252,18 +252,18 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             String suffix = joinFuture(pm.getPlayerOwnSuffix(uuid));
 
             if (prefix != null && !prefix.isEmpty()) {
-                user.setPermission(DataType.NORMAL, Prefix.builder(maxWeight.get(), prefix).build(), true);
+                user.setNode(DataType.NORMAL, Prefix.builder(maxWeight.get(), prefix).build(), true);
             }
 
             if (suffix != null && !suffix.isEmpty()) {
-                user.setPermission(DataType.NORMAL, Suffix.builder(maxWeight.get(), suffix).build(), true);
+                user.setNode(DataType.NORMAL, Suffix.builder(maxWeight.get(), suffix).build(), true);
             }
 
             Group primaryGroup = joinFuture(pm.getPlayerPrimaryGroup(uuid));
             if (primaryGroup != null && primaryGroup.getName() != null) {
                 String primary = primaryGroup.getName().toLowerCase();
                 if (!primary.equals(GroupManager.DEFAULT_GROUP_NAME)) {
-                    user.setPermission(DataType.NORMAL, Inheritance.builder(primary).build(), true);
+                    user.setNode(DataType.NORMAL, Inheritance.builder(primary).build(), true);
                     user.getPrimaryGroup().setStoredValue(primary);
                 }
             }
@@ -314,7 +314,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         if (server != null) nb.withContext(DefaultContextKeys.SERVER_KEY, server);
         if (world != null) nb.withContext(DefaultContextKeys.WORLD_KEY, world);
 
-        holder.setPermission(DataType.NORMAL, nb.build(), true);
+        holder.setNode(DataType.NORMAL, nb.build(), true);
     }
 
     private void applyGroup(PermissionManager pm, PermissionHolder holder, CachedGroup g, String server) {
@@ -335,7 +335,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             nb.withContext(DefaultContextKeys.SERVER_KEY, server);
         }
 
-        holder.setPermission(DataType.NORMAL, nb.build(), true);
+        holder.setNode(DataType.NORMAL, nb.build(), true);
     }
 
     private static <T> T joinFuture(Future<T> future) {

@@ -191,7 +191,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
             if (p.name().isEmpty()) {
                 continue;
             }
-            holder.setPermission(DataType.NORMAL, NodeBuilders.determineMostApplicable(p.name()).value(p.isTrue()).withContext(DefaultContextKeys.SERVER_KEY, "global").withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
+            holder.setNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(p.name()).value(p.isTrue()).withContext(DefaultContextKeys.SERVER_KEY, "global").withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
 
             // Include any child permissions
             for (Map.Entry<String, Boolean> child : p.getChildren().entrySet()) {
@@ -199,7 +199,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                     continue;
                 }
 
-                holder.setPermission(DataType.NORMAL, NodeBuilders.determineMostApplicable(child.getKey()).value((boolean) child.getValue()).withContext(DefaultContextKeys.SERVER_KEY, "global").withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
+                holder.setNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(child.getKey()).value((boolean) child.getValue()).withContext(DefaultContextKeys.SERVER_KEY, "global").withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
             }
         }
 
@@ -210,7 +210,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 parentName = GroupManager.DEFAULT_GROUP_NAME;
             }
 
-            holder.setPermission(DataType.NORMAL, Inheritance.builder(parentName).value(true).withContext(DefaultContextKeys.SERVER_KEY, "global").withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
+            holder.setNode(DataType.NORMAL, Inheritance.builder(parentName).value(true).withContext(DefaultContextKeys.SERVER_KEY, "global").withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
         });
 
         // Migrate existing meta
@@ -220,16 +220,16 @@ public class MigrationBPermissions extends SubCommand<Object> {
             }
 
             if (meta.getKey().equalsIgnoreCase("prefix")) {
-                holder.setPermission(DataType.NORMAL, Prefix.builder(c.getPriority(), meta.getValue()).withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
+                holder.setNode(DataType.NORMAL, Prefix.builder(c.getPriority(), meta.getValue()).withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
                 continue;
             }
 
             if (meta.getKey().equalsIgnoreCase("suffix")) {
-                holder.setPermission(DataType.NORMAL, Suffix.builder(c.getPriority(), meta.getValue()).withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
+                holder.setNode(DataType.NORMAL, Suffix.builder(c.getPriority(), meta.getValue()).withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
                 continue;
             }
 
-            holder.setPermission(DataType.NORMAL, Meta.builder(meta.getKey(), meta.getValue()).withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
+            holder.setNode(DataType.NORMAL, Meta.builder(meta.getKey(), meta.getValue()).withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
         }
     }
 }

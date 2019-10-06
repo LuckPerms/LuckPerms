@@ -132,9 +132,9 @@ public class Storage {
         return makeFuture(() -> this.implementation.applyBulkUpdate(bulkUpdate));
     }
 
-    public CompletableFuture<User> loadUser(UUID uuid, String username) {
+    public CompletableFuture<User> loadUser(UUID uniqueId, String username) {
         return makeFuture(() -> {
-            User user = this.implementation.loadUser(uuid, username);
+            User user = this.implementation.loadUser(uniqueId, username);
             if (user != null) {
                 this.plugin.getEventFactory().handleUserLoad(user);
             }
@@ -242,21 +242,21 @@ public class Storage {
          });
     }
 
-    public CompletableFuture<PlayerSaveResult> savePlayerData(UUID uuid, String username) {
+    public CompletableFuture<PlayerSaveResult> savePlayerData(UUID uniqueId, String username) {
         return makeFuture(() -> {
-            PlayerSaveResult result = this.implementation.savePlayerData(uuid, username);
+            PlayerSaveResult result = this.implementation.savePlayerData(uniqueId, username);
             if (result != null) {
-                this.plugin.getEventFactory().handlePlayerDataSave(uuid, username, result);
+                this.plugin.getEventFactory().handlePlayerDataSave(uniqueId, username, result);
             }
             return result;
         });
     }
 
-    public CompletableFuture<UUID> getPlayerUuid(String username) {
-        return makeFuture(() -> this.implementation.getPlayerUuid(username));
+    public CompletableFuture<UUID> getPlayerUniqueId(String username) {
+        return makeFuture(() -> this.implementation.getPlayerUniqueId(username));
     }
 
-    public CompletableFuture<String> getPlayerName(UUID uuid) {
-        return makeFuture(() -> this.implementation.getPlayerName(uuid));
+    public CompletableFuture<String> getPlayerName(UUID uniqueId) {
+        return makeFuture(() -> this.implementation.getPlayerName(uniqueId));
     }
 }

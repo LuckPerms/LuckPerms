@@ -200,7 +200,7 @@ public interface PermissionHolder {
          * @return a Tristate for the holders permission status for the node
          * @throws NullPointerException if the node is null
          */
-        @NonNull Tristate hasNode(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate);
+        @NonNull Tristate containsNode(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate);
 
         /**
          * Sets a permission node for the permission holder.
@@ -462,18 +462,6 @@ public interface PermissionHolder {
      * <p>This method is called periodically by the platform, so it is only necessary to run
      * if you want to guarantee that the current data is totally up-to-date.</p>
      */
-    void auditTemporaryPermissions();
-
-    /**
-     * Checks to see if the object inherits a certain permission.
-     *
-     * <p>Although this method is named inheritsPermission, it can be used for all node types.</p>
-     *
-     * @param node              the node to check for
-     * @param equalityPredicate how to determine if a node matches
-     * @return a Tristate for the holders inheritance status for the node
-     * @throws NullPointerException if the node is null
-     */
-    @NonNull Tristate inheritsNode(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate);
+    void auditTemporaryNodes();
 
 }

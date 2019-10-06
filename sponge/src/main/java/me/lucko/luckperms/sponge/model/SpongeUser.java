@@ -38,20 +38,14 @@ import java.util.UUID;
 public class SpongeUser extends User implements SpongePermissionHolder {
     private final UserSubject spongeData;
 
-    public SpongeUser(UUID uuid, LPSpongePlugin plugin) {
-        super(uuid, plugin);
-        this.spongeData = new UserSubject(plugin, this);
-    }
-
-    public SpongeUser(UUID uuid, String name, LPSpongePlugin plugin) {
-        super(uuid, name, plugin);
+    public SpongeUser(UUID uniqueId, LPSpongePlugin plugin) {
+        super(uniqueId, plugin);
         this.spongeData = new UserSubject(plugin, this);
     }
 
     @Override
     protected void invalidateCache() {
         super.invalidateCache();
-
         this.spongeData.fireUpdateEvent();
     }
 

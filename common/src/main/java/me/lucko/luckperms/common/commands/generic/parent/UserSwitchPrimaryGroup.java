@@ -95,9 +95,9 @@ public class UserSwitchPrimaryGroup extends SharedSubCommand {
         }
 
         Node node = Inheritance.builder(group.getName()).build();
-        if (!user.hasPermission(DataType.NORMAL, node, NodeEqualityPredicate.IGNORE_VALUE).asBoolean()) {
+        if (!user.hasNode(DataType.NORMAL, node, NodeEqualityPredicate.IGNORE_VALUE).asBoolean()) {
             Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, user.getFormattedDisplayName(), group.getName());
-            holder.setPermission(DataType.NORMAL, node, true);
+            holder.setNode(DataType.NORMAL, node, true);
         }
 
         user.getPrimaryGroup().setStoredValue(group.getName());

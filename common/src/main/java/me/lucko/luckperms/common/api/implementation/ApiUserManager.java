@@ -29,7 +29,6 @@ import me.lucko.luckperms.common.api.ApiUtils;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.model.manager.user.UserManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
@@ -60,28 +59,28 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
     }
 
     @Override
-    public @NonNull CompletableFuture<net.luckperms.api.model.user.User> loadUser(@NonNull UUID uuid, @Nullable String username) {
-        Objects.requireNonNull(uuid, "uuid");
+    public @NonNull CompletableFuture<net.luckperms.api.model.user.User> loadUser(@NonNull UUID uniqueId, @Nullable String username) {
+        Objects.requireNonNull(uniqueId, "uuid");
         ApiUtils.checkUsername(username, this.plugin);
 
-        if (this.plugin.getUserManager().getIfLoaded(uuid) == null) {
-            this.plugin.getUserManager().getHouseKeeper().registerApiUsage(uuid);
+        if (this.plugin.getUserManager().getIfLoaded(uniqueId) == null) {
+            this.plugin.getUserManager().getHouseKeeper().registerApiUsage(uniqueId);
         }
 
-        return this.plugin.getStorage().loadUser(uuid, username)
+        return this.plugin.getStorage().loadUser(uniqueId, username)
                 .thenApply(this::getDelegateFor);
     }
 
     @Override
     public @NonNull CompletableFuture<UUID> lookupUniqueId(@NonNull String username) {
         Objects.requireNonNull(username, "username");
-        return this.plugin.getStorage().getPlayerUuid(username);
+        return this.plugin.getStorage().getPlayerUniqueId(username);
     }
 
     @Override
-    public @NonNull CompletableFuture<String> lookupUsername(@NonNull UUID uuid) {
-        Objects.requireNonNull(uuid, "uuid");
-        return this.plugin.getStorage().getPlayerName(uuid);
+    public @NonNull CompletableFuture<String> lookupUsername(@NonNull UUID uniqueId) {
+        Objects.requireNonNull(uniqueId, "uuid");
+        return this.plugin.getStorage().getPlayerName(uniqueId);
     }
 
     @Override
@@ -91,10 +90,10 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
     }
 
     @Override
-    public @NonNull CompletableFuture<PlayerSaveResult> savePlayerData(@NonNull UUID uuid, @NonNull String username) {
-        Objects.requireNonNull(uuid, "uuid");
+    public @NonNull CompletableFuture<PlayerSaveResult> savePlayerData(@NonNull UUID uniqueId, @NonNull String username) {
+        Objects.requireNonNull(uniqueId, "uuid");
         Objects.requireNonNull(username, "username");
-        return this.plugin.getStorage().savePlayerData(uuid, username);
+        return this.plugin.getStorage().savePlayerData(uniqueId, username);
     }
 
     @Override
@@ -109,9 +108,9 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
     }
 
     @Override
-    public net.luckperms.api.model.user.User getUser(@NonNull UUID uuid) {
-        Objects.requireNonNull(uuid, "uuid");
-        return getDelegateFor(this.handle.getIfLoaded(uuid));
+    public net.luckperms.api.model.user.User getUser(@NonNull UUID uniqueId) {
+        Objects.requireNonNull(uniqueId, "uuid");
+        return getDelegateFor(this.handle.getIfLoaded(uniqueId));
     }
 
     @Override
@@ -128,14 +127,14 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
     }
 
     @Override
-    public boolean isLoaded(@NonNull UUID uuid) {
-        Objects.requireNonNull(uuid, "uuid");
-        return this.handle.isLoaded(UserIdentifier.of(uuid, null));
+    public boolean isLoaded(@NonNull UUID uniqueId) {
+        Objects.requireNonNull(uniqueId, "uuid");
+        return this.handle.isLoaded(uniqueId);
     }
 
     @Override
     public void cleanupUser(net.luckperms.api.model.user.@NonNull User user) {
         Objects.requireNonNull(user, "user");
-        this.handle.getHouseKeeper().clearApiUsage(ApiUser.cast(user).getUuid());
+        this.handle.getHouseKeeper().clearApiUsage(ApiUser.cast(user).getUniqueId());
     }
 }

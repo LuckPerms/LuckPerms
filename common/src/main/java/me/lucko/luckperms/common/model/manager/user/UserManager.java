@@ -27,13 +27,14 @@ package me.lucko.luckperms.common.model.manager.user;
 
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.model.manager.Manager;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public interface UserManager<T extends User> extends Manager<UserIdentifier, User, T> {
+public interface UserManager<T extends User> extends Manager<UUID, User, T> {
+
+    T getOrMake(UUID id, String username);
 
     /**
      * Get a user object by name

@@ -279,7 +279,7 @@ public class VerboseListener {
                 )
                 .add("uploader", new JObject()
                         .add("name", this.notifiedSender.getNameWithLocation())
-                        .add("uuid", this.notifiedSender.getUuid().toString())
+                        .add("uuid", this.notifiedSender.getUniqueId().toString())
                 )
                 .add("filter", filter)
                 .add("truncated", truncated);

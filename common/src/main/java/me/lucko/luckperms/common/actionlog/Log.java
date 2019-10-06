@@ -67,10 +67,10 @@ public class Log {
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public SortedSet<LoggedAction> getUserHistory(UUID uuid) {
+    public SortedSet<LoggedAction> getUserHistory(UUID uniqueId) {
         return this.content.stream()
                 .filter(e -> e.getTarget().getType() == Action.Target.Type.USER)
-                .filter(e -> e.getTarget().getUniqueId().isPresent() && e.getTarget().getUniqueId().get().equals(uuid))
+                .filter(e -> e.getTarget().getUniqueId().isPresent() && e.getTarget().getUniqueId().get().equals(uniqueId))
                 .collect(ImmutableCollectors.toSortedSet(Comparator.naturalOrder()));
     }
 

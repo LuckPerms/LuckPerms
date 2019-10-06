@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableCollection;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.model.manager.AbstractManager;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.node.types.Inheritance;
@@ -38,7 +37,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.luckperms.api.model.DataType;
 import net.luckperms.api.node.Node;
-import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.InheritanceNode;
 
 import java.util.Optional;
@@ -47,7 +45,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-public abstract class AbstractUserManager<T extends User> extends AbstractManager<UserIdentifier, User, T> implements UserManager<T> {
+public abstract class AbstractUserManager<T extends User> extends AbstractManager<UUID, User, T> implements UserManager<T> {
 
     private final LuckPermsPlugin plugin;
     private final UserHousekeeper housekeeper;
@@ -59,18 +57,16 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
     }
 
     @Override
-    public T getOrMake(UserIdentifier id) {
-        T ret = super.getOrMake(id);
-        if (id.getUsername().isPresent()) {
-            ret.setName(id.getUsername().get(), false);
-        }
-        return ret;
+    public T getOrMake(UUID id, String username) {
+        T user = getOrMake(id);
+        user.setUsername(username, false);
+        return user;
     }
 
     @Override
     public T getByUsername(String name) {
         for (T user : getAll().values()) {
-            Optional<String> n = user.getName();
+            Optional<String> n = user.getUsername();
             if (n.isPresent() && n.get().equalsIgnoreCase(name)) {
                 return user;
             }
@@ -79,31 +75,24 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
     }
 
     @Override
-    public T getIfLoaded(UUID uuid) {
-        return getIfLoaded(UserIdentifier.of(uuid, null));
-    }
-
-    @Override
     public boolean giveDefaultIfNeeded(User user, boolean save) {
         boolean work = false;
 
         // check that they are actually a member of their primary group, otherwise remove it
         if (this.plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD).equals("stored")) {
-            String pg = user.getPrimaryGroup().getValue();
-            boolean has = false;
+            String primaryGroup = user.getPrimaryGroup().getValue();
+            boolean memberOfPrimaryGroup = false;
 
-            for (Node node : user.normalData().immutable().get(ImmutableContextSetImpl.EMPTY)) {
-                if (node instanceof InheritanceNode && ((InheritanceNode) node).getGroupName().equalsIgnoreCase(pg)) {
-                    has = true;
+            for (InheritanceNode node : user.normalData().immutableInheritance().get(ImmutableContextSetImpl.EMPTY)) {
+                if (node.getGroupName().equalsIgnoreCase(primaryGroup)) {
+                    memberOfPrimaryGroup = true;
                     break;
                 }
             }
 
             // need to find a new primary group for the user.
-            if (!has) {
-                String group = user.normalData().immutable().get(ImmutableContextSetImpl.EMPTY).stream()
-                        .filter(NodeType.INHERITANCE::matches)
-                        .map(NodeType.INHERITANCE::cast)
+            if (!memberOfPrimaryGroup) {
+                String group = user.normalData().immutableInheritance().get(ImmutableContextSetImpl.EMPTY).stream()
                         .findFirst()
                         .map(InheritanceNode::getGroupName)
                         .orElse(null);
@@ -119,21 +108,12 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
         // check that all users are member of at least one group
         boolean hasGroup = false;
         if (user.getPrimaryGroup().getStoredValue().isPresent()) {
-            for (Node node : user.normalData().immutable().values()) {
-                if (!node.getContexts().isEmpty()) {
-                    continue;
-                }
-
-                if (node instanceof InheritanceNode) {
-                    hasGroup = true;
-                    break;
-                }
-            }
+            hasGroup = !user.normalData().immutableInheritance().get(ImmutableContextSetImpl.EMPTY).isEmpty();
         }
 
         if (!hasGroup) {
             user.getPrimaryGroup().setStoredValue(GroupManager.DEFAULT_GROUP_NAME);
-            user.setPermission(DataType.NORMAL, Inheritance.builder(GroupManager.DEFAULT_GROUP_NAME).build(), false);
+            user.setNode(DataType.NORMAL, Inheritance.builder(GroupManager.DEFAULT_GROUP_NAME).build(), false);
             work = true;
         }
 
@@ -151,7 +131,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
 
     @Override
     public void cleanup(User user) {
-        this.housekeeper.cleanup(user.getId());
+        this.housekeeper.cleanup(user.getUniqueId());
     }
 
     @Override
@@ -159,7 +139,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
         return CompletableFuture.runAsync(
                 () -> {
                     Stream.concat(
-                        getAll().keySet().stream().map(UserIdentifier::getUuid),
+                        getAll().keySet().stream(),
                         this.plugin.getBootstrap().getOnlinePlayers()
                     ).forEach(u -> this.plugin.getStorage().loadUser(u, null).join());
                 },

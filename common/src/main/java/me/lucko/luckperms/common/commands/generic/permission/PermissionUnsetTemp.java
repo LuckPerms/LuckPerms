@@ -84,7 +84,7 @@ public class PermissionUnsetTemp extends SharedSubCommand {
             }
         }
 
-        DataMutateResult result = holder.unsetPermission(DataType.NORMAL, builtNode);
+        DataMutateResult result = holder.unsetNode(DataType.NORMAL, builtNode);
 
         if (result.wasSuccessful()) {
             Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));

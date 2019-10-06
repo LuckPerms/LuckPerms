@@ -59,22 +59,22 @@ public interface UserManager {
     /**
      * Loads a user from the plugin's storage provider into memory.
      *
-     * @param uuid     the uuid of the user
+     * @param uniqueId     the uuid of the user
      * @param username the username, if known
      * @return the resultant user
      * @throws NullPointerException if the uuid is null
      */
-    @NonNull CompletableFuture<User> loadUser(@NonNull UUID uuid, @Nullable String username);
+    @NonNull CompletableFuture<User> loadUser(@NonNull UUID uniqueId, @Nullable String username);
 
     /**
      * Loads a user from the plugin's storage provider into memory.
      *
-     * @param uuid the uuid of the user
+     * @param uniqueId the uuid of the user
      * @return the resultant user
      * @throws NullPointerException if the uuid is null
      */
-    default @NonNull CompletableFuture<User> loadUser(@NonNull UUID uuid) {
-        return loadUser(uuid, null);
+    default @NonNull CompletableFuture<User> loadUser(@NonNull UUID uniqueId) {
+        return loadUser(uniqueId, null);
     }
 
     /**
@@ -92,12 +92,12 @@ public interface UserManager {
     /**
      * Uses the LuckPerms cache to find a username for the given uuid.
      *
-     * @param uuid the uuid
+     * @param uniqueId the uuid
      * @return a username, could be null
      * @throws NullPointerException     if either parameters are null
      * @throws IllegalArgumentException if the username is invalid
      */
-    @NonNull CompletableFuture<String> lookupUsername(@NonNull UUID uuid);
+    @NonNull CompletableFuture<String> lookupUsername(@NonNull UUID uniqueId);
 
     /**
      * Saves a user's data back to the plugin's storage provider.
@@ -114,13 +114,13 @@ public interface UserManager {
     /**
      * Saves data about a player to the uuid caching system.
      *
-     * @param uuid     the users mojang unique id
+     * @param uniqueId     the users mojang unique id
      * @param username the users username
      * @return the result of the operation.
      * @throws NullPointerException     if either parameters are null
      * @throws IllegalArgumentException if the username is invalid
      */
-    @NonNull CompletableFuture<PlayerSaveResult> savePlayerData(@NonNull UUID uuid, @NonNull String username);
+    @NonNull CompletableFuture<PlayerSaveResult> savePlayerData(@NonNull UUID uniqueId, @NonNull String username);
 
     /**
      * Gets a set all "unique" user UUIDs.
@@ -143,11 +143,11 @@ public interface UserManager {
     /**
      * Gets a loaded user.
      *
-     * @param uuid the uuid of the user to get
+     * @param uniqueId the uuid of the user to get
      * @return a {@link User} object, if one matching the uuid is loaded, or null if not
      * @throws NullPointerException if the uuid is null
      */
-    @Nullable User getUser(@NonNull UUID uuid);
+    @Nullable User getUser(@NonNull UUID uniqueId);
 
     /**
      * Gets a loaded user.
@@ -168,11 +168,11 @@ public interface UserManager {
     /**
      * Check if a user is loaded in memory
      *
-     * @param uuid the uuid to check for
+     * @param uniqueId the uuid to check for
      * @return true if the user is loaded
      * @throws NullPointerException if the uuid is null
      */
-    boolean isLoaded(@NonNull UUID uuid);
+    boolean isLoaded(@NonNull UUID uniqueId);
 
     /**
      * Unload a user from the internal storage, if they're not currently online.

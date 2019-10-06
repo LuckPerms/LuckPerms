@@ -28,16 +28,19 @@ package me.lucko.luckperms.common.model;
 import me.lucko.luckperms.common.api.implementation.ApiGroup;
 import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.common.cacheddata.GroupCachedDataManager;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.DisplayNameNode;
+import net.luckperms.api.query.QueryOptions;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 import java.util.OptionalInt;
 
-public class Group extends PermissionHolder implements Identifiable<String> {
+public class Group extends PermissionHolder {
     private final ApiGroup apiDelegate = new ApiGroup(this);
 
     /**
@@ -53,7 +56,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     /**
      * Caches the groups display name
      */
-    private final Cache<Optional<String>> displayNameCache = new DisplayNameCache(this);
+    private final Cache<Optional<String>> displayNameCache = new DisplayNameCache();
 
     /**
      * The groups data cache instance
@@ -87,9 +90,13 @@ public class Group extends PermissionHolder implements Identifiable<String> {
         return this.name;
     }
 
+    public ApiGroup getApiDelegate() {
+        return this.apiDelegate;
+    }
+
     @Override
-    public String getId() {
-        return this.name;
+    public GroupCachedDataManager getCachedData() {
+        return this.cachedData;
     }
 
     @Override
@@ -107,30 +114,18 @@ public class Group extends PermissionHolder implements Identifiable<String> {
         return this.displayNameCache.get();
     }
 
-    /**
-     * Gets a display name value exactly matching a specific context.
-     *
-     * <p>Note that the behaviour of {@link #getDisplayName()} is not the same as this.</p>
-     *
-     * @param contextSet the contexts to lookup in
-     * @return the display name
-     */
-    public Optional<String> getDisplayName(ContextSet contextSet) {
-        for (Node n : normalData().immutable().get(contextSet.immutableCopy())) {
+    public Optional<String> calculateDisplayName(QueryOptions queryOptions) {
+        // query for a displayname node
+        for (Node n : getOwnNodes(queryOptions)) {
             if (n instanceof DisplayNameNode) {
-                return Optional.of(((DisplayNameNode) n).getDisplayName());
+                DisplayNameNode displayNameNode = (DisplayNameNode) n;
+                return Optional.of(displayNameNode.getDisplayName());
             }
         }
-        return Optional.empty();
-    }
 
-    public ApiGroup getApiDelegate() {
-        return this.apiDelegate;
-    }
-
-    @Override
-    public GroupCachedDataManager getCachedData() {
-        return this.cachedData;
+        // fallback to config
+        String name = getPlugin().getConfiguration().get(ConfigKeys.GROUP_NAME_REWRITES).get(this.name);
+        return name == null || name.equals(this.name) ? Optional.empty() : Optional.of(name);
     }
 
     @Override
@@ -161,4 +156,13 @@ public class Group extends PermissionHolder implements Identifiable<String> {
         return "Group(name=" + this.name + ")";
     }
 
+    /**
+     * Cache instance to supply the display name of a {@link Group}.
+     */
+    public class DisplayNameCache extends Cache<Optional<String>> {
+        @Override
+        protected @NonNull Optional<String> supply() {
+            return calculateDisplayName(getPlugin().getContextManager().getStaticQueryOptions());
+        }
+    }
 }

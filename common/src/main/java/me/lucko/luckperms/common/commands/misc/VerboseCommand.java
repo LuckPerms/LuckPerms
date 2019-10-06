@@ -105,7 +105,7 @@ public class VerboseCommand extends SingleCommand {
         }
 
         if (mode.equals("off") || mode.equals("false") || mode.equals("paste") || mode.equals("upload")) {
-            VerboseListener listener = plugin.getVerboseHandler().unregisterListener(sender.getUuid());
+            VerboseListener listener = plugin.getVerboseHandler().unregisterListener(sender.getUniqueId());
 
             if (mode.equals("paste") || mode.equals("upload")) {
                 if (listener == null) {

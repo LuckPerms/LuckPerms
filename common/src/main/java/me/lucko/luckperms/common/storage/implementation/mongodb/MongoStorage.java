@@ -45,7 +45,6 @@ import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.model.manager.track.TrackManager;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
@@ -297,12 +296,12 @@ public class MongoStorage implements StorageImplementation {
     }
 
     @Override
-    public User loadUser(UUID uuid, String username) {
-        User user = this.plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
+    public User loadUser(UUID uniqueId, String username) {
+        User user = this.plugin.getUserManager().getOrMake(uniqueId, username);
         user.getIoLock().lock();
         try {
             MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
-            try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUuid())).iterator()) {
+            try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUniqueId())).iterator()) {
                 if (cursor.hasNext()) {
                     // User exists, let's load.
                     Document d = cursor.next();
@@ -310,19 +309,19 @@ public class MongoStorage implements StorageImplementation {
                     String name = d.getString("name");
                     user.getPrimaryGroup().setStoredValue(d.getString("primaryGroup"));
                     user.setNodes(DataType.NORMAL, nodesFromDoc(d));
-                    user.setName(name, true);
+                    user.setUsername(name, true);
 
                     boolean save = this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
-                    if (user.getName().isPresent() && (name == null || !user.getName().get().equalsIgnoreCase(name))) {
+                    if (user.getUsername().isPresent() && (name == null || !user.getUsername().get().equalsIgnoreCase(name))) {
                         save = true;
                     }
 
-                    if (save | user.auditTemporaryPermissions()) {
-                        c.replaceOne(new Document("_id", user.getUuid()), userToDoc(user));
+                    if (save | user.auditTemporaryNodes()) {
+                        c.replaceOne(new Document("_id", user.getUniqueId()), userToDoc(user));
                     }
                 } else {
                     if (this.plugin.getUserManager().shouldSave(user)) {
-                        user.clearEnduringNodes();
+                        user.clearNodes(DataType.NORMAL, null, true);
                         user.getPrimaryGroup().setStoredValue(null);
                         this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
                     }
@@ -340,9 +339,9 @@ public class MongoStorage implements StorageImplementation {
         try {
             MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
             if (!this.plugin.getUserManager().shouldSave(user)) {
-                c.deleteOne(new Document("_id", user.getUuid()));
+                c.deleteOne(new Document("_id", user.getUniqueId()));
             } else {
-                c.replaceOne(new Document("_id", user.getUuid()), userToDoc(user), new ReplaceOptions().upsert(true));
+                c.replaceOne(new Document("_id", user.getUniqueId()), userToDoc(user), new ReplaceOptions().upsert(true));
             }
         } finally {
             user.getIoLock().unlock();
@@ -459,7 +458,8 @@ public class MongoStorage implements StorageImplementation {
 
         GroupManager<?> gm = this.plugin.getGroupManager();
         gm.getAll().values().stream()
-                .filter(g -> !groups.contains(g.getName()))
+                .map(Group::getName)
+                .filter(g -> !groups.contains(g))
                 .forEach(gm::unload);
     }
 
@@ -585,7 +585,8 @@ public class MongoStorage implements StorageImplementation {
 
         TrackManager<?> tm = this.plugin.getTrackManager();
         tm.getAll().values().stream()
-                .filter(t -> !tracks.contains(t.getName()))
+                .map(Track::getName)
+                .filter(t -> !tracks.contains(t))
                 .forEach(tm::unload);
     }
 
@@ -612,16 +613,16 @@ public class MongoStorage implements StorageImplementation {
     }
 
     @Override
-    public PlayerSaveResult savePlayerData(UUID uuid, String username) {
+    public PlayerSaveResult savePlayerData(UUID uniqueId, String username) {
         username = username.toLowerCase();
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
 
         // find any existing mapping
-        String oldUsername = getPlayerName(uuid);
+        String oldUsername = getPlayerName(uniqueId);
 
         // do the insert
         if (!username.equalsIgnoreCase(oldUsername)) {
-            c.replaceOne(new Document("_id", uuid), new Document("_id", uuid).append("name", username), new ReplaceOptions().upsert(true));
+            c.replaceOne(new Document("_id", uniqueId), new Document("_id", uniqueId).append("name", username), new ReplaceOptions().upsert(true));
         }
 
         PlayerSaveResultImpl result = PlayerSaveResultImpl.determineBaseResult(username, oldUsername);
@@ -632,7 +633,7 @@ public class MongoStorage implements StorageImplementation {
                 conflicting.add(cursor.next().get("_id", UUID.class));
             }
         }
-        conflicting.remove(uuid);
+        conflicting.remove(uniqueId);
 
         if (!conflicting.isEmpty()) {
             // remove the mappings for conflicting uuids
@@ -644,7 +645,7 @@ public class MongoStorage implements StorageImplementation {
     }
 
     @Override
-    public UUID getPlayerUuid(String username) {
+    public UUID getPlayerUniqueId(String username) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
         Document doc = c.find(new Document("name", username.toLowerCase())).first();
         if (doc != null) {
@@ -654,9 +655,9 @@ public class MongoStorage implements StorageImplementation {
     }
 
     @Override
-    public String getPlayerName(UUID uuid) {
+    public String getPlayerName(UUID uniqueId) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
-        Document doc = c.find(new Document("_id", uuid)).first();
+        Document doc = c.find(new Document("_id", uniqueId)).first();
         if (doc != null) {
             return doc.get("name", String.class);
         }
@@ -668,8 +669,8 @@ public class MongoStorage implements StorageImplementation {
                 .map(MongoStorage::nodeToDoc)
                 .collect(Collectors.toList());
 
-        return new Document("_id", user.getUuid())
-                .append("name", user.getName().orElse("null"))
+        return new Document("_id", user.getUniqueId())
+                .append("name", user.getUsername().orElse("null"))
                 .append("primaryGroup", user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME))
                 .append("permissions", nodes);
     }

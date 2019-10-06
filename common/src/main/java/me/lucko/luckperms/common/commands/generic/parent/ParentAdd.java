@@ -80,7 +80,7 @@ public class ParentAdd extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        DataMutateResult result = holder.setPermission(DataType.NORMAL, Inheritance.builder(group.getName()).withContext(context).build(), true);
+        DataMutateResult result = holder.setNode(DataType.NORMAL, Inheritance.builder(group.getName()).withContext(context).build(), true);
 
         if (result.wasSuccessful()) {
             Message.SET_INHERIT_SUCCESS.send(sender, holder.getFormattedDisplayName(), group.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));

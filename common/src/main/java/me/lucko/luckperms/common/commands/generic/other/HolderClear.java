@@ -72,9 +72,9 @@ public class HolderClear<T extends PermissionHolder> extends SubCommand<T> {
         }
 
         if (context.isEmpty()) {
-            holder.clearNodes(DataType.NORMAL, null);
+            holder.clearNodes(DataType.NORMAL, null, false);
         } else {
-            holder.clearNodes(DataType.NORMAL, context);
+            holder.clearNodes(DataType.NORMAL, context, false);
         }
 
         int changed = before - holder.normalData().immutable().size();

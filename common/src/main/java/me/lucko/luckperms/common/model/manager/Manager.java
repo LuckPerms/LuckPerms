@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.model.manager;
 
-import me.lucko.luckperms.common.model.Identifiable;
-
 import java.util.Map;
 import java.util.function.Function;
 
@@ -37,7 +35,7 @@ import java.util.function.Function;
  * @param <C> the super class being managed
  * @param <T> the implementation class this manager is "managing"
  */
-public interface Manager<I, C extends Identifiable<I>, T extends C> extends Function<I, T> {
+public interface Manager<I, C, T extends C> extends Function<I, T> {
 
     /**
      * Gets a map containing all cached instances held by this manager.
@@ -78,12 +76,5 @@ public interface Manager<I, C extends Identifiable<I>, T extends C> extends Func
      * @param id The object id to unload
      */
     void unload(I id);
-
-    /**
-     * Removes and unloads the object from the manager
-     *
-     * @param object The object to unload
-     */
-    void unload(C object);
 
 }

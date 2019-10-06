@@ -285,20 +285,20 @@ public final class EventFactory {
         }
     }
 
-    public void handleUserFirstLogin(UUID uuid, String username) {
-        post(UserFirstLoginEvent.class, () -> generate(UserFirstLoginEvent.class, uuid, username));
+    public void handleUserFirstLogin(UUID uniqueId, String username) {
+        post(UserFirstLoginEvent.class, () -> generate(UserFirstLoginEvent.class, uniqueId, username));
     }
 
-    public void handlePlayerLoginProcess(UUID uuid, String username, User user) {
+    public void handlePlayerLoginProcess(UUID uniqueId, String username, User user) {
         if (!shouldPost(PlayerLoginProcessEvent.class)) {
             return;
         }
 
-        post(generate(PlayerLoginProcessEvent.class, uuid, username, new ApiUser(user)));
+        post(generate(PlayerLoginProcessEvent.class, uniqueId, username, new ApiUser(user)));
     }
 
-    public void handlePlayerDataSave(UUID uuid, String username, PlayerSaveResult result) {
-        post(PlayerDataSaveEvent.class, () -> generate(PlayerDataSaveEvent.class, uuid, username, result));
+    public void handlePlayerDataSave(UUID uniqueId, String username, PlayerSaveResult result) {
+        post(PlayerDataSaveEvent.class, () -> generate(PlayerDataSaveEvent.class, uniqueId, username, result));
     }
 
     public void handleUserLoad(User user) {

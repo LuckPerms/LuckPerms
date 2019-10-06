@@ -30,7 +30,7 @@ import com.google.common.base.Preconditions;
 import me.lucko.luckperms.common.cacheddata.GroupCachedDataManager;
 import me.lucko.luckperms.common.model.Group;
 
-import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -68,8 +68,8 @@ public class ApiGroup extends ApiPermissionHolder implements net.luckperms.api.m
     }
 
     @Override
-    public @Nullable String getDisplayName(@NonNull ContextSet contextSet) {
-        return this.handle.getDisplayName(contextSet).orElse(null);
+    public @Nullable String getDisplayName(@NonNull QueryOptions queryOptions) {
+        return this.handle.calculateDisplayName(queryOptions).orElse(null);
     }
 
     @Override

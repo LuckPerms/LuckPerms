@@ -35,39 +35,34 @@ import java.util.UUID;
 /**
  * Used to identify a specific {@link User}.
  */
-public final class UserIdentifier implements Identifiable<UUID> {
+public final class UserIdentifier {
 
     /**
      * Creates a {@link UserIdentifier}.
      *
-     * @param uuid the uuid of the user
+     * @param uniqueId the uuid of the user
      * @param username the username of the user, nullable
      * @return a new identifier
      */
-    public static UserIdentifier of(@NonNull UUID uuid, @Nullable String username) {
-        Objects.requireNonNull(uuid, "uuid");
+    public static UserIdentifier of(@NonNull UUID uniqueId, @Nullable String username) {
+        Objects.requireNonNull(uniqueId, "uuid");
         if (username == null || username.equalsIgnoreCase("null") || username.isEmpty()) {
             username = null;
         }
 
-        return new UserIdentifier(uuid, username);
+        return new UserIdentifier(uniqueId, username);
     }
 
-    private final UUID uuid;
+    private final UUID uniqueId;
     private final String username;
 
-    private UserIdentifier(UUID uuid, String username) {
-        this.uuid = uuid;
+    private UserIdentifier(UUID uniqueId, String username) {
+        this.uniqueId = uniqueId;
         this.username = username;
     }
 
-    public UUID getUuid() {
-        return this.uuid;
-    }
-
-    @Override
-    public UUID getId() {
-        return getUuid();
+    public UUID getUniqueId() {
+        return this.uniqueId;
     }
 
     public Optional<String> getUsername() {
@@ -79,16 +74,16 @@ public final class UserIdentifier implements Identifiable<UUID> {
         if (o == this) return true;
         if (!(o instanceof UserIdentifier)) return false;
         final UserIdentifier other = (UserIdentifier) o;
-        return this.uuid.equals(other.uuid);
+        return this.uniqueId.equals(other.uniqueId);
     }
 
     @Override
     public int hashCode() {
-        return this.uuid.hashCode();
+        return this.uniqueId.hashCode();
     }
 
     @Override
     public String toString() {
-        return "UserIdentifier(uuid=" + this.uuid + ", username=" + this.username + ")";
+        return "UserIdentifier(uniqueId=" + this.uniqueId + ", username=" + this.username + ")";
     }
 }

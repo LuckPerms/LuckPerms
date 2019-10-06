@@ -163,10 +163,10 @@ public interface LuckPermsBootstrap {
      * Gets a player object linked to this User. The returned object must be the same type
      * as the instance used in the platforms ContextManager
      *
-     * @param uuid the users unique id
+     * @param uniqueId the users unique id
      * @return a player object, or null, if one couldn't be found.
      */
-    Optional<?> getPlayer(UUID uuid);
+    Optional<?> getPlayer(UUID uniqueId);
 
     /**
      * Lookup a uuid from a username, using the servers internal uuid cache.
@@ -174,15 +174,15 @@ public interface LuckPermsBootstrap {
      * @param username the username to lookup
      * @return an optional uuid, if found
      */
-    Optional<UUID> lookupUuid(String username);
+    Optional<UUID> lookupUniqueId(String username);
 
     /**
      * Lookup a username from a uuid, using the servers internal uuid cache.
      *
-     * @param uuid the uuid to lookup
+     * @param uniqueId the uuid to lookup
      * @return an optional username, if found
      */
-    Optional<String> lookupUsername(UUID uuid);
+    Optional<String> lookupUsername(UUID uniqueId);
 
     /**
      * Gets the number of users online on the platform
@@ -208,9 +208,9 @@ public interface LuckPermsBootstrap {
     /**
      * Checks if a user is online
      *
-     * @param uuid the users external uuid
+     * @param uniqueId the users external uuid
      * @return true if the user is online
      */
-    boolean isPlayerOnline(UUID uuid);
+    boolean isPlayerOnline(UUID uniqueId);
 
 }

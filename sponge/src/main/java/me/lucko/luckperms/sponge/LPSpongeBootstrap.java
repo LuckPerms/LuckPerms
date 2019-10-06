@@ -263,16 +263,16 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     }
 
     @Override
-    public Optional<Player> getPlayer(UUID uuid) {
+    public Optional<Player> getPlayer(UUID uniqueId) {
         if (!getGame().isServerAvailable()) {
             return Optional.empty();
         }
 
-        return getGame().getServer().getPlayer(uuid);
+        return getGame().getServer().getPlayer(uniqueId);
     }
 
     @Override
-    public Optional<UUID> lookupUuid(String username) {
+    public Optional<UUID> lookupUniqueId(String username) {
         if (!getGame().isServerAvailable()) {
             return Optional.empty();
         }
@@ -284,12 +284,12 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     }
 
     @Override
-    public Optional<String> lookupUsername(UUID uuid) {
+    public Optional<String> lookupUsername(UUID uniqueId) {
         if (!getGame().isServerAvailable()) {
             return Optional.empty();
         }
 
-        return getGame().getServer().getGameProfileManager().get(uuid)
+        return getGame().getServer().getGameProfileManager().get(uniqueId)
                 .thenApply(GameProfile::getName)
                 .exceptionally(x -> Optional.empty())
                 .join();
@@ -311,8 +311,8 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     }
 
     @Override
-    public boolean isPlayerOnline(UUID uuid) {
-        return getGame().isServerAvailable() ? getGame().getServer().getPlayer(uuid).map(Player::isOnline).orElse(false) : false;
+    public boolean isPlayerOnline(UUID uniqueId) {
+        return getGame().isServerAvailable() ? getGame().getServer().getPlayer(uniqueId).map(Player::isOnline).orElse(false) : false;
     }
     
 }

@@ -87,8 +87,12 @@ public enum DataQueryOrder implements Comparator<DataType> {
     private static final List<DataType> TRANSIENT_LAST_LIST = Collections.unmodifiableList(Arrays.asList(DataType.NORMAL, DataType.TRANSIENT));
 
     /**
-     * Gets a {@link List} of all {@link DataType}s, in the order defined by
+     * Gets a {@link List} of all {@link DataType}s, in order of greatest to least, as defined by
      * the {@code comparator}.
+     *
+     * <p>Equivalent to calling {@link Arrays#sort(Object[], Comparator)} on
+     * {@link DataType#values()}, but with the comparator
+     * {@link Comparator#reversed() reversed}.</p>
      *
      * @param comparator the comparator
      * @return the ordered data types

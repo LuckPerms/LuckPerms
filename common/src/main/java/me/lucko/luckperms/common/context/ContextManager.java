@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.context;
 
-import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.common.cache.ExpiringCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
@@ -62,14 +60,6 @@ public abstract class ContextManager<T> {
     protected ContextManager(LuckPermsPlugin plugin, Class<T> subjectClass) {
         this.plugin = plugin;
         this.subjectClass = subjectClass;
-    }
-
-    public List<ContextCalculator<? super T>> getCalculators() {
-        return ImmutableList.copyOf(this.calculators);
-    }
-
-    public List<StaticContextCalculator> getStaticCalculators() {
-        return ImmutableList.copyOf(this.staticCalculators);
     }
 
     public ImmutableContextSet getPotentialContexts() {
@@ -142,7 +132,7 @@ public abstract class ContextManager<T> {
         return formQueryOptions(subject, accumulator.build());
     }
 
-    QueryOptions calculateStatic() {
+    private QueryOptions calculateStatic() {
         ImmutableContextSet.Builder accumulator = new ImmutableContextSetImpl.BuilderImpl();
 
         for (StaticContextCalculator calculator : this.staticCalculators) {

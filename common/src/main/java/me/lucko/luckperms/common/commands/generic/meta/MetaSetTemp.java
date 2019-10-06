@@ -86,13 +86,13 @@ public class MetaSetTemp extends SharedSubCommand {
 
         Node node = Meta.builder(key, value).withContext(context).expiry(duration).build();
 
-        if (holder.hasPermission(DataType.NORMAL, node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
+        if (holder.hasNode(DataType.NORMAL, node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
             Message.ALREADY_HAS_TEMP_META.send(sender, holder.getFormattedDisplayName(), key, value, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
 
         holder.removeIf(DataType.NORMAL, context, n -> n instanceof MetaNode && n.hasExpiry() && ((MetaNode) n).getMetaKey().equalsIgnoreCase(key), null);
-        duration = holder.setPermission(DataType.NORMAL, node, modifier).getMergedNode().getExpiry().getEpochSecond();
+        duration = holder.setNode(DataType.NORMAL, node, modifier).getMergedNode().getExpiry().getEpochSecond();
 
         TextComponent.Builder builder = Message.SET_META_TEMP_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, holder.getFormattedDisplayName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
         HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(

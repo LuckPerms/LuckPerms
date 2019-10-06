@@ -207,7 +207,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
         if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
             getApiProvider().getEventBus().subscribe(UserDataRecalculateEvent.class, event -> {
                 User user = ApiUser.cast(event.getUser());
-                Optional<Player> player = getBootstrap().getPlayer(user.getUuid());
+                Optional<Player> player = getBootstrap().getPlayer(user.getUniqueId());
                 player.ifPresent(this::refreshAutoOp);
             });
         }
@@ -251,7 +251,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
             final User user = getUserManager().getIfLoaded(player.getUniqueId());
             if (user != null) {
                 user.getCachedData().invalidate();
-                getUserManager().unload(user);
+                getUserManager().unload(user.getUniqueId());
             }
         }
 
@@ -291,7 +291,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     public Optional<QueryOptions> getQueryOptionsForUser(User user) {
-        return this.bootstrap.getPlayer(user.getUuid()).map(player -> this.contextManager.getQueryOptions(player));
+        return this.bootstrap.getPlayer(user.getUniqueId()).map(player -> this.contextManager.getQueryOptions(player));
     }
 
     @Override

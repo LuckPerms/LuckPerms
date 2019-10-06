@@ -103,7 +103,7 @@ public class MetaRemoveTempChatMeta extends SharedSubCommand {
             return CommandResult.SUCCESS;
         }
 
-        DataMutateResult result = holder.unsetPermission(DataType.NORMAL, ((this.type == ChatMetaType.PREFIX ? Prefix.builder(priority, meta) : Suffix.builder(priority, meta))).expiry(10L).withContext(context).build());
+        DataMutateResult result = holder.unsetNode(DataType.NORMAL, ((this.type == ChatMetaType.PREFIX ? Prefix.builder(priority, meta) : Suffix.builder(priority, meta))).expiry(10L).withContext(context).build());
 
         if (result.wasSuccessful()) {
             TextComponent.Builder builder = Message.REMOVE_TEMP_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();

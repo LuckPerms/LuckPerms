@@ -46,7 +46,7 @@ public class SenderPlatformEntity implements PlatformEntity {
         if (this.sender.isConsole()) {
             return null;
         }
-        return this.sender.getUuid();
+        return this.sender.getUniqueId();
     }
 
     @Override

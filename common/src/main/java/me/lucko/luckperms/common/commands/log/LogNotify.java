@@ -76,7 +76,7 @@ public class LogNotify extends SubCommand<Log> {
 
         if (state) {
             // add the perm
-            user.setPermission(DataType.NORMAL, NodeBuilders.determineMostApplicable(IGNORE_NODE).build(), true);
+            user.setNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(IGNORE_NODE).build(), true);
         } else {
             // remove the perm
             user.removeIf(DataType.NORMAL, ImmutableContextSetImpl.EMPTY, n -> n.getKey().equalsIgnoreCase(IGNORE_NODE), null);
@@ -92,7 +92,7 @@ public class LogNotify extends SubCommand<Log> {
             return CommandResult.SUCCESS;
         }
 
-        final UUID uuid = sender.getUuid();
+        final UUID uuid = sender.getUniqueId();
         if (args.isEmpty()) {
             if (isIgnoring(plugin, uuid)) {
                 // toggle on

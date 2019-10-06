@@ -29,7 +29,6 @@ import com.google.common.collect.ImmutableSortedSet;
 
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
-import me.lucko.luckperms.common.node.utils.NodeTools;
 
 import net.luckperms.api.cacheddata.CachedDataManager;
 import net.luckperms.api.context.ContextSet;
@@ -47,6 +46,8 @@ import net.luckperms.api.query.QueryOptions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -133,21 +134,26 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
     public @NonNull SortedSet<Node> resolveDistinctInheritedNodes(@NonNull QueryOptions queryOptions) {
         List<Node> entries = this.handle.getAllEntries(queryOptions);
 
-        NodeTools.removeSamePermission(entries.iterator());
+        removeSamePermission(entries.iterator());
         SortedSet<Node> ret = new TreeSet<>(NodeWithContextComparator.reverse());
         ret.addAll(entries);
 
         return ImmutableSortedSet.copyOfSorted(ret);
     }
 
-    @Override
-    public void auditTemporaryPermissions() {
-        this.handle.auditTemporaryPermissions();
+    private static <T extends Node> void removeSamePermission(Iterator<T> it) {
+        Set<String> alreadyIn = new HashSet<>();
+        while (it.hasNext()) {
+            T next = it.next();
+            if (!alreadyIn.add(next.getKey())) {
+                it.remove();
+            }
+        }
     }
 
     @Override
-    public @NonNull Tristate inheritsNode(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate) {
-        return this.handle.inheritsPermission(node, equalityPredicate);
+    public void auditTemporaryNodes() {
+        this.handle.auditTemporaryNodes();
     }
 
     private abstract class AbstractData implements Data {
@@ -168,23 +174,23 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
         }
 
         @Override
-        public @NonNull Tristate hasNode(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate) {
-            return ApiPermissionHolder.this.handle.hasPermission(this.dataType, node, equalityPredicate);
+        public @NonNull Tristate containsNode(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate) {
+            return ApiPermissionHolder.this.handle.hasNode(this.dataType, node, equalityPredicate);
         }
 
         @Override
         public @NonNull DataMutateResult addNode(@NonNull Node node) {
-            return ApiPermissionHolder.this.handle.setPermission(this.dataType, node, true);
+            return ApiPermissionHolder.this.handle.setNode(this.dataType, node, true);
         }
 
         @Override
         public @NonNull TemporaryDataMutateResult addNode(@NonNull Node node, @NonNull TemporaryMergeBehaviour temporaryMergeBehaviour) {
-            return ApiPermissionHolder.this.handle.setPermission(this.dataType, node, temporaryMergeBehaviour);
+            return ApiPermissionHolder.this.handle.setNode(this.dataType, node, temporaryMergeBehaviour);
         }
 
         @Override
         public @NonNull DataMutateResult removeNode(@NonNull Node node) {
-            return ApiPermissionHolder.this.handle.unsetPermission(this.dataType, node);
+            return ApiPermissionHolder.this.handle.unsetNode(this.dataType, node);
         }
 
         @Override
@@ -194,12 +200,12 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
 
         @Override
         public void clearNodes() {
-            ApiPermissionHolder.this.handle.clearNodes(this.dataType, null);
+            ApiPermissionHolder.this.handle.clearNodes(this.dataType, null, false);
         }
 
         @Override
         public void clearNodes(@NonNull ContextSet contextSet) {
-            ApiPermissionHolder.this.handle.clearNodes(this.dataType, contextSet);
+            ApiPermissionHolder.this.handle.clearNodes(this.dataType, contextSet, false);
         }
 
         @Override

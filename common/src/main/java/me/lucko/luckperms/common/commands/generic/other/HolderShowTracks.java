@@ -44,7 +44,6 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.node.Node;
-import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.InheritanceNode;
 
 import java.util.ArrayList;
@@ -77,9 +76,7 @@ public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> 
 
         if (holder.getType() == HolderType.USER) {
             // if the holder is a user, we want to query parent groups for tracks
-            Set<InheritanceNode> nodes = holder.normalData().immutable().values().stream()
-                    .filter(NodeType.INHERITANCE::matches)
-                    .map(NodeType.INHERITANCE::cast)
+            Set<InheritanceNode> nodes = holder.normalData().immutableInheritance().values().stream()
                     .filter(Node::getValue)
                     .filter(n -> !n.hasExpiry())
                     .collect(Collectors.toSet());

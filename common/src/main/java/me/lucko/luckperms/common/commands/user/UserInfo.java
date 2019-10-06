@@ -64,12 +64,12 @@ public class UserInfo extends SubCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
-        Message status = plugin.getBootstrap().isPlayerOnline(user.getUuid()) ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
+        Message status = plugin.getBootstrap().isPlayerOnline(user.getUniqueId()) ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
 
         Message.USER_INFO_GENERAL.send(sender,
-                user.getName().orElse("Unknown"),
-                user.getUuid(),
-                user.getUuid().version() == 4 ? "&2mojang" : "&8offline",
+                user.getUsername().orElse("Unknown"),
+                user.getUniqueId(),
+                user.getUniqueId().version() == 4 ? "&2mojang" : "&8offline",
                 status.asString(plugin.getLocaleManager()),
                 user.getPrimaryGroup().getValue()
         );

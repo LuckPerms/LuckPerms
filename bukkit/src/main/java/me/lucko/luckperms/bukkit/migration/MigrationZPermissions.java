@@ -181,7 +181,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
             // migrate groups
             Set<Node> parents = userParents.get(u);
             if (parents != null) {
-                parents.forEach(node -> user.setPermission(DataType.NORMAL, node, true));
+                parents.forEach(node -> user.setNode(DataType.NORMAL, node, true));
             }
 
             user.getPrimaryGroup().setStoredValue(MigrationUtils.standardizeName(service.getPlayerPrimaryGroup(u)));
@@ -201,9 +201,9 @@ public class MigrationZPermissions extends SubCommand<Object> {
             if (e.getPermission().isEmpty()) continue;
 
             if (e.getWorld() != null && !e.getWorld().getName().equals("")) {
-                holder.setPermission(DataType.NORMAL, NodeBuilders.determineMostApplicable(e.getPermission()).value(e.isValue()).withContext(DefaultContextKeys.WORLD_KEY, e.getWorld().getName()).build(), true);
+                holder.setNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(e.getPermission()).value(e.isValue()).withContext(DefaultContextKeys.WORLD_KEY, e.getWorld().getName()).build(), true);
             } else {
-                holder.setPermission(DataType.NORMAL, NodeBuilders.determineMostApplicable(e.getPermission()).value(e.isValue()).build(), true);
+                holder.setNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(e.getPermission()).value(e.isValue()).build(), true);
             }
         }
 
@@ -211,7 +211,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         if (entity.isGroup()) {
             for (PermissionEntity inheritance : entity.getParents()) {
                 if (!inheritance.getDisplayName().equals(holder.getObjectName())) {
-                    holder.setPermission(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(inheritance.getDisplayName())).build(), true);
+                    holder.setNode(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(inheritance.getDisplayName())).build(), true);
                 }
             }
         }
@@ -226,11 +226,11 @@ public class MigrationZPermissions extends SubCommand<Object> {
             if (valueString.isEmpty()) continue;
 
             if (key.equals("prefix")) {
-                holder.setPermission(DataType.NORMAL, Prefix.builder(weight, valueString).build(), true);
+                holder.setNode(DataType.NORMAL, Prefix.builder(weight, valueString).build(), true);
             } else if (key.equals("suffix")) {
-                holder.setPermission(DataType.NORMAL, Suffix.builder(weight, valueString).build(), true);
+                holder.setNode(DataType.NORMAL, Suffix.builder(weight, valueString).build(), true);
             } else {
-                holder.setPermission(DataType.NORMAL, Meta.builder(key, valueString).build(), true);
+                holder.setNode(DataType.NORMAL, Meta.builder(key, valueString).build(), true);
             }
         }
     }

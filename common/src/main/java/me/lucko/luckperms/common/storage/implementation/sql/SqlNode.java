@@ -25,7 +25,9 @@
 
 package me.lucko.luckperms.common.storage.implementation.sql;
 
+import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
+import me.lucko.luckperms.common.util.gson.GsonProvider;
 
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
@@ -76,7 +78,15 @@ public final class SqlNode {
 
 
         long expiry = node.hasExpiry() ? node.getExpiry().getEpochSecond() : 0L;
-        return new SqlNode(node.getKey(), node.getValue(), server, world, expiry, contexts.immutableCopy());
+        return new SqlNode(node.getKey(), node.getValue(), server, world, expiry, contexts.immutableCopy(), -1);
+    }
+
+    public static SqlNode fromSqlFields(String permission, boolean value, String server, String world, long expiry, String contexts) {
+        return new SqlNode(permission, value, server, world, expiry, ContextSetJsonSerializer.deserializeContextSet(GsonProvider.normal(), contexts).immutableCopy(), -1);
+    }
+
+    public static SqlNode fromSqlFields(long sqlId, String permission, boolean value, String server, String world, long expiry, String contexts) {
+        return new SqlNode(permission, value, server, world, expiry, ContextSetJsonSerializer.deserializeContextSet(GsonProvider.normal(), contexts).immutableCopy(), sqlId);
     }
 
     private final String permission;
@@ -85,14 +95,16 @@ public final class SqlNode {
     private final String world;
     private final long expiry;
     private final ImmutableContextSet contexts;
+    private final long sqlId;
 
-    public SqlNode(String permission, boolean value, String server, String world, long expiry, ImmutableContextSet contexts) {
+    private SqlNode(String permission, boolean value, String server, String world, long expiry, ImmutableContextSet contexts, long sqlId) {
         this.permission = Objects.requireNonNull(permission, "permission");
         this.value = value;
         this.server = Objects.requireNonNull(server, "server");
         this.world = Objects.requireNonNull(world, "world");
         this.expiry = expiry;
         this.contexts = Objects.requireNonNull(contexts, "contexts");
+        this.sqlId = sqlId;
     }
 
     public Node toNode() {
@@ -127,6 +139,13 @@ public final class SqlNode {
 
     public ImmutableContextSet getContexts() {
         return this.contexts;
+    }
+
+    public long getSqlId() {
+        if (this.sqlId == -1) {
+            throw new IllegalStateException("sql id not set");
+        }
+        return this.sqlId;
     }
 
     @Override

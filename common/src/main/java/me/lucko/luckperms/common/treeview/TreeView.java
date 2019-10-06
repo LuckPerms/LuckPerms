@@ -146,14 +146,14 @@ public class TreeView {
                 .add("root", this.rootPosition)
                 .add("uploader", new JObject()
                         .add("name", sender.getNameWithLocation())
-                        .add("uuid", sender.getUuid().toString())
+                        .add("uuid", sender.getUniqueId().toString())
                 );
 
         JObject checks;
         if (user != null && checker != null) {
             metadata.add("referenceUser", new JObject()
                     .add("name", user.getPlainDisplayName())
-                    .add("uuid", user.getUuid().toString())
+                    .add("uuid", user.getUniqueId().toString())
             );
 
             checks = new JObject();

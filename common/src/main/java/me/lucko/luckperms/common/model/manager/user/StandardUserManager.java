@@ -26,9 +26,9 @@
 package me.lucko.luckperms.common.model.manager.user;
 
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class StandardUserManager extends AbstractUserManager<User> {
@@ -40,9 +40,7 @@ public class StandardUserManager extends AbstractUserManager<User> {
     }
 
     @Override
-    public User apply(UserIdentifier id) {
-        return !id.getUsername().isPresent() ?
-                new User(id.getUuid(), this.plugin) :
-                new User(id.getUuid(), id.getUsername().get(), this.plugin);
+    public User apply(UUID id) {
+        return new User(id, this.plugin);
     }
 }

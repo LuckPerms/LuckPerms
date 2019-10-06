@@ -91,7 +91,7 @@ public class ParentAddTemp extends SharedSubCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        TemporaryDataMutateResult ret = holder.setPermission(DataType.NORMAL, Inheritance.builder(group.getName()).expiry(duration).withContext(context).build(), modifier);
+        TemporaryDataMutateResult ret = holder.setNode(DataType.NORMAL, Inheritance.builder(group.getName()).expiry(duration).withContext(context).build(), modifier);
 
         if (((Result) ret.getResult()).wasSuccessful()) {
             duration = ret.getMergedNode().getExpiry().getEpochSecond();

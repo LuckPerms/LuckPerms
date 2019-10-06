@@ -57,9 +57,9 @@ public class ApiActionLog implements ActionLog {
     }
 
     @Override
-    public @NonNull SortedSet<Action> getUserHistory(@NonNull UUID uuid) {
-        Objects.requireNonNull(uuid, "uuid");
-        return (SortedSet) this.handle.getUserHistory(uuid);
+    public @NonNull SortedSet<Action> getUserHistory(@NonNull UUID uniqueId) {
+        Objects.requireNonNull(uniqueId, "uuid");
+        return (SortedSet) this.handle.getUserHistory(uniqueId);
     }
 
     @Override

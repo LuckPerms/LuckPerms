@@ -37,7 +37,6 @@ import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.model.DataMutateResult;
 import net.luckperms.api.model.DataType;
 import net.luckperms.api.node.Node;
-import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.track.DemotionResult;
 import net.luckperms.api.track.PromotionResult;
@@ -52,7 +51,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public final class Track implements Identifiable<String> {
+public final class Track {
 
     /**
      * The name of the track
@@ -85,11 +84,6 @@ public final class Track implements Identifiable<String> {
 
     public ApiTrack getApiDelegate() {
         return this.apiDelegate;
-    }
-
-    @Override
-    public String getId() {
-        return getName();
     }
 
     /**
@@ -279,9 +273,7 @@ public final class Track implements Identifiable<String> {
         }
 
         // find all groups that are inherited by the user in the exact contexts given and applicable to this track
-        List<InheritanceNode> nodes = user.normalData().immutable().get(context.immutableCopy()).stream()
-                .filter(NodeType.INHERITANCE::matches)
-                .map(NodeType.INHERITANCE::cast)
+        List<InheritanceNode> nodes = user.normalData().immutableInheritance().get(context.immutableCopy()).stream()
                 .filter(Node::getValue)
                 .filter(node -> containsGroup(node.getGroupName()))
                 .distinct()
@@ -303,7 +295,7 @@ public final class Track implements Identifiable<String> {
                 return PromotionResults.undefinedFailure();
             }
 
-            user.setPermission(DataType.NORMAL, Inheritance.builder(nextGroup.getId()).withContext(context).build(), true);
+            user.setNode(DataType.NORMAL, Inheritance.builder(nextGroup.getName()).withContext(context).build(), true);
             this.plugin.getEventFactory().handleUserPromote(user, this, null, first, sender);
             return PromotionResults.addedToFirst(first);
         }
@@ -329,8 +321,8 @@ public final class Track implements Identifiable<String> {
             return PromotionResults.undefinedFailure();
         }
 
-        user.unsetPermission(DataType.NORMAL, oldNode);
-        user.setPermission(DataType.NORMAL, Inheritance.builder(nextGroup.getName()).withContext(context).build(), true);
+        user.unsetNode(DataType.NORMAL, oldNode);
+        user.setNode(DataType.NORMAL, Inheritance.builder(nextGroup.getName()).withContext(context).build(), true);
 
         if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME).equalsIgnoreCase(old)) {
             user.getPrimaryGroup().setStoredValue(nextGroup.getName());
@@ -346,9 +338,7 @@ public final class Track implements Identifiable<String> {
         }
 
         // find all groups that are inherited by the user in the exact contexts given and applicable to this track
-        List<InheritanceNode> nodes = user.normalData().immutable().get(context.immutableCopy()).stream()
-                .filter(NodeType.INHERITANCE::matches)
-                .map(NodeType.INHERITANCE::cast)
+        List<InheritanceNode> nodes = user.normalData().immutableInheritance().get(context.immutableCopy()).stream()
                 .filter(Node::getValue)
                 .filter(node -> containsGroup(node.getGroupName()))
                 .distinct()
@@ -375,7 +365,7 @@ public final class Track implements Identifiable<String> {
                 return DemotionResults.removedFromFirst(null);
             }
 
-            user.unsetPermission(DataType.NORMAL, oldNode);
+            user.unsetNode(DataType.NORMAL, oldNode);
             this.plugin.getEventFactory().handleUserDemote(user, this, old, null, sender);
             return DemotionResults.removedFromFirst(old);
         }
@@ -385,8 +375,8 @@ public final class Track implements Identifiable<String> {
             return DemotionResults.malformedTrack(previous);
         }
 
-        user.unsetPermission(DataType.NORMAL, oldNode);
-        user.setPermission(DataType.NORMAL, Inheritance.builder(previousGroup.getName()).withContext(context).build(), true);
+        user.unsetNode(DataType.NORMAL, oldNode);
+        user.setNode(DataType.NORMAL, Inheritance.builder(previousGroup.getName()).withContext(context).build(), true);
 
         if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME).equalsIgnoreCase(old)) {
             user.getPrimaryGroup().setStoredValue(previousGroup.getName());

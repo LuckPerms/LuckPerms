@@ -25,8 +25,8 @@
 
 package net.luckperms.api.model.group;
 
-import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.model.PermissionHolder;
+import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -63,10 +63,10 @@ public interface Group extends PermissionHolder {
      * <p>Will return <code>null</code> if the groups display name is equal to it's
      * {@link #getName() actual name}.</p>
      *
-     * @param contextSet the contexts to lookup in
+     * @param queryOptions the query options to lookup in
      * @return the display name
      */
-    @Nullable String getDisplayName(@NonNull ContextSet contextSet);
+    @Nullable String getDisplayName(@NonNull QueryOptions queryOptions);
 
     /**
      * Gets the weight of this group, if present.

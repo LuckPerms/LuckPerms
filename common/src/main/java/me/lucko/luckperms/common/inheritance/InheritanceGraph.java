@@ -61,7 +61,7 @@ public class InheritanceGraph implements Graph<PermissionHolder> {
     @Override
     public Iterable<? extends PermissionHolder> successors(PermissionHolder holder) {
         Set<Group> successors = new LinkedHashSet<>();
-        for (InheritanceNode n : holder.getOwnGroupNodes(this.queryOptions)) {
+        for (InheritanceNode n : holder.getOwnInheritanceNodes(this.queryOptions)) {
             // effectively: if not (we're applying global groups or it's specific anyways)
             if (!((this.queryOptions.flag(Flag.APPLY_INHERITANCE_NODES_WITHOUT_SERVER_CONTEXT) || n.getContexts().containsKey(DefaultContextKeys.SERVER_KEY)) &&
                     (this.queryOptions.flag(Flag.APPLY_INHERITANCE_NODES_WITHOUT_WORLD_CONTEXT) || n.getContexts().containsKey(DefaultContextKeys.WORLD_KEY)))) {

@@ -132,7 +132,7 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
             ConfigurationSection permsSection = data.getConfigurationSection("permissions");
             for (String perm : permsSection.getKeys(false)) {
                 boolean value = permsSection.getBoolean(perm);
-                holder.setPermission(DataType.NORMAL, MigrationUtils.parseNode(perm, value).build(), true);
+                holder.setNode(DataType.NORMAL, MigrationUtils.parseNode(perm, value).build(), true);
             }
         }
 
@@ -143,7 +143,7 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
                     ConfigurationSection permsSection = worldSection.getConfigurationSection(world);
                     for (String perm : permsSection.getKeys(false)) {
                         boolean value = permsSection.getBoolean(perm);
-                        holder.setPermission(DataType.NORMAL, MigrationUtils.parseNode(perm, value).withContext(DefaultContextKeys.WORLD_KEY, world).build(), true);
+                        holder.setNode(DataType.NORMAL, MigrationUtils.parseNode(perm, value).withContext(DefaultContextKeys.WORLD_KEY, world).build(), true);
                     }
                 }
             }
@@ -153,13 +153,13 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
         if (data.isList("groups")) {
             List<String> groups = data.getStringList("groups");
             for (String group : groups) {
-                holder.setPermission(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(group)).build(), true);
+                holder.setNode(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(group)).build(), true);
             }
         }
         if (data.isList("inheritance")) {
             List<String> groups = data.getStringList("inheritance");
             for (String group : groups) {
-                holder.setPermission(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(group)).build(), true);
+                holder.setNode(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(group)).build(), true);
             }
         }
     }

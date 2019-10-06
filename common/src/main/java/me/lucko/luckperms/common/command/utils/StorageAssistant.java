@@ -70,7 +70,7 @@ public final class StorageAssistant {
         }
 
         if (auditTemporary) {
-            group.auditTemporaryPermissions();
+            group.auditTemporaryNodes();
         }
 
         return group;

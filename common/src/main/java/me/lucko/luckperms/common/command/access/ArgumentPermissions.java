@@ -109,7 +109,7 @@ public final class ArgumentPermissions {
         if (target instanceof User) {
             User targetUser = ((User) target);
             
-            if (targetUser.getUuid().equals(sender.getUuid())) {
+            if (targetUser.getUniqueId().equals(sender.getUniqueId())) {
                 // the sender is trying to edit themselves
                 Tristate ret = sender.getPermissionValue(base.getPermission() + ".modify.self");
                 if (ret != Tristate.UNDEFINED) {
@@ -174,7 +174,7 @@ public final class ArgumentPermissions {
         if (target instanceof User) {
             User targetUser = ((User) target);
 
-            if (targetUser.getUuid().equals(sender.getUuid())) {
+            if (targetUser.getUniqueId().equals(sender.getUniqueId())) {
                 // the sender is trying to view themselves
                 Tristate ret = sender.getPermissionValue(base.getPermission() + ".view.self");
                 if (ret != Tristate.UNDEFINED) {
@@ -299,9 +299,9 @@ public final class ArgumentPermissions {
             return false;
         }
 
-        User user = plugin.getUserManager().getIfLoaded(sender.getUuid());
+        User user = plugin.getUserManager().getIfLoaded(sender.getUniqueId());
         if (user == null) {
-            throw new IllegalStateException("Unable to get a User for " + sender.getUuid() + " - " + sender.getName());
+            throw new IllegalStateException("Unable to get a User for " + sender.getUniqueId() + " - " + sender.getName());
         }
 
         PermissionCache permissionData = user.getCachedData().getPermissionData(QueryOptions.defaultContextualOptions().toBuilder().context(contextSet).build());

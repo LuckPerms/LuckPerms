@@ -54,7 +54,7 @@ public class SpongeSenderFactory extends SenderFactory<CommandSource> {
     }
 
     @Override
-    protected UUID getUuid(CommandSource source) {
+    protected UUID getUniqueId(CommandSource source) {
         if (source instanceof Player) {
             return ((Player) source).getUniqueId();
         }
