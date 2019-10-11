@@ -25,19 +25,52 @@
 
 package net.luckperms.api.query;
 
+import net.luckperms.api.node.metadata.NodeMetadataKey;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.Objects;
+
 /**
  * Represents a key for a custom option defined in {@link QueryOptions}.
  *
- * <p>Option keys are compared using reference equality, the
- * {@link #equals(Object)} method should not be implemented.</p>
- *
  * <p>It is intended that {@link OptionKey}s are created and defined as follows.</p>
  * <p><blockquote><pre>
- *     public static final OptionKey<String> SPECIAL_OPTION = new OptionKey<String>(){};
+ *     public static final OptionKey<String> SPECIAL_OPTION = OptionKey.of("special", String.class);
  * </pre></blockquote></p>
  *
- * @param <O> the option type
+ * @param <T> the option type
  */
-public interface OptionKey<O> {
+public interface OptionKey<T> {
+
+    /**
+     * Creates a new {@link NodeMetadataKey} for the given name and type.
+     *
+     * <p>Note that the returned key implements object reference equality.</p>
+     *
+     * @param name the name
+     * @param type the type
+     * @param <T> the type parameter
+     * @return the key
+     */
+    static <T> @NonNull OptionKey<T> of(@NonNull String name, @NonNull Class<T> type) {
+        Objects.requireNonNull(name, "name");
+        Objects.requireNonNull(type, "type");
+        return new SimpleOptionKey<>(name, type);
+    }
+
+    /**
+     * Gets a name describing the key type.
+     *
+     * @return the key name
+     */
+    @NonNull String name();
+
+    /**
+     * Gets the type of the key
+     *
+     * @return the type
+     */
+    @NonNull Class<T> getType();
 
 }

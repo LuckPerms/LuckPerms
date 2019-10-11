@@ -45,12 +45,12 @@ public interface MetaStackDefinition {
     /**
      * The {@link OptionKey} for the prefix {@link MetaStackDefinition}.
      */
-    OptionKey<MetaStackDefinition> PREFIX_STACK_KEY = new OptionKey<MetaStackDefinition>(){};
+    OptionKey<MetaStackDefinition> PREFIX_STACK_KEY = OptionKey.of("prefixstack", MetaStackDefinition.class);
 
     /**
      * The {@link OptionKey} for the suffix {@link MetaStackDefinition}.
      */
-    OptionKey<MetaStackDefinition> SUFFIX_STACK_KEY = new OptionKey<MetaStackDefinition>(){};
+    OptionKey<MetaStackDefinition> SUFFIX_STACK_KEY = OptionKey.of("suffixstack", MetaStackDefinition.class);
 
     /**
      * Gets an immutable list of the elements in this stack definition

@@ -42,7 +42,7 @@ public interface DataQueryOrderFunction {
     /**
      * The {@link OptionKey} for {@link DataQueryOrderFunction}.
      */
-    OptionKey<DataQueryOrderFunction> KEY = new OptionKey<DataQueryOrderFunction>(){};
+    OptionKey<DataQueryOrderFunction> KEY = OptionKey.of("dataqueryorderfunction", DataQueryOrderFunction.class);
 
     /**
      * Gets the {@link DataQueryOrder} comparator for the given

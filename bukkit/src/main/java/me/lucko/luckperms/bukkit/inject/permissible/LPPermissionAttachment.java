@@ -56,7 +56,7 @@ import java.util.Set;
  */
 public class LPPermissionAttachment extends PermissionAttachment {
 
-    public static final NodeMetadataKey<LPPermissionAttachment> TRANSIENT_SOURCE_KEY = NodeMetadataKey.of("TransientSource", LPPermissionAttachment.class);
+    public static final NodeMetadataKey<LPPermissionAttachment> TRANSIENT_SOURCE_KEY = NodeMetadataKey.of("transientsource", LPPermissionAttachment.class);
 
     /**
      * The field in PermissionAttachment where the attachments applied permissions

@@ -32,13 +32,10 @@ import java.util.Objects;
 /**
  * Represents a key for a specific type of node metadata.
  *
- * <p>Metadata keys are compared using reference equality, the
- * {@link #equals(Object)} method should not be implemented.</p>
- *
  * <p>It is intended that {@link NodeMetadataKey}s are obtained and stored as
  * follows.</p>
  * <p><blockquote><pre>
- *     public static final NodeMetadataKey<SpecialMetadata> SPECIAL_METADATA_KEY = NodeMetadataKey.of("SpecialMetadata", SpecialMetadata.class);
+ *     public static final NodeMetadataKey<SpecialMetadata> SPECIAL_METADATA_KEY = NodeMetadataKey.of("specialmetadata", SpecialMetadata.class);
  * </pre></blockquote></p>
  *
  * @param <T> the metadata type

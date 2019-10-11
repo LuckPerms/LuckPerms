@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 
 public class BukkitContextManager extends ContextManager<Player> {
 
-    public static final OptionKey<Boolean> OP_OPTION = new OptionKey<Boolean>(){};
+    public static final OptionKey<Boolean> OP_OPTION = OptionKey.of("op", Boolean.class);
 
     // cache the creation of ContextsCache instances for online players with no expiry
     private final LoadingMap<Player, QueryOptionsCache<Player>> onlineSubjectCaches = LoadingMap.of(key -> new QueryOptionsCache<>(key, this));

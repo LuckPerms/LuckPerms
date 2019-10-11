@@ -23,35 +23,47 @@
  *  SOFTWARE.
  */
 
-package net.luckperms.api.node.metadata.types;
-
-import net.luckperms.api.model.PermissionHolder;
-import net.luckperms.api.node.Node;
-import net.luckperms.api.node.metadata.NodeMetadataKey;
+package net.luckperms.api.query;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-/**
- * Node metadata indicating where a node was inherited from.
- */
-public interface InheritanceOriginMetadata {
+import java.util.Objects;
 
-    /**
-     * The {@link NodeMetadataKey} for {@link InheritanceOriginMetadata}.
-     */
-    NodeMetadataKey<InheritanceOriginMetadata> KEY = NodeMetadataKey.of("inheritanceorigin", InheritanceOriginMetadata.class);
+final class SimpleOptionKey<T> implements OptionKey<T> {
+    private final String name;
+    private final Class<T> type;
 
-    /**
-     * Gets the location where the {@link Node} is inherited from.
-     *
-     * <p>The resultant string is the {@link PermissionHolder.Identifier#getName() object name} of the
-     * permission holder the node was inherited from.</p>
-     *
-     * <p>If the node was not inherited, the {@link PermissionHolder.Identifier#getName() object name}
-     * of the permission holder itself (the one that defined the node) will be returned.</p>
-     *
-     * @return where the node was inherited from.
-     */
-    @NonNull String getOrigin();
+    SimpleOptionKey(String name, Class<T> type) {
+        this.name = name.toLowerCase();
+        this.type = type;
+    }
 
+    @Override
+    public @NonNull String name() {
+        return this.name;
+    }
+
+    @Override
+    public @NonNull Class<T> getType() {
+        return this.type;
+    }
+
+    @Override
+    public String toString() {
+        return "OptionKey(name=" + this.name + ", type=" + this.type.getName() + ")";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SimpleOptionKey<?> that = (SimpleOptionKey<?>) o;
+        return this.name.equals(that.name) &&
+                this.type.equals(that.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.name, this.type);
+    }
 }

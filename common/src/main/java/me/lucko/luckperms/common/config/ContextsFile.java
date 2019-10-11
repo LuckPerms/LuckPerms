@@ -56,28 +56,13 @@ public class ContextsFile {
 
     public void load() {
         Path file = this.configuration.getPlugin().getBootstrap().getDataDirectory().resolve("contexts.json");
-        Path oldFile = this.configuration.getPlugin().getBootstrap().getDataDirectory().resolve("static-contexts.json");
-        if (Files.exists(oldFile)) {
-            try {
-                Files.move(oldFile, file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
         if (!Files.exists(file)) {
             save();
             return;
         }
 
-        boolean save = false;
         try (BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
             JsonObject data = GsonProvider.normal().fromJson(reader, JsonObject.class);
-
-            if (data.has("context")) {
-                this.staticContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("context").getAsJsonObject()).immutableCopy();
-                save = true;
-            }
 
             if (data.has("static-contexts")) {
                 this.staticContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("static-contexts").getAsJsonObject()).immutableCopy();
@@ -89,10 +74,6 @@ public class ContextsFile {
 
         } catch (IOException e) {
             e.printStackTrace();
-        }
-
-        if (save) {
-            save();
         }
     }
 

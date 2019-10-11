@@ -27,12 +27,14 @@ package net.luckperms.api.node.metadata;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Objects;
+
 final class SimpleNodeMetadataKey<T> implements NodeMetadataKey<T> {
     private final String name;
     private final Class<T> type;
 
     SimpleNodeMetadataKey(String name, Class<T> type) {
-        this.name = name;
+        this.name = name.toLowerCase();
         this.type = type;
     }
 
@@ -49,5 +51,19 @@ final class SimpleNodeMetadataKey<T> implements NodeMetadataKey<T> {
     @Override
     public String toString() {
         return "NodeMetadataKey(name=" + this.name + ", type=" + this.type.getName() + ")";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SimpleNodeMetadataKey<?> that = (SimpleNodeMetadataKey<?>) o;
+        return this.name.equals(that.name) &&
+                this.type.equals(that.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.name, this.type);
     }
 }
