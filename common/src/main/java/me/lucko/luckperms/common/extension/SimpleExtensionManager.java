@@ -81,6 +81,7 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
         if (this.extensions.stream().anyMatch(e -> e.instance.equals(extension))) {
             return;
         }
+        this.plugin.getLogger().info("Loading extension: " + extension.getClass().getName());
         this.extensions.add(new LoadedExtension(extension, null, null));
         extension.load();
         this.plugin.getEventFactory().handleExtensionLoad(extension);
@@ -93,10 +94,12 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
 
         try (Stream<Path> stream = Files.list(directory)) {
             stream.forEach(path -> {
-                try {
-                    loadExtension(path);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (path.getFileName().toString().endsWith(".jar")) {
+                    try {
+                        loadExtension(path);
+                    } catch (IOException e) {
+                        new RuntimeException("Exception loading extension from " + path, e).printStackTrace();
+                    }
                 }
             });
         } catch (IOException e) {
@@ -119,7 +122,7 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
 
         try (InputStream in = classLoader.getResourceAsStream("extension.json")) {
             if (in == null) {
-                throw new RuntimeException("extension.json not present in " + path.toString());
+                throw new IllegalStateException("extension.json not present");
             }
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
                 JsonElement parsed = GsonProvider.parser().parse(reader);
@@ -138,6 +141,8 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
             throw new RuntimeException(e);
         }
 
+        this.plugin.getLogger().info("Loading extension: " + extensionClass.getName() + " (" + path.getFileName().toString() + ")");
+
         Extension extension = null;
 
         try {
@@ -153,7 +158,9 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
             try {
                 Constructor<? extends Extension> constructor = extensionClass.getConstructor();
                 extension = constructor.newInstance();
-            } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException("Unable to find valid constructor in " + extensionClass.getName());
+            } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
         }

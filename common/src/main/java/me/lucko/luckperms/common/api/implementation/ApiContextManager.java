@@ -65,7 +65,7 @@ public class ApiContextManager implements net.luckperms.api.context.ContextManag
     }
 
     @Override
-    public @NonNull Optional<ImmutableContextSet> lookupContext(@NonNull User user) {
+    public @NonNull Optional<ImmutableContextSet> getContext(@NonNull User user) {
         Objects.requireNonNull(user, "user");
         return this.plugin.getQueryOptionsForUser(ApiUser.cast(user)).map(QueryOptions::context);
     }
@@ -88,7 +88,7 @@ public class ApiContextManager implements net.luckperms.api.context.ContextManag
     }
 
     @Override
-    public @NonNull Optional<QueryOptions> lookupQueryOptions(@NonNull User user) {
+    public @NonNull Optional<QueryOptions> getQueryOptions(@NonNull User user) {
         Objects.requireNonNull(user, "user");
         return this.plugin.getQueryOptionsForUser(ApiUser.cast(user));
     }
@@ -96,19 +96,6 @@ public class ApiContextManager implements net.luckperms.api.context.ContextManag
     @Override
     public @NonNull QueryOptions getStaticQueryOptions() {
         return this.handle.getStaticQueryOptions();
-    }
-
-    @Override
-    public @NonNull QueryOptions formQueryOptions(@NonNull Object subject, @NonNull ImmutableContextSet contextSet) {
-        Objects.requireNonNull(subject, "subject");
-        Objects.requireNonNull(contextSet, "contextSet");
-        return this.handle.formQueryOptions(subject, contextSet);
-    }
-
-    @Override
-    public @NonNull QueryOptions formQueryOptions(@NonNull ImmutableContextSet contextSet) {
-        Objects.requireNonNull(contextSet, "contextSet");
-        return this.handle.formQueryOptions(contextSet);
     }
 
     @Override

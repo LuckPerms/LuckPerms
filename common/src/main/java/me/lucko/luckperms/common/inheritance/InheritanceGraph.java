@@ -32,9 +32,7 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.node.types.InheritanceNode;
-import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.ArrayList;
@@ -62,12 +60,6 @@ public class InheritanceGraph implements Graph<PermissionHolder> {
     public Iterable<? extends PermissionHolder> successors(PermissionHolder holder) {
         Set<Group> successors = new LinkedHashSet<>();
         for (InheritanceNode n : holder.getOwnInheritanceNodes(this.queryOptions)) {
-            // effectively: if not (we're applying global groups or it's specific anyways)
-            if (!((this.queryOptions.flag(Flag.APPLY_INHERITANCE_NODES_WITHOUT_SERVER_CONTEXT) || n.getContexts().containsKey(DefaultContextKeys.SERVER_KEY)) &&
-                    (this.queryOptions.flag(Flag.APPLY_INHERITANCE_NODES_WITHOUT_WORLD_CONTEXT) || n.getContexts().containsKey(DefaultContextKeys.WORLD_KEY)))) {
-                continue;
-            }
-
             Group g = this.plugin.getGroupManager().getIfLoaded(n.getGroupName());
             if (g != null) {
                 successors.add(g);

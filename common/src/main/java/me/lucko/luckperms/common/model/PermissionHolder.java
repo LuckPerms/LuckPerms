@@ -37,7 +37,6 @@ import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.luckperms.api.context.ContextSet;
-import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.DataMutateResult;
 import net.luckperms.api.model.DataType;
@@ -63,7 +62,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
@@ -279,41 +277,33 @@ public abstract class PermissionHolder {
         return ret;
     }
 
-    public void accumulateInheritancesTo(List<? super Node> accumulator, QueryOptions queryOptions) {
-        InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph(queryOptions);
-        Iterable<PermissionHolder> traversal = graph.traverse(this);
-        for (PermissionHolder holder : traversal) {
-            List<? extends Node> nodes = holder.getOwnNodes(queryOptions);
-            accumulator.addAll(nodes);
-        }
-    }
-
-    public List<Node> resolveInheritances(QueryOptions queryOptions) {
-        List<Node> accumulator = new ArrayList<>();
-        accumulateInheritancesTo(accumulator, queryOptions);
-        return accumulator;
-    }
-
-    public List<Node> getAllEntries(QueryOptions queryOptions) {
-        List<Node> entries = new LinkedList<>();
+    private void accumulateInheritedNodesTo(Collection<Node> accumulator, QueryOptions queryOptions) {
         if (queryOptions.flag(Flag.RESOLVE_INHERITANCE)) {
-            accumulateInheritancesTo(entries, queryOptions);
+            InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph(queryOptions);
+            Iterable<PermissionHolder> traversal = graph.traverse(this);
+            for (PermissionHolder holder : traversal) {
+                List<? extends Node> nodes = holder.getOwnNodes(queryOptions);
+                accumulator.addAll(nodes);
+            }
         } else {
-            entries.addAll(getOwnNodes(queryOptions));
+            accumulator.addAll(getOwnNodes(queryOptions));
         }
+    }
 
-        if (!queryOptions.flag(Flag.INCLUDE_NODES_WITHOUT_SERVER_CONTEXT)) {
-            entries.removeIf(n -> !(n instanceof InheritanceNode) && !n.getContexts().containsKey(DefaultContextKeys.SERVER_KEY));
-        }
-        if (!queryOptions.flag(Flag.INCLUDE_NODES_WITHOUT_WORLD_CONTEXT)) {
-            entries.removeIf(n -> !(n instanceof InheritanceNode) && !n.getContexts().containsKey(DefaultContextKeys.WORLD_KEY));
-        }
+    public List<Node> resolveInheritedNodes(QueryOptions queryOptions) {
+        List<Node> ret = new ArrayList<>();
+        accumulateInheritedNodesTo(ret, queryOptions);
+        return ret;
+    }
 
-        return entries;
+    public SortedSet<Node> resolveInheritedNodesSorted(QueryOptions queryOptions) {
+        SortedSet<Node> ret = new TreeSet<>(NodeWithContextComparator.reverse());
+        accumulateInheritedNodesTo(ret, queryOptions);
+        return ret;
     }
 
     public Map<String, Boolean> exportPermissions(QueryOptions queryOptions, boolean convertToLowercase, boolean resolveShorthand) {
-        List<Node> entries = getAllEntries(queryOptions);
+        List<Node> entries = resolveInheritedNodes(queryOptions);
         return processExportedPermissions(entries, convertToLowercase, resolveShorthand);
     }
 
@@ -355,12 +345,6 @@ public abstract class PermissionHolder {
             for (Node node : nodes) {
                 if (!node.getValue()) continue;
                 if (!NodeType.META_OR_CHAT_META.matches(node)) continue;
-
-                // effectively: if not (we're applying global groups or it's specific anyways)
-                if (!((queryOptions.flag(Flag.APPLY_INHERITANCE_NODES_WITHOUT_SERVER_CONTEXT) || node.getContexts().containsKey(DefaultContextKeys.SERVER_KEY)) &&
-                        (queryOptions.flag(Flag.APPLY_INHERITANCE_NODES_WITHOUT_WORLD_CONTEXT) || node.getContexts().containsKey(DefaultContextKeys.WORLD_KEY)))) {
-                    continue;
-                }
 
                 accumulator.accumulateNode(node);
             }

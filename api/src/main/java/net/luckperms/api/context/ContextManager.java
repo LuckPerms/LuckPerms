@@ -75,7 +75,7 @@ public interface ContextManager {
      * @param user the user
      * @return the applicable context for the subject
      */
-    @NonNull Optional<ImmutableContextSet> lookupContext(@NonNull User user);
+    @NonNull Optional<ImmutableContextSet> getContext(@NonNull User user);
 
     /**
      * Gets the contexts from the static calculators in this manager.
@@ -115,7 +115,7 @@ public interface ContextManager {
      * @param user the user
      * @return the query options for the subject
      */
-    @NonNull Optional<QueryOptions> lookupQueryOptions(@NonNull User user);
+    @NonNull Optional<QueryOptions> getQueryOptions(@NonNull User user);
 
     /**
      * Gets the static query options, using the registered static context calculators.
@@ -123,29 +123,6 @@ public interface ContextManager {
      * @return the current static query options
      */
     @NonNull QueryOptions getStaticQueryOptions();
-
-    /**
-     * Forms a {@link QueryOptions} instance from an {@link ImmutableContextSet}.
-     *
-     * <p>This method relies on the plugins configuration to form the
-     * {@link QueryOptions} instance.</p>
-     *
-     * @param subject    the reference subject
-     * @param contextSet the context set
-     * @return a options instance
-     */
-    @NonNull QueryOptions formQueryOptions(@NonNull Object subject, @NonNull ImmutableContextSet contextSet);
-
-    /**
-     * Forms a {@link QueryOptions} instance from an {@link ImmutableContextSet}.
-     *
-     * <p>This method relies on the plugins configuration to form the
-     * {@link QueryOptions} instance.</p>
-     *
-     * @param contextSet the context set
-     * @return a options instance
-     */
-    @NonNull QueryOptions formQueryOptions(@NonNull ImmutableContextSet contextSet);
 
     /**
      * Registers a context calculator with the manager.

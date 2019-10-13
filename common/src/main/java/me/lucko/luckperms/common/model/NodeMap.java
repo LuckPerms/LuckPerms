@@ -37,11 +37,13 @@ import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.node.model.InheritanceOrigin;
 
 import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
 import net.luckperms.api.node.types.InheritanceNode;
+import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -135,7 +137,25 @@ public final class NodeMap {
     public void copyTo(Collection<? super Node> collection, QueryOptions filter) {
         for (Map.Entry<ImmutableContextSet, SortedSet<Node>> e : this.map.entrySet()) {
             if (filter.satisfies(e.getKey())) {
-                collection.addAll(e.getValue());
+                boolean serverMissing = !e.getKey().containsKey(DefaultContextKeys.SERVER_KEY);
+                boolean worldMissing = !e.getKey().containsKey(DefaultContextKeys.WORLD_KEY);
+                boolean excludeAsServerMissing = !filter.flag(Flag.INCLUDE_NODES_WITHOUT_SERVER_CONTEXT) && serverMissing;
+                boolean excludeAsWorldMissing = !filter.flag(Flag.INCLUDE_NODES_WITHOUT_WORLD_CONTEXT) && worldMissing;
+
+                if (excludeAsServerMissing || excludeAsWorldMissing) {
+                    boolean excludeInheritanceAsServerMissing = !filter.flag(Flag.APPLY_INHERITANCE_NODES_WITHOUT_SERVER_CONTEXT) && serverMissing;
+                    boolean excludeInheritanceAsWorldMissing = !filter.flag(Flag.APPLY_INHERITANCE_NODES_WITHOUT_WORLD_CONTEXT) && worldMissing;
+
+                    if (!excludeInheritanceAsServerMissing && !excludeInheritanceAsWorldMissing) {
+                        // only copy inheritance nodes.
+                        SortedSet<InheritanceNode> inheritanceNodes = this.inheritanceMap.get(e.getKey());
+                        if (inheritanceNodes != null) {
+                            collection.addAll(inheritanceNodes);
+                        }
+                    }
+                } else {
+                    collection.addAll(e.getValue());
+                }
             }
         }
     }
@@ -143,7 +163,14 @@ public final class NodeMap {
     public void copyInheritanceNodesTo(Collection<? super InheritanceNode> collection, QueryOptions filter) {
         for (Map.Entry<ImmutableContextSet, SortedSet<InheritanceNode>> e : this.inheritanceMap.entrySet()) {
             if (filter.satisfies(e.getKey())) {
-                collection.addAll(e.getValue());
+                boolean serverMissing = !e.getKey().containsKey(DefaultContextKeys.SERVER_KEY);
+                boolean worldMissing = !e.getKey().containsKey(DefaultContextKeys.WORLD_KEY);
+                boolean excludeInheritanceAsServerMissing = !filter.flag(Flag.APPLY_INHERITANCE_NODES_WITHOUT_SERVER_CONTEXT) && serverMissing;
+                boolean excludeInheritanceAsWorldMissing = !filter.flag(Flag.APPLY_INHERITANCE_NODES_WITHOUT_WORLD_CONTEXT) && worldMissing;
+
+                if (!excludeInheritanceAsServerMissing && !excludeInheritanceAsWorldMissing) {
+                    collection.addAll(e.getValue());
+                }
             }
         }
     }

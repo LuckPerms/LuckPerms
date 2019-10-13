@@ -66,7 +66,7 @@ public class PermissionCheckInherits extends SharedSubCommand {
         String node = ArgumentParser.parseString(0, args);
         MutableContextSet context = ArgumentParser.parseContext(1, args, plugin);
 
-        Optional<Node> match = holder.resolveInheritances(QueryOptions.nonContextual()).stream()
+        Optional<Node> match = holder.resolveInheritedNodes(QueryOptions.nonContextual()).stream()
                 .filter(n -> n.getKey().equalsIgnoreCase(node) && n.getContexts().equals(context))
                 .findFirst();
 

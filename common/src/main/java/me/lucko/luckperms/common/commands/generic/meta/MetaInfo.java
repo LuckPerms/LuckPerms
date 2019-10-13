@@ -89,7 +89,7 @@ public class MetaInfo extends SharedSubCommand {
         Set<MetaNode> meta = new LinkedHashSet<>();
 
         // Collect data
-        for (Node node : holder.resolveInheritances(QueryOptions.nonContextual())) {
+        for (Node node : holder.resolveInheritedNodes(QueryOptions.nonContextual())) {
             if (!NodeType.META_OR_CHAT_META.matches(node)) {
                 continue;
             }

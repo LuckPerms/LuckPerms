@@ -138,13 +138,11 @@ public class MinimalApiProvider implements LuckPerms {
         }
 
         @Override public @NonNull ImmutableContextSet getContext(@NonNull Object subject) { throw exception(); }
-        @Override public @NonNull Optional<ImmutableContextSet> lookupContext(@NonNull User user) { throw exception(); }
+        @Override public @NonNull Optional<ImmutableContextSet> getContext(@NonNull User user) { throw exception(); }
         @Override public @NonNull ImmutableContextSet getStaticContext() { throw exception(); }
         @Override public @NonNull QueryOptions getQueryOptions(@NonNull Object subject) { throw exception(); }
-        @Override public @NonNull Optional<QueryOptions> lookupQueryOptions(@NonNull User user) { throw exception(); }
+        @Override public @NonNull Optional<QueryOptions> getQueryOptions(@NonNull User user) { throw exception(); }
         @Override public @NonNull QueryOptions getStaticQueryOptions() { throw exception(); }
-        @Override public @NonNull QueryOptions formQueryOptions(@NonNull Object subject, @NonNull ImmutableContextSet contextSet) { throw exception(); }
-        @Override public @NonNull QueryOptions formQueryOptions(@NonNull ImmutableContextSet contextSet) { throw exception(); }
         @Override public void registerCalculator(@NonNull ContextCalculator<?> calculator) { throw exception(); }
         @Override public void unregisterCalculator(@NonNull ContextCalculator<?> calculator) { throw exception(); }
         @Override public void invalidateCache(@NonNull Object subject) { throw exception(); }

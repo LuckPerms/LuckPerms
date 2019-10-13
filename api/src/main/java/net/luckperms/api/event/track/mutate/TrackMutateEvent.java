@@ -52,7 +52,7 @@ public interface TrackMutateEvent extends LuckPermsEvent {
      * @return the data before the change
      */
     @Param(1)
-    @NonNull List<String> getDataBefore();
+    @NonNull List<String> getStateBefore();
 
     /**
      * Gets an immutable copy of the tracks data after the change
@@ -60,6 +60,6 @@ public interface TrackMutateEvent extends LuckPermsEvent {
      * @return the data after the change
      */
     @Param(2)
-    @NonNull List<String> getDataAfter();
+    @NonNull List<String> getStateAfter();
 
 }

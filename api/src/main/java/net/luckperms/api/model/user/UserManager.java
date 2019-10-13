@@ -152,11 +152,11 @@ public interface UserManager {
     /**
      * Gets a loaded user.
      *
-     * @param name the username of the user to get
+     * @param username the username of the user to get
      * @return a {@link User} object, if one matching the uuid is loaded, or null if not
      * @throws NullPointerException if the name is null
      */
-    @Nullable User getUser(@NonNull String name);
+    @Nullable User getUser(@NonNull String username);
 
     /**
      * Gets a set of all loaded users.

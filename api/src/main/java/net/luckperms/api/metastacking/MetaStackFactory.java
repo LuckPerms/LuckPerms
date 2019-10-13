@@ -56,19 +56,6 @@ public interface MetaStackFactory {
     /**
      * Creates a new {@link MetaStackDefinition} with the given properties.
      *
-     * @param elements     the elements to be included in the stack.
-     * @param startSpacer  the spacer to be included at the start of the stacks output
-     * @param middleSpacer the spacer to be included between stack elements
-     * @param endSpacer    the spacer to be included at the end of the stacks output
-     * @return the new stack definition instance
-     */
-    default @NonNull MetaStackDefinition createDefinition(@NonNull List<MetaStackElement> elements, @NonNull String startSpacer, @NonNull String middleSpacer, @NonNull String endSpacer) {
-        return createDefinition(elements, DuplicateRemovalFunction.RETAIN_ALL, startSpacer, middleSpacer, endSpacer);
-    }
-
-    /**
-     * Creates a new {@link MetaStackDefinition} with the given properties.
-     *
      * @param elements                 the elements to be included in the stack.
      * @param duplicateRemovalFunction the duplicate removal function
      * @param startSpacer              the spacer to be included at the start of the stacks output

@@ -48,7 +48,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 /**
@@ -126,16 +125,6 @@ public interface PermissionHolder {
      * @return the holders cached data.
      */
     @NonNull CachedDataManager getCachedData();
-
-    /**
-     * Refreshes and applies any changes to the cached holder data.
-     *
-     * <p>Calling this method is unnecessary in most cases. Cache updates are handled
-     * behind the scenes by the implementation.</p>
-     *
-     * @return the task future
-     */
-    @NonNull CompletableFuture<Void> refreshCachedData();
 
     /**
      * Gets the {@link Data} of a particular type.

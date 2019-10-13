@@ -25,10 +25,7 @@
 
 package me.lucko.luckperms.common.api.implementation;
 
-import com.google.common.collect.ImmutableSortedSet;
-
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 
 import net.luckperms.api.cacheddata.CachedDataManager;
 import net.luckperms.api.context.ContextSet;
@@ -46,15 +43,11 @@ import net.luckperms.api.query.QueryOptions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHolder {
@@ -86,11 +79,6 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
     @Override
     public @NonNull CachedDataManager getCachedData() {
         return this.handle.getCachedData();
-    }
-
-    @Override
-    public @NonNull CompletableFuture<Void> refreshCachedData() {
-        return CompletableFuture.runAsync(() -> this.handle.getCachedData().invalidate());
     }
 
     @Override
@@ -127,28 +115,12 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
 
     @Override
     public @NonNull List<Node> resolveInheritedNodes(@NonNull QueryOptions queryOptions) {
-        return this.handle.resolveInheritances(queryOptions);
+        return this.handle.resolveInheritedNodes(queryOptions);
     }
 
     @Override
     public @NonNull SortedSet<Node> resolveDistinctInheritedNodes(@NonNull QueryOptions queryOptions) {
-        List<Node> entries = this.handle.getAllEntries(queryOptions);
-
-        removeSamePermission(entries.iterator());
-        SortedSet<Node> ret = new TreeSet<>(NodeWithContextComparator.reverse());
-        ret.addAll(entries);
-
-        return ImmutableSortedSet.copyOfSorted(ret);
-    }
-
-    private static <T extends Node> void removeSamePermission(Iterator<T> it) {
-        Set<String> alreadyIn = new HashSet<>();
-        while (it.hasNext()) {
-            T next = it.next();
-            if (!alreadyIn.add(next.getKey())) {
-                it.remove();
-            }
-        }
+        return this.handle.resolveInheritedNodesSorted(queryOptions);
     }
 
     @Override

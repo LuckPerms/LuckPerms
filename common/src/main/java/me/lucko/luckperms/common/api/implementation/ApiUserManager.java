@@ -114,9 +114,9 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
     }
 
     @Override
-    public net.luckperms.api.model.user.User getUser(@NonNull String name) {
-        Objects.requireNonNull(name, "name");
-        return getDelegateFor(this.handle.getByUsername(name));
+    public net.luckperms.api.model.user.User getUser(@NonNull String username) {
+        Objects.requireNonNull(username, "name");
+        return getDelegateFor(this.handle.getByUsername(username));
     }
 
     @Override
