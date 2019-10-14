@@ -44,6 +44,7 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
+import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
@@ -162,7 +163,7 @@ public class ApplyEditsCommand extends SingleCommand {
         }
 
         Set<Node> before = new HashSet<>(holder.normalData().immutable().values());
-        Set<Node> after = new HashSet<>(WebEditor.deserializePermissions(data.getAsJsonArray("nodes")));
+        Set<Node> after = new HashSet<>(NodeJsonSerializer.deserializeNodes(data.getAsJsonArray("nodes")));
 
         Map.Entry<Set<Node>, Set<Node>> diff = diff(before, after);
         Set<Node> diffAdded = diff.getKey();

@@ -25,7 +25,10 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
+import com.google.gson.JsonObject;
+
 import me.lucko.luckperms.common.backup.Importer;
+import me.lucko.luckperms.common.backup.LegacyImporter;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -35,13 +38,17 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
+import me.lucko.luckperms.common.util.gson.GsonProvider;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.zip.GZIPInputStream;
 
 public class ImportCommand extends SingleCommand {
     private final AtomicBoolean running = new AtomicBoolean(false);
@@ -57,8 +64,13 @@ public class ImportCommand extends SingleCommand {
             return CommandResult.STATE_ERROR;
         }
 
+        String fileName = args.get(0);
+        if (!fileName.contains(".")) {
+            fileName += ".json.gz";
+        }
+
         Path dataDirectory = plugin.getBootstrap().getDataDirectory();
-        Path path = dataDirectory.resolve(args.get(0));
+        Path path = dataDirectory.resolve(fileName);
 
         if (!path.getParent().equals(dataDirectory) || path.getFileName().toString().equals("config.yml")) {
             Message.FILE_NOT_WITHIN_DIRECTORY.send(sender, path.toString());
@@ -66,40 +78,68 @@ public class ImportCommand extends SingleCommand {
         }
 
         if (!Files.exists(path)) {
-            Message.IMPORT_LOG_DOESNT_EXIST.send(sender, path.toString());
+            Message.IMPORT_FILE_DOESNT_EXIST.send(sender, path.toString());
             return CommandResult.INVALID_ARGS;
         }
 
         if (!Files.isReadable(path)) {
-            Message.IMPORT_LOG_NOT_READABLE.send(sender, path.toString());
+            Message.IMPORT_FILE_NOT_READABLE.send(sender, path.toString());
             return CommandResult.FAILURE;
         }
 
-        List<String> commands;
-
-        try {
-            commands = Files.readAllLines(path, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            e.printStackTrace();
-            Message.IMPORT_LOG_FAILURE.send(sender);
-            return CommandResult.FAILURE;
-        }
-
-        if (!this.running.compareAndSet(false, true)) {
-            Message.IMPORT_ALREADY_RUNNING.send(sender);
-            return CommandResult.STATE_ERROR;
-        }
-
-        Importer importer = new Importer(plugin.getCommandManager(), sender, commands);
-
-        // Run the importer in its own thread.
-        plugin.getBootstrap().getScheduler().executeAsync(() -> {
+        if (!fileName.endsWith(".json.gz")) {
+            // legacy
+            List<String> commands;
             try {
-                importer.run();
-            } finally {
-                this.running.set(false);
+                commands = Files.readAllLines(path, StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                e.printStackTrace();
+                Message.IMPORT_FILE_READ_FAILURE.send(sender);
+                return CommandResult.FAILURE;
             }
-        });
+
+            if (!this.running.compareAndSet(false, true)) {
+                Message.IMPORT_ALREADY_RUNNING.send(sender);
+                return CommandResult.STATE_ERROR;
+            }
+
+            LegacyImporter importer = new LegacyImporter(plugin.getCommandManager(), sender, commands);
+
+            // Run the importer in its own thread.
+            plugin.getBootstrap().getScheduler().executeAsync(() -> {
+                try {
+                    importer.run();
+                } finally {
+                    this.running.set(false);
+                }
+            });
+        } else {
+            // modern
+            JsonObject data;
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(path)), StandardCharsets.UTF_8))) {
+                data = GsonProvider.normal().fromJson(reader, JsonObject.class);;
+            } catch (IOException e) {
+                e.printStackTrace();
+                Message.IMPORT_FILE_READ_FAILURE.send(sender);
+                return CommandResult.FAILURE;
+            }
+
+            if (!this.running.compareAndSet(false, true)) {
+                Message.IMPORT_ALREADY_RUNNING.send(sender);
+                return CommandResult.STATE_ERROR;
+            }
+
+            Importer importer = new Importer(plugin, sender, data);
+
+            // Run the importer in its own thread.
+            plugin.getBootstrap().getScheduler().executeAsync(() -> {
+                try {
+                    importer.run();
+                } finally {
+                    this.running.set(false);
+                }
+            });
+        }
 
         return CommandResult.SUCCESS;
     }

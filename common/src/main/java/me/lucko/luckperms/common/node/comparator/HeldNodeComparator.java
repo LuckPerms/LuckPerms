@@ -29,14 +29,14 @@ import net.luckperms.api.node.HeldNode;
 
 import java.util.Comparator;
 
-public class HeldPermissionComparator<T extends Comparable<T>> implements Comparator<HeldNode<T>> {
+public class HeldNodeComparator<T extends Comparable<T>> implements Comparator<HeldNode<T>> {
 
     public static <T extends Comparable<T>> Comparator<? super HeldNode<T>> normal() {
-        return new HeldPermissionComparator<>();
+        return new HeldNodeComparator<>();
     }
 
     public static <T extends Comparable<T>> Comparator<? super HeldNode<T>> reverse() {
-        return HeldPermissionComparator.<T>normal().reversed();
+        return HeldNodeComparator.<T>normal().reversed();
     }
 
     @Override

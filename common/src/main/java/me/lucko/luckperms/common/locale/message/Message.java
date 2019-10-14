@@ -28,9 +28,9 @@ package me.lucko.luckperms.common.locale.message;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.TextComponent;
+import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -453,9 +453,9 @@ public enum Message {
     IMPORT_ALREADY_RUNNING("&cAnother import process is already running. Please wait for it to finish and try again.", true),
     EXPORT_ALREADY_RUNNING("&cAnother export process is already running. Please wait for it to finish and try again.", true),
     FILE_NOT_WITHIN_DIRECTORY("&cError: File &4{}&c must be a direct child of the data directory.", true),
-    IMPORT_LOG_DOESNT_EXIST("&cError: File &4{}&c does not exist.", true),
-    IMPORT_LOG_NOT_READABLE("&cError: File &4{}&c is not readable.", true),
-    IMPORT_LOG_FAILURE("&cAn unexpected error occured whilst reading from the log file.", true),
+    IMPORT_FILE_DOESNT_EXIST("&cError: File &4{}&c does not exist.", true),
+    IMPORT_FILE_NOT_READABLE("&cError: File &4{}&c is not readable.", true),
+    IMPORT_FILE_READ_FAILURE("&cAn unexpected error occured whilst reading from the import file.", true),
 
     IMPORT_PROGRESS("&b(Import) &b-> &f{}&f% complete &7- &b{}&f/&b{} &foperations complete with &c{} &ferrors.", true),
     IMPORT_PROGRESS_SIN("&b(Import) &b-> &f{}&f% complete &7- &b{}&f/&b{} &foperations complete with &c{} &ferror.", true),
@@ -482,8 +482,16 @@ public enum Message {
 
     Message(String message, boolean showPrefix) {
         // rewrite hardcoded placeholders according to their position
-        this.message = TextUtils.rewritePlaceholders(message);
+        this.message = rewritePlaceholders(message);
         this.showPrefix = showPrefix;
+    }
+
+    private static String rewritePlaceholders(String input) {
+        int i = 0;
+        while (input.contains("{}")) {
+            input = input.replaceFirst("\\{\\}", "{" + i++ + "}");
+        }
+        return input;
     }
 
     public String getMessage() {
@@ -517,7 +525,7 @@ public enum Message {
     }
 
     public TextComponent asComponent(@Nullable LocaleManager localeManager, Object... objects) {
-        return TextUtils.fromLegacy(format(localeManager, objects), CommandManager.AMPERSAND_CHAR);
+        return LegacyComponentSerializer.INSTANCE.deserialize(format(localeManager, objects), CommandManager.AMPERSAND_CHAR);
     }
 
     public void send(Sender sender, Object... objects) {

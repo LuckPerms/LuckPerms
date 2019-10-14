@@ -44,19 +44,19 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.HolderType;
-import me.lucko.luckperms.common.node.comparator.HeldPermissionComparator;
+import me.lucko.luckperms.common.node.comparator.HeldNodeComparator;
 import me.lucko.luckperms.common.node.factory.NodeCommandFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.Predicates;
-import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.ComponentBuilder;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
+import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.node.HeldNode;
 import net.luckperms.api.node.Node;
 
@@ -129,7 +129,7 @@ public class SearchCommand extends SingleCommand {
 
     private static <T extends Comparable<T>> void sendResult(Sender sender, List<HeldNode<T>> results, Function<T, String> lookupFunction, Message headerMessage, HolderType holderType, String label, int page, Comparison comparison) {
         results = new ArrayList<>(results);
-        results.sort(HeldPermissionComparator.normal());
+        results.sort(HeldNodeComparator.normal());
 
         int pageIndex = page - 1;
         List<List<HeldNode<T>>> pages = Iterators.divideIterable(results, 15);
@@ -156,7 +156,7 @@ public class SearchCommand extends SingleCommand {
             }
 
             String s = "&3> &b" + ent.getKey() + permission + "&7 - " + (ent.getValue().getNode().getValue() ? "&a" : "&c") + ent.getValue().getNode().getValue() + getNodeExpiryString(ent.getValue().getNode()) + MessageUtils.getAppendableNodeContextString(sender.getPlugin().getLocaleManager(), ent.getValue().getNode());
-            TextComponent message = TextUtils.fromLegacy(s, CommandManager.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), holderType, label, ent.getValue(), sender.getPlugin())).build();
+            TextComponent message = LegacyComponentSerializer.INSTANCE.deserialize(s, CommandManager.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), holderType, label, ent.getValue(), sender.getPlugin())).build();
             sender.sendMessage(message);
         }
     }
@@ -170,11 +170,8 @@ public class SearchCommand extends SingleCommand {
     }
 
     private static Consumer<ComponentBuilder<?, ?>> makeFancy(String holderName, HolderType holderType, String label, HeldNode<?> perm, LuckPermsPlugin plugin) {
-        HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
-                "&3> " + (perm.getNode().getValue() ? "&a" : "&c") + perm.getNode().getKey(),
-                " ",
-                "&7Click to remove this node from " + holderName
-        ), CommandManager.AMPERSAND_CHAR));
+        String[] strings = new String[]{"&3> " + (perm.getNode().getValue() ? "&a" : "&c") + perm.getNode().getKey(), " ", "&7Click to remove this node from " + holderName};
+        HoverEvent hoverEvent = HoverEvent.showText(LegacyComponentSerializer.INSTANCE.deserialize(String.join("\n", strings), CommandManager.AMPERSAND_CHAR));
 
         boolean explicitGlobalContext = !plugin.getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
         String command = "/" + label + " " + NodeCommandFactory.generateCommand(perm.getNode(), holderName, holderType, false, explicitGlobalContext);

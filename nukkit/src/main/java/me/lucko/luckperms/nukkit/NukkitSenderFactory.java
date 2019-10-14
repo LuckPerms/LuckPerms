@@ -28,9 +28,9 @@ package me.lucko.luckperms.nukkit;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
-import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.Component;
+import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.node.Tristate;
 
 import cn.nukkit.Player;
@@ -75,7 +75,7 @@ public class NukkitSenderFactory extends SenderFactory<CommandSender> {
     @Override
     protected void sendMessage(CommandSender sender, Component message) {
         // Fallback to legacy format
-        sendMessage(sender, TextUtils.toLegacy(message));
+        sendMessage(sender, LegacyComponentSerializer.INSTANCE.serialize(message));
     }
 
     @Override

@@ -29,10 +29,10 @@ import me.lucko.luckperms.bukkit.compat.CraftBukkitUtil;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
-import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.Component;
 import net.kyori.text.adapter.bukkit.TextAdapter;
+import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.node.Tristate;
 
 import org.bukkit.command.CommandSender;
@@ -82,7 +82,7 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
             TextAdapter.sendComponent(sender, message);
         } else {
             // Fallback to legacy format
-            sendMessage(sender, TextUtils.toLegacy(message));
+            sendMessage(sender, LegacyComponentSerializer.INSTANCE.serialize(message));
         }
     }
 

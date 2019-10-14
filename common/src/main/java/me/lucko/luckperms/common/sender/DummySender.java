@@ -26,9 +26,9 @@
 package me.lucko.luckperms.common.sender;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.Component;
+import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.node.Tristate;
 
 import java.util.UUID;
@@ -58,7 +58,7 @@ public abstract class DummySender implements Sender {
 
     @Override
     public void sendMessage(Component message) {
-        consumeMessage(TextUtils.toLegacy(message));
+        consumeMessage(LegacyComponentSerializer.INSTANCE.serialize(message));
     }
 
     @Override

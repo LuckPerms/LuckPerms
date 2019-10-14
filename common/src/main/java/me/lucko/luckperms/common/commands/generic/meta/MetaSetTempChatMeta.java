@@ -49,10 +49,10 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Predicates;
-import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
+import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.DataType;
 import net.luckperms.api.model.TemporaryDataMutateResult;
@@ -139,10 +139,7 @@ public class MetaSetTempChatMeta extends SharedSubCommand {
             duration = ret.getMergedNode().getExpiry().getEpochSecond();
 
             TextComponent.Builder builder = Message.ADD_TEMP_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
-            HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(
-                    "¥3Raw " + this.type.name().toLowerCase() + ": ¥r" + meta,
-                    '¥'
-            ));
+            HoverEvent event = HoverEvent.showText(LegacyComponentSerializer.INSTANCE.deserialize("¥3Raw " + this.type.name().toLowerCase() + ": ¥r" + meta, '¥'));
             builder.applyDeep(c -> c.hoverEvent(event));
             sender.sendMessage(builder.build());
 

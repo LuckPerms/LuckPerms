@@ -57,9 +57,9 @@ public class ExportCommand extends SingleCommand {
         }
 
         Path dataDirectory = plugin.getBootstrap().getDataDirectory();
-        Path path = dataDirectory.resolve(args.get(0));
+        Path path = dataDirectory.resolve(args.get(0) + ".json.gz");
 
-        if (!path.getParent().equals(dataDirectory) || path.getFileName().toString().equals("config.yml")) {
+        if (!path.getParent().equals(dataDirectory)) {
             Message.FILE_NOT_WITHIN_DIRECTORY.send(sender, path.toString());
             return CommandResult.INVALID_ARGS;
         }

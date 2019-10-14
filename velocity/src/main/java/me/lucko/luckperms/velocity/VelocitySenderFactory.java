@@ -31,10 +31,10 @@ import com.velocitypowered.api.proxy.Player;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
-import me.lucko.luckperms.common.util.TextUtils;
 import me.lucko.luckperms.velocity.service.CompatibilityUtil;
 
 import net.kyori.text.Component;
+import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.node.Tristate;
 
 import java.util.UUID;
@@ -62,7 +62,7 @@ public class VelocitySenderFactory extends SenderFactory<CommandSource> {
 
     @Override
     protected void sendMessage(CommandSource source, String s) {
-        sendMessage(source, TextUtils.fromLegacy(s));
+        sendMessage(source, LegacyComponentSerializer.INSTANCE.deserialize(s));
     }
 
     @Override
