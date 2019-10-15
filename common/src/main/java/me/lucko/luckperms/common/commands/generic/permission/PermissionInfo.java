@@ -46,12 +46,12 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.Predicates;
+import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.ComponentBuilder;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
 
@@ -119,7 +119,7 @@ public class PermissionInfo extends SharedSubCommand {
                 s += "\n&2-    expires in " + DurationFormatter.LONG.formatDateDiff(node.getExpiry().getEpochSecond());
             }
 
-            TextComponent message = LegacyComponentSerializer.INSTANCE.deserialize(s, CommandManager.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build();
+            TextComponent message = TextUtils.fromLegacy(s, CommandManager.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build();
             sender.sendMessage(message);
         }
 
@@ -137,8 +137,11 @@ public class PermissionInfo extends SharedSubCommand {
     };
 
     private static Consumer<ComponentBuilder<?, ?>> makeFancy(PermissionHolder holder, String label, Node node) {
-        String[] strings = new String[]{"¥3> " + (node.getValue() ? "¥a" : "¥c") + node.getKey(), " ", "¥7Click to remove this node from " + holder.getFormattedDisplayName()};
-        HoverEvent hoverEvent = HoverEvent.showText(LegacyComponentSerializer.INSTANCE.deserialize(String.join("\n", strings), '¥'));
+        HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
+                "¥3> " + (node.getValue() ? "¥a" : "¥c") + node.getKey(),
+                " ",
+                "¥7Click to remove this node from " + holder.getFormattedDisplayName()
+        ), '¥'));
 
         String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getFormattedDisplayName();
         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();

@@ -61,11 +61,11 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.ArrayList;
@@ -276,9 +276,16 @@ public class CommandManager {
                 .forEach(c -> {
                     String permission = c.getPermission().map(CommandPermission::getPermission).orElse("None");
 
-                    TextComponent component = LegacyComponentSerializer.INSTANCE.deserialize("&3> &a" + String.format(c.getUsage(), label), AMPERSAND_CHAR)
+                    TextComponent component = TextUtils.fromLegacy("&3> &a" + String.format(c.getUsage(), label), AMPERSAND_CHAR)
                             .toBuilder().applyDeep(comp -> {
-                                comp.hoverEvent(HoverEvent.showText(LegacyComponentSerializer.INSTANCE.deserialize(String.join("\n", "&bCommand: &2" + c.getName(), "&bDescription: &2" + c.getDescription(), "&bUsage: &2" + String.format(c.getUsage(), label), "&bPermission: &2" + permission, " ", "&7Click to auto-complete."), AMPERSAND_CHAR)));
+                                comp.hoverEvent(HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
+                                        "&bCommand: &2" + c.getName(),
+                                        "&bDescription: &2" + c.getDescription(),
+                                        "&bUsage: &2" + String.format(c.getUsage(), label),
+                                        "&bPermission: &2" + permission,
+                                        " ",
+                                        "&7Click to auto-complete."
+                                ), AMPERSAND_CHAR)));
                                 comp.clickEvent(ClickEvent.suggestCommand(String.format(c.getUsage(), label)));
                             }).build();
                     sender.sendMessage(component);

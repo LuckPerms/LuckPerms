@@ -43,12 +43,12 @@ import me.lucko.luckperms.common.node.factory.NodeCommandFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
+import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.ComponentBuilder;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
@@ -171,7 +171,11 @@ public class MetaInfo extends SharedSubCommand {
             }
         }
 
-        HoverEvent hoverEvent = HoverEvent.showText(LegacyComponentSerializer.INSTANCE.deserialize(String.join("\n", "¥3> ¥a" + node.getPriority() + " ¥7- ¥r" + node.getMetaValue(), " ", "¥7Click to remove this " + node.getMetaType().name().toLowerCase() + " from " + holder.getFormattedDisplayName()), '¥'));
+        HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
+                "¥3> ¥a" + node.getPriority() + " ¥7- ¥r" + node.getMetaValue(),
+                " ",
+                "¥7Click to remove this " + node.getMetaType().name().toLowerCase() + " from " + holder.getFormattedDisplayName()
+        ), '¥'));
 
         String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getFormattedDisplayName();
         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
@@ -194,7 +198,11 @@ public class MetaInfo extends SharedSubCommand {
             }
         }
 
-        HoverEvent hoverEvent = HoverEvent.showText(LegacyComponentSerializer.INSTANCE.deserialize(String.join("\n", "¥3> ¥r" + node.getMetaKey() + " ¥7- ¥r" + node.getMetaValue(), " ", "¥7Click to remove this meta pair from " + holder.getFormattedDisplayName()), '¥'));
+        HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
+                "¥3> ¥r" + node.getMetaKey() + " ¥7- ¥r" + node.getMetaValue(),
+                " ",
+                "¥7Click to remove this meta pair from " + holder.getFormattedDisplayName()
+        ), '¥'));
 
         String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getFormattedDisplayName();
         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();

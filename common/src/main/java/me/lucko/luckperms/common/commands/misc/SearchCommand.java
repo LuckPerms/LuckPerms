@@ -51,12 +51,12 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.Predicates;
+import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.ComponentBuilder;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.node.HeldNode;
 import net.luckperms.api.node.Node;
 
@@ -156,7 +156,7 @@ public class SearchCommand extends SingleCommand {
             }
 
             String s = "&3> &b" + ent.getKey() + permission + "&7 - " + (ent.getValue().getNode().getValue() ? "&a" : "&c") + ent.getValue().getNode().getValue() + getNodeExpiryString(ent.getValue().getNode()) + MessageUtils.getAppendableNodeContextString(sender.getPlugin().getLocaleManager(), ent.getValue().getNode());
-            TextComponent message = LegacyComponentSerializer.INSTANCE.deserialize(s, CommandManager.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), holderType, label, ent.getValue(), sender.getPlugin())).build();
+            TextComponent message = TextUtils.fromLegacy(s, CommandManager.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), holderType, label, ent.getValue(), sender.getPlugin())).build();
             sender.sendMessage(message);
         }
     }
@@ -170,8 +170,11 @@ public class SearchCommand extends SingleCommand {
     }
 
     private static Consumer<ComponentBuilder<?, ?>> makeFancy(String holderName, HolderType holderType, String label, HeldNode<?> perm, LuckPermsPlugin plugin) {
-        String[] strings = new String[]{"&3> " + (perm.getNode().getValue() ? "&a" : "&c") + perm.getNode().getKey(), " ", "&7Click to remove this node from " + holderName};
-        HoverEvent hoverEvent = HoverEvent.showText(LegacyComponentSerializer.INSTANCE.deserialize(String.join("\n", strings), CommandManager.AMPERSAND_CHAR));
+        HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
+                "&3> " + (perm.getNode().getValue() ? "&a" : "&c") + perm.getNode().getKey(),
+                " ",
+                "&7Click to remove this node from " + holderName
+        ), CommandManager.AMPERSAND_CHAR));
 
         boolean explicitGlobalContext = !plugin.getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
         String command = "/" + label + " " + NodeCommandFactory.generateCommand(perm.getNode(), holderName, holderType, false, explicitGlobalContext);

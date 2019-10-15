@@ -28,9 +28,9 @@ package me.lucko.luckperms.common.locale.message;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.TextComponent;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -482,16 +482,8 @@ public enum Message {
 
     Message(String message, boolean showPrefix) {
         // rewrite hardcoded placeholders according to their position
-        this.message = rewritePlaceholders(message);
+        this.message = TextUtils.rewritePlaceholders(message);
         this.showPrefix = showPrefix;
-    }
-
-    private static String rewritePlaceholders(String input) {
-        int i = 0;
-        while (input.contains("{}")) {
-            input = input.replaceFirst("\\{\\}", "{" + i++ + "}");
-        }
-        return input;
     }
 
     public String getMessage() {
@@ -525,7 +517,7 @@ public enum Message {
     }
 
     public TextComponent asComponent(@Nullable LocaleManager localeManager, Object... objects) {
-        return LegacyComponentSerializer.INSTANCE.deserialize(format(localeManager, objects), CommandManager.AMPERSAND_CHAR);
+        return TextUtils.fromLegacy(format(localeManager, objects), CommandManager.AMPERSAND_CHAR);
     }
 
     public void send(Sender sender, Object... objects) {

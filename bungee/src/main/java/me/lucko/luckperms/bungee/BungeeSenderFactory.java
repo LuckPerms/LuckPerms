@@ -29,10 +29,10 @@ import me.lucko.luckperms.bungee.event.TristateCheckEvent;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
+import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.Component;
 import net.kyori.text.adapter.bungeecord.TextAdapter;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.node.Tristate;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -62,7 +62,7 @@ public class BungeeSenderFactory extends SenderFactory<CommandSender> {
 
     @Override
     protected void sendMessage(CommandSender sender, String s) {
-        sendMessage(sender, LegacyComponentSerializer.INSTANCE.deserialize(s));
+        sendMessage(sender, TextUtils.fromLegacy(s));
     }
 
     @Override

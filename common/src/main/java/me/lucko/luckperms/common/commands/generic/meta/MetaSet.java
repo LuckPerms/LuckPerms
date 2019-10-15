@@ -44,10 +44,10 @@ import me.lucko.luckperms.common.node.types.Meta;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
+import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.DataType;
 import net.luckperms.api.node.Node;
@@ -90,7 +90,10 @@ public class MetaSet extends SharedSubCommand {
         holder.setNode(DataType.NORMAL, node, true);
 
         TextComponent.Builder builder = Message.SET_META_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
-        HoverEvent event = HoverEvent.showText(LegacyComponentSerializer.INSTANCE.deserialize(String.join("\n", "¥3Raw key: ¥r" + key, "¥3Raw value: ¥r" + value), '¥'));
+        HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(
+                TextUtils.joinNewline("¥3Raw key: ¥r" + key, "¥3Raw value: ¥r" + value),
+                '¥'
+        ));
         builder.applyDeep(c -> c.hoverEvent(event));
         sender.sendMessage(builder.build());
 

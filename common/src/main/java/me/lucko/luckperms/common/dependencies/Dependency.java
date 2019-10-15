@@ -65,22 +65,22 @@ public enum Dependency {
     TEXT(
             "net{}kyori",
             "text-api",
-            "3.0.0",
-            "/d7o/eZkZx/naJE+pMg1KqIzL8TWxWjA4yxjv8/10Cg=",
+            "3.0.2",
+            "seZnPElZhfba3XO8/LLUWQHE35kqVM02HpswEVcJqz0=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_SERIALIZER_GSON(
             "net{}kyori",
             "text-serializer-gson",
-            "3.0.0",
-            "zc1ePBBRCjSoNQiNqsBL+6TYRmaUPyEZtj1LhCtViv0=",
+            "3.0.2",
+            "8gJFpnqSHp762TWXn3x5ICLiKg2KgEwEA1FFyOtJ92Y=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_SERIALIZER_LEGACY(
             "net{}kyori",
             "text-serializer-legacy",
-            "3.0.0",
-            "Zns1sKvALAt3Sn0Px+vENv1XQ9y80E1cSzzDN46C9rQ=",
+            "3.0.2",
+            "ks8pZV6ZUHWtwD93Xynyg0KaAMs8CLa61Zb8CaLPsdM=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_ADAPTER_BUKKIT(

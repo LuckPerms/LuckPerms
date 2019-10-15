@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.StackTracePrinter;
+import me.lucko.luckperms.common.util.TextUtils;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
@@ -45,7 +46,6 @@ import me.lucko.luckperms.common.web.BytebinClient;
 
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.node.Tristate;
 import net.luckperms.api.query.QueryMode;
 
@@ -60,7 +60,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -233,7 +232,7 @@ public class VerboseListener {
         }
 
         // send the message
-        HoverEvent hoverEvent = HoverEvent.showText(LegacyComponentSerializer.INSTANCE.deserialize(hover.stream().collect(Collectors.joining("\n")), CommandManager.AMPERSAND_CHAR));
+        HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(hover.stream()), CommandManager.AMPERSAND_CHAR));
         TextComponent text = textComponent.toBuilder().applyDeep(comp -> comp.hoverEvent(hoverEvent)).build();
         this.notifiedSender.sendMessage(text);
     }

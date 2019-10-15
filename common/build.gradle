@@ -2,13 +2,13 @@ dependencies {
     compile project(':api')
 
     compile 'org.checkerframework:checker-qual:2.5.5'
-    compile('net.kyori:text-api:3.0.0') {
+    compile('net.kyori:text-api:3.0.2') {
         exclude(module: 'checker-qual')
     }
-    compile('net.kyori:text-serializer-legacy:3.0.0') {
+    compile('net.kyori:text-serializer-legacy:3.0.2') {
         exclude(module: 'text-api')
     }
-    compile('net.kyori:text-serializer-gson:3.0.0') {
+    compile('net.kyori:text-serializer-gson:3.0.2') {
         exclude(module: 'text-api')
         exclude(module: 'gson')
     }

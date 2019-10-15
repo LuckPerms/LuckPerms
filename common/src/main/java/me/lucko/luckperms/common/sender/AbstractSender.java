@@ -28,9 +28,9 @@ package me.lucko.luckperms.common.sender;
 import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.Component;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.node.Tristate;
 
 import java.lang.ref.WeakReference;
@@ -93,7 +93,7 @@ public final class AbstractSender<T> implements Sender {
     @Override
     public void sendMessage(Component message) {
         if (isConsole()) {
-            sendMessage(LegacyComponentSerializer.INSTANCE.serialize(message));
+            sendMessage(TextUtils.toLegacy(message));
             return;
         }
 
