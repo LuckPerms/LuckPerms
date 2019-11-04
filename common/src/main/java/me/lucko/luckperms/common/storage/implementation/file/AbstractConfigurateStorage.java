@@ -714,7 +714,12 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
             }
         }
 
-        if (permissionsSection.hasListChildren()) {
+        if (permissionsSection.hasListChildren() || this instanceof CombinedConfigurateStorage) {
+            // ensure for CombinedConfigurateStorage that there's at least *something* to save to the file
+            // even if it's just an empty list.
+            if (!permissionsSection.hasListChildren()) {
+                permissionsSection.setValue(Collections.emptyList());
+            }
             to.getNode("permissions").setValue(permissionsSection);
         }
         if (parentsSection.hasListChildren()) {

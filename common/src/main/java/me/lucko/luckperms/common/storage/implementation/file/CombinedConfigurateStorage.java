@@ -103,15 +103,13 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
             this.lock.lock();
             try {
                 if (this.node == null || reload) {
-                    recordChange();
-                    this.node = this.loader.load();
+                    reload();
                 }
 
                 action.accept(this.node);
 
                 if (save) {
-                    recordChange();
-                    this.loader.save(this.node);
+                    save();
                 }
             } finally {
                 this.lock.unlock();

@@ -35,11 +35,6 @@ public final class PermissionHolderIdentifier implements Identifier {
     private final String type;
     private final String name;
 
-    public PermissionHolderIdentifier(String type, String name) {
-        this.type = type;
-        this.name = name;
-    }
-
     public PermissionHolderIdentifier(HolderType type, String name) {
         this.type = type == HolderType.USER ? Identifier.USER_TYPE : Identifier.GROUP_TYPE;
         this.name = name;
