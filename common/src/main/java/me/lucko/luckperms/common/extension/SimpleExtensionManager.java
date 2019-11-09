@@ -42,8 +42,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -51,6 +49,8 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -67,13 +67,11 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
         for (LoadedExtension extension : this.extensions) {
             try {
                 extension.instance.unload();
-                if (extension.classLoader != null) {
-                    extension.classLoader.close();
-                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+        this.extensions.clear();
     }
 
     @Override
@@ -82,7 +80,7 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
             return;
         }
         this.plugin.getLogger().info("Loading extension: " + extension.getClass().getName());
-        this.extensions.add(new LoadedExtension(extension, null, null));
+        this.extensions.add(new LoadedExtension(extension, null));
         extension.load();
         this.plugin.getEventFactory().handleExtensionLoad(extension);
     }
@@ -117,16 +115,20 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
             throw new NoSuchFileException("No file at " + path);
         }
 
-        URLClassLoader classLoader = new URLClassLoader(new URL[]{path.toUri().toURL()}, getClass().getClassLoader());
         String className;
-
-        try (InputStream in = classLoader.getResourceAsStream("extension.json")) {
-            if (in == null) {
+        try (JarFile jar = new JarFile(path.toFile())) {
+            JarEntry extensionJarEntry = jar.getJarEntry("extension.json");
+            if (extensionJarEntry == null) {
                 throw new IllegalStateException("extension.json not present");
             }
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
-                JsonElement parsed = GsonProvider.parser().parse(reader);
-                className = parsed.getAsJsonObject().get("class").getAsString();
+            try (InputStream in = jar.getInputStream(extensionJarEntry)) {
+                if (in == null) {
+                    throw new IllegalStateException("extension.json not present");
+                }
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
+                    JsonElement parsed = GsonProvider.parser().parse(reader);
+                    className = parsed.getAsJsonObject().get("class").getAsString();
+                }
             }
         }
 
@@ -134,9 +136,11 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
             throw new IllegalArgumentException("class is null");
         }
 
+        this.plugin.getBootstrap().getPluginClassLoader().loadJar(path);
+
         Class<? extends Extension> extensionClass;
         try {
-            extensionClass = classLoader.loadClass(className).asSubclass(Extension.class);
+            extensionClass = Class.forName(className).asSubclass(Extension.class);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -165,7 +169,7 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
             }
         }
 
-        this.extensions.add(new LoadedExtension(extension, classLoader, path));
+        this.extensions.add(new LoadedExtension(extension, path));
         extension.load();
         this.plugin.getEventFactory().handleExtensionLoad(extension);
         return extension;
@@ -178,12 +182,10 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
 
     private static final class LoadedExtension {
         private final Extension instance;
-        private final URLClassLoader classLoader;
         private final Path path;
 
-        private LoadedExtension(Extension instance, URLClassLoader classLoader, Path path) {
+        private LoadedExtension(Extension instance, Path path) {
             this.instance = instance;
-            this.classLoader = classLoader;
             this.path = path;
         }
     }

@@ -86,7 +86,7 @@ public class MetaSet extends SharedSubCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        holder.removeIf(DataType.NORMAL, context, n -> n instanceof MetaNode && !n.hasExpiry() && ((MetaNode) n).getMetaKey().equalsIgnoreCase(key), null);
+        holder.removeIf(DataType.NORMAL, context, n -> n instanceof MetaNode && !n.hasExpiry() && ((MetaNode) n).getMetaKey().equalsIgnoreCase(key));
         holder.setNode(DataType.NORMAL, node, true);
 
         TextComponent.Builder builder = Message.SET_META_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();

@@ -478,7 +478,11 @@ public abstract class PermissionHolder {
         return DataMutateResult.SUCCESS;
     }
 
-    public boolean removeIf(DataType dataType, @Nullable ContextSet contextSet, Predicate<? super Node> predicate, @Nullable Runnable taskIfSuccess) {
+    public boolean removeIf(DataType dataType, @Nullable ContextSet contextSet, Predicate<? super Node> predicate) {
+        return removeIf(dataType, contextSet, predicate, false);
+    }
+
+    public boolean removeIf(DataType dataType, @Nullable ContextSet contextSet, Predicate<? super Node> predicate, boolean giveDefault) {
         NodeMap data = getData(dataType);
         ImmutableCollection<? extends Node> before = data.immutable().values();
 
@@ -492,8 +496,8 @@ public abstract class PermissionHolder {
             }
         }
 
-        if (taskIfSuccess != null) {
-            taskIfSuccess.run();
+        if (getType() == HolderType.USER && giveDefault) {
+            getPlugin().getUserManager().giveDefaultIfNeeded((User) this, false);
         }
 
         invalidateCache();
@@ -528,14 +532,6 @@ public abstract class PermissionHolder {
 
         this.plugin.getEventFactory().handleNodeClear(this, dataType, before, after);
         return true;
-    }
-
-    public boolean clearNormalParents(ContextSet contextSet, boolean giveDefault) {
-        return removeIf(DataType.NORMAL, contextSet, n -> n instanceof InheritanceNode, () -> {
-            if (this.getType() == HolderType.USER && giveDefault) {
-                this.plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
-            }
-        });
     }
 
     public OptionalInt getWeight() {

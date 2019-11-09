@@ -65,6 +65,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class PermissionHolderSubjectData implements LPSubjectData {
@@ -144,12 +145,8 @@ public class PermissionHolderSubjectData implements LPSubjectData {
 
     @Override
     public CompletableFuture<Boolean> clearPermissions() {
-        if (!this.holder.clearNodes(this.type, null, false)) {
+        if (!this.holder.clearNodes(this.type, null, true)) {
             return CompletableFuture.completedFuture(false);
-        }
-
-        if (this.holder.getType() == HolderType.USER) {
-            this.service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) this.holder), false);
         }
 
         return save(this.holder).thenApply(v -> true);
@@ -158,12 +155,8 @@ public class PermissionHolderSubjectData implements LPSubjectData {
     @Override
     public CompletableFuture<Boolean> clearPermissions(ImmutableContextSet contexts) {
         Objects.requireNonNull(contexts, "contexts");
-        if (!this.holder.clearNodes(this.type, contexts, false)) {
+        if (!this.holder.clearNodes(this.type, contexts, true)) {
             return CompletableFuture.completedFuture(false);
-        }
-
-        if (this.holder.getType() == HolderType.USER) {
-            this.service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) this.holder), false);
         }
 
         return save(this.holder).thenApply(v -> true);
@@ -233,22 +226,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
 
     @Override
     public CompletableFuture<Boolean> clearParents() {
-        boolean ret;
-        switch (this.type) {
-            case NORMAL:
-                ret = this.holder.clearNormalParents(null, true);
-                break;
-            case TRANSIENT:
-                ret = streamNodes()
-                        .filter(n -> n instanceof InheritanceNode)
-                        .peek(n -> this.holder.unsetNode(DataType.TRANSIENT, n))
-                        .findAny().isPresent();
-                break;
-            default:
-                throw new AssertionError();
-        }
-
-        if (!ret) {
+        if (!this.holder.removeIf(this.type, null, NodeType.INHERITANCE::matches, true)) {
             return CompletableFuture.completedFuture(false);
         }
 
@@ -258,23 +236,8 @@ public class PermissionHolderSubjectData implements LPSubjectData {
     @Override
     public CompletableFuture<Boolean> clearParents(ImmutableContextSet contexts) {
         Objects.requireNonNull(contexts, "contexts");
-        boolean ret;
-        switch (this.type) {
-            case NORMAL:
-                ret = this.holder.clearNormalParents(contexts, true);
-                break;
-            case TRANSIENT:
-                ret = streamNodes()
-                        .filter(n -> n instanceof InheritanceNode)
-                        .filter(n -> n.getContexts().equals(contexts))
-                        .peek(n -> this.holder.unsetNode(DataType.TRANSIENT, n))
-                        .findAny().isPresent();
-                break;
-            default:
-                throw new AssertionError();
-        }
 
-        if (!ret) {
+        if (!this.holder.removeIf(this.type, contexts, NodeType.INHERITANCE::matches, true)) {
             return CompletableFuture.completedFuture(false);
         }
 
@@ -343,10 +306,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
 
             // remove all prefixes/suffixes from the user
-            streamNodes()
-                    .filter(n -> type.nodeType().matches(n))
-                    .filter(n -> n.getContexts().equals(contexts))
-                    .forEach(n -> this.holder.unsetNode(this.type, n));
+            this.holder.removeIf(this.type, contexts, type.nodeType()::matches, false);
 
             MetaAccumulator metaAccumulator = this.holder.accumulateMeta(null, QueryOptions.defaultContextualOptions().toBuilder().context(contexts).build());
             metaAccumulator.complete();
@@ -357,11 +317,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             node = builder.withContext(contexts).build();
         } else {
             // standard remove
-            streamNodes()
-                    .filter(n -> n instanceof MetaNode && ((MetaNode) n).getMetaKey().equals(key))
-                    .filter(n -> n.getContexts().equals(contexts))
-                    .forEach(n -> this.holder.unsetNode(this.type, n));
-
+            this.holder.removeIf(this.type, contexts, NodeType.META.predicate(n -> n.getMetaKey().equals(key)), false);
             node = Meta.builder(key, value).withContext(contexts).build();
         }
 
@@ -374,18 +330,18 @@ public class PermissionHolderSubjectData implements LPSubjectData {
         Objects.requireNonNull(contexts, "contexts");
         Objects.requireNonNull(key, "key");
 
-        streamNodes()
-                .filter(n -> {
-                    if (key.equalsIgnoreCase(Prefix.NODE_KEY)) {
-                        return n instanceof PrefixNode;
-                    } else if (key.equalsIgnoreCase(Suffix.NODE_KEY)) {
-                        return n instanceof SuffixNode;
-                    } else {
-                        return n instanceof MetaNode && ((MetaNode) n).getMetaKey().equals(key);
-                    }
-                })
-                .filter(n -> n.getContexts().equals(contexts))
-                .forEach(n -> this.holder.unsetNode(this.type, n));
+        Predicate<? super Node> test;
+        if (key.equalsIgnoreCase(Prefix.NODE_KEY)) {
+            test = NodeType.PREFIX::matches;
+        } else if (key.equalsIgnoreCase(Suffix.NODE_KEY)) {
+            test = NodeType.SUFFIX::matches;
+        } else {
+            test = NodeType.META.predicate(mn -> mn.getMetaKey().equals(key));
+        }
+
+        if (!this.holder.removeIf(this.type, contexts, test, false)) {
+            return CompletableFuture.completedFuture(false);
+        }
 
         return save(this.holder).thenApply(v -> true);
     }
@@ -394,13 +350,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
     public CompletableFuture<Boolean> clearOptions(ImmutableContextSet contexts) {
         Objects.requireNonNull(contexts, "contexts");
 
-        boolean success = streamNodes()
-                .filter(NodeType.META_OR_CHAT_META::matches)
-                .filter(n -> n.getContexts().equals(contexts))
-                .peek(n -> this.holder.unsetNode(this.type, n))
-                .findAny().isPresent();
-
-        if (!success) {
+        if (!this.holder.removeIf(this.type, contexts, NodeType.META_OR_CHAT_META::matches, false)) {
             return CompletableFuture.completedFuture(false);
         }
 
@@ -409,12 +359,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
 
     @Override
     public CompletableFuture<Boolean> clearOptions() {
-        boolean success = streamNodes()
-                .filter(NodeType.META_OR_CHAT_META::matches)
-                .peek(n -> this.holder.unsetNode(this.type, n))
-                .findAny().isPresent();
-
-        if (!success) {
+        if (!this.holder.removeIf(this.type, null, NodeType.META_OR_CHAT_META::matches, false)) {
             return CompletableFuture.completedFuture(false);
         }
 

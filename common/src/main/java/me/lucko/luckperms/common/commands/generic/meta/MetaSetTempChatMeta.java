@@ -117,7 +117,7 @@ public class MetaSetTempChatMeta extends SharedSubCommand {
         }
 
         // remove all other prefixes/suffixes set in these contexts
-        holder.removeIf(DataType.NORMAL, context, node -> this.type.nodeType().matches(node), null);
+        holder.removeIf(DataType.NORMAL, context, node -> this.type.nodeType().matches(node));
 
         // determine the priority to set at
         if (priority == Integer.MIN_VALUE) {

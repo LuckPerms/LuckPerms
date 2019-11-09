@@ -73,9 +73,9 @@ public class PermissionClear extends SharedSubCommand {
         }
 
         if (context.isEmpty()) {
-            holder.removeIf(DataType.NORMAL, null, node -> node instanceof PermissionNode, null);
+            holder.removeIf(DataType.NORMAL, null, node -> node instanceof PermissionNode);
         } else {
-            holder.removeIf(DataType.NORMAL, context, node -> node instanceof PermissionNode, null);
+            holder.removeIf(DataType.NORMAL, context, node -> node instanceof PermissionNode);
         }
 
         int changed = before - holder.normalData().immutable().size();

@@ -31,11 +31,11 @@ import net.luckperms.api.node.Node;
  * Controls how the implementation should behave when new temporary nodes are set
  * that would otherwise conflict with existing entries.
  *
- * <p>The default behaviour of {@link PermissionHolder.Data#addNode(Node)} is
+ * <p>The default behaviour of {@link PermissionHolder.Data#add(Node)} is
  * to return a result of {@link DataMutateResult#ALREADY_HAS} when an equivalent
  * node is found. This can be replicated using {@link #FAIL_WITH_ALREADY_HAS}.</p>
  *
- * <p>However, the {@link PermissionHolder.Data#addNode(Node, TemporaryMergeBehaviour)}
+ * <p>However, the {@link PermissionHolder.Data#add(Node, TemporaryMergeBehaviour)}
  * method allows this behaviour to be customized for temporary permissions.</p>
  */
 public enum TemporaryMergeBehaviour {

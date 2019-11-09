@@ -50,6 +50,7 @@ import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.DataType;
+import net.luckperms.api.node.NodeType;
 
 import java.util.List;
 
@@ -81,7 +82,7 @@ public class ParentSet extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        holder.clearNormalParents(context, false);
+        holder.removeIf(DataType.NORMAL, context, NodeType.INHERITANCE::matches, false);
         holder.setNode(DataType.NORMAL, Inheritance.builder(group.getName()).withContext(context).build(), true);
         if (holder.getType() == HolderType.USER) {
             ((User) holder).getPrimaryGroup().setStoredValue(group.getName());

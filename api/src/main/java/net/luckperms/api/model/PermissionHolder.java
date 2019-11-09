@@ -35,9 +35,6 @@ import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.node.Tristate;
-import net.luckperms.api.node.types.MetaNode;
-import net.luckperms.api.node.types.PrefixNode;
-import net.luckperms.api.node.types.SuffixNode;
 import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -159,232 +156,105 @@ public interface PermissionHolder {
      */
     @NonNull Data transientData();
 
+    /**
+     * Encapsulates a store of data ({@link Node}s) within a {@link PermissionHolder}.
+     *
+     * <p>The effect of any mutate operation will not persist in storage unless changes are
+     * explicitly saved. If changes are not saved, the effect will only be observed until the next
+     * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
+     * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
+     * using {@link GroupManager#saveGroup(Group)}.</p>
+     *
+     * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
+     * the backing data from the storage if you haven't done so already, to avoid overwriting changes
+     * made already. This can be done via {@link UserManager#loadUser(UUID)} or
+     * {@link GroupManager#loadGroup(String)} respectively.</p>
+     */
     interface Data {
 
         /**
-         * Gets the backing map containing every permission this holder has.
+         * Gets a map of the {@link Node}s contained within this instance,
+         * mapped to their defined {@link Node#getContexts() context}.
          *
-         * <p>This method <b>does not</b> resolve inheritance rules, and returns a
-         * view of what's 'in the file'.</p>
-         *
-         * @return the holders own nodes
+         * @return a map of nodes
          */
-        @NonNull Map<ImmutableContextSet, Collection<Node>> getNodes();
+        @NonNull Map<ImmutableContextSet, Collection<Node>> toMap();
 
         /**
-         * Gets a flattened set of {@link Node}s the holder has.
+         * Gets a flattened set of {@link Node}s contained within this instance.
          *
          * <p>Effectively combines the value collections of the map returned by
-         * {@link #getNodes()}.</p>
+         * {@link #toMap()}.</p>
          *
          * @return a flattened set of the holders own nodes
          */
-        @NonNull Set<Node> getFlattenedNodes();
+        @NonNull Set<Node> toSet();
 
         /**
-         * Checks to see if the object has a certain permission.
+         * Gets if this instance contains a given {@link Node}.
+         *
+         * <p>Returns {@link Tristate#UNDEFINED} if the instance does not contain the node,
+         * and the {@link Node#getValue() assigned value} of the node as a {@link Tristate}
+         * if it is present.</p>
          *
          * @param node              the node to check for
          * @param equalityPredicate how to determine if a node matches
-         * @return a Tristate for the holders permission status for the node
+         * @return a Tristate relating to the assigned state of the node
          * @throws NullPointerException if the node is null
          */
-        @NonNull Tristate containsNode(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate);
+        @NonNull Tristate contains(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate);
 
         /**
-         * Sets a permission node for the permission holder.
+         * Adds a node.
          *
-         * <p>Although this method is named setPermission, it can be used for all node types.</p>
-         *
-         * <p>The effect of this mutate operation will not persist in storage unless changes are
-         * explicitly saved. If changes are not saved, the effect will only be observed until the next
-         * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
-         * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
-         * using {@link GroupManager#saveGroup(Group)}.</p>
-         *
-         * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
-         * the backing data from the storage if you haven't done so already, to avoid overwriting changes
-         * made already. This can be done via {@link UserManager#loadUser(UUID)} or
-         * {@link GroupManager#loadGroup(String)} respectively.</p>
-         *
-         * @param node The node to be set
+         * @param node the node to be add
          * @return the result of the operation
-         * @throws NullPointerException if the node is null
          */
-        @NonNull DataMutateResult addNode(@NonNull Node node);
+        @NonNull DataMutateResult add(@NonNull Node node);
 
         /**
-         * Sets a permission node for the permission holder.
+         * Adds a node.
          *
-         * <p>Although this method is named setPermission, it can be used for all node types.</p>
-         *
-         * <p>The effect of this mutate operation will not persist in storage unless changes are
-         * explicitly saved. If changes are not saved, the effect will only be observed until the next
-         * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
-         * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
-         * using {@link GroupManager#saveGroup(Group)}.</p>
-         *
-         * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
-         * the backing data from the storage if you haven't done so already, to avoid overwriting changes
-         * made already. This can be done via {@link UserManager#loadUser(UUID)} or
-         * {@link GroupManager#loadGroup(String)} respectively.</p>
-         *
-         * @param node                    The node to be set
-         * @param temporaryMergeBehaviour The behaviour used to merge temporary permission entries
+         * @param node the node to add
+         * @param temporaryMergeBehaviour the behaviour used to merge temporary permission entries
          * @return the result of the operation
-         * @throws NullPointerException if the node is null
          */
-        @NonNull TemporaryDataMutateResult addNode(@NonNull Node node, @NonNull TemporaryMergeBehaviour temporaryMergeBehaviour);
+        @NonNull TemporaryDataMutateResult add(@NonNull Node node, @NonNull TemporaryMergeBehaviour temporaryMergeBehaviour);
 
         /**
-         * Unsets a permission for the permission holder.
+         * Removes a node.
          *
-         * <p>Although this method is named unsetPermission, it can be used for all node types.</p>
-         *
-         * <p>The effect of this mutate operation will not persist in storage unless changes are
-         * explicitly saved. If changes are not saved, the effect will only be observed until the next
-         * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
-         * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
-         * using {@link GroupManager#saveGroup(Group)}.</p>
-         *
-         * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
-         * the backing data from the storage if you haven't done so already, to avoid overwriting changes
-         * made already. This can be done via {@link UserManager#loadUser(UUID)} or
-         * {@link GroupManager#loadGroup(String)} respectively.</p>
-         *
-         * @param node The node to be unset
+         * @param node the node to remove
          * @return the result of the operation
-         * @throws NullPointerException if the node is null
          */
-        @NonNull DataMutateResult removeNode(@NonNull Node node);
+        @NonNull DataMutateResult remove(@NonNull Node node);
 
         /**
-         * Clears any nodes from the holder which pass the predicate.
-         *
-         * <p>This method only targets enduring data.</p>
-         *
-         * <p>The effect of this mutate operation will not persist in storage unless changes are
-         * explicitly saved. If changes are not saved, the effect will only be observed until the next
-         * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
-         * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
-         * using {@link GroupManager#saveGroup(Group)}.</p>
-         *
-         * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
-         * the backing data from the storage if you haven't done so already, to avoid overwriting changes
-         * made already. This can be done via {@link UserManager#loadUser(UUID)} or
-         * {@link GroupManager#loadGroup(String)} respectively.</p>
+         * Clears all nodes.
+         */
+        void clear();
+
+        /**
+         * Clears any nodes which pass the predicate.
          *
          * @param test the predicate to test for nodes which should be removed
          */
-        void clearMatching(@NonNull Predicate<? super Node> test);
+        void clear(@NonNull Predicate<? super Node> test);
 
         /**
-         * Clears all nodes held by the permission holder.
-         *
-         * <p>The effect of this mutate operation will not persist in storage unless changes are
-         * explicitly saved. If changes are not saved, the effect will only be observed until the next
-         * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
-         * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
-         * using {@link GroupManager#saveGroup(Group)}.</p>
-         *
-         * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
-         * the backing data from the storage if you haven't done so already, to avoid overwriting changes
-         * made already. This can be done via {@link UserManager#loadUser(UUID)} or
-         * {@link GroupManager#loadGroup(String)} respectively.</p>
-         */
-        void clearNodes();
-
-        /**
-         * Clears all nodes held by the permission holder in a specific context.
-         *
-         * <p>The effect of this mutate operation will not persist in storage unless changes are
-         * explicitly saved. If changes are not saved, the effect will only be observed until the next
-         * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
-         * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
-         * using {@link GroupManager#saveGroup(Group)}.</p>
-         *
-         * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
-         * the backing data from the storage if you haven't done so already, to avoid overwriting changes
-         * made already. This can be done via {@link UserManager#loadUser(UUID)} or
-         * {@link GroupManager#loadGroup(String)} respectively.</p>
+         * Clears all nodes in a specific context.
          *
          * @param contextSet the contexts to filter by
          */
-        void clearNodes(@NonNull ContextSet contextSet);
+        void clear(@NonNull ContextSet contextSet);
 
         /**
-         * Clears all parent groups.
-         *
-         * <p>The effect of this mutate operation will not persist in storage unless changes are
-         * explicitly saved. If changes are not saved, the effect will only be observed until the next
-         * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
-         * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
-         * using {@link GroupManager#saveGroup(Group)}.</p>
-         *
-         * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
-         * the backing data from the storage if you haven't done so already, to avoid overwriting changes
-         * made already. This can be done via {@link UserManager#loadUser(UUID)} or
-         * {@link GroupManager#loadGroup(String)} respectively.</p>
-         */
-        void clearParents();
-
-        /**
-         * Clears all parent groups in a specific context.
-         *
-         * <p>The effect of this mutate operation will not persist in storage unless changes are
-         * explicitly saved. If changes are not saved, the effect will only be observed until the next
-         * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
-         * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
-         * using {@link GroupManager#saveGroup(Group)}.</p>
-         *
-         * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
-         * the backing data from the storage if you haven't done so already, to avoid overwriting changes
-         * made already. This can be done via {@link UserManager#loadUser(UUID)} or
-         * {@link GroupManager#loadGroup(String)} respectively.</p>
+         * Clears all nodes in a specific context which pass the predicate.
          *
          * @param contextSet the contexts to filter by
+         * @param test the predicate to test for nodes which should be removed
          */
-        void clearParents(@NonNull ContextSet contextSet);
-
-        /**
-         * Clears all meta held by the permission holder.
-         *
-         * <p>Meta nodes in this case, are any nodes which have a {@link MetaNode}, {@link PrefixNode}
-         * or {@link SuffixNode} type.</p>
-         *
-         * <p>The effect of this mutate operation will not persist in storage unless changes are
-         * explicitly saved. If changes are not saved, the effect will only be observed until the next
-         * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
-         * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
-         * using {@link GroupManager#saveGroup(Group)}.</p>
-         *
-         * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
-         * the backing data from the storage if you haven't done so already, to avoid overwriting changes
-         * made already. This can be done via {@link UserManager#loadUser(UUID)} or
-         * {@link GroupManager#loadGroup(String)} respectively.</p>
-         */
-        void clearMeta();
-
-        /**
-         * Clears all meta held by the permission holder in a specific context.
-         *
-         * <p>Meta nodes in this case, are any nodes which have a {@link MetaNode}, {@link PrefixNode}
-         * or {@link SuffixNode} type.</p>
-         *
-         * <p>The effect of this mutate operation will not persist in storage unless changes are
-         * explicitly saved. If changes are not saved, the effect will only be observed until the next
-         * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
-         * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
-         * using {@link GroupManager#saveGroup(Group)}.</p>
-         *
-         * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
-         * the backing data from the storage if you haven't done so already, to avoid overwriting changes
-         * made already. This can be done via {@link UserManager#loadUser(UUID)} or
-         * {@link GroupManager#loadGroup(String)} respectively.</p>
-         *
-         * @param contextSet the contexts to filter by
-         */
-        void clearMeta(@NonNull ContextSet contextSet);
+        void clear(@NonNull ContextSet contextSet, @NonNull Predicate<? super Node> test);
 
     }
 

@@ -92,7 +92,7 @@ public class MetaRemoveTempChatMeta extends SharedSubCommand {
             holder.removeIf(DataType.NORMAL, null, n -> this.type.nodeType().matches(n) &&
                     this.type.nodeType().cast(n).getPriority() == priority &&
                     n.hasExpiry() &&
-                    n.getContexts().equals(context), null);
+                    n.getContexts().equals(context));
             Message.BULK_REMOVE_TEMP_CHATMETA_SUCCESS.send(sender, holder.getFormattedDisplayName(), this.type.name().toLowerCase(), priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             LoggedAction.build().source(sender).target(holder)

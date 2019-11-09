@@ -43,7 +43,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.model.DataType;
-import net.luckperms.api.node.types.WeightNode;
+import net.luckperms.api.node.NodeType;
 
 import java.util.List;
 
@@ -61,7 +61,7 @@ public class GroupSetWeight extends SubCommand<Group> {
 
         int weight = ArgumentParser.parsePriority(0, args);
 
-        group.removeIf(DataType.NORMAL, null, n -> n instanceof WeightNode, null);
+        group.removeIf(DataType.NORMAL, null, NodeType.WEIGHT::matches);
         group.setNode(DataType.NORMAL, Weight.builder(weight).build(), true);
 
         Message.GROUP_SET_WEIGHT.send(sender, weight, group.getFormattedDisplayName());

@@ -45,6 +45,8 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.model.DataType;
+import net.luckperms.api.node.NodeType;
 
 import java.util.List;
 
@@ -70,9 +72,9 @@ public class ParentClear extends SharedSubCommand {
         }
 
         if (context.isEmpty()) {
-            holder.clearNormalParents(null, true);
+            holder.removeIf(DataType.NORMAL, null, NodeType.INHERITANCE::matches, true);
         } else {
-            holder.clearNormalParents(context, true);
+            holder.removeIf(DataType.NORMAL, context, NodeType.INHERITANCE::matches, true);
         }
 
         int changed = before - holder.normalData().immutable().size();

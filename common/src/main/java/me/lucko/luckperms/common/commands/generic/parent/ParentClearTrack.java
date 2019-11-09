@@ -94,9 +94,9 @@ public class ParentClearTrack extends SharedSubCommand {
         }
 
         if (context.isEmpty()) {
-            holder.removeIf(DataType.NORMAL, null, NodeType.INHERITANCE.predicate(n -> track.containsGroup(n.getGroupName())), null);
+            holder.removeIf(DataType.NORMAL, null, NodeType.INHERITANCE.predicate(n -> track.containsGroup(n.getGroupName())));
         } else {
-            holder.removeIf(DataType.NORMAL, null, NodeType.INHERITANCE.predicate(n -> n.getContexts().equals(context) && track.containsGroup(n.getGroupName())), null);
+            holder.removeIf(DataType.NORMAL, null, NodeType.INHERITANCE.predicate(n -> n.getContexts().equals(context) && track.containsGroup(n.getGroupName())));
         }
 
         if (holder.getType() == HolderType.USER) {

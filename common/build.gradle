@@ -18,9 +18,9 @@ dependencies {
     }
     compile 'com.google.code.gson:gson:2.7'
     compile 'com.google.guava:guava:19.0'
-    compile 'com.github.ben-manes.caffeine:caffeine:2.7.0'
-    compile 'com.squareup.okhttp3:okhttp:3.14.1'
-    compile 'com.squareup.okio:okio:1.17.3'
+    compile 'com.github.ben-manes.caffeine:caffeine:2.8.0'
+    compile 'com.squareup.okhttp3:okhttp:4.2.2'
+    compile 'com.squareup.okio:okio:2.2.2'
     compile('me.lucko.configurate:configurate-core:3.5') {
         exclude(module: 'guava')
     }
@@ -34,8 +34,8 @@ dependencies {
     compile('me.lucko.configurate:configurate-toml:3.5') {
         exclude(module: 'toml4j')
     }
-    compile 'com.zaxxer:HikariCP:3.3.1'
+    compile 'com.zaxxer:HikariCP:3.4.1'
     compile 'redis.clients:jedis:2.10.2'
-    compile 'org.mongodb:mongo-java-driver:3.10.1'
+    compile 'org.mongodb:mongo-java-driver:3.11.1'
     compile 'org.yaml:snakeyaml:1.23'
 }

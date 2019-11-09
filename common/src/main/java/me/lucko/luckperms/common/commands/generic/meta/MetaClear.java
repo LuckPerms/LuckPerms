@@ -101,9 +101,9 @@ public class MetaClear extends SharedSubCommand {
         }
 
         if (context.isEmpty()) {
-            holder.removeIf(DataType.NORMAL, null, type::matches, null);
+            holder.removeIf(DataType.NORMAL, null, type::matches);
         } else {
-            holder.removeIf(DataType.NORMAL, context, type::matches, null);
+            holder.removeIf(DataType.NORMAL, context, type::matches);
         }
 
         int changed = before - holder.normalData().immutable().size();

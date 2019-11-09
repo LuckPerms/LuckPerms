@@ -266,7 +266,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         }
 
         // remove all prefixes/suffixes directly set on the user/group
-        holder.removeIf(DataType.NORMAL, null, node -> type.nodeType().matches(node), null);
+        holder.removeIf(DataType.NORMAL, null, node -> type.nodeType().matches(node));
 
         if (value == null) {
             this.vaultPermission.holderSave(holder);
@@ -292,7 +292,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
             logMsg("#setMeta: %s - %s - %s - %s", holder.getPlainDisplayName(), key, value, world);
         }
 
-        holder.removeIf(DataType.NORMAL, null, n -> n instanceof MetaNode && ((MetaNode) n).getMetaKey().equals(key), null);
+        holder.removeIf(DataType.NORMAL, null, n -> n instanceof MetaNode && ((MetaNode) n).getMetaKey().equals(key));
 
         if (value == null) {
             this.vaultPermission.holderSave(holder);
