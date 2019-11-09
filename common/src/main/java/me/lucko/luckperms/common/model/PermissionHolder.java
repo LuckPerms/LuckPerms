@@ -478,10 +478,6 @@ public abstract class PermissionHolder {
         return DataMutateResult.SUCCESS;
     }
 
-    public boolean removeIf(DataType dataType, @Nullable ContextSet contextSet, Predicate<? super Node> predicate) {
-        return removeIf(dataType, contextSet, predicate, false);
-    }
-
     public boolean removeIf(DataType dataType, @Nullable ContextSet contextSet, Predicate<? super Node> predicate, boolean giveDefault) {
         NodeMap data = getData(dataType);
         ImmutableCollection<? extends Node> before = data.immutable().values();

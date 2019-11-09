@@ -46,7 +46,7 @@ import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.DataType;
-import net.luckperms.api.node.types.PermissionNode;
+import net.luckperms.api.node.NodeType;
 
 import java.util.List;
 
@@ -72,11 +72,7 @@ public class PermissionClear extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        if (context.isEmpty()) {
-            holder.removeIf(DataType.NORMAL, null, node -> node instanceof PermissionNode);
-        } else {
-            holder.removeIf(DataType.NORMAL, context, node -> node instanceof PermissionNode);
-        }
+        holder.removeIf(DataType.NORMAL, context.isEmpty() ? null : context, NodeType.PERMISSION::matches, false);
 
         int changed = before - holder.normalData().immutable().size();
         if (changed == 1) {

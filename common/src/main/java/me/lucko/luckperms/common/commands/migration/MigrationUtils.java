@@ -57,7 +57,7 @@ public final class MigrationUtils {
     }
 
     public static void setGroupWeight(Group group, int weight) {
-        group.removeIf(DataType.NORMAL, null, NodeType.WEIGHT::matches);
+        group.removeIf(DataType.NORMAL, null, NodeType.WEIGHT::matches, false);
         group.setNode(DataType.NORMAL, Weight.builder(weight).build(), true);
     }
 

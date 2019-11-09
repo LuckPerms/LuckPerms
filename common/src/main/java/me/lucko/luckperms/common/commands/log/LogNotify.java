@@ -79,7 +79,7 @@ public class LogNotify extends SubCommand<Log> {
             user.setNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(IGNORE_NODE).build(), true);
         } else {
             // remove the perm
-            user.removeIf(DataType.NORMAL, ImmutableContextSetImpl.EMPTY, n -> n.getKey().equalsIgnoreCase(IGNORE_NODE));
+            user.removeIf(DataType.NORMAL, ImmutableContextSetImpl.EMPTY, n -> n.getKey().equalsIgnoreCase(IGNORE_NODE), false);
         }
 
         plugin.getStorage().saveUser(user).join();

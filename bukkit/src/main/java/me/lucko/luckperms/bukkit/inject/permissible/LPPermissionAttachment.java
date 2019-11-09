@@ -201,13 +201,13 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
         // remove transient permissions from the holder which were added by this attachment & equal the permission
         User user = this.permissible.getUser();
-        user.removeIf(DataType.TRANSIENT, null, n -> n.getMetadata(TRANSIENT_SOURCE_KEY).orElse(null) == this && n.getKey().equals(name));
+        user.removeIf(DataType.TRANSIENT, null, n -> n.getMetadata(TRANSIENT_SOURCE_KEY).orElse(null) == this && n.getKey().equals(name), false);
     }
 
     private void clearInternal() {
         // remove all transient permissions added by this attachment
         User user = this.permissible.getUser();
-        user.removeIf(DataType.TRANSIENT, null, n -> n.getMetadata(TRANSIENT_SOURCE_KEY).orElse(null) == this);
+        user.removeIf(DataType.TRANSIENT, null, n -> n.getMetadata(TRANSIENT_SOURCE_KEY).orElse(null) == this, false);
     }
 
     @Override

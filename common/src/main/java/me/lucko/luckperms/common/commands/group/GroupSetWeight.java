@@ -61,7 +61,7 @@ public class GroupSetWeight extends SubCommand<Group> {
 
         int weight = ArgumentParser.parsePriority(0, args);
 
-        group.removeIf(DataType.NORMAL, null, NodeType.WEIGHT::matches);
+        group.removeIf(DataType.NORMAL, null, NodeType.WEIGHT::matches, false);
         group.setNode(DataType.NORMAL, Weight.builder(weight).build(), true);
 
         Message.GROUP_SET_WEIGHT.send(sender, weight, group.getFormattedDisplayName());

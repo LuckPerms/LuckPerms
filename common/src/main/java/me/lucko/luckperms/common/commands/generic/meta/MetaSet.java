@@ -52,7 +52,7 @@ import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
-import net.luckperms.api.node.types.MetaNode;
+import net.luckperms.api.node.NodeType;
 
 import java.util.List;
 
@@ -86,7 +86,7 @@ public class MetaSet extends SharedSubCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        holder.removeIf(DataType.NORMAL, context, n -> n instanceof MetaNode && !n.hasExpiry() && ((MetaNode) n).getMetaKey().equalsIgnoreCase(key));
+        holder.removeIf(DataType.NORMAL, context, NodeType.META.predicate(n -> !n.hasExpiry() && n.getMetaKey().equalsIgnoreCase(key)), false);
         holder.setNode(DataType.NORMAL, node, true);
 
         TextComponent.Builder builder = Message.SET_META_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();

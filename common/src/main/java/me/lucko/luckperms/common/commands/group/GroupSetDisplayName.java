@@ -90,7 +90,7 @@ public class GroupSetDisplayName extends SubCommand<Group> {
             return CommandResult.STATE_ERROR;
         }
 
-        group.removeIf(DataType.NORMAL, context, n -> n instanceof DisplayNameNode);
+        group.removeIf(DataType.NORMAL, context, NodeType.DISPLAY_NAME::matches, false);
 
         if (name.equals(group.getName())) {
             Message.GROUP_SET_DISPLAY_NAME_REMOVED.send(sender, group.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));

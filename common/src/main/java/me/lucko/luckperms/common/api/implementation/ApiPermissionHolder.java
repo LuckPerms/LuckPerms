@@ -52,13 +52,13 @@ import java.util.function.Predicate;
 public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHolder {
     private final PermissionHolder handle;
 
-    private final DataImpl normalData;
-    private final DataImpl transientData;
+    private final NodeMapImpl normalData;
+    private final NodeMapImpl transientData;
 
     ApiPermissionHolder(PermissionHolder handle) {
         this.handle = Objects.requireNonNull(handle, "handle");
-        this.normalData = new DataImpl(DataType.NORMAL);
-        this.transientData = new DataImpl(DataType.TRANSIENT);
+        this.normalData = new NodeMapImpl(DataType.NORMAL);
+        this.transientData = new NodeMapImpl(DataType.TRANSIENT);
     }
 
     PermissionHolder getHandle() {
@@ -81,7 +81,7 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
     }
 
     @Override
-    public Data getData(@NonNull DataType dataType) {
+    public NodeMap getData(@NonNull DataType dataType) {
         switch (dataType) {
             case NORMAL:
                 return this.normalData;
@@ -93,12 +93,12 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
     }
 
     @Override
-    public @NonNull Data data() {
+    public @NonNull net.luckperms.api.model.PermissionHolder.NodeMap data() {
         return this.normalData;
     }
 
     @Override
-    public @NonNull Data transientData() {
+    public @NonNull net.luckperms.api.model.PermissionHolder.NodeMap transientData() {
         return this.transientData;
     }
 
@@ -127,10 +127,10 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
         this.handle.auditTemporaryNodes();
     }
 
-    private class DataImpl implements Data {
+    private class NodeMapImpl implements NodeMap {
         private final DataType dataType;
 
-        DataImpl(DataType dataType) {
+        NodeMapImpl(DataType dataType) {
             this.dataType = dataType;
         }
 

@@ -55,7 +55,7 @@ import net.luckperms.api.model.DataType;
 import net.luckperms.api.model.TemporaryMergeBehaviour;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
-import net.luckperms.api.node.types.MetaNode;
+import net.luckperms.api.node.NodeType;
 
 import java.util.List;
 
@@ -91,7 +91,7 @@ public class MetaSetTemp extends SharedSubCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        holder.removeIf(DataType.NORMAL, context, n -> n instanceof MetaNode && n.hasExpiry() && ((MetaNode) n).getMetaKey().equalsIgnoreCase(key));
+        holder.removeIf(DataType.NORMAL, context, NodeType.META.predicate(n -> n.hasExpiry() && n.getMetaKey().equalsIgnoreCase(key)), false);
         duration = holder.setNode(DataType.NORMAL, node, modifier).getMergedNode().getExpiry().getEpochSecond();
 
         TextComponent.Builder builder = Message.SET_META_TEMP_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, holder.getFormattedDisplayName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();

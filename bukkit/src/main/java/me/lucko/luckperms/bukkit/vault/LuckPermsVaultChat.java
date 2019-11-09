@@ -45,7 +45,7 @@ import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.DataType;
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.NodeBuilder;
-import net.luckperms.api.node.types.MetaNode;
+import net.luckperms.api.node.NodeType;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 import net.milkbowl.vault.chat.Chat;
@@ -266,7 +266,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         }
 
         // remove all prefixes/suffixes directly set on the user/group
-        holder.removeIf(DataType.NORMAL, null, node -> type.nodeType().matches(node));
+        holder.removeIf(DataType.NORMAL, null, type.nodeType()::matches, false);
 
         if (value == null) {
             this.vaultPermission.holderSave(holder);
@@ -292,7 +292,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
             logMsg("#setMeta: %s - %s - %s - %s", holder.getPlainDisplayName(), key, value, world);
         }
 
-        holder.removeIf(DataType.NORMAL, null, n -> n instanceof MetaNode && ((MetaNode) n).getMetaKey().equals(key));
+        holder.removeIf(DataType.NORMAL, null, NodeType.META.predicate(n -> n.getMetaKey().equals(key)), false);
 
         if (value == null) {
             this.vaultPermission.holderSave(holder);

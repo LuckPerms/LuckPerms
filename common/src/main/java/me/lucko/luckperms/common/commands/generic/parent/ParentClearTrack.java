@@ -93,11 +93,7 @@ public class ParentClearTrack extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        if (context.isEmpty()) {
-            holder.removeIf(DataType.NORMAL, null, NodeType.INHERITANCE.predicate(n -> track.containsGroup(n.getGroupName())));
-        } else {
-            holder.removeIf(DataType.NORMAL, null, NodeType.INHERITANCE.predicate(n -> n.getContexts().equals(context) && track.containsGroup(n.getGroupName())));
-        }
+        holder.removeIf(DataType.NORMAL, context.isEmpty() ? null : context, NodeType.INHERITANCE.predicate(n -> track.containsGroup(n.getGroupName())), false);
 
         if (holder.getType() == HolderType.USER) {
             plugin.getUserManager().giveDefaultIfNeeded(((User) holder), false);

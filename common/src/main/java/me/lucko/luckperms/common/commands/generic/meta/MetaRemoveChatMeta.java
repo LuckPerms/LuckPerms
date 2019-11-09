@@ -89,10 +89,7 @@ public class MetaRemoveChatMeta extends SharedSubCommand {
 
         // Handle bulk removal
         if (meta.equalsIgnoreCase("null") || meta.equals("*")) {
-            holder.removeIf(DataType.NORMAL, null, n -> this.type.nodeType().matches(n) &&
-                    this.type.nodeType().cast(n).getPriority() == priority &&
-                    !n.hasExpiry() &&
-                    n.getContexts().equals(context));
+            holder.removeIf(DataType.NORMAL, context, this.type.nodeType().predicate(n -> n.getPriority() == priority && !n.hasExpiry()), false);
             Message.BULK_REMOVE_CHATMETA_SUCCESS.send(sender, holder.getFormattedDisplayName(), this.type.name().toLowerCase(), priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             LoggedAction.build().source(sender).target(holder)

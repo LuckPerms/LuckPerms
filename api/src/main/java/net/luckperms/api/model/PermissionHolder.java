@@ -124,19 +124,19 @@ public interface PermissionHolder {
     @NonNull CachedDataManager getCachedData();
 
     /**
-     * Gets the {@link Data} of a particular type.
+     * Gets the {@link NodeMap} of a particular type.
      *
      * @param dataType the data type
      * @return the data
      */
-    Data getData(@NonNull DataType dataType);
+    NodeMap getData(@NonNull DataType dataType);
 
     /**
      * Gets the holders {@link DataType#NORMAL} data.
      *
      * @return the normal data
      */
-    @NonNull Data data();
+    @NonNull NodeMap data();
 
     /**
      * Gets the holders {@link DataType#TRANSIENT} data.
@@ -154,7 +154,7 @@ public interface PermissionHolder {
      *
      * @return the transient data
      */
-    @NonNull Data transientData();
+    @NonNull NodeMap transientData();
 
     /**
      * Encapsulates a store of data ({@link Node}s) within a {@link PermissionHolder}.
@@ -170,7 +170,7 @@ public interface PermissionHolder {
      * made already. This can be done via {@link UserManager#loadUser(UUID)} or
      * {@link GroupManager#loadGroup(String)} respectively.</p>
      */
-    interface Data {
+    interface NodeMap {
 
         /**
          * Gets a map of the {@link Node}s contained within this instance,
