@@ -590,7 +590,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 if (entry == null) {
                     continue;
                 }
-                nodes.add(readMetaAttributes(entry.getValue(), c -> Prefix.builder(c.getNode("priority").getInt(0), entry.getKey())));
+                nodes.add(readMetaAttributes(entry.getValue(), c -> Prefix.builder(entry.getKey(), c.getNode("priority").getInt(0))));
             }
         }
 
@@ -601,7 +601,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 if (entry == null) {
                     continue;
                 }
-                nodes.add(readMetaAttributes(entry.getValue(), c -> Suffix.builder(c.getNode("priority").getInt(0), entry.getKey())));
+                nodes.add(readMetaAttributes(entry.getValue(), c -> Suffix.builder(entry.getKey(), c.getNode("priority").getInt(0))));
             }
         }
 

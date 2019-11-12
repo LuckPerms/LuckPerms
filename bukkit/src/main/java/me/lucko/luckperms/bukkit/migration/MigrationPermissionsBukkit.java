@@ -116,7 +116,7 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
                 migrate(lpUser, usersSection.getConfigurationSection(key));
             }
 
-            plugin.getUserManager().cleanup(lpUser);
+            plugin.getUserManager().getHouseKeeper().cleanup(lpUser.getUniqueId());
             plugin.getStorage().saveUser(lpUser);
             log.logProgress("Migrated {} users so far.", userCount.incrementAndGet(), ProgressLogger.DEFAULT_NOTIFY_FREQUENCY);
         });

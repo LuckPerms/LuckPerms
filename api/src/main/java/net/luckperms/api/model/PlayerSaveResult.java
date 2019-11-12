@@ -61,15 +61,15 @@ public interface PlayerSaveResult {
     }
 
     /**
-     * Gets the old username involved in the result.
+     * Gets the previous username involved in the result.
      *
      * <p>Returns null when the result doesn't {@link #includes(Outcome) include} the
      * {@link Outcome#USERNAME_UPDATED} status.</p>
      *
-     * @return the old username
+     * @return the previous username
      * @see Outcome#USERNAME_UPDATED
      */
-    @Nullable String getOldUsername();
+    @Nullable String getPreviousUsername();
 
     /**
      * Gets the other uuids involved in the result.

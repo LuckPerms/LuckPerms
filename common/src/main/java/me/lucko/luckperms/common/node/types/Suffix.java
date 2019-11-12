@@ -53,7 +53,7 @@ public class Suffix extends AbstractNode<SuffixNode, SuffixNode.Builder> impleme
         return new Builder();
     }
 
-    public static Builder builder(int priority, String suffix) {
+    public static Builder builder(String suffix, int priority) {
         return builder().suffix(suffix).priority(priority);
     }
 

@@ -278,7 +278,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         metaAccumulator.complete();
         int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0) + 10;
 
-        NodeBuilder chatMetaNode = type == ChatMetaType.PREFIX ? Prefix.builder(priority, value) : Suffix.builder(priority, value);
+        NodeBuilder chatMetaNode = type == ChatMetaType.PREFIX ? Prefix.builder(value, priority) : Suffix.builder(value, priority);
         chatMetaNode.withContext(DefaultContextKeys.SERVER_KEY, this.vaultPermission.getVaultServer());
         chatMetaNode.withContext(DefaultContextKeys.WORLD_KEY, world);
 
@@ -301,9 +301,9 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
 
         NodeBuilder metaNode;
         if (key.equalsIgnoreCase("prefix")) {
-            metaNode = Prefix.builder(100, value.toString());
+            metaNode = Prefix.builder(value.toString(), 100);
         } else if (key.equalsIgnoreCase("suffix")) {
-            metaNode = Suffix.builder(100, value.toString());
+            metaNode = Suffix.builder(value.toString(), 100);
         } else {
             metaNode = Meta.builder(key, value.toString());
         }

@@ -26,6 +26,8 @@
 package net.luckperms.api.node;
 
 import net.luckperms.api.node.types.ChatMetaNode;
+import net.luckperms.api.node.types.PrefixNode;
+import net.luckperms.api.node.types.SuffixNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -37,12 +39,32 @@ public enum ChatMetaType {
     /**
      * Represents a prefix
      */
-    PREFIX(NodeType.PREFIX),
+    PREFIX(NodeType.PREFIX) {
+        @Override
+        public ChatMetaNode.@NonNull Builder<?, ?> builder() {
+            return PrefixNode.builder();
+        }
+
+        @Override
+        public ChatMetaNode.@NonNull Builder<?, ?> builder(@NonNull String prefix, int priority) {
+            return PrefixNode.builder(prefix, priority);
+        }
+    },
 
     /**
      * Represents a suffix
      */
-    SUFFIX(NodeType.SUFFIX);
+    SUFFIX(NodeType.SUFFIX) {
+        @Override
+        public ChatMetaNode.@NonNull Builder<?, ?> builder() {
+            return SuffixNode.builder();
+        }
+
+        @Override
+        public ChatMetaNode.@NonNull Builder<?, ?> builder(@NonNull String suffix, int priority) {
+            return SuffixNode.builder(suffix, priority);
+        }
+    };
 
     private final String name;
     private final NodeType<? extends ChatMetaNode<?, ?>> nodeType;
@@ -60,6 +82,22 @@ public enum ChatMetaType {
     public @NonNull NodeType<? extends ChatMetaNode<?, ?>> nodeType() {
         return this.nodeType;
     }
+
+    /**
+     * Creates a {@link ChatMetaNode.Builder} for the {@link ChatMetaType}.
+     *
+     * @return a builder
+     */
+    public abstract ChatMetaNode.@NonNull Builder<?, ?> builder();
+
+    /**
+     * Creates a {@link ChatMetaNode.Builder} for the {@link ChatMetaType}.
+     *
+     * @param value the value to set
+     * @param priority the priority to set
+     * @return a builder
+     */
+    public abstract ChatMetaNode.@NonNull Builder<?, ?> builder(@NonNull String value, int priority);
 
     @Override
     public String toString() {

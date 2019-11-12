@@ -53,7 +53,7 @@ public class Prefix extends AbstractNode<PrefixNode, PrefixNode.Builder> impleme
         return new Builder();
     }
 
-    public static Builder builder(int priority, String prefix) {
+    public static Builder builder(String prefix, int priority) {
         return builder().prefix(prefix).priority(priority);
     }
 

@@ -138,7 +138,7 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
 
     @Override
     protected void cleanup(User user, LuckPermsPlugin plugin) {
-        plugin.getUserManager().cleanup(user);
+        plugin.getUserManager().getHouseKeeper().cleanup(user.getUniqueId());
     }
 
     @Override

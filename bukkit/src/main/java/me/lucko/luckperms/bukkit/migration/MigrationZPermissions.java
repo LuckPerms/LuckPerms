@@ -186,7 +186,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
             user.getPrimaryGroup().setStoredValue(MigrationUtils.standardizeName(service.getPlayerPrimaryGroup(u)));
 
-            plugin.getUserManager().cleanup(user);
+            plugin.getUserManager().getHouseKeeper().cleanup(user.getUniqueId());
             plugin.getStorage().saveUser(user);
             log.logProgress("Migrated {} users so far.", userCount.incrementAndGet(), ProgressLogger.DEFAULT_NOTIFY_FREQUENCY);
         });
@@ -226,9 +226,9 @@ public class MigrationZPermissions extends SubCommand<Object> {
             if (valueString.isEmpty()) continue;
 
             if (key.equals("prefix")) {
-                holder.setNode(DataType.NORMAL, Prefix.builder(weight, valueString).build(), true);
+                holder.setNode(DataType.NORMAL, Prefix.builder(valueString, weight).build(), true);
             } else if (key.equals("suffix")) {
-                holder.setNode(DataType.NORMAL, Suffix.builder(weight, valueString).build(), true);
+                holder.setNode(DataType.NORMAL, Suffix.builder(valueString, weight).build(), true);
             } else {
                 holder.setNode(DataType.NORMAL, Meta.builder(key, valueString).build(), true);
             }

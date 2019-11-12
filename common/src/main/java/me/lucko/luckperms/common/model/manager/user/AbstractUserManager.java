@@ -130,11 +130,6 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
     }
 
     @Override
-    public void cleanup(User user) {
-        this.housekeeper.cleanup(user.getUniqueId());
-    }
-
-    @Override
     public CompletableFuture<Void> updateAllUsers() {
         return CompletableFuture.runAsync(
                 () -> {

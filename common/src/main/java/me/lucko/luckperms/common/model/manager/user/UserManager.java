@@ -75,13 +75,6 @@ public interface UserManager<T extends User> extends Manager<UUID, User, T> {
     UserHousekeeper getHouseKeeper();
 
     /**
-     * Unloads the user if a corresponding player is not online
-     *
-     * @param user the user
-     */
-    void cleanup(User user);
-
-    /**
      * Reloads the data of all *online* users
      */
     CompletableFuture<Void> updateAllUsers();

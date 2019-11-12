@@ -173,7 +173,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 migrateHolder(world, user, lpUser);
 
                 plugin.getStorage().saveUser(lpUser);
-                plugin.getUserManager().cleanup(lpUser);
+                plugin.getUserManager().getHouseKeeper().cleanup(lpUser.getUniqueId());
 
                 log.logProgress("Migrated {} users so far.", userCount.incrementAndGet(), ProgressLogger.DEFAULT_NOTIFY_FREQUENCY);
             });
@@ -220,12 +220,12 @@ public class MigrationBPermissions extends SubCommand<Object> {
             }
 
             if (meta.getKey().equalsIgnoreCase("prefix")) {
-                holder.setNode(DataType.NORMAL, Prefix.builder(c.getPriority(), meta.getValue()).withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
+                holder.setNode(DataType.NORMAL, Prefix.builder(meta.getValue(), c.getPriority()).withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
                 continue;
             }
 
             if (meta.getKey().equalsIgnoreCase("suffix")) {
-                holder.setNode(DataType.NORMAL, Suffix.builder(c.getPriority(), meta.getValue()).withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
+                holder.setNode(DataType.NORMAL, Suffix.builder(meta.getValue(), c.getPriority()).withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
                 continue;
             }
 

@@ -29,19 +29,19 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.node.utils.ShorthandParser;
 
-import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.node.ScopedNode;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
-import net.luckperms.api.node.types.RegexPermissionNode;
+import net.luckperms.api.node.types.PermissionNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -74,7 +74,7 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
         this.contexts = contexts;
         this.metadata = metadata;
 
-        this.resolvedShorthand = this instanceof RegexPermissionNode ? ImmutableList.of() : ImmutableList.copyOf(ShorthandParser.parseShorthand(this.key));
+        this.resolvedShorthand = this instanceof PermissionNode ? ImmutableList.copyOf(ShorthandParser.parseShorthand(this.key)) : ImmutableList.of();
 
         this.hashCode = calculateHashCode();
     }
@@ -102,16 +102,6 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
     }
 
     @Override
-    public boolean appliesGlobally() {
-        return this.contexts.isEmpty();
-    }
-
-    @Override
-    public boolean shouldApplyWithContext(@NonNull ContextSet contextSet) {
-        return this.contexts.isSatisfiedBy(contextSet);
-    }
-
-    @Override
     public boolean hasExpiry() {
         return this.expireAt != 0L;
     }
@@ -127,7 +117,7 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
     }
 
     @Override
-    public @NonNull List<String> resolveShorthand() {
+    public @NonNull Collection<String> resolveShorthand() {
         return this.resolvedShorthand;
     }
 

@@ -121,7 +121,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             migrateHolder(u, u.getGroupsString(), userWeight, user);
 
             plugin.getStorage().saveUser(user);
-            plugin.getUserManager().cleanup(user);
+            plugin.getUserManager().getHouseKeeper().cleanup(user.getUniqueId());
 
             log.logProgress("Migrated {} users so far.", userCount.incrementAndGet(), ProgressLogger.DEFAULT_NOTIFY_FREQUENCY);
         });
@@ -165,10 +165,10 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         String suffix = entity.getSuffix();
 
         if (prefix != null && !prefix.isEmpty()) {
-            holder.setNode(DataType.NORMAL, Prefix.builder(weight, prefix).build(), true);
+            holder.setNode(DataType.NORMAL, Prefix.builder(prefix, weight).build(), true);
         }
         if (suffix != null && !suffix.isEmpty()) {
-            holder.setNode(DataType.NORMAL, Suffix.builder(weight, suffix).build(), true);
+            holder.setNode(DataType.NORMAL, Suffix.builder(suffix, weight).build(), true);
         }
     }
 }

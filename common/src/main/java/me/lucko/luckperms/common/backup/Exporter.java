@@ -183,7 +183,7 @@ public class Exporter implements Runnable {
                         })
                         .add("nodes", NodeJsonSerializer.serializeNodes(user.normalData().asSet()))
                         .toJson());
-                this.plugin.getUserManager().cleanup(user);
+                this.plugin.getUserManager().getHouseKeeper().cleanup(user.getUniqueId());
                 userCount.incrementAndGet();
             }, executor));
         }

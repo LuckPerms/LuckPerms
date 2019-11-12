@@ -50,7 +50,6 @@ import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.Tristate;
-import net.luckperms.api.node.types.ChatMetaNode;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.node.types.PrefixNode;
@@ -313,8 +312,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0);
             priority += 10;
 
-            ChatMetaNode.Builder<?, ?> builder = type == ChatMetaType.PREFIX ? Prefix.builder(priority, value) : Suffix.builder(priority, value);
-            node = builder.withContext(contexts).build();
+            node = type.builder(value, priority).withContext(contexts).build();
         } else {
             // standard remove
             this.holder.removeIf(this.type, contexts, NodeType.META.predicate(n -> n.getMetaKey().equals(key)), false);

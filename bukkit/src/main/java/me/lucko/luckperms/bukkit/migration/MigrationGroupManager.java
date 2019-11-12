@@ -156,9 +156,9 @@ public class MigrationGroupManager extends SubCommand<Object> {
                     if (key.equals("build")) continue;
 
                     if (key.equals("prefix")) {
-                        groups.get(groupName).add(Prefix.builder(50, value).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
+                        groups.get(groupName).add(Prefix.builder(value, 50).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
                     } else if (key.equals("suffix")) {
-                        groups.get(groupName).add(Suffix.builder(50, value).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
+                        groups.get(groupName).add(Suffix.builder(value, 50).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
                     } else {
                         groups.get(groupName).add(Meta.builder(key, value).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
                     }
@@ -209,9 +209,9 @@ public class MigrationGroupManager extends SubCommand<Object> {
                     if (key.equals("build")) continue;
 
                     if (key.equals("prefix")) {
-                        users.get(id).add(Prefix.builder(100, value).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
+                        users.get(id).add(Prefix.builder(value, 100).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
                     } else if (key.equals("suffix")) {
-                        users.get(id).add(Suffix.builder(100, value).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
+                        users.get(id).add(Suffix.builder(value, 100).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
                     } else {
                         users.get(id).add(Meta.builder(key, value).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
                     }
@@ -256,7 +256,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
             }
 
             plugin.getStorage().saveUser(user);
-            plugin.getUserManager().cleanup(user);
+            plugin.getUserManager().getHouseKeeper().cleanup(user.getUniqueId());
             log.logProgress("Migrated {} users so far.", userCount.incrementAndGet(), ProgressLogger.DEFAULT_NOTIFY_FREQUENCY);
         });
 

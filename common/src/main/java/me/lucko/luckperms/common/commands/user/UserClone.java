@@ -82,7 +82,7 @@ public class UserClone extends SubCommand<User> {
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(otherUser, sender, plugin);
-        plugin.getUserManager().cleanup(otherUser);
+        plugin.getUserManager().getHouseKeeper().cleanup(otherUser.getUniqueId());
         return CommandResult.SUCCESS;
     }
 }

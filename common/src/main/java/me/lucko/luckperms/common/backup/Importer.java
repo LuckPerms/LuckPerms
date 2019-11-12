@@ -109,7 +109,7 @@ public class Importer implements Runnable {
         }
         user.setNodes(DataType.NORMAL, userData.nodes);
         this.plugin.getStorage().saveUser(user).join();
-        this.plugin.getUserManager().cleanup(user);
+        this.plugin.getUserManager().getHouseKeeper().cleanup(user.getUniqueId());
     }
 
     @Override

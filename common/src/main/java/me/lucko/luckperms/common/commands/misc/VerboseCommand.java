@@ -113,7 +113,7 @@ public class VerboseCommand extends SingleCommand {
                 } else {
                     Message.VERBOSE_UPLOAD_START.send(sender);
                     String id = listener.uploadPasteData(plugin.getBytebin());
-                    String url = plugin.getConfiguration().get(ConfigKeys.VERBOSE_VIEWER_URL_PATTERN) + "#" + id;
+                    String url = plugin.getConfiguration().get(ConfigKeys.VERBOSE_VIEWER_URL_PATTERN) + id;
 
                     Message.VERBOSE_RESULTS_URL.send(sender);
 

@@ -31,7 +31,6 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
@@ -40,24 +39,10 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
-import me.lucko.luckperms.common.util.gson.GsonProvider;
-import me.lucko.luckperms.common.web.AbstractHttpClient;
 import me.lucko.luckperms.common.web.WebEditor;
 
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.event.HoverEvent;
-import net.kyori.text.format.TextColor;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
-import java.util.zip.GZIPOutputStream;
 
 public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
     public HolderEditor(LocaleManager locale, boolean user) {
@@ -73,37 +58,8 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
 
         Message.EDITOR_START.send(sender);
 
-        // form the payload data
         JsonObject payload = WebEditor.formPayload(Collections.singletonList(holder), Collections.emptyList(), sender, label, plugin);
-
-        // upload the payload data to gist
-        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-        try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(bytesOut), StandardCharsets.UTF_8)) {
-            GsonProvider.prettyPrinting().toJson(payload, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        String pasteId;
-        try {
-            pasteId = plugin.getBytebin().postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE, false).key();
-        } catch (IOException e) {
-            Message.EDITOR_UPLOAD_FAILURE.send(sender);
-            return CommandResult.STATE_ERROR;
-        }
-
-        // form a url for the editor
-        String url = plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + "#" + pasteId;
-
-        Message.EDITOR_URL.send(sender);
-
-        Component message = TextComponent.builder(url).color(TextColor.AQUA)
-                .clickEvent(ClickEvent.openUrl(url))
-                .hoverEvent(HoverEvent.showText(TextComponent.of("Click to open the editor.").color(TextColor.GRAY)))
-                .build();
-
-        sender.sendMessage(message);
-        return CommandResult.SUCCESS;
+        return WebEditor.post(payload, sender, plugin);
     }
 
 }

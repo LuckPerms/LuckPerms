@@ -264,7 +264,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         ContextSet contexts = getQueryOptions(uuid, world).context();
 
         String[] ret = user.normalData().immutableInheritance().values().stream()
-                .filter(n -> n.shouldApplyWithContext(contexts))
+                .filter(n -> n.getContexts().isSatisfiedBy(contexts))
                 .map(n -> {
                     Group group = this.plugin.getGroupManager().getIfLoaded(n.getGroupName());
                     if (group != null) {

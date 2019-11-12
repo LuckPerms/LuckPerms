@@ -32,35 +32,26 @@ import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
-import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
-import me.lucko.luckperms.common.util.gson.GsonProvider;
-import me.lucko.luckperms.common.web.AbstractHttpClient;
 import me.lucko.luckperms.common.web.WebEditor;
 
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.event.HoverEvent;
-import net.kyori.text.format.TextColor;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.zip.GZIPOutputStream;
+import java.util.Set;
+import java.util.UUID;
 
 public class EditorCommand extends SingleCommand {
+    private static final int MAX_USERS = 500;
+
     public EditorCommand(LocaleManager locale) {
         super(CommandSpec.EDITOR.localize(locale), "Editor", CommandPermission.EDITOR, Predicates.notInRange(0, 1));
     }
@@ -83,6 +74,9 @@ public class EditorCommand extends SingleCommand {
         List<PermissionHolder> holders = new ArrayList<>();
         List<Track> tracks = new ArrayList<>();
         if (type.includingGroups) {
+            // run a sync task
+            plugin.getSyncTaskBuffer().requestDirectly();
+
             plugin.getGroupManager().getAll().values().stream()
                     .sorted((o1, o2) -> {
                         int i = Integer.compare(o2.getWeight().orElse(0), o1.getWeight().orElse(0));
@@ -92,9 +86,29 @@ public class EditorCommand extends SingleCommand {
             tracks = new ArrayList<>(plugin.getTrackManager().getAll().values());
         }
         if (type.includingUsers) {
+            Set<UUID> users = new LinkedHashSet<>();
+
+            // online players first
             plugin.getUserManager().getAll().values().stream()
                     .sorted((o1, o2) -> o1.getFormattedDisplayName().compareToIgnoreCase(o2.getFormattedDisplayName()))
-                    .forEach(holders::add);
+                    .map(User::getUniqueId)
+                    .forEach(users::add);
+
+            // then fill up with other users
+            users.addAll(plugin.getStorage().getUniqueUsers().join());
+
+            users.stream().limit(MAX_USERS).forEach(uuid -> {
+                User user = plugin.getUserManager().getIfLoaded(uuid);
+                if (user != null) {
+                    holders.add(user);
+                } else {
+                    user = plugin.getStorage().loadUser(uuid, null).join();
+                    if (user != null) {
+                        holders.add(user);
+                    }
+                    plugin.getUserManager().getHouseKeeper().cleanup(uuid);
+                }
+            });
         }
 
         if (holders.isEmpty()) {
@@ -114,37 +128,8 @@ public class EditorCommand extends SingleCommand {
 
         Message.EDITOR_START.send(sender);
 
-        // form the payload data
         JsonObject payload = WebEditor.formPayload(holders, tracks, sender, label, plugin);
-
-        // upload the payload data to gist
-        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-        try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(bytesOut), StandardCharsets.UTF_8)) {
-            GsonProvider.prettyPrinting().toJson(payload, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        String pasteId;
-        try {
-            pasteId = plugin.getBytebin().postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE, false).key();
-        } catch (IOException e) {
-            Message.EDITOR_UPLOAD_FAILURE.send(sender);
-            return CommandResult.STATE_ERROR;
-        }
-
-        // form a url for the editor
-        String url = plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + "#" + pasteId;
-
-        Message.EDITOR_URL.send(sender);
-
-        Component message = TextComponent.builder(url).color(TextColor.AQUA)
-                .clickEvent(ClickEvent.openUrl(url))
-                .hoverEvent(HoverEvent.showText(TextComponent.of("Click to open the editor.").color(TextColor.GRAY)))
-                .build();
-
-        sender.sendMessage(message);
-        return CommandResult.SUCCESS;
+        return WebEditor.post(payload, sender, plugin);
     }
 
     private enum Type {

@@ -319,7 +319,7 @@ public abstract class PermissionHolder {
 
         if (resolveShorthand) {
             for (Node node : entries) {
-                List<String> shorthand = node.resolveShorthand();
+                Collection<String> shorthand = node.resolveShorthand();
                 for (String s : shorthand) {
                     if (convertToLowercase) {
                         perms.putIfAbsent(s.toLowerCase(), node.getValue());

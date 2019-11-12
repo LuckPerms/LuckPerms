@@ -69,12 +69,12 @@ public final class PlayerSaveResultImpl implements PlayerSaveResult {
     }
 
     private final Set<Outcome> outcomes;
-    private final @Nullable String oldUsername;
+    private final @Nullable String previousUsername;
     private final @Nullable Set<UUID> otherUuids;
 
-    private PlayerSaveResultImpl(EnumSet<Outcome> outcomes, @Nullable String oldUsername, @Nullable Set<UUID> otherUuids) {
+    private PlayerSaveResultImpl(EnumSet<Outcome> outcomes, @Nullable String previousUsername, @Nullable Set<UUID> otherUuids) {
         this.outcomes = ImmutableSet.copyOf(outcomes);
-        this.oldUsername = oldUsername;
+        this.previousUsername = previousUsername;
         this.otherUuids = otherUuids;
     }
 
@@ -92,7 +92,7 @@ public final class PlayerSaveResultImpl implements PlayerSaveResult {
     public PlayerSaveResultImpl withOtherUuidsPresent(@NonNull Set<UUID> otherUuids) {
         EnumSet<Outcome> outcomes = EnumSet.copyOf(this.outcomes);
         outcomes.add(Outcome.OTHER_UNIQUE_IDS_PRESENT_FOR_USERNAME);
-        return new PlayerSaveResultImpl(outcomes, this.oldUsername, ImmutableSet.copyOf(otherUuids));
+        return new PlayerSaveResultImpl(outcomes, this.previousUsername, ImmutableSet.copyOf(otherUuids));
     }
 
     @Override
@@ -101,8 +101,8 @@ public final class PlayerSaveResultImpl implements PlayerSaveResult {
     }
 
     @Override
-    public @Nullable String getOldUsername() {
-        return this.oldUsername;
+    public @Nullable String getPreviousUsername() {
+        return this.previousUsername;
     }
 
     @Override
@@ -116,17 +116,17 @@ public final class PlayerSaveResultImpl implements PlayerSaveResult {
         if (that == null || getClass() != that.getClass()) return false;
         PlayerSaveResultImpl result = (PlayerSaveResultImpl) that;
         return Objects.equals(this.outcomes, result.outcomes) &&
-                Objects.equals(this.oldUsername, result.oldUsername) &&
+                Objects.equals(this.previousUsername, result.previousUsername) &&
                 Objects.equals(this.otherUuids, result.otherUuids);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.outcomes, this.oldUsername, this.otherUuids);
+        return Objects.hash(this.outcomes, this.previousUsername, this.otherUuids);
     }
 
     @Override
     public String toString() {
-        return "PlayerSaveResult(outcomes=" + this.outcomes + ", oldUsername=" + this.oldUsername + ", otherUuids=" + this.otherUuids + ")";
+        return "PlayerSaveResult(outcomes=" + this.outcomes + ", previousUsername=" + this.previousUsername + ", otherUuids=" + this.otherUuids + ")";
     }
 }

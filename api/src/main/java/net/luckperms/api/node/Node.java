@@ -26,7 +26,6 @@
 package net.luckperms.api.node;
 
 import net.luckperms.api.LuckPermsProvider;
-import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
 import net.luckperms.api.node.types.DisplayNameNode;
@@ -42,7 +41,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.time.Instant;
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -135,21 +134,6 @@ public interface Node {
     }
 
     /**
-     * Gets if this node applies globally, and therefore has no specific context.
-     *
-     * @return true if this node applies globally, and has no specific context
-     */
-    boolean appliesGlobally();
-
-    /**
-     * Gets if this node should apply in the given context
-     *
-     * @param contextSet the context set
-     * @return true if the node should apply
-     */
-    boolean shouldApplyWithContext(@NonNull ContextSet contextSet);
-
-    /**
      * Resolves any shorthand parts of this node and returns the full list of
      * resolved nodes.
      *
@@ -157,7 +141,7 @@ public interface Node {
      *
      * @return a list of full nodes
      */
-    @NonNull List<String> resolveShorthand();
+    @NonNull Collection<String> resolveShorthand();
 
     /**
      * Gets if this node is assigned temporarily.
@@ -172,7 +156,7 @@ public interface Node {
      * @return the {@link Instant} when this node will expire, or null if it
      * doesn't have an expiry time
      */
-    @Nullable Instant getExpiry() throws IllegalStateException;
+    @Nullable Instant getExpiry();
 
     /**
      * Gets if the node has expired.

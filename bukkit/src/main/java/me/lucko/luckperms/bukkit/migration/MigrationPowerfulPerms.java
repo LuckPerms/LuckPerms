@@ -190,9 +190,9 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 }
 
                 if (server != null) {
-                    group.setNode(DataType.NORMAL, Prefix.builder(g.getRank(), prefix.getValue()).withContext(DefaultContextKeys.SERVER_KEY, server).build(), true);
+                    group.setNode(DataType.NORMAL, Prefix.builder(prefix.getValue(), g.getRank()).withContext(DefaultContextKeys.SERVER_KEY, server).build(), true);
                 } else {
-                    group.setNode(DataType.NORMAL, Prefix.builder(g.getRank(), prefix.getValue()).build(), true);
+                    group.setNode(DataType.NORMAL, Prefix.builder(prefix.getValue(), g.getRank()).build(), true);
                 }
             }
 
@@ -205,9 +205,9 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 }
 
                 if (server != null) {
-                    group.setNode(DataType.NORMAL, Suffix.builder(g.getRank(), suffix.getValue()).withContext(DefaultContextKeys.SERVER_KEY, server).build(), true);
+                    group.setNode(DataType.NORMAL, Suffix.builder(suffix.getValue(), g.getRank()).withContext(DefaultContextKeys.SERVER_KEY, server).build(), true);
                 } else {
-                    group.setNode(DataType.NORMAL, Suffix.builder(g.getRank(), suffix.getValue()).build(), true);
+                    group.setNode(DataType.NORMAL, Suffix.builder(suffix.getValue(), g.getRank()).build(), true);
                 }
             }
 
@@ -252,11 +252,11 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             String suffix = joinFuture(pm.getPlayerOwnSuffix(uuid));
 
             if (prefix != null && !prefix.isEmpty()) {
-                user.setNode(DataType.NORMAL, Prefix.builder(maxWeight.get(), prefix).build(), true);
+                user.setNode(DataType.NORMAL, Prefix.builder(prefix, maxWeight.get()).build(), true);
             }
 
             if (suffix != null && !suffix.isEmpty()) {
-                user.setNode(DataType.NORMAL, Suffix.builder(maxWeight.get(), suffix).build(), true);
+                user.setNode(DataType.NORMAL, Suffix.builder(suffix, maxWeight.get()).build(), true);
             }
 
             Group primaryGroup = joinFuture(pm.getPlayerPrimaryGroup(uuid));
@@ -268,7 +268,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 }
             }
 
-            plugin.getUserManager().cleanup(user);
+            plugin.getUserManager().getHouseKeeper().cleanup(user.getUniqueId());
             plugin.getStorage().saveUser(user);
             log.logProgress("Migrated {} users so far.", userCount.incrementAndGet(), ProgressLogger.DEFAULT_NOTIFY_FREQUENCY);
         });

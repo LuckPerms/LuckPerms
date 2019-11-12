@@ -93,12 +93,12 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
     }
 
     @Override
-    public @NonNull net.luckperms.api.model.PermissionHolder.NodeMap data() {
+    public @NonNull NodeMap data() {
         return this.normalData;
     }
 
     @Override
-    public @NonNull net.luckperms.api.model.PermissionHolder.NodeMap transientData() {
+    public @NonNull NodeMap transientData() {
         return this.transientData;
     }
 

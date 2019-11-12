@@ -28,7 +28,10 @@ package me.lucko.luckperms.common.web;
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
 
+import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
+import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
@@ -38,16 +41,26 @@ import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
 
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.event.ClickEvent;
+import net.kyori.text.event.HoverEvent;
+import net.kyori.text.format.TextColor;
+
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Utility methods for interacting with the LuckPerms web permission editor.
@@ -109,6 +122,37 @@ public final class WebEditor {
                     o.add("potentialContexts", ContextSetJsonSerializer.serializeContextSet(plugin.getContextManager().getPotentialContexts()));
                 })
                 .toJson();
+    }
+
+    public static CommandResult post(JsonObject payload, Sender sender, LuckPermsPlugin plugin) {
+        // upload the payload data to gist
+        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+        try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(bytesOut), StandardCharsets.UTF_8)) {
+            GsonProvider.prettyPrinting().toJson(payload, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String pasteId;
+        try {
+            pasteId = plugin.getBytebin().postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE, false).key();
+        } catch (IOException e) {
+            Message.EDITOR_UPLOAD_FAILURE.send(sender);
+            return CommandResult.STATE_ERROR;
+        }
+
+        // form a url for the editor
+        String url = plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + pasteId;
+
+        Message.EDITOR_URL.send(sender);
+
+        Component message = TextComponent.builder(url).color(TextColor.AQUA)
+                .clickEvent(ClickEvent.openUrl(url))
+                .hoverEvent(HoverEvent.showText(TextComponent.of("Click to open the editor.").color(TextColor.GRAY)))
+                .build();
+
+        sender.sendMessage(message);
+        return CommandResult.SUCCESS;
     }
 
     public static JsonObject readDataFromBytebin(BytebinClient bytebin, String id) {
