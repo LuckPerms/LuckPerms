@@ -73,6 +73,14 @@ public class MetaCheckEvent extends VerboseEvent {
                 .add("origin", this.origin.name().toLowerCase());
     }
 
+    @Override
+    public boolean eval(String variable) {
+        return variable.equals("meta") ||
+                getCheckTarget().equalsIgnoreCase(variable) ||
+                getKey().toLowerCase().startsWith(variable.toLowerCase()) ||
+                getResult().equalsIgnoreCase(variable);
+    }
+
     /**
      * Represents the origin of a meta check
      */

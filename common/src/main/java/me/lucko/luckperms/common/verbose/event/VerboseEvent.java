@@ -30,6 +30,7 @@ import com.google.gson.JsonObject;
 import me.lucko.luckperms.common.util.StackTracePrinter;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
+import me.lucko.luckperms.common.verbose.expression.BooleanExpressionCompiler.VariableEvaluator;
 
 import net.luckperms.api.context.Context;
 import net.luckperms.api.query.QueryMode;
@@ -40,7 +41,7 @@ import java.util.Objects;
 /**
  * Represents a verbose event.
  */
-public abstract class VerboseEvent {
+public abstract class VerboseEvent implements VariableEvaluator {
 
     /**
      * The name of the entity which was checked

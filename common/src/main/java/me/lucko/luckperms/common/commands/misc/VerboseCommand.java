@@ -75,9 +75,9 @@ public class VerboseCommand extends SingleCommand {
 
             String filter = filters.isEmpty() ? "" : String.join(" ", filters);
 
-            VerboseFilter parsedFilter;
+            VerboseFilter compiledFilter;
             try {
-                parsedFilter = VerboseFilter.parse(filter);
+                compiledFilter = new VerboseFilter(filter);
             } catch (InvalidFilterException e) {
                 Message.VERBOSE_INVALID_FILTER.send(sender, filter, e.getCause().getMessage());
                 return CommandResult.FAILURE;
@@ -85,7 +85,7 @@ public class VerboseCommand extends SingleCommand {
 
             boolean notify = !mode.equals("record");
 
-            plugin.getVerboseHandler().registerListener(sender, parsedFilter, notify);
+            plugin.getVerboseHandler().registerListener(sender, compiledFilter, notify);
 
             if (notify) {
                 if (!filter.equals("")) {

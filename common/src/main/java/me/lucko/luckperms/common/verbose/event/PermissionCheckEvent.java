@@ -86,6 +86,14 @@ public class PermissionCheckEvent extends VerboseEvent {
         object.add("origin", this.origin.name().toLowerCase());
     }
 
+    @Override
+    public boolean eval(String variable) {
+        return variable.equals("permission") ||
+                getCheckTarget().equalsIgnoreCase(variable) ||
+                getPermission().toLowerCase().startsWith(variable.toLowerCase()) ||
+                getResult().result().name().equalsIgnoreCase(variable);
+    }
+
     /**
      * Represents the origin of a permission check
      */
