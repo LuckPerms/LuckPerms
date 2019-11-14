@@ -30,7 +30,6 @@ import com.google.common.collect.Maps;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
 import me.lucko.luckperms.common.cache.LoadingMap;
-import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -148,7 +147,7 @@ public class GroupListMembers extends SubCommand<Group> {
 
         for (Map.Entry<String, HeldNode<T>> ent : mappedContent) {
             String s = "&3> &b" + ent.getKey() + " " + getNodeExpiryString(ent.getValue().getNode()) + MessageUtils.getAppendableNodeContextString(sender.getPlugin().getLocaleManager(), ent.getValue().getNode());
-            TextComponent message = TextUtils.fromLegacy(s, CommandManager.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), holderType, label, ent.getValue(), sender.getPlugin())).build();
+            TextComponent message = TextUtils.fromLegacy(s, TextUtils.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), holderType, label, ent.getValue(), sender.getPlugin())).build();
             sender.sendMessage(message);
         }
     }
@@ -166,7 +165,7 @@ public class GroupListMembers extends SubCommand<Group> {
                 "&3> &b" + ((InheritanceNode) perm.getNode()).getGroupName(),
                 " ",
                 "&7Click to remove this parent from " + holderName
-        ), CommandManager.AMPERSAND_CHAR));
+        ), TextUtils.AMPERSAND_CHAR));
 
         boolean explicitGlobalContext = !plugin.getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
         String command = "/" + label + " " + NodeCommandFactory.generateCommand(perm.getNode(), holderName, holderType, false, explicitGlobalContext);

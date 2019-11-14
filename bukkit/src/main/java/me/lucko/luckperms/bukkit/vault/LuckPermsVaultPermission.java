@@ -32,7 +32,6 @@ import me.lucko.luckperms.bukkit.context.BukkitContextManager;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.calculator.processor.MapProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
-import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
@@ -41,6 +40,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.node.types.Inheritance;
+import me.lucko.luckperms.common.util.TextUtils;
 import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
@@ -374,8 +374,8 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
     }
     private void logMsg(String format, Object... args) {
         this.plugin.getLogger().info("[VAULT-PERMS] " + String.format(format, args)
-                .replace(CommandManager.SECTION_CHAR, '$')
-                .replace(CommandManager.AMPERSAND_CHAR, '$')
+                .replace(TextUtils.SECTION_CHAR, '$')
+                .replace(TextUtils.AMPERSAND_CHAR, '$')
         );
     }
 

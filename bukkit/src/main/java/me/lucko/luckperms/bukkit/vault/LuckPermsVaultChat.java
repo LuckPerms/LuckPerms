@@ -30,7 +30,6 @@ import com.google.common.base.Strings;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
-import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.Group;
@@ -38,6 +37,7 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.types.Meta;
 import me.lucko.luckperms.common.node.types.Prefix;
 import me.lucko.luckperms.common.node.types.Suffix;
+import me.lucko.luckperms.common.util.TextUtils;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 
 import net.luckperms.api.context.DefaultContextKeys;
@@ -255,8 +255,8 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
     }
     private void logMsg(String format, Object... args) {
         this.plugin.getLogger().info("[VAULT-CHAT] " + String.format(format, args)
-                .replace(CommandManager.SECTION_CHAR, '$')
-                .replace(CommandManager.AMPERSAND_CHAR, '$')
+                .replace(TextUtils.SECTION_CHAR, '$')
+                .replace(TextUtils.AMPERSAND_CHAR, '$')
         );
     }
 

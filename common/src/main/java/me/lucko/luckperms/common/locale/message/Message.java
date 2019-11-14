@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.locale.message;
 
-import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.TextUtils;
@@ -517,7 +516,7 @@ public enum Message {
     }
 
     public TextComponent asComponent(@Nullable LocaleManager localeManager, Object... objects) {
-        return TextUtils.fromLegacy(format(localeManager, objects), CommandManager.AMPERSAND_CHAR);
+        return TextUtils.fromLegacy(format(localeManager, objects), TextUtils.AMPERSAND_CHAR);
     }
 
     public void send(Sender sender, Object... objects) {

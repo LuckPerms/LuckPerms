@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.common.sender;
 
-import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.Component;
 import net.luckperms.api.context.DefaultContextKeys;
@@ -112,7 +112,7 @@ public interface Sender {
     /**
      * Send a message to the Sender.
      *
-     * <p>Supports {@link CommandManager#SECTION_CHAR} for message formatting.</p>
+     * <p>Supports {@link TextUtils#SECTION_CHAR} for message formatting.</p>
      *
      * @param message the message to send.
      */

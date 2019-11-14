@@ -84,9 +84,6 @@ import java.util.stream.Collectors;
 public class CommandManager {
     public static final Pattern COMMAND_SEPARATOR_PATTERN = Pattern.compile(" (?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
 
-    public static final char SECTION_CHAR = '\u00A7'; // §
-    public static final char AMPERSAND_CHAR = '&';
-
     private final LuckPermsPlugin plugin;
 
     // the default executor to run commands on
@@ -276,7 +273,7 @@ public class CommandManager {
                 .forEach(c -> {
                     String permission = c.getPermission().map(CommandPermission::getPermission).orElse("None");
 
-                    TextComponent component = TextUtils.fromLegacy("&3> &a" + String.format(c.getUsage(), label), AMPERSAND_CHAR)
+                    TextComponent component = TextUtils.fromLegacy("&3> &a" + String.format(c.getUsage(), label), TextUtils.AMPERSAND_CHAR)
                             .toBuilder().applyDeep(comp -> {
                                 comp.hoverEvent(HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
                                         "&bCommand: &2" + c.getName(),
@@ -285,7 +282,7 @@ public class CommandManager {
                                         "&bPermission: &2" + permission,
                                         " ",
                                         "&7Click to auto-complete."
-                                ), AMPERSAND_CHAR)));
+                                ), TextUtils.AMPERSAND_CHAR)));
                                 comp.clickEvent(ClickEvent.suggestCommand(String.format(c.getUsage(), label)));
                             }).build();
                     sender.sendMessage(component);

@@ -36,6 +36,9 @@ import java.util.stream.Stream;
 public final class TextUtils {
     private TextUtils() {}
 
+    public static final char SECTION_CHAR = '\u00A7'; // §
+    public static final char AMPERSAND_CHAR = '&';
+
     public static String joinNewline(String... strings) {
         return joinNewline(Arrays.stream(strings));
     }

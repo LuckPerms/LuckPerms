@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.generic.parent;
 
-import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -119,7 +118,7 @@ public class ParentInfo extends SharedSubCommand {
                 s += "\n&2  expires in " + DurationFormatter.LONG.formatDateDiff(node.getExpiry().getEpochSecond());
             }
 
-            TextComponent message = TextUtils.fromLegacy(s, CommandManager.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build();
+            TextComponent message = TextUtils.fromLegacy(s, TextUtils.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build();
             sender.sendMessage(message);
         }
 
@@ -141,7 +140,7 @@ public class ParentInfo extends SharedSubCommand {
                 "&3> &f" + node.getGroupName(),
                 " ",
                 "&7Click to remove this parent from " + holder.getFormattedDisplayName()
-        ), CommandManager.AMPERSAND_CHAR));
+        ), TextUtils.AMPERSAND_CHAR));
 
         String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getFormattedDisplayName();
         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();

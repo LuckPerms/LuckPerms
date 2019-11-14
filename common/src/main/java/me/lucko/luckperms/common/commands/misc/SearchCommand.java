@@ -31,7 +31,6 @@ import me.lucko.luckperms.common.bulkupdate.comparison.Comparison;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
 import me.lucko.luckperms.common.cache.LoadingMap;
-import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -156,7 +155,7 @@ public class SearchCommand extends SingleCommand {
             }
 
             String s = "&3> &b" + ent.getKey() + permission + "&7 - " + (ent.getValue().getNode().getValue() ? "&a" : "&c") + ent.getValue().getNode().getValue() + getNodeExpiryString(ent.getValue().getNode()) + MessageUtils.getAppendableNodeContextString(sender.getPlugin().getLocaleManager(), ent.getValue().getNode());
-            TextComponent message = TextUtils.fromLegacy(s, CommandManager.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), holderType, label, ent.getValue(), sender.getPlugin())).build();
+            TextComponent message = TextUtils.fromLegacy(s, TextUtils.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), holderType, label, ent.getValue(), sender.getPlugin())).build();
             sender.sendMessage(message);
         }
     }
@@ -174,7 +173,7 @@ public class SearchCommand extends SingleCommand {
                 "&3> " + (perm.getNode().getValue() ? "&a" : "&c") + perm.getNode().getKey(),
                 " ",
                 "&7Click to remove this node from " + holderName
-        ), CommandManager.AMPERSAND_CHAR));
+        ), TextUtils.AMPERSAND_CHAR));
 
         boolean explicitGlobalContext = !plugin.getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
         String command = "/" + label + " " + NodeCommandFactory.generateCommand(perm.getNode(), holderName, holderType, false, explicitGlobalContext);
