@@ -160,7 +160,7 @@ public interface LuckPerms {
 
     /**
      * Gets the {@link ContextManager}, responsible for managing
-     * {@link ContextCalculator}s, and calculating applicable contexts.</p>
+     * {@link ContextCalculator}s, and calculating applicable contexts.
      *
      * @return the context manager
      */

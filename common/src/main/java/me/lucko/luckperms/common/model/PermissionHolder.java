@@ -52,6 +52,7 @@ import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.query.dataorder.DataQueryOrder;
 import net.luckperms.api.query.dataorder.DataQueryOrderFunction;
 
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -99,6 +100,11 @@ public abstract class PermissionHolder {
      * @see #getPlugin()
      */
     private final LuckPermsPlugin plugin;
+
+    /**
+     * The holders identifier
+     */
+    private @MonotonicNonNull PermissionHolderIdentifier identifier;
 
     /**
      * The holders persistent nodes.
@@ -175,7 +181,10 @@ public abstract class PermissionHolder {
     }
 
     public PermissionHolderIdentifier getIdentifier() {
-        return new PermissionHolderIdentifier(getType(), getObjectName());
+        if (this.identifier == null) {
+            this.identifier = new PermissionHolderIdentifier(getType(), getObjectName());
+        }
+        return this.identifier;
     }
 
     /**

@@ -69,7 +69,7 @@ import java.util.function.Consumer;
 
 public class MetaInfo extends SharedSubCommand {
     private static String processLocation(Node node, PermissionHolder holder) {
-        String location = node.metadata(InheritanceOriginMetadata.KEY).getOrigin();
+        String location = node.metadata(InheritanceOriginMetadata.KEY).getOrigin().getName();
         return location.equalsIgnoreCase(holder.getObjectName()) ? "self" : location;
     }
 
@@ -162,7 +162,7 @@ public class MetaInfo extends SharedSubCommand {
     }
 
     private static Consumer<ComponentBuilder<?, ?>> makeFancy(PermissionHolder holder, String label, ChatMetaNode<?, ?> node) {
-        String location = node.metadata(InheritanceOriginMetadata.KEY).getOrigin();
+        String location = node.metadata(InheritanceOriginMetadata.KEY).getOrigin().getName();
         if (!location.equals(holder.getObjectName())) {
             // inherited.
             Group group = holder.getPlugin().getGroupManager().getIfLoaded(location);
@@ -189,7 +189,7 @@ public class MetaInfo extends SharedSubCommand {
     }
 
     private static Consumer<ComponentBuilder<?, ?>> makeFancy(PermissionHolder holder, String label, MetaNode node) {
-        String location = node.metadata(InheritanceOriginMetadata.KEY).getOrigin();
+        String location = node.metadata(InheritanceOriginMetadata.KEY).getOrigin().getName();
         if (!location.equals(holder.getObjectName())) {
             // inherited.
             Group group = holder.getPlugin().getGroupManager().getIfLoaded(location);

@@ -70,7 +70,7 @@ public class PermissionCheckInherits extends SharedSubCommand {
                 .filter(n -> n.getKey().equalsIgnoreCase(node) && n.getContexts().equals(context))
                 .findFirst();
 
-        String location = match.map(n -> n.metadata(InheritanceOriginMetadata.KEY).getOrigin()).orElse(null);
+        String location = match.map(n -> n.metadata(InheritanceOriginMetadata.KEY).getOrigin().getName()).orElse(null);
 
         if (location == null || location.equalsIgnoreCase(holder.getObjectName())) {
             location = "self";

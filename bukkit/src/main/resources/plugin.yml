@@ -2,7 +2,7 @@ name: LuckPerms
 version: ${pluginVersion}
 description: A permissions plugin
 author: Luck
-website: https://luckperms.github.io
+website: https://luckperms.net
 
 main: me.lucko.luckperms.bukkit.LPBukkitBootstrap
 load: STARTUP

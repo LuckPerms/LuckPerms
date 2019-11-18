@@ -36,8 +36,8 @@ import java.util.Objects;
  *
  * <p>It is intended that {@link OptionKey}s are created and defined as follows.</p>
  * <p><blockquote><pre>
- *     public static final OptionKey<String> SPECIAL_OPTION = OptionKey.of("special", String.class);
- * </pre></blockquote></p>
+ *     public static final OptionKey&lt;String&gt; SPECIAL_OPTION = OptionKey.of("special", String.class);
+ * </pre></blockquote>
  *
  * @param <T> the option type
  */
@@ -71,6 +71,6 @@ public interface OptionKey<T> {
      *
      * @return the type
      */
-    @NonNull Class<T> getType();
+    @NonNull Class<T> type();
 
 }

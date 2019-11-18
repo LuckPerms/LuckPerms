@@ -198,11 +198,11 @@ public final class NodeMap {
 
     private Node localise(Node node) {
         Optional<InheritanceOriginMetadata> metadata = node.getMetadata(InheritanceOriginMetadata.KEY);
-        if (metadata.map(InheritanceOriginMetadata::getOrigin).equals(Optional.of(this.holder.getObjectName()))) {
+        if (metadata.isPresent() && metadata.get().getOrigin().equals(this.holder.getIdentifier())) {
             return node;
         }
 
-        return node.toBuilder().withMetadata(InheritanceOriginMetadata.KEY, new InheritanceOrigin(this.holder.getObjectName())).build();
+        return node.toBuilder().withMetadata(InheritanceOriginMetadata.KEY, new InheritanceOrigin(this.holder.getIdentifier())).build();
     }
 
     void add(Node node) {

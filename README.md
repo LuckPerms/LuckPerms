@@ -13,7 +13,7 @@ Still not convinced? More information can be found on the wiki, under: [Why Luck
 
 ## Useful Links
 
-The latest **downloads** can be found on the [project's homepage](https://luckperms.github.io/).
+The latest **downloads** can be found on the [project's homepage](https://luckperms.net/).
 
 More information about the project & how to use the plugin can be found in the [wiki](https://github.com/lucko/LuckPerms/wiki).
 

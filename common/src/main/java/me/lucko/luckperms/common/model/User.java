@@ -29,8 +29,6 @@ import me.lucko.luckperms.common.api.implementation.ApiUser;
 import me.lucko.luckperms.common.cacheddata.UserCachedDataManager;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.primarygroup.ContextualHolder;
-import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -73,8 +71,8 @@ public class User extends PermissionHolder {
         super.invalidateCache();
 
         // invalidate our caches
-        if (this.primaryGroup instanceof ContextualHolder) {
-            ((ContextualHolder) this.primaryGroup).invalidateCache();
+        if (this.primaryGroup instanceof PrimaryGroupHolder.AbstractContextual) {
+            ((PrimaryGroupHolder.AbstractContextual) this.primaryGroup).invalidateCache();
         }
     }
 

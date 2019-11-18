@@ -28,9 +28,9 @@ package me.lucko.luckperms.common.metastacking;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
-import me.lucko.luckperms.common.util.Uuids;
 
 import net.luckperms.api.metastacking.MetaStackElement;
+import net.luckperms.api.model.PermissionHolder;
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
 import net.luckperms.api.node.types.ChatMetaNode;
@@ -97,8 +97,8 @@ public final class StandardStackElements {
     private static final MetaStackElement TYPE_CHECK = (type, node, current) -> type.nodeType().matches(node);
     private static final MetaStackElement HIGHEST_CHECK = (type, node, current) -> current == null || node.getPriority() > current.getPriority();
     private static final MetaStackElement LOWEST_CHECK = (type, node, current) -> current == null || node.getPriority() < current.getPriority();
-    private static final MetaStackElement OWN_CHECK = (type, node, current) -> Uuids.fromString(node.metadata(InheritanceOriginMetadata.KEY).getOrigin()) != null;
-    private static final MetaStackElement INHERITED_CHECK = (type, node, current) -> Uuids.fromString(node.metadata(InheritanceOriginMetadata.KEY).getOrigin()) == null;
+    private static final MetaStackElement OWN_CHECK = (type, node, current) -> node.metadata(InheritanceOriginMetadata.KEY).getOrigin().getType().equals(PermissionHolder.Identifier.USER_TYPE);
+    private static final MetaStackElement INHERITED_CHECK = (type, node, current) -> node.metadata(InheritanceOriginMetadata.KEY).getOrigin().getType().equals(PermissionHolder.Identifier.GROUP_TYPE);
 
 
     // implementations
@@ -220,8 +220,9 @@ public final class StandardStackElements {
 
         @Override
         public boolean shouldAccumulate(@NonNull ChatMetaType type, @NonNull ChatMetaNode<?, ?> node, @Nullable ChatMetaNode<?, ?> current) {
-            Track t = this.plugin.getTrackManager().getIfLoaded(this.trackName);
-            return t != null && t.containsGroup(node.metadata(InheritanceOriginMetadata.KEY).getOrigin());
+            Track track = this.plugin.getTrackManager().getIfLoaded(this.trackName);
+            PermissionHolder.Identifier origin = node.metadata(InheritanceOriginMetadata.KEY).getOrigin();
+            return track != null && origin.getType().equals(PermissionHolder.Identifier.GROUP_TYPE) && track.containsGroup(origin.getName());
         }
 
         @Override
@@ -249,8 +250,9 @@ public final class StandardStackElements {
 
         @Override
         public boolean shouldAccumulate(@NonNull ChatMetaType type, @NonNull ChatMetaNode<?, ?> node, @Nullable ChatMetaNode<?, ?> current) {
-            Track t = this.plugin.getTrackManager().getIfLoaded(this.trackName);
-            return t != null && !t.containsGroup(node.metadata(InheritanceOriginMetadata.KEY).getOrigin());
+            Track track = this.plugin.getTrackManager().getIfLoaded(this.trackName);
+            PermissionHolder.Identifier origin = node.metadata(InheritanceOriginMetadata.KEY).getOrigin();
+            return track != null && !track.containsGroup(origin.getName());
         }
 
         @Override
@@ -276,7 +278,8 @@ public final class StandardStackElements {
 
         @Override
         public boolean shouldAccumulate(@NonNull ChatMetaType type, @NonNull ChatMetaNode<?, ?> node, @Nullable ChatMetaNode<?, ?> current) {
-            return this.groupName.equals(node.metadata(InheritanceOriginMetadata.KEY).getOrigin());
+            PermissionHolder.Identifier origin = node.metadata(InheritanceOriginMetadata.KEY).getOrigin();
+            return origin.getType().equals(PermissionHolder.Identifier.GROUP_TYPE) && this.groupName.equals(origin.getName());
         }
 
         @Override
@@ -302,7 +305,8 @@ public final class StandardStackElements {
 
         @Override
         public boolean shouldAccumulate(@NonNull ChatMetaType type, @NonNull ChatMetaNode<?, ?> node, @Nullable ChatMetaNode<?, ?> current) {
-            return !this.groupName.equals(node.metadata(InheritanceOriginMetadata.KEY).getOrigin());
+            PermissionHolder.Identifier origin = node.metadata(InheritanceOriginMetadata.KEY).getOrigin();
+            return !this.groupName.equals(origin.getName());
         }
 
         @Override

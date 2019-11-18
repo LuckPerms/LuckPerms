@@ -35,8 +35,8 @@ import java.util.Objects;
  * <p>It is intended that {@link NodeMetadataKey}s are obtained and stored as
  * follows.</p>
  * <p><blockquote><pre>
- *     public static final NodeMetadataKey<SpecialMetadata> SPECIAL_METADATA_KEY = NodeMetadataKey.of("specialmetadata", SpecialMetadata.class);
- * </pre></blockquote></p>
+ *     public static final NodeMetadataKey&lt;SpecialMetadata&gt; SPECIAL_METADATA_KEY = NodeMetadataKey.of("specialmetadata", SpecialMetadata.class);
+ * </pre></blockquote>
  *
  * @param <T> the metadata type
  */
@@ -70,6 +70,6 @@ public interface NodeMetadataKey<T> {
      *
      * @return the type
      */
-    @NonNull Class<T> getType();
+    @NonNull Class<T> type();
 
 }

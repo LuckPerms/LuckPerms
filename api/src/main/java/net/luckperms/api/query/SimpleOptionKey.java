@@ -44,7 +44,7 @@ final class SimpleOptionKey<T> implements OptionKey<T> {
     }
 
     @Override
-    public @NonNull Class<T> getType() {
+    public @NonNull Class<T> type() {
         return this.type;
     }
 

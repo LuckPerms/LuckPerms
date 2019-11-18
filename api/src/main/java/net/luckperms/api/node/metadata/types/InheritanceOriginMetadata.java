@@ -52,6 +52,6 @@ public interface InheritanceOriginMetadata {
      *
      * @return where the node was inherited from.
      */
-    @NonNull String getOrigin();
+    PermissionHolder.@NonNull Identifier getOrigin();
 
 }

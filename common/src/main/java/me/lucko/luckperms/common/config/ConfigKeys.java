@@ -32,11 +32,8 @@ import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
+import me.lucko.luckperms.common.model.PrimaryGroupHolder;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.primarygroup.AllParentsByWeightHolder;
-import me.lucko.luckperms.common.primarygroup.ParentsByWeightHolder;
-import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
-import me.lucko.luckperms.common.primarygroup.StoredHolder;
 import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.storage.implementation.split.SplitStorageType;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
@@ -162,11 +159,11 @@ public final class ConfigKeys {
         String option = PRIMARY_GROUP_CALCULATION_METHOD.get(c);
         switch (option) {
             case "stored":
-                return (Function<User, PrimaryGroupHolder>) StoredHolder::new;
+                return (Function<User, PrimaryGroupHolder>) PrimaryGroupHolder.Stored::new;
             case "parents-by-weight":
-                return (Function<User, PrimaryGroupHolder>) ParentsByWeightHolder::new;
+                return (Function<User, PrimaryGroupHolder>) PrimaryGroupHolder.ParentsByWeight::new;
             default:
-                return (Function<User, PrimaryGroupHolder>) AllParentsByWeightHolder::new;
+                return (Function<User, PrimaryGroupHolder>) PrimaryGroupHolder.AllParentsByWeight::new;
         }
     }));
 

@@ -71,7 +71,7 @@ import java.util.stream.Stream;
         version = "@version@",
         authors = "Luck",
         description = "A permissions plugin",
-        url = "https://luckperms.github.io",
+        url = "https://luckperms.net",
         dependencies = {
                 // explicit dependency on spongeapi with no defined API version
                 @Dependency(id = "spongeapi")

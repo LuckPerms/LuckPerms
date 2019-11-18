@@ -3,7 +3,7 @@ version: ${pluginVersion}
 api: ["1.0.5"]
 description: A permissions plugin
 author: Luck
-website: https://luckperms.github.io
+website: https://luckperms.net
 
 main: me.lucko.luckperms.nukkit.LPNukkitBootstrap
 load: STARTUP

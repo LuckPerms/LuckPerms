@@ -44,7 +44,7 @@ final class SimpleNodeMetadataKey<T> implements NodeMetadataKey<T> {
     }
 
     @Override
-    public @NonNull Class<T> getType() {
+    public @NonNull Class<T> type() {
         return this.type;
     }
 

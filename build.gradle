@@ -47,7 +47,8 @@ subprojects {
     project.ext.majorVersion = '5'
     project.ext.minorVersion = '0'
     project.ext.patchVersion = determinePatchVersion()
-    project.ext.fullVersion = project.ext.majorVersion + '.' + project.ext.minorVersion + '.' + project.ext.patchVersion
+    project.ext.apiVersion = project.ext.majorVersion + '.' + project.ext.minorVersion
+    project.ext.fullVersion = project.ext.apiVersion + '.' + project.ext.patchVersion
 
     license {
         header = rootProject.file('HEADER.txt')
