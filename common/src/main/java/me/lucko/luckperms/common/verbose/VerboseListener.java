@@ -258,14 +258,6 @@ public class VerboseListener {
         String endDate = DATE_FORMAT.format(new Date(now));
         long secondsTaken = (now - this.startTime) / 1000L;
         String duration = DurationFormatter.CONCISE.format(secondsTaken);
-
-        String filter;
-        if (this.filter.isBlank()){
-            filter = "any";
-        } else {
-            filter = this.filter.toString();
-        }
-
         boolean truncated = this.matchedCounter.get() > this.results.size();
 
         JObject metadata = new JObject()
@@ -280,7 +272,7 @@ public class VerboseListener {
                         .add("name", this.notifiedSender.getNameWithLocation())
                         .add("uuid", this.notifiedSender.getUniqueId().toString())
                 )
-                .add("filter", filter)
+                .add("filter", this.filter.toString())
                 .add("truncated", truncated);
 
         JArray data = new JArray();

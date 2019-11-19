@@ -208,8 +208,8 @@ watch-files: true
 #                option is set to 'none' and SQL storage is in use. Set to 'notsql' to disable this.
 #   => redis     Uses Redis pub-sub to push changes. Your server connection info must be configured
 #                below.
-#   => none      Disables the service.
-messaging-service: none
+#   => auto      Attempts to automatically setup a messaging service using redis or sql.
+messaging-service: auto
 
 # If LuckPerms should automatically push updates after a change has been made with a command.
 auto-push-updates: true

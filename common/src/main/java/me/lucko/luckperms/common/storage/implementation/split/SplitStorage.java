@@ -58,7 +58,11 @@ public class SplitStorage implements StorageImplementation {
         this.implementations = ImmutableMap.copyOf(implementations);
         this.types = ImmutableMap.copyOf(types);
     }
-    
+
+    public Map<StorageType, StorageImplementation> getImplementations() {
+        return this.implementations;
+    }
+
     private StorageImplementation implFor(SplitStorageType type) {
         return this.implementations.get(this.types.get(type));
     }

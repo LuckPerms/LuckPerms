@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
+import me.lucko.luckperms.common.storage.implementation.split.SplitStorage;
 import me.lucko.luckperms.common.util.ThrowingRunnable;
 
 import net.luckperms.api.actionlog.Action;
@@ -43,6 +44,8 @@ import net.luckperms.api.event.cause.DeletionCause;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.node.HeldNode;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -66,6 +69,14 @@ public class Storage {
 
     public StorageImplementation getImplementation() {
         return this.implementation;
+    }
+
+    public Collection<StorageImplementation> getImplementations() {
+        if (this.implementation instanceof SplitStorage) {
+            return ((SplitStorage) this.implementation).getImplementations().values();
+        } else {
+            return Collections.singleton(this.implementation);
+        }
     }
 
     private <T> CompletableFuture<T> makeFuture(Callable<T> supplier) {

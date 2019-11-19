@@ -211,8 +211,8 @@ watch-files: true
 #                    configured below.
 #   => redisbungee   Uses Redis pub-sub to push changes, using the RedisBungee API. You need to have
 #                    the RedisBungee plugin installed.
-#   => none          Disables the service.
-messaging-service: none
+#   => auto          Attempts to automatically setup a messaging service using redis or sql.
+messaging-service: auto
 
 # If LuckPerms should automatically push updates after a change has been made with a command.
 auto-push-updates: true

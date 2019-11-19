@@ -485,7 +485,7 @@ public final class ConfigKeys {
     /**
      * The name of the messaging service in use, or "none" if not enabled
      */
-    public static final ConfigKey<String> MESSAGING_SERVICE = enduringKey(lowercaseStringKey("messaging-service", "none"));
+    public static final ConfigKey<String> MESSAGING_SERVICE = enduringKey(lowercaseStringKey("messaging-service", "auto"));
 
     /**
      * If updates should be automatically pushed by the messaging service

@@ -38,16 +38,18 @@ import me.lucko.luckperms.common.verbose.expression.BooleanExpressionCompiler.Pa
  * evaluations should be relatively fast.</p>
  */
 public final class VerboseFilter {
+    private final String expression;
     private final AST ast;
 
-    public VerboseFilter(String filterExpression) throws InvalidFilterException {
-        if (filterExpression.isEmpty()) {
+    public VerboseFilter(String expression) throws InvalidFilterException {
+        this.expression = expression;
+        if (expression.isEmpty()) {
             this.ast = AST.ALWAYS_TRUE;
         } else {
             try {
-                this.ast = BooleanExpressionCompiler.compile(filterExpression);
+                this.ast = BooleanExpressionCompiler.compile(expression);
             } catch (LexerException | ParserException e) {
-                throw new InvalidFilterException("Exception occurred whilst generating an expression for '" + filterExpression + "'", e);
+                throw new InvalidFilterException("Exception occurred whilst generating an expression for '" + expression + "'", e);
             }
         }
     }
@@ -59,10 +61,6 @@ public final class VerboseFilter {
      * @return if the check data passes the filter
      */
     public boolean evaluate(VerboseEvent data) {
-        if (isBlank()) {
-            return true;
-        }
-
         try {
             return this.ast.eval(data);
         } catch (Exception e) {
@@ -75,4 +73,8 @@ public final class VerboseFilter {
         return this.ast == AST.ALWAYS_TRUE;
     }
 
+    @Override
+    public String toString() {
+        return isBlank() ? "any" : this.expression;
+    }
 }
