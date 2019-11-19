@@ -79,7 +79,7 @@ public class BytebinClient extends AbstractHttpClient {
      * @throws IOException if an error occurs
      */
     public Content postContent(byte[] buf, MediaType contentType, boolean allowModification) throws IOException {
-        RequestBody body = RequestBody.create(buf, contentType);
+        RequestBody body = RequestBody.create(contentType, buf);
 
         Request.Builder requestBuilder = new Request.Builder()
                 .url(this.url + "post")
@@ -122,7 +122,7 @@ public class BytebinClient extends AbstractHttpClient {
             throw new IllegalArgumentException("Existing content is not modifiable");
         }
 
-        RequestBody body = RequestBody.create(buf, contentType);
+        RequestBody body = RequestBody.create(contentType, buf);
 
         Request.Builder requestBuilder = new Request.Builder()
                 .url(this.url + existingContent.key())
