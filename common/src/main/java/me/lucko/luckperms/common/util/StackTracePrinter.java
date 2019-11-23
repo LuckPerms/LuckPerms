@@ -57,8 +57,12 @@ public final class StackTracePrinter {
                 printing = true;
             }
 
-            if (!printing) continue;
-            if (count >= this.truncateLength) break;
+            if (!printing) {
+                continue;
+            }
+            if (count >= this.truncateLength) {
+                break;
+            }
 
             consumer.accept(e);
             count++;
