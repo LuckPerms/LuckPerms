@@ -42,7 +42,7 @@ import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 
 import java.util.List;
 import java.util.UUID;

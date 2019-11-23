@@ -30,7 +30,7 @@ import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcesso
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 
 import java.util.Collections;
 import java.util.Map;

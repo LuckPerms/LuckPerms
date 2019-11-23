@@ -34,7 +34,7 @@ import com.google.common.collect.Maps;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.cache.Cache;
 
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginManager;

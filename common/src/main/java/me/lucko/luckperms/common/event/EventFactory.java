@@ -44,7 +44,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.sender.Sender;
 
 import net.luckperms.api.actionlog.Action;
-import net.luckperms.api.event.Cancellable;
+import net.luckperms.api.event.type.Cancellable;
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;

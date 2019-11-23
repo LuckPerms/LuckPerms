@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.Component;
 import net.kyori.text.adapter.bungeecord.TextAdapter;
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 

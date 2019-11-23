@@ -46,7 +46,7 @@ import me.lucko.luckperms.common.util.Predicates;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.NodeEqualityPredicate;
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 
 import java.util.List;
 

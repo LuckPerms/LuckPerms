@@ -31,7 +31,7 @@ import com.google.common.collect.Maps;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.node.types.RegexPermission;
 
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 
 import java.util.Collections;
 import java.util.List;

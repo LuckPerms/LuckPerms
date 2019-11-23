@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.Component;
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;

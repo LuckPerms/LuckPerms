@@ -25,7 +25,7 @@
 
 package net.luckperms.api.cacheddata;
 
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

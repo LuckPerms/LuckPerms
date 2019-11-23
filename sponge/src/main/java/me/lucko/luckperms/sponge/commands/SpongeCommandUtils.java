@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 
 import net.luckperms.api.context.ContextSet;
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 
 import java.util.List;
 import java.util.Map;

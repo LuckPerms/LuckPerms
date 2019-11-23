@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.util.PrivateMethodHandles;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.event.LuckPermsEvent;
-import net.luckperms.api.event.Param;
+import net.luckperms.api.event.util.Param;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

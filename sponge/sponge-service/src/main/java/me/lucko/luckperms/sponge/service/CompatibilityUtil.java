@@ -34,7 +34,7 @@ import me.lucko.luckperms.sponge.service.context.DelegatingImmutableContextSet;
 
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 
 import org.spongepowered.api.service.context.Context;
 

@@ -28,7 +28,7 @@ package me.lucko.luckperms.sponge.service.model;
 import com.google.common.collect.ImmutableList;
 
 import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 import net.luckperms.api.query.QueryOptions;
 
 import org.spongepowered.api.command.CommandSource;

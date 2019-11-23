@@ -37,7 +37,7 @@ import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import me.lucko.luckperms.nukkit.calculator.DefaultsProcessor;
 import me.lucko.luckperms.nukkit.inject.PermissionDefault;
 
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

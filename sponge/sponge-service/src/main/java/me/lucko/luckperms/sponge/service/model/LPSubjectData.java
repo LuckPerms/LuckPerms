@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableMap;
 
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.data.DataType;
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 
 import org.spongepowered.api.service.permission.SubjectData;
 

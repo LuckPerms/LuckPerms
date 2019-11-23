@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.sender;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.text.Component;
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 
 import java.util.Objects;
 import java.util.UUID;

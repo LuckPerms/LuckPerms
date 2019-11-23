@@ -45,7 +45,7 @@ import me.lucko.luckperms.common.web.BytebinClient;
 
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 import net.luckperms.api.query.QueryMode;
 
 import java.io.ByteArrayOutputStream;

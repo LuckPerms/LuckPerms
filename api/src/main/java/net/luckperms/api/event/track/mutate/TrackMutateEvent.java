@@ -26,7 +26,7 @@
 package net.luckperms.api.event.track.mutate;
 
 import net.luckperms.api.event.LuckPermsEvent;
-import net.luckperms.api.event.Param;
+import net.luckperms.api.event.util.Param;
 import net.luckperms.api.track.Track;
 
 import org.checkerframework.checker.nullness.qual.NonNull;

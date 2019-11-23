@@ -39,7 +39,7 @@ import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 
 import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 
 import java.util.List;
 

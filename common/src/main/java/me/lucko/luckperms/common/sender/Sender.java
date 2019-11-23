@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.util.TextUtils;
 import net.kyori.text.Component;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 
 import java.util.Set;
 import java.util.UUID;

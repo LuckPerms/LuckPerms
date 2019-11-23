@@ -1,5 +1,5 @@
 /*
- * This file is part of LuckPerms, licensed under the MIT License.
+ * This file is part of luckperms, licensed under the MIT License.
  *
  *  Copyright (c) lucko (Luck) <luck@lucko.me>
  *  Copyright (c) contributors
@@ -23,7 +23,9 @@
  *  SOFTWARE.
  */
 
-package net.luckperms.api.event;
+package net.luckperms.api.event.type;
+
+import net.luckperms.api.event.util.Param;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -40,7 +42,7 @@ public interface Cancellable {
      * @return the cancellation
      */
     @Param(-1)
-    @NonNull AtomicBoolean getCancellationState();
+    @NonNull AtomicBoolean cancellationState();
 
     /**
      * Returns true if the event is currently cancelled.
@@ -48,7 +50,7 @@ public interface Cancellable {
      * @return if the event is cancelled
      */
     default boolean isCancelled() {
-        return getCancellationState().get();
+        return cancellationState().get();
     }
 
     /**
@@ -67,7 +69,7 @@ public interface Cancellable {
      * @return the previous state
      */
     default boolean setCancelled(boolean cancelled) {
-        return getCancellationState().getAndSet(cancelled);
+        return cancellationState().getAndSet(cancelled);
     }
 
 }

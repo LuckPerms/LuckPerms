@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableMap;
 import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

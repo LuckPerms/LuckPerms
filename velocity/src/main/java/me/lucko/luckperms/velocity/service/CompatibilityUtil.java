@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.velocity.service;
 
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 
 import java.util.Objects;
 

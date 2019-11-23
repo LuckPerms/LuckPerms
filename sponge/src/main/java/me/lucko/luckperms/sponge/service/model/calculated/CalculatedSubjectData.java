@@ -38,7 +38,7 @@ import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.data.DataType;
-import net.luckperms.api.node.Tristate;
+import net.luckperms.api.util.Tristate;
 import net.luckperms.api.query.QueryOptions;
 
 import org.spongepowered.api.service.permission.SubjectData;
