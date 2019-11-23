@@ -43,8 +43,6 @@ import me.lucko.luckperms.common.node.model.HeldNodeImpl;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
-import me.lucko.luckperms.common.storage.implementation.sql.connection.file.SQLiteConnectionFactory;
-import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.PostgreConnectionFactory;
 import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 
@@ -230,20 +228,6 @@ public class SqlStorage implements StorageImplementation {
                     }
                 }
             }
-        }
-
-        // migrations
-        try {
-            if (!(this.connectionFactory instanceof SQLiteConnectionFactory) && !(this.connectionFactory instanceof PostgreConnectionFactory)) {
-                try (Connection connection = this.connectionFactory.getConnection()) {
-                    try (Statement s = connection.createStatement()) {
-                        s.execute(this.statementProcessor.apply("ALTER TABLE {prefix}actions MODIFY COLUMN actor_name VARCHAR(100)"));
-                        s.execute(this.statementProcessor.apply("ALTER TABLE {prefix}actions MODIFY COLUMN action VARCHAR(300)"));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
