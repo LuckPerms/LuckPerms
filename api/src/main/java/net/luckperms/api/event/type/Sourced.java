@@ -1,5 +1,5 @@
 /*
- * This file is part of luckperms, licensed under the MIT License.
+ * This file is part of LuckPerms, licensed under the MIT License.
  *
  *  Copyright (c) lucko (Luck) <luck@lucko.me>
  *  Copyright (c) contributors
@@ -25,8 +25,8 @@
 
 package net.luckperms.api.event.type;
 
-import net.luckperms.api.event.util.Param;
 import net.luckperms.api.event.source.Source;
+import net.luckperms.api.event.util.Param;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
