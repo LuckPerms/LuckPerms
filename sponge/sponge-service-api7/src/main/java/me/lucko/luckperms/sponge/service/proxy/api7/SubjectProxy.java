@@ -66,7 +66,7 @@ public final class SubjectProxy implements Subject, ProxiedSubject, ProxiedServi
     }
 
     // lazy init
-    private QueryOptionsSupplier getContextsCache() {
+    private QueryOptionsSupplier queryOptionsCache() {
         if (this.queryOptionsSupplier == null) {
             this.queryOptionsSupplier = this.service.getContextManager().getCacheFor(this);
         }
@@ -160,12 +160,12 @@ public final class SubjectProxy implements Subject, ProxiedSubject, ProxiedServi
 
     @Override
     public @NonNull Set<Context> getActiveContexts() {
-        return CompatibilityUtil.convertContexts(getContextsCache().getContextSet());
+        return CompatibilityUtil.convertContexts(queryOptionsCache().getContextSet());
     }
 
     @Override
     public ImmutableContextSet getActiveContextSet() {
-        return getContextsCache().getContextSet();
+        return queryOptionsCache().getContextSet();
     }
 
     @Override

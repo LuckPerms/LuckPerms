@@ -70,11 +70,6 @@ public class ApiTrack implements net.luckperms.api.track.Track {
     }
 
     @Override
-    public int getSize() {
-        return this.handle.getSize();
-    }
-
-    @Override
     public String getNext(@NonNull Group current) {
         Objects.requireNonNull(current, "current");
         try {
