@@ -47,8 +47,8 @@ public class PermissionCheckEvent extends VerboseEvent {
      */
     private final TristateResult result;
 
-    public PermissionCheckEvent(Origin origin, String checkTarget, QueryOptions checkQueryOptions, StackTraceElement[] checkTrace, String permission, TristateResult result) {
-        super(checkTarget, checkQueryOptions, checkTrace);
+    public PermissionCheckEvent(Origin origin, String checkTarget, QueryOptions checkQueryOptions, StackTraceElement[] checkTrace, String checkThread, String permission, TristateResult result) {
+        super(checkTarget, checkQueryOptions, checkTrace, checkThread);
         this.origin = origin;
         this.permission = permission;
         this.result = result;

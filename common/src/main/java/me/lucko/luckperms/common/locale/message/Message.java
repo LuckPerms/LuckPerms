@@ -447,7 +447,7 @@ public enum Message {
     LOG_EXPORT_NOT_WRITABLE("&cError: File &4{}&c is not writable.", true),
     LOG_EXPORT_EMPTY("&cThe log is empty and therefore cannot be exported.", true),
     LOG_EXPORT_FAILURE("&cAn unexpected error occured whilst writing to the file.", true),
-    LOG_EXPORT_SUCCESS("&aSuccessfully exported the log to &b{}&a.", true),
+    LOG_EXPORT_SUCCESS("&aSuccessfully exported to &b{}&a.", true),
 
     IMPORT_ALREADY_RUNNING("&cAnother import process is already running. Please wait for it to finish and try again.", true),
     EXPORT_ALREADY_RUNNING("&cAnother export process is already running. Please wait for it to finish and try again.", true),

@@ -45,8 +45,8 @@ import me.lucko.luckperms.common.web.BytebinClient;
 
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
-import net.luckperms.api.util.Tristate;
 import net.luckperms.api.query.QueryMode;
+import net.luckperms.api.util.Tristate;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -217,6 +217,7 @@ public class VerboseListener {
         if (event.getCheckQueryOptions().mode() == QueryMode.CONTEXTUAL) {
             hover.add("&bContext: &r" + MessageUtils.contextSetToString(this.notifiedSender.getPlugin().getLocaleManager(), event.getCheckQueryOptions().context()));
         }
+        hover.add("&bThread: &r" + event.getCheckThread());
         hover.add("&bTrace: &r");
 
         Consumer<StackTraceElement> printer = StackTracePrinter.elementToString(str -> hover.add("&7" + str));

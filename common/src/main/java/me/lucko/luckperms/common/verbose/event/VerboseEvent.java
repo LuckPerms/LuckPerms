@@ -58,10 +58,16 @@ public abstract class VerboseEvent implements VariableEvaluator {
      */
     private final StackTraceElement[] checkTrace;
 
-    protected VerboseEvent(String checkTarget, QueryOptions checkQueryOptions, StackTraceElement[] checkTrace) {
+    /**
+     * The name of the thread where the check took place
+     */
+    private final String checkThread;
+
+    protected VerboseEvent(String checkTarget, QueryOptions checkQueryOptions, StackTraceElement[] checkTrace, String checkThread) {
         this.checkTarget = checkTarget;
         this.checkQueryOptions = checkQueryOptions;
         this.checkTrace = checkTrace;
+        this.checkThread = checkThread;
     }
 
     public String getCheckTarget() {
@@ -76,9 +82,13 @@ public abstract class VerboseEvent implements VariableEvaluator {
         return this.checkTrace;
     }
 
+    public String getCheckThread() {
+        return this.checkThread;
+    }
+
     protected abstract void serializeTo(JObject object);
 
-    private JObject formBaseJson() {
+    public JsonObject toJson(StackTracePrinter tracePrinter) {
         return new JObject()
                 .add("who", new JObject()
                         .add("identifier", this.checkTarget)
@@ -95,15 +105,6 @@ public abstract class VerboseEvent implements VariableEvaluator {
                         );
                     }
                 })
-                .consume(this::serializeTo);
-    }
-
-    public JsonObject toJson() {
-        return formBaseJson().toJson();
-    }
-
-    public JsonObject toJson(StackTracePrinter tracePrinter) {
-        return formBaseJson()
                 .add("trace", new JArray()
                         .consume(arr -> {
                             int overflow = tracePrinter.process(this.checkTrace, StackTracePrinter.elementToString(arr::add));
@@ -112,6 +113,8 @@ public abstract class VerboseEvent implements VariableEvaluator {
                             }
                         })
                 )
+                .add("thread", this.checkThread)
+                .consume(this::serializeTo)
                 .toJson();
     }
 }
