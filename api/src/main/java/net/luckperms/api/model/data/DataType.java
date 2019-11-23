@@ -1,5 +1,5 @@
 /*
- * This file is part of LuckPerms, licensed under the MIT License.
+ * This file is part of luckperms, licensed under the MIT License.
  *
  *  Copyright (c) lucko (Luck) <luck@lucko.me>
  *  Copyright (c) contributors
@@ -23,39 +23,24 @@
  *  SOFTWARE.
  */
 
-package net.luckperms.api.model;
-
-import net.luckperms.api.node.Node;
-import net.luckperms.api.util.Result;
-
-import org.checkerframework.checker.nullness.qual.NonNull;
+package net.luckperms.api.model.data;
 
 /**
- * Extension of {@link DataMutateResult} for temporary set operations.
+ * Represents a type of data.
  */
-public interface TemporaryDataMutateResult extends Result {
+public enum DataType {
 
     /**
-     * Gets the underlying result.
-     *
-     * @return the result
+     * Normal data.
      */
-    @NonNull DataMutateResult getResult();
+    NORMAL,
 
     /**
-     * Gets the node that resulted from any {@link TemporaryMergeBehaviour}
-     * processing.
+     * Data which expires automatically at the end of a session.
+     * (when a user logs off)
      *
-     * <p>If no processing took place, the same instance will be returned by
-     * this method.</p>
-     *
-     * @return the resultant node
+     * <p>This data is never saved to the backend storage provider.</p>
      */
-    @NonNull Node getMergedNode();
-
-    @Override
-    default boolean wasSuccessful() {
-        return getResult().wasSuccessful();
-    }
+    TRANSIENT
 
 }

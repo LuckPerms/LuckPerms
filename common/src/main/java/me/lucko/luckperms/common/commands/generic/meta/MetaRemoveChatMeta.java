@@ -48,8 +48,8 @@ import me.lucko.luckperms.common.util.TextUtils;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
 import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.model.DataMutateResult;
-import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.data.DataMutateResult;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.ChatMetaType;
 
 import java.util.List;

@@ -49,7 +49,7 @@ import net.alpenblock.bungeeperms.Server;
 import net.alpenblock.bungeeperms.World;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.event.cause.CreationCause;
-import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.data.DataType;
 
 import java.util.List;
 import java.util.Map;

@@ -54,7 +54,6 @@ import net.luckperms.api.track.TrackManager;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -145,11 +144,6 @@ public class LuckPermsApiProvider implements LuckPerms {
     @Override
     public @NonNull ContextManager getContextManager() {
         return this.contextManager;
-    }
-
-    @Override
-    public @NonNull Collection<String> getKnownPermissions() {
-        return this.plugin.getPermissionRegistry().rootAsList();
     }
 
     @Override

@@ -26,26 +26,18 @@
 package net.luckperms.api.model;
 
 import net.luckperms.api.cacheddata.CachedDataManager;
-import net.luckperms.api.context.ContextSet;
-import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.model.data.NodeMap;
 import net.luckperms.api.model.group.Group;
-import net.luckperms.api.model.group.GroupManager;
 import net.luckperms.api.model.user.User;
-import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.node.Node;
-import net.luckperms.api.node.NodeEqualityPredicate;
-import net.luckperms.api.node.Tristate;
 import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 /**
  * Generic superinterface for an object which holds permissions.
@@ -157,108 +149,6 @@ public interface PermissionHolder {
     @NonNull NodeMap transientData();
 
     /**
-     * Encapsulates a store of data ({@link Node}s) within a {@link PermissionHolder}.
-     *
-     * <p>The effect of any mutate operation will not persist in storage unless changes are
-     * explicitly saved. If changes are not saved, the effect will only be observed until the next
-     * time the holders permission data is (re)loaded. Changes to {@link User}s should be saved
-     * using {@link UserManager#saveUser(User)}, and changes to {@link Group}s should be saved
-     * using {@link GroupManager#saveGroup(Group)}.</p>
-     *
-     * <p>Before making changes to a user or group, it may be a good idea to load a fresh copy of
-     * the backing data from the storage if you haven't done so already, to avoid overwriting changes
-     * made already. This can be done via {@link UserManager#loadUser(UUID)} or
-     * {@link GroupManager#loadGroup(String)} respectively.</p>
-     */
-    interface NodeMap {
-
-        /**
-         * Gets a map of the {@link Node}s contained within this instance,
-         * mapped to their defined {@link Node#getContexts() context}.
-         *
-         * @return a map of nodes
-         */
-        @NonNull Map<ImmutableContextSet, Collection<Node>> toMap();
-
-        /**
-         * Gets a flattened set of {@link Node}s contained within this instance.
-         *
-         * <p>Effectively combines the value collections of the map returned by
-         * {@link #toMap()}.</p>
-         *
-         * @return a flattened set of the holders own nodes
-         */
-        @NonNull Set<Node> toSet();
-
-        /**
-         * Gets if this instance contains a given {@link Node}.
-         *
-         * <p>Returns {@link Tristate#UNDEFINED} if the instance does not contain the node,
-         * and the {@link Node#getValue() assigned value} of the node as a {@link Tristate}
-         * if it is present.</p>
-         *
-         * @param node              the node to check for
-         * @param equalityPredicate how to determine if a node matches
-         * @return a Tristate relating to the assigned state of the node
-         * @throws NullPointerException if the node is null
-         */
-        @NonNull Tristate contains(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate);
-
-        /**
-         * Adds a node.
-         *
-         * @param node the node to be add
-         * @return the result of the operation
-         */
-        @NonNull DataMutateResult add(@NonNull Node node);
-
-        /**
-         * Adds a node.
-         *
-         * @param node the node to add
-         * @param temporaryMergeBehaviour the behaviour used to merge temporary permission entries
-         * @return the result of the operation
-         */
-        @NonNull TemporaryDataMutateResult add(@NonNull Node node, @NonNull TemporaryMergeBehaviour temporaryMergeBehaviour);
-
-        /**
-         * Removes a node.
-         *
-         * @param node the node to remove
-         * @return the result of the operation
-         */
-        @NonNull DataMutateResult remove(@NonNull Node node);
-
-        /**
-         * Clears all nodes.
-         */
-        void clear();
-
-        /**
-         * Clears any nodes which pass the predicate.
-         *
-         * @param test the predicate to test for nodes which should be removed
-         */
-        void clear(@NonNull Predicate<? super Node> test);
-
-        /**
-         * Clears all nodes in a specific context.
-         *
-         * @param contextSet the contexts to filter by
-         */
-        void clear(@NonNull ContextSet contextSet);
-
-        /**
-         * Clears all nodes in a specific context which pass the predicate.
-         *
-         * @param contextSet the contexts to filter by
-         * @param test the predicate to test for nodes which should be removed
-         */
-        void clear(@NonNull ContextSet contextSet, @NonNull Predicate<? super Node> test);
-
-    }
-
-    /**
      * Gets a flattened/squashed view of the holders permissions.
      *
      * <p>This list is constructed using the values
@@ -272,7 +162,7 @@ public interface PermissionHolder {
      *
      * @return a list of the holders own nodes.
      */
-    @NonNull List<Node> getNodes();
+    @NonNull Collection<Node> getNodes();
 
     /**
      * Gets a sorted set of all held nodes.
@@ -301,7 +191,7 @@ public interface PermissionHolder {
      * @param queryOptions the query options
      * @return a list of nodes
      */
-    @NonNull List<Node> resolveInheritedNodes(@NonNull QueryOptions queryOptions);
+    @NonNull Collection<Node> resolveInheritedNodes(@NonNull QueryOptions queryOptions);
 
     /**
      * Gets a mutable sorted set of the nodes that this object has and inherits, filtered by context

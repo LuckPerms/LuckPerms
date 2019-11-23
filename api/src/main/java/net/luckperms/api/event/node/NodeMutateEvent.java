@@ -27,8 +27,8 @@ package net.luckperms.api.event.node;
 
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.Param;
-import net.luckperms.api.model.DataType;
 import net.luckperms.api.model.PermissionHolder;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.Node;

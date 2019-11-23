@@ -55,7 +55,7 @@ import me.lucko.luckperms.common.web.WebEditor;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
-import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 
 import java.util.ArrayList;

@@ -1,5 +1,5 @@
 /*
- * This file is part of LuckPerms, licensed under the MIT License.
+ * This file is part of luckperms, licensed under the MIT License.
  *
  *  Copyright (c) lucko (Luck) <luck@lucko.me>
  *  Copyright (c) contributors
@@ -23,10 +23,14 @@
  *  SOFTWARE.
  */
 
-package net.luckperms.api.model;
+package net.luckperms.api.model.data;
 
+import net.luckperms.api.model.PermissionHolder;
+import net.luckperms.api.node.Node;
 import net.luckperms.api.track.Track;
 import net.luckperms.api.util.Result;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents the result of a data mutation call on a LuckPerms object.
@@ -41,28 +45,53 @@ public enum DataMutateResult implements Result {
     SUCCESS(true),
 
     /**
+     * Indicates the mutation failed
+     */
+    FAIL(false),
+
+    /**
      * Indicates the mutation failed because the subject of the action already has something
      */
-    ALREADY_HAS(false),
+    FAIL_ALREADY_HAS(false),
 
     /**
      * Indicates the mutation failed because the subject of the action lacks something
      */
-    LACKS(false),
+    FAIL_LACKS(false);
 
-    /**
-     * Indicates the mutation failed
-     */
-    FAIL(false);
+    private final boolean successful;
 
-    private final boolean success;
-
-    DataMutateResult(boolean success) {
-        this.success = success;
+    DataMutateResult(boolean successful) {
+        this.successful = successful;
     }
 
     @Override
     public boolean wasSuccessful() {
-        return this.success;
+        return this.successful;
+    }
+
+    /**
+     * Extension of {@link DataMutateResult} for temporary set operations.
+     */
+    public interface WithMergedNode {
+
+        /**
+         * Gets the underlying result.
+         *
+         * @return the result
+         */
+        @NonNull DataMutateResult getResult();
+
+        /**
+         * Gets the node that resulted from any {@link TemporaryNodeMergeStrategy}
+         * processing.
+         *
+         * <p>If no processing took place, the same instance will be returned by
+         * this method.</p>
+         *
+         * @return the resultant node
+         */
+        @NonNull Node getMergedNode();
+
     }
 }

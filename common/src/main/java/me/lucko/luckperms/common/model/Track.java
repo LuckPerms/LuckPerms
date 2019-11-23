@@ -34,8 +34,8 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 
 import net.luckperms.api.context.ContextSet;
-import net.luckperms.api.model.DataMutateResult;
-import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.data.DataMutateResult;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.track.DemotionResult;
@@ -177,7 +177,7 @@ public final class Track {
      */
     public DataMutateResult appendGroup(Group group) {
         if (containsGroup(group)) {
-            return DataMutateResult.ALREADY_HAS;
+            return DataMutateResult.FAIL_ALREADY_HAS;
         }
 
         List<String> before = ImmutableList.copyOf(this.groups);
@@ -198,7 +198,7 @@ public final class Track {
      */
     public DataMutateResult insertGroup(Group group, int position) throws IndexOutOfBoundsException {
         if (containsGroup(group)) {
-            return DataMutateResult.ALREADY_HAS;
+            return DataMutateResult.FAIL_ALREADY_HAS;
         }
 
         List<String> before = ImmutableList.copyOf(this.groups);
@@ -227,7 +227,7 @@ public final class Track {
      */
     public DataMutateResult removeGroup(String group) {
         if (!containsGroup(group)) {
-            return DataMutateResult.LACKS;
+            return DataMutateResult.FAIL_LACKS;
         }
 
         List<String> before = ImmutableList.copyOf(this.groups);

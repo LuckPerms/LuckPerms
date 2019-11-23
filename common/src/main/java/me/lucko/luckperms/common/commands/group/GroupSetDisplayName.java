@@ -46,7 +46,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.DisplayNameNode;
 

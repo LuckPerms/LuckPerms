@@ -28,8 +28,8 @@ package me.lucko.luckperms.common.plugin.util;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import net.luckperms.api.model.DataType;
 import net.luckperms.api.model.PlayerSaveResult;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.platform.Platform;
 
 import java.util.Set;

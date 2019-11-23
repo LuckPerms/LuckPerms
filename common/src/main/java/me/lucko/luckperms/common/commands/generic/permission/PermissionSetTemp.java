@@ -48,12 +48,11 @@ import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.context.MutableContextSet;
-import net.luckperms.api.model.DataType;
-import net.luckperms.api.model.TemporaryDataMutateResult;
-import net.luckperms.api.model.TemporaryMergeBehaviour;
+import net.luckperms.api.model.data.DataMutateResult;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;
-import net.luckperms.api.util.Result;
 
 import java.util.List;
 
@@ -72,7 +71,7 @@ public class PermissionSetTemp extends SharedSubCommand {
         String node = ArgumentParser.parseString(0, args);
         boolean value = ArgumentParser.parseBoolean(1, args);
         long duration = ArgumentParser.parseDuration(2, args);
-        TemporaryMergeBehaviour modifier = ArgumentParser.parseTemporaryModifier(3, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
+        TemporaryNodeMergeStrategy modifier = ArgumentParser.parseTemporaryModifier(3, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
         MutableContextSet context = ArgumentParser.parseContext(3, args, plugin);
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
@@ -91,9 +90,9 @@ public class PermissionSetTemp extends SharedSubCommand {
             }
         }
 
-        TemporaryDataMutateResult result = holder.setNode(DataType.NORMAL, builtNode, modifier);
+        DataMutateResult.WithMergedNode result = holder.setNode(DataType.NORMAL, builtNode, modifier);
 
-        if (((Result) result.getResult()).wasSuccessful()) {
+        if (result.getResult().wasSuccessful()) {
             duration = result.getMergedNode().getExpiry().getEpochSecond();
             Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, value, holder.getFormattedDisplayName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 

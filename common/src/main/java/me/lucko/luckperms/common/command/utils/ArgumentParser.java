@@ -36,7 +36,7 @@ import me.lucko.luckperms.common.util.DateParser;
 
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.MutableContextSet;
-import net.luckperms.api.model.TemporaryMergeBehaviour;
+import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
 
 import java.util.List;
 import java.util.Optional;
@@ -122,27 +122,28 @@ public class ArgumentParser {
         return unixTime < (System.currentTimeMillis() / 1000L);
     }
 
-    public static TemporaryMergeBehaviour parseTemporaryModifier(String s) {
+    public static TemporaryNodeMergeStrategy parseTemporaryModifier(String s) {
         switch (s.toLowerCase()) {
             case "accumulate":
-                return TemporaryMergeBehaviour.ADD_NEW_DURATION_TO_EXISTING;
+                return TemporaryNodeMergeStrategy.ADD_NEW_DURATION_TO_EXISTING;
             case "replace":
-                return TemporaryMergeBehaviour.REPLACE_EXISTING_IF_DURATION_LONGER;
+                return TemporaryNodeMergeStrategy.REPLACE_EXISTING_IF_DURATION_LONGER;
             case "deny":
-                return TemporaryMergeBehaviour.FAIL_WITH_ALREADY_HAS;
+            case "none":
+                return TemporaryNodeMergeStrategy.NONE;
             default:
                 throw new IllegalArgumentException("Unknown value: " + s);
         }
     }
 
-    public static Optional<TemporaryMergeBehaviour> parseTemporaryModifier(int index, List<String> args) {
+    public static Optional<TemporaryNodeMergeStrategy> parseTemporaryModifier(int index, List<String> args) {
         if (index < 0 || index >= args.size()) {
             return Optional.empty();
         }
 
         String s = args.get(index);
         try {
-            Optional<TemporaryMergeBehaviour> ret = Optional.of(parseTemporaryModifier(s));
+            Optional<TemporaryNodeMergeStrategy> ret = Optional.of(parseTemporaryModifier(s));
             args.remove(index);
             return ret;
         } catch (IllegalArgumentException e) {

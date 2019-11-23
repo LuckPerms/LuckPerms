@@ -52,9 +52,9 @@ import me.lucko.luckperms.common.util.TextUtils;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
 import net.luckperms.api.context.MutableContextSet;
-import net.luckperms.api.model.DataType;
-import net.luckperms.api.model.TemporaryDataMutateResult;
-import net.luckperms.api.model.TemporaryMergeBehaviour;
+import net.luckperms.api.model.data.DataMutateResult;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.query.QueryOptions;
 
@@ -85,7 +85,7 @@ public class MetaSetTempChatMeta extends SharedSubCommand {
         int priority = ArgumentParser.parseIntOrElse(0, args, Integer.MIN_VALUE);
         String meta;
         long duration;
-        TemporaryMergeBehaviour modifier;
+        TemporaryNodeMergeStrategy modifier;
         MutableContextSet context;
 
         if (priority == Integer.MIN_VALUE) {
@@ -130,7 +130,7 @@ public class MetaSetTempChatMeta extends SharedSubCommand {
             }
         }
 
-        TemporaryDataMutateResult ret = holder.setNode(DataType.NORMAL, this.type.builder(meta, priority).expiry(duration).withContext(context).build(), modifier);
+        DataMutateResult.WithMergedNode ret = holder.setNode(DataType.NORMAL, this.type.builder(meta, priority).expiry(duration).withContext(context).build(), modifier);
 
         if (ret.getResult().wasSuccessful()) {
             duration = ret.getMergedNode().getExpiry().getEpochSecond();

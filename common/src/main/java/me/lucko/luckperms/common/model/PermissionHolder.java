@@ -38,10 +38,9 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.model.DataMutateResult;
-import net.luckperms.api.model.DataType;
-import net.luckperms.api.model.TemporaryDataMutateResult;
-import net.luckperms.api.model.TemporaryMergeBehaviour;
+import net.luckperms.api.model.data.DataMutateResult;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.node.NodeType;
@@ -410,7 +409,7 @@ public abstract class PermissionHolder {
 
     public DataMutateResult setNode(DataType dataType, Node node, boolean callEvent) {
         if (hasNode(dataType, node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME) != Tristate.UNDEFINED) {
-            return DataMutateResult.ALREADY_HAS;
+            return DataMutateResult.FAIL_ALREADY_HAS;
         }
 
         NodeMap data = getData(dataType);
@@ -428,8 +427,8 @@ public abstract class PermissionHolder {
         return DataMutateResult.SUCCESS;
     }
 
-    public TemporaryDataMutateResult setNode(DataType dataType, Node node, TemporaryMergeBehaviour mergeBehaviour) {
-        if (node.hasExpiry() && mergeBehaviour != TemporaryMergeBehaviour.FAIL_WITH_ALREADY_HAS) {
+    public DataMutateResult.WithMergedNode setNode(DataType dataType, Node node, TemporaryNodeMergeStrategy mergeStrategy) {
+        if (node.hasExpiry() && mergeStrategy != TemporaryNodeMergeStrategy.NONE) {
             Node otherMatch = getData(dataType).immutable().values().stream()
                     .filter(NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE.equalTo(node))
                     .findFirst().orElse(null);
@@ -437,7 +436,7 @@ public abstract class PermissionHolder {
                 NodeMap data = getData(dataType);
 
                 Node newNode = null;
-                switch (mergeBehaviour) {
+                switch (mergeStrategy) {
                     case ADD_NEW_DURATION_TO_EXISTING: {
                         // Create a new Node with the same properties, but add the expiry dates together
                         long newExpiry = otherMatch.getExpiry().plus(Duration.between(Instant.now(), node.getExpiry())).getEpochSecond();
@@ -462,18 +461,18 @@ public abstract class PermissionHolder {
                     ImmutableCollection<? extends Node> after = data.immutable().values();
                     this.plugin.getEventFactory().handleNodeAdd(newNode, this, dataType, before, after);
 
-                    return new TemporaryResult(DataMutateResult.SUCCESS, newNode);
+                    return new MergedNodeResult(DataMutateResult.SUCCESS, newNode);
                 }
             }
         }
 
         // Fallback to the normal handling.
-        return new TemporaryResult(setNode(dataType, node, true), node);
+        return new MergedNodeResult(setNode(dataType, node, true), node);
     }
 
     public DataMutateResult unsetNode(DataType dataType, Node node) {
         if (hasNode(dataType, node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE) == Tristate.UNDEFINED) {
-            return DataMutateResult.LACKS;
+            return DataMutateResult.FAIL_LACKS;
         }
 
         ImmutableCollection<? extends Node> before = getData(dataType).immutable().values();
@@ -543,11 +542,11 @@ public abstract class PermissionHolder {
         return OptionalInt.empty();
     }
 
-    private static final class TemporaryResult implements TemporaryDataMutateResult {
+    private static final class MergedNodeResult implements DataMutateResult.WithMergedNode {
         private final DataMutateResult result;
         private final Node mergedNode;
 
-        private TemporaryResult(DataMutateResult result, Node mergedNode) {
+        private MergedNodeResult(DataMutateResult result, Node mergedNode) {
             this.result = result;
             this.mergedNode = mergedNode;
         }

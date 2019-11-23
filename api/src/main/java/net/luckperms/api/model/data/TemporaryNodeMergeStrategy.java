@@ -1,5 +1,5 @@
 /*
- * This file is part of LuckPerms, licensed under the MIT License.
+ * This file is part of luckperms, licensed under the MIT License.
  *
  *  Copyright (c) lucko (Luck) <luck@lucko.me>
  *  Copyright (c) contributors
@@ -23,24 +23,36 @@
  *  SOFTWARE.
  */
 
-package net.luckperms.api.model;
+package net.luckperms.api.model.data;
+
+import net.luckperms.api.node.Node;
 
 /**
- * Represents a type of data.
+ * Controls how the implementation should behave when new temporary nodes are set
+ * that would otherwise conflict with existing entries.
+ *
+ * <p>The default behaviour of {@link NodeMap#add(Node)} is
+ * to return a result of {@link DataMutateResult#FAIL_ALREADY_HAS} when an equivalent
+ * node is found. This can be replicated using {@link #NONE}.</p>
+ *
+ * <p>However, the {@link NodeMap#add(Node, TemporaryNodeMergeStrategy)}
+ * method allows this behaviour to be customized for temporary permissions.</p>
  */
-public enum DataType {
+public enum TemporaryNodeMergeStrategy {
 
     /**
-     * Normal data.
+     * Expiry durations will be added to the existing expiry time of a permission.
      */
-    NORMAL,
+    ADD_NEW_DURATION_TO_EXISTING,
 
     /**
-     * Data which expires automatically at the end of a session.
-     * (when a user logs off)
-     *
-     * <p>This data is never saved to the backend storage provider.</p>
+     * Expiry durations will be replaced if the new duration is longer than the current one.
      */
-    TRANSIENT
+    REPLACE_EXISTING_IF_DURATION_LONGER,
+
+    /**
+     * The operation will fail if an existing temporary node is present.
+     */
+    NONE
 
 }

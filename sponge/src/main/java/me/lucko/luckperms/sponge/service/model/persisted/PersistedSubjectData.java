@@ -28,7 +28,7 @@ package me.lucko.luckperms.sponge.service.model.persisted;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.model.calculated.MonitoredSubjectData;
 
-import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.data.DataType;
 
 /**
  * Extension of CalculatedSubjectData which persists data when modified

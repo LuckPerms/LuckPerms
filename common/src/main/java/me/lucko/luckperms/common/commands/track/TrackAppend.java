@@ -43,7 +43,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.Predicates;
 
-import net.luckperms.api.model.DataMutateResult;
+import net.luckperms.api.model.data.DataMutateResult;
 
 import java.util.List;
 

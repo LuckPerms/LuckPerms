@@ -57,7 +57,7 @@ import me.lucko.luckperms.common.util.ProgressLogger;
 
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.event.cause.CreationCause;
-import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.NodeBuilder;
 
 import org.bukkit.Bukkit;

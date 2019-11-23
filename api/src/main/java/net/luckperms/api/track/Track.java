@@ -26,7 +26,7 @@
 package net.luckperms.api.track;
 
 import net.luckperms.api.context.ContextSet;
-import net.luckperms.api.model.DataMutateResult;
+import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.user.User;
 
@@ -57,13 +57,6 @@ public interface Track {
      * @return an ordered {@link List} of the groups on this track
      */
     @NonNull List<String> getGroups();
-
-    /**
-     * Gets the number of groups on this track
-     *
-     * @return the number of groups on this track
-     */
-    int getSize();
 
     /**
      * Gets the next group on the track, after the one provided

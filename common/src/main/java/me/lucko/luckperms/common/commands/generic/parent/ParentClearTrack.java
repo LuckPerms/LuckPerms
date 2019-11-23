@@ -49,7 +49,7 @@ import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.NodeType;
 
 import java.util.List;

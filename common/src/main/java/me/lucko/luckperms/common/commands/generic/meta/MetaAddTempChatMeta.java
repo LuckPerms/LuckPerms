@@ -50,9 +50,9 @@ import me.lucko.luckperms.common.util.TextUtils;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
 import net.luckperms.api.context.MutableContextSet;
-import net.luckperms.api.model.DataType;
-import net.luckperms.api.model.TemporaryDataMutateResult;
-import net.luckperms.api.model.TemporaryMergeBehaviour;
+import net.luckperms.api.model.data.DataMutateResult;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
 import net.luckperms.api.node.ChatMetaType;
 
 import java.util.List;
@@ -81,7 +81,7 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
         int priority = ArgumentParser.parsePriority(0, args);
         String meta = ArgumentParser.parseString(1, args);
         long duration = ArgumentParser.parseDuration(2, args);
-        TemporaryMergeBehaviour modifier = ArgumentParser.parseTemporaryModifier(3, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
+        TemporaryNodeMergeStrategy modifier = ArgumentParser.parseTemporaryModifier(3, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
         MutableContextSet context = ArgumentParser.parseContext(3, args, plugin);
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
@@ -90,7 +90,7 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        TemporaryDataMutateResult ret = holder.setNode(DataType.NORMAL, this.type.builder(meta, priority).expiry(duration).withContext(context).build(), modifier);
+        DataMutateResult.WithMergedNode ret = holder.setNode(DataType.NORMAL, this.type.builder(meta, priority).expiry(duration).withContext(context).build(), modifier);
 
         if (ret.getResult().wasSuccessful()) {
             duration = ret.getMergedNode().getExpiry().getEpochSecond();

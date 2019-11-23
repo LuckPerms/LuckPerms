@@ -54,7 +54,6 @@ import net.luckperms.api.track.TrackManager;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -99,7 +98,6 @@ public class MinimalApiProvider implements LuckPerms {
     @Override public @NonNull MetaStackFactory getMetaStackFactory() { throw exception(); }
     @Override public @NonNull CompletableFuture<Void> runUpdateTask() { throw exception(); }
     @Override public void registerMessengerProvider(@NonNull MessengerProvider messengerProvider) { throw exception(); }
-    @Override public @NonNull Collection<String> getKnownPermissions() { throw exception(); }
 
     private static final class MinimalActionLogger implements ActionLogger {
         private static final MinimalActionLogger INSTANCE = new MinimalActionLogger();

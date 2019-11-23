@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.nukkit.inject.dummy.DummyPlugin;
 
-import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
 import net.luckperms.api.util.Result;

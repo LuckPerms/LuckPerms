@@ -30,10 +30,10 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import net.luckperms.api.cacheddata.CachedDataManager;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.model.DataMutateResult;
-import net.luckperms.api.model.DataType;
-import net.luckperms.api.model.TemporaryDataMutateResult;
-import net.luckperms.api.model.TemporaryMergeBehaviour;
+import net.luckperms.api.model.data.DataMutateResult;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.model.data.NodeMap;
+import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.node.Tristate;
@@ -140,7 +140,7 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
         }
 
         @Override
-        public @NonNull Set<Node> toSet() {
+        public @NonNull Set<Node> toCollection() {
             return ApiPermissionHolder.this.handle.getData(this.dataType).asSet();
         }
 
@@ -155,8 +155,8 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
         }
 
         @Override
-        public @NonNull TemporaryDataMutateResult add(@NonNull Node node, @NonNull TemporaryMergeBehaviour temporaryMergeBehaviour) {
-            return ApiPermissionHolder.this.handle.setNode(this.dataType, node, temporaryMergeBehaviour);
+        public DataMutateResult.@NonNull WithMergedNode add(@NonNull Node node, @NonNull TemporaryNodeMergeStrategy temporaryNodeMergeStrategy) {
+            return ApiPermissionHolder.this.handle.setNode(this.dataType, node, temporaryNodeMergeStrategy);
         }
 
         @Override

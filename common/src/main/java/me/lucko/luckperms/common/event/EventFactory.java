@@ -84,8 +84,8 @@ import net.luckperms.api.event.user.UserLoadEvent;
 import net.luckperms.api.event.user.track.UserDemoteEvent;
 import net.luckperms.api.event.user.track.UserPromoteEvent;
 import net.luckperms.api.extension.Extension;
-import net.luckperms.api.model.DataType;
 import net.luckperms.api.model.PlayerSaveResult;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 
 import org.checkerframework.checker.nullness.qual.Nullable;

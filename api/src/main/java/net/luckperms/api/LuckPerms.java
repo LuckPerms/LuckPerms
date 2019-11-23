@@ -46,7 +46,6 @@ import net.luckperms.api.track.TrackManager;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -206,12 +205,5 @@ public interface LuckPerms {
      * @param messengerProvider the messenger provider.
      */
     void registerMessengerProvider(@NonNull MessengerProvider messengerProvider);
-
-    /**
-     * Gets a {@link Collection} of all known permission strings.
-     *
-     * @return a collection of the known permissions
-     */
-    @NonNull Collection<String> getKnownPermissions();
 
 }

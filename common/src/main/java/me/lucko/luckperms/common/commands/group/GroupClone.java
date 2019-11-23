@@ -41,7 +41,7 @@ import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.event.cause.CreationCause;
-import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.data.DataType;
 
 import java.util.List;
 

@@ -49,8 +49,8 @@ import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 
 import net.luckperms.api.actionlog.Action;
-import net.luckperms.api.model.DataType;
 import net.luckperms.api.model.PlayerSaveResult;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.HeldNode;
 import net.luckperms.api.node.Node;
 

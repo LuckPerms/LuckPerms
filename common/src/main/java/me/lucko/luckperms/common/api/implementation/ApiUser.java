@@ -31,8 +31,8 @@ import me.lucko.luckperms.common.cacheddata.UserCachedDataManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.types.Inheritance;
 
-import net.luckperms.api.model.DataMutateResult;
-import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.data.DataMutateResult;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.NodeEqualityPredicate;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -77,7 +77,7 @@ public class ApiUser extends ApiPermissionHolder implements net.luckperms.api.mo
     public @NonNull DataMutateResult setPrimaryGroup(@NonNull String group) {
         Objects.requireNonNull(group, "group");
         if (getPrimaryGroup().equalsIgnoreCase(group)) {
-            return DataMutateResult.ALREADY_HAS;
+            return DataMutateResult.FAIL_ALREADY_HAS;
         }
 
         if (!this.handle.hasNode(DataType.NORMAL, Inheritance.builder(group.toLowerCase()).build(), NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {

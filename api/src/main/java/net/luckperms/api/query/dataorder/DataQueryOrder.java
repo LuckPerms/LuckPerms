@@ -25,7 +25,7 @@
 
 package net.luckperms.api.query.dataorder;
 
-import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;

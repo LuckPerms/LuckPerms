@@ -48,7 +48,7 @@ import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.MutableContextSet;
-import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Tristate;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;

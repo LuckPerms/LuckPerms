@@ -42,7 +42,7 @@ import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.NodeType;

@@ -28,6 +28,7 @@ package net.luckperms.api.platform;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 
@@ -49,6 +50,13 @@ public interface Platform {
      * @return the unique connections
      */
     @NonNull Set<UUID> getUniqueConnections();
+
+    /**
+     * Gets a {@link Collection} of all known permission strings.
+     *
+     * @return a collection of the known permissions
+     */
+    @NonNull Collection<String> getKnownPermissions();
 
     /**
      * Gets the time when the plugin first started.

@@ -33,6 +33,7 @@ import net.luckperms.api.platform.PluginMetadata;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
@@ -62,6 +63,11 @@ public class ApiPlatform implements Platform, PluginMetadata {
     @Override
     public @NonNull Set<UUID> getUniqueConnections() {
         return Collections.unmodifiableSet(this.plugin.getConnectionListener().getUniqueConnections());
+    }
+
+    @Override
+    public @NonNull Collection<String> getKnownPermissions() {
+        return this.plugin.getPermissionRegistry().rootAsList();
     }
 
     @Override

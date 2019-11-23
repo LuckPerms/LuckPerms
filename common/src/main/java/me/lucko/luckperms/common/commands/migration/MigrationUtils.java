@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.node.types.Weight;
 
-import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.NodeType;
 

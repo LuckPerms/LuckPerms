@@ -50,8 +50,8 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.context.MutableContextSet;
-import net.luckperms.api.model.DataMutateResult;
-import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.data.DataMutateResult;
+import net.luckperms.api.model.data.DataType;
 
 import java.util.List;
 

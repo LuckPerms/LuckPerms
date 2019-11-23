@@ -48,7 +48,7 @@ import me.lucko.luckperms.common.util.Uuids;
 
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.event.cause.CreationCause;
-import net.luckperms.api.model.DataType;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 
 import org.anjocaido.groupmanager.GlobalGroups;
