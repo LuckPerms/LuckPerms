@@ -25,8 +25,9 @@
 
 package me.lucko.luckperms.common.verbose.event;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.util.gson.JObject;
+
+import net.luckperms.api.query.QueryOptions;
 
 public class MetaCheckEvent extends VerboseEvent {
 
@@ -45,8 +46,8 @@ public class MetaCheckEvent extends VerboseEvent {
      */
     private final String result;
 
-    public MetaCheckEvent(Origin origin, String checkTarget, ImmutableContextSet checkContext, StackTraceElement[] checkTrace, String key, String result) {
-        super(checkTarget, checkContext, checkTrace);
+    public MetaCheckEvent(Origin origin, String checkTarget, QueryOptions checkQueryOptions, StackTraceElement[] checkTrace, String checkThread, String key, String result) {
+        super(checkTarget, checkQueryOptions, checkTrace, checkThread);
         this.origin = origin;
         this.key = key;
         this.result = result;
@@ -70,6 +71,14 @@ public class MetaCheckEvent extends VerboseEvent {
                 .add("key", this.key)
                 .add("result", this.result)
                 .add("origin", this.origin.name().toLowerCase());
+    }
+
+    @Override
+    public boolean eval(String variable) {
+        return variable.equals("meta") ||
+                getCheckTarget().equalsIgnoreCase(variable) ||
+                getKey().toLowerCase().startsWith(variable.toLowerCase()) ||
+                getResult().equalsIgnoreCase(variable);
     }
 
     /**

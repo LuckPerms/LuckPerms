@@ -27,19 +27,18 @@ package me.lucko.luckperms.sponge.service.model.calculated;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.inheritance.SubjectInheritanceGraph;
-import me.lucko.luckperms.sponge.service.inheritance.SubjectInheritanceGraphs;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
+
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.util.Tristate;
+import net.luckperms.api.query.QueryOptions;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -49,11 +48,11 @@ import java.util.Set;
 
 public abstract class CalculatedSubject implements LPSubject {
     private final LPSpongePlugin plugin;
-    private final CalculatedSubjectCachedData cachedData;
+    private final CalculatedSubjectCachedDataManager cachedData;
 
     protected CalculatedSubject(LPSpongePlugin plugin) {
         this.plugin = plugin;
-        this.cachedData = new CalculatedSubjectCachedData(this, plugin);
+        this.cachedData = new CalculatedSubjectCachedDataManager(this, plugin);
     }
 
     @Override
@@ -64,7 +63,7 @@ public abstract class CalculatedSubject implements LPSubject {
     public abstract CalculatedSubjectData getSubjectData();
     public abstract CalculatedSubjectData getTransientSubjectData();
 
-    public Map<String, Boolean> getCombinedPermissions(ContextSet filter) {
+    public Map<String, Boolean> getCombinedPermissions(QueryOptions filter) {
         Map<String, Boolean> permissions;
         Map<String, Boolean> merging;
         switch (getParentCollection().getResolutionOrder()) {
@@ -86,30 +85,8 @@ public abstract class CalculatedSubject implements LPSubject {
         return permissions;
     }
 
-    public Map<String, Boolean> getCombinedPermissions() {
-        Map<String, Boolean> permissions;
-        Map<String, Boolean> merging;
-        switch (getParentCollection().getResolutionOrder()) {
-            case TRANSIENT_FIRST:
-                permissions = getTransientSubjectData().resolvePermissions();
-                merging = getSubjectData().resolvePermissions();
-                break;
-            case TRANSIENT_LAST:
-                permissions = getSubjectData().resolvePermissions();
-                merging = getTransientSubjectData().resolvePermissions();
-                break;
-            default:
-                throw new AssertionError();
-        }
-
-        for (Map.Entry<String, Boolean> entry : merging.entrySet()) {
-            permissions.putIfAbsent(entry.getKey(), entry.getValue());
-        }
-        return permissions;
-    }
-
-    public Map<String, Boolean> resolveAllPermissions(ImmutableContextSet filter) {
-        SubjectInheritanceGraph graph = SubjectInheritanceGraphs.getGraph(filter);
+    public Map<String, Boolean> resolveAllPermissions(QueryOptions filter) {
+        SubjectInheritanceGraph graph = new SubjectInheritanceGraph(filter);
         Map<String, Boolean> result = new HashMap<>();
 
         Iterable<CalculatedSubject> traversal = graph.traverse(TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER, this);
@@ -122,21 +99,7 @@ public abstract class CalculatedSubject implements LPSubject {
         return result;
     }
 
-    public Map<String, Boolean> resolveAllPermissions() {
-        SubjectInheritanceGraph graph = SubjectInheritanceGraphs.getGraph();
-        Map<String, Boolean> result = new HashMap<>();
-
-        Iterable<CalculatedSubject> traversal = graph.traverse(TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER, this);
-        for (CalculatedSubject subject : traversal) {
-            for (Map.Entry<String, Boolean> entry : subject.getCombinedPermissions().entrySet()) {
-                result.putIfAbsent(entry.getKey(), entry.getValue());
-            }
-        }
-
-        return result;
-    }
-
-    public Set<LPSubjectReference> getCombinedParents(ContextSet filter) {
+    public Set<LPSubjectReference> getCombinedParents(QueryOptions filter) {
         Set<LPSubjectReference> parents;
         Set<LPSubjectReference> merging;
         switch (getParentCollection().getResolutionOrder()) {
@@ -156,28 +119,8 @@ public abstract class CalculatedSubject implements LPSubject {
         return parents;
     }
 
-    public Set<LPSubjectReference> getCombinedParents() {
-        Set<LPSubjectReference> parents;
-        Set<LPSubjectReference> merging;
-        switch (getParentCollection().getResolutionOrder()) {
-            case TRANSIENT_FIRST:
-                parents = getTransientSubjectData().resolveParents();
-                merging = getSubjectData().resolveParents();
-                break;
-            case TRANSIENT_LAST:
-                parents = getSubjectData().resolveParents();
-                merging = getTransientSubjectData().resolveParents();
-                break;
-            default:
-                throw new AssertionError();
-        }
-
-        parents.addAll(merging);
-        return parents;
-    }
-
-    public Set<LPSubjectReference> resolveAllParents(ImmutableContextSet filter) {
-        SubjectInheritanceGraph graph = SubjectInheritanceGraphs.getGraph(filter);
+    public Set<LPSubjectReference> resolveAllParents(QueryOptions filter) {
+        SubjectInheritanceGraph graph = new SubjectInheritanceGraph(filter);
         Set<LPSubjectReference> result = new LinkedHashSet<>();
 
         Iterable<CalculatedSubject> traversal = graph.traverse(TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER, this);
@@ -188,19 +131,7 @@ public abstract class CalculatedSubject implements LPSubject {
         return result;
     }
 
-    public Set<LPSubjectReference> resolveAllParents() {
-        SubjectInheritanceGraph graph = SubjectInheritanceGraphs.getGraph();
-        Set<LPSubjectReference> result = new LinkedHashSet<>();
-
-        Iterable<CalculatedSubject> traversal = graph.traverse(TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER, this);
-        for (CalculatedSubject subject : traversal) {
-            result.addAll(subject.getCombinedParents());
-        }
-
-        return result;
-    }
-
-    public Map<String, String> getCombinedOptions(ContextSet filter) {
+    public Map<String, String> getCombinedOptions(QueryOptions filter) {
         Map<String, String> options;
         Map<String, String> merging;
         switch (getParentCollection().getResolutionOrder()) {
@@ -222,30 +153,8 @@ public abstract class CalculatedSubject implements LPSubject {
         return options;
     }
 
-    public Map<String, String> getCombinedOptions() {
-        Map<String, String> options;
-        Map<String, String> merging;
-        switch (getParentCollection().getResolutionOrder()) {
-            case TRANSIENT_FIRST:
-                options = getTransientSubjectData().resolveOptions();
-                merging = getSubjectData().resolveOptions();
-                break;
-            case TRANSIENT_LAST:
-                options = getSubjectData().resolveOptions();
-                merging = getTransientSubjectData().resolveOptions();
-                break;
-            default:
-                throw new AssertionError();
-        }
-
-        for (Map.Entry<String, String> entry : merging.entrySet()) {
-            options.putIfAbsent(entry.getKey(), entry.getValue());
-        }
-        return options;
-    }
-
-    public Map<String, String> resolveAllOptions(ImmutableContextSet filter) {
-        SubjectInheritanceGraph graph = SubjectInheritanceGraphs.getGraph(filter);
+    public Map<String, String> resolveAllOptions(QueryOptions filter) {
+        SubjectInheritanceGraph graph = new SubjectInheritanceGraph(filter);
         Map<String, String> result = new HashMap<>();
 
         Iterable<CalculatedSubject> traversal = graph.traverse(TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER, this);
@@ -258,22 +167,8 @@ public abstract class CalculatedSubject implements LPSubject {
         return result;
     }
 
-    public Map<String, String> resolveAllOptions() {
-        SubjectInheritanceGraph graph = SubjectInheritanceGraphs.getGraph();
-        Map<String, String> result = new HashMap<>();
-
-        Iterable<CalculatedSubject> traversal = graph.traverse(TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER, this);
-        for (CalculatedSubject subject : traversal) {
-            for (Map.Entry<String, String> entry : subject.getCombinedOptions().entrySet()) {
-                result.putIfAbsent(entry.getKey(), entry.getValue());
-            }
-        }
-
-        return result;
-    }
-
-    public void resolveAllOptions(MetaAccumulator accumulator, ImmutableContextSet filter) {
-        SubjectInheritanceGraph graph = SubjectInheritanceGraphs.getGraph(filter);
+    public void resolveAllOptions(MetaAccumulator accumulator, QueryOptions filter) {
+        SubjectInheritanceGraph graph = new SubjectInheritanceGraph(filter);
         Iterable<CalculatedSubject> traversal = graph.traverse(TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER, this);
         for (CalculatedSubject subject : traversal) {
             for (Map.Entry<String, String> entry : subject.getCombinedOptions(filter).entrySet()) {
@@ -282,34 +177,29 @@ public abstract class CalculatedSubject implements LPSubject {
         }
     }
 
-    public void resolveAllOptions(MetaAccumulator accumulator) {
-        SubjectInheritanceGraph graph = SubjectInheritanceGraphs.getGraph();
-        Iterable<CalculatedSubject> traversal = graph.traverse(TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER, this);
-        for (CalculatedSubject subject : traversal) {
-            for (Map.Entry<String, String> entry : subject.getCombinedOptions().entrySet()) {
-                accumulator.accumulateMeta(entry.getKey(), entry.getValue());
-            }
-        }
+    @Override
+    public Tristate getPermissionValue(QueryOptions options, String permission) {
+        return this.cachedData.getPermissionData(options).checkPermission(permission, PermissionCheckEvent.Origin.INTERNAL).result();
     }
 
     @Override
     public Tristate getPermissionValue(ImmutableContextSet contexts, String permission) {
-        return this.cachedData.getPermissionData(Contexts.global().setContexts(contexts)).getPermissionValue(permission, PermissionCheckEvent.Origin.INTERNAL).result();
+        return getPermissionValue(QueryOptions.defaultContextualOptions().toBuilder().context(contexts).build(), permission);
     }
 
     @Override
     public boolean isChildOf(ImmutableContextSet contexts, LPSubjectReference parent) {
-        return resolveAllParents(contexts).contains(parent);
+        return resolveAllParents(QueryOptions.defaultContextualOptions().toBuilder().context(contexts).build()).contains(parent);
     }
 
     @Override
     public ImmutableList<LPSubjectReference> getParents(ImmutableContextSet contexts) {
-        return ImmutableList.copyOf(resolveAllParents(contexts));
+        return ImmutableList.copyOf(resolveAllParents(QueryOptions.defaultContextualOptions().toBuilder().context(contexts).build()));
     }
 
     @Override
     public Optional<String> getOption(ImmutableContextSet contexts, String key) {
-        return Optional.ofNullable(this.cachedData.getMetaData(Contexts.global().setContexts(contexts)).getMeta(MetaCheckEvent.Origin.PLATFORM_API).get(key));
+        return Optional.ofNullable(this.cachedData.getMetaData(QueryOptions.defaultContextualOptions().toBuilder().context(contexts).build()).getMetaValue(key, MetaCheckEvent.Origin.PLATFORM_API));
     }
 
     @Override

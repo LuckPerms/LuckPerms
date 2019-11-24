@@ -25,13 +25,14 @@
 
 package me.lucko.luckperms.bukkit;
 
-import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.bukkit.compat.NullSafeConsoleCommandSender;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.logging.JavaPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
+
+import net.luckperms.api.platform.Platform;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
@@ -198,8 +199,8 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     // provide information about the platform
 
     @Override
-    public PlatformType getType() {
-        return PlatformType.BUKKIT;
+    public Platform.Type getType() {
+        return Platform.Type.BUKKIT;
     }
 
     @Override
@@ -223,19 +224,19 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     }
 
     @Override
-    public Optional<Player> getPlayer(UUID uuid) {
-        return Optional.ofNullable(getServer().getPlayer(uuid));
+    public Optional<Player> getPlayer(UUID uniqueId) {
+        return Optional.ofNullable(getServer().getPlayer(uniqueId));
     }
 
     @Override
-    public Optional<UUID> lookupUuid(String username) {
+    public Optional<UUID> lookupUniqueId(String username) {
         //noinspection deprecation
         return Optional.ofNullable(getServer().getOfflinePlayer(username)).map(OfflinePlayer::getUniqueId);
     }
 
     @Override
-    public Optional<String> lookupUsername(UUID uuid) {
-        return Optional.ofNullable(getServer().getOfflinePlayer(uuid)).map(OfflinePlayer::getName);
+    public Optional<String> lookupUsername(UUID uniqueId) {
+        return Optional.ofNullable(getServer().getOfflinePlayer(uniqueId)).map(OfflinePlayer::getName);
     }
 
     @Override
@@ -254,8 +255,8 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     }
 
     @Override
-    public boolean isPlayerOnline(UUID uuid) {
-        Player player = getServer().getPlayer(uuid);
+    public boolean isPlayerOnline(UUID uniqueId) {
+        Player player = getServer().getPlayer(uniqueId);
         return player != null && player.isOnline();
     }
 

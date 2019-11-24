@@ -27,7 +27,6 @@ package me.lucko.luckperms.bukkit.migration;
 
 import com.platymuus.bukkit.permissions.PermissionsPlugin;
 
-import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -38,12 +37,16 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.ProgressLogger;
+
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.event.cause.CreationCause;
+import net.luckperms.api.model.data.DataType;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -80,7 +83,7 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
 
         ConfigurationSection groupsSection = config.getConfigurationSection("groups");
 
-        Iterators.iterate(groupsSection.getKeys(false), key -> {
+        Iterators.tryIterate(groupsSection.getKeys(false), key -> {
             final String groupName = MigrationUtils.standardizeName(key);
             Group lpGroup = plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
 
@@ -100,7 +103,7 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
 
         ConfigurationSection usersSection = config.getConfigurationSection("users");
 
-        Iterators.iterate(usersSection.getKeys(false), key -> {
+        Iterators.tryIterate(usersSection.getKeys(false), key -> {
             UUID uuid = BukkitUuids.lookupUuid(log, key);
             if (uuid == null) {
                 return;
@@ -113,7 +116,7 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
                 migrate(lpUser, usersSection.getConfigurationSection(key));
             }
 
-            plugin.getUserManager().cleanup(lpUser);
+            plugin.getUserManager().getHouseKeeper().cleanup(lpUser.getUniqueId());
             plugin.getStorage().saveUser(lpUser);
             log.logProgress("Migrated {} users so far.", userCount.incrementAndGet(), ProgressLogger.DEFAULT_NOTIFY_FREQUENCY);
         });
@@ -129,7 +132,7 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
             ConfigurationSection permsSection = data.getConfigurationSection("permissions");
             for (String perm : permsSection.getKeys(false)) {
                 boolean value = permsSection.getBoolean(perm);
-                holder.setPermission(MigrationUtils.parseNode(perm, value).build());
+                holder.setNode(DataType.NORMAL, MigrationUtils.parseNode(perm, value).build(), true);
             }
         }
 
@@ -140,7 +143,7 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
                     ConfigurationSection permsSection = worldSection.getConfigurationSection(world);
                     for (String perm : permsSection.getKeys(false)) {
                         boolean value = permsSection.getBoolean(perm);
-                        holder.setPermission(MigrationUtils.parseNode(perm, value).setWorld(world).build());
+                        holder.setNode(DataType.NORMAL, MigrationUtils.parseNode(perm, value).withContext(DefaultContextKeys.WORLD_KEY, world).build(), true);
                     }
                 }
             }
@@ -150,13 +153,13 @@ public class MigrationPermissionsBukkit extends SubCommand<Object> {
         if (data.isList("groups")) {
             List<String> groups = data.getStringList("groups");
             for (String group : groups) {
-                holder.setPermission(NodeFactory.buildGroupNode(MigrationUtils.standardizeName(group)).build());
+                holder.setNode(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(group)).build(), true);
             }
         }
         if (data.isList("inheritance")) {
             List<String> groups = data.getStringList("inheritance");
             for (String group : groups) {
-                holder.setPermission(NodeFactory.buildGroupNode(MigrationUtils.standardizeName(group)).build());
+                holder.setNode(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(group)).build(), true);
             }
         }
     }

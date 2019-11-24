@@ -25,9 +25,7 @@
 
 package me.lucko.luckperms.common.commands.group;
 
-import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.api.event.cause.DeletionCause;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -36,11 +34,14 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.event.cause.CreationCause;
+import net.luckperms.api.event.cause.DeletionCause;
+import net.luckperms.api.model.data.DataType;
 
 import java.util.List;
 
@@ -79,12 +80,12 @@ public class GroupRename extends SubCommand<Group> {
             return CommandResult.FAILURE;
         }
 
-        newGroup.replaceNodes(NodeMapType.ENDURING, group.enduringData().immutable());
+        newGroup.replaceNodes(DataType.NORMAL, group.normalData().immutable());
 
         Message.RENAME_SUCCESS.send(sender, group.getName(), newGroup.getName());
 
-        ExtendedLogEntry.build().actor(sender).acted(group)
-                .action("rename", newGroup.getName())
+        LoggedAction.build().source(sender).target(group)
+                .description("rename", newGroup.getName())
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(newGroup, sender, plugin);

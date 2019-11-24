@@ -25,23 +25,23 @@
 
 package me.lucko.luckperms.common.sender;
 
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.Component;
+import net.luckperms.api.util.Tristate;
 
 import java.util.UUID;
 
 public abstract class DummySender implements Sender {
     private final LuckPermsPlugin platform;
 
-    private final UUID uuid;
+    private final UUID uniqueId;
     private final String name;
 
-    public DummySender(LuckPermsPlugin plugin, UUID uuid, String name) {
+    public DummySender(LuckPermsPlugin plugin, UUID uniqueId, String name) {
         this.platform = plugin;
-        this.uuid = uuid;
+        this.uniqueId = uniqueId;
         this.name = name;
     }
 
@@ -77,8 +77,8 @@ public abstract class DummySender implements Sender {
     }
 
     @Override
-    public UUID getUuid() {
-        return this.uuid;
+    public UUID getUniqueId() {
+        return this.uniqueId;
     }
 
     @Override

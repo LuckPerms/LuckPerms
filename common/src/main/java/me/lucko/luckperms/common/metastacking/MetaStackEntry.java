@@ -25,10 +25,9 @@
 
 package me.lucko.luckperms.common.metastacking;
 
-import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.api.metastacking.MetaStackElement;
+import net.luckperms.api.metastacking.MetaStackElement;
+import net.luckperms.api.node.types.ChatMetaNode;
 
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -56,7 +55,7 @@ public interface MetaStackEntry {
      *
      * @return the entry
      */
-    Optional<Map.Entry<Integer, String>> getCurrentValue();
+    Optional<ChatMetaNode<?, ?>> getCurrentValue();
 
     /**
      * Accumulates a node to this entry
@@ -64,6 +63,6 @@ public interface MetaStackEntry {
      * @param node the node to accumulate
      * @return if the node was accepted
      */
-    boolean accumulateNode(LocalizedNode node);
+    boolean accumulateNode(ChatMetaNode<?, ?> node);
 
 }

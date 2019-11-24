@@ -25,13 +25,14 @@
 
 package me.lucko.luckperms.common.commands.generic.meta;
 
-import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
@@ -39,11 +40,13 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.model.NodeTypes;
-import me.lucko.luckperms.common.node.utils.MetaType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.node.NodeType;
 
 import java.util.List;
 
@@ -59,23 +62,23 @@ public class MetaClear extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        MetaType type = null;
+        NodeType type = null;
         if (!args.isEmpty()) {
             String typeId = args.get(0).toLowerCase();
             if (typeId.equals("any") || typeId.equals("all") || typeId.equals("*")) {
-                type = MetaType.ANY;
+                type = NodeType.META_OR_CHAT_META;
             }
             if (typeId.equals("chat") || typeId.equals("chatmeta")) {
-                type = MetaType.CHAT;
+                type = NodeType.CHAT_META;
             }
-            if (typeId.equals(NodeTypes.META_KEY)) {
-                type = MetaType.META;
+            if (typeId.equals("meta")) {
+                type = NodeType.META;
             }
-            if (typeId.equals(NodeTypes.PREFIX_KEY) || typeId.equals("prefixes")) {
-                type = MetaType.PREFIX;
+            if (typeId.equals("prefix") || typeId.equals("prefixes")) {
+                type = NodeType.PREFIX;
             }
-            if (typeId.equals(NodeTypes.SUFFIX_KEY) || typeId.equals("suffixes")) {
-                type = MetaType.SUFFIX;
+            if (typeId.equals("suffix") || typeId.equals("suffixes")) {
+                type = NodeType.SUFFIX;
             }
 
             if (type != null) {
@@ -84,10 +87,10 @@ public class MetaClear extends SharedSubCommand {
         }
 
         if (type == null) {
-            type = MetaType.ANY;
+            type = NodeType.META_OR_CHAT_META;
         }
 
-        int before = holder.enduringData().immutable().size();
+        int before = holder.normalData().immutable().size();
 
         MutableContextSet context = ArgumentParser.parseContext(0, args, plugin);
 
@@ -98,23 +101,30 @@ public class MetaClear extends SharedSubCommand {
         }
 
         if (context.isEmpty()) {
-            holder.clearMeta(type);
+            holder.removeIf(DataType.NORMAL, null, type::matches, false);
         } else {
-            holder.clearMeta(type, context);
+            holder.removeIf(DataType.NORMAL, context, type::matches, false);
         }
 
-        int changed = before - holder.enduringData().immutable().size();
+        int changed = before - holder.normalData().immutable().size();
         if (changed == 1) {
             Message.META_CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFormattedDisplayName(), type.name().toLowerCase(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         } else {
             Message.META_CLEAR_SUCCESS.send(sender, holder.getFormattedDisplayName(), type.name().toLowerCase(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         }
 
-        ExtendedLogEntry.build().actor(sender).acted(holder)
-                .action("meta", "clear", context)
+        LoggedAction.build().source(sender).target(holder)
+                .description("meta", "clear", context)
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(holder, sender, plugin);
         return CommandResult.SUCCESS;
+    }
+
+    @Override
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        return TabCompleter.create()
+                .from(0, TabCompletions.contexts(plugin))
+                .complete(args);
     }
 }

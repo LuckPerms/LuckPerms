@@ -25,11 +25,12 @@
 
 package me.lucko.luckperms.nukkit;
 
-import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
+
+import net.luckperms.api.platform.Platform;
 
 import cn.nukkit.Player;
 import cn.nukkit.plugin.PluginBase;
@@ -154,8 +155,8 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     // provide information about the platform
 
     @Override
-    public PlatformType getType() {
-        return PlatformType.NUKKIT;
+    public Platform.Type getType() {
+        return Platform.Type.NUKKIT;
     }
 
     @Override
@@ -179,17 +180,17 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     }
 
     @Override
-    public Optional<Player> getPlayer(UUID uuid) {
-        return Optional.ofNullable(getServer().getOnlinePlayers().get(uuid));
+    public Optional<Player> getPlayer(UUID uniqueId) {
+        return Optional.ofNullable(getServer().getOnlinePlayers().get(uniqueId));
     }
 
     @Override
-    public Optional<UUID> lookupUuid(String username) {
+    public Optional<UUID> lookupUniqueId(String username) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<String> lookupUsername(UUID uuid) {
+    public Optional<String> lookupUsername(UUID uniqueId) {
         return Optional.empty();
     }
 
@@ -209,8 +210,8 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     }
 
     @Override
-    public boolean isPlayerOnline(UUID uuid) {
-        Player player = getServer().getOnlinePlayers().get(uuid);
+    public boolean isPlayerOnline(UUID uniqueId) {
+        Player player = getServer().getOnlinePlayers().get(uniqueId);
         return player != null && player.isOnline();
     }
 }

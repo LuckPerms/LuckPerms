@@ -27,17 +27,14 @@ package me.lucko.luckperms.sponge.service.model.permissionholder;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.inheritance.InheritanceGraph;
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
-import me.lucko.luckperms.common.node.model.NodeTypes;
+import me.lucko.luckperms.common.node.types.Inheritance;
+import me.lucko.luckperms.common.node.types.Prefix;
+import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
@@ -46,6 +43,11 @@ import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
+
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.util.Tristate;
+import net.luckperms.api.query.QueryOptions;
 
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -67,8 +69,8 @@ public abstract class PermissionHolderSubject<T extends PermissionHolder> implem
     PermissionHolderSubject(LPSpongePlugin plugin, T parent) {
         this.parent = parent;
         this.plugin = plugin;
-        this.subjectData = new PermissionHolderSubjectData(plugin.getService(), NodeMapType.ENDURING, parent, this);
-        this.transientSubjectData = new PermissionHolderSubjectData(plugin.getService(), NodeMapType.TRANSIENT, parent, this);
+        this.subjectData = new PermissionHolderSubjectData(plugin.getService(), DataType.NORMAL, parent, this);
+        this.transientSubjectData = new PermissionHolderSubjectData(plugin.getService(), DataType.TRANSIENT, parent, this);
     }
 
     public void fireUpdateEvent() {
@@ -109,20 +111,25 @@ public abstract class PermissionHolderSubject<T extends PermissionHolder> implem
     }
 
     @Override
+    public Tristate getPermissionValue(QueryOptions options, String permission) {
+        return this.parent.getCachedData().getPermissionData(options).checkPermission(permission, PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK).result();
+    }
+
+    @Override
     public Tristate getPermissionValue(ImmutableContextSet contexts, String permission) {
-        Contexts lookupContexts = this.plugin.getContextManager().formContexts(contexts);
-        return this.parent.getCachedData().getPermissionData(lookupContexts).getPermissionValue(permission, PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK).result();
+        QueryOptions queryOptions = this.plugin.getContextManager().formQueryOptions(contexts);
+        return getPermissionValue(queryOptions, permission);
     }
 
     @Override
     public boolean isChildOf(ImmutableContextSet contexts, LPSubjectReference parent) {
         return parent.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP) &&
-                getPermissionValue(contexts, NodeFactory.groupNode(parent.getSubjectIdentifier())).asBoolean();
+                getPermissionValue(contexts, Inheritance.key(parent.getSubjectIdentifier())).asBoolean();
     }
 
     @Override
     public ImmutableList<LPSubjectReference> getParents(ImmutableContextSet contexts) {
-        InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph(this.plugin.getContextManager().formContexts(contexts));
+        InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph(this.plugin.getContextManager().formQueryOptions(contexts));
         Iterable<PermissionHolder> traversal = graph.traverse(TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER, this.parent);
 
         ImmutableList.Builder<LPSubjectReference> subjects = ImmutableList.builder();
@@ -138,22 +145,22 @@ public abstract class PermissionHolderSubject<T extends PermissionHolder> implem
 
     @Override
     public Optional<String> getOption(ImmutableContextSet contexts, String s) {
-        MetaCache data = this.parent.getCachedData().getMetaData(this.plugin.getContextManager().formContexts(contexts));
-        if (s.equalsIgnoreCase(NodeTypes.PREFIX_KEY)) {
+        MetaCache data = this.parent.getCachedData().getMetaData(this.plugin.getContextManager().formQueryOptions(contexts));
+        if (s.equalsIgnoreCase(Prefix.NODE_KEY)) {
             String prefix = data.getPrefix(MetaCheckEvent.Origin.PLATFORM_API);
             if (prefix != null) {
                 return Optional.of(prefix);
             }
         }
 
-        if (s.equalsIgnoreCase(NodeTypes.SUFFIX_KEY)) {
+        if (s.equalsIgnoreCase(Suffix.NODE_KEY)) {
             String suffix = data.getSuffix(MetaCheckEvent.Origin.PLATFORM_API);
             if (suffix != null) {
                 return Optional.of(suffix);
             }
         }
 
-        String val = data.getMeta(MetaCheckEvent.Origin.PLATFORM_API).get(s);
+        String val = data.getMetaValue(s, MetaCheckEvent.Origin.PLATFORM_API);
         if (val != null) {
             return Optional.of(val);
         }

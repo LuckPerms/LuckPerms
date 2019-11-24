@@ -25,9 +25,10 @@
 
 package me.lucko.luckperms.sponge.service.model.persisted;
 
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.model.calculated.MonitoredSubjectData;
+
+import net.luckperms.api.model.data.DataType;
 
 /**
  * Extension of CalculatedSubjectData which persists data when modified
@@ -36,7 +37,7 @@ public class PersistedSubjectData extends MonitoredSubjectData {
     private final PersistedSubject subject;
     private boolean save = true;
 
-    public PersistedSubjectData(PersistedSubject subject, NodeMapType type, LuckPermsService service) {
+    public PersistedSubjectData(PersistedSubject subject, DataType type, LuckPermsService service) {
         super(subject, type, service);
         this.subject = subject;
     }

@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.bungee;
 
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bungee.event.TristateCheckEvent;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -34,6 +33,7 @@ import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.Component;
 import net.kyori.text.adapter.bungeecord.TextAdapter;
+import net.luckperms.api.util.Tristate;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
@@ -53,7 +53,7 @@ public class BungeeSenderFactory extends SenderFactory<CommandSender> {
     }
 
     @Override
-    protected UUID getUuid(CommandSender sender) {
+    protected UUID getUniqueId(CommandSender sender) {
         if (sender instanceof ProxiedPlayer) {
             return ((ProxiedPlayer) sender).getUniqueId();
         }

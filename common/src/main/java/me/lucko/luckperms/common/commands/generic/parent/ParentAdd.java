@@ -25,9 +25,7 @@
 
 package me.lucko.luckperms.common.commands.generic.parent;
 
-import me.lucko.luckperms.api.DataMutateResult;
-import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
@@ -43,10 +41,14 @@ import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.model.data.DataMutateResult;
+import net.luckperms.api.model.data.DataType;
 
 import java.util.List;
 
@@ -78,13 +80,13 @@ public class ParentAdd extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        DataMutateResult result = holder.setPermission(NodeFactory.buildGroupNode(group.getName()).withExtraContext(context).build());
+        DataMutateResult result = holder.setNode(DataType.NORMAL, Inheritance.builder(group.getName()).withContext(context).build(), true);
 
-        if (result.asBoolean()) {
+        if (result.wasSuccessful()) {
             Message.SET_INHERIT_SUCCESS.send(sender, holder.getFormattedDisplayName(), group.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-            ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("parent", "add", group.getName(), context)
+            LoggedAction.build().source(sender).target(holder)
+                    .description("parent", "add", group.getName(), context)
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(holder, sender, plugin);
@@ -99,6 +101,7 @@ public class ParentAdd extends SharedSubCommand {
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return TabCompleter.create()
                 .at(0, TabCompletions.groups(plugin))
+                .from(1, TabCompletions.contexts(plugin))
                 .complete(args);
     }
 }

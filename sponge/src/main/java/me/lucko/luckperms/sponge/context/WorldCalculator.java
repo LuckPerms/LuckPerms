@@ -25,39 +25,62 @@
 
 package me.lucko.luckperms.sponge.context;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.context.ContextCalculator;
-import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.sponge.LPSpongePlugin;
+
+import net.luckperms.api.context.ContextCalculator;
+import net.luckperms.api.context.ContextConsumer;
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.ImmutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.Game;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.world.World;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class WorldCalculator implements ContextCalculator<Subject> {
-    private final LuckPermsPlugin plugin;
+    private final LPSpongePlugin plugin;
 
-    public WorldCalculator(LuckPermsPlugin plugin) {
+    public WorldCalculator(LPSpongePlugin plugin) {
         this.plugin = plugin;
     }
 
     @Override
-    public @NonNull MutableContextSet giveApplicableContext(@NonNull Subject subject, @NonNull MutableContextSet accumulator) {
+    public void calculate(@NonNull Subject subject, @NonNull ContextConsumer consumer) {
         CommandSource source = subject.getCommandSource().orElse(null);
         if (source == null || !(source instanceof Player)) {
-            return accumulator;
+            return;
         }
 
         Player p = ((Player) source);
+
+        Set<String> seen = new HashSet<>();
         String world = p.getWorld().getName().toLowerCase();
-        while (!accumulator.has(Contexts.WORLD_KEY, world)) {
-            accumulator.add(Contexts.WORLD_KEY, world);
+        while (seen.add(world)) {
+            consumer.accept(DefaultContextKeys.WORLD_KEY, world);
             world = this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(world, world).toLowerCase();
         }
-
-        return accumulator;
     }
 
+    @Override
+    public ContextSet estimatePotentialContexts() {
+        Game game = this.plugin.getBootstrap().getGame();
+        if (!game.isServerAvailable()) {
+            return ImmutableContextSet.empty();
+        }
+
+        Collection<World> worlds = game.getServer().getWorlds();
+        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        for (World world : worlds) {
+            builder.add(DefaultContextKeys.WORLD_KEY, world.getName().toLowerCase());
+        }
+        return builder.build();
+    }
 }

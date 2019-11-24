@@ -25,15 +25,15 @@
 
 package me.lucko.luckperms.common.sender;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.Component;
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.util.Tristate;
 
 import java.util.Set;
 import java.util.UUID;
@@ -89,7 +89,7 @@ public interface Sender {
         } else if (staticContext.size() == 1) {
             location = staticContext.iterator().next().getValue();
         } else {
-            Set<String> servers = staticContext.getValues(Contexts.SERVER_KEY);
+            Set<String> servers = staticContext.getValues(DefaultContextKeys.SERVER_KEY);
             if (servers.size() == 1) {
                 location = servers.iterator().next();
             } else {
@@ -107,12 +107,12 @@ public interface Sender {
      *
      * @return the sender's uuid
      */
-    UUID getUuid();
+    UUID getUniqueId();
 
     /**
      * Send a message to the Sender.
      *
-     * <p>Supports {@link CommandManager#SECTION_CHAR} for message formatting.</p>
+     * <p>Supports {@link TextUtils#SECTION_CHAR} for message formatting.</p>
      *
      * @param message the message to send.
      */
@@ -157,7 +157,7 @@ public interface Sender {
      * @return if the sender is the console
      */
     default boolean isConsole() {
-        return CONSOLE_UUID.equals(getUuid()) || IMPORT_UUID.equals(getUuid());
+        return CONSOLE_UUID.equals(getUniqueId()) || IMPORT_UUID.equals(getUniqueId());
     }
 
     /**
@@ -166,7 +166,7 @@ public interface Sender {
      * @return if the sender is an import process
      */
     default boolean isImport() {
-        return IMPORT_UUID.equals(getUuid());
+        return IMPORT_UUID.equals(getUniqueId());
     }
 
     /**

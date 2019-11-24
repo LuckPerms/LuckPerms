@@ -25,13 +25,14 @@
 
 package me.lucko.luckperms.common.commands.generic.permission;
 
-import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
@@ -42,6 +43,10 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.node.NodeType;
 
 import java.util.List;
 
@@ -57,7 +62,7 @@ public class PermissionClear extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        int before = holder.enduringData().immutable().size();
+        int before = holder.normalData().immutable().size();
 
         MutableContextSet context = ArgumentParser.parseContext(0, args, plugin);
 
@@ -67,24 +72,27 @@ public class PermissionClear extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        if (context.isEmpty()) {
-            holder.clearPermissions();
-        } else {
-            holder.clearPermissions(context);
-        }
+        holder.removeIf(DataType.NORMAL, context.isEmpty() ? null : context, NodeType.PERMISSION::matches, false);
 
-        int changed = before - holder.enduringData().immutable().size();
+        int changed = before - holder.normalData().immutable().size();
         if (changed == 1) {
             Message.PERMISSION_CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         } else {
             Message.PERMISSION_CLEAR_SUCCESS.send(sender, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         }
 
-        ExtendedLogEntry.build().actor(sender).acted(holder)
-                .action("permission", "clear", context)
+        LoggedAction.build().source(sender).target(holder)
+                .description("permission", "clear", context)
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(holder, sender, plugin);
         return CommandResult.SUCCESS;
+    }
+
+    @Override
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        return TabCompleter.create()
+                .from(0, TabCompletions.contexts(plugin))
+                .complete(args);
     }
 }

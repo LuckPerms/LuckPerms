@@ -25,9 +25,10 @@
 
 package me.lucko.luckperms.common.verbose.event;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.util.gson.JObject;
+
+import net.luckperms.api.query.QueryOptions;
 
 public class PermissionCheckEvent extends VerboseEvent {
 
@@ -46,8 +47,8 @@ public class PermissionCheckEvent extends VerboseEvent {
      */
     private final TristateResult result;
 
-    public PermissionCheckEvent(Origin origin, String checkTarget, ImmutableContextSet checkContext, StackTraceElement[] checkTrace, String permission, TristateResult result) {
-        super(checkTarget, checkContext, checkTrace);
+    public PermissionCheckEvent(Origin origin, String checkTarget, QueryOptions checkQueryOptions, StackTraceElement[] checkTrace, String checkThread, String permission, TristateResult result) {
+        super(checkTarget, checkQueryOptions, checkTrace, checkThread);
         this.origin = origin;
         this.permission = permission;
         this.result = result;
@@ -83,6 +84,14 @@ public class PermissionCheckEvent extends VerboseEvent {
         }
 
         object.add("origin", this.origin.name().toLowerCase());
+    }
+
+    @Override
+    public boolean eval(String variable) {
+        return variable.equals("permission") ||
+                getCheckTarget().equalsIgnoreCase(variable) ||
+                getPermission().toLowerCase().startsWith(variable.toLowerCase()) ||
+                getResult().result().name().equalsIgnoreCase(variable);
     }
 
     /**

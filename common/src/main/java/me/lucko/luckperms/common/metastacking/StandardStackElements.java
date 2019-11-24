@@ -25,19 +25,20 @@
 
 package me.lucko.luckperms.common.metastacking;
 
-import me.lucko.luckperms.api.ChatMetaType;
-import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.api.metastacking.MetaStackElement;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
-import me.lucko.luckperms.common.util.Uuids;
+
+import net.luckperms.api.metastacking.MetaStackElement;
+import net.luckperms.api.model.PermissionHolder;
+import net.luckperms.api.node.ChatMetaType;
+import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
+import net.luckperms.api.node.types.ChatMetaNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -93,11 +94,11 @@ public final class StandardStackElements {
 
     // utility functions, used in combination with FluentMetaStackElement for form full MetaStackElements
 
-    private static final MetaStackElement TYPE_CHECK = (node, type, current) -> type.matches(node);
-    private static final MetaStackElement HIGHEST_CHECK = (node, type, current) -> current == null || type.getEntry(node).getKey() > current.getKey();
-    private static final MetaStackElement LOWEST_CHECK = (node, type, current) -> current == null || type.getEntry(node).getKey() < current.getKey();
-    private static final MetaStackElement OWN_CHECK = (node, type, current) -> Uuids.fromString(node.getLocation()) != null;
-    private static final MetaStackElement INHERITED_CHECK = (node, type, current) -> Uuids.fromString(node.getLocation()) == null;
+    private static final MetaStackElement TYPE_CHECK = (type, node, current) -> type.nodeType().matches(node);
+    private static final MetaStackElement HIGHEST_CHECK = (type, node, current) -> current == null || node.getPriority() > current.getPriority();
+    private static final MetaStackElement LOWEST_CHECK = (type, node, current) -> current == null || node.getPriority() < current.getPriority();
+    private static final MetaStackElement OWN_CHECK = (type, node, current) -> node.metadata(InheritanceOriginMetadata.KEY).getOrigin().getType().equals(PermissionHolder.Identifier.USER_TYPE);
+    private static final MetaStackElement INHERITED_CHECK = (type, node, current) -> node.metadata(InheritanceOriginMetadata.KEY).getOrigin().getType().equals(PermissionHolder.Identifier.GROUP_TYPE);
 
 
     // implementations
@@ -218,9 +219,10 @@ public final class StandardStackElements {
         }
 
         @Override
-        public boolean shouldAccumulate(@NonNull LocalizedNode node, @NonNull ChatMetaType type, Map.@Nullable Entry<Integer, String> current) {
-            Track t = this.plugin.getTrackManager().getIfLoaded(this.trackName);
-            return t != null && t.containsGroup(node.getLocation());
+        public boolean shouldAccumulate(@NonNull ChatMetaType type, @NonNull ChatMetaNode<?, ?> node, @Nullable ChatMetaNode<?, ?> current) {
+            Track track = this.plugin.getTrackManager().getIfLoaded(this.trackName);
+            PermissionHolder.Identifier origin = node.metadata(InheritanceOriginMetadata.KEY).getOrigin();
+            return track != null && origin.getType().equals(PermissionHolder.Identifier.GROUP_TYPE) && track.containsGroup(origin.getName());
         }
 
         @Override
@@ -247,9 +249,10 @@ public final class StandardStackElements {
         }
 
         @Override
-        public boolean shouldAccumulate(@NonNull LocalizedNode node, @NonNull ChatMetaType type, Map.@Nullable Entry<Integer, String> current) {
-            Track t = this.plugin.getTrackManager().getIfLoaded(this.trackName);
-            return t != null && !t.containsGroup(node.getLocation());
+        public boolean shouldAccumulate(@NonNull ChatMetaType type, @NonNull ChatMetaNode<?, ?> node, @Nullable ChatMetaNode<?, ?> current) {
+            Track track = this.plugin.getTrackManager().getIfLoaded(this.trackName);
+            PermissionHolder.Identifier origin = node.metadata(InheritanceOriginMetadata.KEY).getOrigin();
+            return track != null && !track.containsGroup(origin.getName());
         }
 
         @Override
@@ -274,8 +277,9 @@ public final class StandardStackElements {
         }
 
         @Override
-        public boolean shouldAccumulate(@NonNull LocalizedNode node, @NonNull ChatMetaType type, Map.@Nullable Entry<Integer, String> current) {
-            return this.groupName.equals(node.getLocation());
+        public boolean shouldAccumulate(@NonNull ChatMetaType type, @NonNull ChatMetaNode<?, ?> node, @Nullable ChatMetaNode<?, ?> current) {
+            PermissionHolder.Identifier origin = node.metadata(InheritanceOriginMetadata.KEY).getOrigin();
+            return origin.getType().equals(PermissionHolder.Identifier.GROUP_TYPE) && this.groupName.equals(origin.getName());
         }
 
         @Override
@@ -300,8 +304,9 @@ public final class StandardStackElements {
         }
 
         @Override
-        public boolean shouldAccumulate(@NonNull LocalizedNode node, @NonNull ChatMetaType type, Map.@Nullable Entry<Integer, String> current) {
-            return !this.groupName.equals(node.getLocation());
+        public boolean shouldAccumulate(@NonNull ChatMetaType type, @NonNull ChatMetaNode<?, ?> node, @Nullable ChatMetaNode<?, ?> current) {
+            PermissionHolder.Identifier origin = node.metadata(InheritanceOriginMetadata.KEY).getOrigin();
+            return !this.groupName.equals(origin.getName());
         }
 
         @Override

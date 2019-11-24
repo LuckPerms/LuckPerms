@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.verbose;
 
-import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.sender.Sender;
@@ -33,6 +32,8 @@ import me.lucko.luckperms.common.util.RepeatingTask;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.common.verbose.event.VerboseEvent;
+
+import net.luckperms.api.query.QueryOptions;
 
 import java.util.Map;
 import java.util.Queue;
@@ -69,20 +70,21 @@ public class VerboseHandler extends RepeatingTask {
      *
      * @param origin the origin of the check
      * @param checkTarget the target of the permission check
-     * @param checkContext the contexts where the check occurred
+     * @param checkQueryOptions the query options used for the check
      * @param permission the permission which was checked for
      * @param result the result of the permission check
      */
-    public void offerPermissionCheckEvent(PermissionCheckEvent.Origin origin, String checkTarget, ContextSet checkContext, String permission, TristateResult result) {
+    public void offerPermissionCheckEvent(PermissionCheckEvent.Origin origin, String checkTarget, QueryOptions checkQueryOptions, String permission, TristateResult result) {
         // don't bother even processing the check if there are no listeners registered
         if (!this.listening) {
             return;
         }
 
         StackTraceElement[] trace = new Exception().getStackTrace();
+        String thread = Thread.currentThread().getName();
 
         // add the check data to a queue to be processed later.
-        this.queue.offer(new PermissionCheckEvent(origin, checkTarget, checkContext.makeImmutable(), trace, permission, result));
+        this.queue.offer(new PermissionCheckEvent(origin, checkTarget, checkQueryOptions, trace, thread, permission, result));
     }
 
     /**
@@ -93,20 +95,21 @@ public class VerboseHandler extends RepeatingTask {
      *
      * @param origin the origin of the check
      * @param checkTarget the target of the meta check
-     * @param checkContext the contexts where the check occurred
+     * @param checkQueryOptions the query options used for the check
      * @param key the meta key which was checked for
      * @param result the result of the meta check
      */
-    public void offerMetaCheckEvent(MetaCheckEvent.Origin origin, String checkTarget, ContextSet checkContext, String key, String result) {
+    public void offerMetaCheckEvent(MetaCheckEvent.Origin origin, String checkTarget, QueryOptions checkQueryOptions, String key, String result) {
         // don't bother even processing the check if there are no listeners registered
         if (!this.listening) {
             return;
         }
 
         StackTraceElement[] trace = new Exception().getStackTrace();
+        String thread = Thread.currentThread().getName();
 
         // add the check data to a queue to be processed later.
-        this.queue.offer(new MetaCheckEvent(origin, checkTarget, checkContext.makeImmutable(), trace, key, result));
+        this.queue.offer(new MetaCheckEvent(origin, checkTarget, checkQueryOptions, trace, thread, key, result));
     }
 
     /**
@@ -117,7 +120,7 @@ public class VerboseHandler extends RepeatingTask {
      * @param notify if the sender should be notified in chat on each check
      */
     public void registerListener(Sender sender, VerboseFilter filter, boolean notify) {
-        this.listeners.put(sender.getUuid(), new VerboseListener(sender, filter, notify));
+        this.listeners.put(sender.getUniqueId(), new VerboseListener(sender, filter, notify));
         this.listening = true;
     }
 

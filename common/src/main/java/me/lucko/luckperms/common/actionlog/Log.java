@@ -27,8 +27,9 @@ package me.lucko.luckperms.common.actionlog;
 
 import com.google.common.collect.ImmutableSortedSet;
 
-import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
+
+import net.luckperms.api.actionlog.Action;
 
 import java.util.Comparator;
 import java.util.SortedSet;
@@ -50,53 +51,53 @@ public class Log {
         return empty;
     }
 
-    private final SortedSet<ExtendedLogEntry> content;
+    private final SortedSet<LoggedAction> content;
 
-    public Log(SortedSet<ExtendedLogEntry> content) {
+    public Log(SortedSet<LoggedAction> content) {
         this.content = ImmutableSortedSet.copyOfSorted(content);
     }
 
-    public SortedSet<ExtendedLogEntry> getContent() {
+    public SortedSet<LoggedAction> getContent() {
         return this.content;
     }
 
-    public SortedSet<ExtendedLogEntry> getContent(UUID actor) {
+    public SortedSet<LoggedAction> getContent(UUID actor) {
         return this.content.stream()
-                .filter(e -> e.getActor().equals(actor))
+                .filter(e -> e.getSource().getUniqueId().equals(actor))
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public SortedSet<ExtendedLogEntry> getUserHistory(UUID uuid) {
+    public SortedSet<LoggedAction> getUserHistory(UUID uniqueId) {
         return this.content.stream()
-                .filter(e -> e.getType() == LogEntry.Type.USER)
-                .filter(e -> e.getActed().isPresent() && e.getActed().get().equals(uuid))
+                .filter(e -> e.getTarget().getType() == Action.Target.Type.USER)
+                .filter(e -> e.getTarget().getUniqueId().isPresent() && e.getTarget().getUniqueId().get().equals(uniqueId))
                 .collect(ImmutableCollectors.toSortedSet(Comparator.naturalOrder()));
     }
 
-    public SortedSet<ExtendedLogEntry> getGroupHistory(String name) {
+    public SortedSet<LoggedAction> getGroupHistory(String name) {
         return this.content.stream()
-                .filter(e -> e.getType() == LogEntry.Type.GROUP)
-                .filter(e -> e.getActedName().equals(name))
+                .filter(e -> e.getTarget().getType() == Action.Target.Type.GROUP)
+                .filter(e -> e.getTarget().getName().equals(name))
                 .collect(ImmutableCollectors.toSortedSet(Comparator.naturalOrder()));
     }
 
-    public SortedSet<ExtendedLogEntry> getTrackHistory(String name) {
+    public SortedSet<LoggedAction> getTrackHistory(String name) {
         return this.content.stream()
-                .filter(e -> e.getType() == LogEntry.Type.TRACK)
-                .filter(e -> e.getActedName().equals(name))
+                .filter(e -> e.getTarget().getType() == Action.Target.Type.TRACK)
+                .filter(e -> e.getTarget().getName().equals(name))
                 .collect(ImmutableCollectors.toSortedSet(Comparator.naturalOrder()));
     }
 
-    public SortedSet<ExtendedLogEntry> getSearch(String query) {
+    public SortedSet<LoggedAction> getSearch(String query) {
         return this.content.stream()
                 .filter(e -> e.matchesSearch(query))
                 .collect(ImmutableCollectors.toSortedSet(Comparator.naturalOrder()));
     }
 
     public static class Builder {
-        private final SortedSet<ExtendedLogEntry> content = new TreeSet<>();
+        private final SortedSet<LoggedAction> content = new TreeSet<>();
 
-        public Builder add(ExtendedLogEntry e) {
+        public Builder add(LoggedAction e) {
             this.content.add(e);
             return this;
         }

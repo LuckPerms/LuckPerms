@@ -26,29 +26,27 @@
 package me.lucko.luckperms.common.model;
 
 import me.lucko.luckperms.common.api.implementation.ApiUser;
-import me.lucko.luckperms.common.cacheddata.UserCachedData;
+import me.lucko.luckperms.common.cacheddata.UserCachedDataManager;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.primarygroup.ContextualHolder;
-import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public class User extends PermissionHolder implements Identifiable<UserIdentifier> {
+public class User extends PermissionHolder {
     private final ApiUser apiDelegate = new ApiUser(this);
 
     /**
      * The users Mojang UUID
      */
-    private final UUID uuid;
+    private final UUID uniqueId;
 
     /**
      * The last known username of a player
      */
-    private @Nullable String name = null;
+    private @Nullable String username = null;
 
     /**
      * The users primary group
@@ -58,21 +56,14 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     /**
      * The users data cache instance
      */
-    private final UserCachedData cachedData;
+    private final UserCachedDataManager cachedData;
 
-    public User(UUID uuid, String name, LuckPermsPlugin plugin) {
+    public User(UUID uniqueId, LuckPermsPlugin plugin) {
         super(plugin);
-        this.uuid = uuid;
-        setName(name, false);
-
+        this.uniqueId = uniqueId;
         this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
-
-        this.cachedData = new UserCachedData(this);
+        this.cachedData = new UserCachedDataManager(this);
         getPlugin().getEventFactory().handleUserCacheLoad(this, this.cachedData);
-    }
-
-    public User(UUID uuid, LuckPermsPlugin plugin) {
-        this(uuid, null, plugin);
     }
 
     @Override
@@ -80,32 +71,27 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         super.invalidateCache();
 
         // invalidate our caches
-        if (this.primaryGroup instanceof ContextualHolder) {
-            ((ContextualHolder) this.primaryGroup).invalidateCache();
+        if (this.primaryGroup instanceof PrimaryGroupHolder.AbstractContextual) {
+            ((PrimaryGroupHolder.AbstractContextual) this.primaryGroup).invalidateCache();
         }
     }
 
-    public UUID getUuid() {
-        return this.uuid;
+    public UUID getUniqueId() {
+        return this.uniqueId;
     }
 
-    public Optional<String> getName() {
-        return Optional.ofNullable(this.name);
+    public Optional<String> getUsername() {
+        return Optional.ofNullable(this.username);
     }
 
     @Override
     public String getObjectName() {
-        return this.uuid.toString();
-    }
-
-    @Override
-    public UserIdentifier getId() {
-        return UserIdentifier.of(this.uuid, this.name);
+        return this.uniqueId.toString();
     }
 
     @Override
     public String getFormattedDisplayName() {
-        return this.name != null ? this.name : this.uuid.toString();
+        return this.username != null ? this.username : this.uniqueId.toString();
     }
 
     @Override
@@ -118,7 +104,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     }
 
     @Override
-    public UserCachedData getCachedData() {
+    public UserCachedDataManager getCachedData() {
         return this.cachedData;
     }
 
@@ -133,17 +119,17 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      * @param weak if true, the value will only be updated if a value hasn't been set previously.
      * @return true if a change was made
      */
-    public boolean setName(String name, boolean weak) {
+    public boolean setUsername(String name, boolean weak) {
         if (name != null && name.length() > 16) {
             return false; // nope
         }
 
         // if weak is true, only update the value in the User if it's null
-        if (weak && this.name != null) {
+        if (weak && this.username != null) {
 
             // try to update casing if they're equalIgnoreCase
-            if (this.name.equalsIgnoreCase(name)) {
-                this.name = name;
+            if (this.username.equalsIgnoreCase(name)) {
+                this.username = name;
             }
 
             return false;
@@ -155,21 +141,21 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         }
 
         // if one or the other is null, just update and return true
-        if ((this.name == null) != (name == null)) {
-            this.name = name;
+        if ((this.username == null) != (name == null)) {
+            this.username = name;
             return true;
         }
 
-        if (this.name == null) {
+        if (this.username == null) {
             // they're both null
             return false;
         } else {
             // both non-null
-            if (this.name.equalsIgnoreCase(name)) {
-                this.name = name; // update case anyway, but return false
+            if (this.username.equalsIgnoreCase(name)) {
+                this.username = name; // update case anyway, but return false
                 return false;
             } else {
-                this.name = name;
+                this.username = name;
                 return true;
             }
         }
@@ -180,36 +166,22 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         return HolderType.USER;
     }
 
-    /**
-     * Clear all of the users permission nodes
-     */
-    @Override
-    public boolean clearNodes() {
-        boolean ret = super.clearNodes();
-        if (!ret) {
-            return false;
-        }
-
-        getPlugin().getUserManager().giveDefaultIfNeeded(this, false);
-        return true;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof User)) return false;
         final User other = (User) o;
-        return this.uuid.equals(other.uuid);
+        return this.uniqueId.equals(other.uniqueId);
     }
 
     @Override
     public int hashCode() {
-        return this.uuid.hashCode();
+        return this.uniqueId.hashCode();
     }
 
     @Override
     public String toString() {
-        return "User(uuid=" + this.uuid + ")";
+        return "User(uuid=" + this.uniqueId + ")";
     }
 
 }

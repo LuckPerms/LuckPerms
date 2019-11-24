@@ -28,9 +28,9 @@ package me.lucko.luckperms.sponge.service.model;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.model.NodeMapType;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.util.Tristate;
 
 import org.spongepowered.api.service.permission.SubjectData;
 
@@ -45,7 +45,7 @@ public interface LPSubjectData {
 
     LPSubject getParentSubject();
 
-    NodeMapType getType();
+    DataType getType();
 
     /* permissions */
 

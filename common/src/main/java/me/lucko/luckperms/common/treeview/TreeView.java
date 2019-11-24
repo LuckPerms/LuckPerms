@@ -31,15 +31,23 @@ import com.google.gson.JsonObject;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JObject;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
-import me.lucko.luckperms.common.web.Bytebin;
+import me.lucko.luckperms.common.web.AbstractHttpClient;
+import me.lucko.luckperms.common.web.BytebinClient;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * A readable view of a branch of {@link TreeNode}s.
@@ -122,7 +130,7 @@ public class TreeView {
      * @param checker the permission data instance to check against, or null
      * @return the id, or null
      */
-    public String uploadPasteData(Bytebin bytebin, Sender sender, User user, PermissionCache checker) {
+    public String uploadPasteData(BytebinClient bytebin, Sender sender, User user, PermissionCache checker) {
         // only paste if there is actually data here
         if (!hasData()) {
             throw new IllegalStateException();
@@ -138,20 +146,20 @@ public class TreeView {
                 .add("root", this.rootPosition)
                 .add("uploader", new JObject()
                         .add("name", sender.getNameWithLocation())
-                        .add("uuid", sender.getUuid().toString())
+                        .add("uuid", sender.getUniqueId().toString())
                 );
 
         JObject checks;
         if (user != null && checker != null) {
             metadata.add("referenceUser", new JObject()
                     .add("name", user.getPlainDisplayName())
-                    .add("uuid", user.getUuid().toString())
+                    .add("uuid", user.getUniqueId().toString())
             );
 
             checks = new JObject();
             for (Map.Entry<Integer, String> node : this.view.getNodeEndings()) {
                 String permission = prefix + node.getValue();
-                checks.add(permission, checker.getPermissionValue(permission, PermissionCheckEvent.Origin.INTERNAL).result().name().toLowerCase());
+                checks.add(permission, checker.checkPermission(permission, PermissionCheckEvent.Origin.INTERNAL).result().name().toLowerCase());
             }
         } else {
             checks = null;
@@ -169,7 +177,19 @@ public class TreeView {
                 )
                 .toJson();
 
-        return bytebin.postJson(payload, true).id();
+        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+        try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(bytesOut), StandardCharsets.UTF_8)) {
+            GsonProvider.prettyPrinting().toJson(payload, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            return bytebin.postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE, false).key();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }

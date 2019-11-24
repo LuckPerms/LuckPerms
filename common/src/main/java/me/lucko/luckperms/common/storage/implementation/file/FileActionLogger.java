@@ -28,19 +28,23 @@ package me.lucko.luckperms.common.storage.implementation.file;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 
-import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.common.actionlog.ActionJsonSerializer;
 import me.lucko.luckperms.common.actionlog.Log;
-import me.lucko.luckperms.common.actionlog.LogEntryJsonSerializer;
 import me.lucko.luckperms.common.cache.BufferedRequest;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 
+import net.luckperms.api.actionlog.Action;
+
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
@@ -61,7 +65,7 @@ public class FileActionLogger {
     /**
      * The queue of entries pending save to the file
      */
-    private final Queue<LogEntry> entryQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<Action> entryQueue = new ConcurrentLinkedQueue<>();
 
     private final SaveBuffer saveBuffer;
 
@@ -69,11 +73,36 @@ public class FileActionLogger {
         this.saveBuffer = new SaveBuffer(plugin);
     }
 
-    public void init(Path contentFile) {
+    public void init(Path contentFile, Path legacyFile) {
         this.contentFile = contentFile;
+
+        if (Files.exists(legacyFile)) {
+            // migrate
+            JsonArray array;
+
+            try (JsonReader reader = new JsonReader(Files.newBufferedReader(legacyFile, StandardCharsets.UTF_8))) {
+                array = GsonProvider.parser().parse(reader).getAsJsonArray();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+
+            for (JsonElement element : array) {
+                this.entryQueue.add(ActionJsonSerializer.deserialize(element));
+            }
+
+            flush();
+
+            try {
+                Files.delete(legacyFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
-    public void logAction(LogEntry entry) {
+    public void logAction(Action entry) {
         this.entryQueue.add(entry);
         this.saveBuffer.request();
     }
@@ -87,30 +116,14 @@ public class FileActionLogger {
             }
 
             try {
-                // read existing array data into memory
-                JsonArray array;
-
-                if (Files.exists(this.contentFile)) {
-                    try (JsonReader reader = new JsonReader(Files.newBufferedReader(this.contentFile, StandardCharsets.UTF_8))) {
-                        array = GsonProvider.parser().parse(reader).getAsJsonArray();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        array = new JsonArray();
-                    }
-                } else {
-                    array = new JsonArray();
-                }
+                List<String> toWrite = new ArrayList<>(this.entryQueue.size());
 
                 // poll the queue for new entries
-                for (LogEntry e; (e = this.entryQueue.poll()) != null; ) {
-                    array.add(LogEntryJsonSerializer.serialize(e));
+                for (Action e; (e = this.entryQueue.poll()) != null; ) {
+                    toWrite.add(GsonProvider.normal().toJson(ActionJsonSerializer.serialize(e)));
                 }
 
-                // write the full content back to the file
-                try (JsonWriter writer = new JsonWriter(Files.newBufferedWriter(this.contentFile, StandardCharsets.UTF_8))) {
-                    writer.setIndent("  ");
-                    GsonProvider.normal().toJson(array, writer);
-                }
+                Files.write(this.contentFile, toWrite, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -120,13 +133,24 @@ public class FileActionLogger {
     }
 
     public Log getLog() throws IOException {
+        if (!Files.exists(this.contentFile)) {
+            return Log.empty();
+        }
+
         Log.Builder log = Log.builder();
-        try (JsonReader reader = new JsonReader(Files.newBufferedReader(this.contentFile, StandardCharsets.UTF_8))) {
-            JsonArray array = GsonProvider.parser().parse(reader).getAsJsonArray();
-            for (JsonElement element : array) {
-                log.add(LogEntryJsonSerializer.deserialize(element));
+
+        try (BufferedReader reader = Files.newBufferedReader(this.contentFile, StandardCharsets.UTF_8)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                try {
+                    JsonElement parsed = GsonProvider.parser().parse(line);
+                    log.add(ActionJsonSerializer.deserialize(parsed));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
+
         return log.build();
     }
 

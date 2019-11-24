@@ -25,9 +25,10 @@
 
 package me.lucko.luckperms.common.calculator.result;
 
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
+
+import net.luckperms.api.util.Tristate;
 
 /**
  * Represents the result of a {@link PermissionCalculator} lookup.

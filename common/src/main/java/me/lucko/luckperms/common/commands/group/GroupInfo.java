@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.group;
 
-import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -40,8 +39,10 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Predicates;
 
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.types.InheritanceNode;
+
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class GroupInfo extends SubCommand<Group> {
@@ -62,28 +63,28 @@ public class GroupInfo extends SubCommand<Group> {
                 group.getWeight().isPresent() ? group.getWeight().getAsInt() : "None"
         );
 
-        Set<Node> parents = group.enduringData().asSet().stream()
-                .filter(Node::isGroupNode)
-                .filter(Node::isPermanent)
-                .collect(Collectors.toSet());
+        List<InheritanceNode> parents = group.normalData().inheritanceAsSortedSet().stream()
+                .filter(Node::getValue)
+                .filter(n -> !n.hasExpiry())
+                .collect(Collectors.toList());
 
-        Set<Node> tempParents = group.enduringData().asSet().stream()
-                .filter(Node::isGroupNode)
-                .filter(Node::isTemporary)
-                .collect(Collectors.toSet());
+        List<InheritanceNode> tempParents = group.normalData().inheritanceAsSortedSet().stream()
+                .filter(Node::getValue)
+                .filter(Node::hasExpiry)
+                .collect(Collectors.toList());
 
         if (!parents.isEmpty()) {
             Message.INFO_PARENT_HEADER.send(sender);
-            for (Node node : parents) {
+            for (InheritanceNode node : parents) {
                 Message.INFO_PARENT_ENTRY.send(sender, node.getGroupName(), MessageUtils.getAppendableNodeContextString(plugin.getLocaleManager(), node));
             }
         }
 
         if (!tempParents.isEmpty()) {
             Message.INFO_TEMP_PARENT_HEADER.send(sender);
-            for (Node node : tempParents) {
+            for (InheritanceNode node : tempParents) {
                 Message.INFO_PARENT_ENTRY.send(sender, node.getGroupName(), MessageUtils.getAppendableNodeContextString(plugin.getLocaleManager(), node));
-                Message.INFO_PARENT_ENTRY_EXPIRY.send(sender, DurationFormatter.LONG.formatDateDiff(node.getExpiryUnixTime()));
+                Message.INFO_PARENT_ENTRY_EXPIRY.send(sender, DurationFormatter.LONG.formatDateDiff(node.getExpiry().getEpochSecond()));
             }
         }
         return CommandResult.SUCCESS;

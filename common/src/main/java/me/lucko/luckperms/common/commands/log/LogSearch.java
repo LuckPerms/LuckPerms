@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.commands.log;
 
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -38,6 +38,8 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Paginated;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.actionlog.Action;
 
 import java.util.List;
 import java.util.Map;
@@ -63,7 +65,7 @@ public class LogSearch extends SubCommand<Log> {
         }
 
         final String query = String.join(" ", args);
-        Paginated<ExtendedLogEntry> content = new Paginated<>(log.getSearch(query));
+        Paginated<LoggedAction> content = new Paginated<>(log.getSearch(query));
 
         if (page != Integer.MIN_VALUE) {
             return showLog(page, query, sender, content);
@@ -72,7 +74,7 @@ public class LogSearch extends SubCommand<Log> {
         }
     }
 
-    private static CommandResult showLog(int page, String query, Sender sender, Paginated<ExtendedLogEntry> log) {
+    private static CommandResult showLog(int page, String query, Sender sender, Paginated<LoggedAction> log) {
         int maxPage = log.getMaxPages(ENTRIES_PER_PAGE);
         if (maxPage == 0) {
             Message.LOG_NO_ENTRIES.send(sender);
@@ -88,19 +90,19 @@ public class LogSearch extends SubCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        SortedMap<Integer, ExtendedLogEntry> entries = log.getPage(page, ENTRIES_PER_PAGE);
+        SortedMap<Integer, LoggedAction> entries = log.getPage(page, ENTRIES_PER_PAGE);
         Message.LOG_SEARCH_HEADER.send(sender, query, page, maxPage);
 
         long now = System.currentTimeMillis() / 1000L;
-        for (Map.Entry<Integer, ExtendedLogEntry> e : entries.entrySet()) {
-            long time = e.getValue().getTimestamp();
+        for (Map.Entry<Integer, LoggedAction> e : entries.entrySet()) {
+            long time = e.getValue().getTimestamp().getEpochSecond();
             Message.LOG_ENTRY.send(sender,
                     e.getKey(),
                     DurationFormatter.CONCISE_LOW_ACCURACY.format(now - time),
-                    e.getValue().getActorFriendlyString(),
-                    Character.toString(e.getValue().getType().getCode()),
-                    e.getValue().getActedFriendlyString(),
-                    e.getValue().getAction()
+                    e.getValue().getSourceFriendlyString(),
+                    Character.toString(LoggedAction.getTypeCharacter(((Action) e.getValue()).getTarget().getType())),
+                    e.getValue().getTargetFriendlyString(),
+                    e.getValue().getDescription()
             );
         }
 

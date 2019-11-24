@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
-import me.lucko.luckperms.api.ChatMetaType;
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -39,13 +36,21 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
-import me.lucko.luckperms.common.node.model.NodeTypes;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
+import me.lucko.luckperms.common.node.types.Inheritance;
+import me.lucko.luckperms.common.node.types.Meta;
+import me.lucko.luckperms.common.node.types.Prefix;
+import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.ProgressLogger;
+
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.event.cause.CreationCause;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.node.Node;
 
 import org.bukkit.Bukkit;
 import org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService;
@@ -106,7 +111,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
         AtomicInteger groupCount = new AtomicInteger(0);
         AtomicInteger maxWeight = new AtomicInteger(0);
-        Iterators.iterate(internalService.getEntities(true), entity -> {
+        Iterators.tryIterate(internalService.getEntities(true), entity -> {
             String groupName = MigrationUtils.standardizeName(entity.getDisplayName());
             Group group = plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
 
@@ -125,10 +130,10 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
                 Set<Node> nodes = userParents.computeIfAbsent(uuid, u -> new HashSet<>());
                 if (membership.getExpiration() == null) {
-                    nodes.add(NodeFactory.buildGroupNode(groupName).build());
+                    nodes.add(Inheritance.builder(groupName).build());
                 } else {
                     long expiry = membership.getExpiration().toInstant().getEpochSecond();
-                    nodes.add(NodeFactory.buildGroupNode(groupName).setExpiry(expiry).build());
+                    nodes.add(Inheritance.builder(groupName).expiry(expiry).build());
                 }
             }
 
@@ -140,7 +145,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         // Migrate all tracks
         log.log("Starting track migration.");
         AtomicInteger trackCount = new AtomicInteger(0);
-        Iterators.iterate(service.getAllTracks(), t -> {
+        Iterators.tryIterate(service.getAllTracks(), t -> {
             String trackName = MigrationUtils.standardizeName(t);
             Track track = plugin.getStorage().createAndLoadTrack(trackName, CreationCause.INTERNAL).join();
             track.setGroups(service.getTrackGroups(t));
@@ -158,7 +163,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         Set<UUID> usersToMigrate = new HashSet<>(userParents.keySet());
         usersToMigrate.addAll(service.getAllPlayersUUID());
 
-        Iterators.iterate(usersToMigrate, u -> {
+        Iterators.tryIterate(usersToMigrate, u -> {
             PermissionEntity entity = internalService.getEntity(null, u, false);
 
             String username = null;
@@ -176,12 +181,12 @@ public class MigrationZPermissions extends SubCommand<Object> {
             // migrate groups
             Set<Node> parents = userParents.get(u);
             if (parents != null) {
-                parents.forEach(user::setPermission);
+                parents.forEach(node -> user.setNode(DataType.NORMAL, node, true));
             }
 
             user.getPrimaryGroup().setStoredValue(MigrationUtils.standardizeName(service.getPlayerPrimaryGroup(u)));
 
-            plugin.getUserManager().cleanup(user);
+            plugin.getUserManager().getHouseKeeper().cleanup(user.getUniqueId());
             plugin.getStorage().saveUser(user);
             log.logProgress("Migrated {} users so far.", userCount.incrementAndGet(), ProgressLogger.DEFAULT_NOTIFY_FREQUENCY);
         });
@@ -196,9 +201,9 @@ public class MigrationZPermissions extends SubCommand<Object> {
             if (e.getPermission().isEmpty()) continue;
 
             if (e.getWorld() != null && !e.getWorld().getName().equals("")) {
-                holder.setPermission(NodeFactory.builder(e.getPermission()).setValue(e.isValue()).setWorld(e.getWorld().getName()).build());
+                holder.setNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(e.getPermission()).value(e.isValue()).withContext(DefaultContextKeys.WORLD_KEY, e.getWorld().getName()).build(), true);
             } else {
-                holder.setPermission(NodeFactory.builder(e.getPermission()).setValue(e.isValue()).build());
+                holder.setNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(e.getPermission()).value(e.isValue()).build(), true);
             }
         }
 
@@ -206,7 +211,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         if (entity.isGroup()) {
             for (PermissionEntity inheritance : entity.getParents()) {
                 if (!inheritance.getDisplayName().equals(holder.getObjectName())) {
-                    holder.setPermission(NodeFactory.buildGroupNode(MigrationUtils.standardizeName(inheritance.getDisplayName())).build());
+                    holder.setNode(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(inheritance.getDisplayName())).build(), true);
                 }
             }
         }
@@ -220,11 +225,12 @@ public class MigrationZPermissions extends SubCommand<Object> {
             String valueString = value.toString();
             if (valueString.isEmpty()) continue;
 
-            if (key.equals(NodeTypes.PREFIX_KEY) || key.equals(NodeTypes.SUFFIX_KEY)) {
-                ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
-                holder.setPermission(NodeFactory.buildChatMetaNode(type, weight, valueString).build());
+            if (key.equals("prefix")) {
+                holder.setNode(DataType.NORMAL, Prefix.builder(valueString, weight).build(), true);
+            } else if (key.equals("suffix")) {
+                holder.setNode(DataType.NORMAL, Suffix.builder(valueString, weight).build(), true);
             } else {
-                holder.setPermission(NodeFactory.buildMetaNode(key, valueString).build());
+                holder.setNode(DataType.NORMAL, Meta.builder(key, valueString).build(), true);
             }
         }
     }

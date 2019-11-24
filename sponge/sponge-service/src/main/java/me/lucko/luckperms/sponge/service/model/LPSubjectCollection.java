@@ -29,7 +29,8 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.query.dataorder.DataQueryOrder;
 
 import org.spongepowered.api.service.permission.SubjectCollection;
 
@@ -52,11 +53,11 @@ public interface LPSubjectCollection {
     Predicate<String> getIdentifierValidityPredicate();
 
     // transient has priority for all collections except default
-    default ResolutionOrder getResolutionOrder() {
+    default DataQueryOrder getResolutionOrder() {
         if (isDefaultsCollection()) {
-            return ResolutionOrder.TRANSIENT_LAST;
+            return DataQueryOrder.TRANSIENT_LAST;
         } else {
-            return ResolutionOrder.TRANSIENT_FIRST;
+            return DataQueryOrder.TRANSIENT_FIRST;
         }
     }
 

@@ -25,13 +25,14 @@
 
 package me.lucko.luckperms.common.commands.generic.meta;
 
-import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
@@ -42,6 +43,10 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.node.NodeType;
 
 import java.util.List;
 
@@ -67,11 +72,11 @@ public class MetaUnset extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        if (holder.clearMetaKeys(key, context, false)) {
+        if (holder.removeIf(DataType.NORMAL, context, NodeType.META.predicate(n -> !n.hasExpiry() && n.getMetaKey().equalsIgnoreCase(key)), false)) {
             Message.UNSET_META_SUCCESS.send(sender, key, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-            ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("meta", "unset", key, context)
+            LoggedAction.build().source(sender).target(holder)
+                    .description("meta", "unset", key, context)
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(holder, sender, plugin);
@@ -80,5 +85,12 @@ public class MetaUnset extends SharedSubCommand {
             Message.DOESNT_HAVE_META.send(sender, holder.getFormattedDisplayName(), key, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
+    }
+
+    @Override
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        return TabCompleter.create()
+                .from(1, TabCompletions.contexts(plugin))
+                .complete(args);
     }
 }

@@ -27,15 +27,19 @@ package me.lucko.luckperms.common.model;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.DataMutateResult;
-import me.lucko.luckperms.api.DemotionResult;
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.PromotionResult;
-import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.api.implementation.ApiTrack;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.model.manager.group.GroupManager;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
+
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.model.data.DataMutateResult;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.types.InheritanceNode;
+import net.luckperms.api.track.DemotionResult;
+import net.luckperms.api.track.PromotionResult;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -47,7 +51,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public final class Track implements Identifiable<String> {
+public final class Track {
 
     /**
      * The name of the track
@@ -80,11 +84,6 @@ public final class Track implements Identifiable<String> {
 
     public ApiTrack getApiDelegate() {
         return this.apiDelegate;
-    }
-
-    @Override
-    public String getId() {
-        return this.name.toLowerCase();
     }
 
     /**
@@ -178,7 +177,7 @@ public final class Track implements Identifiable<String> {
      */
     public DataMutateResult appendGroup(Group group) {
         if (containsGroup(group)) {
-            return DataMutateResult.ALREADY_HAS;
+            return DataMutateResult.FAIL_ALREADY_HAS;
         }
 
         List<String> before = ImmutableList.copyOf(this.groups);
@@ -199,7 +198,7 @@ public final class Track implements Identifiable<String> {
      */
     public DataMutateResult insertGroup(Group group, int position) throws IndexOutOfBoundsException {
         if (containsGroup(group)) {
-            return DataMutateResult.ALREADY_HAS;
+            return DataMutateResult.FAIL_ALREADY_HAS;
         }
 
         List<String> before = ImmutableList.copyOf(this.groups);
@@ -228,7 +227,7 @@ public final class Track implements Identifiable<String> {
      */
     public DataMutateResult removeGroup(String group) {
         if (!containsGroup(group)) {
-            return DataMutateResult.LACKS;
+            return DataMutateResult.FAIL_LACKS;
         }
 
         List<String> before = ImmutableList.copyOf(this.groups);
@@ -274,8 +273,7 @@ public final class Track implements Identifiable<String> {
         }
 
         // find all groups that are inherited by the user in the exact contexts given and applicable to this track
-        List<Node> nodes = user.enduringData().immutable().get(context.makeImmutable()).stream()
-                .filter(Node::isGroupNode)
+        List<InheritanceNode> nodes = user.normalData().immutableInheritance().get(context.immutableCopy()).stream()
                 .filter(Node::getValue)
                 .filter(node -> containsGroup(node.getGroupName()))
                 .distinct()
@@ -297,7 +295,7 @@ public final class Track implements Identifiable<String> {
                 return PromotionResults.undefinedFailure();
             }
 
-            user.setPermission(NodeFactory.buildGroupNode(nextGroup.getId()).withExtraContext(context).build());
+            user.setNode(DataType.NORMAL, Inheritance.builder(nextGroup.getName()).withContext(context).build(), true);
             this.plugin.getEventFactory().handleUserPromote(user, this, null, first, sender);
             return PromotionResults.addedToFirst(first);
         }
@@ -306,7 +304,7 @@ public final class Track implements Identifiable<String> {
             return PromotionResults.ambiguousCall();
         }
 
-        Node oldNode = nodes.get(0);
+        InheritanceNode oldNode = nodes.get(0);
         String old = oldNode.getGroupName();
         String next = getNext(old);
 
@@ -323,10 +321,10 @@ public final class Track implements Identifiable<String> {
             return PromotionResults.undefinedFailure();
         }
 
-        user.unsetPermission(oldNode);
-        user.setPermission(NodeFactory.buildGroupNode(nextGroup.getName()).withExtraContext(context).build());
+        user.unsetNode(DataType.NORMAL, oldNode);
+        user.setNode(DataType.NORMAL, Inheritance.builder(nextGroup.getName()).withContext(context).build(), true);
 
-        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(old)) {
+        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME).equalsIgnoreCase(old)) {
             user.getPrimaryGroup().setStoredValue(nextGroup.getName());
         }
 
@@ -340,8 +338,7 @@ public final class Track implements Identifiable<String> {
         }
 
         // find all groups that are inherited by the user in the exact contexts given and applicable to this track
-        List<Node> nodes = user.enduringData().immutable().get(context.makeImmutable()).stream()
-                .filter(Node::isGroupNode)
+        List<InheritanceNode> nodes = user.normalData().immutableInheritance().get(context.immutableCopy()).stream()
                 .filter(Node::getValue)
                 .filter(node -> containsGroup(node.getGroupName()))
                 .distinct()
@@ -355,7 +352,7 @@ public final class Track implements Identifiable<String> {
             return DemotionResults.ambiguousCall();
         }
 
-        Node oldNode = nodes.get(0);
+        InheritanceNode oldNode = nodes.get(0);
         String old = oldNode.getGroupName();
         String previous = getPrevious(old);
 
@@ -368,7 +365,7 @@ public final class Track implements Identifiable<String> {
                 return DemotionResults.removedFromFirst(null);
             }
 
-            user.unsetPermission(oldNode);
+            user.unsetNode(DataType.NORMAL, oldNode);
             this.plugin.getEventFactory().handleUserDemote(user, this, old, null, sender);
             return DemotionResults.removedFromFirst(old);
         }
@@ -378,10 +375,10 @@ public final class Track implements Identifiable<String> {
             return DemotionResults.malformedTrack(previous);
         }
 
-        user.unsetPermission(oldNode);
-        user.setPermission(NodeFactory.buildGroupNode(previousGroup.getName()).withExtraContext(context).build());
+        user.unsetNode(DataType.NORMAL, oldNode);
+        user.setNode(DataType.NORMAL, Inheritance.builder(previousGroup.getName()).withContext(context).build(), true);
 
-        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(old)) {
+        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME).equalsIgnoreCase(old)) {
             user.getPrimaryGroup().setStoredValue(previousGroup.getName());
         }
 

@@ -28,54 +28,13 @@ package me.lucko.luckperms.common.event;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
-import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.PlayerSaveResult;
-import me.lucko.luckperms.api.caching.GroupData;
-import me.lucko.luckperms.api.caching.UserData;
-import me.lucko.luckperms.api.event.Cancellable;
-import me.lucko.luckperms.api.event.LuckPermsEvent;
-import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.api.event.cause.DeletionCause;
-import me.lucko.luckperms.api.event.group.GroupCacheLoadEvent;
-import me.lucko.luckperms.api.event.group.GroupCreateEvent;
-import me.lucko.luckperms.api.event.group.GroupDataRecalculateEvent;
-import me.lucko.luckperms.api.event.group.GroupDeleteEvent;
-import me.lucko.luckperms.api.event.group.GroupLoadAllEvent;
-import me.lucko.luckperms.api.event.group.GroupLoadEvent;
-import me.lucko.luckperms.api.event.log.LogBroadcastEvent;
-import me.lucko.luckperms.api.event.log.LogNetworkPublishEvent;
-import me.lucko.luckperms.api.event.log.LogNotifyEvent;
-import me.lucko.luckperms.api.event.log.LogPublishEvent;
-import me.lucko.luckperms.api.event.log.LogReceiveEvent;
-import me.lucko.luckperms.api.event.node.NodeAddEvent;
-import me.lucko.luckperms.api.event.node.NodeClearEvent;
-import me.lucko.luckperms.api.event.node.NodeRemoveEvent;
-import me.lucko.luckperms.api.event.player.PlayerDataSaveEvent;
-import me.lucko.luckperms.api.event.player.PlayerLoginProcessEvent;
-import me.lucko.luckperms.api.event.source.Source;
-import me.lucko.luckperms.api.event.sync.ConfigReloadEvent;
-import me.lucko.luckperms.api.event.sync.PostSyncEvent;
-import me.lucko.luckperms.api.event.sync.PreNetworkSyncEvent;
-import me.lucko.luckperms.api.event.sync.PreSyncEvent;
-import me.lucko.luckperms.api.event.track.TrackCreateEvent;
-import me.lucko.luckperms.api.event.track.TrackDeleteEvent;
-import me.lucko.luckperms.api.event.track.TrackLoadAllEvent;
-import me.lucko.luckperms.api.event.track.TrackLoadEvent;
-import me.lucko.luckperms.api.event.track.mutate.TrackAddGroupEvent;
-import me.lucko.luckperms.api.event.track.mutate.TrackClearEvent;
-import me.lucko.luckperms.api.event.track.mutate.TrackRemoveGroupEvent;
-import me.lucko.luckperms.api.event.user.UserCacheLoadEvent;
-import me.lucko.luckperms.api.event.user.UserDataRecalculateEvent;
-import me.lucko.luckperms.api.event.user.UserFirstLoginEvent;
-import me.lucko.luckperms.api.event.user.UserLoadEvent;
-import me.lucko.luckperms.api.event.user.track.UserDemoteEvent;
-import me.lucko.luckperms.api.event.user.track.UserPromoteEvent;
 import me.lucko.luckperms.common.api.implementation.ApiPermissionHolder;
 import me.lucko.luckperms.common.api.implementation.ApiUser;
+import me.lucko.luckperms.common.cacheddata.GroupCachedDataManager;
+import me.lucko.luckperms.common.cacheddata.UserCachedDataManager;
 import me.lucko.luckperms.common.event.gen.GeneratedEventSpec;
 import me.lucko.luckperms.common.event.model.EntitySourceImpl;
-import me.lucko.luckperms.common.event.model.SenderEntity;
+import me.lucko.luckperms.common.event.model.SenderPlatformEntity;
 import me.lucko.luckperms.common.event.model.UnknownSource;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
@@ -83,6 +42,51 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.sender.Sender;
+
+import net.luckperms.api.actionlog.Action;
+import net.luckperms.api.event.type.Cancellable;
+import net.luckperms.api.event.LuckPermsEvent;
+import net.luckperms.api.event.cause.CreationCause;
+import net.luckperms.api.event.cause.DeletionCause;
+import net.luckperms.api.event.extension.ExtensionLoadEvent;
+import net.luckperms.api.event.group.GroupCacheLoadEvent;
+import net.luckperms.api.event.group.GroupCreateEvent;
+import net.luckperms.api.event.group.GroupDataRecalculateEvent;
+import net.luckperms.api.event.group.GroupDeleteEvent;
+import net.luckperms.api.event.group.GroupLoadAllEvent;
+import net.luckperms.api.event.group.GroupLoadEvent;
+import net.luckperms.api.event.log.LogBroadcastEvent;
+import net.luckperms.api.event.log.LogNetworkPublishEvent;
+import net.luckperms.api.event.log.LogNotifyEvent;
+import net.luckperms.api.event.log.LogPublishEvent;
+import net.luckperms.api.event.log.LogReceiveEvent;
+import net.luckperms.api.event.node.NodeAddEvent;
+import net.luckperms.api.event.node.NodeClearEvent;
+import net.luckperms.api.event.node.NodeRemoveEvent;
+import net.luckperms.api.event.player.PlayerDataSaveEvent;
+import net.luckperms.api.event.player.PlayerLoginProcessEvent;
+import net.luckperms.api.event.source.Source;
+import net.luckperms.api.event.sync.ConfigReloadEvent;
+import net.luckperms.api.event.sync.PostSyncEvent;
+import net.luckperms.api.event.sync.PreNetworkSyncEvent;
+import net.luckperms.api.event.sync.PreSyncEvent;
+import net.luckperms.api.event.track.TrackCreateEvent;
+import net.luckperms.api.event.track.TrackDeleteEvent;
+import net.luckperms.api.event.track.TrackLoadAllEvent;
+import net.luckperms.api.event.track.TrackLoadEvent;
+import net.luckperms.api.event.track.mutate.TrackAddGroupEvent;
+import net.luckperms.api.event.track.mutate.TrackClearEvent;
+import net.luckperms.api.event.track.mutate.TrackRemoveGroupEvent;
+import net.luckperms.api.event.user.UserCacheLoadEvent;
+import net.luckperms.api.event.user.UserDataRecalculateEvent;
+import net.luckperms.api.event.user.UserFirstLoginEvent;
+import net.luckperms.api.event.user.UserLoadEvent;
+import net.luckperms.api.event.user.track.UserDemoteEvent;
+import net.luckperms.api.event.user.track.UserPromoteEvent;
+import net.luckperms.api.extension.Extension;
+import net.luckperms.api.model.PlayerSaveResult;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.node.Node;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -131,7 +135,11 @@ public final class EventFactory {
         return (T) GeneratedEventSpec.lookup(eventClass).newInstance(this.eventBus.getApiProvider(), params);
     }
 
-    public void handleGroupCacheLoad(Group group, GroupData data) {
+    public void handleExtensionLoad(Extension extension) {
+        post(ExtensionLoadEvent.class, () -> generate(ExtensionLoadEvent.class, extension));
+    }
+
+    public void handleGroupCacheLoad(Group group, GroupCachedDataManager data) {
         post(GroupCacheLoadEvent.class, () -> generate(GroupCacheLoadEvent.class, group.getApiDelegate(), data));
     }
 
@@ -140,7 +148,7 @@ public final class EventFactory {
     }
 
     public void handleGroupDelete(Group group, DeletionCause cause) {
-        post(GroupDeleteEvent.class, () -> generate(GroupDeleteEvent.class, group.getName(), ImmutableSet.copyOf(group.enduringData().immutable().values()), cause));
+        post(GroupDeleteEvent.class, () -> generate(GroupDeleteEvent.class, group.getName(), ImmutableSet.copyOf(group.normalData().immutable().values()), cause));
     }
 
     public void handleGroupLoadAll() {
@@ -151,7 +159,7 @@ public final class EventFactory {
         post(GroupLoadEvent.class, () -> generate(GroupLoadEvent.class, group.getApiDelegate()));
     }
 
-    public boolean handleLogBroadcast(boolean initialState, LogEntry entry, LogBroadcastEvent.Origin origin) {
+    public boolean handleLogBroadcast(boolean initialState, Action entry, LogBroadcastEvent.Origin origin) {
         if (!shouldPost(LogBroadcastEvent.class)) {
             return initialState;
         }
@@ -161,7 +169,7 @@ public final class EventFactory {
         return cancel.get();
     }
 
-    public boolean handleLogPublish(boolean initialState, LogEntry entry) {
+    public boolean handleLogPublish(boolean initialState, Action entry) {
         if (!shouldPost(LogPublishEvent.class)) {
             return initialState;
         }
@@ -171,7 +179,7 @@ public final class EventFactory {
         return cancel.get();
     }
 
-    public boolean handleLogNetworkPublish(boolean initialState, UUID id, LogEntry entry) {
+    public boolean handleLogNetworkPublish(boolean initialState, UUID id, Action entry) {
         if (!shouldPost(LogNetworkPublishEvent.class)) {
             return initialState;
         }
@@ -181,30 +189,30 @@ public final class EventFactory {
         return cancel.get();
     }
 
-    public boolean handleLogNotify(boolean initialState, LogEntry entry, LogNotifyEvent.Origin origin, Sender sender) {
+    public boolean handleLogNotify(boolean initialState, Action entry, LogNotifyEvent.Origin origin, Sender sender) {
         if (!shouldPost(LogNotifyEvent.class)) {
             return initialState;
         }
 
         AtomicBoolean cancel = new AtomicBoolean(initialState);
-        post(generate(LogNotifyEvent.class, cancel, entry, origin, new SenderEntity(sender)));
+        post(generate(LogNotifyEvent.class, cancel, entry, origin, new SenderPlatformEntity(sender)));
         return cancel.get();
     }
 
-    public void handleLogReceive(UUID id, LogEntry entry) {
+    public void handleLogReceive(UUID id, Action entry) {
         post(LogReceiveEvent.class, () -> generate(LogReceiveEvent.class, id, entry));
     }
 
-    public void handleNodeAdd(Node node, PermissionHolder target, Collection<? extends Node> before, Collection<? extends Node> after) {
-        post(NodeAddEvent.class, () -> generate(NodeAddEvent.class, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node));
+    public void handleNodeAdd(Node node, PermissionHolder target, DataType dataType, Collection<? extends Node> before, Collection<? extends Node> after) {
+        post(NodeAddEvent.class, () -> generate(NodeAddEvent.class, getDelegate(target), dataType, ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node));
     }
 
-    public void handleNodeClear(PermissionHolder target, Collection<? extends Node> before, Collection<? extends Node> after) {
-        post(NodeClearEvent.class, () -> generate(NodeClearEvent.class, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after)));
+    public void handleNodeClear(PermissionHolder target, DataType dataType, Collection<? extends Node> before, Collection<? extends Node> after) {
+        post(NodeClearEvent.class, () -> generate(NodeClearEvent.class, getDelegate(target), dataType, ImmutableSet.copyOf(before), ImmutableSet.copyOf(after)));
     }
 
-    public void handleNodeRemove(Node node, PermissionHolder target, Collection<? extends Node> before, Collection<? extends Node> after) {
-        post(NodeRemoveEvent.class, () -> generate(NodeRemoveEvent.class, getDelegate(target), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node));
+    public void handleNodeRemove(Node node, PermissionHolder target, DataType dataType, Collection<? extends Node> before, Collection<? extends Node> after) {
+        post(NodeRemoveEvent.class, () -> generate(NodeRemoveEvent.class, getDelegate(target), dataType, ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node));
     }
 
     public void handleConfigReload() {
@@ -263,7 +271,7 @@ public final class EventFactory {
         post(TrackRemoveGroupEvent.class, () -> generate(TrackRemoveGroupEvent.class, track.getApiDelegate(), ImmutableList.copyOf(before), ImmutableList.copyOf(after), group));
     }
 
-    public void handleUserCacheLoad(User user, UserData data) {
+    public void handleUserCacheLoad(User user, UserCachedDataManager data) {
         post(UserCacheLoadEvent.class, () -> generate(UserCacheLoadEvent.class, new ApiUser(user), data));
     }
 
@@ -277,20 +285,20 @@ public final class EventFactory {
         }
     }
 
-    public void handleUserFirstLogin(UUID uuid, String username) {
-        post(UserFirstLoginEvent.class, () -> generate(UserFirstLoginEvent.class, uuid, username));
+    public void handleUserFirstLogin(UUID uniqueId, String username) {
+        post(UserFirstLoginEvent.class, () -> generate(UserFirstLoginEvent.class, uniqueId, username));
     }
 
-    public void handlePlayerLoginProcess(UUID uuid, String username, User user) {
+    public void handlePlayerLoginProcess(UUID uniqueId, String username, User user) {
         if (!shouldPost(PlayerLoginProcessEvent.class)) {
             return;
         }
 
-        post(generate(PlayerLoginProcessEvent.class, uuid, username, new ApiUser(user)));
+        post(generate(PlayerLoginProcessEvent.class, uniqueId, username, new ApiUser(user)));
     }
 
-    public void handlePlayerDataSave(UUID uuid, String username, PlayerSaveResult result) {
-        post(PlayerDataSaveEvent.class, () -> generate(PlayerDataSaveEvent.class, uuid, username, result));
+    public void handlePlayerDataSave(UUID uniqueId, String username, PlayerSaveResult result) {
+        post(PlayerDataSaveEvent.class, () -> generate(PlayerDataSaveEvent.class, uniqueId, username, result));
     }
 
     public void handleUserLoad(User user) {
@@ -299,14 +307,14 @@ public final class EventFactory {
 
     public void handleUserDemote(User user, Track track, String from, String to, @Nullable Sender source) {
         post(UserDemoteEvent.class, () -> {
-            Source s = source == null ? UnknownSource.INSTANCE : new EntitySourceImpl(new SenderEntity(source));
+            Source s = source == null ? UnknownSource.INSTANCE : new EntitySourceImpl(new SenderPlatformEntity(source));
             return generate(UserDemoteEvent.class, s, track.getApiDelegate(), new ApiUser(user), Optional.ofNullable(from), Optional.ofNullable(to));
         });
     }
 
     public void handleUserPromote(User user, Track track, String from, String to, @Nullable Sender source) {
         post(UserPromoteEvent.class, () -> {
-            Source s = source == null ? UnknownSource.INSTANCE : new EntitySourceImpl(new SenderEntity(source));
+            Source s = source == null ? UnknownSource.INSTANCE : new EntitySourceImpl(new SenderPlatformEntity(source));
             return generate(UserPromoteEvent.class, s, track.getApiDelegate(), new ApiUser(user), Optional.ofNullable(from), Optional.ofNullable(to));
         });
     }

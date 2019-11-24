@@ -28,10 +28,10 @@ package me.lucko.luckperms.common.calculator.processor;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
-import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.nodetype.types.RegexType;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
-import me.lucko.luckperms.common.node.model.NodeTypes;
+import me.lucko.luckperms.common.node.types.RegexPermission;
+
+import net.luckperms.api.util.Tristate;
 
 import java.util.Collections;
 import java.util.List;
@@ -57,17 +57,17 @@ public class RegexProcessor extends AbstractPermissionProcessor implements Permi
     public void refresh() {
         ImmutableList.Builder<Map.Entry<Pattern, TristateResult>> builder = ImmutableList.builder();
         for (Map.Entry<String, Boolean> e : this.sourceMap.entrySet()) {
-            RegexType regexType = NodeTypes.parseRegexType(e.getKey());
-            if (regexType == null) {
+            RegexPermission.Builder regexPerm = RegexPermission.parse(e.getKey());
+            if (regexPerm == null) {
                 continue;
             }
 
-            Pattern pattern = regexType.getPattern().orElse(null);
+            Pattern pattern = regexPerm.build().getPattern().orElse(null);
             if (pattern == null) {
                 continue;
             }
 
-            TristateResult value = RESULT_FACTORY.result(Tristate.fromBoolean(e.getValue()), "pattern: " + pattern.pattern());
+            TristateResult value = RESULT_FACTORY.result(Tristate.of(e.getValue()), "pattern: " + pattern.pattern());
             builder.add(Maps.immutableEntry(pattern, value));
         }
         this.regexPermissions = builder.build();

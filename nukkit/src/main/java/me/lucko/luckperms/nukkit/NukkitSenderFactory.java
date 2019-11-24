@@ -25,13 +25,13 @@
 
 package me.lucko.luckperms.nukkit;
 
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.Component;
+import net.luckperms.api.util.Tristate;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
@@ -53,7 +53,7 @@ public class NukkitSenderFactory extends SenderFactory<CommandSender> {
     }
 
     @Override
-    protected UUID getUuid(CommandSender sender) {
+    protected UUID getUniqueId(CommandSender sender) {
         if (sender instanceof Player) {
             return ((Player) sender).getUniqueId();
         }
@@ -83,7 +83,7 @@ public class NukkitSenderFactory extends SenderFactory<CommandSender> {
         boolean isSet = sender.isPermissionSet(node);
         boolean val = sender.hasPermission(node);
 
-        return !isSet ? val ? Tristate.TRUE : Tristate.UNDEFINED : Tristate.fromBoolean(val);
+        return !isSet ? val ? Tristate.TRUE : Tristate.UNDEFINED : Tristate.of(val);
     }
 
     @Override

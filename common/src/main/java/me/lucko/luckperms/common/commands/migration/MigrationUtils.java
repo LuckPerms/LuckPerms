@@ -25,37 +25,40 @@
 
 package me.lucko.luckperms.common.commands.migration;
 
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.nodetype.types.WeightType;
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
+import me.lucko.luckperms.common.node.types.Weight;
+
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.node.NodeBuilder;
+import net.luckperms.api.node.NodeType;
 
 public final class MigrationUtils {
     private MigrationUtils() {}
 
-    public static Node.Builder parseNode(String permission, boolean value) {
+    public static NodeBuilder parseNode(String permission, boolean value) {
         if (permission.startsWith("-") || permission.startsWith("!")) {
             if (permission.length() == 1) {
-                return NodeFactory.builder(permission).setValue(value);
+                return NodeBuilders.determineMostApplicable(permission).value(value);
             }
 
             permission = permission.substring(1);
             value = false;
         } else if (permission.startsWith("+")) {
             if (permission.length() == 1) {
-                return NodeFactory.builder(permission).setValue(value);
+                return NodeBuilders.determineMostApplicable(permission).value(value);
             }
 
             permission = permission.substring(1);
             value = true;
         }
 
-        return NodeFactory.builder(permission).setValue(value);
+        return NodeBuilders.determineMostApplicable(permission).value(value);
     }
 
     public static void setGroupWeight(Group group, int weight) {
-        group.removeIf(n -> n.getTypeData(WeightType.KEY).isPresent());
-        group.setPermission(NodeFactory.buildWeightNode(weight).build());
+        group.removeIf(DataType.NORMAL, null, NodeType.WEIGHT::matches, false);
+        group.setNode(DataType.NORMAL, Weight.builder(weight).build(), true);
     }
 
     public static String standardizeName(String string) {

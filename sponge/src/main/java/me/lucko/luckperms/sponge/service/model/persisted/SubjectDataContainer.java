@@ -32,13 +32,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.context.ContextSetComparator;
 import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 import me.lucko.luckperms.sponge.service.model.calculated.CalculatedSubjectData;
+
+import net.luckperms.api.context.ImmutableContextSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -121,7 +122,7 @@ public class SubjectDataContainer {
             JsonObject context = section.get("context").getAsJsonObject();
             JsonObject data = section.get("data").getAsJsonObject();
 
-            ImmutableContextSet contextSet = ContextSetJsonSerializer.deserializeContextSet(context).makeImmutable();
+            ImmutableContextSet contextSet = ContextSetJsonSerializer.deserializeContextSet(context).immutableCopy();
             ImmutableMap.Builder<String, Boolean> perms = ImmutableMap.builder();
             for (Map.Entry<String, JsonElement> perm : data.entrySet()) {
                 perms.put(perm.getKey(), perm.getValue().getAsBoolean());
@@ -144,7 +145,7 @@ public class SubjectDataContainer {
             JsonObject context = section.get("context").getAsJsonObject();
             JsonObject data = section.get("data").getAsJsonObject();
 
-            ImmutableContextSet contextSet = ContextSetJsonSerializer.deserializeContextSet(context).makeImmutable();
+            ImmutableContextSet contextSet = ContextSetJsonSerializer.deserializeContextSet(context).immutableCopy();
             ImmutableMap.Builder<String, String> opts = ImmutableMap.builder();
             for (Map.Entry<String, JsonElement> opt : data.entrySet()) {
                 opts.put(opt.getKey(), opt.getValue().getAsString());
@@ -167,7 +168,7 @@ public class SubjectDataContainer {
             JsonObject context = section.get("context").getAsJsonObject();
             JsonArray data = section.get("data").getAsJsonArray();
 
-            ImmutableContextSet contextSet = ContextSetJsonSerializer.deserializeContextSet(context).makeImmutable();
+            ImmutableContextSet contextSet = ContextSetJsonSerializer.deserializeContextSet(context).immutableCopy();
             ImmutableList.Builder<LPSubjectReference> pars = ImmutableList.builder();
             for (JsonElement p : data) {
                 if (!p.isJsonObject()) {

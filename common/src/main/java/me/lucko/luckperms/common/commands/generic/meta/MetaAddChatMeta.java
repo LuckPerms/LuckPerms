@@ -25,15 +25,14 @@
 
 package me.lucko.luckperms.common.commands.generic.meta;
 
-import me.lucko.luckperms.api.ChatMetaType;
-import me.lucko.luckperms.api.DataMutateResult;
-import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
@@ -41,7 +40,6 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -49,6 +47,10 @@ import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
+import net.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.model.data.DataMutateResult;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.node.ChatMetaType;
 
 import java.util.List;
 
@@ -83,8 +85,8 @@ public class MetaAddChatMeta extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        DataMutateResult result = holder.setPermission(NodeFactory.buildChatMetaNode(this.type, priority, meta).withExtraContext(context).build());
-        if (result.asBoolean()) {
+        DataMutateResult result = holder.setNode(DataType.NORMAL, this.type.builder(meta, priority).withContext(context).build(), true);
+        if (result.wasSuccessful()) {
             TextComponent.Builder builder = Message.ADD_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
             HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(
                     "¥3Raw " + this.type.name().toLowerCase() + ": ¥r" + meta,
@@ -93,8 +95,8 @@ public class MetaAddChatMeta extends SharedSubCommand {
             builder.applyDeep(c -> c.hoverEvent(event));
             sender.sendMessage(builder.build());
 
-            ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("meta" , "add" + this.type.name().toLowerCase(), priority, meta, context)
+            LoggedAction.build().source(sender).target(holder)
+                    .description("meta" , "add" + this.type.name().toLowerCase(), priority, meta, context)
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(holder, sender, plugin);
@@ -103,5 +105,12 @@ public class MetaAddChatMeta extends SharedSubCommand {
             Message.ALREADY_HAS_CHAT_META.send(sender, holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
+    }
+
+    @Override
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        return TabCompleter.create()
+                .from(2, TabCompletions.contexts(plugin))
+                .complete(args);
     }
 }

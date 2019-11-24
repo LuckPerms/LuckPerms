@@ -32,6 +32,11 @@ import me.lucko.luckperms.common.model.manager.Manager;
 public interface GroupManager<T extends Group> extends Manager<String, Group, T> {
 
     /**
+     * The name of the default group.
+     */
+    String DEFAULT_GROUP_NAME = "default";
+
+    /**
      * Get a group object by display name
      *
      * @param name The name to search by

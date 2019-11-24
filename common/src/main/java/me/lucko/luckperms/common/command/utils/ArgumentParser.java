@@ -25,18 +25,19 @@
 
 package me.lucko.luckperms.common.command.utils;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.TemporaryMergeBehaviour;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.commands.user.UserMainCommand;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.DateParser;
 
-import java.util.ArrayList;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -121,27 +122,28 @@ public class ArgumentParser {
         return unixTime < (System.currentTimeMillis() / 1000L);
     }
 
-    public static TemporaryMergeBehaviour parseTemporaryModifier(String s) {
+    public static TemporaryNodeMergeStrategy parseTemporaryModifier(String s) {
         switch (s.toLowerCase()) {
             case "accumulate":
-                return TemporaryMergeBehaviour.ADD_NEW_DURATION_TO_EXISTING;
+                return TemporaryNodeMergeStrategy.ADD_NEW_DURATION_TO_EXISTING;
             case "replace":
-                return TemporaryMergeBehaviour.REPLACE_EXISTING_IF_DURATION_LONGER;
+                return TemporaryNodeMergeStrategy.REPLACE_EXISTING_IF_DURATION_LONGER;
             case "deny":
-                return TemporaryMergeBehaviour.FAIL_WITH_ALREADY_HAS;
+            case "none":
+                return TemporaryNodeMergeStrategy.NONE;
             default:
                 throw new IllegalArgumentException("Unknown value: " + s);
         }
     }
 
-    public static Optional<TemporaryMergeBehaviour> parseTemporaryModifier(int index, List<String> args) {
+    public static Optional<TemporaryNodeMergeStrategy> parseTemporaryModifier(int index, List<String> args) {
         if (index < 0 || index >= args.size()) {
             return Optional.empty();
         }
 
         String s = args.get(index);
         try {
-            Optional<TemporaryMergeBehaviour> ret = Optional.of(parseTemporaryModifier(s));
+            Optional<TemporaryNodeMergeStrategy> ret = Optional.of(parseTemporaryModifier(s));
             args.remove(index);
             return ret;
         } catch (IllegalArgumentException e) {
@@ -150,87 +152,30 @@ public class ArgumentParser {
     }
 
     public static MutableContextSet parseContext(int fromIndex, List<String> args, LuckPermsPlugin plugin) throws CommandException {
-        if (args.size() > fromIndex) {
-            MutableContextSet set = MutableContextSet.create();
+        if (args.size() <= fromIndex) {
+            return plugin.getConfiguration().getContextsFile().getDefaultContexts().mutableCopy();
+        }
 
-            List<String> contexts = args.subList(fromIndex, args.size());
-
-            for (int i = 0; i < contexts.size(); i++) {
-                String pair = contexts.get(i);
-
-                // one of the first two values, and doesn't have a key
-                if (i <= 1 && !pair.contains("=")) {
-                    String key = i == 0 ? Contexts.SERVER_KEY : Contexts.WORLD_KEY;
-                    set.add(key, pair);
-                    continue;
-                }
-
-                int index = pair.indexOf('=');
-                if (index == -1) {
-                    continue;
-                }
-
-                String key = pair.substring(0, index);
+        MutableContextSet contextSet = new MutableContextSetImpl();
+        List<String> toQuery = args.subList(fromIndex, args.size());
+        for (String s : toQuery) {
+            int index = s.indexOf('=');
+            if (index != -1) {
+                String key = s.substring(0, index);
                 if (key.equals("") || key.trim().isEmpty()) {
                     continue;
                 }
 
-                String value = pair.substring(index + 1);
+                String value = s.substring(index + 1);
                 if (value.equals("") || value.trim().isEmpty()) {
                     continue;
                 }
 
-                set.add(key, value);
-            }
-
-            return sanitizeContexts(set);
-        } else {
-            return sanitizeContexts(plugin.getConfiguration().getContextsFile().getDefaultContexts().mutableCopy());
-        }
-    }
-
-    private static MutableContextSet sanitizeContexts(MutableContextSet set) throws ArgumentException {
-        // remove any potential "global" context mappings
-        set.remove(Contexts.SERVER_KEY, "global");
-        set.remove(Contexts.WORLD_KEY, "global");
-        set.remove(Contexts.SERVER_KEY, "null");
-        set.remove(Contexts.WORLD_KEY, "null");
-        set.remove(Contexts.SERVER_KEY, "*");
-        set.remove(Contexts.WORLD_KEY, "*");
-
-        // remove excess entries from the set.
-        // (it can only have one server and one world.)
-        List<String> servers = new ArrayList<>(set.getValues(Contexts.SERVER_KEY));
-        if (servers.size() > 1) {
-            // start iterating at index 1
-            for (int i = 1; i < servers.size(); i++) {
-                set.remove(Contexts.SERVER_KEY, servers.get(i));
+                contextSet.add(key, value);
             }
         }
 
-        List<String> worlds = new ArrayList<>(set.getValues(Contexts.WORLD_KEY));
-        if (worlds.size() > 1) {
-            // start iterating at index 1
-            for (int i = 1; i < worlds.size(); i++) {
-                set.remove(Contexts.WORLD_KEY, worlds.get(i));
-            }
-        }
-
-        // there's either none or 1
-        for (String server : servers) {
-            if (!DataConstraints.SERVER_NAME_TEST.test(server)) {
-                throw new InvalidServerWorldException();
-            }
-        }
-
-        // there's either none or 1
-        for (String world : worlds) {
-            if (!DataConstraints.WORLD_NAME_TEST.test(world)) {
-                throw new InvalidServerWorldException();
-            }
-        }
-
-        return set;
+        return contextSet;
     }
 
     public static int parsePriority(int index, List<String> args) throws ArgumentException {
@@ -243,21 +188,21 @@ public class ArgumentParser {
 
     public static ImmutableContextSet parseContextSponge(int fromIndex, List<String> args) {
         if (args.size() <= fromIndex) {
-            return ImmutableContextSet.empty();
+            return ImmutableContextSetImpl.EMPTY;
         }
 
-        MutableContextSet contextSet = MutableContextSet.create();
+        MutableContextSet contextSet = new MutableContextSetImpl();
         List<String> toQuery = args.subList(fromIndex, args.size());
         for (String s : toQuery) {
             int index = s.indexOf('=');
             if (index != -1) {
                 String key = s.substring(0, index);
-                if (key.equals("")) {
+                if (key.equals("") || key.trim().isEmpty()) {
                     continue;
                 }
 
                 String value = s.substring(index + 1);
-                if (value.equals("")) {
+                if (value.equals("") || value.trim().isEmpty()) {
                     continue;
                 }
 
@@ -265,12 +210,12 @@ public class ArgumentParser {
             }
         }
 
-        return contextSet.makeImmutable();
+        return contextSet.immutableCopy();
     }
 
     public static UUID parseUserTarget(int index, List<String> args, LuckPermsPlugin plugin, Sender sender) {
         final String target = args.get(index);
-        return UserMainCommand.parseTargetUuid(target, plugin, sender);
+        return UserMainCommand.parseTargetUniqueId(target, plugin, sender);
     }
 
     public abstract static class ArgumentException extends CommandException {}

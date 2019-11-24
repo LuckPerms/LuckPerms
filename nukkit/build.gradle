@@ -24,6 +24,7 @@ shadowJar {
     archiveName = "LuckPerms-Nukkit-${project.ext.fullVersion}.jar"
 
     dependencies {
+        include(dependency('net.luckperms:.*'))
         include(dependency('me.lucko.luckperms:.*'))
     }
 

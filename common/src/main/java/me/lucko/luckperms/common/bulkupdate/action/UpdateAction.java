@@ -27,7 +27,10 @@ package me.lucko.luckperms.common.bulkupdate.action;
 
 import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
 import me.lucko.luckperms.common.bulkupdate.query.QueryField;
-import me.lucko.luckperms.common.node.model.NodeDataContainer;
+
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.node.Node;
 
 public class UpdateAction implements Action {
 
@@ -52,14 +55,36 @@ public class UpdateAction implements Action {
     }
 
     @Override
-    public NodeDataContainer apply(NodeDataContainer from) {
+    public Node apply(Node from) {
         switch (this.field) {
             case PERMISSION:
-                return from.setPermission(this.value);
-            case SERVER:
-                return from.setServer(this.value);
-            case WORLD:
-                return from.setWorld(this.value);
+                return Node.builder(this.value)
+                        .value(from.getValue())
+                        .expiry(from.getExpiry())
+                        .context(from.getContexts())
+                        .build();
+            case SERVER: {
+                MutableContextSet contexts = from.getContexts().mutableCopy();
+                contexts.removeAll(DefaultContextKeys.SERVER_KEY);
+                if (!this.value.equals("global")) {
+                    contexts.add(DefaultContextKeys.SERVER_KEY, this.value);
+                }
+
+                return from.toBuilder()
+                        .context(contexts)
+                        .build();
+            }
+            case WORLD: {
+                MutableContextSet contexts = from.getContexts().mutableCopy();
+                contexts.removeAll(DefaultContextKeys.WORLD_KEY);
+                if (!this.value.equals("global")) {
+                    contexts.add(DefaultContextKeys.WORLD_KEY, this.value);
+                }
+
+                return from.toBuilder()
+                        .context(contexts)
+                        .build();
+            }
             default:
                 throw new RuntimeException();
         }

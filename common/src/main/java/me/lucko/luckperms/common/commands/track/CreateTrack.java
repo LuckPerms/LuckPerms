@@ -25,9 +25,7 @@
 
 package me.lucko.luckperms.common.commands.track;
 
-import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -38,6 +36,9 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.actionlog.Action;
+import net.luckperms.api.event.cause.CreationCause;
 
 import java.util.List;
 
@@ -74,8 +75,8 @@ public class CreateTrack extends SingleCommand {
 
         Message.CREATE_SUCCESS.send(sender, trackName);
 
-        ExtendedLogEntry.build().actor(sender).actedName(trackName).type(LogEntry.Type.TRACK)
-                .action("create").build()
+        LoggedAction.build().source(sender).targetName(trackName).targetType(Action.Target.Type.TRACK)
+                .description("create").build()
                 .submit(plugin, sender);
 
         return CommandResult.SUCCESS;

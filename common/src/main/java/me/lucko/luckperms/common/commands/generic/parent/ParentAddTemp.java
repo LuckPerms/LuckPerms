@@ -25,10 +25,7 @@
 
 package me.lucko.luckperms.common.commands.generic.parent;
 
-import me.lucko.luckperms.api.TemporaryDataMutateResult;
-import me.lucko.luckperms.api.TemporaryMergeBehaviour;
-import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
@@ -45,11 +42,16 @@ import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.model.data.DataMutateResult;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
 
 import java.util.List;
 
@@ -67,7 +69,7 @@ public class ParentAddTemp extends SharedSubCommand {
 
         String groupName = ArgumentParser.parseName(0, args);
         long duration = ArgumentParser.parseDuration(1, args);
-        TemporaryMergeBehaviour modifier = ArgumentParser.parseTemporaryModifier(2, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
+        TemporaryNodeMergeStrategy modifier = ArgumentParser.parseTemporaryModifier(2, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
         MutableContextSet context = ArgumentParser.parseContext(2, args, plugin);
 
         Group group = StorageAssistant.loadGroup(groupName, sender, plugin, false);
@@ -88,14 +90,14 @@ public class ParentAddTemp extends SharedSubCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        TemporaryDataMutateResult ret = holder.setPermission(NodeFactory.buildGroupNode(group.getName()).setExpiry(duration).withExtraContext(context).build(), modifier);
+        DataMutateResult.WithMergedNode ret = holder.setNode(DataType.NORMAL, Inheritance.builder(group.getName()).expiry(duration).withContext(context).build(), modifier);
 
-        if (ret.getResult().asBoolean()) {
-            duration = ret.getMergedNode().getExpiryUnixTime();
+        if (ret.getResult().wasSuccessful()) {
+            duration = ret.getMergedNode().getExpiry().getEpochSecond();
             Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFormattedDisplayName(), group.getFormattedDisplayName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-            ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("parent", "addtemp", group.getName(), duration, context)
+            LoggedAction.build().source(sender).target(holder)
+                    .description("parent", "addtemp", group.getName(), duration, context)
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(holder, sender, plugin);
@@ -110,6 +112,7 @@ public class ParentAddTemp extends SharedSubCommand {
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return TabCompleter.create()
                 .at(0, TabCompletions.groups(plugin))
+                .from(2, TabCompletions.contexts(plugin))
                 .complete(args);
     }
 }

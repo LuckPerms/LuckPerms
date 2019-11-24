@@ -53,16 +53,16 @@ public class VaultHookManager {
     public void hook() {
         try {
             if (this.permission == null) {
-                this.permission = new LuckPermsVaultPermission(plugin);
+                this.permission = new LuckPermsVaultPermission(this.plugin);
             }
 
             if (this.chat == null) {
-                this.chat = new LuckPermsVaultChat(plugin, this.permission);
+                this.chat = new LuckPermsVaultChat(this.plugin, this.permission);
             }
 
-            final ServicesManager sm = plugin.getBootstrap().getServer().getServicesManager();
-            sm.register(Permission.class, this.permission, plugin.getBootstrap(), ServicePriority.High);
-            sm.register(Chat.class, this.chat, plugin.getBootstrap(), ServicePriority.High);
+            final ServicesManager sm = this.plugin.getBootstrap().getServer().getServicesManager();
+            sm.register(Permission.class, this.permission, this.plugin.getBootstrap(), ServicePriority.High);
+            sm.register(Chat.class, this.chat, this.plugin.getBootstrap(), ServicePriority.High);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -73,7 +73,7 @@ public class VaultHookManager {
      * Unregisters the LuckPerms Vault hooks, if present.
      */
     public void unhook() {
-        final ServicesManager sm = plugin.getBootstrap().getServer().getServicesManager();
+        final ServicesManager sm = this.plugin.getBootstrap().getServer().getServicesManager();
 
         if (this.permission != null) {
             sm.unregister(Permission.class, this.permission);

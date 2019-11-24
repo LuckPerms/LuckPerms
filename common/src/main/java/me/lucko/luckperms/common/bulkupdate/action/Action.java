@@ -26,7 +26,8 @@
 package me.lucko.luckperms.common.bulkupdate.action;
 
 import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
-import me.lucko.luckperms.common.node.model.NodeDataContainer;
+
+import net.luckperms.api.node.Node;
 
 /**
  * Represents an action to be applied to a given node.
@@ -46,7 +47,7 @@ public interface Action {
      * @param from the node to base changes from
      * @return the new nodemodel instance, or null if the node should be deleted.
      */
-    NodeDataContainer apply(NodeDataContainer from);
+    Node apply(Node from);
 
     /**
      * Gets this action in SQL form.

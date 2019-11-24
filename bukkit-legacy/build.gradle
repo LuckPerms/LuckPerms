@@ -12,6 +12,7 @@ shadowJar {
     archiveName = "LuckPerms-Bukkit-Legacy-${project.ext.fullVersion}.jar"
 
     dependencies {
+        include(dependency('net.luckperms:.*'))
         include(dependency('me.lucko.luckperms:.*'))
         include(dependency('com.google.guava:guava:.*'))
         include(dependency('com.google.code.gson:gson:.*'))

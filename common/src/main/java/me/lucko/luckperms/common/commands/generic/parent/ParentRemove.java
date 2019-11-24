@@ -25,9 +25,7 @@
 
 package me.lucko.luckperms.common.commands.generic.parent;
 
-import me.lucko.luckperms.api.DataMutateResult;
-import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
@@ -45,10 +43,15 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.model.manager.group.GroupManager;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.model.data.DataMutateResult;
+import net.luckperms.api.model.data.DataType;
 
 import java.util.List;
 
@@ -81,7 +84,7 @@ public class ParentRemove extends SharedSubCommand {
             boolean shouldPrevent = plugin.getConfiguration().get(ConfigKeys.PREVENT_PRIMARY_GROUP_REMOVAL) &&
                     context.isEmpty() &&
                     plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD).equals("stored") &&
-                    user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(groupName);
+                    user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME).equalsIgnoreCase(groupName);
 
             if (shouldPrevent) {
                 Message.USER_REMOVEGROUP_ERROR_PRIMARY.send(sender);
@@ -89,12 +92,12 @@ public class ParentRemove extends SharedSubCommand {
             }
         }
 
-        DataMutateResult result = holder.unsetPermission(NodeFactory.buildGroupNode(groupName).withExtraContext(context).build());
-        if (result.asBoolean()) {
+        DataMutateResult result = holder.unsetNode(DataType.NORMAL, Inheritance.builder(groupName).withContext(context).build());
+        if (result.wasSuccessful()) {
             Message.UNSET_INHERIT_SUCCESS.send(sender, holder.getFormattedDisplayName(), groupName, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-            ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("parent", "remove", groupName, context)
+            LoggedAction.build().source(sender).target(holder)
+                    .description("parent", "remove", groupName, context)
                     .build().submit(plugin, sender);
 
             if (holder.getType() == HolderType.USER) {
@@ -113,6 +116,7 @@ public class ParentRemove extends SharedSubCommand {
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return TabCompleter.create()
                 .at(0, TabCompletions.groups(plugin))
+                .from(1, TabCompletions.contexts(plugin))
                 .complete(args);
     }
 }

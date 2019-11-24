@@ -25,8 +25,7 @@
 
 package me.lucko.luckperms.common.commands.generic.parent;
 
-import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
@@ -48,6 +47,10 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.node.NodeType;
 
 import java.util.List;
 
@@ -79,9 +82,9 @@ public class ParentClearTrack extends SharedSubCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        int before = holder.enduringData().immutable().size();
+        int before = holder.normalData().immutable().size();
 
-        MutableContextSet context = ArgumentParser.parseContext(1, args, plugin);
+        ImmutableContextSet context = ArgumentParser.parseContext(1, args, plugin).immutableCopy();
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
                 ArgumentPermissions.checkGroup(plugin, sender, holder, context) ||
@@ -90,17 +93,13 @@ public class ParentClearTrack extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        if (context.isEmpty()) {
-            holder.removeIf(node -> node.isGroupNode() && track.containsGroup(node.getGroupName()));
-        } else {
-            holder.removeIf(node -> node.isGroupNode() && node.getFullContexts().equals(context) && track.containsGroup(node.getGroupName()));
-        }
+        holder.removeIf(DataType.NORMAL, context.isEmpty() ? null : context, NodeType.INHERITANCE.predicate(n -> track.containsGroup(n.getGroupName())), false);
 
         if (holder.getType() == HolderType.USER) {
             plugin.getUserManager().giveDefaultIfNeeded(((User) holder), false);
         }
 
-        int changed = before - holder.enduringData().immutable().size();
+        int changed = before - holder.normalData().immutable().size();
 
         if (changed == 1) {
             Message.PARENT_CLEAR_TRACK_SUCCESS_SINGULAR.send(sender, holder.getFormattedDisplayName(), track.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
@@ -108,8 +107,8 @@ public class ParentClearTrack extends SharedSubCommand {
             Message.PARENT_CLEAR_TRACK_SUCCESS.send(sender, holder.getFormattedDisplayName(), track.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         }
 
-        ExtendedLogEntry.build().actor(sender).acted(holder)
-                .action("parent", "cleartrack", track.getName(), context)
+        LoggedAction.build().source(sender).target(holder)
+                .description("parent", "cleartrack", track.getName(), context)
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(holder, sender, plugin);
@@ -120,6 +119,7 @@ public class ParentClearTrack extends SharedSubCommand {
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return TabCompleter.create()
                 .at(0, TabCompletions.tracks(plugin))
+                .from(1, TabCompletions.contexts(plugin))
                 .complete(args);
     }
 }

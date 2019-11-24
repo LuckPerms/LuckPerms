@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.plugin;
 
-import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
@@ -35,6 +34,7 @@ import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.event.EventFactory;
+import me.lucko.luckperms.common.extension.SimpleExtensionManager;
 import me.lucko.luckperms.common.inheritance.InheritanceHandler;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
@@ -53,7 +53,9 @@ import me.lucko.luckperms.common.storage.implementation.file.FileWatcher;
 import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
-import me.lucko.luckperms.common.web.Bytebin;
+import me.lucko.luckperms.common.web.BytebinClient;
+
+import net.luckperms.api.query.QueryOptions;
 
 import java.util.Collections;
 import java.util.List;
@@ -146,6 +148,13 @@ public interface LuckPermsPlugin {
     LuckPermsApiProvider getApiProvider();
 
     /**
+     * Gets the extension manager.
+     *
+     * @return the extension manager
+     */
+    SimpleExtensionManager getExtensionManager();
+
+    /**
      * Gets the command manager
      *
      * @return the command manager
@@ -228,7 +237,7 @@ public interface LuckPermsPlugin {
      *
      * @return the bytebin instance
      */
-    Bytebin getBytebin();
+    BytebinClient getBytebin();
 
     /**
      * Gets a calculated context instance for the user using the rules of the platform.
@@ -236,7 +245,7 @@ public interface LuckPermsPlugin {
      * @param user the user instance
      * @return a contexts object, or null if one couldn't be generated
      */
-    Optional<Contexts> getContextForUser(User user);
+    Optional<QueryOptions> getQueryOptionsForUser(User user);
 
     /**
      * Gets a list of online Senders on the platform

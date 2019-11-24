@@ -25,13 +25,12 @@
 
 package me.lucko.luckperms.common.metastacking;
 
-import me.lucko.luckperms.api.ChatMetaType;
-import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.api.metastacking.MetaStackElement;
+import net.luckperms.api.metastacking.MetaStackElement;
+import net.luckperms.api.node.ChatMetaType;
+import net.luckperms.api.node.types.ChatMetaNode;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Map;
 import java.util.Optional;
 
 final class SimpleMetaStackEntry implements MetaStackEntry {
@@ -39,7 +38,7 @@ final class SimpleMetaStackEntry implements MetaStackEntry {
     private final MetaStackElement element;
     private final ChatMetaType type;
 
-    private Map.@Nullable Entry<Integer, String> current = null;
+    private @Nullable ChatMetaNode<?, ?> current = null;
 
     public SimpleMetaStackEntry(MetaStack parentStack, MetaStackElement element, ChatMetaType type) {
         this.parentStack = parentStack;
@@ -48,14 +47,14 @@ final class SimpleMetaStackEntry implements MetaStackEntry {
     }
 
     @Override
-    public Optional<Map.Entry<Integer, String>> getCurrentValue() {
+    public Optional<ChatMetaNode<?, ?>> getCurrentValue() {
         return Optional.ofNullable(this.current);
     }
 
     @Override
-    public boolean accumulateNode(LocalizedNode node) {
-        if (this.element.shouldAccumulate(node, this.type, this.current)) {
-            this.current = this.type.getEntry(node);
+    public boolean accumulateNode(ChatMetaNode<?, ?> node) {
+        if (this.element.shouldAccumulate(this.type, node, this.current)) {
+            this.current = node;
             return true;
         }
         return false;

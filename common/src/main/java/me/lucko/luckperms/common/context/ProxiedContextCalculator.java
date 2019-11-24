@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.context;
 
-import me.lucko.luckperms.api.context.ContextCalculator;
+import net.luckperms.api.context.ContextCalculator;
 
 /**
  * Represents a {@link ContextCalculator} which delegates calls to another object.

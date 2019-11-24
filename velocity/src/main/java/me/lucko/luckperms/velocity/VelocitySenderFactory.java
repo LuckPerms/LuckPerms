@@ -28,7 +28,6 @@ package me.lucko.luckperms.velocity;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
@@ -36,6 +35,7 @@ import me.lucko.luckperms.common.util.TextUtils;
 import me.lucko.luckperms.velocity.service.CompatibilityUtil;
 
 import net.kyori.text.Component;
+import net.luckperms.api.util.Tristate;
 
 import java.util.UUID;
 
@@ -53,7 +53,7 @@ public class VelocitySenderFactory extends SenderFactory<CommandSource> {
     }
 
     @Override
-    protected UUID getUuid(CommandSource source) {
+    protected UUID getUniqueId(CommandSource source) {
         if (source instanceof Player) {
             return ((Player) source).getUniqueId();
         }

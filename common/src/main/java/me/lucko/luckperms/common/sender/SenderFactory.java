@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.common.sender;
 
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.text.Component;
+import net.luckperms.api.util.Tristate;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -50,7 +50,7 @@ public abstract class SenderFactory<T> {
         return this.plugin;
     }
 
-    protected abstract UUID getUuid(T t);
+    protected abstract UUID getUniqueId(T t);
 
     protected abstract String getName(T t);
 

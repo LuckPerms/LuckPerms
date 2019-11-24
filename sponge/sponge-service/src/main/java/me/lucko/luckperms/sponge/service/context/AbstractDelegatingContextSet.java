@@ -46,7 +46,7 @@ abstract class AbstractDelegatingContextSet extends AbstractSet<Context> impleme
     public boolean contains(Object o) {
         if (o instanceof Context) {
             Context context = (Context) o;
-            return !context.getKey().isEmpty() && !context.getValue().isEmpty() && getDelegate().has(context);
+            return !context.getKey().isEmpty() && !context.getValue().isEmpty() && getDelegate().contains(context.getKey(), context.getValue());
         }
         return false;
     }

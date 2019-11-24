@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.commands.log;
 
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -39,6 +39,8 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Paginated;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.actionlog.Action;
 
 import java.util.List;
 import java.util.Map;
@@ -56,13 +58,13 @@ public class LogRecent extends SubCommand<Log> {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
         if (args.isEmpty()) {
             // No page or user
-            Paginated<ExtendedLogEntry> content = new Paginated<>(log.getContent());
+            Paginated<LoggedAction> content = new Paginated<>(log.getContent());
             return showLog(content.getMaxPages(ENTRIES_PER_PAGE), false, sender, content);
         }
 
         int page = ArgumentParser.parseIntOrElse(0, args, Integer.MIN_VALUE);
         if (page != Integer.MIN_VALUE) {
-            Paginated<ExtendedLogEntry> content = new Paginated<>(log.getContent());
+            Paginated<LoggedAction> content = new Paginated<>(log.getContent());
             return showLog(page, false, sender, content);
         }
 
@@ -72,7 +74,7 @@ public class LogRecent extends SubCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        Paginated<ExtendedLogEntry> content = new Paginated<>(log.getContent(uuid));
+        Paginated<LoggedAction> content = new Paginated<>(log.getContent(uuid));
         page = ArgumentParser.parseIntOrElse(1, args, Integer.MIN_VALUE);
         if (page != Integer.MIN_VALUE) {
             return showLog(page, true, sender, content);
@@ -81,7 +83,7 @@ public class LogRecent extends SubCommand<Log> {
         }
     }
 
-    private static CommandResult showLog(int page, boolean specificUser, Sender sender, Paginated<ExtendedLogEntry> log) {
+    private static CommandResult showLog(int page, boolean specificUser, Sender sender, Paginated<LoggedAction> log) {
         int maxPage = log.getMaxPages(ENTRIES_PER_PAGE);
         if (maxPage == 0) {
             Message.LOG_NO_ENTRIES.send(sender);
@@ -93,9 +95,9 @@ public class LogRecent extends SubCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        SortedMap<Integer, ExtendedLogEntry> entries = log.getPage(page, ENTRIES_PER_PAGE);
+        SortedMap<Integer, LoggedAction> entries = log.getPage(page, ENTRIES_PER_PAGE);
         if (specificUser) {
-            String name = entries.values().stream().findAny().get().getActorName();
+            String name = ((Action) entries.values().stream().findAny().get()).getSource().getName();
             if (name.contains("@")) {
                 name = name.split("@")[0];
             }
@@ -105,15 +107,15 @@ public class LogRecent extends SubCommand<Log> {
         }
 
         long now = System.currentTimeMillis() / 1000L;
-        for (Map.Entry<Integer, ExtendedLogEntry> e : entries.entrySet()) {
-            long time = e.getValue().getTimestamp();
+        for (Map.Entry<Integer, LoggedAction> e : entries.entrySet()) {
+            long time = e.getValue().getTimestamp().getEpochSecond();
             Message.LOG_ENTRY.send(sender,
                     e.getKey(),
                     DurationFormatter.CONCISE_LOW_ACCURACY.format(now - time),
-                    e.getValue().getActorFriendlyString(),
-                    Character.toString(e.getValue().getType().getCode()),
-                    e.getValue().getActedFriendlyString(),
-                    e.getValue().getAction()
+                    e.getValue().getSourceFriendlyString(),
+                    Character.toString(LoggedAction.getTypeCharacter(((Action) e.getValue()).getTarget().getType())),
+                    e.getValue().getTargetFriendlyString(),
+                    e.getValue().getDescription()
             );
         }
         return CommandResult.SUCCESS;

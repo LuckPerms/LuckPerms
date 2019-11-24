@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.common.metastacking;
 
-import me.lucko.luckperms.api.ChatMetaType;
-import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
+import net.luckperms.api.metastacking.MetaStackDefinition;
+import net.luckperms.api.node.ChatMetaType;
+import net.luckperms.api.node.types.ChatMetaNode;
 
 /**
  * A live stack of {@link MetaStackEntry} instances, formed from a
@@ -65,6 +65,6 @@ public interface MetaStack {
      *
      * @param node the node to accumulate
      */
-    void accumulateToAll(LocalizedNode node);
+    void accumulateToAll(ChatMetaNode<?, ?> node);
 
 }

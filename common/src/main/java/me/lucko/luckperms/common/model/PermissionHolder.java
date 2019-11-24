@@ -29,38 +29,41 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.DataMutateResult;
-import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.api.LookupSetting;
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.NodeEqualityPredicate;
-import me.lucko.luckperms.api.StandardNodeEquality;
-import me.lucko.luckperms.api.TemporaryDataMutateResult;
-import me.lucko.luckperms.api.TemporaryMergeBehaviour;
-import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.cacheddata.HolderCachedData;
+import me.lucko.luckperms.common.cacheddata.HolderCachedDataManager;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.inheritance.InheritanceComparator;
 import me.lucko.luckperms.common.inheritance.InheritanceGraph;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
-import me.lucko.luckperms.common.node.utils.InheritanceInfo;
-import me.lucko.luckperms.common.node.utils.MetaType;
-import me.lucko.luckperms.common.node.utils.NodeTools;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.data.DataMutateResult;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeEqualityPredicate;
+import net.luckperms.api.node.NodeType;
+import net.luckperms.api.util.Tristate;
+import net.luckperms.api.node.types.InheritanceNode;
+import net.luckperms.api.query.Flag;
+import net.luckperms.api.query.QueryOptions;
+import net.luckperms.api.query.dataorder.DataQueryOrder;
+import net.luckperms.api.query.dataorder.DataQueryOrderFunction;
 
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.SortedSet;
@@ -79,10 +82,9 @@ import java.util.function.Predicate;
  * These lookup methods initially use Lists of nodes populated with the
  * inheritance tree. Nodes at the start of this list have priority over nodes at
  * the end. Nodes higher up the tree appear at the end of these lists. In order
- * to remove duplicate elements, the lists are flattened using the methods in
- * {@link NodeTools}. This is significantly faster than trying to prevent
- * duplicates throughout the process of accumulation, and reduces the need for
- * too much caching.</p>
+ * to remove duplicate elements, the lists are flattened. This is significantly
+ * faster than trying to prevent duplicates throughout the process of accumulation,
+ * and reduces the need for too much caching.</p>
  *
  * <p>Cached state is avoided in these instances to cut down on memory
  * footprint. The nodes are stored indexed to the contexts they apply in, so
@@ -99,13 +101,18 @@ public abstract class PermissionHolder {
     private final LuckPermsPlugin plugin;
 
     /**
+     * The holders identifier
+     */
+    private @MonotonicNonNull PermissionHolderIdentifier identifier;
+
+    /**
      * The holders persistent nodes.
      *
      * <p>These (unlike transient nodes) are saved to the storage backing.</p>
      *
-     * @see #enduringData()
+     * @see #normalData()
      */
-    private final NodeMap enduringNodes = new NodeMap(this);
+    private final NodeMap normalNodes = new NodeMap(this);
 
     /**
      * The holders transient nodes.
@@ -153,10 +160,10 @@ public abstract class PermissionHolder {
         return this.inheritanceComparator;
     }
 
-    public NodeMap getData(NodeMapType type) {
+    public NodeMap getData(DataType type) {
         switch (type) {
-            case ENDURING:
-                return this.enduringNodes;
+            case NORMAL:
+                return this.normalNodes;
             case TRANSIENT:
                 return this.transientNodes;
             default:
@@ -164,12 +171,19 @@ public abstract class PermissionHolder {
         }
     }
 
-    public NodeMap enduringData() {
-        return this.enduringNodes;
+    public NodeMap normalData() {
+        return this.normalNodes;
     }
 
     public NodeMap transientData() {
         return this.transientNodes;
+    }
+
+    public PermissionHolderIdentifier getIdentifier() {
+        if (this.identifier == null) {
+            this.identifier = new PermissionHolderIdentifier(getType(), getObjectName());
+        }
+        return this.identifier;
     }
 
     /**
@@ -202,7 +216,7 @@ public abstract class PermissionHolder {
      *
      * @return the holders cached data
      */
-    public abstract HolderCachedData<?> getCachedData();
+    public abstract HolderCachedDataManager<?> getCachedData();
 
     /**
      * Returns the type of this PermissionHolder.
@@ -212,175 +226,108 @@ public abstract class PermissionHolder {
     public abstract HolderType getType();
 
     protected void invalidateCache() {
-        this.enduringNodes.invalidate();
+        this.normalNodes.invalidate();
         this.transientNodes.invalidate();
 
         getCachedData().invalidate();
         getPlugin().getEventFactory().handleDataRecalculate(this);
     }
 
-    public void setNodes(NodeMapType type, Set<? extends Node> set) {
+    public void setNodes(DataType type, Collection<? extends Node> set) {
         getData(type).setContent(set);
         invalidateCache();
     }
 
-    public void replaceNodes(NodeMapType type, Multimap<ImmutableContextSet, ? extends Node> multimap) {
+    public void replaceNodes(DataType type, Multimap<ImmutableContextSet, ? extends Node> multimap) {
         getData(type).setContent(multimap);
         invalidateCache();
     }
 
-    public List<LocalizedNode> getOwnNodes() {
-        List<LocalizedNode> ret = new ArrayList<>();
-        this.transientNodes.copyTo(ret);
-        this.enduringNodes.copyTo(ret);
+    public List<Node> getOwnNodes(QueryOptions queryOptions) {
+        List<Node> ret = new ArrayList<>();
+
+        Comparator<DataType> comparator = queryOptions.option(DataQueryOrderFunction.KEY)
+                .map(func -> func.getOrderComparator(getIdentifier()))
+                .orElse(DataQueryOrder.TRANSIENT_FIRST);
+
+        for (DataType dataType : DataQueryOrder.order(comparator)) {
+            getData(dataType).copyTo(ret, queryOptions);
+        }
+
         return ret;
     }
 
-    public List<LocalizedNode> getOwnNodes(ContextSet filter) {
-        List<LocalizedNode> ret = new ArrayList<>();
-        this.transientNodes.copyTo(ret, filter);
-        this.enduringNodes.copyTo(ret, filter);
+    public SortedSet<Node> getOwnNodesSorted(QueryOptions queryOptions) {
+        SortedSet<Node> ret = new TreeSet<>(NodeWithContextComparator.reverse());
+
+        Comparator<DataType> comparator = queryOptions.option(DataQueryOrderFunction.KEY)
+                .map(func -> func.getOrderComparator(getIdentifier()))
+                .orElse(DataQueryOrder.TRANSIENT_FIRST);
+
+        for (DataType dataType : DataQueryOrder.order(comparator)) {
+            getData(dataType).copyTo(ret, queryOptions);
+        }
+
         return ret;
     }
 
-    public List<LocalizedNode> getOwnGroupNodes() {
-        List<LocalizedNode> ret = new ArrayList<>();
-        this.transientNodes.copyGroupNodesTo(ret);
-        this.enduringNodes.copyGroupNodesTo(ret);
+    public List<InheritanceNode> getOwnInheritanceNodes(QueryOptions queryOptions) {
+        List<InheritanceNode> ret = new ArrayList<>();
+
+        Comparator<DataType> comparator = queryOptions.option(DataQueryOrderFunction.KEY)
+                .map(func -> func.getOrderComparator(getIdentifier()))
+                .orElse(DataQueryOrder.TRANSIENT_FIRST);
+
+        for (DataType dataType : DataQueryOrder.order(comparator)) {
+            getData(dataType).copyInheritanceNodesTo(ret, queryOptions);
+        }
+
         return ret;
     }
 
-    public List<LocalizedNode> getOwnGroupNodes(ContextSet filter) {
-        List<LocalizedNode> ret = new ArrayList<>();
-        this.transientNodes.copyGroupNodesTo(ret, filter);
-        this.enduringNodes.copyGroupNodesTo(ret, filter);
-        return ret;
-    }
-
-    public SortedSet<LocalizedNode> getOwnNodesSorted() {
-        SortedSet<LocalizedNode> ret = new TreeSet<>(NodeWithContextComparator.reverse());
-        this.transientNodes.copyTo(ret);
-        this.enduringNodes.copyTo(ret);
-        return ret;
-    }
-
-    public boolean removeIf(Predicate<? super LocalizedNode> predicate) {
-        return removeIf(predicate, null);
-    }
-
-    public boolean removeIf(Predicate<? super LocalizedNode> predicate, Runnable taskIfSuccess) {
-        ImmutableCollection<? extends Node> before = enduringData().immutable().values();
-        if (!this.enduringNodes.removeIf(predicate)) {
-            return false;
-        }
-        if (taskIfSuccess != null) {
-            taskIfSuccess.run();
-        }
-        invalidateCache();
-        ImmutableCollection<? extends Node> after = enduringData().immutable().values();
-
-        this.plugin.getEventFactory().handleNodeClear(this, before, after);
-        return true;
-    }
-
-    public boolean removeIf(ContextSet contextSet, Predicate<? super LocalizedNode> predicate) {
-        return removeIf(contextSet, predicate, null);
-    }
-
-    public boolean removeIf(ContextSet contextSet, Predicate<? super LocalizedNode> predicate, Runnable taskIfSuccess) {
-        ImmutableCollection<? extends Node> before = enduringData().immutable().values();
-        if (!this.enduringNodes.removeIf(contextSet, predicate)) {
-            return false;
-        }
-        if (taskIfSuccess != null) {
-            taskIfSuccess.run();
-        }
-        invalidateCache();
-        ImmutableCollection<? extends Node> after = enduringData().immutable().values();
-
-        this.plugin.getEventFactory().handleNodeClear(this, before, after);
-        return true;
-    }
-
-    public boolean removeIfTransient(Predicate<? super LocalizedNode> predicate) {
-        boolean result = this.transientNodes.removeIf(predicate);
-        if (result) {
-            invalidateCache();
-        }
-        return result;
-    }
-
-    public void accumulateInheritancesTo(List<? super LocalizedNode> accumulator, Contexts context) {
-        InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph(context);
-        Iterable<PermissionHolder> traversal = graph.traverse(this.plugin.getConfiguration(), this);
-        for (PermissionHolder holder : traversal) {
-            List<? extends LocalizedNode> nodes = holder.getOwnNodes(context.getContexts());
-            accumulator.addAll(nodes);
-        }
-    }
-
-    public List<LocalizedNode> resolveInheritances(Contexts context) {
-        List<LocalizedNode> accumulator = new ArrayList<>();
-        accumulateInheritancesTo(accumulator, context);
-        return accumulator;
-    }
-
-    public void accumulateInheritancesTo(List<? super LocalizedNode> accumulator) {
-        InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph();
-        Iterable<PermissionHolder> traversal = graph.traverse(this.plugin.getConfiguration(), this);
-        for (PermissionHolder holder : traversal) {
-            List<? extends LocalizedNode> nodes = holder.getOwnNodes();
-            accumulator.addAll(nodes);
-        }
-    }
-
-    public List<LocalizedNode> resolveInheritances() {
-        List<LocalizedNode> accumulator = new ArrayList<>();
-        accumulateInheritancesTo(accumulator);
-        return accumulator;
-    }
-
-    public List<LocalizedNode> getAllEntries(Contexts context) {
-        List<LocalizedNode> entries = new LinkedList<>();
-        if (context.hasSetting(LookupSetting.RESOLVE_INHERITANCE)) {
-            accumulateInheritancesTo(entries, context);
+    private void accumulateInheritedNodesTo(Collection<Node> accumulator, QueryOptions queryOptions) {
+        if (queryOptions.flag(Flag.RESOLVE_INHERITANCE)) {
+            InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph(queryOptions);
+            Iterable<PermissionHolder> traversal = graph.traverse(this);
+            for (PermissionHolder holder : traversal) {
+                List<? extends Node> nodes = holder.getOwnNodes(queryOptions);
+                accumulator.addAll(nodes);
+            }
         } else {
-            entries.addAll(getOwnNodes(context.getContexts()));
+            accumulator.addAll(getOwnNodes(queryOptions));
         }
-
-        if (!context.hasSetting(LookupSetting.INCLUDE_NODES_SET_WITHOUT_SERVER)) {
-            entries.removeIf(n -> !n.isGroupNode() && !n.isServerSpecific());
-        }
-        if (!context.hasSetting(LookupSetting.INCLUDE_NODES_SET_WITHOUT_WORLD)) {
-            entries.removeIf(n -> !n.isGroupNode() && !n.isWorldSpecific());
-        }
-
-        return entries;
     }
 
-    public Map<String, Boolean> exportPermissions(Contexts context, boolean convertToLowercase, boolean resolveShorthand) {
-        List<LocalizedNode> entries = getAllEntries(context);
+    public List<Node> resolveInheritedNodes(QueryOptions queryOptions) {
+        List<Node> ret = new ArrayList<>();
+        accumulateInheritedNodesTo(ret, queryOptions);
+        return ret;
+    }
+
+    public SortedSet<Node> resolveInheritedNodesSorted(QueryOptions queryOptions) {
+        SortedSet<Node> ret = new TreeSet<>(NodeWithContextComparator.reverse());
+        accumulateInheritedNodesTo(ret, queryOptions);
+        return ret;
+    }
+
+    public Map<String, Boolean> exportPermissions(QueryOptions queryOptions, boolean convertToLowercase, boolean resolveShorthand) {
+        List<Node> entries = resolveInheritedNodes(queryOptions);
         return processExportedPermissions(entries, convertToLowercase, resolveShorthand);
     }
 
-    public Map<String, Boolean> exportPermissions(boolean convertToLowercase, boolean resolveShorthand) {
-        List<LocalizedNode> entries = resolveInheritances();
-        return processExportedPermissions(entries, convertToLowercase, resolveShorthand);
-    }
-
-    private static ImmutableMap<String, Boolean> processExportedPermissions(List<LocalizedNode> entries, boolean convertToLowercase, boolean resolveShorthand) {
+    private static ImmutableMap<String, Boolean> processExportedPermissions(List<Node> entries, boolean convertToLowercase, boolean resolveShorthand) {
         Map<String, Boolean> perms = new HashMap<>(entries.size());
         for (Node node : entries) {
             if (convertToLowercase) {
-                perms.putIfAbsent(node.getPermission().toLowerCase(), node.getValue());
+                perms.putIfAbsent(node.getKey().toLowerCase(), node.getValue());
             } else {
-                perms.putIfAbsent(node.getPermission(), node.getValue());
+                perms.putIfAbsent(node.getKey(), node.getValue());
             }
         }
 
         if (resolveShorthand) {
             for (Node node : entries) {
-                List<String> shorthand = node.resolveShorthand();
+                Collection<String> shorthand = node.resolveShorthand();
                 for (String s : shorthand) {
                     if (convertToLowercase) {
                         perms.putIfAbsent(s.toLowerCase(), node.getValue());
@@ -394,22 +341,18 @@ public abstract class PermissionHolder {
         return ImmutableMap.copyOf(perms);
     }
 
-    public MetaAccumulator accumulateMeta(MetaAccumulator accumulator, Contexts context) {
+    public MetaAccumulator accumulateMeta(MetaAccumulator accumulator, QueryOptions queryOptions) {
         if (accumulator == null) {
             accumulator = MetaAccumulator.makeFromConfig(this.plugin);
         }
 
-        InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph(context);
-        Iterable<PermissionHolder> traversal = graph.traverse(this.plugin.getConfiguration(), this);
+        InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph(queryOptions);
+        Iterable<PermissionHolder> traversal = graph.traverse(this);
         for (PermissionHolder holder : traversal) {
-            List<? extends LocalizedNode> nodes = holder.getOwnNodes(context.getContexts());
-            for (LocalizedNode node : nodes) {
+            List<? extends Node> nodes = holder.getOwnNodes(queryOptions);
+            for (Node node : nodes) {
                 if (!node.getValue()) continue;
-                if (!node.isMeta() && !node.isPrefix() && !node.isSuffix()) continue;
-
-                if (!((context.hasSetting(LookupSetting.INCLUDE_NODES_SET_WITHOUT_SERVER) || node.isServerSpecific()) && (context.hasSetting(LookupSetting.INCLUDE_NODES_SET_WITHOUT_WORLD) || node.isWorldSpecific()))) {
-                    continue;
-                }
+                if (!NodeType.META_OR_CHAT_META.matches(node)) continue;
 
                 accumulator.accumulateNode(node);
             }
@@ -423,321 +366,175 @@ public abstract class PermissionHolder {
         return accumulator;
     }
 
-    public MetaAccumulator accumulateMeta(MetaAccumulator accumulator) {
-        if (accumulator == null) {
-            accumulator = MetaAccumulator.makeFromConfig(this.plugin);
-        }
-
-        InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph();
-        Iterable<PermissionHolder> traversal = graph.traverse(this.plugin.getConfiguration(), this);
-        for (PermissionHolder holder : traversal) {
-            List<? extends LocalizedNode> nodes = holder.getOwnNodes();
-            for (LocalizedNode node : nodes) {
-                if (!node.getValue()) continue;
-                if (!node.isMeta() && !node.isPrefix() && !node.isSuffix()) continue;
-
-                accumulator.accumulateNode(node);
-            }
-
-            OptionalInt w = getWeight();
-            if (w.isPresent()) {
-                accumulator.accumulateWeight(w.getAsInt());
-            }
-        }
-
-        return accumulator;
-    }
-
     /**
      * Removes temporary permissions that have expired
      *
      * @return true if permissions had expired and were removed
      */
-    public boolean auditTemporaryPermissions() {
-        // audit temporary nodes first, but don't track ones which are removed
-        // we don't call events for transient nodes
-        boolean transientWork = this.transientNodes.auditTemporaryNodes(null);
+    public boolean auditTemporaryNodes() {
+        boolean transientWork = auditTemporaryNodes(DataType.TRANSIENT);
+        boolean normalWork = auditTemporaryNodes(DataType.NORMAL);
 
-        ImmutableCollection<? extends LocalizedNode> before = enduringData().immutable().values();
+        return transientWork || normalWork;
+    }
+
+    private boolean auditTemporaryNodes(DataType dataType) {
+        ImmutableCollection<? extends Node> before = getData(dataType).immutable().values();
         Set<Node> removed = new HashSet<>();
 
-        boolean enduringWork = this.enduringNodes.auditTemporaryNodes(removed);
-        if (enduringWork) {
+        boolean work = getData(dataType).auditTemporaryNodes(removed);
+        if (work) {
             // invalidate
             invalidateCache();
 
             // call event
-            ImmutableCollection<? extends Node> after = enduringData().immutable().values();
+            ImmutableCollection<? extends Node> after = getData(dataType).immutable().values();
             for (Node r : removed) {
-                this.plugin.getEventFactory().handleNodeRemove(r, this, before, after);
+                this.plugin.getEventFactory().handleNodeRemove(r, this, dataType, before, after);
             }
         }
-
-        if (transientWork && !enduringWork) {
-            invalidateCache();
-        }
-
-        return transientWork || enduringWork;
+        return work;
     }
 
-    private Optional<LocalizedNode> searchForMatch(NodeMapType type, Node node, NodeEqualityPredicate equalityPredicate) {
-        for (LocalizedNode n : getData(type).immutable().values()) {
-            if (n.equals(node, equalityPredicate)) {
-                return Optional.of(n);
-            }
-        }
-        return Optional.empty();
-    }
-
-    /**
-     * Check if the holder has a permission node
-     *
-     * @param type which backing map to check
-     * @param node the node to check
-     * @param equalityPredicate how to match
-     * @return a tristate, returns undefined if no match
-     */
-    public Tristate hasPermission(NodeMapType type, Node node, NodeEqualityPredicate equalityPredicate) {
-        if (this.getType() == HolderType.GROUP && node.isGroupNode() && node.getGroupName().equalsIgnoreCase(getObjectName())) {
+    public Tristate hasNode(DataType type, Node node, NodeEqualityPredicate equalityPredicate) {
+        if (this.getType() == HolderType.GROUP && node instanceof InheritanceNode && ((InheritanceNode) node).getGroupName().equalsIgnoreCase(getObjectName())) {
             return Tristate.TRUE;
         }
 
-        return searchForMatch(type, node, equalityPredicate).map(Node::getTristate).orElse(Tristate.UNDEFINED);
+        return getData(type).immutable().values().stream()
+                .filter(equalityPredicate.equalTo(node))
+                .findFirst()
+                .map(n -> Tristate.of(n.getValue())).orElse(Tristate.UNDEFINED);
     }
 
-    /**
-     * Check if the holder inherits a node
-     *
-     * @param node the node to check
-     * @param equalityPredicate how to match
-     * @return the result of the lookup
-     */
-    public InheritanceInfo searchForInheritedMatch(Node node, NodeEqualityPredicate equalityPredicate) {
-        for (LocalizedNode n : resolveInheritances()) {
-            if (n.getNode().equals(node, equalityPredicate)) {
-                return InheritanceInfo.of(n);
-            }
+    public DataMutateResult setNode(DataType dataType, Node node, boolean callEvent) {
+        if (hasNode(dataType, node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME) != Tristate.UNDEFINED) {
+            return DataMutateResult.FAIL_ALREADY_HAS;
         }
 
-        return InheritanceInfo.empty();
-    }
+        NodeMap data = getData(dataType);
 
-    public Tristate inheritsPermission(Node node, NodeEqualityPredicate equalityPredicate) {
-        return searchForInheritedMatch(node, equalityPredicate).getResult();
-    }
+        ImmutableCollection<? extends Node> before = data.immutable().values();
 
-    public DataMutateResult setPermission(Node node) {
-        return setPermission(node, true);
-    }
-
-    public DataMutateResult setPermission(Node node, boolean callEvent) {
-        if (hasPermission(NodeMapType.ENDURING, node, StandardNodeEquality.IGNORE_EXPIRY_TIME) != Tristate.UNDEFINED) {
-            return DataMutateResult.ALREADY_HAS;
-        }
-
-        ImmutableCollection<? extends Node> before = enduringData().immutable().values();
-        this.enduringNodes.add(node);
+        data.add(node);
         invalidateCache();
-        ImmutableCollection<? extends Node> after = enduringData().immutable().values();
 
+        ImmutableCollection<? extends Node> after = data.immutable().values();
         if (callEvent) {
-            this.plugin.getEventFactory().handleNodeAdd(node, this, before, after);
+            this.plugin.getEventFactory().handleNodeAdd(node, this, dataType, before, after);
         }
+
         return DataMutateResult.SUCCESS;
     }
 
-    public TemporaryDataMutateResult setPermission(Node node, TemporaryMergeBehaviour modifier) {
-        TemporaryDataMutateResult result = handleTemporaryMergeBehaviour(NodeMapType.ENDURING, node, modifier);
-        if (result != null) {
-            return result;
+    public DataMutateResult.WithMergedNode setNode(DataType dataType, Node node, TemporaryNodeMergeStrategy mergeStrategy) {
+        if (node.hasExpiry() && mergeStrategy != TemporaryNodeMergeStrategy.NONE) {
+            Node otherMatch = getData(dataType).immutable().values().stream()
+                    .filter(NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE.equalTo(node))
+                    .findFirst().orElse(null);
+            if (otherMatch != null) {
+                NodeMap data = getData(dataType);
+
+                Node newNode = null;
+                switch (mergeStrategy) {
+                    case ADD_NEW_DURATION_TO_EXISTING: {
+                        // Create a new Node with the same properties, but add the expiry dates together
+                        long newExpiry = otherMatch.getExpiry().plus(Duration.between(Instant.now(), node.getExpiry())).getEpochSecond();
+                        newNode = node.toBuilder().expiry(newExpiry).build();
+                    }
+                    case REPLACE_EXISTING_IF_DURATION_LONGER: {
+                        // Only replace if the new expiry time is greater than the old one.
+                        if (node.getExpiry().getEpochSecond() <= otherMatch.getExpiry().getEpochSecond()) {
+                            break;
+                        }
+                        newNode = node;
+                    }
+                }
+
+                if (newNode != null) {
+                    // Remove the old Node & add the new one.
+                    ImmutableCollection<? extends Node> before = data.immutable().values();
+
+                    data.replace(newNode, otherMatch);
+                    invalidateCache();
+
+                    ImmutableCollection<? extends Node> after = data.immutable().values();
+                    this.plugin.getEventFactory().handleNodeAdd(newNode, this, dataType, before, after);
+
+                    return new MergedNodeResult(DataMutateResult.SUCCESS, newNode);
+                }
+            }
         }
 
         // Fallback to the normal handling.
-        return new TemporaryResult(setPermission(node), node);
+        return new MergedNodeResult(setNode(dataType, node, true), node);
     }
 
-    public DataMutateResult setTransientPermission(Node node) {
-        if (hasPermission(NodeMapType.TRANSIENT, node, StandardNodeEquality.IGNORE_EXPIRY_TIME) != Tristate.UNDEFINED) {
-            return DataMutateResult.ALREADY_HAS;
+    public DataMutateResult unsetNode(DataType dataType, Node node) {
+        if (hasNode(dataType, node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE) == Tristate.UNDEFINED) {
+            return DataMutateResult.FAIL_LACKS;
         }
 
-        // don't call any events for transient operations
-        this.transientNodes.add(node);
+        ImmutableCollection<? extends Node> before = getData(dataType).immutable().values();
+
+        getData(dataType).remove(node);
         invalidateCache();
+
+        ImmutableCollection<? extends Node> after = getData(dataType).immutable().values();
+        this.plugin.getEventFactory().handleNodeRemove(node, this, dataType, before, after);
+
         return DataMutateResult.SUCCESS;
     }
 
-    public TemporaryDataMutateResult setTransientPermission(Node node, TemporaryMergeBehaviour modifier) {
-        TemporaryDataMutateResult result = handleTemporaryMergeBehaviour(NodeMapType.TRANSIENT, node, modifier);
-        if (result != null) {
-            return result;
-        }
+    public boolean removeIf(DataType dataType, @Nullable ContextSet contextSet, Predicate<? super Node> predicate, boolean giveDefault) {
+        NodeMap data = getData(dataType);
+        ImmutableCollection<? extends Node> before = data.immutable().values();
 
-        // Fallback to the normal handling.
-        return new TemporaryResult(setTransientPermission(node), node);
-    }
-
-    private TemporaryDataMutateResult handleTemporaryMergeBehaviour(NodeMapType nodeMapType, Node node, TemporaryMergeBehaviour mergeBehaviour) {
-        // If the node is temporary, we should take note of the modifier
-        if (!node.isTemporary() || mergeBehaviour == TemporaryMergeBehaviour.FAIL_WITH_ALREADY_HAS) {
-            return null;
-        }
-
-        Node previous = searchForMatch(nodeMapType, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE).orElse(null);
-        if (previous == null) {
-            return null;
-        }
-
-        NodeMap data = getData(nodeMapType);
-        boolean callEvents = nodeMapType == NodeMapType.ENDURING;
-
-        switch (mergeBehaviour) {
-            case ADD_NEW_DURATION_TO_EXISTING: {
-                // Create a new node with the same properties, but add the expiry dates together
-                Node newNode = node.toBuilder().setExpiry(previous.getExpiryUnixTime() + node.getSecondsTilExpiry()).build();
-
-                // Remove the old node & add the new one.
-                ImmutableCollection<? extends Node> before = null;
-                if (callEvents) {
-                    before = data.immutable().values();
-                }
-
-                data.replace(newNode, previous);
-                invalidateCache();
-
-                if (callEvents) {
-                    ImmutableCollection<? extends Node> after = data.immutable().values();
-                    this.plugin.getEventFactory().handleNodeAdd(newNode, this, before, after);
-                }
-
-                return new TemporaryResult(DataMutateResult.SUCCESS, newNode);
+        if (contextSet == null) {
+            if (!data.removeIf(predicate)) {
+                return false;
             }
-            case REPLACE_EXISTING_IF_DURATION_LONGER: {
-                // Only replace if the new expiry time is greater than the old one.
-                if (node.getExpiryUnixTime() <= previous.getExpiryUnixTime()) {
-                    break;
-                }
-
-                ImmutableCollection<? extends Node> before = null;
-                if (callEvents) {
-                    before = data.immutable().values();
-                }
-
-                data.replace(node, previous);
-                invalidateCache();
-
-                if (callEvents) {
-                    ImmutableCollection<? extends Node> after = data.immutable().values();
-                    this.plugin.getEventFactory().handleNodeAdd(node, this, before, after);
-                }
-
-                return new TemporaryResult(DataMutateResult.SUCCESS, node);
+        } else {
+            if (!data.removeIf(contextSet, predicate)) {
+                return false;
             }
-            default:
-                break;
-        }
-        return null;
-    }
-
-    public DataMutateResult unsetPermission(Node node) {
-        if (hasPermission(NodeMapType.ENDURING, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE) == Tristate.UNDEFINED) {
-            return DataMutateResult.LACKS;
         }
 
-        ImmutableCollection<? extends Node> before = enduringData().immutable().values();
-        this.enduringNodes.remove(node);
-        invalidateCache();
-        ImmutableCollection<? extends Node> after = enduringData().immutable().values();
-
-        this.plugin.getEventFactory().handleNodeRemove(node, this, before, after);
-        return DataMutateResult.SUCCESS;
-    }
-
-    public DataMutateResult unsetTransientPermission(Node node) {
-        if (hasPermission(NodeMapType.TRANSIENT, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE) == Tristate.UNDEFINED) {
-            return DataMutateResult.LACKS;
+        if (getType() == HolderType.USER && giveDefault) {
+            getPlugin().getUserManager().giveDefaultIfNeeded((User) this, false);
         }
 
-        // don't call any events for transient operations
-        this.transientNodes.remove(node);
         invalidateCache();
-        return DataMutateResult.SUCCESS;
+
+        ImmutableCollection<? extends Node> after = data.immutable().values();
+        this.plugin.getEventFactory().handleNodeClear(this, dataType, before, after);
+
+        return true;
     }
 
-    /**
-     * Clear all of the holders permission nodes
-     */
-    public boolean clearNodes() {
-        ImmutableCollection<? extends Node> before = enduringData().immutable().values();
-        this.enduringNodes.clear();
+    public boolean clearNodes(DataType dataType, ContextSet contextSet, boolean giveDefault) {
+        NodeMap data = getData(dataType);
+        ImmutableCollection<? extends Node> before = data.immutable().values();
+
+        if (contextSet == null) {
+            data.clear();
+        } else {
+            data.clear(contextSet);
+        }
+
+        if (getType() == HolderType.USER && giveDefault) {
+            getPlugin().getUserManager().giveDefaultIfNeeded((User) this, false);
+        }
+
         invalidateCache();
-        ImmutableCollection<? extends Node> after = enduringData().immutable().values();
+
+        ImmutableCollection<? extends Node> after = data.immutable().values();
 
         if (before.size() == after.size()) {
             return false;
         }
 
-        this.plugin.getEventFactory().handleNodeClear(this, before, after);
-        return true;
-    }
-
-    public boolean clearNodes(ContextSet contextSet) {
-        ImmutableCollection<? extends Node> before = enduringData().immutable().values();
-        this.enduringNodes.clear(contextSet);
-        invalidateCache();
-        ImmutableCollection<? extends Node> after = enduringData().immutable().values();
-
-        if (before.size() == after.size()) {
-            return false;
-        }
-
-        this.plugin.getEventFactory().handleNodeClear(this, before, after);
-        return true;
-    }
-
-    public boolean clearPermissions() {
-        return removeIf(node -> !node.hasTypeData());
-    }
-
-    public boolean clearPermissions(ContextSet contextSet) {
-        return removeIf(contextSet, node -> !node.hasTypeData());
-    }
-
-    public boolean clearParents(boolean giveDefault) {
-        return removeIf(Node::isGroupNode, () -> {
-            if (this.getType() == HolderType.USER && giveDefault) {
-                this.plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
-            }
-        });
-    }
-
-    public boolean clearParents(ContextSet contextSet, boolean giveDefault) {
-        return removeIf(contextSet, Node::isGroupNode, () -> {
-            if (this.getType() == HolderType.USER && giveDefault) {
-                this.plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
-            }
-        });
-    }
-
-    public boolean clearMeta(MetaType type) {
-        return removeIf(type::matches);
-    }
-
-    public boolean clearMeta(MetaType type, ContextSet contextSet) {
-        return removeIf(contextSet, type::matches);
-    }
-
-    public boolean clearMetaKeys(String key, boolean temp) {
-        return removeIf(n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key));
-    }
-
-    public boolean clearMetaKeys(String key, ContextSet contextSet, boolean temp) {
-        return removeIf(contextSet, n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key));
-    }
-
-    public boolean clearTransientNodes() {
-        this.transientNodes.clear();
-        invalidateCache();
+        this.plugin.getEventFactory().handleNodeClear(this, dataType, before, after);
         return true;
     }
 
@@ -745,11 +542,11 @@ public abstract class PermissionHolder {
         return OptionalInt.empty();
     }
 
-    private static final class TemporaryResult implements TemporaryDataMutateResult {
+    private static final class MergedNodeResult implements DataMutateResult.WithMergedNode {
         private final DataMutateResult result;
         private final Node mergedNode;
 
-        private TemporaryResult(DataMutateResult result, Node mergedNode) {
+        private MergedNodeResult(DataMutateResult result, Node mergedNode) {
             this.result = result;
             this.mergedNode = mergedNode;
         }

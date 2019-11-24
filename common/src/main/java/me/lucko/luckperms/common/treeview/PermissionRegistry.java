@@ -59,11 +59,8 @@ public class PermissionRegistry extends RepeatingTask {
         return this.rootNode;
     }
 
-    @Override
-    protected void tick() {
-        for (String e; (e = this.queue.poll()) != null; ) {
-            insert(e);
-        }
+    public List<String> rootAsList() {
+        return this.rootNode.makeImmutableCopy().getNodeEndings().stream().map(Map.Entry::getValue).collect(ImmutableCollectors.toList());
     }
 
     public void offer(String permission) {
@@ -73,20 +70,19 @@ public class PermissionRegistry extends RepeatingTask {
         this.queue.offer(permission);
     }
 
+    @Override
+    protected void tick() {
+        for (String e; (e = this.queue.poll()) != null; ) {
+            insert(e);
+        }
+    }
+
     public void insert(String permission) {
         try {
             doInsert(permission);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-    }
-
-    public List<String> rootAsList() {
-        return this.rootNode.makeImmutableCopy().getNodeEndings().stream().map(Map.Entry::getValue).collect(ImmutableCollectors.toList());
-    }
-
-    public int getSize() {
-        return this.rootNode.getDeepSize();
     }
 
     private void doInsert(String permission) {

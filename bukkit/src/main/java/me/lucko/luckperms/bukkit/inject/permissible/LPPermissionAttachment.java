@@ -27,17 +27,19 @@ package me.lucko.luckperms.bukkit.inject.permissible;
 
 import com.google.common.base.Preconditions;
 
-import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.bukkit.inject.dummy.DummyPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
-import me.lucko.luckperms.common.node.model.ImmutableTransientNode;
-import me.lucko.luckperms.common.node.utils.NodeTools;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
+
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.metadata.NodeMetadataKey;
 
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionRemovedExecutor;
 import org.bukkit.plugin.Plugin;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -53,6 +55,8 @@ import java.util.Set;
  * Applies all permissions directly to the backing user instance via transient nodes.
  */
 public class LPPermissionAttachment extends PermissionAttachment {
+
+    public static final NodeMetadataKey<LPPermissionAttachment> TRANSIENT_SOURCE_KEY = NodeMetadataKey.of("transientsource", LPPermissionAttachment.class);
 
     /**
      * The field in PermissionAttachment where the attachments applied permissions
@@ -140,7 +144,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
     }
 
     @Override
-    public LPPermissible getPermissible() {
+    public @NonNull LPPermissible getPermissible() {
         return this.permissible;
     }
 
@@ -179,17 +183,15 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
         // construct a node for the permission being set
         // we use the servers static context to *try* to ensure that the node will apply
-        Node node = NodeFactory.builder(name)
-                .setValue(value)
-                .withExtraContext(this.permissible.getPlugin().getContextManager().getStaticContext())
+        Node node = NodeBuilders.determineMostApplicable(name)
+                .value(value)
+                .withContext(this.permissible.getPlugin().getContextManager().getStaticContext())
+                .withMetadata(TRANSIENT_SOURCE_KEY, this)
                 .build();
-
-        // convert the constructed node to a transient node instance to refer back to this attachment
-        ImmutableTransientNode<LPPermissionAttachment> transientNode = ImmutableTransientNode.of(node, this);
 
         // set the transient node
         User user = this.permissible.getUser();
-        user.setTransientPermission(transientNode);
+        user.setNode(DataType.TRANSIENT, node, true);
     }
 
     private void unsetPermissionInternal(String name) {
@@ -199,13 +201,13 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
         // remove transient permissions from the holder which were added by this attachment & equal the permission
         User user = this.permissible.getUser();
-        user.removeIfTransient(NodeTools.localizedNodeComposedPredicate(n -> n instanceof ImmutableTransientNode && ((ImmutableTransientNode) n).getOwner() == this && n.getPermission().equals(name)));
+        user.removeIf(DataType.TRANSIENT, null, n -> n.getMetadata(TRANSIENT_SOURCE_KEY).orElse(null) == this && n.getKey().equals(name), false);
     }
 
     private void clearInternal() {
         // remove all transient permissions added by this attachment
         User user = this.permissible.getUser();
-        user.removeIfTransient(NodeTools.localizedNodeComposedPredicate(n -> n instanceof ImmutableTransientNode && ((ImmutableTransientNode) n).getOwner() == this));
+        user.removeIf(DataType.TRANSIENT, null, n -> n.getMetadata(TRANSIENT_SOURCE_KEY).orElse(null) == this, false);
     }
 
     @Override
@@ -229,7 +231,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
     }
 
     @Override
-    public void setPermission(String name, boolean value) {
+    public void setPermission(@NonNull String name, boolean value) {
         Objects.requireNonNull(name, "name is null");
         Preconditions.checkArgument(!name.isEmpty(), "name is empty");
 
@@ -254,7 +256,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
     }
 
     @Override
-    public void unsetPermission(String name) {
+    public void unsetPermission(@NonNull String name) {
         Objects.requireNonNull(name, "name is null");
         Preconditions.checkArgument(!name.isEmpty(), "name is empty");
 
@@ -275,12 +277,12 @@ public class LPPermissionAttachment extends PermissionAttachment {
     }
 
     @Override
-    public Map<String, Boolean> getPermissions() {
+    public @NonNull Map<String, Boolean> getPermissions() {
         return this.perms;
     }
 
     @Override
-    public Plugin getPlugin() {
+    public @NonNull Plugin getPlugin() {
         return this.owner != null ? this.owner : this.permissible.getPlugin().getBootstrap();
     }
 

@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.sponge.service.context;
 
-import me.lucko.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.ContextSet;
 
 import org.spongepowered.api.service.context.Context;
 

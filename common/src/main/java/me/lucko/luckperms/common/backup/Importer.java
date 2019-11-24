@@ -25,24 +25,31 @@
 
 package me.lucko.luckperms.common.backup;
 
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.MultimapBuilder;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.common.command.CommandManager;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.locale.message.Message;
-import me.lucko.luckperms.common.sender.DummySender;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 
+import net.luckperms.api.event.cause.CreationCause;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.node.Node;
+
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -50,35 +57,59 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * Handles import operations
  */
 public class Importer implements Runnable {
 
-    private final CommandManager commandManager;
+    private final LuckPermsPlugin plugin;
     private final Set<Sender> notify;
-    private final List<String> commandList;
-    private final List<ImportCommand> commands;
+    private final JsonObject data;
 
-    public Importer(CommandManager commandManager, Sender executor, List<String> commands) {
-        this.commandManager = commandManager;
+    public Importer(LuckPermsPlugin plugin, Sender executor, JsonObject data) {
+        this.plugin = plugin;
 
         if (executor.isConsole()) {
             this.notify = ImmutableSet.of(executor);
         } else {
-            this.notify = ImmutableSet.of(executor, commandManager.getPlugin().getConsoleSender());
+            this.notify = ImmutableSet.of(executor, plugin.getConsoleSender());
         }
-        this.commandList = commands.stream()
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .filter(s -> !s.startsWith("#"))
-                .filter(s -> !s.startsWith("//"))
-                .map(s -> s.startsWith("/luckperms ") ? s.substring("/luckperms ".length()) : s)
-                .map(s -> s.startsWith("/lp ") ? s.substring("/lp ".length()) : s)
-                .collect(Collectors.toList());
-        this.commands = new ArrayList<>();
+        this.data = data;
+    }
+
+    private static final class UserData {
+        private final String username;
+        private final String primaryGroup;
+        private final Set<Node> nodes;
+
+        UserData(String username, String primaryGroup, Set<Node> nodes) {
+            this.username = username;
+            this.primaryGroup = primaryGroup;
+            this.nodes = nodes;
+        }
+    }
+
+    private void processGroup(String groupName, Set<Node> nodes) {
+        Group group = this.plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
+        group.setNodes(DataType.NORMAL, nodes);
+        this.plugin.getStorage().saveGroup(group);
+    }
+
+    private void processTrack(String trackName, List<String> groups) {
+        Track track = this.plugin.getStorage().createAndLoadTrack(trackName, CreationCause.INTERNAL).join();
+        track.setGroups(groups);
+        this.plugin.getStorage().saveTrack(track).join();
+    }
+
+    private void processUser(UUID uuid, UserData userData) {
+        User user = this.plugin.getStorage().loadUser(uuid, userData.username).join();
+        if (userData.primaryGroup != null) {
+            user.getPrimaryGroup().setStoredValue(userData.primaryGroup);
+        }
+        user.setNodes(DataType.NORMAL, userData.nodes);
+        this.plugin.getStorage().saveUser(user).join();
+        this.plugin.getUserManager().getHouseKeeper().cleanup(user.getUniqueId());
     }
 
     @Override
@@ -87,28 +118,39 @@ public class Importer implements Runnable {
         this.notify.forEach(s -> Message.IMPORT_START.send(s));
 
         // start an update task in the background - we'll #join this later
-        CompletableFuture<Void> updateTask = CompletableFuture.runAsync(() -> this.commandManager.getPlugin().getSyncTaskBuffer().requestDirectly());
+        CompletableFuture<Void> updateTask = CompletableFuture.runAsync(() -> this.plugin.getSyncTaskBuffer().requestDirectly());
 
-        this.notify.forEach(s -> Message.IMPORT_INFO.send(s, "Processing commands..."));
+        this.notify.forEach(s -> Message.IMPORT_INFO.send(s, "Reading data..."));
 
-        // form instances for all commands, and register them
-        int index = 1;
-        for (String command : this.commandList) {
-            ImportCommand cmd = new ImportCommand(this.commandManager, index, command);
-            this.commands.add(cmd);
+        Map<String, Set<Node>> groups = new HashMap<>();
+        Map<String, List<String>> tracks = new HashMap<>();
+        Map<UUID, UserData> users = new HashMap<>();
 
-            if (cmd.getCommand().startsWith("creategroup ") || cmd.getCommand().startsWith("createtrack ")) {
-                cmd.process(); // process immediately
+        for (Map.Entry<String, JsonElement> group : this.data.get("groups").getAsJsonObject().entrySet()) {
+            groups.put(group.getKey(), NodeJsonSerializer.deserializeNodes(group.getValue().getAsJsonObject().get("nodes").getAsJsonArray()));
+        }
+        for (Map.Entry<String, JsonElement> track : this.data.get("tracks").getAsJsonObject().entrySet()) {
+            JsonArray trackGroups = track.getValue().getAsJsonObject().get("groups").getAsJsonArray();
+            List<String> trackGroupsList = new ArrayList<>();
+            trackGroups.forEach(g -> trackGroupsList.add(g.getAsString()));
+            tracks.put(track.getKey(), trackGroupsList);
+        }
+        for (Map.Entry<String, JsonElement> user : this.data.get("users").getAsJsonObject().entrySet()) {
+            JsonObject jsonData = user.getValue().getAsJsonObject();
+
+            UUID uuid = UUID.fromString(user.getKey());
+            String username = null;
+            String primaryGroup = null;
+            Set<Node> nodes = NodeJsonSerializer.deserializeNodes(jsonData.get("nodes").getAsJsonArray());
+
+            if (jsonData.has("username")) {
+                username = jsonData.get("username").getAsString();
+            }
+            if (jsonData.has("primaryGroup")) {
+                primaryGroup = jsonData.get("primaryGroup").getAsString();
             }
 
-            index++;
-        }
-
-        // split data up into sections for each holder
-        // holder id --> commands
-        ListMultimap<String, ImportCommand> sections = MultimapBuilder.linkedHashKeys().arrayListValues().build();
-        for (ImportCommand cmd : this.commands) {
-            sections.put(Strings.nullToEmpty(cmd.getTarget()), cmd);
+            users.put(uuid, new UserData(username, primaryGroup, nodes));
         }
 
         this.notify.forEach(s -> Message.IMPORT_INFO.send(s, "Waiting for initial update task to complete..."));
@@ -116,34 +158,43 @@ public class Importer implements Runnable {
         // join the update task future before scheduling command executions
         updateTask.join();
 
-        this.notify.forEach(s -> Message.IMPORT_INFO.send(s, "Setting up command executor..."));
+        this.notify.forEach(s -> Message.IMPORT_INFO.send(s, "Setting up data processor..."));
 
         // create a threadpool for the processing
-        ExecutorService executor = Executors.newFixedThreadPool(128, new ThreadFactoryBuilder().setNameFormat("luckperms-importer-%d").build());
+        ExecutorService executor = Executors.newFixedThreadPool(16, new ThreadFactoryBuilder().setNameFormat("luckperms-importer-%d").build());
 
         // A set of futures, which are really just the processes we need to wait for.
         Set<CompletableFuture<Void>> futures = new HashSet<>();
 
+        int total = 0;
         AtomicInteger processedCount = new AtomicInteger(0);
 
-        // iterate through each user sublist.
-        for (Collection<ImportCommand> subList : sections.asMap().values()) {
-
-            // register and start a new thread to process the sublist
-            futures.add(CompletableFuture.completedFuture(subList).thenAcceptAsync(sl -> {
-
-                // iterate through each user in the sublist, and grab their data.
-                for (ImportCommand cmd : sl) {
-                    cmd.process();
-                    processedCount.incrementAndGet();
-                }
+        for (Map.Entry<String, Set<Node>> group : groups.entrySet()) {
+            futures.add(CompletableFuture.completedFuture(group).thenAcceptAsync(ent -> {
+                processGroup(ent.getKey(), ent.getValue());
+                processedCount.incrementAndGet();
             }, executor));
+            total++;
+        }
+        for (Map.Entry<String, List<String>> track : tracks.entrySet()) {
+            futures.add(CompletableFuture.completedFuture(track).thenAcceptAsync(ent -> {
+                processTrack(ent.getKey(), ent.getValue());
+                processedCount.incrementAndGet();
+            }, executor));
+            total++;
+        }
+        for (Map.Entry<UUID, UserData> user : users.entrySet()) {
+            futures.add(CompletableFuture.completedFuture(user).thenAcceptAsync(ent -> {
+                processUser(ent.getKey(), ent.getValue());
+                processedCount.incrementAndGet();
+            }, executor));
+            total++;
         }
 
         // all of the threads have been scheduled now and are running. we just need to wait for them all to complete
         CompletableFuture<Void> overallFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 
-        this.notify.forEach(s -> Message.IMPORT_INFO.send(s, "All commands have been processed and scheduled - now waiting for the execution to complete."));
+        this.notify.forEach(s -> Message.IMPORT_INFO.send(s, "All data entries have been processed and scheduled for import - now waiting for the execution to complete."));
 
         while (true) {
             try {
@@ -154,7 +205,7 @@ public class Importer implements Runnable {
                 break;
             } catch (TimeoutException e) {
                 // still executing - send a progress report and continue waiting
-                sendProgress(processedCount.get());
+                sendProgress(processedCount.get(), total);
                 continue;
             }
 
@@ -167,166 +218,12 @@ public class Importer implements Runnable {
         long endTime = System.currentTimeMillis();
         double seconds = (endTime - startTime) / 1000.0;
 
-        int errors = (int) this.commands.stream().filter(v -> v.getResult().wasFailure()).count();
-
-        switch (errors) {
-            case 0:
-                this.notify.forEach(s -> Message.IMPORT_END_COMPLETE.send(s, seconds));
-                break;
-            case 1:
-                this.notify.forEach(s -> Message.IMPORT_END_COMPLETE_ERR_SIN.send(s, seconds, errors));
-                break;
-            default:
-                this.notify.forEach(s -> Message.IMPORT_END_COMPLETE_ERR.send(s, seconds, errors));
-                break;
-        }
-
-        AtomicInteger errIndex = new AtomicInteger(1);
-        for (ImportCommand e : this.commands) {
-            if (e.getResult() != null && e.getResult().wasFailure()) {
-                for (Sender s : this.notify) {
-                    Message.IMPORT_END_ERROR_HEADER.send(s, errIndex.get(), e.getId(), e.getCommand(), e.getResult().toString());
-                    e.getOutput().forEach(out -> Message.IMPORT_END_ERROR_CONTENT.send(s, out));
-                    Message.IMPORT_END_ERROR_FOOTER.send(s);
-                }
-
-                errIndex.incrementAndGet();
-            }
-        }
+        this.notify.forEach(s -> Message.IMPORT_END_COMPLETE.send(s, seconds));
     }
 
-    private void sendProgress(int processedCount) {
-        int percent = (processedCount * 100) / this.commandList.size();
-        int errors = (int) this.commands.stream().filter(v -> v.isCompleted() && v.getResult().wasFailure()).count();
-
-        if (errors == 1) {
-            this.notify.forEach(s -> Message.IMPORT_PROGRESS_SIN.send(s, percent, processedCount, this.commands.size(), errors));
-        } else {
-            this.notify.forEach(s -> Message.IMPORT_PROGRESS.send(s, percent, processedCount, this.commands.size(), errors));
-        }
-    }
-
-    private static class ImportCommand extends DummySender {
-        private static final Splitter ARGUMENT_SPLITTER = Splitter.on(CommandManager.COMMAND_SEPARATOR_PATTERN).omitEmptyStrings();
-        private static final Splitter SPACE_SPLITTER = Splitter.on(" ");
-
-        private final CommandManager commandManager;
-        private final int id;
-        private final String command;
-
-        private final String target;
-
-        private boolean completed = false;
-
-        private final List<String> output = new ArrayList<>();
-
-        private CommandResult result = CommandResult.FAILURE;
-
-        ImportCommand(CommandManager commandManager, int id, String command) {
-            super(commandManager.getPlugin());
-            this.commandManager = commandManager;
-            this.id = id;
-            this.command = command;
-            this.target = determineTarget(command);
-        }
-
-        @Override
-        protected void consumeMessage(String s) {
-            this.output.add(s);
-        }
-
-        public void process() {
-            if (isCompleted()) {
-                return;
-            }
-
-            try {
-                List<String> args = CommandManager.stripQuotes(ARGUMENT_SPLITTER.splitToList(getCommand()));
-                CommandResult result = this.commandManager.onCommand(this, "lp", args, Runnable::run).get();
-                setResult(result);
-            } catch (Exception e) {
-                setResult(CommandResult.FAILURE);
-                e.printStackTrace();
-            }
-
-            setCompleted(true);
-        }
-
-        private static String determineTarget(String command) {
-            if (command.startsWith("user ") && command.length() > "user ".length()) {
-                String subCmd = command.substring("user ".length());
-                if (!subCmd.contains(" ")) {
-                    return null;
-                }
-
-                String targetUser = SPACE_SPLITTER.split(subCmd).iterator().next();
-                return "u:" + targetUser;
-            }
-
-            if (command.startsWith("group ") && command.length() > "group ".length()) {
-                String subCmd = command.substring("group ".length());
-                if (!subCmd.contains(" ")) {
-                    return null;
-                }
-
-                String targetGroup = SPACE_SPLITTER.split(subCmd).iterator().next();
-                return "g:" + targetGroup;
-            }
-
-            if (command.startsWith("track ") && command.length() > "track ".length()) {
-                String subCmd = command.substring("track ".length());
-                if (!subCmd.contains(" ")) {
-                    return null;
-                }
-
-                String targetTrack = SPACE_SPLITTER.split(subCmd).iterator().next();
-                return "t:" + targetTrack;
-            }
-
-            if (command.startsWith("creategroup ") && command.length() > "creategroup ".length()) {
-                String targetGroup = command.substring("creategroup ".length());
-                return "g:" + targetGroup;
-            }
-
-            if (command.startsWith("createtrack ") && command.length() > "createtrack ".length()) {
-                String targetTrack = command.substring("createtrack ".length());
-                return "t:" + targetTrack;
-            }
-
-            return null;
-        }
-
-        public int getId() {
-            return this.id;
-        }
-
-        public String getCommand() {
-            return this.command;
-        }
-
-        public String getTarget() {
-            return this.target;
-        }
-
-        public boolean isCompleted() {
-            return this.completed;
-        }
-
-        public List<String> getOutput() {
-            return this.output;
-        }
-
-        public CommandResult getResult() {
-            return this.result;
-        }
-
-        public void setCompleted(boolean completed) {
-            this.completed = completed;
-        }
-
-        public void setResult(CommandResult result) {
-            this.result = result;
-        }
+    private void sendProgress(int processedCount, int total) {
+        int percent = (processedCount * 100) / total;
+        this.notify.forEach(s -> Message.IMPORT_PROGRESS.send(s, percent, processedCount, total, 0));
     }
 
 }

@@ -25,18 +25,18 @@
 
 package me.lucko.luckperms.common.messaging;
 
-import com.google.common.base.Preconditions;
-
-import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
-import me.lucko.luckperms.api.messenger.Messenger;
-import me.lucko.luckperms.api.messenger.MessengerProvider;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.messaging.redis.RedisMessenger;
 import me.lucko.luckperms.common.messaging.sql.SqlMessenger;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.sql.SqlStorage;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MariaDbConnectionFactory;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MySqlConnectionFactory;
+
+import net.luckperms.api.messenger.IncomingMessageConsumer;
+import net.luckperms.api.messenger.Messenger;
+import net.luckperms.api.messenger.MessengerProvider;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -52,19 +52,29 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
     }
 
     public final InternalMessagingService getInstance() {
-        String messagingType = this.plugin.getConfiguration().get(ConfigKeys.MESSAGING_SERVICE).toLowerCase();
-        if (messagingType.equals("none") && this.plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
-            messagingType = "redis";
+        String messagingType = this.plugin.getConfiguration().get(ConfigKeys.MESSAGING_SERVICE);
+        if (messagingType.equals("none")) {
+            messagingType = "auto";
         }
 
-        if (messagingType.equals("none") && this.plugin.getStorage().getImplementation() instanceof SqlStorage) {
-            SqlStorage dao = (SqlStorage) this.plugin.getStorage().getImplementation();
-            if (dao.getConnectionFactory() instanceof MySqlConnectionFactory || dao.getConnectionFactory() instanceof MariaDbConnectionFactory) {
-                messagingType = "sql";
+        // attempt to detect "auto" messaging service type.
+        if (messagingType.equals("auto")) {
+            if (this.plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
+                messagingType = "redis";
+            } else {
+                for (StorageImplementation implementation : this.plugin.getStorage().getImplementations()) {
+                    if (implementation instanceof SqlStorage) {
+                        SqlStorage sql = (SqlStorage) implementation;
+                        if (sql.getConnectionFactory() instanceof MySqlConnectionFactory || sql.getConnectionFactory() instanceof MariaDbConnectionFactory) {
+                            messagingType = "sql";
+                            break;
+                        }
+                    }
+                }
             }
         }
 
-        if (messagingType.equals("none") || messagingType.equals("notsql")) {
+        if (messagingType.equals("auto") || messagingType.equals("notsql")) {
             return null;
         }
 
@@ -125,12 +135,19 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
 
         @Override
         public @NonNull Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer) {
-            SqlStorage dao = (SqlStorage) getPlugin().getStorage().getImplementation();
-            Preconditions.checkState(dao.getConnectionFactory() instanceof MySqlConnectionFactory || dao.getConnectionFactory() instanceof MariaDbConnectionFactory, "not a supported sql type");
+            for (StorageImplementation implementation : getPlugin().getStorage().getImplementations()) {
+                if (implementation instanceof SqlStorage) {
+                    SqlStorage storage = (SqlStorage) implementation;
+                    if (storage.getConnectionFactory() instanceof MySqlConnectionFactory || storage.getConnectionFactory() instanceof MariaDbConnectionFactory) {
+                        // found an implementation match!
+                        SqlMessenger sql = new SqlMessenger(getPlugin(), storage, incomingMessageConsumer);
+                        sql.init();
+                        return sql;
+                    }
+                }
+            }
 
-            SqlMessenger sql = new SqlMessenger(getPlugin(), dao, incomingMessageConsumer);
-            sql.init();
-            return sql;
+            throw new IllegalStateException("Can't find a supported sql storage implementation");
         }
     }
 

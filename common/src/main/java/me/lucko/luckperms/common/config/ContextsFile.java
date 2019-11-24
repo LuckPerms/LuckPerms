@@ -28,9 +28,11 @@ package me.lucko.luckperms.common.config;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
+
+import net.luckperms.api.context.ImmutableContextSet;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -45,8 +47,8 @@ import java.nio.file.Path;
 public class ContextsFile {
     private final LuckPermsConfiguration configuration;
 
-    private ImmutableContextSet staticContexts = ImmutableContextSet.empty();
-    private ImmutableContextSet defaultContexts = ImmutableContextSet.empty();
+    private ImmutableContextSet staticContexts = ImmutableContextSetImpl.EMPTY;
+    private ImmutableContextSet defaultContexts = ImmutableContextSetImpl.EMPTY;
 
     public ContextsFile(LuckPermsConfiguration configuration) {
         this.configuration = configuration;
@@ -54,43 +56,24 @@ public class ContextsFile {
 
     public void load() {
         Path file = this.configuration.getPlugin().getBootstrap().getDataDirectory().resolve("contexts.json");
-        Path oldFile = this.configuration.getPlugin().getBootstrap().getDataDirectory().resolve("static-contexts.json");
-        if (Files.exists(oldFile)) {
-            try {
-                Files.move(oldFile, file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
         if (!Files.exists(file)) {
             save();
             return;
         }
 
-        boolean save = false;
         try (BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
             JsonObject data = GsonProvider.normal().fromJson(reader, JsonObject.class);
 
-            if (data.has("context")) {
-                this.staticContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("context").getAsJsonObject()).makeImmutable();
-                save = true;
-            }
-
             if (data.has("static-contexts")) {
-                this.staticContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("static-contexts").getAsJsonObject()).makeImmutable();
+                this.staticContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("static-contexts").getAsJsonObject()).immutableCopy();
             }
 
             if (data.has("default-contexts")) {
-                this.defaultContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("default-contexts").getAsJsonObject()).makeImmutable();
+                this.defaultContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("default-contexts").getAsJsonObject()).immutableCopy();
             }
 
         } catch (IOException e) {
             e.printStackTrace();
-        }
-
-        if (save) {
-            save();
         }
     }
 

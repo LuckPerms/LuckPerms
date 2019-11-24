@@ -25,10 +25,11 @@
 
 package me.lucko.luckperms.bukkit.calculator;
 
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
+
+import net.luckperms.api.util.Tristate;
 
 import org.bukkit.permissions.Permission;
 
@@ -58,6 +59,6 @@ public class DefaultsProcessor implements PermissionProcessor {
         if (defPerm == null) {
             return TristateResult.UNDEFINED;
         }
-        return PERMISSION_MAP_RESULT_FACTORY.result(Tristate.fromBoolean(defPerm.getDefault().getValue(this.isOp)));
+        return PERMISSION_MAP_RESULT_FACTORY.result(Tristate.of(defPerm.getDefault().getValue(this.isOp)));
     }
 }

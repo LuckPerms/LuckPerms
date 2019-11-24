@@ -25,9 +25,10 @@
 
 package me.lucko.luckperms.common.api.implementation;
 
-import me.lucko.luckperms.api.MessagingService;
-import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
+
+import net.luckperms.api.messaging.MessagingService;
+import net.luckperms.api.model.user.User;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

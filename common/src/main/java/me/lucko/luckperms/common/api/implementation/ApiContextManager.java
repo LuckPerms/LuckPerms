@@ -25,12 +25,16 @@
 
 package me.lucko.luckperms.common.api.implementation;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.User;
-import me.lucko.luckperms.api.context.ContextCalculator;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.query.QueryOptionsBuilderImpl;
+
+import net.luckperms.api.context.ContextCalculator;
+import net.luckperms.api.context.ContextSetFactory;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.user.User;
+import net.luckperms.api.query.QueryMode;
+import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -38,7 +42,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @SuppressWarnings("unchecked")
-public class ApiContextManager implements me.lucko.luckperms.api.context.ContextManager {
+public class ApiContextManager implements net.luckperms.api.context.ContextManager {
     private final LuckPermsPlugin plugin;
     private final ContextManager handle;
 
@@ -55,27 +59,15 @@ public class ApiContextManager implements me.lucko.luckperms.api.context.Context
     }
 
     @Override
-    public @NonNull ImmutableContextSet getApplicableContext(@NonNull Object subject) {
+    public @NonNull ImmutableContextSet getContext(@NonNull Object subject) {
         Objects.requireNonNull(subject, "subject");
-        return this.handle.getApplicableContext(checkType(subject));
+        return this.handle.getContext(checkType(subject));
     }
 
     @Override
-    public @NonNull Contexts getApplicableContexts(@NonNull Object subject) {
-        Objects.requireNonNull(subject, "subject");
-        return this.handle.getApplicableContexts(checkType(subject));
-    }
-
-    @Override
-    public @NonNull Optional<ImmutableContextSet> lookupApplicableContext(@NonNull User user) {
+    public @NonNull Optional<ImmutableContextSet> getContext(@NonNull User user) {
         Objects.requireNonNull(user, "user");
-        return this.plugin.getContextForUser(ApiUser.cast(user)).map(c -> c.getContexts().makeImmutable());
-    }
-
-    @Override
-    public @NonNull Optional<Contexts> lookupApplicableContexts(@NonNull User user) {
-        Objects.requireNonNull(user, "user");
-        return this.plugin.getContextForUser(ApiUser.cast(user));
+        return this.plugin.getQueryOptionsForUser(ApiUser.cast(user)).map(QueryOptions::context);
     }
 
     @Override
@@ -84,21 +76,26 @@ public class ApiContextManager implements me.lucko.luckperms.api.context.Context
     }
 
     @Override
-    public @NonNull Contexts getStaticContexts() {
-        return this.handle.getStaticContexts();
+    public QueryOptions.@NonNull Builder queryOptionsBuilder(@NonNull QueryMode mode) {
+        Objects.requireNonNull(mode, "mode");
+        return new QueryOptionsBuilderImpl(mode);
     }
 
     @Override
-    public @NonNull Contexts formContexts(@NonNull Object subject, @NonNull ImmutableContextSet contextSet) {
+    public @NonNull QueryOptions getQueryOptions(@NonNull Object subject) {
         Objects.requireNonNull(subject, "subject");
-        Objects.requireNonNull(contextSet, "contextSet");
-        return this.handle.formContexts(checkType(subject), contextSet);
+        return this.handle.getQueryOptions(subject);
     }
 
     @Override
-    public @NonNull Contexts formContexts(@NonNull ImmutableContextSet contextSet) {
-        Objects.requireNonNull(contextSet, "contextSet");
-        return this.handle.formContexts(contextSet);
+    public @NonNull Optional<QueryOptions> getQueryOptions(@NonNull User user) {
+        Objects.requireNonNull(user, "user");
+        return this.plugin.getQueryOptionsForUser(ApiUser.cast(user));
+    }
+
+    @Override
+    public @NonNull QueryOptions getStaticQueryOptions() {
+        return this.handle.getStaticQueryOptions();
     }
 
     @Override
@@ -111,6 +108,11 @@ public class ApiContextManager implements me.lucko.luckperms.api.context.Context
     public void unregisterCalculator(@NonNull ContextCalculator<?> calculator) {
         Objects.requireNonNull(calculator, "calculator");
         this.handle.unregisterCalculator(calculator);
+    }
+
+    @Override
+    public @NonNull ContextSetFactory getContextSetFactory() {
+        return ApiContextSetFactory.INSTANCE;
     }
 
     @Override

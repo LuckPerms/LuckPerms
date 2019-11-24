@@ -26,7 +26,6 @@
 package me.lucko.luckperms.sponge.service.model.persisted;
 
 import me.lucko.luckperms.common.cache.BufferedRequest;
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
@@ -35,6 +34,8 @@ import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import me.lucko.luckperms.sponge.service.model.calculated.CalculatedSubject;
 import me.lucko.luckperms.sponge.service.model.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.model.calculated.MonitoredSubjectData;
+
+import net.luckperms.api.model.data.DataType;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.Subject;
@@ -81,7 +82,7 @@ public class PersistedSubject extends CalculatedSubject implements LPSubject {
         this.parentCollection = parentCollection;
         this.identifier = identifier;
 
-        this.subjectData = new PersistedSubjectData(this, NodeMapType.ENDURING, service) {
+        this.subjectData = new PersistedSubjectData(this, DataType.NORMAL, service) {
             @Override
             protected void onUpdate(boolean success) {
                 super.onUpdate(success);
@@ -90,7 +91,7 @@ public class PersistedSubject extends CalculatedSubject implements LPSubject {
                 }
             }
         };
-        this.transientSubjectData = new MonitoredSubjectData(this, NodeMapType.TRANSIENT, service) {
+        this.transientSubjectData = new MonitoredSubjectData(this, DataType.TRANSIENT, service) {
             @Override
             protected void onUpdate(boolean success) {
                 if (success) {

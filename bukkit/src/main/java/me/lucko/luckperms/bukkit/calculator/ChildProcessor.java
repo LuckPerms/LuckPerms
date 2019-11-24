@@ -25,11 +25,12 @@
 
 package me.lucko.luckperms.bukkit.calculator;
 
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
+
+import net.luckperms.api.util.Tristate;
 
 import java.util.Collections;
 import java.util.Map;
@@ -42,7 +43,7 @@ public class ChildProcessor extends AbstractPermissionProcessor implements Permi
     private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(ChildProcessor.class);
 
     private final LPBukkitPlugin plugin;
-    private Map<String, Boolean> childPermissions = Collections.emptyMap();
+    private Map<String, TristateResult> childPermissions = Collections.emptyMap();
 
     public ChildProcessor(LPBukkitPlugin plugin) {
         this.plugin = plugin;
@@ -50,16 +51,16 @@ public class ChildProcessor extends AbstractPermissionProcessor implements Permi
 
     @Override
     public TristateResult hasPermission(String permission) {
-        return RESULT_FACTORY.result(Tristate.fromNullableBoolean(this.childPermissions.get(permission)));
+        return this.childPermissions.getOrDefault(permission, TristateResult.UNDEFINED);
     }
 
     @Override
     public void refresh() {
-        Map<String, Boolean> builder = new ConcurrentHashMap<>();
+        Map<String, TristateResult> builder = new ConcurrentHashMap<>();
         for (Map.Entry<String, Boolean> e : this.sourceMap.entrySet()) {
             Map<String, Boolean> children = this.plugin.getPermissionMap().getChildPermissions(e.getKey(), e.getValue());
-            if (children != null) {
-                builder.putAll(children);
+            for (Map.Entry<String, Boolean> child : children.entrySet()) {
+                builder.put(child.getKey(), RESULT_FACTORY.result(Tristate.of(child.getValue()), "parent: " + e.getKey()));
             }
         }
         this.childPermissions = builder;

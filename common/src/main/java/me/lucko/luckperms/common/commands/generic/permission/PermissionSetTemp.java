@@ -25,11 +25,7 @@
 
 package me.lucko.luckperms.common.commands.generic.permission;
 
-import me.lucko.luckperms.api.TemporaryDataMutateResult;
-import me.lucko.luckperms.api.TemporaryMergeBehaviour;
-import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.api.nodetype.types.InheritanceType;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
@@ -45,12 +41,18 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
-import me.lucko.luckperms.common.node.model.NodeTypes;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.model.data.DataMutateResult;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.types.InheritanceNode;
 
 import java.util.List;
 
@@ -69,7 +71,7 @@ public class PermissionSetTemp extends SharedSubCommand {
         String node = ArgumentParser.parseString(0, args);
         boolean value = ArgumentParser.parseBoolean(1, args);
         long duration = ArgumentParser.parseDuration(2, args);
-        TemporaryMergeBehaviour modifier = ArgumentParser.parseTemporaryModifier(3, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
+        TemporaryNodeMergeStrategy modifier = ArgumentParser.parseTemporaryModifier(3, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
         MutableContextSet context = ArgumentParser.parseContext(3, args, plugin);
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
@@ -79,22 +81,23 @@ public class PermissionSetTemp extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        InheritanceType inheritanceType = NodeTypes.parseInheritanceType(node);
-        if (inheritanceType != null) {
-            if (ArgumentPermissions.checkGroup(plugin, sender, inheritanceType.getGroupName(), context)) {
+        Node builtNode = NodeBuilders.determineMostApplicable(node).value(value).withContext(context).expiry(duration).build();
+
+        if (builtNode instanceof InheritanceNode) {
+            if (ArgumentPermissions.checkGroup(plugin, sender, ((InheritanceNode) builtNode).getGroupName(), context)) {
                 Message.COMMAND_NO_PERMISSION.send(sender);
                 return CommandResult.NO_PERMISSION;
             }
         }
 
-        TemporaryDataMutateResult result = holder.setPermission(NodeFactory.builder(node).setValue(value).withExtraContext(context).setExpiry(duration).build(), modifier);
+        DataMutateResult.WithMergedNode result = holder.setNode(DataType.NORMAL, builtNode, modifier);
 
-        if (result.getResult().asBoolean()) {
-            duration = result.getMergedNode().getExpiryUnixTime();
+        if (result.getResult().wasSuccessful()) {
+            duration = result.getMergedNode().getExpiry().getEpochSecond();
             Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, value, holder.getFormattedDisplayName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-            ExtendedLogEntry.build().actor(sender).acted(holder)
-                    .action("permission", "settemp", node, value, duration, context)
+            LoggedAction.build().source(sender).target(holder)
+                    .description("permission", "settemp", node, value, duration, context)
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(holder, sender, plugin);
@@ -110,6 +113,7 @@ public class PermissionSetTemp extends SharedSubCommand {
         return TabCompleter.create()
                 .at(0, TabCompletions.permissions(plugin))
                 .at(1, TabCompletions.booleans())
+                .from(3, TabCompletions.contexts(plugin))
                 .complete(args);
     }
 }

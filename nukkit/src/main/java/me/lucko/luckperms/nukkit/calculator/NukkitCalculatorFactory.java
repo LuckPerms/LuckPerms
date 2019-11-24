@@ -27,8 +27,6 @@ package me.lucko.luckperms.nukkit.calculator;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.LookupSetting;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
@@ -39,6 +37,9 @@ import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
+import me.lucko.luckperms.nukkit.context.NukkitContextManager;
+
+import net.luckperms.api.query.QueryOptions;
 
 public class NukkitCalculatorFactory implements CalculatorFactory {
     private final LPNukkitPlugin plugin;
@@ -48,7 +49,7 @@ public class NukkitCalculatorFactory implements CalculatorFactory {
     }
 
     @Override
-    public PermissionCalculator build(Contexts contexts, CacheMetadata metadata) {
+    public PermissionCalculator build(QueryOptions queryOptions, CacheMetadata metadata) {
         ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
 
         processors.add(new MapProcessor());
@@ -66,7 +67,7 @@ public class NukkitCalculatorFactory implements CalculatorFactory {
         }
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_NUKKIT_DEFAULT_PERMISSIONS) && metadata.getHolderType() == HolderType.USER) {
-            processors.add(new DefaultsProcessor(this.plugin, contexts.hasSetting(LookupSetting.IS_OP)));
+            processors.add(new DefaultsProcessor(this.plugin, queryOptions.option(NukkitContextManager.OP_OPTION).orElse(false)));
         }
 
         return new PermissionCalculator(this.plugin, metadata, processors.build());

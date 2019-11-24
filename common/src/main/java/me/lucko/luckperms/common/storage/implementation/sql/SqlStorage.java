@@ -28,33 +28,29 @@ package me.lucko.luckperms.common.storage.implementation.sql;
 import com.google.common.collect.Maps;
 import com.google.gson.reflect.TypeToken;
 
-import me.lucko.luckperms.api.HeldPermission;
-import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.PlayerSaveResult;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.model.manager.track.TrackManager;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
-import me.lucko.luckperms.common.node.model.NodeDataContainer;
-import me.lucko.luckperms.common.node.model.NodeHeldPermission;
+import me.lucko.luckperms.common.node.model.HeldNodeImpl;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
-import me.lucko.luckperms.common.storage.implementation.sql.connection.file.SQLiteConnectionFactory;
-import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.PostgreConnectionFactory;
 import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
+
+import net.luckperms.api.actionlog.Action;
+import net.luckperms.api.model.PlayerSaveResult;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.node.HeldNode;
+import net.luckperms.api.node.Node;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -67,6 +63,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -81,8 +78,8 @@ import java.util.stream.Collectors;
 public class SqlStorage implements StorageImplementation {
     private static final Type LIST_STRING_TYPE = new TypeToken<List<String>>(){}.getType();
 
-    private static final String USER_PERMISSIONS_SELECT = "SELECT permission, value, server, world, expiry, contexts FROM {prefix}user_permissions WHERE uuid=?";
-    private static final String USER_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM {prefix}user_permissions WHERE uuid=? AND permission=? AND value=? AND server=? AND world=? AND expiry=? AND contexts=?";
+    private static final String USER_PERMISSIONS_SELECT = "SELECT id, permission, value, server, world, expiry, contexts FROM {prefix}user_permissions WHERE uuid=?";
+    private static final String USER_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM {prefix}user_permissions WHERE id=?";
     private static final String USER_PERMISSIONS_DELETE = "DELETE FROM {prefix}user_permissions WHERE uuid=?";
     private static final String USER_PERMISSIONS_INSERT = "INSERT INTO {prefix}user_permissions(uuid, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
     private static final String USER_PERMISSIONS_SELECT_DISTINCT = "SELECT DISTINCT uuid FROM {prefix}user_permissions";
@@ -98,9 +95,9 @@ public class SqlStorage implements StorageImplementation {
     private static final String PLAYER_SELECT_PRIMARY_GROUP_BY_UUID = "SELECT primary_group FROM {prefix}players WHERE uuid=? LIMIT 1";
     private static final String PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID = "UPDATE {prefix}players SET primary_group=? WHERE uuid=?";
 
-    private static final String GROUP_PERMISSIONS_SELECT = "SELECT permission, value, server, world, expiry, contexts FROM {prefix}group_permissions WHERE name=?";
+    private static final String GROUP_PERMISSIONS_SELECT = "SELECT id, permission, value, server, world, expiry, contexts FROM {prefix}group_permissions WHERE name=?";
+    private static final String GROUP_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM {prefix}group_permissions WHERE id=?";
     private static final String GROUP_PERMISSIONS_DELETE = "DELETE FROM {prefix}group_permissions WHERE name=?";
-    private static final String GROUP_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM {prefix}group_permissions WHERE name=? AND permission=? AND value=? AND server=? AND world=? AND expiry=? AND contexts=?";
     private static final String GROUP_PERMISSIONS_INSERT = "INSERT INTO {prefix}group_permissions(name, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
     private static final String GROUP_PERMISSIONS_SELECT_PERMISSION = "SELECT name, permission, value, server, world, expiry, contexts FROM {prefix}group_permissions WHERE ";
 
@@ -232,20 +229,6 @@ public class SqlStorage implements StorageImplementation {
                 }
             }
         }
-
-        // migrations
-        try {
-            if (!(this.connectionFactory instanceof SQLiteConnectionFactory) && !(this.connectionFactory instanceof PostgreConnectionFactory)) {
-                try (Connection connection = this.connectionFactory.getConnection()) {
-                    try (Statement s = connection.createStatement()) {
-                        s.execute(this.statementProcessor.apply("ALTER TABLE {prefix}actions MODIFY COLUMN actor_name VARCHAR(100)"));
-                        s.execute(this.statementProcessor.apply("ALTER TABLE {prefix}actions MODIFY COLUMN action VARCHAR(300)"));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -263,16 +246,16 @@ public class SqlStorage implements StorageImplementation {
     }
 
     @Override
-    public void logAction(LogEntry entry) throws SQLException {
+    public void logAction(Action entry) throws SQLException {
         try (Connection c = this.connectionFactory.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(ACTION_INSERT))) {
-                ps.setLong(1, entry.getTimestamp());
-                ps.setString(2, entry.getActor().toString());
-                ps.setString(3, entry.getActorName());
-                ps.setString(4, Character.toString(entry.getType().getCode()));
-                ps.setString(5, entry.getActed().map(UUID::toString).orElse("null"));
-                ps.setString(6, entry.getActedName());
-                ps.setString(7, entry.getAction());
+                ps.setLong(1, entry.getTimestamp().getEpochSecond());
+                ps.setString(2, entry.getSource().getUniqueId().toString());
+                ps.setString(3, entry.getSource().getName());
+                ps.setString(4, Character.toString(LoggedAction.getTypeCharacter(entry.getTarget().getType())));
+                ps.setString(5, entry.getTarget().getUniqueId().map(UUID::toString).orElse("null"));
+                ps.setString(6, entry.getTarget().getName());
+                ps.setString(7, entry.getDescription());
                 ps.execute();
             }
         }
@@ -286,14 +269,14 @@ public class SqlStorage implements StorageImplementation {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         final String actedUuid = rs.getString("acted_uuid");
-                        ExtendedLogEntry e = ExtendedLogEntry.build()
-                                .timestamp(rs.getLong("time"))
-                                .actor(UUID.fromString(rs.getString("actor_uuid")))
-                                .actorName(rs.getString("actor_name"))
-                                .type(LogEntry.Type.valueOf(rs.getString("type").toCharArray()[0]))
-                                .acted(actedUuid.equals("null") ? null : UUID.fromString(actedUuid))
-                                .actedName(rs.getString("acted_name"))
-                                .action(rs.getString("action"))
+                        LoggedAction e = LoggedAction.build()
+                                .timestamp(Instant.ofEpochSecond(rs.getLong("time")))
+                                .source(UUID.fromString(rs.getString("actor_uuid")))
+                                .sourceName(rs.getString("actor_name"))
+                                .targetType(LoggedAction.parseTypeCharacter(rs.getString("type").toCharArray()[0]))
+                                .target(actedUuid.equals("null") ? null : UUID.fromString(actedUuid))
+                                .targetName(rs.getString("acted_name"))
+                                .description(rs.getString("action"))
                                 .build();
                         
                         log.add(e);
@@ -324,18 +307,18 @@ public class SqlStorage implements StorageImplementation {
     }
 
     @Override
-    public User loadUser(UUID uuid, String username) throws SQLException {
-        User user = this.plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
+    public User loadUser(UUID uniqueId, String username) throws SQLException {
+        User user = this.plugin.getUserManager().getOrMake(uniqueId, username);
         user.getIoLock().lock();
         try {
-            List<NodeDataContainer> data = new ArrayList<>();
+            List<SqlNode> data = new ArrayList<>();
             String primaryGroup = null;
             String userName = null;
 
             // Collect user permissions
             try (Connection c = this.connectionFactory.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_SELECT))) {
-                    ps.setString(1, user.getUuid().toString());
+                    ps.setString(1, user.getUniqueId().toString());
 
                     try (ResultSet rs = ps.executeQuery()) {
                         while (rs.next()) {
@@ -345,7 +328,7 @@ public class SqlStorage implements StorageImplementation {
                             String world = rs.getString("world");
                             long expiry = rs.getLong("expiry");
                             String contexts = rs.getString("contexts");
-                            data.add(deserializeNode(permission, value, server, world, expiry, contexts));
+                            data.add(SqlNode.fromSqlFields(permission, value, server, world, expiry, contexts));
                         }
                     }
                 }
@@ -354,7 +337,7 @@ public class SqlStorage implements StorageImplementation {
             // Collect user meta (username & primary group)
             try (Connection c = this.connectionFactory.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_SELECT_BY_UUID))) {
-                    ps.setString(1, user.getUuid().toString());
+                    ps.setString(1, user.getUniqueId().toString());
 
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
@@ -367,20 +350,20 @@ public class SqlStorage implements StorageImplementation {
 
             // update username & primary group
             if (primaryGroup == null) {
-                primaryGroup = NodeFactory.DEFAULT_GROUP_NAME;
+                primaryGroup = GroupManager.DEFAULT_GROUP_NAME;
             }
             user.getPrimaryGroup().setStoredValue(primaryGroup);
 
             // Update their username to what was in the storage if the one in the local instance is null
-            user.setName(userName, true);
+            user.setUsername(userName, true);
 
             // If the user has any data in storage
             if (!data.isEmpty()) {
-                Set<Node> nodes = data.stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
-                user.setNodes(NodeMapType.ENDURING, nodes);
+                Set<Node> nodes = data.stream().map(SqlNode::toNode).collect(Collectors.toSet());
+                user.setNodes(DataType.NORMAL, nodes);
 
                 // Save back to the store if data they were given any defaults or had permissions expire
-                if (this.plugin.getUserManager().giveDefaultIfNeeded(user, false) | user.auditTemporaryPermissions()) {
+                if (this.plugin.getUserManager().giveDefaultIfNeeded(user, false) | user.auditTemporaryNodes()) {
                     // This should be fine, as the lock will be acquired by the same thread.
                     saveUser(user);
                 }
@@ -388,7 +371,7 @@ public class SqlStorage implements StorageImplementation {
             } else {
                 // User has no data in storage.
                 if (this.plugin.getUserManager().shouldSave(user)) {
-                    user.clearNodes();
+                    user.clearNodes(DataType.NORMAL, null, true);
                     user.getPrimaryGroup().setStoredValue(null);
                     this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
                 }
@@ -407,12 +390,12 @@ public class SqlStorage implements StorageImplementation {
             if (!this.plugin.getUserManager().shouldSave(user)) {
                 try (Connection c = this.connectionFactory.getConnection()) {
                     try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_DELETE))) {
-                        ps.setString(1, user.getUuid().toString());
+                        ps.setString(1, user.getUniqueId().toString());
                         ps.execute();
                     }
                     try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID))) {
-                        ps.setString(1, NodeFactory.DEFAULT_GROUP_NAME);
-                        ps.setString(2, user.getUuid().toString());
+                        ps.setString(1, GroupManager.DEFAULT_GROUP_NAME);
+                        ps.setString(2, user.getUniqueId().toString());
                         ps.execute();
                     }
                 }
@@ -420,43 +403,38 @@ public class SqlStorage implements StorageImplementation {
             }
 
             // Get a snapshot of current data.
-            Set<NodeDataContainer> remote = new HashSet<>();
+            Set<SqlNode> remote = new HashSet<>();
             try (Connection c = this.connectionFactory.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_SELECT))) {
-                    ps.setString(1, user.getUuid().toString());
+                    ps.setString(1, user.getUniqueId().toString());
 
                     try (ResultSet rs = ps.executeQuery()) {
                         while (rs.next()) {
+                            long id = rs.getLong("id");
                             String permission = rs.getString("permission");
                             boolean value = rs.getBoolean("value");
                             String server = rs.getString("server");
                             String world = rs.getString("world");
                             long expiry = rs.getLong("expiry");
                             String contexts = rs.getString("contexts");
-                            remote.add(deserializeNode(permission, value, server, world, expiry, contexts));
+                            remote.add(SqlNode.fromSqlFields(id, permission, value, server, world, expiry, contexts));
                         }
                     }
                 }
             }
 
-            Set<NodeDataContainer> local = user.enduringData().immutable().values().stream().map(NodeDataContainer::fromNode).collect(Collectors.toSet());
+            Set<SqlNode> local = user.normalData().immutable().values().stream().map(SqlNode::fromNode).collect(Collectors.toSet());
 
-            Map.Entry<Set<NodeDataContainer>, Set<NodeDataContainer>> diff = compareSets(local, remote);
+            Map.Entry<Set<SqlNode>, Set<SqlNode>> diff = compareSets(local, remote);
 
-            Set<NodeDataContainer> toAdd = diff.getKey();
-            Set<NodeDataContainer> toRemove = diff.getValue();
+            Set<SqlNode> toAdd = diff.getKey();
+            Set<SqlNode> toRemove = diff.getValue();
 
             if (!toRemove.isEmpty()) {
                 try (Connection c = this.connectionFactory.getConnection()) {
                     try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_DELETE_SPECIFIC))) {
-                        for (NodeDataContainer nd : toRemove) {
-                            ps.setString(1, user.getUuid().toString());
-                            ps.setString(2, nd.getPermission());
-                            ps.setBoolean(3, nd.getValue());
-                            ps.setString(4, nd.getServer());
-                            ps.setString(5, nd.getWorld());
-                            ps.setLong(6, nd.getExpiry());
-                            ps.setString(7, GsonProvider.normal().toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
+                        for (SqlNode nd : toRemove) {
+                            ps.setLong(1, nd.getSqlId());
                             ps.addBatch();
                         }
                         ps.executeBatch();
@@ -467,8 +445,8 @@ public class SqlStorage implements StorageImplementation {
             if (!toAdd.isEmpty()) {
                 try (Connection c = this.connectionFactory.getConnection()) {
                     try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_INSERT))) {
-                        for (NodeDataContainer nd : toAdd) {
-                            ps.setString(1, user.getUuid().toString());
+                        for (SqlNode nd : toAdd) {
+                            ps.setString(1, user.getUniqueId().toString());
                             ps.setString(2, nd.getPermission());
                             ps.setBoolean(3, nd.getValue());
                             ps.setString(4, nd.getServer());
@@ -486,7 +464,7 @@ public class SqlStorage implements StorageImplementation {
                 boolean hasPrimaryGroupSaved;
 
                 try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_SELECT_PRIMARY_GROUP_BY_UUID))) {
-                    ps.setString(1, user.getUuid().toString());
+                    ps.setString(1, user.getUniqueId().toString());
                     try (ResultSet rs = ps.executeQuery()) {
                         hasPrimaryGroupSaved = rs.next();
                     }
@@ -495,16 +473,16 @@ public class SqlStorage implements StorageImplementation {
                 if (hasPrimaryGroupSaved) {
                     // update
                     try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID))) {
-                        ps.setString(1, user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
-                        ps.setString(2, user.getUuid().toString());
+                        ps.setString(1, user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME));
+                        ps.setString(2, user.getUniqueId().toString());
                         ps.execute();
                     }
                 } else {
                     // insert
                     try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_INSERT))) {
-                        ps.setString(1, user.getUuid().toString());
-                        ps.setString(2, user.getName().orElse("null").toLowerCase());
-                        ps.setString(3, user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME));
+                        ps.setString(1, user.getUniqueId().toString());
+                        ps.setString(2, user.getUsername().orElse("null").toLowerCase());
+                        ps.setString(3, user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME));
                         ps.execute();
                     }
                 }
@@ -532,11 +510,11 @@ public class SqlStorage implements StorageImplementation {
     }
 
     @Override
-    public List<HeldPermission<UUID>> getUsersWithPermission(Constraint constraint) throws SQLException {
+    public List<HeldNode<UUID>> getUsersWithPermission(Constraint constraint) throws SQLException {
         PreparedStatementBuilder builder = new PreparedStatementBuilder().append(USER_PERMISSIONS_SELECT_PERMISSION);
         constraint.appendSql(builder, "permission");
 
-        List<HeldPermission<UUID>> held = new ArrayList<>();
+        List<HeldNode<UUID>> held = new ArrayList<>();
         try (Connection c = this.connectionFactory.getConnection()) {
             try (PreparedStatement ps = builder.build(c, this.statementProcessor)) {
                 try (ResultSet rs = ps.executeQuery()) {
@@ -549,8 +527,8 @@ public class SqlStorage implements StorageImplementation {
                         long expiry = rs.getLong("expiry");
                         String contexts = rs.getString("contexts");
 
-                        NodeDataContainer data = deserializeNode(perm, value, server, world, expiry, contexts);
-                        held.add(NodeHeldPermission.of(holder, data));
+                        SqlNode data = SqlNode.fromSqlFields(perm, value, server, world, expiry, contexts);
+                        held.add(HeldNodeImpl.of(holder, data.toNode()));
                     }
                 }
             }
@@ -608,7 +586,7 @@ public class SqlStorage implements StorageImplementation {
         Group group = this.plugin.getGroupManager().getOrMake(name);
         group.getIoLock().lock();
         try {
-            List<NodeDataContainer> data = new ArrayList<>();
+            List<SqlNode> data = new ArrayList<>();
 
             try (Connection c = this.connectionFactory.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_SELECT))) {
@@ -622,17 +600,17 @@ public class SqlStorage implements StorageImplementation {
                             String world = rs.getString("world");
                             long expiry = rs.getLong("expiry");
                             String contexts = rs.getString("contexts");
-                            data.add(deserializeNode(permission, value, server, world, expiry, contexts));
+                            data.add(SqlNode.fromSqlFields(permission, value, server, world, expiry, contexts));
                         }
                     }
                 }
             }
 
             if (!data.isEmpty()) {
-                Set<Node> nodes = data.stream().map(NodeDataContainer::toNode).collect(Collectors.toSet());
-                group.setNodes(NodeMapType.ENDURING, nodes);
+                Set<Node> nodes = data.stream().map(SqlNode::toNode).collect(Collectors.toSet());
+                group.setNodes(DataType.NORMAL, nodes);
             } else {
-                group.clearNodes();
+                group.clearNodes(DataType.NORMAL, null, false);
             }
         } finally {
             group.getIoLock().unlock();
@@ -669,7 +647,8 @@ public class SqlStorage implements StorageImplementation {
 
         GroupManager<?> gm = this.plugin.getGroupManager();
         gm.getAll().values().stream()
-                .filter(g -> !groups.contains(g.getName()))
+                .map(Group::getName)
+                .filter(g -> !groups.contains(g))
                 .forEach(gm::unload);
     }
 
@@ -678,7 +657,7 @@ public class SqlStorage implements StorageImplementation {
         group.getIoLock().lock();
         try {
             // Empty data, just delete.
-            if (group.enduringData().immutable().isEmpty()) {
+            if (group.normalData().immutable().isEmpty()) {
                 try (Connection c = this.connectionFactory.getConnection()) {
                     try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_DELETE))) {
                         ps.setString(1, group.getName());
@@ -689,43 +668,38 @@ public class SqlStorage implements StorageImplementation {
             }
 
             // Get a snapshot of current data
-            Set<NodeDataContainer> remote = new HashSet<>();
+            Set<SqlNode> remote = new HashSet<>();
             try (Connection c = this.connectionFactory.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_SELECT))) {
                     ps.setString(1, group.getName());
 
                     try (ResultSet rs = ps.executeQuery()) {
                         while (rs.next()) {
+                            long id = rs.getLong("id");
                             String permission = rs.getString("permission");
                             boolean value = rs.getBoolean("value");
                             String server = rs.getString("server");
                             String world = rs.getString("world");
                             long expiry = rs.getLong("expiry");
                             String contexts = rs.getString("contexts");
-                            remote.add(deserializeNode(permission, value, server, world, expiry, contexts));
+                            remote.add(SqlNode.fromSqlFields(id, permission, value, server, world, expiry, contexts));
                         }
                     }
                 }
             }
 
-            Set<NodeDataContainer> local = group.enduringData().immutable().values().stream().map(NodeDataContainer::fromNode).collect(Collectors.toSet());
+            Set<SqlNode> local = group.normalData().immutable().values().stream().map(SqlNode::fromNode).collect(Collectors.toSet());
 
-            Map.Entry<Set<NodeDataContainer>, Set<NodeDataContainer>> diff = compareSets(local, remote);
+            Map.Entry<Set<SqlNode>, Set<SqlNode>> diff = compareSets(local, remote);
 
-            Set<NodeDataContainer> toAdd = diff.getKey();
-            Set<NodeDataContainer> toRemove = diff.getValue();
+            Set<SqlNode> toAdd = diff.getKey();
+            Set<SqlNode> toRemove = diff.getValue();
 
             if (!toRemove.isEmpty()) {
                 try (Connection c = this.connectionFactory.getConnection()) {
                     try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_DELETE_SPECIFIC))) {
-                        for (NodeDataContainer nd : toRemove) {
-                            ps.setString(1, group.getName());
-                            ps.setString(2, nd.getPermission());
-                            ps.setBoolean(3, nd.getValue());
-                            ps.setString(4, nd.getServer());
-                            ps.setString(5, nd.getWorld());
-                            ps.setLong(6, nd.getExpiry());
-                            ps.setString(7, GsonProvider.normal().toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
+                        for (SqlNode nd : toRemove) {
+                            ps.setLong(1, nd.getSqlId());
                             ps.addBatch();
                         }
                         ps.executeBatch();
@@ -736,7 +710,7 @@ public class SqlStorage implements StorageImplementation {
             if (!toAdd.isEmpty()) {
                 try (Connection c = this.connectionFactory.getConnection()) {
                     try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_INSERT))) {
-                        for (NodeDataContainer nd : toAdd) {
+                        for (SqlNode nd : toAdd) {
                             ps.setString(1, group.getName());
                             ps.setString(2, nd.getPermission());
                             ps.setBoolean(3, nd.getValue());
@@ -774,15 +748,15 @@ public class SqlStorage implements StorageImplementation {
             group.getIoLock().unlock();
         }
 
-        this.plugin.getGroupManager().unload(group);
+        this.plugin.getGroupManager().unload(group.getName());
     }
 
     @Override
-    public List<HeldPermission<String>> getGroupsWithPermission(Constraint constraint) throws SQLException {
+    public List<HeldNode<String>> getGroupsWithPermission(Constraint constraint) throws SQLException {
         PreparedStatementBuilder builder = new PreparedStatementBuilder().append(GROUP_PERMISSIONS_SELECT_PERMISSION);
         constraint.appendSql(builder, "permission");
 
-        List<HeldPermission<String>> held = new ArrayList<>();
+        List<HeldNode<String>> held = new ArrayList<>();
         try (Connection c = this.connectionFactory.getConnection()) {
             try (PreparedStatement ps = builder.build(c, this.statementProcessor)) {
                 try (ResultSet rs = ps.executeQuery()) {
@@ -795,8 +769,8 @@ public class SqlStorage implements StorageImplementation {
                         long expiry = rs.getLong("expiry");
                         String contexts = rs.getString("contexts");
 
-                        NodeDataContainer data = deserializeNode(perm, value, server, world, expiry, contexts);
-                        held.add(NodeHeldPermission.of(holder, data));
+                        SqlNode data = SqlNode.fromSqlFields(perm, value, server, world, expiry, contexts);
+                        held.add(HeldNodeImpl.of(holder, data.toNode()));
                     }
                 }
             }
@@ -907,7 +881,8 @@ public class SqlStorage implements StorageImplementation {
 
         TrackManager<?> tm = this.plugin.getTrackManager();
         tm.getAll().values().stream()
-                .filter(t -> !tracks.contains(t.getName()))
+                .map(Track::getName)
+                .filter(t -> !tracks.contains(t))
                 .forEach(tm::unload);
     }
 
@@ -942,15 +917,15 @@ public class SqlStorage implements StorageImplementation {
             track.getIoLock().unlock();
         }
 
-        this.plugin.getTrackManager().unload(track);
+        this.plugin.getTrackManager().unload(track.getName());
     }
 
     @Override
-    public PlayerSaveResult savePlayerData(UUID uuid, String username) throws SQLException {
+    public PlayerSaveResult savePlayerData(UUID uniqueId, String username) throws SQLException {
         username = username.toLowerCase();
 
         // find any existing mapping
-        String oldUsername = getPlayerName(uuid);
+        String oldUsername = getPlayerName(uniqueId);
 
         // do the insert
         if (!username.equals(oldUsername)) {
@@ -958,14 +933,14 @@ public class SqlStorage implements StorageImplementation {
                 if (oldUsername != null) {
                     try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_UPDATE_USERNAME_FOR_UUID))) {
                         ps.setString(1, username);
-                        ps.setString(2, uuid.toString());
+                        ps.setString(2, uniqueId.toString());
                         ps.execute();
                     }
                 } else {
                     try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_INSERT))) {
-                        ps.setString(1, uuid.toString());
+                        ps.setString(1, uniqueId.toString());
                         ps.setString(2, username);
-                        ps.setString(3, NodeFactory.DEFAULT_GROUP_NAME);
+                        ps.setString(3, GroupManager.DEFAULT_GROUP_NAME);
                         ps.execute();
                     }
                 }
@@ -978,7 +953,7 @@ public class SqlStorage implements StorageImplementation {
         try (Connection c = this.connectionFactory.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_SELECT_ALL_UUIDS_BY_USERNAME))) {
                 ps.setString(1, username);
-                ps.setString(2, uuid.toString());
+                ps.setString(2, uniqueId.toString());
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         conflicting.add(UUID.fromString(rs.getString("uuid")));
@@ -992,7 +967,7 @@ public class SqlStorage implements StorageImplementation {
             try (Connection c = this.connectionFactory.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_DELETE_ALL_UUIDS_BY_USERNAME))) {
                     ps.setString(1, username);
-                    ps.setString(2, uuid.toString());
+                    ps.setString(2, uniqueId.toString());
                     ps.execute();
                 }
             }
@@ -1003,7 +978,7 @@ public class SqlStorage implements StorageImplementation {
     }
 
     @Override
-    public UUID getPlayerUuid(String username) throws SQLException {
+    public UUID getPlayerUniqueId(String username) throws SQLException {
         username = username.toLowerCase();
         try (Connection c = this.connectionFactory.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_SELECT_UUID_BY_USERNAME))) {
@@ -1019,10 +994,10 @@ public class SqlStorage implements StorageImplementation {
     }
 
     @Override
-    public String getPlayerName(UUID uuid) throws SQLException {
+    public String getPlayerName(UUID uniqueId) throws SQLException {
         try (Connection c = this.connectionFactory.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_SELECT_USERNAME_BY_UUID))) {
-                ps.setString(1, uuid.toString());
+                ps.setString(1, uniqueId.toString());
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         return rs.getString("username");
@@ -1039,20 +1014,17 @@ public class SqlStorage implements StorageImplementation {
      * @param remote the remote set
      * @return the entries to add to remote, and the entries to remove from remote
      */
-    private static Map.Entry<Set<NodeDataContainer>, Set<NodeDataContainer>> compareSets(Set<NodeDataContainer> local, Set<NodeDataContainer> remote) {
+    private static Map.Entry<Set<SqlNode>, Set<SqlNode>> compareSets(Set<SqlNode> local, Set<SqlNode> remote) {
         // entries in local but not remote need to be added
         // entries in remote but not local need to be removed
 
-        Set<NodeDataContainer> toAdd = new HashSet<>(local);
+        Set<SqlNode> toAdd = new HashSet<>(local);
         toAdd.removeAll(remote);
 
-        Set<NodeDataContainer> toRemove = new HashSet<>(remote);
+        Set<SqlNode> toRemove = new HashSet<>(remote);
         toRemove.removeAll(local);
 
         return Maps.immutableEntry(toAdd, toRemove);
     }
 
-    private NodeDataContainer deserializeNode(String permission, boolean value, String server, String world, long expiry, String contexts) {
-        return NodeDataContainer.of(permission, value, server, world, expiry, ContextSetJsonSerializer.deserializeContextSet(GsonProvider.normal(), contexts).makeImmutable());
-    }
 }

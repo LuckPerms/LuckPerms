@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.storage.implementation;
 
-import me.lucko.luckperms.api.HeldPermission;
-import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.api.PlayerSaveResult;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
@@ -35,6 +32,10 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+
+import net.luckperms.api.actionlog.Action;
+import net.luckperms.api.model.PlayerSaveResult;
+import net.luckperms.api.node.HeldNode;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -58,19 +59,19 @@ public interface StorageImplementation {
         return Collections.emptyMap();
     }
 
-    void logAction(LogEntry entry) throws Exception;
+    void logAction(Action entry) throws Exception;
 
     Log getLog() throws Exception;
 
     void applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception;
 
-    User loadUser(UUID uuid, String username) throws Exception;
+    User loadUser(UUID uniqueId, String username) throws Exception;
 
     void saveUser(User user) throws Exception;
 
     Set<UUID> getUniqueUsers() throws Exception;
 
-    List<HeldPermission<UUID>> getUsersWithPermission(Constraint constraint) throws Exception;
+    List<HeldNode<UUID>> getUsersWithPermission(Constraint constraint) throws Exception;
 
     Group createAndLoadGroup(String name) throws Exception;
 
@@ -82,7 +83,7 @@ public interface StorageImplementation {
 
     void deleteGroup(Group group) throws Exception;
 
-    List<HeldPermission<String>> getGroupsWithPermission(Constraint constraint) throws Exception;
+    List<HeldNode<String>> getGroupsWithPermission(Constraint constraint) throws Exception;
 
     Track createAndLoadTrack(String name) throws Exception;
 
@@ -94,9 +95,9 @@ public interface StorageImplementation {
 
     void deleteTrack(Track track) throws Exception;
 
-    PlayerSaveResult savePlayerData(UUID uuid, String username) throws Exception;
+    PlayerSaveResult savePlayerData(UUID uniqueId, String username) throws Exception;
 
-    @Nullable UUID getPlayerUuid(String username) throws Exception;
+    @Nullable UUID getPlayerUniqueId(String username) throws Exception;
 
-    @Nullable String getPlayerName(UUID uuid) throws Exception;
+    @Nullable String getPlayerName(UUID uniqueId) throws Exception;
 }

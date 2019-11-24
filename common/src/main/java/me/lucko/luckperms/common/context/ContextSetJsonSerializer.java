@@ -32,23 +32,26 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
+
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.MutableContextSet;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public final class ContextSetJsonSerializer {
     private ContextSetJsonSerializer() {}
 
     public static JsonObject serializeContextSet(ContextSet contextSet) {
         JsonObject data = new JsonObject();
-        Map<String, Collection<String>> map = contextSet.toMultimap().asMap();
+        Map<String, Set<String>> map = contextSet.toMap();
 
-        for (Map.Entry<String, Collection<String>> entry : map.entrySet()) {
+        for (Map.Entry<String, Set<String>> entry : map.entrySet()) {
             List<String> values = new ArrayList<>(entry.getValue());
             int size = values.size();
 
@@ -69,12 +72,12 @@ public final class ContextSetJsonSerializer {
     public static ContextSet deserializeContextSet(Gson gson, String json) {
         Objects.requireNonNull(json, "json");
         if (json.equals("{}")) {
-            return ContextSet.empty();
+            return ImmutableContextSetImpl.EMPTY;
         }
 
         JsonObject context = gson.fromJson(json, JsonObject.class);
         if (context == null) {
-            return ContextSet.empty();
+            return ImmutableContextSetImpl.EMPTY;
         }
 
         return deserializeContextSet(context);
@@ -85,10 +88,10 @@ public final class ContextSetJsonSerializer {
         JsonObject data = element.getAsJsonObject();
 
         if (data.entrySet().isEmpty()) {
-            return ContextSet.empty();
+            return ImmutableContextSetImpl.EMPTY;
         }
 
-        MutableContextSet map = MutableContextSet.create();
+        MutableContextSet map = new MutableContextSetImpl();
         for (Map.Entry<String, JsonElement> e : data.entrySet()) {
             String k = e.getKey();
             JsonElement v = e.getValue();

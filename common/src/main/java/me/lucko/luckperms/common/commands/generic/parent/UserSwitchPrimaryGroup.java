@@ -25,10 +25,7 @@
 
 package me.lucko.luckperms.common.commands.generic.parent;
 
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.StandardNodeEquality;
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -37,17 +34,22 @@ import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.model.manager.group.GroupManager;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeEqualityPredicate;
 
 import java.util.List;
 
@@ -79,30 +81,30 @@ public class UserSwitchPrimaryGroup extends SharedSubCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (ArgumentPermissions.checkContext(plugin, sender, permission, ContextSet.empty()) ||
-                ArgumentPermissions.checkGroup(plugin, sender, holder, ContextSet.empty()) ||
-                ArgumentPermissions.checkGroup(plugin, sender, group, ContextSet.empty()) ||
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, ImmutableContextSetImpl.EMPTY) ||
+                ArgumentPermissions.checkGroup(plugin, sender, holder, ImmutableContextSetImpl.EMPTY) ||
+                ArgumentPermissions.checkGroup(plugin, sender, group, ImmutableContextSetImpl.EMPTY) ||
                 ArgumentPermissions.checkArguments(plugin, sender, permission, group.getName())) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        if (user.getPrimaryGroup().getStoredValue().orElse(NodeFactory.DEFAULT_GROUP_NAME).equalsIgnoreCase(group.getName())) {
+        if (user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME).equalsIgnoreCase(group.getName())) {
             Message.USER_PRIMARYGROUP_ERROR_ALREADYHAS.send(sender, user.getFormattedDisplayName(), group.getFormattedDisplayName());
             return CommandResult.STATE_ERROR;
         }
 
-        Node node = NodeFactory.buildGroupNode(group.getName()).build();
-        if (!user.hasPermission(NodeMapType.ENDURING, node, StandardNodeEquality.IGNORE_VALUE).asBoolean()) {
+        Node node = Inheritance.builder(group.getName()).build();
+        if (!user.hasNode(DataType.NORMAL, node, NodeEqualityPredicate.IGNORE_VALUE).asBoolean()) {
             Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, user.getFormattedDisplayName(), group.getName());
-            user.setPermission(node);
+            holder.setNode(DataType.NORMAL, node, true);
         }
 
         user.getPrimaryGroup().setStoredValue(group.getName());
         Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user.getFormattedDisplayName(), group.getFormattedDisplayName());
 
-        ExtendedLogEntry.build().actor(sender).acted(user)
-                .action("parent", "switchprimarygroup", group.getName())
+        LoggedAction.build().source(sender).target(user)
+                .description("parent", "switchprimarygroup", group.getName())
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(user, sender, plugin);

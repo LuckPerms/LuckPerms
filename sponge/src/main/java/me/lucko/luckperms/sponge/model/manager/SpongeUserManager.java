@@ -32,12 +32,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
-import me.lucko.luckperms.api.HeldPermission;
-import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
-import me.lucko.luckperms.common.model.UserIdentifier;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.manager.user.AbstractUserManager;
 import me.lucko.luckperms.common.model.manager.user.UserHousekeeper;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
@@ -49,6 +46,10 @@ import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
+
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.node.HeldNode;
+import net.luckperms.api.util.Tristate;
 
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -103,10 +104,8 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
     }
 
     @Override
-    public SpongeUser apply(UserIdentifier id) {
-        return !id.getUsername().isPresent() ?
-                new SpongeUser(id.getUuid(), this.plugin) :
-                new SpongeUser(id.getUuid(), id.getUsername().get(), this.plugin);
+    public SpongeUser apply(UUID id) {
+        return new SpongeUser(id, this.plugin);
     }
 
     @Override
@@ -168,7 +167,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
             return CompletableFuture.completedFuture(false);
         }
 
-        if (isLoaded(UserIdentifier.of(uuid, null))) {
+        if (isLoaded(uuid)) {
             return CompletableFuture.completedFuture(true);
         }
 
@@ -201,7 +200,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
         return CompletableFuture.supplyAsync(() -> {
             ImmutableSet.Builder<String> ids = ImmutableSet.builder();
 
-            getAll().keySet().forEach(uuid -> ids.add(uuid.getUuid().toString()));
+            getAll().keySet().forEach(uuid -> ids.add(uuid.toString()));
             this.plugin.getStorage().getUniqueUsers().join().forEach(uuid -> ids.add(uuid.toString()));
 
             return ids.build();
@@ -213,10 +212,10 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
         return CompletableFuture.supplyAsync(() -> {
             ImmutableMap.Builder<LPSubjectReference, Boolean> ret = ImmutableMap.builder();
 
-            List<HeldPermission<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(Constraint.of(StandardComparison.EQUAL, permission)).join();
-            for (HeldPermission<UUID> holder : lookup) {
-                if (holder.asNode().getFullContexts().equals(ImmutableContextSet.empty())) {
-                    ret.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder().toString()), holder.getValue());
+            List<HeldNode<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(Constraint.of(StandardComparison.EQUAL, permission)).join();
+            for (HeldNode<UUID> holder : lookup) {
+                if (holder.getNode().getContexts().equals(ImmutableContextSetImpl.EMPTY)) {
+                    ret.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder().toString()), holder.getNode().getValue());
                 }
             }
 
@@ -229,10 +228,10 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
         return CompletableFuture.supplyAsync(() -> {
             ImmutableMap.Builder<LPSubjectReference, Boolean> ret = ImmutableMap.builder();
 
-            List<HeldPermission<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(Constraint.of(StandardComparison.EQUAL, permission)).join();
-            for (HeldPermission<UUID> holder : lookup) {
-                if (holder.asNode().getFullContexts().equals(contexts)) {
-                    ret.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder().toString()), holder.getValue());
+            List<HeldNode<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(Constraint.of(StandardComparison.EQUAL, permission)).join();
+            for (HeldNode<UUID> holder : lookup) {
+                if (holder.getNode().getContexts().equals(contexts)) {
+                    ret.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder().toString()), holder.getNode().getValue());
                 }
             }
 
@@ -244,7 +243,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
     public ImmutableMap<LPSubject, Boolean> getLoadedWithPermission(String permission) {
         return getAll().values().stream()
                 .map(SpongeUser::sponge)
-                .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(ImmutableContextSet.empty(), permission)))
+                .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(ImmutableContextSetImpl.EMPTY, permission)))
                 .filter(pair -> pair.getValue() != Tristate.UNDEFINED)
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
     }

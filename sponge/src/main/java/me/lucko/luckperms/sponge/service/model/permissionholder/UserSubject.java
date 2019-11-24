@@ -47,17 +47,17 @@ public final class UserSubject extends PermissionHolderSubject<SpongeUser> imple
 
     @Override
     public String getIdentifier() {
-        return this.parent.getUuid().toString();
+        return this.parent.getUniqueId().toString();
     }
 
     @Override
     public Optional<String> getFriendlyIdentifier() {
-        return this.parent.getName();
+        return this.parent.getUsername();
     }
 
     @Override
     public Optional<CommandSource> getCommandSource() {
-        final UUID uuid = this.parent.getUuid();
+        final UUID uuid = this.parent.getUniqueId();
         return Sponge.getServer().getPlayer(uuid).map(Function.identity());
     }
 

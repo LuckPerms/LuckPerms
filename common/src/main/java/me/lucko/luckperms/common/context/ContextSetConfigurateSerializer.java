@@ -27,25 +27,28 @@ package me.lucko.luckperms.common.context;
 
 import com.google.common.base.Preconditions;
 
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
+
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.MutableContextSet;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.SimpleConfigurationNode;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public final class ContextSetConfigurateSerializer {
     private ContextSetConfigurateSerializer() {}
 
     public static ConfigurationNode serializeContextSet(ContextSet contextSet) {
         ConfigurationNode data = SimpleConfigurationNode.root();
-        Map<String, Collection<String>> map = contextSet.toMultimap().asMap();
+        Map<String, Set<String>> map = contextSet.toMap();
 
-        for (Map.Entry<String, Collection<String>> entry : map.entrySet()) {
+        for (Map.Entry<String, Set<String>> entry : map.entrySet()) {
             List<String> values = new ArrayList<>(entry.getValue());
             int size = values.size();
 
@@ -64,10 +67,10 @@ public final class ContextSetConfigurateSerializer {
         Map<Object, ? extends ConfigurationNode> dataMap = data.getChildrenMap();
 
         if (dataMap.isEmpty()) {
-            return ContextSet.empty();
+            return ImmutableContextSetImpl.EMPTY;
         }
 
-        MutableContextSet map = MutableContextSet.create();
+        MutableContextSet map = new MutableContextSetImpl();
         for (Map.Entry<Object, ? extends ConfigurationNode> e : dataMap.entrySet()) {
             String k = e.getKey().toString();
             ConfigurationNode v = e.getValue();

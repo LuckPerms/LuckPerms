@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.sponge;
 
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
@@ -33,6 +32,7 @@ import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 
 import net.kyori.text.Component;
 import net.kyori.text.adapter.spongeapi.TextAdapter;
+import net.luckperms.api.util.Tristate;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
@@ -54,7 +54,7 @@ public class SpongeSenderFactory extends SenderFactory<CommandSource> {
     }
 
     @Override
-    protected UUID getUuid(CommandSource source) {
+    protected UUID getUniqueId(CommandSource source) {
         if (source instanceof Player) {
             return ((Player) source).getUniqueId();
         }

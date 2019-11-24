@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.common.plugin;
 
-import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.ApiRegistrationUtil;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
+import me.lucko.luckperms.common.api.MinimalApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.config.AbstractConfiguration;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.event.EventFactory;
+import me.lucko.luckperms.common.extension.SimpleExtensionManager;
 import me.lucko.luckperms.common.inheritance.InheritanceHandler;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -53,7 +54,11 @@ import me.lucko.luckperms.common.storage.implementation.file.FileWatcher;
 import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
-import me.lucko.luckperms.common.web.Bytebin;
+import me.lucko.luckperms.common.web.BytebinClient;
+
+import net.luckperms.api.LuckPerms;
+
+import okhttp3.OkHttpClient;
 
 import java.io.IOException;
 import java.util.EnumSet;
@@ -72,7 +77,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private LogDispatcher logDispatcher;
     private LuckPermsConfiguration configuration;
     private LocaleManager localeManager;
-    private Bytebin bytebin;
+    private BytebinClient bytebin;
     private FileWatcher fileWatcher = null;
     private Storage storage;
     private InternalMessagingService messagingService = null;
@@ -81,6 +86,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private CalculatorFactory calculatorFactory;
     private LuckPermsApiProvider apiProvider;
     private EventFactory eventFactory;
+    private SimpleExtensionManager extensionManager;
 
     /**
      * Performs the initial actions to load the plugin
@@ -98,6 +104,9 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         // send the startup banner
         displayBanner(getConsoleSender());
 
+        // minimal api
+        ApiRegistrationUtil.registerProvider(MinimalApiProvider.INSTANCE);
+
         // load some utilities early
         this.verboseHandler = new VerboseHandler(getBootstrap().getScheduler());
         this.permissionRegistry = new PermissionRegistry(getBootstrap().getScheduler());
@@ -112,7 +121,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         this.localeManager.tryLoad(this, getBootstrap().getConfigDirectory().resolve("lang.yml"));
 
         // setup a bytebin instance
-        this.bytebin = new Bytebin(getConfiguration().get(ConfigKeys.BYTEBIN_URL));
+        this.bytebin = new BytebinClient(new OkHttpClient(), getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
 
         // now the configuration is loaded, we can create a storage factory and load initial dependencies
         StorageFactory storageFactory = new StorageFactory(this);
@@ -165,6 +174,10 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         ApiRegistrationUtil.registerProvider(this.apiProvider);
         registerApiOnPlatform(this.apiProvider);
 
+        // setup extension manager
+        this.extensionManager = new SimpleExtensionManager(this);
+        this.extensionManager.loadExtensions(getBootstrap().getConfigDirectory().resolve("extensions"));
+
         // schedule update tasks
         int mins = getConfiguration().get(ConfigKeys.SYNC_TIME);
         if (mins > 0) {
@@ -192,6 +205,9 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         // shutdown permission vault and verbose handler tasks
         this.permissionRegistry.stop();
         this.verboseHandler.stop();
+
+        // unload extensions
+        this.extensionManager.close();
 
         // remove any hooks into the platform
         removePlatformHooks();
@@ -243,7 +259,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     protected abstract void setupContextManager();
     protected abstract void setupPlatformHooks();
     protected abstract AbstractEventBus provideEventBus(LuckPermsApiProvider apiProvider);
-    protected abstract void registerApiOnPlatform(LuckPermsApi api);
+    protected abstract void registerApiOnPlatform(LuckPerms api);
     protected abstract void registerHousekeepingTasks();
     protected abstract void performFinalSetup();
 
@@ -292,7 +308,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public Bytebin getBytebin() {
+    public BytebinClient getBytebin() {
         return this.bytebin;
     }
 
@@ -329,6 +345,11 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     @Override
     public LuckPermsApiProvider getApiProvider() {
         return this.apiProvider;
+    }
+
+    @Override
+    public SimpleExtensionManager getExtensionManager() {
+        return this.extensionManager;
     }
 
     @Override

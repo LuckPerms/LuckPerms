@@ -25,55 +25,49 @@
 
 package me.lucko.luckperms.common.api;
 
-import me.lucko.luckperms.api.ActionLogger;
-import me.lucko.luckperms.api.LPConfiguration;
-import me.lucko.luckperms.api.LuckPermsApi;
-import me.lucko.luckperms.api.MessagingService;
-import me.lucko.luckperms.api.NodeFactory;
-import me.lucko.luckperms.api.Storage;
-import me.lucko.luckperms.api.UuidCache;
-import me.lucko.luckperms.api.context.ContextManager;
-import me.lucko.luckperms.api.event.EventBus;
-import me.lucko.luckperms.api.manager.CachedDataManager;
-import me.lucko.luckperms.api.manager.GroupManager;
-import me.lucko.luckperms.api.manager.TrackManager;
-import me.lucko.luckperms.api.manager.UserManager;
-import me.lucko.luckperms.api.messenger.MessengerProvider;
-import me.lucko.luckperms.api.metastacking.MetaStackFactory;
-import me.lucko.luckperms.api.platform.PlatformInfo;
 import me.lucko.luckperms.common.api.implementation.ApiActionLogger;
-import me.lucko.luckperms.common.api.implementation.ApiCachedDataManager;
 import me.lucko.luckperms.common.api.implementation.ApiContextManager;
 import me.lucko.luckperms.common.api.implementation.ApiGroupManager;
 import me.lucko.luckperms.common.api.implementation.ApiMessagingService;
 import me.lucko.luckperms.common.api.implementation.ApiMetaStackFactory;
-import me.lucko.luckperms.common.api.implementation.ApiNodeFactory;
-import me.lucko.luckperms.common.api.implementation.ApiPlatformInfo;
+import me.lucko.luckperms.common.api.implementation.ApiNodeBuilderRegistry;
+import me.lucko.luckperms.common.api.implementation.ApiPlatform;
 import me.lucko.luckperms.common.api.implementation.ApiTrackManager;
 import me.lucko.luckperms.common.api.implementation.ApiUserManager;
-import me.lucko.luckperms.common.api.implementation.NoopUuidCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.actionlog.ActionLogger;
+import net.luckperms.api.context.ContextManager;
+import net.luckperms.api.event.EventBus;
+import net.luckperms.api.messaging.MessagingService;
+import net.luckperms.api.messenger.MessengerProvider;
+import net.luckperms.api.metastacking.MetaStackFactory;
+import net.luckperms.api.model.group.GroupManager;
+import net.luckperms.api.model.user.UserManager;
+import net.luckperms.api.node.NodeBuilderRegistry;
+import net.luckperms.api.platform.Platform;
+import net.luckperms.api.platform.PluginMetadata;
+import net.luckperms.api.track.TrackManager;
+
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
  * Implements the LuckPerms API using the plugin instance
  */
-public class LuckPermsApiProvider implements LuckPermsApi {
+public class LuckPermsApiProvider implements LuckPerms {
 
     private final LuckPermsPlugin plugin;
 
-    private final PlatformInfo platformInfo;
+    private final ApiPlatform platform;
     private final UserManager userManager;
     private final GroupManager groupManager;
     private final TrackManager trackManager;
-    private final CachedDataManager cachedDataManager;
     private final ActionLogger actionLogger;
     private final ContextManager contextManager;
     private final MetaStackFactory metaStackFactory;
@@ -81,19 +75,28 @@ public class LuckPermsApiProvider implements LuckPermsApi {
     public LuckPermsApiProvider(LuckPermsPlugin plugin) {
         this.plugin = plugin;
 
-        this.platformInfo = new ApiPlatformInfo(plugin);
+        this.platform = new ApiPlatform(plugin);
         this.userManager = new ApiUserManager(plugin, plugin.getUserManager());
         this.groupManager = new ApiGroupManager(plugin, plugin.getGroupManager());
         this.trackManager = new ApiTrackManager(plugin, plugin.getTrackManager());
-        this.cachedDataManager = new ApiCachedDataManager(plugin.getUserManager(), plugin.getGroupManager());
         this.actionLogger = new ApiActionLogger(plugin);
         this.contextManager = new ApiContextManager(plugin, plugin.getContextManager());
         this.metaStackFactory = new ApiMetaStackFactory(plugin);
     }
 
     @Override
-    public @NonNull PlatformInfo getPlatformInfo() {
-        return this.platformInfo;
+    public @NonNull String getServerName() {
+        return this.plugin.getConfiguration().get(ConfigKeys.SERVER);
+    }
+
+    @Override
+    public @NonNull Platform getPlatform() {
+        return this.platform;
+    }
+
+    @Override
+    public @NonNull PluginMetadata getPluginMetadata() {
+        return this.platform;
     }
 
     @Override
@@ -112,11 +115,6 @@ public class LuckPermsApiProvider implements LuckPermsApi {
     }
 
     @Override
-    public @NonNull CachedDataManager getCachedDataManager() {
-        return this.cachedDataManager;
-    }
-
-    @Override
     public @NonNull CompletableFuture<Void> runUpdateTask() {
         return this.plugin.getSyncTaskBuffer().request();
     }
@@ -124,16 +122,6 @@ public class LuckPermsApiProvider implements LuckPermsApi {
     @Override
     public @NonNull EventBus getEventBus() {
         return this.plugin.getEventFactory().getEventBus();
-    }
-
-    @Override
-    public @NonNull LPConfiguration getConfiguration() {
-        return this.plugin.getConfiguration().getDelegate();
-    }
-
-    @Override
-    public @NonNull Storage getStorage() {
-        return this.plugin.getStorage().getApiDelegate();
     }
 
     @Override
@@ -153,25 +141,14 @@ public class LuckPermsApiProvider implements LuckPermsApi {
         return this.actionLogger;
     }
 
-    @Deprecated
-    @Override
-    public @NonNull UuidCache getUuidCache() {
-        return NoopUuidCache.INSTANCE;
-    }
-
     @Override
     public @NonNull ContextManager getContextManager() {
         return this.contextManager;
     }
 
     @Override
-    public @NonNull Collection<String> getKnownPermissions() {
-        return this.plugin.getPermissionRegistry().rootAsList();
-    }
-
-    @Override
-    public @NonNull NodeFactory getNodeFactory() {
-        return ApiNodeFactory.INSTANCE;
+    public @NonNull NodeBuilderRegistry getNodeBuilderRegistry() {
+        return ApiNodeBuilderRegistry.INSTANCE;
     }
 
     @Override

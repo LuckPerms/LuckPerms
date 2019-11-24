@@ -1,10 +1,6 @@
 rootProject.name = 'luckperms'
-
-// set the artifact id for the API to 'luckperms-api'
-include 'api'
-findProject(':api')?.name = 'luckperms-api'
-
 include (
+        'api',
         'common',
         'bukkit',
         'bukkit-legacy',

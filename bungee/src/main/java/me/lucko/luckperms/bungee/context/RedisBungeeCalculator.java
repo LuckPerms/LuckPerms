@@ -28,8 +28,10 @@ package me.lucko.luckperms.bungee.context;
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
 
-import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.api.context.StaticContextCalculator;
+import net.luckperms.api.context.ContextConsumer;
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.context.StaticContextCalculator;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -37,11 +39,24 @@ public class RedisBungeeCalculator implements StaticContextCalculator {
     private static final String PROXY_KEY = "proxy";
 
     @Override
-    public @NonNull MutableContextSet giveApplicableContext(@NonNull MutableContextSet accumulator) {
+    public void calculate(@NonNull ContextConsumer consumer) {
         RedisBungeeAPI redisBungee = RedisBungee.getApi();
         if (redisBungee != null) {
-            accumulator.add(PROXY_KEY, redisBungee.getServerId());
+            consumer.accept(PROXY_KEY, redisBungee.getServerId());
         }
-        return accumulator;
+    }
+
+    @Override
+    public ContextSet estimatePotentialContexts() {
+        RedisBungeeAPI redisBungee = RedisBungee.getApi();
+        if (redisBungee == null) {
+            return ImmutableContextSet.empty();
+        }
+
+        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        for (String server : redisBungee.getAllServers()) {
+            builder.add(PROXY_KEY, server);
+        }
+        return builder.build();
     }
 }

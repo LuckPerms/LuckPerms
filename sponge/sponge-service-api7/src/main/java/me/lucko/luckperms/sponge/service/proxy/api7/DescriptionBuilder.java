@@ -25,13 +25,14 @@
 
 package me.lucko.luckperms.sponge.service.proxy.api7;
 
-import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.ProxiedServiceObject;
+
+import net.luckperms.api.util.Tristate;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -79,7 +80,7 @@ public final class DescriptionBuilder implements PermissionDescription.Builder, 
     @Override
     public PermissionDescription.@NonNull Builder assign(@NonNull String role, boolean value) {
         Objects.requireNonNull(role, "role");
-        this.roles.put(role, Tristate.fromBoolean(value));
+        this.roles.put(role, Tristate.of(value));
         return this;
     }
 
@@ -95,7 +96,7 @@ public final class DescriptionBuilder implements PermissionDescription.Builder, 
         LPSubjectCollection subjects = this.service.getCollection(PermissionService.SUBJECTS_ROLE_TEMPLATE);
         for (Map.Entry<String, Tristate> assignment : this.roles.entrySet()) {
             LPSubject roleSubject = subjects.loadSubject(assignment.getKey()).join();
-            roleSubject.getTransientSubjectData().setPermission(ContextSet.empty(), this.id, assignment.getValue());
+            roleSubject.getTransientSubjectData().setPermission(ImmutableContextSetImpl.EMPTY, this.id, assignment.getValue());
         }
 
         // null stuff so this instance can be reused

@@ -33,9 +33,11 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings("deprecation")
 public final class TextUtils {
     private TextUtils() {}
+
+    public static final char SECTION_CHAR = '\u00A7'; // §
+    public static final char AMPERSAND_CHAR = '&';
 
     public static String joinNewline(String... strings) {
         return joinNewline(Arrays.stream(strings));
@@ -46,19 +48,19 @@ public final class TextUtils {
     }
 
     public static TextComponent fromLegacy(String input, char character) {
-        return LegacyComponentSerializer.INSTANCE.deserialize(input, character);
+        return LegacyComponentSerializer.legacy().deserialize(input, character);
     }
 
     public static TextComponent fromLegacy(String input) {
-        return LegacyComponentSerializer.INSTANCE.deserialize(input);
+        return LegacyComponentSerializer.legacy().deserialize(input);
     }
 
     public static String toLegacy(Component component, char character) {
-        return LegacyComponentSerializer.INSTANCE.serialize(component, character);
+        return LegacyComponentSerializer.legacy().serialize(component, character);
     }
 
     public static String toLegacy(Component component) {
-        return LegacyComponentSerializer.INSTANCE.serialize(component);
+        return LegacyComponentSerializer.legacy().serialize(component);
     }
 
     public static String rewritePlaceholders(String input) {

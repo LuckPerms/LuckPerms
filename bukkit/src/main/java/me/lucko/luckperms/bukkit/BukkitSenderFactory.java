@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.bukkit;
 
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.compat.CraftBukkitUtil;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -34,6 +33,7 @@ import me.lucko.luckperms.common.util.TextUtils;
 
 import net.kyori.text.Component;
 import net.kyori.text.adapter.bukkit.TextAdapter;
+import net.luckperms.api.util.Tristate;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -57,7 +57,7 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
     }
 
     @Override
-    protected UUID getUuid(CommandSender sender) {
+    protected UUID getUniqueId(CommandSender sender) {
         if (sender instanceof Player) {
             return ((Player) sender).getUniqueId();
         }
@@ -91,7 +91,7 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
         boolean isSet = sender.isPermissionSet(node);
         boolean val = sender.hasPermission(node);
 
-        return !isSet ? val ? Tristate.TRUE : Tristate.UNDEFINED : Tristate.fromBoolean(val);
+        return !isSet ? val ? Tristate.TRUE : Tristate.UNDEFINED : Tristate.of(val);
     }
 
     @Override

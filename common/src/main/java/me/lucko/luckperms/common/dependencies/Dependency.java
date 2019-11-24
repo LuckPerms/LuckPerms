@@ -46,41 +46,41 @@ public enum Dependency {
     ASM(
             "org.ow2.asm",
             "asm",
-            "6.2.1",
-            "FGDbbDPMmchOXLMORrAX5NHMmn+8F0EB1vhIKbtkwIU="
+            "7.1",
+            "SrL6K20sycyx6qBeoynEB7R7E+0pFfYvjEuMyWJY1N4="
     ),
     ASM_COMMONS(
             "org.ow2.asm",
             "asm-commons",
-            "6.2.1",
-            "P1eNMe8w+UttH0SBL0H+T5inzUKvNTNfXUhmqzuQGGU="
+            "7.1",
+            "5VkEidjxmE2Fv+q9Oxc3TFnCiuCdSOxKDrvQGVns01g="
     ),
     JAR_RELOCATOR(
             "me.lucko",
             "jar-relocator",
-            "1.3",
-            "mmz3ltQbS8xXGA2scM0ZH6raISlt4nukjCiU2l9Jxfs="
+            "1.4",
+            "1RsiF3BiVztjlfTA+svDCuoDSGFuSpTZYHvUK8yBx8I="
     ),
 
     TEXT(
             "net{}kyori",
             "text-api",
-            "3.0.0",
-            "/d7o/eZkZx/naJE+pMg1KqIzL8TWxWjA4yxjv8/10Cg=",
+            "3.0.2",
+            "seZnPElZhfba3XO8/LLUWQHE35kqVM02HpswEVcJqz0=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_SERIALIZER_GSON(
             "net{}kyori",
             "text-serializer-gson",
-            "3.0.0",
-            "zc1ePBBRCjSoNQiNqsBL+6TYRmaUPyEZtj1LhCtViv0=",
+            "3.0.2",
+            "8gJFpnqSHp762TWXn3x5ICLiKg2KgEwEA1FFyOtJ92Y=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_SERIALIZER_LEGACY(
             "net{}kyori",
             "text-serializer-legacy",
-            "3.0.0",
-            "Zns1sKvALAt3Sn0Px+vENv1XQ9y80E1cSzzDN46C9rQ=",
+            "3.0.2",
+            "ks8pZV6ZUHWtwD93Xynyg0KaAMs8CLa61Zb8CaLPsdM=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_ADAPTER_BUKKIT(
@@ -114,22 +114,22 @@ public enum Dependency {
     CAFFEINE(
             "com{}github{}ben-manes{}caffeine",
             "caffeine",
-            "2.7.0",
-            "Fw8phtcHwN+UIo9X1SV7fxH4hv1CtTthMWp0mKx+B/8=",
+            "2.8.0",
+            "sRB6QJe+RRWpI6Vbxj2gTkEeaWSqBFvs4bx6y4SHLtc=",
             Relocation.of("caffeine", "com{}github{}benmanes{}caffeine")
     ),
     OKIO(
             "com{}squareup{}" + RelocationHelper.OKIO_STRING,
             RelocationHelper.OKIO_STRING,
-            "1.17.3",
-            "yxja86IIrjirnYJUP/uT4fGF6GPIoOUsw3L/46WPVUk=",
+            "1.17.4",
+            "14+sWIRY/AmebILpH+XwN1xnQ0YmRRo6d3csZdnu6Fs=",
             Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
     ),
     OKHTTP(
             "com{}squareup{}" + RelocationHelper.OKHTTP3_STRING,
             "okhttp",
-            "3.14.1",
-            "WmvmkWUwdqpk3NNh0uRF5AYLS13IgrH2uknnnd/D5WM=",
+            "3.14.4",
+            "WMyzdU8VzELfjxaHs7qGMw7ZfH5S5cPoP+ETG4DOPg8=",
             Relocation.of(RelocationHelper.OKHTTP3_STRING, RelocationHelper.OKHTTP3_STRING),
             Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
     ),
@@ -143,15 +143,15 @@ public enum Dependency {
     MARIADB_DRIVER(
             "org{}mariadb{}jdbc",
             "mariadb-java-client",
-            "2.4.0",
-            "G346tblA35aJS8q1a3dQVZdU7Q7isGMzhwftoz6MZqU=",
+            "2.5.1",
+            "/AxG0o0JnIme7hnDTO2WEUxgF1yXPiWPhMKermXAzZE=",
             Relocation.of("mariadb", "org{}mariadb{}jdbc")
     ),
     MYSQL_DRIVER(
             "mysql",
             "mysql-connector-java",
-            "5.1.47",
-            "5PhASPOSsrN7r0ao1QjkuN2uKG0gnvmVueEYhSAcGSM=",
+            "5.1.48",
+            "VuJsqqOCH1rkr0T5x09mz4uE6gFRatOAPLsOkEm27Kg=",
             Relocation.of("mysql", "com{}mysql")
     ),
     POSTGRESQL_DRIVER(
@@ -164,43 +164,43 @@ public enum Dependency {
     H2_DRIVER(
             "com.h2database",
             "h2",
-            "1.4.198",
-            "Mt1rFJy3IqpMLdTUCnSpzUHjKsWaTnVaZuV1NmDWHUY="
+            "1.4.200",
+            "OtmsS2qunNnTrBxEdGXh7QYBm4UbiT3WqNdt222FvKY="
             // we don't apply relocations to h2 - it gets loaded via
             // an isolated classloader
     ),
     SQLITE_DRIVER(
             "org.xerial",
             "sqlite-jdbc",
-            "3.25.2",
-            "pF2mGr7WFWilM/3s4SUJMYCCjt6w1Lb21XLgz0V0ZfY="
+            "3.28.0",
+            "k3hOVtv1RiXgbJks+D9w6cG93Vxq0dPwEwjIex2WG2A="
             // we don't apply relocations to sqlite - it gets loaded via
             // an isolated classloader
     ),
     HIKARI(
             "com{}zaxxer",
             "HikariCP",
-            "3.3.1",
-            "SIaA1yzGHOZNpZNoIt903f5ScJrIB3u8CT2cNkaLcy0=",
+            "3.4.1",
+            "uCbLTp8iz699ZJS3TxSAf4j9UfrikmgxvTHT0+N/Bck=",
             Relocation.of("hikari", "com{}zaxxer{}hikari")
     ),
     SLF4J_SIMPLE(
             "org.slf4j",
             "slf4j-simple",
-            "1.7.25",
-            "CWbob/+lvlLT2ee4ndZ02YoD7tCkVPuvfBvZSTvZ2HQ="
+            "1.7.28",
+            "YO863GwYR8RuGr16gGIlWqPizh2ywI37H9Q/GkYgdzY="
     ),
     SLF4J_API(
             "org.slf4j",
             "slf4j-api",
-            "1.7.25",
-            "GMSgCV1cHaa4F1kudnuyPSndL1YK1033X/OWHb3iW3k="
+            "1.7.28",
+            "+25PZ6KkaJ4+cTWE2xel0QkMHr5u7DDp4DSabuEYFB4="
     ),
     MONGODB_DRIVER(
             "org.mongodb",
             "mongo-java-driver",
-            "3.10.1",
-            "IGjdjTH4VjqnqGUdVe8u+dKfzKkpCG1NR11TE8ieCdU=",
+            "3.11.1",
+            "tIWEOrQegZK3TT7mNV4ZnjkpW4ViwPiFEpD6yYPyFmE=",
             Relocation.of("mongodb", "com{}mongodb"),
             Relocation.of("bson", "org{}bson")
     ),
@@ -216,8 +216,8 @@ public enum Dependency {
     COMMONS_POOL_2(
             "org.apache.commons",
             "commons-pool2",
-            "2.6.1",
-            "4tb0CE+KGA3mbHcAND/orToKqE8ssFYe20F/4f1BqhU=",
+            "2.7.0",
+            "a1TGdcc4fhV9KMcJiHPy53LCI8ejW8mxNxc2fJdToeQ=",
             Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
     ),
     CONFIGURATE_CORE(

@@ -32,7 +32,7 @@ import com.velocitypowered.api.permission.PermissionSubject;
 import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.proxy.Player;
 
-import me.lucko.luckperms.common.context.ContextsSupplier;
+import me.lucko.luckperms.common.context.QueryOptionsSupplier;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
@@ -41,12 +41,12 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public class PlayerPermissionProvider implements PermissionProvider, PermissionFunction {
     private final Player player;
     private final User user;
-    private final ContextsSupplier contextsSupplier;
+    private final QueryOptionsSupplier queryOptionsSupplier;
 
-    public PlayerPermissionProvider(Player player, User user, ContextsSupplier contextsSupplier) {
+    public PlayerPermissionProvider(Player player, User user, QueryOptionsSupplier queryOptionsSupplier) {
         this.player = player;
         this.user = user;
-        this.contextsSupplier = contextsSupplier;
+        this.queryOptionsSupplier = queryOptionsSupplier;
     }
 
     @Override
@@ -57,6 +57,6 @@ public class PlayerPermissionProvider implements PermissionProvider, PermissionF
 
     @Override
     public @NonNull Tristate getPermissionValue(@NonNull String permission) {
-        return CompatibilityUtil.convertTristate(this.user.getCachedData().getPermissionData(this.contextsSupplier.getContexts()).getPermissionValue(permission, PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK).result());
+        return CompatibilityUtil.convertTristate(this.user.getCachedData().getPermissionData(this.queryOptionsSupplier.getQueryOptions()).checkPermission(permission, PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK).result());
     }
 }

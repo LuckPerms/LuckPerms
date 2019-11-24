@@ -26,14 +26,22 @@
 package me.lucko.luckperms.velocity.context;
 
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.context.ContextCalculator;
-import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.velocity.LPVelocityPlugin;
+
+import net.luckperms.api.context.ContextCalculator;
+import net.luckperms.api.context.ContextConsumer;
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.ImmutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class BackendServerCalculator implements ContextCalculator<Player> {
 
@@ -41,20 +49,29 @@ public class BackendServerCalculator implements ContextCalculator<Player> {
         return player.getCurrentServer().isPresent() ? player.getCurrentServer().get().getServerInfo().getName().toLowerCase() : null;
     }
 
-    private final LuckPermsPlugin plugin;
+    private final LPVelocityPlugin plugin;
 
-    public BackendServerCalculator(LuckPermsPlugin plugin) {
+    public BackendServerCalculator(LPVelocityPlugin plugin) {
         this.plugin = plugin;
     }
 
     @Override
-    public @NonNull MutableContextSet giveApplicableContext(@NonNull Player subject, @NonNull MutableContextSet accumulator) {
+    public void calculate(@NonNull Player subject, @NonNull ContextConsumer consumer) {
+        Set<String> seen = new HashSet<>();
         String server = getServer(subject);
-        while (server != null && !accumulator.has(Contexts.WORLD_KEY, server)) {
-            accumulator.add(Contexts.WORLD_KEY, server);
+        while (server != null && seen.add(server)) {
+            consumer.accept(DefaultContextKeys.WORLD_KEY, server);
             server = this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(server, server).toLowerCase();
         }
+    }
 
-        return accumulator;
+    @Override
+    public ContextSet estimatePotentialContexts() {
+        Collection<RegisteredServer> servers = this.plugin.getBootstrap().getProxy().getAllServers();
+        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        for (RegisteredServer server : servers) {
+            builder.add(DefaultContextKeys.WORLD_KEY, server.getServerInfo().getName().toLowerCase());
+        }
+        return builder.build();
     }
 }

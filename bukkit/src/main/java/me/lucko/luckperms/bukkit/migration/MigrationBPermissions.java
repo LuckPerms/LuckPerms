@@ -31,8 +31,6 @@ import de.bananaco.bpermissions.api.Permission;
 import de.bananaco.bpermissions.api.World;
 import de.bananaco.bpermissions.api.WorldManager;
 
-import me.lucko.luckperms.api.ChatMetaType;
-import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -43,13 +41,21 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
-import me.lucko.luckperms.common.node.model.NodeTypes;
+import me.lucko.luckperms.common.model.manager.group.GroupManager;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
+import me.lucko.luckperms.common.node.types.Inheritance;
+import me.lucko.luckperms.common.node.types.Meta;
+import me.lucko.luckperms.common.node.types.Prefix;
+import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.ProgressLogger;
+
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.event.cause.CreationCause;
+import net.luckperms.api.model.data.DataType;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -125,17 +131,17 @@ public class MigrationBPermissions extends SubCommand<Object> {
 
         // Migrate one world at a time.
         log.log("Starting world migration.");
-        Iterators.iterate(worldManager.getAllWorlds(), world -> {
+        Iterators.tryIterate(worldManager.getAllWorlds(), world -> {
             log.log("Migrating world: " + world.getName());
 
             // Migrate all groups
             log.log("Starting group migration in world " + world.getName() + ".");
             AtomicInteger groupCount = new AtomicInteger(0);
 
-            Iterators.iterate(world.getAll(CalculableType.GROUP), group -> {
+            Iterators.tryIterate(world.getAll(CalculableType.GROUP), group -> {
                 String groupName = MigrationUtils.standardizeName(group.getName());
                 if (group.getName().equalsIgnoreCase(world.getDefaultGroup())) {
-                    groupName = NodeFactory.DEFAULT_GROUP_NAME;
+                    groupName = GroupManager.DEFAULT_GROUP_NAME;
                 }
 
                 // Make a LuckPerms group for the one being migrated.
@@ -154,7 +160,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
             // Migrate all users
             log.log("Starting user migration in world " + world.getName() + ".");
             AtomicInteger userCount = new AtomicInteger(0);
-            Iterators.iterate(world.getAll(CalculableType.USER), user -> {
+            Iterators.tryIterate(world.getAll(CalculableType.USER), user -> {
                 // There is no mention of UUIDs in the API. I assume that name = uuid. idk?
                 UUID uuid = BukkitUuids.lookupUuid(log, user.getName());
                 if (uuid == null) {
@@ -167,7 +173,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 migrateHolder(world, user, lpUser);
 
                 plugin.getStorage().saveUser(lpUser);
-                plugin.getUserManager().cleanup(lpUser);
+                plugin.getUserManager().getHouseKeeper().cleanup(lpUser.getUniqueId());
 
                 log.logProgress("Migrated {} users so far.", userCount.incrementAndGet(), ProgressLogger.DEFAULT_NOTIFY_FREQUENCY);
             });
@@ -185,7 +191,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
             if (p.name().isEmpty()) {
                 continue;
             }
-            holder.setPermission(NodeFactory.make(p.name(), p.isTrue(), "global", world.getName()));
+            holder.setNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(p.name()).value(p.isTrue()).withContext(DefaultContextKeys.SERVER_KEY, "global").withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
 
             // Include any child permissions
             for (Map.Entry<String, Boolean> child : p.getChildren().entrySet()) {
@@ -193,7 +199,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                     continue;
                 }
 
-                holder.setPermission(NodeFactory.make(child.getKey(), child.getValue(), "global", world.getName()));
+                holder.setNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(child.getKey()).value((boolean) child.getValue()).withContext(DefaultContextKeys.SERVER_KEY, "global").withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
             }
         }
 
@@ -201,10 +207,10 @@ public class MigrationBPermissions extends SubCommand<Object> {
         c.getGroups().forEach(parent -> {
             String parentName = MigrationUtils.standardizeName(parent.getName());
             if (parent.getName().equalsIgnoreCase(world.getDefaultGroup())) {
-                parentName = NodeFactory.DEFAULT_GROUP_NAME;
+                parentName = GroupManager.DEFAULT_GROUP_NAME;
             }
 
-            holder.setPermission(NodeFactory.make(NodeFactory.groupNode(parentName), true, "global", world.getName()));
+            holder.setNode(DataType.NORMAL, Inheritance.builder(parentName).value(true).withContext(DefaultContextKeys.SERVER_KEY, "global").withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
         });
 
         // Migrate existing meta
@@ -213,13 +219,17 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 continue;
             }
 
-            if (meta.getKey().equalsIgnoreCase(NodeTypes.PREFIX_KEY) || meta.getKey().equalsIgnoreCase(NodeTypes.SUFFIX_KEY)) {
-                ChatMetaType type = ChatMetaType.valueOf(meta.getKey().toUpperCase());
-                holder.setPermission(NodeFactory.buildChatMetaNode(type, c.getPriority(), meta.getValue()).setWorld(world.getName()).build());
+            if (meta.getKey().equalsIgnoreCase("prefix")) {
+                holder.setNode(DataType.NORMAL, Prefix.builder(meta.getValue(), c.getPriority()).withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
                 continue;
             }
 
-            holder.setPermission(NodeFactory.buildMetaNode(meta.getKey(), meta.getValue()).setWorld(world.getName()).build());
+            if (meta.getKey().equalsIgnoreCase("suffix")) {
+                holder.setNode(DataType.NORMAL, Suffix.builder(meta.getValue(), c.getPriority()).withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
+                continue;
+            }
+
+            holder.setNode(DataType.NORMAL, Meta.builder(meta.getKey(), meta.getValue()).withContext(DefaultContextKeys.WORLD_KEY, world.getName()).build(), true);
         }
     }
 }

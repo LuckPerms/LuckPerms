@@ -25,12 +25,13 @@
 
 package me.lucko.luckperms.sponge.service;
 
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
+
+import net.luckperms.api.model.data.DataType;
 
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -75,8 +76,8 @@ public final class ProxyFactory {
     public static SubjectData toSponge(LPSubjectData luckPerms) {
         LPSubject parentSubject = luckPerms.getParentSubject();
         return IS_API_7 ?
-                new me.lucko.luckperms.sponge.service.proxy.api7.SubjectDataProxy(parentSubject.getService(), parentSubject.toReference(), luckPerms.getType() == NodeMapType.ENDURING) :
-                new me.lucko.luckperms.sponge.service.proxy.api6.SubjectDataProxy(parentSubject.getService(), parentSubject.toReference(), luckPerms.getType() == NodeMapType.ENDURING);
+                new me.lucko.luckperms.sponge.service.proxy.api7.SubjectDataProxy(parentSubject.getService(), parentSubject.toReference(), luckPerms.getType() == DataType.NORMAL) :
+                new me.lucko.luckperms.sponge.service.proxy.api6.SubjectDataProxy(parentSubject.getService(), parentSubject.toReference(), luckPerms.getType() == DataType.NORMAL);
     }
 
     public static PermissionDescription toSponge(LPPermissionDescription luckPerms) {

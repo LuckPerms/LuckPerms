@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.event.model;
 
-import me.lucko.luckperms.api.event.source.Source;
+import net.luckperms.api.event.source.Source;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

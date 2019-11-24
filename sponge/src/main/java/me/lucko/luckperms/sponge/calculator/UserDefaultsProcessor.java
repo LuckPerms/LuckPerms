@@ -25,14 +25,15 @@
 
 package me.lucko.luckperms.sponge.calculator;
 
-import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 
+import net.luckperms.api.query.QueryOptions;
+
 public class UserDefaultsProcessor extends DefaultsProcessor implements PermissionProcessor {
-    public UserDefaultsProcessor(LPPermissionService service, ImmutableContextSet contexts) {
-        super(service, contexts);
+    public UserDefaultsProcessor(LPPermissionService service, QueryOptions queryOptions) {
+        super(service, queryOptions);
     }
 
     @Override

@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.model.manager;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.cache.LoadingMap;
-import me.lucko.luckperms.common.model.Identifiable;
 
 import java.util.Map;
 
@@ -39,7 +38,7 @@ import java.util.Map;
  * @param <C> the super class being managed
  * @param <T> the implementation class this manager is "managing"
  */
-public abstract class AbstractManager<I, C extends Identifiable<I>, T extends C> implements Manager<I, C, T> {
+public abstract class AbstractManager<I, C, T extends C> implements Manager<I, C, T> {
 
     private final LoadingMap<I, T> objects = LoadingMap.of(this);
 
@@ -67,13 +66,6 @@ public abstract class AbstractManager<I, C extends Identifiable<I>, T extends C>
     public void unload(I id) {
         if (id != null) {
             this.objects.remove(sanitizeIdentifier(id));
-        }
-    }
-
-    @Override
-    public void unload(C object) {
-        if (object != null) {
-            unload(object.getId());
         }
     }
 

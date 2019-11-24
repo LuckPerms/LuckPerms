@@ -25,14 +25,14 @@
 
 package me.lucko.luckperms.common.event;
 
-import me.lucko.luckperms.api.event.EventBus;
-import me.lucko.luckperms.api.event.EventHandler;
-import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.event.EventSubscriber;
 import net.kyori.event.SimpleEventBus;
+import net.luckperms.api.event.EventBus;
+import net.luckperms.api.event.EventSubscription;
+import net.luckperms.api.event.LuckPermsEvent;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -89,21 +89,21 @@ public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
     }
 
     @Override
-    public @NonNull <T extends LuckPermsEvent> EventHandler<T> subscribe(@NonNull Class<T> eventClass, @NonNull Consumer<? super T> handler) {
+    public @NonNull <T extends LuckPermsEvent> EventSubscription<T> subscribe(@NonNull Class<T> eventClass, @NonNull Consumer<? super T> handler) {
         Objects.requireNonNull(eventClass, "eventClass");
         Objects.requireNonNull(handler, "handler");
         return registerSubscription(eventClass, handler, null);
     }
 
     @Override
-    public @NonNull <T extends LuckPermsEvent> EventHandler<T> subscribe(Object plugin, @NonNull Class<T> eventClass, @NonNull Consumer<? super T> handler) {
+    public @NonNull <T extends LuckPermsEvent> EventSubscription<T> subscribe(Object plugin, @NonNull Class<T> eventClass, @NonNull Consumer<? super T> handler) {
         Objects.requireNonNull(plugin, "plugin");
         Objects.requireNonNull(eventClass, "eventClass");
         Objects.requireNonNull(handler, "handler");
         return registerSubscription(eventClass, handler, checkPlugin(plugin));
     }
 
-    private <T extends LuckPermsEvent> EventHandler<T> registerSubscription(Class<T> eventClass, Consumer<? super T> handler, Object plugin) {
+    private <T extends LuckPermsEvent> EventSubscription<T> registerSubscription(Class<T> eventClass, Consumer<? super T> handler, Object plugin) {
         if (!eventClass.isInterface()) {
             throw new IllegalArgumentException("class " + eventClass + " is not an interface");
         }
@@ -111,14 +111,14 @@ public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
             throw new IllegalArgumentException("class " + eventClass.getName() + " does not implement LuckPermsEvent");
         }
 
-        LuckPermsEventHandler<T> eventHandler = new LuckPermsEventHandler<>(this, eventClass, handler, plugin);
+        LuckPermsEventSubscription<T> eventHandler = new LuckPermsEventSubscription<>(this, eventClass, handler, plugin);
         this.bus.register(eventClass, eventHandler);
 
         return eventHandler;
     }
 
     @Override
-    public @NonNull <T extends LuckPermsEvent> Set<EventHandler<T>> getHandlers(@NonNull Class<T> eventClass) {
+    public @NonNull <T extends LuckPermsEvent> Set<EventSubscription<T>> getSubscriptions(@NonNull Class<T> eventClass) {
         return this.bus.getHandlers(eventClass);
     }
 
@@ -127,7 +127,7 @@ public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
      *
      * @param handler the handler to remove
      */
-    public void unregisterHandler(LuckPermsEventHandler<?> handler) {
+    public void unregisterHandler(LuckPermsEventSubscription<?> handler) {
         this.bus.unregister(handler);
     }
 
@@ -137,7 +137,7 @@ public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
      * @param plugin the plugin
      */
     protected void unregisterHandlers(P plugin) {
-        this.bus.unregister(sub -> ((LuckPermsEventHandler) sub).getPlugin() == plugin);
+        this.bus.unregister(sub -> ((LuckPermsEventSubscription) sub).getPlugin() == plugin);
     }
 
     @Override
@@ -155,11 +155,11 @@ public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
             return true;
         }
 
-        public <T extends LuckPermsEvent> Set<EventHandler<T>> getHandlers(Class<T> eventClass) {
+        public <T extends LuckPermsEvent> Set<EventSubscription<T>> getHandlers(Class<T> eventClass) {
             //noinspection unchecked
             return super.subscribers().values().stream()
-                    .filter(s -> s instanceof EventHandler && ((EventHandler<?>) s).getEventClass().isAssignableFrom(eventClass))
-                    .map(s -> ((EventHandler<T>) s))
+                    .filter(s -> s instanceof EventSubscription && ((EventSubscription<?>) s).getEventClass().isAssignableFrom(eventClass))
+                    .map(s -> ((EventSubscription<T>) s))
                     .collect(Collectors.toSet());
         }
     }

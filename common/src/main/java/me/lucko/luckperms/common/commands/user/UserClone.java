@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.commands.user;
 
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -35,11 +35,12 @@ import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.model.data.DataType;
 
 import java.util.List;
 import java.util.UUID;
@@ -72,16 +73,16 @@ public class UserClone extends SubCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
-        otherUser.replaceNodes(NodeMapType.ENDURING, user.enduringData().immutable());
+        otherUser.replaceNodes(DataType.NORMAL, user.normalData().immutable());
 
         Message.CLONE_SUCCESS.send(sender, user.getFormattedDisplayName(), otherUser.getFormattedDisplayName());
 
-        ExtendedLogEntry.build().actor(sender).acted(otherUser)
-                .action("clone", user.getName())
+        LoggedAction.build().source(sender).target(otherUser)
+                .description("clone", user.getUsername())
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(otherUser, sender, plugin);
-        plugin.getUserManager().cleanup(otherUser);
+        plugin.getUserManager().getHouseKeeper().cleanup(otherUser.getUniqueId());
         return CommandResult.SUCCESS;
     }
 }

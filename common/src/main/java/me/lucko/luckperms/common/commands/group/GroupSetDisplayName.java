@@ -25,14 +25,14 @@
 
 package me.lucko.luckperms.common.commands.group;
 
-import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.api.nodetype.types.DisplayNameType;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
@@ -40,10 +40,15 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
+import me.lucko.luckperms.common.node.types.DisplayName;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.node.NodeType;
+import net.luckperms.api.node.types.DisplayNameNode;
 
 import java.util.List;
 
@@ -60,9 +65,14 @@ public class GroupSetDisplayName extends SubCommand<Group> {
         }
 
         String name = ArgumentParser.parseString(0, args);
-        MutableContextSet context = ArgumentParser.parseContext(1, args, plugin);
+        ImmutableContextSet context = ArgumentParser.parseContext(1, args, plugin).immutableCopy();
 
-        String previousName = group.getDisplayName(context).orElse(null);
+        String previousName = group.normalData().immutable().get(context).stream()
+                .filter(NodeType.DISPLAY_NAME::matches)
+                .map(NodeType.DISPLAY_NAME::cast)
+                .findFirst()
+                .map(DisplayNameNode::getDisplayName)
+                .orElse(null);
 
         if (previousName == null && name.equals(group.getName())) {
             Message.GROUP_SET_DISPLAY_NAME_DOESNT_HAVE.send(sender, group.getName());
@@ -80,28 +90,35 @@ public class GroupSetDisplayName extends SubCommand<Group> {
             return CommandResult.STATE_ERROR;
         }
 
-        group.removeIf(context, n -> n.getTypeData(DisplayNameType.KEY).isPresent());
+        group.removeIf(DataType.NORMAL, context, NodeType.DISPLAY_NAME::matches, false);
 
         if (name.equals(group.getName())) {
             Message.GROUP_SET_DISPLAY_NAME_REMOVED.send(sender, group.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-            ExtendedLogEntry.build().actor(sender).acted(group)
-                    .action("setdisplayname", name, context)
+            LoggedAction.build().source(sender).target(group)
+                    .description("setdisplayname", name, context)
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(group, sender, plugin);
             return CommandResult.SUCCESS;
         }
 
-        group.setPermission(NodeFactory.builder("displayname." + name).withExtraContext(context).build());
+        group.setNode(DataType.NORMAL, DisplayName.builder(name).withContext(context).build(), true);
 
         Message.GROUP_SET_DISPLAY_NAME.send(sender, name, group.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-        ExtendedLogEntry.build().actor(sender).acted(group)
-                .action("setdisplayname", name, context)
+        LoggedAction.build().source(sender).target(group)
+                .description("setdisplayname", name, context)
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(group, sender, plugin);
         return CommandResult.SUCCESS;
+    }
+
+    @Override
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        return TabCompleter.create()
+                .from(1, TabCompletions.contexts(plugin))
+                .complete(args);
     }
 }

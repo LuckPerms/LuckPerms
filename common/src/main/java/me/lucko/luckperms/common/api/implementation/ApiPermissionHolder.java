@@ -25,52 +25,40 @@
 
 package me.lucko.luckperms.common.api.implementation;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.ImmutableSortedSet;
-
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.DataMutateResult;
-import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.NodeEqualityPredicate;
-import me.lucko.luckperms.api.StandardNodeEquality;
-import me.lucko.luckperms.api.TemporaryDataMutateResult;
-import me.lucko.luckperms.api.TemporaryMergeBehaviour;
-import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.caching.CachedData;
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.HolderType;
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
-import me.lucko.luckperms.common.node.factory.NodeFactory;
-import me.lucko.luckperms.common.node.utils.MetaType;
-import me.lucko.luckperms.common.node.utils.NodeTools;
-import me.lucko.luckperms.common.util.ImmutableCollectors;
+
+import net.luckperms.api.cacheddata.CachedDataManager;
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.data.DataMutateResult;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.model.data.NodeMap;
+import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeEqualityPredicate;
+import net.luckperms.api.util.Tristate;
+import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.LinkedList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
-public class ApiPermissionHolder implements me.lucko.luckperms.api.PermissionHolder {
+public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHolder {
     private final PermissionHolder handle;
+
+    private final NodeMapImpl normalData;
+    private final NodeMapImpl transientData;
 
     ApiPermissionHolder(PermissionHolder handle) {
         this.handle = Objects.requireNonNull(handle, "handle");
+        this.normalData = new NodeMapImpl(DataType.NORMAL);
+        this.transientData = new NodeMapImpl(DataType.TRANSIENT);
     }
 
     PermissionHolder getHandle() {
@@ -78,8 +66,8 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.PermissionHol
     }
 
     @Override
-    public @NonNull String getObjectName() {
-        return this.handle.getObjectName();
+    public @NonNull Identifier getIdentifier() {
+        return this.handle.getIdentifier();
     }
 
     @Override
@@ -88,271 +76,114 @@ public class ApiPermissionHolder implements me.lucko.luckperms.api.PermissionHol
     }
 
     @Override
-    public @NonNull CachedData getCachedData() {
+    public @NonNull CachedDataManager getCachedData() {
         return this.handle.getCachedData();
     }
 
     @Override
-    public @NonNull CompletableFuture<Void> refreshCachedData() {
-        return CompletableFuture.runAsync(() -> this.handle.getCachedData().invalidate());
-    }
-
-    @Override
-    public @NonNull ImmutableSetMultimap<ImmutableContextSet, Node> getNodes() {
-        //noinspection unchecked
-        return (ImmutableSetMultimap) this.handle.enduringData().immutable();
-    }
-
-    @Override
-    public @NonNull ImmutableSetMultimap<ImmutableContextSet, Node> getTransientNodes() {
-        //noinspection unchecked
-        return (ImmutableSetMultimap) this.handle.transientData().immutable();
-    }
-
-    @Override
-    public @NonNull List<Node> getOwnNodes() {
-        return ImmutableList.copyOf(this.handle.getOwnNodes());
-    }
-
-    @Override
-    public @NonNull SortedSet<? extends Node> getPermissions() {
-        return ImmutableSortedSet.copyOfSorted(this.handle.getOwnNodesSorted());
-    }
-
-    @Override
-    public @NonNull Set<Node> getEnduringPermissions() {
-        return ImmutableSet.copyOf(this.handle.enduringData().immutable().values());
-    }
-
-    @Override
-    public @NonNull Set<Node> getTransientPermissions() {
-        return ImmutableSet.copyOf(this.handle.transientData().immutable().values());
-    }
-
-    @Override
-    public @NonNull SortedSet<LocalizedNode> getAllNodes(@NonNull Contexts contexts) {
-        Objects.requireNonNull(contexts, "contexts");
-
-        List<LocalizedNode> nodes = new LinkedList<>();
-        this.handle.accumulateInheritancesTo(nodes, contexts);
-        NodeTools.removeEqual(nodes.iterator(), StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
-
-        SortedSet<LocalizedNode> ret = new TreeSet<>(NodeWithContextComparator.reverse());
-        ret.addAll(nodes);
-
-        return ImmutableSortedSet.copyOfSorted(ret);
-    }
-
-    @Override
-    public @NonNull SortedSet<LocalizedNode> getAllNodes() {
-        List<LocalizedNode> nodes = new LinkedList<>();
-        this.handle.accumulateInheritancesTo(nodes);
-        NodeTools.removeEqual(nodes.iterator(), StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
-
-        SortedSet<LocalizedNode> ret = new TreeSet<>(NodeWithContextComparator.reverse());
-        ret.addAll(nodes);
-
-        return ImmutableSortedSet.copyOfSorted(ret);
-    }
-
-    @Override
-    public @NonNull Set<LocalizedNode> getAllNodesFiltered(@NonNull Contexts contexts) {
-        Objects.requireNonNull(contexts, "contexts");
-
-        List<LocalizedNode> entries = this.handle.getAllEntries(contexts);
-
-        NodeTools.removeSamePermission(entries.iterator());
-        SortedSet<LocalizedNode> ret = new TreeSet<>(NodeWithContextComparator.reverse());
-        ret.addAll(entries);
-
-        return ImmutableSet.copyOf(ret);
-    }
-
-    @Override
-    public @NonNull Map<String, Boolean> exportNodes(@NonNull Contexts contexts, boolean lowerCase) {
-        Objects.requireNonNull(contexts, "contexts");
-        return ImmutableMap.copyOf(this.handle.exportPermissions(contexts, lowerCase, true));
-    }
-
-    @Override
-    public @NonNull Tristate hasPermission(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate) {
-        Objects.requireNonNull(node, "node");
-        Objects.requireNonNull(equalityPredicate, "equalityPredicate");
-        return this.handle.hasPermission(NodeMapType.ENDURING, node, equalityPredicate);
-    }
-
-    @Override
-    public @NonNull Tristate hasTransientPermission(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate) {
-        Objects.requireNonNull(node, "node");
-        Objects.requireNonNull(equalityPredicate, "equalityPredicate");
-        return this.handle.hasPermission(NodeMapType.TRANSIENT, node, equalityPredicate);
-    }
-
-    @Override
-    public @NonNull Tristate inheritsPermission(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate) {
-        Objects.requireNonNull(node, "node");
-        Objects.requireNonNull(equalityPredicate, "equalityPredicate");
-        return this.handle.inheritsPermission(node, equalityPredicate);
-    }
-
-    @Override
-    public @NonNull Tristate hasPermission(@NonNull Node node) {
-        Objects.requireNonNull(node, "node");
-        return this.handle.hasPermission(NodeMapType.ENDURING, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
-    }
-
-    @Override
-    public @NonNull Tristate hasTransientPermission(@NonNull Node node) {
-        Objects.requireNonNull(node, "node");
-        return this.handle.hasPermission(NodeMapType.TRANSIENT, node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
-    }
-
-    @Override
-    public @NonNull Tristate inheritsPermission(@NonNull Node node) {
-        Objects.requireNonNull(node, "node");
-        return this.handle.inheritsPermission(node, StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE);
-    }
-
-    @Override
-    public boolean inheritsGroup(me.lucko.luckperms.api.@NonNull Group group) {
-        Objects.requireNonNull(group, "group");
-
-        Group g = ApiGroup.cast(group);
-        if (this.handle.getType() == HolderType.GROUP && g.getName().equals(this.handle.getObjectName())) {
-            return true;
-        }
-
-        return this.handle.hasPermission(NodeMapType.ENDURING, NodeFactory.buildGroupNode(g.getName()).build(), StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean();
-    }
-
-    @Override
-    public boolean inheritsGroup(me.lucko.luckperms.api.@NonNull Group group, @NonNull ContextSet contextSet) {
-        Objects.requireNonNull(group, "group");
-        Objects.requireNonNull(contextSet, "contextSet");
-
-        Group g = ApiGroup.cast(group);
-        if (this.handle.getType() == HolderType.GROUP && g.getName().equals(this.handle.getObjectName())) {
-            return true;
-        }
-
-        return this.handle.hasPermission(NodeMapType.ENDURING, NodeFactory.buildGroupNode(g.getName()).withExtraContext(contextSet).build(), StandardNodeEquality.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean();
-    }
-
-    @Override
-    public @NonNull DataMutateResult setPermission(@NonNull Node node) {
-        Objects.requireNonNull(node, "node");
-        return this.handle.setPermission(node);
-    }
-
-    @Override
-    public @NonNull TemporaryDataMutateResult setPermission(@NonNull Node node, @NonNull TemporaryMergeBehaviour temporaryMergeBehaviour) {
-        Objects.requireNonNull(node, "node");
-        Objects.requireNonNull(temporaryMergeBehaviour, "temporaryMergeBehaviour");
-        return this.handle.setPermission(node, temporaryMergeBehaviour);
-    }
-
-    @Override
-    public @NonNull DataMutateResult setTransientPermission(@NonNull Node node) {
-        Objects.requireNonNull(node, "node");
-        return this.handle.setTransientPermission(node);
-    }
-
-    @Override
-    public @NonNull TemporaryDataMutateResult setTransientPermission(@NonNull Node node, @NonNull TemporaryMergeBehaviour temporaryMergeBehaviour) {
-        Objects.requireNonNull(node, "node");
-        Objects.requireNonNull(temporaryMergeBehaviour, "temporaryMergeBehaviour");
-        return this.handle.setTransientPermission(node, temporaryMergeBehaviour);
-    }
-
-    @Override
-    public @NonNull DataMutateResult unsetPermission(@NonNull Node node) {
-        Objects.requireNonNull(node, "node");
-        return this.handle.unsetPermission(node);
-    }
-
-    @Override
-    public @NonNull DataMutateResult unsetTransientPermission(@NonNull Node node) {
-        Objects.requireNonNull(node, "node");
-        return this.handle.unsetTransientPermission(node);
-    }
-
-    @Override
-    public void clearMatching(@NonNull Predicate<Node> test) {
-        Objects.requireNonNull(test, "test");
-        this.handle.removeIf(test);
-        if (this.handle.getType() == HolderType.USER) {
-            this.handle.getPlugin().getUserManager().giveDefaultIfNeeded((User) this.handle, false);
+    public NodeMap getData(@NonNull DataType dataType) {
+        switch (dataType) {
+            case NORMAL:
+                return this.normalData;
+            case TRANSIENT:
+                return this.transientData;
+            default:
+                throw new AssertionError();
         }
     }
 
     @Override
-    public void clearMatchingTransient(@NonNull Predicate<Node> test) {
-        Objects.requireNonNull(test, "test");
-        this.handle.removeIfTransient(test);
+    public @NonNull NodeMap data() {
+        return this.normalData;
     }
 
     @Override
-    public void clearNodes() {
-        this.handle.clearNodes();
+    public @NonNull NodeMap transientData() {
+        return this.transientData;
     }
 
     @Override
-    public void clearNodes(@NonNull ContextSet contextSet) {
-        Objects.requireNonNull(contextSet, "contextSet");
-        this.handle.clearNodes(contextSet);
+    public @NonNull List<Node> getNodes() {
+        return this.handle.getOwnNodes(QueryOptions.nonContextual());
     }
 
     @Override
-    public void clearParents() {
-        this.handle.clearParents(true);
+    public @NonNull SortedSet<Node> getDistinctNodes() {
+        return this.handle.getOwnNodesSorted(QueryOptions.nonContextual());
     }
 
     @Override
-    public void clearParents(@NonNull ContextSet contextSet) {
-        Objects.requireNonNull(contextSet, "contextSet");
-        this.handle.clearParents(contextSet, true);
+    public @NonNull List<Node> resolveInheritedNodes(@NonNull QueryOptions queryOptions) {
+        return this.handle.resolveInheritedNodes(queryOptions);
     }
 
     @Override
-    public void clearMeta() {
-        this.handle.clearMeta(MetaType.ANY);
+    public @NonNull SortedSet<Node> resolveDistinctInheritedNodes(@NonNull QueryOptions queryOptions) {
+        return this.handle.resolveInheritedNodesSorted(queryOptions);
     }
 
     @Override
-    public void clearMeta(@NonNull ContextSet contextSet) {
-        Objects.requireNonNull(contextSet, "contextSet");
-        this.handle.clearMeta(MetaType.ANY, contextSet);
+    public void auditTemporaryNodes() {
+        this.handle.auditTemporaryNodes();
     }
 
-    @Override
-    public void clearTransientNodes() {
-        this.handle.clearTransientNodes();
-    }
+    private class NodeMapImpl implements NodeMap {
+        private final DataType dataType;
 
-    @Override
-    public @NonNull List<LocalizedNode> resolveInheritances(@NonNull Contexts contexts) {
-        Objects.requireNonNull(contexts, "contexts");
-        return ImmutableList.copyOf(this.handle.resolveInheritances(contexts));
-    }
+        NodeMapImpl(DataType dataType) {
+            this.dataType = dataType;
+        }
 
-    @Override
-    public @NonNull List<LocalizedNode> resolveInheritances() {
-        return ImmutableList.copyOf(this.handle.resolveInheritances());
-    }
+        @Override
+        public @NonNull Map<ImmutableContextSet, Collection<Node>> toMap() {
+            return ApiPermissionHolder.this.handle.getData(this.dataType).immutable().asMap();
+        }
 
-    @Override
-    public @NonNull Set<Node> getPermanentPermissionNodes() {
-        return this.handle.getOwnNodes().stream().filter(Node::isPermanent).collect(ImmutableCollectors.toSet());
-    }
+        @Override
+        public @NonNull Set<Node> toCollection() {
+            return ApiPermissionHolder.this.handle.getData(this.dataType).asSet();
+        }
 
-    @Override
-    public @NonNull Set<Node> getTemporaryPermissionNodes() {
-        return this.handle.getOwnNodes().stream().filter(Node::isPrefix).collect(ImmutableCollectors.toSet());
-    }
+        @Override
+        public @NonNull Tristate contains(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate) {
+            return ApiPermissionHolder.this.handle.hasNode(this.dataType, node, equalityPredicate);
+        }
 
-    @Override
-    public void auditTemporaryPermissions() {
-        this.handle.auditTemporaryPermissions();
+        @Override
+        public @NonNull DataMutateResult add(@NonNull Node node) {
+            return ApiPermissionHolder.this.handle.setNode(this.dataType, node, true);
+        }
+
+        @Override
+        public DataMutateResult.@NonNull WithMergedNode add(@NonNull Node node, @NonNull TemporaryNodeMergeStrategy temporaryNodeMergeStrategy) {
+            return ApiPermissionHolder.this.handle.setNode(this.dataType, node, temporaryNodeMergeStrategy);
+        }
+
+        @Override
+        public @NonNull DataMutateResult remove(@NonNull Node node) {
+            return ApiPermissionHolder.this.handle.unsetNode(this.dataType, node);
+        }
+
+        @Override
+        public void clear() {
+            ApiPermissionHolder.this.handle.clearNodes(this.dataType, null, true);
+        }
+
+        @Override
+        public void clear(@NonNull Predicate<? super Node> test) {
+            ApiPermissionHolder.this.handle.removeIf(this.dataType, null, test, true);
+        }
+
+
+        @Override
+        public void clear(@NonNull ContextSet contextSet) {
+            ApiPermissionHolder.this.handle.clearNodes(this.dataType, contextSet, true);
+        }
+
+        @Override
+        public void clear(@NonNull ContextSet contextSet, @NonNull Predicate<? super Node> test) {
+            ApiPermissionHolder.this.handle.removeIf(this.dataType, contextSet, test, true);
+        }
     }
 
 }

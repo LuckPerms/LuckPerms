@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.bukkit;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.LuckPermsApi;
-import me.lucko.luckperms.api.event.user.UserDataRecalculateEvent;
 import me.lucko.luckperms.bukkit.calculator.BukkitCalculatorFactory;
 import me.lucko.luckperms.bukkit.compat.LuckPermsBrigadier;
 import me.lucko.luckperms.bukkit.context.BukkitContextManager;
@@ -63,6 +60,10 @@ import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
+
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.event.user.UserDataRecalculateEvent;
+import net.luckperms.api.query.QueryOptions;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.PluginCommand;
@@ -230,8 +231,8 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected void registerApiOnPlatform(LuckPermsApi api) {
-        this.bootstrap.getServer().getServicesManager().register(LuckPermsApi.class, api, this.bootstrap, ServicePriority.Normal);
+    protected void registerApiOnPlatform(LuckPerms api) {
+        this.bootstrap.getServer().getServicesManager().register(LuckPerms.class, api, this.bootstrap, ServicePriority.Normal);
     }
 
     @Override
@@ -267,7 +268,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
         if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
             getApiProvider().getEventBus().subscribe(UserDataRecalculateEvent.class, event -> {
                 User user = ApiUser.cast(event.getUser());
-                Optional<Player> player = getBootstrap().getPlayer(user.getUuid());
+                Optional<Player> player = getBootstrap().getPlayer(user.getUniqueId());
                 player.ifPresent(p -> refreshAutoOp(p, false));
             });
         }
@@ -311,7 +312,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
             final User user = getUserManager().getIfLoaded(player.getUniqueId());
             if (user != null) {
                 user.getCachedData().invalidate();
-                getUserManager().unload(user);
+                getUserManager().unload(user.getUniqueId());
             }
         }
 
@@ -336,7 +337,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
         boolean value;
 
         if (user != null) {
-            Map<String, Boolean> permData = user.getCachedData().getPermissionData(this.contextManager.getApplicableContexts(player)).getImmutableBacking();
+            Map<String, Boolean> permData = user.getCachedData().getPermissionData(this.contextManager.getQueryOptions(player)).getPermissionMap();
             value = permData.getOrDefault("luckperms.autoop", false);
         } else {
             value = false;
@@ -359,8 +360,8 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    public Optional<Contexts> getContextForUser(User user) {
-        return this.bootstrap.getPlayer(user.getUuid()).map(player -> this.contextManager.getApplicableContexts(player));
+    public Optional<QueryOptions> getQueryOptionsForUser(User user) {
+        return this.bootstrap.getPlayer(user.getUniqueId()).map(player -> this.contextManager.getQueryOptions(player));
     }
 
     @Override

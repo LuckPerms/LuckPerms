@@ -27,12 +27,13 @@ package me.lucko.luckperms.common.event.gen;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.LuckPermsApi;
-import me.lucko.luckperms.api.event.LuckPermsEvent;
-import me.lucko.luckperms.api.event.Param;
 import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.common.util.PrivateMethodHandles;
+
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.event.LuckPermsEvent;
+import net.luckperms.api.event.util.Param;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -51,14 +52,14 @@ public class GeneratedEventSpec {
     private static final Method TO_STRING_METHOD;
     private static final Method EQUALS_METHOD;
     private static final Method HASHCODE_METHOD;
-    private static final Method GET_API_METHOD;
+    private static final Method GET_LUCKPERMS_METHOD;
     private static final Method GET_EVENT_TYPE_METHOD;
     static {
         try {
             TO_STRING_METHOD = Object.class.getMethod("toString");
             EQUALS_METHOD = Object.class.getMethod("equals", Object.class);
             HASHCODE_METHOD = Object.class.getMethod("hashCode");
-            GET_API_METHOD = LuckPermsEvent.class.getMethod("getApi");
+            GET_LUCKPERMS_METHOD = LuckPermsEvent.class.getMethod("getLuckPerms");
             GET_EVENT_TYPE_METHOD = LuckPermsEvent.class.getMethod("getEventType");
         } catch (NoSuchMethodException e) {
             throw new ExceptionInInitializerError(e);
@@ -83,7 +84,7 @@ public class GeneratedEventSpec {
             if (method.isDefault()) {
                 continue;
             }
-            if (GET_API_METHOD.equals(method) || GET_EVENT_TYPE_METHOD.equals(method)) {
+            if (GET_LUCKPERMS_METHOD.equals(method) || GET_EVENT_TYPE_METHOD.equals(method)) {
                 continue;
             }
 
@@ -97,7 +98,7 @@ public class GeneratedEventSpec {
                 .collect(ImmutableCollectors.toList());
     }
 
-    public LuckPermsEvent newInstance(LuckPermsApi api, Object... params) {
+    public LuckPermsEvent newInstance(LuckPerms api, Object... params) {
         if (params.length != this.methods.size()) {
             throw new IllegalStateException("param length differs from number of methods. expected " + this.methods.size() + " - " + this.methods);
         }
@@ -118,10 +119,10 @@ public class GeneratedEventSpec {
      * An invocation handler bound to a set of parameters, used to implement the event as a proxy.
      */
     private final class EventInvocationHandler implements InvocationHandler {
-        private final LuckPermsApi api;
+        private final LuckPerms api;
         private final Object[] fields;
 
-        EventInvocationHandler(LuckPermsApi api, Object[] fields) {
+        EventInvocationHandler(LuckPerms api, Object[] fields) {
             this.api = api;
             this.fields = fields;
         }
@@ -140,7 +141,7 @@ public class GeneratedEventSpec {
             if (HASHCODE_METHOD.equals(method)) {
                 return System.identityHashCode(proxy);
             }
-            if (GET_API_METHOD.equals(method)) {
+            if (GET_LUCKPERMS_METHOD.equals(method)) {
                 return this.api;
             }
             if (GET_EVENT_TYPE_METHOD.equals(method)) {

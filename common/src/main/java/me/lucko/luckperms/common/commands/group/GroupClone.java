@@ -25,8 +25,7 @@
 
 package me.lucko.luckperms.common.commands.group;
 
-import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -36,11 +35,13 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.Predicates;
+
+import net.luckperms.api.event.cause.CreationCause;
+import net.luckperms.api.model.data.DataType;
 
 import java.util.List;
 
@@ -73,12 +74,12 @@ public class GroupClone extends SubCommand<Group> {
             return CommandResult.NO_PERMISSION;
         }
 
-        newGroup.replaceNodes(NodeMapType.ENDURING, group.enduringData().immutable());
+        newGroup.replaceNodes(DataType.NORMAL, group.normalData().immutable());
 
         Message.CLONE_SUCCESS.send(sender, group.getName(), newGroup.getName());
 
-        ExtendedLogEntry.build().actor(sender).acted(newGroup)
-                .action("clone", group.getName())
+        LoggedAction.build().source(sender).target(newGroup)
+                .description("clone", group.getName())
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(newGroup, sender, plugin);

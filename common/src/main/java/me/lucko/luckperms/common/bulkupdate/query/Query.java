@@ -27,7 +27,9 @@ package me.lucko.luckperms.common.bulkupdate.query;
 
 import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
-import me.lucko.luckperms.common.node.model.NodeDataContainer;
+
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.node.Node;
 
 /**
  * Represents a query component
@@ -55,14 +57,14 @@ public class Query {
      * @param node the node
      * @return true if satisfied
      */
-    public boolean isSatisfiedBy(NodeDataContainer node) {
+    public boolean isSatisfiedBy(Node node) {
         switch (this.field) {
             case PERMISSION:
-                return this.constraint.eval(node.getPermission());
+                return this.constraint.eval(node.getKey());
             case SERVER:
-                return this.constraint.eval(node.getServer());
+                return this.constraint.eval(node.getContexts().getAnyValue(DefaultContextKeys.SERVER_KEY).orElse("global"));
             case WORLD:
-                return this.constraint.eval(node.getWorld());
+                return this.constraint.eval(node.getContexts().getAnyValue(DefaultContextKeys.WORLD_KEY).orElse("global"));
             default:
                 throw new RuntimeException();
         }

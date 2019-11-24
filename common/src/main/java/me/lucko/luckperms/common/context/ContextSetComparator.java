@@ -25,14 +25,14 @@
 
 package me.lucko.luckperms.common.context;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.context.Context;
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.ImmutableContextSet;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 public class ContextSetComparator implements Comparator<ImmutableContextSet> {
 
@@ -53,12 +53,12 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
             return 0;
         }
 
-        int result = Boolean.compare(o1.containsKey(Contexts.SERVER_KEY), o2.containsKey(Contexts.SERVER_KEY));
+        int result = Boolean.compare(o1.containsKey(DefaultContextKeys.SERVER_KEY), o2.containsKey(DefaultContextKeys.SERVER_KEY));
         if (result != 0) {
             return result;
         }
 
-        result = Boolean.compare(o1.containsKey(Contexts.WORLD_KEY), o2.containsKey(Contexts.WORLD_KEY));
+        result = Boolean.compare(o1.containsKey(DefaultContextKeys.WORLD_KEY), o2.containsKey(DefaultContextKeys.WORLD_KEY));
         if (result != 0) {
             return result;
         }
@@ -73,20 +73,20 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
 
         // in order to have consistent ordering, we have to compare the content of the context sets by ordering the
         // elements and then comparing which set is greater.
-        List<Map.Entry<String, String>> o1Entries = new ArrayList<>(o1.toSet());
-        List<Map.Entry<String, String>> o2Entries = new ArrayList<>(o2.toSet());
-        o1Entries.sort(STRING_ENTRY_COMPARATOR);
-        o2Entries.sort(STRING_ENTRY_COMPARATOR);
+        List<Context> o1Entries = new ArrayList<>(o1.toSet());
+        List<Context> o2Entries = new ArrayList<>(o2.toSet());
+        o1Entries.sort(CONTEXT_COMPARATOR);
+        o2Entries.sort(CONTEXT_COMPARATOR);
 
         // size is definitely the same
-        Iterator<Map.Entry<String, String>> it1 = o1Entries.iterator();
-        Iterator<Map.Entry<String, String>> it2 = o2Entries.iterator();
+        Iterator<Context> it1 = o1Entries.iterator();
+        Iterator<Context> it2 = o2Entries.iterator();
 
         while (it1.hasNext()) {
-            Map.Entry<String, String> ent1 = it1.next();
-            Map.Entry<String, String> ent2 = it2.next();
+            Context ent1 = it1.next();
+            Context ent2 = it2.next();
 
-            int ret = STRING_ENTRY_COMPARATOR.compare(ent1, ent2);
+            int ret = CONTEXT_COMPARATOR.compare(ent1, ent2);
             if (ret != 0) {
                 return ret;
             }
@@ -98,7 +98,7 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
     @SuppressWarnings("StringEquality")
     private static final Comparator<String> FAST_STRING_COMPARATOR = (o1, o2) -> o1 == o2 ? 0 : o1.compareTo(o2);
 
-    private static final Comparator<Map.Entry<String, String>> STRING_ENTRY_COMPARATOR = (o1, o2) -> {
+    private static final Comparator<Context> CONTEXT_COMPARATOR = (o1, o2) -> {
         if (o1 == o2) {
             return 0;
         }

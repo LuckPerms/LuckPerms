@@ -78,8 +78,6 @@ public final class ShorthandParser {
     }
 
     private static Set<String> captureResults(String s) {
-        s = s.replace('(', '{').replace(')', '}');
-
         int openingIndex = s.indexOf('{');
         if (openingIndex == -1) {
             return null;
@@ -113,7 +111,6 @@ public final class ShorthandParser {
 
         @Override
         public Iterable<String> apply(String s) {
-            s = s.replace('|', ',');
             if (!s.contains(",")) {
                 return Collections.singleton(s);
             }
@@ -134,13 +131,19 @@ public final class ShorthandParser {
         @Override
         public Iterable<String> apply(String s) {
             int index = s.indexOf("-");
-            if (index == -1) return null;
+            if (index == -1) {
+                return null;
+            }
 
             Integer before = parseInt(s.substring(0, index));
-            if (before == null) return null;
+            if (before == null) {
+                return null;
+            }
 
             Integer after = parseInt(s.substring(index + 1));
-            if (after == null) return null;
+            if (after == null) {
+                return null;
+            }
 
             return IntStream.rangeClosed(before, after).mapToObj(Integer::toString).collect(Collectors.toList());
         }
@@ -159,13 +162,19 @@ public final class ShorthandParser {
         @Override
         public Iterable<String> apply(String s) {
             int index = s.indexOf("-");
-            if (index == -1) return null;
+            if (index == -1) {
+                return null;
+            }
 
             String before = s.substring(0, index);
-            if (before.length() != 1) return null;
+            if (before.length() != 1) {
+                return null;
+            }
 
             String after = s.substring(index + 1);
-            if (after.length() != 1) return null;
+            if (after.length() != 1) {
+                return null;
+            }
 
             return getCharRange(before.charAt(0), after.charAt(0));
         }

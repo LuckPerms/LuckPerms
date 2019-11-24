@@ -35,12 +35,13 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 
-import me.lucko.luckperms.api.platform.PlatformType;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.logging.Slf4jPluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+
+import net.luckperms.api.platform.Platform;
 
 import org.slf4j.Logger;
 
@@ -60,7 +61,7 @@ import java.util.stream.Stream;
         version = "@version@",
         authors = "Luck",
         description = "A permissions plugin",
-        url = "https://luckperms.github.io"
+        url = "https://luckperms.net"
 )
 public class LPVelocityBootstrap implements LuckPermsBootstrap {
 
@@ -179,8 +180,8 @@ public class LPVelocityBootstrap implements LuckPermsBootstrap {
     // provide information about the platform
 
     @Override
-    public PlatformType getType() {
-        return PlatformType.VELOCITY;
+    public Platform.Type getType() {
+        return Platform.Type.VELOCITY;
     }
 
     @Override
@@ -204,17 +205,17 @@ public class LPVelocityBootstrap implements LuckPermsBootstrap {
     }
 
     @Override
-    public Optional<Player> getPlayer(UUID uuid) {
-        return this.proxy.getPlayer(uuid);
+    public Optional<Player> getPlayer(UUID uniqueId) {
+        return this.proxy.getPlayer(uniqueId);
     }
 
     @Override
-    public Optional<UUID> lookupUuid(String username) {
+    public Optional<UUID> lookupUniqueId(String username) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<String> lookupUsername(UUID uuid) {
+    public Optional<String> lookupUsername(UUID uniqueId) {
         return Optional.empty();
     }
 
@@ -234,8 +235,8 @@ public class LPVelocityBootstrap implements LuckPermsBootstrap {
     }
 
     @Override
-    public boolean isPlayerOnline(UUID uuid) {
-        Player player = this.proxy.getPlayer(uuid).orElse(null);
+    public boolean isPlayerOnline(UUID uniqueId) {
+        Player player = this.proxy.getPlayer(uniqueId).orElse(null);
         return player != null && player.isActive();
     }
 }

@@ -27,8 +27,9 @@ package me.lucko.luckperms.sponge.service.model;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.util.Tristate;
+import net.luckperms.api.query.QueryOptions;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.Subject;
@@ -65,6 +66,8 @@ public interface LPSubject {
     LPSubjectData getSubjectData();
 
     LPSubjectData getTransientSubjectData();
+
+    Tristate getPermissionValue(QueryOptions options, String permission);
 
     Tristate getPermissionValue(ImmutableContextSet contexts, String permission);
 

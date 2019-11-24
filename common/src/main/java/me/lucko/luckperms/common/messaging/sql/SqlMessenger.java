@@ -25,11 +25,12 @@
 
 package me.lucko.luckperms.common.messaging.sql;
 
-import me.lucko.luckperms.api.messenger.IncomingMessageConsumer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import me.lucko.luckperms.common.storage.implementation.sql.SqlStorage;
+
+import net.luckperms.api.messenger.IncomingMessageConsumer;
 
 import java.sql.Connection;
 import java.sql.SQLException;

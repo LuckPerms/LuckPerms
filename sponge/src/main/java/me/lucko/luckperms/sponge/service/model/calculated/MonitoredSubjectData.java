@@ -25,12 +25,13 @@
 
 package me.lucko.luckperms.sponge.service.model.calculated;
 
-import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.model.NodeMapType;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
+
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.util.Tristate;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -38,7 +39,7 @@ import java.util.concurrent.CompletableFuture;
  * Extension of CalculatedSubjectData which allows subclasses to respond to updates
  */
 public abstract class MonitoredSubjectData extends CalculatedSubjectData {
-    public MonitoredSubjectData(LPSubject subject, NodeMapType type, LuckPermsService service) {
+    public MonitoredSubjectData(LPSubject subject, DataType type, LuckPermsService service) {
         super(subject, type, service);
     }
     

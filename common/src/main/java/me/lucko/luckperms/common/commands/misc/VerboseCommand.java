@@ -75,9 +75,9 @@ public class VerboseCommand extends SingleCommand {
 
             String filter = filters.isEmpty() ? "" : String.join(" ", filters);
 
-            VerboseFilter parsedFilter;
+            VerboseFilter compiledFilter;
             try {
-                parsedFilter = VerboseFilter.parse(filter);
+                compiledFilter = new VerboseFilter(filter);
             } catch (InvalidFilterException e) {
                 Message.VERBOSE_INVALID_FILTER.send(sender, filter, e.getCause().getMessage());
                 return CommandResult.FAILURE;
@@ -85,7 +85,7 @@ public class VerboseCommand extends SingleCommand {
 
             boolean notify = !mode.equals("record");
 
-            plugin.getVerboseHandler().registerListener(sender, parsedFilter, notify);
+            plugin.getVerboseHandler().registerListener(sender, compiledFilter, notify);
 
             if (notify) {
                 if (!filter.equals("")) {
@@ -105,7 +105,7 @@ public class VerboseCommand extends SingleCommand {
         }
 
         if (mode.equals("off") || mode.equals("false") || mode.equals("paste") || mode.equals("upload")) {
-            VerboseListener listener = plugin.getVerboseHandler().unregisterListener(sender.getUuid());
+            VerboseListener listener = plugin.getVerboseHandler().unregisterListener(sender.getUniqueId());
 
             if (mode.equals("paste") || mode.equals("upload")) {
                 if (listener == null) {
@@ -113,7 +113,7 @@ public class VerboseCommand extends SingleCommand {
                 } else {
                     Message.VERBOSE_UPLOAD_START.send(sender);
                     String id = listener.uploadPasteData(plugin.getBytebin());
-                    String url = plugin.getConfiguration().get(ConfigKeys.VERBOSE_VIEWER_URL_PATTERN) + "#" + id;
+                    String url = plugin.getConfiguration().get(ConfigKeys.VERBOSE_VIEWER_URL_PATTERN) + id;
 
                     Message.VERBOSE_RESULTS_URL.send(sender);
 

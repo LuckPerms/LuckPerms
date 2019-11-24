@@ -30,6 +30,7 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -103,17 +104,17 @@ public class DummyPermissibleBase extends PermissibleBase {
 
     @Override public boolean isOp() { return false; }
     @Override public void setOp(boolean value) {}
-    @Override public boolean isPermissionSet(String name) { return false; }
-    @Override public boolean isPermissionSet(Permission perm) { return false; }
-    @Override public boolean hasPermission(String inName) { return false; }
-    @Override public boolean hasPermission(Permission perm) { return false; }
-    @Override public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value) { return null; }
-    @Override public PermissionAttachment addAttachment(Plugin plugin) { return null; }
-    @Override public void removeAttachment(PermissionAttachment attachment) {}
+    @Override public boolean isPermissionSet(@NonNull String name) { return false; }
+    @Override public boolean isPermissionSet(@NonNull Permission perm) { return false; }
+    @Override public boolean hasPermission(@NonNull String inName) { return false; }
+    @Override public boolean hasPermission(@NonNull Permission perm) { return false; }
+    @Override public @NonNull PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String name, boolean value) { return null; }
+    @Override public @NonNull PermissionAttachment addAttachment(@NonNull Plugin plugin) { return null; }
+    @Override public void removeAttachment(@NonNull PermissionAttachment attachment) {}
     @Override public void recalculatePermissions() {}
     @Override public void clearPermissions() {}
-    @Override public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value, int ticks) { return null; }
-    @Override public PermissionAttachment addAttachment(Plugin plugin, int ticks) { return null; }
-    @Override public Set<PermissionAttachmentInfo> getEffectivePermissions() { return Collections.emptySet(); }
+    @Override public PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String name, boolean value, int ticks) { return null; }
+    @Override public PermissionAttachment addAttachment(@NonNull Plugin plugin, int ticks) { return null; }
+    @Override public @NonNull Set<PermissionAttachmentInfo> getEffectivePermissions() { return Collections.emptySet(); }
 
 }
