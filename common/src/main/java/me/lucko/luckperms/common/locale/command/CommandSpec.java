@@ -292,6 +292,7 @@ public enum CommandSpec {
             Argument.list(
                     Argument.create("group", true, "the group to inherit from"),
                     Argument.create("duration", true, "the duration of the group membership"),
+                    Argument.create("temporary modifier", false, "how the temporary permission should be applied"),
                     Argument.create("context...", false, "the contexts to inherit the group in")
             )
     ),
