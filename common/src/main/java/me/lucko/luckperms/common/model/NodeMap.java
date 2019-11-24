@@ -134,19 +134,28 @@ public final class NodeMap {
         return ret;
     }
 
+    private static boolean flagExcludeTest(Flag flag, String contextKey, QueryOptions filter, ImmutableContextSet contextSet) {
+        // return true (negative result) if the explicit *include* flag is not set, and if the context set doesn't contain the required context key.
+        return !filter.flag(flag) && !contextSet.containsKey(contextKey);
+    }
+
+    private static boolean normalNodesExcludeTest(QueryOptions filter, ImmutableContextSet contextSet) {
+        // return true (negative result) if normal nodes should not be included due to the lack of a server/world context.
+        return flagExcludeTest(Flag.INCLUDE_NODES_WITHOUT_SERVER_CONTEXT, DefaultContextKeys.SERVER_KEY, filter, contextSet) ||
+                flagExcludeTest(Flag.INCLUDE_NODES_WITHOUT_WORLD_CONTEXT, DefaultContextKeys.WORLD_KEY, filter, contextSet);
+    }
+
+    private static boolean inheritanceNodesIncludeTest(QueryOptions filter, ImmutableContextSet contextSet) {
+        // return true (positive result) if inheritance nodes should be included, due to the lack of any flags preventing their inclusion.
+        return !flagExcludeTest(Flag.APPLY_INHERITANCE_NODES_WITHOUT_SERVER_CONTEXT, DefaultContextKeys.SERVER_KEY, filter, contextSet) &&
+                !flagExcludeTest(Flag.APPLY_INHERITANCE_NODES_WITHOUT_WORLD_CONTEXT, DefaultContextKeys.WORLD_KEY, filter, contextSet);
+    }
+
     public void copyTo(Collection<? super Node> collection, QueryOptions filter) {
         for (Map.Entry<ImmutableContextSet, SortedSet<Node>> e : this.map.entrySet()) {
             if (filter.satisfies(e.getKey())) {
-                boolean serverMissing = !e.getKey().containsKey(DefaultContextKeys.SERVER_KEY);
-                boolean worldMissing = !e.getKey().containsKey(DefaultContextKeys.WORLD_KEY);
-                boolean excludeAsServerMissing = !filter.flag(Flag.INCLUDE_NODES_WITHOUT_SERVER_CONTEXT) && serverMissing;
-                boolean excludeAsWorldMissing = !filter.flag(Flag.INCLUDE_NODES_WITHOUT_WORLD_CONTEXT) && worldMissing;
-
-                if (excludeAsServerMissing || excludeAsWorldMissing) {
-                    boolean excludeInheritanceAsServerMissing = !filter.flag(Flag.APPLY_INHERITANCE_NODES_WITHOUT_SERVER_CONTEXT) && serverMissing;
-                    boolean excludeInheritanceAsWorldMissing = !filter.flag(Flag.APPLY_INHERITANCE_NODES_WITHOUT_WORLD_CONTEXT) && worldMissing;
-
-                    if (!excludeInheritanceAsServerMissing && !excludeInheritanceAsWorldMissing) {
+                if (normalNodesExcludeTest(filter, e.getKey())) {
+                    if (inheritanceNodesIncludeTest(filter, e.getKey())) {
                         // only copy inheritance nodes.
                         SortedSet<InheritanceNode> inheritanceNodes = this.inheritanceMap.get(e.getKey());
                         if (inheritanceNodes != null) {
@@ -163,12 +172,7 @@ public final class NodeMap {
     public void copyInheritanceNodesTo(Collection<? super InheritanceNode> collection, QueryOptions filter) {
         for (Map.Entry<ImmutableContextSet, SortedSet<InheritanceNode>> e : this.inheritanceMap.entrySet()) {
             if (filter.satisfies(e.getKey())) {
-                boolean serverMissing = !e.getKey().containsKey(DefaultContextKeys.SERVER_KEY);
-                boolean worldMissing = !e.getKey().containsKey(DefaultContextKeys.WORLD_KEY);
-                boolean excludeInheritanceAsServerMissing = !filter.flag(Flag.APPLY_INHERITANCE_NODES_WITHOUT_SERVER_CONTEXT) && serverMissing;
-                boolean excludeInheritanceAsWorldMissing = !filter.flag(Flag.APPLY_INHERITANCE_NODES_WITHOUT_WORLD_CONTEXT) && worldMissing;
-
-                if (!excludeInheritanceAsServerMissing && !excludeInheritanceAsWorldMissing) {
+                if (inheritanceNodesIncludeTest(filter, e.getKey())) {
                     collection.addAll(e.getValue());
                 }
             }
@@ -193,7 +197,7 @@ public final class NodeMap {
      */
     void invalidate() {
         this.mapCache.invalidate();
-        this.inheritanceMapCache.get();
+        this.inheritanceMapCache.invalidate();
     }
 
     private Node localise(Node node) {
