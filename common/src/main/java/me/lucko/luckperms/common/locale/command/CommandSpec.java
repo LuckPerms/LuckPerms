@@ -229,6 +229,7 @@ public enum CommandSpec {
                     Argument.create("node", true, "the permission node to set"),
                     Argument.create("true|false", false, "the value of the node"),
                     Argument.create("duration", true, "the duration until the permission node expires"),
+                    Argument.create("temporary modifier", false, "how the temporary permission should be applied"),
                     Argument.create("context...", false, "the contexts to add the permission in")
             )
     ),
@@ -291,6 +292,7 @@ public enum CommandSpec {
             Argument.list(
                     Argument.create("group", true, "the group to inherit from"),
                     Argument.create("duration", true, "the duration of the group membership"),
+                    Argument.create("temporary modifier", false, "how the temporary permission should be applied"),
                     Argument.create("context...", false, "the contexts to inherit the group in")
             )
     ),
