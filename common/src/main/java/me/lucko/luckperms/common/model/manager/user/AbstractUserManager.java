@@ -59,7 +59,9 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
     @Override
     public T getOrMake(UUID id, String username) {
         T user = getOrMake(id);
-        user.setUsername(username, false);
+        if (username != null) {
+            user.setUsername(username, false);
+        }
         return user;
     }
 
