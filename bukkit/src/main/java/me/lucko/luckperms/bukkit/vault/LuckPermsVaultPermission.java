@@ -49,10 +49,10 @@ import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.data.DataType;
-import net.luckperms.api.util.Tristate;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Result;
+import net.luckperms.api.util.Tristate;
 import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.Bukkit;

@@ -41,8 +41,8 @@ import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextSet;
-import net.luckperms.api.util.Tristate;
 import net.luckperms.api.query.QueryOptions;
+import net.luckperms.api.util.Tristate;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;

@@ -31,8 +31,8 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
-import net.luckperms.api.util.Tristate;
 import net.luckperms.api.query.QueryOptions;
+import net.luckperms.api.util.Tristate;
 
 import org.bukkit.permissions.PermissibleBase;
 import org.bukkit.permissions.Permission;

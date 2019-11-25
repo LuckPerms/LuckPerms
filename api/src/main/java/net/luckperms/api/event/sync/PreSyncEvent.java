@@ -25,8 +25,8 @@
 
 package net.luckperms.api.event.sync;
 
-import net.luckperms.api.event.type.Cancellable;
 import net.luckperms.api.event.LuckPermsEvent;
+import net.luckperms.api.event.type.Cancellable;
 
 /**
  * Called before a sync task runs

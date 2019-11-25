@@ -31,8 +31,8 @@ import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.nukkit.inject.dummy.DummyPermissibleBase;
 
-import net.luckperms.api.util.Tristate;
 import net.luckperms.api.query.QueryOptions;
+import net.luckperms.api.util.Tristate;
 
 import cn.nukkit.permission.PermissibleBase;
 import cn.nukkit.permission.Permission;

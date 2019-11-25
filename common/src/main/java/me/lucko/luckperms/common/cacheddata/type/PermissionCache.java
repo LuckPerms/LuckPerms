@@ -32,8 +32,8 @@ import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
 import net.luckperms.api.cacheddata.CachedPermissionData;
-import net.luckperms.api.util.Tristate;
 import net.luckperms.api.query.QueryOptions;
+import net.luckperms.api.util.Tristate;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

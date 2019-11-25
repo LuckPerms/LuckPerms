@@ -44,9 +44,9 @@ import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.node.Node;
-import net.luckperms.api.util.Tristate;
 import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
 import net.luckperms.api.query.QueryOptions;
+import net.luckperms.api.util.Tristate;
 
 import java.util.List;
 import java.util.Optional;

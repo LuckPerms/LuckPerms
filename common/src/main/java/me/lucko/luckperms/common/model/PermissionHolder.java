@@ -44,12 +44,12 @@ import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.node.NodeType;
-import net.luckperms.api.util.Tristate;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.query.dataorder.DataQueryOrder;
 import net.luckperms.api.query.dataorder.DataQueryOrderFunction;
+import net.luckperms.api.util.Tristate;
 
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;

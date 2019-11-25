@@ -30,8 +30,8 @@ import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 
-import net.luckperms.api.util.Tristate;
 import net.luckperms.api.query.QueryOptions;
+import net.luckperms.api.util.Tristate;
 
 public abstract class DefaultsProcessor implements PermissionProcessor {
     private static final TristateResult.Factory TYPE_DEFAULTS_RESULT_FACTORY = new TristateResult.Factory(DefaultsProcessor.class, "type defaults");
