@@ -37,8 +37,8 @@ import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 
 import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.util.Tristate;
 import net.luckperms.api.query.QueryOptions;
+import net.luckperms.api.util.Tristate;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;

@@ -26,8 +26,8 @@
 package net.luckperms.api.event.user.track;
 
 import net.luckperms.api.event.LuckPermsEvent;
-import net.luckperms.api.event.util.Param;
 import net.luckperms.api.event.type.Sourced;
+import net.luckperms.api.event.util.Param;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.track.Track;
 

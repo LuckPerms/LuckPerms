@@ -44,7 +44,6 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.sender.Sender;
 
 import net.luckperms.api.actionlog.Action;
-import net.luckperms.api.event.type.Cancellable;
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
@@ -77,6 +76,7 @@ import net.luckperms.api.event.track.TrackLoadEvent;
 import net.luckperms.api.event.track.mutate.TrackAddGroupEvent;
 import net.luckperms.api.event.track.mutate.TrackClearEvent;
 import net.luckperms.api.event.track.mutate.TrackRemoveGroupEvent;
+import net.luckperms.api.event.type.Cancellable;
 import net.luckperms.api.event.user.UserCacheLoadEvent;
 import net.luckperms.api.event.user.UserDataRecalculateEvent;
 import net.luckperms.api.event.user.UserFirstLoginEvent;
