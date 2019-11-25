@@ -70,6 +70,12 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
             this.plugin.getLogger().info("Processing pre-login for " + c.getUniqueId() + " - " + c.getName());
         }
 
+        if (e.isCancelled()) {
+            // another plugin has disallowed the login.
+            this.plugin.getLogger().info("Another plugin has cancelled the connection for " + c.getUniqueId() + " - " + c.getName() + ". No permissions data will be loaded.");
+            return;
+        }
+
         this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
             /* Actually process the login for the connection.
                We do this here to delay the login until the data is ready.
