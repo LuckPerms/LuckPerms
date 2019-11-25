@@ -124,6 +124,11 @@ public class QueryOptionsImpl implements QueryOptions {
     }
 
     @Override
+    public String toString() {
+        return "QueryOptions(mode=" + this.mode + ", context=" + this.context + ", flags=" + flags() + ", options=" + this.options + ')';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
