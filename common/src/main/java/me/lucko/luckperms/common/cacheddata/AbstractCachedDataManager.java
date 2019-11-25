@@ -52,6 +52,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Abstract implementation of {@link CachedDataManager}.
@@ -178,25 +179,53 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
         this.metaDataManager.cache.synchronous().cleanUp();
     }
 
-    private final class Permission implements Container<CachedPermissionData> {
+    /**
+     * Implementation of a most-recently-used cache with a mod counter, to prevent race conditions
+     * occurring when the cache is cleared whilst a calculation is taking place.
+     *
+     * @param <T> the cached type
+     */
+    private abstract static class MRUCache<T> {
+        private volatile T recent;
+        private final AtomicInteger modCount = new AtomicInteger();
+
+        protected int modCount() {
+            return this.modCount.get();
+        }
+
+        protected T getRecent() {
+            return this.recent;
+        }
+
+        protected void offerRecent(int validAt, T offer) {
+            if (validAt == this.modCount.get()) {
+                this.recent = offer;
+            }
+        }
+
+        protected void clearRecent() {
+            this.recent = null;
+            this.modCount.incrementAndGet();
+        }
+    }
+
+    private final class Permission extends MRUCache<RecentPermissionData> implements Container<CachedPermissionData> {
         private final AsyncLoadingCache<QueryOptions, PermissionCache> cache = CaffeineFactory.newBuilder()
                 .expireAfterAccess(2, TimeUnit.MINUTES)
                 .buildAsync(new PermissionCacheLoader());
-
-        // cache the most recent lookup.
-        private RecentPermissionData recentPermissionData = null;
 
         @Override
         public @NonNull PermissionCache get(@NonNull QueryOptions queryOptions) {
             Objects.requireNonNull(queryOptions, "queryOptions");
 
-            RecentPermissionData recent = this.recentPermissionData;
+            RecentPermissionData recent = getRecent();
             if (recent != null && queryOptions.equals(recent.queryOptions)) {
                 return recent.permissionData;
             }
 
+            int modCount = modCount();
             PermissionCache data = this.cache.synchronous().get(queryOptions);
-            this.recentPermissionData = new RecentPermissionData(queryOptions, data);
+            offerRecent(modCount, new RecentPermissionData(queryOptions, data));
 
             //noinspection ConstantConditions
             return data;
@@ -212,7 +241,7 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
         public void recalculate(@NonNull QueryOptions queryOptions) {
             Objects.requireNonNull(queryOptions, "queryOptions");
             this.cache.synchronous().refresh(queryOptions);
-            this.recentPermissionData = null;
+            clearRecent();
         }
 
         @Override
@@ -224,7 +253,7 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
 
             // invalidate any previous setting
             this.cache.synchronous().invalidate(queryOptions);
-            this.recentPermissionData = null;
+            clearRecent();
 
             // if the previous value is already calculated, use it when recalculating.
             PermissionCache value = getIfReady(previous);
@@ -252,35 +281,34 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
         public void invalidate(@NonNull QueryOptions queryOptions) {
             Objects.requireNonNull(queryOptions, "queryOptions");
             this.cache.synchronous().invalidate(queryOptions);
-            this.recentPermissionData = null;
+            clearRecent();
         }
 
         @Override
         public void invalidate() {
             this.cache.synchronous().invalidateAll();
-            this.recentPermissionData = null;
+            clearRecent();
         }
     }
 
-    private final class Meta implements Container<CachedMetaData> {
+    private final class Meta extends MRUCache<RecentMetaData> implements Container<CachedMetaData> {
         private final AsyncLoadingCache<QueryOptions, MetaCache> cache = CaffeineFactory.newBuilder()
                 .expireAfterAccess(2, TimeUnit.MINUTES)
                 .buildAsync(new MetaCacheLoader());
 
-        // cache the most recent lookup.
-        private RecentMetaData recentMetaData = null;
 
         @Override
         public @NonNull MetaCache get(@NonNull QueryOptions queryOptions) {
             Objects.requireNonNull(queryOptions, "queryOptions");
 
-            RecentMetaData recent = this.recentMetaData;
+            RecentMetaData recent = getRecent();
             if (recent != null && queryOptions.equals(recent.queryOptions)) {
                 return recent.metaData;
             }
 
+            int modCount = modCount();
             MetaCache data = this.cache.synchronous().get(queryOptions);
-            this.recentMetaData = new RecentMetaData(queryOptions, data);
+            offerRecent(modCount, new RecentMetaData(queryOptions, data));
 
             //noinspection ConstantConditions
             return data;
@@ -296,7 +324,7 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
         public void recalculate(@NonNull QueryOptions queryOptions) {
             Objects.requireNonNull(queryOptions, "queryOptions");
             this.cache.synchronous().refresh(queryOptions);
-            this.recentMetaData = null;
+            clearRecent();
         }
 
         @Override
@@ -308,7 +336,7 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
 
             // invalidate any previous setting
             this.cache.synchronous().invalidate(queryOptions);
-            this.recentMetaData = null;
+            clearRecent();
 
             // if the previous value is already calculated, use it when recalculating.
             MetaCache value = getIfReady(previous);
@@ -336,13 +364,13 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
         public void invalidate(@NonNull QueryOptions queryOptions) {
             Objects.requireNonNull(queryOptions, "queryOptions");
             this.cache.synchronous().invalidate(queryOptions);
-            this.recentMetaData = null;
+            clearRecent();
         }
 
         @Override
         public void invalidate() {
             this.cache.synchronous().invalidateAll();
-            this.recentMetaData = null;
+            clearRecent();
         }
     }
 
