@@ -74,7 +74,7 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
         this.contexts = contexts;
         this.metadata = metadata;
 
-        this.resolvedShorthand = this instanceof PermissionNode ? ImmutableList.copyOf(ShorthandParser.parseShorthand(this.key)) : ImmutableList.of();
+        this.resolvedShorthand = this instanceof PermissionNode ? ImmutableList.copyOf(ShorthandParser.expandShorthand(this.key)) : ImmutableList.of();
 
         this.hashCode = calculateHashCode();
     }
