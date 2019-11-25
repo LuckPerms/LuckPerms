@@ -81,7 +81,8 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
         /* Called when the player first attempts a connection with the server.
-           Listening on LOW priority to allow plugins to modify username / UUID data here. (auth plugins) */
+           Listening on LOW priority to allow plugins to modify username / UUID data here. (auth plugins)
+           Also, give other plugins a chance to cancel the event. */
 
         /* wait for the plugin to enable. because these events are fired async, they can be called before
            the plugin has enabled.  */
@@ -93,6 +94,13 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
             this.plugin.getLogger().info("Processing pre-login for " + e.getUniqueId() + " - " + e.getName());
+        }
+
+        if (e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
+            // another plugin has disallowed the login.
+            this.plugin.getLogger().info("Another plugin has cancelled the connection for " + e.getUniqueId() + " - " + e.getName() + ". No permissions data will be loaded.");
+            this.deniedAsyncLogin.add(e.getUniqueId());
+            return;
         }
 
         /* Actually process the login for the connection.
