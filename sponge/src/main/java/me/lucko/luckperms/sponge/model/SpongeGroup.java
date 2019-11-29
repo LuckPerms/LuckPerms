@@ -40,7 +40,6 @@ public class SpongeGroup extends Group implements SpongePermissionHolder {
     @Override
     protected void invalidateCache() {
         super.invalidateCache();
-
         this.spongeData.fireUpdateEvent();
     }
 
