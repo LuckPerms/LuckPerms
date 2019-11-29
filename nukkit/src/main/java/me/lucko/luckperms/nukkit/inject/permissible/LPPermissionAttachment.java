@@ -35,7 +35,6 @@ import me.lucko.luckperms.nukkit.inject.dummy.DummyPlugin;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
-import net.luckperms.api.util.Result;
 
 import cn.nukkit.permission.Permission;
 import cn.nukkit.permission.PermissionAttachment;
@@ -192,7 +191,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
         // set the transient node
         User user = this.permissible.getUser();
-        ((Result) user.setNode(DataType.TRANSIENT, node, true)).wasSuccessful();
+        user.setNode(DataType.TRANSIENT, node, true).wasSuccessful();
     }
 
     private void unsetPermissionInternal(String name) {

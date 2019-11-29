@@ -51,7 +51,6 @@ import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
-import net.luckperms.api.util.Result;
 import net.luckperms.api.util.Tristate;
 import net.milkbowl.vault.permission.Permission;
 
@@ -438,7 +437,11 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
             logMsg("#holderAddPermission: %s - %s - %s", holder.getPlainDisplayName(), permission, world);
         }
 
-        if (((Result) holder.setNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(permission).value(true).withContext(DefaultContextKeys.SERVER_KEY, getVaultServer()).withContext(DefaultContextKeys.WORLD_KEY, world).build(), true)).wasSuccessful()) {
+        if (world == null) {
+            world = "global";
+        }
+
+        if (holder.setNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(permission).value(true).withContext(DefaultContextKeys.SERVER_KEY, getVaultServer()).withContext(DefaultContextKeys.WORLD_KEY, world).build(), true).wasSuccessful()) {
             return holderSave(holder);
         }
         return false;
@@ -450,6 +453,10 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
 
         if (log()) {
             logMsg("#holderRemovePermission: %s - %s - %s", holder.getPlainDisplayName(), permission, world);
+        }
+
+        if (world == null) {
+            world = "global";
         }
 
         if (holder.unsetNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(permission).withContext(DefaultContextKeys.SERVER_KEY, getVaultServer()).withContext(DefaultContextKeys.WORLD_KEY, world).build()).wasSuccessful()) {
