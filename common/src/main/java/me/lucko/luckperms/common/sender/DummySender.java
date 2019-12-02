@@ -45,10 +45,6 @@ public abstract class DummySender implements Sender {
         this.name = name;
     }
 
-    public DummySender(LuckPermsPlugin plugin) {
-        this(plugin, Sender.IMPORT_UUID, Sender.IMPORT_NAME);
-    }
-
     protected abstract void consumeMessage(String s);
 
     @Override

@@ -69,7 +69,6 @@ public class BulkUpdateCommand extends SingleCommand {
         }
 
         if (args.size() == 2 && args.get(0).equalsIgnoreCase("confirm")) {
-
             String id = args.get(1);
             BulkUpdate operation = this.pendingOperations.asMap().remove(id);
 
