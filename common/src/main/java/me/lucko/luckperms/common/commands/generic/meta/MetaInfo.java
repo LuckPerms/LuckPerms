@@ -174,7 +174,7 @@ public class MetaInfo extends SharedSubCommand {
         HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
                 "¥3> ¥a" + node.getPriority() + " ¥7- ¥r" + node.getMetaValue(),
                 " ",
-                "¥7Click to remove this " + node.getMetaType().name().toLowerCase() + " from " + holder.getFormattedDisplayName()
+                "¥7Click to remove this " + node.getMetaType().name().toLowerCase() + " from " + holder.getPlainDisplayName()
         ), '¥'));
 
         String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getFormattedDisplayName();
@@ -201,10 +201,10 @@ public class MetaInfo extends SharedSubCommand {
         HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
                 "¥3> ¥r" + node.getMetaKey() + " ¥7- ¥r" + node.getMetaValue(),
                 " ",
-                "¥7Click to remove this meta pair from " + holder.getFormattedDisplayName()
+                "¥7Click to remove this meta pair from " + holder.getPlainDisplayName()
         ), '¥'));
 
-        String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getFormattedDisplayName();
+        String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
         String command = "/" + label + " " + NodeCommandFactory.generateCommand(node, id, holder.getType(), false, explicitGlobalContext);
         ClickEvent clickEvent = ClickEvent.suggestCommand(command);

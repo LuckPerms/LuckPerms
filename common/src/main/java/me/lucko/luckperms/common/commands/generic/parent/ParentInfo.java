@@ -139,10 +139,10 @@ public class ParentInfo extends SharedSubCommand {
         HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
                 "&3> &f" + node.getGroupName(),
                 " ",
-                "&7Click to remove this parent from " + holder.getFormattedDisplayName()
+                "&7Click to remove this parent from " + holder.getPlainDisplayName()
         ), TextUtils.AMPERSAND_CHAR));
 
-        String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getFormattedDisplayName();
+        String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
         String command = "/" + label + " " + NodeCommandFactory.generateCommand(node, id, holder.getType(), false, explicitGlobalContext);
         ClickEvent clickEvent = ClickEvent.suggestCommand(command);
