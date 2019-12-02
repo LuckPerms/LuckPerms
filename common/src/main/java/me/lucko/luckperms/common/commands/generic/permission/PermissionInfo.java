@@ -139,10 +139,10 @@ public class PermissionInfo extends SharedSubCommand {
         HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
                 "¥3> " + (node.getValue() ? "¥a" : "¥c") + node.getKey(),
                 " ",
-                "¥7Click to remove this node from " + holder.getFormattedDisplayName()
+                "¥7Click to remove this node from " + holder.getPlainDisplayName()
         ), '¥'));
 
-        String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getFormattedDisplayName();
+        String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
         String command = "/" + label + " " + NodeCommandFactory.generateCommand(node, id, holder.getType(), false, explicitGlobalContext);
         ClickEvent clickEvent = ClickEvent.suggestCommand(command);
