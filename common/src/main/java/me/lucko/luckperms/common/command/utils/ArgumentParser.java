@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.DateParser;
 
+import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
@@ -155,24 +156,42 @@ public class ArgumentParser {
         if (args.size() <= fromIndex) {
             return plugin.getConfiguration().getContextsFile().getDefaultContexts().mutableCopy();
         }
+        return parseContext(fromIndex, args);
+    }
 
+    public static ImmutableContextSet parseContextSponge(int fromIndex, List<String> args) {
+        if (args.size() <= fromIndex) {
+            return ImmutableContextSetImpl.EMPTY;
+        }
+        return parseContext(fromIndex, args).immutableCopy();
+    }
+
+    private static MutableContextSet parseContext(int fromIndex, List<String> args) {
         MutableContextSet contextSet = new MutableContextSetImpl();
-        List<String> toQuery = args.subList(fromIndex, args.size());
-        for (String s : toQuery) {
-            int index = s.indexOf('=');
+        List<String> pairs = args.subList(fromIndex, args.size());
+        for (int i = 0; i < pairs.size(); i++) {
+            String pair = pairs.get(i);
+            int index = pair.indexOf('=');
+
+            String key;
+            String value;
+
             if (index != -1) {
-                String key = s.substring(0, index);
-                if (key.equals("") || key.trim().isEmpty()) {
-                    continue;
-                }
-
-                String value = s.substring(index + 1);
-                if (value.equals("") || value.trim().isEmpty()) {
-                    continue;
-                }
-
-                contextSet.add(key, value);
+                key = pair.substring(0, index);
+                value = pair.substring(index + 1);
+            } else {
+                key = i == 1 ? DefaultContextKeys.WORLD_KEY : DefaultContextKeys.SERVER_KEY;
+                value = pair;
             }
+
+            if (key.equals("") || key.trim().isEmpty()) {
+                continue;
+            }
+            if (value.equals("") || value.trim().isEmpty()) {
+                continue;
+            }
+
+            contextSet.add(key, value);
         }
 
         return contextSet;
@@ -184,33 +203,6 @@ public class ArgumentParser {
         } catch (NumberFormatException e) {
             throw new InvalidPriorityException(args.get(index));
         }
-    }
-
-    public static ImmutableContextSet parseContextSponge(int fromIndex, List<String> args) {
-        if (args.size() <= fromIndex) {
-            return ImmutableContextSetImpl.EMPTY;
-        }
-
-        MutableContextSet contextSet = new MutableContextSetImpl();
-        List<String> toQuery = args.subList(fromIndex, args.size());
-        for (String s : toQuery) {
-            int index = s.indexOf('=');
-            if (index != -1) {
-                String key = s.substring(0, index);
-                if (key.equals("") || key.trim().isEmpty()) {
-                    continue;
-                }
-
-                String value = s.substring(index + 1);
-                if (value.equals("") || value.trim().isEmpty()) {
-                    continue;
-                }
-
-                contextSet.add(key, value);
-            }
-        }
-
-        return contextSet.immutableCopy();
     }
 
     public static UUID parseUserTarget(int index, List<String> args, LuckPermsPlugin plugin, Sender sender) {
