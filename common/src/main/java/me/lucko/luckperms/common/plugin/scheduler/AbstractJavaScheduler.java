@@ -32,6 +32,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -46,35 +47,37 @@ public abstract class AbstractJavaScheduler implements SchedulerAdapter {
             .build()
     );
 
-    private final ErrorReportingExecutor workerPool = new ErrorReportingExecutor(Executors.newCachedThreadPool(new ThreadFactoryBuilder()
+    private final ErrorReportingExecutor schedulerWorkerPool = new ErrorReportingExecutor(Executors.newCachedThreadPool(new ThreadFactoryBuilder()
             .setDaemon(true)
-            .setNameFormat("luckperms-worker-%d")
+            .setNameFormat("luckperms-scheduler-worker-%d")
             .build()
     ));
 
+    private final ForkJoinPool worker = new ForkJoinPool(32, ForkJoinPool.defaultForkJoinWorkerThreadFactory, (t, e) -> e.printStackTrace(), false);
+
     @Override
     public Executor async() {
-        return this.workerPool;
+        return this.worker;
     }
 
     @Override
     public SchedulerTask asyncLater(Runnable task, long delay, TimeUnit unit) {
-        ScheduledFuture<?> future = this.scheduler.schedule(() -> this.workerPool.execute(task), delay, unit);
+        ScheduledFuture<?> future = this.scheduler.schedule(() -> this.schedulerWorkerPool.execute(task), delay, unit);
         return () -> future.cancel(false);
     }
 
     @Override
     public SchedulerTask asyncRepeating(Runnable task, long interval, TimeUnit unit) {
-        ScheduledFuture<?> future = this.scheduler.scheduleAtFixedRate(() -> this.workerPool.execute(task), interval, interval, unit);
+        ScheduledFuture<?> future = this.scheduler.scheduleAtFixedRate(() -> this.schedulerWorkerPool.execute(task), interval, interval, unit);
         return () -> future.cancel(false);
     }
 
     @Override
     public void shutdown() {
         this.scheduler.shutdown();
-        this.workerPool.delegate.shutdown();
+        this.schedulerWorkerPool.delegate.shutdown();
         try {
-            this.workerPool.delegate.awaitTermination(1, TimeUnit.MINUTES);
+            this.schedulerWorkerPool.delegate.awaitTermination(1, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

@@ -223,7 +223,7 @@ public class LegacyImporter implements Runnable {
         private CommandResult result = CommandResult.FAILURE;
 
         ImportCommand(CommandManager commandManager, int id, String command) {
-            super(commandManager.getPlugin());
+            super(commandManager.getPlugin(), Sender.IMPORT_UUID, Sender.IMPORT_NAME);
             this.commandManager = commandManager;
             this.id = id;
             this.command = command;
