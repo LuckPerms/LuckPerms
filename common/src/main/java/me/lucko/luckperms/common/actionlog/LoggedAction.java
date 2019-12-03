@@ -158,7 +158,7 @@ public class LoggedAction implements Action {
         if (!(o instanceof Action)) return false;
         final Action that = (Action) o;
 
-        return getTimestamp() == that.getTimestamp() &&
+        return getTimestamp().equals(that.getTimestamp()) &&
                 getSource().equals(that.getSource()) &&
                 getTarget().equals(that.getTarget()) &&
                 getDescription().equals(that.getDescription());
