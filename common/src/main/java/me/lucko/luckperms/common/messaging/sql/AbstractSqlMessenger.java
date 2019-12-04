@@ -71,7 +71,7 @@ public abstract class AbstractSqlMessenger implements Messenger {
     @Override
     public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
         try (Connection c = getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement("INSERT INTO " + getTableName() + "(`time`, `msg`) VALUES(NOW(), ?)")) {
+            try (PreparedStatement ps = c.prepareStatement("INSERT INTO `" + getTableName() + "` (`time`, `msg`) VALUES(NOW(), ?)")) {
                 ps.setString(1, outgoingMessage.asEncodedString());
                 ps.execute();
             }
@@ -82,7 +82,7 @@ public abstract class AbstractSqlMessenger implements Messenger {
 
     public void pollMessages() {
         try (Connection c = getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement("SELECT `id`, `msg` FROM " + getTableName() + " WHERE `id` > ? AND (NOW() - `time` < 30)")) {
+            try (PreparedStatement ps = c.prepareStatement("SELECT `id`, `msg` FROM `" + getTableName() + "` WHERE `id` > ? AND (NOW() - `time` < 30)")) {
                 ps.setLong(1, this.lastId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -101,7 +101,7 @@ public abstract class AbstractSqlMessenger implements Messenger {
 
     public void runHousekeeping() {
         try (Connection c = getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement("DELETE FROM " + getTableName() + " WHERE (NOW() - `time` > 60)")) {
+            try (PreparedStatement ps = c.prepareStatement("DELETE FROM `" + getTableName() + "` WHERE (NOW() - `time` > 60)")) {
                 ps.execute();
             }
         } catch (SQLException e) {
