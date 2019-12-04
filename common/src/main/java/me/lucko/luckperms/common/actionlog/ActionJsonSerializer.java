@@ -48,13 +48,13 @@ public final class ActionJsonSerializer {
                         .add("name", new JsonPrimitive(logEntry.getSource().getName()))
                 )
                 .add("target", new JObject()
-                        .add("type", new JsonPrimitive(logEntry.getTarget().getType().name())))
+                        .add("type", new JsonPrimitive(logEntry.getTarget().getType().name()))
                         .consume(obj -> {
                             if (logEntry.getTarget().getUniqueId().isPresent()) {
                                 obj.add("uniqueId", new JsonPrimitive(logEntry.getTarget().getUniqueId().get().toString()));
                             }
                         })
-                        .add("name", new JsonPrimitive(logEntry.getTarget().getName())
+                        .add("name", new JsonPrimitive(logEntry.getTarget().getName()))
                 )
                 .add("description", new JsonPrimitive(logEntry.getDescription()))
                 .toJson();
