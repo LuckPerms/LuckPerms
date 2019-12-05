@@ -102,7 +102,7 @@ public class H2ConnectionFactory extends FlatfileConnectionFactory {
 
     @Override
     public Function<String, String> getStatementProcessor() {
-        return s -> s.replace("'", "");
+        return s -> s.replace("'", "`");
     }
 
     @Override
