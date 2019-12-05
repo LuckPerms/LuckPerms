@@ -39,7 +39,9 @@ import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.extension.Extension;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -62,6 +64,14 @@ public class InfoCommand extends SingleCommand {
         Message.INFO_STORAGE.send(sender, plugin.getStorage().getName());
         for (Map.Entry<String, String> e : storageMeta.entrySet()) {
             Message.INFO_STORAGE_META.send(sender, e.getKey(), formatValue(e.getValue()));
+        }
+
+        Collection<Extension> loadedExtensions = plugin.getExtensionManager().getLoadedExtensions();
+        if (!loadedExtensions.isEmpty()) {
+            Message.INFO_EXTENSIONS.send(sender);
+            for (Extension extension : loadedExtensions) {
+                Message.INFO_EXTENSION_ENTRY.send(sender, extension.getClass().getName());
+            }
         }
 
         ImmutableContextSet staticContext = plugin.getContextManager().getStaticContext();
