@@ -78,28 +78,28 @@ import java.util.stream.Collectors;
 public class SqlStorage implements StorageImplementation {
     private static final Type LIST_STRING_TYPE = new TypeToken<List<String>>(){}.getType();
 
-    private static final String USER_PERMISSIONS_SELECT = "SELECT id, permission, value, server, world, expiry, contexts FROM {prefix}user_permissions WHERE uuid=?";
-    private static final String USER_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM {prefix}user_permissions WHERE id=?";
-    private static final String USER_PERMISSIONS_DELETE = "DELETE FROM {prefix}user_permissions WHERE uuid=?";
-    private static final String USER_PERMISSIONS_INSERT = "INSERT INTO {prefix}user_permissions(uuid, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
-    private static final String USER_PERMISSIONS_SELECT_DISTINCT = "SELECT DISTINCT uuid FROM {prefix}user_permissions";
-    private static final String USER_PERMISSIONS_SELECT_PERMISSION = "SELECT uuid, permission, value, server, world, expiry, contexts FROM {prefix}user_permissions WHERE ";
+    private static final String USER_PERMISSIONS_SELECT = "SELECT id, permission, value, server, world, expiry, contexts FROM '{prefix}user_permissions' WHERE uuid=?";
+    private static final String USER_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM '{prefix}user_permissions' WHERE id=?";
+    private static final String USER_PERMISSIONS_DELETE = "DELETE FROM '{prefix}user_permissions' WHERE uuid=?";
+    private static final String USER_PERMISSIONS_INSERT = "INSERT INTO '{prefix}user_permissions' (uuid, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
+    private static final String USER_PERMISSIONS_SELECT_DISTINCT = "SELECT DISTINCT uuid FROM '{prefix}user_permissions'";
+    private static final String USER_PERMISSIONS_SELECT_PERMISSION = "SELECT uuid, permission, value, server, world, expiry, contexts FROM '{prefix}user_permissions' WHERE ";
 
-    private static final String PLAYER_SELECT_UUID_BY_USERNAME = "SELECT uuid FROM {prefix}players WHERE username=? LIMIT 1";
-    private static final String PLAYER_SELECT_USERNAME_BY_UUID = "SELECT username FROM {prefix}players WHERE uuid=? LIMIT 1";
-    private static final String PLAYER_UPDATE_USERNAME_FOR_UUID = "UPDATE {prefix}players SET username=? WHERE uuid=?";
-    private static final String PLAYER_INSERT = "INSERT INTO {prefix}players (uuid, username, primary_group) VALUES(?, ?, ?)";
-    private static final String PLAYER_SELECT_ALL_UUIDS_BY_USERNAME = "SELECT uuid FROM {prefix}players WHERE username=? AND NOT uuid=?";
-    private static final String PLAYER_DELETE_ALL_UUIDS_BY_USERNAME = "DELETE FROM {prefix}players WHERE username=? AND NOT uuid=?";
-    private static final String PLAYER_SELECT_BY_UUID = "SELECT username, primary_group FROM {prefix}players WHERE uuid=?";
-    private static final String PLAYER_SELECT_PRIMARY_GROUP_BY_UUID = "SELECT primary_group FROM {prefix}players WHERE uuid=? LIMIT 1";
-    private static final String PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID = "UPDATE {prefix}players SET primary_group=? WHERE uuid=?";
+    private static final String PLAYER_SELECT_UUID_BY_USERNAME = "SELECT uuid FROM '{prefix}players' WHERE username=? LIMIT 1";
+    private static final String PLAYER_SELECT_USERNAME_BY_UUID = "SELECT username FROM '{prefix}players' WHERE uuid=? LIMIT 1";
+    private static final String PLAYER_UPDATE_USERNAME_FOR_UUID = "UPDATE '{prefix}players' SET username=? WHERE uuid=?";
+    private static final String PLAYER_INSERT = "INSERT INTO '{prefix}players' (uuid, username, primary_group) VALUES(?, ?, ?)";
+    private static final String PLAYER_SELECT_ALL_UUIDS_BY_USERNAME = "SELECT uuid FROM '{prefix}players' WHERE username=? AND NOT uuid=?";
+    private static final String PLAYER_DELETE_ALL_UUIDS_BY_USERNAME = "DELETE FROM '{prefix}players' WHERE username=? AND NOT uuid=?";
+    private static final String PLAYER_SELECT_BY_UUID = "SELECT username, primary_group FROM '{prefix}players' WHERE uuid=?";
+    private static final String PLAYER_SELECT_PRIMARY_GROUP_BY_UUID = "SELECT primary_group FROM '{prefix}players' WHERE uuid=? LIMIT 1";
+    private static final String PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID = "UPDATE '{prefix}players' SET primary_group=? WHERE uuid=?";
 
-    private static final String GROUP_PERMISSIONS_SELECT = "SELECT id, permission, value, server, world, expiry, contexts FROM {prefix}group_permissions WHERE name=?";
-    private static final String GROUP_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM {prefix}group_permissions WHERE id=?";
-    private static final String GROUP_PERMISSIONS_DELETE = "DELETE FROM {prefix}group_permissions WHERE name=?";
-    private static final String GROUP_PERMISSIONS_INSERT = "INSERT INTO {prefix}group_permissions(name, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
-    private static final String GROUP_PERMISSIONS_SELECT_PERMISSION = "SELECT name, permission, value, server, world, expiry, contexts FROM {prefix}group_permissions WHERE ";
+    private static final String GROUP_PERMISSIONS_SELECT = "SELECT id, permission, value, server, world, expiry, contexts FROM '{prefix}group_permissions' WHERE name=?";
+    private static final String GROUP_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM '{prefix}group_permissions' WHERE id=?";
+    private static final String GROUP_PERMISSIONS_DELETE = "DELETE FROM '{prefix}group_permissions' WHERE name=?";
+    private static final String GROUP_PERMISSIONS_INSERT = "INSERT INTO '{prefix}group_permissions' (name, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
+    private static final String GROUP_PERMISSIONS_SELECT_PERMISSION = "SELECT name, permission, value, server, world, expiry, contexts FROM '{prefix}group_permissions' WHERE ";
 
     private static final String GROUP_SELECT_ALL = "SELECT name FROM '{prefix}groups'";
     private static final String MYSQL_GROUP_INSERT = "INSERT INTO '{prefix}groups' (name) VALUES(?) ON DUPLICATE KEY UPDATE name=name";
@@ -108,14 +108,14 @@ public class SqlStorage implements StorageImplementation {
     private static final String POSTGRESQL_GROUP_INSERT = "INSERT INTO '{prefix}groups' (name) VALUES(?) ON CONFLICT (name) DO NOTHING";
     private static final String GROUP_DELETE = "DELETE FROM '{prefix}groups' WHERE name=?";
 
-    private static final String TRACK_INSERT = "INSERT INTO {prefix}tracks (name, 'groups') VALUES(?, ?)";
-    private static final String TRACK_SELECT = "SELECT 'groups' FROM {prefix}tracks WHERE name=?";
-    private static final String TRACK_SELECT_ALL = "SELECT * FROM {prefix}tracks";
-    private static final String TRACK_UPDATE = "UPDATE {prefix}tracks SET 'groups'=? WHERE name=?";
-    private static final String TRACK_DELETE = "DELETE FROM {prefix}tracks WHERE name=?";
+    private static final String TRACK_INSERT = "INSERT INTO '{prefix}tracks' (name, 'groups') VALUES(?, ?)";
+    private static final String TRACK_SELECT = "SELECT 'groups' FROM '{prefix}tracks' WHERE name=?";
+    private static final String TRACK_SELECT_ALL = "SELECT * FROM '{prefix}tracks'";
+    private static final String TRACK_UPDATE = "UPDATE '{prefix}tracks' SET 'groups'=? WHERE name=?";
+    private static final String TRACK_DELETE = "DELETE FROM '{prefix}tracks' WHERE name=?";
 
-    private static final String ACTION_INSERT = "INSERT INTO {prefix}actions(time, actor_uuid, actor_name, type, acted_uuid, acted_name, action) VALUES(?, ?, ?, ?, ?, ?, ?)";
-    private static final String ACTION_SELECT_ALL = "SELECT * FROM {prefix}actions";
+    private static final String ACTION_INSERT = "INSERT INTO '{prefix}actions' (time, actor_uuid, actor_name, type, acted_uuid, acted_name, action) VALUES(?, ?, ?, ?, ?, ?, ?)";
+    private static final String ACTION_SELECT_ALL = "SELECT * FROM '{prefix}actions'";
 
     private final LuckPermsPlugin plugin;
     
