@@ -86,7 +86,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
             return CommandResult.STATE_ERROR;
         }
         final boolean migrateAsGlobal = Boolean.parseBoolean(args.get(0));
-        final Function<String, String> worldMappingFunc = s -> migrateAsGlobal ? null : s;
+        final Function<String, String> worldMappingFunc = s -> migrateAsGlobal || s == null ? "global" : s;
         
         if (!Bukkit.getPluginManager().isPluginEnabled("GroupManager")) {
             log.logError("Plugin not loaded.");
@@ -145,7 +145,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 }
                 for (String s : group.getInherits()) {
                     if (s.isEmpty()) continue;
-                    groups.get(groupName).add(Inheritance.builder(MigrationUtils.standardizeName(s)).value(true).withContext(DefaultContextKeys.SERVER_KEY, null).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
+                    groups.get(groupName).add(Inheritance.builder(MigrationUtils.standardizeName(s)).value(true).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
                 }
 
                 String[] metaKeys = group.getVariables().getVarKeyList();

@@ -313,12 +313,9 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
     }
 
     private static String standardizeWorld(String world) {
-        if (world != null && (world.isEmpty() || world.equals("*"))) {
-            world = null;
+        if (world == null || world.isEmpty() || world.equals("*")) {
+            world = "global";
         }
-        if (world != null) {
-            world = world.toLowerCase();
-        }
-        return world;
+        return world.toLowerCase();
     }
 }
