@@ -309,7 +309,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             server = "global";
         }
 
-        NodeBuilder nb = NodeBuilders.determineMostApplicable(node).value(value);
+        NodeBuilder<?, ?> nb = NodeBuilders.determineMostApplicable(node).value(value);
         if (expireAt != 0) nb.expiry(expireAt);
         if (server != null) nb.withContext(DefaultContextKeys.SERVER_KEY, server);
         if (world != null) nb.withContext(DefaultContextKeys.WORLD_KEY, world);
@@ -325,7 +325,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             expireAt = g.getExpirationDate().getTime() / 1000L;
         }
 
-        NodeBuilder nb = Inheritance.builder(MigrationUtils.standardizeName(group.getName()));
+        NodeBuilder<?, ?> nb = Inheritance.builder(MigrationUtils.standardizeName(group.getName()));
 
         if (expireAt != 0) {
             nb.expiry(expireAt);
