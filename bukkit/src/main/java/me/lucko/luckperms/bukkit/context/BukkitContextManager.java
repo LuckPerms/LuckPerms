@@ -32,7 +32,6 @@ import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.context.QueryOptionsCache;
-import me.lucko.luckperms.common.context.QueryOptionsSupplier;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 
 import net.luckperms.api.context.ImmutableContextSet;
@@ -70,7 +69,7 @@ public class BukkitContextManager extends ContextManager<Player> {
     }
 
     @Override
-    public QueryOptionsSupplier getCacheFor(Player subject) {
+    public QueryOptionsCache<Player> getCacheFor(Player subject) {
         if (subject == null) {
             throw new NullPointerException("subject");
         }

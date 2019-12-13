@@ -29,14 +29,16 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.QueryOptionsSupplier;
+import me.lucko.luckperms.common.context.QueryOptionsCache;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import me.lucko.luckperms.nukkit.calculator.DefaultsProcessor;
+import me.lucko.luckperms.nukkit.context.NukkitContextManager;
 import me.lucko.luckperms.nukkit.inject.PermissionDefault;
 
+import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -94,7 +96,7 @@ public class LPPermissible extends PermissibleBase {
     private final LPNukkitPlugin plugin;
 
     // caches context lookups for the player
-    private final QueryOptionsSupplier queryOptionsSupplier;
+    private final QueryOptionsCache<Player> queryOptionsSupplier;
 
     // the players previous permissible. (the one they had before this one was injected)
     private PermissibleBase oldPermissible = null;
@@ -164,8 +166,14 @@ public class LPPermissible extends PermissibleBase {
             throw new NullPointerException("permission");
         }
 
-        Tristate ts = this.user.getCachedData().getPermissionData(this.queryOptionsSupplier.getQueryOptions()).checkPermission(permission, PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK).result();
-        return ts != Tristate.UNDEFINED ? ts.asBoolean() : PermissionDefault.OP.getValue(isOp());
+        QueryOptions queryOptions = this.queryOptionsSupplier.getQueryOptions();
+        Tristate ts = this.user.getCachedData().getPermissionData(queryOptions).checkPermission(permission, PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK).result();
+        if (ts != Tristate.UNDEFINED) {
+            return ts.asBoolean();
+        }
+
+        boolean isOp = queryOptions.option(NukkitContextManager.OP_OPTION).orElse(false);
+        return PermissionDefault.OP.getValue(isOp);
     }
 
     @Override
@@ -174,16 +182,18 @@ public class LPPermissible extends PermissibleBase {
             throw new NullPointerException("permission");
         }
 
-        Tristate ts = this.user.getCachedData().getPermissionData(this.queryOptionsSupplier.getQueryOptions()).checkPermission(permission.getName(), PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK).result();
+        QueryOptions queryOptions = this.queryOptionsSupplier.getQueryOptions();
+        Tristate ts = this.user.getCachedData().getPermissionData(queryOptions).checkPermission(permission.getName(), PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK).result();
         if (ts != Tristate.UNDEFINED) {
             return ts.asBoolean();
         }
 
+        boolean isOp = queryOptions.option(NukkitContextManager.OP_OPTION).orElse(false);
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_NUKKIT_DEFAULT_PERMISSIONS)) {
             PermissionDefault def = PermissionDefault.fromPermission(permission);
-            return def != null && def.getValue(isOp());
+            return def != null && def.getValue(isOp);
         } else {
-            return PermissionDefault.OP.getValue(isOp());
+            return PermissionDefault.OP.getValue(isOp);
         }
     }
 
@@ -280,7 +290,13 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public void recalculatePermissions() {
-        // do nothing
+        // this method is called (among other times) when op status is updated.
+        // because we encapsulate op status within QueryOptions, we need to invalidate
+        // the contextmanager cache when op status changes.
+        // (#invalidate is a fast call)
+        this.queryOptionsSupplier.invalidate();
+
+        // but we don't need to do anything else in this method, unlike the CB impl.
     }
 
     @Override
