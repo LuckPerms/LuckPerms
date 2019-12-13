@@ -54,7 +54,7 @@ public class QueryOptionsBuilderImpl implements QueryOptions.Builder {
     public QueryOptionsBuilderImpl(QueryMode mode) {
         this.mode = mode;
         this.context = mode == QueryMode.CONTEXTUAL ? ImmutableContextSetImpl.EMPTY : null;
-        this.flags = 0;
+        this.flags = FlagUtils.DEFAULT_FLAGS;
         this.flagsSet = null;
         this.options = null;
         this.copyOptions = false;
@@ -94,13 +94,13 @@ public class QueryOptionsBuilderImpl implements QueryOptions.Builder {
     public QueryOptions.@NonNull Builder flag(@NonNull Flag flag, boolean value) {
         Objects.requireNonNull(flag, "flag");
 
-        // already set
+        // check if already set
         if (this.flagsSet == null && FlagUtils.read(this.flags, flag) == value) {
             return this;
         }
 
         if (this.flagsSet == null) {
-            this.flagsSet = FlagUtils.createSetFromFlag(this.flags);
+            this.flagsSet = FlagUtils.toSet(this.flags);
         }
         if (value) {
             this.flagsSet.add(flag);
@@ -146,7 +146,7 @@ public class QueryOptionsBuilderImpl implements QueryOptions.Builder {
 
     @Override
     public @NonNull QueryOptions build() {
-        byte flags = this.flagsSet != null ? FlagUtils.createFlag(this.flagsSet) : this.flags;
+        byte flags = this.flagsSet != null ? FlagUtils.toByte(this.flagsSet) : this.flags;
 
         if (this.options == null) {
             if (this.mode == QueryMode.NON_CONTEXTUAL) {

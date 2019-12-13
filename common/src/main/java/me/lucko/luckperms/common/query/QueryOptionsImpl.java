@@ -86,7 +86,7 @@ public class QueryOptionsImpl implements QueryOptions {
         if (this.flagsSet != null) {
             return this.flagsSet;
         }
-        Set<Flag> set = ImmutableSet.copyOf(FlagUtils.createSetFromFlag(this.flags));
+        Set<Flag> set = ImmutableSet.copyOf(FlagUtils.toSet(this.flags));
         this.flagsSet = set;
         return set;
     }

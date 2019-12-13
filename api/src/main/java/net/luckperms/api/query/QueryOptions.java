@@ -71,7 +71,7 @@ public interface QueryOptions {
      * @return the query options
      */
     static @NonNull QueryOptions contextual(@NonNull ContextSet context) {
-        return defaultContextualOptions().toBuilder().context(context).build();
+        return builder(QueryMode.CONTEXTUAL).context(context).build();
     }
 
     /**
@@ -208,6 +208,8 @@ public interface QueryOptions {
         /**
          * Sets the value of the given flag.
          *
+         * <p>By default, all {@link Flag}s are set to true.</p>
+         *
          * @param flag the flag
          * @param value the value to set
          * @return this builder
@@ -219,6 +221,8 @@ public interface QueryOptions {
          *
          * <p>Note that this is a set operation, not append. Existing flags will
          * be overridden.</p>
+         *
+         * <p>By default, all {@link Flag}s are set to true.</p>
          *
          * @param flags the flags
          * @return this builder
