@@ -27,6 +27,9 @@ package net.luckperms.api.query;
 
 /**
  * The flags which can be set for a query.
+ *
+ * <p>By default (in places like new instances of {@link QueryOptions.Builder} and
+ * {@link QueryOptions#defaultContextualOptions()}), all {@link Flag}s are set to true.</p>
  */
 public enum Flag {
 

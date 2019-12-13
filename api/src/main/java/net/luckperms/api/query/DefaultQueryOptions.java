@@ -25,10 +25,6 @@
 
 package net.luckperms.api.query;
 
-import net.luckperms.api.context.ImmutableContextSet;
-
-import java.util.EnumSet;
-
 /**
  * Some default {@link QueryOptions} instances.
  */
@@ -38,7 +34,6 @@ final class DefaultQueryOptions {
     }
 
     private static boolean setup = false;
-    private static final EnumSet<Flag> DEFAULT_FLAGS = EnumSet.allOf(Flag.class);
     private static QueryOptions contextual;
     private static QueryOptions nonContextual;
 
@@ -47,8 +42,8 @@ final class DefaultQueryOptions {
             return;
         }
         setup = true;
-        contextual = QueryOptions.contextual(ImmutableContextSet.empty(), DEFAULT_FLAGS);
-        nonContextual = QueryOptions.nonContextual(DEFAULT_FLAGS);
+        contextual = QueryOptions.builder(QueryMode.CONTEXTUAL).build();
+        nonContextual = QueryOptions.builder(QueryMode.NON_CONTEXTUAL).build();
     }
 
     static QueryOptions contextual() {

@@ -33,13 +33,25 @@ import java.util.Set;
 final class FlagUtils {
     private FlagUtils() {}
 
+    private static final EnumSet<Flag> DEFAULT_FLAGS_SET = EnumSet.allOf(Flag.class);
+    private static final int DEFAULT_FLAGS_SIZE = DEFAULT_FLAGS_SET.size();
+    static final byte DEFAULT_FLAGS = encodeAsByte(DEFAULT_FLAGS_SET);
+
     /* bitwise utility methods */
 
     static boolean read(byte b, Flag setting) {
         return ((b >> setting.ordinal()) & 1) == 1;
     }
 
-    static byte createFlag(Set<Flag> settings) {
+    static byte toByte(Set<Flag> settings) {
+        // fast path for the default set of flags.
+        if (settings.size() == DEFAULT_FLAGS_SIZE) {
+            return DEFAULT_FLAGS;
+        }
+        return encodeAsByte(settings);
+    }
+
+    private static byte encodeAsByte(Set<Flag> settings) {
         byte b = 0;
         for (Flag setting : settings) {
             b |= (1 << setting.ordinal());
@@ -47,7 +59,7 @@ final class FlagUtils {
         return b;
     }
 
-    static Set<Flag> createSetFromFlag(byte b) {
+    static Set<Flag> toSet(byte b) {
         EnumSet<Flag> settings = EnumSet.noneOf(Flag.class);
         for (Flag setting : Flag.values()) {
             if (read(b, setting)) {
