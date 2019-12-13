@@ -38,7 +38,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.EnumSet;
-import java.util.IdentityHashMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -124,9 +124,9 @@ public class QueryOptionsBuilderImpl implements QueryOptions.Builder {
 
         if (this.options == null || this.copyOptions) {
             if (this.options != null) {
-                this.options = new IdentityHashMap<>(this.options);
+                this.options = new HashMap<>(this.options);
             } else {
-                this.options = new IdentityHashMap<>();
+                this.options = new HashMap<>();
             }
             this.copyOptions = false;
         }

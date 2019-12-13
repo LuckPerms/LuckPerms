@@ -32,10 +32,12 @@ import java.util.Objects;
 final class SimpleOptionKey<T> implements OptionKey<T> {
     private final String name;
     private final Class<T> type;
+    private final int hashCode;
 
     SimpleOptionKey(String name, Class<T> type) {
         this.name = name.toLowerCase();
         this.type = type;
+        this.hashCode = Objects.hash(this.name, this.type); // cache hashcode
     }
 
     @Override
@@ -64,6 +66,6 @@ final class SimpleOptionKey<T> implements OptionKey<T> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.name, this.type);
+        return this.hashCode;
     }
 }
