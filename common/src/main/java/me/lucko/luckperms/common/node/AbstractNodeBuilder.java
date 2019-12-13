@@ -39,6 +39,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -61,7 +62,7 @@ public abstract class AbstractNodeBuilder<N extends ScopedNode<N, B>, B extends 
         this.value = value;
         this.expireAt = expireAt;
         this.context = new ImmutableContextSetImpl.BuilderImpl().addAll(context);
-        this.metadata = new IdentityHashMap<>(metadata);
+        this.metadata = new HashMap<>(metadata);
     }
 
     @Override
