@@ -62,7 +62,7 @@ public class MetaClear extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        NodeType type = null;
+        NodeType<?> type = null;
         if (!args.isEmpty()) {
             String typeId = args.get(0).toLowerCase();
             if (typeId.equals("any") || typeId.equals("all") || typeId.equals("*")) {
