@@ -95,7 +95,7 @@ public interface Node {
      * @param key the key
      * @return the node builder
      */
-    static @NonNull NodeBuilder builder(@NonNull String key) {
+    static @NonNull NodeBuilder<?, ?> builder(@NonNull String key) {
         return LuckPermsProvider.get().getNodeBuilderRegistry().forKey(key);
     }
 

@@ -91,7 +91,7 @@ public final class ConfigKeys {
     /**
      * The default global contexts instance
      */
-    public static final ConfigKey<QueryOptions> GLOBAL_CONTEXTS = customKey(c -> {
+    public static final ConfigKey<QueryOptions> GLOBAL_QUERY_OPTIONS = customKey(c -> {
         Set<Flag> flags = EnumSet.of(Flag.RESOLVE_INHERITANCE);
         if (c.getBoolean("include-global", true)) {
             flags.add(Flag.INCLUDE_NODES_WITHOUT_SERVER_CONTEXT);

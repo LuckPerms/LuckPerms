@@ -191,7 +191,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected AbstractEventBus provideEventBus(LuckPermsApiProvider apiProvider) {
+    protected AbstractEventBus<?> provideEventBus(LuckPermsApiProvider apiProvider) {
         return new SpongeEventBus(this, apiProvider);
     }
 

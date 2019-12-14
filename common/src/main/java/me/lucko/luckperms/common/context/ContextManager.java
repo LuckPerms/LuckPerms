@@ -93,7 +93,7 @@ public abstract class ContextManager<T> {
     }
 
     public QueryOptions formQueryOptions(ImmutableContextSet contextSet) {
-        return this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_CONTEXTS).toBuilder().context(contextSet).build();
+        return this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS).toBuilder().context(contextSet).build();
     }
 
     public abstract QueryOptions formQueryOptions(T subject, ImmutableContextSet contextSet);

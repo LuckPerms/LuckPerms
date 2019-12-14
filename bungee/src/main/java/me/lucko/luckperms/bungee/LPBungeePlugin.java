@@ -152,7 +152,7 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected AbstractEventBus provideEventBus(LuckPermsApiProvider apiProvider) {
+    protected AbstractEventBus<?> provideEventBus(LuckPermsApiProvider apiProvider) {
         return new BungeeEventBus(this, apiProvider);
     }
 

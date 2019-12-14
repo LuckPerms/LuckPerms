@@ -168,7 +168,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected AbstractEventBus provideEventBus(LuckPermsApiProvider apiProvider) {
+    protected AbstractEventBus<?> provideEventBus(LuckPermsApiProvider apiProvider) {
         return new NukkitEventBus(this, apiProvider);
     }
 

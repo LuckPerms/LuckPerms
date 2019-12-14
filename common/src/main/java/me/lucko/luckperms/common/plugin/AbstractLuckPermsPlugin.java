@@ -258,7 +258,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     protected abstract CalculatorFactory provideCalculatorFactory();
     protected abstract void setupContextManager();
     protected abstract void setupPlatformHooks();
-    protected abstract AbstractEventBus provideEventBus(LuckPermsApiProvider apiProvider);
+    protected abstract AbstractEventBus<?> provideEventBus(LuckPermsApiProvider apiProvider);
     protected abstract void registerApiOnPlatform(LuckPerms api);
     protected abstract void registerHousekeepingTasks();
     protected abstract void performFinalSetup();
