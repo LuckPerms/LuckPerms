@@ -292,13 +292,13 @@ public class LPPermissible extends PermissibleBase {
     public void recalculatePermissions() {
         // this method is called (among other times) when op status is updated.
         // because we encapsulate op status within QueryOptions, we need to invalidate
-        // the contextmanager cache when op status changes.
+        // the query options cache when op status changes.
         // (#invalidate is a fast call)
         if (this.queryOptionsSupplier != null) { // this method is called by the super class constructor, before this class has fully initialised
             this.queryOptionsSupplier.invalidate();
         }
 
-        // but we don't need to do anything else in this method, unlike the CB impl.
+        // but we don't need to do anything else in this method, unlike the Nukkit impl.
     }
 
     @Override

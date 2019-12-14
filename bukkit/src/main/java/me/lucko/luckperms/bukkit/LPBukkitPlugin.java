@@ -208,7 +208,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected AbstractEventBus provideEventBus(LuckPermsApiProvider apiProvider) {
+    protected AbstractEventBus<?> provideEventBus(LuckPermsApiProvider apiProvider) {
         return new BukkitEventBus(this, apiProvider);
     }
 

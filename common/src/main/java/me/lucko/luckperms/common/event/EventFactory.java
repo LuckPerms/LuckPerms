@@ -104,7 +104,7 @@ public final class EventFactory {
         this.eventBus = eventBus;
     }
 
-    public AbstractEventBus getEventBus() {
+    public AbstractEventBus<?> getEventBus() {
         return this.eventBus;
     }
 

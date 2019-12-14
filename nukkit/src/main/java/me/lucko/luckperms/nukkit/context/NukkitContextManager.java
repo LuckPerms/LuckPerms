@@ -100,7 +100,7 @@ public class NukkitContextManager extends ContextManager<Player> {
 
     @Override
     public QueryOptions formQueryOptions(Player subject, ImmutableContextSet contextSet) {
-        QueryOptions.Builder queryOptions = this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_CONTEXTS).toBuilder();
+        QueryOptions.Builder queryOptions = this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS).toBuilder();
         if (subject.isOp()) {
             queryOptions.option(OP_OPTION, true);
         }

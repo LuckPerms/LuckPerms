@@ -33,8 +33,10 @@ import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.nukkit.inject.dummy.DummyPlugin;
 
 import net.luckperms.api.model.data.DataType;
-import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
+import net.luckperms.api.query.Flag;
+import net.luckperms.api.query.QueryOptions;
 
 import cn.nukkit.permission.Permission;
 import cn.nukkit.permission.PermissionAttachment;
@@ -182,16 +184,19 @@ public class LPPermissionAttachment extends PermissionAttachment {
         }
 
         // construct a node for the permission being set
-        // we use the servers static context to *try* to ensure that the node will apply
-        Node node = NodeBuilders.determineMostApplicable(name)
+        NodeBuilder<?, ?> node = NodeBuilders.determineMostApplicable(name)
                 .value(value)
-                .withContext(this.permissible.getPlugin().getContextManager().getStaticContext())
-                .withMetadata(TRANSIENT_SOURCE_KEY, this)
-                .build();
+                .withMetadata(TRANSIENT_SOURCE_KEY, this);
+
+        // apply with the servers static context to *try* to ensure that the node will apply if INCLUDE_NODES_WITHOUT_SERVER_CONTEXT is not set
+        QueryOptions globalQueryOptions = this.permissible.getPlugin().getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS);
+        if (!globalQueryOptions.flag(Flag.INCLUDE_NODES_WITHOUT_SERVER_CONTEXT)) {
+            node.withContext(this.permissible.getPlugin().getContextManager().getStaticContext());
+        }
 
         // set the transient node
         User user = this.permissible.getUser();
-        user.setNode(DataType.TRANSIENT, node, true).wasSuccessful();
+        user.setNode(DataType.TRANSIENT, node.build(), true);
     }
 
     private void unsetPermissionInternal(String name) {

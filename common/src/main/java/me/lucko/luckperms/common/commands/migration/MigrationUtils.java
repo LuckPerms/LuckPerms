@@ -36,7 +36,7 @@ import net.luckperms.api.node.NodeType;
 public final class MigrationUtils {
     private MigrationUtils() {}
 
-    public static NodeBuilder parseNode(String permission, boolean value) {
+    public static NodeBuilder<?, ?> parseNode(String permission, boolean value) {
         if (permission.startsWith("-") || permission.startsWith("!")) {
             if (permission.length() == 1) {
                 return NodeBuilders.determineMostApplicable(permission).value(value);
