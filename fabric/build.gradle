@@ -1,0 +1,96 @@
+import net.fabricmc.loom.task.RemapJarTask
+
+plugins {
+    id 'com.github.johnrengelman.shadow' version '4.0.1'
+    id 'fabric-loom' version '0.2.6-SNAPSHOT'
+}
+
+repositories {
+    maven { url 'https://maven.fabricmc.net/' }
+}
+
+configurations {
+    shade
+    compile.extendsFrom shade
+}
+
+def minecraftVersion = "1.14.4"
+def yarnBuild = "build.15"
+def loaderVersion = "0.7.2+build.174"
+
+dependencies {
+    // Fabric Stuff, We don't specifically target only a single version but yarn mappings require a version to be specified.
+    minecraft "com.mojang:minecraft:${minecraftVersion}"
+    mappings "net.fabricmc:yarn:${minecraftVersion}+${yarnBuild}:v2"
+    modCompile "net.fabricmc:fabric-loader:${loaderVersion}"
+
+    // We only include the bare minimum of what we use within the Fabric API.
+    modImplementation "net.fabricmc.fabric-api:fabric-api-base:0.1.2+b7f9825de8"
+    modImplementation "net.fabricmc.fabric-api:fabric-commands-v0:0.1.2+b7f9825de8"
+    modImplementation "net.fabricmc.fabric-api:fabric-events-lifecycle-v0:0.1.2+b7f9825de8"
+    modImplementation "net.fabricmc.fabric-api:fabric-networking-v0:0.1.7+12515ed9e8"
+
+    include "net.fabricmc.fabric-api:fabric-api-base:0.1.2+b7f9825de8"
+    include "net.fabricmc.fabric-api:fabric-commands-v0:0.1.2+b7f9825de8"
+    include "net.fabricmc.fabric-api:fabric-events-lifecycle-v0:0.1.2+b7f9825de8"
+    include "net.fabricmc.fabric-api:fabric-networking-v0:0.1.7+12515ed9e8"
+
+    shade project(':common')
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    from(sourceSets.main.resources.srcDirs) {
+        include "fabric.mod.json"
+        expand "version": project.version
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude "fabric.mod.json"
+    }
+}
+
+shadowJar {
+    archiveName = "LuckPerms-Fabric-${project.ext.fullVersion}-dev.jar"
+    configurations = [project.configurations.shade]
+
+    dependencies {
+        exclude('net.fabricmc:.*')
+        include(dependency('net.luckperms:.*'))
+        include(dependency('me.lucko.luckperms:.*'))
+        // Stop the mappings from ending up in the output jar
+    }
+
+    relocate 'net.kyori.text', 'me.lucko.luckperms.lib.text'
+    relocate 'net.kyori.event', 'me.lucko.luckperms.lib.eventbus'
+    relocate 'com.github.benmanes.caffeine', 'me.lucko.luckperms.lib.caffeine'
+    relocate 'okio', 'me.lucko.luckperms.lib.okio'
+    relocate 'okhttp3', 'me.lucko.luckperms.lib.okhttp3'
+    relocate 'org.mariadb.jdbc', 'me.lucko.luckperms.lib.mariadb'
+    relocate 'com.mysql', 'me.lucko.luckperms.lib.mysql'
+    relocate 'org.postgresql', 'me.lucko.luckperms.lib.postgresql'
+    relocate 'com.zaxxer.hikari', 'me.lucko.luckperms.lib.hikari'
+    relocate 'com.mongodb', 'me.lucko.luckperms.lib.mongodb'
+    relocate 'org.bson', 'me.lucko.luckperms.lib.bson'
+    relocate 'redis.clients.jedis', 'me.lucko.luckperms.lib.jedis'
+    relocate 'org.apache.commons.pool2', 'me.lucko.luckperms.lib.commonspool2'
+    relocate 'ninja.leaping.configurate', 'me.lucko.luckperms.lib.configurate'
+}
+
+task remappedShadowJar(type: RemapJarTask) {
+    dependsOn tasks.shadowJar
+    input = tasks.shadowJar.archivePath
+    addNestedDependencies = true
+    archiveName = "LuckPerms-Fabric-${project.ext.fullVersion}.jar"
+    //input = shadowJar.archivePath
+    //addNestedDependencies = true
+    //output = shadowJar.archivePath
+}
+
+tasks.assemble.dependsOn tasks.remappedShadowJar
+
+artifacts {
+    archives remappedShadowJar
+    shadow shadowJar
+}

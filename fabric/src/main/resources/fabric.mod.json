@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "luckperms",
+  "version": "${version}",
+  "name": "LuckPerms",
+  "icon": "icon.png",
+  "description": "An advanced permissions mod (plugin)",
+  "authors": [
+    {
+      "name": "Luck",
+      "minecraft": "UUID_HERE"
+    }
+  ],
+  "licence": "MIT",
+  "contact": {
+    "homepage": "https://luckperms.net",
+    "source": "https://github.com/lucko/LuckPerms",
+    "issues": "https://github.com/lucko/LuckPerms/issues"
+  },
+  "entrypoints": {
+    "server": [
+      "me.lucko.luckperms.fabric.LPFabricServerBootstrap"
+    ],
+    "client": [
+      "me.lucko.luckperms.fabric.LPFabricClientBootstrap"
+    ]
+  },
+  "mixins": [
+    "mixins.luckperms.json"
+  ],
+  "custom": {
+    "modmenu:api": true
+  }
+}

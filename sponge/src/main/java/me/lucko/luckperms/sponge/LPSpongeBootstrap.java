@@ -239,6 +239,11 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     }
 
     @Override
+    public net.luckperms.api.platform.Platform.Environment getEnvironment() {
+        return this.game.getPlatform().getType().isClient() ? net.luckperms.api.platform.Platform.Environment.CLIENT : net.luckperms.api.platform.Platform.Environment.SERVER;
+    }
+
+    @Override
     public String getServerBrand() {
         return this.game.getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getName();
     }

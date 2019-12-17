@@ -196,6 +196,11 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     }
 
     @Override
+    public Platform.Environment getEnvironment() {
+        return Platform.Environment.PROXY;
+    }
+
+    @Override
     public String getServerBrand() {
         return getProxy().getName();
     }

@@ -1,3 +1,9 @@
+allprojects {
+    configurations {
+        compileClasspath // Fabric-loom needs this for remap jar for some reason
+    }
+}
+
 buildscript {
     repositories {
         maven { url 'https://plugins.gradle.org/m2' }
