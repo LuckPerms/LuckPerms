@@ -48,6 +48,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 import java.util.zip.GZIPInputStream;
 
 public class ImportCommand extends SingleCommand {
@@ -65,16 +66,20 @@ public class ImportCommand extends SingleCommand {
         }
 
         String fileName = args.get(0);
-        if (!fileName.contains(".")) {
-            fileName += ".json.gz";
-        }
-
         Path dataDirectory = plugin.getBootstrap().getDataDirectory();
         Path path = dataDirectory.resolve(fileName);
 
         if (!path.getParent().equals(dataDirectory) || path.getFileName().toString().equals("config.yml")) {
             Message.FILE_NOT_WITHIN_DIRECTORY.send(sender, path.toString());
             return CommandResult.INVALID_ARGS;
+        }
+
+        // try auto adding the '.json.gz' extension
+        if (!Files.exists(path) && !fileName.contains(".")) {
+            Path pathWithDefaultExtension = path.resolveSibling(fileName + ".json.gz");
+            if (Files.exists(pathWithDefaultExtension)) {
+                path = pathWithDefaultExtension;
+            }
         }
 
         if (!Files.exists(path)) {
@@ -87,59 +92,55 @@ public class ImportCommand extends SingleCommand {
             return CommandResult.FAILURE;
         }
 
-        if (!fileName.endsWith(".json.gz")) {
-            // legacy
-            List<String> commands;
-            try {
-                commands = Files.readAllLines(path, StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                e.printStackTrace();
-                Message.IMPORT_FILE_READ_FAILURE.send(sender);
-                return CommandResult.FAILURE;
-            }
-
-            if (!this.running.compareAndSet(false, true)) {
-                Message.IMPORT_ALREADY_RUNNING.send(sender);
-                return CommandResult.STATE_ERROR;
-            }
-
-            LegacyImporter importer = new LegacyImporter(plugin.getCommandManager(), sender, commands);
-
-            // Run the importer in its own thread.
-            plugin.getBootstrap().getScheduler().executeAsync(() -> {
-                try {
-                    importer.run();
-                } finally {
-                    this.running.set(false);
-                }
-            });
+        if (path.getFileName().toString().endsWith(".json.gz")) {
+            return exportModern(plugin, sender, path);
         } else {
-            // modern
-            JsonObject data;
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(path)), StandardCharsets.UTF_8))) {
-                data = GsonProvider.normal().fromJson(reader, JsonObject.class);;
-            } catch (IOException e) {
-                e.printStackTrace();
-                Message.IMPORT_FILE_READ_FAILURE.send(sender);
-                return CommandResult.FAILURE;
-            }
-
-            if (!this.running.compareAndSet(false, true)) {
-                Message.IMPORT_ALREADY_RUNNING.send(sender);
-                return CommandResult.STATE_ERROR;
-            }
-
-            Importer importer = new Importer(plugin, sender, data);
-
-            // Run the importer in its own thread.
-            plugin.getBootstrap().getScheduler().executeAsync(() -> {
-                try {
-                    importer.run();
-                } finally {
-                    this.running.set(false);
-                }
-            });
+            return exportLegacy(plugin, sender, path);
         }
+    }
+
+    private CommandResult exportModern(LuckPermsPlugin plugin, Sender sender, Path path) {
+        JsonObject data;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(path)), StandardCharsets.UTF_8))) {
+            data = GsonProvider.normal().fromJson(reader, JsonObject.class);;
+        } catch (IOException e) {
+            e.printStackTrace();
+            Message.IMPORT_FILE_READ_FAILURE.send(sender);
+            return CommandResult.FAILURE;
+        }
+
+        return runImporter(plugin, sender, () -> new Importer(plugin, sender, data));
+    }
+
+    private CommandResult exportLegacy(LuckPermsPlugin plugin, Sender sender, Path path) {
+        List<String> commands;
+        try {
+            commands = Files.readAllLines(path, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Message.IMPORT_FILE_READ_FAILURE.send(sender);
+            return CommandResult.FAILURE;
+        }
+
+        return runImporter(plugin, sender, () -> new LegacyImporter(plugin.getCommandManager(), sender, commands));
+    }
+
+    private CommandResult runImporter(LuckPermsPlugin plugin, Sender sender, Supplier<Runnable> importerSupplier) {
+        if (!this.running.compareAndSet(false, true)) {
+            Message.IMPORT_ALREADY_RUNNING.send(sender);
+            return CommandResult.STATE_ERROR;
+        }
+
+        Runnable importer = importerSupplier.get();
+
+        // Run the importer in its own thread.
+        plugin.getBootstrap().getScheduler().executeAsync(() -> {
+            try {
+                importer.run();
+            } finally {
+                this.running.set(false);
+            }
+        });
 
         return CommandResult.SUCCESS;
     }
