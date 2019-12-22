@@ -30,7 +30,18 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.function.Predicate;
 
 /**
- * A rule for determining if two nodes are equal.
+ * An equality test for determining if two nodes are to be considered equal.
+ *
+ * <p>Recall that {@link Node}s have 4 key attributes: key, value, context, expiry.</p>
+ *
+ * <p>In the default {@link Node#equals(Object)} implementation (equivalent to {@link #EXACT}),
+ * all 4 of these key attributes are considered. However, there are occasions where such strict
+ * equality checking is not desired, hence the use of this class.</p>
+ *
+ * <p>{@link NodeEqualityPredicate}s can either be used inline, by directly calling the
+ * {@link #areEqual(Node, Node)} method, or can be passed as a parameter to the
+ * {@link Node#equals(Node, NodeEqualityPredicate)} method. Either approach is valid, and both will
+ * result in the same result.</p>
  *
  * <p>Generally, implementations of this interface should fulfil the same
  * requirements as the {@link Object#equals(Object)} contract.</p>
@@ -61,60 +72,88 @@ public interface NodeEqualityPredicate {
         return other -> areEqual(node, other);
     }
 
-
-    /*
-     * Some 'default' implementations of NodeEqualityPredicate are provided below.
-     *
-     * These are implemented in the common code, by a special case in the
-     * implementation of Node#equals. As noted above, this should generally be
-     * avoided.
-     */
-
     /**
      * Represents an exact match.
      *
-     * <p>All attributes of the nodes must match for them to be considered
-     * equal.</p>
-     */
-    NodeEqualityPredicate EXACT = new NodeEqualityPredicate() {
-        @Override public boolean areEqual(@NonNull Node o1, @NonNull Node o2) { return o1.equals(o2, this); }
-    };
-
-    /**
-     * All attributes must match, except for
-     * {@link Node#getValue() value}, which is ignored.
-     */
-    NodeEqualityPredicate IGNORE_VALUE = new NodeEqualityPredicate() {
-        @Override public boolean areEqual(@NonNull Node o1, @NonNull Node o2) { return o1.equals(o2, this); }
-    };
-
-    /**
-     * All attributes must match, except for the
-     * {@link Node#getExpiry() expiry time}, which is ignored.
+     * <p>Returns true if: (and)</p>
+     * <p></p>
+     * <ul>
+     * <li>{@link Node#getKey() key} = key</li>
+     * <li>{@link Node#getValue() value} = value</li>
+     * <li>{@link Node#getContexts() context} = context</li>
+     * <li>{@link Node#getExpiry() expiry} = expiry</li>
+     * </ul>
      *
-     * <p>Note that with this setting, whether a node is temporary or not is
-     * still considered.</p>
+     * <p>All 4 attributes of the nodes must match to be considered equal.</p>
+     *
+     * <p>This is the default form of equality, used by {@link Node#equals(Object)}.</p>
      */
-    NodeEqualityPredicate IGNORE_EXPIRY_TIME = new NodeEqualityPredicate() {
-        @Override public boolean areEqual(@NonNull Node o1, @NonNull Node o2) { return o1.equals(o2, this); }
-    };
+    NodeEqualityPredicate EXACT = new DummyNodeEqualityPredicate("EXACT");
 
     /**
-     * All attributes must match, except for
-     * {@link Node#getValue() value} and the
+     * Only the {@link Node#getKey() key}s need match, all other attributes are ignored.
+     */
+    NodeEqualityPredicate ONLY_KEY = new DummyNodeEqualityPredicate("ONLY_KEY");
+
+    /**
+     * All attributes must match, except for {@link Node#getValue() value}, which is ignored.
+     *
+     * <p>Returns true if: (and)</p>
+     * <p></p>
+     * <ul>
+     * <li>{@link Node#getKey() key} = key</li>
+     * <li>{@link Node#getContexts() context} = context</li>
+     * <li>{@link Node#getExpiry() expiry} = expiry</li>
+     * </ul>
+     */
+    NodeEqualityPredicate IGNORE_VALUE = new DummyNodeEqualityPredicate("IGNORE_VALUE");
+
+    /**
+     * All attributes must match, except for the {@link Node#getExpiry() expiry time}, which is
+     * ignored.
+     *
+     * <p>Note that with this setting, whether a node has an expiry or not is still considered.</p>
+     *
+     * <p>Returns true if: (and)</p>
+     * <p></p>
+     * <ul>
+     * <li>{@link Node#getKey() key} = key</li>
+     * <li>{@link Node#getValue() value} = value</li>
+     * <li>{@link Node#getContexts() context} = context</li>
+     * <li>{@link Node#hasExpiry() has expiry} = has expiry</li>
+     * </ul>
+     */
+    NodeEqualityPredicate IGNORE_EXPIRY_TIME = new DummyNodeEqualityPredicate("IGNORE_EXPIRY_TIME");
+
+    /**
+     * All attributes must match, except for {@link Node#getValue() value} and the
      * {@link Node#getExpiry() expiry time}, which are ignored.
+     *
+     * <p>Note that with this setting, whether a node has an expiry or not is still considered.</p>
+     *
+     * <p>Returns true if: (and)</p>
+     * <p></p>
+     * <ul>
+     * <li>{@link Node#getKey() key} = key</li>
+     * <li>{@link Node#getContexts() context} = context</li>
+     * <li>{@link Node#hasExpiry() has expiry} = has expiry</li>
+     * </ul>
      */
-    NodeEqualityPredicate IGNORE_EXPIRY_TIME_AND_VALUE = new NodeEqualityPredicate() {
-        @Override public boolean areEqual(@NonNull Node o1, @NonNull Node o2) { return o1.equals(o2, this); }
-    };
+    NodeEqualityPredicate IGNORE_EXPIRY_TIME_AND_VALUE = new DummyNodeEqualityPredicate("IGNORE_EXPIRY_TIME_AND_VALUE");
 
     /**
-     * All attributes must match, except for
-     * {@link Node#getValue() value} and the if the node is
-     * {@link Node#hasExpiry() temporary}, which are ignored.
+     * All attributes must match, except for {@link Node#getValue() value} and the if the node
+     * {@link Node#hasExpiry() has an expiry}, which are ignored.
+     *
+     * <p>Effectively only considers the key and the context.</p>
+     *
+     * <p>Returns true if: (and)</p>
+     * <p></p>
+     * <ul>
+     * <li>{@link Node#getKey() key} = key</li>
+     * <li>{@link Node#getContexts() context} = context</li>
+     * </ul>
      */
-    NodeEqualityPredicate IGNORE_VALUE_OR_IF_TEMPORARY = new NodeEqualityPredicate() {
-        @Override public boolean areEqual(@NonNull Node o1, @NonNull Node o2) { return o1.equals(o2, this); }
-    };
+    NodeEqualityPredicate IGNORE_VALUE_OR_IF_TEMPORARY = new DummyNodeEqualityPredicate("IGNORE_VALUE_OR_IF_TEMPORARY");
 
 }

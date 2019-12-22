@@ -63,14 +63,23 @@ import java.util.stream.Stream;
  * node, as well as methods to query and extract additional state and properties
  * from these settings.</p>
  *
- * <p>Nodes have the following attributes:</p>
+ * <p>Nodes have the following 4 key attributes:</p>
  * <p></p>
  * <ul>
  * <li>{@link #getKey() key} - the key of the node</li>
  * <li>{@link #getValue() value} - the value of the node (false for negated)</li>
- * <li>{@link #getContexts() context} - the contexts required for this node to apply </li>
+ * <li>{@link #getContexts() context} - the contexts required for this node to apply</li>
  * <li>{@link #getExpiry() expiry} - the time when this node should expire</li>
  * </ul>
+ *
+ * <p>These are the key attributes which are considered when evaluating node
+ * {@link #equals(Object) equality}.</p>
+ *
+ * <p>Nodes can also optionally have {@link #metadata(NodeMetadataKey) metadata} attached to them,
+ * added during construction using {@link NodeBuilder#withMetadata(NodeMetadataKey, Object)}, and
+ * queried using {@link #metadata(NodeMetadataKey)} and {@link #getMetadata(NodeMetadataKey)}.
+ * Such metadata is never considered when evaluating {@link #equals(Object)} or
+ * {@link #equals(Node, NodeEqualityPredicate)} (any form of equality check).</p>
  *
  * <p>There are a number of node types, all of which extend from this class:</p>
  * <p></p>
