@@ -93,7 +93,7 @@ public class AbstractConfiguration implements LuckPermsConfiguration {
         this.adapter.reload();
         load();
 
-        getPlugin().getEventFactory().handleConfigReload();
+        getPlugin().getEventDispatcher().dispatchConfigReload();
     }
 
     @Override

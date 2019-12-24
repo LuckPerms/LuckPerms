@@ -50,7 +50,7 @@ public class LogDispatcher {
                 .filter(CommandPermission.LOG_NOTIFY::isAuthorized)
                 .filter(s -> {
                     boolean shouldCancel = LogNotify.isIgnoring(this.plugin, s.getUniqueId()) || (sender != null && s.getUniqueId().equals(sender.getUniqueId()));
-                    return !this.plugin.getEventFactory().handleLogNotify(shouldCancel, entry, origin, s);
+                    return !this.plugin.getEventDispatcher().dispatchLogNotify(shouldCancel, entry, origin, s);
                 })
                 .forEach(s -> Message.LOG.send(s,
                         entry.getSourceFriendlyString(),
@@ -62,7 +62,7 @@ public class LogDispatcher {
 
     public void dispatch(LoggedAction entry, Sender sender) {
         // set the event to cancelled if the sender is import
-        if (!this.plugin.getEventFactory().handleLogPublish(sender.isImport(), entry)) {
+        if (!this.plugin.getEventDispatcher().dispatchLogPublish(sender.isImport(), entry)) {
             this.plugin.getStorage().logAction(entry);
         }
 
@@ -77,13 +77,13 @@ public class LogDispatcher {
         }
 
         boolean shouldCancel = !this.plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
-        if (!this.plugin.getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.LOCAL)) {
+        if (!this.plugin.getEventDispatcher().dispatchLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.LOCAL)) {
             broadcast(entry, LogNotifyEvent.Origin.LOCAL, sender);
         }
     }
 
     public void dispatchFromApi(LoggedAction entry) {
-        if (!this.plugin.getEventFactory().handleLogPublish(false, entry)) {
+        if (!this.plugin.getEventDispatcher().dispatchLogPublish(false, entry)) {
             try {
                 this.plugin.getStorage().logAction(entry).get();
             } catch (Exception e) {
@@ -98,14 +98,14 @@ public class LogDispatcher {
         this.plugin.getMessagingService().ifPresent(extendedMessagingService -> extendedMessagingService.pushLog(entry));
 
         boolean shouldCancel = !this.plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
-        if (!this.plugin.getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.LOCAL_API)) {
+        if (!this.plugin.getEventDispatcher().dispatchLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.LOCAL_API)) {
             broadcast(entry, LogNotifyEvent.Origin.LOCAL_API, null);
         }
     }
 
     public void dispatchFromRemote(LoggedAction entry) {
         boolean shouldCancel = !this.plugin.getConfiguration().get(ConfigKeys.BROADCAST_RECEIVED_LOG_ENTRIES) || !this.plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
-        if (!this.plugin.getEventFactory().handleLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.REMOTE)) {
+        if (!this.plugin.getEventDispatcher().dispatchLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.REMOTE)) {
             broadcast(entry, LogNotifyEvent.Origin.REMOTE, null);
         }
     }

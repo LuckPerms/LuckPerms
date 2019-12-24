@@ -230,7 +230,7 @@ public abstract class PermissionHolder {
         this.transientNodes.invalidate();
 
         getCachedData().invalidate();
-        getPlugin().getEventFactory().handleDataRecalculate(this);
+        getPlugin().getEventDispatcher().dispatchDataRecalculate(this);
     }
 
     public void setNodes(DataType type, Collection<? extends Node> set) {
@@ -390,7 +390,7 @@ public abstract class PermissionHolder {
             // call event
             ImmutableCollection<? extends Node> after = getData(dataType).immutable().values();
             for (Node r : removed) {
-                this.plugin.getEventFactory().handleNodeRemove(r, this, dataType, before, after);
+                this.plugin.getEventDispatcher().dispatchNodeRemove(r, this, dataType, before, after);
             }
         }
         return work;
@@ -421,7 +421,7 @@ public abstract class PermissionHolder {
 
         ImmutableCollection<? extends Node> after = data.immutable().values();
         if (callEvent) {
-            this.plugin.getEventFactory().handleNodeAdd(node, this, dataType, before, after);
+            this.plugin.getEventDispatcher().dispatchNodeAdd(node, this, dataType, before, after);
         }
 
         return DataMutateResult.SUCCESS;
@@ -459,7 +459,7 @@ public abstract class PermissionHolder {
                     invalidateCache();
 
                     ImmutableCollection<? extends Node> after = data.immutable().values();
-                    this.plugin.getEventFactory().handleNodeAdd(newNode, this, dataType, before, after);
+                    this.plugin.getEventDispatcher().dispatchNodeAdd(newNode, this, dataType, before, after);
 
                     return new MergedNodeResult(DataMutateResult.SUCCESS, newNode);
                 }
@@ -481,7 +481,7 @@ public abstract class PermissionHolder {
         invalidateCache();
 
         ImmutableCollection<? extends Node> after = getData(dataType).immutable().values();
-        this.plugin.getEventFactory().handleNodeRemove(node, this, dataType, before, after);
+        this.plugin.getEventDispatcher().dispatchNodeRemove(node, this, dataType, before, after);
 
         return DataMutateResult.SUCCESS;
     }
@@ -507,7 +507,7 @@ public abstract class PermissionHolder {
         invalidateCache();
 
         ImmutableCollection<? extends Node> after = data.immutable().values();
-        this.plugin.getEventFactory().handleNodeClear(this, dataType, before, after);
+        this.plugin.getEventDispatcher().dispatchNodeClear(this, dataType, before, after);
 
         return true;
     }
@@ -534,7 +534,7 @@ public abstract class PermissionHolder {
             return false;
         }
 
-        this.plugin.getEventFactory().handleNodeClear(this, dataType, before, after);
+        this.plugin.getEventDispatcher().dispatchNodeClear(this, dataType, before, after);
         return true;
     }
 

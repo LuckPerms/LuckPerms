@@ -82,7 +82,7 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
         this.plugin.getLogger().info("Loading extension: " + extension.getClass().getName());
         this.extensions.add(new LoadedExtension(extension, null));
         extension.load();
-        this.plugin.getEventFactory().handleExtensionLoad(extension);
+        this.plugin.getEventDispatcher().dispatchExtensionLoad(extension);
     }
 
     public void loadExtensions(Path directory) {
@@ -171,7 +171,7 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
 
         this.extensions.add(new LoadedExtension(extension, path));
         extension.load();
-        this.plugin.getEventFactory().handleExtensionLoad(extension);
+        this.plugin.getEventDispatcher().dispatchExtensionLoad(extension);
         return extension;
     }
 

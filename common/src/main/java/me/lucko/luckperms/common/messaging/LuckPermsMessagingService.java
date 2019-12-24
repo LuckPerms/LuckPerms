@@ -131,7 +131,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
         this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
             UUID requestId = generatePingId();
 
-            if (this.plugin.getEventFactory().handleLogNetworkPublish(!this.plugin.getConfiguration().get(ConfigKeys.PUSH_LOG_ENTRIES), requestId, logEntry)) {
+            if (this.plugin.getEventDispatcher().dispatchLogNetworkPublish(!this.plugin.getConfiguration().get(ConfigKeys.PUSH_LOG_ENTRIES), requestId, logEntry)) {
                 return;
             }
 
@@ -233,7 +233,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
 
             this.plugin.getLogger().info("[Messaging] Received update ping with id: " + msg.getId());
 
-            if (this.plugin.getEventFactory().handleNetworkPreSync(false, msg.getId())) {
+            if (this.plugin.getEventDispatcher().dispatchNetworkPreSync(false, msg.getId())) {
                 return;
             }
 
@@ -248,7 +248,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
 
             this.plugin.getLogger().info("[Messaging] Received user update ping for '" + user.getPlainDisplayName() + "' with id: " + msg.getId());
 
-            if (this.plugin.getEventFactory().handleNetworkPreSync(false, msg.getId())) {
+            if (this.plugin.getEventDispatcher().dispatchNetworkPreSync(false, msg.getId())) {
                 return;
             }
 
@@ -256,7 +256,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
         } else if (message instanceof ActionLogMessage) {
             ActionLogMessage msg = (ActionLogMessage) message;
 
-            this.plugin.getEventFactory().handleLogReceive(msg.getId(), msg.getAction());
+            this.plugin.getEventDispatcher().dispatchLogReceive(msg.getId(), msg.getAction());
             this.plugin.getLogDispatcher().dispatchFromRemote((LoggedAction) msg.getAction());
         } else {
             throw new IllegalArgumentException("Unknown message type: " + message.getClass().getName());

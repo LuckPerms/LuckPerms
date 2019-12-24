@@ -184,7 +184,7 @@ public final class Track {
         this.groups.add(group.getName());
         List<String> after = ImmutableList.copyOf(this.groups);
 
-        this.plugin.getEventFactory().handleTrackAddGroup(this, group.getName(), before, after);
+        this.plugin.getEventDispatcher().dispatchTrackAddGroup(this, group.getName(), before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -205,7 +205,7 @@ public final class Track {
         this.groups.add(position, group.getName());
         List<String> after = ImmutableList.copyOf(this.groups);
 
-        this.plugin.getEventFactory().handleTrackAddGroup(this, group.getName(), before, after);
+        this.plugin.getEventDispatcher().dispatchTrackAddGroup(this, group.getName(), before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -234,7 +234,7 @@ public final class Track {
         this.groups.remove(group);
         List<String> after = ImmutableList.copyOf(this.groups);
 
-        this.plugin.getEventFactory().handleTrackRemoveGroup(this, group, before, after);
+        this.plugin.getEventDispatcher().dispatchTrackRemoveGroup(this, group, before, after);
         return DataMutateResult.SUCCESS;
     }
 
@@ -264,7 +264,7 @@ public final class Track {
     public void clearGroups() {
         List<String> before = ImmutableList.copyOf(this.groups);
         this.groups.clear();
-        this.plugin.getEventFactory().handleTrackClear(this, before);
+        this.plugin.getEventDispatcher().dispatchTrackClear(this, before);
     }
 
     public PromotionResult promote(User user, ContextSet context, Predicate<String> nextGroupPermissionChecker, @Nullable Sender sender, boolean addToFirst) {
@@ -296,7 +296,7 @@ public final class Track {
             }
 
             user.setNode(DataType.NORMAL, Inheritance.builder(nextGroup.getName()).withContext(context).build(), true);
-            this.plugin.getEventFactory().handleUserPromote(user, this, null, first, sender);
+            this.plugin.getEventDispatcher().dispatchUserPromote(user, this, null, first, sender);
             return PromotionResults.addedToFirst(first);
         }
 
@@ -328,7 +328,7 @@ public final class Track {
             user.getPrimaryGroup().setStoredValue(nextGroup.getName());
         }
 
-        this.plugin.getEventFactory().handleUserPromote(user, this, old, nextGroup.getName(), sender);
+        this.plugin.getEventDispatcher().dispatchUserPromote(user, this, old, nextGroup.getName(), sender);
         return PromotionResults.success(old, nextGroup.getName());
     }
 
@@ -366,7 +366,7 @@ public final class Track {
             }
 
             user.unsetNode(DataType.NORMAL, oldNode);
-            this.plugin.getEventFactory().handleUserDemote(user, this, old, null, sender);
+            this.plugin.getEventDispatcher().dispatchUserDemote(user, this, old, null, sender);
             return DemotionResults.removedFromFirst(old);
         }
 
@@ -382,7 +382,7 @@ public final class Track {
             user.getPrimaryGroup().setStoredValue(previousGroup.getName());
         }
 
-        this.plugin.getEventFactory().handleUserDemote(user, this, old, previousGroup.getName(), sender);
+        this.plugin.getEventDispatcher().dispatchUserDemote(user, this, old, previousGroup.getName(), sender);
         return DemotionResults.success(old, previousGroup.getName());
     }
 

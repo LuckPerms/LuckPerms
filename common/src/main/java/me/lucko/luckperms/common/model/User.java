@@ -63,7 +63,7 @@ public class User extends PermissionHolder {
         this.uniqueId = uniqueId;
         this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
         this.cachedData = new UserCachedDataManager(this);
-        getPlugin().getEventFactory().handleUserCacheLoad(this, this.cachedData);
+        getPlugin().getEventDispatcher().dispatchUserCacheLoad(this, this.cachedData);
     }
 
     @Override

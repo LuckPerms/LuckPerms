@@ -59,7 +59,7 @@ public class SyncTask implements Runnable {
      */
     @Override
     public void run() {
-        if (this.plugin.getEventFactory().handlePreSync(false)) {
+        if (this.plugin.getEventDispatcher().dispatchPreSync(false)) {
             return;
         }
 
@@ -80,7 +80,7 @@ public class SyncTask implements Runnable {
 
         this.plugin.performPlatformDataSync();
 
-        this.plugin.getEventFactory().handlePostSync();
+        this.plugin.getEventDispatcher().dispatchPostSync();
     }
 
     public static class Buffer extends BufferedRequest<Void> {

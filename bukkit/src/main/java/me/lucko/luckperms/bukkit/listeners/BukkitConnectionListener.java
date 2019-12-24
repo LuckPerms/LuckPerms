@@ -115,7 +115,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
         try {
             User user = loadUser(e.getUniqueId(), e.getName());
             recordConnection(e.getUniqueId());
-            this.plugin.getEventFactory().handlePlayerLoginProcess(e.getUniqueId(), e.getName(), user);
+            this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(e.getUniqueId(), e.getName(), user);
         } catch (Exception ex) {
             this.plugin.getLogger().severe("Exception occurred whilst loading data for " + e.getUniqueId() + " - " + e.getName());
             ex.printStackTrace();
@@ -123,7 +123,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
             // deny the connection
             this.deniedAsyncLogin.add(e.getUniqueId());
             e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Message.LOADING_DATABASE_ERROR.asString(this.plugin.getLocaleManager()));
-            this.plugin.getEventFactory().handlePlayerLoginProcess(e.getUniqueId(), e.getName(), null);
+            this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(e.getUniqueId(), e.getName(), null);
         }
     }
 

@@ -89,7 +89,7 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
             try {
                 User user = loadUser(c.getUniqueId(), c.getName());
                 recordConnection(c.getUniqueId());
-                this.plugin.getEventFactory().handlePlayerLoginProcess(c.getUniqueId(), c.getName(), user);
+                this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(c.getUniqueId(), c.getName(), user);
             } catch (Exception ex) {
                 this.plugin.getLogger().severe("Exception occurred whilst loading data for " + c.getUniqueId() + " - " + c.getName());
                 ex.printStackTrace();
@@ -100,7 +100,7 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
                     e.setCancelReason(TextComponent.fromLegacyText(Message.LOADING_DATABASE_ERROR.asString(this.plugin.getLocaleManager())));
                     e.setCancelled(true);
                 }
-                this.plugin.getEventFactory().handlePlayerLoginProcess(c.getUniqueId(), c.getName(), null);
+                this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(c.getUniqueId(), c.getName(), null);
             }
 
             // finally, complete our intent to modify state, so the proxy can continue handling the connection.
