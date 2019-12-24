@@ -88,7 +88,7 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
         try {
             User user = loadUser(profile.getUniqueId(), username);
             recordConnection(profile.getUniqueId());
-            this.plugin.getEventFactory().handlePlayerLoginProcess(profile.getUniqueId(), username, user);
+            this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(profile.getUniqueId(), username, user);
         } catch (Exception ex) {
             this.plugin.getLogger().severe("Exception occurred whilst loading data for " + profile.getUniqueId() + " - " + profile.getName());
             ex.printStackTrace();
@@ -99,7 +99,7 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
             e.setMessageCancelled(false);
             //noinspection deprecation
             e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_DATABASE_ERROR.asString(this.plugin.getLocaleManager())));
-            this.plugin.getEventFactory().handlePlayerLoginProcess(profile.getUniqueId(), username, null);
+            this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(profile.getUniqueId(), username, null);
         }
     }
 

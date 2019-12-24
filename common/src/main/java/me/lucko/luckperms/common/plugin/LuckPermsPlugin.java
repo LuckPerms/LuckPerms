@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
-import me.lucko.luckperms.common.event.EventFactory;
+import me.lucko.luckperms.common.event.EventDispatcher;
 import me.lucko.luckperms.common.extension.SimpleExtensionManager;
 import me.lucko.luckperms.common.inheritance.InheritanceHandler;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -134,11 +134,11 @@ public interface LuckPermsPlugin {
     PluginLogger getLogger();
 
     /**
-     * Gets the event factory
+     * Gets the event dispatcher
      *
-     * @return the event factory
+     * @return the event dispatcher
      */
-    EventFactory getEventFactory();
+    EventDispatcher getEventDispatcher();
 
     /**
      * Returns the class implementing the LuckPermsAPI on this platform.

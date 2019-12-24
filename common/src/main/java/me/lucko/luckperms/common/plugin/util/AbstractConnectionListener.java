@@ -71,7 +71,7 @@ public abstract class AbstractConnectionListener {
 
         // fire UserFirstLogin event
         if (saveResult.includes(PlayerSaveResult.Outcome.CLEAN_INSERT)) {
-            this.plugin.getEventFactory().handleUserFirstLogin(uniqueId, username);
+            this.plugin.getEventDispatcher().dispatchUserFirstLogin(uniqueId, username);
         }
 
         // most likely because ip forwarding is not setup correctly

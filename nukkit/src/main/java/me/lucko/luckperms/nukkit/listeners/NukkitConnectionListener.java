@@ -86,7 +86,7 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
         try {
             User user = loadUser(e.getUuid(), e.getName());
             recordConnection(e.getUuid());
-            this.plugin.getEventFactory().handlePlayerLoginProcess(e.getUuid(), e.getName(), user);
+            this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(e.getUuid(), e.getName(), user);
         } catch (Exception ex) {
             this.plugin.getLogger().severe("Exception occurred whilst loading data for " + e.getUuid() + " - " + e.getName());
             ex.printStackTrace();
@@ -94,7 +94,7 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
             // deny the connection
             this.deniedAsyncLogin.add(e.getUuid());
             e.disAllow(Message.LOADING_DATABASE_ERROR.asString(this.plugin.getLocaleManager()));
-            this.plugin.getEventFactory().handlePlayerLoginProcess(e.getUuid(), e.getName(), null);
+            this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(e.getUuid(), e.getName(), null);
         }
     }
 

@@ -97,10 +97,10 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public final class EventFactory {
+public final class EventDispatcher {
     private final AbstractEventBus<?> eventBus;
 
-    public EventFactory(AbstractEventBus<?> eventBus) {
+    public EventDispatcher(AbstractEventBus<?> eventBus) {
         this.eventBus = eventBus;
     }
 
@@ -135,31 +135,31 @@ public final class EventFactory {
         return (T) GeneratedEventSpec.lookup(eventClass).newInstance(this.eventBus.getApiProvider(), params);
     }
 
-    public void handleExtensionLoad(Extension extension) {
+    public void dispatchExtensionLoad(Extension extension) {
         post(ExtensionLoadEvent.class, () -> generate(ExtensionLoadEvent.class, extension));
     }
 
-    public void handleGroupCacheLoad(Group group, GroupCachedDataManager data) {
+    public void dispatchGroupCacheLoad(Group group, GroupCachedDataManager data) {
         post(GroupCacheLoadEvent.class, () -> generate(GroupCacheLoadEvent.class, group.getApiDelegate(), data));
     }
 
-    public void handleGroupCreate(Group group, CreationCause cause) {
+    public void dispatchGroupCreate(Group group, CreationCause cause) {
         post(GroupCreateEvent.class, () -> generate(GroupCreateEvent.class, group.getApiDelegate(), cause));
     }
 
-    public void handleGroupDelete(Group group, DeletionCause cause) {
+    public void dispatchGroupDelete(Group group, DeletionCause cause) {
         post(GroupDeleteEvent.class, () -> generate(GroupDeleteEvent.class, group.getName(), ImmutableSet.copyOf(group.normalData().immutable().values()), cause));
     }
 
-    public void handleGroupLoadAll() {
+    public void dispatchGroupLoadAll() {
         post(GroupLoadAllEvent.class, () -> generate(GroupLoadAllEvent.class));
     }
 
-    public void handleGroupLoad(Group group) {
+    public void dispatchGroupLoad(Group group) {
         post(GroupLoadEvent.class, () -> generate(GroupLoadEvent.class, group.getApiDelegate()));
     }
 
-    public boolean handleLogBroadcast(boolean initialState, Action entry, LogBroadcastEvent.Origin origin) {
+    public boolean dispatchLogBroadcast(boolean initialState, Action entry, LogBroadcastEvent.Origin origin) {
         if (!shouldPost(LogBroadcastEvent.class)) {
             return initialState;
         }
@@ -169,7 +169,7 @@ public final class EventFactory {
         return cancel.get();
     }
 
-    public boolean handleLogPublish(boolean initialState, Action entry) {
+    public boolean dispatchLogPublish(boolean initialState, Action entry) {
         if (!shouldPost(LogPublishEvent.class)) {
             return initialState;
         }
@@ -179,7 +179,7 @@ public final class EventFactory {
         return cancel.get();
     }
 
-    public boolean handleLogNetworkPublish(boolean initialState, UUID id, Action entry) {
+    public boolean dispatchLogNetworkPublish(boolean initialState, UUID id, Action entry) {
         if (!shouldPost(LogNetworkPublishEvent.class)) {
             return initialState;
         }
@@ -189,7 +189,7 @@ public final class EventFactory {
         return cancel.get();
     }
 
-    public boolean handleLogNotify(boolean initialState, Action entry, LogNotifyEvent.Origin origin, Sender sender) {
+    public boolean dispatchLogNotify(boolean initialState, Action entry, LogNotifyEvent.Origin origin, Sender sender) {
         if (!shouldPost(LogNotifyEvent.class)) {
             return initialState;
         }
@@ -199,31 +199,31 @@ public final class EventFactory {
         return cancel.get();
     }
 
-    public void handleLogReceive(UUID id, Action entry) {
+    public void dispatchLogReceive(UUID id, Action entry) {
         post(LogReceiveEvent.class, () -> generate(LogReceiveEvent.class, id, entry));
     }
 
-    public void handleNodeAdd(Node node, PermissionHolder target, DataType dataType, Collection<? extends Node> before, Collection<? extends Node> after) {
+    public void dispatchNodeAdd(Node node, PermissionHolder target, DataType dataType, Collection<? extends Node> before, Collection<? extends Node> after) {
         post(NodeAddEvent.class, () -> generate(NodeAddEvent.class, getDelegate(target), dataType, ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node));
     }
 
-    public void handleNodeClear(PermissionHolder target, DataType dataType, Collection<? extends Node> before, Collection<? extends Node> after) {
+    public void dispatchNodeClear(PermissionHolder target, DataType dataType, Collection<? extends Node> before, Collection<? extends Node> after) {
         post(NodeClearEvent.class, () -> generate(NodeClearEvent.class, getDelegate(target), dataType, ImmutableSet.copyOf(before), ImmutableSet.copyOf(after)));
     }
 
-    public void handleNodeRemove(Node node, PermissionHolder target, DataType dataType, Collection<? extends Node> before, Collection<? extends Node> after) {
+    public void dispatchNodeRemove(Node node, PermissionHolder target, DataType dataType, Collection<? extends Node> before, Collection<? extends Node> after) {
         post(NodeRemoveEvent.class, () -> generate(NodeRemoveEvent.class, getDelegate(target), dataType, ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node));
     }
 
-    public void handleConfigReload() {
+    public void dispatchConfigReload() {
         post(ConfigReloadEvent.class, () -> generate(ConfigReloadEvent.class));
     }
 
-    public void handlePostSync() {
+    public void dispatchPostSync() {
         post(PostSyncEvent.class, () -> generate(PostSyncEvent.class));
     }
 
-    public boolean handleNetworkPreSync(boolean initialState, UUID id) {
+    public boolean dispatchNetworkPreSync(boolean initialState, UUID id) {
         if (!shouldPost(PreNetworkSyncEvent.class)) {
             return initialState;
         }
@@ -233,7 +233,7 @@ public final class EventFactory {
         return cancel.get();
     }
 
-    public boolean handlePreSync(boolean initialState) {
+    public boolean dispatchPreSync(boolean initialState) {
         if (!shouldPost(PreSyncEvent.class)) {
             return initialState;
         }
@@ -243,39 +243,39 @@ public final class EventFactory {
         return cancel.get();
     }
 
-    public void handleTrackCreate(Track track, CreationCause cause) {
+    public void dispatchTrackCreate(Track track, CreationCause cause) {
         post(TrackCreateEvent.class, () -> generate(TrackCreateEvent.class, track.getApiDelegate(), cause));
     }
 
-    public void handleTrackDelete(Track track, DeletionCause cause) {
+    public void dispatchTrackDelete(Track track, DeletionCause cause) {
         post(TrackDeleteEvent.class, () -> generate(TrackDeleteEvent.class, track.getName(), ImmutableList.copyOf(track.getGroups()), cause));
     }
 
-    public void handleTrackLoadAll() {
+    public void dispatchTrackLoadAll() {
         post(TrackLoadAllEvent.class, () -> generate(TrackLoadAllEvent.class));
     }
 
-    public void handleTrackLoad(Track track) {
+    public void dispatchTrackLoad(Track track) {
         post(TrackLoadEvent.class, () -> generate(TrackLoadEvent.class, track.getApiDelegate()));
     }
 
-    public void handleTrackAddGroup(Track track, String group, List<String> before, List<String> after) {
+    public void dispatchTrackAddGroup(Track track, String group, List<String> before, List<String> after) {
         post(TrackAddGroupEvent.class, () -> generate(TrackAddGroupEvent.class, track.getApiDelegate(), ImmutableList.copyOf(before), ImmutableList.copyOf(after), group));
     }
 
-    public void handleTrackClear(Track track, List<String> before) {
+    public void dispatchTrackClear(Track track, List<String> before) {
         post(TrackClearEvent.class, () -> generate(TrackClearEvent.class, track.getApiDelegate(), ImmutableList.copyOf(before), ImmutableList.of()));
     }
 
-    public void handleTrackRemoveGroup(Track track, String group, List<String> before, List<String> after) {
+    public void dispatchTrackRemoveGroup(Track track, String group, List<String> before, List<String> after) {
         post(TrackRemoveGroupEvent.class, () -> generate(TrackRemoveGroupEvent.class, track.getApiDelegate(), ImmutableList.copyOf(before), ImmutableList.copyOf(after), group));
     }
 
-    public void handleUserCacheLoad(User user, UserCachedDataManager data) {
+    public void dispatchUserCacheLoad(User user, UserCachedDataManager data) {
         post(UserCacheLoadEvent.class, () -> generate(UserCacheLoadEvent.class, new ApiUser(user), data));
     }
 
-    public void handleDataRecalculate(PermissionHolder holder) {
+    public void dispatchDataRecalculate(PermissionHolder holder) {
         if (holder.getType() == HolderType.USER) {
             User user = (User) holder;
             post(UserDataRecalculateEvent.class, () -> generate(UserDataRecalculateEvent.class, user.getApiDelegate(), user.getCachedData()));
@@ -285,11 +285,11 @@ public final class EventFactory {
         }
     }
 
-    public void handleUserFirstLogin(UUID uniqueId, String username) {
+    public void dispatchUserFirstLogin(UUID uniqueId, String username) {
         post(UserFirstLoginEvent.class, () -> generate(UserFirstLoginEvent.class, uniqueId, username));
     }
 
-    public void handlePlayerLoginProcess(UUID uniqueId, String username, User user) {
+    public void dispatchPlayerLoginProcess(UUID uniqueId, String username, User user) {
         if (!shouldPost(PlayerLoginProcessEvent.class)) {
             return;
         }
@@ -297,22 +297,22 @@ public final class EventFactory {
         post(generate(PlayerLoginProcessEvent.class, uniqueId, username, new ApiUser(user)));
     }
 
-    public void handlePlayerDataSave(UUID uniqueId, String username, PlayerSaveResult result) {
+    public void dispatchPlayerDataSave(UUID uniqueId, String username, PlayerSaveResult result) {
         post(PlayerDataSaveEvent.class, () -> generate(PlayerDataSaveEvent.class, uniqueId, username, result));
     }
 
-    public void handleUserLoad(User user) {
+    public void dispatchUserLoad(User user) {
         post(UserLoadEvent.class, () -> generate(UserLoadEvent.class, new ApiUser(user)));
     }
 
-    public void handleUserDemote(User user, Track track, String from, String to, @Nullable Sender source) {
+    public void dispatchUserDemote(User user, Track track, String from, String to, @Nullable Sender source) {
         post(UserDemoteEvent.class, () -> {
             Source s = source == null ? UnknownSource.INSTANCE : new EntitySourceImpl(new SenderPlatformEntity(source));
             return generate(UserDemoteEvent.class, s, track.getApiDelegate(), new ApiUser(user), Optional.ofNullable(from), Optional.ofNullable(to));
         });
     }
 
-    public void handleUserPromote(User user, Track track, String from, String to, @Nullable Sender source) {
+    public void dispatchUserPromote(User user, Track track, String from, String to, @Nullable Sender source) {
         post(UserPromoteEvent.class, () -> {
             Source s = source == null ? UnknownSource.INSTANCE : new EntitySourceImpl(new SenderPlatformEntity(source));
             return generate(UserPromoteEvent.class, s, track.getApiDelegate(), new ApiUser(user), Optional.ofNullable(from), Optional.ofNullable(to));

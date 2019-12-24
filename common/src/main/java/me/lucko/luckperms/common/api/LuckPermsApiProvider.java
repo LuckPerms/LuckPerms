@@ -121,7 +121,7 @@ public class LuckPermsApiProvider implements LuckPerms {
 
     @Override
     public @NonNull EventBus getEventBus() {
-        return this.plugin.getEventFactory().getEventBus();
+        return this.plugin.getEventDispatcher().getEventBus();
     }
 
     @Override

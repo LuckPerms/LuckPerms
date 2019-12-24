@@ -147,7 +147,7 @@ public class Storage {
         return makeFuture(() -> {
             User user = this.implementation.loadUser(uniqueId, username);
             if (user != null) {
-                this.plugin.getEventFactory().handleUserLoad(user);
+                this.plugin.getEventDispatcher().dispatchUserLoad(user);
             }
             return user;
         });
@@ -173,7 +173,7 @@ public class Storage {
         return makeFuture(() -> {
             Group group = this.implementation.createAndLoadGroup(name);
             if (group != null) {
-                this.plugin.getEventFactory().handleGroupCreate(group, cause);
+                this.plugin.getEventDispatcher().dispatchGroupCreate(group, cause);
             }
             return group;
         });
@@ -183,7 +183,7 @@ public class Storage {
         return makeFuture(() -> {
             Optional<Group> group = this.implementation.loadGroup(name);
             if (group.isPresent()) {
-                this.plugin.getEventFactory().handleGroupLoad(group.get());
+                this.plugin.getEventDispatcher().dispatchGroupLoad(group.get());
             }
             return group;
         });
@@ -192,7 +192,7 @@ public class Storage {
     public CompletableFuture<Void> loadAllGroups() {
         return makeFuture(() -> {
             this.implementation.loadAllGroups();
-            this.plugin.getEventFactory().handleGroupLoadAll();
+            this.plugin.getEventDispatcher().dispatchGroupLoadAll();
         });
     }
 
@@ -203,7 +203,7 @@ public class Storage {
     public CompletableFuture<Void> deleteGroup(Group group, DeletionCause cause) {
         return makeFuture(() -> {
             this.implementation.deleteGroup(group);
-            this.plugin.getEventFactory().handleGroupDelete(group, cause);
+            this.plugin.getEventDispatcher().dispatchGroupDelete(group, cause);
         });
     }
 
@@ -219,7 +219,7 @@ public class Storage {
         return makeFuture(() -> {
             Track track = this.implementation.createAndLoadTrack(name);
             if (track != null) {
-                this.plugin.getEventFactory().handleTrackCreate(track, cause);
+                this.plugin.getEventDispatcher().dispatchTrackCreate(track, cause);
             }
             return track;
         });
@@ -229,7 +229,7 @@ public class Storage {
         return makeFuture(() -> {
             Optional<Track> track = this.implementation.loadTrack(name);
             if (track.isPresent()) {
-                this.plugin.getEventFactory().handleTrackLoad(track.get());
+                this.plugin.getEventDispatcher().dispatchTrackLoad(track.get());
             }
             return track;
         });
@@ -238,7 +238,7 @@ public class Storage {
     public CompletableFuture<Void> loadAllTracks() {
         return makeFuture(() -> {
             this.implementation.loadAllTracks();
-            this.plugin.getEventFactory().handleTrackLoadAll();
+            this.plugin.getEventDispatcher().dispatchTrackLoadAll();
         });
     }
 
@@ -249,7 +249,7 @@ public class Storage {
     public CompletableFuture<Void> deleteTrack(Track track, DeletionCause cause) {
         return makeFuture(() -> {
             this.implementation.deleteTrack(track);
-            this.plugin.getEventFactory().handleTrackDelete(track, cause);
+            this.plugin.getEventDispatcher().dispatchTrackDelete(track, cause);
          });
     }
 
@@ -257,7 +257,7 @@ public class Storage {
         return makeFuture(() -> {
             PlayerSaveResult result = this.implementation.savePlayerData(uniqueId, username);
             if (result != null) {
-                this.plugin.getEventFactory().handlePlayerDataSave(uniqueId, username, result);
+                this.plugin.getEventDispatcher().dispatchPlayerDataSave(uniqueId, username, result);
             }
             return result;
         });

@@ -68,7 +68,7 @@ public class Group extends PermissionHolder {
         this.name = name.toLowerCase();
 
         this.cachedData = new GroupCachedDataManager(this);
-        getPlugin().getEventFactory().handleGroupCacheLoad(this, this.cachedData);
+        getPlugin().getEventDispatcher().dispatchGroupCacheLoad(this, this.cachedData);
     }
 
     @Override

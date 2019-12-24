@@ -38,7 +38,7 @@ import me.lucko.luckperms.common.context.LPStaticContextsCalculator;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.event.AbstractEventBus;
-import me.lucko.luckperms.common.event.EventFactory;
+import me.lucko.luckperms.common.event.EventDispatcher;
 import me.lucko.luckperms.common.extension.SimpleExtensionManager;
 import me.lucko.luckperms.common.inheritance.InheritanceHandler;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -85,7 +85,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private InheritanceHandler inheritanceHandler;
     private CalculatorFactory calculatorFactory;
     private LuckPermsApiProvider apiProvider;
-    private EventFactory eventFactory;
+    private EventDispatcher eventDispatcher;
     private SimpleExtensionManager extensionManager;
 
     /**
@@ -170,7 +170,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // register with the LP API
         this.apiProvider = new LuckPermsApiProvider(this);
-        this.eventFactory = new EventFactory(provideEventBus(this.apiProvider));
+        this.eventDispatcher = new EventDispatcher(provideEventBus(this.apiProvider));
         ApiRegistrationUtil.registerProvider(this.apiProvider);
         registerApiOnPlatform(this.apiProvider);
 
@@ -353,8 +353,8 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public EventFactory getEventFactory() {
-        return this.eventFactory;
+    public EventDispatcher getEventDispatcher() {
+        return this.eventDispatcher;
     }
 
     private void displayBanner(Sender sender) {
