@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.storage.implementation.custom;
 
 /**
- * Hook to allow external code to provide a storage dao
+ * Hook to allow external code to provide a storage implementation
  */
 public final class CustomStorageProviders {
     private CustomStorageProviders() {}
