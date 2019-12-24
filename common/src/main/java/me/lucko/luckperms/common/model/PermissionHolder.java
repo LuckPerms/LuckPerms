@@ -428,11 +428,12 @@ public abstract class PermissionHolder {
     }
 
     public DataMutateResult.WithMergedNode setNode(DataType dataType, Node node, TemporaryNodeMergeStrategy mergeStrategy) {
-        if (node.hasExpiry() && mergeStrategy != TemporaryNodeMergeStrategy.NONE) {
+        if (node.getExpiry() != null && mergeStrategy != TemporaryNodeMergeStrategy.NONE) {
             Node otherMatch = getData(dataType).immutable().values().stream()
                     .filter(NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE.equalTo(node))
                     .findFirst().orElse(null);
-            if (otherMatch != null) {
+
+            if (otherMatch != null && otherMatch.getExpiry() != null) {
                 NodeMap data = getData(dataType);
 
                 Node newNode = null;
@@ -445,10 +446,10 @@ public abstract class PermissionHolder {
                     }
                     case REPLACE_EXISTING_IF_DURATION_LONGER: {
                         // Only replace if the new expiry time is greater than the old one.
-                        if (node.getExpiry().getEpochSecond() <= otherMatch.getExpiry().getEpochSecond()) {
-                            break;
+                        if (node.getExpiry().compareTo(otherMatch.getExpiry()) > 0) {
+                            newNode = node;
                         }
-                        newNode = node;
+                        break;
                     }
                 }
 
