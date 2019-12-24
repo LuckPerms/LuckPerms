@@ -35,6 +35,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * An implementation of {@link Messenger} using SQL.
@@ -54,9 +55,20 @@ public abstract class AbstractSqlMessenger implements Messenger {
     public void init() throws SQLException {
         try (Connection c = getConnection()) {
             // init table
-            try (PreparedStatement ps = c.prepareStatement("CREATE TABLE IF NOT EXISTS `" + getTableName() + "` (`id` INT AUTO_INCREMENT NOT NULL, `time` TIMESTAMP NOT NULL, `msg` TEXT NOT NULL, PRIMARY KEY (`id`))")) {
-                ps.execute();
+            String createStatement = "CREATE TABLE IF NOT EXISTS `" + getTableName() + "` (`id` INT AUTO_INCREMENT NOT NULL, `time` TIMESTAMP NOT NULL, `msg` TEXT NOT NULL, PRIMARY KEY (`id`)) DEFAULT CHARSET = utf8mb4";
+            try (Statement s = c.createStatement()) {
+                try {
+                    s.execute(createStatement);
+                } catch (SQLException e) {
+                    if (e.getMessage().contains("Unknown character set")) {
+                        // try again
+                        s.execute(createStatement.replace("utf8mb4", "utf8"));
+                    } else {
+                        throw e;
+                    }
+                }
             }
+
             // pull last id
             try (PreparedStatement ps = c.prepareStatement("SELECT MAX(`id`) as `latest` FROM `" + getTableName() + "`")) {
                 try (ResultSet rs = ps.executeQuery()) {
