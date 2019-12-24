@@ -66,9 +66,10 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     private FileWatcher.WatchedLocation trackWatcher = null;
 
     /**
-     * Creates a new configurate dao
+     * Creates a new configurate storage implementation
+     *
      * @param plugin the plugin instance
-     * @param implementationName the name of this dao
+     * @param implementationName the name of this implementation
      * @param fileExtension the file extension used by this instance, including a "." at the start
      * @param dataFolderName the name of the folder used to store data
      */

@@ -67,7 +67,7 @@ public class ExpireTemporaryTask implements Runnable {
 
     // return true if the holder's io lock is currently held, false otherwise
     private static boolean shouldSkip(PermissionHolder holder) {
-        // if the holder is currently being manipulated by the storage dao,
+        // if the holder is currently being manipulated by the storage impl,
         // don't attempt to audit temporary permissions
         if (!holder.getIoLock().tryLock()) {
             // if #tryLock returns false, it means it's held by something else
