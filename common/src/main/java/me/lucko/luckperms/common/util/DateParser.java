@@ -127,9 +127,9 @@ public final class DateParser {
         max.add(Calendar.YEAR, 10);
 
         if (c.after(max)) {
-            return (max.getTimeInMillis() / 1000) + 1;
+            c = max;
         }
-        return (c.getTimeInMillis() / 1000) + 1;
+        return c.getTimeInMillis() / 1000;
     }
 
 }
