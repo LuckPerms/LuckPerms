@@ -53,9 +53,10 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -65,7 +66,7 @@ import java.util.zip.GZIPOutputStream;
  * Accepts and processes {@link VerboseEvent}, passed from the {@link VerboseHandler}.
  */
 public class VerboseListener {
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
 
     // how much data should we store before stopping.
     private static final int DATA_TRUNCATION = 10000;
@@ -97,7 +98,7 @@ public class VerboseListener {
             .build();
 
     // the time when the listener was first registered
-    private final long startTime = System.currentTimeMillis();
+    private final Instant startTime = Instant.now();
     // the sender to notify each time the listener processes a check which passes the filter
     private final Sender notifiedSender;
     // the filter
@@ -255,10 +256,9 @@ public class VerboseListener {
     public String uploadPasteData(BytebinClient bytebin) {
         // retrieve variables
         long now = System.currentTimeMillis();
-        String startDate = DATE_FORMAT.format(new Date(this.startTime));
-        String endDate = DATE_FORMAT.format(new Date(now));
-        long secondsTaken = (now - this.startTime) / 1000L;
-        String duration = DurationFormatter.CONCISE.format(secondsTaken);
+        String startDate = DATE_FORMAT.format(this.startTime);
+        String endDate = DATE_FORMAT.format(Instant.now());
+        String duration = DurationFormatter.CONCISE.format(Duration.between(this.startTime, Instant.now()));
         boolean truncated = this.matchedCounter.get() > this.results.size();
 
         JObject metadata = new JObject()

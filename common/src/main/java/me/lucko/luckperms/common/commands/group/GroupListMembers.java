@@ -157,7 +157,7 @@ public class GroupListMembers extends SubCommand<Group> {
             return "";
         }
 
-        return " &8(&7expires in " + DurationFormatter.LONG.formatDateDiff(node.getExpiry().getEpochSecond()) + "&8)";
+        return " &8(&7expires in " + DurationFormatter.LONG.format(node.getExpiryDuration()) + "&8)";
     }
 
     private static Consumer<ComponentBuilder<? ,?>> makeFancy(String holderName, HolderType holderType, String label, HeldNode<?> perm, LuckPermsPlugin plugin) {

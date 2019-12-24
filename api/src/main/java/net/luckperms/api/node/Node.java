@@ -40,6 +40,7 @@ import net.luckperms.api.node.types.WeightNode;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Optional;
@@ -162,8 +163,8 @@ public interface Node {
     /**
      * Gets the time when this node will expire.
      *
-     * @return the {@link Instant} when this node will expire, or null if it
-     * doesn't have an expiry time
+     * @return the {@link Instant} when this node will expire, or
+     * {@code null} if it doesn't have an expiry time
      */
     @Nullable Instant getExpiry();
 
@@ -175,6 +176,17 @@ public interface Node {
      * @return true if this node has expired
      */
     boolean hasExpired();
+
+    /**
+     * Gets the time until this node will expire.
+     *
+     * <p>Returns {@code null} if the node doesn't have an expiry time,
+     * and a {@link Duration#isNegative() negative} duration if it has already expired.</p>
+     *
+     * @return the duration until the nodes expiry
+     * @since 5.1
+     */
+    @Nullable Duration getExpiryDuration();
 
     /**
      * Gets the contexts required for this node to apply.

@@ -32,13 +32,16 @@ import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
-import me.lucko.luckperms.common.util.DateParser;
+import me.lucko.luckperms.common.util.DurationParser;
 
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -100,27 +103,27 @@ public class ArgumentParser {
         return true;
     }
 
-    public static long parseDuration(int index, List<String> args) throws ArgumentException {
-        long duration;
+    public static Duration parseDuration(int index, List<String> args) throws ArgumentException {
+        String input = args.get(index);
+        Duration duration;
+
         try {
-            duration = Long.parseLong(args.get(index));
+            long number = Long.parseLong(input);
+            Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+            duration = Duration.between(now, Instant.ofEpochSecond(number));
         } catch (NumberFormatException e) {
             try {
-                duration = DateParser.parseDate(args.get(index), true);
+                duration = DurationParser.parseDuration(input);
             } catch (IllegalArgumentException e1) {
-                throw new InvalidDateException(args.get(index));
+                throw new InvalidDateException(input);
             }
         }
 
-        if (shouldExpire(duration)) {
+        if (duration.isNegative()) {
             throw new PastDateException();
         }
 
         return duration;
-    }
-
-    private static boolean shouldExpire(long unixTime) {
-        return unixTime < (System.currentTimeMillis() / 1000L);
     }
 
     public static TemporaryNodeMergeStrategy parseTemporaryModifier(String s) {

@@ -32,6 +32,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalAmount;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -85,7 +86,20 @@ public interface NodeBuilder<N extends ScopedNode<N, B>, B extends NodeBuilder<N
     /**
      * Sets the time when the node should expire.
      *
-     * <p>The expiry timestamp is calculated relative to the current
+     * <p>The expiry time is calculated relative to the current
+     * system time.</p>
+     *
+     * @param duration how long the node should be added for
+     * @return the builder
+     * @see Node#getExpiry()
+     * @since 5.1
+     */
+    @NonNull B expiry(@Nullable TemporalAmount duration);
+
+    /**
+     * Sets the time when the node should expire.
+     *
+     * <p>The expiry time is calculated relative to the current
      * system time.</p>
      *
      * @param duration how long the node should be added for

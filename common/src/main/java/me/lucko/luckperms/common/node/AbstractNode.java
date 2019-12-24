@@ -40,7 +40,9 @@ import net.luckperms.api.node.types.PermissionNode;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -113,7 +115,18 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
 
     @Override
     public boolean hasExpired() {
-        return hasExpiry() && this.expireAt < System.currentTimeMillis() / 1000L;
+        Instant expiry = getExpiry();
+        return expiry != null && expiry.isBefore(Instant.now());
+    }
+
+    @Override
+    public @Nullable Duration getExpiryDuration() {
+        Instant expiry = getExpiry();
+        if (expiry == null) {
+            return null;
+        }
+        Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+        return Duration.between(now, expiry);
     }
 
     @Override

@@ -53,6 +53,7 @@ import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
 
+import java.time.Duration;
 import java.util.List;
 
 public class ParentAddTemp extends SharedSubCommand {
@@ -68,7 +69,7 @@ public class ParentAddTemp extends SharedSubCommand {
         }
 
         String groupName = ArgumentParser.parseName(0, args);
-        long duration = ArgumentParser.parseDuration(1, args);
+        Duration duration = ArgumentParser.parseDuration(1, args);
         TemporaryNodeMergeStrategy modifier = ArgumentParser.parseTemporaryModifier(2, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
         MutableContextSet context = ArgumentParser.parseContext(2, args, plugin);
 
@@ -93,8 +94,8 @@ public class ParentAddTemp extends SharedSubCommand {
         DataMutateResult.WithMergedNode ret = holder.setNode(DataType.NORMAL, Inheritance.builder(group.getName()).expiry(duration).withContext(context).build(), modifier);
 
         if (ret.getResult().wasSuccessful()) {
-            duration = ret.getMergedNode().getExpiry().getEpochSecond();
-            Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFormattedDisplayName(), group.getFormattedDisplayName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            duration = ret.getMergedNode().getExpiryDuration();
+            Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFormattedDisplayName(), group.getFormattedDisplayName(), DurationFormatter.LONG.format(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
             LoggedAction.build().source(sender).target(holder)
                     .description("parent", "addtemp", group.getName(), duration, context)

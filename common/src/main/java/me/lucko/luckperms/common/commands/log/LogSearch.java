@@ -93,12 +93,10 @@ public class LogSearch extends SubCommand<Log> {
         SortedMap<Integer, LoggedAction> entries = log.getPage(page, ENTRIES_PER_PAGE);
         Message.LOG_SEARCH_HEADER.send(sender, query, page, maxPage);
 
-        long now = System.currentTimeMillis() / 1000L;
         for (Map.Entry<Integer, LoggedAction> e : entries.entrySet()) {
-            long time = e.getValue().getTimestamp().getEpochSecond();
             Message.LOG_ENTRY.send(sender,
                     e.getKey(),
-                    DurationFormatter.CONCISE_LOW_ACCURACY.format(now - time),
+                    DurationFormatter.CONCISE_LOW_ACCURACY.format(e.getValue().getDurationSince()),
                     e.getValue().getSourceFriendlyString(),
                     Character.toString(LoggedAction.getTypeCharacter(((Action) e.getValue()).getTarget().getType())),
                     e.getValue().getTargetFriendlyString(),

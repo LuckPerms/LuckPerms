@@ -61,6 +61,8 @@ import net.luckperms.api.LuckPerms;
 import okhttp3.OkHttpClient;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
@@ -198,7 +200,8 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         // perform any platform-specific final setup tasks
         performFinalSetup();
 
-        getLogger().info("Successfully enabled. (took " + (System.currentTimeMillis() - getBootstrap().getStartupTime()) + "ms)");
+        Duration timeTaken = Duration.between(getBootstrap().getStartupTime(), Instant.now());
+        getLogger().info("Successfully enabled. (took " + timeTaken.toMillis() + "ms)");
     }
 
     public final void disable() {

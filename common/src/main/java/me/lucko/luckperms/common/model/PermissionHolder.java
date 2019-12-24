@@ -440,7 +440,7 @@ public abstract class PermissionHolder {
                 switch (mergeStrategy) {
                     case ADD_NEW_DURATION_TO_EXISTING: {
                         // Create a new Node with the same properties, but add the expiry dates together
-                        long newExpiry = otherMatch.getExpiry().plus(Duration.between(Instant.now(), node.getExpiry())).getEpochSecond();
+                        Instant newExpiry = otherMatch.getExpiry().plus(Duration.between(Instant.now(), node.getExpiry()));
                         newNode = node.toBuilder().expiry(newExpiry).build();
                         break;
                     }

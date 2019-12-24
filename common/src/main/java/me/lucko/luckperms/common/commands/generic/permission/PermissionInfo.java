@@ -115,7 +115,7 @@ public class PermissionInfo extends SharedSubCommand {
         for (Node node : content) {
             String s = "&3> " + (node.getValue() ? "&a" : "&c") + node.getKey() + (sender.isConsole() ? " &7(" + node.getValue() + "&7)" : "") + MessageUtils.getAppendableNodeContextString(plugin.getLocaleManager(), node);
             if (node.hasExpiry()) {
-                s += "\n&2-    expires in " + DurationFormatter.LONG.formatDateDiff(node.getExpiry().getEpochSecond());
+                s += "\n&2-    expires in " + DurationFormatter.LONG.format(node.getExpiryDuration());
             }
 
             TextComponent message = TextUtils.fromLegacy(s, TextUtils.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build();

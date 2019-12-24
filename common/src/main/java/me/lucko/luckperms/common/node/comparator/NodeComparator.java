@@ -28,8 +28,6 @@ package me.lucko.luckperms.common.node.comparator;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.PermissionNode;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 
 public class NodeComparator implements Comparator<Node> {
@@ -65,8 +63,7 @@ public class NodeComparator implements Comparator<Node> {
         }
 
         if (o1.hasExpiry()) {
-            // note vvv
-            result = -Long.compare(ChronoUnit.MILLIS.between(Instant.now(), o1.getExpiry()), ChronoUnit.MILLIS.between(Instant.now(), o2.getExpiry()));
+            result = o1.getExpiry().compareTo(o2.getExpiry());
             if (result != 0) {
                 return result;
             }

@@ -42,6 +42,7 @@ import net.luckperms.api.context.DefaultContextKeys;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -90,6 +91,10 @@ public class LoggedAction implements Action {
     @Override
     public @NonNull Instant getTimestamp() {
         return Instant.ofEpochSecond(this.timestamp);
+    }
+
+    public Duration getDurationSince() {
+        return Duration.between(getTimestamp(), Instant.now());
     }
 
     @Override
