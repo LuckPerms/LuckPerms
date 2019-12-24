@@ -441,6 +441,7 @@ public abstract class PermissionHolder {
                         // Create a new Node with the same properties, but add the expiry dates together
                         long newExpiry = otherMatch.getExpiry().plus(Duration.between(Instant.now(), node.getExpiry())).getEpochSecond();
                         newNode = node.toBuilder().expiry(newExpiry).build();
+                        break;
                     }
                     case REPLACE_EXISTING_IF_DURATION_LONGER: {
                         // Only replace if the new expiry time is greater than the old one.
