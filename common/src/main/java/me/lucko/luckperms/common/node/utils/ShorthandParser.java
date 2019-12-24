@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.node.utils;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterators;
 
@@ -42,7 +43,7 @@ public enum ShorthandParser {
      */
     NUMERIC_RANGE {
         @Override
-        public Iterator<String> extract(String input) {
+        public Iterator<String> extract(String input) throws NumberFormatException {
             int index = input.indexOf(RANGE_SEPARATOR);
             if (index == -1 || index == 0 || index == (input.length() - 1)) {
                 return null;
@@ -77,14 +78,14 @@ public enum ShorthandParser {
     },
 
     /**
-     * Expands "aa,bb,cc" to ["aa", "bb", "cc"]
+     * Expands "aa,bb|cc" to ["aa", "bb", "cc"]
      */
     LIST {
-        private final Splitter splitter = Splitter.on(LIST_SEPARATOR).omitEmptyStrings();
+        private final Splitter splitter = Splitter.on(CharMatcher.anyOf(new String(new char[]{LIST_SEPARATOR, LIST_SEPARATOR_2}))).omitEmptyStrings();
 
         @Override
         public Iterator<String> extract(String input) {
-            if (input.indexOf(LIST_SEPARATOR) == -1) {
+            if (indexOfEither(input, LIST_SEPARATOR, LIST_SEPARATOR_2) == -1) {
                 return Iterators.singletonIterator(input);
             }
             return this.splitter.split(input).iterator();
@@ -104,8 +105,14 @@ public enum ShorthandParser {
     private static final char OPEN_GROUP = '{';
     /** Character used to close a group */
     private static final char CLOSE_GROUP = '}';
+    /** Another character used to open a group */
+    private static final char OPEN_GROUP_2 = '(';
+    /** Another character used to close a group */
+    private static final char CLOSE_GROUP_2 = ')';
     /** Character used to separate items in a list */
     private static final char LIST_SEPARATOR = ',';
+    /** Another character used to separate items in a list */
+    private static final char LIST_SEPARATOR_2 = '|';
     /** Character used to indicate a range between two values */
     private static final char RANGE_SEPARATOR = '-';
 
@@ -126,13 +133,13 @@ public enum ShorthandParser {
         while (true) {
 
             boolean work = false;
-            for (String str : results) {
-                Set<String> expanded = matchGroup(str);
+            for (String string : results) {
+                Set<String> expanded = matchGroup(string);
                 if (expanded != null) {
                     work = true;
                     workSet.addAll(expanded);
                 } else {
-                    workSet.add(str);
+                    workSet.add(string);
                 }
             }
 
@@ -155,29 +162,29 @@ public enum ShorthandParser {
         return results;
     }
 
-    private static Set<String> matchGroup(String s) {
-        int openingIndex = s.indexOf(OPEN_GROUP);
+    private static Set<String> matchGroup(String input) {
+        int openingIndex = indexOfEither(input, OPEN_GROUP, OPEN_GROUP_2);
         if (openingIndex == -1) {
             return null;
         }
 
-        int closingIndex = s.indexOf(CLOSE_GROUP);
+        int closingIndex = indexOfEither(input, CLOSE_GROUP, CLOSE_GROUP_2);
         if (closingIndex < openingIndex) {
             return null;
         }
 
-        String before = s.substring(0, openingIndex);
-        String after = s.substring(closingIndex + 1);
-        String between = s.substring(openingIndex + 1, closingIndex);
+        String before = input.substring(0, openingIndex);
+        String after = input.substring(closingIndex + 1);
+        String between = input.substring(openingIndex + 1, closingIndex);
 
         Set<String> results = new HashSet<>();
 
         for (ShorthandParser parser : PARSERS) {
             try {
-                Iterator<String> res = parser.extract(between);
-                if (res != null) {
-                    while (res.hasNext()) {
-                        results.add(before + res.next() + after);
+                Iterator<String> extracted = parser.extract(between);
+                if (extracted != null) {
+                    while (extracted.hasNext()) {
+                        results.add(before + extracted.next() + after);
                     }
 
                     // break after one parser has matched
@@ -189,6 +196,14 @@ public enum ShorthandParser {
         }
 
         return results;
+    }
+
+    private static int indexOfEither(String s, char c1, char c2) {
+        int index = s.indexOf(c1);
+        if (index != -1) {
+            return index;
+        }
+        return s.indexOf(c2);
     }
 
     /**
