@@ -72,6 +72,6 @@ public class ApiPlatform implements Platform, PluginMetadata {
 
     @Override
     public @NonNull Instant getStartTime() {
-        return Instant.ofEpochMilli(this.plugin.getBootstrap().getStartupTime());
+        return this.plugin.getBootstrap().getStartupTime();
     }
 }

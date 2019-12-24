@@ -35,6 +35,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -99,7 +100,7 @@ public interface LuckPermsBootstrap {
      *
      * @return the enable time
      */
-    long getStartupTime();
+    Instant getStartupTime();
 
     /**
      * Gets the platform type this instance of LuckPerms is running on.

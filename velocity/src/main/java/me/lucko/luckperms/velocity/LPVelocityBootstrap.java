@@ -47,6 +47,7 @@ import org.slf4j.Logger;
 
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -88,7 +89,7 @@ public class LPVelocityBootstrap implements LuckPermsBootstrap {
     /**
      * The time when the plugin was enabled
      */
-    private long startTime;
+    private Instant startTime;
 
     // load/enable latches
     private final CountDownLatch loadLatch = new CountDownLatch(1);
@@ -130,7 +131,7 @@ public class LPVelocityBootstrap implements LuckPermsBootstrap {
 
     @Subscribe(order = PostOrder.FIRST)
     public void onEnable(ProxyInitializeEvent e) {
-        this.startTime = System.currentTimeMillis();
+        this.startTime = Instant.now();
         try {
             this.plugin.load();
         } finally {
@@ -173,7 +174,7 @@ public class LPVelocityBootstrap implements LuckPermsBootstrap {
     }
 
     @Override
-    public long getStartupTime() {
+    public Instant getStartupTime() {
         return this.startTime;
     }
 

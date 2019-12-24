@@ -37,8 +37,11 @@ import net.luckperms.api.node.metadata.NodeMetadataKey;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.time.Instant;
 import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalAmount;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -90,6 +93,16 @@ public abstract class AbstractNodeBuilder<N extends ScopedNode<N, B>, B extends 
         }
 
         this.expireAt = expiry.getLong(ChronoField.INSTANT_SECONDS);
+        return (B) this;
+    }
+
+    @Override
+    public @NonNull B expiry(@Nullable TemporalAmount duration) {
+        if (duration == null) {
+            return clearExpiry();
+        }
+
+        this.expireAt = Instant.now().truncatedTo(ChronoUnit.SECONDS).plus(duration).getEpochSecond();
         return (B) this;
     }
 

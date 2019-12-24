@@ -57,6 +57,7 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.node.NodeType;
 
+import java.time.Duration;
 import java.util.List;
 
 public class MetaSetTemp extends SharedSubCommand {
@@ -73,7 +74,7 @@ public class MetaSetTemp extends SharedSubCommand {
 
         String key = args.get(0);
         String value = args.get(1);
-        long duration = ArgumentParser.parseDuration(2, args);
+        Duration duration = ArgumentParser.parseDuration(2, args);
         TemporaryNodeMergeStrategy modifier = ArgumentParser.parseTemporaryModifier(3, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
         MutableContextSet context = ArgumentParser.parseContext(3, args, plugin);
 
@@ -92,9 +93,9 @@ public class MetaSetTemp extends SharedSubCommand {
         }
 
         holder.removeIf(DataType.NORMAL, context, NodeType.META.predicate(n -> n.hasExpiry() && n.getMetaKey().equalsIgnoreCase(key)), false);
-        duration = holder.setNode(DataType.NORMAL, node, modifier).getMergedNode().getExpiry().getEpochSecond();
+        duration = holder.setNode(DataType.NORMAL, node, modifier).getMergedNode().getExpiryDuration();
 
-        TextComponent.Builder builder = Message.SET_META_TEMP_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, holder.getFormattedDisplayName(), DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
+        TextComponent.Builder builder = Message.SET_META_TEMP_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, holder.getFormattedDisplayName(), DurationFormatter.LONG.format(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
         HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(
                 TextUtils.joinNewline("¥3Raw key: ¥r" + key, "¥3Raw value: ¥r" + value),
                 '¥'

@@ -55,6 +55,7 @@ import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
 import net.luckperms.api.node.ChatMetaType;
 
+import java.time.Duration;
 import java.util.List;
 
 public class MetaAddTempChatMeta extends SharedSubCommand {
@@ -80,7 +81,7 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
 
         int priority = ArgumentParser.parsePriority(0, args);
         String meta = ArgumentParser.parseString(1, args);
-        long duration = ArgumentParser.parseDuration(2, args);
+        Duration duration = ArgumentParser.parseDuration(2, args);
         TemporaryNodeMergeStrategy modifier = ArgumentParser.parseTemporaryModifier(3, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
         MutableContextSet context = ArgumentParser.parseContext(3, args, plugin);
 
@@ -93,9 +94,9 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
         DataMutateResult.WithMergedNode ret = holder.setNode(DataType.NORMAL, this.type.builder(meta, priority).expiry(duration).withContext(context).build(), modifier);
 
         if (ret.getResult().wasSuccessful()) {
-            duration = ret.getMergedNode().getExpiry().getEpochSecond();
+            duration = ret.getMergedNode().getExpiryDuration();
 
-            TextComponent.Builder builder = Message.ADD_TEMP_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, DurationFormatter.LONG.formatDateDiff(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
+            TextComponent.Builder builder = Message.ADD_TEMP_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, DurationFormatter.LONG.format(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
             HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(
                     "¥3Raw " + this.type.name().toLowerCase() + ": ¥r" + meta,
                     '¥'

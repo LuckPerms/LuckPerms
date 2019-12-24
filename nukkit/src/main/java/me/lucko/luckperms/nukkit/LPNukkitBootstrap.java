@@ -37,6 +37,7 @@ import cn.nukkit.plugin.PluginBase;
 
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -70,7 +71,7 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     /**
      * The time when the plugin was enabled
      */
-    private long startTime;
+    private Instant startTime;
 
     // load/enable latches
     private final CountDownLatch loadLatch = new CountDownLatch(1);
@@ -117,7 +118,7 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
 
     @Override
     public void onEnable() {
-        this.startTime = System.currentTimeMillis();
+        this.startTime = Instant.now();
         try {
             this.plugin.enable();
         } finally {
@@ -148,7 +149,7 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     }
 
     @Override
-    public long getStartupTime() {
+    public Instant getStartupTime() {
         return this.startTime;
     }
 

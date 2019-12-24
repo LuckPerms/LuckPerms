@@ -312,7 +312,7 @@ public class ApplyEditsCommand extends SingleCommand {
 
     private static String formatNode(LocaleManager localeManager, Node n) {
         return n.getKey() + " &7(" + (n.getValue() ? "&a" : "&c") + n.getValue() + "&7)" + MessageUtils.getAppendableNodeContextString(localeManager, n) +
-                (n.hasExpiry() ? " &7(" + DurationFormatter.CONCISE.formatDateDiff(n.getExpiry().getEpochSecond()) + ")" : "");
+                (n.hasExpiry() ? " &7(" + DurationFormatter.CONCISE.format(n.getExpiryDuration()) + ")" : "");
     }
 
     private static <T> Map.Entry<Set<T>, Set<T>> diff(Set<T> before, Set<T> after) {

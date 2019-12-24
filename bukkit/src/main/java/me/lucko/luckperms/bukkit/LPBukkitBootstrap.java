@@ -42,6 +42,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -81,7 +82,7 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     /**
      * The time when the plugin was enabled
      */
-    private long startTime;
+    private Instant startTime;
 
     // load/enable latches
     private final CountDownLatch loadLatch = new CountDownLatch(1);
@@ -149,7 +150,7 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
             return;
         }
 
-        this.startTime = System.currentTimeMillis();
+        this.startTime = Instant.now();
         try {
             this.plugin.enable();
 
@@ -192,7 +193,7 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     }
 
     @Override
-    public long getStartupTime() {
+    public Instant getStartupTime() {
         return this.startTime;
     }
 

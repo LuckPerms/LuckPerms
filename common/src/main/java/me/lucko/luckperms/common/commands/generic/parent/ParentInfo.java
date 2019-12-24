@@ -115,7 +115,7 @@ public class ParentInfo extends SharedSubCommand {
         for (InheritanceNode node : content) {
             String s = "&3> &a" + node.getGroupName() + MessageUtils.getAppendableNodeContextString(plugin.getLocaleManager(), node);
             if (node.hasExpiry()) {
-                s += "\n&2  expires in " + DurationFormatter.LONG.formatDateDiff(node.getExpiry().getEpochSecond());
+                s += "\n&2  expires in " + DurationFormatter.LONG.format(node.getExpiryDuration());
             }
 
             TextComponent message = TextUtils.fromLegacy(s, TextUtils.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build();

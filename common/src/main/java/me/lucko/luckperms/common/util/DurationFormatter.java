@@ -25,157 +25,109 @@
 
 package me.lucko.luckperms.common.util;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 
 /**
  * Formats durations to a readable form
- *
- * @author khobbits, drtshock, vemacs
- * see: https://github.com/drtshock/Essentials/blob/2.x/Essentials/src/com/earth2me/essentials/utils/DateUtil.java
  */
 public enum DurationFormatter {
-
+    LONG,
     CONCISE {
-        private final String[] names = new String[]{"y", "y", "m", "m", "d", "d", "h", "h", "m", "m", "s", "s"};
+        @Override
+        protected String formatUnitPlural(ChronoUnit unit) {
+            return String.valueOf(Character.toLowerCase(unit.name().charAt(0)));
+        }
 
         @Override
-        public String format(Calendar from, Calendar to) {
-            return dateDiff(from, to, 4, this.names, true);
+        protected String formatUnitSingular(ChronoUnit unit) {
+            return formatUnitPlural(unit);
         }
     },
-
-    CONCISE_LOW_ACCURACY {
-        private final String[] names = new String[]{"y", "y", "m", "m", "d", "d", "h", "h", "m", "m", "s", "s"};
-
+    CONCISE_LOW_ACCURACY(3) {
         @Override
-        public String format(Calendar from, Calendar to) {
-            return dateDiff(from, to, 2, this.names, true);
+        protected String formatUnitPlural(ChronoUnit unit) {
+            return String.valueOf(Character.toLowerCase(unit.name().charAt(0)));
         }
-    },
-
-    LONG {
-        private final String[] names = new String[]{"year", "years", "month", "months", "day", "days", "hour", "hours", "minute", "minutes", "second", "seconds"};
 
         @Override
-        public String format(Calendar from, Calendar to) {
-            return dateDiff(from, to, 4, this.names, false);
+        protected String formatUnitSingular(ChronoUnit unit) {
+            return formatUnitPlural(unit);
         }
     };
 
-    /**
-     * The calender type magic numbers to use when formatting
-     */
-    private static final int[] CALENDAR_TYPES = new int[] {
-            Calendar.YEAR,
-            Calendar.MONTH,
-            Calendar.DAY_OF_MONTH,
-            Calendar.HOUR_OF_DAY,
-            Calendar.MINUTE,
-            Calendar.SECOND
+    private final Unit[] units = new Unit[]{
+            new Unit(ChronoUnit.YEARS),
+            new Unit(ChronoUnit.MONTHS),
+            new Unit(ChronoUnit.WEEKS),
+            new Unit(ChronoUnit.DAYS),
+            new Unit(ChronoUnit.HOURS),
+            new Unit(ChronoUnit.MINUTES),
+            new Unit(ChronoUnit.SECONDS)
     };
 
-    private static final int MAX_YEARS = 100000;
+    private final int accuracy;
 
-    /**
-     * Formats the difference between two dates
-     *
-     * @param from the start date
-     * @param to the end date
-     * @param maxAccuracy how accurate the output should be (how many sections it'll have)
-     * @param names the names to use to format each of the corresponding {@link #CALENDAR_TYPES}
-     * @return a formatted string
-     */
-    private static String dateDiff(Calendar from, Calendar to, int maxAccuracy, String[] names, boolean concise) {
-        if (to.equals(from)) {
-            return "now";
+    DurationFormatter() {
+        this(Integer.MAX_VALUE);
+    }
+
+    DurationFormatter(int accuracy) {
+        if (accuracy <= 0) {
+            throw new IllegalArgumentException("accuracy must be >= 1");
+        }
+        this.accuracy = accuracy;
+    }
+
+    protected String formatUnitPlural(ChronoUnit unit) {
+        return " " + unit.name().toLowerCase();
+    }
+
+    protected String formatUnitSingular(ChronoUnit unit) {
+        String s = unit.name().toLowerCase();
+        return " " + s.substring(0, s.length() - 1);
+    }
+
+    private final class Unit {
+        private final long duration;
+        private final String stringPlural;
+        private final String stringSingular;
+
+        Unit(ChronoUnit unit) {
+            this.duration = unit.getDuration().getSeconds();
+            this.stringPlural = formatUnitPlural(unit);
+            this.stringSingular = formatUnitSingular(unit);
         }
 
-        boolean future = to.after(from);
+        public String toString(long n) {
+            return n == 1 ? this.stringSingular : this.stringPlural;
+        }
+    }
 
-        StringBuilder sb = new StringBuilder();
-        int accuracy = 0;
-        for (int i = 0; i < CALENDAR_TYPES.length; i++) {
-            if (accuracy > maxAccuracy) {
+    private String format(long seconds) {
+        StringBuilder output = new StringBuilder();
+        int outputSize = 0;
+
+        for (Unit unit : this.units) {
+            long n = seconds / unit.duration;
+            if (n > 0) {
+                seconds -= unit.duration * n;
+                output.append(' ').append(n).append(unit.toString(n));
+                outputSize++;
+            }
+            if (seconds <= 0 || outputSize >= this.accuracy) {
                 break;
             }
-
-            int diff = dateDiff(CALENDAR_TYPES[i], from, to, future);
-            if (diff > 0) {
-                int plural = diff > 1 ? 1 : 0;
-                String unit = names[i * 2 + plural];
-
-                sb.append(" ");
-                sb.append(diff);
-                if (!concise) {
-                    sb.append(" ");
-                }
-                sb.append(unit);
-
-                accuracy++;
-            }
         }
 
-        if (sb.length() == 0) {
-            return "now";
+        if (output.length() == 0) {
+            return "0" + this.units[this.units.length - 1].stringPlural;
         }
-
-        return sb.toString().trim();
+        return output.substring(1);
     }
 
-    private static int dateDiff(int type, Calendar fromDate, Calendar toDate, boolean future) {
-        int fromYear = fromDate.get(Calendar.YEAR);
-        int toYear = toDate.get(Calendar.YEAR);
-        if (Math.abs(fromYear - toYear) > MAX_YEARS) {
-            toDate.set(Calendar.YEAR, fromYear + (future ? MAX_YEARS : -MAX_YEARS));
-        }
-
-        int diff = 0;
-        long savedDate = fromDate.getTimeInMillis();
-        while ((future && !fromDate.after(toDate)) || (!future && !fromDate.before(toDate))) {
-            savedDate = fromDate.getTimeInMillis();
-            fromDate.add(type, future ? 1 : -1);
-            diff++;
-        }
-
-        diff--;
-        fromDate.setTimeInMillis(savedDate);
-        return diff;
+    public String format(Duration duration) {
+        return format(duration.getSeconds());
     }
 
-    /**
-     * Formats the time difference between two dates
-     *
-     * @param from the start date
-     * @param to the end date
-     * @return the formatted duration string
-     */
-    public abstract String format(Calendar from, Calendar to);
-
-    /**
-     * Formats a duration, in seconds
-     *
-     * @param seconds the duration
-     * @return the formatted duration string
-     */
-    public String format(long seconds) {
-        Calendar from = new GregorianCalendar();
-        from.setTimeInMillis(0);
-
-        Calendar to = new GregorianCalendar();
-        to.setTimeInMillis(seconds * 1000L);
-
-        return format(from, to);
-    }
-
-    /**
-     * Formats the duration between the current time and the given unix timestamp
-     *
-     * @param unixTimestamp the timestamp, in seconds
-     * @return the formatted duration string
-     */
-    public String formatDateDiff(long unixTimestamp) {
-        long now = System.currentTimeMillis() / 1000L;
-        return format(unixTimestamp - now);
-    }
 }

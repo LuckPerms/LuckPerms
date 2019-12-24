@@ -41,6 +41,8 @@ import me.lucko.luckperms.common.util.Predicates;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.extension.Extension;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +82,7 @@ public class InfoCommand extends SingleCommand {
                 staticContext.isEmpty() ? "None" : MessageUtils.contextSetToString(plugin.getLocaleManager(), staticContext),
                 plugin.getBootstrap().getPlayerCount(),
                 plugin.getConnectionListener().getUniqueConnections().size(),
-                DurationFormatter.CONCISE_LOW_ACCURACY.format((System.currentTimeMillis() - plugin.getBootstrap().getStartupTime()) / 1000L),
+                DurationFormatter.CONCISE_LOW_ACCURACY.format(Duration.between(plugin.getBootstrap().getStartupTime(), Instant.now())),
                 plugin.getUserManager().getAll().size(),
                 plugin.getGroupManager().getAll().size(),
                 plugin.getTrackManager().getAll().size()
