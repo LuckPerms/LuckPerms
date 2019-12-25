@@ -25,9 +25,11 @@
 
 package me.lucko.luckperms.common.util;
 
+import com.google.common.collect.ImmutableMap;
+
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -38,28 +40,21 @@ import java.util.stream.Collectors;
 public final class DurationParser {
     private DurationParser() {}
 
-    private static final ChronoUnit[] UNITS = new ChronoUnit[]{
-            ChronoUnit.YEARS,
-            ChronoUnit.MONTHS,
-            ChronoUnit.WEEKS,
-            ChronoUnit.DAYS,
-            ChronoUnit.HOURS,
-            ChronoUnit.MINUTES,
-            ChronoUnit.SECONDS
-    };
+    private static final Map<ChronoUnit, String> UNITS_PATTERNS = ImmutableMap.<ChronoUnit, String>builder()
+            .put(ChronoUnit.YEARS, "y(?:ear)?s?")
+            .put(ChronoUnit.MONTHS, "mo(?:nth)?s?")
+            .put(ChronoUnit.WEEKS, "w(?:eek)?s?")
+            .put(ChronoUnit.DAYS, "d(?:ay)?s?")
+            .put(ChronoUnit.HOURS, "h(?:our|r)?s?")
+            .put(ChronoUnit.MINUTES, "m(?:inute|in)?s?")
+            .put(ChronoUnit.SECONDS, "(?:s(?:econd|ec)?s?)?")
+            .build();
 
-    private static final String PATTERN_STRING = Arrays.stream(UNITS)
-            .limit(UNITS.length - 1) // skip seconds
-            .map(unit -> {
-                if (unit == ChronoUnit.MONTHS) {
-                    return "mo";
-                }
-                // use the first char as the abbreviation
-                return String.valueOf(Character.toLowerCase(unit.name().charAt(0)));
-            })
-            .map(abbreviation -> "(?:([0-9]+)\\s*" + abbreviation + "[a-z]*[,\\s]*)?")
-            .collect(Collectors.joining())
-            .concat("(?:([0-9]+)\\s*(?:s[a-z]*)?)?");
+    private static final ChronoUnit[] UNITS = UNITS_PATTERNS.keySet().toArray(new ChronoUnit[0]);
+
+    private static final String PATTERN_STRING = UNITS_PATTERNS.values().stream()
+            .map(pattern -> "(?:(\\d+)\\s*" + pattern + "[,\\s]*)?")
+            .collect(Collectors.joining());
 
     private static final Pattern PATTERN = Pattern.compile(PATTERN_STRING, Pattern.CASE_INSENSITIVE);
 
