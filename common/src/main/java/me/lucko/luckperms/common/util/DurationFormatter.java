@@ -73,10 +73,36 @@ public enum DurationFormatter {
     }
 
     DurationFormatter(int accuracy) {
-        if (accuracy <= 0) {
-            throw new IllegalArgumentException("accuracy must be >= 1");
-        }
         this.accuracy = accuracy;
+    }
+
+    /**
+     * Formats {@code duration} as a string.
+     *
+     * @param duration the duration
+     * @return the formatted string
+     */
+    public String format(Duration duration) {
+        long seconds = duration.getSeconds();
+        StringBuilder output = new StringBuilder();
+        int outputSize = 0;
+
+        for (Unit unit : this.units) {
+            long n = seconds / unit.duration;
+            if (n > 0) {
+                seconds -= unit.duration * n;
+                output.append(' ').append(n).append(unit.toString(n));
+                outputSize++;
+            }
+            if (seconds <= 0 || outputSize >= this.accuracy) {
+                break;
+            }
+        }
+
+        if (output.length() == 0) {
+            return "0" + this.units[this.units.length - 1].stringPlural;
+        }
+        return output.substring(1);
     }
 
     protected String formatUnitPlural(ChronoUnit unit) {
@@ -102,32 +128,6 @@ public enum DurationFormatter {
         public String toString(long n) {
             return n == 1 ? this.stringSingular : this.stringPlural;
         }
-    }
-
-    private String format(long seconds) {
-        StringBuilder output = new StringBuilder();
-        int outputSize = 0;
-
-        for (Unit unit : this.units) {
-            long n = seconds / unit.duration;
-            if (n > 0) {
-                seconds -= unit.duration * n;
-                output.append(' ').append(n).append(unit.toString(n));
-                outputSize++;
-            }
-            if (seconds <= 0 || outputSize >= this.accuracy) {
-                break;
-            }
-        }
-
-        if (output.length() == 0) {
-            return "0" + this.units[this.units.length - 1].stringPlural;
-        }
-        return output.substring(1);
-    }
-
-    public String format(Duration duration) {
-        return format(duration.getSeconds());
     }
 
 }
