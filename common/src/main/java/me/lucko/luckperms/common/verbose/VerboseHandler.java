@@ -27,8 +27,8 @@ package me.lucko.luckperms.common.verbose;
 
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.util.RepeatingTask;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.common.verbose.event.VerboseEvent;
@@ -45,21 +45,21 @@ import java.util.concurrent.TimeUnit;
 /**
  * Accepts {@link VerboseEvent}s and passes them onto registered {@link VerboseListener}s.
  */
-public class VerboseHandler extends RepeatingTask {
+public class VerboseHandler implements AutoCloseable {
 
-    // the listeners currently registered
+    /** A map of currently registered listeners */
     private final Map<UUID, VerboseListener> listeners;
-
-    // a queue of events
+    /** A queue of verbose events to be handled */
     private final Queue<VerboseEvent> queue;
-
-    // if there are any listeners currently registered
+    /** If there are any listeners registered */
     private boolean listening = false;
+    /** The tick task */
+    private final SchedulerTask task;
 
     public VerboseHandler(SchedulerAdapter scheduler) {
-        super(scheduler, 100, TimeUnit.MILLISECONDS);
         this.listeners = new ConcurrentHashMap<>();
         this.queue = new ConcurrentLinkedQueue<>();
+        this.task = scheduler.asyncRepeating(this::tick, 100, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -137,8 +137,7 @@ public class VerboseHandler extends RepeatingTask {
         return this.listeners.remove(uuid);
     }
 
-    @Override
-    protected void tick() {
+    private void tick() {
         // remove listeners where the sender is no longer valid
         this.listeners.values().removeIf(l -> !l.getNotifiedSender().isValid());
 
@@ -159,4 +158,10 @@ public class VerboseHandler extends RepeatingTask {
             }
         }
     }
+
+    @Override
+    public void close() {
+        this.task.cancel();
+    }
+
 }

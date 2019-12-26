@@ -28,8 +28,8 @@ package me.lucko.luckperms.common.treeview;
 import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
-import me.lucko.luckperms.common.util.RepeatingTask;
 
 import java.util.List;
 import java.util.Map;
@@ -40,19 +40,20 @@ import java.util.concurrent.TimeUnit;
 /**
  * Stores a collection of all permissions known to the platform.
  */
-public class PermissionRegistry extends RepeatingTask {
+public class PermissionRegistry implements AutoCloseable {
     private static final Splitter DOT_SPLIT = Splitter.on('.').omitEmptyStrings();
 
-    // the root node in the tree
+    /** The root node in the tree */
     private final TreeNode rootNode;
-
-    // a queue of permission strings to be processed by the tree
+    /** A queue of permission strings to be added to the tree */
     private final Queue<String> queue;
+    /** The tick task */
+    private final SchedulerTask task;
 
     public PermissionRegistry(SchedulerAdapter scheduler) {
-        super(scheduler, 1, TimeUnit.SECONDS);
         this.rootNode = new TreeNode();
         this.queue = new ConcurrentLinkedQueue<>();
+        this.task = scheduler.asyncRepeating(this::tick, 1, TimeUnit.SECONDS);
     }
 
     public TreeNode getRootNode() {
@@ -70,11 +71,15 @@ public class PermissionRegistry extends RepeatingTask {
         this.queue.offer(permission);
     }
 
-    @Override
-    protected void tick() {
+    private void tick() {
         for (String e; (e = this.queue.poll()) != null; ) {
             insert(e);
         }
+    }
+
+    @Override
+    public void close() {
+        this.task.cancel();
     }
 
     public void insert(String permission) {
