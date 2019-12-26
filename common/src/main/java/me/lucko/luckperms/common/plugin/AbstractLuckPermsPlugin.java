@@ -206,8 +206,8 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
     public final void disable() {
         // shutdown permission vault and verbose handler tasks
-        this.permissionRegistry.stop();
-        this.verboseHandler.stop();
+        this.permissionRegistry.close();
+        this.verboseHandler.close();
 
         // unload extensions
         this.extensionManager.close();
