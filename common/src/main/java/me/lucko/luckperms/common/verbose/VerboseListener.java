@@ -55,6 +55,7 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +67,8 @@ import java.util.zip.GZIPOutputStream;
  * Accepts and processes {@link VerboseEvent}, passed from the {@link VerboseHandler}.
  */
 public class VerboseListener {
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z")
+            .withZone(ZoneId.systemDefault());
 
     // how much data should we store before stopping.
     private static final int DATA_TRUNCATION = 10000;
@@ -255,7 +257,6 @@ public class VerboseListener {
      */
     public String uploadPasteData(BytebinClient bytebin) {
         // retrieve variables
-        long now = System.currentTimeMillis();
         String startDate = DATE_FORMAT.format(this.startTime);
         String endDate = DATE_FORMAT.format(Instant.now());
         String duration = DurationFormatter.CONCISE.format(Duration.between(this.startTime, Instant.now()));
