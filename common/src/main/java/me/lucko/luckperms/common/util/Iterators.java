@@ -34,10 +34,10 @@ import java.util.function.Function;
 public final class Iterators {
     private Iterators() {}
 
-    public static <I> void tryIterate(Iterable<I> iterable, Consumer<I> action) {
-        for (I i : iterable) {
+    public static <E> void tryIterate(Iterable<E> iterable, Consumer<E> action) {
+        for (E element : iterable) {
             try {
-                action.accept(i);
+                action.accept(element);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -45,19 +45,19 @@ public final class Iterators {
     }
 
     public static <I, O> void tryIterate(Iterable<I> iterable, Function<I, O> mapping, Consumer<O> action) {
-        for (I i : iterable) {
+        for (I element : iterable) {
             try {
-                action.accept(mapping.apply(i));
+                action.accept(mapping.apply(element));
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public static <I> void tryIterate(I[] array, Consumer<I> action) {
-        for (I i : array) {
+    public static <E> void tryIterate(E[] array, Consumer<E> action) {
+        for (E element : array) {
             try {
-                action.accept(i);
+                action.accept(element);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -65,20 +65,20 @@ public final class Iterators {
     }
 
     public static <I, O> void tryIterate(I[] array, Function<I, O> mapping, Consumer<O> action) {
-        for (I i : array) {
+        for (I element : array) {
             try {
-                action.accept(mapping.apply(i));
+                action.accept(mapping.apply(element));
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public static <T> List<List<T>> divideIterable(Iterable<T> source, int size) {
-        List<List<T>> lists = new ArrayList<>();
-        Iterator<T> it = source.iterator();
+    public static <E> List<List<E>> divideIterable(Iterable<E> source, int size) {
+        List<List<E>> lists = new ArrayList<>();
+        Iterator<E> it = source.iterator();
         while (it.hasNext()) {
-            List<T> subList = new ArrayList<>();
+            List<E> subList = new ArrayList<>();
             for (int i = 0; it.hasNext() && i < size; i++) {
                 subList.add(it.next());
             }
