@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import me.lucko.luckperms.nukkit.calculator.DefaultsProcessor;
-import me.lucko.luckperms.nukkit.context.NukkitContextManager;
+import me.lucko.luckperms.nukkit.calculator.OpProcessor;
 import me.lucko.luckperms.nukkit.inject.PermissionDefault;
 
 import net.luckperms.api.query.QueryOptions;
@@ -142,13 +142,19 @@ public class LPPermissible extends PermissibleBase {
             throw new NullPointerException("permission");
         }
 
-        TristateResult result = this.user.getCachedData().getPermissionData(this.queryOptionsSupplier.getQueryOptions()).checkPermission(permission, PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK);
+        QueryOptions queryOptions = this.queryOptionsSupplier.getQueryOptions();
+        TristateResult result = this.user.getCachedData().getPermissionData(queryOptions).checkPermission(permission, PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK);
         if (result.result() == Tristate.UNDEFINED) {
             return false;
         }
 
         // ignore matches made from looking up in the permission map (replicate nukkit behaviour)
-        return !(result.processorClass() == DefaultsProcessor.class && "permission map".equals(result.cause()));
+        if (result.processorClass() == DefaultsProcessor.class && "permission map".equals(result.cause())) {
+            return false;
+        }
+
+        // ignore the op processor
+        return result.processorClass() != OpProcessor.class;
     }
 
     @Override
@@ -167,13 +173,7 @@ public class LPPermissible extends PermissibleBase {
         }
 
         QueryOptions queryOptions = this.queryOptionsSupplier.getQueryOptions();
-        Tristate ts = this.user.getCachedData().getPermissionData(queryOptions).checkPermission(permission, PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK).result();
-        if (ts != Tristate.UNDEFINED) {
-            return ts.asBoolean();
-        }
-
-        boolean isOp = queryOptions.option(NukkitContextManager.OP_OPTION).orElse(false);
-        return PermissionDefault.OP.getValue(isOp);
+        return this.user.getCachedData().getPermissionData(queryOptions).checkPermission(permission, PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK).result().asBoolean();
     }
 
     @Override
@@ -183,18 +183,18 @@ public class LPPermissible extends PermissibleBase {
         }
 
         QueryOptions queryOptions = this.queryOptionsSupplier.getQueryOptions();
-        Tristate ts = this.user.getCachedData().getPermissionData(queryOptions).checkPermission(permission.getName(), PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK).result();
-        if (ts != Tristate.UNDEFINED) {
-            return ts.asBoolean();
+        TristateResult result = this.user.getCachedData().getPermissionData(queryOptions).checkPermission(permission.getName(), PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK);
+
+        // override default op handling using the Permission class we have
+        if (result.processorClass() == OpProcessor.class && this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
+            // 'op == true' is implied by the presence of the OpProcessor class
+            PermissionDefault def = PermissionDefault.fromPermission(permission);
+            if (def != null) {
+                return def.getValue(true);
+            }
         }
 
-        boolean isOp = queryOptions.option(NukkitContextManager.OP_OPTION).orElse(false);
-        if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_NUKKIT_DEFAULT_PERMISSIONS)) {
-            PermissionDefault def = PermissionDefault.fromPermission(permission);
-            return def != null && def.getValue(isOp);
-        } else {
-            return PermissionDefault.OP.getValue(isOp);
-        }
+        return result.result().asBoolean();
     }
 
     /**
