@@ -66,8 +66,15 @@ public class NukkitCalculatorFactory implements CalculatorFactory {
             processors.add(new WildcardProcessor());
         }
 
-        if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_NUKKIT_DEFAULT_PERMISSIONS) && metadata.getHolderType() == HolderType.USER) {
-            processors.add(new DefaultsProcessor(this.plugin, queryOptions.option(NukkitContextManager.OP_OPTION).orElse(false)));
+        if (metadata.getHolderType() == HolderType.USER) {
+            boolean op = queryOptions.option(NukkitContextManager.OP_OPTION).orElse(false);
+            if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_NUKKIT_DEFAULT_PERMISSIONS)) {
+                processors.add(new DefaultsProcessor(this.plugin, op));
+            }
+
+            if (op) {
+                processors.add(new OpProcessor());
+            }
         }
 
         return new PermissionCalculator(this.plugin, metadata, processors.build());
