@@ -25,20 +25,11 @@
 
 package me.lucko.luckperms.bukkit.brigadier;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.ArgumentBuilder;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import me.lucko.commodore.Commodore;
 import me.lucko.commodore.CommodoreProvider;
+import me.lucko.commodore.file.CommodoreFileFormat;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 
@@ -48,41 +39,32 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.plugin.PluginManager;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.zip.GZIPInputStream;
 
 /**
- * Utility for registering LuckPerms command data to brigadier using {@link Commodore}.
+ * Registers LuckPerms command data to brigadier using {@link Commodore}.
  */
 public class LuckPermsBrigadier {
 
     /**
-     * Registers LuckPerms command data for the given {@code pluginCommand}.
+     * Registers LuckPerms command data to the given {@code pluginCommand}.
      *
      * @param plugin the luckperms plugin
      * @param pluginCommand the command
      * @throws Exception if something goes wrong
      */
     public static void register(LPBukkitPlugin plugin, Command pluginCommand) throws Exception {
-        // register completions with commodore
         Commodore commodore = CommodoreProvider.getCommodore(plugin.getBootstrap());
-        try (InputStream is = plugin.getBootstrap().getResourceStream("luckperms-brigadier.json.gz")) {
+        try (InputStream is = plugin.getBootstrap().getResourceStream("luckperms.commodore")) {
             if (is == null) {
-                throw new Exception("Brigadier command data missing from jar!");
+                throw new Exception("Brigadier command data missing from jar");
             }
 
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(is), StandardCharsets.UTF_8))) {
-                JsonObject data = new JsonParser().parse(reader).getAsJsonObject();
-                LiteralArgumentBuilder command = deserializeLiteral(data);
-                commodore.register(pluginCommand, command);
-            }
+            LiteralCommandNode<?> command = CommodoreFileFormat.parse(is);
+            commodore.register(pluginCommand, command);
         }
 
         // add event listener to prevent completions from being send to players without permission
@@ -109,76 +91,6 @@ public class LuckPermsBrigadier {
                 e.getCommands().removeAll(this.aliases);
             }
         }
-    }
-
-    private static ArgumentBuilder deserialize(JsonObject data) {
-        String type = data.get("type").getAsString();
-        switch (type) {
-            case "literal": {
-                return deserializeLiteral(data);
-            }
-            case "argument": {
-                return deserializeArgument(data);
-            }
-            default:
-                throw new IllegalArgumentException("type: " + type);
-        }
-    }
-
-    private static LiteralArgumentBuilder deserializeLiteral(JsonObject data) {
-        String name = data.get("name").getAsString();
-        LiteralArgumentBuilder arg = LiteralArgumentBuilder.literal(name);
-        return deserializeChildren(data, arg);
-    }
-
-    private static RequiredArgumentBuilder deserializeArgument(JsonObject data) {
-        String name = data.get("name").getAsString();
-        ArgumentType argumentType = deserializeArgumentType(data);
-
-        //noinspection unchecked
-        RequiredArgumentBuilder arg = RequiredArgumentBuilder.argument(name, argumentType);
-        return deserializeChildren(data, arg);
-    }
-
-    private static ArgumentType deserializeArgumentType(JsonObject data) {
-        String parser = data.get("parser").getAsString();
-        String properties = null;
-        if (data.has("properties")) {
-            properties = data.get("properties").getAsString();
-        }
-
-        switch (parser) {
-            case "brigadier:string": {
-                Objects.requireNonNull(properties, "string properties");
-                switch (properties) {
-                    case "SINGLE_WORD":
-                        return StringArgumentType.word();
-                    case "QUOTABLE_PHRASE":
-                        return StringArgumentType.string();
-                    case "GREEDY_PHRASE":
-                        return StringArgumentType.greedyString();
-                    default:
-                        throw new IllegalArgumentException("string property: " + properties);
-                }
-            }
-            case "brigadier:bool":
-                return BoolArgumentType.bool();
-            case "brigadier:integer":
-                return IntegerArgumentType.integer();
-            default:
-                throw new IllegalArgumentException("parser: " + parser);
-        }
-    }
-
-    private static <T extends ArgumentBuilder> T deserializeChildren(JsonObject data, T builder) {
-        if (data.has("children")) {
-            JsonArray children = data.get("children").getAsJsonArray();
-            for (JsonElement child : children) {
-                //noinspection unchecked
-                builder.then(deserialize(child.getAsJsonObject()));
-            }
-        }
-        return builder;
     }
 
 }
