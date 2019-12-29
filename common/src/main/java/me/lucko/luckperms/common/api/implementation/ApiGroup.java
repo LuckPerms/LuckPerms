@@ -83,6 +83,14 @@ public class ApiGroup extends ApiPermissionHolder implements net.luckperms.api.m
     }
 
     @Override
+    protected void onNodeChange() {
+        // invalidate caches - they have potentially been affected by
+        // this change.
+        this.handle.getPlugin().getGroupManager().invalidateAllGroupCaches();
+        this.handle.getPlugin().getUserManager().invalidateAllUserCaches();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof ApiGroup)) return false;
