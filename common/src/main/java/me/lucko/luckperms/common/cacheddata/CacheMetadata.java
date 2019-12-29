@@ -36,11 +36,6 @@ import net.luckperms.api.query.QueryOptions;
 public class CacheMetadata {
 
     /**
-     * The cached data instance which creates this container
-     */
-    private final AbstractCachedDataManager parentContainer;
-
-    /**
      * The type of the object which owns the cache
      */
     private final HolderType holderType;
@@ -55,15 +50,10 @@ public class CacheMetadata {
      */
     private final QueryOptions queryOptions;
 
-    public CacheMetadata(AbstractCachedDataManager parentContainer, HolderType holderType, String objectName, QueryOptions queryOptions) {
-        this.parentContainer = parentContainer;
+    public CacheMetadata(HolderType holderType, String objectName, QueryOptions queryOptions) {
         this.holderType = holderType;
         this.objectName = objectName;
         this.queryOptions = queryOptions;
-    }
-
-    public AbstractCachedDataManager getParentContainer() {
-        return this.parentContainer;
     }
 
     public HolderType getHolderType() {
