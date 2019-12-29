@@ -78,9 +78,9 @@ public final class SubjectReferenceFactory {
 
     public LPSubjectReference obtain(LPSubject subject) {
         Objects.requireNonNull(subject, "subject");
-        LPSubjectReference ret = obtain(subject.getParentCollection().getIdentifier(), subject.getIdentifier());
-        ((CachedSubjectReference) ret).fillCache(subject);
-        return ret;
+        LPSubjectReference reference = obtain(subject.getParentCollection().getIdentifier(), subject.getIdentifier());
+        ((CachedSubjectReference) reference).fillCache(subject);
+        return reference;
     }
 
     public LPSubjectReference obtain(Subject subject) {

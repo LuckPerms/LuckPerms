@@ -23,14 +23,14 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.nukkit.inject.permissible;
+package me.lucko.luckperms.bukkit.inject.permissible;
 
 import com.google.common.base.Preconditions;
 
+import me.lucko.luckperms.bukkit.inject.dummy.DummyPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
-import me.lucko.luckperms.nukkit.inject.dummy.DummyPlugin;
 
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.NodeBuilder;
@@ -38,16 +38,15 @@ import net.luckperms.api.node.metadata.NodeMetadataKey;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 
-import cn.nukkit.permission.Permission;
-import cn.nukkit.permission.PermissionAttachment;
-import cn.nukkit.permission.PermissionRemovedExecutor;
-import cn.nukkit.plugin.Plugin;
+import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.permissions.PermissionRemovedExecutor;
+import org.bukkit.plugin.Plugin;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -57,9 +56,9 @@ import java.util.Set;
  *
  * Applies all permissions directly to the backing user instance via transient nodes.
  */
-public class LPPermissionAttachment extends PermissionAttachment {
+public class LuckPermsPermissionAttachment extends PermissionAttachment {
 
-    public static final NodeMetadataKey<LPPermissionAttachment> TRANSIENT_SOURCE_KEY = NodeMetadataKey.of("transientsource", LPPermissionAttachment.class);
+    public static final NodeMetadataKey<LuckPermsPermissionAttachment> TRANSIENT_SOURCE_KEY = NodeMetadataKey.of("transientsource", LuckPermsPermissionAttachment.class);
 
     /**
      * The field in PermissionAttachment where the attachments applied permissions
@@ -79,7 +78,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
     /**
      * The parent LPPermissible
      */
-    private final LPPermissible permissible;
+    private final LuckPermsPermissible permissible;
 
     /**
      * The plugin which "owns" this attachment, may be null
@@ -106,7 +105,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
      */
     private PermissionAttachment source;
 
-    public LPPermissionAttachment(LPPermissible permissible, Plugin owner) {
+    public LuckPermsPermissionAttachment(LuckPermsPermissible permissible, Plugin owner) {
         super(DummyPlugin.INSTANCE, null);
         this.permissible = permissible;
         this.owner = owner;
@@ -114,7 +113,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
         injectFakeMap();
     }
 
-    public LPPermissionAttachment(LPPermissible permissible, PermissionAttachment source) {
+    public LuckPermsPermissionAttachment(LuckPermsPermissible permissible, PermissionAttachment source) {
         super(DummyPlugin.INSTANCE, null);
         this.permissible = permissible;
         this.owner = source.getPlugin();
@@ -128,7 +127,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
     /**
      * Injects a fake 'permissions' map into the superclass, for (clever/dumb??) plugins
-     * which attempt to modify attachment permissions using reflection to get around the slow nukkit
+     * which attempt to modify attachment permissions using reflection to get around the slow bukkit
      * behaviour in the base PermissionAttachment implementation.
      *
      * The fake map proxies calls back to the methods on this attachment
@@ -146,7 +145,8 @@ public class LPPermissionAttachment extends PermissionAttachment {
         }
     }
 
-    public LPPermissible getPermissible() {
+    @Override
+    public @NonNull LuckPermsPermissible getPermissible() {
         return this.permissible;
     }
 
@@ -169,7 +169,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
      */
     public void hook() {
         this.hooked = true;
-        this.permissible.lpAttachments.add(this);
+        this.permissible.hookedAttachments.add(this);
         for (Map.Entry<String, Boolean> entry : this.perms.entrySet()) {
             if (entry.getKey() == null || entry.getKey().isEmpty()) {
                 continue;
@@ -179,7 +179,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
     }
 
     private void setPermissionInternal(String name, boolean value) {
-        if (!this.permissible.getPlugin().getConfiguration().get(ConfigKeys.APPLY_NUKKIT_ATTACHMENT_PERMISSIONS)) {
+        if (!this.permissible.getPlugin().getConfiguration().get(ConfigKeys.APPLY_BUKKIT_ATTACHMENT_PERMISSIONS)) {
             return;
         }
 
@@ -216,9 +216,9 @@ public class LPPermissionAttachment extends PermissionAttachment {
     }
 
     @Override
-    public void remove() {
+    public boolean remove() {
         if (!this.hooked) {
-            return;
+            return false;
         }
 
         // clear the internal permissions
@@ -231,11 +231,12 @@ public class LPPermissionAttachment extends PermissionAttachment {
 
         // unhook from the permissible
         this.hooked = false;
-        this.permissible.lpAttachments.remove(this);
+        this.permissible.hookedAttachments.remove(this);
+        return true;
     }
 
     @Override
-    public void setPermission(String name, boolean value) {
+    public void setPermission(@NonNull String name, boolean value) {
         Objects.requireNonNull(name, "name is null");
         Preconditions.checkArgument(!name.isEmpty(), "name is empty");
 
@@ -260,19 +261,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
     }
 
     @Override
-    public void setPermission(Permission permission, boolean value) {
-        setPermission(permission.getName(), value);
-    }
-
-    @Override
-    public void setPermissions(Map<String, Boolean> permissions) {
-        for (Map.Entry<String, Boolean> entry : permissions.entrySet()) {
-            setPermission(entry.getKey(), entry.getValue());
-        }
-    }
-
-    @Override
-    public void unsetPermission(String name, boolean value) {
+    public void unsetPermission(@NonNull String name) {
         Objects.requireNonNull(name, "name is null");
         Preconditions.checkArgument(!name.isEmpty(), "name is empty");
 
@@ -293,30 +282,12 @@ public class LPPermissionAttachment extends PermissionAttachment {
     }
 
     @Override
-    public void unsetPermission(Permission permission, boolean value) {
-        unsetPermission(permission.getName(), value);
-    }
-
-    @Override
-    public void unsetPermissions(List<String> permissions) {
-        for (String perm : permissions) {
-            unsetPermission(perm, true);
-        }
-    }
-
-    @Override
-    public void clearPermissions() {
-        this.perms.clear();
-        clearInternal();
-    }
-
-    @Override
-    public Map<String, Boolean> getPermissions() {
+    public @NonNull Map<String, Boolean> getPermissions() {
         return this.perms;
     }
 
     @Override
-    public Plugin getPlugin() {
+    public @NonNull Plugin getPlugin() {
         return this.owner != null ? this.owner : this.permissible.getPlugin().getBootstrap();
     }
 
@@ -335,7 +306,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
      * proxies calls back to this attachment instance.
      *
      * Some (clever/dumb??) plugins attempt to modify attachment permissions using reflection
-     * to get around the slow nukkit behaviour in the base PermissionAttachment implementation.
+     * to get around the slow bukkit behaviour in the base PermissionAttachment implementation.
      *
      * An instance of this map is injected into the super instance so these plugins continue
      * to work with LuckPerms.
@@ -345,7 +316,7 @@ public class LPPermissionAttachment extends PermissionAttachment {
         @Override
         public Boolean put(String key, Boolean value) {
             // grab the previous result, so we can still satisfy the method signature of Map
-            Boolean previous = LPPermissionAttachment.this.perms.get(key);
+            Boolean previous = LuckPermsPermissionAttachment.this.perms.get(key);
 
             // proxy the call back through the PermissionAttachment instance
             setPermission(key, value);
@@ -364,10 +335,10 @@ public class LPPermissionAttachment extends PermissionAttachment {
             String permission = ((String) key);
 
             // grab the previous result, so we can still satisfy the method signature of Map
-            Boolean previous = LPPermissionAttachment.this.perms.get(permission);
+            Boolean previous = LuckPermsPermissionAttachment.this.perms.get(permission);
 
             // proxy the call back through the PermissionAttachment instance
-            unsetPermission(permission, true);
+            unsetPermission(permission);
 
             // return the previous value
             return previous;
@@ -383,71 +354,71 @@ public class LPPermissionAttachment extends PermissionAttachment {
         @Override
         public void clear() {
             // remove the permissions which have already been applied
-            if (LPPermissionAttachment.this.hooked) {
+            if (LuckPermsPermissionAttachment.this.hooked) {
                 clearInternal();
             }
 
             // clear the backing map
-            LPPermissionAttachment.this.perms.clear();
+            LuckPermsPermissionAttachment.this.perms.clear();
         }
 
         @Override
         public int size() {
             // return the size of the permissions map - probably the most accurate value we have
-            return LPPermissionAttachment.this.perms.size();
+            return LuckPermsPermissionAttachment.this.perms.size();
         }
 
         @Override
         public boolean isEmpty() {
             // return if the permissions map is empty - again probably the most accurate thing
             // we can return
-            return LPPermissionAttachment.this.perms.isEmpty();
+            return LuckPermsPermissionAttachment.this.perms.isEmpty();
         }
 
         @Override
         public boolean containsKey(Object key) {
             // just proxy
-            return LPPermissionAttachment.this.perms.containsKey(key);
+            return LuckPermsPermissionAttachment.this.perms.containsKey(key);
         }
 
         @Override
         public boolean containsValue(Object value) {
             // just proxy
-            return LPPermissionAttachment.this.perms.containsValue(value);
+            return LuckPermsPermissionAttachment.this.perms.containsValue(value);
         }
 
         @Override
         public Boolean get(Object key) {
             // just proxy
-            return LPPermissionAttachment.this.perms.get(key);
+            return LuckPermsPermissionAttachment.this.perms.get(key);
         }
 
         @Override
         public Set<String> keySet() {
             // just proxy
-            return Collections.unmodifiableSet(LPPermissionAttachment.this.perms.keySet());
+            return Collections.unmodifiableSet(LuckPermsPermissionAttachment.this.perms.keySet());
         }
 
         @Override
         public Collection<Boolean> values() {
             // just proxy
-            return Collections.unmodifiableCollection(LPPermissionAttachment.this.perms.values());
+            return Collections.unmodifiableCollection(LuckPermsPermissionAttachment.this.perms.values());
         }
 
         @Override
         public Set<Entry<String, Boolean>> entrySet() {
             // just proxy
-            return Collections.unmodifiableSet(LPPermissionAttachment.this.perms.entrySet());
+            return Collections.unmodifiableSet(LuckPermsPermissionAttachment.this.perms.entrySet());
         }
 
         @Override
         public boolean equals(Object obj) {
-            return obj instanceof Map<?, ?> && LPPermissionAttachment.this.perms.equals(obj);
+            return obj instanceof Map<?, ?> && LuckPermsPermissionAttachment.this.perms.equals(obj);
         }
 
         @Override
         public int hashCode() {
-            return LPPermissionAttachment.this.perms.hashCode();
+            return LuckPermsPermissionAttachment.this.perms.hashCode();
         }
     }
 }

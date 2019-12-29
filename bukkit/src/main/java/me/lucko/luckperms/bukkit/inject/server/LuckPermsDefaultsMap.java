@@ -56,7 +56,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * Injected by {@link InjectorDefaultsMap}.
  */
-public final class LPDefaultsMap implements Map<Boolean, Set<Permission>> {
+public final class LuckPermsDefaultsMap implements Map<Boolean, Set<Permission>> {
     // keyset for all instances
     private static final Set<Boolean> KEY_SET = ImmutableSet.of(Boolean.TRUE, Boolean.FALSE);
 
@@ -78,7 +78,7 @@ public final class LPDefaultsMap implements Map<Boolean, Set<Permission>> {
             Maps.immutableEntry(Boolean.FALSE, this.nonOpSet)
     );
 
-    public LPDefaultsMap(LPBukkitPlugin plugin, Map<Boolean, Set<Permission>> existingData) {
+    public LuckPermsDefaultsMap(LPBukkitPlugin plugin, Map<Boolean, Set<Permission>> existingData) {
         this.plugin = plugin;
         this.opSet.addAll(existingData.getOrDefault(Boolean.TRUE, Collections.emptySet()));
         this.nonOpSet.addAll(existingData.getOrDefault(Boolean.FALSE, Collections.emptySet()));
@@ -142,10 +142,10 @@ public final class LPDefaultsMap implements Map<Boolean, Set<Permission>> {
         @Override
         protected @NonNull Map<String, Boolean> supply() {
             Map<String, Boolean> builder = new HashMap<>();
-            for (Permission perm : LPDefaultsMap.this.get(this.op)) {
+            for (Permission perm : LuckPermsDefaultsMap.this.get(this.op)) {
                 String name = perm.getName().toLowerCase();
                 builder.put(name, true);
-                for (Map.Entry<String, Boolean> child : LPDefaultsMap.this.plugin.getPermissionMap().getChildPermissions(name, true).entrySet()) {
+                for (Map.Entry<String, Boolean> child : LuckPermsDefaultsMap.this.plugin.getPermissionMap().getChildPermissions(name, true).entrySet()) {
                     builder.putIfAbsent(child.getKey(), child.getValue());
                 }
             }

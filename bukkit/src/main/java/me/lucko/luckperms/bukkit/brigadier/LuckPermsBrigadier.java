@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.compat;
+package me.lucko.luckperms.bukkit.brigadier;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -58,8 +58,18 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
+/**
+ * Utility for registering LuckPerms command data to brigadier using {@link Commodore}.
+ */
 public class LuckPermsBrigadier {
 
+    /**
+     * Registers LuckPerms command data for the given {@code pluginCommand}.
+     *
+     * @param plugin the luckperms plugin
+     * @param pluginCommand the command
+     * @throws Exception if something goes wrong
+     */
     public static void register(LPBukkitPlugin plugin, Command pluginCommand) throws Exception {
         // register completions with commodore
         Commodore commodore = CommodoreProvider.getCommodore(plugin.getBootstrap());

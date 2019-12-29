@@ -86,9 +86,9 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
             Context ent1 = it1.next();
             Context ent2 = it2.next();
 
-            int ret = CONTEXT_COMPARATOR.compare(ent1, ent2);
-            if (ret != 0) {
-                return ret;
+            result = CONTEXT_COMPARATOR.compare(ent1, ent2);
+            if (result != 0) {
+                return result;
             }
         }
 
@@ -103,9 +103,9 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
             return 0;
         }
 
-        int ret = FAST_STRING_COMPARATOR.compare(o1.getKey(), o2.getKey());
-        if (ret != 0) {
-            return ret;
+        int i = FAST_STRING_COMPARATOR.compare(o1.getKey(), o2.getKey());
+        if (i != 0) {
+            return i;
         }
 
         return FAST_STRING_COMPARATOR.compare(o1.getValue(), o2.getValue());

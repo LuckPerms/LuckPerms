@@ -26,7 +26,7 @@
 package me.lucko.luckperms.bukkit.listeners;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.bukkit.inject.permissible.LPPermissible;
+import me.lucko.luckperms.bukkit.inject.permissible.LuckPermsPermissible;
 import me.lucko.luckperms.bukkit.inject.permissible.PermissibleInjector;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -187,7 +187,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
         // Care should be taken at this stage to ensure that async tasks which manipulate bukkit data check that the player is still online.
         try {
             // Make a new permissible for the user
-            LPPermissible lpPermissible = new LPPermissible(player, user, this.plugin);
+            LuckPermsPermissible lpPermissible = new LuckPermsPermissible(player, user, this.plugin);
 
             // Inject into the player
             PermissibleInjector.inject(player, lpPermissible);

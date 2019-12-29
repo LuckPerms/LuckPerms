@@ -177,16 +177,16 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
     @Override
     public CompletableFuture<ImmutableCollection<LPSubject>> loadSubjects(Set<String> identifiers) {
         return CompletableFuture.supplyAsync(() -> {
-            ImmutableSet.Builder<LPSubject> ret = ImmutableSet.builder();
+            ImmutableSet.Builder<LPSubject> subjects = ImmutableSet.builder();
             for (String id : identifiers) {
                 UUID uuid = Uuids.parse(id);
                 if (uuid == null) {
                     continue;
                 }
-                ret.add(loadSubject(uuid.toString()).join());
+                subjects.add(loadSubject(uuid.toString()).join());
             }
 
-            return ret.build();
+            return subjects.build();
         }, this.plugin.getBootstrap().getScheduler().async());
     }
 
@@ -210,32 +210,32 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
     @Override
     public CompletableFuture<ImmutableMap<LPSubjectReference, Boolean>> getAllWithPermission(String permission) {
         return CompletableFuture.supplyAsync(() -> {
-            ImmutableMap.Builder<LPSubjectReference, Boolean> ret = ImmutableMap.builder();
+            ImmutableMap.Builder<LPSubjectReference, Boolean> builder = ImmutableMap.builder();
 
             List<HeldNode<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(Constraint.of(StandardComparison.EQUAL, permission)).join();
             for (HeldNode<UUID> holder : lookup) {
                 if (holder.getNode().getContexts().equals(ImmutableContextSetImpl.EMPTY)) {
-                    ret.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder().toString()), holder.getNode().getValue());
+                    builder.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder().toString()), holder.getNode().getValue());
                 }
             }
 
-            return ret.build();
+            return builder.build();
         }, this.plugin.getBootstrap().getScheduler().async());
     }
 
     @Override
     public CompletableFuture<ImmutableMap<LPSubjectReference, Boolean>> getAllWithPermission(ImmutableContextSet contexts, String permission) {
         return CompletableFuture.supplyAsync(() -> {
-            ImmutableMap.Builder<LPSubjectReference, Boolean> ret = ImmutableMap.builder();
+            ImmutableMap.Builder<LPSubjectReference, Boolean> builder = ImmutableMap.builder();
 
             List<HeldNode<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(Constraint.of(StandardComparison.EQUAL, permission)).join();
             for (HeldNode<UUID> holder : lookup) {
                 if (holder.getNode().getContexts().equals(contexts)) {
-                    ret.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder().toString()), holder.getNode().getValue());
+                    builder.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder().toString()), holder.getNode().getValue());
                 }
             }
 
-            return ret.build();
+            return builder.build();
         }, this.plugin.getBootstrap().getScheduler().async());
     }
 

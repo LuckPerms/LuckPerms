@@ -131,10 +131,10 @@ public class MetaSetTempChatMeta extends SharedSubCommand {
             }
         }
 
-        DataMutateResult.WithMergedNode ret = holder.setNode(DataType.NORMAL, this.type.builder(meta, priority).expiry(duration).withContext(context).build(), modifier);
+        DataMutateResult.WithMergedNode result = holder.setNode(DataType.NORMAL, this.type.builder(meta, priority).expiry(duration).withContext(context).build(), modifier);
 
-        if (ret.getResult().wasSuccessful()) {
-            duration = ret.getMergedNode().getExpiryDuration();
+        if (result.getResult().wasSuccessful()) {
+            duration = result.getMergedNode().getExpiryDuration();
 
             TextComponent.Builder builder = Message.ADD_TEMP_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, DurationFormatter.LONG.format(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
             HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(

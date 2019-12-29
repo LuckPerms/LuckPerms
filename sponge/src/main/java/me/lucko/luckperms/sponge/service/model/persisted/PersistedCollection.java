@@ -143,11 +143,11 @@ public class PersistedCollection implements LPSubjectCollection {
 
     @Override
     public CompletableFuture<ImmutableCollection<LPSubject>> loadSubjects(Set<String> identifiers) {
-        ImmutableSet.Builder<LPSubject> ret = ImmutableSet.builder();
+        ImmutableSet.Builder<LPSubject> subjects = ImmutableSet.builder();
         for (String id : identifiers) {
-            ret.add(Objects.requireNonNull(this.subjects.get(id.toLowerCase())));
+            subjects.add(Objects.requireNonNull(this.subjects.get(id.toLowerCase())));
         }
-        return CompletableFuture.completedFuture(ret.build());
+        return CompletableFuture.completedFuture(subjects.build());
     }
 
     @Override

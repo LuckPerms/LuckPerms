@@ -25,19 +25,19 @@
 
 package me.lucko.luckperms.bukkit;
 
+import me.lucko.luckperms.bukkit.brigadier.LuckPermsBrigadier;
 import me.lucko.luckperms.bukkit.calculator.BukkitCalculatorFactory;
-import me.lucko.luckperms.bukkit.compat.LuckPermsBrigadier;
 import me.lucko.luckperms.bukkit.context.BukkitContextManager;
 import me.lucko.luckperms.bukkit.context.WorldCalculator;
-import me.lucko.luckperms.bukkit.inject.permissible.LPPermissible;
+import me.lucko.luckperms.bukkit.inject.permissible.LuckPermsPermissible;
 import me.lucko.luckperms.bukkit.inject.permissible.PermissibleInjector;
 import me.lucko.luckperms.bukkit.inject.permissible.PermissibleMonitoringInjector;
 import me.lucko.luckperms.bukkit.inject.server.InjectorDefaultsMap;
 import me.lucko.luckperms.bukkit.inject.server.InjectorPermissionMap;
 import me.lucko.luckperms.bukkit.inject.server.InjectorSubscriptionMap;
-import me.lucko.luckperms.bukkit.inject.server.LPDefaultsMap;
-import me.lucko.luckperms.bukkit.inject.server.LPPermissionMap;
-import me.lucko.luckperms.bukkit.inject.server.LPSubscriptionMap;
+import me.lucko.luckperms.bukkit.inject.server.LuckPermsDefaultsMap;
+import me.lucko.luckperms.bukkit.inject.server.LuckPermsPermissionMap;
+import me.lucko.luckperms.bukkit.inject.server.LuckPermsSubscriptionMap;
 import me.lucko.luckperms.bukkit.listeners.BukkitConnectionListener;
 import me.lucko.luckperms.bukkit.listeners.BukkitPlatformListener;
 import me.lucko.luckperms.bukkit.messaging.BukkitMessagingFactory;
@@ -93,9 +93,9 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     private StandardGroupManager groupManager;
     private StandardTrackManager trackManager;
     private BukkitContextManager contextManager;
-    private LPSubscriptionMap subscriptionMap;
-    private LPPermissionMap permissionMap;
-    private LPDefaultsMap defaultPermissionMap;
+    private LuckPermsSubscriptionMap subscriptionMap;
+    private LuckPermsPermissionMap permissionMap;
+    private LuckPermsDefaultsMap defaultPermissionMap;
     private VaultHookManager vaultHookManager = null;
     
     public LPBukkitPlugin(LPBukkitBootstrap bootstrap) {
@@ -281,7 +281,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
                     if (user != null) {
                         this.bootstrap.getScheduler().executeSync(() -> {
                             try {
-                                LPPermissible lpPermissible = new LPPermissible(player, user, this);
+                                LuckPermsPermissible lpPermissible = new LuckPermsPermissible(player, user, this);
                                 PermissibleInjector.inject(player, lpPermissible);
                             } catch (Throwable t) {
                                 t.printStackTrace();
@@ -411,27 +411,27 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
         return this.contextManager;
     }
 
-    public LPSubscriptionMap getSubscriptionMap() {
+    public LuckPermsSubscriptionMap getSubscriptionMap() {
         return this.subscriptionMap;
     }
 
-    public void setSubscriptionMap(LPSubscriptionMap subscriptionMap) {
+    public void setSubscriptionMap(LuckPermsSubscriptionMap subscriptionMap) {
         this.subscriptionMap = subscriptionMap;
     }
 
-    public LPPermissionMap getPermissionMap() {
+    public LuckPermsPermissionMap getPermissionMap() {
         return this.permissionMap;
     }
 
-    public void setPermissionMap(LPPermissionMap permissionMap) {
+    public void setPermissionMap(LuckPermsPermissionMap permissionMap) {
         this.permissionMap = permissionMap;
     }
 
-    public LPDefaultsMap getDefaultPermissionMap() {
+    public LuckPermsDefaultsMap getDefaultPermissionMap() {
         return this.defaultPermissionMap;
     }
 
-    public void setDefaultPermissionMap(LPDefaultsMap defaultPermissionMap) {
+    public void setDefaultPermissionMap(LuckPermsDefaultsMap defaultPermissionMap) {
         this.defaultPermissionMap = defaultPermissionMap;
     }
 

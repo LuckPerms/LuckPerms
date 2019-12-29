@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.nukkit.inject.server;
+package me.lucko.luckperms.bukkit.inject.server;
 
 import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.ImmutableMap;
@@ -32,11 +32,10 @@ import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 
+import org.bukkit.permissions.Permission;
+import org.bukkit.plugin.PluginManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import cn.nukkit.permission.Permission;
-import cn.nukkit.plugin.PluginManager;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
@@ -47,17 +46,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
- * A replacement map for the 'permissions' instance in Nukkit's SimplePluginManager.
+ * A replacement map for the 'permissions' instance in Bukkit's SimplePluginManager.
  *
  * This instance allows LuckPerms to intercept calls to
  * {@link PluginManager#addPermission(Permission)} and record permissions in the
- * {@link PermissionRegistry}.
+ * {@link PermissionRegistry}. It also lets us monitor changes to child permission
+ * relationships.
  *
  * It also allows us to pre-determine child permission relationships.
  *
  * Injected by {@link InjectorPermissionMap}.
  */
-public final class LPPermissionMap extends ForwardingMap<String, Permission> {
+public final class LuckPermsPermissionMap extends ForwardingMap<String, Permission> {
 
     private static final Field PERMISSION_CHILDREN_FIELD;
 
@@ -82,7 +82,7 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
      */
     final LuckPermsPlugin plugin;
 
-    public LPPermissionMap(LuckPermsPlugin plugin, Map<String, Permission> existingData) {
+    public LuckPermsPermissionMap(LuckPermsPlugin plugin, Map<String, Permission> existingData) {
         this.plugin = plugin;
         putAll(existingData);
     }
@@ -178,7 +178,7 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
                 continue; // Prevent infinite loops
             }
 
-            // xor the value using the parent (nukkit logic, not mine)
+            // xor the value using the parent (bukkit logic, not mine)
             boolean value = e.getValue() ^ invert;
             accumulator.put(e.getKey().toLowerCase(), value);
 
@@ -198,11 +198,11 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
         try {
             //noinspection unchecked
             Map<String, Boolean> children = (Map<String, Boolean>) PERMISSION_CHILDREN_FIELD.get(permission);
-            while (children instanceof PermissionNotifyingChildrenMap) {
-                children = ((PermissionNotifyingChildrenMap) children).delegate;
+            while (children instanceof NotifyingChildrenMap) {
+                children = ((NotifyingChildrenMap) children).delegate;
             }
 
-            PermissionNotifyingChildrenMap notifyingChildren = new PermissionNotifyingChildrenMap(children);
+            NotifyingChildrenMap notifyingChildren = new NotifyingChildrenMap(children);
             PERMISSION_CHILDREN_FIELD.set(permission, notifyingChildren);
         } catch (Exception e) {
             e.printStackTrace();
@@ -218,8 +218,8 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
         try {
             //noinspection unchecked
             Map<String, Boolean> children = (Map<String, Boolean>) PERMISSION_CHILDREN_FIELD.get(permission);
-            while (children instanceof PermissionNotifyingChildrenMap) {
-                children = ((PermissionNotifyingChildrenMap) children).delegate;
+            while (children instanceof NotifyingChildrenMap) {
+                children = ((NotifyingChildrenMap) children).delegate;
             }
             PERMISSION_CHILDREN_FIELD.set(permission, children);
         } catch (Exception e) {
@@ -228,10 +228,10 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
         return permission;
     }
 
-    private final class PermissionNotifyingChildrenMap extends ForwardingMap<String, Boolean> {
+    private final class NotifyingChildrenMap extends ForwardingMap<String, Boolean> {
         private final Map<String, Boolean> delegate;
 
-        PermissionNotifyingChildrenMap(Map<String, Boolean> delegate) {
+        NotifyingChildrenMap(Map<String, Boolean> delegate) {
             this.delegate = delegate;
         }
 
@@ -243,27 +243,27 @@ public final class LPPermissionMap extends ForwardingMap<String, Permission> {
         @Override
         public Boolean put(@NonNull String key, @NonNull Boolean value) {
             Boolean ret = super.put(key, value);
-            LPPermissionMap.this.update();
+            LuckPermsPermissionMap.this.update();
             return ret;
         }
 
         @Override
         public void putAll(@NonNull Map<? extends String, ? extends Boolean> map) {
             super.putAll(map);
-            LPPermissionMap.this.update();
+            LuckPermsPermissionMap.this.update();
         }
 
         @Override
         public Boolean remove(@NonNull Object object) {
             Boolean ret = super.remove(object);
-            LPPermissionMap.this.update();
+            LuckPermsPermissionMap.this.update();
             return ret;
         }
 
         @Override
         public void clear() {
             super.clear();
-            LPPermissionMap.this.update();
+            LuckPermsPermissionMap.this.update();
         }
     }
 

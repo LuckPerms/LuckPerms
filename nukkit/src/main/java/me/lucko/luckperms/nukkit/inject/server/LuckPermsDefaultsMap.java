@@ -52,7 +52,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * Injected by {@link InjectorDefaultsMap}.
  */
-public final class LPDefaultsMap {
+public final class LuckPermsDefaultsMap {
 
     // the plugin
     final LPNukkitPlugin plugin;
@@ -65,7 +65,7 @@ public final class LPDefaultsMap {
     private final DefaultsCache opCache = new DefaultsCache(true);
     private final DefaultsCache nonOpCache = new DefaultsCache(false);
 
-    public LPDefaultsMap(LPNukkitPlugin plugin, Map<Boolean, Map<String, Permission>> existingData) {
+    public LuckPermsDefaultsMap(LPNukkitPlugin plugin, Map<Boolean, Map<String, Permission>> existingData) {
         this.plugin = plugin;
         this.opSet.putAll(existingData.getOrDefault(Boolean.TRUE, Collections.emptyMap()));
         this.nonOpSet.putAll(existingData.getOrDefault(Boolean.FALSE, Collections.emptyMap()));
@@ -106,7 +106,7 @@ public final class LPDefaultsMap {
     }
 
     final class DefaultPermissionSet extends ForwardingMap<String, Permission> {
-        final LPDefaultsMap parent = LPDefaultsMap.this;
+        final LuckPermsDefaultsMap parent = LuckPermsDefaultsMap.this;
 
         private final Map<String, Permission> delegate = new ConcurrentHashMap<>();
         private final boolean op;
@@ -158,10 +158,10 @@ public final class LPDefaultsMap {
         @Override
         protected @NonNull Map<String, Boolean> supply() {
             Map<String, Boolean> builder = new HashMap<>();
-            for (Permission perm : LPDefaultsMap.this.get(this.op).values()) {
+            for (Permission perm : LuckPermsDefaultsMap.this.get(this.op).values()) {
                 String name = perm.getName().toLowerCase();
                 builder.put(name, true);
-                for (Map.Entry<String, Boolean> child : LPDefaultsMap.this.plugin.getPermissionMap().getChildPermissions(name, true).entrySet()) {
+                for (Map.Entry<String, Boolean> child : LuckPermsDefaultsMap.this.plugin.getPermissionMap().getChildPermissions(name, true).entrySet()) {
                     builder.putIfAbsent(child.getKey(), child.getValue());
                 }
             }

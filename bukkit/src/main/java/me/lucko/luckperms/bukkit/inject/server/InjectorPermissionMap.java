@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Injects a {@link LPPermissionMap} into the {@link PluginManager}.
+ * Injects a {@link LuckPermsPermissionMap} into the {@link PluginManager}.
  */
 public class InjectorPermissionMap implements Runnable {
     private static final Field PERMISSIONS_FIELD;
@@ -63,9 +63,9 @@ public class InjectorPermissionMap implements Runnable {
     @Override
     public void run() {
         try {
-            LPPermissionMap ret = inject();
-            if (ret != null) {
-                this.plugin.setPermissionMap(ret);
+            LuckPermsPermissionMap permissionMap = inject();
+            if (permissionMap != null) {
+                this.plugin.setPermissionMap(permissionMap);
             }
         } catch (Exception e) {
             this.plugin.getLogger().severe("Exception occurred whilst injecting LuckPerms Permission map.");
@@ -73,7 +73,7 @@ public class InjectorPermissionMap implements Runnable {
         }
     }
 
-    private LPPermissionMap inject() throws Exception {
+    private LuckPermsPermissionMap inject() throws Exception {
         Objects.requireNonNull(PERMISSIONS_FIELD, "PERMISSIONS_FIELD");
         PluginManager pluginManager = this.plugin.getBootstrap().getServer().getPluginManager();
 
@@ -84,7 +84,7 @@ public class InjectorPermissionMap implements Runnable {
         }
 
         Object map = PERMISSIONS_FIELD.get(pluginManager);
-        if (map instanceof LPPermissionMap && ((LPPermissionMap) map).plugin == this.plugin) {
+        if (map instanceof LuckPermsPermissionMap && ((LuckPermsPermissionMap) map).plugin == this.plugin) {
             return null;
         }
 
@@ -92,7 +92,7 @@ public class InjectorPermissionMap implements Runnable {
         Map<String, Permission> castedMap = (Map<String, Permission>) map;
 
         // make a new map & inject it
-        LPPermissionMap newMap = new LPPermissionMap(this.plugin, castedMap);
+        LuckPermsPermissionMap newMap = new LuckPermsPermissionMap(this.plugin, castedMap);
         PERMISSIONS_FIELD.set(pluginManager, newMap);
         return newMap;
     }
@@ -107,8 +107,8 @@ public class InjectorPermissionMap implements Runnable {
             }
 
             Object map = PERMISSIONS_FIELD.get(pluginManager);
-            if (map instanceof LPPermissionMap) {
-                LPPermissionMap lpMap = (LPPermissionMap) map;
+            if (map instanceof LuckPermsPermissionMap) {
+                LuckPermsPermissionMap lpMap = (LuckPermsPermissionMap) map;
                 PERMISSIONS_FIELD.set(pluginManager, new HashMap<>(lpMap));
             }
         } catch (Exception e) {

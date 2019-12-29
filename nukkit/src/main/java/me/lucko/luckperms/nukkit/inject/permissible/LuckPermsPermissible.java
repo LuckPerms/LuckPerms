@@ -23,36 +23,37 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.inject.permissible;
+package me.lucko.luckperms.nukkit.inject.permissible;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.bukkit.calculator.DefaultsProcessor;
-import me.lucko.luckperms.bukkit.calculator.OpProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.QueryOptionsCache;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+import me.lucko.luckperms.nukkit.LPNukkitPlugin;
+import me.lucko.luckperms.nukkit.calculator.DefaultsProcessor;
+import me.lucko.luckperms.nukkit.calculator.OpProcessor;
+import me.lucko.luckperms.nukkit.inject.PermissionDefault;
 
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 
-import org.bukkit.entity.Player;
-import org.bukkit.permissions.PermissibleBase;
-import org.bukkit.permissions.Permission;
-import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.permissions.PermissionAttachmentInfo;
-import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
+import cn.nukkit.Player;
+import cn.nukkit.permission.PermissibleBase;
+import cn.nukkit.permission.Permission;
+import cn.nukkit.permission.PermissionAttachment;
+import cn.nukkit.permission.PermissionAttachmentInfo;
+import cn.nukkit.plugin.Plugin;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -72,7 +73,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * This class is **thread safe**. This means that when LuckPerms is installed on the server,
  * is is safe to call Player#hasPermission asynchronously.
  */
-public class LPPermissible extends PermissibleBase {
+public class LuckPermsPermissible extends PermissibleBase {
 
     private static final Field ATTACHMENTS_FIELD;
 
@@ -92,7 +93,7 @@ public class LPPermissible extends PermissibleBase {
     private final Player player;
 
     // the luckperms plugin instance
-    private final LPBukkitPlugin plugin;
+    private final LPNukkitPlugin plugin;
 
     // caches context lookups for the player
     private final QueryOptionsCache<Player> queryOptionsSupplier;
@@ -105,9 +106,9 @@ public class LPPermissible extends PermissibleBase {
 
     // the attachments hooked onto the permissible.
     // this collection is only modified by the attachments themselves
-    final Set<LPPermissionAttachment> lpAttachments = ConcurrentHashMap.newKeySet();
+    final Set<LuckPermsPermissionAttachment> hookedAttachments = ConcurrentHashMap.newKeySet();
 
-    public LPPermissible(Player player, User user, LPBukkitPlugin plugin) {
+    public LuckPermsPermissible(Player player, User user, LPNukkitPlugin plugin) {
         super(player);
         this.user = Objects.requireNonNull(user, "user");
         this.player = Objects.requireNonNull(player, "player");
@@ -118,25 +119,25 @@ public class LPPermissible extends PermissibleBase {
     }
 
     /**
-     * Injects a fake 'attachments' list into the superclass, for dumb plugins
+     * Injects a fake 'attachments' set into the superclass, for dumb plugins
      * which for some reason decided to add attachments via reflection.
      *
      * The fake list proxies (some) calls back to the proper methods on this permissible.
      */
     private void injectFakeAttachmentsList() {
-        FakeAttachmentList fakeList = new FakeAttachmentList();
+        FakeAttachmentSet fakeSet = new FakeAttachmentSet();
 
         try {
             // the field we need to modify is in the superclass - it has private
             // and final modifiers so we have to use reflection to modify it.
-            ATTACHMENTS_FIELD.set(this, fakeList);
+            ATTACHMENTS_FIELD.set(this, fakeSet);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public boolean isPermissionSet(@NonNull String permission) {
+    public boolean isPermissionSet(String permission) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
@@ -147,7 +148,7 @@ public class LPPermissible extends PermissibleBase {
             return false;
         }
 
-        // ignore matches made from looking up in the permission map (replicate bukkit behaviour)
+        // ignore matches made from looking up in the permission map (replicate nukkit behaviour)
         if (result.processorClass() == DefaultsProcessor.class && "permission map".equals(result.cause())) {
             return false;
         }
@@ -157,7 +158,7 @@ public class LPPermissible extends PermissibleBase {
     }
 
     @Override
-    public boolean isPermissionSet(@NonNull Permission permission) {
+    public boolean isPermissionSet(Permission permission) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
@@ -166,7 +167,7 @@ public class LPPermissible extends PermissibleBase {
     }
 
     @Override
-    public boolean hasPermission(@NonNull String permission) {
+    public boolean hasPermission(String permission) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
@@ -176,7 +177,7 @@ public class LPPermissible extends PermissibleBase {
     }
 
     @Override
-    public boolean hasPermission(@NonNull Permission permission) {
+    public boolean hasPermission(Permission permission) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
@@ -187,7 +188,10 @@ public class LPPermissible extends PermissibleBase {
         // override default op handling using the Permission class we have
         if (result.processorClass() == OpProcessor.class && this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
             // 'op == true' is implied by the presence of the OpProcessor class
-            return permission.getDefault().getValue(true);
+            PermissionDefault def = PermissionDefault.fromPermission(permission);
+            if (def != null) {
+                return def.getValue(true);
+            }
         }
 
         return result.result().asBoolean();
@@ -200,7 +204,7 @@ public class LPPermissible extends PermissibleBase {
      */
     void convertAndAddAttachments(Collection<PermissionAttachment> attachments) {
         for (PermissionAttachment attachment : attachments) {
-            new LPPermissionAttachment(this, attachment).hook();
+            new LuckPermsPermissionAttachment(this, attachment).hook();
         }
     }
 
@@ -210,94 +214,78 @@ public class LPPermissible extends PermissibleBase {
     }
 
     @Override
-    public @NonNull Set<PermissionAttachmentInfo> getEffectivePermissions() {
+    public Map<String, PermissionAttachmentInfo> getEffectivePermissions() {
         return this.user.getCachedData().getPermissionData(this.queryOptionsSupplier.getQueryOptions()).getPermissionMap().entrySet().stream()
-                .map(entry -> new PermissionAttachmentInfo(this.player, entry.getKey(), null, entry.getValue()))
-                .collect(ImmutableCollectors.toSet());
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, entry -> new PermissionAttachmentInfo(this.player, entry.getKey(), null, entry.getValue())));
     }
 
     @Override
-    public @NonNull LPPermissionAttachment addAttachment(@NonNull Plugin plugin) {
+    public LuckPermsPermissionAttachment addAttachment(Plugin plugin) {
         if (plugin == null) {
             throw new NullPointerException("plugin");
         }
 
-        LPPermissionAttachment ret = new LPPermissionAttachment(this, plugin);
-        ret.hook();
-        return ret;
+        LuckPermsPermissionAttachment attachment = new LuckPermsPermissionAttachment(this, plugin);
+        attachment.hook();
+        return attachment;
     }
 
     @Override
-    public @NonNull PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String permission, boolean value) {
-        if (plugin == null) {
-            throw new NullPointerException("plugin");
-        }
-        if (permission == null) {
-            throw new NullPointerException("permission");
-        }
-
-        PermissionAttachment ret = addAttachment(plugin);
-        ret.setPermission(permission, value);
-        return ret;
-    }
-
-    @Override
-    public LPPermissionAttachment addAttachment(@NonNull Plugin plugin, int ticks) {
-        if (plugin == null) {
-            throw new NullPointerException("plugin");
-        }
-
-        if (!plugin.isEnabled()) {
-            throw new IllegalArgumentException("Plugin " + plugin.getDescription().getFullName() + " is not enabled");
-        }
-
-        LPPermissionAttachment ret = addAttachment(plugin);
-        if (getPlugin().getBootstrap().getServer().getScheduler().scheduleSyncDelayedTask(plugin, ret::remove, ticks) == -1) {
-            ret.remove();
-            throw new RuntimeException("Could not add PermissionAttachment to " + this.player + " for plugin " + plugin.getDescription().getFullName() + ": Scheduler returned -1");
-        }
-        return ret;
-    }
-
-    @Override
-    public LPPermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String permission, boolean value, int ticks) {
+    public PermissionAttachment addAttachment(Plugin plugin, String permission) {
         if (plugin == null) {
             throw new NullPointerException("plugin");
         }
         if (permission == null) {
-            throw new NullPointerException("permission");
+            return addAttachment(plugin);
         }
 
-        LPPermissionAttachment ret = addAttachment(plugin, ticks);
-        ret.setPermission(permission, value);
-        return ret;
+        PermissionAttachment attachment = addAttachment(plugin);
+        attachment.setPermission(permission, true);
+        return attachment;
     }
 
     @Override
-    public void removeAttachment(@NonNull PermissionAttachment attachment) {
+    public PermissionAttachment addAttachment(Plugin plugin, String permission, Boolean value) {
+        if (plugin == null) {
+            throw new NullPointerException("plugin");
+        }
+        if (permission == null) {
+            return addAttachment(plugin);
+        }
+        if (value == null) {
+            return addAttachment(plugin, permission);   
+        }
+
+        PermissionAttachment attachment = addAttachment(plugin);
+        attachment.setPermission(permission, value);
+        return attachment;
+    }
+
+    @Override
+    public void removeAttachment(PermissionAttachment attachment) {
         if (attachment == null) {
             throw new NullPointerException("attachment");
         }
 
-        LPPermissionAttachment a;
+        LuckPermsPermissionAttachment luckPermsAttachment;
 
-        if (!(attachment instanceof LPPermissionAttachment)) {
+        if (!(attachment instanceof LuckPermsPermissionAttachment)) {
             // try to find a match
-            LPPermissionAttachment match = this.lpAttachments.stream().filter(at -> at.getSource() == attachment).findFirst().orElse(null);
+            LuckPermsPermissionAttachment match = this.hookedAttachments.stream().filter(at -> at.getSource() == attachment).findFirst().orElse(null);
             if (match != null) {
-                a = match;
+                luckPermsAttachment = match;
             } else {
                 throw new IllegalArgumentException("Given attachment is not a LPPermissionAttachment.");
             }
         } else {
-            a = (LPPermissionAttachment) attachment;
+            luckPermsAttachment = (LuckPermsPermissionAttachment) attachment;
         }
 
-        if (a.getPermissible() != this) {
+        if (luckPermsAttachment.getPermissible() != this) {
             throw new IllegalArgumentException("Attachment does not belong to this permissible.");
         }
 
-        a.remove();
+        luckPermsAttachment.remove();
     }
 
     @Override
@@ -310,12 +298,12 @@ public class LPPermissible extends PermissibleBase {
             this.queryOptionsSupplier.invalidate();
         }
 
-        // but we don't need to do anything else in this method, unlike the CB impl.
+        // but we don't need to do anything else in this method, unlike the Nukkit impl.
     }
 
     @Override
     public void clearPermissions() {
-        this.lpAttachments.forEach(LPPermissionAttachment::remove);
+        this.hookedAttachments.forEach(LuckPermsPermissionAttachment::remove);
     }
 
     public User getUser() {
@@ -326,7 +314,7 @@ public class LPPermissible extends PermissibleBase {
         return this.player;
     }
 
-    public LPBukkitPlugin getPlugin() {
+    public LPNukkitPlugin getPlugin() {
         return this.plugin;
     }
 
@@ -343,7 +331,7 @@ public class LPPermissible extends PermissibleBase {
     }
 
     /**
-     * A fake list to be injected into the superclass. This implementation simply
+     * A fake set to be injected into the superclass. This implementation simply
      * proxies calls back to this permissible instance.
      *
      * Some (clever/dumb??) plugins attempt to add/remove/query attachments using reflection.
@@ -351,15 +339,15 @@ public class LPPermissible extends PermissibleBase {
      * An instance of this map is injected into the super instance so these plugins continue
      * to work with LuckPerms.
      */
-    private final class FakeAttachmentList implements List<PermissionAttachment> {
+    private final class FakeAttachmentSet implements Set<PermissionAttachment> {
 
         @Override
         public boolean add(PermissionAttachment attachment) {
-            if (LPPermissible.this.lpAttachments.stream().anyMatch(at -> at.getSource() == attachment)) {
+            if (LuckPermsPermissible.this.hookedAttachments.stream().anyMatch(at -> at.getSource() == attachment)) {
                 return false;
             }
 
-            new LPPermissionAttachment(LPPermissible.this, attachment).hook();
+            new LuckPermsPermissionAttachment(LuckPermsPermissible.this, attachment).hook();
             return true;
         }
 
@@ -388,44 +376,28 @@ public class LPPermissible extends PermissibleBase {
         @Override
         public boolean contains(Object o) {
             PermissionAttachment attachment = (PermissionAttachment) o;
-            return LPPermissible.this.lpAttachments.stream().anyMatch(at -> at.getSource() == attachment);
+            return LuckPermsPermissible.this.hookedAttachments.stream().anyMatch(at -> at.getSource() == attachment);
         }
 
         @Override
         public Iterator<PermissionAttachment> iterator() {
-            return ImmutableList.<PermissionAttachment>copyOf(LPPermissible.this.lpAttachments).iterator();
-        }
-
-        @Override
-        public ListIterator<PermissionAttachment> listIterator() {
-            return ImmutableList.<PermissionAttachment>copyOf(LPPermissible.this.lpAttachments).listIterator();
+            return ImmutableList.<PermissionAttachment>copyOf(LuckPermsPermissible.this.hookedAttachments).iterator();
         }
 
         @Override
         public @NonNull Object[] toArray() {
-            return ImmutableList.<PermissionAttachment>copyOf(LPPermissible.this.lpAttachments).toArray();
+            return ImmutableList.<PermissionAttachment>copyOf(LuckPermsPermissible.this.hookedAttachments).toArray();
         }
 
         @Override
         public @NonNull <T> T[] toArray(@NonNull T[] a) {
-            return ImmutableList.<PermissionAttachment>copyOf(LPPermissible.this.lpAttachments).toArray(a);
+            return ImmutableList.<PermissionAttachment>copyOf(LuckPermsPermissible.this.hookedAttachments).toArray(a);
         }
 
         @Override public int size() { throw new UnsupportedOperationException(); }
         @Override public boolean isEmpty() { throw new UnsupportedOperationException(); }
         @Override public boolean containsAll(@NonNull Collection<?> c) { throw new UnsupportedOperationException(); }
-        @Override public boolean addAll(int index, @NonNull Collection<? extends PermissionAttachment> c) { throw new UnsupportedOperationException(); }
         @Override public boolean removeAll(@NonNull Collection<?> c) { throw new UnsupportedOperationException(); }
         @Override public boolean retainAll(@NonNull Collection<?> c) { throw new UnsupportedOperationException(); }
-        @Override public PermissionAttachment get(int index) { throw new UnsupportedOperationException(); }
-        @Override public PermissionAttachment set(int index, PermissionAttachment element) { throw new UnsupportedOperationException(); }
-        @Override public void add(int index, PermissionAttachment element) { throw new UnsupportedOperationException(); }
-        @Override public PermissionAttachment remove(int index) { throw new UnsupportedOperationException(); }
-        @Override public int indexOf(Object o) { throw new UnsupportedOperationException(); }
-        @Override public int lastIndexOf(Object o) { throw new UnsupportedOperationException(); }
-        @Override
-        public @NonNull ListIterator<PermissionAttachment> listIterator(int index) { throw new UnsupportedOperationException(); }
-        @Override
-        public @NonNull List<PermissionAttachment> subList(int fromIndex, int toIndex) { throw new UnsupportedOperationException(); }
     }
 }

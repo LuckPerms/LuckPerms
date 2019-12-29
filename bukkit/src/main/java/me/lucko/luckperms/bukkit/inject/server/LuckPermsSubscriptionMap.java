@@ -66,12 +66,12 @@ import java.util.stream.Collectors;
  *
  * Injected by {@link InjectorSubscriptionMap}.
  */
-public final class LPSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>> {
+public final class LuckPermsSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>> {
 
     // the plugin instance
     final LPBukkitPlugin plugin;
 
-    public LPSubscriptionMap(LPBukkitPlugin plugin, Map<String, Map<Permissible, Boolean>> existingData) {
+    public LuckPermsSubscriptionMap(LPBukkitPlugin plugin, Map<String, Map<Permissible, Boolean>> existingData) {
         super(existingData);
         this.plugin = plugin;
     }
@@ -133,17 +133,17 @@ public final class LPSubscriptionMap extends HashMap<String, Map<Permissible, Bo
      * @return a standard representation of this map
      */
     public Map<String, Map<Permissible, Boolean>> detach() {
-        Map<String, Map<Permissible, Boolean>> ret = new HashMap<>();
+        Map<String, Map<Permissible, Boolean>> map = new HashMap<>();
 
         for (Map.Entry<String, Map<Permissible, Boolean>> ent : entrySet()) {
             if (ent.getValue() instanceof LPSubscriptionValueMap) {
-                ret.put(ent.getKey(), ((LPSubscriptionValueMap) ent.getValue()).backing);
+                map.put(ent.getKey(), ((LPSubscriptionValueMap) ent.getValue()).backing);
             } else {
-                ret.put(ent.getKey(), ent.getValue());
+                map.put(ent.getKey(), ent.getValue());
             }
         }
 
-        return ret;
+        return map;
     }
 
     /**
@@ -219,7 +219,7 @@ public final class LPSubscriptionMap extends HashMap<String, Map<Permissible, Bo
         @Override
         public @NonNull Set<Permissible> keySet() {
             // gather players (LPPermissibles)
-            Set<Permissible> players = LPSubscriptionMap.this.plugin.getBootstrap().getServer().getOnlinePlayers().stream()
+            Set<Permissible> players = LuckPermsSubscriptionMap.this.plugin.getBootstrap().getServer().getOnlinePlayers().stream()
                     .filter(player -> player.hasPermission(this.permission) || player.isPermissionSet(this.permission))
                     .collect(Collectors.toSet());
 
@@ -230,9 +230,9 @@ public final class LPSubscriptionMap extends HashMap<String, Map<Permissible, Bo
         @Override
         public @NonNull Set<Entry<Permissible, Boolean>> entrySet() {
             return keySet().stream()
-                    .map(p -> {
-                        Boolean ret = get(p);
-                        return ret != null ? Maps.immutableEntry(p, ret) : null;
+                    .map(key -> {
+                        Boolean value = get(key);
+                        return value != null ? Maps.immutableEntry(key, value) : null;
                     })
                     .filter(Objects::nonNull)
                     .collect(ImmutableCollectors.toSet());

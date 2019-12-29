@@ -37,7 +37,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Injects a {@link LPSubscriptionMap} into the {@link PluginManager}.
+ * Injects a {@link LuckPermsSubscriptionMap} into the {@link PluginManager}.
  */
 public class InjectorSubscriptionMap implements Runnable {
     private static final Field PERM_SUBS_FIELD;
@@ -62,9 +62,9 @@ public class InjectorSubscriptionMap implements Runnable {
     @Override
     public void run() {
         try {
-            LPSubscriptionMap ret = inject();
-            if (ret != null) {
-                this.plugin.setSubscriptionMap(ret);
+            LuckPermsSubscriptionMap subscriptionMap = inject();
+            if (subscriptionMap != null) {
+                this.plugin.setSubscriptionMap(subscriptionMap);
             }
         } catch (Exception e) {
             this.plugin.getLogger().severe("Exception occurred whilst injecting LuckPerms Permission Subscription map.");
@@ -72,24 +72,24 @@ public class InjectorSubscriptionMap implements Runnable {
         }
     }
 
-    private LPSubscriptionMap inject() throws Exception {
+    private LuckPermsSubscriptionMap inject() throws Exception {
         Objects.requireNonNull(PERM_SUBS_FIELD, "PERM_SUBS_FIELD");
         PluginManager pluginManager = this.plugin.getBootstrap().getServer().getPluginManager();
 
         Object map = PERM_SUBS_FIELD.get(pluginManager);
-        if (map instanceof LPSubscriptionMap) {
-            if (((LPSubscriptionMap) map).plugin == this.plugin) {
+        if (map instanceof LuckPermsSubscriptionMap) {
+            if (((LuckPermsSubscriptionMap) map).plugin == this.plugin) {
                 return null;
             }
 
-            map = ((LPSubscriptionMap) map).detach();
+            map = ((LuckPermsSubscriptionMap) map).detach();
         }
 
         //noinspection unchecked
         Map<String, Set<Permissible>> castedMap = (Map<String, Set<Permissible>>) map;
 
         // make a new subscription map & inject it
-        LPSubscriptionMap newMap = new LPSubscriptionMap(this.plugin, castedMap);
+        LuckPermsSubscriptionMap newMap = new LuckPermsSubscriptionMap(this.plugin, castedMap);
         PERM_SUBS_FIELD.set(pluginManager, newMap);
         return newMap;
     }
@@ -100,8 +100,8 @@ public class InjectorSubscriptionMap implements Runnable {
             PluginManager pluginManager = Server.getInstance().getPluginManager();
 
             Object map = PERM_SUBS_FIELD.get(pluginManager);
-            if (map instanceof LPSubscriptionMap) {
-                LPSubscriptionMap lpMap = (LPSubscriptionMap) map;
+            if (map instanceof LuckPermsSubscriptionMap) {
+                LuckPermsSubscriptionMap lpMap = (LuckPermsSubscriptionMap) map;
                 PERM_SUBS_FIELD.set(pluginManager, lpMap.detach());
             }
         } catch (Exception e) {

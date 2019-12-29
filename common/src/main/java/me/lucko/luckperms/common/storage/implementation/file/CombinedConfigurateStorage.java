@@ -160,8 +160,8 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
     @Override
     protected ConfigurationNode readFile(StorageLocation location, String name) throws IOException {
         ConfigurationNode root = getStorageLoader(location).getNode();
-        ConfigurationNode ret = root.getNode(name);
-        return ret.isVirtual() ? null : ret;
+        ConfigurationNode node = root.getNode(name);
+        return node.isVirtual() ? null : node;
     }
 
     @Override

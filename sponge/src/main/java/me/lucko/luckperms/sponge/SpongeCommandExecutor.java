@@ -103,7 +103,7 @@ public class SpongeCommandExecutor extends CommandManager implements CommandCall
                             .filter(e -> e instanceof Player)
                             .map(e -> ((Player) e))
                             .findFirst()
-                            .ifPresent(ret -> it.set(ret.getUniqueId().toString()));
+                            .ifPresent(player -> it.set(player.getUniqueId().toString()));
                 } catch (IllegalArgumentException e) {
                     // ignored
                 }
