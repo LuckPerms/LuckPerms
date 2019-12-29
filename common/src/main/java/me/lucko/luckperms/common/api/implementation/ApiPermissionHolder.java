@@ -65,6 +65,12 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
         return this.handle;
     }
 
+    protected void onNodeChange() {
+        // overridden by groups
+        // when a node is changed on a group, it could potentially affect other groups/users,
+        // so their caches need to be invalidated too. we handle this automatically for API users.
+    }
+
     @Override
     public @NonNull Identifier getIdentifier() {
         return this.handle.getIdentifier();
@@ -151,38 +157,58 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
 
         @Override
         public @NonNull DataMutateResult add(@NonNull Node node) {
-            return ApiPermissionHolder.this.handle.setNode(this.dataType, node, true);
+            DataMutateResult result = ApiPermissionHolder.this.handle.setNode(this.dataType, node, true);
+            if (result.wasSuccessful()) {
+                onNodeChange();
+            }
+            return result;
         }
 
         @Override
         public DataMutateResult.@NonNull WithMergedNode add(@NonNull Node node, @NonNull TemporaryNodeMergeStrategy temporaryNodeMergeStrategy) {
-            return ApiPermissionHolder.this.handle.setNode(this.dataType, node, temporaryNodeMergeStrategy);
+            DataMutateResult.WithMergedNode result = ApiPermissionHolder.this.handle.setNode(this.dataType, node, temporaryNodeMergeStrategy);
+            if (result.getResult().wasSuccessful()) {
+                onNodeChange();
+            }
+            return result;
         }
 
         @Override
         public @NonNull DataMutateResult remove(@NonNull Node node) {
-            return ApiPermissionHolder.this.handle.unsetNode(this.dataType, node);
+            DataMutateResult result = ApiPermissionHolder.this.handle.unsetNode(this.dataType, node);
+            if (result.wasSuccessful()) {
+                onNodeChange();
+            }
+            return result;
         }
 
         @Override
         public void clear() {
-            ApiPermissionHolder.this.handle.clearNodes(this.dataType, null, true);
+            if (ApiPermissionHolder.this.handle.clearNodes(this.dataType, null, true)) {
+                onNodeChange();
+            }
         }
 
         @Override
         public void clear(@NonNull Predicate<? super Node> test) {
-            ApiPermissionHolder.this.handle.removeIf(this.dataType, null, test, true);
+            if (ApiPermissionHolder.this.handle.removeIf(this.dataType, null, test, true)) {
+                onNodeChange();
+            }
         }
 
 
         @Override
         public void clear(@NonNull ContextSet contextSet) {
-            ApiPermissionHolder.this.handle.clearNodes(this.dataType, contextSet, true);
+            if (ApiPermissionHolder.this.handle.clearNodes(this.dataType, contextSet, true)) {
+                onNodeChange();
+            }
         }
 
         @Override
         public void clear(@NonNull ContextSet contextSet, @NonNull Predicate<? super Node> test) {
-            ApiPermissionHolder.this.handle.removeIf(this.dataType, contextSet, test, true);
+            if (ApiPermissionHolder.this.handle.removeIf(this.dataType, contextSet, test, true)) {
+                onNodeChange();
+            }
         }
     }
 
