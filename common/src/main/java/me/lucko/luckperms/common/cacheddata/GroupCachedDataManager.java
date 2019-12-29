@@ -42,6 +42,6 @@ public class GroupCachedDataManager extends HolderCachedDataManager<Group> imple
 
     @Override
     protected CacheMetadata getMetadataForQueryOptions(QueryOptions queryOptions) {
-        return new CacheMetadata(this, HolderType.GROUP, this.holder.getPlainDisplayName(), queryOptions);
+        return new CacheMetadata(HolderType.GROUP, this.holder.getPlainDisplayName(), queryOptions);
     }
 }

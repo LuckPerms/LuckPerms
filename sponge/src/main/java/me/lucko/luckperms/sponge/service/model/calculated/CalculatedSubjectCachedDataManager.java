@@ -64,7 +64,7 @@ public class CalculatedSubjectCachedDataManager extends AbstractCachedDataManage
 
     @Override
     protected CacheMetadata getMetadataForQueryOptions(QueryOptions queryOptions) {
-        return new CacheMetadata(this, null, this.subject.getParentCollection().getIdentifier() + "/" + this.subject.getIdentifier(), queryOptions);
+        return new CacheMetadata(null, this.subject.getParentCollection().getIdentifier() + "/" + this.subject.getIdentifier(), queryOptions);
     }
 
     @Override
