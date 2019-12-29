@@ -65,7 +65,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 public class PermissionHolderSubjectData implements LPSubjectData {
     private final LuckPermsService service;
@@ -79,10 +78,6 @@ public class PermissionHolderSubjectData implements LPSubjectData {
         this.service = service;
         this.holder = holder;
         this.parentSubject = parentSubject;
-    }
-
-    private Stream<? extends Node> streamNodes() {
-        return this.holder.getData(this.type).immutable().values().stream();
     }
 
     @Override

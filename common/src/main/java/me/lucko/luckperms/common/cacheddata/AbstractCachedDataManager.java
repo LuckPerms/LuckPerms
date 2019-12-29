@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.cacheddata;
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 
+import me.lucko.luckperms.common.cache.MRUCache;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
@@ -52,7 +53,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Abstract implementation of {@link CachedDataManager}.
@@ -177,36 +177,6 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
     public final void performCacheCleanup() {
         this.permissionDataManager.cache.synchronous().cleanUp();
         this.metaDataManager.cache.synchronous().cleanUp();
-    }
-
-    /**
-     * Implementation of a most-recently-used cache with a mod counter, to prevent race conditions
-     * occurring when the cache is cleared whilst a calculation is taking place.
-     *
-     * @param <T> the cached type
-     */
-    private abstract static class MRUCache<T> {
-        private volatile T recent;
-        private final AtomicInteger modCount = new AtomicInteger();
-
-        protected int modCount() {
-            return this.modCount.get();
-        }
-
-        protected T getRecent() {
-            return this.recent;
-        }
-
-        protected void offerRecent(int validAt, T offer) {
-            if (validAt == this.modCount.get()) {
-                this.recent = offer;
-            }
-        }
-
-        protected void clearRecent() {
-            this.recent = null;
-            this.modCount.incrementAndGet();
-        }
     }
 
     private final class Permission extends MRUCache<RecentPermissionData> implements Container<CachedPermissionData> {
