@@ -544,9 +544,6 @@ vault-include-global: true
 # If Vault operations should ignore any world arguments if supplied.
 vault-ignore-world: false
 
-# If LuckPerms should print debugging info to console when a plugin uses a Vault function
-vault-debug: false
-
 # +----------------------------------------------------------------------------------------------+ #
 # | Miscellaneous (and rarely used) settings                                                     | #
 # +----------------------------------------------------------------------------------------------+ #

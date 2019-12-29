@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.common.cacheddata.type;
 
+import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
-import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
@@ -64,7 +64,7 @@ public class MetaCache implements CachedMetaData {
      */
     private final CacheMetadata metadata;
 
-    private ListMultimap<String, String> meta = ImmutableListMultimap.of();
+    private Map<String, List<String>> meta = ImmutableMap.of();
     private Map<String, String> flattenedMeta = ImmutableMap.of();
     private SortedMap<Integer, String> prefixes = ImmutableSortedMap.of();
     private SortedMap<Integer, String> suffixes = ImmutableSortedMap.of();
@@ -79,21 +79,18 @@ public class MetaCache implements CachedMetaData {
     public void loadMeta(MetaAccumulator meta) {
         meta.complete();
 
-        this.meta = ImmutableListMultimap.copyOf(meta.getMeta());
+        this.meta = Multimaps.asMap(ImmutableListMultimap.copyOf(meta.getMeta()));
 
-        //noinspection unchecked
-        Map<String, List<String>> metaMap = (Map) this.meta.asMap();
-        ImmutableMap.Builder<String, String> metaMapBuilder = ImmutableMap.builder();
-
-        for (Map.Entry<String, List<String>> e : metaMap.entrySet()) {
+        ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+        for (Map.Entry<String, List<String>> e : this.meta.entrySet()) {
             if (e.getValue().isEmpty()) {
                 continue;
             }
 
             // take the value which was accumulated first
-            metaMapBuilder.put(e.getKey(), e.getValue().get(0));
+            builder.put(e.getKey(), e.getValue().get(0));
         }
-        this.flattenedMeta = metaMapBuilder.build();
+        this.flattenedMeta = builder.build();
 
         this.prefixes = ImmutableSortedMap.copyOfSorted(meta.getPrefixes());
         this.suffixes = ImmutableSortedMap.copyOfSorted(meta.getSuffixes());
@@ -149,9 +146,13 @@ public class MetaCache implements CachedMetaData {
         return getSuffix(MetaCheckEvent.Origin.LUCKPERMS_API);
     }
 
+    public Map<String, List<String>> getMeta(MetaCheckEvent.Origin origin) {
+        return new MonitoredMetaMap(origin);
+    }
+
     @Override
     public @NonNull Map<String, List<String>> getMeta() {
-        return Multimaps.asMap(this.meta);
+        return getMeta(MetaCheckEvent.Origin.LUCKPERMS_API);
     }
 
     @Override
@@ -177,6 +178,35 @@ public class MetaCache implements CachedMetaData {
     @Override
     public @NonNull QueryOptions getQueryOptions() {
         return this.queryOptions;
+    }
+
+    private final class MonitoredMetaMap extends ForwardingMap<String, List<String>> {
+        private final MetaCheckEvent.Origin origin;
+
+        MonitoredMetaMap(MetaCheckEvent.Origin origin) {
+            this.origin = origin;
+        }
+
+        @Override
+        protected Map<String, List<String>> delegate() {
+            return MetaCache.this.meta;
+        }
+
+        @Override
+        public List<String> get(Object k) {
+            if (k == null) {
+                return null;
+            }
+
+            String key = (String) k;
+            List<String> values = super.get(key);
+
+            // log this meta lookup to the verbose handler
+            VerboseHandler verboseHandler = MetaCache.this.metadata.getParentContainer().getPlugin().getVerboseHandler();
+            verboseHandler.offerMetaCheckEvent(this.origin, MetaCache.this.metadata.getObjectName(), MetaCache.this.metadata.getQueryOptions(), key, String.valueOf(values));
+
+            return values;
+        }
     }
 
 }

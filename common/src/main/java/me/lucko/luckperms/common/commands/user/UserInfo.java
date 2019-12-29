@@ -122,7 +122,7 @@ public class UserInfo extends SubCommand<User> {
                 suffix = "&f\"" + sussexValue + "&f\"";
             }
 
-            Map<String, List<String>> metaMap = data.getMeta();
+            Map<String, List<String>> metaMap = data.getMeta(MetaCheckEvent.Origin.INTERNAL);
             if (!metaMap.isEmpty()) {
                 meta = metaMap.entrySet().stream()
                         .flatMap(entry -> entry.getValue().stream().map(value -> Maps.immutableEntry(entry.getKey(), value)))

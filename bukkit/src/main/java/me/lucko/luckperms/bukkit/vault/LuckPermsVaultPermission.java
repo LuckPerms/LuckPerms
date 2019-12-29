@@ -40,7 +40,6 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.node.types.Inheritance;
-import me.lucko.luckperms.common.util.TextUtils;
 import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
@@ -58,7 +57,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -195,9 +193,6 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         PermissionCache permissionData = user.getCachedData().getPermissionData(queryOptions);
 
         Tristate result = permissionData.checkPermission(permission, PermissionCheckEvent.Origin.THIRD_PARTY_API).result();
-        if (log()) {
-            logMsg("#userHasPermission: %s - %s - %s - %s", user.getPlainDisplayName(), queryOptions.context(), permission, result);
-        }
         return result != Tristate.UNDEFINED ? result.asBoolean() : org.bukkit.permissions.Permission.DEFAULT_PERMISSION.getValue(queryOptions.option(BukkitContextManager.OP_OPTION).orElse(false));
     }
 
@@ -235,9 +230,6 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         PermissionCache permissionData = user.getCachedData().getPermissionData(queryOptions);
 
         TristateResult result = permissionData.checkPermission(Inheritance.key(rewriteGroupName(group)), PermissionCheckEvent.Origin.THIRD_PARTY_API);
-        if (log()) {
-            logMsg("#userInGroup: %s - %s - %s - %s", user.getPlainDisplayName(), queryOptions.context(), group, result);
-        }
         return result.processorClass() == MapProcessor.class && result.result().asBoolean();
     }
 
@@ -262,7 +254,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         PermissionHolder user = lookupUser(uuid);
         ContextSet contexts = getQueryOptions(uuid, world).context();
 
-        String[] groups = user.normalData().immutableInheritance().values().stream()
+        return user.normalData().immutableInheritance().values().stream()
                 .filter(n -> n.getContexts().isSatisfiedBy(contexts))
                 .map(n -> {
                     Group group = this.plugin.getGroupManager().getIfLoaded(n.getGroupName());
@@ -272,12 +264,6 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
                     return n.getGroupName();
                 })
                 .toArray(String[]::new);
-
-        if (log()) {
-            logMsg("#userGetGroups: %s - %s - %s", user.getPlainDisplayName(), contexts, Arrays.toString(groups));
-        }
-
-        return groups;
     }
 
     @Override
@@ -295,11 +281,6 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         }
 
         this.plugin.getVerboseHandler().offerMetaCheckEvent(MetaCheckEvent.Origin.THIRD_PARTY_API, user.getPlainDisplayName(), QueryOptions.defaultContextualOptions(), "primarygroup", value);
-
-        if (log()) {
-            logMsg("#userGetPrimaryGroup: %s - %s - %s", user.getPlainDisplayName(), world, value);
-        }
-
         return value;
     }
 
@@ -315,12 +296,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
 
         QueryOptions queryOptions = getQueryOptions(null, world);
         PermissionCache permissionData = group.getCachedData().getPermissionData(queryOptions);
-
-        Tristate result = permissionData.checkPermission(permission, PermissionCheckEvent.Origin.THIRD_PARTY_API).result();
-        if (log()) {
-            logMsg("#groupHasPermission: %s - %s - %s - %s", group.getName(), queryOptions.context(), permission, result);
-        }
-        return result.asBoolean();
+        return permissionData.checkPermission(permission, PermissionCheckEvent.Origin.THIRD_PARTY_API).result().asBoolean();
     }
 
     @Override
@@ -365,17 +341,6 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
             return group.getName();
         }
         return name;
-    }
-
-    // logging
-    private boolean log() {
-        return this.plugin.getConfiguration().get(ConfigKeys.VAULT_DEBUG);
-    }
-    private void logMsg(String format, Object... args) {
-        this.plugin.getLogger().info("[VAULT-PERMS] " + String.format(format, args)
-                .replace(TextUtils.SECTION_CHAR, '$')
-                .replace(TextUtils.AMPERSAND_CHAR, '$')
-        );
     }
 
     // utility method for getting a contexts instance for a given vault lookup.
@@ -433,10 +398,6 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         Objects.requireNonNull(permission, "permission is null");
         Preconditions.checkArgument(!permission.isEmpty(), "permission is an empty string");
 
-        if (log()) {
-            logMsg("#holderAddPermission: %s - %s - %s", holder.getPlainDisplayName(), permission, world);
-        }
-
         if (world == null) {
             world = "global";
         }
@@ -450,10 +411,6 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
     private boolean holderRemovePermission(PermissionHolder holder, String permission, String world) {
         Objects.requireNonNull(permission, "permission is null");
         Preconditions.checkArgument(!permission.isEmpty(), "permission is an empty string");
-
-        if (log()) {
-            logMsg("#holderRemovePermission: %s - %s - %s", holder.getPlainDisplayName(), permission, world);
-        }
 
         if (world == null) {
             world = "global";

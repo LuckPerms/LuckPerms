@@ -398,11 +398,6 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> VAULT_IGNORE_WORLD = booleanKey("vault-ignore-world", false);
 
     /**
-     * If Vault debug mode is enabled
-     */
-    public static final ConfigKey<Boolean> VAULT_DEBUG = booleanKey("vault-debug", false);
-
-    /**
      * The world rewrites map
      */
     public static final ConfigKey<Map<String, String>> WORLD_REWRITES = customKey(c -> {
