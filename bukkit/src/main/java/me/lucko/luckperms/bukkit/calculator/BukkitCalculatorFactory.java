@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.processor.RegexProcessor;
 import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.model.HolderType;
 
 import net.luckperms.api.query.QueryOptions;
 
@@ -66,7 +67,7 @@ public class BukkitCalculatorFactory implements CalculatorFactory {
         }
 
         boolean op = queryOptions.option(BukkitContextManager.OP_OPTION).orElse(false);
-        if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
+        if (metadata.getHolderType() == HolderType.USER && this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
             processors.add(new DefaultsProcessor(this.plugin, op));
         }
 
