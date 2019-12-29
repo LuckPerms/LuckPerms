@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.compat;
+package me.lucko.luckperms.bukkit.util;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;

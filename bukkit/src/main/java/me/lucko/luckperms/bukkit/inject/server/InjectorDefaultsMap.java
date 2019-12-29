@@ -39,7 +39,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Injects a {@link LPDefaultsMap} info the {@link PluginManager}.
+ * Injects a {@link LuckPermsDefaultsMap} info the {@link PluginManager}.
  */
 public class InjectorDefaultsMap implements Runnable {
     private static final Field DEFAULT_PERMISSIONS_FIELD;
@@ -64,9 +64,9 @@ public class InjectorDefaultsMap implements Runnable {
     @Override
     public void run() {
         try {
-            LPDefaultsMap ret = inject();
-            if (ret != null) {
-                this.plugin.setDefaultPermissionMap(ret);
+            LuckPermsDefaultsMap defaultsMap = inject();
+            if (defaultsMap != null) {
+                this.plugin.setDefaultPermissionMap(defaultsMap);
             }
         } catch (Exception e) {
             this.plugin.getLogger().severe("Exception occurred whilst injecting LuckPerms Default Permission map.");
@@ -74,7 +74,7 @@ public class InjectorDefaultsMap implements Runnable {
         }
     }
 
-    private LPDefaultsMap inject() throws Exception {
+    private LuckPermsDefaultsMap inject() throws Exception {
         Objects.requireNonNull(DEFAULT_PERMISSIONS_FIELD, "DEFAULT_PERMISSIONS_FIELD");
         PluginManager pluginManager = this.plugin.getBootstrap().getServer().getPluginManager();
 
@@ -85,7 +85,7 @@ public class InjectorDefaultsMap implements Runnable {
         }
 
         Object map = DEFAULT_PERMISSIONS_FIELD.get(pluginManager);
-        if (map instanceof LPDefaultsMap && ((LPDefaultsMap) map).plugin == this.plugin) {
+        if (map instanceof LuckPermsDefaultsMap && ((LuckPermsDefaultsMap) map).plugin == this.plugin) {
             return null;
         }
 
@@ -93,7 +93,7 @@ public class InjectorDefaultsMap implements Runnable {
         Map<Boolean, Set<Permission>> castedMap = (Map<Boolean, Set<Permission>>) map;
 
         // make a new map & inject it
-        LPDefaultsMap newMap = new LPDefaultsMap(this.plugin, castedMap);
+        LuckPermsDefaultsMap newMap = new LuckPermsDefaultsMap(this.plugin, castedMap);
         DEFAULT_PERMISSIONS_FIELD.set(pluginManager, newMap);
         return newMap;
     }
@@ -108,8 +108,8 @@ public class InjectorDefaultsMap implements Runnable {
             }
 
             Object map = DEFAULT_PERMISSIONS_FIELD.get(pluginManager);
-            if (map instanceof LPDefaultsMap) {
-                LPDefaultsMap lpMap = (LPDefaultsMap) map;
+            if (map instanceof LuckPermsDefaultsMap) {
+                LuckPermsDefaultsMap lpMap = (LuckPermsDefaultsMap) map;
                 DEFAULT_PERMISSIONS_FIELD.set(pluginManager, new HashMap<>(lpMap));
             }
         } catch (Exception e) {

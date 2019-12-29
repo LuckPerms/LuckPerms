@@ -30,7 +30,7 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
-import me.lucko.luckperms.nukkit.inject.permissible.LPPermissible;
+import me.lucko.luckperms.nukkit.inject.permissible.LuckPermsPermissible;
 import me.lucko.luckperms.nukkit.inject.permissible.PermissibleInjector;
 
 import cn.nukkit.Player;
@@ -151,7 +151,7 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
         // Care should be taken at this stage to ensure that async tasks which manipulate nukkit data check that the player is still online.
         try {
             // Make a new permissible for the user
-            LPPermissible lpPermissible = new LPPermissible(player, user, this.plugin);
+            LuckPermsPermissible lpPermissible = new LuckPermsPermissible(player, user, this.plugin);
 
             // Inject into the player
             PermissibleInjector.inject(player, lpPermissible);

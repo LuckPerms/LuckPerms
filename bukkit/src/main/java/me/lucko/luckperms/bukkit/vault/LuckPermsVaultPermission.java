@@ -262,7 +262,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         PermissionHolder user = lookupUser(uuid);
         ContextSet contexts = getQueryOptions(uuid, world).context();
 
-        String[] ret = user.normalData().immutableInheritance().values().stream()
+        String[] groups = user.normalData().immutableInheritance().values().stream()
                 .filter(n -> n.getContexts().isSatisfiedBy(contexts))
                 .map(n -> {
                     Group group = this.plugin.getGroupManager().getIfLoaded(n.getGroupName());
@@ -274,10 +274,10 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
                 .toArray(String[]::new);
 
         if (log()) {
-            logMsg("#userGetGroups: %s - %s - %s", user.getPlainDisplayName(), contexts, Arrays.toString(ret));
+            logMsg("#userGetGroups: %s - %s - %s", user.getPlainDisplayName(), contexts, Arrays.toString(groups));
         }
 
-        return ret;
+        return groups;
     }
 
     @Override

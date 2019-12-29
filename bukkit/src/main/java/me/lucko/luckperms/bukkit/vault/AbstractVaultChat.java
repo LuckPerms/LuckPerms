@@ -45,7 +45,7 @@ import java.util.function.Function;
  * to get a result using the players username.
  *
  * Whilst this meant the old plugins would still be supported, it made the whole
- * API a total mess. This class reverses this decision, and instead upgrades
+ * API a total mess. This class reverses this action, and instead upgrades
  * requests to use UUIDs. This makes implementing Vault significantly easier for modern
  * plugins, and because requests are upgraded instead of being downgraded then upgraded,
  * much faster for plugins querying data.
@@ -88,10 +88,10 @@ public abstract class AbstractVaultChat extends Chat {
     // utility methods for parsing metadata values from strings
 
     private static String strConvert(String s, String def) {
-        if (s != null) {
-            return s;
+        if (s == null) {
+            return def;
         }
-        return def;
+        return s;
     }
 
     private static int intConvert(String s, int def) {
@@ -124,19 +124,13 @@ public abstract class AbstractVaultChat extends Chat {
             return true;
         } else if (s.equalsIgnoreCase("false")) {
             return false;
+        } else {
+            return def;
         }
-        return def;
     }
 
     private String world(String world) {
         return this.worldMappingFunction.apply(world);
-    }
-
-    private String world(Player player) {
-        if (player == null) {
-            return null;
-        }
-        return world(player.getWorld());
     }
 
     private String world(World world) {
@@ -144,6 +138,13 @@ public abstract class AbstractVaultChat extends Chat {
             return null;
         }
         return world(world.getName());
+    }
+
+    private String world(Player player) {
+        if (player == null) {
+            return null;
+        }
+        return world(player.getWorld());
     }
 
     @Override

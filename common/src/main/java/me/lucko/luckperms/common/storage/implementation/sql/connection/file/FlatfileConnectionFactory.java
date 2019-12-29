@@ -54,7 +54,7 @@ abstract class FlatfileConnectionFactory implements ConnectionFactory {
 
     @Override
     public Map<String, String> getMeta() {
-        Map<String, String> ret = new LinkedHashMap<>();
+        Map<String, String> meta = new LinkedHashMap<>();
 
         Path databaseFile = getWriteFile();
         if (Files.exists(databaseFile)) {
@@ -66,11 +66,11 @@ abstract class FlatfileConnectionFactory implements ConnectionFactory {
             }
 
             double size = length / 1048576D;
-            ret.put("File Size", DF.format(size) + "MB");
+            meta.put("File Size", DF.format(size) + "MB");
         } else {
-            ret.put("File Size", "0MB");
+            meta.put("File Size", "0MB");
         }
 
-        return ret;
+        return meta;
     }
 }

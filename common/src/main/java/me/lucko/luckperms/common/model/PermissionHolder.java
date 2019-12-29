@@ -244,45 +244,45 @@ public abstract class PermissionHolder {
     }
 
     public List<Node> getOwnNodes(QueryOptions queryOptions) {
-        List<Node> ret = new ArrayList<>();
+        List<Node> nodes = new ArrayList<>();
 
         Comparator<DataType> comparator = queryOptions.option(DataQueryOrderFunction.KEY)
                 .map(func -> func.getOrderComparator(getIdentifier()))
                 .orElse(DataQueryOrder.TRANSIENT_FIRST);
 
         for (DataType dataType : DataQueryOrder.order(comparator)) {
-            getData(dataType).copyTo(ret, queryOptions);
+            getData(dataType).copyTo(nodes, queryOptions);
         }
 
-        return ret;
+        return nodes;
     }
 
     public SortedSet<Node> getOwnNodesSorted(QueryOptions queryOptions) {
-        SortedSet<Node> ret = new TreeSet<>(NodeWithContextComparator.reverse());
+        SortedSet<Node> nodes = new TreeSet<>(NodeWithContextComparator.reverse());
 
         Comparator<DataType> comparator = queryOptions.option(DataQueryOrderFunction.KEY)
                 .map(func -> func.getOrderComparator(getIdentifier()))
                 .orElse(DataQueryOrder.TRANSIENT_FIRST);
 
         for (DataType dataType : DataQueryOrder.order(comparator)) {
-            getData(dataType).copyTo(ret, queryOptions);
+            getData(dataType).copyTo(nodes, queryOptions);
         }
 
-        return ret;
+        return nodes;
     }
 
     public List<InheritanceNode> getOwnInheritanceNodes(QueryOptions queryOptions) {
-        List<InheritanceNode> ret = new ArrayList<>();
+        List<InheritanceNode> nodes = new ArrayList<>();
 
         Comparator<DataType> comparator = queryOptions.option(DataQueryOrderFunction.KEY)
                 .map(func -> func.getOrderComparator(getIdentifier()))
                 .orElse(DataQueryOrder.TRANSIENT_FIRST);
 
         for (DataType dataType : DataQueryOrder.order(comparator)) {
-            getData(dataType).copyInheritanceNodesTo(ret, queryOptions);
+            getData(dataType).copyInheritanceNodesTo(nodes, queryOptions);
         }
 
-        return ret;
+        return nodes;
     }
 
     private void accumulateInheritedNodesTo(Collection<Node> accumulator, QueryOptions queryOptions) {
@@ -299,15 +299,15 @@ public abstract class PermissionHolder {
     }
 
     public List<Node> resolveInheritedNodes(QueryOptions queryOptions) {
-        List<Node> ret = new ArrayList<>();
-        accumulateInheritedNodesTo(ret, queryOptions);
-        return ret;
+        List<Node> nodes = new ArrayList<>();
+        accumulateInheritedNodesTo(nodes, queryOptions);
+        return nodes;
     }
 
     public SortedSet<Node> resolveInheritedNodesSorted(QueryOptions queryOptions) {
-        SortedSet<Node> ret = new TreeSet<>(NodeWithContextComparator.reverse());
-        accumulateInheritedNodesTo(ret, queryOptions);
-        return ret;
+        SortedSet<Node> nodes = new TreeSet<>(NodeWithContextComparator.reverse());
+        accumulateInheritedNodesTo(nodes, queryOptions);
+        return nodes;
     }
 
     public Map<String, Boolean> exportPermissions(QueryOptions queryOptions, boolean convertToLowercase, boolean resolveShorthand) {
@@ -316,12 +316,12 @@ public abstract class PermissionHolder {
     }
 
     private static ImmutableMap<String, Boolean> processExportedPermissions(List<Node> entries, boolean convertToLowercase, boolean resolveShorthand) {
-        Map<String, Boolean> perms = new HashMap<>(entries.size());
+        Map<String, Boolean> map = new HashMap<>(entries.size());
         for (Node node : entries) {
             if (convertToLowercase) {
-                perms.putIfAbsent(node.getKey().toLowerCase(), node.getValue());
+                map.putIfAbsent(node.getKey().toLowerCase(), node.getValue());
             } else {
-                perms.putIfAbsent(node.getKey(), node.getValue());
+                map.putIfAbsent(node.getKey(), node.getValue());
             }
         }
 
@@ -330,15 +330,15 @@ public abstract class PermissionHolder {
                 Collection<String> shorthand = node.resolveShorthand();
                 for (String s : shorthand) {
                     if (convertToLowercase) {
-                        perms.putIfAbsent(s.toLowerCase(), node.getValue());
+                        map.putIfAbsent(s.toLowerCase(), node.getValue());
                     } else {
-                        perms.putIfAbsent(s, node.getValue());
+                        map.putIfAbsent(s, node.getValue());
                     }
                 }
             }
         }
 
-        return ImmutableMap.copyOf(perms);
+        return ImmutableMap.copyOf(map);
     }
 
     public MetaAccumulator accumulateMeta(MetaAccumulator accumulator, QueryOptions queryOptions) {

@@ -106,12 +106,12 @@ public class SplitStorage implements StorageImplementation {
 
     @Override
     public Map<String, String> getMeta() {
-        Map<String, String> ret = new LinkedHashMap<>();
-        ret.put("Types", this.types.toString());
+        Map<String, String> meta = new LinkedHashMap<>();
+        meta.put("Types", this.types.toString());
         for (StorageImplementation backing : this.implementations.values()) {
-            ret.putAll(backing.getMeta());
+            meta.putAll(backing.getMeta());
         }
-        return ret;
+        return meta;
     }
 
     @Override

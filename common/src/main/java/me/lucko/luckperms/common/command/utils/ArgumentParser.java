@@ -147,9 +147,9 @@ public class ArgumentParser {
 
         String s = args.get(index);
         try {
-            Optional<TemporaryNodeMergeStrategy> ret = Optional.of(parseTemporaryModifier(s));
+            Optional<TemporaryNodeMergeStrategy> strategy = Optional.of(parseTemporaryModifier(s));
             args.remove(index);
-            return ret;
+            return strategy;
         } catch (IllegalArgumentException e) {
             return Optional.empty();
         }

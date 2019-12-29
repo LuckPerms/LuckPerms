@@ -26,7 +26,7 @@
 package me.lucko.luckperms.bukkit.inject.permissible;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.bukkit.compat.CraftBukkitUtil;
+import me.lucko.luckperms.bukkit.util.CraftBukkitImplementation;
 
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.permissions.PermissibleBase;
@@ -101,7 +101,7 @@ public class PermissibleMonitoringInjector implements Runnable {
         ConsoleCommandSender consoleSender = this.plugin.getBootstrap().getServer().getConsoleSender();
 
         // get the ServerCommandSender class
-        Class<?> serverCommandSenderClass = CraftBukkitUtil.obcClass("command.ServerCommandSender");
+        Class<?> serverCommandSenderClass = CraftBukkitImplementation.obcClass("command.ServerCommandSender");
 
         // get the perm field
         Field permField = serverCommandSenderClass.getDeclaredField("perm");
@@ -122,7 +122,7 @@ public class PermissibleMonitoringInjector implements Runnable {
 
     private void injectCommandBlock() throws Exception {
         // get the ServerCommandSender class
-        Class<?> serverCommandSenderClass = CraftBukkitUtil.obcClass("command.ServerCommandSender");
+        Class<?> serverCommandSenderClass = CraftBukkitImplementation.obcClass("command.ServerCommandSender");
 
         // get the blockPermInst field
         Field permField = serverCommandSenderClass.getDeclaredField("blockPermInst");
@@ -149,7 +149,7 @@ public class PermissibleMonitoringInjector implements Runnable {
 
     private void injectEntity() throws Exception {
         // get the CraftEntity class
-        Class<?> entityClass = CraftBukkitUtil.obcClass("entity.CraftEntity");
+        Class<?> entityClass = CraftBukkitImplementation.obcClass("entity.CraftEntity");
 
         // get the method used to obtain a PermissibleBase
         // this method will initialise a new PB instance if one doesn't yet exist

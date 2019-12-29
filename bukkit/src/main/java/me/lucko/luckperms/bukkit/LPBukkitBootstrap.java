@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.bukkit;
 
-import me.lucko.luckperms.bukkit.compat.NullSafeConsoleCommandSender;
+import me.lucko.luckperms.bukkit.util.NullSafeConsoleCommandSender;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;

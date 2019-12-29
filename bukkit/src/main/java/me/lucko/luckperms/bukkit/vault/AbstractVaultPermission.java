@@ -46,7 +46,7 @@ import java.util.function.Function;
  * to get a result using the players username.
  *
  * Whilst this meant the old plugins would still be supported, it made the whole
- * API a total mess. This class reverses this decision, and instead upgrades
+ * API a total mess. This class reverses this action, and instead upgrades
  * requests to use UUIDs. This makes implementing Vault significantly easier for modern
  * plugins, and because requests are upgraded instead of being downgraded then upgraded,
  * much faster for plugins querying data.
@@ -98,18 +98,18 @@ public abstract class AbstractVaultPermission extends Permission {
         return this.worldMappingFunction.apply(world);
     }
 
-    private String world(Player player) {
-        if (player == null) {
-            return null;
-        }
-        return world(player.getWorld());
-    }
-
     private String world(World world) {
         if (world == null) {
             return null;
         }
         return world(world.getName());
+    }
+
+    private String world(Player player) {
+        if (player == null) {
+            return null;
+        }
+        return world(player.getWorld());
     }
 
     @Override

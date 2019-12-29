@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Injects a {@link LPDefaultsMap} info the {@link PluginManager}.
+ * Injects a {@link LuckPermsDefaultsMap} info the {@link PluginManager}.
  */
 public class InjectorDefaultsMap implements Runnable {
     private static final Field OP_DEFAULT_PERMISSIONS_FIELD;
@@ -74,9 +74,9 @@ public class InjectorDefaultsMap implements Runnable {
     @Override
     public void run() {
         try {
-            LPDefaultsMap ret = inject();
-            if (ret != null) {
-                this.plugin.setDefaultPermissionMap(ret);
+            LuckPermsDefaultsMap defaultsMap = inject();
+            if (defaultsMap != null) {
+                this.plugin.setDefaultPermissionMap(defaultsMap);
             }
         } catch (Exception e) {
             this.plugin.getLogger().severe("Exception occurred whilst injecting LuckPerms Default Permission map.");
@@ -84,7 +84,7 @@ public class InjectorDefaultsMap implements Runnable {
         }
     }
 
-    private LPDefaultsMap inject() throws Exception {
+    private LuckPermsDefaultsMap inject() throws Exception {
         Objects.requireNonNull(OP_DEFAULT_PERMISSIONS_FIELD, "OP_DEFAULT_PERMISSIONS_FIELD");
         Objects.requireNonNull(NON_OP_DEFAULT_PERMISSIONS_FIELD, "NON_OP_DEFAULT_PERMISSIONS_FIELD");
 
@@ -93,8 +93,8 @@ public class InjectorDefaultsMap implements Runnable {
         Object opMap = OP_DEFAULT_PERMISSIONS_FIELD.get(pluginManager);
         Object nonOpMap = NON_OP_DEFAULT_PERMISSIONS_FIELD.get(pluginManager);
 
-        if (opMap instanceof LPDefaultsMap.DefaultPermissionSet && ((LPDefaultsMap.DefaultPermissionSet) opMap).parent.plugin == this.plugin) {
-            if (nonOpMap instanceof LPDefaultsMap.DefaultPermissionSet && ((LPDefaultsMap.DefaultPermissionSet) nonOpMap).parent.plugin == this.plugin) {
+        if (opMap instanceof LuckPermsDefaultsMap.DefaultPermissionSet && ((LuckPermsDefaultsMap.DefaultPermissionSet) opMap).parent.plugin == this.plugin) {
+            if (nonOpMap instanceof LuckPermsDefaultsMap.DefaultPermissionSet && ((LuckPermsDefaultsMap.DefaultPermissionSet) nonOpMap).parent.plugin == this.plugin) {
                 return null;
             }
         }
@@ -106,7 +106,7 @@ public class InjectorDefaultsMap implements Runnable {
         Map<String, Permission> castedNonOpMap = (Map<String, Permission>) nonOpMap;
 
         // make a new map & inject it
-        LPDefaultsMap newMap = new LPDefaultsMap(this.plugin, ImmutableMap.of(true, castedOpMap, false, castedNonOpMap));
+        LuckPermsDefaultsMap newMap = new LuckPermsDefaultsMap(this.plugin, ImmutableMap.of(true, castedOpMap, false, castedNonOpMap));
         OP_DEFAULT_PERMISSIONS_FIELD.set(pluginManager, newMap.getOpPermissions());
         NON_OP_DEFAULT_PERMISSIONS_FIELD.set(pluginManager, newMap.getNonOpPermissions());
         return newMap;
@@ -119,15 +119,15 @@ public class InjectorDefaultsMap implements Runnable {
             PluginManager pluginManager = Server.getInstance().getPluginManager();
             {
                 Object map = OP_DEFAULT_PERMISSIONS_FIELD.get(pluginManager);
-                if (map instanceof LPDefaultsMap.DefaultPermissionSet) {
-                    LPDefaultsMap.DefaultPermissionSet lpMap = (LPDefaultsMap.DefaultPermissionSet) map;
+                if (map instanceof LuckPermsDefaultsMap.DefaultPermissionSet) {
+                    LuckPermsDefaultsMap.DefaultPermissionSet lpMap = (LuckPermsDefaultsMap.DefaultPermissionSet) map;
                     OP_DEFAULT_PERMISSIONS_FIELD.set(pluginManager, new HashMap<>(lpMap));
                 }
             }
             {
                 Object map = NON_OP_DEFAULT_PERMISSIONS_FIELD.get(pluginManager);
-                if (map instanceof LPDefaultsMap.DefaultPermissionSet) {
-                    LPDefaultsMap.DefaultPermissionSet lpMap = (LPDefaultsMap.DefaultPermissionSet) map;
+                if (map instanceof LuckPermsDefaultsMap.DefaultPermissionSet) {
+                    LuckPermsDefaultsMap.DefaultPermissionSet lpMap = (LuckPermsDefaultsMap.DefaultPermissionSet) map;
                     NON_OP_DEFAULT_PERMISSIONS_FIELD.set(pluginManager, new HashMap<>(lpMap));
                 }
             }

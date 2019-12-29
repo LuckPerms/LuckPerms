@@ -71,8 +71,8 @@ public class NukkitConfigAdapter implements ConfigurationAdapter {
 
     @Override
     public List<String> getStringList(String path, List<String> def) {
-        List<String> ret = this.configuration.getStringList(path);
-        return ret == null ? def : ret;
+        List<String> list = this.configuration.getStringList(path);
+        return list == null ? def : list;
     }
 
     @Override

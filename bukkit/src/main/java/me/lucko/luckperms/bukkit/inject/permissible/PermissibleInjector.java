@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.bukkit.inject.permissible;
 
-import me.lucko.luckperms.bukkit.compat.CraftBukkitUtil;
 import me.lucko.luckperms.bukkit.inject.dummy.DummyPermissibleBase;
+import me.lucko.luckperms.bukkit.util.CraftBukkitImplementation;
 
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissibleBase;
@@ -36,7 +36,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 /**
- * Injects a {@link LPPermissible} into a {@link Player}.
+ * Injects a {@link LuckPermsPermissible} into a {@link Player}.
  *
  * This allows LuckPerms to directly intercept permission checks and take over all handling of
  * checks made by plugins.
@@ -63,7 +63,7 @@ public final class PermissibleInjector {
             Field humanEntityPermissibleField;
             try {
                 // craftbukkit
-                humanEntityPermissibleField = CraftBukkitUtil.obcClass("entity.CraftHumanEntity").getDeclaredField("perm");
+                humanEntityPermissibleField = CraftBukkitImplementation.obcClass("entity.CraftHumanEntity").getDeclaredField("perm");
                 humanEntityPermissibleField.setAccessible(true);
             } catch (Exception e) {
                 // glowstone
@@ -81,19 +81,19 @@ public final class PermissibleInjector {
     }
 
     /**
-     * Injects a {@link LPPermissible} into a {@link Player}.
+     * Injects a {@link LuckPermsPermissible} into a {@link Player}.
      *
      * @param player the player to inject into
      * @param newPermissible the permissible to inject
      * @throws Exception propagates any exceptions which were thrown during injection
      */
-    public static void inject(Player player, LPPermissible newPermissible) throws Exception {
+    public static void inject(Player player, LuckPermsPermissible newPermissible) throws Exception {
 
         // get the existing PermissibleBase held by the player
         PermissibleBase oldPermissible = (PermissibleBase) HUMAN_ENTITY_PERMISSIBLE_FIELD.get(player);
 
         // seems we have already injected into this player.
-        if (oldPermissible instanceof LPPermissible) {
+        if (oldPermissible instanceof LuckPermsPermissible) {
             throw new IllegalStateException("LPPermissible already injected into player " + player.toString());
         }
 
@@ -115,7 +115,7 @@ public final class PermissibleInjector {
     }
 
     /**
-     * Uninjects a {@link LPPermissible} from a {@link Player}.
+     * Uninjects a {@link LuckPermsPermissible} from a {@link Player}.
      *
      * @param player the player to uninject from
      * @param dummy if the replacement permissible should be a dummy.
@@ -127,8 +127,8 @@ public final class PermissibleInjector {
         PermissibleBase permissible = (PermissibleBase) HUMAN_ENTITY_PERMISSIBLE_FIELD.get(player);
 
         // only uninject if the permissible was a luckperms one.
-        if (permissible instanceof LPPermissible) {
-            LPPermissible lpPermissible = ((LPPermissible) permissible);
+        if (permissible instanceof LuckPermsPermissible) {
+            LuckPermsPermissible lpPermissible = ((LuckPermsPermissible) permissible);
 
             // clear all permissions
             lpPermissible.clearPermissions();

@@ -64,12 +64,12 @@ import java.util.stream.Collectors;
  *
  * Injected by {@link InjectorSubscriptionMap}.
  */
-public final class LPSubscriptionMap extends HashMap<String, Set<Permissible>> {
+public final class LuckPermsSubscriptionMap extends HashMap<String, Set<Permissible>> {
 
     // the plugin instance
     final LPNukkitPlugin plugin;
 
-    public LPSubscriptionMap(LPNukkitPlugin plugin, Map<String, Set<Permissible>> existingData) {
+    public LuckPermsSubscriptionMap(LPNukkitPlugin plugin, Map<String, Set<Permissible>> existingData) {
         super(existingData);
         this.plugin = plugin;
     }
@@ -131,19 +131,19 @@ public final class LPSubscriptionMap extends HashMap<String, Set<Permissible>> {
      * @return a standard representation of this map
      */
     public Map<String, Set<Permissible>> detach() {
-        Map<String, Set<Permissible>> ret = new HashMap<>();
+        Map<String, Set<Permissible>> map = new HashMap<>();
 
         for (Map.Entry<String, Set<Permissible>> ent : entrySet()) {
             if (ent.getValue() instanceof LPSubscriptionValueSet) {
                 Set<Permissible> backing = ((LPSubscriptionValueSet) ent.getValue()).backing;
                 Set<Permissible> copy; (copy = Collections.newSetFromMap(new WeakHashMap<>(backing.size()))).addAll(backing);
-                ret.put(ent.getKey(), copy);
+                map.put(ent.getKey(), copy);
             } else {
-                ret.put(ent.getKey(), ent.getValue());
+                map.put(ent.getKey(), ent.getValue());
             }
         }
 
-        return ret;
+        return map;
     }
 
     /**
@@ -175,7 +175,7 @@ public final class LPSubscriptionMap extends HashMap<String, Set<Permissible>> {
 
         private Sets.SetView<Permissible> getContentView() {
             // gather players (LPPermissibles)
-            Set<Permissible> players = LPSubscriptionMap.this.plugin.getBootstrap().getServer().getOnlinePlayers().values().stream()
+            Set<Permissible> players = LuckPermsSubscriptionMap.this.plugin.getBootstrap().getServer().getOnlinePlayers().values().stream()
                     .filter(player -> player.hasPermission(this.permission) || player.isPermissionSet(this.permission))
                     .collect(Collectors.toSet());
 

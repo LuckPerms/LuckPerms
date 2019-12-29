@@ -23,12 +23,12 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.compat;
+package me.lucko.luckperms.bukkit.util;
 
 import org.bukkit.Bukkit;
 
-public final class CraftBukkitUtil {
-    private CraftBukkitUtil() {}
+public final class CraftBukkitImplementation {
+    private CraftBukkitImplementation() {}
 
     private static final String SERVER_PACKAGE_VERSION = getServerPackageVersion();
     private static final boolean CHAT_COMPATIBLE = !SERVER_PACKAGE_VERSION.startsWith(".v1_7_");

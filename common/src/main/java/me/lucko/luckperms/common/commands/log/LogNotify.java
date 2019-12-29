@@ -59,13 +59,13 @@ public class LogNotify extends SubCommand<Log> {
             return false;
         }
 
-        Optional<? extends Node> ret = user.normalData().immutable().get(ImmutableContextSetImpl.EMPTY).stream()
+        Optional<? extends Node> node = user.normalData().immutable().get(ImmutableContextSetImpl.EMPTY).stream()
                 .filter(n -> n.getKey().equalsIgnoreCase(IGNORE_NODE))
                 .findFirst();
 
         // if they don't have the perm, they're not ignoring
         // if set to false, ignore it, return false
-        return ret.map(Node::getValue).orElse(false);
+        return node.map(Node::getValue).orElse(false);
     }
 
     private static void setIgnoring(LuckPermsPlugin plugin, UUID uuid, boolean state) {

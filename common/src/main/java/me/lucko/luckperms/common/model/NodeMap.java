@@ -117,9 +117,9 @@ public final class NodeMap {
     }
 
     public SortedSet<Node> asSortedSet() {
-        SortedSet<Node> ret = new TreeSet<>(NodeWithContextComparator.reverse());
-        copyTo(ret, QueryOptions.nonContextual());
-        return ret;
+        SortedSet<Node> set = new TreeSet<>(NodeWithContextComparator.reverse());
+        copyTo(set, QueryOptions.nonContextual());
+        return set;
     }
 
     public LinkedHashSet<InheritanceNode> inheritanceAsSet() {
@@ -129,9 +129,9 @@ public final class NodeMap {
     }
 
     public SortedSet<InheritanceNode> inheritanceAsSortedSet() {
-        SortedSet<InheritanceNode> ret = new TreeSet<>(NodeWithContextComparator.reverse());
-        copyInheritanceNodesTo(ret, QueryOptions.nonContextual());
-        return ret;
+        SortedSet<InheritanceNode> set = new TreeSet<>(NodeWithContextComparator.reverse());
+        copyInheritanceNodesTo(set, QueryOptions.nonContextual());
+        return set;
     }
 
     private static boolean flagExcludeTest(Flag flag, String contextKey, QueryOptions filter, ImmutableContextSet contextSet) {
@@ -285,26 +285,26 @@ public final class NodeMap {
     }
 
     boolean removeIf(Predicate<? super Node> predicate) {
-        boolean ret = false;
+        boolean success = false;
         for (SortedSet<Node> valueSet : this.map.values()) {
             if (valueSet.removeIf(predicate)) {
-                ret = true;
+                success = true;
             }
         }
         for (SortedSet<InheritanceNode> valueSet : this.inheritanceMap.values()) {
             valueSet.removeIf(predicate);
         }
-        return ret;
+        return success;
     }
 
     boolean removeIf(ContextSet contextSet, Predicate<? super Node> predicate) {
         ImmutableContextSet context = contextSet.immutableCopy();
 
-        boolean ret = false;
+        boolean success = false;
 
         SortedSet<Node> nodesInContext = this.map.get(context);
         if (nodesInContext != null) {
-            ret = nodesInContext.removeIf(predicate);
+            success = nodesInContext.removeIf(predicate);
         }
 
         SortedSet<InheritanceNode> inheritanceNodesInContext = this.inheritanceMap.get(context);
@@ -312,7 +312,7 @@ public final class NodeMap {
             inheritanceNodesInContext.removeIf(predicate);
         }
 
-        return ret;
+        return success;
     }
 
     boolean auditTemporaryNodes(@Nullable Set<? super Node> removed) {

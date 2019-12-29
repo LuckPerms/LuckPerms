@@ -143,7 +143,7 @@ public class MongoStorage implements StorageImplementation {
 
     @Override
     public Map<String, String> getMeta() {
-        Map<String, String> ret = new LinkedHashMap<>();
+        Map<String, String> meta = new LinkedHashMap<>();
         boolean success = true;
 
         long start = System.currentTimeMillis();
@@ -155,13 +155,13 @@ public class MongoStorage implements StorageImplementation {
         long duration = System.currentTimeMillis() - start;
 
         if (success) {
-            ret.put("Ping", "&a" + duration + "ms");
-            ret.put("Connected", "true");
+            meta.put("Ping", "&a" + duration + "ms");
+            meta.put("Connected", "true");
         } else {
-            ret.put("Connected", "false");
+            meta.put("Connected", "false");
         }
 
-        return ret;
+        return meta;
     }
 
     @Override
