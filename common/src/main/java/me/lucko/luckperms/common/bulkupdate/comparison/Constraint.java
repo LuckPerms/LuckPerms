@@ -37,7 +37,6 @@ public class Constraint {
     private final String expressionValue;
     private final Comparison.CompiledExpression compiledExpression;
 
-
     private Constraint(Comparison comparison, String expression) {
         this.comparison = comparison;
         this.expressionValue = expression;
