@@ -1,0 +1,614 @@
+luckperms {
+  sync;
+  info;
+  editor {
+    all;
+    groups;
+    users;
+  }
+  debug;
+  verbose {
+    off;
+    on {
+      filter brigadier:string greedy_phrase;
+    }
+    paste;
+    record {
+      filter brigadier:string greedy_phrase;
+    }
+  }
+  tree {
+    scope brigadier:string single_word {
+      player brigadier:string single_word;
+    }
+  }
+  search {
+    permission brigadier:string quotable_phrase;
+  }
+  check {
+    user brigadier:string single_word {
+      permission brigadier:string quotable_phrase;
+    }
+  }
+  networksync;
+  import {
+    file brigadier:string quotable_phrase;
+  }
+  export {
+    file brigadier:string quotable_phrase;
+  }
+  reloadconfig;
+  bulkupdate {
+    datatype brigadier:string single_word {
+      delete {
+        constraint brigadier:string greedy_phrase;
+      }
+      update {
+        actionfield brigadier:string single_word {
+          actionvalue brigadier:string quotable_phrase {
+            constraint brigadier:string greedy_phrase;
+          }
+        }
+      }
+    }
+  }
+  migration {
+    plugin brigadier:string single_word;
+  }
+  creategroup {
+    name brigadier:string single_word;
+  }
+  deletegroup {
+    name brigadier:string single_word;
+  }
+  listgroups;
+  createtrack {
+    name brigadier:string single_word;
+  }
+  deletetrack {
+    name brigadier:string single_word;
+  }
+  listtracks;
+
+  user {
+    user brigadier:string single_word {
+      info;
+
+      permission {
+        info;
+        set {
+          node brigadier:string quotable_phrase {
+            value brigadier:bool {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        unset {
+          node brigadier:string quotable_phrase {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        settemp {
+          node brigadier:string quotable_phrase {
+            value brigadier:bool {
+              duration brigadier:string single_word {
+                context brigadier:string greedy_phrase;
+              }
+            }
+          }
+        }
+        unsettemp {
+          node brigadier:string quotable_phrase {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        check {
+          node brigadier:string quotable_phrase {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        checkinherits {
+          node brigadier:string quotable_phrase {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        clear {
+          context brigadier:string greedy_phrase;
+        }
+      }
+
+      parent {
+        info;
+        set {
+          group brigadier:string single_word {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        add {
+          group brigadier:string single_word {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        remove {
+          group brigadier:string single_word {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        settrack {
+          track brigadier:string single_word {
+            group brigadier:string single_word {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        addtemp {
+          group brigadier:string quotable_phrase {
+            duration brigadier:string single_word {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        removetemp {
+          group brigadier:string single_word {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        clear {
+          context brigadier:string greedy_phrase;
+        }
+        cleartrack {
+          track brigadier:string single_word {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        switchprimarygroup {
+          group brigadier:string quotable_phrase;
+        }
+      }
+
+      meta {
+        info;
+        set {
+          key brigadier:string quotable_phrase {
+            value brigadier:string quotable_phrase {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        unset {
+          key brigadier:string quotable_phrase {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        settemp {
+          key brigadier:string quotable_phrase {
+            value brigadier:string quotable_phrase {
+              duration brigadier:string single_word {
+                context brigadier:string greedy_phrase;
+              }
+            }
+          }
+        }
+        unsettemp {
+          key brigadier:string quotable_phrase {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        addprefix {
+          priority brigadier:integer {
+            prefix brigadier:string quotable_phrase {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        addsuffix {
+          priority brigadier:integer {
+            suffix brigadier:string quotable_phrase {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        setprefix {
+          priority brigadier:integer {
+            prefix brigadier:string quotable_phrase {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        setsuffix {
+          priority brigadier:integer {
+            suffix brigadier:string quotable_phrase {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        removeprefix {
+          priority brigadier:integer {
+            prefix brigadier:string quotable_phrase {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        removesuffix {
+          priority brigadier:integer {
+            suffix brigadier:string quotable_phrase {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        addtempprefix {
+          priority brigadier:integer {
+            prefix brigadier:string quotable_phrase {
+              duration brigadier:string single_word {
+                context brigadier:string greedy_phrase;
+              }
+            }
+          }
+        }
+        addtempsuffix {
+          priority brigadier:integer {
+            suffix brigadier:string quotable_phrase {
+              duration brigadier:string single_word {
+                context brigadier:string greedy_phrase;
+              }
+            }
+          }
+        }
+        settempprefix {
+          priority brigadier:integer {
+            prefix brigadier:string quotable_phrase {
+              duration brigadier:string single_word {
+                context brigadier:string greedy_phrase;
+              }
+            }
+          }
+        }
+        settempsuffix {
+          priority brigadier:integer {
+            suffix brigadier:string quotable_phrase {
+              duration brigadier:string single_word {
+                context brigadier:string greedy_phrase;
+              }
+            }
+          }
+        }
+        removetempprefix {
+          priority brigadier:integer {
+            prefix brigadier:string quotable_phrase {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        removetempsuffix {
+          priority brigadier:integer {
+            suffix brigadier:string quotable_phrase {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        clear {
+          context brigadier:string greedy_phrase;
+        }
+      }
+
+      editor;
+      promote {
+        track brigadier:string single_word {
+          context brigadier:string greedy_phrase;
+        }
+      }
+      demote {
+        track brigadier:string single_word {
+          context brigadier:string greedy_phrase;
+        }
+      }
+      showtracks;
+      clear {
+        context brigadier:string greedy_phrase;
+      }
+      clone {
+        user brigadier:string single_word;
+      }
+    }
+  }
+
+  group {
+    group brigadier:string single_word {
+      info;
+
+      permission {
+        info;
+        set {
+          node brigadier:string quotable_phrase {
+            value brigadier:bool {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        unset {
+          node brigadier:string quotable_phrase {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        settemp {
+          node brigadier:string quotable_phrase {
+            value brigadier:bool {
+              duration brigadier:string single_word {
+                context brigadier:string greedy_phrase;
+              }
+            }
+          }
+        }
+        unsettemp {
+          node brigadier:string quotable_phrase {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        check {
+          node brigadier:string quotable_phrase {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        checkinherits {
+          node brigadier:string quotable_phrase {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        clear {
+          context brigadier:string greedy_phrase;
+        }
+      }
+
+      parent {
+        info;
+        set {
+          group brigadier:string single_word {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        add {
+          group brigadier:string single_word {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        remove {
+          group brigadier:string single_word {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        settrack {
+          track brigadier:string single_word {
+            group brigadier:string single_word {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        addtemp {
+          group brigadier:string quotable_phrase {
+            duration brigadier:string single_word {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        removetemp {
+          group brigadier:string single_word {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        clear {
+          context brigadier:string greedy_phrase;
+        }
+        cleartrack {
+          track brigadier:string single_word {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        switchprimarygroup {
+          group brigadier:string quotable_phrase;
+        }
+      }
+
+      meta {
+        info;
+        set {
+          key brigadier:string quotable_phrase {
+            value brigadier:string quotable_phrase {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        unset {
+          key brigadier:string quotable_phrase {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        settemp {
+          key brigadier:string quotable_phrase {
+            value brigadier:string quotable_phrase {
+              duration brigadier:string single_word {
+                context brigadier:string greedy_phrase;
+              }
+            }
+          }
+        }
+        unsettemp {
+          key brigadier:string quotable_phrase {
+            context brigadier:string greedy_phrase;
+          }
+        }
+        addprefix {
+          priority brigadier:integer {
+            prefix brigadier:string quotable_phrase {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        addsuffix {
+          priority brigadier:integer {
+            suffix brigadier:string quotable_phrase {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        setprefix {
+          priority brigadier:integer {
+            prefix brigadier:string quotable_phrase {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        setsuffix {
+          priority brigadier:integer {
+            suffix brigadier:string quotable_phrase {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        removeprefix {
+          priority brigadier:integer {
+            prefix brigadier:string quotable_phrase {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        removesuffix {
+          priority brigadier:integer {
+            suffix brigadier:string quotable_phrase {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        addtempprefix {
+          priority brigadier:integer {
+            prefix brigadier:string quotable_phrase {
+              duration brigadier:string single_word {
+                context brigadier:string greedy_phrase;
+              }
+            }
+          }
+        }
+        addtempsuffix {
+          priority brigadier:integer {
+            suffix brigadier:string quotable_phrase {
+              duration brigadier:string single_word {
+                context brigadier:string greedy_phrase;
+              }
+            }
+          }
+        }
+        settempprefix {
+          priority brigadier:integer {
+            prefix brigadier:string quotable_phrase {
+              duration brigadier:string single_word {
+                context brigadier:string greedy_phrase;
+              }
+            }
+          }
+        }
+        settempsuffix {
+          priority brigadier:integer {
+            suffix brigadier:string quotable_phrase {
+              duration brigadier:string single_word {
+                context brigadier:string greedy_phrase;
+              }
+            }
+          }
+        }
+        removetempprefix {
+          priority brigadier:integer {
+            prefix brigadier:string quotable_phrase {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        removetempsuffix {
+          priority brigadier:integer {
+            suffix brigadier:string quotable_phrase {
+              context brigadier:string greedy_phrase;
+            }
+          }
+        }
+        clear {
+          context brigadier:string greedy_phrase;
+        }
+      }
+
+      editor;
+      listmembers {
+        page brigadier:integer;
+      }
+      setweight {
+        weight brigadier:integer;
+      }
+      setdisplayname {
+        name brigadier:string single_word;
+      }
+      showtracks;
+      clear {
+        context brigadier:string greedy_phrase;
+      }
+      rename {
+        newname brigadier:string single_word;
+      }
+      clone {
+        newname brigadier:string single_word;
+      }
+    }
+  }
+
+  track {
+    track brigadier:string single_word {
+      info;
+      append {
+        group brigadier:string single_word;
+      }
+      insert {
+        group brigadier:string single_word {
+          position brigadier:integer;
+        }
+      }
+      remove {
+        group brigadier:string single_word;
+      }
+      clear;
+      rename {
+        newname brigadier:string single_word;
+      }
+      clone {
+        newname brigadier:string single_word;
+      }
+    }
+  }
+
+  log {
+    recent {
+      user brigadier:string single_word {
+        page brigadier:integer;
+      }
+    }
+    search {
+      query brigadier:string quotable_phrase {
+        page brigadier:integer;
+      }
+    }
+    notify {
+      off;
+      on;
+    }
+    userhistory {
+      user brigadier:string single_word {
+        page brigadier:integer;
+      }
+    }
+    grouphistory {
+      group brigadier:string single_word {
+        page brigadier:integer;
+      }
+    }
+    trackhistory {
+      track brigadier:string single_word {
+        page brigadier:integer;
+      }
+    }
+  }
+}
