@@ -30,14 +30,12 @@ import com.google.common.base.Strings;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
-import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.types.Meta;
 import me.lucko.luckperms.common.node.types.Prefix;
 import me.lucko.luckperms.common.node.types.Suffix;
-import me.lucko.luckperms.common.util.TextUtils;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 
 import net.luckperms.api.context.DefaultContextKeys;
@@ -93,11 +91,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         PermissionHolder user = this.vaultPermission.lookupUser(uuid);
         QueryOptions queryOptions = this.vaultPermission.getQueryOptions(uuid, world);
         MetaCache metaData = user.getCachedData().getMetaData(queryOptions);
-        String prefix = metaData.getPrefix(MetaCheckEvent.Origin.THIRD_PARTY_API);
-        if (log()) {
-            logMsg("#getUserChatPrefix: %s - %s - %s", user.getPlainDisplayName(), queryOptions.context(), prefix);
-        }
-        return Strings.nullToEmpty(prefix);
+        return Strings.nullToEmpty(metaData.getPrefix(MetaCheckEvent.Origin.THIRD_PARTY_API));
     }
 
     @Override
@@ -107,11 +101,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         PermissionHolder user = this.vaultPermission.lookupUser(uuid);
         QueryOptions queryOptions = this.vaultPermission.getQueryOptions(uuid, world);
         MetaCache metaData = user.getCachedData().getMetaData(queryOptions);
-        String suffix = metaData.getSuffix(MetaCheckEvent.Origin.THIRD_PARTY_API);
-        if (log()) {
-            logMsg("#getUserChatSuffix: %s - %s - %s", user.getPlainDisplayName(), queryOptions.context(), suffix);
-        }
-        return Strings.nullToEmpty(suffix);
+        return Strings.nullToEmpty(metaData.getSuffix(MetaCheckEvent.Origin.THIRD_PARTY_API));
     }
 
     @Override
@@ -144,11 +134,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         PermissionHolder user = this.vaultPermission.lookupUser(uuid);
         QueryOptions queryOptions = this.vaultPermission.getQueryOptions(uuid, world);
         MetaCache metaData = user.getCachedData().getMetaData(queryOptions);
-        String value = metaData.getMetaValue(key, MetaCheckEvent.Origin.THIRD_PARTY_API);
-        if (log()) {
-            logMsg("#getUserMeta: %s - %s - %s - %s", user.getPlainDisplayName(), queryOptions.context(), key, value);
-        }
-        return value;
+        return metaData.getMetaValue(key, MetaCheckEvent.Origin.THIRD_PARTY_API);
     }
 
     @Override
@@ -172,11 +158,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         }
         QueryOptions queryOptions = this.vaultPermission.getQueryOptions(null, world);
         MetaCache metaData = group.getCachedData().getMetaData(queryOptions);
-        String prefix = metaData.getPrefix(MetaCheckEvent.Origin.THIRD_PARTY_API);
-        if (log()) {
-            logMsg("#getGroupPrefix: %s - %s - %s", group.getName(), queryOptions.context(), prefix);
-        }
-        return Strings.nullToEmpty(prefix);
+        return Strings.nullToEmpty(metaData.getPrefix(MetaCheckEvent.Origin.THIRD_PARTY_API));
     }
 
     @Override
@@ -188,11 +170,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         }
         QueryOptions queryOptions = this.vaultPermission.getQueryOptions(null, world);
         MetaCache metaData = group.getCachedData().getMetaData(queryOptions);
-        String suffix = metaData.getSuffix(MetaCheckEvent.Origin.THIRD_PARTY_API);
-        if (log()) {
-            logMsg("#getGroupSuffix: %s - %s - %s", group.getName(), queryOptions.context(), suffix);
-        }
-        return Strings.nullToEmpty(suffix);
+        return Strings.nullToEmpty(metaData.getSuffix(MetaCheckEvent.Origin.THIRD_PARTY_API));
     }
 
     @Override
@@ -225,11 +203,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         }
         QueryOptions queryOptions = this.vaultPermission.getQueryOptions(null, world);
         MetaCache metaData = group.getCachedData().getMetaData(queryOptions);
-        String value = metaData.getMetaValue(key, MetaCheckEvent.Origin.THIRD_PARTY_API);
-        if (log()) {
-            logMsg("#getGroupMeta: %s - %s - %s - %s", group.getName(), queryOptions.context(), key, value);
-        }
-        return value;
+        return metaData.getMetaValue(key, MetaCheckEvent.Origin.THIRD_PARTY_API);
     }
 
     @Override
@@ -249,22 +223,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         return this.plugin.getGroupManager().getByDisplayName(name);
     }
 
-    // logging
-    private boolean log() {
-        return this.plugin.getConfiguration().get(ConfigKeys.VAULT_DEBUG);
-    }
-    private void logMsg(String format, Object... args) {
-        this.plugin.getLogger().info("[VAULT-CHAT] " + String.format(format, args)
-                .replace(TextUtils.SECTION_CHAR, '$')
-                .replace(TextUtils.AMPERSAND_CHAR, '$')
-        );
-    }
-
     private void setChatMeta(PermissionHolder holder, ChatMetaType type, String value, String world) {
-        if (log()) {
-            logMsg("#setChatMeta: %s - %s - %s - %s", holder.getPlainDisplayName(), type, value, world);
-        }
-
         // remove all prefixes/suffixes directly set on the user/group
         holder.removeIf(DataType.NORMAL, null, type.nodeType()::matches, false);
 
@@ -288,10 +247,6 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
     }
 
     private void setMeta(PermissionHolder holder, String key, Object value, String world) {
-        if (log()) {
-            logMsg("#setMeta: %s - %s - %s - %s", holder.getPlainDisplayName(), key, value, world);
-        }
-
         holder.removeIf(DataType.NORMAL, null, NodeType.META.predicate(n -> n.getMetaKey().equals(key)), false);
 
         if (value == null) {
