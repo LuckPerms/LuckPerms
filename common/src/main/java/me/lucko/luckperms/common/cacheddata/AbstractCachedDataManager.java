@@ -153,7 +153,7 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
 
         if (data == null) {
             CacheMetadata metadata = getMetadataForQueryOptions(queryOptions);
-            data = new MetaCache(queryOptions, metadata);
+            data = new MetaCache(this.plugin, queryOptions, metadata);
         }
 
         MetaAccumulator accumulator = newAccumulator(queryOptions);
@@ -265,7 +265,6 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
         private final AsyncLoadingCache<QueryOptions, MetaCache> cache = CaffeineFactory.newBuilder()
                 .expireAfterAccess(2, TimeUnit.MINUTES)
                 .buildAsync(new MetaCacheLoader());
-
 
         @Override
         public @NonNull MetaCache get(@NonNull QueryOptions queryOptions) {

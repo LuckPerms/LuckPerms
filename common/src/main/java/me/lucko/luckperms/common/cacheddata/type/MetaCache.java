@@ -33,9 +33,10 @@ import com.google.common.collect.Multimaps;
 
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.metastacking.MetaStack;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.node.types.Prefix;
 import me.lucko.luckperms.common.node.types.Suffix;
-import me.lucko.luckperms.common.verbose.VerboseHandler;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 
 import net.luckperms.api.cacheddata.CachedMetaData;
@@ -54,16 +55,19 @@ import java.util.SortedMap;
  */
 public class MetaCache implements CachedMetaData {
 
-    /**
-     * The query options this container is holding data for
-     */
+    /** The plugin instance */
+    private final LuckPermsPlugin plugin;
+
+    /** The query options this container is holding data for */
     private final QueryOptions queryOptions;
 
-    /**
-     * The metadata for this cache
-     */
+    /** The metadata for this cache */
     private final CacheMetadata metadata;
 
+    /** The object name passed to the verbose handler when checks are made */
+    private final String verboseCheckTarget;
+
+    /* The data */
     private Map<String, List<String>> meta = ImmutableMap.of();
     private Map<String, String> flattenedMeta = ImmutableMap.of();
     private SortedMap<Integer, String> prefixes = ImmutableSortedMap.of();
@@ -71,9 +75,16 @@ public class MetaCache implements CachedMetaData {
     private MetaStack prefixStack = null;
     private MetaStack suffixStack = null;
 
-    public MetaCache(QueryOptions queryOptions, CacheMetadata metadata) {
+    public MetaCache(LuckPermsPlugin plugin, QueryOptions queryOptions, CacheMetadata metadata) {
+        this.plugin = plugin;
         this.queryOptions = queryOptions;
         this.metadata = metadata;
+
+        if (this.metadata.getHolderType() == HolderType.GROUP) {
+            this.verboseCheckTarget = "group/" + this.metadata.getObjectName();
+        } else {
+            this.verboseCheckTarget = this.metadata.getObjectName();
+        }
     }
 
     public void loadMeta(MetaAccumulator meta) {
@@ -101,11 +112,7 @@ public class MetaCache implements CachedMetaData {
     public String getMetaValue(String key, MetaCheckEvent.Origin origin) {
         Objects.requireNonNull(key, "key");
         String value = this.flattenedMeta.get(key);
-
-        // log this meta lookup to the verbose handler
-        VerboseHandler verboseHandler = MetaCache.this.metadata.getParentContainer().getPlugin().getVerboseHandler();
-        verboseHandler.offerMetaCheckEvent(origin, MetaCache.this.metadata.getObjectName(), MetaCache.this.metadata.getQueryOptions(), key, String.valueOf(value));
-
+        this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.verboseCheckTarget, this.metadata.getQueryOptions(), key, String.valueOf(value));
         return value;
     }
 
@@ -117,11 +124,7 @@ public class MetaCache implements CachedMetaData {
     public String getPrefix(MetaCheckEvent.Origin origin) {
         MetaStack prefixStack = this.prefixStack;
         String value = prefixStack == null ? null : prefixStack.toFormattedString();
-
-        // log this meta lookup to the verbose handler
-        VerboseHandler verboseHandler = this.metadata.getParentContainer().getPlugin().getVerboseHandler();
-        verboseHandler.offerMetaCheckEvent(origin, this.metadata.getObjectName(), this.metadata.getQueryOptions(), Prefix.NODE_KEY, String.valueOf(value));
-
+        this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.verboseCheckTarget, this.metadata.getQueryOptions(), Prefix.NODE_KEY, String.valueOf(value));
         return value;
     }
 
@@ -133,11 +136,7 @@ public class MetaCache implements CachedMetaData {
     public String getSuffix(MetaCheckEvent.Origin origin) {
         MetaStack suffixStack = this.suffixStack;
         String value = suffixStack == null ? null : suffixStack.toFormattedString();
-
-        // log this meta lookup to the verbose handler
-        VerboseHandler verboseHandler = this.metadata.getParentContainer().getPlugin().getVerboseHandler();
-        verboseHandler.offerMetaCheckEvent(origin, this.metadata.getObjectName(), this.metadata.getQueryOptions(), Suffix.NODE_KEY, String.valueOf(value));
-
+        this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.verboseCheckTarget, this.metadata.getQueryOptions(), Suffix.NODE_KEY, String.valueOf(value));
         return value;
     }
 
@@ -200,11 +199,7 @@ public class MetaCache implements CachedMetaData {
 
             String key = (String) k;
             List<String> values = super.get(key);
-
-            // log this meta lookup to the verbose handler
-            VerboseHandler verboseHandler = MetaCache.this.metadata.getParentContainer().getPlugin().getVerboseHandler();
-            verboseHandler.offerMetaCheckEvent(this.origin, MetaCache.this.metadata.getObjectName(), MetaCache.this.metadata.getQueryOptions(), key, String.valueOf(values));
-
+            MetaCache.this.plugin.getVerboseHandler().offerMetaCheckEvent(this.origin, MetaCache.this.verboseCheckTarget, MetaCache.this.metadata.getQueryOptions(), key, String.valueOf(values));
             return values;
         }
     }
