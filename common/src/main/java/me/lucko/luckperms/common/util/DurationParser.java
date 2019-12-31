@@ -73,7 +73,9 @@ public final class DurationParser {
 
                 if (matcher.group(g) != null && !matcher.group(g).isEmpty()) {
                     int n = Integer.parseInt(matcher.group(g));
-                    duration = duration.plus(n, unit);
+                    if (n > 0) {
+                        duration = duration.plus(unit.getDuration().multipliedBy(n));
+                    }
                 }
             }
 
