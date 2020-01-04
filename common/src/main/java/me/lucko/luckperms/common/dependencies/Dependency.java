@@ -136,8 +136,8 @@ public enum Dependency {
     COMMODORE(
             "me{}lucko",
             "commodore",
-            "1.4",
-            "9jrCBDKswqiT9/i97FtRmVJwYE3pXncxjoKFvdZMgzM=",
+            "1.5",
+            "vRQpmpYu/R780xwdOV5DNFYvKt9QKhkAVg6if6gMaa4=",
             Relocation.of("commodore", "me{}lucko{}commodore")
     ),
     MARIADB_DRIVER(

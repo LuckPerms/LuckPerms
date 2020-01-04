@@ -34,28 +34,15 @@ import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 
 import org.bukkit.command.Command;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerCommandSendEvent;
-import org.bukkit.plugin.PluginManager;
 
 import java.io.InputStream;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Registers LuckPerms command data to brigadier using {@link Commodore}.
  */
-public class LuckPermsBrigadier {
+public final class LuckPermsBrigadier {
+    private LuckPermsBrigadier() {}
 
-    /**
-     * Registers LuckPerms command data to the given {@code pluginCommand}.
-     *
-     * @param plugin the luckperms plugin
-     * @param pluginCommand the command
-     * @throws Exception if something goes wrong
-     */
     public static void register(LPBukkitPlugin plugin, Command pluginCommand) throws Exception {
         Commodore commodore = CommodoreProvider.getCommodore(plugin.getBootstrap());
         try (InputStream is = plugin.getBootstrap().getResourceStream("luckperms.commodore")) {
@@ -63,33 +50,11 @@ public class LuckPermsBrigadier {
                 throw new Exception("Brigadier command data missing from jar");
             }
 
-            LiteralCommandNode<?> command = CommodoreFileFormat.parse(is);
-            commodore.register(pluginCommand, command);
-        }
-
-        // add event listener to prevent completions from being send to players without permission
-        // to use any LP commands.
-        PluginManager pluginManager = plugin.getBootstrap().getServer().getPluginManager();
-        pluginManager.registerEvents(new PermissionListener(plugin, pluginCommand), plugin.getBootstrap());
-    }
-
-    private static final class PermissionListener implements Listener {
-        private final LPBukkitPlugin plugin;
-        private final List<String> aliases;
-
-        private PermissionListener(LPBukkitPlugin plugin, Command pluginCommand) {
-            this.plugin = plugin;
-            this.aliases = Commodore.getAliases(pluginCommand).stream()
-                    .flatMap(alias -> Stream.of(alias, "minecraft:" + alias))
-                    .collect(Collectors.toList());
-        }
-
-        @EventHandler
-        public void onCommandSend(PlayerCommandSendEvent e) {
-            Sender playerAsSender = this.plugin.getSenderFactory().wrap(e.getPlayer());
-            if (!this.plugin.getCommandManager().hasPermissionForAny(playerAsSender)) {
-                e.getCommands().removeAll(this.aliases);
-            }
+            LiteralCommandNode<?> commandNode = CommodoreFileFormat.parse(is);
+            commodore.register(pluginCommand, commandNode, player -> {
+                Sender playerAsSender = plugin.getSenderFactory().wrap(player);
+                return plugin.getCommandManager().hasPermissionForAny(playerAsSender);
+            });
         }
     }
 
