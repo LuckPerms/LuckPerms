@@ -80,10 +80,13 @@ public class NukkitSenderFactory extends SenderFactory<CommandSender> {
 
     @Override
     protected Tristate getPermissionValue(CommandSender sender, String node) {
-        boolean isSet = sender.isPermissionSet(node);
-        boolean val = sender.hasPermission(node);
-
-        return !isSet ? val ? Tristate.TRUE : Tristate.UNDEFINED : Tristate.of(val);
+        if (sender.hasPermission(node)) {
+            return Tristate.TRUE;
+        } else if (sender.isPermissionSet(node)) {
+            return Tristate.FALSE;
+        } else {
+            return Tristate.UNDEFINED;
+        }
     }
 
     @Override
