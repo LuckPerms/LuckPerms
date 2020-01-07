@@ -43,7 +43,6 @@ import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.Node;
-import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
@@ -242,12 +241,16 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
                 .withContext(DefaultContextKeys.SERVER_KEY, this.vaultPermission.getVaultServer())
                 .withContext(DefaultContextKeys.WORLD_KEY, world == null ? "global" : world).build();
 
-        // assume success
         holder.setNode(DataType.NORMAL, node, true);
         this.vaultPermission.holderSave(holder);
     }
 
     private void setMeta(PermissionHolder holder, String key, Object value, String world) {
+        if (key.equalsIgnoreCase(Prefix.NODE_KEY) || key.equalsIgnoreCase(Suffix.NODE_KEY)) {
+            setChatMeta(holder, ChatMetaType.valueOf(key.toUpperCase()), value == null ? null : value.toString(), world);
+            return;
+        }
+
         holder.removeIf(DataType.NORMAL, null, NodeType.META.predicate(n -> n.getMetaKey().equals(key)), false);
 
         if (value == null) {
@@ -255,20 +258,12 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
             return;
         }
 
-        NodeBuilder<?, ?> metaNode;
-        if (key.equalsIgnoreCase("prefix")) {
-            metaNode = Prefix.builder(value.toString(), 100);
-        } else if (key.equalsIgnoreCase("suffix")) {
-            metaNode = Suffix.builder(value.toString(), 100);
-        } else {
-            metaNode = Meta.builder(key, value.toString());
-        }
+        Node node = Meta.builder(key, value.toString())
+                .withContext(DefaultContextKeys.SERVER_KEY, this.vaultPermission.getVaultServer())
+                .withContext(DefaultContextKeys.WORLD_KEY, world == null ? "global" : world)
+                .build();
 
-        metaNode.withContext(DefaultContextKeys.SERVER_KEY, this.vaultPermission.getVaultServer());
-        metaNode.withContext(DefaultContextKeys.WORLD_KEY, world == null ? "global" : world);
-
-        // assume success
-        holder.setNode(DataType.NORMAL, metaNode.build(), true);
+        holder.setNode(DataType.NORMAL, node, true);
         this.vaultPermission.holderSave(holder);
     }
 
