@@ -48,6 +48,7 @@ import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.node.Node;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
@@ -398,11 +399,12 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         Objects.requireNonNull(permission, "permission is null");
         Preconditions.checkArgument(!permission.isEmpty(), "permission is an empty string");
 
-        if (world == null) {
-            world = "global";
-        }
+        Node node = NodeBuilders.determineMostApplicable(permission)
+                .withContext(DefaultContextKeys.SERVER_KEY, getVaultServer())
+                .withContext(DefaultContextKeys.WORLD_KEY, world == null ? "global" : world)
+                .build();
 
-        if (holder.setNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(permission).value(true).withContext(DefaultContextKeys.SERVER_KEY, getVaultServer()).withContext(DefaultContextKeys.WORLD_KEY, world).build(), true).wasSuccessful()) {
+        if (holder.setNode(DataType.NORMAL, node, true).wasSuccessful()) {
             return holderSave(holder);
         }
         return false;
@@ -412,11 +414,12 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         Objects.requireNonNull(permission, "permission is null");
         Preconditions.checkArgument(!permission.isEmpty(), "permission is an empty string");
 
-        if (world == null) {
-            world = "global";
-        }
+        Node node = NodeBuilders.determineMostApplicable(permission)
+                .withContext(DefaultContextKeys.SERVER_KEY, getVaultServer())
+                .withContext(DefaultContextKeys.WORLD_KEY, world == null ? "global" : world)
+                .build();
 
-        if (holder.unsetNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(permission).withContext(DefaultContextKeys.SERVER_KEY, getVaultServer()).withContext(DefaultContextKeys.WORLD_KEY, world).build()).wasSuccessful()) {
+        if (holder.unsetNode(DataType.NORMAL, node).wasSuccessful()) {
             return holderSave(holder);
         }
         return false;
