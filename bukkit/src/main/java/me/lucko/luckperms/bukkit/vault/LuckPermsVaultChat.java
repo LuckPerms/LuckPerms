@@ -42,6 +42,7 @@ import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.ChatMetaType;
+import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.query.Flag;
@@ -237,12 +238,12 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         metaAccumulator.complete();
         int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0) + 10;
 
-        NodeBuilder<?, ?> chatMetaNode = type == ChatMetaType.PREFIX ? Prefix.builder(value, priority) : Suffix.builder(value, priority);
-        chatMetaNode.withContext(DefaultContextKeys.SERVER_KEY, this.vaultPermission.getVaultServer());
-        chatMetaNode.withContext(DefaultContextKeys.WORLD_KEY, world);
+        Node node = type.builder(value, priority)
+                .withContext(DefaultContextKeys.SERVER_KEY, this.vaultPermission.getVaultServer())
+                .withContext(DefaultContextKeys.WORLD_KEY, world == null ? "global" : world).build();
 
         // assume success
-        holder.setNode(DataType.NORMAL, chatMetaNode.build(), true);
+        holder.setNode(DataType.NORMAL, node, true);
         this.vaultPermission.holderSave(holder);
     }
 
@@ -264,7 +265,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         }
 
         metaNode.withContext(DefaultContextKeys.SERVER_KEY, this.vaultPermission.getVaultServer());
-        metaNode.withContext(DefaultContextKeys.WORLD_KEY, world);
+        metaNode.withContext(DefaultContextKeys.WORLD_KEY, world == null ? "global" : world);
 
         // assume success
         holder.setNode(DataType.NORMAL, metaNode.build(), true);
