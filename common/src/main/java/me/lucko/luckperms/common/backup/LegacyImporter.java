@@ -242,6 +242,14 @@ public class LegacyImporter implements Runnable {
 
             try {
                 List<String> args = CommandManager.stripQuotes(ARGUMENT_SPLITTER.splitToList(getCommand()));
+
+                // rewrite rule for switchprimarygroup command
+                if (args.size() >= 3 && args.get(0).equals("user") && args.get(2).equals("switchprimarygroup")) {
+                    args.remove(2);
+                    args.add(2, "parent");
+                    args.add(3, "switchprimarygroup");
+                }
+
                 CommandResult result = this.commandManager.onCommand(this, "lp", args, Runnable::run).get();
                 setResult(result);
             } catch (Exception e) {
