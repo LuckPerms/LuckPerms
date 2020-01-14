@@ -82,16 +82,16 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
 
     public LuckPermsVaultPermission(LPBukkitPlugin plugin) {
         this.plugin = plugin;
-        this.worldMappingFunction = world -> isIgnoreWorld() ? null : world;
-    }
-
-    public LPBukkitPlugin getPlugin() {
-        return this.plugin;
     }
 
     @Override
     public String getName() {
         return "LuckPerms";
+    }
+
+    @Override
+    protected String convertWorld(String world) {
+        return isIgnoreWorld() ? null : super.convertWorld(world);
     }
 
     @Override

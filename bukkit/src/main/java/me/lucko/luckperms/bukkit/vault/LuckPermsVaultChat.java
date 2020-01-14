@@ -76,12 +76,16 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         super(vaultPermission);
         this.plugin = plugin;
         this.vaultPermission = vaultPermission;
-        this.worldMappingFunction = world -> vaultPermission.isIgnoreWorld() ? null : world;
     }
 
     @Override
     public String getName() {
         return "LuckPerms";
+    }
+
+    @Override
+    protected String convertWorld(String world) {
+        return this.vaultPermission.isIgnoreWorld() ? null : super.convertWorld(world);
     }
 
     @Override
